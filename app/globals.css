@@ -1,0 +1,551 @@
+/* Import Inter font from Google Fonts — primary UI font for all text */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@theme {
+  --color-pc-bg: #1b1b1f;
+  --color-pc-bg-secondary: #161618;
+  --color-pc-bg-elevated: #202127;
+  --color-pc-accent: #33b6b1;
+  --color-pc-accent-secondary: #268d89;
+  --color-pc-accent-deep: #186360;
+  --color-pc-accent-mid: #23837f;
+  --color-pc-accent-light: #99dbd8;
+  --color-pc-border: #3c3f44;
+  --color-pc-text: #dfdfd6;
+  --color-pc-text-secondary: #98989f;
+  --color-pc-text-muted: #6a6a71;
+}
+
+@custom-variant dark (&:is(.dark *));
+
+/* Color system — oklch() for modern perceptual uniformity */
+/* Teal accent preserved as brand identity; all values converted from hex to oklch */
+:root {
+  /* Backgrounds — dark theme base layers */
+  --pc-bg: oklch(0.165 0.002 280);       /* #1b1b1f — page background */
+  --pc-bg-secondary: oklch(0.140 0.002 280); /* #161618 — secondary surfaces (nav, hero bar) */
+  --pc-bg-elevated: oklch(0.210 0.005 280);   /* #202127 — cards, elevated surfaces */
+
+  /* Accent — teal brand colors, from deep to light */
+  --pc-accent: oklch(0.720 0.060 185);        /* #33b6b1 — primary accent (buttons, links, active states) */
+  --pc-accent-secondary: oklch(0.620 0.055 185); /* #268d89 — hover state for accent */
+  --pc-accent-deep: oklch(0.450 0.045 185);   /* #186360 — borders, subtle accents */
+  --pc-accent-mid: oklch(0.560 0.055 185);    /* #23837f — card hover borders */
+  --pc-accent-light: oklch(0.850 0.040 185);  /* #99dbd8 — light text accents, icons */
+
+  /* Border — subtle separation between elements */
+  --pc-border: oklch(0.420 0.010 280);        /* #3c3f44 — default borders */
+
+  /* Text — three levels of emphasis */
+  --pc-text: oklch(0.870 0.005 280);          /* #dfdfd6 — primary text */
+  --pc-text-secondary: oklch(0.620 0.005 280); /* #98989f — secondary text, descriptions */
+  --pc-text-muted: oklch(0.450 0.005 280);    /* #6a6a71 — labels, placeholders, disabled */
+
+  /* ── shadcn/ui theme variables — mapped to PaladinsCat dark theme ── */
+  --background: var(--pc-bg);
+  --foreground: var(--pc-text);
+  --card: var(--pc-bg-elevated);
+  --card-foreground: var(--pc-text);
+  --popover: var(--pc-bg-elevated);
+  --popover-foreground: var(--pc-text);
+  --primary: var(--pc-accent);
+  --primary-foreground: oklch(0.150 0 0);        /* dark text on teal */
+  --secondary: var(--pc-bg-secondary);
+  --secondary-foreground: var(--pc-text-secondary);
+  --muted: var(--pc-bg-elevated);
+  --muted-foreground: var(--pc-text-muted);
+  --accent: var(--pc-accent-deep);
+  --accent-foreground: var(--pc-accent-light);
+  --destructive: oklch(0.577 0.245 27.325);     /* shadcn red — kept as-is */
+  --border: var(--pc-border);
+  --input: var(--pc-border);
+  --ring: var(--pc-accent);
+
+  /* Chart colors — teal-based palette for consistency */
+  --chart-1: var(--pc-accent);
+  --chart-2: var(--pc-accent-mid);
+  --chart-3: var(--pc-accent-deep);
+  --chart-4: oklch(0.500 0.040 185);
+  --chart-5: oklch(0.400 0.035 185);
+
+  --radius: 0.75rem;                            /* 12px — matches card radius */
+
+  /* Sidebar — matches elevated surfaces */
+  --sidebar: var(--pc-bg-secondary);
+  --sidebar-foreground: var(--pc-text);
+  --sidebar-primary: var(--pc-accent);
+  --sidebar-primary-foreground: oklch(0.150 0 0);
+  --sidebar-accent: var(--pc-accent-deep);
+  --sidebar-accent-foreground: var(--pc-accent-light);
+  --sidebar-border: var(--pc-border);
+  --sidebar-ring: var(--pc-accent);
+}
+
+/* Shadow system — subtle, oklch-based shadows for depth */
+/* Used on cards, modals, dropdowns — never heavy drop shadows */
+:root {
+  --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.3);
+  --shadow-md: 0 4px 8px oklch(0 0 0 / 0.2), 0 1px 2px oklch(0 0 0 / 0.1);
+  --shadow-lg: 0 8px 16px oklch(0 0 0 / 0.15), 0 2px 4px oklch(0 0 0 / 0.1);
+  --shadow-card-hover: 0 8px 24px oklch(0 0 0 / 0.2), 0 2px 8px oklch(0 0 0 / 0.15);
+}
+
+body {
+  background-color: var(--pc-bg);
+  color: var(--pc-text);
+  /* Inter is primary font — loaded from Google Fonts above */
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* ── Component Utilities ── */
+
+/* Card: elevated bg, 16px radius, 1px border, default shadow */
+/* Hover lift + shadow increase handled in Card.tsx via inline events */
+.pc-card {
+  background-color: var(--pc-bg-elevated);
+  border: 1px solid var(--pc-border);
+  border-radius: 16px;
+  padding: 24px;
+  transition: border-color 0.25s ease;
+}
+
+.pc-card:hover {
+  border-color: var(--pc-accent-mid);
+}
+
+/* Card variant: no padding (for tables, lists) */
+.pc-card-flush {
+  background-color: var(--pc-bg-elevated);
+  border: 1px solid var(--pc-border);
+  border-radius: 12px;
+  transition: border-color 0.25s ease;
+}
+
+.pc-card-flush:hover {
+  border-color: var(--pc-accent-mid);
+}
+
+/* Card title: uppercase, letter-spacing, semibold */
+.pc-card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--pc-text);
+  margin-bottom: 16px;
+}
+
+/* Stats grid: 3-column, value + label */
+.pc-stats-grid {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+}
+
+.pc-stats-value {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--pc-text);
+}
+
+.pc-stats-label {
+  font-size: 0.6875rem;
+  letter-spacing: 0.5px;
+  color: var(--pc-text-muted);
+  margin-top: 2px;
+}
+
+/* Button: Primary — accent bg, bg text, 8px radius */
+.pc-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--pc-accent);
+  color: var(--pc-bg);
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.pc-btn-primary:hover {
+  background-color: var(--pc-accent-secondary);
+}
+
+.pc-btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Button: Secondary — transparent, accent text, deep border */
+.pc-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: var(--pc-accent);
+  border: 1px solid var(--pc-accent-deep);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.pc-btn-secondary:hover {
+  background-color: rgba(38, 141, 137, 0.1);
+  border-color: var(--pc-accent);
+}
+
+/* Button: Ghost — transparent, muted text, no border */
+.pc-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: var(--pc-text-muted);
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.pc-btn-ghost:hover {
+  color: var(--pc-text);
+  background-color: var(--pc-bg-elevated);
+}
+
+/* Badge/Tag: inline-block, bg bg, accent text, pill shape */
+.pc-badge {
+  display: inline-block;
+  background-color: var(--pc-bg);
+  color: var(--pc-accent);
+  border: 1px solid var(--pc-border);
+  border-radius: 20px;
+  padding: 2px 10px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* Input: standard field, 8px radius, border, focus glow */
+.pc-input {
+  width: 100%;
+  background-color: var(--pc-bg);
+  color: var(--pc-text);
+  border: 1px solid var(--pc-border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pc-input::placeholder {
+  color: var(--pc-text-muted);
+}
+
+.pc-input:focus {
+  border-color: var(--pc-accent);
+  box-shadow: 0 0 0 3px rgba(51, 182, 177, 0.15);
+}
+
+/* Search pill: pill-shaped, max-width, centered */
+.pc-search-pill {
+  width: 100%;
+  max-width: 580px;
+  background-color: var(--pc-bg);
+  color: var(--pc-text);
+  border: 1px solid var(--pc-border);
+  border-radius: 30px;
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pc-search-pill::placeholder {
+  color: var(--pc-text-muted);
+}
+
+.pc-search-pill:focus {
+  border-color: var(--pc-accent);
+  box-shadow: 0 0 0 3px rgba(51, 182, 177, 0.15);
+}
+
+/* Select: styled dropdown matching input spec */
+.pc-select {
+  background-color: var(--pc-bg);
+  color: var(--pc-text);
+  border: 1px solid var(--pc-border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pc-select:focus {
+  border-color: var(--pc-accent);
+  box-shadow: 0 0 0 3px rgba(51, 182, 177, 0.15);
+}
+
+/* Label: uppercase, letter-spacing, muted */
+.pc-label {
+  display: block;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+  color: var(--pc-text-muted);
+  margin-bottom: 6px;
+}
+
+/* Heading: semibold, pc-text */
+.pc-heading {
+  font-weight: 600;
+  color: var(--pc-text);
+}
+
+.pc-heading-lg {
+  font-size: 1.875rem;
+  line-height: 1.2;
+}
+
+.pc-heading-md {
+  font-size: 1.25rem;
+  line-height: 1.3;
+}
+
+.pc-heading-sm {
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+/* Body text: secondary color, readable line-height */
+.pc-body {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--pc-text-secondary);
+}
+
+/* Nav link: uppercase, letter-spacing, muted → accent on hover */
+.pc-nav-link {
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  color: var(--pc-text-secondary);
+  padding: 4px 0;
+  transition: color 0.2s ease;
+  position: relative;
+}
+
+.pc-nav-link:hover {
+  color: var(--pc-accent);
+}
+
+.pc-nav-link-active {
+  color: var(--pc-accent);
+}
+
+.pc-nav-link-active::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--pc-accent);
+  border-radius: 1px;
+}
+
+/* Table: consistent header and row styling */
+.pc-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.pc-table th {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--pc-accent);
+  padding: 12px 16px;
+  text-align: left;
+  background-color: var(--pc-bg-elevated);
+  border-bottom: 1px solid var(--pc-border);
+}
+
+.pc-table td {
+  padding: 12px 16px;
+  color: var(--pc-text-secondary);
+  border-bottom: 1px solid var(--pc-border);
+  font-size: 0.9rem;
+}
+
+.pc-table tr:hover td {
+  background-color: var(--pc-bg-secondary);
+}
+
+/* Skeleton loader: animated shimmer */
+.pc-skeleton {
+  background: linear-gradient(90deg, var(--pc-bg-elevated) 25%, var(--pc-bg-secondary) 50%, var(--pc-bg-elevated) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Page wrapper: consistent max-width, padding */
+.pc-page {
+  max-width: 72rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+@media (min-width: 640px) {
+  .pc-page {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .pc-page {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Entry animation — fade in with slight upward motion */
+/* Applied to cards, sections on page load */
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Utility class for entry animation — 400ms ease-out */
+.pc-animate-in {
+  animation: fadeInUp 0.4s ease-out both;
+}
+
+/* Stagger children — delay each child by 50ms for cascading effect */
+.pc-animate-stagger > * {
+  animation: fadeInUp 0.4s ease-out both;
+}
+.pc-animate-stagger > *:nth-child(1) { animation-delay: 0ms; }
+.pc-animate-stagger > *:nth-child(2) { animation-delay: 50ms; }
+.pc-animate-stagger > *:nth-child(3) { animation-delay: 100ms; }
+.pc-animate-stagger > *:nth-child(4) { animation-delay: 150ms; }
+.pc-animate-stagger > *:nth-child(5) { animation-delay: 200ms; }
+.pc-animate-stagger > *:nth-child(6) { animation-delay: 250ms; }
+
+@theme inline {
+  --font-heading: var(--font-sans);
+  --font-sans: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}
