@@ -2087,6 +2087,77 @@ export const WILLO_DATA: ChampionData = {
   ],
 };
 
+export const EVIE_DATA: ChampionData = {
+  name: "Evie",
+  roles: ["Flank"],
+  stats: {
+    health: "1800",
+    speed: "365",
+    speedUnits: "~22 units/s",
+    range: "300",
+  },
+  skills: [
+    {
+      name: "Ice Staff",
+      key: "LMB",
+      iconUrl: "/images/skills/WeaponAttack_Evie_Icon.png",
+      damage: "850",
+      description: "Fire a frozen blast every 1s that deals 850 damage to enemies near its impact.",
+    },
+    {
+      name: "Ice Block",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_Ice_Block.png",
+      cooldown: "14s",
+      description: "Encase yourself in ice to become immune to all damage.",
+    },
+    {
+      name: "Blink",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Blink.png",
+      cooldown: "4s",
+      description: "Magically teleport forward a short distance.",
+    },
+    {
+      name: "Soar",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Soar.png",
+      cooldown: "10s",
+      description: "Take flight on your staff.",
+    },
+    {
+      name: "Ice Storm",
+      key: "E",
+      iconUrl: "/images/skills/Ability_Ice_Storm.png",
+      cooldown: "Ultimate",
+      description: "",
+    },
+  ],
+  talents: [
+    { name: "Over the Moon", description: "Increase the damage you deal with your weapon shots by 25% for 3s after Soar ends.", category: "Soar", iconUrl: "/images/champions/Talent Evie OverTheMoon.png" },
+    { name: "Snow Globe", description: "", category: "", iconUrl: "/images/champions/Talent Evie SnowGlobe.png" },
+    { name: "Wormhole", description: "Blink leaves behind a magical wormhole. Refire Blink within 4s of its use to return to the wormhole.", category: "Blink", iconUrl: "/images/champions/Talent Evie Wormhole.png" },
+  ],
+  loadouts: [
+    { name: "Avalanche", description: "Increase the damage you deal.", category: "", iconUrl: "/images/cards/Card_Avalanche.png" },
+    { name: "Biting Cold", description: "Increase the damage of Ice Block.", category: "Ice Block", iconUrl: "/images/cards/Card_Biting_Cold.png" },
+    { name: "Cantrip", description: "Reduce the Cooldown of Soar.", category: "Soar", iconUrl: "/images/cards/Card_Cantrip.png" },
+    { name: "Chilled", description: "Blink applies a Slow.", category: "Blink", iconUrl: "/images/cards/Card_Chilled.png" },
+    { name: "Cold Acclimation", description: "Increase the maximum Health.", category: "", iconUrl: "/images/cards/Card_Cold_Acclimation.png" },
+    { name: "Cold Blooded", description: "Reduce the Cooldown of Ice Block.", category: "Ice Block", iconUrl: "/images/cards/Card_Cold_Blooded.png" },
+    { name: "Flicker", description: "Reduce the Cooldown of Blink.", category: "Blink", iconUrl: "/images/cards/Card_Flicker.png" },
+    { name: "Frigid Field", description: "Increase the damage of Ice Block.", category: "Ice Block", iconUrl: "/images/cards/Card_Frigid_Field.png" },
+    { name: "Great Distance", description: "Increase the duration of Soar.", category: "Soar", iconUrl: "/images/cards/Card_Great_Distance.png" },
+    { name: "Howling Gale", description: "Increase the duration of Ice Block.", category: "Ice Block", iconUrl: "/images/cards/Card_Howling_Gale.png" },
+    { name: "Impact", description: "Reduce the damage you deal.", category: "", iconUrl: "/images/cards/Card_Impact.png" },
+    { name: "Keep Moving", description: "Increase your Movement Speed.", category: "", iconUrl: "/images/cards/Card_Keep_Moving.png" },
+    { name: "Killing Frost", description: "Reduce the Cooldown of Soar.", category: "Soar", iconUrl: "/images/cards/Card_Killing_Frost.png" },
+    { name: "Riftwalk", description: "Blink reduces the Cooldown of Ice Storm.", category: "Blink", iconUrl: "/images/cards/Card_Riftwalk.png" },
+    { name: "Swift Witch", description: "Increase the duration of Soar.", category: "Soar", iconUrl: "/images/cards/Card_Swift_Witch.png" },
+    { name: "Teleport", description: "Blink reduces the Cooldown of Ice Storm.", category: "Blink", iconUrl: "/images/cards/Card_Teleport.png" },
+  ],
+};
+
 export const BUCK_DATA: ChampionData = {
   name: "Buck",
   roles: ["Flank"],
@@ -2161,6 +2232,7 @@ export const BUCK_DATA: ChampionData = {
 export const CHAMPION_DATA: Record<string, ChampionData> = {", 
   androxus: ANDROXUS_DATA,
   buck: BUCK_DATA,
+  evie: EVIE_DATA,
   ash: ASH_DATA,
   atlas: ATLAS_DATA,
   azaan: AZAAN_DATA,
