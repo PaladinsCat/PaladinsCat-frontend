@@ -1060,6 +1060,77 @@ export const TORVALD_DATA: ChampionData = {
   ],
 };
 
+export const CASSIE_DATA: ChampionData = {
+  name: "Cassie",
+  roles: ["Damage"],
+  stats: {
+    health: "2200",
+    speed: "355",
+    speedUnits: "~22 units/s",
+    range: "300",
+  },
+  skills: [
+    {
+      name: "Crossbow",
+      key: "LMB",
+      iconUrl: "/images/skills/Ability_Crossbow.png",
+      damage: "680",
+      description: "A hunting crossbow that deals 680 damage every 0.75s.",
+    },
+    {
+      name: "Disengage",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_Disengage.png",
+      cooldown: "11s",
+      description: "Fire a grappling hook that pulls you to a surface.",
+    },
+    {
+      name: "Blast Shot",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Blast_Shot.png",
+      cooldown: "10s",
+      description: "Fire an explosive shot that deals damage in an area.",
+    },
+    {
+      name: "Dodge Roll",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Dodge_Roll.png",
+      cooldown: "6s",
+      description: "Quickly roll out of danger.",
+    },
+    {
+      name: "Scout",
+      key: "E",
+      iconUrl: "/images/skills/Ability_Scout.png",
+      cooldown: "Ultimate",
+      description: "Reveal enemies in a large area and gain increased movement speed.",
+    },
+  ],
+  talents: [
+    { name: "Exaction", description: "For 8s after using Dodge Roll, your next weapon shot's damage is increased by 30%.", category: "Dodge Roll", iconUrl: "/images/champions/Talent Cassie Exaction.png" },
+    { name: "Impulse", description: "Blast Shot has its damage increased by 150 and its Cooldown decreased by 2s.", category: "Blast Shot", iconUrl: "/images/champions/Talent Cassie Impulse.png" },
+    { name: "Big Game", description: "For 4s after hitting an enemy with Disengage, your weapon shots deal an additional 9% of that enemy's maximum Health as damage.", category: "Disengage", iconUrl: "/images/champions/Talent Cassie Big Game.png" },
+  ],
+  loadouts: [
+    { name: "Blast Shower", description: "Reduce the Cooldown of Blast Shot.", category: "Blast Shot", iconUrl: "/images/cards/Card_Blast_Shower.png" },
+    { name: "Drain Life", description: "Heal when hitting enemies with Blast Shot.", category: "Blast Shot", iconUrl: "/images/cards/Card_Drain_Life.png" },
+    { name: "Excitement", description: "Reduce the Cooldown of Disengage.", category: "Disengage", iconUrl: "/images/cards/Card_Excitement.png" },
+    { name: "Fatal Sign", description: "Increase your damage.", category: "", iconUrl: "/images/cards/Card_Fatal_Sign.png" },
+    { name: "Incitement", description: "Reduce the Cooldown of Dodge Roll.", category: "Dodge Roll", iconUrl: "/images/cards/Card_Incitement.png" },
+    { name: "Intense Training", description: "Increase the damage of Dodge Roll.", category: "Dodge Roll", iconUrl: "/images/cards/Card_Intense_Training.png" },
+    { name: "Kinetics", description: "Increase the damage of Blast Shot.", category: "Blast Shot", iconUrl: "/images/cards/Card_Kinetics.png" },
+    { name: "Lunge", description: "Increase the distance of Dodge Roll.", category: "Dodge Roll", iconUrl: "/images/cards/Card_Lunge.png" },
+    { name: "Megaton", description: "Increase the damage of Blast Shot.", category: "Blast Shot", iconUrl: "/images/cards/Card_Megaton.png" },
+    { name: "Onslaught", description: "Increase the damage of Dodge Roll.", category: "Dodge Roll", iconUrl: "/images/cards/Card_Onslaught.png" },
+    { name: "Quiver", description: "Increase your weapon damage.", category: "", iconUrl: "/images/cards/Card_Quiver.png" },
+    { name: "Raze", description: "Increase the damage of Disengage.", category: "Disengage", iconUrl: "/images/cards/Card_Raze.png" },
+    { name: "Sky Warden", description: "Increase the damage of Disengage.", category: "Disengage", iconUrl: "/images/cards/Card_Sky_Warden.png" },
+    { name: "Somersault", description: "Increase your movement speed.", category: "", iconUrl: "/images/cards/Card_Somersault.png" },
+    { name: "Territorial", description: "Reduce the Cooldown of Disengage.", category: "Disengage", iconUrl: "/images/cards/Card_Territorial.png" },
+    { name: "Tumble", description: "Increase your maximum Health.", category: "", iconUrl: "/images/cards/Card_Tumble.png" },
+  ],
+};
+
 export const BOMB_KING_DATA: ChampionData = {
   name: "Bomb King",
   roles: ["Damage"],
@@ -1136,6 +1207,7 @@ export const CHAMPION_DATA: Record<string, ChampionData> = {
   atlas: ATLAS_DATA,
   azaan: AZAAN_DATA,
   barik: BARIK_DATA,
+  cassie: CASSIE_DATA,
   fernando: FERNANDO_DATA,
   inara: INARA_DATA,
   khan: KHAN_DATA,
