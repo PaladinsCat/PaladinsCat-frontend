@@ -3391,6 +3391,77 @@ export const JENOS_DATA: ChampionData = {
   ],
 };
 
+export const LILLITH_DATA: ChampionData = {
+  name: "Lillith",
+  roles: ["Support"],
+  stats: {
+    health: "500",
+    speed: "375",
+    speedUnits: "~23 units/s",
+    range: "200",
+  },
+  skills: [
+    {
+      name: "Heart of Crimson",
+      key: "LMB",
+      iconUrl: "/images/skills/WeaponAttack_Lillith_Icon.png",
+      damage: "650",
+      description: "The Heart-Cube fires blood, dealing 650 damage per shot. Consume no ammo while Hex or Swarm affect Champions. Your Blood pool acts as health and is used to cast abilities.",
+    },
+    {
+      name: "Blood Hex",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_Blood_Hex.png",
+      cooldown: "4s",
+      description: "Lillith hexes an enemy or ally, dealing current Health damage to enemies or Healing allies for an increasing value based on duration. You regenerate Blood while this ability is active.",
+    },
+    {
+      name: "Swarm",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Swarm.png",
+      cooldown: "3s",
+      description: "Release a swarm of blood bats that deal damage to enemies and heal allies.",
+    },
+    {
+      name: "Death Wings",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Death_Wings.png",
+      cooldown: "2s",
+      description: "Gain increased jump height and Movement Speed.",
+    },
+    {
+      name: "Blood Moon",
+      key: "E",
+      iconUrl: "/images/skills/Ability_Blood_Moon.png",
+      cooldown: "Ultimate",
+      description: "Lillith grants her team True Lifesteal (unaffected by Anti-heal) for 8s while gaining increased Movement Speed, jump height, and Blood regeneration.",
+    },
+  ],
+  talents: [
+    { name: "Cursed Accord", description: "Blood Hexed allies ignore damage resistance up to 10%. Heal an extra 250 Blood Health when a Blood Hexed ally eliminates an enemy.", category: "Blood Hex", iconUrl: "/images/champions/Talent Lillith CursedAccord.png" },
+    { name: "Maelstrom of Carnage", description: "Swarm is now cast on yourself and follows you around instead of being placed on the ground, its ability cost is decreased and its radius is increased by 40%.", category: "Swarm" },
+    { name: "Murderous Intent", description: "Hitting an enemy with Heart of Crimson while they're affected by Blood Hex or Swarm increases your movement speed by 10% and attack speed by 11% for 4s. Stacks up to 3 times.", category: "Heart of Crimson", iconUrl: "/images/champions/Talent Lillith MurderousIntent.png" },
+  ],
+  loadouts: [
+    { name: "Blood Canon", description: "Increase your maximum Blood pool by 50.", category: "", iconUrl: "/images/cards/Card_Blood_Canon.png" },
+    { name: "Blood Sense", description: "Hitting an enemy with Blood Hex will reveal them.", category: "Blood Hex" },
+    { name: "Charmed", description: "Increase the Healing of Blood Hex by 4%.", category: "Blood Hex", iconUrl: "/images/cards/Card_Charmed.png" },
+    { name: "Convenient Leech", description: "Reduce the damage enemies take from Swarm by 5%.", category: "Swarm", iconUrl: "/images/cards/Card_Convenient_Leech.png" },
+    { name: "Enriched Blood", description: "Increase the duration of Swarm by 0.2s.", category: "Swarm", iconUrl: "/images/cards/Card_Enriched_Blood.png" },
+    { name: "Gloomy Nook", description: "Increase the damage of Swarm by 150.", category: "Swarm" },
+    { name: "Overflowing Delights", description: "Increase the Healing of Swarm by 3%.", category: "Swarm", iconUrl: "/images/cards/Card_Overflowing_Delights.png" },
+    { name: "Sanguine Pact", description: "Reduce the Cooldown of Death Wings by 0.5s.", category: "Death Wings" },
+    { name: "Sharpened Slaughter", description: "Increase your weapon damage by 25%.", category: "" },
+    { name: "Sheer Ascent", description: "Increase the Movement Speed bonus of Death Wings by 5%.", category: "Death Wings" },
+    { name: "Symbiotic Relationship", description: "Increase the radius of Swarm by 4%.", category: "Swarm", iconUrl: "/images/cards/Card_Symbiotic_Relationship.png" },
+    { name: "Tainted Form", description: "Increase your maximum Health by 1%.", category: "" },
+    { name: "Unholy Flight", description: "Reduce the jump cost of Death Wings by 10%.", category: "Death Wings", iconUrl: "/images/cards/Card_Unholy_Flight.png" },
+    { name: "Virulent", description: "Reduce the damage enemies take from Blood Hex by 4%.", category: "Blood Hex", iconUrl: "/images/cards/Card_Virulent.png" },
+    { name: "Waning Moon", description: "Reduce the damage enemies take from Blood Hex by 5%.", category: "Blood Hex", iconUrl: "/images/cards/Card_Waning_Moon.png" },
+    { name: "Wings of Terror", description: "Increase the Movement Speed bonus of Death Wings by 6%.", category: "Death Wings", iconUrl: "/images/cards/Card_Wings_of_Terror.png" },
+  ],
+};
+
 export const CHAMPION_DATA: Record<string, ChampionData> = {
   talus: TALUS_DATA,
   corvus: CORVUS_DATA,
@@ -3399,6 +3470,7 @@ export const CHAMPION_DATA: Record<string, ChampionData> = {
   grover: GROVER_DATA,
   io: IO_DATA,
   jenos: JENOS_DATA,
+  lillith: LILLITH_DATA,
   skye: SKYE_DATA,
   androxus: ANDROXUS_DATA,
   buck: BUCK_DATA,

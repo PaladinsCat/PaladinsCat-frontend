@@ -134,8 +134,9 @@ export default function MetricDetailPage({ config }: { config: MetricConfig }) {
             </p>
             <p>
               In the leaderboard, each champion has its own <span className="text-pc-text font-medium">range bar</span> showing
-              their min → max spread. The <span style={{ color: config.stroke }}>colored line</span> marks
-              the global mean for comparison.
+              min → mode → median → max. The <span style={{ color: config.stroke }}>colored dot</span> is
+              the champion's average. The <span className="text-pc-text font-medium">global mean</span> line
+              shows where the overall average falls within that champion's range.
             </p>
             <p>
               <span className="text-pc-text font-medium">vs Avg</span> shows how far a champion's
@@ -215,14 +216,14 @@ export default function MetricDetailPage({ config }: { config: MetricConfig }) {
                 // Champion-specific range
                 const cMin = c.min;
                 const cMax = c.max;
-                const cMean = c.mean;
+                const cMedian = c.median;
                 const cMode = c.mode;
                 const cRange = cMax - cMin;
                 // Position of champion's avg value within its own range
                 const valPct = cRange > 0 ? ((c.value - cMin) / cRange) * 100 : 50;
                 // Position of global mean within champion's range (clamped)
                 const globalMeanPct = cRange > 0 ? Math.max(0, Math.min(100, ((d.mean - cMin) / cRange) * 100)) : 50;
-                const meanPctC = cRange > 0 ? ((cMean - cMin) / cRange) * 100 : 50;
+                const meanPctC = cRange > 0 ? ((cMedian - cMin) / cRange) * 100 : 50;
                 const modePctC = cRange > 0 ? ((cMode - cMin) / cRange) * 100 : 50;
 
                 return (
@@ -277,7 +278,7 @@ export default function MetricDetailPage({ config }: { config: MetricConfig }) {
                         <div className="absolute bottom-0 inset-x-0 flex justify-between text-[8px] leading-none text-pc-text-muted/60">
                           <span>{formatVal(cMin)}</span>
                           <span style={{ color: config.stroke, opacity: 0.7 }}>{formatVal(cMode)}</span>
-                          <span style={{ color: config.stroke }}>{formatVal(cMean)}</span>
+                          <span style={{ color: config.stroke }}>{formatVal(cMedian)}</span>
                           <span>{formatVal(cMax)}</span>
                         </div>
                       </div>
@@ -304,7 +305,7 @@ export default function MetricDetailPage({ config }: { config: MetricConfig }) {
               <span className="w-2.5 h-2.5 rounded-full" style={{ background: config.stroke }} /> Champion Avg
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full" style={{ background: config.stroke, opacity: 0.5 }} /> Champion Mean
+              <span className="w-2.5 h-2.5 rounded-full" style={{ background: config.stroke, opacity: 0.5 }} /> Champion Median
             </span>
             <span className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-pc-text-muted/40" /> Champion Mode
