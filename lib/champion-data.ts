@@ -407,12 +407,87 @@ export const BARIK_DATA: ChampionData = {
   ],
 };
 
+export const FERNANDO_DATA: ChampionData = {
+  name: "Fernando",
+  roles: ["Frontline"],
+  stats: {
+    health: "4600",
+    speed: "350",
+    speedUnits: "~21 units/s",
+    range: "50",
+  },
+  skills: [
+    {
+      name: "Flame Lance",
+      key: "LMB",
+      iconUrl: "/images/skills/WeaponAttack_Fernando_Icon.png",
+      damage: "35 per 0.1s, 200 over 2s (Burn)",
+      description: "A flamethrower that deals 35 damage every 0.1s and applies a Burn that deals 200 damage over 2s.",
+    },
+    {
+      name: "Chivalry",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_Shield.png",
+      damage: "4000",
+      description: "Hold up a large shield with 4000 health in front of you that blocks attacks.",
+    },
+    {
+      name: "Fireball",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Fireball.png",
+      damage: "450",
+      cooldown: "7s",
+      description: "Shoot a fireball that pierces through enemies and deals 450 damage to them.",
+    },
+    {
+      name: "Charge",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Charge.png",
+      damage: "400",
+      cooldown: "10s",
+      description: "Charge through your enemies, dealing 400 damage to them.",
+    },
+    {
+      name: "Immortal",
+      key: "E",
+      iconUrl: "/images/skills/Ability_Immortal.png",
+      damage: "1500",
+      cooldown: "Ultimate",
+      description: "Rally your allies around you, preventing them from falling below 1500 health.",
+    },
+  ],
+  talents: [
+    { name: "Aegis", description: "Increase Chivalry's Shield to 5500, and it begins regenerating 25% sooner and 25% faster. You now only need 20% Shield to activate Chivalry after it is broken.", category: "Chivalry" },
+    { name: "Scorch", description: "Increase the damage of Fireball by 35%, decrease its Cooldown by 1s, and deal 20% increased damage for each subsequent target hit after the first.", category: "Fireball" },
+    { name: "Formidable", description: "You now have 2 charges of Charge, each Charge deals an additional 100 damage, and you are Immune to Crowd Control while Charging, but the Cooldown of Charge is increased to 13s.", category: "Charge" },
+  ],
+  loadouts: [
+    { name: "Brand", description: "Heal for damage over 2s for each enemy hit by Fireball.", category: "Fireball", iconUrl: "/images/cards/Card_Brand.png" },
+    { name: "Cavalier", description: "Increase your maximum Health.", category: "", iconUrl: "/images/cards/Card_Cavalier.png" },
+    { name: "Dire Need", description: "Reduce your damage taken while at or below 50% Health.", category: "Chivalry", iconUrl: "/images/cards/Card_Dire_Need.png" },
+    { name: "Fearless Leader", description: "Reduce your active Cooldowns after getting an Elimination.", category: "", iconUrl: "/images/cards/Card_Fearless_Leader.png" },
+    { name: "Heat Transfer", description: "Reduce the Cooldown of Chivalry.", category: "Chivalry", iconUrl: "/images/cards/Card_Heat_Transfer.png" },
+    { name: "Hot Pursuit", description: "Increase the Movement Speed of allies near you.", category: "Fireball", iconUrl: "/images/cards/Card_Hot_Pursuit.png" },
+    { name: "Immovable Object", description: "Reduce your damage taken.", category: "", iconUrl: "/images/cards/Card_Immovable_Object.png" },
+    { name: "Incinerate", description: "Reduce the Cooldown of Fireball.", category: "Fireball", iconUrl: "/images/cards/Card_Incinerate.png" },
+    { name: "Last Stand", description: "Increase the Shield of Chivalry.", category: "Chivalry", iconUrl: "/images/cards/Card_Last_Stand.png" },
+    { name: "Launch", description: "Increase the Knockback distance of Charge.", category: "Charge", iconUrl: "/images/cards/Card_Launch.png" },
+    { name: "Looks That Kill", description: "Reduce the Cooldown of Fireball.", category: "Fireball", iconUrl: "/images/cards/Card_Looks_That_Kill.png" },
+    { name: "Pyre", description: "Increase the Burn damage of Flame Lance.", category: "", iconUrl: "/images/cards/Card_Pyre.png" },
+    { name: "Running Start", description: "Increase the Movement Speed of Charge.", category: "Charge", iconUrl: "/images/cards/Card_Running_Start.png" },
+    { name: "Safe Travel", description: "Heal after activating Charge.", category: "Charge", iconUrl: "/images/cards/Card_Safe_Travel.png" },
+    { name: "Towering Barrier", description: "Reduce your damage taken while Chivalry is active.", category: "Chivalry", iconUrl: "/images/cards/Card_Towering_Barrier.png" },
+    { name: "Unstoppable Force", description: "Apply a Slow to enemies hit by Charge.", category: "Charge", iconUrl: "/images/cards/Card_Unstoppable_Force.png" },
+  ],
+};
+
 export const CHAMPION_DATA: Record<string, ChampionData> = {
   androxus: ANDROXUS_DATA,
   ash: ASH_DATA,
   atlas: ATLAS_DATA,
   azaan: AZAAN_DATA,
   barik: BARIK_DATA,
+  fernando: FERNANDO_DATA,
 };
 
 export function getChampionData(slug: string): ChampionData | undefined {
