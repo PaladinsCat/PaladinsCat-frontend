@@ -11,6 +11,7 @@ export interface CardProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
   hover?: boolean;
   wide?: boolean;
+  opaque?: boolean;
 }
 
 export default function Card({
@@ -20,19 +21,18 @@ export default function Card({
   hover = true,
   wide,
   style,
+  opaque = false,
   onMouseEnter,
   onMouseLeave,
   ...props
 }: CardProps) {
+  const cardStyle = opaque
+    ? { backgroundColor: "var(--pc-bg-elevated)" as unknown as string }
+    : { backgroundColor: "oklch(0.210 0.005 280 / 0.65)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" };
+
   const baseStyle = hover
-    ? {
-        boxShadow: "var(--shadow-md)",
-        transition: "transform 0.2s ease, box-shadow 0.2s ease, border-color 0.25s ease",
-      }
-    : {
-        borderColor: "var(--pc-border)",
-        boxShadow: "var(--shadow-sm)",
-      };
+    ? { ...cardStyle, boxShadow: "var(--shadow-md)", transition: "transform 0.2s ease, box-shadow 0.2s ease, border-color 0.25s ease" }
+    : { ...cardStyle, borderColor: "var(--pc-border)", boxShadow: "var(--shadow-sm)" };
 
   return (
     // Card: elevated bg, border, 16px radius, shadow, hover lift + shadow increase
