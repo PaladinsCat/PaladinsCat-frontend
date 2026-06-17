@@ -15,6 +15,7 @@ export interface ChampionTalent {
   name: string;
   description: string;
   category: string;
+  iconUrl?: string;
 }
 
 export interface ChampionStats {
@@ -383,9 +384,9 @@ export const BARIK_DATA: ChampionData = {
     },
   ],
   talents: [
-    { name: "Fortify", description: "Increase the maximum Health of Barricade by 2000 and reduce its Cooldown by 3s.", category: "Barricade" },
-    { name: "Tinkerin'", description: "Modify your Blunderbuss to fire a single slug that deals 600 damage.", category: "Blunderbuss" },
-    { name: "Forgefire", description: "Dome Shield now costs 40% Ultimate charge and places a miniature Flamethrower Turret. This turret deals 400 damage every 1s and has no Shield, but you can have 2 active at once.", category: "Dome Shield" },
+    { name: "Fortify", description: "Increase the maximum Health of Barricade by 2000 and reduce its Cooldown by 3s.", category: "Barricade", iconUrl: "/images/champions/Talent Barik Fortify.png" },
+    { name: "Tinkerin'", description: "Modify your Blunderbuss to fire a single slug that deals 600 damage.", category: "Blunderbuss", iconUrl: "/images/champions/Talent Barik Tinkerin.png" },
+    { name: "Forgefire", description: "Dome Shield now costs 40% Ultimate charge and places a miniature Flamethrower Turret. This turret deals 400 damage every 1s and has no Shield, but you can have 2 active at once.", category: "Dome Shield", iconUrl: "/images/champions/Talent Barik Forgefire.png" },
   ],
   loadouts: [
     { name: "Accelerator Field", description: "Increase the speed of Rocket Boots by 12%.", category: "Barricade", iconUrl: "/images/cards/Card_Accelerator_Field.png" },
