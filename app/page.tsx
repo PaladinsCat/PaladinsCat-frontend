@@ -16,6 +16,25 @@ import {
   type RankedPlayer,
   type StatsChampion,
 } from "@/lib/api-client";
+import { MOCK_STATS_CHAMPIONS, MOCK_RANKED_PLAYERS } from "@/lib/mock-data";
+
+// Champion roles for grouping
+const ROLES = ["Damage", "Flank", "Frontline", "Support"];
+
+// Dummy test data for fallback when API is empty
+const DUMMY_BANNED = MOCK_STATS_CHAMPIONS.slice(0, 8).map((s) => ({
+  championId: s.championId,
+  championName: s.championName,
+  banRate: s.banRate,
+}));
+
+const DUMMY_LEADERBOARD = MOCK_RANKED_PLAYERS.slice(0, 10).map((p) => ({
+  rank: p.rank,
+  player_id: p.player_id,
+  name: p.name,
+  points: p.points,
+  trend: p.trend,
+} as RankedPlayer));
 
 export default function HomePage() {
   const [champions, setChampions] = useState<Champion[]>([]);
@@ -31,9 +50,16 @@ export default function HomePage() {
           fetchStatsChampions({ sort: "win_rate", limit: 26 }),
           fetchRankedLeaderboard({ tier: "26", top: 20 }),
         ]);
-        setChampions(champs);
-        setStatsChampions(stats);
-        setRankedPlayers(players);
+
+        // Use API data or fall back to mock data
+        setChampions(champs.length > 0 ? champs : []);
+        setStatsChampions(stats.length > 0 ? stats : MOCK_STATS_CHAMPIONS);
+        setRankedPlayers(players.length > 0 ? players : DUMMY_LEADERBOARD);
+      } catch {
+        // On error, use mock data as fallback
+        setChampions([]);
+        setStatsChampions(MOCK_STATS_CHAMPIONS);
+        setRankedPlayers(DUMMY_LEADERBOARD);
       } finally {
         setLoading(false);
       }
@@ -45,7 +71,10 @@ export default function HomePage() {
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchValue, setSearchValue] = useState("");
 
-  const roles = ["Damage", "Flank", "Frontline", "Support"];
+  // Sorted data for display
+  const mostBanned = [...statsChampions]
+    .sort((a, b) => (b.banRate ?? 0) - (a.banRate ?? 0))
+    .slice(0, 8);
 
   return (
     <div className="relative min-h-screen">
@@ -121,8 +150,10 @@ export default function HomePage() {
           </form>
         </motion.div>
 
+        {/* Main content: 3-column layout on wide screens */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="space-y-6">
+            {/* Top Win Rate by Role */}
             <motion.div initial={{ opacity: 0, y: 25 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 300, damping: 20 }}>
               <Card style={{ maxWidth: "none" }}>
                 <div className="pc-card-title mb-4">
@@ -130,7 +161,7 @@ export default function HomePage() {
                 </div>
                 {loading ? (
                   <div className="space-y-4">
-                    {roles.map((role) => (
+                    {ROLES.map((role) => (
                       <div key={role}>
                         <h3 className="text-pc-text font-medium text-sm mb-3">{role}</h3>
                         {Array.from({ length: 4 }).map((_, i) => <div key={i} className="pc-skeleton h-16 w-full mb-3" />)}
@@ -138,7 +169,7 @@ export default function HomePage() {
                     ))}
                   </div>
                 ) : (
-                  roles.map((role) => {
+                  ROLES.map((role) => {
                     const inRole = champions.filter((c) => c.roles?.includes(role));
                     const safeEntries = inRole
                       .sort((a, b) => (b.winRate ?? 0) - (a.winRate ?? 0))
@@ -184,9 +215,44 @@ export default function HomePage() {
                 )}
               </Card>
             </motion.div>
+
+            {/* Most Banned */}
+            <motion.div initial={{ opacity: 0, y: 25 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.15 }}>
+              <Card>
+                <div className="pc-card-title mb-3">
+                  <ScrambleText text="Most Banned" speed={45} iterations={3} delayFromCenter={false} />
+                </div>
+                {loading ? (
+                  <div className="space-y-3">
+                    {Array.from({ length: 5 }).map((_, i) => <div key={i} className="pc-skeleton h-10 w-full" />)}
+                  </div>
+                ) : mostBanned.length === 0 ? (
+                  <p className="pc-body text-sm">No ban data available yet.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {mostBanned.map((entry) => (
+                      <div key={entry.championId} className="flex items-center gap-3">
+                        <Image
+                          src={getChampionIconSafe(entry.championName)}
+                          alt={entry.championName}
+                          width={36}
+                          height={36}
+                          className="rounded-lg shrink-0"
+                        />
+                        <span className="text-pc-text text-sm font-medium flex-1">{entry.championName}</span>
+                        <span className="text-pc-text-muted text-sm">
+                          {entry.banRate != null ? `${(entry.banRate * 100).toFixed(2)}%` : "???"}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </Card>
+            </motion.div>
           </div>
 
           <div className="space-y-6">
+            {/* Leaderboard */}
             <motion.div initial={{ opacity: 0, y: 25 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 300, damping: 20 }}>
               <Card>
                 <div className="pc-card-title mb-3">Leaderboard</div>
