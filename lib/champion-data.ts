@@ -1131,6 +1131,77 @@ export const CASSIE_DATA: ChampionData = {
   ],
 };
 
+export const DREDGE_DATA: ChampionData = {
+  name: "Dredge",
+  roles: ["Damage"],
+  stats: {
+    health: "2200",
+    speed: "350",
+    speedUnits: "~21 units/s",
+    range: "500",
+  },
+  skills: [
+    {
+      name: "Cursed Howitzer",
+      key: "LMB",
+      iconUrl: "/images/skills/Ability_Cursed_Howitzer.png",
+      damage: "850",
+      description: "Fire Abyssal mortars every 0.7s that bounce and explode, dealing 850 damage.",
+    },
+    {
+      name: "Broadside",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_Broadside.png",
+      damage: "950",
+      description: "Launch three depth charges that hover and arm after contacting the ground, dealing 950 damage when they explode.",
+    },
+    {
+      name: "Harpoon",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Harpoon.png",
+      cooldown: "14s",
+      description: "Fire a harpoon that pulls you to the target location.",
+    },
+    {
+      name: "Shortcut",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Shortcut.png",
+      cooldown: "1s",
+      description: "Create shortcuts that allow you to traverse through the Abyss.",
+    },
+    {
+      name: "Kraken",
+      key: "E",
+      iconUrl: "/images/skills/Ability_Kraken.png",
+      cooldown: "Ultimate",
+      description: "Summon the Kraken to deal massive damage to enemies.",
+    },
+  ],
+  talents: [
+    { name: "Scuttle", description: "Cursed Howitzer's Abyssal Reload now explodes in a 20-unit-radius area on contact, but only deals 700 damage.", category: "Cursed Howitzer", iconUrl: "/images/champions/Talent Dredge Scuttle.png" },
+    { name: "Hurl", description: "Increase the range of Harpoon.", category: "Harpoon", iconUrl: "/images/champions/Talent Dredge Hurl.png" },
+    { name: "Abyss Spike", description: "Harpoon lodges into terrain and explodes when an enemy comes within 20 units, dealing 1000 damage in a 35-unit-radius area.", category: "Harpoon", iconUrl: "/images/champions/Talent Dredge Abyss Spike.png" },
+  ],
+  loadouts: [
+    { name: "Abyss Cannon", description: "Increase the damage of Broadside.", category: "Broadside", iconUrl: "/images/cards/Card_Abyss_Cannon.png" },
+    { name: "Blow the Man Down", description: "Reduce the damage of Harpoon.", category: "Harpoon", iconUrl: "/images/cards/Card_Blow_the_Man_Down.png" },
+    { name: "Crow's Nest", description: "Hitting yourself with Broadside now applies a Knockup.", category: "Broadside", iconUrl: "/images/cards/Card_Crow's_Nest.png" },
+    { name: "Cursed Weaponry", description: "Increase the damage of Harpoon.", category: "Harpoon", iconUrl: "/images/cards/Card_Cursed_Weaponry.png" },
+    { name: "Dark Bargain", description: "Increase the damage of Shortcut.", category: "Shortcut", iconUrl: "/images/cards/Card_Dark_Bargain.png" },
+    { name: "Dreadnought", description: "Increase your maximum Health.", category: "", iconUrl: "/images/cards/Card_Dreadnought.png" },
+    { name: "Expansive Vault", description: "Increase the range of Shortcut.", category: "Shortcut", iconUrl: "/images/cards/Card_Expansive_Vault.png" },
+    { name: "Gun Deck", description: "Increase your damage.", category: "", iconUrl: "/images/cards/Card_Gun_Deck.png" },
+    { name: "Hangman's Ire", description: "Increase your damage.", category: "", iconUrl: "/images/cards/Card_Hangman's_Ire.png" },
+    { name: "Haul on the Bowline", description: "Increase the range of Shortcut.", category: "Shortcut", iconUrl: "/images/cards/Card_Haul_on_the_Bowline.png" },
+    { name: "Heave Away", description: "Reduce the Cooldown of Broadside.", category: "Broadside", iconUrl: "/images/cards/Card_Heave_Away.png" },
+    { name: "Hull Piercer", description: "Reduce the Cooldown of Harpoon.", category: "Harpoon", iconUrl: "/images/cards/Card_Hull_Piercer.png" },
+    { name: "Mortal Skewer", description: "Increase the damage of Harpoon.", category: "Harpoon", iconUrl: "/images/cards/Card_Mortal_Skewer.png" },
+    { name: "Plank Walker", description: "Increase the damage of Shortcut.", category: "Shortcut", iconUrl: "/images/cards/Card_Plank_Walker.png" },
+    { name: "Reckless Barrage", description: "Increase the damage of Broadside.", category: "Broadside", iconUrl: "/images/cards/Card_Reckless_Barrage.png" },
+    { name: "Sea Dogs", description: "Increase your damage.", category: "", iconUrl: "/images/cards/Card_Sea_Dogs.png" },
+  ],
+};
+
 export const BOMB_KING_DATA: ChampionData = {
   name: "Bomb King",
   roles: ["Damage"],
@@ -1208,6 +1279,7 @@ export const CHAMPION_DATA: Record<string, ChampionData> = {
   azaan: AZAAN_DATA,
   barik: BARIK_DATA,
   cassie: CASSIE_DATA,
+  dredge: DREDGE_DATA,
   fernando: FERNANDO_DATA,
   inara: INARA_DATA,
   khan: KHAN_DATA,
