@@ -2746,6 +2746,80 @@ export const VATU_DATA: ChampionData = {
   ],
 };
 
+export const VII_DATA: ChampionData = {
+  name: "VII",
+  roles: ["Flank"],
+  stats: {
+    health: "1900",
+    speed: "370",
+    speedUnits: "~23 units/s",
+    range: "100",
+  },
+  skills: [
+    {
+      name: "Heavy SMG",
+      key: "LMB",
+      iconUrl: "/images/skills/Ability_Heavy_SMG.png",
+      damage: "160 / 450 / 235",
+      description: "A weapon with 3 fire modes. Burst: 6x160/0.9s. Mag Dump: 450/0.15s. Automatic: 235/0.175s.",
+    },
+    {
+      name: "Trigger Discipline",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_Trigger_Discipline.png",
+      cooldown: "0.35s",
+      description: "Swap between the 3 fire modes of your Heavy SMG.",
+    },
+    {
+      name: "Explosive Dodge",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Explosive_Dodge.png",
+      damage: "200",
+      cooldown: "7s",
+      description: "Dodge in 8 directions while leaving behind an explosive trap.",
+    },
+    {
+      name: "Grappling Hook",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Grappling_Hook.png",
+      damage: "200",
+      cooldown: "12s",
+      description: "Grapple to walls and stick to them for up to 5s becoming stealthed.",
+    },
+    {
+      name: "Decree 77",
+      key: "E",
+      iconUrl: "/images/skills/Ability_Decree_77.png",
+      damage: "250",
+      cooldown: "Ultimate",
+      description: "Target up to 5 enemies, Fearing them and dealing damage.",
+    },
+  ],
+  talents: [
+    { name: "Tribunal Upgrades", description: "Burst Mode now deals additional Shock damage that Reveals targets, Mag Dump adds a Burn over time, and Automatic freezes to Slow enemies.", category: "Heavy SMG", iconUrl: "/images/champions/Talent Tribunal Upgrades VII.png" },
+    { name: "Execute Article VII", description: "Decree 77 now targets the closest enemy with laser lock-on. After .8s, your eye blasts them and deals 1000 damage. Anyone hit is executed if below 25%.", category: "Decree 77", iconUrl: "/images/champions/Talent Execute Article VII.png" },
+    { name: "Spring Loaded", description: "Increase the travel distance of Explosive Dodge by 30%, and drop explosive traps at both your starting and ending locations.", category: "Explosive Dodge", iconUrl: "/images/champions/Talent Spring Loaded VII.png" },
+  ],
+  loadouts: [
+    { name: "Aggressive Dodge", description: "Increase the distance traveled by Explosive Dodge.", category: "Explosive Dodge", iconUrl: "/images/cards/Card_Aggressive_Dodge.png" },
+    { name: "Equivocate", description: "Heal after hitting an enemy with Grappling Hook.", category: "Grappling Hook", iconUrl: "/images/cards/Card_Equivocate.png" },
+    { name: "Fragments", description: "Heal over time after latching to a wall with Grappling Hook.", category: "", iconUrl: "/images/cards/Card_Fragments.png" },
+    { name: "Latch and Fire", description: "Reduce the Cooldown of Grappling Hook after activating Explosive Dodge.", category: "Explosive Dodge", iconUrl: "/images/cards/Card_Latch_and_Fire.png" },
+    { name: "My City", description: "Reduce damage taken while latched to a wall.", category: "Grappling Hook", iconUrl: "/images/cards/Card_My_City.png" },
+    { name: "Nasty Surprise", description: "Generate Ammo after activating Explosive Dodge.", category: "Explosive Dodge", iconUrl: "/images/cards/Card_Nasty_Surprise.png" },
+    { name: "Never Look", description: "Increase your maximum Health.", category: "", iconUrl: "/images/cards/Card_Never_Look.png" },
+    { name: "Night Watch", description: "Generate Ammo when you activate Trigger Discipline.", category: "Trigger Discipline", iconUrl: "/images/cards/Card_Night_Watch.png" },
+    { name: "Pop Off", description: "Increase the Area of Effect of Explosive Dodge bombs.", category: "Explosive Dodge", iconUrl: "/images/cards/Card_Pop_Off.png" },
+    { name: "Rapid Response", description: "Decrease the recoil of Mag Dump.", category: "Trigger Discipline", iconUrl: "/images/cards/Card_Rapid_Response.png" },
+    { name: "Red Room", description: "Increase Movement Speed while in Automatic fire mode.", category: "Trigger Discipline", iconUrl: "/images/cards/Card_Red_Room.png" },
+    { name: "Terror", description: "Gain a Shield after using Grappling Hook.", category: "Grappling Hook", iconUrl: "/images/cards/Card_Terror.png" },
+    { name: "The Fear", description: "Reduce active Cooldowns after getting a Killing Blow while in Burst Mode.", category: "Trigger Discipline", iconUrl: "/images/cards/Card_The_Fear.png" },
+    { name: "The Night", description: "Reduce the Cooldown of Explosive Dodge after activating Grappling Hook.", category: "Grappling Hook", iconUrl: "/images/cards/Card_The_Night.png" },
+    { name: "Tick Tock", description: "Reset the Cooldown of Grappling Hook when falling to or below 10% Health.", category: "", iconUrl: "/images/cards/Card_Tick_Tock.png" },
+    { name: "Unknown Caller", description: "Increase your Reload Speed.", category: "", iconUrl: "/images/cards/Card_Unknown_Caller.png" },
+  ],
+};
+
 export const CHAMPION_DATA: Record<string, ChampionData> = {
   talus: TALUS_DATA,
   skye: SKYE_DATA,", 
@@ -2784,6 +2858,7 @@ export const CHAMPION_DATA: Record<string, ChampionData> = {
   vivian: VIVIAN_DATA,
   willob: WILLO_DATA,
   vatu: VATU_DATA,
+  vii: VII_DATA,
 };
 
 export function getChampionData(slug: string): ChampionData | undefined {
