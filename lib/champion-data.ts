@@ -85,16 +85,9 @@ export const ANDROXUS_DATA: ChampionData = {
     },
   ],
   talents: [
-    { name: "Darkstalker", description: "Increase damage dealt by 15% while cloaked.", category: "Nether Step" },
-    { name: "Defiant Fist", description: "Defiance grants 10% Armor for 2 seconds.", category: "Defiance" },
-    { name: "Godslayer", description: "Deal 10% more damage to enemies above 75% health.", category: "" },
-    { name: "Heads Will Roll", description: "Gain 5% movement speed for each enemy champion killed, stacking up to 5 times.", category: "" },
-    { name: "Nether Strike", description: "Increase the damage of each Nether Step dash by 50.", category: "Nether Step" },
-    { name: "Overwhelming", description: "Increase the duration of Reversal by 2s.", category: "Reversal" },
-    { name: "Soul Harvest", description: "Heal for 30 when an enemy champion dies within 5s of being hit by Nether Step.", category: "Nether Step" },
-    { name: "Vengeance", description: "Heal for 30 when hitting an enemy champion with Defiance.", category: "Defiance" },
-    { name: "Watchful", description: "Reduce all active Cooldowns by 10% after getting an Elimination.", category: "" },
-    { name: "Spiteful", description: "Defiance deals 25% more damage to enemies below 50% health.", category: "Defiance" },
+    { name: "Defiant Fist", description: "Successful hits with your Revolver increase the damage of your next Defiance by 20%, stacking up to 100%.", category: "Defiance" },
+    { name: "Godslayer", description: "Reversal always fires back and does an additional 800 damage.", category: "Reversal" },
+    { name: "Dark Stalker", description: "Nether Step now has 3 separate charges and is no longer linked.", category: "Nether Step" },
   ],
   loadouts: [
     // Placeholder loadout types — will be populated from DB
