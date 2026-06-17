@@ -16,7 +16,7 @@ import {
   type RankedPlayer,
   type StatsChampion,
 } from "@/lib/api-client";
-import { MOCK_STATS_CHAMPIONS, MOCK_RANKED_PLAYERS } from "@/lib/mock-data";
+import { MOCK_STATS_CHAMPIONS, MOCK_RANKED_PLAYERS, MOCK_CHAMPIONS } from "@/lib/mock-data";
 
 // Champion roles for grouping
 const ROLES = ["Damage", "Flank", "Frontline", "Support"];
@@ -52,12 +52,12 @@ export default function HomePage() {
         ]);
 
         // Use API data or fall back to mock data
-        setChampions(champs.length > 0 ? champs : []);
+        setChampions(champs.length > 0 ? champs : MOCK_CHAMPIONS);
         setStatsChampions(stats.length > 0 ? stats : MOCK_STATS_CHAMPIONS);
         setRankedPlayers(players.length > 0 ? players : DUMMY_LEADERBOARD);
       } catch {
         // On error, use mock data as fallback
-        setChampions([]);
+        setChampions(MOCK_CHAMPIONS);
         setStatsChampions(MOCK_STATS_CHAMPIONS);
         setRankedPlayers(DUMMY_LEADERBOARD);
       } finally {
@@ -179,7 +179,7 @@ export default function HomePage() {
                       <div key={role}>
                         <div className="flex items-center gap-2 mb-3">
                           <Image
-                            src={`/images/icons/Class_${role}_Icon.avif`}
+                            src={role === "Frontline" ? "/images/icons/Class_Front_Line_Icon.avif" : `/images/icons/Class_${role}_Icon.avif`}
                             alt={role}
                             width={20}
                             height={20}
