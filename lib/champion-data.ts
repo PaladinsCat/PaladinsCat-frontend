@@ -25,8 +25,8 @@ export interface ChampionStats {
 
 export interface ChampionLoadout {
   name: string;
-  level: number; // 1-5
   description: string;
+  category: string; // Linked ability (Nether Step, Defiance, Reversal, or "")
   iconUrl?: string;
   // DB fields (placeholder)
   pickRate?: number;
@@ -90,8 +90,22 @@ export const ANDROXUS_DATA: ChampionData = {
     { name: "Dark Stalker", description: "Nether Step now has 3 separate charges and is no longer linked.", category: "Nether Step" },
   ],
   loadouts: [
-    // Placeholder loadout types — will be populated from DB
-    // Each champion has 1-3 weapon loadouts (LV1-5)
+    { name: "Abyss Walker", description: "Heal for 40", category: "Nether Step" },
+    { name: "Abyssal Touch", description: "Reduce the Cooldown of Nether Step by 1.2s after hitting an enemy with Defiance.", category: "Defiance" },
+    { name: "Buying Time", description: "Generate 1 Energy", category: "Reversal" },
+    { name: "Disrupt", description: "Reduce the Cooldown of Reversal by 1.2s.", category: "Reversal" },
+    { name: "Elusive", description: "Increase your Movement Speed by 10% for 3s after activating Nether Step.", category: "Nether Step" },
+    { name: "Equivalent Exchange", description: "Heal for 10% of the damage Absorbed by Reversal.", category: "Reversal" },
+    { name: "Featherweight", description: "Heal for 50", category: "" },
+    { name: "Marksman", description: "Generate 1 Energy", category: "Defiance" },
+    { name: "Power of the Abyss", description: "Reduce the Cooldown of Nether Step by 20% after hitting an enemy champion with Reversal.", category: "Reversal" },
+    { name: "Quick Draw", description: "Hitting a player with Revolver Heals you for 15.", category: "" },
+    { name: "Seething Hatred", description: "Reduce the Cooldown of Reversal by 0.5s after hitting an enemy champion with Revolver.", category: "" },
+    { name: "Sleight of Hand", description: "Generate 1 Energy", category: "Nether Step" },
+    { name: "Spiteful", description: "Generate 1% Ultimate charge after hitting at least one enemy champion with Defiance.", category: "Defiance" },
+    { name: "Through the Warp", description: "Increase the distance of each Nether Step dash by 5%.", category: "Nether Step" },
+    { name: "Vengeance", description: "Heal for 30", category: "Defiance" },
+    { name: "Watchful", description: "Reduce all active Cooldowns by 10% after getting an Elimination.", category: "" },
   ],
 };
 

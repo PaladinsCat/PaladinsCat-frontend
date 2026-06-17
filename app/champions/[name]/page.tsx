@@ -184,14 +184,33 @@ export default function ChampionDetailPage() {
         </div>
       )}
 
-      {/* Loadout Types (placeholder for DB) */}
-      <div className="pc-card">
-        <h2 className="pc-card-title mb-4">Loadout Types</h2>
-        <div className="text-center py-8">
-          <p className="text-pc-text-muted">Loadout data will be populated from the database.</p>
-          <p className="text-pc-text-muted text-sm mt-1">Pick rates, win rates, and level stats coming soon.</p>
+      {/* Loadout Cards */}
+      {championData?.loadouts && championData.loadouts.length > 0 && (
+        <div className="pc-card">
+          <h2 className="pc-card-title mb-4">Loadout Cards</h2>
+          {(() => {
+            const byCategory: Record<string, ChampionLoadout[]> = {};
+            championData.loadouts.forEach((l) => {
+              const key = l.category || "General";
+              if (!byCategory[key]) byCategory[key] = [];
+              byCategory[key].push(l);
+            });
+            return Object.entries(byCategory).map(([cat, cards]) => (
+              <div key={cat} className="mb-6 last:mb-0">
+                <div className="text-xs font-medium text-pc-text-muted uppercase tracking-wider mb-2">{cat}</div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {cards.map((card) => (
+                    <div key={card.name} className="pc-surface-light rounded-lg p-3 border border-pc-border">
+                      <div className="text-xs font-medium text-pc-accent mb-1">{card.name}</div>
+                      <p className="text-xs text-pc-text-secondary leading-relaxed">{card.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ));
+          })()}
         </div>
-      </div>
+      )}
 
       {/* Average Player Stats */}
       <div className="pc-card">
