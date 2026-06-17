@@ -1546,6 +1546,78 @@ export const OCTAVIA_DATA: ChampionData = {
   ],
 };
 
+export const SHA_LIN_DATA: ChampionData = {
+  name: "Sha Lin",
+  roles: ["Damage"],
+  stats: {
+    health: "2150",
+    speed: "350",
+    speedUnits: "~21 units/s",
+    range: "450",
+  },
+  skills: [
+    {
+      name: "Long Bow",
+      key: "LMB",
+      iconUrl: "/images/skills/Ability_LongBow.png",
+      damage: "1000",
+      description: "Draw back your longbow every 1.4s to fire deadly arrows that deals up to 1000 damage.",
+    },
+    {
+      name: "Crippling Arrow",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_CripplingArrow.png",
+      cooldown: "8s",
+      description: "Your next Longbow arrow will Cripple enemies, preventing them from using movement abilities for 2s.",
+    },
+    {
+      name: "Rapid Shot",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_RapidShot.png",
+      damage: "625",
+      cooldown: "12s",
+      description: "Rapidly fire off a barrage of arrows while moving, each dealing 625 damage.",
+    },
+    {
+      name: "Withdraw",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Withdraw.png",
+      cooldown: "11s",
+      description: "Leap backwards and become stealthed.",
+    },
+    {
+      name: "Heat Haze",
+      key: "E",
+      iconUrl: "/images/skills/Ability_HeatHaze.png",
+      cooldown: "Ultimate",
+      description: "Become a desert mirage, stealthing and enhancing your combat skills, only revealing yourself when you fire.",
+    },
+  ],
+  talents: [
+    { name: "Desert Shadow", description: "Eliminations enter you into Stealth for 2s. Shots from Stealth deal 200 increased damage.", category: "Withdraw" },
+    { name: "Recurve", description: "Increase the rate at which your Longbow charges by 25%.", category: "Long Bow" },
+    { name: "Sand Trap", description: "Crippling Arrow now explodes in a 20-unit-radius area on contact, dealing up to 300 additional Area Damage to enemies hit, but its Cripple is reduced by 1s.", category: "Crippling Arrow" },
+  ],
+  loadouts: [
+    { name: "Bullseye", description: "Reduce your active Cooldowns by 10% when you get an Elimination.", category: "", iconUrl: "/images/cards/Card_Bullseye.png" },
+    { name: "Daring Escape", description: "Increase your Movement Speed by 10% for 3s after Rapid Shot ends.", category: "Rapid Shot", iconUrl: "/images/cards/Card_Daring_Escape.png" },
+    { name: "Grounded", description: "Regenerate 60 Health every 1s while using Rapid Shot.", category: "Rapid Shot", iconUrl: "/images/cards/Card_Grounded.png" },
+    { name: "Master Archer", description: "Reduce the Cooldown of Rapid Shot by 0.6s.", category: "Rapid Shot", iconUrl: "/images/cards/Card_Master_Archer.png" },
+    { name: "Mirage", description: "Reduce the Cooldown of Withdraw by 0.6s.", category: "Withdraw", iconUrl: "/images/cards/Card_Mirage.png" },
+    { name: "Oasis", description: "Heal for 80 after using Withdraw.", category: "Withdraw", iconUrl: "/images/cards/Card_Oasis.png" },
+    { name: "Poise", description: "While in Stealth, gain 40% increased Jump Height.", category: "", iconUrl: "/images/cards/Card_Poise.png" },
+    { name: "Quick Sand", description: "Reduce the Cooldown of Crippling Arrow by 0.6s.", category: "Crippling Arrow", iconUrl: "/images/cards/Card_Quick_Sand.png" },
+    { name: "Run Like the Wind", description: "Increase your Movement Speed by 7% for 3s after using Withdraw.", category: "Withdraw", iconUrl: "/images/cards/Card_Run_Like_the_Wind.png" },
+    { name: "Run Them Down", description: "Increase the duration of the Cripple effect applied by Crippling Arrow by 0.1s.", category: "Crippling Arrow", iconUrl: "/images/cards/Card_Run_Them_Down.png" },
+    { name: "Shimmer", description: "Reset the Cooldown of Withdraw after dropping to or below 15% Health.", category: "Withdraw", iconUrl: "/images/cards/Card_Shimmer.png" },
+    { name: "Skewer", description: "Hitting an enemy with Crippling Arrow reduces the Cooldown of Rapid Shot by 0.6s.", category: "Crippling Arrow", iconUrl: "/images/cards/Card_Skewer.png" },
+    { name: "Strike True", description: "Heal for 70 after hitting an enemy with Crippling Arrow.", category: "Crippling Arrow", iconUrl: "/images/cards/Card_Strike_True.png" },
+    { name: "Swagger", description: "Increase your maximum Health by 50.", category: "", iconUrl: "/images/cards/Card_Swagger.png" },
+    { name: "Wanderlust", description: "Increase your Movement Speed by 3%.", category: "", iconUrl: "/images/cards/Card_Wanderlust.png" },
+    { name: "Windwall", description: "Each arrow of Rapid Shot reduces the Movement Speed of any enemy hit by 5% for 2s.", category: "Rapid Shot", iconUrl: "/images/cards/Card_Windwall.png" },
+  ],
+};
+
 export const CHAMPION_DATA: Record<string, ChampionData> = {
   androxus: ANDROXUS_DATA,
   ash: ASH_DATA,
@@ -1568,6 +1640,7 @@ export const CHAMPION_DATA: Record<string, ChampionData> = {
   torvald: TORVALD_DATA,
   bombking: BOMB_KING_DATA,
   octavia: OCTAVIA_DATA,
+  shalin: SHA_LIN_DATA,
 };
 
 export function getChampionData(slug: string): ChampionData | undefined {
