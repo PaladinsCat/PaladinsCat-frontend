@@ -1410,6 +1410,71 @@ export const KINESSA_DATA: ChampionData = {
   ],
 };
 
+export const LIAN_DATA: ChampionData = {
+  name: "Lian",
+  roles: ["Damage"],
+  stats: {
+    health: "2100",
+    speed: "355",
+    speedUnits: "~22 units/s",
+    range: "125",
+  },
+  skills: [
+    {
+      name: "Heirloom Rifle",
+      key: "LMB",
+      iconUrl: "/images/skills/Ability_Heirloom_Rifle.png",
+      damage: "425",
+      description: "A automatic rifle passed down through House Aico that deals 425 damage every 0.45s.",
+    },
+    {
+      name: "Valor",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_Valor.png",
+      damage: "350",
+      cooldown: "8s",
+      description: "Fire a charged weapon shot to hit all enemies in sight with your rifle for 350 damage.",
+    },
+    {
+      name: "Presence",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Presence.png",
+      damage: "800",
+      cooldown: "15s",
+      description: "Charge your rifle to fire a long-range piercing weapon attack that deals 800 damage to enemies hit.",
+    },
+    {
+      name: "Grace",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Grace.png",
+      damage: "400",
+      cooldown: "5s",
+      description: "Quickly dodge and fire off a deadly shot with your weapon that deals 400 damage.",
+    },
+    {
+      name: "Enlightenment",
+      key: "E",
+      iconUrl: "/images/skills/Ability_Enlightenment.png",
+      damage: "1600",
+      cooldown: "Ultimate",
+      description: "Channel the power of your noble blood and take reduced damage and launch the embodiment of your house to deal 1600 damage to your target.",
+    },
+  ],
+  talents: [
+    { name: "Alacrity", description: "Grace now hits all enemies in front of you instead of only one, but its Cooldown is increased by 1s.", category: "Grace", iconUrl: "/images/champions/Talent Lian Alacrity.png" },
+    { name: "Eminence", description: "Increase the damage of Presence by up to 50% based on the range at which it hits and reduce its Cooldown by 4s.", category: "Presence" },
+    { name: "Precision", description: "Hitting an enemy with Heirloom Rifle increases your Heirloom Rifle damage against that enemy by 7% for 5s, stacking up to 5 times.", category: "Heirloom Rifle", iconUrl: "/images/champions/Talent Lian Precision.png" },
+  ],
+  loadouts: [
+    { name: "Superiority", description: "Increase your damage.", category: "", iconUrl: "/images/cards/Card_Superiority.png" },
+    { name: "Swift Jade", description: "Reduce the Cooldown of Valor.", category: "Valor", iconUrl: "/images/cards/Card_Swift_Jade.png" },
+    { name: "Divine Right", description: "Increase the damage of Grace.", category: "Grace", iconUrl: "/images/cards/Card_Divine_Right.png" },
+    { name: "Royal Seal", description: "Reduce the Cooldown of Presence.", category: "Presence", iconUrl: "/images/cards/Card_Royal_Seal.png" },
+    { name: "Heraldry", description: "Reduce the Cooldown of Presence.", category: "Presence", iconUrl: "/images/cards/Card_Heraldry.png" },
+    { name: "Eagle's Emerald", description: "Increase the damage of Valor.", category: "Valor", iconUrl: "/images/cards/Card_Eagle's_Emerald.png" },
+  ],
+};
+
 export const CHAMPION_DATA: Record<string, ChampionData> = {
   androxus: ANDROXUS_DATA,
   ash: ASH_DATA,
@@ -1420,6 +1485,7 @@ export const CHAMPION_DATA: Record<string, ChampionData> = {
   dredge: DREDGE_DATA,
   imani: IMANI_DATA,
   kinessa: KINESSA_DATA,
+  lian: LIAN_DATA,
   fernando: FERNANDO_DATA,
   inara: INARA_DATA,
   khan: KHAN_DATA,
