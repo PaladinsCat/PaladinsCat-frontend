@@ -27,7 +27,7 @@ export default function Card({
   ...props
 }: CardProps) {
   const cardStyle = opaque
-    ? { backgroundColor: "var(--pc-bg-elevated)" as unknown as string }
+    ? { backgroundColor: "var(--pc-bg-elevated)" as unknown as string, backdropFilter: "none", WebkitBackdropFilter: "none" }
     : { backgroundColor: "oklch(0.210 0.005 280 / 0.65)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" };
 
   const baseStyle = hover
