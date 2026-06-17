@@ -232,7 +232,51 @@ export const MOCK_MATCH_STATS = {
   ],
 };
 
-// Tier name mapping for display
+// Global item stats
+export const MOCK_ITEM_STATS = [
+  { name: "Cauterize", pickRate: 92.4, winRate: 51.2, category: "Offense" },
+  { name: "Wrecker", pickRate: 68.1, winRate: 49.8, category: "Offense" },
+  { name: "Bulldozer", pickRate: 23.5, winRate: 48.3, category: "Offense" },
+  { name: "Deft Hands", pickRate: 31.7, winRate: 50.1, category: "Offense" },
+  { name: "Morale Boost", pickRate: 45.2, winRate: 52.6, category: "Utility" },
+  { name: "Nimble", pickRate: 58.9, winRate: 51.8, category: "Utility" },
+  { name: "Master Riding", pickRate: 12.4, winRate: 47.2, category: "Utility" },
+  { name: "Illuminate", pickRate: 34.6, winRate: 53.1, category: "Utility" },
+  { name: "Resilience", pickRate: 52.3, winRate: 50.7, category: "Utility" },
+  { name: "Haven", pickRate: 71.8, winRate: 52.9, category: "Armor" },
+  { name: "Blast Shields", pickRate: 44.6, winRate: 50.3, category: "Armor" },
+  { name: "Veteran", pickRate: 8.2, winRate: 46.1, category: "Armor" },
+  { name: "Rejuvenate", pickRate: 38.4, winRate: 51.5, category: "Healing" },
+  { name: "Kill to Heal", pickRate: 29.1, winRate: 49.4, category: "Healing" },
+  { name: "Life Rip", pickRate: 42.7, winRate: 50.8, category: "Healing" },
+];
+
+// Map stats
+export const MOCK_MAP_STATS = [
+  { name: "Jaguar Falls", matches: 18_420, avgDuration: "12:34", winRateAttack: 48.2 },
+  { name: "Serpent Beach", matches: 16_890, avgDuration: "11:52", winRateAttack: 51.6 },
+  { name: "Fish Market", matches: 15_340, avgDuration: "13:10", winRateAttack: 47.8 },
+  { name: "Frog Isle", matches: 14_720, avgDuration: "10:45", winRateAttack: 52.1 },
+  { name: "Stone Keep", matches: 13_580, avgDuration: "14:22", winRateAttack: 49.5 },
+  { name: "Brightmarsh", matches: 12_910, avgDuration: "11:18", winRateAttack: 50.3 },
+  { name: "Ascension Peak", matches: 11_460, avgDuration: "12:08", winRateAttack: 48.9 },
+  { name: "Ice Mines", matches: 10_840, avgDuration: "13:45", winRateAttack: 51.2 },
+  { name: "Splitstone Quarry", matches: 9_670, avgDuration: "11:30", winRateAttack: 49.1 },
+  { name: "Warder's Gate", matches: 8_920, avgDuration: "12:55", winRateAttack: 50.7 },
+];
+
+// Global performance metrics
+export const MOCK_GLOBAL_METRICS = {
+  avgDPM: 682,
+  avgHPM: 1_240,
+  avgGPM: 1_850,
+  avgMPM: 42,  // mitigation per min
+  avgKDA: "2.4 / 4.1 / 6.8",
+  kdaRatio: 2.24,
+  totalMatchesTracked: 287_450,
+  totalPlayersTracked: 48_320,
+  avgMatchDuration: "12:18",
+};
 export const TIER_NAMES: Record<number, string> = {
   1: 'Bronze V', 2: 'Bronze IV', 3: 'Bronze III', 4: 'Bronze II', 5: 'Bronze I',
   6: 'Silver V', 7: 'Silver IV', 8: 'Silver III', 9: 'Silver II', 10: 'Silver I',

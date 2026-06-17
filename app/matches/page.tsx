@@ -8,19 +8,14 @@ import {
   type MatchSearchResult,
   type MatchData,
 } from "@/lib/api-client";
-import ScrambleText from "@/components/ScrambleText";
 import { useChampions } from "@/lib/champion-names";
+import { MOCK_MATCH_STATS } from "@/lib/mock-data";
 
 /**
- * Match Search Page — /matches
+ * Matches Page — /matches
  *
- * Lists recent matches with search filters (champion, queue, region, date range).
- * Paginated results with clickable rows linking to /matches/[id].
- *
- * Data sources:
- *   GET /api/matches/recent          → default recent matches
- *   GET /api/matches/search          → filtered search
- *   @/lib/champion-names             → champion name dropdown
+ * Left: search filters. Right: live match stats by region.
+ * Bottom: paginated results table.
  */
 export default function MatchesPage() {
   const [matches, setMatches] = useState<MatchSearchResult[]>([]);
@@ -59,10 +54,8 @@ export default function MatchesPage() {
         setTotal(result.total);
         setTotalPages(result.page.totalPages);
       } else {
-        // Default: show recent matches
         const recent = await fetchRecentMatches(perPage);
         if (recent.length > 0) {
-          // Map to MatchSearchResult shape for the table
           const mapped: MatchSearchResult[] = recent.map((m: MatchData) => ({
             match_id: m.match_id,
             entry_datetime: m.entry_datetime,
@@ -117,79 +110,95 @@ export default function MatchesPage() {
     setPage(1);
   };
 
-  // Reload after filter/page changes
   useEffect(() => {
     if (hasFilters) loadMatches();
   }, [page, hasFilters, loadMatches]);
+
+  const stats = MOCK_MATCH_STATS;
+  const maxMatches = Math.max(...stats.regions.map((r) => r.matchesPerHour));
 
   return (
     <div className="space-y-6">
       {/* ── Header ── */}
       <div>
-        <h1 className="text-2xl font-bold text-pc-text">
-          <ScrambleText text="Matches" speed={30} iterations={15} delayFromCenter={false} />
-        </h1>
-        <p className="text-pc-text-secondary mt-1">
-          Search and browse match history
+        <h1 className="pc-heading pc-heading-lg text-pc-accent">Matches</h1>
+        <p className="text-pc-text-secondary text-sm mt-1">
+          Search match history and view live ranked activity
         </p>
       </div>
 
-      {/* ── Filters ── */}
-      <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-          <div>
-            <label className="block text-sm text-pc-text-secondary mb-1">Champion</label>
-            <select
-              value={championId}
-              onChange={(e) => setChampionId(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg bg-pc-bg-secondary border border-pc-border text-pc-text text-sm focus:outline-none focus:border-pc-accent"
-              disabled={championsLoading}
-            >
-              <option value="">All champions</option>
-              {champions?.sort((a, b) => a.name.localeCompare(b.name)).map((c) => (
-                <option key={c.id} value={String(c.id)}>{c.name}</option>
-              ))}
-            </select>
+      {/* ── Top: Search (left) + Stats (right) ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+
+        {/* Left: Search Filters (3/5) */}
+        <div className="lg:col-span-3 bg-pc-bg-elevated border border-pc-border rounded-xl p-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs text-pc-text-muted mb-1.5">Champion</label>
+              <select
+                value={championId}
+                onChange={(e) => setChampionId(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg bg-pc-bg border border-pc-border text-pc-text text-sm focus:outline-none focus:border-pc-accent"
+                disabled={championsLoading}
+              >
+                <option value="">All champions</option>
+                {champions?.sort((a, b) => a.name.localeCompare(b.name)).map((c) => (
+                  <option key={c.id} value={String(c.id)}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs text-pc-text-muted mb-1.5">Queue</label>
+              <select
+                value={queueId}
+                onChange={(e) => setQueueId(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg bg-pc-bg border border-pc-border text-pc-text text-sm focus:outline-none focus:border-pc-accent"
+              >
+                <option value="">All queues</option>
+                <option value="486">Ranked</option>
+                <option value="487">Casual</option>
+                <option value="488">Custom</option>
+                <option value="489">Tournament</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs text-pc-text-muted mb-1.5">Region</label>
+              <select
+                value={region}
+                onChange={(e) => setRegion(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg bg-pc-bg border border-pc-border text-pc-text text-sm focus:outline-none focus:border-pc-accent"
+              >
+                <option value="">All regions</option>
+                <option value="NA">NA</option>
+                <option value="EU">EU</option>
+                <option value="Asia">Asia</option>
+                <option value="OCE">OCE</option>
+                <option value="BR">Brazil</option>
+                <option value="LATAM">LATAM</option>
+              </select>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs text-pc-text-muted mb-1.5">From</label>
+                <input
+                  type="date"
+                  value={from}
+                  onChange={(e) => setFrom(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg bg-pc-bg border border-pc-border text-pc-text text-sm focus:outline-none focus:border-pc-accent"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-pc-text-muted mb-1.5">To</label>
+                <input
+                  type="date"
+                  value={to}
+                  onChange={(e) => setTo(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg bg-pc-bg border border-pc-border text-pc-text text-sm focus:outline-none focus:border-pc-accent"
+                />
+              </div>
+            </div>
           </div>
-          <div>
-            <label className="block text-sm text-pc-text-secondary mb-1">Queue ID</label>
-            <input
-              type="number"
-              value={queueId}
-              onChange={(e) => setQueueId(e.target.value)}
-              placeholder="486 = Ranked"
-              className="w-full px-3 py-2 rounded-lg bg-pc-bg-secondary border border-pc-border text-pc-text text-sm focus:outline-none focus:border-pc-accent"
-            />
-          </div>
-          <div>
-            <label className="block text-sm text-pc-text-secondary mb-1">Region</label>
-            <input
-              type="text"
-              value={region}
-              onChange={(e) => setRegion(e.target.value)}
-              placeholder="e.g. na"
-              className="w-full px-3 py-2 rounded-lg bg-pc-bg-secondary border border-pc-border text-pc-text text-sm focus:outline-none focus:border-pc-accent"
-            />
-          </div>
-          <div>
-            <label className="block text-sm text-pc-text-secondary mb-1">From</label>
-            <input
-              type="datetime-local"
-              value={from}
-              onChange={(e) => setFrom(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg bg-pc-bg-secondary border border-pc-border text-pc-text text-sm focus:outline-none focus:border-pc-accent"
-            />
-          </div>
-          <div>
-            <label className="block text-sm text-pc-text-secondary mb-1">To</label>
-            <input
-              type="datetime-local"
-              value={to}
-              onChange={(e) => setTo(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg bg-pc-bg-secondary border border-pc-border text-pc-text text-sm focus:outline-none focus:border-pc-accent"
-            />
-          </div>
-          <div className="flex items-end gap-2">
+          <div className="flex gap-2 mt-4">
             <button
               onClick={handleSearch}
               className="flex-1 px-4 py-2 rounded-lg bg-pc-accent text-pc-bg font-semibold text-sm hover:bg-pc-accent-secondary transition-colors"
@@ -198,44 +207,91 @@ export default function MatchesPage() {
             </button>
             <button
               onClick={handleReset}
-              className="px-4 py-2 rounded-lg bg-pc-bg-secondary border border-pc-border text-pc-text-secondary text-sm hover:bg-pc-bg-elevated transition-colors"
+              className="px-4 py-2 rounded-lg bg-pc-bg border border-pc-border text-pc-text-secondary text-sm hover:bg-pc-bg-elevated transition-colors"
             >
               Reset
             </button>
           </div>
         </div>
+
+        {/* Right: Live Match Stats (2/5) */}
+        <div className="lg:col-span-2 space-y-4">
+          {/* Summary */}
+          <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <h2 className="text-pc-text font-semibold text-sm">Live Match Activity</h2>
+            </div>
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <div className="text-pc-text-muted text-[10px] uppercase tracking-wider mb-0.5">Total Today</div>
+                <div className="text-pc-text font-bold text-lg">{stats.totalToday.toLocaleString()}</div>
+              </div>
+              <div>
+                <div className="text-pc-text-muted text-[10px] uppercase tracking-wider mb-0.5">Ranked Today</div>
+                <div className="text-pc-accent font-bold text-lg">{stats.rankedToday.toLocaleString()}</div>
+              </div>
+            </div>
+            {/* Region bars */}
+            <div className="space-y-2">
+              {stats.regions.map((r) => (
+                <div key={r.region} className="flex items-center gap-3 text-xs">
+                  <span className="text-pc-text w-10 shrink-0 font-medium">{r.region}</span>
+                  <div className="flex-1 h-2 bg-pc-bg rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-pc-accent-deep to-pc-accent transition-all duration-500"
+                      style={{ width: `${(r.matchesPerHour / maxMatches) * 100}%` }}
+                    />
+                  </div>
+                  <span className="text-pc-accent font-medium w-12 text-right shrink-0">{r.matchesPerHour}/hr</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* Peak hours */}
+          <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4">
+            <h3 className="text-pc-text-muted text-[10px] uppercase tracking-wider mb-2">Peak Hours</h3>
+            <div className="grid grid-cols-3 gap-2">
+              {stats.regions.map((r) => (
+                <div key={r.region} className="text-center">
+                  <div className="text-pc-text text-xs font-medium">{r.region}</div>
+                  <div className="text-pc-text-muted text-[10px]">{r.peakHour}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
       </div>
 
       {/* ── Results ── */}
       {loading && (
-        <div className="text-center py-12 text-pc-text-secondary">Loading matches...</div>
+        <div className="text-center py-12 text-pc-text-secondary text-sm">Loading matches...</div>
       )}
 
       {error && (
-        <div className="text-center py-12 text-red-400">{error}</div>
+        <div className="text-center py-12 text-red-400 text-sm">{error}</div>
       )}
 
       {!loading && !error && matches.length === 0 && (
-        <div className="text-center py-12 text-pc-text-secondary">
+        <div className="text-center py-12 text-pc-text-secondary text-sm">
           {hasFilters ? "No matches found for these filters." : "No matches available."}
         </div>
       )}
 
       {!loading && !error && matches.length > 0 && (
         <>
-          {/* Results count */}
           {hasFilters && (
-            <div className="text-sm text-pc-text-secondary">
-              Showing {(page - 1) * perPage + 1}–{Math.min(page * perPage, total)} of {total} matches
+            <div className="text-xs text-pc-text-muted">
+              Showing {(page - 1) * perPage + 1}–{Math.min(page * perPage, total)} of {total.toLocaleString()} matches
             </div>
           )}
 
-          {/* Table */}
           <div className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-pc-border bg-pc-bg-secondary text-pc-text-secondary text-left">
+                  <tr className="border-b border-pc-border bg-pc-bg-secondary text-pc-text-muted text-left text-xs">
                     <th className="px-4 py-3">Match ID</th>
                     <th className="px-4 py-3">Queue</th>
                     <th className="px-4 py-3">Map</th>
@@ -253,23 +309,22 @@ export default function MatchesPage() {
             </div>
           </div>
 
-          {/* Pagination */}
           {hasFilters && totalPages > 1 && (
             <div className="flex items-center justify-center gap-2">
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="px-3 py-2 rounded-lg bg-pc-bg-elevated border border-pc-border text-pc-text text-sm disabled:opacity-50 hover:bg-pc-bg-secondary transition-colors"
+                className="px-3 py-2 rounded-lg bg-pc-bg-elevated border border-pc-border text-pc-text text-xs disabled:opacity-50 hover:bg-pc-bg-secondary transition-colors"
               >
                 ← Prev
               </button>
-              <span className="text-sm text-pc-text-secondary px-4">
+              <span className="text-xs text-pc-text-secondary px-4">
                 Page {page} of {totalPages}
               </span>
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
-                className="px-3 py-2 rounded-lg bg-pc-bg-elevated border border-pc-border text-pc-text text-sm disabled:opacity-50 hover:bg-pc-bg-secondary transition-colors"
+                className="px-3 py-2 rounded-lg bg-pc-bg-elevated border border-pc-border text-pc-text text-xs disabled:opacity-50 hover:bg-pc-bg-secondary transition-colors"
               >
                 Next →
               </button>
@@ -287,21 +342,18 @@ function MatchRow({ match }: { match: MatchSearchResult }) {
   const date = new Date(match.entry_datetime).toLocaleString();
 
   return (
-    <Link
-      href={`/matches/${match.match_id}`}
-      className="group"
-    >
+    <Link href={`/matches/${match.match_id}`} className="group">
       <tr className="border-b border-pc-border/50 hover:bg-pc-bg-secondary transition-colors cursor-pointer">
         <td className="px-4 py-3">
-          <span className="font-medium text-pc-accent group-hover:text-pc-accent-secondary transition-colors">
+          <span className="font-medium text-pc-accent group-hover:text-pc-accent-secondary transition-colors text-xs">
             #{match.match_id}
           </span>
         </td>
-        <td className="px-4 py-3 text-pc-text-secondary">{queueLabel}</td>
-        <td className="px-4 py-3 text-pc-text-secondary">{match.map}</td>
-        <td className="px-4 py-3 text-pc-text-secondary">{match.region}</td>
-        <td className="px-4 py-3 text-pc-text-secondary">{duration}</td>
-        <td className="px-4 py-3 text-pc-text-secondary">{date}</td>
+        <td className="px-4 py-3 text-pc-text-secondary text-xs">{queueLabel}</td>
+        <td className="px-4 py-3 text-pc-text-secondary text-xs">{match.map}</td>
+        <td className="px-4 py-3 text-pc-text-secondary text-xs">{match.region}</td>
+        <td className="px-4 py-3 text-pc-text-secondary text-xs">{duration}</td>
+        <td className="px-4 py-3 text-pc-text-secondary text-xs">{date}</td>
       </tr>
     </Link>
   );
@@ -311,9 +363,9 @@ function MatchRow({ match }: { match: MatchSearchResult }) {
 
 function queueName(id: number): string {
   const map: Record<number, string> = {
-    486: "Ranked 10v10",
-    487: "Casual 10v10",
-    488: "Custom Game",
+    486: "Ranked",
+    487: "Casual",
+    488: "Custom",
     489: "Tournament",
   };
   return map[id] || `Queue ${id}`;
