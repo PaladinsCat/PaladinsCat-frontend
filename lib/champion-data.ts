@@ -260,10 +260,85 @@ export const ATLAS_DATA: ChampionData = {
   ],
 };
 
+export const AZAAN_DATA: ChampionData = {
+  name: "Azaan",
+  roles: ["Frontline"],
+  stats: {
+    health: "4500",
+    speed: "365",
+    speedUnits: "~22 units/s",
+    range: "110",
+  },
+  skills: [
+    {
+      name: "Judgement",
+      key: "LMB",
+      iconUrl: "/images/skills/WeaponAttack_Azaan_Icon.png",
+      damage: "525, 525, 630",
+      description: "Throw your hammer in an attack chain, dealing 525, 525, 630 damage. Dealing and taking damage increases your Ire, which can augment your abilities and provide passive benefits.",
+    },
+    {
+      name: "Reckoning",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_Reckoning.png",
+      damage: "300",
+      cooldown: "9s",
+      description: "Send out a projectile that explodes in an area. Enemies hit take 300 damage and are Lifted. Using above Ire threshold reduces the Cooldown.",
+    },
+    {
+      name: "Sanctuary",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Sanctuary.png",
+      cooldown: "12s",
+      description: "Create a series of Deployable wall segments, each with 2500 Health. Using Sanctuary above the Ire threshold increases the Health of segments.",
+    },
+    {
+      name: "Conviction",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Conviction.png",
+      damage: "150 (contact), 350 (wall), 500 (Sanctuary)",
+      cooldown: "12s",
+      description: "Dash forward, carrying an enemy with you. Deals damage and Stuns on hitting any wall. While above the Ire threshold, this ability is used faster.",
+    },
+    {
+      name: "Deliverance",
+      key: "E",
+      iconUrl: "/images/skills/Ability_Deliverance.png",
+      damage: "725 (initial), 250 (second)",
+      cooldown: "Ultimate",
+      description: "Rise up and throw your hammer, dealing damage and Knockback, before teleporting to the impact, dealing more damage and Knockback.",
+    },
+  ],
+  talents: [
+    { name: "Persistence", description: "Gain 30% Lifesteal on your hits with Judgement.", category: "Judgement" },
+    { name: "Tempering", description: "Reckoning's damage and size, Sanctuary's health, and Conviction's range and stun duration are increased by 50%, but their Cooldown is increased by 25%.", category: "Tempering" },
+    { name: "Eternal", description: "Your Ire no longer decays due to not taking or dealing damage, but you no longer gain the passive damage increase while above Ire threshold.", category: "Eternal" },
+  ],
+  loadouts: [
+    { name: "Ad Eternum", description: "Reduce the damage you take by 3% while at least one wall segment of Sanctuary is active.", category: "Sanctuary", iconUrl: "/images/cards/Card_Ad_Eternum.png" },
+    { name: "Deadly Edict", description: "Reduce the Cooldown of Conviction by 0.3s after using Reckoning.", category: "Reckoning", iconUrl: "/images/cards/Card_Deadly_Edict.png" },
+    { name: "Depths of Despair", description: "Reduce the damage you take by 4% for 2s after activating Conviction.", category: "Conviction", iconUrl: "/images/cards/Card_Depths_of_Despair.png" },
+    { name: "Duty is a Mountain", description: "Increase the time until Ire starts to decay by 0.25s.", category: "", iconUrl: "/images/cards/Card_Duty_is_a_Mountain.png" },
+    { name: "Eternal Strife", description: "Using an ability above Ire threshold Heals you for 75.", category: "", iconUrl: "/images/cards/Card_Eternal_Strife.png" },
+    { name: "Flames of Wrath", description: "Increase the duration of the Lift applied by Reckoning by 20%.", category: "Reckoning", iconUrl: "/images/cards/Card_Flames_of_Wrath.png" },
+    { name: "Forged in Battle", description: "Reduce the Cooldown of Sanctuary by 0.6s.", category: "Sanctuary", iconUrl: "/images/cards/Card_Forged_in_Battle.png" },
+    { name: "Gathering Power", description: "Heal for 70 for each enemy hit with Reckoning.", category: "Reckoning", iconUrl: "/images/cards/Card_Gathering_Power.png" },
+    { name: "Grim Deliverance", description: "Heal for 5 for every percentage point of Ire consumed by abilities.", category: "", iconUrl: "/images/cards/Card_Grim_Deliverance.png" },
+    { name: "Indignation", description: "Reduce the Cooldown of Conviction by 0.4s.", category: "Conviction", iconUrl: "/images/cards/Card_Indignation.png" },
+    { name: "Overwhelming Presence", description: "Heal for 12 every 0.5s while at least one wall segment of Sanctuary is active.", category: "Sanctuary", iconUrl: "/images/cards/Card_Overwhelming_Presence.png" },
+    { name: "Piety", description: "Heal for 75 after activating Conviction.", category: "Conviction", iconUrl: "/images/cards/Card_Piety.png" },
+    { name: "Righteous Fury", description: "Reduce the Cooldown of Sanctuary by 0.6s after using Reckoning.", category: "Reckoning", iconUrl: "/images/cards/Card_Righteous_Fury.png" },
+    { name: "Solemn Watch", description: "Increase the distance traveled by Conviction by 6%.", category: "Conviction", iconUrl: "/images/cards/Card_Solemn_Watch.png" },
+    { name: "Tools of Salvation", description: "Increase your maximum Health by 150.", category: "", iconUrl: "/images/cards/Card_Tools_of_Salvation.png" },
+    { name: "True Conviction", description: "Reduce the damage your other allies take by 5% while they are within 35 units of the middle wall segment of your Sanctuary.", category: "Sanctuary", iconUrl: "/images/cards/Card_True_Conviction.png" },
+  ],
+};
+
 export const CHAMPION_DATA: Record<string, ChampionData> = {
   androxus: ANDROXUS_DATA,
   ash: ASH_DATA,
   atlas: ATLAS_DATA,
+  azaan: AZAAN_DATA,
 };
 
 export function getChampionData(slug: string): ChampionData | undefined {
