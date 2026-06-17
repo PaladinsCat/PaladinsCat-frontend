@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Fragment } from "react";
 import Link from "next/link";
 import { MOCK_GLOBAL_METRICS, MOCK_METRIC_BY_CLASS } from "@/lib/mock-data";
 import { championSlug } from "@/lib/utils";
@@ -27,6 +27,7 @@ type SortDir = "asc" | "desc";
 
 export default function MetricDetailPage({ config }: { config: MetricConfig }) {
   const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const [expandedChamp, setExpandedChamp] = useState<string | null>(null);
 
   const globalMetrics = MOCK_GLOBAL_METRICS;
   const d = globalMetrics[config.key as keyof typeof globalMetrics] as { min: number; max: number; mean: number; mode: number };
@@ -206,12 +207,14 @@ export default function MetricDetailPage({ config }: { config: MetricConfig }) {
                 <th className="px-3 py-3 text-right">{config.label}</th>
                 <th className="px-3 py-3 text-right">Matches</th>
                 <th className="px-3 py-3 text-right">vs Avg</th>
+                <th className="px-3 py-3 w-8"></th>
               </tr>
             </thead>
             <tbody>
               {sorted.map((c, i) => {
                 const diff = c.value - d.mean;
                 const diffPct = d.mean !== 0 ? ((diff / d.mean) * 100) : 0;
+                const isExpanded = expandedChamp === c.name;
 
                 // Champion-specific range
                 const cMin = c.min;
@@ -219,82 +222,151 @@ export default function MetricDetailPage({ config }: { config: MetricConfig }) {
                 const cMedian = c.median;
                 const cMode = c.mode;
                 const cRange = cMax - cMin;
-                // Position of champion's avg value within its own range
                 const valPct = cRange > 0 ? ((c.value - cMin) / cRange) * 100 : 50;
-                // Position of global mean within champion's range (clamped)
                 const globalMeanPct = cRange > 0 ? Math.max(0, Math.min(100, ((d.mean - cMin) / cRange) * 100)) : 50;
                 const meanPctC = cRange > 0 ? ((cMedian - cMin) / cRange) * 100 : 50;
                 const modePctC = cRange > 0 ? ((cMode - cMin) / cRange) * 100 : 50;
 
+                // Bell curve for expanded view
+                const BW = 300;
+                const BH = 70;
+                const bSigma = 0.15;
+                const bValPct = cRange > 0 ? (c.value - cMin) / cRange : 0.5;
+                const bMedianPct = cRange > 0 ? (cMedian - cMin) / cRange : 0.5;
+                const bModePct = cRange > 0 ? (cMode - cMin) / cRange : 0.5;
+                const bGlobalMeanPct = cRange > 0 ? Math.max(0, Math.min(1, (d.mean - cMin) / cRange)) : 0.5;
+                const bPoints: string[] = [];
+                for (let j = 0; j <= BW; j++) {
+                  const x = j / BW;
+                  const g1 = Math.exp(-0.5 * ((x - bValPct) / bSigma) ** 2);
+                  const g2 = Math.exp(-0.5 * ((x - bMedianPct) / (bSigma * 0.8)) ** 2);
+                  const y = 0.6 * g1 + 0.4 * g2;
+                  bPoints.push(`${j},${BH - y * (BH - 6)}`);
+                }
+                const bLinePath = `M0,${BH} L${bPoints.join(" L")} L${BW},${BH} Z`;
+
                 return (
-                  <tr key={c.name} className="border-b border-pc-border/50 hover:bg-pc-bg/50 transition-colors">
-                    <td className="px-3 py-2 text-pc-text-muted text-xs">{i + 1}</td>
-                    <td className="px-3 py-2">
-                      <div className="flex items-center gap-2">
-                        <img
-                          src={getChampionIconSafe(c.name)}
-                          alt={c.name}
-                          className="w-7 h-7 object-contain rounded shrink-0"
-                        />
-                        <div className="min-w-0">
-                          <Link href={`/champions/${championSlug(c.name)}`} className="text-pc-text font-medium text-xs hover:text-pc-accent transition-colors block truncate">
-                            {c.name}
-                          </Link>
-                          <span className="flex items-center gap-1 text-pc-text-muted text-[10px]">
-                            <img src={CLASS_ICONS[c.className]} alt={c.className} className="w-3 h-3" />
-                            {c.className}
-                          </span>
+                  <Fragment key={c.name}>
+                    <tr className={`border-b border-pc-border/50 hover:bg-pc-bg/50 transition-colors ${isExpanded ? "bg-pc-bg/30" : ""}`}>
+                      <td className="px-3 py-2 text-pc-text-muted text-xs">{i + 1}</td>
+                      <td className="px-3 py-2">
+                        <div className="flex items-center gap-2">
+                          <img src={getChampionIconSafe(c.name)} alt={c.name} className="w-7 h-7 object-contain rounded shrink-0" />
+                          <div className="min-w-0">
+                            <Link href={`/champions/${championSlug(c.name)}`} className="text-pc-text font-medium text-xs hover:text-pc-accent transition-colors block truncate">
+                              {c.name}
+                            </Link>
+                            <span className="flex items-center gap-1 text-pc-text-muted text-[10px]">
+                              <img src={CLASS_ICONS[c.className]} alt={c.className} className="w-3 h-3" />
+                              {c.className}
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-3 py-2">
-                      {/* Champion range bar */}
-                      <div className="relative h-8 w-52">
-                        {/* Track */}
-                        <div className="absolute top-2 inset-x-0 h-2 rounded-full bg-pc-bg" />
-                        {/* Fill to champion value */}
-                        <div
-                          className="absolute top-2 left-0 h-2 rounded-full opacity-25"
-                          style={{ width: `${clamp(valPct)}%`, background: config.stroke }}
-                        />
-                        {/* Mode marker — only if within range */}
-                        {modePctC >= 0 && modePctC <= 100 && (
-                          <div className="absolute top-1 bottom-4 w-px bg-pc-text-muted/40" style={{ left: `${modePctC}%` }} />
-                        )}
-                        {/* Champion mean marker — only if within range */}
-                        {meanPctC >= 0 && meanPctC <= 100 && (
-                          <div className="absolute top-1 bottom-4 w-px" style={{ left: `${meanPctC}%`, background: config.stroke, opacity: 0.6 }} />
-                        )}
-                        {/* Global mean — only if within range */}
-                        {globalMeanPct >= 0 && globalMeanPct <= 100 && (
-                          <div className="absolute top-0.5 bottom-2.5 border-l border-dashed" style={{ left: `${globalMeanPct}%`, borderColor: config.stroke, opacity: 0.4 }} />
-                        )}
-                        {/* Champion value dot */}
-                        <div
-                          className="absolute top-1 w-3 h-3 rounded-full border-2 border-pc-bg-elevated"
-                          style={{ left: `${clamp(valPct)}%`, transform: "translateX(-50%)", background: config.stroke }}
-                        />
-                        {/* Numbers row */}
-                        <div className="absolute bottom-0 inset-x-0 flex justify-between text-[8px] leading-none text-pc-text-muted/60">
-                          <span>{formatVal(cMin)}</span>
-                          <span style={{ color: config.stroke, opacity: 0.7 }}>{formatVal(cMode)}</span>
-                          <span style={{ color: config.stroke }}>{formatVal(cMedian)}</span>
-                          <span>{formatVal(cMax)}</span>
+                      </td>
+                      <td className="px-3 py-2">
+                        <div className="relative h-8 w-52">
+                          <div className="absolute top-2 inset-x-0 h-2 rounded-full bg-pc-bg" />
+                          <div className="absolute top-2 left-0 h-2 rounded-full opacity-25" style={{ width: `${clamp(valPct)}%`, background: config.stroke }} />
+                          {modePctC >= 0 && modePctC <= 100 && (
+                            <div className="absolute top-1 bottom-4 w-px bg-pc-text-muted/40" style={{ left: `${modePctC}%` }} />
+                          )}
+                          {meanPctC >= 0 && meanPctC <= 100 && (
+                            <div className="absolute top-1 bottom-4 w-px" style={{ left: `${meanPctC}%`, background: config.stroke, opacity: 0.6 }} />
+                          )}
+                          {globalMeanPct >= 0 && globalMeanPct <= 100 && (
+                            <div className="absolute top-0.5 bottom-2.5 border-l border-dashed" style={{ left: `${globalMeanPct}%`, borderColor: config.stroke, opacity: 0.4 }} />
+                          )}
+                          <div className="absolute top-1 w-3 h-3 rounded-full border-2 border-pc-bg-elevated" style={{ left: `${clamp(valPct)}%`, transform: "translateX(-50%)", background: config.stroke }} />
+                          <div className="absolute bottom-0 inset-x-0 flex justify-between text-[8px] leading-none text-pc-text-muted/60">
+                            <span>{formatVal(cMin)}</span>
+                            <span style={{ color: config.stroke, opacity: 0.7 }}>{formatVal(cMode)}</span>
+                            <span style={{ color: config.stroke }}>{formatVal(cMedian)}</span>
+                            <span>{formatVal(cMax)}</span>
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-3 py-2 text-right font-medium text-xs" style={{ color: config.stroke }}>
-                      {formatVal(c.value)}
-                    </td>
-                    <td className="px-3 py-2 text-right text-pc-text-secondary text-xs">
-                      {c.matches.toLocaleString()}
-                    </td>
-                    <td className="px-3 py-2 text-right text-xs">
-                      <span className={diff >= 0 ? "text-emerald-400" : "text-red-400"}>
-                        {diff >= 0 ? "+" : ""}{isDecimal ? diff.toFixed(1) : diff.toLocaleString()} ({diff >= 0 ? "+" : ""}{diffPct.toFixed(1)}%)
-                      </span>
-                    </td>
-                  </tr>
+                      </td>
+                      <td className="px-3 py-2 text-right font-medium text-xs" style={{ color: config.stroke }}>
+                        {formatVal(c.value)}
+                      </td>
+                      <td className="px-3 py-2 text-right text-pc-text-secondary text-xs">
+                        {c.matches.toLocaleString()}
+                      </td>
+                      <td className="px-3 py-2 text-right text-xs">
+                        <span className={diff >= 0 ? "text-emerald-400" : "text-red-400"}>
+                          {diff >= 0 ? "+" : ""}{isDecimal ? diff.toFixed(1) : diff.toLocaleString()} ({diff >= 0 ? "+" : ""}{diffPct.toFixed(1)}%)
+                        </span>
+                      </td>
+                      <td className="px-3 py-2">
+                        <button
+                          onClick={() => setExpandedChamp(isExpanded ? null : c.name)}
+                          className={`text-pc-text-muted hover:text-pc-accent transition-colors text-xs ${isExpanded ? "rotate-180" : ""}`}
+                        >
+                          ▼
+                        </button>
+                      </td>
+                    </tr>
+                    {/* Expanded detail row */}
+                    {isExpanded && (
+                      <tr>
+                        <td colSpan={7} className="px-6 py-4 bg-pc-bg/40 border-b border-pc-border/30">
+                          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            {/* Bell curve */}
+                            <div className="lg:col-span-2">
+                              <svg viewBox={`0 0 ${BW} ${BH}`} className="w-full h-28" preserveAspectRatio="none">
+                                <defs>
+                                  <linearGradient id={`exp-grad-${c.name}`} x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stopColor={config.stroke} stopOpacity="0.25" />
+                                    <stop offset="100%" stopColor={config.stroke} stopOpacity="0.02" />
+                                  </linearGradient>
+                                </defs>
+                                <path d={bLinePath} fill={`url(#exp-grad-${c.name})`} />
+                                <path d={`M${bPoints.join(" L")}`} fill="none" stroke={config.stroke} strokeWidth="2" strokeLinecap="round" />
+                                {/* Mode line */}
+                                <line x1={bModePct * BW} y1="4" x2={bModePct * BW} y2={BH} stroke="#6a6a71" strokeWidth="1" strokeDasharray="3 2" opacity="0.5" />
+                                {/* Median line */}
+                                <line x1={bMedianPct * BW} y1="0" x2={bMedianPct * BW} y2={BH} stroke={config.stroke} strokeWidth="1.5" strokeDasharray="4 3" opacity="0.6" />
+                                {/* Global mean line */}
+                                <line x1={bGlobalMeanPct * BW} y1="0" x2={bGlobalMeanPct * BW} y2={BH} stroke={config.stroke} strokeWidth="1" strokeDasharray="2 2" opacity="0.3" />
+                                {/* Avg dot */}
+                                <circle cx={bValPct * BW} cy="2" r="3.5" fill={config.stroke} />
+                              </svg>
+                              <div className="flex items-center gap-4 mt-1">
+                                <span className="flex items-center gap-1 text-[10px] text-pc-text-muted">
+                                  <span className="w-2 h-2 rounded-full" style={{ background: config.stroke }} /> Avg
+                                </span>
+                                <span className="flex items-center gap-1 text-[10px] text-pc-text-muted">
+                                  <span className="w-2 h-2 rounded-full" style={{ background: config.stroke, opacity: 0.5 }} /> Median
+                                </span>
+                                <span className="flex items-center gap-1 text-[10px] text-pc-text-muted">
+                                  <span className="w-2 h-2 rounded-full bg-pc-text-muted/50" /> Mode
+                                </span>
+                                <span className="flex items-center gap-1 text-[10px] text-pc-text-muted">
+                                  <span className="w-4 h-px" style={{ background: config.stroke, opacity: 0.3 }} /> Global Mean
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Stats grid */}
+                            <div className="grid grid-cols-2 gap-3">
+                              {[
+                                { label: "Min", value: formatVal(cMin), color: "text-pc-text-secondary" },
+                                { label: "Mode", value: formatVal(cMode), color: "text-pc-text-secondary" },
+                                { label: "Median", value: formatVal(cMedian), color: config.stroke },
+                                { label: "Max", value: formatVal(cMax), color: "text-pc-text-secondary" },
+                                { label: "Avg", value: formatVal(c.value), color: config.stroke },
+                                { label: "Matches", value: c.matches.toLocaleString(), color: "text-pc-text-secondary" },
+                              ].map((s) => (
+                                <div key={s.label} className="text-center py-1">
+                                  <div className="text-pc-text-muted text-[10px] uppercase tracking-wider mb-0.5">{s.label}</div>
+                                  <div className="text-lg font-bold" style={{ color: s.color }}>{s.value}</div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
                 );
               })}
             </tbody>

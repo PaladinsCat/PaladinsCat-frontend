@@ -3602,6 +3602,76 @@ export const MOJI_DATA: ChampionData = {
   ],
 };
 
+export const PIP_DATA: ChampionData = {
+  name: "Pip",
+  roles: ["Support"],
+  stats: {
+    health: "2200",
+    speed: "350",
+    speedUnits: "~21 units/s",
+    range: "500",
+  },
+  skills: [
+    {
+      name: "Potion Launcher",
+      key: "LMB",
+      iconUrl: "/images/skills/Ability_Potion_Launcher.png",
+      description: "A custom-made launcher that fires volatile potions that explode in an area on impact, dealing 600 damage."
+    },
+    {
+      name: "Explosive Flask",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_Explosive_Flask.png",
+      cooldown: "8s",
+      description: "Explodes in a large area, damaging and slowing enemies by half, allowing him to slow groups of enemies."
+    },
+    {
+      name: "Healing Potion",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Healing_Potion.png",
+      cooldown: "7s",
+      description: "Throw a potion that heals allies for 1200 when it explodes. Reactivate this ability to explode the potion in the air."
+    },
+    {
+      name: "Weightless",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Weightless.png",
+      cooldown: "10s",
+      description: "Launch yourself upwards, increasing your Movement Speed and jump strength for 3s."
+    },
+    {
+      name: "Evil Mojo",
+      key: "E",
+      iconUrl: "/images/skills/Ability_Evil_Mojo.png",
+      cooldown: "Ultimate",
+      description: "Fires a massive explosive that turns all enemies caught in its blast into tiny, helpless chickens with reduced health."
+    },
+  ],
+  talents: [
+    { name: "Mega Potion", description: "Healing Potion's Healing is increased by 1000 and now provides a stacking 200 Shield.", category: "Healing Potion", iconUrl: "/images/champions/Talent Pip Mega Potion.png" },
+    { name: "Catalyst", description: "Enemies hit with Explosive Flask take 40% increased damage from your weapon shots for 4s.", category: "Explosive Flask", iconUrl: "/images/champions/Talent Pip Catalyst.png" },
+    { name: "Combat Medic", description: "Potion Launcher also Heals allies hit for 700 and your Potion Launcher fire rate is increased by 15%. You no longer take damage from your weapon shots.", category: "Potion Launcher", iconUrl: "/images/champions/Talent Pip Combat Medic.png" },
+  ],
+  loadouts: [
+    { name: "Acrobat's Trick", description: "Reduce the Cooldown of Healing Potion by 0.1s after hitting an enemy with your weapon.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Acrobat_s_Trick.png" },
+    { name: "Acumen", description: "Gain 8% Lifesteal for 3s after using Explosive Flask.", category: "Explosive Flask", iconUrl: "/images/cards/Card_Acumen.png" },
+    { name: "Escape Artist", description: "Increase the duration of Weightless by 0.4s.", category: "Weightless", iconUrl: "/images/cards/Card_Escape_Artist.png" },
+    { name: "From Above", description: "Reduces the Cooldown of Weightless by 0.6s.", category: "Weightless", iconUrl: "/images/cards/Card_From_Above.png" },
+    { name: "Gift Giver", description: "Heal yourself for 20% of Healing Potion's effect if you hit an ally but not yourself.", category: "Healing Potion", iconUrl: "/images/cards/Card_Gift_Giver.png" },
+    { name: "Graviton", description: "Increase the duration of Explosive Flask's Slow by 0.3s.", category: "Explosive Flask", iconUrl: "/images/cards/Card_Graviton.png" },
+    { name: "Medicinal Excellence", description: "Increase the radius of Healing Potion by 8%.", category: "Healing Potion", iconUrl: "/images/cards/Card_Medicinal_Excellence.png" },
+    { name: "Moxie", description: "Increase your Healing received by 6% while at or below 50% Health.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Moxie.png" },
+    { name: "Pep in the Step", description: "Allies hit by Healing Potion have their Movement Speed increased by 6% for 3s.", category: "Healing Potion", iconUrl: "/images/cards/Card_Disinfect.png" },
+    { name: "Refreshing Jog", description: "Heal for 60 every 1s while Weightless is active.", category: "Weightless", iconUrl: "/images/cards/Card_Refreshing_Jog.png" },
+    { name: "Reload", description: "Reduce the Cooldown of Healing Potion by 0.6s for each ally it hits.", category: "Healing Potion", iconUrl: "/images/cards/Card_Reload.png" },
+    { name: "Shrewd Move", description: "Reduce your active Cooldowns by 8% after getting an Elimination.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Shrewd_Move.png" },
+    { name: "Side Tanks", description: "Reduce the Cooldown of Explosive Flask by 0.6s.", category: "Explosive Flask", iconUrl: "/images/cards/Card_Side_Tanks.png" },
+    { name: "Smithereens", description: "Generate 1 Ammo for each enemy hit by Explosive Flask.", category: "Explosive Flask", iconUrl: "/images/cards/Card_Smithereens.png" },
+    { name: "Sprint", description: "Increase your jump speed by an additional 10% while using Weightless.", category: "Weightless", iconUrl: "/images/cards/Card_Sprint.png" },
+    { name: "Sturdy", description: "Gain 3% Movement Speed.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Undying.png" },
+  ],
+};
+
 export const CHAMPION_DATA: Record<string, ChampionData> = {
   talus: TALUS_DATA,
   corvus: CORVUS_DATA,
@@ -3613,6 +3683,7 @@ export const CHAMPION_DATA: Record<string, ChampionData> = {
   lillith: LILLITH_DATA,
   maldamba: MAL_DAMBA_DATA,
   moji: MOJI_DATA,
+  pip: PIP_DATA,
   skye: SKYE_DATA,
   androxus: ANDROXUS_DATA,
   buck: BUCK_DATA,
