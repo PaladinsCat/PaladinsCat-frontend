@@ -1060,6 +1060,76 @@ export const TORVALD_DATA: ChampionData = {
   ],
 };
 
+export const BOMB_KING_DATA: ChampionData = {
+  name: "Bomb King",
+  roles: ["Damage"],
+  stats: {
+    health: "2200",
+    speed: "360",
+    speedUnits: "~22 units/s",
+    range: "500",
+  },
+  skills: [
+    {
+      name: "Sticky Bomb",
+      key: "LMB",
+      iconUrl: "/images/skills/Ability_Sticky_Bomb.png",
+      description: "Throw out sticky bombs that stick to any surface, or your enemies, and can be detonated to deal damage.",
+    },
+    {
+      name: "Detonate",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_Detonate.png",
+      damage: "850",
+      description: "Detonate your active sticky bombs to blast away nearby enemies, dealing 850 damage per explosion.",
+    },
+    {
+      name: "Grumpy Bomb",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Grumpy_Bomb.png",
+      cooldown: "12s",
+      description: "Throw out a grumpy bomb that explodes with rage to deal 800 damage and Stuns enemies.",
+    },
+    {
+      name: "Poppy Bomb",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Poppy_Bomb.png",
+      cooldown: "8s",
+      description: "Throw an unstable bomb that sticks to any surface and can be used to Knockback yourself or enemies, dealing 150 damage to enemies hit.",
+    },
+    {
+      name: "King Bomb",
+      key: "E",
+      iconUrl: "/images/skills/Ability_King_Bomb.png",
+      cooldown: "Ultimate",
+      description: "Embody your reign and become the King Bomb, able to roll around and explode to deal 2500 damage and Stun enemies caught in your kingly blast.",
+    },
+  ],
+  talents: [
+    { name: "Chain Reaction", description: "Hitting with more than one Sticky Bomb on a use of Detonate increases the damage of each explosion after the first by 30% of its base damage, up to 150%.", category: "Detonate", iconUrl: "/images/champions/Talent BombKing ChainReaction.png" },
+    { name: "Royal Subjects", description: "Poppy bomb now has 2 charges, but reduce its Knockback strength against enemies by 40%.", category: "Poppy Bomb", iconUrl: "/images/champions/Talent BombKing RoyalSubjects.png" },
+    { name: "Accelerant", description: "Reduces the time it takes for Grumpy Bomb to explode by 40% and increase its damage to shields by 200%.", category: "Grumpy Bomb", iconUrl: "/images/champions/Talent BombKing Accelerant.png" },
+  ],
+  loadouts: [
+    { name: "Short Fuse", description: "Reduce the Cooldown of Sticky Bomb.", category: "Sticky Bomb", iconUrl: "/images/cards/Card_Short_Fuse.png" },
+    { name: "Air Blast", description: "Increase the Knockback distance of Poppy Bomb.", category: "Poppy Bomb", iconUrl: "/images/cards/Card_Air_Blast.png" },
+    { name: "Sabotage", description: "Increase the damage of Sticky Bomb.", category: "Sticky Bomb", iconUrl: "/images/cards/Card_Sabotage.png" },
+    { name: "Bomb Shelter", description: "Gain a Shield after using Poppy Bomb.", category: "Poppy Bomb", iconUrl: "/images/cards/Card_Bomb_Shelter.png" },
+    { name: "Countdown", description: "Reduce the Cooldown of Grumpy Bomb.", category: "Grumpy Bomb", iconUrl: "/images/cards/Card_Countdown.png" },
+    { name: "Doomsday", description: "Increase the damage of Grumpy Bomb.", category: "Grumpy Bomb", iconUrl: "/images/cards/Card_Doomsday.png" },
+    { name: "Explosive Entrance", description: "Gain a Shield after using Poppy Bomb.", category: "Poppy Bomb", iconUrl: "/images/cards/Card_Explosive_Entrance.png" },
+    { name: "Fallout", description: "Increase the duration of Grumpy Bomb.", category: "Grumpy Bomb", iconUrl: "/images/cards/Card_Fallout.png" },
+    { name: "Jolt", description: "Increase the damage of Poppy Bomb.", category: "Poppy Bomb", iconUrl: "/images/cards/Card_Jolt.png" },
+    { name: "King's Court", description: "Increase the damage of Detonate.", category: "Detonate", iconUrl: "/images/cards/Card_King's_Court.png" },
+    { name: "King's New Cloak", description: "Increase your maximum Health.", category: "", iconUrl: "/images/cards/Card_King's_New_Cloak.png" },
+    { name: "Mad Bomber", description: "Increase the damage of Grumpy Bomb.", category: "Grumpy Bomb", iconUrl: "/images/cards/Card_Mad_Bomber.png" },
+    { name: "Sticky Bomb", description: "Increase the damage of Sticky Bomb.", category: "Sticky Bomb", iconUrl: "/images/cards/Card_Sticky_Bomb.png" },
+    { name: "Royal Decree", description: "Increase the damage of Detonate.", category: "Detonate", iconUrl: "/images/cards/Card_Royal_Decree.png" },
+    { name: "Bombardment", description: "Increase the damage of Detonate.", category: "Detonate", iconUrl: "/images/cards/Card_Bombardment.png" },
+    { name: "Uncontrolled", description: "Reduce the damage taken.", category: "", iconUrl: "/images/cards/Card_Uncontrolled.png" },
+  ],
+};
+
 export const CHAMPION_DATA: Record<string, ChampionData> = {
   androxus: ANDROXUS_DATA,
   ash: ASH_DATA,
@@ -1075,6 +1145,7 @@ export const CHAMPION_DATA: Record<string, ChampionData> = {
   ruckus: RUCKUS_DATA,
   terminus: TERMINUS_DATA,
   torvald: TORVALD_DATA,
+  bombking: BOMB_KING_DATA,
 };
 
 export function getChampionData(slug: string): ChampionData | undefined {
