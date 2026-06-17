@@ -34,6 +34,7 @@ export default function MetricDetailPage({ config }: { config: MetricConfig }) {
 
   const isDecimal = config.key === "kda";
   const formatVal = isDecimal ? (v: number) => v.toFixed(1) : (v: number) => v.toLocaleString();
+  const clamp = (v: number) => Math.max(0, Math.min(100, v));
 
   // Bell curve
   const W = 280;
@@ -246,25 +247,31 @@ export default function MetricDetailPage({ config }: { config: MetricConfig }) {
                       </div>
                     </td>
                     <td className="px-3 py-2">
-                      {/* Champion range bar with actual numbers */}
+                      {/* Champion range bar */}
                       <div className="relative h-8 w-52">
                         {/* Track */}
                         <div className="absolute top-2 inset-x-0 h-2 rounded-full bg-pc-bg" />
                         {/* Fill to champion value */}
                         <div
                           className="absolute top-2 left-0 h-2 rounded-full opacity-25"
-                          style={{ width: `${valPct}%`, background: config.stroke }}
+                          style={{ width: `${clamp(valPct)}%`, background: config.stroke }}
                         />
-                        {/* Mode marker */}
-                        <div className="absolute top-1 bottom-4 w-px bg-pc-text-muted/40" style={{ left: `${modePctC}%` }} />
-                        {/* Champion mean marker */}
-                        <div className="absolute top-1 bottom-4 w-px" style={{ left: `${meanPctC}%`, background: config.stroke, opacity: 0.6 }} />
-                        {/* Global mean line (dashed) */}
-                        <div className="absolute top-0.5 bottom-2.5 border-l border-dashed" style={{ left: `${globalMeanPct}%`, borderColor: config.stroke, opacity: 0.4 }} />
+                        {/* Mode marker — only if within range */}
+                        {modePctC >= 0 && modePctC <= 100 && (
+                          <div className="absolute top-1 bottom-4 w-px bg-pc-text-muted/40" style={{ left: `${modePctC}%` }} />
+                        )}
+                        {/* Champion mean marker — only if within range */}
+                        {meanPctC >= 0 && meanPctC <= 100 && (
+                          <div className="absolute top-1 bottom-4 w-px" style={{ left: `${meanPctC}%`, background: config.stroke, opacity: 0.6 }} />
+                        )}
+                        {/* Global mean — only if within range */}
+                        {globalMeanPct >= 0 && globalMeanPct <= 100 && (
+                          <div className="absolute top-0.5 bottom-2.5 border-l border-dashed" style={{ left: `${globalMeanPct}%`, borderColor: config.stroke, opacity: 0.4 }} />
+                        )}
                         {/* Champion value dot */}
                         <div
                           className="absolute top-1 w-3 h-3 rounded-full border-2 border-pc-bg-elevated"
-                          style={{ left: `${valPct}%`, transform: "translateX(-50%)", background: config.stroke }}
+                          style={{ left: `${clamp(valPct)}%`, transform: "translateX(-50%)", background: config.stroke }}
                         />
                         {/* Numbers row */}
                         <div className="absolute bottom-0 inset-x-0 flex justify-between text-[8px] leading-none text-pc-text-muted/60">

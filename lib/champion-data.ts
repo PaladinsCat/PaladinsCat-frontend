@@ -42,6 +42,7 @@ export interface ChampionData {
   skills: ChampionSkill[];
   talents: ChampionTalent[];
   loadouts?: ChampionLoadout[];
+  cards?: Array<{ name: string; values: string[]; category: string; iconUrl?: string }>;
 }
 
 export const ANDROXUS_DATA: ChampionData = {
@@ -3249,12 +3250,155 @@ export const GROVER_DATA: ChampionData = {
   ],
 };
 
+export const IO_DATA: ChampionData = {
+  name: "Io",
+  roles: ["Support"],
+  stats: {
+    health: "2200",
+    speed: "370",
+    speedUnits: "~23 units/s",
+    range: "350",
+  },
+  skills: [
+    {
+      name: "Light Bow",
+      key: "LMB",
+      iconUrl: "/images/skills/WeaponAttack_Io_Icon.png",
+      damage: "425",
+      description: "A celestial bow that fires godly energy, dealing 425 damage every 0.6s.",
+    },
+    {
+      name: "Moonlight",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_Moonlight.png",
+      description: "Channel the healing power of the moon to restore an ally, healing for 135 every 0.15s while channeling.",
+    },
+    {
+      name: "Guardian Spirit",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Guardian_Spirit.png",
+      cooldown: "Ultimate",
+      description: "Summon Luna to your side to unleash your wrath in a series of hits. Luna Stuns targets hit by Light Bow, and heals allies around her for 300 per second.",
+    },
+    {
+      name: "Lunar Leap",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Lunar_Leap.png",
+      cooldown: "10s",
+      description: "Quickly leap backwards through the air.",
+    },
+    {
+      name: "Begone",
+      key: "E",
+      iconUrl: "/images/skills/Ability_Begone.png",
+      cooldown: "Ultimate",
+      description: "Project an ethereal manifestation of Luna and Pull enemies in its path, removing them from your Realm and dealing 1000 damage to them if they collide with a wall.",
+    },
+  ],
+  talents: [
+    { name: "Life Link", description: "When Io or Luna heal an ally other than each other, the other is also healed at 50% efficiency.", category: "Default", iconUrl: "/images/champions/Talent Io LifeLink.png" },
+    { name: "Goddess's Blessing", description: "Allies being Healed by Moonlight take 15% reduced damage.", category: "Moonlight", iconUrl: "/images/champions/Talent Io GoddessBlessing.png" },
+    { name: "Sacrifice", description: "If Io falls below 200 Health while Luna is active, she trades places with Luna, heals for 50% of her Health, and Luna dies in her stead.", category: "Guardian Spirit", iconUrl: "/images/champions/Talent Io Sacrifice.png" },
+  ],
+  loadouts: [
+    { name: "Broken Deity", description: "Increase Luna's deploy range by 20%.", category: "Guardian Spirit", iconUrl: "/images/cards/Card_Broken_Deity.png" },
+    { name: "Celestial Body", description: "Increase your maximum Health by 50.", category: "", iconUrl: "/images/cards/Card_Celestial_Body.png" },
+    { name: "Crescent", description: "Reset the Cooldown of Lunar Leap after dropping to or below 15% Health.", category: "Lunar Leap", iconUrl: "/images/cards/Card_Crescent.png" },
+    { name: "Eternal Reliquary", description: "Generate 2 Ammo after using Lunar Leap.", category: "Lunar Leap", iconUrl: "/images/cards/Card_Eternal_Reliquary.png" },
+    { name: "Feral Strength", description: "Increase Luna's Health by 225.", category: "Guardian Spirit", iconUrl: "/images/cards/Card_Feral_Strength.png" },
+    { name: "Full Moon", description: "Gain a 100-Health Shield for 3s after activating Lunar Leap.", category: "Lunar Leap", iconUrl: "/images/cards/Card_Full_Moon.png" },
+    { name: "Half Moon", description: "Reduce the Cooldown of Lunar Leap by 0.8s.", category: "Lunar Leap", iconUrl: "/images/cards/Card_Half_Moon.png" },
+    { name: "Lunar Connection", description: "Reduce the Cooldown of Luna's initial deploy by 1.2s.", category: "Guardian Spirit", iconUrl: "/images/cards/Card_Lunar_Connection.png" },
+    { name: "Moonlight Garden", description: "Generate 2% Moonlight for each enemy hit with Light Bow.", category: "", iconUrl: "/images/cards/Card_Moonlight_Garden.png" },
+    { name: "Moonwalk", description: "Increase your Moonlight's capacity by 8%.", category: "", iconUrl: "/images/cards/Card_Moonwalk.png" },
+    { name: "Protectors", description: "Regenerate 2% Moonlight every 1s while within 30 units of Luna and not using Moonlight.", category: "Guardian Spirit", iconUrl: "/images/cards/Card_Protectors.png" },
+    { name: "Restored Faith", description: "Heal for 10 every time you Heal an ally with Moonlight.", category: "Moonlight", iconUrl: "/images/cards/Card_Restored_Faith.png" },
+    { name: "Sanctum of Faith", description: "Regenerate 1% Moonlight every 1s when not using Moonlight.", category: "Moonlight", iconUrl: "/images/cards/Card_Sanctum_Of_Faith.png" },
+    { name: "Sky Walker", description: "Lower your gravity and increase your air control by 50% while firing your Light Bow.", category: "", iconUrl: "/images/cards/Card_Sky_Walker.png" },
+    { name: "Spirit Arrows", description: "Reduce the Cooldown of Luna's redeploy by 0.1s after Healing with Moonlight.", category: "Moonlight", iconUrl: "/images/cards/Card_Spirit_Arrows.png" },
+    { name: "Swift Arrows", description: "Increase allies' Movement Speed by 6% while they are being Healed by Moonlight.", category: "Moonlight", iconUrl: "/images/cards/Card_Swift_Arrows.png" },
+  ],
+};
+
+export const JENOS_DATA: ChampionData = {
+  name: "Jenos",
+  roles: ["Support"],
+  stats: {
+    health: "2200",
+    speed: "360",
+    speedUnits: "~22 units/s",
+    range: "100",
+  },
+  skills: [
+    {
+      name: "Star Splitter",
+      key: "LMB",
+      iconUrl: "/images/skills/WeaponAttack_Jenos_Icon.png",
+      damage: "115",
+      description: "An automatic carbine that channels the power of the cosmos, dealing 115 damage every 0.13s.",
+    },
+    {
+      name: "Astral Mark",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_Astral_Mark.png",
+      description: "Apply a celestial blessing that passes through obstacles to heal allies for 400 and an additional 220 every 1s for 13s.",
+    },
+    {
+      name: "Void Grip",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Void_Grip.png",
+      damage: "400",
+      cooldown: "12s",
+      description: "Channel gravitational energy, lifting an enemy into the air and dealing 400 damage over 2.5s.",
+    },
+    {
+      name: "Stellar Wind",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Stellar_Wind.png",
+      cooldown: "1s",
+      description: "Lower your weapon and start to glide, increasing your movement speed and jump height.",
+    },
+    {
+      name: "Through Time and Space",
+      key: "E",
+      iconUrl: "/images/skills/Ability_Through_Time_and_Space.png",
+      cooldown: "Ultimate",
+      description: "Fire a cosmic beam that deals damage and applies a Slow to enemies in its path.",
+    },
+  ],
+  talents: [
+    { name: "Luminary", description: "All allies already affected by Astral Mark are Healed for an additional 285 when you use Astral Mark.", category: "Astral Mark", iconUrl: "/images/champions/Talent Jenos Luminary.png" },
+    { name: "Binary Star", description: "Star Splitter now deals 380 damage every 0.4s, but reduces your maximum Ammo to 15.", category: "Star Splitter", iconUrl: "/images/champions/Talent Jenos BinaryStar.png" },
+    { name: "The Power Cosmeum", description: "Through Time and Space now has 2 charges and its Cooldown is reduced to 20s.", category: "Through Time and Space", iconUrl: "/images/champions/Talent Jenos ThePowerCosmeum.png" },
+  ],
+  loadouts: [
+    { name: "Astral Cycle", description: "Increase the duration of Astral Mark by 4%.", category: "Astral Mark", iconUrl: "/images/cards/Card_Astral_Cycle.png" },
+    { name: "Cosmic Barrier", description: "Reduce the damage you take by 5% while Stellar Wind is active.", category: "Stellar Wind", iconUrl: "/images/cards/Card_Cosmic_Barrier.png" },
+    { name: "Eclipse", description: "Increase the damage of Void Grip by 50.", category: "Void Grip", iconUrl: "/images/cards/Card_Eclipse.png" },
+    { name: "Falling Star", description: "Void Grip now costs 20% less Ultimate charge.", category: "Void Grip", iconUrl: "/images/cards/Card_Falling_Star.png" },
+    { name: "Heavenly Pull", description: "Increase the duration of the Lift applied by Void Grip by 10%.", category: "Void Grip", iconUrl: "/images/cards/Card_Heavenly_Pull.png" },
+    { name: "Inertia", description: "Increase your Movement Speed by 5%.", category: "", iconUrl: "/images/cards/Card_Inertia.png" },
+    { name: "Inner Peace", description: "Reduce the Cooldown of Void Grip by 1.2s.", category: "Void Grip", iconUrl: "/images/cards/Card_Inner_Peace.png" },
+    { name: "Lightyears", description: "Increase the Healing of Astral Mark by 4%.", category: "Astral Mark", iconUrl: "/images/cards/Card_Lightyears.png" },
+    { name: "Lorentz Configuration", description: "Increase your maximum Ammo by 10%.", category: "", iconUrl: "/images/cards/Card_Lorentz_Configuration.png" },
+    { name: "Penumbra", description: "Increase your Healing received by 5%.", category: "", iconUrl: "/images/cards/Card_Penumbra.png" },
+    { name: "Relativity", description: "Heal for 40 every 1s for 3s after using Astral Mark.", category: "Astral Mark", iconUrl: "/images/cards/Card_Relativity.png" },
+    { name: "Retrograde", description: "Heal for 40 every 1s for 3s after using Astral Mark.", category: "Astral Mark", iconUrl: "/images/cards/Card_Retrograde.png" },
+    { name: "Sidereal", description: "Increase your maximum Health by 50.", category: "", iconUrl: "/images/cards/Card_Sidereal.png" },
+    { name: "Solar Sails", description: "Generate 2 Ammo after activating Stellar Wind.", category: "Stellar Wind", iconUrl: "/images/cards/Card_Solar_Sails.png" },
+    { name: "Space Jam", description: "Increase the Movement Speed bonus of Stellar Wind by 12%.", category: "Stellar Wind", iconUrl: "/images/cards/Card_Space_Jam.png" },
+    { name: "Star Seeker", description: "Increase the jump height bonus of Stellar Wind by 14%.", category: "Stellar Wind", iconUrl: "/images/cards/Card_Star_Seeker.png" },
+  ],
+};
+
 export const CHAMPION_DATA: Record<string, ChampionData> = {
   talus: TALUS_DATA,
   corvus: CORVUS_DATA,
   furia: FURIA_DATA,
   grohk: GROHK_DATA,
   grover: GROVER_DATA,
+  io: IO_DATA,
+  jenos: JENOS_DATA,
   skye: SKYE_DATA,
   androxus: ANDROXUS_DATA,
   buck: BUCK_DATA,
