@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import {
   MOCK_ITEM_STATS,
   MOCK_MAP_STATS,
@@ -86,10 +87,12 @@ export default function StatsPage() {
                 {/* Header */}
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-pc-text font-semibold text-sm">{label}</span>
-                  <span className="text-[10px] uppercase tracking-wider">
-                    <span className="text-pc-text-muted">mean </span>
-                    <span className="font-bold" style={{ color: stroke }}>{formatVal(d.mean)}</span>
-                  </span>
+                  <Link
+                    href={`/stats/${key}`}
+                    className="text-[10px] px-2 py-0.5 rounded bg-pc-bg text-pc-accent hover:bg-pc-accent hover:text-pc-bg transition-colors"
+                  >
+                    Detail →
+                  </Link>
                 </div>
 
                 {/* Bell curve SVG */}
@@ -134,6 +137,7 @@ export default function StatsPage() {
                 <div className="flex items-center justify-between text-[10px]">
                   <span className="text-pc-text-muted">min <span className="text-pc-text-secondary">{formatVal(d.min)}</span></span>
                   <span className="text-pc-text-muted">mode <span className="text-pc-text-secondary">{formatVal(d.mode)}</span></span>
+                  <span className="text-pc-text-muted">mean <span className="font-bold" style={{ color: stroke }}>{formatVal(d.mean)}</span></span>
                   <span className="text-pc-text-muted">max <span className="text-pc-text-secondary">{formatVal(d.max)}</span></span>
                 </div>
               </div>
@@ -158,121 +162,102 @@ export default function StatsPage() {
         </div>
       </section>
 
-      {/* ── Item Stats ── */}
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-pc-text">Item Stats</h2>
-          <div className="flex gap-2">
-            {(["pickRate", "winRate"] as const).map((key) => (
-              <button
-                key={key}
-                onClick={() => toggleItemSort(key)}
-                className={`text-xs px-2.5 py-1 rounded-lg transition-colors ${
-                  itemSort === key
-                    ? "bg-pc-accent text-pc-bg"
-                    : "bg-pc-card text-pc-muted hover:text-pc-text"
-                }`}
-              >
-                {key === "pickRate" ? "Pick Rate" : "Win Rate"}
-                {itemSort === key && (itemSortDir === "desc" ? " ↓" : " ↑")}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-pc-border text-pc-text-muted text-left text-xs">
-                <th className="px-4 py-3">Item</th>
-                <th className="px-4 py-3">Category</th>
-                <th className="px-4 py-3">Pick Rate</th>
-                <th className="px-4 py-3">Win Rate</th>
-                <th className="px-4 py-3 hidden sm:table-cell">Popularity</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedItems.map((item) => (
-                <tr key={item.name} className="border-b border-pc-border/50 hover:bg-pc-bg/50 transition-colors">
-                  <td className="px-4 py-2.5">
-                    <div className="flex items-center gap-2">
-                      <img src={item.icon} alt={item.name} className="w-6 h-6 object-contain" />
-                      <span className="text-pc-text font-medium text-xs">{item.name}</span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-2.5">
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded ${
-                      item.category === "Offense" ? "bg-red-500/10 text-red-400" :
-                      item.category === "Utility" ? "bg-blue-500/10 text-blue-400" :
-                      item.category === "Defense" ? "bg-amber-500/10 text-amber-400" :
-                      "bg-emerald-500/10 text-emerald-400"
-                    }`}>
-                      {item.category}
-                    </span>
-                  </td>
-                  <td className="px-4 py-2.5 text-pc-text-secondary text-xs">{item.pickRate}%</td>
-                  <td className="px-4 py-2.5 text-xs">
-                    <span className={item.winRate >= 50 ? "text-emerald-400" : "text-red-400"}>
-                      {item.winRate}%
-                    </span>
-                  </td>
-                  <td className="px-4 py-2.5 hidden sm:table-cell">
-                    <div className="w-24 h-1.5 bg-pc-bg rounded-full overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-pc-accent"
-                        style={{ width: `${(item.pickRate / maxItemPick) * 100}%` }}
-                      />
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
+      {/* ── Item Stats + Map Stats ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
 
-      {/* ── Map Stats ── */}
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-pc-text">Map Stats</h2>
-          <button
-            onClick={() => setMapSortDir((d) => (d === "desc" ? "asc" : "desc"))}
-            className="text-xs px-2.5 py-1 rounded-lg bg-pc-accent text-pc-bg"
-          >
-            Most Played {mapSortDir === "desc" ? "↓" : "↑"}
-          </button>
-        </div>
-        <div className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-pc-border text-pc-text-muted text-left text-xs">
-                <th className="px-4 py-3 w-8">#</th>
-                <th className="px-4 py-3">Map</th>
-                <th className="px-4 py-3">Matches</th>
-                <th className="px-4 py-3">Avg Duration</th>
-                <th className="px-4 py-3 hidden sm:table-cell">Activity</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedMaps.map((map, i) => (
-                <tr key={map.name} className="border-b border-pc-border/50 hover:bg-pc-bg/50 transition-colors">
-                  <td className="px-4 py-2.5 text-pc-text-muted text-xs">{i + 1}</td>
-                  <td className="px-4 py-2.5 text-pc-text font-medium text-xs">{map.name}</td>
-                  <td className="px-4 py-2.5 text-pc-text-secondary text-xs">{map.matches.toLocaleString()}</td>
-                  <td className="px-4 py-2.5 text-pc-text-secondary text-xs">{map.avgDuration}</td>
-                  <td className="px-4 py-2.5 hidden sm:table-cell">
-                    <div className="w-24 h-1.5 bg-pc-bg rounded-full overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-gradient-to-r from-pc-accent-deep to-pc-accent"
-                        style={{ width: `${(map.matches / maxMapMatches) * 100}%` }}
-                      />
-                    </div>
-                  </td>
-                </tr>
+        {/* Item Stats (3/5) */}
+        <section className="lg:col-span-3">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-pc-text">Item Stats</h2>
+            <div className="flex gap-2">
+              {(["pickRate", "winRate"] as const).map((key) => (
+                <button
+                  key={key}
+                  onClick={() => toggleItemSort(key)}
+                  className={`text-xs px-2.5 py-1 rounded-lg transition-colors ${
+                    itemSort === key
+                      ? "bg-pc-accent text-pc-bg"
+                      : "bg-pc-card text-pc-muted hover:text-pc-text"
+                  }`}
+                >
+                  {key === "pickRate" ? "Pick Rate" : "Win Rate"}
+                  {itemSort === key && (itemSortDir === "desc" ? " ↓" : " ↑")}
+                </button>
               ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
+            </div>
+          </div>
+          <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 space-y-4">
+            {(["Defense", "Utility", "Healing", "Offense"] as const).map((cat) => {
+              const catColor = cat === "Offense" ? "text-red-400" :
+                cat === "Defense" ? "text-blue-400" :
+                cat === "Healing" ? "text-emerald-400" :
+                "text-amber-400";
+              const catItems = sortedItems.filter((i) => i.category === cat);
+              if (catItems.length === 0) return null;
+              return (
+                <div key={cat}>
+                  <span className={`text-[10px] font-bold uppercase tracking-wider ${catColor} mb-2 block`}>{cat}</span>
+                  <div className="grid grid-cols-5 gap-2">
+                    {catItems.map((item) => (
+                      <div key={item.name} className="flex flex-col items-center text-center py-1">
+                        {item.icon ? (
+                          <img src={item.icon} alt={item.name} className="w-12 h-12 object-contain rounded-md mb-1" />
+                        ) : (
+                          <div className="w-12 h-12 rounded-md bg-pc-bg flex items-center justify-center mb-1">
+                            <span className="text-sm text-pc-text-muted font-bold">{item.name.charAt(0)}</span>
+                          </div>
+                        )}
+                        <div className="text-pc-text font-medium text-[10px] leading-tight truncate w-full">{item.name}</div>
+                        <div className="flex items-center gap-1 text-[9px] mt-0.5">
+                          <span className={item.winRate >= 50 ? "text-emerald-400" : "text-red-400"}>
+                            WR {item.winRate}%
+                          </span>
+                          <span className="text-pc-text-muted">·</span>
+                          <span className="text-pc-text-muted">PR {item.pickRate}%</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Map Stats (2/5) */}
+        <section className="lg:col-span-2">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-pc-text">Map Stats</h2>
+            <button
+              onClick={() => setMapSortDir((d) => (d === "desc" ? "asc" : "desc"))}
+              className="text-xs px-2.5 py-1 rounded-lg bg-pc-accent text-pc-bg"
+            >
+              Most Played {mapSortDir === "desc" ? "↓" : "↑"}
+            </button>
+          </div>
+          <div className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-pc-border text-pc-text-muted text-left text-xs">
+                  <th className="px-3 py-3 w-8">#</th>
+                  <th className="px-3 py-3">Map</th>
+                  <th className="px-3 py-3 text-right">Matches</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortedMaps.map((map, i) => (
+                  <tr key={map.name} className="border-b border-pc-border/50 hover:bg-pc-bg/50 transition-colors">
+                    <td className="px-3 py-2 text-pc-text-muted text-xs">{i + 1}</td>
+                    <td className="px-3 py-2 text-pc-text font-medium text-xs">{map.name}</td>
+                    <td className="px-3 py-2 text-pc-text-secondary text-xs text-right">{map.matches.toLocaleString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+      </div>
     </div>
   );
 }
