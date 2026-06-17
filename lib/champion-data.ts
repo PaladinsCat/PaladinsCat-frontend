@@ -1618,7 +1618,78 @@ export const SHA_LIN_DATA: ChampionData = {
   ],
 };
 
-export const CHAMPION_DATA: Record<string, ChampionData> = {
+export const STRIX_DATA: ChampionData = {
+  name: "Strix",
+  roles: ["Damage"],
+  stats: {
+    health: "2150",
+    speed: "350",
+    speedUnits: "~21 units/s",
+    range: "500",
+  },
+  skills: [
+    {
+      name: "Talon Rifle / Pistol",
+      key: "LMB",
+      iconUrl: "/images/skills/Ability_Talon_Rifle.png",
+      damage: "1200 /1.2s — 165 /0.15s",
+      description: "A rifle and pistol combination for eliminating your targets. Your rifle deals 1200 damage every 1.2s and your pistol deals 165 damage every 0.15s while regenerating Stealth energy.",
+    },
+    {
+      name: "Scope / Flare",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_Scope.png",
+      damage: "Flare: 200 + 100 over 2s",
+      description: "Look down your rifle scope to gain increased accuracy or fire off a flare to Reveal your enemies.",
+    },
+    {
+      name: "Quick Switch",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Quick_Switch.png",
+      description: "Swap between your Talon Rifle and Pistol.",
+    },
+    {
+      name: "Stealth",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Stealth.png",
+      cooldown: "1s",
+      description: "Enter stealth and hide yourself from vision. While in Stealth your energy is consumed.",
+    },
+    {
+      name: "Flashbang",
+      key: "E",
+      iconUrl: "/images/skills/Ability_Flashbang.png",
+      damage: "250",
+      cooldown: "Ultimate",
+      description: "Blind your enemies and deal 250 damage with an explosive flashbang.",
+    },
+  ],
+  talents: [
+    { name: "Nocturnal", description: "While standing still, Stealth lasts indefinitely.", category: "Stealth" },
+    { name: "Unauthorized Use", description: "Flare has 200% base damage and Projectile Speed, and Weakens targets by 20% to your weapons on a direct hit for 2s, but it no longer Reveals. Reduce Flare's Cooldown by 8s.", category: "Scope / Flare" },
+    { name: "Crack Shot", description: "Talon Rifle and Pistol gain perfect Accuracy, but Talon Rifle's damage is reduced to 950.", category: "Talon Rifle / Pistol" },
+  ],
+  loadouts: [
+    { name: "Bushwhack", description: "Swapping to your Pistol grants 10% Lifesteal for 3s.", category: "Quick Switch", iconUrl: "/images/cards/Card_Bushwhack.png" },
+    { name: "Cooled Mags", description: "Your inactive weapon generates 2 Ammo every 2s.", category: "Quick Switch", iconUrl: "/images/cards/Card_Cooled_Mags.png" },
+    { name: "Dexterous", description: "Reduce the time it takes to Quick Switch to your Pistol by 10%.", category: "Quick Switch", iconUrl: "/images/cards/Card_Dexterous.png" },
+    { name: "Escape Plan", description: "Heal for 100 after entering Stealth at or below 65% Health.", category: "Stealth", iconUrl: "/images/cards/Card_Escape_Plan.png" },
+    { name: "Flare XL", description: "Increase the area that Flare will Reveal enemies by 10%.", category: "Scope / Flare", iconUrl: "/images/cards/Card_Flare_XL.png" },
+    { name: "Grizzled", description: "Increase your maximum Health by 50.", category: "", iconUrl: "/images/cards/Card_Grizzled.png" },
+    { name: "Guerilla Tactics", description: "Generate 12 Energy after getting an Elimination.", category: "Stealth", iconUrl: "/images/cards/Card_Guerilla_Tactics.png" },
+    { name: "Infused Crystals", description: "Increase the maximum Ammo count of both your weapons by 1.", category: "", iconUrl: "/images/cards/Card_Infused_Crystals.png" },
+    { name: "Overburn", description: "Flare lasts 0.6s longer.", category: "Scope / Flare", iconUrl: "/images/cards/Card_Overburn.png" },
+    { name: "Relentless", description: "Reduce the Movement Speed penalty of Scope by 20%.", category: "Scope / Flare", iconUrl: "/images/cards/Card_Relentless.png" },
+    { name: "Resourceful", description: "While you have your Talon Rifle equipped, the Cooldown of Flare is reduced by 0.2s every 1s.", category: "Quick Switch", iconUrl: "/images/cards/Card_Resourceful.png" },
+    { name: "Roost", description: "Hits with Talon Rifle increase your Stealth energy charge rate by 30% for 2s.", category: "Scope / Flare", iconUrl: "/images/cards/Card_Roost.png" },
+    { name: "Stalker", description: "Heal for 15 every 1s while Stealth is active.", category: "Stealth", iconUrl: "/images/cards/Card_Stalker.png" },
+    { name: "Tactical Retreat", description: "Increase your Movement Speed by 10% for 2s after entering Stealth.", category: "Stealth", iconUrl: "/images/cards/Card_Tactical_Retreat.png" },
+    { name: "Trigger Control", description: "Reduce the maximum inaccuracy of your Pistol by 8%.", category: "", iconUrl: "/images/cards/Card_Trigger_Control.png" },
+    { name: "White Knuckle", description: "Reduce the recoil of your Pistol by 6%.", category: "", iconUrl: "/images/cards/Card_White_Knuckle.png" },
+  ],
+};
+
+export const CHAMPION_DATA: Record<string, ChampionData> = {", 
   androxus: ANDROXUS_DATA,
   ash: ASH_DATA,
   atlas: ATLAS_DATA,
@@ -1641,6 +1712,7 @@ export const CHAMPION_DATA: Record<string, ChampionData> = {
   bombking: BOMB_KING_DATA,
   octavia: OCTAVIA_DATA,
   shalin: SHA_LIN_DATA,
+  strix: STRIX_DATA,
 };
 
 export function getChampionData(slug: string): ChampionData | undefined {
