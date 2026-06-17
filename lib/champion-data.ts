@@ -334,11 +334,85 @@ export const AZAAN_DATA: ChampionData = {
   ],
 };
 
+export const BARIK_DATA: ChampionData = {
+  name: "Barik",
+  roles: ["Frontline"],
+  stats: {
+    health: "3400",
+    speed: "345",
+    speedUnits: "~21 units/s",
+    range: "40",
+  },
+  skills: [
+    {
+      name: "Blunderbuss",
+      key: "LMB",
+      iconUrl: "/images/skills/WeaponAttack_Barik_Icon.png",
+      damage: "500",
+      description: "A short-range blunderbuss that deals 500 damage every 1s.",
+    },
+    {
+      name: "Barricade",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_Barricade.png",
+      damage: "4500",
+      cooldown: "12s",
+      description: "Create a barricade with 4500 health to protect allies and yourself from harm.",
+    },
+    {
+      name: "Turret",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Turret.png",
+      damage: "120, 1000",
+      cooldown: "10s",
+      description: "Deploy a turret that targets nearby enemies, dealing 120 damage every 1s.",
+    },
+    {
+      name: "Rocket Boots",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Rocket_Boots.png",
+      cooldown: "12s",
+      description: "Activate your rocket-boots, charging you forward with great speed for a short time.",
+    },
+    {
+      name: "Dome Shield",
+      key: "E",
+      iconUrl: "/images/skills/Ability_Dome_Shield.png",
+      cooldown: "Ultimate",
+      description: "Create a protective dome shield around yourself and nearby allies.",
+    },
+  ],
+  talents: [
+    { name: "Fortify", description: "Increase the maximum Health of Barricade by 2000 and reduce its Cooldown by 3s.", category: "Barricade" },
+    { name: "Tinkerin'", description: "Modify your Blunderbuss to fire a single slug that deals 600 damage.", category: "Blunderbuss" },
+    { name: "Forgefire", description: "Dome Shield now costs 40% Ultimate charge and places a miniature Flamethrower Turret. This turret deals 400 damage every 1s and has no Shield, but you can have 2 active at once.", category: "Dome Shield" },
+  ],
+  loadouts: [
+    { name: "Accelerator Field", description: "Increase the speed of Rocket Boots by 12%.", category: "Barricade", iconUrl: "/images/cards/Card_Accelerator_Field.png" },
+    { name: "Bowling Ball", description: "Heal for 175 after hitting an enemy champion with Rocket Boots.", category: "Rocket Boots", iconUrl: "/images/cards/Card_Bowling_Ball.png" },
+    { name: "Brave and Bold", description: "Increase your maximum Health by 150.", category: "", iconUrl: "/images/cards/Card_Brave_and_Bold.png" },
+    { name: "Bunker", description: "Increase the Health of Barricade by 250.", category: "Barricade", iconUrl: "/images/cards/Card_Bunker.png" },
+    { name: "Combat Repair", description: "Heal your Turret for 100 every 2s.", category: "Turret", iconUrl: "/images/cards/Card_Combat_Repair.png" },
+    { name: "Double Time", description: "Heal for 65 after activating Rocket Boots.", category: "Rocket Boots", iconUrl: "/images/cards/Card_Double_Time.png" },
+    { name: "Failsafe", description: "Reduce your damage taken by 30% while at or below 50% Health.", category: "", iconUrl: "/images/cards/Card_Failsafe.png" },
+    { name: "Field Deploy", description: "Generate 1 Ammo after deploying your Turret.", category: "Turret", iconUrl: "/images/cards/Card_Field_Deploy.png" },
+    { name: "Forged Alloy", description: "Increase your maximum Health by 150.", category: "Turret", iconUrl: "/images/cards/Card_Forged_Alloy.png" },
+    { name: "Foundation", description: "Increase the duration of Barricade by 0.6s.", category: "Barricade", iconUrl: "/images/cards/Card_Foundation.png" },
+    { name: "Fuel Efficiency", description: "Increase the duration of Rocket Boots by 0.3s.", category: "Rocket Boots", iconUrl: "/images/cards/Card_Fuel_Efficiency.png" },
+    { name: "Healing Station", description: "Heal nearby allies for 50 every 2s while Turret is active.", category: "Turret", iconUrl: "/images/cards/Card_Healing_Station.png" },
+    { name: "One Man's Scrap", description: "Reduce your damage taken by 5% for each nearby ally.", category: "", iconUrl: "/images/cards/Card_One_Mans_Scrap.png" },
+    { name: "One Man's Treasure", description: "Reduce your active Cooldowns by 10% after getting an Elimination.", category: "", iconUrl: "/images/cards/Card_One_Mans_Treasure.png" },
+    { name: "Palisade", description: "Reduce the Cooldown of Barricade by 0.6s.", category: "Barricade", iconUrl: "/images/cards/Card_Palisade.png" },
+    { name: "Red Streak", description: "Reduce the Cooldown of Rocket Boots by 0.8s.", category: "Rocket Boots", iconUrl: "/images/cards/Card_Red_Streak.png" },
+  ],
+};
+
 export const CHAMPION_DATA: Record<string, ChampionData> = {
   androxus: ANDROXUS_DATA,
   ash: ASH_DATA,
   atlas: ATLAS_DATA,
   azaan: AZAAN_DATA,
+  barik: BARIK_DATA,
 };
 
 export function getChampionData(slug: string): ChampionData | undefined {
