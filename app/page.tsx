@@ -257,7 +257,7 @@ export default function HomePage() {
           <div className="space-y-6">
             {/* Leaderboard */}
             <motion.div initial={{ opacity: 0, y: 25 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 300, damping: 20 }}>
-              <Card style={{ backgroundColor: "var(--pc-bg-elevated)", backdropFilter: "none" }}>
+              <Card className="pc-card-opaque">
                 <div className="pc-card-title mb-3">Leaderboard</div>
                 {loading ? (
                   <div className="space-y-3">

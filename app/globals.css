@@ -122,6 +122,7 @@ body {
 .pc-card.pc-card-opaque {
   background-color: var(--pc-bg-elevated) !important;
   backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 /* Card variant: no padding (for tables, lists) */
