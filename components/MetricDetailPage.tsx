@@ -230,6 +230,7 @@ export default function MetricDetailPage({ config }: { config: MetricConfig }) {
                 // Bell curve for expanded view
                 const BW = 300;
                 const BH = 70;
+                const PAD = 10; // top padding for dot
                 const bSigma = 0.15;
                 const bValPct = cRange > 0 ? (c.value - cMin) / cRange : 0.5;
                 const bMedianPct = cRange > 0 ? (cMedian - cMin) / cRange : 0.5;
@@ -241,9 +242,9 @@ export default function MetricDetailPage({ config }: { config: MetricConfig }) {
                   const g1 = Math.exp(-0.5 * ((x - bValPct) / bSigma) ** 2);
                   const g2 = Math.exp(-0.5 * ((x - bMedianPct) / (bSigma * 0.8)) ** 2);
                   const y = 0.6 * g1 + 0.4 * g2;
-                  bPoints.push(`${j},${BH - y * (BH - 6)}`);
+                  bPoints.push(`${j},${PAD + BH - y * (BH - 6)}`);
                 }
-                const bLinePath = `M0,${BH} L${bPoints.join(" L")} L${BW},${BH} Z`;
+                const bLinePath = `M0,${PAD + BH} L${bPoints.join(" L")} L${BW},${PAD + BH} Z`;
 
                 return (
                   <Fragment key={c.name}>
@@ -312,7 +313,7 @@ export default function MetricDetailPage({ config }: { config: MetricConfig }) {
                           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                             {/* Bell curve */}
                             <div className="lg:col-span-2">
-                              <svg viewBox={`0 0 ${BW} ${BH}`} className="w-full h-28" preserveAspectRatio="none">
+                              <svg viewBox={`0 -${PAD} ${BW} ${PAD + BH + 4}`} className="w-full h-28" preserveAspectRatio="none">
                                 <defs>
                                   <linearGradient id={`exp-grad-${c.name}`} x1="0" y1="0" x2="0" y2="1">
                                     <stop offset="0%" stopColor={config.stroke} stopOpacity="0.25" />
@@ -322,13 +323,13 @@ export default function MetricDetailPage({ config }: { config: MetricConfig }) {
                                 <path d={bLinePath} fill={`url(#exp-grad-${c.name})`} />
                                 <path d={`M${bPoints.join(" L")}`} fill="none" stroke={config.stroke} strokeWidth="2" strokeLinecap="round" />
                                 {/* Mode line */}
-                                <line x1={bModePct * BW} y1="4" x2={bModePct * BW} y2={BH} stroke="#6a6a71" strokeWidth="1" strokeDasharray="3 2" opacity="0.5" />
+                                <line x1={bModePct * BW} y1={PAD} x2={bModePct * BW} y2={PAD + BH} stroke="#6a6a71" strokeWidth="1" strokeDasharray="3 2" opacity="0.5" />
                                 {/* Median line */}
-                                <line x1={bMedianPct * BW} y1="0" x2={bMedianPct * BW} y2={BH} stroke={config.stroke} strokeWidth="1.5" strokeDasharray="4 3" opacity="0.6" />
+                                <line x1={bMedianPct * BW} y1={-PAD + 4} x2={bMedianPct * BW} y2={PAD + BH} stroke={config.stroke} strokeWidth="1.5" strokeDasharray="4 3" opacity="0.6" />
                                 {/* Global mean line */}
-                                <line x1={bGlobalMeanPct * BW} y1="0" x2={bGlobalMeanPct * BW} y2={BH} stroke={config.stroke} strokeWidth="1" strokeDasharray="2 2" opacity="0.3" />
+                                <line x1={bGlobalMeanPct * BW} y1={-PAD + 4} x2={bGlobalMeanPct * BW} y2={PAD + BH} stroke={config.stroke} strokeWidth="1" strokeDasharray="2 2" opacity="0.3" />
                                 {/* Avg dot */}
-                                <circle cx={bValPct * BW} cy="2" r="3.5" fill={config.stroke} />
+                                <circle cx={bValPct * BW} cy={-2} r="4" fill={config.stroke} />
                               </svg>
                               <div className="flex items-center gap-4 mt-1">
                                 <span className="flex items-center gap-1 text-[10px] text-pc-text-muted">

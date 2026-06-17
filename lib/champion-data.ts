@@ -3754,6 +3754,7 @@ export const CHAMPION_DATA: Record<string, ChampionData> = {
   maldamba: MAL_DAMBA_DATA,
   moji: MOJI_DATA,
   pip: PIP_DATA,
+  rei: REI_DATA,
   skye: SKYE_DATA,
   androxus: ANDROXUS_DATA,
   buck: BUCK_DATA,
