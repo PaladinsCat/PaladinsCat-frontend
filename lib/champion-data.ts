@@ -915,6 +915,80 @@ export const RUCKUS_DATA: ChampionData = {
   ],
 };
 
+export const TERMINUS_DATA: ChampionData = {
+  name: "Terminus",
+  roles: ["Frontline"],
+  stats: {
+    health: "4000",
+    speed: "350",
+    speedUnits: "~22 units/s",
+    range: "18",
+  },
+  skills: [
+    {
+      name: "Massacre Axe",
+      key: "LMB",
+      iconUrl: "/images/skills/WeaponAttack_Terminus_Icon.png",
+      damage: "650",
+      description: "Swing a massive axe every 1.1s to rend foes in front of you for 650 damage.",
+    },
+    {
+      name: "Calamity Blast",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_Calamity_Blast.png",
+      damage: "250",
+      cooldown: "2s",
+      description: "Fire a mass of Calamity from your hand and an additional one for every stored charge, dealing 250 damage per blast.",
+    },
+    {
+      name: "Power Siphon",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Power_Siphon.png",
+      damage: "1200",
+      cooldown: "1s",
+      description: "Create a powerful funnel that absorbs enemy attacks to generate Calamity Charges.",
+    },
+    {
+      name: "Shatterfall",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Shatterfall.png",
+      cooldown: "12s",
+      description: "Leap into the air and slam down, dealing damage and stunning enemies.",
+    },
+    {
+      name: "Reanimate",
+      key: "E",
+      iconUrl: "/images/skills/Ability_Reanimate.png",
+      damage: "2600",
+      cooldown: "Ultimate",
+      description: "Revive yourself after a short time and deal 2600 damage to enemies upon reviving.",
+    },
+  ],
+  talents: [
+    { name: "Undying", description: "Reduce the damage you take by 15% while at or below 50% Health.", category: "", iconUrl: "/images/champions/Talent Terminus Undying.png" },
+    { name: "Crush", description: "Shatterfall deals 50% more damage and has a larger area of effect, but its Cooldown is increased by 4s.", category: "Shatterfall", iconUrl: "/images/champions/Talent Terminus Crush.png" },
+    { name: "Decimation", description: "Each Calamity Blast deals an additional 100 damage.", category: "Calamity Blast", iconUrl: "/images/champions/Talent Terminus Decimation.png" },
+  ],
+  loadouts: [
+    { name: "Abomination", description: "Increase the damage of Calamity Blast.", category: "Calamity Blast", iconUrl: "/images/cards/Card_Abomination.png" },
+    { name: "Blood and Stone", description: "Increase the damage of Shatterfall.", category: "Shatterfall", iconUrl: "/images/cards/Card_Blood_and_Stone.png" },
+    { name: "Despoiler", description: "Increase the damage of Power Siphon.", category: "Shatterfall", iconUrl: "/images/cards/Card_Despoiler.png" },
+    { name: "Devastation", description: "Increase the damage of Calamity Blast.", category: "Calamity Blast", iconUrl: "/images/cards/Card_Devastation.png" },
+    { name: "Forsaken", description: "Increase your damage.", category: "", iconUrl: "/images/cards/Card_Forsaken.png" },
+    { name: "Hulking Monstrosity", description: "Increase your maximum Health.", category: "", iconUrl: "/images/cards/Card_Hulking_Monstrosity.png" },
+    { name: "It Follows", description: "Increase the damage of Calamity Blast.", category: "Calamity Blast", iconUrl: "/images/cards/Card_It_Follows.png" },
+    { name: "It Waits", description: "Reduce the Cooldown of Power Siphon.", category: "Power Siphon", iconUrl: "/images/cards/Card_It_Waits.png" },
+    { name: "It Watches", description: "Increase your damage.", category: "", iconUrl: "/images/cards/Card_It_Watches.png" },
+    { name: "Necromantic Might", description: "Increase the damage of Power Siphon.", category: "Power Siphon", iconUrl: "/images/cards/Card_Necromantic_Might.png" },
+    { name: "Playing God", description: "Increase the damage of Power Siphon.", category: "Power Siphon", iconUrl: "/images/cards/Card_Playing_God.png" },
+    { name: "Powerslave", description: "Increase the damage of Power Siphon.", category: "Power Siphon", iconUrl: "/images/cards/Card_Powerslave.png" },
+    { name: "Strength of Stone", description: "Increase the damage of Shatterfall.", category: "Calamity Blast", iconUrl: "/images/cards/Card_Strength_of_Stone.png" },
+    { name: "Unfeeling", description: "Reduce the damage you take.", category: "Shatterfall", iconUrl: "/images/cards/Card_Unfeeling.png" },
+    { name: "We Can Rebuild Him", description: "Increase your damage.", category: "", iconUrl: "/images/cards/Card_We_Can_Rebuild_Him.png" },
+    { name: "Wrecking Ball", description: "Increase the damage of Shatterfall.", category: "Shatterfall", iconUrl: "/images/cards/Card_Wrecking_Ball.png" },
+  ],
+};
+
 export const CHAMPION_DATA: Record<string, ChampionData> = {
   androxus: ANDROXUS_DATA,
   ash: ASH_DATA,
@@ -928,6 +1002,7 @@ export const CHAMPION_DATA: Record<string, ChampionData> = {
   nyx: NYX_DATA,
   raum: RAUM_DATA,
   ruckus: RUCKUS_DATA,
+  terminus: TERMINUS_DATA,
 };
 
 export function getChampionData(slug: string): ChampionData | undefined {
