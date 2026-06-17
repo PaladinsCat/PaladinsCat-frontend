@@ -28,7 +28,7 @@ const DUMMY_BANNED = MOCK_STATS_CHAMPIONS.slice(0, 8).map((s) => ({
   banRate: s.banRate,
 }));
 
-const DUMMY_LEADERBOARD = MOCK_RANKED_PLAYERS.slice(0, 10).map((p) => ({
+const DUMMY_LEADERBOARD = MOCK_RANKED_PLAYERS.map((p) => ({
   rank: p.rank,
   player_id: p.player_id,
   name: p.name,
