@@ -1503,7 +1503,7 @@ export const OCTAVIA_DATA: ChampionData = {
       key: "Q",
       iconUrl: "/images/skills/Ability_Distortion_Field.png",
       cooldown: "16s",
-      description: "Create an opaque, anti-gravity dome that hides allies and disorients and Slows enemies while inside of it – lasts for 3.5s.",
+      description: "Create an opaque, anti-gravity dome that hides allies and disorients and Slows enemies while inside of it - lasts for 3.5s.",
     },
     {
       name: "Commanding Leap",
@@ -1632,7 +1632,7 @@ export const STRIX_DATA: ChampionData = {
       name: "Talon Rifle / Pistol",
       key: "LMB",
       iconUrl: "/images/skills/Ability_Talon_Rifle.png",
-      damage: "1200 /1.2s — 165 /0.15s",
+      damage: "1200 /1.2s - 165 /0.15s",
       description: "A rifle and pistol combination for eliminating your targets. Your rifle deals 1200 damage every 1.2s and your pistol deals 165 damage every 0.15s while regenerating Stealth energy.",
     },
     {
@@ -1703,14 +1703,14 @@ export const TIBERIUS_DATA: ChampionData = {
       name: "Bladed Chakrams",
       key: "LMB",
       iconUrl: "/images/skills/Ability_Bladed_Chakrams.png",
-      damage: "675 / 0.7s — 525",
+      damage: "675 / 0.7s - 525",
       description: "Sling Bladed Chakrams from your hand every 0.7s, dealing 675 damage with each, and bouncing off floors and walls up to 4 times.",
     },
     {
       name: "Heavy Blade",
       key: "RMB",
       iconUrl: "/images/skills/Ability_Heavy_Blade.png",
-      damage: "850 — 500",
+      damage: "850 - 500",
       cooldown: "12s",
       description: "Throw your Heavy Blade in a straight line to pierce shields and enemies, dealing 850 damage and Slowing. Can be recalled through enemies to deal 500 damage to them.",
     },
@@ -1732,7 +1732,7 @@ export const TIBERIUS_DATA: ChampionData = {
       name: "Blade Dance",
       key: "E",
       iconUrl: "/images/skills/Ability_Blade_Dance.png",
-      damage: "650 — 900",
+      damage: "650 - 900",
       description: "Flourish your Heavy Blade and gain the ability to use Striking Tigron and Whirling Blades up to 5 times for 15s.",
     },
   ],
@@ -2820,9 +2820,79 @@ export const VII_DATA: ChampionData = {
   ],
 };
 
+export const VORA_DATA: ChampionData = {
+  name: "Vora",
+  roles: ["Flank"],
+  stats: {
+    health: "2000",
+    speed: "380",
+    speedUnits: "~23 units/s",
+    range: "180",
+  },
+  skills: [
+    {
+      name: "Deadly Scythe",
+      key: "LMB",
+      iconUrl: "/images/skills/Ability_Deadly_Scythe.png",
+      description: "Fire projectiles to deal damage over time and gain a stack of Darkness. Consuming Darkness heals Vora over time. Consuming maximum stacks augments other abilities.",
+    },
+    {
+      name: "Obliteration",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_Obliteration.png",
+      cooldown: "11s",
+      description: "Fire a powerful beam that deals damage to enemies in its path.",
+    },
+    {
+      name: "Dark Siphon",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Dark_Siphon.png",
+      cooldown: "6s",
+      description: "Siphon life force from nearby enemies, dealing damage and healing Vora.",
+    },
+    {
+      name: "Tendril",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Tendril.png",
+      cooldown: "12s",
+      description: "Manifest your will, propelling yourself towards your target with a tendril. Can hit players to pull you to them.",
+    },
+    {
+      name: "Harbinger's Wrath",
+      key: "E",
+      iconUrl: "/images/skills/Ability_Harbinger's_Wrath.png",
+      cooldown: "Ultimate",
+      description: "Hunt your enemies, increasing Movement Speed and reducing the damage you take. Select a nearby target to lock down, damaging or executing them if they are low health.",
+    },
+  ],
+  talents: [
+    { name: "Unyielding Pressure", description: "Your Dark Siphon now deals an additional 10% of the target's maximum Health as damage over 1.5s.", category: "Dark Siphon", iconUrl: "/images/champions/Talent Vora UnyieldingPressure.png" },
+    { name: "Parasitic Pull", description: "Tendril can now target allies & on attach provides them double your Tendril card effects after attaching. Hitting enemies with Tendril deals 225 damage over 1.25s.", category: "Tendril", iconUrl: "/images/champions/Talent Vora RelentlessPresence.png" },
+    { name: "Eclipsed Affection", description: "Reduce Obliteration's Cooldown by 2s and by 50% after earning an Elimination. When used at max Darkness stacks, Obliteration deals 100 more bonus damage.", category: "Obliteration", iconUrl: "/images/champions/Talent Vora DeafeningSilence.png" },
+  ],
+  loadouts: [
+    { name: "A Broken Path", description: "Increase the damage of Dark Siphon.", category: "Dark Siphon", iconUrl: "/images/cards/Card_A_Broken_Path.png" },
+    { name: "A Change of Faith", description: "Reduce the Cooldown of Dark Siphon.", category: "Dark Siphon", iconUrl: "/images/cards/Card_Change_of_Faith.png" },
+    { name: "A Dance with Fate", description: "Reduce the Cooldown of Tendril.", category: "Tendril", iconUrl: "/images/cards/Card_Dance_with_Fate.png" },
+    { name: "Broken Promises", description: "Increase the damage of Obliteration.", category: "Obliteration", iconUrl: "/images/cards/Card_Broken_Promises.png" },
+    { name: "Crimson Ascent", description: "Reduce the Cooldown of Dark Siphon.", category: "Dark Siphon", iconUrl: "/images/cards/Card_Crimson_Ascent.png" },
+    { name: "Deadly Dance", description: "Increase the damage of Obliteration.", category: "Obliteration", iconUrl: "/images/cards/Card_Deadly_Dance.png" },
+    { name: "Elegant Paring", description: "Reduce the Cooldown of Tendril.", category: "Tendril", iconUrl: "/images/cards/Card_Elegant_Paring.png" },
+    { name: "False Idol", description: "", category: "", iconUrl: "/images/cards/Card_False_Idol.png" },
+    { name: "Inevitability", description: "Reduce the Cooldown of Obliteration.", category: "Obliteration", iconUrl: "/images/cards/Card_Inevitability.png" },
+    { name: "New Purpose", description: "", category: "", iconUrl: "/images/cards/Card_New_Purpose.png" },
+    { name: "Otherworldly Tether", description: "Increase the damage of Tendril.", category: "Tendril", iconUrl: "/images/cards/Card_Otherworldly_Tether.png" },
+    { name: "Ruthless Elegance", description: "Increase the damage of Obliteration.", category: "Obliteration", iconUrl: "/images/cards/Card_Ruthless_Elegance.png" },
+    { name: "Sharpened Resolve", description: "", category: "", iconUrl: "/images/cards/Card_Sharpened_Resolve.png" },
+    { name: "The Maw's Embrace", description: "", category: "", iconUrl: "/images/cards/Card_Maws_Embrace.png" },
+    { name: "Unified in Purpose", description: "Reduce the Cooldown of Dark Siphon.", category: "Dark Siphon", iconUrl: "/images/cards/Card_Unified_in_Purpose.png" },
+    { name: "What May Come", description: "Reduce the Cooldown of Tendril.", category: "Tendril", iconUrl: "/images/cards/Card_What_May_Come.png" },
+  ],
+};
+
 export const CHAMPION_DATA: Record<string, ChampionData> = {
   talus: TALUS_DATA,
-  skye: SKYE_DATA,", 
+  skye: SKYE_DATA,",
   androxus: ANDROXUS_DATA,
   buck: BUCK_DATA,
   maeve: MAEVE_DATA,
@@ -2859,6 +2929,7 @@ export const CHAMPION_DATA: Record<string, ChampionData> = {
   willob: WILLO_DATA,
   vatu: VATU_DATA,
   vii: VII_DATA,
+  vora: VORA_DATA,
 };
 
 export function getChampionData(slug: string): ChampionData | undefined {
