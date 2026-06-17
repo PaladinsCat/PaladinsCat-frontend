@@ -772,6 +772,77 @@ export const NYX_DATA: ChampionData = {
   ],
 };
 
+export const RAUM_DATA: ChampionData = {
+  name: "Raum",
+  roles: ["Frontline"],
+  stats: {
+    health: "4500",
+    speed: "365",
+    speedUnits: "~22 units/s",
+    range: "80",
+  },
+  skills: [
+    {
+      name: "Hellfire Gatling",
+      key: "LMB",
+      iconUrl: "/images/skills/Ability_HellfireGatling.png",
+      damage: "40 /0.05s",
+      description: "An Abyssal Gatling gun that shreds its targets' souls every 5 hits. Deals 40 damage every 0.05s when fully spun up. Each soul fragment can be consumed to gain soul armor.",
+    },
+    {
+      name: "Ignition",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_Ignition.png",
+      cooldown: "10s",
+      description: "Ignite your Gatling gun to fully spin it up and consume no ammo for 3s.",
+    },
+    {
+      name: "Soul Harvest",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_SoulHarvest.png",
+      cooldown: "10s",
+      description: "Harvest your enemies' shattered souls, drawing loose souls in and gaining 2000 soul armor on activation, as well as an additional 200 soul armor for each fragment collected.",
+    },
+    {
+      name: "Juggernaut",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Juggernaut.png",
+      cooldown: "15s",
+      description: "Charge forward, becoming immune to Crowd Control and dealing damage to enemies in your path.",
+    },
+    {
+      name: "Cataclysm",
+      key: "E",
+      iconUrl: "/images/skills/Ability_Cataclysm.png",
+      cooldown: "Ultimate",
+      description: "Fire a devastating shot that deals massive damage in an area.",
+    },
+  ],
+  talents: [
+    { name: "Enforcer", description: "Gain 1.2s of Crowd Control Immunity and reduce your damage taken by 40% while using Juggernaut.", category: "Juggernaut", iconUrl: "/images/champions/Talent Raum Enforcer.png" },
+    { name: "Earthsplitter", description: "Increase your Ultimate charge rate by 60%.", category: "Cataclysm", iconUrl: "/images/champions/Talent Raum Earthsplitter.png" },
+    { name: "Subservience", description: "All your living allies are Healed for 1.5% of their maximum Health for each Soul Harvested.", category: "Soul Harvest", iconUrl: "/images/champions/Talent Raum Subservience.png" },
+  ],
+  loadouts: [
+    { name: "Abhorrent Vista", description: "Reduce the Cooldown of Ignition.", category: "Ignition", iconUrl: "/images/cards/Card_Abhorrent_Vista.png" },
+    { name: "Abyssal Connections", description: "Increase the duration of Ignition.", category: "Ignition", iconUrl: "/images/cards/Card_Abyssal_Connections.png" },
+    { name: "Apocalypse", description: "Increase the damage of Juggernaut.", category: "Juggernaut", iconUrl: "/images/cards/Card_Apocalypse.png" },
+    { name: "Declaration of War", description: "Increase the damage of Juggernaut.", category: "Juggernaut", iconUrl: "/images/cards/Card_Declaration_of_War.png" },
+    { name: "Desperation", description: "Increase your damage when below 50% Health.", category: "", iconUrl: "/images/cards/Card_Desperation.png" },
+    { name: "Fanning the Flames", description: "Increase the damage of Juggernaut.", category: "Juggernaut", iconUrl: "/images/cards/Card_Fanning_the_Flames.png" },
+    { name: "Harbinger", description: "Reduce the Cooldown of Soul Harvest.", category: "Soul Harvest", iconUrl: "/images/cards/Card_Harbinger.png" },
+    { name: "Hellish Lodestones", description: "Reduce the Cooldown of Ignition.", category: "Ignition", iconUrl: "/images/cards/Card_Hellish_Lodestones.png" },
+    { name: "Infernal Reload", description: "Increase your damage.", category: "", iconUrl: "/images/cards/Card_Infernal_Reload.png" },
+    { name: "Shattered Essence", description: "Increase the soul armor of Soul Harvest.", category: "Soul Harvest", iconUrl: "/images/cards/Card_Shattered_Essence.png" },
+    { name: "Sinister Allies", description: "Increase your maximum Health.", category: "", iconUrl: "/images/cards/Card_Sinister_Allies.png" },
+    { name: "Subjugation", description: "Increase the damage of Juggernaut.", category: "Juggernaut", iconUrl: "/images/cards/Card_Subjugation.png" },
+    { name: "Tormented Fissure", description: "Increase the duration of Ignition.", category: "Ignition", iconUrl: "/images/cards/Card_Tormented_Fissure.png" },
+    { name: "Triumphant Ascension", description: "Increase the soul armor of Soul Harvest.", category: "Soul Harvest", iconUrl: "/images/cards/Card_Triumphant_Ascension.png" },
+    { name: "Void Lord", description: "Reduce the Cooldown of Soul Harvest.", category: "Soul Harvest", iconUrl: "/images/cards/Card_Void_Lord.png" },
+    { name: "War-Torn Plains", description: "Increase your damage.", category: "", iconUrl: "/images/cards/Card_War-Torn_Plains.png" },
+  ],
+};
+
 export const CHAMPION_DATA: Record<string, ChampionData> = {
   androxus: ANDROXUS_DATA,
   ash: ASH_DATA,
@@ -783,6 +854,7 @@ export const CHAMPION_DATA: Record<string, ChampionData> = {
   khan: KHAN_DATA,
   makoa: MAKOA_DATA,
   nyx: NYX_DATA,
+  raum: RAUM_DATA,
 };
 
 export function getChampionData(slug: string): ChampionData | undefined {
