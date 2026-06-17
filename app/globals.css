@@ -105,10 +105,20 @@ body {
 /* Card: elevated bg, 16px radius, 1px border, default shadow */
 /* Hover lift + shadow increase handled in Card.tsx via inline events */
 .pc-card {
+  background-color: oklch(0.210 0.005 280 / 0.75);
   border: 1px solid var(--pc-border);
   border-radius: 16px;
   padding: 24px;
   transition: border-color 0.25s ease;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Opaque variant for leaderboard */
+.pc-card--opaque {
+  background-color: var(--pc-bg-elevated) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 .pc-card:hover {
@@ -245,7 +255,7 @@ body {
 /* Input: standard field, 8px radius, border, focus glow */
 .pc-input {
   width: 100%;
-  background-color: var(--pc-bg);
+  background-color: oklch(0.210 0.005 280 / 0.75);
   color: var(--pc-text);
   border: 1px solid var(--pc-border);
   border-radius: 8px;
@@ -253,6 +263,8 @@ body {
   font-size: 0.9rem;
   outline: none;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .pc-input::placeholder {
@@ -289,7 +301,7 @@ body {
 
 /* Select: styled dropdown matching input spec */
 .pc-select {
-  background-color: var(--pc-bg);
+  background-color: oklch(0.210 0.005 280 / 0.75);
   color: var(--pc-text);
   border: 1px solid var(--pc-border);
   border-radius: 8px;
@@ -298,6 +310,8 @@ body {
   outline: none;
   cursor: pointer;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .pc-select:focus {
@@ -385,7 +399,7 @@ body {
   color: var(--pc-accent);
   padding: 12px 16px;
   text-align: left;
-  background-color: var(--pc-bg-elevated);
+  background-color: transparent;
   border-bottom: 1px solid var(--pc-border);
 }
 
@@ -398,6 +412,32 @@ body {
 
 .pc-table tr:hover td {
   background-color: var(--pc-bg-secondary);
+}
+
+/* Global: all bg-pc-bg-elevated surfaces get 65% transparency + blur */
+.bg-pc-bg-elevated {
+  background-color: oklch(0.210 0.005 280 / 0.75) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Semi-transparent card surfaces (65% opacity + blur) */
+.pc-surface {
+  background-color: oklch(0.210 0.005 280 / 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.pc-surface-light {
+  background-color: oklch(0.210 0.005 280 / 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.pc-surface-subtle {
+  background-color: oklch(0.210 0.005 280 / 0.3);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 /* Skeleton loader: animated shimmer */
@@ -456,7 +496,7 @@ body {
   animation: fadeInUp 0.4s ease-out both;
 }
 
-/* Stagger children — delay each child by 50ms for cascading effect */
+/* Stagger animation — applied dynamically by PageLayout.tsx */
 .pc-animate-stagger > * {
   animation: fadeInUp 0.4s ease-out both;
 }
@@ -466,6 +506,13 @@ body {
 .pc-animate-stagger > *:nth-child(4) { animation-delay: 150ms; }
 .pc-animate-stagger > *:nth-child(5) { animation-delay: 200ms; }
 .pc-animate-stagger > *:nth-child(6) { animation-delay: 250ms; }
+.pc-animate-stagger > *:nth-child(7) { animation-delay: 300ms; }
+.pc-animate-stagger > *:nth-child(8) { animation-delay: 350ms; }
+.pc-animate-stagger > *:nth-child(9) { animation-delay: 400ms; }
+.pc-animate-stagger > *:nth-child(10) { animation-delay: 450ms; }
+.pc-animate-stagger > *:nth-child(11) { animation-delay: 500ms; }
+.pc-animate-stagger > *:nth-child(12) { animation-delay: 550ms; }
+.pc-animate-stagger > *:nth-child(n+13) { animation-delay: 600ms; }
 
 @theme inline {
   --font-heading: var(--font-sans);

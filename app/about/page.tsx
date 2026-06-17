@@ -1,3 +1,7 @@
+"use client";
+
+import ScrambleText from "@/components/ScrambleText";
+
 export default function AboutPage() {
   return (
     <div className="space-y-16 max-w-4xl mx-auto text-center">
@@ -6,14 +10,16 @@ export default function AboutPage() {
       <section className="space-y-4">
         <div className="flex items-center justify-center gap-3">
           <img src="/images/icons/paladinscat.avif" alt="PaladinsCat" className="w-12 h-12 rounded-xl" />
-          <h1 className="text-4xl font-bold text-pc-accent">PaladinsCat</h1>
+          <h1 className="text-4xl font-bold text-pc-accent">
+            <ScrambleText text="PaladinsCat" speed={30} iterations={15} delayFromCenter={false} />
+          </h1>
         </div>
-        <p className="text-xl text-pc-text-secondary leading-relaxed">
+        <p className="text-xl text-pc-text-secondary leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
           The competitive stats platform for Paladins players who want to win more.
         </p>
         <div className="flex flex-wrap justify-center gap-2 pt-2">
           {["Champion Stats", "Ranked Tracking", "Counter Picks", "Meta Analysis", "Player Profiles"].map((tag) => (
-            <span key={tag} className="text-xs px-3 py-1 rounded-full bg-pc-accent/10 text-pc-accent border border-pc-accent/20">
+            <span key={tag} className="text-xs px-3 py-1 rounded-full bg-pc-accent/10 text-pc-accent border border-pc-accent/20 drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]">
               {tag}
             </span>
           ))}
@@ -22,7 +28,7 @@ export default function AboutPage() {
 
       {/* ── What is it ── */}
       <section className="space-y-4">
-        <h2 className="text-2xl font-bold text-pc-text">What is PaladinsCat?</h2>
+        <h2 className="text-2xl font-bold text-pc-text drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">What is PaladinsCat?</h2>
         <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-6 space-y-4 text-pc-text-secondary leading-relaxed text-left">
           <p>
             PaladinsCat is a community-driven analytics platform built for the Paladins competitive
@@ -39,7 +45,7 @@ export default function AboutPage() {
 
       {/* ── Why it exists ── */}
       <section className="space-y-4">
-        <h2 className="text-2xl font-bold text-pc-text">Why does this exist?</h2>
+        <h2 className="text-2xl font-bold text-pc-text drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">Why does this exist?</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
           {[
             {
@@ -69,7 +75,7 @@ export default function AboutPage() {
 
       {/* ── What it does ── */}
       <section className="space-y-4">
-        <h2 className="text-2xl font-bold text-pc-text">What does it do?</h2>
+        <h2 className="text-2xl font-bold text-pc-text drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">What does it do?</h2>
         <div className="space-y-3 text-left">
           {[
             {
@@ -121,7 +127,7 @@ export default function AboutPage() {
 
       {/* ── Who is it for ── */}
       <section className="space-y-4">
-        <h2 className="text-2xl font-bold text-pc-text">Who is it for?</h2>
+        <h2 className="text-2xl font-bold text-pc-text drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">Who is it for?</h2>
         <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-6 space-y-4 text-center">
           <p className="text-pc-text font-semibold text-sm">Everyone</p>
           <p className="text-pc-text-secondary text-sm">
@@ -139,7 +145,7 @@ export default function AboutPage() {
 
       {/* ── Attribution ── */}
       <section className="border-t border-pc-border pt-8">
-        <p className="text-pc-text-muted text-sm leading-relaxed">
+        <p className="text-pc-text-muted text-sm leading-relaxed drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]">
           PaladinsCat is a fan-made project and is not affiliated with or endorsed by Hi-Rez Studios.
           All Paladins game content, including champion names, images, and assets, are property of
           Hi-Rez Studios. Game data is provided through the Hi-Rez Studios API.

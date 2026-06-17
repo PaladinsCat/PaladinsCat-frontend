@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Card from "@/components/Card";
 import LeaderboardChart from "@/components/LeaderboardChart";
 import { fetchLeaderboard, fetchPatchTrends, type LeaderboardEntry, type PatchTrendEntry } from "@/lib/api-client";
+import ScrambleText from "@/components/ScrambleText";
 import { MOCK_STATS_CHAMPIONS } from "@/lib/mock-data";
 
 type SortKey = "championName" | "winRate" | "totalPlays" | "rating";
@@ -75,7 +76,9 @@ export default function StatsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="pc-heading pc-heading-lg text-pc-accent">Stats</h1>
+      <h1 className="pc-heading pc-heading-lg text-pc-accent">
+        <ScrambleText text="Stats" speed={30} iterations={15} delayFromCenter={false} />
+      </h1>
 
       {/* Filters */}
       <div className="flex gap-3 flex-wrap">

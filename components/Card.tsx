@@ -1,11 +1,5 @@
 import type { HTMLAttributes, ReactNode } from "react";
 
-/**
- * Card component — elevated surface with hover lift effect
- * Hover: translateY(-2px) + shadow increase (from --shadow-md to --shadow-card-hover)
- * Entry animation: fadeInUp via pc-animate-in class
- * Pattern source: superdesign skill (card hover lift + shadow)
- */
 export interface CardProps extends HTMLAttributes<HTMLDivElement> {
   title?: string;
   children: ReactNode;
@@ -26,21 +20,15 @@ export default function Card({
   onMouseLeave,
   ...props
 }: CardProps) {
-  const cardStyle = opaque
-    ? { backgroundColor: "var(--pc-bg-elevated)" as unknown as string, backdropFilter: "none", WebkitBackdropFilter: "none" }
-    : { backgroundColor: "oklch(0.210 0.005 280 / 0.65)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" };
-
   const baseStyle = hover
-    ? { ...cardStyle, boxShadow: "var(--shadow-md)", transition: "transform 0.2s ease, box-shadow 0.2s ease, border-color 0.25s ease" }
-    : { ...cardStyle, borderColor: "var(--pc-border)", boxShadow: "var(--shadow-sm)" };
+    ? { boxShadow: "var(--shadow-md)", transition: "transform 0.2s ease, box-shadow 0.2s ease, border-color 0.25s ease" }
+    : { borderColor: "var(--pc-border)", boxShadow: "var(--shadow-sm)" };
 
   return (
-    // Card: elevated bg, border, 16px radius, shadow, hover lift + shadow increase
     <div
       {...props}
-      className={`pc-card ${wide ? 'max-w-2xl' : ''} ${className}`}
+      className={`pc-card ${wide ? 'max-w-2xl' : ''} ${opaque ? 'pc-card--opaque' : ''} ${className}`}
       style={{ ...baseStyle, ...style }}
-      // Hover lift effect: translateY -2px on hover (applied via :hover in CSS)
       onMouseEnter={(e) => {
         onMouseEnter?.(e);
         if (hover) {

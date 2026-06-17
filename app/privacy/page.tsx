@@ -1,11 +1,17 @@
+"use client";
+
+import ScrambleText from "@/components/ScrambleText";
+
 export default function PrivacyPage() {
   return (
     <div className="space-y-12 max-w-3xl mx-auto text-center">
 
       {/* ── Header ── */}
       <section className="space-y-2">
-        <h1 className="text-3xl font-bold text-pc-accent">Privacy Policy</h1>
-        <p className="text-pc-text-muted text-sm">
+        <h1 className="text-3xl font-bold text-pc-accent">
+          <ScrambleText text="Privacy Policy" speed={30} iterations={15} delayFromCenter={false} />
+        </h1>
+        <p className="text-pc-text-muted text-sm drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]">
           Last updated: {new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
         </p>
       </section>
@@ -77,7 +83,7 @@ export default function PrivacyPage() {
 
       {/* ── Attribution ── */}
       <section className="border-t border-pc-border pt-8">
-        <p className="text-pc-text-muted text-sm leading-relaxed">
+        <p className="text-pc-text-muted text-sm leading-relaxed drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]">
           PaladinsCat is a fan-made project and is not affiliated with or endorsed by Hi-Rez Studios.
           All Paladins game content, including champion names, images, and assets, are property of
           Hi-Rez Studios.

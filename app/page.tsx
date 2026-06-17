@@ -6,8 +6,8 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import ScrambleText from "@/components/ScrambleText";
 import Card from "@/components/Card";
-import MapSlideshow from "@/components/MapSlideshow";
 import { getChampionIconSafe } from "@/lib/champion-icons";
+import { championSlug } from "@/lib/utils";
 import {
   fetchChampions,
   fetchRankedLeaderboard,
@@ -20,13 +20,6 @@ import { MOCK_STATS_CHAMPIONS, MOCK_RANKED_PLAYERS, MOCK_CHAMPIONS } from "@/lib
 
 // Champion roles for grouping
 const ROLES = ["Damage", "Flank", "Frontline", "Support"];
-
-// Dummy test data for fallback when API is empty
-const DUMMY_BANNED = MOCK_STATS_CHAMPIONS.slice(0, 8).map((s) => ({
-  championId: s.championId,
-  championName: s.championName,
-  banRate: s.banRate,
-}));
 
 const DUMMY_LEADERBOARD = MOCK_RANKED_PLAYERS.map((p) => ({
   rank: p.rank,
@@ -71,16 +64,8 @@ export default function HomePage() {
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchValue, setSearchValue] = useState("");
 
-  // Sorted data for display
-  const mostBanned = [...statsChampions]
-    .sort((a, b) => (b.banRate ?? 0) - (a.banRate ?? 0))
-    .slice(0, 8);
-
   return (
-    <div className="relative min-h-screen">
-      <MapSlideshow />
-
-      <div className="relative z-10 py-8">
+    <div className="relative z-10 min-h-screen py-8">
         <motion.div
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -92,17 +77,17 @@ export default function HomePage() {
             alt="PaladinsCat logo"
             width={80}
             height={80}
-            className="mx-auto mb-2 opacity-90"
+            className="mx-auto mb-2 opacity-90 drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]"
           />
-          <h1 className="text-4xl font-semibold tracking-wide">
+          <h1 className="text-4xl font-semibold tracking-wide drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)]">
             <ScrambleText
               text="PaladinsCat"
-              speed={50}
-              iterations={3}
+              speed={30}
+              iterations={15}
               delayFromCenter={false}
             />
           </h1>
-          <p className="text-xs text-pc-text-muted mt-1">
+          <p className="text-xs text-pc-text-secondary mt-1 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]">
             Paladins: Comp Analytics Tool — advanced statistic, or just meow.
           </p>
         </motion.div>
@@ -124,6 +109,7 @@ export default function HomePage() {
               }
             }}
             className={`group relative rounded-lg border transition-all duration-200 ease-out hover:scale-[1.02] hover:border-pc-accent-mid hover:bg-[#202127] hover:shadow-[0_10px_26px_rgba(51,182,177,0.14)] focus-within:scale-[1.02] focus-within:border-pc-accent-mid focus-within:bg-[#202127] focus-within:shadow-[0_10px_26px_rgba(51,182,177,0.14)] ${searchHovered || searchFocused ? "scale-[1.02] border-pc-accent-mid bg-[#202127] shadow-[0_10px_26px_rgba(51,182,177,0.14)]" : "border-white/5 bg-[#1a1d23]"}`}
+            style={{ backgroundColor: searchHovered || searchFocused ? undefined : "oklch(0.210 0.005 280 / 0.75)", backdropFilter: searchHovered || searchFocused ? undefined : "blur(12px)", WebkitBackdropFilter: searchHovered || searchFocused ? undefined : "blur(12px)" }}
           >
             <input
               type="text"
@@ -192,7 +178,7 @@ export default function HomePage() {
                             {safeEntries.map((c) => (
                               <Link
                                 key={c.id}
-                                href={`/champions/${c.id}`}
+                                href={`/champions/${championSlug(c.name)}`}
                                 className="group flex min-w-0 flex-col items-center gap-1 text-center"
                               >
                                 <Image
@@ -221,33 +207,65 @@ export default function HomePage() {
 
             {/* Most Banned */}
             <motion.div initial={{ opacity: 0, y: 25 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.15 }}>
-              <Card>
-                <div className="pc-card-title mb-3">
+              <Card style={{ maxWidth: "none" }}>
+                <div className="pc-card-title mb-4">
                   <ScrambleText text="Most Banned" speed={45} iterations={3} delayFromCenter={false} />
                 </div>
                 {loading ? (
-                  <div className="space-y-3">
-                    {Array.from({ length: 5 }).map((_, i) => <div key={i} className="pc-skeleton h-10 w-full" />)}
-                  </div>
-                ) : mostBanned.length === 0 ? (
-                  <p className="pc-body text-sm">No ban data available yet.</p>
-                ) : (
-                  <div className="space-y-2">
-                    {mostBanned.map((entry) => (
-                      <div key={entry.championId} className="flex items-center gap-3">
-                        <Image
-                          src={getChampionIconSafe(entry.championName)}
-                          alt={entry.championName}
-                          width={36}
-                          height={36}
-                          className="rounded-lg shrink-0"
-                        />
-                        <span className="text-pc-text text-sm font-medium flex-1">{entry.championName}</span>
-                        <span className="text-pc-text-muted text-sm">
-                          {entry.banRate != null ? `${(entry.banRate * 100).toFixed(2)}%` : "???"}
-                        </span>
+                  <div className="space-y-4">
+                    {ROLES.map((role) => (
+                      <div key={role}>
+                        <h3 className="text-pc-text font-medium text-sm mb-3">{role}</h3>
+                        {Array.from({ length: 4 }).map((_, i) => <div key={i} className="pc-skeleton h-16 w-full mb-3" />)}
                       </div>
                     ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    {ROLES.map((role) => {
+                      const inRole = champions.filter((c) => c.roles?.includes(role));
+                      const bannedEntries = inRole
+                        .sort((a, b) => (b.banRate ?? 0) - (a.banRate ?? 0))
+                        .slice(0, 4);
+                      if (bannedEntries.length === 0) return null;
+                      return (
+                        <div key={role} className="space-y-3">
+                          <div className="flex items-center gap-2 mb-2 border-b border-pc-border pb-1">
+                            <Image
+                              src={role === "Frontline" ? "/images/icons/Class_Front_Line_Icon.avif" : `/images/icons/Class_${role}_Icon.avif`}
+                              alt={role}
+                              width={20}
+                              height={20}
+                              style={{ opacity: 0.85 }}
+                            />
+                            <span className="text-sm font-medium text-pc-text-muted">{role}</span>
+                          </div>
+                          <div className="grid grid-cols-4 gap-x-3 gap-y-4">
+                            {bannedEntries.map((c) => (
+                              <Link
+                                key={c.id}
+                                href={`/champions/${championSlug(c.name)}`}
+                                className="group flex min-w-0 flex-col items-center gap-1 text-center"
+                              >
+                                <Image
+                                  src={getChampionIconSafe(c.name)}
+                                  alt={c.name}
+                                  width={48}
+                                  height={48}
+                                  className="rounded-lg group-hover:ring-2 ring-pc-accent transition-all"
+                                />
+                                <span className="max-w-full truncate text-xs leading-tight text-pc-text-muted group-hover:text-pc-accent transition-colors">
+                                  {c.name}
+                                </span>
+                                <span className="text-xs font-mono text-pc-text-muted">
+                                  {c.banRate != null ? `${(c.banRate * 100).toFixed(1)}%` : "N/A"}
+                                </span>
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </Card>
@@ -257,7 +275,7 @@ export default function HomePage() {
           <div className="space-y-6">
             {/* Leaderboard */}
             <motion.div initial={{ opacity: 0, y: 25 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 300, damping: 20 }}>
-              <Card opaque>
+              <Card>
                 <div className="pc-card-title mb-3">Leaderboard</div>
                 {loading ? (
                   <div className="space-y-3">
@@ -307,7 +325,6 @@ export default function HomePage() {
             </motion.div>
           </div>
         </div>
-      </div>
     </div>
   );
 }

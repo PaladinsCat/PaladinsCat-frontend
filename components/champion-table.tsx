@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import ScrambleText from "@/components/ScrambleText";
 import { fetchChampions, type Champion } from "@/lib/api-client";
 import { STATIC_CHAMPIONS } from "@/lib/mock-data";
 import { getChampionIconSafe } from "@/lib/champion-icons";
+import { championSlug } from "@/lib/utils";
 
 const ROLES = [
   { label: "Frontline", icon: "/images/icons/Class_Front_Line_Icon.avif" },
@@ -110,7 +112,9 @@ export default function ChampionTable() {
 
   return (
     <div className="space-y-6">
-      <h1 className="pc-heading pc-heading-lg text-pc-accent">Champions</h1>
+      <h1 className="pc-heading pc-heading-lg text-pc-accent drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)]">
+        <ScrambleText text="Champions" speed={30} iterations={15} delayFromCenter={false} />
+      </h1>
 
       {/* Filters */}
       <div className="flex gap-3 flex-wrap items-center">
@@ -155,10 +159,10 @@ export default function ChampionTable() {
       <div className="flex gap-2 flex-wrap items-center">
         <button
           onClick={() => setFilterRole(null)}
-          className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+          className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] ${
             filterRole === null
               ? "bg-pc-accent text-pc-bg"
-              : "bg-pc-card text-pc-muted hover:text-pc-text hover:bg-pc-card/80"
+              : "pc-surface text-pc-muted hover:text-pc-text"
           }`}
         >
           All
@@ -167,10 +171,10 @@ export default function ChampionTable() {
           <button
             key={r.label}
             onClick={() => setFilterRole(filterRole === r.label ? null : r.label)}
-            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] ${
               filterRole === r.label
                 ? "bg-pc-accent text-pc-bg"
-                : "bg-pc-card text-pc-muted hover:text-pc-text hover:bg-pc-card/80"
+                : "pc-surface text-pc-muted hover:text-pc-text"
             }`}
           >
             <img src={r.icon} alt={r.label} className="w-5 h-5" />
@@ -204,10 +208,10 @@ export default function ChampionTable() {
               return String(n);
             };
             return (
-              <Link key={c.id} href={`/champions/${c.id}`}>
-                <div className="group relative flex items-center gap-3.5 p-3 rounded-xl bg-pc-bg-elevated border border-pc-border hover:border-pc-accent-mid transition-all duration-200 hover:shadow-[0_0_20px_rgba(51,182,177,0.08)]">
+              <Link key={c.id} href={`/champions/${championSlug(c.name)}`}>
+                <div className="group relative flex items-center gap-3.5 p-3 rounded-xl pc-surface border border-pc-border hover:border-pc-accent-mid transition-all duration-200 hover:shadow-[0_0_20px_rgba(51,182,177,0.08)]">
                   {/* Portrait */}
-                  <div className="shrink-0 w-12 h-12 rounded-lg bg-pc-bg flex items-center justify-center overflow-hidden border border-pc-border/50 group-hover:border-pc-accent-deep/50 transition-colors">
+                  <div className="shrink-0 w-12 h-12 rounded-lg pc-surface-light flex items-center justify-center overflow-hidden border border-pc-border/50 group-hover:border-pc-accent-deep/50 transition-colors">
                     {c.imagePath ? (
                       <img src={c.imagePath} alt={c.name} className="w-full h-full object-contain" />
                     ) : (
@@ -225,7 +229,7 @@ export default function ChampionTable() {
                         {c.name}
                       </h3>
                       {c.roles && c.roles.length > 0 && (
-                        <span className="shrink-0 flex items-center gap-1 text-pc-text-muted text-[10px] px-1.5 py-0.5 rounded bg-pc-bg/60">
+                        <span className="shrink-0 flex items-center gap-1 text-pc-text-muted text-[10px] px-1.5 py-0.5 rounded pc-surface-subtle">
                           {roleIcon && <img src={roleIcon} alt={c.roles[0]} className="w-3 h-3" />}
                           {c.roles[0]}
                         </span>

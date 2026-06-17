@@ -8,6 +8,7 @@ import {
   type MatchSearchResult,
   type MatchData,
 } from "@/lib/api-client";
+import ScrambleText from "@/components/ScrambleText";
 import { useChampions } from "@/lib/champion-names";
 
 /**
@@ -125,7 +126,9 @@ export default function MatchesPage() {
     <div className="space-y-6">
       {/* ── Header ── */}
       <div>
-        <h1 className="text-2xl font-bold text-pc-text">Matches</h1>
+        <h1 className="text-2xl font-bold text-pc-text">
+          <ScrambleText text="Matches" speed={30} iterations={15} delayFromCenter={false} />
+        </h1>
         <p className="text-pc-text-secondary mt-1">
           Search and browse match history
         </p>

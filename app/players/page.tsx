@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { fetchPlayerSearch, type PlayerSearchResult } from "@/lib/api-client";
+import ScrambleText from "@/components/ScrambleText";
 import {
   MOCK_RANKED_PLAYERS,
   MOCK_CLASS_LEADERBOARDS,
@@ -63,7 +64,9 @@ export default function PlayersPage() {
     <div className="space-y-8">
       {/* ── Header + Search ── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">Players</h1>
+        <h1 className="pc-heading pc-heading-lg text-pc-accent">
+          <ScrambleText text="Players" speed={30} iterations={15} delayFromCenter={false} />
+        </h1>
         <div className="relative w-full sm:w-72">
           <input
             type="text"

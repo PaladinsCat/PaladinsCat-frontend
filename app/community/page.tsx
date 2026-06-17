@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { fetchPosts, type Post } from "@/lib/api-client";
+import ScrambleText from "@/components/ScrambleText";
 
 export default function CommunityPage() {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -47,7 +48,9 @@ export default function CommunityPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-pc-accent">Community</h1>
+        <h1 className="text-3xl font-bold text-pc-accent">
+          <ScrambleText text="Community" speed={30} iterations={15} delayFromCenter={false} />
+        </h1>
         <Link
           href="/community/create"
           className="px-4 py-2 bg-pc-accent hover:bg-pc-accent-secondary text-white font-semibold rounded-lg transition-colors text-sm"
