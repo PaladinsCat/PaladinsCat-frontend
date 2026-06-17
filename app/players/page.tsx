@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { fetchPlayerSearch, type PlayerSearchResult } from "@/lib/api-client";
 
@@ -10,7 +10,7 @@ export default function PlayerSearchPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const search = useCallback(async (q: string) => {
+  const search = async (q: string) => {
     if (q.length < 2) {
       setResults([]);
       return;
@@ -25,16 +25,7 @@ export default function PlayerSearchPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
-
-  const [debouncedQuery, setDebouncedQuery] = useState("");
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedQuery(query);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [query]);
+  };
 
   return (
     <div className="space-y-6">
@@ -50,9 +41,10 @@ export default function PlayerSearchPage() {
           className="flex-1 px-4 py-2 rounded-lg bg-pc-bg-elevated border border-pc-border text-pc-text placeholder-pc-text-muted"
         />
         <button
-          onClick={() => search(debouncedQuery)}
+          onClick={() => search(query)}
           disabled={loading}
           className="px-4 py-2 rounded-lg bg-pc-accent text-pc-bg font-semibold hover:bg-pc-accent-secondary transition-colors disabled:opacity-50"
+          aria-label="Search"
         >
           Search
         </button>

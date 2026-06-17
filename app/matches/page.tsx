@@ -8,6 +8,7 @@ import {
   type MatchSearchResult,
   type MatchData,
 } from "@/lib/api-client";
+import { useChampions } from "@/lib/champion-names";
 
 /**
  * Match Search Page — /matches
@@ -18,8 +19,7 @@ import {
  * Data sources:
  *   GET /api/matches/recent          → default recent matches
  *   GET /api/matches/search          → filtered search
- *
- * @see C:\PaladinsCat\docs\frontend\matches-list.md
+ *   @/lib/champion-names             → champion name dropdown
  */
 export default function MatchesPage() {
   const [matches, setMatches] = useState<MatchSearchResult[]>([]);
@@ -37,6 +37,7 @@ export default function MatchesPage() {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [hasFilters, setHasFilters] = useState(false);
+  const { champions, loading: championsLoading } = useChampions();
 
   const loadMatches = useCallback(async () => {
     setLoading(true);
@@ -59,27 +60,36 @@ export default function MatchesPage() {
       } else {
         // Default: show recent matches
         const recent = await fetchRecentMatches(perPage);
-        // Map to MatchSearchResult shape for the table
-        const mapped: MatchSearchResult[] = recent.map((m: MatchData) => ({
-          match_id: m.match_id,
-          entry_datetime: m.entry_datetime,
-          map: m.map,
-          queue_id: m.queue_id,
-          duration_seconds: m.duration_seconds,
-          region: m.region,
-          champion_id: 0,
-          champion_name: "",
-          win_status: "",
-          kills: 0,
-          deaths: 0,
-          assists: 0,
-          player_count: 10,
-        }));
-        setMatches(mapped);
-        setTotal(recent.length);
-        setTotalPages(1);
+        if (recent.length > 0) {
+          // Map to MatchSearchResult shape for the table
+          const mapped: MatchSearchResult[] = recent.map((m: MatchData) => ({
+            match_id: m.match_id,
+            entry_datetime: m.entry_datetime,
+            map: m.map,
+            queue_id: m.queue_id,
+            duration_seconds: m.duration_seconds,
+            region: m.region,
+            champion_id: 0,
+            champion_name: "",
+            win_status: "",
+            kills: 0,
+            deaths: 0,
+            assists: 0,
+            player_count: 10,
+          }));
+          setMatches(mapped);
+          setTotal(recent.length);
+          setTotalPages(1);
+        } else {
+          setMatches([]);
+          setTotal(0);
+          setTotalPages(1);
+        }
       }
     } catch (err: any) {
+      setMatches([]);
+      setTotal(0);
+      setTotalPages(1);
       setError(err.message || "Failed to load matches");
     } finally {
       setLoading(false);
@@ -109,10 +119,10 @@ export default function MatchesPage() {
   // Reload after filter/page changes
   useEffect(() => {
     if (hasFilters) loadMatches();
-  }, [page, hasFilters]);
+  }, [page, hasFilters, loadMatches]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <div className="space-y-6">
       {/* ── Header ── */}
       <div>
         <h1 className="text-2xl font-bold text-pc-text">Matches</h1>
@@ -123,16 +133,20 @@ export default function MatchesPage() {
 
       {/* ── Filters ── */}
       <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
           <div>
-            <label className="block text-sm text-pc-text-secondary mb-1">Champion ID</label>
-            <input
-              type="number"
+            <label className="block text-sm text-pc-text-secondary mb-1">Champion</label>
+            <select
               value={championId}
               onChange={(e) => setChampionId(e.target.value)}
-              placeholder="e.g. 1"
               className="w-full px-3 py-2 rounded-lg bg-pc-bg-secondary border border-pc-border text-pc-text text-sm focus:outline-none focus:border-pc-accent"
-            />
+              disabled={championsLoading}
+            >
+              <option value="">All champions</option>
+              {champions?.sort((a, b) => a.name.localeCompare(b.name)).map((c) => (
+                <option key={c.id} value={String(c.id)}>{c.name}</option>
+              ))}
+            </select>
           </div>
           <div>
             <label className="block text-sm text-pc-text-secondary mb-1">Queue ID</label>

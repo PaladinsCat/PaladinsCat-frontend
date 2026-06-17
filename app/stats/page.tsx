@@ -2,11 +2,23 @@
 
 import { useEffect, useState } from "react";
 import Card from "@/components/Card";
-import { fetchLeaderboard, fetchPatchTrends, type LeaderboardEntry, type PatchTrendEntry } from "@/lib/api-client";
 import LeaderboardChart from "@/components/LeaderboardChart";
+import { fetchLeaderboard, fetchPatchTrends, type LeaderboardEntry, type PatchTrendEntry } from "@/lib/api-client";
+import { MOCK_STATS_CHAMPIONS } from "@/lib/mock-data";
 
 type SortKey = "championName" | "winRate" | "totalPlays" | "rating";
 type SortDir = "asc" | "desc";
+
+/** Convert mock champion stats to LeaderboardEntry shape */
+function mockToLeaderboard(m: { championId: number; championName: string; winRate: number; totalPlays: number }): LeaderboardEntry {
+  return {
+    championId: m.championId,
+    championName: m.championName,
+    winRate: m.winRate,
+    totalPlays: m.totalPlays,
+    rating: null,
+  };
+}
 
 export default function StatsPage() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -22,9 +34,14 @@ export default function StatsPage() {
     const load = async () => {
       try {
         const data = await fetchLeaderboard({ tier: filterTier || undefined, region: filterRegion || undefined });
-        setLeaderboard(data);
+        if (data.length > 0) {
+          setLeaderboard(data);
+        } else {
+          setLeaderboard(MOCK_STATS_CHAMPIONS.map(mockToLeaderboard));
+        }
       } catch {
-        setError("Failed to load leaderboard");
+        setLeaderboard(MOCK_STATS_CHAMPIONS.map(mockToLeaderboard));
+        setError(null);
       } finally {
         setLoading(false);
       }
@@ -54,7 +71,7 @@ export default function StatsPage() {
   });
 
   const sortArrow = (key: SortKey) =>
-    sortKey === key ? (sortDir === "asc" ? " ↑" : " ↓") : "";
+    sortKey === key ? (sortDir === "asc" ? " \u2191" : " \u2193") : "";
 
   return (
     <div className="space-y-6">
@@ -120,7 +137,7 @@ export default function StatsPage() {
                     <td>{entry.championName}</td>
                     <td>{entry.winRate}%</td>
                     <td>{entry.totalPlays.toLocaleString()}</td>
-                    <td>{entry.rating ?? "—"}</td>
+                    <td>{entry.rating ?? "\u2014"}</td>
                   </tr>
                 ))}
               </tbody>

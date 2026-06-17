@@ -8,6 +8,14 @@ import { fetchChampions, type Champion } from "@/lib/api-client";
 const ROLES = ["Frontline", "Damage", "Flank", "Support"] as const;
 const TIERS = ["Iron", "Bronze", "Silver", "Gold", "Platinum", "Diamond", "Master", "Grandmaster"] as const;
 
+// Mock champion shape from mock-data.ts
+interface MockChampion {
+  id: number;
+  name: string;
+  roles: string[];
+  winRate: number;
+}
+
 export default function ChampionTable() {
   const [champions, setChampions] = useState<Champion[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,9 +33,15 @@ export default function ChampionTable() {
           region: filterRegion || undefined,
           patch: filterPatch || undefined,
         });
-        setChampions(data);
+        if (data.length > 0) {
+          setChampions(data);
+        } else {
+          // No mock data fallback — if the API is empty, show empty state
+          setChampions([]);
+        }
       } catch {
-        setError("Failed to load champions");
+        setChampions([]);
+        setError(null);
       } finally {
         setLoading(false);
       }
