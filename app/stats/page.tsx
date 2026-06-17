@@ -50,32 +50,87 @@ export default function StatsPage() {
       {/* ── Global Metrics ── */}
       <section>
         <h2 className="text-lg font-bold text-pc-text mb-4">Performance Overview</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[
-            { label: "Avg DPM", value: metrics.avgDPM.toLocaleString(), color: "text-red-400" },
-            { label: "Avg HPM", value: metrics.avgHPM.toLocaleString(), color: "text-emerald-400" },
-            { label: "Avg GPM", value: metrics.avgGPM.toLocaleString(), color: "text-yellow-400" },
-            { label: "Avg MPM", value: metrics.avgMPM.toLocaleString(), color: "text-blue-400" },
-            { label: "Avg KDA", value: metrics.avgKDA, color: "text-pc-accent" },
-          ].map((m) => (
-            <div key={m.label} className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 text-center hover:border-pc-accent-mid transition-colors">
-              <div className="text-pc-text-muted text-[10px] uppercase tracking-wider mb-1">{m.label}</div>
-              <div className={`font-bold text-lg ${m.color}`}>{m.value}</div>
-            </div>
-          ))}
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">
-          {[
-            { label: "Matches Tracked", value: metrics.totalMatchesTracked.toLocaleString() },
-            { label: "Players Tracked", value: metrics.totalPlayersTracked.toLocaleString() },
-            { label: "Avg Duration", value: metrics.avgMatchDuration },
-            { label: "KDA Ratio", value: metrics.kdaRatio.toFixed(2) },
-          ].map((m) => (
-            <div key={m.label} className="bg-pc-bg-elevated border border-pc-border rounded-xl p-3 text-center hover:border-pc-accent-mid transition-colors">
-              <div className="text-pc-text-muted text-[10px] uppercase tracking-wider mb-0.5">{m.label}</div>
-              <div className="text-pc-text font-semibold text-sm">{m.value}</div>
-            </div>
-          ))}
+            { key: "dpm", label: "Damage / Min", unit: "", color: "bg-red-400", trackColor: "bg-red-400/20" },
+            { key: "hpm", label: "Healing / Min", unit: "", color: "bg-emerald-400", trackColor: "bg-emerald-400/20" },
+            { key: "gpm", label: "Gold / Min", unit: "", color: "bg-yellow-400", trackColor: "bg-yellow-400/20" },
+            { key: "mpm", label: "Mitigation / Min", unit: "", color: "bg-blue-400", trackColor: "bg-blue-400/20" },
+            { key: "kda", label: "KDA Ratio", unit: "", color: "bg-pc-accent", trackColor: "bg-pc-accent/20" },
+          ].map(({ key, label, color, trackColor }) => {
+            const d = metrics[key as keyof typeof metrics] as { min: number; max: number; mean: number; mode: number };
+            const range = d.max - d.min;
+            const meanPct = ((d.mean - d.min) / range) * 100;
+            const modePct = ((d.mode - d.min) / range) * 100;
+            const formatVal = key === "kda"
+              ? (v: number) => v.toFixed(1)
+              : (v: number) => v.toLocaleString();
+            return (
+              <div key={key} className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-pc-text font-semibold text-sm">{label}</span>
+                  <span className="text-pc-text-muted text-[10px] uppercase tracking-wider">
+                    mean <span className={`font-bold ${color.replace("bg-", "text-")}`}>{formatVal(d.mean)}</span>
+                  </span>
+                </div>
+
+                {/* Mini chart bar */}
+                <div className="relative h-6 mb-3">
+                  {/* Track */}
+                  <div className={`absolute inset-y-0 inset-x-0 rounded-full ${trackColor}`} />
+                  {/* Fill up to mean */}
+                  <div
+                    className={`absolute inset-y-0 left-0 rounded-full ${color} opacity-40`}
+                    style={{ width: `${meanPct}%` }}
+                  />
+                  {/* Mean marker */}
+                  <div
+                    className="absolute top-0 bottom-0 w-0.5"
+                    style={{ left: `${meanPct}%` }}
+                  >
+                    <div className={`absolute -top-1 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full ${color} border-2 border-pc-bg-elevated`} />
+                  </div>
+                  {/* Mode marker */}
+                  <div
+                    className="absolute top-0 bottom-0 w-0.5"
+                    style={{ left: `${modePct}%` }}
+                  >
+                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-pc-text-muted border border-pc-bg-elevated" />
+                  </div>
+                </div>
+
+                {/* Min / Mode / Mean / Max labels */}
+                <div className="flex items-center justify-between text-[10px]">
+                  <span className="text-pc-text-muted">
+                    min <span className="text-pc-text-secondary">{formatVal(d.min)}</span>
+                  </span>
+                  <span className="text-pc-text-muted">
+                    mode <span className="text-pc-text-secondary">{formatVal(d.mode)}</span>
+                  </span>
+                  <span className="text-pc-text-muted">
+                    max <span className="text-pc-text-secondary">{formatVal(d.max)}</span>
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Summary stats card */}
+          <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 space-y-3">
+            <span className="text-pc-text font-semibold text-sm">Dataset</span>
+            {[
+              { label: "Matches Tracked", value: metrics.totalMatchesTracked.toLocaleString() },
+              { label: "Players Tracked", value: metrics.totalPlayersTracked.toLocaleString() },
+              { label: "Avg Match Duration", value: metrics.avgMatchDuration },
+              { label: "Avg KDA", value: metrics.avgKDA },
+            ].map((m) => (
+              <div key={m.label} className="flex items-center justify-between">
+                <span className="text-pc-text-muted text-xs">{m.label}</span>
+                <span className="text-pc-text font-medium text-xs">{m.value}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 

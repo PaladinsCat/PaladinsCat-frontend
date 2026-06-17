@@ -265,14 +265,14 @@ export const MOCK_MAP_STATS = [
   { name: "Warder's Gate", matches: 8_920, avgDuration: "12:55", winRateAttack: 50.7 },
 ];
 
-// Global performance metrics
+// Global performance metrics with distribution
 export const MOCK_GLOBAL_METRICS = {
-  avgDPM: 682,
-  avgHPM: 1_240,
-  avgGPM: 1_850,
-  avgMPM: 42,  // mitigation per min
+  dpm: { min: 85, max: 1_420, mean: 682, mode: 540 },
+  hpm: { min: 0, max: 5_800, mean: 1_240, mode: 980 },
+  gpm: { min: 320, max: 3_600, mean: 1_850, mode: 1_620 },
+  mpm: { min: 0, max: 4_200, mean: 42, mode: 18 },
+  kda: { min: 0.2, max: 8.5, mean: 2.24, mode: 1.8 },
   avgKDA: "2.4 / 4.1 / 6.8",
-  kdaRatio: 2.24,
   totalMatchesTracked: 287_450,
   totalPlayersTracked: 48_320,
   avgMatchDuration: "12:18",
