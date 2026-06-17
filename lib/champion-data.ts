@@ -627,6 +627,78 @@ export const KHAN_DATA: ChampionData = {
   ],
 };
 
+export const MAKOA_DATA: ChampionData = {
+  name: "Makoa",
+  roles: ["Frontline"],
+  stats: {
+    health: "4500",
+    speed: "350",
+    speedUnits: "~21 units/s",
+    range: "75",
+  },
+  skills: [
+    {
+      name: "Cannon",
+      key: "LMB",
+      iconUrl: "/images/skills/Ability_Cannon.png",
+      damage: "575",
+      description: "A salvaged ship cannon that fires cannonballs every 1s, each dealing 575 damage.",
+    },
+    {
+      name: "Dredge Anchor",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_DredgeAnchor.png",
+      cooldown: "14s",
+      description: "Fire a harpoon that pulls you toward an enemy or surface.",
+    },
+    {
+      name: "Shell Shield",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_ShellShield.png",
+      damage: "4500",
+      cooldown: "14s",
+      description: "Create a shield in an area around you to protect yourself and allies from up to 4500 damage.",
+    },
+    {
+      name: "Shell Spin",
+      key: "F",
+      iconUrl: "/images/skills/Ability_ShellSpin.png",
+      cooldown: "12s",
+      description: "Spin around, dealing damage to nearby enemies.",
+    },
+    {
+      name: "Ancient Rage",
+      key: "E",
+      iconUrl: "/images/skills/Ability_AncientRage.png",
+      cooldown: "Ultimate",
+      description: "Call on the powers of the Ancients, increasing your health and trading your cannon for an anchor that deals 600 damage per swing.",
+    },
+  ],
+  talents: [
+    { name: "Pluck", description: "For 4s after hitting an enemy with Dredge Anchor, your next weapon shot against that enemy deals 75% increased damage.", category: "Dredge Anchor", iconUrl: "/images/champions/Talent Makoa Pluck.png" },
+    { name: "Half Shell", description: "Shell Shield is placed on the ground instead of channeled around you and lasts 2s longer.", category: "Shell Shield", iconUrl: "/images/champions/Talent Makoa HalfShell.png" },
+    { name: "Leviathan", description: "Increase your Ultimate charge rate by 25% and Health by 500. Ancient Rage now causes Makoa to grow 50% in size, resets all his Cooldowns, and increases his Movement Speed by 45%.", category: "Ancient Rage", iconUrl: "/images/champions/Talent Makoa Leviathan.png" },
+  ],
+  loadouts: [
+    { name: "Ancient Resolve", description: "Increase the duration of Shell Shield.", category: "Shell Shield", iconUrl: "/images/cards/Card_Ancient_Resolve.png" },
+    { name: "Barrier Reef", description: "Reduce the Cooldown of Shell Shield.", category: "Shell Shield", iconUrl: "/images/cards/Card_Barrier_Reef.png" },
+    { name: "Carapace", description: "Increase the Shield of Shell Shield.", category: "Shell Shield", iconUrl: "/images/cards/Card_Carapace.png" },
+    { name: "Crashing Wave", description: "Reduce the Cooldown of Shell Spin.", category: "Shell Spin", iconUrl: "/images/cards/Card_Crashing_Wave.png" },
+    { name: "Determination", description: "Increase your damage.", category: "", iconUrl: "/images/cards/Card_Determination.png" },
+    { name: "Ebb and Flow", description: "Reduce the damage you take.", category: "", iconUrl: "/images/cards/Card_Ebb_and_Flow.png" },
+    { name: "Harden", description: "Reduce the Cooldown of Dredge Anchor.", category: "Dredge Anchor", iconUrl: "/images/cards/Card_Harden.png" },
+    { name: "Lighter Cannonballs", description: "Increase your damage.", category: "", iconUrl: "/images/cards/Card_Lighter_Cannonballs.png" },
+    { name: "Rampage", description: "Increase your damage.", category: "", iconUrl: "/images/cards/Card_Rampage.png" },
+    { name: "Salvage", description: "Increase the pull distance of Dredge Anchor.", category: "Dredge Anchor", iconUrl: "/images/cards/Card_Salvage.png" },
+    { name: "Sea Legs", description: "Increase the damage of Dredge Anchor.", category: "Dredge Anchor", iconUrl: "/images/cards/Card_Sea_Legs.png" },
+    { name: "Spring Tide", description: "Increase the damage of Shell Spin.", category: "Shell Spin", iconUrl: "/images/cards/Card_Spring_Tide.png" },
+    { name: "Strongarm", description: "Reduce the Cooldown of Dredge Anchor.", category: "Dredge Anchor", iconUrl: "/images/cards/Card_Strongarm.png" },
+    { name: "Surf", description: "Increase the damage of Shell Spin.", category: "Shell Spin", iconUrl: "/images/cards/Card_Surf.png" },
+    { name: "Tidal Grace", description: "Increase the Shield of Shell Shield.", category: "Shell Shield", iconUrl: "/images/cards/Card_Tidal_Grace.png" },
+    { name: "Tsunami", description: "Increase the damage of Shell Spin.", category: "Shell Spin", iconUrl: "/images/cards/Card_Tsunami.png" },
+  ],
+};
+
 export const CHAMPION_DATA: Record<string, ChampionData> = {
   androxus: ANDROXUS_DATA,
   ash: ASH_DATA,
@@ -636,6 +708,7 @@ export const CHAMPION_DATA: Record<string, ChampionData> = {
   fernando: FERNANDO_DATA,
   inara: INARA_DATA,
   khan: KHAN_DATA,
+  makoa: MAKOA_DATA,
 };
 
 export function getChampionData(slug: string): ChampionData | undefined {
