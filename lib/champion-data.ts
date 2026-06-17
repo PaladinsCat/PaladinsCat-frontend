@@ -2529,7 +2529,80 @@ export const MAEVE_DATA: ChampionData = {
   ],
 };
 
-export const CHAMPION_DATA: Record<string, ChampionData> = {", 
+export const SKYE_DATA: ChampionData = {
+  name: "Skye",
+  roles: ["Flank"],
+  stats: {
+    health: "2000",
+    speed: "390",
+    speedUnits: "~24 units/s",
+    range: "55",
+  },
+  skills: [
+    {
+      name: "Wrist Crossbow",
+      key: "LMB",
+      iconUrl: "/images/skills/Ability_Wrist_Crossbow.png",
+      damage: "130",
+      description: "A fast-firing wrist-mounted crossbow for close-range engagements that deals 130 damage every 0.1s.",
+    },
+    {
+      name: "Poison Bolts",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_Poison_Bolts.png",
+      cooldown: "8s",
+      description: "Fire a poison bolt that deals damage over time.",
+    },
+    {
+      name: "Smoke Screen",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Smoke_Screen.png",
+      cooldown: "14s",
+      description: "Throw a smoke screen that grants stealth to you if you stand in it. Has 2 Charges.",
+    },
+    {
+      name: "Hidden",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Hidden.png",
+      cooldown: "14s",
+      description: "Blend with the shadows and become stealthed.",
+    },
+    {
+      name: "Time Bomb",
+      key: "E",
+      iconUrl: "/images/skills/Ability_Time_Bomb.png",
+      damage: "3000",
+      cooldown: "Ultimate",
+      description: "Throw a massive bomb that destroys shields and deals 3000 damage to enemies caught in its blast.",
+    },
+  ],
+  talents: [
+    { name: "Debilitate", description: "Increase the damage done by Poison Bolts by 15% and the rate at which they deal damage by 75%.", category: "Poison Bolts", iconUrl: "/images/champions/Talent Skye Debilitate.png" },
+    { name: "Smoke and Dagger", description: "Benefits from your Smoke Screen cards also benefit allies who enter Smoke Screen and allies are Healed for 100 every 1s while in your Smoke Screen.", category: "Smoke Screen", iconUrl: "/images/champions/Talent Skye Smoke and Dagger.png" },
+    { name: "Preparation", description: "Hidden gains a second charge and refills Wrist Crossbow's Ammo. While Hidden is active, reduce the damage you take by 50%. Permanently set the maximum duration of Hidden to 4s.", category: "Hidden", iconUrl: "/images/champions/Talent Skye Preparation.png" },
+  ],
+  loadouts: [
+    { name: "Cloak", description: "Increase the duration of Hidden.", category: "Hidden", iconUrl: "/images/cards/Card_Cloak.png" },
+    { name: "Confound", description: "Reduce the Cooldown of Poison Bolts.", category: "Poison Bolts", iconUrl: "/images/cards/Card_Confound.png" },
+    { name: "Decrepify", description: "Increase the damage of Poison Bolts.", category: "Poison Bolts", iconUrl: "/images/cards/Card_Diminish.png" },
+    { name: "Dissipate", description: "Reduce the Cooldown of Smoke Screen.", category: "Smoke Screen", iconUrl: "/images/cards/Card_Endure.png" },
+    { name: "Emergency Exit", description: "Reduce the Cooldown of Smoke Screen.", category: "", iconUrl: "/images/cards/Card_Emergency_Exit.png" },
+    { name: "Healing Vapors", description: "Heal for 125 over 2s after entering Smoke Screen.", category: "Smoke Screen", iconUrl: "/images/cards/Card_Healing_Vapors.png" },
+    { name: "Nimble Fingers", description: "Increase the damage of Poison Bolts.", category: "Poison Bolts", iconUrl: "/images/cards/Card_Nimble_Fingers.png" },
+    { name: "Ninja", description: "Increase the duration of Hidden.", category: "Hidden", iconUrl: "/images/cards/Card_Ninja.png" },
+    { name: "Poisoner", description: "Reduce the Cooldown of Poison Bolts.", category: "Poison Bolts", iconUrl: "/images/cards/Card_Pollute.png" },
+    { name: "Quick Smoker", description: "Reduce the Cooldown of Smoke Screen.", category: "Smoke Screen", iconUrl: "/images/cards/Card_Acid_Cloud.png" },
+    { name: "Shadow Affinity", description: "Reduce the Cooldown of Hidden.", category: "Hidden", iconUrl: "/images/cards/Card_Surprise_Attack.png" },
+    { name: "Slip Away", description: "Increase the duration of Hidden.", category: "Hidden", iconUrl: "/images/cards/Card_Slip_Away.png" },
+    { name: "Specter", description: "Increase the damage of Poison Bolts.", category: "Smoke Screen", iconUrl: "/images/cards/Card_Backstab.png" },
+    { name: "Tactical Reload", description: "Increase your maximum Ammo.", category: "", iconUrl: "/images/cards/Card_Tactical_Reload.png" },
+    { name: "Twilight Armor", description: "Increase your maximum Health.", category: "", iconUrl: "/images/cards/Card_Preparation.png" },
+    { name: "Victory Rush", description: "Increase your Movement Speed.", category: "", iconUrl: "/images/cards/Card_Preparation.png" },
+  ],
+};
+
+export const CHAMPION_DATA: Record<string, ChampionData> = {
+  skye: SKYE_DATA,", 
   androxus: ANDROXUS_DATA,
   buck: BUCK_DATA,
   maeve: MAEVE_DATA,
