@@ -1767,6 +1767,82 @@ export const TIBERIUS_DATA: ChampionData = {
   ],
 };
 
+export const TYRA_DATA: ChampionData = {
+  name: "Tyra",
+  roles: ["Damage"],
+  stats: {
+    health: "2400",
+    speed: "370",
+    speedUnits: "~23.13 units/s",
+    range: "115",
+  },
+  skills: [
+    {
+      name: "Auto Rifle",
+      key: "LMB",
+      iconUrl: "/images/skills/Ability_Auto_Rifle.png",
+      damage: "115 / 0.09s",
+      description: "A fast-firing automatic rifle that deals 115 damage every 0.09s.",
+    },
+    {
+      name: "Nade Launcher",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_Nade_Launcher.png",
+      damage: "700",
+      cooldown: "9s",
+      description: "Fire a grenade that explodes on impact, dealing 700 damage.",
+    },
+    {
+      name: "Fire Bomb",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Fire_Bomb.png",
+      damage: "9% / 0.6s",
+      cooldown: "15s",
+      description: "Hurl an incendiary device, leaving a pool of fire on impact that Burns 9% of the target's maximum health as damage over 0.6s. Standing in the fire refreshes this damage effect.",
+    },
+    {
+      name: "Hunter's Mark",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Hunters_Mark.png",
+      cooldown: "14s",
+      description: "Mark your prey to Reveal them and Weaken them by 15% to your weapon.",
+    },
+    {
+      name: "Crossfire",
+      key: "E",
+      iconUrl: "/images/skills/Ability_Crossfire.png",
+      description: "Enhance your rate of fire by 67% and increase your speed while no longer consuming ammo.",
+    },
+  ],
+  talents: [
+    {
+      name: "Mercy Kill",
+      description: "Nade Launcher has 3 charges, but reduce the damage of each to 650.",
+      category: "Default Talent",
+      iconUrl: "/images/champions/Talent Tyra Mercy Kill.png",
+    },
+    {
+      name: "Hunting Party",
+      description: "Hunter's Mark now Weakens its target for all allies.",
+      category: "Mastery Level 2",
+      iconUrl: "/images/champions/Talent Tyra Hunting Party.png",
+    },
+    {
+      name: "Burn, Monster!",
+      description: "Fire Bomb deals 30% increased damage and applies a 60% reduced healing effect.",
+      category: "Mastery Level 8",
+      iconUrl: "/images/champions/Talent Tyra Burn Monster.png",
+    },
+  ],
+  loadouts: [
+    { name: "Auto Rifle", description: "A fast-firing automatic rifle that deals 115 damage every 0.09s.", category: "", iconUrl: "/images/skills/Ability_Auto_Rifle.png" },
+    { name: "Nade Launcher", description: "Fire a grenade that explodes on impact, dealing 700 damage.", category: "", iconUrl: "/images/skills/Ability_Nade_Launcher.png" },
+    { name: "Fire Bomb", description: "Hurl an incendiary device, leaving a pool of fire on impact that Burns 9% of the target's maximum health as damage over 0.6s.", category: "", iconUrl: "/images/skills/Ability_Fire_Bomb.png" },
+    { name: "Hunter's Mark", description: "Mark your prey to Reveal them and Weaken them by 15% to your weapon.", category: "", iconUrl: "/images/skills/Ability_Hunters_Mark.png" },
+    { name: "Crossfire", description: "Enhance your rate of fire by 67% and increase your speed while no longer consuming ammo.", category: "", iconUrl: "/images/skills/Ability_Crossfire.png" },
+  ],
+};
+
 export const CHAMPION_DATA: Record<string, ChampionData> = {", 
   androxus: ANDROXUS_DATA,
   ash: ASH_DATA,
@@ -1792,6 +1868,7 @@ export const CHAMPION_DATA: Record<string, ChampionData> = {",
   shalin: SHA_LIN_DATA,
   strix: STRIX_DATA,
   tiberius: TIBERIUS_DATA,
+  tyra: TYRA_DATA,
 };
 
 export function getChampionData(slug: string): ChampionData | undefined {
