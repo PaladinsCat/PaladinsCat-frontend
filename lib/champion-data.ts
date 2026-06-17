@@ -3533,6 +3533,75 @@ export const MAL_DAMBA_DATA: ChampionData = {
   ],
 };
 
+export const MOJI_DATA: ChampionData = {
+  name: "Moji",
+  roles: ["Support"],
+  stats: {
+    health: "2400",
+    speed: "370",
+    speedUnits: "~23 units/s",
+    range: "300",
+  },
+  skills: [
+    {
+      name: "Spit",
+      key: "LMB",
+      iconUrl: "/images/skills/Ability_Spit.png",
+      description: "Spit out an explosive magical projectile that deals 450 damage and heals allies for 300."
+    },
+    {
+      name: "Sparkle",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_Sparkle.png",
+      description: "Spray magical energy, dealing 20 damage to enemies while healing allies for 50. Applies Magic Mark to allies."
+    },
+    {
+      name: "Magic Shield",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Magic_Shield.png",
+      cooldown: "10s",
+      description: "Generate a 1000 Shield on yourself and 600 Shield for allies within 55 units."
+    },
+    {
+      name: "Scamper",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Scamper.png",
+      cooldown: "4s",
+      description: "Quickly Scamper forward, doubling your movement speed. Refire to cancel."
+    },
+    {
+      name: "Bon Appetit",
+      key: "E",
+      iconUrl: "/images/skills/Ability_Bon_Appetit.png",
+      cooldown: "Ultimate",
+      description: "Transform enemies into helpless treats, which are executed if Moji makes contact with them."
+    },
+  ],
+  talents: [
+    { name: "Spit Shine", description: "Detonating 10 stacks of Magic Mark now also increases the Movement Speed of affected allies by 10% for 4s. This effect stacks up to 3 times.", category: "Sparkle", iconUrl: "/images/champions/Talent Spit Shine Moji.png" },
+    { name: "Jubilation", description: "Magic Marks are now instead applied to enemies. Detonating at least 7 stacks of Magic Mark deals bonus damage, up to 550 damage at 10 stacks.", category: "Sparkle", iconUrl: "/images/champions/Talent Jubilation Moji.png" },
+    { name: "Realm Runner", description: "When entering Scamper, leave a magical dust cloud behind that applies a lingering heal for 600 over 3s. The dust cloud lasts 4s.", category: "Scamper", iconUrl: "/images/champions/Talent Realm Runner Moji.png" },
+  ],
+  loadouts: [
+    { name: "Boop", description: "Increase the Movement Speed bonus of Scamper by 8%.", category: "Scamper", iconUrl: "/images/cards/Card_Boop.png" },
+    { name: "Cozy", description: "Increase the Shield of Magic Shield by 6.", category: "Magic Shield", iconUrl: "/images/cards/Card_Cozy.png" },
+    { name: "Dense Woods", description: "Increase the duration of Familiar Spray by 0.8s.", category: "Familiar Spray", iconUrl: "/images/cards/Card_Dense_Woods.png" },
+    { name: "Fluffy", description: "Increase your maximum Health by 50.", category: "", iconUrl: "/images/cards/Card_Fluffy.png" },
+    { name: "Glimmer", description: "Reduce the Cooldown of Magic Shield by 0.1s.", category: "Magic Shield", iconUrl: "/images/cards/Card_Glimmer.png" },
+    { name: "Greater Good", description: "Increase the Healing of Familiar Spray by 20.", category: "Familiar Spray", iconUrl: "/images/cards/Card_Greater_Good.png" },
+    { name: "Harmonious", description: "Increase the Shield of Magic Shield by 3%.", category: "Magic Shield", iconUrl: "/images/cards/Card_Harmonious.png" },
+    { name: "Morning Breath", description: "Increase the damage of Familiar Spray by 20%.", category: "Familiar Spray", iconUrl: "/images/cards/Card_Morning_Breath.png" },
+    { name: "Nature's Blessing", description: "Increase the Healing of Familiar Spray by 5%.", category: "Familiar Spray", iconUrl: "/images/cards/Card_Nature_s_Blessing.png" },
+    { name: "Peppy", description: "Increase your Movement Speed by 0.4%.", category: "", iconUrl: "/images/cards/Card_Peppy.png" },
+    { name: "Scoot", description: "Reduce the Cooldown of Scamper by 4%.", category: "Scamper", iconUrl: "/images/cards/Card_Scoot.png" },
+    { name: "Scurry", description: "Increase the Movement Speed of Scamper by 20.", category: "Scamper", iconUrl: "/images/cards/Card_Scurry.png" },
+    { name: "Shimmering", description: "Increase the Shield of Magic Shield by 3%.", category: "Magic Shield", iconUrl: "/images/cards/Card_Shimmering.png" },
+    { name: "Symbiotic", description: "Increase your maximum Health by 6%.", category: "", iconUrl: "/images/cards/Card_Symbiotic.png" },
+    { name: "Will-o-the-Wisp", description: "Increase your maximum Health by 5%.", category: "", iconUrl: "/images/cards/Card_Will-o-the-Wisp.png" },
+    { name: "Wobbles", description: "Increase the Movement Speed of Scamper by 10%.", category: "Scamper", iconUrl: "/images/cards/Card_Wobbles.png" },
+  ],
+};
+
 export const CHAMPION_DATA: Record<string, ChampionData> = {
   talus: TALUS_DATA,
   corvus: CORVUS_DATA,
@@ -3543,6 +3612,7 @@ export const CHAMPION_DATA: Record<string, ChampionData> = {
   jenos: JENOS_DATA,
   lillith: LILLITH_DATA,
   maldamba: MAL_DAMBA_DATA,
+  moji: MOJI_DATA,
   skye: SKYE_DATA,
   androxus: ANDROXUS_DATA,
   buck: BUCK_DATA,
