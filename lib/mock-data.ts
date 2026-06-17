@@ -218,6 +218,20 @@ export const MOCK_SUSPICIOUS_PLAYERS = [
   { name: 'NoRecoil420', id: 9008, reason: 'Zero recoil pattern detected', severity: 'medium' as const, flagged: '2026-06-15' },
 ];
 
+// Ranked matches per region per hour (mock live stats)
+export const MOCK_MATCH_STATS = {
+  totalToday: 14_287,
+  rankedToday: 8_432,
+  regions: [
+    { region: "NA", matchesPerHour: 420, peakHour: "8 PM EST", totalToday: 3_810 },
+    { region: "EU", matchesPerHour: 510, peakHour: "9 PM CET", totalToday: 4_590 },
+    { region: "Asia", matchesPerHour: 280, peakHour: "10 PM JST", totalToday: 2_520 },
+    { region: "OCE", matchesPerHour: 95, peakHour: "8 PM AEST", totalToday: 855 },
+    { region: "BR", matchesPerHour: 180, peakHour: "9 PM BRT", totalToday: 1_620 },
+    { region: "LATAM", matchesPerHour: 115, peakHour: "8 PM CST", totalToday: 1_035 },
+  ],
+};
+
 // Tier name mapping for display
 export const TIER_NAMES: Record<number, string> = {
   1: 'Bronze V', 2: 'Bronze IV', 3: 'Bronze III', 4: 'Bronze II', 5: 'Bronze I',
