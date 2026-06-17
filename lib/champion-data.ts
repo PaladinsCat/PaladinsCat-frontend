@@ -1689,6 +1689,84 @@ export const STRIX_DATA: ChampionData = {
   ],
 };
 
+export const TIBERIUS_DATA: ChampionData = {
+  name: "Tiberius",
+  roles: ["Damage"],
+  stats: {
+    health: "2200",
+    speed: "360",
+    speedUnits: "~22.5 units/s",
+    range: "300",
+  },
+  skills: [
+    {
+      name: "Bladed Chakrams",
+      key: "LMB",
+      iconUrl: "/images/skills/Ability_Bladed_Chakrams.png",
+      damage: "675 / 0.7s — 525",
+      description: "Sling Bladed Chakrams from your hand every 0.7s, dealing 675 damage with each, and bouncing off floors and walls up to 4 times.",
+    },
+    {
+      name: "Heavy Blade",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_Heavy_Blade.png",
+      damage: "850 — 500",
+      cooldown: "12s",
+      description: "Throw your Heavy Blade in a straight line to pierce shields and enemies, dealing 850 damage and Slowing. Can be recalled through enemies to deal 500 damage to them.",
+    },
+    {
+      name: "Combat Trance",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Combat_Trance.png",
+      cooldown: "15s",
+      description: "Channel your energy, increasing your Attack and Movement Speed for 4s.",
+    },
+    {
+      name: "Crouching Tigron",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Crouching_Tigron.png",
+      cooldown: "12s",
+      description: "Crouch down, then launch yourself forward through the air.",
+    },
+    {
+      name: "Blade Dance",
+      key: "E",
+      iconUrl: "/images/skills/Ability_Blade_Dance.png",
+      damage: "650 — 900",
+      description: "Flourish your Heavy Blade and gain the ability to use Striking Tigron and Whirling Blades up to 5 times for 15s.",
+    },
+  ],
+  talents: [
+    {
+      name: "Borrowed Luck",
+      description: "Combat Trance now resets your other abilities' cooldowns when activated.",
+      category: "Default Talent",
+      iconUrl: "/images/champions/Talent Tiberius Borrowed Luck.png",
+    },
+    {
+      name: "Tigron's Fury",
+      description: "Heavy Blade now explodes on reactivation instead of recalling, but the initial throw deals reduced damage.",
+      category: "Mastery Level 2",
+      iconUrl: "/images/champions/Talent Tiberius Tigrons Fury.png",
+    },
+    {
+      name: "Vicious Assault",
+      description: "Crouching Tigron now has 2 charges and deals 600 damage in a 20-unit-radius area on landing. Gain 40% Damage Resistance while airborne.",
+      category: "Mastery Level 8",
+      iconUrl: "/images/champions/Talent Tiberius Vicious Assault.png",
+    },
+  ],
+  loadouts: [
+    { name: "Bladed Chakrams", description: "Sling Bladed Chakrams from your hand every 0.7s, dealing 675 damage with each, and bouncing off floors and walls up to 4 times.", category: "", iconUrl: "/images/skills/Ability_Bladed_Chakrams.png" },
+    { name: "Heavy Blade", description: "Throw your Heavy Blade in a straight line to pierce shields and enemies, dealing 850 damage and Slowing. Can be recalled through enemies to deal 500 damage to them.", category: "", iconUrl: "/images/skills/Ability_Heavy_Blade.png" },
+    { name: "Combat Trance", description: "Channel your energy, increasing your Attack and Movement Speed for 4s.", category: "", iconUrl: "/images/skills/Ability_Combat_Trance.png" },
+    { name: "Crouching Tigron", description: "Crouch down, then launch yourself forward through the air.", category: "", iconUrl: "/images/skills/Ability_Crouching_Tigron.png" },
+    { name: "Blade Dance", description: "Flourish your Heavy Blade and gain the ability to use Striking Tigron and Whirling Blades up to 5 times for 15s.", category: "", iconUrl: "/images/skills/Ability_Blade_Dance.png" },
+    { name: "Striking Tigron", description: "Leap forward and slam down, dealing damage in an area.", category: "Blade Dance", iconUrl: "/images/skills/Ability_Striking_Tigron.png" },
+    { name: "Whirling Blades", description: "Spin your Heavy Blade, dealing damage to nearby enemies.", category: "Blade Dance", iconUrl: "/images/skills/Ability_Whirling_Blades.png" },
+  ],
+};
+
 export const CHAMPION_DATA: Record<string, ChampionData> = {", 
   androxus: ANDROXUS_DATA,
   ash: ASH_DATA,
@@ -1713,6 +1791,7 @@ export const CHAMPION_DATA: Record<string, ChampionData> = {",
   octavia: OCTAVIA_DATA,
   shalin: SHA_LIN_DATA,
   strix: STRIX_DATA,
+  tiberius: TIBERIUS_DATA,
 };
 
 export function getChampionData(slug: string): ChampionData | undefined {
