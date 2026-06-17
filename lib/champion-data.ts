@@ -1843,6 +1843,81 @@ export const TYRA_DATA: ChampionData = {
   ],
 };
 
+export const VIKTOR_DATA: ChampionData = {
+  name: "Viktor",
+  roles: ["Damage"],
+  stats: {
+    health: "2200",
+    speed: "365",
+    speedUnits: "~22.81 units/s",
+    range: "100",
+  },
+  skills: [
+    {
+      name: "Assault Rifle",
+      key: "LMB",
+      iconUrl: "/images/skills/Ability_Auto_Rifle.png",
+      damage: "140 / 0.1s",
+      description: "A Sentinel-issued military assault rifle that deals 140 damage every 0.1s.",
+    },
+    {
+      name: "Iron Sights",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Iron_Sights.png",
+      cooldown: "8s",
+      description: "Look down your sights and increase your accuracy.",
+    },
+    {
+      name: "Frag Grenade",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Frag_Grenade.png",
+      damage: "750",
+      cooldown: "9s",
+      description: "Throw a cookable frag grenade that deals 750 damage when it explodes.",
+    },
+    {
+      name: "Hustle",
+      key: "E",
+      iconUrl: "/images/skills/Ability_Hustle.png",
+      description: "Start hustling, gaining 65% movement speed while running.",
+    },
+    {
+      name: "Barrage",
+      key: "R",
+      iconUrl: "/images/skills/Ability_Barrage.png",
+      damage: "3× 1400 / 0.75s",
+      description: "Call down your wrath in a series of artillery barrages on your foes' heads, dealing 1400 damage in an area per shell.",
+    },
+  ],
+  talents: [
+    {
+      name: "Cardio",
+      description: "Heal for 300 per second and gain 150% increased Jump Height while using Hustle.",
+      category: "Default Talent",
+      iconUrl: "/images/champions/Talent Viktor Cardio.png",
+    },
+    {
+      name: "Burst Mode",
+      description: "Switch your rifle to Three-Shot-Burst mode, increasing your effective range and firing three 210-damage shots every 0.5s.",
+      category: "Mastery Level 2",
+      iconUrl: "/images/champions/Talent Viktor Gunnery.png",
+    },
+    {
+      name: "Shrapnel",
+      description: "Increase the radius of Frag Grenade's explosion by 40% and its damage by 150.",
+      category: "Mastery Level 8",
+      iconUrl: "/images/champions/Talent Viktor Shrapnel.png",
+    },
+  ],
+  loadouts: [
+    { name: "Assault Rifle", description: "A Sentinel-issued military assault rifle that deals 140 damage every 0.1s.", category: "", iconUrl: "/images/skills/Ability_Auto_Rifle.png" },
+    { name: "Iron Sights", description: "Look down your sights and increase your accuracy.", category: "", iconUrl: "/images/skills/Ability_Iron_Sights.png" },
+    { name: "Frag Grenade", description: "Throw a cookable frag grenade that deals 750 damage when it explodes.", category: "", iconUrl: "/images/skills/Ability_Frag_Grenade.png" },
+    { name: "Hustle", description: "Start hustling, gaining 65% movement speed while running.", category: "", iconUrl: "/images/skills/Ability_Hustle.png" },
+    { name: "Barrage", description: "Call down your wrath in a series of artillery barrages on your foes' heads, dealing 1400 damage in an area per shell.", category: "", iconUrl: "/images/skills/Ability_Barrage.png" },
+  ],
+};
+
 export const CHAMPION_DATA: Record<string, ChampionData> = {", 
   androxus: ANDROXUS_DATA,
   ash: ASH_DATA,
@@ -1869,6 +1944,7 @@ export const CHAMPION_DATA: Record<string, ChampionData> = {",
   strix: STRIX_DATA,
   tiberius: TIBERIUS_DATA,
   tyra: TYRA_DATA,
+  viktor: VIKTOR_DATA,
 };
 
 export function getChampionData(slug: string): ChampionData | undefined {
