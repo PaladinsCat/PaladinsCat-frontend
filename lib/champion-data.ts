@@ -2890,6 +2890,79 @@ export const VORA_DATA: ChampionData = {
   ],
 };
 
+export const ZHIN_DATA: ChampionData = {
+  name: "Zhin",
+  roles: ["Flank"],
+  stats: {
+    health: "2000",
+    speed: "380",
+    speedUnits: "~23 units/s",
+    range: "90",
+  },
+  skills: [
+    {
+      name: "Inferno Blade",
+      key: "LMB",
+      iconUrl: "/images/skills/Ability_Inferno_Blade.png",
+      damage: "400 — 700",
+      description: "Launch 3 burning oil projectiles through the air every 2s to scorch your foes to a crisp, dealing 400 damage with the first two swings and 700 damage with the final swing.",
+    },
+    {
+      name: "Counter",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_Counter.png",
+      damage: "600",
+      cooldown: "7s",
+      description: "Counter a single attack from the front and unleash a vicious counterattack that deals 600 damage.",
+    },
+    {
+      name: "Billow",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Billow.png",
+      cooldown: "15s",
+      description: "Disperse into smoke to become ethereal and increase your movement speed by 10%.",
+    },
+    {
+      name: "Whirl",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Whirl.png",
+      damage: "400",
+      cooldown: "7s",
+      description: "Lunge forward while swinging your blade, dealing 400 damage to enemies caught in the path.",
+    },
+    {
+      name: "Spite",
+      key: "E",
+      iconUrl: "/images/skills/Ability_Spite.png",
+      cooldown: "Ultimate",
+      description: "",
+    },
+  ],
+  talents: [
+    { name: "Guillotine", description: "Spite deals 20% of its target's maximum Health with each hit. If this kills the target, you are refunded 20% charge.", category: "Spite", iconUrl: "/images/champions/Talent Zhin Guillotine.png" },
+    { name: "Yomi", description: "", category: "", iconUrl: "/images/champions/Talent Zhin Yomi.png" },
+    { name: "Smolder", description: "Heal for 15% of your maximum Health per second while using Billow.", category: "Billow", iconUrl: "/images/champions/Talent Zhin Smolder.png" },
+  ],
+  loadouts: [
+    { name: "Blade Dancer", description: "", category: "Whirl", iconUrl: "/images/cards/Card_Blade_Dance.png" },
+    { name: "Dragon Oil", description: "", category: "", iconUrl: "/images/cards/Card_Dragon_Oil.png" },
+    { name: "Embers", description: "", category: "Billow", iconUrl: "/images/cards/Card_Embers.png" },
+    { name: "Fan the Flames", description: "", category: "Billow", iconUrl: "/images/cards/Card_Fan_the_Flames.png" },
+    { name: "Footwork", description: "", category: "Counter", iconUrl: "/images/cards/Card_Footwork.png" },
+    { name: "Fuel for the Fire", description: "", category: "Whirl", iconUrl: "/images/cards/Card_Fuel_for_the_Fire.png" },
+    { name: "Heartless", description: "", category: "", iconUrl: "/images/cards/Card_Heartless.png" },
+    { name: "Hideout", description: "", category: "Billow", iconUrl: "/images/cards/Card_Hideout.png" },
+    { name: "Infamy", description: "", category: "", iconUrl: "/images/cards/Card_Infamy.png" },
+    { name: "Kindling", description: "", category: "Whirl", iconUrl: "/images/cards/Card_Kindling.png" },
+    { name: "Malice", description: "", category: "", iconUrl: "/images/cards/Card_Malice.png" },
+    { name: "Master Stance", description: "", category: "Counter", iconUrl: "/images/cards/Card_Master_Stance.png" },
+    { name: "Perfect Block", description: "", category: "Counter", iconUrl: "/images/cards/Card_Perfect_Block.png" },
+    { name: "Up in Smoke", description: "", category: "Billow", iconUrl: "/images/cards/Card_Up_in_Smoke.png" },
+    { name: "Viciousness", description: "", category: "Counter", iconUrl: "/images/cards/Card_Viciousness.png" },
+    { name: "Wild Fire", description: "", category: "Whirl", iconUrl: "/images/cards/Card_Wild_Fire.png" },
+  ],
+};
+
 export const CHAMPION_DATA: Record<string, ChampionData> = {
   talus: TALUS_DATA,
   skye: SKYE_DATA,",
@@ -2930,6 +3003,7 @@ export const CHAMPION_DATA: Record<string, ChampionData> = {
   vatu: VATU_DATA,
   vii: VII_DATA,
   vora: VORA_DATA,
+  zhin: ZHIN_DATA,
 };
 
 export function getChampionData(slug: string): ChampionData | undefined {
