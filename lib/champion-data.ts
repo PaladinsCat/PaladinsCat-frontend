@@ -2963,8 +2963,80 @@ export const ZHIN_DATA: ChampionData = {
   ],
 };
 
+export const CORVUS_DATA: ChampionData = {
+  name: "Corvus",
+  roles: ["Support"],
+  stats: {
+    health: "2200",
+    speed: "360",
+    speedUnits: "~22 units/s",
+    range: "125",
+  },
+  skills: [
+    {
+      name: "Officer's Pistol",
+      key: "LMB",
+      iconUrl: "/images/skills/Ability_Officers_Pistol.png",
+      damage: "75",
+      description: "An automatic machine pistol that deals 75 damage every 0.075s.",
+    },
+    {
+      name: "Abyssal Reconstruction",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_Abyssal_Reconstruction.png",
+      cooldown: "4s",
+      description: "Channel the Abyss to heal an ally for 450 over 0.5s and then a burst of 800 health.",
+    },
+    {
+      name: "Mark of Fate",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Mark_of_Fate.png",
+      cooldown: "2s",
+      description: "Mark an ally to have them receive a portion of the healing done to allies or increased effects if healing them directly.",
+    },
+    {
+      name: "Projection",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Projection.png",
+      cooldown: "8s",
+      description: "Project a manifestation of your will, piercing, damaging and Slowing enemies hit by it. Can be reactivate to teleport to the projection.",
+    },
+    {
+      name: "Entropic Breach",
+      key: "E",
+      iconUrl: "/images/skills/Ability_Entropic_Breach.png",
+      cooldown: "Ultimate",
+      description: "Rise up into the air, gaining defensive benefits and the ability to call down Abyssal energy that Slows and damages enemies while healing allies caught inside based on their maximum health.",
+    },
+  ],
+  talents: [
+    { name: "Dark Gifts", description: "Your Marked ally gains 15% Crowd Control reduction, 20% Cooldown reduction, 25% Reload Speed increase, and they are Healed for 100 every 1s.", category: "Mark of Fate", iconUrl: "/images/champions/Talent Corvus Dark Gifts.png" },
+    { name: "Stunning Visage", description: "Enemies hit by Projection are Stunned for 1s and any enemy caught between your Projection and you when you Teleport takes 800 damage. Reduce Projection's Cooldown by 3s.", category: "Projection", iconUrl: "/images/champions/Talent Corvus Stunning Visage.png" },
+    { name: "Spreading Influence", description: "Decrease the percentage of Healing given to Marked targets by 20%, but you can have two Marks out at a time.", category: "Mark of Fate", iconUrl: "/images/champions/Talent Corvus Spreading Influence.png" },
+  ],
+  loadouts: [
+    { name: "Abyssal Effluxion", description: "Reduce the damage taken by an ally Healed by Abyssal Reconstruction by 4% for 0.8s after being Healed.", category: "Abyssal Reconstruction", iconUrl: "/images/cards/Card_Abyssal_Effluxion.png" },
+    { name: "Abyssal Shift", description: "Reduce your damage taken by 6% while your Projection is out.", category: "Projection", iconUrl: "/images/cards/Card_Abyssal_Shift.png" },
+    { name: "Battle-Ready", description: "Increase your maximum Health by 50.", category: "", iconUrl: "/images/cards/Card_Battle-Ready.png" },
+    { name: "By My Will", description: "Increase your maximum Ammo by 4.", category: "", iconUrl: "/images/cards/Card_By_My_Will.png" },
+    { name: "Condemnation", description: "Increase the Healing you do by 5% while at or below 70% Health.", category: "", iconUrl: "/images/cards/Card_Condemnation.png" },
+    { name: "Crushing Expectations", description: "Increase the Movement Speed of any ally Marked by Mark of Fate by 3%.", category: "Mark of Fate", iconUrl: "/images/cards/Card_Crushing_Expectations.png" },
+    { name: "Extraplanar Power", description: "Increase your Movement Speed by 6% for 3s after activating Projection.", category: "Projection", iconUrl: "/images/cards/Card_Extraplanar_Power.png" },
+    { name: "Grand Design", description: "Grants Marked ally 2.5% Lifesteal and Corvus shares 100% of the Healing done due to the Marked target's granted Lifesteal.", category: "Mark of Fate", iconUrl: "/images/cards/Card_Grand_Design.png" },
+    { name: "Magistrate's Might", description: "Gain a 130-Health Shield for 3s after dropping to or below 35% Health.", category: "", iconUrl: "/images/cards/Card_Magistrate's_Might.png" },
+    { name: "New Resolve", description: "Grant a 40-Health Shield to an ally for 2s when you Mark them.", category: "Mark of Fate", iconUrl: "/images/cards/Card_New_Resolve.png" },
+    { name: "Ominous Relic", description: "Generate 3 Ammo after Healing an ally with Abyssal Reconstruction.", category: "Abyssal Reconstruction", iconUrl: "/images/cards/Card_Ominous_Relic.png" },
+    { name: "Priority Targets", description: "Healing an ally with Abyssal Reconstruction reduces the Cooldown of Projection by 0.5s. This effect can only occur once every 5s.", category: "Abyssal Reconstruction", iconUrl: "/images/cards/Card_Priority_Targets.png" },
+    { name: "Shadow Tribunal", description: "Mark of Fate now provides to its target an additional 5% of the Healing done to other allies with Abyssal Reconstruction.", category: "Mark of Fate", iconUrl: "/images/cards/Card_Shadow_Tribunal.png" },
+    { name: "The Price of Salvation", description: "Heal for 80 over 1s after Healing an ally with Abyssal Reconstruction.", category: "Abyssal Reconstruction", iconUrl: "/images/cards/Card_The_Price_of_Salvation.png" },
+    { name: "Unexpected Complications", description: "Regenerate 10 Ammo every 0.5s for 0.5s after using Projection.", category: "Projection", iconUrl: "/images/cards/Card_Unexpected_Complications.png" },
+    { name: "Unyielding Discipline", description: "Reduce the Cooldown of Projection by 0.5s for each enemy hit by it.", category: "Projection", iconUrl: "/images/cards/Card_Unyielding_Discipline.png" },
+  ],
+};
+
 export const CHAMPION_DATA: Record<string, ChampionData> = {
   talus: TALUS_DATA,
+  corvus: CORVUS_DATA,
   skye: SKYE_DATA,",
   androxus: ANDROXUS_DATA,
   buck: BUCK_DATA,
