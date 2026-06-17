@@ -5,6 +5,7 @@
 export interface ChampionSkill {
   name: string;
   key: string;
+  iconUrl?: string;
   damage?: string;
   cooldown?: string;
   description?: string;
@@ -55,30 +56,35 @@ export const ANDROXUS_DATA: ChampionData = {
     {
       name: "Revolver",
       key: "LMB",
+      iconUrl: "/images/skills/Ability_Revolver.png",
       damage: "550",
       description: "A cursed automatic revolver that deals 550 damage every 0.5s.",
     },
     {
       name: "Defiance",
       key: "RMB",
+      iconUrl: "/images/skills/Ability_Defiance.png",
       damage: "520",
       description: "Punch forward, striking enemies in front of you for 520 damage.",
     },
     {
       name: "Reversal",
       key: "Q",
+      iconUrl: "/images/skills/Ability_Reversal.png",
       cooldown: "14s",
       description: "Absorb ranged attacks and fire a blast back that deals damage equal to 75% of the damage absorbed.",
     },
     {
       name: "Nether Step",
       key: "F",
+      iconUrl: "/images/skills/Ability_Nether_Step.png",
       cooldown: "10s",
       description: "Dash through enemies, dealing damage to each one hit. Can be cast up to 3 times.",
     },
     {
       name: "Accursed Arm",
       key: "E",
+      iconUrl: "/images/skills/Ability_Accursed_Arm.png",
       damage: "1000",
       cooldown: "Ultimate",
       description: "Transform your weapon into an explosive revolver that deals 1000 damage in an area.",

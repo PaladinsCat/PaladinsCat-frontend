@@ -380,8 +380,17 @@ function StatBadge({ label, value }: { label: string; value: string }) {
 function SkillCard({ skill }: { skill: ChampionSkill }) {
   return (
     <div className="pc-surface-light rounded-lg p-4 border border-pc-border flex items-start gap-4">
-      <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-pc-bg-elevated border border-pc-border flex items-center justify-center">
-        <span className="text-xs font-mono text-pc-accent">{skill.key}</span>
+      <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-pc-bg-elevated border border-pc-border flex items-center justify-center overflow-hidden">
+        {skill.iconUrl ? (
+          <img
+            src={skill.iconUrl}
+            alt={skill.name}
+            className="w-full h-full object-contain"
+            onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+          />
+        ) : (
+          <span className="text-xs font-mono text-pc-accent">{skill.key}</span>
+        )}
       </div>
       <div className="flex-1">
         <div className="flex items-center gap-2 mb-1">
