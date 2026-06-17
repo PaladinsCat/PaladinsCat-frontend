@@ -1918,6 +1918,81 @@ export const VIKTOR_DATA: ChampionData = {
   ],
 };
 
+export const VIVIAN_DATA: ChampionData = {
+  name: "Vivian",
+  roles: ["Damage"],
+  stats: {
+    health: "2200",
+    speed: "370",
+    speedUnits: "~23.13 units/s",
+    range: "95",
+  },
+  skills: [
+    {
+      name: "Light Machine Gun",
+      key: "LMB",
+      iconUrl: "/images/skills/Ability_Sniper_Rifle.png",
+      damage: "165 / 0.14s",
+      description: "A versatile light machine gun that deals 165 damage every 0.14s.",
+    },
+    {
+      name: "Precision Sights",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Precision_Sights.png",
+      cooldown: "13s",
+      description: "Look down the barrel of your gun and gain increased accuracy.",
+    },
+    {
+      name: "Deflector Shield",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Deflector_Shield.png",
+      damage: "1500",
+      cooldown: "10s",
+      description: "Project a shield in front of your gun to prevent up to 1500 damage.",
+    },
+    {
+      name: "Sensor Drone",
+      key: "E",
+      iconUrl: "/images/skills/Ability_Sensor_Drone.png",
+      description: "Throw out drones that Reveal your enemies to all allies.",
+    },
+    {
+      name: "Sentinels",
+      key: "R",
+      iconUrl: "/images/skills/Ability_Sentinels.png",
+      damage: "2× 150 / 1s",
+      description: "Summon 2 drones that fire Shock blasts where you are shooting every 1s, dealing 150 damage.",
+    },
+  ],
+  talents: [
+    {
+      name: "Suspect Everyone",
+      description: "Reduce Deflector Shield's cooldown by half if it is destroyed by an enemy.",
+      category: "Default Talent",
+      iconUrl: "/images/champions/Talent Vivian Suspect Everyone.png",
+    },
+    {
+      name: "Booby Trap",
+      description: "Your Sensor Drones explode, dealing 600 Area Damage and applying a Knockback to those hit when an enemy is within 20 units.",
+      category: "Mastery Level 2",
+      iconUrl: "/images/champions/Talent Vivian Booby Trap.png",
+    },
+    {
+      name: "Opportunity in Chaos",
+      description: "After firing continuously for 2s, gain 10% increased damage.",
+      category: "Mastery Level 8",
+      iconUrl: "/images/champions/Talent Vivian Opportunity In Chaos.png",
+    },
+  ],
+  loadouts: [
+    { name: "Light Machine Gun", description: "A versatile light machine gun that deals 165 damage every 0.14s.", category: "", iconUrl: "/images/skills/Ability_Sniper_Rifle.png" },
+    { name: "Precision Sights", description: "Look down the barrel of your gun and gain increased accuracy.", category: "", iconUrl: "/images/skills/Ability_Precision_Sights.png" },
+    { name: "Deflector Shield", description: "Project a shield in front of your gun to prevent up to 1500 damage.", category: "", iconUrl: "/images/skills/Ability_Deflector_Shield.png" },
+    { name: "Sensor Drone", description: "Throw out drones that Reveal your enemies to all allies.", category: "", iconUrl: "/images/skills/Ability_Sensor_Drone.png" },
+    { name: "Sentinels", description: "Summon 2 drones that fire Shock blasts where you are shooting every 1s, dealing 150 damage.", category: "", iconUrl: "/images/skills/Ability_Sentinels.png" },
+  ],
+};
+
 export const CHAMPION_DATA: Record<string, ChampionData> = {", 
   androxus: ANDROXUS_DATA,
   ash: ASH_DATA,
@@ -1945,6 +2020,7 @@ export const CHAMPION_DATA: Record<string, ChampionData> = {",
   tiberius: TIBERIUS_DATA,
   tyra: TYRA_DATA,
   viktor: VIKTOR_DATA,
+  vivian: VIVIAN_DATA,
 };
 
 export function getChampionData(slug: string): ChampionData | undefined {
