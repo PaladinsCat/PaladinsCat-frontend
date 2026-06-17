@@ -52,65 +52,89 @@ export default function StatsPage() {
         <h2 className="text-lg font-bold text-pc-text mb-4">Performance Overview</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[
-            { key: "dpm", label: "Damage / Min", unit: "", color: "bg-red-400", trackColor: "bg-red-400/20" },
-            { key: "hpm", label: "Healing / Min", unit: "", color: "bg-emerald-400", trackColor: "bg-emerald-400/20" },
-            { key: "gpm", label: "Gold / Min", unit: "", color: "bg-yellow-400", trackColor: "bg-yellow-400/20" },
-            { key: "mpm", label: "Mitigation / Min", unit: "", color: "bg-blue-400", trackColor: "bg-blue-400/20" },
-            { key: "kda", label: "KDA Ratio", unit: "", color: "bg-pc-accent", trackColor: "bg-pc-accent/20" },
-          ].map(({ key, label, color, trackColor }) => {
+            { key: "dpm", label: "Damage / Min", stroke: "#f87171", fill: "rgba(248,113,113,0.15)" },
+            { key: "hpm", label: "Healing / Min", stroke: "#34d399", fill: "rgba(52,211,153,0.15)" },
+            { key: "gpm", label: "Gold / Min", stroke: "#facc15", fill: "rgba(250,204,21,0.15)" },
+            { key: "mpm", label: "Mitigation / Min", stroke: "#60a5fa", fill: "rgba(96,165,250,0.15)" },
+            { key: "kda", label: "KDA Ratio", stroke: "#33b6b1", fill: "rgba(51,182,177,0.15)" },
+          ].map(({ key, label, stroke, fill }) => {
             const d = metrics[key as keyof typeof metrics] as { min: number; max: number; mean: number; mode: number };
             const range = d.max - d.min;
-            const meanPct = ((d.mean - d.min) / range) * 100;
-            const modePct = ((d.mode - d.min) / range) * 100;
-            const formatVal = key === "kda"
-              ? (v: number) => v.toFixed(1)
-              : (v: number) => v.toLocaleString();
+            const meanPct = (d.mean - d.min) / range;
+            const modePct = (d.mode - d.min) / range;
+            const formatVal = key === "kda" ? (v: number) => v.toFixed(1) : (v: number) => v.toLocaleString();
+
+            // Generate bell curve points — skewed so mode != mean
+            const W = 280;
+            const H = 60;
+            const sigma = 0.18; // controls spread
+            const points: string[] = [];
+            for (let i = 0; i <= W; i++) {
+              const x = i / W;
+              // Blend two gaussians centered at mean and mode for a realistic skewed shape
+              const g1 = Math.exp(-0.5 * ((x - meanPct) / sigma) ** 2);
+              const g2 = Math.exp(-0.5 * ((x - modePct) / (sigma * 0.8)) ** 2);
+              const y = 0.6 * g1 + 0.4 * g2;
+              const px = i;
+              const py = H - y * (H - 4);
+              points.push(`${px},${py}`);
+            }
+            const linePath = `M0,${H} L${points.join(" L")} L${W},${H} Z`;
+
             return (
               <div key={key} className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
                 {/* Header */}
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center justify-between mb-2">
                   <span className="text-pc-text font-semibold text-sm">{label}</span>
-                  <span className="text-pc-text-muted text-[10px] uppercase tracking-wider">
-                    mean <span className={`font-bold ${color.replace("bg-", "text-")}`}>{formatVal(d.mean)}</span>
+                  <span className="text-[10px] uppercase tracking-wider">
+                    <span className="text-pc-text-muted">mean </span>
+                    <span className="font-bold" style={{ color: stroke }}>{formatVal(d.mean)}</span>
                   </span>
                 </div>
 
-                {/* Mini chart bar */}
-                <div className="relative h-6 mb-3">
-                  {/* Track */}
-                  <div className={`absolute inset-y-0 inset-x-0 rounded-full ${trackColor}`} />
-                  {/* Fill up to mean */}
-                  <div
-                    className={`absolute inset-y-0 left-0 rounded-full ${color} opacity-40`}
-                    style={{ width: `${meanPct}%` }}
+                {/* Bell curve SVG */}
+                <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-16 mb-1" preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id={`grad-${key}`} x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={stroke} stopOpacity="0.3" />
+                      <stop offset="100%" stopColor={stroke} stopOpacity="0.02" />
+                    </linearGradient>
+                  </defs>
+                  {/* Fill */}
+                  <path d={linePath} fill={`url(#grad-${key})`} />
+                  {/* Stroke */}
+                  <path
+                    d={`M${points.join(" L")}`}
+                    fill="none"
+                    stroke={stroke}
+                    strokeWidth="2"
+                    strokeLinecap="round"
                   />
-                  {/* Mean marker */}
-                  <div
-                    className="absolute top-0 bottom-0 w-0.5"
-                    style={{ left: `${meanPct}%` }}
-                  >
-                    <div className={`absolute -top-1 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full ${color} border-2 border-pc-bg-elevated`} />
-                  </div>
-                  {/* Mode marker */}
-                  <div
-                    className="absolute top-0 bottom-0 w-0.5"
-                    style={{ left: `${modePct}%` }}
-                  >
-                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-pc-text-muted border border-pc-bg-elevated" />
-                  </div>
+                  {/* Mean line */}
+                  <line x1={meanPct * W} y1="0" x2={meanPct * W} y2={H} stroke={stroke} strokeWidth="1.5" strokeDasharray="4 3" opacity="0.6" />
+                  {/* Mode line */}
+                  <line x1={modePct * W} y1="4" x2={modePct * W} y2={H} stroke="#6a6a71" strokeWidth="1" strokeDasharray="2 3" opacity="0.5" />
+                  {/* Mean dot */}
+                  <circle cx={meanPct * W} cy="2" r="3" fill={stroke} />
+                  {/* Mode dot */}
+                  <circle cx={modePct * W} cy="6" r="2.5" fill="#6a6a71" />
+                </svg>
+
+                {/* Legend dots */}
+                <div className="flex items-center gap-4 mb-2">
+                  <span className="flex items-center gap-1 text-[10px] text-pc-text-muted">
+                    <span className="w-2 h-2 rounded-full" style={{ background: stroke }} /> Mean
+                  </span>
+                  <span className="flex items-center gap-1 text-[10px] text-pc-text-muted">
+                    <span className="w-2 h-2 rounded-full bg-pc-text-muted" /> Mode
+                  </span>
                 </div>
 
-                {/* Min / Mode / Mean / Max labels */}
+                {/* Min / Mode / Mean / Max */}
                 <div className="flex items-center justify-between text-[10px]">
-                  <span className="text-pc-text-muted">
-                    min <span className="text-pc-text-secondary">{formatVal(d.min)}</span>
-                  </span>
-                  <span className="text-pc-text-muted">
-                    mode <span className="text-pc-text-secondary">{formatVal(d.mode)}</span>
-                  </span>
-                  <span className="text-pc-text-muted">
-                    max <span className="text-pc-text-secondary">{formatVal(d.max)}</span>
-                  </span>
+                  <span className="text-pc-text-muted">min <span className="text-pc-text-secondary">{formatVal(d.min)}</span></span>
+                  <span className="text-pc-text-muted">mode <span className="text-pc-text-secondary">{formatVal(d.mode)}</span></span>
+                  <span className="text-pc-text-muted">max <span className="text-pc-text-secondary">{formatVal(d.max)}</span></span>
                 </div>
               </div>
             );
@@ -169,12 +193,17 @@ export default function StatsPage() {
             <tbody>
               {sortedItems.map((item) => (
                 <tr key={item.name} className="border-b border-pc-border/50 hover:bg-pc-bg/50 transition-colors">
-                  <td className="px-4 py-2.5 text-pc-text font-medium text-xs">{item.name}</td>
+                  <td className="px-4 py-2.5">
+                    <div className="flex items-center gap-2">
+                      <img src={item.icon} alt={item.name} className="w-6 h-6 object-contain" />
+                      <span className="text-pc-text font-medium text-xs">{item.name}</span>
+                    </div>
+                  </td>
                   <td className="px-4 py-2.5">
                     <span className={`text-[10px] px-1.5 py-0.5 rounded ${
                       item.category === "Offense" ? "bg-red-500/10 text-red-400" :
                       item.category === "Utility" ? "bg-blue-500/10 text-blue-400" :
-                      item.category === "Armor" ? "bg-amber-500/10 text-amber-400" :
+                      item.category === "Defense" ? "bg-amber-500/10 text-amber-400" :
                       "bg-emerald-500/10 text-emerald-400"
                     }`}>
                       {item.category}
@@ -220,7 +249,6 @@ export default function StatsPage() {
                 <th className="px-4 py-3">Map</th>
                 <th className="px-4 py-3">Matches</th>
                 <th className="px-4 py-3">Avg Duration</th>
-                <th className="px-4 py-3">Attack WR</th>
                 <th className="px-4 py-3 hidden sm:table-cell">Activity</th>
               </tr>
             </thead>
@@ -231,11 +259,6 @@ export default function StatsPage() {
                   <td className="px-4 py-2.5 text-pc-text font-medium text-xs">{map.name}</td>
                   <td className="px-4 py-2.5 text-pc-text-secondary text-xs">{map.matches.toLocaleString()}</td>
                   <td className="px-4 py-2.5 text-pc-text-secondary text-xs">{map.avgDuration}</td>
-                  <td className="px-4 py-2.5 text-xs">
-                    <span className={map.winRateAttack >= 50 ? "text-emerald-400" : "text-red-400"}>
-                      {map.winRateAttack}%
-                    </span>
-                  </td>
                   <td className="px-4 py-2.5 hidden sm:table-cell">
                     <div className="w-24 h-1.5 bg-pc-bg rounded-full overflow-hidden">
                       <div
