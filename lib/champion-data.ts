@@ -1475,6 +1475,77 @@ export const LIAN_DATA: ChampionData = {
   ],
 };
 
+export const OCTAVIA_DATA: ChampionData = {
+  name: "Octavia",
+  roles: ["Damage"],
+  stats: {
+    health: "2200",
+    speed: "360",
+    speedUnits: "~22.5 units/s",
+    range: "150",
+  },
+  skills: [
+    {
+      name: "Marksman Rifle",
+      key: "LMB",
+      iconUrl: "/images/skills/Ability_Marksman_Rifle_Octavia.png",
+      damage: "415 / 250",
+      description: "A fully-automatic marksman rifle that deals 415 damage every 0.3s while scoped, and 250 damage every 0.2s from the hip.",
+    },
+    {
+      name: "Designated Sights",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_Designated_Sights.png",
+      description: "Look down your sights and gain increased accuracy; stopping in air when looking down your sights.",
+    },
+    {
+      name: "Distortion Field",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Distortion_Field.png",
+      cooldown: "16s",
+      description: "Create an opaque, anti-gravity dome that hides allies and disorients and Slows enemies while inside of it – lasts for 3.5s.",
+    },
+    {
+      name: "Commanding Leap",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Commanding_Leap.png",
+      cooldown: "12s",
+      description: "Leap into the air to gain control of the battlefield, then place a healing rally point at your landing zone.",
+    },
+    {
+      name: "Creeping Barrage",
+      key: "E",
+      iconUrl: "/images/skills/Ability_Creeping_Barrage.png",
+      damage: "850",
+      cooldown: "Ultimate",
+      description: "Rain down a laser barrage upon your enemies that deals 850 damage per beam.",
+    },
+  ],
+  talents: [
+    { name: "Paratrooper", description: "You can now hover for 4s and gain 50% increase air control. While in Commanding Leap, gain 10% increased Weapon Damage.", category: "Commanding Leap", iconUrl: "/images/champions/Talent Octavia Paratrooper.png" },
+    { name: "Display of Force", description: "Enemies are Rooted in place when they are hit by the pre-fire beam and the Creeping Barrage deals 1450 damage.", category: "Creeping Barrage", iconUrl: "/images/champions/Talent Octavia DisplayofForce.png" },
+    { name: "Asymmetric Warfare", description: "Distortion Field now damages enemies for 200 every .5s for the duration of Distortion Field and heals allies for 125 every .5 seconds while inside of the field.", category: "Distortion Field", iconUrl: "/images/champions/Talent Octavia AsymmetricWarfare.png" },
+  ],
+  loadouts: [
+    { name: "Air Supremacy", description: "Reduce damage taken by 5% for 2.5s after activating Commanding Leap.", category: "Commanding Leap", iconUrl: "/images/cards/Card_Air Supremacy.png" },
+    { name: "Got Your Six", description: "Increase the duration of Commanding Leap's rally point by 0.3s.", category: "Commanding Leap", iconUrl: "/images/cards/Card_Clean Shots.png" },
+    { name: "Determined Defense", description: "Increase your maximum Health by 50.", category: "", iconUrl: "/images/cards/Card_Determined Defense.png" },
+    { name: "Dominant Dome", description: "Increase the radius of your Distortion Field by 10%.", category: "Distortion Field", iconUrl: "/images/cards/Card_Dominant Dome.png" },
+    { name: "Entrenched", description: "Reduce your damage taken by 5% while standing inside of your Distortion Field.", category: "Distortion Field", iconUrl: "/images/cards/Card_Entrenched.png" },
+    { name: "Fire and Maneuver", description: "Increase your Movement Speed by 6% for 2.5s after getting a Killing Blow or Elimination.", category: "", iconUrl: "/images/cards/Card_Fire and Maneuver.png" },
+    { name: "Getting Jumpy", description: "Reset the Cooldown of Commanding Leap after dropping to or below 10% Health.", category: "", iconUrl: "/images/cards/Card_Getting Jumpy.png" },
+    { name: "High Ground", description: "Increase the jump strength of Octavia's Commanding Leap by 5%.", category: "Commanding Leap", iconUrl: "/images/cards/Card_High Ground.png" },
+    { name: "Interdiction", description: "Increase your maximum Ammo by 2.", category: "", iconUrl: "/images/cards/Card_Interdiction.png" },
+    { name: "New Boots", description: "Reduce the Movement Speed penalty of Designated Sights by 20%.", category: "Designated Sights", iconUrl: "/images/cards/Card_New Boots.png" },
+    { name: "Overwhelming Force", description: "Generate 1% Ultimate charge after getting Killing Blow or Eliminations while Designated Sights is active.", category: "Designated Sights", iconUrl: "/images/cards/Card_Overwhelming Force.png" },
+    { name: "Forward Operating Base", description: "Reduce the effect of Crowd Control for allies within Distortion Field by 5%.", category: "Distortion Field", iconUrl: "/images/cards/Card_Priority Requisition.png" },
+    { name: "Snap To It", description: "Reduce the time it takes to bring up Designated Sights by 10%.", category: "Designated Sights", iconUrl: "/images/cards/Card_Snap To It.png" },
+    { name: "Tactical Fire", description: "Generate 1 Ammo after getting a Killing Blow or Elimination while Designated Sights is active.", category: "Designated Sights", iconUrl: "/images/cards/Card_Tactical Fire.png" },
+    { name: "Vantage Point", description: "Reduce the Cooldown of Commanding Leap by 0.3s every 1s while standing inside of your Distortion Field.", category: "Distortion Field", iconUrl: "/images/cards/Card_Vantage Point.png" },
+    { name: "Vicious Circle", description: "Reduce the Cooldown of Distortion Field by 0.6s after activating Commanding Leap.", category: "Commanding Leap", iconUrl: "/images/cards/Card_Vicious Circle.png" },
+  ],
+};
+
 export const CHAMPION_DATA: Record<string, ChampionData> = {
   androxus: ANDROXUS_DATA,
   ash: ASH_DATA,
@@ -1496,6 +1567,7 @@ export const CHAMPION_DATA: Record<string, ChampionData> = {
   terminus: TERMINUS_DATA,
   torvald: TORVALD_DATA,
   bombking: BOMB_KING_DATA,
+  octavia: OCTAVIA_DATA,
 };
 
 export function getChampionData(slug: string): ChampionData | undefined {
