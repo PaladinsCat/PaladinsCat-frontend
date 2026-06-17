@@ -2529,6 +2529,77 @@ export const MAEVE_DATA: ChampionData = {
   ],
 };
 
+export const TALUS_DATA: ChampionData = {
+  name: "Talus",
+  roles: ["Flank"],
+  stats: {
+    health: "1900",
+    speed: "385",
+    speedUnits: "~24 units/s",
+    range: "45",
+  },
+  skills: [
+    {
+      name: "Veracharger",
+      key: "LMB",
+      iconUrl: "/images/skills/Ability_Veracharger.png",
+      damage: "110",
+      description: "A fast-firing weapon for short-range engagements that deals 110 damage every 0.095s.",
+    },
+    {
+      name: "Blitz Upper",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_Blitz_Upper.png",
+      cooldown: "10s",
+      description: "Throw a powerful uppercut that launches you forward.",
+    },
+    {
+      name: "Overcharge",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Overcharge.png",
+      cooldown: "10s",
+      description: "Overcharge your weapon to enhance its attack speed by 33% and consume no ammo.",
+    },
+    {
+      name: "Rune of Travel",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Rune_of_Travel.png",
+      cooldown: "15s",
+      description: "Inscribe a rune on the ground that can be used to escape back to its location after 10s and heal you for 500.",
+    },
+    {
+      name: "True Power",
+      key: "E",
+      iconUrl: "/images/skills/Ability_True_Power.png",
+      cooldown: "Ultimate",
+      description: "Channel ancient power to become unstoppable.",
+    },
+  ],
+  talents: [
+    { name: "Inner Strength", description: "Reduce the Cooldown of Overcharge and Blitz Upper by 6s when you Teleport using Rune of Travel.", category: "Rune of Travel", iconUrl: "/images/champions/Talent Talus Inner Strength.png" },
+    { name: "Faustian Bargain", description: "Rune of Travel no longer automatically activates, and if the Rune is not used the Cooldown is reset.", category: "Rune of Travel", iconUrl: "/images/champions/Talent Talus Faustian Bargain.png" },
+    { name: "Nothing Personal", description: "", category: "Veracharger", iconUrl: "/images/champions/Talent Talus Nothing Personal.png" },
+  ],
+  loadouts: [
+    { name: "Ancient Power", description: "Reduce the Cooldown of Overcharge.", category: "Overcharge", iconUrl: "/images/cards/Card_Ancient_Power.png" },
+    { name: "Antediluvian", description: "Reduce the Cooldown of Overcharge.", category: "Overcharge", iconUrl: "/images/cards/Card_Antediluvian.png" },
+    { name: "Carry through", description: "Increase the damage of Blitz Upper.", category: "Blitz Upper", iconUrl: "/images/cards/Card_Carry_through.png" },
+    { name: "Daredevil", description: "Increase the damage of Blitz Upper.", category: "Blitz Upper", iconUrl: "/images/cards/Card_Daredevil.png" },
+    { name: "Dark Vision", description: "Increase the damage of Blitz Upper.", category: "Blitz Upper", iconUrl: "/images/cards/Card_Dark_Vision.png" },
+    { name: "Eternal", description: "Increase the duration of Rune of Travel.", category: "Rune of Travel", iconUrl: "/images/cards/Card_Eternal.png" },
+    { name: "Evanescent", description: "Increase the duration of Rune of Travel.", category: "Rune of Travel", iconUrl: "/images/cards/Card_Evanescent.png" },
+    { name: "Guts", description: "Reduce your damage taken.", category: "", iconUrl: "/images/cards/Card_Guts.png" },
+    { name: "Last Remnant", description: "Increase your maximum Health.", category: "", iconUrl: "/images/cards/Card_Last_Remnant.png" },
+    { name: "Perseverance", description: "Reduce your damage taken.", category: "", iconUrl: "/images/cards/Card_Perseverance.png" },
+    { name: "Primeval Might", description: "Increase the damage of Overcharge.", category: "Overcharge", iconUrl: "/images/cards/Card_Primeval_Might.png" },
+    { name: "Reclamation", description: "Reduce the Cooldown of Overcharge.", category: "Overcharge", iconUrl: "/images/cards/Card_Reclamation.png" },
+    { name: "Relic Affinity", description: "Increase the damage of Blitz Upper.", category: "Blitz Upper", iconUrl: "/images/cards/Card_Relic_Affinity.png" },
+    { name: "Revitalize", description: "Increase the Healing of Rune of Travel.", category: "Rune of Travel", iconUrl: "/images/cards/Card_Revitalize.png" },
+    { name: "Spirited", description: "Increase your maximum Health.", category: "", iconUrl: "/images/cards/Card_Spirited.png" },
+    { name: "Transient", description: "Reduce the Cooldown of Rune of Travel.", category: "Rune of Travel", iconUrl: "/images/cards/Card_Transient.png" },
+  ],
+};
+
 export const SKYE_DATA: ChampionData = {
   name: "Skye",
   roles: ["Flank"],
@@ -2601,7 +2672,82 @@ export const SKYE_DATA: ChampionData = {
   ],
 };
 
+export const VATU_DATA: ChampionData = {
+  name: "Vatu",
+  roles: ["Flank"],
+  stats: {
+    health: "1900",
+    speed: "370",
+    speedUnits: "~23 units/s",
+    range: "90",
+  },
+  skills: [
+    {
+      name: "Kunai",
+      key: "LMB",
+      iconUrl: "/images/skills/Ability_Kunai.png",
+      damage: "280",
+      description: "Launch 3 Kunai in an arc from your hands, dealing 280 damage per Kunai.",
+    },
+    {
+      name: "Shadow Bombs",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_Shadow_Bombs.png",
+      damage: "10 + 200",
+      cooldown: "8s",
+      description: "Throw out 3 explosive projectiles that stick to their target and deal a small amount of damage on hit and an additional damage when they explode.",
+    },
+    {
+      name: "Ambush",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Ambush.png",
+      damage: "200",
+      cooldown: "11s",
+      description: "Teleport next to your target, dealing damage in an area on arrival. Can be refired on another enemy within 4s of teleporting.",
+    },
+    {
+      name: "Dash",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Dash.png",
+      cooldown: "5s",
+      description: "Quickly dash in the direction of your movement input.",
+    },
+    {
+      name: "Nightfall",
+      key: "E",
+      iconUrl: "/images/skills/Ability_Nightfall.png",
+      damage: "800",
+      cooldown: "Ultimate",
+      description: "Activate to start charging up and fire to dash forward through enemies dealing 800 damage and Stunning them for 1.25s.",
+    },
+  ],
+  talents: [
+    { name: "Omnipresence", description: "Your Ambush gains an additional teleport and can now be used on allies.", category: "Ambush", iconUrl: "/images/champions/Talent Omnipresence VatuOmnipresence.png" },
+    { name: "Unerring", description: "Increase the explosion radius of Shadow Bombs by 5 units and they now home to enemies.", category: "Shadow Bombs", iconUrl: "/images/champions/Talent Unerring VatuUnerring.png" },
+    { name: "Enveloping Shadows", description: "Reduce the Cooldown of your basic abilities by 3% for each Kunai that hits an enemy.", category: "Kunai", iconUrl: "/images/champions/Talent Enveloping Shadows VatuEnvelopingShadows.png" },
+  ],
+  loadouts: [
+    { name: "Assassin's Tools", description: "Reduce the Cooldown of Shadow Bombs.", category: "Shadow Bombs", iconUrl: "/images/cards/Card_Assassin's_Tools.png" },
+    { name: "Contemplation", description: "Reduce the Cooldown of Dash.", category: "Dash", iconUrl: "/images/cards/Card_Contemplation.png" },
+    { name: "Deadly Dash", description: "Reduce the Cooldown of Dash.", category: "Dash", iconUrl: "/images/cards/Card_Deadly_Dash.png" },
+    { name: "Extraction", description: "Reduce the Cooldown of Dash.", category: "Dash", iconUrl: "/images/cards/Card_Extraction.png" },
+    { name: "Final Sight", description: "", category: "", iconUrl: "/images/cards/Card_Final_Sight.png" },
+    { name: "Gathering Shadow", description: "Reduce the Cooldown of Ambush.", category: "Ambush", iconUrl: "/images/cards/Card_Gathering_Shadow.png" },
+    { name: "Infiltration", description: "Increase the damage of Ambush.", category: "Ambush", iconUrl: "/images/cards/Card_Infiltration.png" },
+    { name: "Memento Vivere", description: "", category: "", iconUrl: "/images/cards/Card_Memento_Vivere.png" },
+    { name: "Nightwatcher", description: "Reduce the Cooldown of Dash.", category: "Dash", iconUrl: "/images/cards/Card_Nightwatcher.png" },
+    { name: "Outnumbered", description: "Increase Shadow Bombs count.", category: "Shadow Bombs", iconUrl: "/images/cards/Card_Outnumbered.png" },
+    { name: "Retribution", description: "Increase the damage of Ambush.", category: "Ambush", iconUrl: "/images/cards/Card_Retribution.png" },
+    { name: "Shadow Garrote", description: "", category: "", iconUrl: "/images/cards/Card_Shadow_Garrote.png" },
+    { name: "Shadow's Gaze", description: "Increase the damage of Shadow Bombs.", category: "Shadow Bombs", iconUrl: "/images/cards/Card_Shadow's_Gaze.png" },
+    { name: "Shadow's Perch", description: "Increase the damage of Ambush.", category: "Ambush", iconUrl: "/images/cards/Card_Shadow's_Perch.png" },
+    { name: "Shattered Worlds", description: "Reduce the Cooldown of Shadow Bombs.", category: "Shadow Bombs", iconUrl: "/images/cards/Card_Shattered_Worlds.png" },
+    { name: "Tranquility", description: "", category: "", iconUrl: "/images/cards/Card_Tranquility.png" },
+  ],
+};
+
 export const CHAMPION_DATA: Record<string, ChampionData> = {
+  talus: TALUS_DATA,
   skye: SKYE_DATA,", 
   androxus: ANDROXUS_DATA,
   buck: BUCK_DATA,
@@ -2637,6 +2783,7 @@ export const CHAMPION_DATA: Record<string, ChampionData> = {
   viktor: VIKTOR_DATA,
   vivian: VIVIAN_DATA,
   willob: WILLO_DATA,
+  vatu: VATU_DATA,
 };
 
 export function getChampionData(slug: string): ChampionData | undefined {
