@@ -1272,6 +1272,79 @@ export const BOMB_KING_DATA: ChampionData = {
   ],
 };
 
+export const IMANI_DATA: ChampionData = {
+  name: "Imani",
+  roles: ["Damage"],
+  stats: {
+    health: "2200",
+    speed: "350",
+    speedUnits: "~21 units/s",
+    range: "500",
+  },
+  skills: [
+    {
+      name: "Frost Bolt / Pyre Ball",
+      key: "LMB",
+      iconUrl: "/images/skills/Ability_Frost_Bolt.png",
+      damage: "440 / 1000",
+      description: "Throw out ice shards that deal 440 damage every 0.5s or charged pyre balls that deal 1000 damage after charging for 1.2s, depending on your elemental alignment.",
+    },
+    {
+      name: "Frost Bomb / Inferno Cannon",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_Frost_Bomb.png",
+      damage: "800 / 100 per 0.09s",
+      cooldown: "13s",
+      description: "Channel ice or fire into a powerful frost orb that deals 800 damage at max range or scorching fire rays that deal 100 damage every 0.09s, depending on your elemental alignment.",
+    },
+    {
+      name: "Elemental Shift",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Elemental_Shift.png",
+      cooldown: "1s",
+      description: "Shift your elemental alignment between freezing ice and scorching fire, gaining access to new abilities.",
+    },
+    {
+      name: "FrostFire Glide",
+      key: "F",
+      iconUrl: "/images/skills/Ability_FrostFire_Glide.png",
+      cooldown: "12s",
+      description: "Channel the elements to glide through the air.",
+    },
+    {
+      name: "Dragon's Call",
+      key: "E",
+      iconUrl: "/images/skills/Ability_Dragons_Call.png",
+      damage: "170 per 0.1s",
+      cooldown: "Ultimate",
+      description: "Summon a deadly Draconic Avatar to rain down FrostFire breath on your helpless foes, dealing 170 damage every 0.1s.",
+    },
+  ],
+  talents: [
+    { name: "Splitting Ice", description: "Frost Bolt Chains to a nearby enemy within 30 units, dealing 225 damage.", category: "Frost Bolt", iconUrl: "/images/champions/Talent Imani Splitting Ice.png" },
+    { name: "Pyromania", description: "Each of your Pyre Balls explodes in a 20-unit-radius area on hit and generate more Mana. Converts Pyre ball to Area Damage.", category: "Pyre Ball", iconUrl: "/images/champions/Talent Imani Pyromania.png" },
+    { name: "Mana Rift", description: "Remaining still for 1s creates a 30-unit Mana Rift around you that generates Mana every 1s. Leaving the Mana Rift destroys it.", category: "Mana Rift", iconUrl: "/images/champions/Talent Imani Mana Rift.png" },
+  ],
+  loadouts: [
+    { name: "Affinity", description: "Reduce the Cooldown of Elemental Shift.", category: "Elemental Shift", iconUrl: "/images/cards/Card_Affinity.png" },
+    { name: "Ancient Duty", description: "Increase your maximum Health.", category: "", iconUrl: "/images/cards/Card_Ancient_Duty.png" },
+    { name: "Arcane Flame", description: "Increase the damage of Inferno Cannon.", category: "Inferno Cannon", iconUrl: "/images/cards/Card_Arcane_Flame.png" },
+    { name: "Arcane Ice", description: "Increase the damage of Frost Bomb.", category: "Frost Bomb", iconUrl: "/images/cards/Card_Arcane_Ice.png" },
+    { name: "Cooling Runes", description: "Reduce your active Cooldowns.", category: "", iconUrl: "/images/cards/Card_Cooling_Runes.png" },
+    { name: "Discipline", description: "Reduce the Cooldown of Elemental Shift.", category: "Elemental Shift", iconUrl: "/images/cards/Card_Discipline.png" },
+    { name: "Draconic Will", description: "Reduce the Cooldown of Elemental Shift.", category: "Elemental Shift", iconUrl: "/images/cards/Card_Draconic_Will.png" },
+    { name: "Elemental Barrier", description: "Gain a Shield after using Elemental Shift.", category: "Elemental Shift", iconUrl: "/images/cards/Card_Elemental_Barrier.png" },
+    { name: "Elemental Grace", description: "Increase your Healing received.", category: "", iconUrl: "/images/cards/Card_Elemental_Grace.png" },
+    { name: "Heat Sink", description: "Reduce your active Cooldowns.", category: "", iconUrl: "/images/cards/Card_Heat_Sink.png" },
+    { name: "Ice In Her Veins", description: "Increase your maximum Health.", category: "FrostFire Glide", iconUrl: "/images/cards/Card_Ice_In_Her_Veins.png" },
+    { name: "Mystic Fire", description: "Increase your damage.", category: "FrostFire Glide", iconUrl: "/images/cards/Card_Mystic_Fire.png" },
+    { name: "Permafrost", description: "Increase the slow of Frost Bomb.", category: "Frost Bomb", iconUrl: "/images/cards/Card_Permafrost.png" },
+    { name: "Pilgrimage", description: "Increase the duration of FrostFire Glide.", category: "FrostFire Glide", iconUrl: "/images/cards/Card_Pilgrimage.png" },
+    { name: "Pyretic Momentum", description: "Increase your movement speed.", category: "FrostFire Glide", iconUrl: "/images/cards/Card_Pyretic_Momentum.png" },
+    { name: "Swift Sear", description: "Increase the damage of Inferno Cannon.", category: "Inferno Cannon", iconUrl: "/images/cards/Card_Swift_Sear.png" },
+  ],
+};
+
 export const CHAMPION_DATA: Record<string, ChampionData> = {
   androxus: ANDROXUS_DATA,
   ash: ASH_DATA,
@@ -1280,6 +1353,7 @@ export const CHAMPION_DATA: Record<string, ChampionData> = {
   barik: BARIK_DATA,
   cassie: CASSIE_DATA,
   dredge: DREDGE_DATA,
+  imani: IMANI_DATA,
   fernando: FERNANDO_DATA,
   inara: INARA_DATA,
   khan: KHAN_DATA,
