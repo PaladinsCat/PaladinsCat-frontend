@@ -1993,6 +1993,100 @@ export const VIVIAN_DATA: ChampionData = {
   ],
 };
 
+export const WILLO_DATA: ChampionData = {
+  name: "Willo",
+  roles: ["Damage"],
+  stats: {
+    health: "2200",
+    speed: "370",
+    speedUnits: "~23 units/s",
+    range: "500",
+  },
+  skills: [
+    {
+      name: "Wand of Overgrowth",
+      key: "LMB",
+      iconUrl: "/images/skills/Ability_Wand_of_Overgrowth.png",
+      damage: "500",
+      description: "Fire a blast of Fae energy every 0.75s that deals 500 damage in an area.",
+    },
+    {
+      name: "Dead Zone",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_Dead_Zone.png",
+      damage: "100",
+      cooldown: "16s",
+      description: "Launch a toxic spore that deals 100 damage and infects enemies in an area, preventing them from being healed.",
+    },
+    {
+      name: "Seedling",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Seedling.png",
+      damage: "400, 400",
+      cooldown: "13s",
+      description: "Throw an explosive seed that deals 400 damage and spawns 4 more damaging seeds in an area around it.",
+    },
+    {
+      name: "Flutter",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Flutter.png",
+      cooldown: "10s",
+      description: "Quickly flutter your wings and propel yourself forwards and upwards. Hold Jump to use Pixie Dust, reducing your fall speed in air.",
+    },
+    {
+      name: "Fae Flight",
+      key: "E",
+      iconUrl: "/images/skills/Ability_Fae_Flight.png",
+      description: "Take to the skies and rain down Fae vengeance.",
+    },
+  ],
+  talents: [
+    {
+      name: "Nightshade",
+      description: "Dead Zone damage is increased to 650. On hit, 25% of Dead Zone's cooldown is refunded.",
+      category: "Default Talent",
+      iconUrl: "/images/champions/Talent Willo Nightshade.png",
+    },
+    {
+      name: "Blastflower",
+      description: "Hitting an enemy with your weapon shots increases the damage they take from weapon shots by 15% for 3s, stacking up to 3 times.",
+      category: "Mastery Level 2",
+      iconUrl: "/images/champions/Talent Willo Blastflower.png",
+    },
+    {
+      name: "Scorn",
+      description: "Increase the damage of each Seedling to 750 and reduce their detonation time by 25%. Secondary Seedlings now deal 1500 damage over 2s to any deployable shield hit.",
+      category: "Mastery Level 8",
+      iconUrl: "/images/champions/Talent Willo Scorn.png",
+    },
+  ],
+  cards: [
+    { name: "Antics", values: ["5%", "10%", "15%", "20%", "25%"], category: "", iconUrl: "/images/cards/Card_Antics.png" },
+    { name: "Fauna", values: ["40%", "80%", "120%", "160%", "200%"], category: "", iconUrl: "/images/cards/Card_Fauna.png" },
+    { name: "Flitter", values: ["-0.6s", "-1.2s", "-1.8s", "-2.4s", "-3s"], category: "Flutter", iconUrl: "/images/cards/Card_Flitter.png" },
+    { name: "Flora", values: ["50", "100", "150", "200", "250"], category: "", iconUrl: "/images/cards/Card_Flora.png" },
+    { name: "Germination", values: ["1", "2", "3", "4", "5"], category: "Seedling", iconUrl: "/images/cards/Card_Germination.png" },
+    { name: "Hijinks", values: ["50", "100", "150", "200", "250"], category: "Flutter", iconUrl: "/images/cards/Card_Hijinks.png" },
+    { name: "Hummingbird", values: ["1", "2", "3", "4", "5"], category: "Flutter", iconUrl: "/images/cards/Card_Hummingbird.png" },
+    { name: "Just Believe!", values: ["-8%", "-16%", "-24%", "-32%", "-40%"], category: "", iconUrl: "/images/cards/Card_Just_Believe!.png" },
+    { name: "Nectar", values: ["75", "150", "225", "300", "375"], category: "Seedling", iconUrl: "/images/cards/Card_Nectar.png" },
+    { name: "Photosynthesis", values: ["6%", "12%", "18%", "24%", "30%"], category: "Seedling", iconUrl: "/images/cards/Card_Photosynthesis.png" },
+    { name: "Pixie Dust", values: ["75", "150", "225", "300", "375"], category: "Dead Zone", iconUrl: "/images/cards/Card_Pixie_Dust.png" },
+    { name: "Shenanigans", values: ["8%", "16%", "24%", "32%", "40%"], category: "Dead Zone", iconUrl: "/images/cards/Card_Shenanigans.png" },
+    { name: "Sparkle", values: ["0.6s", "1.2s", "1.8s", "2.4s", "3s"], category: "Dead Zone", iconUrl: "/images/cards/Card_Sparkle.png" },
+    { name: "Spritely", values: ["-5%", "-10%", "-15%", "-20%", "-25%"], category: "Flutter", iconUrl: "/images/cards/Card_Spritely.png" },
+    { name: "Sprouts", values: ["-0.5s", "-1s", "-1.5s", "-2s", "-2.5s"], category: "Seedling", iconUrl: "/images/cards/Card_Sprouts.png" },
+    { name: "Twilight", values: ["-0.8s", "-1.6s", "-2.4s", "-3.2s", "-4s"], category: "Dead Zone", iconUrl: "/images/cards/Card_Twilight.png" },
+  ],
+  loadouts: [
+    { name: "Wand of Overgrowth", description: "Fire a blast of Fae energy every 0.75s that deals 500 damage in an area.", category: "", iconUrl: "/images/skills/Ability_Wand_of_Overgrowth.png" },
+    { name: "Dead Zone", description: "Launch a toxic spore that deals 100 damage and infects enemies in an area, preventing them from being healed.", category: "", iconUrl: "/images/skills/Ability_Dead_Zone.png" },
+    { name: "Seedling", description: "Throw an explosive seed that deals 400 damage and spawns 4 more damaging seeds in an area around it.", category: "", iconUrl: "/images/skills/Ability_Seedling.png" },
+    { name: "Flutter", description: "", category: "", iconUrl: "/images/skills/Ability_Flutter.png" },
+    { name: "Fae Flight", description: "Take to the skies and rain down Fae vengeance.", category: "", iconUrl: "/images/skills/Ability_Fae_Flight.png" },
+  ],
+};
+
 export const CHAMPION_DATA: Record<string, ChampionData> = {", 
   androxus: ANDROXUS_DATA,
   ash: ASH_DATA,
@@ -2021,6 +2115,7 @@ export const CHAMPION_DATA: Record<string, ChampionData> = {",
   tyra: TYRA_DATA,
   viktor: VIKTOR_DATA,
   vivian: VIVIAN_DATA,
+  willob: WILLO_DATA,
 };
 
 export function getChampionData(slug: string): ChampionData | undefined {
