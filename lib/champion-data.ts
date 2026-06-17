@@ -556,6 +556,77 @@ export const INARA_DATA: ChampionData = {
   ],
 };
 
+export const KHAN_DATA: ChampionData = {
+  name: "Khan",
+  roles: ["Frontline"],
+  stats: {
+    health: "4000",
+    speed: "350",
+    speedUnits: "~21 units/s",
+    range: "60",
+  },
+  skills: [
+    {
+      name: "Heavy Repeater",
+      key: "LMB",
+      iconUrl: "/images/skills/Ability_HeavyRepeater.png",
+      damage: "210",
+      description: "An automatic heavy repeater that riddles enemies with high-caliber bullets, dealing 210 damage every 0.22s.",
+    },
+    {
+      name: "Bulwark",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_Bulwark.png",
+      damage: "4500",
+      description: "Activate a shield that blocks up to 4500 damage and regenerates itself while not active.",
+    },
+    {
+      name: "Battle Shout",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_BattleShout.png",
+      cooldown: "12s",
+      description: "Release a battle-shout, becoming immune and healing yourself and nearby allies for 1350.",
+    },
+    {
+      name: "Commander's Grab",
+      key: "F",
+      iconUrl: "/images/skills/Ability_CommandersGrab.png",
+      cooldown: "12s",
+      description: "Grab an enemy and slam them down, dealing damage to them and nearby enemies.",
+    },
+    {
+      name: "Overpower",
+      key: "E",
+      iconUrl: "/images/skills/Ability_Overpower.png",
+      cooldown: "Ultimate",
+      description: "Fire a powerful shot that deals damage and applies Knockback to enemies in its path.",
+    },
+  ],
+  talents: [
+    { name: "Lian's Shield", description: "Your Shield now regenerates at 120% effectiveness, and regenerates even while it is active.", category: "Bulwark", iconUrl: "/images/champions/Talent Khan LiansShield.png" },
+    { name: "Storm of Bullets", description: "Increase your Attack Speed by 40%, but reduce your damage-per-shot by 25%.", category: "Heavy Repeater", iconUrl: "/images/champions/Talent Khan StormofBullets.png" },
+    { name: "Vortex Grip", description: "Commander's Grab now pulls all nearby enemies toward you and Stuns them for 1s.", category: "Commander's Grab", iconUrl: "/images/champions/Talent Khan VortexGrip.png" },
+  ],
+  loadouts: [
+    { name: "Bloodthirst", description: "Gain Lifesteal.", category: "", iconUrl: "/images/cards/Card_Bloodthirst.png" },
+    { name: "Chokehold", description: "Increase the Stun duration of Commander's Grab.", category: "Commander's Grab", iconUrl: "/images/cards/Card_Chokehold.png" },
+    { name: "Close and Personal", description: "Reduce the Cooldown of Commander's Grab.", category: "Commander's Grab", iconUrl: "/images/cards/Card_Close_and_Personal.png" },
+    { name: "Excessive Force", description: "Increase the number of targets Commander's Grab can hit.", category: "", iconUrl: "/images/cards/Card_Excessive_Force.png" },
+    { name: "Hold The Line!", description: "Increase the healing of Battle Shout.", category: "Battle Shout", iconUrl: "/images/cards/Card_Hold_The_Line!.png" },
+    { name: "Hopeguard", description: "Increase the Shield of Bulwark.", category: "Bulwark", iconUrl: "/images/cards/Card_Hopeguard.png" },
+    { name: "Hulking Strength", description: "Reduce the Cooldown of Commander's Grab.", category: "Commander's Grab", iconUrl: "/images/cards/Card_Hulking_Strength.png" },
+    { name: "Into The Breach!", description: "Increase the damage reduction of Battle Shout.", category: "Battle Shout", iconUrl: "/images/cards/Card_Into_The_Breach!.png" },
+    { name: "Lifetaker", description: "Reduce the damage you take.", category: "", iconUrl: "/images/cards/Card_Lifetaker.png" },
+    { name: "Martial Law", description: "Increase the number of targets Commander's Grab can hit.", category: "Commander's Grab", iconUrl: "/images/cards/Card_Martial_Law.png" },
+    { name: "Never Surrender!", description: "Reduce the Cooldown of Battle Shout.", category: "Battle Shout", iconUrl: "/images/cards/Card_Never_Surrender!.png" },
+    { name: "Open Fire!", description: "Increase the number of bullets from your weapon.", category: "Battle Shout", iconUrl: "/images/cards/Card_Open_Fire!.png" },
+    { name: "Platemail", description: "Increase your maximum Health.", category: "", iconUrl: "/images/cards/Card_Platemail.png" },
+    { name: "Ready For War", description: "Increase the Shield of Bulwark.", category: "Bulwark", iconUrl: "/images/cards/Card_Ready_For_War.png" },
+    { name: "Shield Wall", description: "Increase the Shield of Bulwark.", category: "Bulwark", iconUrl: "/images/cards/Card_Shield_Wall.png" },
+    { name: "Vigorous Defense", description: "Increase the Shield of Bulwark.", category: "Bulwark", iconUrl: "/images/cards/Card_Vigorous_Defense.png" },
+  ],
+};
+
 export const CHAMPION_DATA: Record<string, ChampionData> = {
   androxus: ANDROXUS_DATA,
   ash: ASH_DATA,
@@ -564,6 +635,7 @@ export const CHAMPION_DATA: Record<string, ChampionData> = {
   barik: BARIK_DATA,
   fernando: FERNANDO_DATA,
   inara: INARA_DATA,
+  khan: KHAN_DATA,
 };
 
 export function getChampionData(slug: string): ChampionData | undefined {
