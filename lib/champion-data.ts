@@ -843,6 +843,78 @@ export const RAUM_DATA: ChampionData = {
   ],
 };
 
+export const RUCKUS_DATA: ChampionData = {
+  name: "Ruckus",
+  roles: ["Frontline"],
+  stats: {
+    health: "4000",
+    speed: "365",
+    speedUnits: "~22 units/s",
+    range: "85",
+  },
+  skills: [
+    {
+      name: "Miniguns",
+      key: "LMB",
+      iconUrl: "/images/skills/WeaponAttack_Ruckus_Icon.png",
+      damage: "40 /0.05s",
+      description: "Fast-firing miniguns that shred your enemies with bullets, dealing 40 damage every 0.05s when fully spun up.",
+    },
+    {
+      name: "Missile Launcher",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_Missile_Launcher.png",
+      damage: "225",
+      cooldown: "10s",
+      description: "Fire large missiles that explode and deal 225 damage each. Has 3 charges.",
+    },
+    {
+      name: "Emitter",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Emitter.png",
+      cooldown: "12s",
+      description: "Shield yourself for up to 2500 damage for a brief time.",
+    },
+    {
+      name: "Advance",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Advance.png",
+      cooldown: "5s",
+      description: "Jet in the direction you're moving, maintaining your ability to fire. Stationary use launches upward.",
+    },
+    {
+      name: "Hexa Fire",
+      key: "E",
+      iconUrl: "/images/skills/Ability_Hexa_Fire.png",
+      cooldown: "Ultimate",
+      description: "Unleash 2 miniguns and rocket launchers that unload their ammo over a short duration. The guns deal 120 damage every 0.04s and the launchers deal 250 damage every 0.25s.",
+    },
+  ],
+  talents: [
+    { name: "Flux Generator", description: "Increase the Shield granted by Emitter by 1000 and reduce its cooldown by 1s. While Emitter is active, gain Immunity to Crowd Control.", category: "Emitter", iconUrl: "/images/champions/Talent Ruckus FluxGenerator.png" },
+    { name: "Rocket Barrage", description: "Increase the radius of Missile Launcher's explosions by 66%.", category: "Missile Launcher", iconUrl: "/images/champions/Talent Ruckus RocketBarrage.png" },
+    { name: "Aerial Assault", description: "Advance gains a 3rd charge.", category: "Advance", iconUrl: "/images/champions/Talent Ruckus Aerial Assault.png" },
+  ],
+  loadouts: [
+    { name: "Air Cooled", description: "Increase the duration of Advance.", category: "Advance", iconUrl: "/images/cards/Card_Air_Cooled.png" },
+    { name: "At The Ready", description: "Increase the number of missiles of Missile Launcher.", category: "Missile Launcher", iconUrl: "/images/cards/Card_At_the_Ready.png" },
+    { name: "Countermeasure", description: "Increase your damage.", category: "", iconUrl: "/images/cards/Card_Countermeasure.png" },
+    { name: "Crystal Capacitor", description: "Reduce the Cooldown of Missile Launcher.", category: "Missile Launcher", iconUrl: "/images/cards/Card_Crystal_Capacitor.png" },
+    { name: "Dampener", description: "Increase the Shield of Emitter.", category: "", iconUrl: "/images/cards/Card_Dampener.png" },
+    { name: "Extended Magazines", description: "Increase the duration of Advance.", category: "Advance", iconUrl: "/images/cards/Card_Extended_Magazines.png" },
+    { name: "Fuel Reserves", description: "Increase the duration of Advance.", category: "Advance", iconUrl: "/images/cards/Card_Fuel_Reserves.png" },
+    { name: "Metal March", description: "Reduce the Cooldown of Missile Launcher.", category: "Missile Launcher", iconUrl: "/images/cards/Card_Metal_March.png" },
+    { name: "Nanotechnology", description: "Increase the Shield of Emitter.", category: "Emitter", iconUrl: "/images/cards/Card_Nanotechnology.png" },
+    { name: "No Chill", description: "Increase your damage.", category: "", iconUrl: "/images/cards/Card_No_Chill.png" },
+    { name: "Opulence", description: "Increase the number of missiles of Missile Launcher.", category: "Missile Launcher", iconUrl: "/images/cards/Card_Opulence.png" },
+    { name: "Proximity", description: "Reduce the Cooldown of Advance.", category: "Advance", iconUrl: "/images/cards/Card_Proximity.png" },
+    { name: "Quick Loader", description: "Increase your damage.", category: "", iconUrl: "/images/cards/Card_Quick_Loader.png" },
+    { name: "Refraction", description: "Reduce the Cooldown of Emitter.", category: "Emitter", iconUrl: "/images/cards/Card_Refraction.png" },
+    { name: "Regenerative Alloy", description: "Increase the Shield of Emitter.", category: "Emitter", iconUrl: "/images/cards/Card_Regenerative_Alloy.png" },
+    { name: "Warden", description: "Increase the duration of Emitter.", category: "Emitter", iconUrl: "/images/cards/Card_Warden.png" },
+  ],
+};
+
 export const CHAMPION_DATA: Record<string, ChampionData> = {
   androxus: ANDROXUS_DATA,
   ash: ASH_DATA,
@@ -855,6 +927,7 @@ export const CHAMPION_DATA: Record<string, ChampionData> = {
   makoa: MAKOA_DATA,
   nyx: NYX_DATA,
   raum: RAUM_DATA,
+  ruckus: RUCKUS_DATA,
 };
 
 export function getChampionData(slug: string): ChampionData | undefined {
