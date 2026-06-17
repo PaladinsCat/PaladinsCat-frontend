@@ -989,6 +989,77 @@ export const TERMINUS_DATA: ChampionData = {
   ],
 };
 
+export const TORVALD_DATA: ChampionData = {
+  name: "Torvald",
+  roles: ["Frontline"],
+  stats: {
+    health: "3000",
+    speed: "350",
+    speedUnits: "~22 units/s",
+    range: "75",
+  },
+  skills: [
+    {
+      name: "Gauntlet",
+      key: "LMB",
+      iconUrl: "/images/skills/WeaponAttack_Torvald_Icon.png",
+      damage: "195",
+      description: "Fire bursts of magical energy from your Gauntlet every 0.25s, dealing 195 damage per shot.",
+    },
+    {
+      name: "Nullify",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_Nullify.png",
+      cooldown: "11s",
+      description: "Cast a spell that nullifies the next enemy ability.",
+    },
+    {
+      name: "Protection",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Protection.png",
+      cooldown: "8s",
+      description: "Project a shield onto an ally for a short duration that prevents up to 500 damage.",
+    },
+    {
+      name: "Recharge",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Recharge.png",
+      cooldown: "12s",
+      description: "Regenerate 2750 of your shield over a short duration.",
+    },
+    {
+      name: "Hyper Beam",
+      key: "E",
+      iconUrl: "/images/skills/Ability_Hyper_Beam.png",
+      cooldown: "Ultimate",
+      description: "Fire a massive beam of energy that deals damage to all enemies in its path.",
+    },
+  ],
+  talents: [
+    { name: "Thanks, Grandpa", description: "Increase Protection's Shield Health by 200.", category: "Protection", iconUrl: "/images/champions/Talent Torvald ThanksGrandpa.png" },
+    { name: "Direct Current", description: "Double the range at which you can use Nullify.", category: "Nullify", iconUrl: "/images/champions/Talent Torvald DirectCurrent.png" },
+    { name: "Field Study", description: "Increase the damage done by allies by 10% while they are Shielded by Protection.", category: "Protection", iconUrl: "/images/champions/Talent Torvald FieldStudy.png" },
+  ],
+  loadouts: [
+    { name: "Arcane Etching", description: "Increase the damage of Nullify.", category: "Nullify", iconUrl: "/images/cards/Card_Arcane_Etching.png" },
+    { name: "Conduction", description: "Reduce the Cooldown of Recharge.", category: "Recharge", iconUrl: "/images/cards/Card_Conduction.png" },
+    { name: "Eldritch Speed", description: "Increase the duration of Recharge.", category: "Recharge", iconUrl: "/images/cards/Card_Eldritch_Speed.png" },
+    { name: "Glyph of Freedom", description: "Reduce the damage you take.", category: "", iconUrl: "/images/cards/Card_Glyph_of_Freedom.png" },
+    { name: "Glyph of Health", description: "Increase your maximum Health.", category: "", iconUrl: "/images/cards/Card_Glyph_of_Health.png" },
+    { name: "Glyph of Siphoning", description: "Increase your Lifesteal.", category: "", iconUrl: "/images/cards/Card_Glyph_of_Siphoning.png" },
+    { name: "Glyph of the Fist", description: "Increase your damage.", category: "", iconUrl: "/images/cards/Card_Glyph_of_the_Fist.png" },
+    { name: "Hearthwarder", description: "Increase the Shield of Protection.", category: "Protection", iconUrl: "/images/cards/Card_Hearthwarder.png" },
+    { name: "Induction", description: "Reduce the Cooldown of Recharge.", category: "Recharge", iconUrl: "/images/cards/Card_Induction.png" },
+    { name: "Infusion", description: "Increase the damage of Nullify.", category: "Nullify", iconUrl: "/images/cards/Card_Infusion.png" },
+    { name: "Lifegiver", description: "Increase the Shield of Protection.", category: "Protection", iconUrl: "/images/cards/Card_Lifegiver.png" },
+    { name: "Rune Torrent", description: "Increase the damage of Nullify.", category: "Nullify", iconUrl: "/images/cards/Card_Rune_Torrent.png" },
+    { name: "Scribe's Wit", description: "Reduce the Cooldown of Nullify.", category: "Nullify", iconUrl: "/images/cards/Card_Scribe_s_Wit.png" },
+    { name: "Timeshaper", description: "Increase the Shield of Protection.", category: "Protection", iconUrl: "/images/cards/Card_Timeshaper.png" },
+    { name: "Vital Grasp", description: "Increase the Shield of Recharge.", category: "Recharge", iconUrl: "/images/cards/Card_Vital_Grasp.png" },
+    { name: "Winddancer", description: "Increase the Shield of Protection.", category: "Protection", iconUrl: "/images/cards/Card_Winddancer.png" },
+  ],
+};
+
 export const CHAMPION_DATA: Record<string, ChampionData> = {
   androxus: ANDROXUS_DATA,
   ash: ASH_DATA,
@@ -1003,6 +1074,7 @@ export const CHAMPION_DATA: Record<string, ChampionData> = {
   raum: RAUM_DATA,
   ruckus: RUCKUS_DATA,
   terminus: TERMINUS_DATA,
+  torvald: TORVALD_DATA,
 };
 
 export function getChampionData(slug: string): ChampionData | undefined {
