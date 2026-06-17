@@ -699,6 +699,79 @@ export const MAKOA_DATA: ChampionData = {
   ],
 };
 
+export const NYX_DATA: ChampionData = {
+  name: "Nyx",
+  roles: ["Frontline"],
+  stats: {
+    health: "4700",
+    speed: "350",
+    speedUnits: "~21 units/s",
+    range: "100",
+  },
+  skills: [
+    {
+      name: "Realm Breaker",
+      key: "LMB",
+      iconUrl: "/images/skills/Ability_RealmBreaker.png",
+      damage: "200×3, 425×2",
+      description: "Punch in a five hit attack chain, dealing 200 three times and 425 two times. Resets to the first hit after missing 2 hits or after 1.25s.",
+    },
+    {
+      name: "Rift Slash",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_RiftSlash.png",
+      damage: "200, 275, 350, 50, 200",
+      cooldown: "11s",
+      description: "Fire a projectile that deals damage and leaves behind an Abyssal Rift. The Rift slows enemies within 30 units and explodes after 2s.",
+    },
+    {
+      name: "Abyssal Fortress",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_AbyssalFortress.png",
+      damage: "5000, 1500",
+      cooldown: "12s",
+      description: "Place a 5000 shield at the target location. The shield loses health the farther it is placed from you.",
+    },
+    {
+      name: "Royal Presence",
+      key: "F",
+      iconUrl: "/images/skills/Ability_RoyalPresence.png",
+      cooldown: "14s",
+      description: "Gain increased Movement Speed and leave a trail that slows enemies.",
+    },
+    {
+      name: "Chaos Nexus",
+      key: "E",
+      iconUrl: "/images/skills/Ability_ChaosNexus.png",
+      cooldown: "Ultimate",
+      description: "Create a rift that pulls enemies toward its center and deals damage over time.",
+    },
+  ],
+  talents: [
+    { name: "Show of Force", description: "Royal Presence now Stuns enemies that enter its area.", category: "Royal Presence", iconUrl: "/images/champions/Talent Nyx Show of Force.png" },
+    { name: "Abyssal Breach", description: "Rift Slash now deals 50% more damage and the Abyssal Rift lasts 2s longer.", category: "Rift Slash", iconUrl: "/images/champions/Talent Nyx Abyssal Breach.png" },
+    { name: "Subjugation", description: "Chaos Nexus now has a larger radius and pulls enemies faster.", category: "Chaos Nexus", iconUrl: "/images/champions/Talent Nyx Subjugation.png" },
+  ],
+  loadouts: [
+    { name: "A Swift End", description: "Increase the damage of Abyssal Fortress.", category: "Abyssal Fortress", iconUrl: "/images/cards/Card_A_Swift_End.png" },
+    { name: "Abyssal Authority", description: "Increase the slow effect of Royal Presence.", category: "Royal Presence", iconUrl: "/images/cards/Card_Abyssal_Authority.png" },
+    { name: "All Will Kneel", description: "Increase the damage of Rift Slash.", category: "Rift Slash", iconUrl: "/images/cards/Card_All_Will_Kneel.png" },
+    { name: "Brutal Pursuer", description: "Increase the damage of Rift Slash.", category: "Rift Slash", iconUrl: "/images/cards/Card_Brutal_Pursuer.png" },
+    { name: "Center of Combat", description: "Increase the duration of Royal Presence.", category: "Royal Presence", iconUrl: "/images/cards/Card_Center_of_Combat.png" },
+    { name: "Devastating Blows", description: "Increase the number of hits from Realm Breaker.", category: "", iconUrl: "/images/cards/Card_Devastating_Blows.png" },
+    { name: "Face to Face", description: "Increase the slow effect of Royal Presence.", category: "Royal Presence", iconUrl: "/images/cards/Card_Face_to_Face.png" },
+    { name: "Forever Changed", description: "Increase your maximum Health.", category: "", iconUrl: "/images/cards/Card_Forever_Changed.png" },
+    { name: "Frontline Commander", description: "Increase the Health of Abyssal Fortress.", category: "Abyssal Fortress", iconUrl: "/images/cards/Card_Frontline_Commander.png" },
+    { name: "The Little Things", description: "Reduce the Cooldown of Rift Slash.", category: "", iconUrl: "/images/cards/Card_The_Little_Things.png" },
+    { name: "The New Order", description: "Increase the healing of Royal Presence.", category: "Royal Presence", iconUrl: "/images/cards/Card_The_New_Order.png" },
+    { name: "True Freedom", description: "Increase the damage of Realm Breaker.", category: "", iconUrl: "/images/cards/Card_True_Freedom.png" },
+    { name: "Unbreakable Will", description: "Reduce the Cooldown of Abyssal Fortress.", category: "Abyssal Fortress", iconUrl: "/images/cards/Card_Unbreakable_Will.png" },
+    { name: "Unchecked Power", description: "Increase the damage of Rift Slash.", category: "Rift Slash", iconUrl: "/images/cards/Card_Unchecked_Power.png" },
+    { name: "Unyielding Advance", description: "Increase the Health of Abyssal Fortress.", category: "Abyssal Fortress", iconUrl: "/images/cards/Card_Unyielding_Advance.png" },
+    { name: "World Torn Asunder", description: "Increase the damage of Rift Slash.", category: "Rift Slash", iconUrl: "/images/cards/Card_World_Torn_Asunder.png" },
+  ],
+};
+
 export const CHAMPION_DATA: Record<string, ChampionData> = {
   androxus: ANDROXUS_DATA,
   ash: ASH_DATA,
@@ -709,6 +782,7 @@ export const CHAMPION_DATA: Record<string, ChampionData> = {
   inara: INARA_DATA,
   khan: KHAN_DATA,
   makoa: MAKOA_DATA,
+  nyx: NYX_DATA,
 };
 
 export function getChampionData(slug: string): ChampionData | undefined {
