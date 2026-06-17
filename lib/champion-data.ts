@@ -42,9 +42,6 @@ export interface ChampionData {
   loadouts?: ChampionLoadout[];
 }
 
-// Image paths for wiki assets
-const IMG = "/images/wiki";
-
 export const ANDROXUS_DATA: ChampionData = {
   name: "Androxus",
   roles: ["Flank"],
@@ -116,5 +113,5 @@ export function getChampionData(slug: string): ChampionData | undefined {
 // Talent image paths
 export function getTalentIconPath(championName: string, talentName: string): string {
   const slug = `${championName}_${talentName.replace(/\s+/g, "")}`;
-  return `${IMG}/talents/Talent ${championName} ${talentName}.png`;
+  return `/images/wiki/talents/Talent ${championName} ${talentName}.png`;
 }
