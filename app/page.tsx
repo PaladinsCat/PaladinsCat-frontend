@@ -150,7 +150,7 @@ export default function HomePage() {
           </form>
         </motion.div>
 
-        {/* Main content: 3-column layout on wide screens */}
+        {/* Main content: two-column layout */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="space-y-6">
             {/* Top Win Rate by Role */}
@@ -169,49 +169,52 @@ export default function HomePage() {
                     ))}
                   </div>
                 ) : (
-                  ROLES.map((role) => {
-                    const inRole = champions.filter((c) => c.roles?.includes(role));
-                    const safeEntries = inRole
-                      .sort((a, b) => (b.winRate ?? 0) - (a.winRate ?? 0))
-                      .slice(0, 4);
-                    if (safeEntries.length === 0) return null;
-                    return (
-                      <div key={role}>
-                        <div className="flex items-center gap-2 mb-3">
-                          <Image
-                            src={role === "Frontline" ? "/images/icons/Class_Front_Line_Icon.avif" : `/images/icons/Class_${role}_Icon.avif`}
-                            alt={role}
-                            width={20}
-                            height={20}
-                            className="rounded-full"
-                          />
-                          <h3 className="text-pc-text font-medium text-sm">{role}</h3>
-                        </div>
-                        <div className="space-y-3">
-                          {safeEntries.map((c) => (
-                            <div key={c.id} className="flex items-center gap-3">
-                              <Image
-                                src={getChampionIconSafe(c.name)}
-                                alt={c.name}
-                                width={48}
-                                height={48}
-                                className="rounded-lg"
-                              />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    {ROLES.map((role) => {
+                      const inRole = champions.filter((c) => c.roles?.includes(role));
+                      const safeEntries = inRole
+                        .sort((a, b) => (b.winRate ?? 0) - (a.winRate ?? 0))
+                        .slice(0, 4);
+                      if (safeEntries.length === 0) return null;
+                      return (
+                        <div key={role} className="space-y-3">
+                          <div className="flex items-center gap-2 mb-2 border-b border-pc-border pb-1">
+                            <Image
+                              src={role === "Frontline" ? "/images/icons/Class_Front_Line_Icon.avif" : `/images/icons/Class_${role}_Icon.avif`}
+                              alt={role}
+                              width={20}
+                              height={20}
+                              style={{ opacity: 0.85 }}
+                            />
+                            <span className="text-sm font-medium text-pc-text-muted">{role}</span>
+                          </div>
+                          <div className="grid grid-cols-4 gap-x-3 gap-y-4">
+                            {safeEntries.map((c) => (
                               <Link
+                                key={c.id}
                                 href={`/champions/${c.id}`}
-                                className="text-pc-text hover:text-pc-accent transition-colors text-sm font-medium"
+                                className="group flex min-w-0 flex-col items-center gap-1 text-center"
                               >
-                                {c.name}
+                                <Image
+                                  src={getChampionIconSafe(c.name)}
+                                  alt={c.name}
+                                  width={48}
+                                  height={48}
+                                  className="rounded-lg group-hover:ring-2 ring-pc-accent transition-all"
+                                />
+                                <span className="max-w-full truncate text-xs leading-tight text-pc-text-muted group-hover:text-pc-accent transition-colors">
+                                  {c.name}
+                                </span>
+                                <span className="text-xs font-mono text-pc-text-muted">
+                                  {c.winRate != null ? `${(c.winRate * 100).toFixed(1)}%` : "N/A"}
+                                </span>
                               </Link>
-                              <span className="text-pc-text-muted text-sm ml-auto">
-                                {c.winRate != null ? `${(c.winRate * 100).toFixed(1)}%` : "???"}
-                              </span>
-                            </div>
-                          ))}
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })
+                      );
+                    })}
+                  </div>
                 )}
               </Card>
             </motion.div>
@@ -254,7 +257,7 @@ export default function HomePage() {
           <div className="space-y-6">
             {/* Leaderboard */}
             <motion.div initial={{ opacity: 0, y: 25 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 300, damping: 20 }}>
-              <Card>
+              <Card style={{ backgroundColor: "var(--pc-bg-elevated)", backdropFilter: "none" }}>
                 <div className="pc-card-title mb-3">Leaderboard</div>
                 {loading ? (
                   <div className="space-y-3">

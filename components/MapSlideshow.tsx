@@ -47,14 +47,14 @@ export default function MapSlideshow() {
   }, [order.length]);
 
   return (
-    <div className="fixed inset-0 -z-10 overflow-hidden" aria-hidden="true">
+    <div className="fixed inset-0 -z-10 overflow-hidden" aria-hidden="true" style={{ backgroundColor: "var(--pc-bg)" }}>
       <AnimatePresence mode="wait">
         <motion.div
           key={order[index]}
-          initial={{ opacity: 0 }}
+          initial={{ opacity: 1 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 2 }}
+          transition={{ duration: 1.5 }}
           style={{
             position: "absolute",
             top: 0,
@@ -64,7 +64,7 @@ export default function MapSlideshow() {
             backgroundImage: `url("${order[index]}")`,
             backgroundPosition: "center",
             backgroundSize: "cover",
-            filter: "brightness(0.25)",
+            filter: "brightness(0.45)",
           }}
         />
       </AnimatePresence>

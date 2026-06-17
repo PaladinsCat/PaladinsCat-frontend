@@ -105,15 +105,23 @@ body {
 /* Card: elevated bg, 16px radius, 1px border, default shadow */
 /* Hover lift + shadow increase handled in Card.tsx via inline events */
 .pc-card {
-  background-color: var(--pc-bg-elevated);
+  background-color: oklch(0.210 0.005 280 / 0.65);
   border: 1px solid var(--pc-border);
   border-radius: 16px;
   padding: 24px;
   transition: border-color 0.25s ease;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .pc-card:hover {
   border-color: var(--pc-accent-mid);
+}
+
+/* Opaque modifier — restores full opacity on cards that also have pc-card-opaque */
+.pc-card.pc-card-opaque {
+  background-color: var(--pc-bg-elevated) !important;
+  backdrop-filter: none !important;
 }
 
 /* Card variant: no padding (for tables, lists) */

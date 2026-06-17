@@ -2,56 +2,111 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Card from "@/components/Card";
 import { fetchChampions, type Champion } from "@/lib/api-client";
+import { STATIC_CHAMPIONS } from "@/lib/mock-data";
+import { getChampionIconSafe } from "@/lib/champion-icons";
 
-const ROLES = ["Frontline", "Damage", "Flank", "Support"] as const;
+const ROLES = [
+  { label: "Frontline", icon: "/images/icons/Class_Front_Line_Icon.avif" },
+  { label: "Damage",    icon: "/images/icons/Class_Damage_Icon.avif" },
+  { label: "Flank",     icon: "/images/icons/Class_Flank_Icon.avif" },
+  { label: "Support",   icon: "/images/icons/Class_Support_Icon.avif" },
+] as const;
 const TIERS = ["Iron", "Bronze", "Silver", "Gold", "Platinum", "Diamond", "Master", "Grandmaster"] as const;
 
-// Mock champion shape from mock-data.ts
-interface MockChampion {
-  id: number;
-  name: string;
-  roles: string[];
-  winRate: number;
+/** Build the guaranteed base list: all 59 champions, no stats. */
+function buildStaticBase(): Champion[] {
+  return STATIC_CHAMPIONS.map((c) => ({
+    id: c.id,
+    name: c.name,
+    roles: c.roles,
+    winRate: null,
+    pickRate: null,
+    banRate: null,
+    rating: null,
+    ratingDeviation: null,
+    volatility: null,
+    totalMatches: null,
+    totalPlays: null,
+    wins: null,
+    imagePath: getChampionIconSafe(c.name),
+  }));
 }
 
 export default function ChampionTable() {
-  const [champions, setChampions] = useState<Champion[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [filterTier, setFilterTier] = useState<string | null>(null);
-  const [filterRegion, setFilterRegion] = useState<string | null>(null);
-  const [filterPatch, setFilterPatch] = useState<string | null>(null);
+  const [champions, setChampions] = useState<Champion[]>(buildStaticBase);
+  const [loading, setLoading] = useState(false);
+  const [dbAvailable, setDbAvailable] = useState<boolean | null>(null); // null = checking
+  const [filterRole, setFilterRole] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<"name" | "winRate" | "banRate" | "popularity">("name");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Try to fetch DB stats in the background and merge them in
   useEffect(() => {
-    const loadChampions = async () => {
+    let cancelled = false;
+
+    async function tryFetchStats() {
       try {
-        const data = await fetchChampions({
-          tier: filterTier || undefined,
-          region: filterRegion || undefined,
-          patch: filterPatch || undefined,
-        });
+        const data = await fetchChampions();
+        if (cancelled) return;
+
         if (data.length > 0) {
-          setChampions(data);
+          // DB is up — merge stats into the static base by champion name
+          const statsByName = new Map(data.map((d) => [d.name.toLowerCase(), d]));
+          setChampions((prev) =>
+            prev.map((c) => {
+              const dbData = statsByName.get(c.name.toLowerCase());
+              if (dbData) {
+                return {
+                  ...c,
+                  winRate: dbData.winRate ?? c.winRate,
+                  pickRate: dbData.pickRate ?? c.pickRate,
+                  banRate: dbData.banRate ?? c.banRate,
+                  rating: dbData.rating ?? c.rating,
+                  totalMatches: dbData.totalMatches ?? c.totalMatches,
+                  totalPlays: dbData.totalPlays ?? c.totalPlays,
+                  wins: dbData.wins ?? c.wins,
+                  imagePath: dbData.imagePath || c.imagePath,
+                };
+              }
+              return c;
+            })
+          );
+          setDbAvailable(true);
         } else {
-          // No mock data fallback — if the API is empty, show empty state
-          setChampions([]);
+          setDbAvailable(false);
         }
       } catch {
-        setChampions([]);
-        setError(null);
-      } finally {
-        setLoading(false);
+        if (!cancelled) setDbAvailable(false);
       }
-    };
-    loadChampions();
-  }, [filterTier, filterRegion, filterPatch]);
+    }
 
-  const filtered = champions.filter((c) =>
-    c.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+    tryFetchStats();
+    return () => { cancelled = true; };
+  }, []);
+
+  const filtered = champions
+    .filter((c) => {
+      const matchesSearch = c.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesRole = !filterRole || (c.roles && c.roles.includes(filterRole));
+      return matchesSearch && matchesRole;
+    })
+    .sort((a, b) => {
+      // Nulls sink to the bottom for stat sorts
+      const nullsLast = (av: number | null | undefined, bv: number | null | undefined) => {
+        if (av == null && bv == null) return 0;
+        if (av == null) return 1;
+        if (bv == null) return -1;
+        return sortDir === "desc" ? bv - av : av - bv;
+      };
+      switch (sortBy) {
+        case "winRate":    return nullsLast(a.winRate, b.winRate);
+        case "banRate":    return nullsLast(a.banRate, b.banRate);
+        case "popularity": return nullsLast(a.totalPlays, b.totalPlays);
+        default:           return sortDir === "asc" ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
+      }
+    });
 
   return (
     <div className="space-y-6">
@@ -59,129 +114,146 @@ export default function ChampionTable() {
 
       {/* Filters */}
       <div className="flex gap-3 flex-wrap items-center">
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search champions..."
-          className="pc-input max-w-xs"
-        />
+        <div className="relative max-w-xs w-full">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search champions..."
+            className="pc-input pr-8 w-full"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-pc-text-muted hover:text-pc-text transition-colors"
+              aria-label="Clear search"
+            >
+              ✕
+            </button>
+          )}
+        </div>
         <select
-          value={filterTier || ""}
-          onChange={(e) => setFilterTier(e.target.value || null)}
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
           className="pc-select"
         >
-          <option value="">All Tiers</option>
-          {TIERS.map((t) => (
-            <option key={t} value={t}>{t}</option>
-          ))}
+          <option value="name">Name</option>
+          <option value="winRate">Win Rate</option>
+          <option value="banRate">Ban Rate</option>
+          <option value="popularity">Popularity</option>
         </select>
-        <select
-          value={filterRegion || ""}
-          onChange={(e) => setFilterRegion(e.target.value || null)}
-          className="pc-select"
+        <button
+          onClick={() => setSortDir(sortDir === "asc" ? "desc" : "asc")}
+          className="pc-select flex items-center gap-1 cursor-pointer"
+          title={sortDir === "asc" ? "Ascending" : "Descending"}
         >
-          <option value="">All Regions</option>
-          <option value="NA">NA</option>
-          <option value="EU">EU</option>
-          <option value="ASIA">ASIA</option>
-          <option value="OCE">OCE</option>
-        </select>
-        <select
-          value={filterPatch || ""}
-          onChange={(e) => setFilterPatch(e.target.value || null)}
-          className="pc-select"
-        >
-          <option value="">All Patches</option>
-          <option value="1.0.0">1.0.0</option>
-          <option value="1.1.0">1.1.0</option>
-          <option value="1.2.0">1.2.0</option>
-        </select>
+          {sortDir === "asc" ? "↑" : "↓"}
+        </button>
       </div>
 
+      {/* Class filter tabs */}
+      <div className="flex gap-2 flex-wrap items-center">
+        <button
+          onClick={() => setFilterRole(null)}
+          className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+            filterRole === null
+              ? "bg-pc-accent text-pc-bg"
+              : "bg-pc-card text-pc-muted hover:text-pc-text hover:bg-pc-card/80"
+          }`}
+        >
+          All
+        </button>
+        {ROLES.map((r) => (
+          <button
+            key={r.label}
+            onClick={() => setFilterRole(filterRole === r.label ? null : r.label)}
+            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              filterRole === r.label
+                ? "bg-pc-accent text-pc-bg"
+                : "bg-pc-card text-pc-muted hover:text-pc-text hover:bg-pc-card/80"
+            }`}
+          >
+            <img src={r.icon} alt={r.label} className="w-5 h-5" />
+            {r.label}
+          </button>
+        ))}
+      </div>
+
+      {/* DB status indicator */}
+      {dbAvailable === false && (
+        <div className="text-pc-muted text-sm italic">
+          Stats unavailable — showing champion list only. Win/pick/ban rates will appear when the database is online.
+        </div>
+      )}
+
       {/* Champion Grid */}
-      {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {Array.from({ length: 12 }).map((_, i) => (
-            <div key={i} className="pc-card p-6">
-              <div className="pc-skeleton h-24 w-full mb-4" />
-              <div className="pc-skeleton h-5 w-3/4 mb-2" />
-              <div className="pc-skeleton h-4 w-1/2" />
-            </div>
-          ))}
-        </div>
-      ) : error ? (
-        <div className="pc-card text-center">
-          <p className="pc-body">{error}</p>
-        </div>
-      ) : filtered.length === 0 ? (
+      {filtered.length === 0 ? (
         <div className="pc-card text-center">
           <p className="pc-body">No champions matched your search.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {filtered.map((c) => (
-            <Link key={c.id} href={`/champions/${c.id}`}>
-              <div className="pc-card group transition-transform duration-200 hover:scale-[1.02]">
-                {/* Champion portrait */}
-                {c.imagePath ? (
-                  <div className="w-full h-24 rounded-lg bg-pc-bg mb-4 flex items-center justify-center overflow-hidden">
-                    <img src={c.imagePath} alt={c.name} className="w-full h-full object-cover" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
+          {filtered.map((c) => {
+            const roleIcon = c.roles && c.roles.length > 0
+              ? ROLES.find(r => r.label === c.roles![0])?.icon
+              : undefined;
+            const formatPlays = (n: number | null | undefined) => {
+              if (n == null) return "—";
+              if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+              if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
+              return String(n);
+            };
+            return (
+              <Link key={c.id} href={`/champions/${c.id}`}>
+                <div className="group relative flex items-center gap-3.5 p-3 rounded-xl bg-pc-bg-elevated border border-pc-border hover:border-pc-accent-mid transition-all duration-200 hover:shadow-[0_0_20px_rgba(51,182,177,0.08)]">
+                  {/* Portrait */}
+                  <div className="shrink-0 w-12 h-12 rounded-lg bg-pc-bg flex items-center justify-center overflow-hidden border border-pc-border/50 group-hover:border-pc-accent-deep/50 transition-colors">
+                    {c.imagePath ? (
+                      <img src={c.imagePath} alt={c.name} className="w-full h-full object-contain" />
+                    ) : (
+                      <span className="text-lg font-bold text-pc-accent">
+                        {c.name.charAt(0).toUpperCase()}
+                      </span>
+                    )}
                   </div>
-                ) : (
-                  <div className="w-full h-24 rounded-lg bg-pc-bg mb-4 flex items-center justify-center">
-                    <span className="text-3xl font-bold text-pc-accent">
-                      {c.name.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                )}
 
-                {/* Name */}
-                <h3 className="text-pc-text font-semibold text-base mb-2 group-hover:text-pc-accent transition-colors">
-                  {c.name}
-                </h3>
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    {/* Row 1: name + role */}
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="text-pc-text font-semibold text-sm truncate group-hover:text-pc-accent transition-colors">
+                        {c.name}
+                      </h3>
+                      {c.roles && c.roles.length > 0 && (
+                        <span className="shrink-0 flex items-center gap-1 text-pc-text-muted text-[10px] px-1.5 py-0.5 rounded bg-pc-bg/60">
+                          {roleIcon && <img src={roleIcon} alt={c.roles[0]} className="w-3 h-3" />}
+                          {c.roles[0]}
+                        </span>
+                      )}
+                    </div>
 
-                {/* Winrate bar */}
-                {c.winRate != null && (
-                  <div className="mb-3">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="pc-label">Win Rate</span>
-                      <span className="text-pc-text text-sm font-medium">{c.winRate}%</span>
-                    </div>
-                    <div className="w-full h-2 rounded-full bg-pc-bg overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-gradient-to-r from-pc-accent-deep to-pc-accent transition-all duration-500"
-                        style={{ width: `${Math.min(c.winRate, 100)}%` }}
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {/* Pick + Ban rate stats */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <span className="pc-label">Pick Rate</span>
-                    <div className="text-pc-text text-sm font-medium">
-                      {c.pickRate != null ? `${c.pickRate}%` : "—"}
-                    </div>
-                  </div>
-                  <div>
-                    <span className="pc-label">Ban Rate</span>
-                    <div className="text-pc-text text-sm font-medium">
-                      {c.banRate != null ? `${c.banRate}%` : "—"}
+                    {/* Row 2: stats */}
+                    <div className="flex items-center gap-3 text-[11px]">
+                      <span className={c.winRate != null ? "text-emerald-400" : "text-pc-text-muted"}>
+                        <span className="text-pc-text-muted mr-1">WR</span>
+                        {c.winRate != null ? `${c.winRate}%` : "—"}
+                      </span>
+                      <span className="text-pc-border">|</span>
+                      <span className={c.banRate != null ? "text-rose-400" : "text-pc-text-muted"}>
+                        <span className="text-pc-text-muted mr-1">BR</span>
+                        {c.banRate != null ? `${c.banRate}%` : "—"}
+                      </span>
+                      <span className="text-pc-border">|</span>
+                      <span className="text-pc-text-muted">
+                        <span className="mr-1">Plays</span>
+                        <span className="text-pc-text-secondary">{formatPlays(c.totalPlays)}</span>
+                      </span>
                     </div>
                   </div>
                 </div>
-
-                {/* Rating badge */}
-                {c.rating != null && (
-                  <div className="mt-3">
-                    <span className="pc-badge">Rating: {c.rating}</span>
-                  </div>
-                )}
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>
