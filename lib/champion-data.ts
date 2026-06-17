@@ -90,22 +90,22 @@ export const ANDROXUS_DATA: ChampionData = {
     { name: "Dark Stalker", description: "Nether Step now has 3 separate charges and is no longer linked.", category: "Nether Step" },
   ],
   loadouts: [
-    { name: "Abyss Walker", description: "Heal for 40", category: "Nether Step" },
-    { name: "Abyssal Touch", description: "Reduce the Cooldown of Nether Step by 1.2s after hitting an enemy with Defiance.", category: "Defiance" },
-    { name: "Buying Time", description: "Generate 1 Energy", category: "Reversal" },
-    { name: "Disrupt", description: "Reduce the Cooldown of Reversal by 1.2s.", category: "Reversal" },
-    { name: "Elusive", description: "Increase your Movement Speed by 10% for 3s after activating Nether Step.", category: "Nether Step" },
-    { name: "Equivalent Exchange", description: "Heal for 10% of the damage Absorbed by Reversal.", category: "Reversal" },
-    { name: "Featherweight", description: "Heal for 50", category: "" },
-    { name: "Marksman", description: "Generate 1 Energy", category: "Defiance" },
+    { name: "Abyss Walker", description: "Heal for 40", category: "Nether Step", iconUrl: "/images/cards/Card_Abyss_Walker.png" },
+    { name: "Abyssal Touch", description: "Reduce the Cooldown of Nether Step by 1.2s after hitting an enemy with Defiance.", category: "Defiance", iconUrl: "/images/cards/Card_Abyssal_Touch.png" },
+    { name: "Buying Time", description: "Generate 1 Energy", category: "Reversal", iconUrl: "/images/cards/Card_Buying_Time.png" },
+    { name: "Disrupt", description: "Reduce the Cooldown of Reversal by 1.2s.", category: "Reversal", iconUrl: "/images/cards/Card_Disrupt.png" },
+    { name: "Elusive", description: "Increase your Movement Speed by 10% for 3s after activating Nether Step.", category: "Nether Step", iconUrl: "/images/cards/Card_Elusive.png" },
+    { name: "Equivalent Exchange", description: "Heal for 10% of the damage Absorbed by Reversal.", category: "Reversal", iconUrl: "/images/cards/Card_Equivalent_Exchange.png" },
+    { name: "Featherweight", description: "Heal for 50", category: "", iconUrl: "/images/cards/Card_Featherweight.png" },
+    { name: "Marksman", description: "Generate 1 Energy", category: "Defiance", iconUrl: "/images/cards/Card_Marksman.png" },
     { name: "Power of the Abyss", description: "Reduce the Cooldown of Nether Step by 20% after hitting an enemy champion with Reversal.", category: "Reversal" },
     { name: "Quick Draw", description: "Hitting a player with Revolver Heals you for 15.", category: "" },
     { name: "Seething Hatred", description: "Reduce the Cooldown of Reversal by 0.5s after hitting an enemy champion with Revolver.", category: "" },
-    { name: "Sleight of Hand", description: "Generate 1 Energy", category: "Nether Step" },
+    { name: "Sleight of Hand", description: "Generate 1 Energy", category: "Nether Step", iconUrl: "/images/cards/Card_Sleight_of_Hand.png" },
     { name: "Spiteful", description: "Generate 1% Ultimate charge after hitting at least one enemy champion with Defiance.", category: "Defiance" },
-    { name: "Through the Warp", description: "Increase the distance of each Nether Step dash by 5%.", category: "Nether Step" },
-    { name: "Vengeance", description: "Heal for 30", category: "Defiance" },
-    { name: "Watchful", description: "Reduce all active Cooldowns by 10% after getting an Elimination.", category: "" },
+    { name: "Through the Warp", description: "Increase the distance of each Nether Step dash by 5%.", category: "Nether Step", iconUrl: "/images/cards/Card_Through_the_Warp.png" },
+    { name: "Vengeance", description: "Heal for 30", category: "Defiance", iconUrl: "/images/cards/Card_Vengeance.png" },
+    { name: "Watchful", description: "Reduce all active Cooldowns by 10% after getting an Elimination.", category: "", iconUrl: "/images/cards/Card_Watchful.png" },
   ],
 };
 
@@ -120,5 +120,5 @@ export function getChampionData(slug: string): ChampionData | undefined {
 // Talent image paths
 export function getTalentIconPath(championName: string, talentName: string): string {
   const slug = `${championName}_${talentName.replace(/\s+/g, "")}`;
-  return `/images/wiki/talents/Talent ${championName} ${talentName}.png`;
+  return `/images/champions/Talent ${championName} ${talentName}.png`;
 }

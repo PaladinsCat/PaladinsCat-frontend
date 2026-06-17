@@ -200,9 +200,18 @@ export default function ChampionDetailPage() {
                 <div className="text-xs font-medium text-pc-text-muted uppercase tracking-wider mb-2">{cat}</div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {cards.map((card) => (
-                    <div key={card.name} className="pc-surface-light rounded-lg p-3 border border-pc-border">
-                      <div className="text-xs font-medium text-pc-accent mb-1">{card.name}</div>
-                      <p className="text-xs text-pc-text-secondary leading-relaxed">{card.description}</p>
+                    <div key={card.name} className="pc-surface-light rounded-lg p-3 border border-pc-border flex items-start gap-3">
+                      {card.iconUrl ? (
+                        <img src={card.iconUrl} alt={card.name} className="flex-shrink-0 w-10 h-10 rounded border border-pc-border bg-pc-bg/50 object-contain" />
+                      ) : (
+                        <div className="flex-shrink-0 w-10 h-10 rounded border border-pc-border bg-pc-bg-elevated flex items-center justify-center">
+                          <span className="text-xs text-pc-accent">?</span>
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <div className="text-xs font-medium text-pc-accent mb-0.5">{card.name}</div>
+                        <p className="text-xs text-pc-text-secondary leading-relaxed">{card.description}</p>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -393,7 +402,7 @@ function SkillCard({ skill }: { skill: ChampionSkill }) {
 }
 
 function TalentCard({ talent, championName }: { talent: ChampionTalent; championName: string }) {
-  const talentImageUrl = `/images/wiki/talents/Talent ${championName} ${talent.name.replace(/\s+/g, "")}.png`;
+  const talentImageUrl = `/images/champions/Talent ${championName} ${talent.name.replace(/\s+/g, "")}.png`;
 
   return (
     <div className="pc-surface-light rounded-lg p-3 border border-pc-border flex items-start gap-3">
