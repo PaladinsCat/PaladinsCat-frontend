@@ -482,6 +482,80 @@ export const FERNANDO_DATA: ChampionData = {
   ],
 };
 
+export const INARA_DATA: ChampionData = {
+  name: "Inara",
+  roles: ["Frontline"],
+  stats: {
+    health: "4700",
+    speed: "350",
+    speedUnits: "~21 units/s",
+    range: "85",
+  },
+  skills: [
+    {
+      name: "Stone Spear",
+      key: "LMB",
+      iconUrl: "/images/skills/Ability_StoneSpear.png",
+      damage: "3× 225 /1.25s",
+      description: "Fire a burst of 3 sharp stone projectiles across the battlefield every 1.25s that each do 225 damage.",
+    },
+    {
+      name: "Earthen Guard",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_EarthenGuard.png",
+      cooldown: "11s",
+      description: "Channel the Realm's strength, reducing damage taken by you and your deployables and increasing your healing received for a brief period of time.",
+    },
+    {
+      name: "Impasse",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Impasse.png",
+      damage: "5500",
+      cooldown: "14s",
+      description: "Deploy a 5500-Health stone wall from the ground to hinder enemies and protect allies.",
+    },
+    {
+      name: "Warder's Field",
+      key: "F",
+      iconUrl: "/images/skills/Ability_WardersField.png",
+      damage: "150 /1s",
+      cooldown: "12s",
+      description: "Deploy an obelisk that channels nature's wrath in an area to Slow and deal 150 damage every 1s to enemies caught inside.",
+    },
+    {
+      name: "Seismic Crash",
+      key: "E",
+      iconUrl: "/images/skills/Ability_SeismicCrash.png",
+      damage: "550",
+      cooldown: "Ultimate",
+      description: "Launch a powerful spear that pierces shields, Stunning and dealing 550 damage to enemies caught in its impact.",
+    },
+  ],
+  talents: [
+    { name: "Mother's Grace", description: "Increase the Damage Reduction of Earthen Guard by 10% and gain Immunity to Crowd Control while Earthen Guard is active.", category: "Earthen Guard", iconUrl: "/images/champions/Talent Inara MothersGrace.png" },
+    { name: "Tremors", description: "Impasse now has 2 charges and its Cooldown is reduced to 12s, but you are unable to destroy your walls.", category: "Impasse", iconUrl: "/images/champions/Talent Inara Tremors.png" },
+    { name: "Treacherous Ground", description: "The radius of Warder's Field is increased by 50% and it Cripples enemies within it.", category: "Warder's Field", iconUrl: "/images/champions/Talent Inara TreacherousGround.png" },
+  ],
+  loadouts: [
+    { name: "Caretaker", description: "Heal for 22", category: "Warder's Field", iconUrl: "/images/cards/Card_Caretaker.png" },
+    { name: "Cloudbreaker", description: "Increase the damage of Impasse.", category: "Impasse", iconUrl: "/images/cards/Card_Cloudbreaker.png" },
+    { name: "Crag", description: "Increase the Health of Impasse.", category: "Impasse", iconUrl: "/images/cards/Card_Crag.png" },
+    { name: "Geomancer", description: "Reduce the Cooldown of Earthen Guard.", category: "Earthen Guard", iconUrl: "/images/cards/Card_Geomancer.png" },
+    { name: "Insurmountable", description: "Increase the number of Impasse walls.", category: "", iconUrl: "/images/cards/Card_Insurmountable.png" },
+    { name: "Living Stone", description: "Increase the Damage Reduction of Earthen Guard.", category: "Earthen Guard", iconUrl: "/images/cards/Card_Living_Stone.png" },
+    { name: "Lodestone", description: "Increase the damage of Warder's Field.", category: "Warder's Field", iconUrl: "/images/cards/Card_Lodestone.png" },
+    { name: "Plateau", description: "Increase the Health of Impasse.", category: "Impasse", iconUrl: "/images/cards/Card_Plateau.png" },
+    { name: "Rolling Stones", description: "Reduce the Cooldown of Warder's Field.", category: "", iconUrl: "/images/cards/Card_Rolling_Stones.png" },
+    { name: "Sacred Ground", description: "Reduce the Cooldown of Warder's Field.", category: "Warder's Field", iconUrl: "/images/cards/Card_Sacred_Ground.png" },
+    { name: "Shear", description: "Increase the Damage Reduction of Earthen Guard.", category: "Earthen Guard", iconUrl: "/images/cards/Card_Shear.png" },
+    { name: "Standing Stones", description: "Reduce the Cooldown of Warder's Field.", category: "Warder's Field", iconUrl: "/images/cards/Card_Standing_Stones.png" },
+    { name: "Steadfast", description: "Increase your maximum Health.", category: "", iconUrl: "/images/cards/Card_Steadfast.png" },
+    { name: "Stone Bulwark", description: "Increase the Damage Reduction of Earthen Guard.", category: "Earthen Guard", iconUrl: "/images/cards/Card_Stone_Bulwark.png" },
+    { name: "Summit", description: "Increase the damage of Impasse.", category: "Impasse", iconUrl: "/images/cards/Card_Summit.png" },
+    { name: "Whetstone", description: "Increase your damage.", category: "", iconUrl: "/images/cards/Card_Whetstone.png" },
+  ],
+};
+
 export const CHAMPION_DATA: Record<string, ChampionData> = {
   androxus: ANDROXUS_DATA,
   ash: ASH_DATA,
@@ -489,6 +563,7 @@ export const CHAMPION_DATA: Record<string, ChampionData> = {
   azaan: AZAAN_DATA,
   barik: BARIK_DATA,
   fernando: FERNANDO_DATA,
+  inara: INARA_DATA,
 };
 
 export function getChampionData(slug: string): ChampionData | undefined {
