@@ -189,9 +189,81 @@ export const ASH_DATA: ChampionData = {
   ],
 };
 
+export const ATLAS_DATA: ChampionData = {
+  name: "Atlas",
+  roles: ["Frontline"],
+  stats: {
+    health: "4000",
+    speed: "360",
+    speedUnits: "~22.5 units/s",
+    range: "110",
+  },
+  skills: [
+    {
+      name: "Chrono-Cannon",
+      key: "LMB",
+      iconUrl: "/images/skills/WeaponAttack_Atlas_Icon.png",
+      damage: "780",
+      description: "A futuristic weapon you can charge up to increase its accuracy and damage while firing fewer shots. Deals 780 damage every 1.4s if fully charging your shots.",
+    },
+    {
+      name: "Setback",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_Setback.png",
+      cooldown: "10s",
+      description: "Fire a concentration of chronon energy from your weapon that Rewinds your enemy.",
+    },
+    {
+      name: "Stasis Field",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Stasis_Field.png",
+      cooldown: "14s",
+      description: "Create a barrier in front of you to absorb all ranged attacks and projectiles.",
+    },
+    {
+      name: "Second Chance",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Second_Chance.png",
+      cooldown: "16s",
+      description: "Rewind yourself into the near past, reversing recent damage and going back to where you were.",
+    },
+    {
+      name: "Exile",
+      key: "E",
+      iconUrl: "/images/skills/Ability_Exile.png",
+      cooldown: "Ultimate",
+      description: "Modify your chronon weapon to Banish enemies from this place of existence for a brief period.",
+    },
+  ],
+  talents: [
+    { name: "Unstable Fissure", description: "When you use Second Chance you also Rewind enemies within 20 units 3s into the past.", category: "Second Chance" },
+    { name: "Temporal Divide", description: "Greatly increase the size of Stasis Field, but its Duration is decreased to 3.5 seconds and its Cooldown is increased to 18s.", category: "Stasis Field" },
+    { name: "Deja vu", description: "Setback becomes a lobbed explosive, capable of Rewinding multiple enemies.", category: "Setback" },
+  ],
+  loadouts: [
+    { name: "Beyond the Veil", description: "Passing through Stasis Field increases your allies' or your own Movement Speed by 7% for 3s.", category: "Stasis Field", iconUrl: "/images/cards/Card_Beyond_the_Veil.png" },
+    { name: "Continuum Shift", description: "Second Chance sends you 0.4s further into the past.", category: "Second Chance", iconUrl: "/images/cards/Card_Continuum_Shift.png" },
+    { name: "Distant Memory", description: "Increase your Healing received from others by 5% while at or below 50% Health.", category: "", iconUrl: "/images/cards/Card_Distant_Memory.png" },
+    { name: "Hell Hunter", description: "Generate 1 Ammo after hitting a fully-charged weapon shot.", category: "", iconUrl: "/images/cards/Card_Hell_Hunter.png" },
+    { name: "Infinity Engine", description: "Your weapon doesn't consume Ammo for 1.6s after activating Stasis Field.", category: "Stasis Field", iconUrl: "/images/cards/Card_Infinity_Engine.png" },
+    { name: "Lessons of the Past", description: "Gain a 100-Health Shield for 5s after hitting an enemy with Setback.", category: "Setback", iconUrl: "/images/cards/Card_Lessons_of_the_Past.png" },
+    { name: "Life Unlived", description: "Heal for an additional 150 when using Second Chance.", category: "Second Chance", iconUrl: "/images/cards/Card_Life_Unlived.png" },
+    { name: "Lost Legacy", description: "Heal for 80 every 1s for 3s after activating Stasis Field.", category: "Stasis Field", iconUrl: "/images/cards/Card_Lost_Legacy.png" },
+    { name: "No One Escapes", description: "Enemies hit by Setback are Rewound 0.3s further into the past.", category: "Setback", iconUrl: "/images/cards/Card_No_One_Escapes.png" },
+    { name: "Old Wounds", description: "Increase your maximum Health by 150.", category: "", iconUrl: "/images/cards/Card_Old_Wounds.png" },
+    { name: "Paradox", description: "Reduce the Cooldown of Second Chance by 0.5s.", category: "Second Chance", iconUrl: "/images/cards/Card_Paradox.png" },
+    { name: "Phantom Pain", description: "Reduces the Cooldown of Stasis Field by 1s after hitting an enemy with Setback.", category: "Setback", iconUrl: "/images/cards/Card_Phantom_Pain.png" },
+    { name: "Ravages of Time", description: "Increase your Movement Speed by 5% for 4s after getting an Elimination.", category: "", iconUrl: "/images/cards/Card_Ravages_of_Time.png" },
+    { name: "Rewritten History", description: "Generate 1 Ammo after using Second Chance.", category: "Second Chance", iconUrl: "/images/cards/Card_Rewritten_History.png" },
+    { name: "Safe Haven", description: "Increase your Healing received by 6% while Stasis Field is active.", category: "Stasis Field", iconUrl: "/images/cards/Card_Safe_Haven.png" },
+    { name: "Steady Arm", description: "Generate 1 Ammo after hitting an enemy with Setback.", category: "Setback", iconUrl: "/images/cards/Card_Steady_Arm.png" },
+  ],
+};
+
 export const CHAMPION_DATA: Record<string, ChampionData> = {
   androxus: ANDROXUS_DATA,
   ash: ASH_DATA,
+  atlas: ATLAS_DATA,
 };
 
 export function getChampionData(slug: string): ChampionData | undefined {
