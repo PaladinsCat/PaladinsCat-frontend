@@ -1345,6 +1345,71 @@ export const IMANI_DATA: ChampionData = {
   ],
 };
 
+export const KINESSA_DATA: ChampionData = {
+  name: "Kinessa",
+  roles: ["Damage"],
+  stats: {
+    health: "2100",
+    speed: "350",
+    speedUnits: "~21 units/s",
+    range: "450",
+  },
+  skills: [
+    {
+      name: "Sniper Rifle",
+      key: "LMB",
+      iconUrl: "/images/skills/Ability_Sniper_Rifle.png",
+      description: "A combination sniper rifle and carbine for both long-range and short-range engagements. Your carbine deals 200 damage every 0.17s.",
+    },
+    {
+      name: "Sniper Mode",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_Sniper_Mode.png",
+      damage: "1000",
+      description: "Scope up to charge your sniper rifle for increased damage, dealing up to 1000 damage after charging for 1.1s.",
+    },
+    {
+      name: "Oppressor Mine",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Oppressor_Mine.png",
+      cooldown: "10s",
+      description: "Deploy an Oppressor Mine that detonates when enemies are near.",
+    },
+    {
+      name: "Transporter",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Transporter.png",
+      cooldown: "10s",
+      description: "Throw out a teleporter that transports you to its location.",
+    },
+    {
+      name: "Headhunter",
+      key: "E",
+      iconUrl: "/images/skills/Ability_Headhunter.png",
+      cooldown: "Ultimate",
+      description: "After 0.25s, channel your inner focus to gain 50% additional damage against enemies' vital locations.",
+    },
+  ],
+  talents: [
+    { name: "Steady Aim", description: "For 4s after hitting a fully-charged weapon shot, your next fully-charged shot will deal an additional 20% damage.", category: "Sniper Mode", iconUrl: "/images/champions/Talent Kinessa Octoppressor.png" },
+    { name: "High Voltage", description: "Oppressor Mine now has 2 charges.", category: "Oppressor Mine", iconUrl: "/images/champions/Talent Kinessa Octoppressor.png" },
+    { name: "Reposition", description: "Transporter instantly Teleports you to its target location, but has its range reduced to 75 units.", category: "Transporter", iconUrl: "/images/champions/Talent Kinessa Reposition.png" },
+  ],
+  loadouts: [
+    { name: "Field Dressing", description: "Heal for 50", category: "", iconUrl: "/images/cards/Card_Field_Dressing.png" },
+    { name: "Quick Scope", description: "Reduce the Cooldown of Sniper Mode.", category: "Sniper Mode", iconUrl: "/images/cards/Card_Quick_Scope.png" },
+    { name: "Open Season", description: "Increase the charge time of Sniper Mode.", category: "Sniper Mode", iconUrl: "/images/cards/Card_Open_Season.png" },
+    { name: "Prodigy", description: "Increase the damage of Sniper Mode.", category: "Sniper Mode", iconUrl: "/images/cards/Card_Prodigy.png" },
+    { name: "Beam Me Up", description: "Reduce the Cooldown of Transporter.", category: "Transporter", iconUrl: "/images/cards/Card_Beam_Me_Up.png" },
+    { name: "Bob and Weave", description: "Increase your Movement Speed.", category: "Transporter", iconUrl: "/images/cards/Card_Bob_and_Weave.png" },
+    { name: "Well Stocked", description: "Increase the number of Oppressor Mines.", category: "Oppressor Mine", iconUrl: "/images/cards/Card_Well_Stocked.png" },
+    { name: "Octoppressor", description: "Increase the damage of Oppressor Mine.", category: "Oppressor Mine", iconUrl: "/images/cards/Card_Octoppressor.png" },
+    { name: "Lie in Wait", description: "Increase your damage.", category: "", iconUrl: "/images/cards/Card_Lie_in_Wait.png" },
+    { name: "Tracking", description: "Increase your damage.", category: "", iconUrl: "/images/cards/Card_Tracking.png" },
+    { name: "Power Supply", description: "Increase your Healing received.", category: "", iconUrl: "/images/cards/Card_Power_Supply.png" },
+  ],
+};
+
 export const CHAMPION_DATA: Record<string, ChampionData> = {
   androxus: ANDROXUS_DATA,
   ash: ASH_DATA,
@@ -1354,6 +1419,7 @@ export const CHAMPION_DATA: Record<string, ChampionData> = {
   cassie: CASSIE_DATA,
   dredge: DREDGE_DATA,
   imani: IMANI_DATA,
+  kinessa: KINESSA_DATA,
   fernando: FERNANDO_DATA,
   inara: INARA_DATA,
   khan: KHAN_DATA,
