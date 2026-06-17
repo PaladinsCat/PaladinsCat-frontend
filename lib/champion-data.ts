@@ -3602,6 +3602,76 @@ export const MOJI_DATA: ChampionData = {
   ],
 };
 
+export const REI_DATA: ChampionData = {
+  name: "Rei",
+  roles: ["Support"],
+  stats: {
+    health: "2200",
+    speed: "375",
+    speedUnits: "~23 units/s",
+    range: "300",
+  },
+  skills: [
+    {
+      name: "Sigil",
+      key: "LMB",
+      iconUrl: "/images/skills/Ability_Sigil.png",
+      description: "Unleash magical energy from your hands, dealing 450 damage every 0.7s."
+    },
+    {
+      name: "Chain Heal",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_Chain_Heal.png",
+      cooldown: "4s",
+      description: "Allows Rei to heal multiple targets at a time and Spirit Link them if needed, due to both abilities' low cooldowns."
+    },
+    {
+      name: "Spirit Link",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Spirit_Link.png",
+      cooldown: "Ultimate",
+      description: "Spirit Link them if needed, due to both abilities' low cooldowns."
+    },
+    {
+      name: "Envelop",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Envelop.png",
+      cooldown: "14s",
+      description: "Completely negate enemy large damaging Ultimates with damage mitigation, increased movement speed, and increased jump height, allowing you to withstand the damage dealt to you then simply heal it."
+    },
+    {
+      name: "Vivify",
+      key: "E",
+      iconUrl: "/images/skills/Ability_Vivify.png",
+      cooldown: "Ultimate",
+      description: "Entirely save a targeted ally and yourself by granting them invulnerability then healing them to seventy-five percent of their maximum health pool."
+    },
+  ],
+  talents: [
+    { name: "Ambidextrous", description: "Chain Heal has 2 charges, but its cooldown is increased by 2 seconds.", category: "Chain Heal", iconUrl: "/images/champions/Talent Rei Extension.png" },
+    { name: "Restraint", description: "", category: "Chain Heal", iconUrl: "/images/champions/Talent Rei Restraint.png" },
+    { name: "Focus", description: "Spirit Link's Cooldown is increased to 6s and it now only lasts for 3s, but its base effects are tripled.", category: "Spirit Link", iconUrl: "/images/champions/Talent Rei Focus.png" },
+  ],
+  loadouts: [
+    { name: "Aico Forces", description: "Increase the Healing of Chain Heal by 1%.", category: "Chain Heal", iconUrl: "/images/cards/Card_Aico_Forces.png" },
+    { name: "Arcane Focus", description: "Increase the Shield of Spirit Link by 20.", category: "Spirit Link", iconUrl: "/images/cards/Card_Arcane_Focus.png" },
+    { name: "Arcane Maelstrom", description: "Reduce the damage mitigation of Envelop by 7%.", category: "Envelop", iconUrl: "/images/cards/Card_Arcane_Maelstrom.png" },
+    { name: "Arcane Manipulation", description: "Reduce the Cooldown of Envelop by 0.8s.", category: "Envelop", iconUrl: "/images/cards/Card_Arcane_Manipulation.png" },
+    { name: "Deft Magics", description: "Reduce the Cooldown of Spirit Link by 0.1s.", category: "Spirit Link", iconUrl: "/images/cards/Card_Deft_Magics.png" },
+    { name: "Desperate Defense", description: "Increase the Shield of Envelop by 80.", category: "Envelop", iconUrl: "/images/cards/Card_Desperate_Defense.png" },
+    { name: "Enveloping Magic", description: "Increase the damage mitigation of Envelop by 255.", category: "Envelop", iconUrl: "/images/cards/Card_Enveloping_Magic.png" },
+    { name: "Future Generations", description: "Increase the Healing of Chain Heal by 2000.", category: "Chain Heal", iconUrl: "/images/cards/Card_Future_Generations.png" },
+    { name: "Leipori Prayer", description: "Increase the Healing of Chain Heal by 0.5%.", category: "Chain Heal", iconUrl: "/images/cards/Card_Leipori_Prayer.png" },
+    { name: "Magic in the Blood", description: "Increase your maximum Health by 5%.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Magic_in_the_Blood.png" },
+    { name: "Midnight Stroll", description: "Reduce the Cooldown of Spirit Link by 3%.", category: "Spirit Link", iconUrl: "/images/cards/Card_Midnight_Stroll.png" },
+    { name: "Mystic Mastery", description: "Increase your maximum Health by 50.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Mystic_Mastery.png" },
+    { name: "Refreshing Break", description: "Increase the Healing of Chain Heal by 0.2%.", category: "Chain Heal", iconUrl: "/images/cards/Card_Refreshing_Break.png" },
+    { name: "Rest and Relaxation", description: "Increase the number of charges of Chain Heal by 2.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Rest_and_Relaxation.png" },
+    { name: "Spring to Action", description: "Increase the Movement Speed of Spirit Link by 20.", category: "Spirit Link", iconUrl: "/images/cards/Card_Spring_to_Action.png" },
+    { name: "Threat and Subject", description: "Increase your maximum Health by 10%.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Threat_and_Subject.png" },
+  ],
+};
+
 export const PIP_DATA: ChampionData = {
   name: "Pip",
   roles: ["Support"],
