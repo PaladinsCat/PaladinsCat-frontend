@@ -458,9 +458,9 @@ export const FERNANDO_DATA: ChampionData = {
     },
   ],
   talents: [
-    { name: "Aegis", description: "Increase Chivalry's Shield to 5500, and it begins regenerating 25% sooner and 25% faster. You now only need 20% Shield to activate Chivalry after it is broken.", category: "Chivalry" },
-    { name: "Scorch", description: "Increase the damage of Fireball by 35%, decrease its Cooldown by 1s, and deal 20% increased damage for each subsequent target hit after the first.", category: "Fireball" },
-    { name: "Formidable", description: "You now have 2 charges of Charge, each Charge deals an additional 100 damage, and you are Immune to Crowd Control while Charging, but the Cooldown of Charge is increased to 13s.", category: "Charge" },
+    { name: "Aegis", description: "Increase Chivalry's Shield to 5500, and it begins regenerating 25% sooner and 25% faster. You now only need 20% Shield to activate Chivalry after it is broken.", category: "Chivalry", iconUrl: "/images/champions/Talent Fernando Aegis.png" },
+    { name: "Scorch", description: "Increase the damage of Fireball by 35%, decrease its Cooldown by 1s, and deal 20% increased damage for each subsequent target hit after the first.", category: "Fireball", iconUrl: "/images/champions/Talent Fernando Scorch.png" },
+    { name: "Formidable", description: "You now have 2 charges of Charge, each Charge deals an additional 100 damage, and you are Immune to Crowd Control while Charging, but the Cooldown of Charge is increased to 13s.", category: "Charge", iconUrl: "/images/champions/Talent Fernando Formidable.png" },
   ],
   loadouts: [
     { name: "Brand", description: "Heal for damage over 2s for each enemy hit by Fireball.", category: "Fireball", iconUrl: "/images/cards/Card_Brand.png" },
