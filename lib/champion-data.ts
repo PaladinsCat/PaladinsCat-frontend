@@ -3843,34 +3843,33 @@ export const MOJI_DATA: ChampionData = {
   stats: {
     health: "2400",
     speed: "370",
-    speedUnits: "~23 units/s",
+    speedUnits: "~23.13 units/s",
     range: "300",
   },
   skills: [
     {
       name: "Spit",
       key: "LMB",
-      iconUrl: "/images/skills/Ability_Spit.png",
+      iconUrl: "/images/skills/WeaponAttack_Moji_Icon.png",
       description: "Spit out an explosive magical projectile that deals 450 damage and heals allies for 300."
     },
     {
       name: "Sparkle",
       key: "RMB",
-      iconUrl: "/images/skills/Ability_Sparkle.png",
+      iconUrl: "/images/skills/Ability_Familiar_Spray.png",
       description: "Spray magical energy, dealing 20 damage to enemies while healing allies for 50. Applies Magic Mark to allies."
     },
     {
       name: "Magic Shield",
       key: "Q",
       iconUrl: "/images/skills/Ability_Magic_Shield.png",
-      cooldown: "10s",
+      cooldown: "4s",
       description: "Generate a 1000 Shield on yourself and 600 Shield for allies within 55 units."
     },
     {
       name: "Scamper",
       key: "F",
       iconUrl: "/images/skills/Ability_Scamper.png",
-      cooldown: "4s",
       description: "Quickly Scamper forward, doubling your movement speed. Refire to cancel."
     },
     {
@@ -3882,8 +3881,8 @@ export const MOJI_DATA: ChampionData = {
     },
   ],
   talents: [
-    { name: "Spit Shine", description: "Detonating 10 stacks of Magic Mark now also increases the Movement Speed of affected allies by 10% for 4s. This effect stacks up to 3 times.", category: "Sparkle", iconUrl: "/images/champions/Talent Spit Shine Moji.png" },
-    { name: "Jubilation", description: "Magic Marks are now instead applied to enemies. Detonating at least 7 stacks of Magic Mark deals bonus damage, up to 550 damage at 10 stacks.", category: "Sparkle", iconUrl: "/images/champions/Talent Jubilation Moji.png" },
+    { name: "Spit Shine", description: "Detonating 10 stacks of Magic Mark now also increases the Movement Speed of affected allies by 10% for 4s. This effect stacks up to 3 times and each stack expires individually.", category: "Sparkle", iconUrl: "/images/champions/Talent Spit Shine Moji.png" },
+    { name: "Jubilation", description: "Magic Marks are now instead applied to enemies. Detonating at least 7 stacks of Magic Mark deals bonus damage, up to 550 damage at 10 stacks. Enemies within 15 units take 75% of the damage.", category: "Sparkle", iconUrl: "/images/champions/Talent Jubilation Moji.png" },
     { name: "Realm Runner", description: "When entering Scamper, leave a magical dust cloud behind that applies a lingering heal for 600 over 3s. The dust cloud lasts 4s.", category: "Scamper", iconUrl: "/images/champions/Talent Realm Runner Moji.png" },
   ],
     loadouts: [
@@ -3895,7 +3894,7 @@ export const MOJI_DATA: ChampionData = {
     { name: "Greater Good", description: "When an ally receives max Magic Marks, they gain a 20 Health Shield while marked.", category: "Familiar Spray", iconUrl: "/images/cards/Card_Greater_Good.png" },
     { name: "Harmonious", description: "Regenerate 3% Sparkle and Ammo for affected allies every 0.25s while channeling Magic Shield.", category: "Magic Shield", iconUrl: "/images/cards/Card_Harmonious.png" },
     { name: "Morning Breath", description: "Sparkle costs 20% less Ammo when hitting an enemy.", category: "Familiar Spray", iconUrl: "/images/cards/Card_Morning_Breath.png" },
-    { name: "Nature's Blessing", description: "Allies gain 5% Movement Speed for 3s after being healed by Sparkle.", category: "Familiar Spray", iconUrl: "/images/cards/Card_Natures_Blessing.png" },
+    { name: "Nature's Blessing", description: "Allies gain 5% Movement Speed for 3s after being healed by Sparkle.", category: "Familiar Spray", iconUrl: "/images/cards/Card_Nature_s_Blessing.png" },
     { name: "Peppy", description: "Generate 0.4% Ultimate Charge when triggering Magic Mark at max stacks.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Peppy.png" },
     { name: "Scoot", description: "Reduce the damage you take during Scamper by 4%.", category: "Scamper", iconUrl: "/images/cards/Card_Scoot.png" },
     { name: "Scurry", description: "Heal for 20 every 0.3s during Scamper.", category: "Scamper", iconUrl: "/images/cards/Card_Scurry.png" },
