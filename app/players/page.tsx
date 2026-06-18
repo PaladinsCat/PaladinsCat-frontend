@@ -1,17 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { fetchPlayerSearch, type PlayerSearchResult } from "@/lib/api-client";
-import ScrambleText from "@/components/ScrambleText";
 import {
-  MOCK_RANKED_PLAYERS,
-  MOCK_CLASS_LEADERBOARDS,
-  MOCK_STAT_LEADERBOARDS,
-  MOCK_CONFIRMED_CHEATERS,
-  MOCK_SUSPICIOUS_PLAYERS,
-  TIER_NAMES,
-} from "@/lib/mock-data";
+  fetchCheaterPlayers,
+  fetchClassLeaderboard,
+  fetchPerformanceLeaderboard,
+  fetchPlayerSearch,
+  fetchRankedLeaderboard,
+  type CheaterPlayer,
+  type ClassLeaderboardEntry,
+  type PerformanceLeaderboardEntry,
+  type PlayerSearchResult,
+  type RankedPlayer,
+} from "@/lib/api-client";
+import ScrambleText from "@/components/ScrambleText";
+import { TIER_NAMES } from "@/lib/mock-data";
 
 const CLASS_ICONS: Record<string, string> = {
   Frontline: "/images/icons/Class_Front_Line_Icon.avif",
@@ -27,11 +31,13 @@ const STAT_LABELS: Record<string, string> = {
   Tanker: "Mitigation / Min",
 };
 
-const SEVERITY_STYLES: Record<string, string> = {
-  high: "bg-red-500/15 text-red-400 border-red-500/30",
-  medium: "bg-amber-500/15 text-amber-400 border-amber-500/30",
-  low: "bg-yellow-500/15 text-yellow-400 border-yellow-500/30",
-};
+const ROLES = ["Frontline", "Damage", "Flank", "Support"] as const;
+const PERFORMANCE_METRICS = [
+  { key: "GPM", metric: "gpm" },
+  { key: "HPM", metric: "hpm" },
+  { key: "DPM", metric: "dpm" },
+  { key: "Tanker", metric: "mpm" },
+] as const;
 
 function RankBadge({ rank }: { rank: number }) {
   if (rank === 1) return <span className="text-yellow-400 font-bold">{rank}</span>;
@@ -45,6 +51,42 @@ export default function PlayersPage() {
   const [results, setResults] = useState<PlayerSearchResult[]>([]);
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
+  const [classLeaderboards, setClassLeaderboards] = useState<Record<string, ClassLeaderboardEntry[]>>({});
+  const [performanceLeaderboards, setPerformanceLeaderboards] = useState<Record<string, PerformanceLeaderboardEntry[]>>({});
+  const [rankedPlayers, setRankedPlayers] = useState<RankedPlayer[]>([]);
+  const [cheaterPlayers, setCheaterPlayers] = useState<CheaterPlayer[]>([]);
+  const [suspiciousPlayers, setSuspiciousPlayers] = useState<CheaterPlayer[]>([]);
+  const [overviewLoading, setOverviewLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadOverview() {
+      setOverviewLoading(true);
+      const [classRows, performanceRows, ranked, cheaters, suspicious] = await Promise.all([
+        Promise.all(ROLES.map(async (role) => [role, await fetchClassLeaderboard({ role, limit: 5, queueId: 486 })] as const)),
+        Promise.all(PERFORMANCE_METRICS.map(async ({ key, metric }) => [key, await fetchPerformanceLeaderboard({ metric, limit: 5, queueId: 486 })] as const)),
+        fetchRankedLeaderboard({ tier: "26", top: 20 }),
+        fetchCheaterPlayers({ cheater: true, limit: 5 }),
+        fetchCheaterPlayers({ susOnly: true, limit: 5 }),
+      ]);
+
+      if (cancelled) return;
+      setClassLeaderboards(Object.fromEntries(classRows));
+      setPerformanceLeaderboards(Object.fromEntries(performanceRows));
+      setRankedPlayers(ranked);
+      setCheaterPlayers(cheaters);
+      setSuspiciousPlayers(suspicious);
+      setOverviewLoading(false);
+    }
+
+    loadOverview().catch(() => {
+      if (!cancelled) setOverviewLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const search = async (q: string) => {
     if (q.length < 2) { setResults([]); return; }
@@ -122,7 +164,9 @@ export default function PlayersPage() {
               <h2 className="text-lg font-bold text-pc-text">Top Players by Class</h2>
             </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {Object.entries(MOCK_CLASS_LEADERBOARDS).map(([role, players]) => (
+            {ROLES.map((role) => {
+              const players = classLeaderboards[role] ?? [];
+              return (
               <div key={role}>
                 <div className="flex items-center justify-between mb-2 px-2">
                   <div className="flex items-center gap-2">
@@ -135,22 +179,25 @@ export default function PlayersPage() {
                 </div>
                 <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
                   <div className="space-y-2">
+                  {players.length === 0 && (
+                    <div className="text-xs text-pc-text-muted">{overviewLoading ? "Loading..." : "No ranked data"}</div>
+                  )}
                   {players.map((p, i) => (
-                    <div key={p.name} className="flex items-center justify-between text-xs">
+                    <div key={`${role}-${p.playerId}`} className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-2 min-w-0">
                         <RankBadge rank={i + 1} />
-                        <span className="text-pc-text truncate">{p.name}</span>
+                        <span className="text-pc-text truncate">{p.playerName}</span>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
-                        <span className="text-pc-text-muted">{p.champion}</span>
-                        <span className="text-emerald-400 font-medium">{p.winRate}%</span>
+                        <span className="text-pc-text-muted">{p.championName}</span>
+                        <span className="text-emerald-400 font-medium">{p.winRate != null ? `${p.winRate.toFixed(1)}%` : "--"}</span>
                       </div>
                     </div>
                   ))}
                   </div>
                 </div>
               </div>
-            ))}
+            )})}
           </div>
 
           {/* Performance Stats 2×2 */}
@@ -158,7 +205,9 @@ export default function PlayersPage() {
             <h2 className="text-lg font-bold text-pc-text">Performance Stats</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {Object.entries(MOCK_STAT_LEADERBOARDS).map(([stat, players]) => (
+            {PERFORMANCE_METRICS.map(({ key: stat }) => {
+              const players = performanceLeaderboards[stat] ?? [];
+              return (
               <div key={stat}>
                 <div className="flex items-center justify-between mb-2 px-2">
                   <h3 className="text-pc-text font-semibold text-sm">{STAT_LABELS[stat] || stat}</h3>
@@ -168,14 +217,17 @@ export default function PlayersPage() {
                 </div>
                 <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
                   <div className="space-y-2">
+                    {players.length === 0 && (
+                      <div className="text-xs text-pc-text-muted">{overviewLoading ? "Loading..." : "No ranked data"}</div>
+                    )}
                     {players.map((p, i) => (
-                      <div key={p.name} className="flex items-center justify-between text-xs">
+                      <div key={`${stat}-${p.playerId}`} className="flex items-center justify-between text-xs">
                         <div className="flex items-center gap-2 min-w-0">
                           <RankBadge rank={i + 1} />
-                          <span className="text-pc-text truncate">{p.name}</span>
+                          <span className="text-pc-text truncate">{p.playerName}</span>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
-                          <span className="text-pc-text-muted">{p.champion}</span>
+                          <span className="text-pc-text-muted">{p.championName ?? p.className ?? ""}</span>
                           <span className="text-pc-accent font-medium">{p.value.toLocaleString()}</span>
                         </div>
                       </div>
@@ -183,7 +235,7 @@ export default function PlayersPage() {
                   </div>
                 </div>
               </div>
-            ))}
+            )})}
           </div>
         </div>
 
@@ -208,7 +260,14 @@ export default function PlayersPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {MOCK_RANKED_PLAYERS.map((p, i) => (
+                  {rankedPlayers.length === 0 && (
+                    <tr>
+                      <td colSpan={4} className="py-4 px-3 text-center text-pc-text-muted text-xs">
+                        {overviewLoading ? "Loading..." : "No ranked leaderboard data"}
+                      </td>
+                    </tr>
+                  )}
+                  {rankedPlayers.map((p, i) => (
                     <tr key={p.player_id} className={`border-b border-pc-border/50 hover:bg-pc-bg/50 transition-colors ${i < 3 ? "bg-pc-bg/30" : ""}`}>
                       <td className="py-1.5 px-3">
                         {i === 0 ? (
@@ -258,7 +317,7 @@ export default function PlayersPage() {
                 <div className="w-2 h-2 rounded-full bg-red-500" />
                 <h3 className="text-pc-text font-semibold text-sm">Confirmed Cheaters</h3>
                 <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/20">
-                  {MOCK_CONFIRMED_CHEATERS.length}
+                  {cheaterPlayers.length}
                 </span>
               </div>
               <Link href="/players/cheaters" className="text-[10px] text-pc-text-secondary hover:text-red-400 transition-colors drop-shadow-sm">
@@ -267,7 +326,10 @@ export default function PlayersPage() {
             </div>
             <div className="bg-pc-bg-elevated border border-red-500/20 rounded-xl p-4">
               <div className="space-y-2">
-              {MOCK_CONFIRMED_CHEATERS.map((p) => (
+              {cheaterPlayers.length === 0 && (
+                <div className="text-xs text-pc-text-muted">{overviewLoading ? "Loading..." : "No confirmed cheaters"}</div>
+              )}
+              {cheaterPlayers.map((p) => (
                 <div key={p.id} className="flex items-start gap-3 p-2.5 rounded-lg bg-pc-bg/50">
                   <div className="shrink-0 mt-1 w-2 h-2 rounded-full bg-red-500" />
                   <div className="flex-1 min-w-0">
@@ -279,8 +341,10 @@ export default function PlayersPage() {
                         banned
                       </span>
                     </div>
-                    <p className="text-pc-text-muted text-xs mt-0.5">{p.reason}</p>
-                    <p className="text-pc-text-muted/50 text-[10px] mt-0.5">Banned {p.banned}</p>
+                    <p className="text-pc-text-muted text-xs mt-0.5">
+                      {p.totalMatches.toLocaleString()} matches{p.winRate != null ? ` · ${p.winRate.toFixed(1)}% WR` : ""}
+                    </p>
+                    <p className="text-pc-text-muted/50 text-[10px] mt-0.5">Suspicion count {p.susCount}</p>
                   </div>
                 </div>
               ))}
@@ -295,7 +359,7 @@ export default function PlayersPage() {
                 <div className="w-2 h-2 rounded-full bg-amber-500" />
                 <h3 className="text-pc-text font-semibold text-sm">Suspicious Players</h3>
                 <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                  {MOCK_SUSPICIOUS_PLAYERS.length}
+                  {suspiciousPlayers.length}
                 </span>
               </div>
               <Link href="/players/suspicious" className="text-[10px] text-pc-text-secondary hover:text-amber-400 transition-colors drop-shadow-sm">
@@ -304,20 +368,25 @@ export default function PlayersPage() {
             </div>
             <div className="bg-pc-bg-elevated border border-amber-500/20 rounded-xl p-4">
               <div className="space-y-2">
-              {MOCK_SUSPICIOUS_PLAYERS.map((p) => (
+              {suspiciousPlayers.length === 0 && (
+                <div className="text-xs text-pc-text-muted">{overviewLoading ? "Loading..." : "No suspicious players"}</div>
+              )}
+              {suspiciousPlayers.map((p) => (
                 <div key={p.id} className="flex items-start gap-3 p-2.5 rounded-lg bg-pc-bg/50">
-                  <div className={`shrink-0 mt-1 w-2 h-2 rounded-full ${p.severity === "medium" ? "bg-amber-500" : "bg-yellow-500"}`} />
+                  <div className="shrink-0 mt-1 w-2 h-2 rounded-full bg-amber-500" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <Link href={`/players/${p.id}`} className="text-pc-text font-medium text-sm hover:text-pc-accent transition-colors truncate">
                         {p.name}
                       </Link>
-                      <span className={`shrink-0 text-[10px] px-1.5 py-0.5 rounded border ${SEVERITY_STYLES[p.severity]}`}>
-                        {p.severity}
+                      <span className="shrink-0 text-[10px] px-1.5 py-0.5 rounded border bg-amber-500/15 text-amber-400 border-amber-500/30">
+                        {p.susCount} flags
                       </span>
                     </div>
-                    <p className="text-pc-text-muted text-xs mt-0.5">{p.reason}</p>
-                    <p className="text-pc-text-muted/50 text-[10px] mt-0.5">Flagged {p.flagged}</p>
+                    <p className="text-pc-text-muted text-xs mt-0.5">
+                      {p.totalMatches.toLocaleString()} matches{p.winRate != null ? ` · ${p.winRate.toFixed(1)}% WR` : ""}
+                    </p>
+                    <p className="text-pc-text-muted/50 text-[10px] mt-0.5">{p.region} · {p.platform}</p>
                   </div>
                 </div>
               ))}

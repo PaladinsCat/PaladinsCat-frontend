@@ -2,25 +2,95 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import {
-  MOCK_ITEM_STATS,
-  MOCK_MAP_STATS,
-  MOCK_GLOBAL_METRICS,
-} from "@/lib/mock-data";
-import { fetchChampions, fetchPerformanceMetrics, type Champion } from "@/lib/api-client";
+  fetchChampions,
+  fetchDatabaseStats,
+  fetchItems,
+  fetchMapStats,
+  fetchPerformanceMetrics,
+  type Champion,
+  type ItemStat,
+  type MapStat,
+} from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
 
 const ROLES = ["Frontline", "Damage", "Flank", "Support"] as const;
 
 type SortKey = "pickRate" | "winRate";
+type ItemCategory = "Defense" | "Utility" | "Healing" | "Offense";
+type PageItemStat = { name: string; pickRate: number; winRate: number; category: ItemCategory; icon: string };
+type PageMapStat = { name: string; matches: number; avgDurationSeconds: number };
+
+const EMPTY_METRICS = {
+  dpm: { min: 0, max: 0, mean: 0, median: 0, mode: 0 },
+  hpm: { min: 0, max: 0, mean: 0, median: 0, mode: 0 },
+  gpm: { min: 0, max: 0, mean: 0, median: 0, mode: 0 },
+  mpm: { min: 0, max: 0, mean: 0, median: 0, mode: 0 },
+  kda: { min: 0, max: 0, mean: 0, median: 0, mode: 0 },
+};
+
+const ITEM_CATEGORIES: Record<string, ItemCategory> = {
+  "Blast Shields": "Defense",
+  Guardian: "Defense",
+  Haven: "Defense",
+  Resilience: "Defense",
+  Sentinel: "Defense",
+  Chronos: "Utility",
+  Hoard: "Utility",
+  "Master Riding": "Utility",
+  "Morale Boost": "Utility",
+  Nimble: "Utility",
+  Bloodbath: "Healing",
+  "Life Rip": "Healing",
+  Meditation: "Healing",
+  Rejuvenate: "Healing",
+  Veteran: "Healing",
+  Bulldozer: "Offense",
+  "Deft Hands": "Offense",
+  Lethality: "Offense",
+  "Trigger Scent": "Offense",
+  Wrecker: "Offense",
+};
+
+function itemIcon(name: string) {
+  return `/images/items/${name.replace(/\s+/g, "_")}_Icon.avif`;
+}
+
+function mapItemStats(items: ItemStat[]): PageItemStat[] {
+  const totalUsage = items.reduce((sum, item) => sum + item.totalUsage, 0);
+  return items.map((item) => ({
+    name: item.itemName,
+    pickRate: totalUsage > 0 ? Number(((item.totalUsage / totalUsage) * 100).toFixed(1)) : 0,
+    winRate: Number(item.winRate.toFixed(1)),
+    category: ITEM_CATEGORIES[item.itemName] ?? "Utility",
+    icon: itemIcon(item.itemName),
+  }));
+}
+
+function mapMapStats(maps: MapStat[]): PageMapStat[] {
+  return maps.map((map) => ({
+    name: map.name,
+    matches: map.totalMatches,
+    avgDurationSeconds: map.avgDurationSeconds,
+  }));
+}
+
+function formatDuration(seconds: number) {
+  if (!Number.isFinite(seconds) || seconds <= 0) return "--";
+  const minutes = Math.floor(seconds / 60);
+  const secs = Math.round(seconds % 60);
+  return `${minutes}:${secs.toString().padStart(2, "0")}`;
+}
 
 export default function StatsPage() {
   const [itemSort, setItemSort] = useState<SortKey>("pickRate");
   const [itemSortDir, setItemSortDir] = useState<"asc" | "desc">("desc");
   const [mapSortDir, setMapSortDir] = useState<"asc" | "desc">("desc");
-  const [metrics, setMetrics] = useState(MOCK_GLOBAL_METRICS);
+  const [metrics, setMetrics] = useState(EMPTY_METRICS);
+  const [datasetCounts, setDatasetCounts] = useState({ matches: 0, players: 0 });
+  const [items, setItems] = useState<PageItemStat[]>([]);
+  const [maps, setMaps] = useState<PageMapStat[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -47,6 +117,18 @@ export default function StatsPage() {
   const [champions, setChampions] = useState<Champion[]>([]);
   useEffect(() => {
     fetchChampions().then(setChampions).catch(() => {});
+    fetchItems({ mode: "ranked", limit: 50 }).then((rows) => setItems(mapItemStats(rows))).catch(() => {});
+    fetchMapStats({ queueId: 486, limit: 25 }).then((rows) => setMaps(mapMapStats(rows))).catch(() => {});
+    fetchDatabaseStats()
+      .then((stats) => {
+        if (!stats) return;
+        const tableCounts = new Map(stats.tables.map((table) => [table.name, table.rowCount]));
+        setDatasetCounts({
+          matches: tableCounts.get("matches") ?? 0,
+          players: tableCounts.get("players") ?? 0,
+        });
+      })
+      .catch(() => {});
   }, []);
 
   const toggleItemSort = (key: SortKey) => {
@@ -58,18 +140,17 @@ export default function StatsPage() {
     }
   };
 
-  const sortedItems = [...MOCK_ITEM_STATS].sort((a, b) => {
+  const sortedItems = [...items].sort((a, b) => {
     const av = a[itemSort];
     const bv = b[itemSort];
     return itemSortDir === "desc" ? bv - av : av - bv;
   });
 
-  const sortedMaps = [...MOCK_MAP_STATS].sort((a, b) => {
+  const sortedMaps = [...maps].sort((a, b) => {
     return mapSortDir === "desc" ? b.matches - a.matches : a.matches - b.matches;
   });
 
-  const maxItemPick = Math.max(...MOCK_ITEM_STATS.map((i) => i.pickRate));
-  const maxMapMatches = Math.max(...MOCK_MAP_STATS.map((m) => m.matches));
+  const avgDurationSeconds = maps.reduce((sum, map) => sum + map.avgDurationSeconds * map.matches, 0) / Math.max(1, maps.reduce((sum, map) => sum + map.matches, 0));
 
   return (
     <div className="space-y-8">
@@ -93,7 +174,7 @@ export default function StatsPage() {
             { key: "kda", label: "KDA Ratio", stroke: "#33b6b1", fill: "rgba(51,182,177,0.15)" },
           ].map(({ key, label, stroke, fill }) => {
             const d = metrics[key as keyof typeof metrics] as { min: number; max: number; mean: number; mode: number };
-            const range = d.max - d.min;
+            const range = Math.max(1, d.max - d.min);
             const meanPct = (d.mean - d.min) / range;
             const modePct = (d.mode - d.min) / range;
             const formatVal = key === "kda" ? (v: number) => v.toFixed(1) : (v: number) => v.toLocaleString();
@@ -181,10 +262,10 @@ export default function StatsPage() {
           <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 space-y-3">
             <span className="text-pc-text font-semibold text-sm">Dataset</span>
             {[
-              { label: "Matches Tracked", value: metrics.totalMatchesTracked.toLocaleString() },
-              { label: "Players Tracked", value: metrics.totalPlayersTracked.toLocaleString() },
-              { label: "Avg Match Duration", value: metrics.avgMatchDuration },
-              { label: "Avg KDA", value: metrics.avgKDA },
+              { label: "Matches Tracked", value: datasetCounts.matches.toLocaleString() },
+              { label: "Players Tracked", value: datasetCounts.players.toLocaleString() },
+              { label: "Avg Match Duration", value: formatDuration(avgDurationSeconds) },
+              { label: "Avg KDA", value: metrics.kda.mean ? metrics.kda.mean.toFixed(2) : "--" },
             ].map((m) => (
               <div key={m.label} className="flex items-center justify-between">
                 <span className="text-pc-text-muted text-xs">{m.label}</span>
@@ -220,7 +301,7 @@ export default function StatsPage() {
                         <span className={`w-4 text-right shrink-0 ${i === 0 ? "text-yellow-400 font-bold" : "text-pc-text-muted"}`}>{i + 1}</span>
                         <img src={getChampionIconSafe(c.name)} alt={c.name} className="w-7 h-7 object-contain rounded shrink-0" />
                         <span className="text-pc-text truncate group-hover:text-pc-accent transition-colors flex-1">{c.name}</span>
-                        <span className="text-emerald-400 font-medium shrink-0">{c.winRate != null ? `${(c.winRate * 100).toFixed(1)}%` : "—"}</span>
+                        <span className="text-emerald-400 font-medium shrink-0">{c.winRate != null ? `${c.winRate.toFixed(1)}%` : "—"}</span>
                       </Link>
                     ))}
                   </div>
@@ -256,7 +337,7 @@ export default function StatsPage() {
                         <span className={`w-4 text-right shrink-0 ${i === 0 ? "text-yellow-400 font-bold" : "text-pc-text-muted"}`}>{i + 1}</span>
                         <img src={getChampionIconSafe(c.name)} alt={c.name} className="w-7 h-7 object-contain rounded shrink-0" />
                         <span className="text-pc-text truncate group-hover:text-pc-accent transition-colors flex-1">{c.name}</span>
-                        <span className="text-rose-400 font-medium shrink-0">{c.banRate != null ? `${(c.banRate * 100).toFixed(1)}%` : "—"}</span>
+                        <span className="text-rose-400 font-medium shrink-0">{c.banRate != null ? `${c.banRate.toFixed(1)}%` : "—"}</span>
                       </Link>
                     ))}
                   </div>
@@ -292,6 +373,9 @@ export default function StatsPage() {
             </div>
           </div>
           <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 space-y-4">
+            {sortedItems.length === 0 && (
+              <div className="text-sm text-pc-text-muted">Item stats unavailable.</div>
+            )}
             {(["Defense", "Utility", "Healing", "Offense"] as const).map((cat) => {
               const catColor = cat === "Offense" ? "text-red-400" :
                 cat === "Defense" ? "text-blue-400" :
@@ -341,6 +425,9 @@ export default function StatsPage() {
             </button>
           </div>
           <div className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
+            {sortedMaps.length === 0 ? (
+              <div className="p-4 text-sm text-pc-text-muted">Map stats unavailable.</div>
+            ) : (
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-pc-border text-pc-text-muted text-left text-xs">
@@ -359,6 +446,7 @@ export default function StatsPage() {
                 ))}
               </tbody>
             </table>
+            )}
           </div>
         </section>
 

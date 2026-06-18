@@ -3,19 +3,23 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import {
+  fetchReferenceRegions,
   fetchMatchSearch,
   fetchRecentMatches,
+  fetchMatchHourlyStats,
   type MatchSearchResult,
   type MatchData,
+  type MatchHourlyStats,
 } from "@/lib/api-client";
 import { useChampions } from "@/lib/champion-names";
-import { MOCK_MATCH_STATS } from "@/lib/mock-data";
+
+const RANKED_QUEUE_ID = "486";
 
 /**
  * Matches Page — /matches
  *
- * Left: search filters. Right: live match stats by region.
- * Bottom: paginated results table.
+ * Left: search filters. Right: live ranked match stats by region (real data).
+ * Bottom: paginated results table (ranked only since DB only tracks ranked).
  */
 export default function MatchesPage() {
   const [matches, setMatches] = useState<MatchSearchResult[]>([]);
@@ -26,14 +30,41 @@ export default function MatchesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Filters
+  // Filters — queueId defaults to ranked and is hidden since DB is ranked-only
   const [championId, setChampionId] = useState("");
-  const [queueId, setQueueId] = useState("");
   const [region, setRegion] = useState("");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [hasFilters, setHasFilters] = useState(false);
   const { champions, loading: championsLoading } = useChampions();
+  const [referenceRegions, setReferenceRegions] = useState<Array<{ region?: string; region_code?: string; name?: string; region_name?: string }>>([]);
+
+  // Live hourly stats from backend
+  const [hourlyStats, setHourlyStats] = useState<MatchHourlyStats | null>(null);
+  const [statsLoading, setStatsLoading] = useState(true);
+
+  // Fetch hourly stats on mount + every 60s
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      setStatsLoading(true);
+      try {
+        const stats = await fetchMatchHourlyStats();
+        if (active) setHourlyStats(stats);
+      } catch {
+        // Silently degrade — stats card shows zeros
+      } finally {
+        if (active) setStatsLoading(false);
+      }
+    };
+    load();
+    const interval = setInterval(load, 60_000);
+    return () => { active = false; clearInterval(interval); };
+  }, []);
+
+  useEffect(() => {
+    fetchReferenceRegions().then(setReferenceRegions).catch(() => {});
+  }, []);
 
   const loadMatches = useCallback(async () => {
     setLoading(true);
@@ -43,7 +74,7 @@ export default function MatchesPage() {
       if (hasFilters) {
         const result = await fetchMatchSearch({
           championId: championId || undefined,
-          queueId: queueId || undefined,
+          queueId: RANKED_QUEUE_ID,
           region: region || undefined,
           from: from || undefined,
           to: to || undefined,
@@ -80,29 +111,28 @@ export default function MatchesPage() {
           setTotalPages(1);
         }
       }
-    } catch (err: any) {
+    } catch {
       setMatches([]);
       setTotal(0);
       setTotalPages(1);
-      setError(err.message || "Failed to load matches");
+      setError("Match data unavailable. Start the PaladinsCat API on port 3005 to load ranked matches.");
     } finally {
       setLoading(false);
     }
-  }, [hasFilters, championId, queueId, region, from, to, page, perPage]);
+  }, [hasFilters, championId, region, from, to, page, perPage]);
 
   useEffect(() => {
     loadMatches();
   }, [loadMatches]);
 
   const handleSearch = () => {
-    const filtered = !!championId || !!queueId || !!region || !!from || !!to;
+    const filtered = !!championId || !!region || !!from || !!to;
     setHasFilters(filtered);
     setPage(1);
   };
 
   const handleReset = () => {
     setChampionId("");
-    setQueueId("");
     setRegion("");
     setFrom("");
     setTo("");
@@ -114,8 +144,9 @@ export default function MatchesPage() {
     if (hasFilters) loadMatches();
   }, [page, hasFilters, loadMatches]);
 
-  const stats = MOCK_MATCH_STATS;
-  const maxMatches = Math.max(...stats.regions.map((r) => r.matchesPerHour));
+  const maxMatches = hourlyStats
+    ? Math.max(...hourlyStats.regions.map((r) => r.matchesPerHour), 1)
+    : 1;
 
   return (
     <div className="space-y-6">
@@ -123,7 +154,7 @@ export default function MatchesPage() {
       <div>
         <h1 className="pc-heading pc-heading-lg text-pc-accent">Matches</h1>
         <p className="text-pc-text-secondary text-sm mt-1">
-          Search match history and view live ranked activity
+          Search ranked match history and view live activity by region
         </p>
       </div>
 
@@ -148,20 +179,6 @@ export default function MatchesPage() {
               </select>
             </div>
             <div>
-              <label className="block text-xs text-pc-text-muted mb-1.5">Queue</label>
-              <select
-                value={queueId}
-                onChange={(e) => setQueueId(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-pc-bg border border-pc-border text-pc-text text-sm focus:outline-none focus:border-pc-accent"
-              >
-                <option value="">All queues</option>
-                <option value="486">Ranked</option>
-                <option value="487">Casual</option>
-                <option value="488">Custom</option>
-                <option value="489">Tournament</option>
-              </select>
-            </div>
-            <div>
               <label className="block text-xs text-pc-text-muted mb-1.5">Region</label>
               <select
                 value={region}
@@ -169,12 +186,15 @@ export default function MatchesPage() {
                 className="w-full px-3 py-2 rounded-lg bg-pc-bg border border-pc-border text-pc-text text-sm focus:outline-none focus:border-pc-accent"
               >
                 <option value="">All regions</option>
-                <option value="NA">NA</option>
-                <option value="EU">EU</option>
-                <option value="Asia">Asia</option>
-                <option value="OCE">OCE</option>
-                <option value="BR">Brazil</option>
-                <option value="LATAM">LATAM</option>
+                {referenceRegions.map((region) => {
+                  const value = region.region ?? region.region_code ?? "";
+                  if (!value) return null;
+                  return (
+                    <option key={value} value={value}>
+                      {region.name ?? region.region_name ?? value}
+                    </option>
+                  );
+                })}
               </select>
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -220,21 +240,17 @@ export default function MatchesPage() {
           <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-5">
             <div className="flex items-center gap-2 mb-3">
               <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <h2 className="text-pc-text font-semibold text-sm">Live Match Activity</h2>
+              <h2 className="text-pc-text font-semibold text-sm">Ranked Activity Today</h2>
             </div>
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div>
-                <div className="text-pc-text-muted text-[10px] uppercase tracking-wider mb-0.5">Total Today</div>
-                <div className="text-pc-text font-bold text-lg">{stats.totalToday.toLocaleString()}</div>
-              </div>
-              <div>
-                <div className="text-pc-text-muted text-[10px] uppercase tracking-wider mb-0.5">Ranked Today</div>
-                <div className="text-pc-accent font-bold text-lg">{stats.rankedToday.toLocaleString()}</div>
+            <div className="mb-4">
+              <div className="text-pc-text-muted text-[10px] uppercase tracking-wider mb-0.5">Total Ranked</div>
+              <div className="text-pc-accent font-bold text-lg">
+                {statsLoading ? "…" : (hourlyStats?.totalToday ?? 0).toLocaleString()}
               </div>
             </div>
             {/* Region bars */}
             <div className="space-y-2">
-              {stats.regions.map((r) => (
+              {(hourlyStats?.regions ?? []).map((r) => (
                 <div key={r.region} className="flex items-center gap-3 text-xs">
                   <span className="text-pc-text w-10 shrink-0 font-medium">{r.region}</span>
                   <div className="flex-1 h-2 bg-pc-bg rounded-full overflow-hidden">
@@ -246,20 +262,25 @@ export default function MatchesPage() {
                   <span className="text-pc-accent font-medium w-12 text-right shrink-0">{r.matchesPerHour}/hr</span>
                 </div>
               ))}
+              {statsLoading && (
+                <div className="text-pc-text-muted text-xs text-center py-2">Loading…</div>
+              )}
             </div>
           </div>
-          {/* Peak hours */}
-          <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4">
-            <h3 className="text-pc-text-muted text-[10px] uppercase tracking-wider mb-2">Peak Hours</h3>
-            <div className="grid grid-cols-3 gap-2">
-              {stats.regions.map((r) => (
-                <div key={r.region} className="text-center">
-                  <div className="text-pc-text text-xs font-medium">{r.region}</div>
-                  <div className="text-pc-text-muted text-[10px]">{r.peakHour}</div>
-                </div>
-              ))}
+          {/* Per-region totals */}
+          {!statsLoading && hourlyStats && hourlyStats.regions.some(r => r.totalToday > 0) && (
+            <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4">
+              <h3 className="text-pc-text-muted text-[10px] uppercase tracking-wider mb-2">Today by Region</h3>
+              <div className="grid grid-cols-3 gap-2">
+                {hourlyStats.regions.map((r) => (
+                  <div key={r.region} className="text-center">
+                    <div className="text-pc-text text-xs font-medium">{r.region}</div>
+                    <div className="text-pc-text-muted text-[10px]">{r.totalToday.toLocaleString()}</div>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
       </div>
@@ -275,7 +296,7 @@ export default function MatchesPage() {
 
       {!loading && !error && matches.length === 0 && (
         <div className="text-center py-12 text-pc-text-secondary text-sm">
-          {hasFilters ? "No matches found for these filters." : "No matches available."}
+          {hasFilters ? "No matches found for these filters." : "No ranked matches available."}
         </div>
       )}
 
@@ -283,7 +304,7 @@ export default function MatchesPage() {
         <>
           {hasFilters && (
             <div className="text-xs text-pc-text-muted">
-              Showing {(page - 1) * perPage + 1}–{Math.min(page * perPage, total)} of {total.toLocaleString()} matches
+              Showing {(page - 1) * perPage + 1}–{Math.min(page * perPage, total)} of {total.toLocaleString()} ranked matches
             </div>
           )}
 
@@ -293,7 +314,6 @@ export default function MatchesPage() {
                 <thead>
                   <tr className="border-b border-pc-border bg-pc-bg-secondary text-pc-text-muted text-left text-xs">
                     <th className="px-4 py-3">Match ID</th>
-                    <th className="px-4 py-3">Queue</th>
                     <th className="px-4 py-3">Map</th>
                     <th className="px-4 py-3">Region</th>
                     <th className="px-4 py-3">Duration</th>
@@ -337,7 +357,6 @@ export default function MatchesPage() {
 }
 
 function MatchRow({ match }: { match: MatchSearchResult }) {
-  const queueLabel = queueName(match.queue_id);
   const duration = formatDuration(match.duration_seconds);
   const date = new Date(match.entry_datetime).toLocaleString();
 
@@ -349,7 +368,6 @@ function MatchRow({ match }: { match: MatchSearchResult }) {
             #{match.match_id}
           </span>
         </td>
-        <td className="px-4 py-3 text-pc-text-secondary text-xs">{queueLabel}</td>
         <td className="px-4 py-3 text-pc-text-secondary text-xs">{match.map}</td>
         <td className="px-4 py-3 text-pc-text-secondary text-xs">{match.region}</td>
         <td className="px-4 py-3 text-pc-text-secondary text-xs">{duration}</td>
@@ -360,16 +378,6 @@ function MatchRow({ match }: { match: MatchSearchResult }) {
 }
 
 /* ── Helpers ── */
-
-function queueName(id: number): string {
-  const map: Record<number, string> = {
-    486: "Ranked",
-    487: "Casual",
-    488: "Custom",
-    489: "Tournament",
-  };
-  return map[id] || `Queue ${id}`;
-}
 
 function formatDuration(seconds: number): string {
   if (!seconds || seconds <= 0) return "—";

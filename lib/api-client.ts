@@ -94,19 +94,42 @@ export interface LeaderboardEntry {
 
 export interface RankedPlayer {
   rank: number;
-  player_id: number;
+  player_id: string;
   name: string;
   tier: number;
   points: number;
   prev_rank?: number | null;
   trend?: number;
+  wins?: number;
+  losses?: number;
+  winRate?: number;
 }
 
 export async function fetchRankedLeaderboard(params?: { tier?: string; top?: number }): Promise<RankedPlayer[]> {
   const query = new URLSearchParams();
   if (params?.tier) query.set('tier', params.tier);
   if (params?.top != null) query.set('top', String(params.top));
-  return fetchJson<RankedPlayer[]>(`/stats/ranked-leaderboard${query.toString() ? `?${query.toString()}` : ''}`);
+  try {
+    const raw = await fetchJson<Array<{
+      player_id: string; name: string; tier: number; points: number;
+      rank: number; prev_rank?: number; trend?: number; tier_change?: number;
+      wins?: number; losses?: number; winrate?: number;
+    }>>(`/stats/ranked-leaderboard${query.toString() ? `?${query.toString()}` : ''}`);
+    return raw.map(r => ({
+      rank: r.rank,
+      player_id: r.player_id,
+      name: r.name,
+      tier: r.tier,
+      points: r.points,
+      prev_rank: r.prev_rank,
+      trend: r.trend,
+      wins: r.wins,
+      losses: r.losses,
+      winRate: r.winrate,
+    }));
+  } catch {
+    return [];
+  }
 }
 
 export interface CheaterPlayer {
@@ -430,6 +453,55 @@ export interface ItemStat {
   winRate: number;
 }
 
+export interface MapStat {
+  name: string;
+  totalMatches: number;
+  avgDurationSeconds: number;
+}
+
+export interface HourlyMatchCount {
+  date: string;
+  hour: number;
+  queueId: number;
+  matches: {
+    NA: number;
+    EU: number;
+    Asia: number;
+    BR: number;
+    OCE: number;
+    SA: number;
+    Unknown: number;
+  };
+  totalMatches: number;
+  fetchedAt: string | null;
+}
+
+export interface DatabaseStats {
+  tables: Array<{ name: string; rowCount: number }>;
+  timestamp: string;
+}
+
+export interface SystemStatus {
+  matches: number;
+  players: number;
+  pendingPulls: number;
+  lastMatch: string | null;
+  timestamp: string;
+}
+
+export interface Notification {
+  id: number;
+  timestamp: string;
+  importance: number;
+  message: string;
+}
+
+export interface NotificationInput {
+  timestamp?: string;
+  importance?: number;
+  message: string;
+}
+
 export interface TierStat {
   tier: string;
   tierSort: number;
@@ -447,10 +519,12 @@ export interface TierStat {
  */
 const FETCH_TIMEOUT_MS = 10000;
 
-async function fetchJson<T>(path: string, options?: RequestInit & { retries?: number }): Promise<T> {
+async function fetchJson<T>(path: string, options?: RequestInit & { retries?: number; unwrapData?: boolean }): Promise<T> {
   const retries = options?.retries ?? 2;
+  const unwrapData = options?.unwrapData ?? true;
   const fetchOptions: RequestInit = { ...options };
   delete (fetchOptions as any).retries;
+  delete (fetchOptions as any).unwrapData;
 
   for (let attempt = 0; attempt <= retries; attempt++) {
     // CRITICAL: Add timeout to prevent indefinite hang on stalled backend.
@@ -466,16 +540,136 @@ async function fetchJson<T>(path: string, options?: RequestInit & { retries?: nu
         continue;
       }
       const errBody = await res.json().catch(() => null);
-      throw new Error(errBody?.error?.message || `API ${res.status} on ${path}`);
+      const message = typeof errBody?.error === "string" ? errBody.error : errBody?.error?.message;
+      throw new Error(message || `API ${res.status} on ${path}`);
     }
     const json = await res.json();
-    // Handle { data, meta } wrapper from backend API
-    if (json && json.data !== undefined) {
+    // Handle normalized list envelopes when callers only need the rows.
+    if (unwrapData && json && json.data !== undefined) {
       return json.data as T;
     }
     return json as T;
   }
   throw new Error("Unexpected fetch failure");
+}
+
+function numberOrNull(value: number | string | null | undefined): number | null {
+  if (value == null) return null;
+  const parsed = typeof value === 'string' ? Number(value) : value;
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function toDisplayPercent(value: number | string | null | undefined): number | null {
+  const parsed = numberOrNull(value);
+  if (parsed == null) return null;
+  return Math.abs(parsed) <= 1 ? Number((parsed * 100).toFixed(2)) : parsed;
+}
+
+function splitRoles(roles: unknown): string[] | null {
+  if (Array.isArray(roles)) return roles.map(String).filter(Boolean);
+  if (typeof roles === 'string') return roles.split(',').map((s) => s.trim()).filter(Boolean);
+  return null;
+}
+
+// ── System ──
+
+export async function fetchDatabaseStats(): Promise<DatabaseStats | null> {
+  try {
+    const raw = await fetchJson<{
+      tables: Array<{ name: string; row_count: number | string }>;
+      timestamp: string;
+    }>(`/database`);
+    return {
+      tables: raw.tables.map((table) => ({
+        name: table.name,
+        rowCount: Number(table.row_count ?? 0),
+      })),
+      timestamp: raw.timestamp,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchSystemStatus(): Promise<SystemStatus | null> {
+  try {
+    const raw = await fetchJson<{
+      matches: number | string;
+      players: number | string;
+      pendingPulls?: number | string;
+      lastMatch?: string | null;
+      timestamp: string;
+    }>(`/status`);
+    return {
+      matches: Number(raw.matches ?? 0),
+      players: Number(raw.players ?? 0),
+      pendingPulls: Number(raw.pendingPulls ?? 0),
+      lastMatch: raw.lastMatch ?? null,
+      timestamp: raw.timestamp,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function mapNotification(raw: {
+  id: number;
+  timestamp?: string;
+  importance?: number | string;
+  message: string;
+}): Notification {
+  return {
+    id: raw.id,
+    timestamp: raw.timestamp ?? "",
+    importance: Number(raw.importance ?? 0),
+    message: raw.message,
+  };
+}
+
+// ── Notifications ──
+
+export async function fetchNotifications(params?: { limit?: number }): Promise<Notification[]> {
+  const query = new URLSearchParams();
+  if (params?.limit != null) query.set('limit', String(params.limit));
+  try {
+    const raw = await fetchJson<any[]>(`/notifications${query.toString() ? `?${query.toString()}` : ''}`);
+    return raw.map(mapNotification);
+  } catch {
+    return [];
+  }
+}
+
+export async function fetchAdminNotifications(token: string): Promise<Notification[]> {
+  const raw = await fetchJson<any[]>(
+    `/admin/notifications`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  return raw.map(mapNotification);
+}
+
+export async function createAdminNotification(token: string, input: NotificationInput): Promise<Notification> {
+  const raw = await fetchJson<any>(`/admin/notifications`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify(input),
+  });
+  return mapNotification(raw);
+}
+
+export async function updateAdminNotification(token: string, id: number, input: Partial<NotificationInput>): Promise<Notification> {
+  const raw = await fetchJson<any>(`/admin/notifications/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify(input),
+  });
+  return mapNotification(raw);
+}
+
+export async function deleteAdminNotification(token: string, id: number): Promise<void> {
+  await fetchJson<{ deleted: boolean; id: number }>(`/admin/notifications/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
 }
 
 // ── Champions ──
@@ -495,7 +689,8 @@ export async function fetchChampions(params?: {
       }
     }
   }
-  const raw = await fetchJson<Array<{
+  const [raw, stats] = await Promise.all([
+    fetchJson<Array<{
     id: number;
     name: string;
     roles?: string;
@@ -503,20 +698,24 @@ export async function fetchChampions(params?: {
     health?: number;
     speed?: number;
     image_path?: string | null;
-  }>>(`/champions${query.toString() ? `?${query.toString()}` : ''}`);
+  }>>(`/champions${query.toString() ? `?${query.toString()}` : ''}`),
+    fetchStatsChampions({ limit: 200 }).catch(() => [] as StatsChampion[]),
+  ]);
+  const statsById = new Map(stats.map((stat) => [stat.championId, stat]));
+  const statsByName = new Map(stats.map((stat) => [stat.championName.toLowerCase(), stat]));
 
   return raw.map((r): Champion => ({
     id: r.id,
     name: r.name,
-    roles: r.roles ? r.roles.split(',').map(s => s.trim()).filter(Boolean) : null,
-    winRate: null,
-    pickRate: null,
-    banRate: null,
+    roles: splitRoles(r.roles),
+    winRate: statsById.get(r.id)?.winRate ?? statsByName.get(r.name.toLowerCase())?.winRate ?? null,
+    pickRate: statsById.get(r.id)?.pickRate ?? statsByName.get(r.name.toLowerCase())?.pickRate ?? null,
+    banRate: statsById.get(r.id)?.banRate ?? statsByName.get(r.name.toLowerCase())?.banRate ?? null,
     rating: null,
     ratingDeviation: null,
     volatility: null,
-    totalMatches: null,
-    totalPlays: null,
+    totalMatches: statsById.get(r.id)?.totalPlays ?? statsByName.get(r.name.toLowerCase())?.totalPlays ?? null,
+    totalPlays: statsById.get(r.id)?.totalPlays ?? statsByName.get(r.name.toLowerCase())?.totalPlays ?? null,
     wins: null,
     imagePath: r.image_path || null,
   }));
@@ -778,26 +977,43 @@ export interface StatsChampion {
   winRate: number;
   totalPlays: number;
   banRate?: number;
+  pickRate?: number;
+  kda?: number;
+  avgDamage?: number;
+  avgGold?: number;
+  avgHeal?: number;
+  avgMitigation?: number;
 }
 
 export async function fetchStatsChampions(params?: { sort?: string; limit?: number }): Promise<StatsChampion[]> {
   const query = new URLSearchParams();
   if (params?.sort) query.set('sort', params.sort);
   if (params?.limit != null) query.set('limit', String(params.limit));
-  const raw = await fetchJson<Array<{
-    champion_id: number;
-    champion_name: string;
-    win_rate: number | string;
-    total_plays: number | string;
-    ban_rate?: number | string;
-  }>>(`/stats/champions${query.toString() ? `?${query.toString()}` : ''}`);
-  return raw.map((r) => ({
-    championId: r.champion_id,
-    championName: r.champion_name,
-    winRate: typeof r.win_rate === 'string' ? Number(r.win_rate) : r.win_rate,
-    totalPlays: typeof r.total_plays === 'string' ? Number(r.total_plays) : r.total_plays,
-    banRate: r.ban_rate != null ? (typeof r.ban_rate === 'string' ? Number(r.ban_rate) : r.ban_rate) as number | undefined : undefined,
-  }));
+  try {
+    const raw = await fetchJson<Array<{
+      champion_id: number; champion_name: string;
+      win_rate: number | string; total_matches?: number | string; total_plays?: number | string;
+      ban_rate?: number | string; pick_rate?: number | string; kda?: number | string;
+      avg_damage?: number | string; avg_gold?: number | string;
+      avg_heal?: number | string; avg_mitigation?: number | string;
+    }>>(`/stats/champions${query.toString() ? `?${query.toString()}` : ''}`);
+    const num = (v: number | string | undefined) => v != null ? (typeof v === 'string' ? Number(v) : v) : undefined;
+    return raw.map((r) => ({
+      championId: r.champion_id,
+      championName: r.champion_name,
+      winRate: toDisplayPercent(r.win_rate) ?? 0,
+      totalPlays: num(r.total_matches) ?? num(r.total_plays) ?? 0,
+      banRate: toDisplayPercent(r.ban_rate) ?? undefined,
+      pickRate: toDisplayPercent(r.pick_rate) ?? undefined,
+      kda: num(r.kda),
+      avgDamage: num(r.avg_damage),
+      avgGold: num(r.avg_gold),
+      avgHeal: num(r.avg_heal),
+      avgMitigation: num(r.avg_mitigation),
+    }));
+  } catch {
+    return [];
+  }
 }
 
 export async function fetchRegions(): Promise<RegionStat[]> {
@@ -913,20 +1129,88 @@ export async function fetchLoadouts(params?: {
   }));
 }
 
-export async function fetchItems(): Promise<ItemStat[]> {
-  const raw = await fetchJson<Array<{
-    item_id: number;
-    item_name: string;
-    total_usage: number;
-    win_rate: number;
-  }>>(`/stats/items`);
+export async function fetchItems(params?: { mode?: string; limit?: number }): Promise<ItemStat[]> {
+  const query = new URLSearchParams();
+  if (params?.mode) query.set('mode', params.mode);
+  if (params?.limit != null) query.set('limit', String(params.limit));
+  try {
+    const raw = await fetchJson<Array<{
+      item_id: number; item_name: string;
+      total_uses?: number | string; total_usage?: number | string;
+      win_rate: number | string;
+    }>>(`/stats/items${query.toString() ? `?${query.toString()}` : ''}`);
+    const num = (v: number | string | undefined) => v != null ? (typeof v === 'string' ? Number(v) : v) : 0;
+    return raw.map((r) => ({
+      itemId: r.item_id,
+      itemName: r.item_name,
+      totalUsage: num(r.total_uses) || num(r.total_usage),
+      winRate: num(r.win_rate),
+    }));
+  } catch {
+    return [];
+  }
+}
 
-  return raw.map((r) => ({
-    itemId: r.item_id,
-    itemName: r.item_name,
-    totalUsage: r.total_usage,
-    winRate: r.win_rate,
-  }));
+export async function fetchMapStats(params?: { queueId?: number; limit?: number }): Promise<MapStat[]> {
+  const query = new URLSearchParams();
+  if (params?.queueId != null) query.set('queueId', String(params.queueId));
+  if (params?.limit != null) query.set('limit', String(params.limit));
+  try {
+    const raw = await fetchJson<Array<{
+      map: string;
+      total_matches: number | string;
+      avg_duration_seconds: number | string;
+    }>>(`/stats/maps${query.toString() ? `?${query.toString()}` : ''}`);
+    return raw.map((r) => ({
+      name: r.map,
+      totalMatches: Number(r.total_matches ?? 0),
+      avgDurationSeconds: Number(r.avg_duration_seconds ?? 0),
+    }));
+  } catch {
+    return [];
+  }
+}
+
+export async function fetchHourlyMatchCounts(params?: { date?: string; hour?: number; queueId?: number }): Promise<HourlyMatchCount[]> {
+  const query = new URLSearchParams();
+  if (params?.date) query.set('date', params.date);
+  if (params?.hour != null) query.set('hour', String(params.hour));
+  if (params?.queueId != null) query.set('queueId', String(params.queueId));
+  try {
+    const raw = await fetchJson<Array<{
+      date: string;
+      hour: number | string;
+      queue_id: number | string;
+      matches_na?: number | string;
+      matches_eu?: number | string;
+      matches_asia?: number | string;
+      matches_br?: number | string;
+      matches_oce?: number | string;
+      matches_sa?: number | string;
+      matches_unknown?: number | string;
+      total_matches?: number | string;
+      fetched_at?: string | null;
+    }>>(`/stats/hourly-match-counts${query.toString() ? `?${query.toString()}` : ''}`);
+    const n = (value: number | string | undefined) => Number(value ?? 0);
+    return raw.map((r) => ({
+      date: r.date,
+      hour: Number(r.hour),
+      queueId: Number(r.queue_id),
+      matches: {
+        NA: n(r.matches_na),
+        EU: n(r.matches_eu),
+        Asia: n(r.matches_asia),
+        BR: n(r.matches_br),
+        OCE: n(r.matches_oce),
+        SA: n(r.matches_sa),
+        Unknown: n(r.matches_unknown),
+      },
+      totalMatches: n(r.total_matches),
+      fetchedAt: r.fetched_at ?? null,
+    }));
+  } catch {
+    return [];
+  }
 }
 
 export async function fetchTiers(): Promise<TierStat[]> {
@@ -1032,40 +1316,24 @@ export function clearAuth() {
 // ── Auth ──
 
 export async function register(username: string, email: string, password: string): Promise<AuthSession> {
-  const raw = await fetchJson<{
-    user: { id: number; username: string; email: string; avatar_url: string | null; bio: string | null; created_at: string; last_login: string | null };
-    token: string;
-    expires_at: string;
-  }>(`/v1/auth/register`, {
+  await fetchJson<{
+    message: string;
+    user: { id: number; username: string; created_at: string };
+  }>(`/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, email, password }),
   });
 
-  const session: AuthSession = {
-    user: {
-      id: raw.user.id,
-      username: raw.user.username,
-      email: raw.user.email,
-      avatarUrl: raw.user.avatar_url,
-      bio: raw.user.bio,
-      createdAt: raw.user.created_at,
-      lastLogin: raw.user.last_login,
-    },
-    token: raw.token,
-    expiresAt: raw.expires_at,
-  };
-
-  setAuthSession(session);
-  return session;
+  return login(username, password);
 }
 
 export async function login(username: string, password: string): Promise<AuthSession> {
   const raw = await fetchJson<{
-    user: { id: number; username: string; email: string; avatar_url: string | null; bio: string | null; created_at: string; last_login: string | null };
+    user: { id: number; username: string; email?: string | null; avatar_url?: string | null; bio?: string | null; created_at?: string; last_login?: string | null };
     token: string;
-    expires_at: string;
-  }>(`/v1/auth/login`, {
+    expires_at?: string;
+  }>(`/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password }),
@@ -1075,14 +1343,14 @@ export async function login(username: string, password: string): Promise<AuthSes
     user: {
       id: raw.user.id,
       username: raw.user.username,
-      email: raw.user.email,
-      avatarUrl: raw.user.avatar_url,
-      bio: raw.user.bio,
-      createdAt: raw.user.created_at,
-      lastLogin: raw.user.last_login,
+      email: raw.user.email ?? "",
+      avatarUrl: raw.user.avatar_url ?? null,
+      bio: raw.user.bio ?? null,
+      createdAt: raw.user.created_at ?? new Date().toISOString(),
+      lastLogin: raw.user.last_login ?? null,
     },
     token: raw.token,
-    expiresAt: raw.expires_at,
+    expiresAt: raw.expires_at ?? new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(),
   };
 
   setAuthSession(session);
@@ -1096,7 +1364,7 @@ export async function logout(): Promise<void> {
     // expect the token in the header (see backend routes/auth.ts). Sending it
     // in the body means the backend never finds it → session never invalidated.
     // Source: Fault #3 — "Logout sends token in body, backend expects header"
-    await fetchJson<unknown>(`/v1/auth/logout`, {
+    await fetchJson<unknown>(`/auth/logout`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
     });
@@ -1104,30 +1372,32 @@ export async function logout(): Promise<void> {
   clearAuth();
 }
 
-export async function getMe(userId: number): Promise<AuthUser> {
-  // CRITICAL: Send userId in body, not URL. URL params are logged in server
-  // access logs, browser history, and proxy logs. The body is not logged.
-  // Source: Fault #4 — "User ID exposed in URL parameter"
+export async function getMe(_userId?: number): Promise<AuthUser> {
+  const token = getAuthToken();
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
   const raw = await fetchJson<{
-    id: number;
+    user_id?: number;
+    id?: number;
     username: string;
     email: string;
     avatar_url: string | null;
     bio: string | null;
-    created_at: string;
-    last_login: string | null;
-  }>(`/v1/auth/me`, {
-    body: JSON.stringify({ user_id: userId }),
+    created_at?: string;
+    last_login?: string | null;
+  }>(`/auth/me`, {
+    headers: { "Authorization": `Bearer ${token}` },
   });
 
   return {
-    id: raw.id,
+    id: raw.id ?? raw.user_id ?? 0,
     username: raw.username,
     email: raw.email,
     avatarUrl: raw.avatar_url,
     bio: raw.bio,
-    createdAt: raw.created_at,
-    lastLogin: raw.last_login,
+    createdAt: raw.created_at ?? "",
+    lastLogin: raw.last_login ?? null,
   };
 }
 
@@ -1140,7 +1410,7 @@ export async function getUserProfile(userId: number): Promise<AuthUser> {
     bio: string | null;
     created_at: string;
     last_login: string | null;
-  }>(`/v1/auth/users/${userId}`);
+  }>(`/players/${userId}`);
 
   return {
     id: raw.id,
@@ -1203,7 +1473,7 @@ export async function fetchPosts(params?: { userId?: string; buildId?: string; l
     likes: number;
     view_count: number;
     created_at: string;
-  }>>(`/v1/posts${query.toString() ? `?${query.toString()}` : ''}`);
+  }>>(`/community/posts${query.toString() ? `?${query.toString()}` : ''}`);
 
   return raw.map((r) => ({
     id: r.id,
@@ -1229,10 +1499,10 @@ export async function createPost(userId: number, title: string, content: string,
     likes: number;
     view_count: number;
     created_at: string;
-  }>(`/v1/posts/create`, {
+  }>(`/community/posts`, {
     method: "POST",
     headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-    body: JSON.stringify({ user_id: userId, title, content, build_id: buildId }),
+    body: JSON.stringify({ title, content, build_id: buildId }),
   });
 
   return {
@@ -1270,7 +1540,7 @@ export async function getPostDetail(postId: number): Promise<PostDetail> {
       content: string;
       created_at: string;
     }>;
-  }>(`/v1/posts/${postId}`);
+  }>(`/community/posts/${postId}`);
 
   return {
     post: {
@@ -1305,10 +1575,10 @@ export async function addComment(postId: number, userId: number, content: string
     parent_id: number | null;
     content: string;
     created_at: string;
-  }>(`/v1/posts/${postId}/comments`, {
+  }>(`/community/posts/${postId}/comments`, {
     method: "POST",
     headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-    body: JSON.stringify({ user_id: userId, content, parent_id: parentId }),
+    body: JSON.stringify({ content, parent_id: parentId }),
   });
 
   return {
@@ -1323,10 +1593,9 @@ export async function addComment(postId: number, userId: number, content: string
 }
 
 export async function togglePostLike(postId: number, userId: number, token: string): Promise<number> {
-  const raw = await fetchJson<{ likes: number }>(`/v1/posts/${postId}/like`, {
+  const raw = await fetchJson<{ likes: number }>(`/community/posts/${postId}/like`, {
     method: "POST",
     headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-    body: JSON.stringify({ user_id: userId }),
   });
 
   return raw.likes;
@@ -1377,7 +1646,7 @@ export async function fetchBuilds(params?: { championId?: string; visibility?: s
     likes: number;
     view_count: number;
     created_at: string;
-  }>>(`/v1/builds${query.toString() ? `?${query.toString()}` : ''}`);
+  }>>(`/builds${query.toString() ? `?${query.toString()}` : ''}`);
 
   return raw.map((r) => ({
     id: r.id,
@@ -1413,10 +1682,10 @@ export async function createBuild(userId: number, championId: number, name: stri
     likes: number;
     view_count: number;
     created_at: string;
-  }>(`/v1/builds/create`, {
+  }>(`/builds`, {
     method: "POST",
     headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-    body: JSON.stringify({ user_id: userId, champion_id: championId, name, items, actives, talents, notes, visibility }),
+    body: JSON.stringify({ champion_id: championId, name, items, actives, talents, notes, visibility }),
   });
 
   return {
@@ -1453,7 +1722,7 @@ export async function getBuildDetail(buildId: number): Promise<Build> {
     likes: number;
     view_count: number;
     created_at: string;
-  }>(`/v1/builds/${buildId}`);
+  }>(`/builds/${buildId}`);
 
   return {
     id: raw.id,
@@ -1474,10 +1743,9 @@ export async function getBuildDetail(buildId: number): Promise<Build> {
 }
 
 export async function toggleBuildLike(buildId: number, userId: number, token: string): Promise<number> {
-  const raw = await fetchJson<{ likes: number }>(`/v1/builds/${buildId}/like`, {
+  const raw = await fetchJson<{ likes: number }>(`/builds/${buildId}/like`, {
     method: "POST",
     headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-    body: JSON.stringify({ user_id: userId }),
   });
 
   return raw.likes;
@@ -1505,46 +1773,58 @@ export interface GlickoHistoryEntry {
 
 // ── Charts ──
 
+type PlayerChartRow = {
+  entry_datetime: string;
+  kills?: number | string | null;
+  deaths?: number | string | null;
+  assists?: number | string | null;
+  damage_per_minute?: number | string | null;
+  rating?: number | string | null;
+};
+
+function playerChartPath(playerId: string, days: number, limit: number) {
+  const to = new Date();
+  const from = new Date(to.getTime() - days * 24 * 60 * 60 * 1000);
+  const query = new URLSearchParams({
+    limit: String(limit),
+    from: from.toISOString(),
+    to: to.toISOString(),
+  });
+  return `/players/${encodeURIComponent(playerId)}/charts?${query.toString()}`;
+}
+
 export async function fetchKdaHistory(playerId: string, days: number = 30, limit: number = 50): Promise<KdaHistoryEntry[]> {
-  const raw = await fetchJson<Array<{
-    date: string;
-    kills: number;
-    deaths: number;
-    assists: number;
-  }>>(`/v1/stats/player/${encodeURIComponent(playerId)}/kda-history?days=${days}&limit=${limit}`);
+  const raw = await fetchJson<PlayerChartRow[]>(playerChartPath(playerId, days, limit));
 
   return raw.map((r) => ({
-    date: r.date,
-    kills: r.kills,
-    deaths: r.deaths,
-    assists: r.assists,
+    date: r.entry_datetime,
+    kills: Number(r.kills ?? 0),
+    deaths: Number(r.deaths ?? 0),
+    assists: Number(r.assists ?? 0),
   }));
 }
 
 export async function fetchDpmHistory(playerId: string, days: number = 30, limit: number = 50): Promise<DpmHistoryEntry[]> {
-  const raw = await fetchJson<Array<{
-    date: string;
-    player_dpm: number;
-    avg_dpm: number;
-  }>>(`/v1/stats/player/${encodeURIComponent(playerId)}/dpm-history?days=${days}&limit=${limit}`);
+  const raw = await fetchJson<PlayerChartRow[]>(playerChartPath(playerId, days, limit));
+  const values = raw.map((r) => Number(r.damage_per_minute ?? 0)).filter((value) => Number.isFinite(value));
+  const avgDpm = values.length > 0 ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
 
   return raw.map((r) => ({
-    date: r.date,
-    playerDpm: r.player_dpm,
-    avgDpm: r.avg_dpm,
+    date: r.entry_datetime,
+    playerDpm: Number(r.damage_per_minute ?? 0),
+    avgDpm,
   }));
 }
 
 export async function fetchGlickoHistory(playerId: string, days: number = 30, limit: number = 50): Promise<GlickoHistoryEntry[]> {
-  const raw = await fetchJson<Array<{
-    date: string;
-    rating: number;
-  }>>(`/v1/stats/player/${encodeURIComponent(playerId)}/glicko-history?days=${days}&limit=${limit}`);
+  const raw = await fetchJson<PlayerChartRow[]>(playerChartPath(playerId, days, limit));
 
-  return raw.map((r) => ({
-    date: r.date,
-    rating: r.rating,
-  }));
+  return raw
+    .filter((r) => r.rating != null)
+    .map((r) => ({
+      date: r.entry_datetime,
+      rating: Number(r.rating),
+    }));
 }
 
 // ── Match Types ──
@@ -1653,6 +1933,16 @@ export interface MatchSearchResult {
 
 // ── Matches ──
 
+export interface MatchHourlyStats {
+  totalToday: number;
+  rankedToday: number;
+  regions: Array<{ region: string; matchesPerHour: number; totalToday: number }>;
+}
+
+export async function fetchMatchHourlyStats(): Promise<MatchHourlyStats> {
+  return fetchJson<MatchHourlyStats>('/matches/hourly-stats');
+}
+
 export async function fetchMatchDetail(matchId: number): Promise<MatchDetailWithBans | null> {
   const raw = await fetchJson<{ matches: MatchDetailWithBans[]; count: number; notFound?: number[] }>(`/matches/${matchId}`);
   if (raw.matches.length === 0) return null;
@@ -1695,7 +1985,10 @@ export async function fetchMatchSearch(params?: {
       }
     }
   }
-  const raw = await fetchJson<{ data: MatchSearchResult[]; total: number; page: { current: number; size: number; totalPages: number } }>(`/matches/search${query.toString() ? `?${query.toString()}` : ''}`);
+  const raw = await fetchJson<{ data: MatchSearchResult[]; total: number; page: { current: number; size: number; totalPages: number } }>(
+    `/matches/search${query.toString() ? `?${query.toString()}` : ''}`,
+    { unwrapData: false }
+  );
   return raw;
 }
 
@@ -1718,6 +2011,11 @@ export async function fetchReferenceCards(): Promise<Array<{ card_id: number; na
 
 export async function fetchReferenceQueues(): Promise<Array<{ queue_id: number; name: string }>> {
   const raw = await fetchJson<any[]>(`/reference/queues`);
+  return raw;
+}
+
+export async function fetchReferenceRegions(): Promise<Array<{ region?: string; region_code?: string; name?: string; region_name?: string }>> {
+  const raw = await fetchJson<any[]>(`/reference/regions`);
   return raw;
 }
 

@@ -1,61 +1,26 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import ScrambleText from "@/components/ScrambleText";
-import Card from "@/components/Card";
-import { getChampionIconSafe } from "@/lib/champion-icons";
-import { championSlug } from "@/lib/utils";
-import {
-  fetchChampions,
-  fetchRankedLeaderboard,
-  fetchStatsChampions,
-  type Champion,
-  type RankedPlayer,
-  type StatsChampion,
-} from "@/lib/api-client";
-import { MOCK_STATS_CHAMPIONS, MOCK_RANKED_PLAYERS, MOCK_CHAMPIONS } from "@/lib/mock-data";
+import { fetchNotifications, type Notification } from "@/lib/api-client";
 
-// Champion roles for grouping
-const ROLES = ["Damage", "Flank", "Frontline", "Support"];
-
-const DUMMY_LEADERBOARD = MOCK_RANKED_PLAYERS.map((p) => ({
-  rank: p.rank,
-  player_id: p.player_id,
-  name: p.name,
-  points: p.points,
-  trend: p.trend,
-} as RankedPlayer));
+function notificationDot(importance: number) {
+  if (importance >= 75) return "bg-amber-500";
+  if (importance >= 25) return "bg-pc-accent";
+  return "bg-pc-text-muted";
+}
 
 export default function HomePage() {
-  const [champions, setChampions] = useState<Champion[]>([]);
-  const [statsChampions, setStatsChampions] = useState<StatsChampion[]>([]);
-  const [rankedPlayers, setRankedPlayers] = useState<RankedPlayer[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notificationsChecked, setNotificationsChecked] = useState(false);
 
   useEffect(() => {
     const load = async () => {
-      try {
-        const [champs, stats, players] = await Promise.all([
-          fetchChampions(),
-          fetchStatsChampions({ sort: "win_rate", limit: 26 }),
-          fetchRankedLeaderboard({ tier: "26", top: 20 }),
-        ]);
-
-        // Use API data or fall back to mock data
-        setChampions(champs.length > 0 ? champs : MOCK_CHAMPIONS);
-        setStatsChampions(stats.length > 0 ? stats : MOCK_STATS_CHAMPIONS);
-        setRankedPlayers(players.length > 0 ? players : DUMMY_LEADERBOARD);
-      } catch {
-        // On error, use mock data as fallback
-        setChampions(MOCK_CHAMPIONS);
-        setStatsChampions(MOCK_STATS_CHAMPIONS);
-        setRankedPlayers(DUMMY_LEADERBOARD);
-      } finally {
-        setLoading(false);
-      }
+      const liveNotifications = await fetchNotifications({ limit: 5 });
+      setNotifications(liveNotifications);
+      setNotificationsChecked(true);
     };
     load();
   }, []);
@@ -137,27 +102,36 @@ export default function HomePage() {
         </motion.div>
 
         {/* ── Notifications ── */}
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.45 }}
-          className="max-w-2xl mx-auto mb-8 space-y-3"
-        >
-          <h2 className="px-2 text-sm font-bold text-pc-text">Notifications</h2>
-          {[
-            { type: "info", text: "Database ingestion running — 5,318 matches tracked and growing.", time: "2 hours ago" },
-            { type: "update", text: "Champion stats now available on the /stats page with per-class breakdowns.", time: "1 day ago" },
-            { type: "info", text: "Ranked leaderboard live with tier filters from Bronze to Grandmaster.", time: "3 days ago" },
-          ].map((n, i) => (
-            <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-pc-bg-elevated border border-pc-border">
-              <div className={`shrink-0 mt-0.5 w-2 h-2 rounded-full ${n.type === "update" ? "bg-pc-accent" : "bg-pc-text-muted"}`} />
-              <div className="flex-1 min-w-0">
-                <p className="text-pc-text-secondary text-sm leading-relaxed">{n.text}</p>
-                <span className="text-pc-text-muted text-[10px] mt-1 block">{n.time}</span>
+        {notificationsChecked && notifications.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.45 }}
+            className="max-w-2xl mx-auto mb-8 space-y-3"
+          >
+            <h2 className="px-2 text-sm font-bold text-pc-text">
+              {notifications.length === 1 ? "Notification" : "Notifications"}
+            </h2>
+            {notifications.map((notification) => (
+              <div key={notification.id} className="group relative flex items-start gap-3 p-3 rounded-xl bg-pc-bg-elevated border border-pc-border">
+                <div className={`shrink-0 mt-0.5 w-2 h-2 rounded-full ${notificationDot(notification.importance)}`} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-pc-text-secondary text-sm leading-relaxed">{notification.message}</p>
+                  <span className="text-pc-text-muted text-[10px] mt-1 block">
+                    {notification.timestamp ? new Date(notification.timestamp).toLocaleString() : ""}
+                  </span>
+                </div>
+                <button
+                  onClick={() => setNotifications((prev) => prev.filter((n) => n.id !== notification.id))}
+                  className="shrink-0 mt-0.5 p-1 rounded text-pc-text-muted hover:text-pc-text opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                  aria-label="Dismiss"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                </button>
               </div>
-            </div>
-          ))}
-        </motion.div>
+            ))}
+          </motion.div>
+        )}
     </div>
   );
 }
