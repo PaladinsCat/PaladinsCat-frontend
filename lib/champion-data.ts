@@ -1572,14 +1572,14 @@ export const LIAN_DATA: ChampionData = {
   stats: {
     health: "2100",
     speed: "355",
-    speedUnits: "~22 units/s",
+    speedUnits: "~22.19 units/s",
     range: "125",
   },
   skills: [
     {
       name: "Heirloom Rifle",
       key: "LMB",
-      iconUrl: "/images/skills/Ability_Heirloom_Rifle.png",
+      iconUrl: "/images/skills/WeaponAttack_Lian_Icon.png",
       damage: "425",
       description: "A automatic rifle passed down through House Aico that deals 425 damage every 0.45s.",
     },
@@ -1634,10 +1634,10 @@ export const LIAN_DATA: ChampionData = {
     { name: "Present Arms", description: "Heal for 100 after using Presence.", category: "Presence", iconUrl: "/images/cards/Card_Present_Arms.png" },
     { name: "Royal Seal", description: "Each enemy hit by Presence reduces Valor's Cooldown by 0.6s.", category: "Presence", iconUrl: "/images/cards/Card_Royal_Seal.png" },
     { name: "Signet Ring", description: "Increase your Movement Speed by 7% for 3s after using Presence.", category: "Presence", iconUrl: "/images/cards/Card_Signet_Ring.png" },
-    { name: "Highborn", description: "Increase your Movement Speed by 3%.", category: "", iconUrl: "/images/cards/Card_Highborn.png" },
-    { name: "Inheritance", description: "Reduce your active Cooldowns by 8% after getting an Elimination.", category: "", iconUrl: "/images/cards/Card_Inheritance.png" },
-    { name: "Noble Crest", description: "Increase your maximum Health by 50.", category: "", iconUrl: "/images/cards/Card_Noble_Crest.png" },
-    { name: "Superiority", description: "Increase your maximum Ammo by 1.", category: "", iconUrl: "/images/cards/Card_Superiority.png" },
+    { name: "Highborn", description: "Increase your Movement Speed by 3%.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Highborn.png" },
+    { name: "Inheritance", description: "Reduce your active Cooldowns by 8% after getting an Elimination.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Inheritance.png" },
+    { name: "Noble Crest", description: "Increase your maximum Health by 50.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Noble_Crest.png" },
+    { name: "Superiority", description: "Increase your maximum Ammo by 1.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Superiority.png" },
   ],
 };
 
