@@ -4122,6 +4122,81 @@ export const YAGORATH_DATA: ChampionData = {
   ],
 };
 
+export const SAATI_DATA: ChampionData = {
+  name: "Saati",
+  roles: ["Damage"],
+  stats: {
+    health: "2100",
+    speed: "370",
+    speedUnits: "~23.13 units/s",
+    range: "60",
+  },
+  skills: [
+    {
+      name: "Hand Cannon",
+      key: "LMB",
+      iconUrl: "/images/skills/WeaponAttack_Saati_Icon.png",
+      damage: "530",
+      description: "A heavy pistol that deals 530 damage every 0.5s.",
+    },
+    {
+      name: "Ricochet",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Ricochet.png",
+      damage: "100 (Coin) — 300 (Deflected Shot) — 750 (Explosion)",
+      cooldown: "3 Pips",
+      description: "Toss & fire a coin to deal damage to the weakest enemy in range. Shoot at it again to cause an explosion.",
+    },
+    {
+      name: "Dead Ringer",
+      key: "E",
+      iconUrl: "/images/skills/Ability_Dead_Ringer.png",
+      damage: "150",
+      cooldown: "4 Pips",
+      description: "Place a decoy that fires in a line & Reveals enemies that damage it.",
+    },
+    {
+      name: "Blast Back",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Blast_Back.png",
+      damage: "250 + 25",
+      cooldown: "5 Pips",
+      description: "Flip to Knock yourself and enemies away, damaging and Burning them.",
+    },
+    {
+      name: "Wallbang",
+      key: "Ultimate",
+      iconUrl: "/images/skills/Ability_Wallbang.png",
+      damage: "777",
+      cooldown: "Ultimate",
+      description: "You have 3 shots that deal 777 damage and can Pierce all enemies and the world.",
+    },
+  ],
+  talents: [
+    { name: "Heads or Tails", description: "Ricochet now costs 2 Pips and earning an Elimination grants you 2 Pips.", category: "Ricochet", iconUrl: "/images/champions/Talent Saati Heads or Tails.png" },
+    { name: "Improvised", description: "Your Dead Ringer Decoy is now rigged to explode when enemies are close, dealing 650 damage within a 20 unit radius.", category: "Dead Ringer", iconUrl: "/images/champions/Talent Saati Improvised.png" },
+    { name: "Window of Opportunity", description: "Blast Back now instead applies a Knockup and enemies take 20% more DMG from Saati for 1.5s.", category: "Blast Back", iconUrl: "/images/champions/Talent Saati Window of Opportunity.png" },
+  ],
+  loadouts: [
+    { name: "Aggressive Tip", description: "Increase the projectile speed of Ricochet by 10%.", category: "Ricochet", iconUrl: "/images/cards/Card_Aggressive_Tip.png" },
+    { name: "Bullet Hopper", description: "Increase your maximum Ammo by 1.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Bullet_Hopper.png" },
+    { name: "Closing Time", description: "Increase your Movement Speed by 6% for 2.5s after activating Blast Back.", category: "Blast Back", iconUrl: "/images/cards/Card_Closing_Time.png" },
+    { name: "Costly Physics", description: "Increase the radius of Ricochet's explosion by 8%.", category: "Ricochet", iconUrl: "/images/cards/Card_Costly_Physics.png" },
+    { name: "Designer Armor", description: "Increase your maximum Health by 40.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Designer_Armor.png" },
+    { name: "Grab and Go", description: "Generate 1 Ammo for each enemy hit with Blast Back.", category: "Blast Back", iconUrl: "/images/cards/Card_Grab_and_Go.png" },
+    { name: "Hide", description: "Increase the duration of Saati's invisibility by 0.125s after deployment of Dead Ringer.", category: "Dead Ringer", iconUrl: "/images/cards/Card_Hide.png" },
+    { name: "Paper Design", description: "Decrease the time between bursts of Dead Ringer's inhand fire by 8%.", category: "Dead Ringer", iconUrl: "/images/cards/Card_Paper_Design.png" },
+    { name: "Plated Leggings", description: "Reduce Damage taken by 3% for 1.5s after using Blast Back.", category: "Blast Back", iconUrl: "/images/cards/Card_Plated_Leggings.png" },
+    { name: "Reinforced Standee", description: "Increase the Health of Dead Ringer by 150hp.", category: "Dead Ringer", iconUrl: "/images/cards/Card_Reinforced_Standee.png" },
+    { name: "Seek", description: "Increase the duration of Dead Ringer's reveal on destruction by 0.5s.", category: "Dead Ringer", iconUrl: "/images/cards/Card_Seek.png" },
+    { name: "Steady Predictions", description: "Generate 0.8% Ultimate Charge after Ricochet hits an enemy.", category: "Ricochet", iconUrl: "/images/cards/Card_Steady_Predictions.png" },
+    { name: "Steel Coin Purse", description: "Reduce damage taken by 4% for 3s after Ricochet is deployed.", category: "Ricochet", iconUrl: "/images/cards/Card_Steel_Coin_Purse.png" },
+    { name: "Step Off", description: "Increase the Distance enemies are Knocked Back from Blast Back by 10%.", category: "Blast Back", iconUrl: "/images/cards/Card_Step_Off.png" },
+    { name: "Sure Shot", description: "Increase your Ultimate charge rate by 3%.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Sure_Shot.png" },
+    { name: "Taste Maker", description: "Increase your Movement Speed by 5% for 4s after getting a Killing Blow or Elimination.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Taste_Maker.png" },
+  ],
+};
+
 export const YING_DATA: ChampionData = {
   name: "Ying",
   roles: ["Support"],
@@ -4327,6 +4402,7 @@ export const CHAMPION_DATA: Record<string, ChampionData> = {
   vii: VII_DATA,
   vora: VORA_DATA,
   zhin: ZHIN_DATA,
+  saati: SAATI_DATA,
   yagorath: YAGORATH_DATA,
   ying: YING_DATA,
 };
