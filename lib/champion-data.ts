@@ -1139,7 +1139,7 @@ export const DROGOZ_DATA: ChampionData = {
   stats: {
     health: "2200",
     speed: "350",
-    speedUnits: "~21 units/s",
+    speedUnits: "~21.88 units/s",
     range: "275",
   },
   skills: [
@@ -1187,7 +1187,7 @@ export const DROGOZ_DATA: ChampionData = {
     { name: "Fusillade", description: "Damage dealt when hitting an enemy directly with Rocket Launcher or Salvo is increased by 25%.", category: "Rocket Launcher", iconUrl: "/images/champions/Talent Drogoz Fusillade.png" },
     { name: "W.Y.R.M. Jets", description: "Increase Booster's Max Vertical Speed by 100% and Vertical Acceleration by 57%.", category: "Thrust", iconUrl: "/images/champions/Talent Drogoz WYRMJets.png" },
   ],
-    loadouts: [
+  loadouts: [
     { name: "Altitude", description: "Restore 20% of your maximum Booster fuel after getting a Killing Blow or Elimination.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Altitude.png" },
     { name: "Apex Predator", description: "Increase your maximum Health by 50.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Apex_Predator.png" },
     { name: "Bask", description: "Heal for 35 for each enemy hit by your Salvo rockets.", category: "Salvo", iconUrl: "/images/cards/Card_Bask.png" },
