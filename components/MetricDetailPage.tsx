@@ -1,10 +1,16 @@
 "use client";
 
-import { useState, Fragment } from "react";
+import { useEffect, useState, Fragment } from "react";
 import Link from "next/link";
 import { MOCK_GLOBAL_METRICS, MOCK_METRIC_BY_CLASS } from "@/lib/mock-data";
 import { championSlug } from "@/lib/utils";
 import { getChampionIconSafe } from "@/lib/champion-icons";
+import {
+  fetchChampionPerformanceDistributions,
+  fetchPerformanceMetrics,
+  type ChampionPerformanceDistribution,
+  type PerformanceMetricKey,
+} from "@/lib/api-client";
 
 interface MetricConfig {
   key: string;
@@ -24,14 +30,91 @@ const CLASS_ICONS: Record<string, string> = {
 const CLASS_ORDER = ["Frontline", "Damage", "Flank", "Support"] as const;
 
 type SortDir = "asc" | "desc";
+type ChampionMetricRow = { name: string; value: number; matches: number; min: number; max: number; median: number; mode: number };
+type ClassMetricData = Record<string, { avg: number; min: number; max: number; champions: ChampionMetricRow[] }>;
+
+const VALID_METRIC_KEYS = new Set<PerformanceMetricKey>(["dpm", "hpm", "gpm", "mpm", "kda"]);
+
+function buildClassData(rows: ChampionPerformanceDistribution[]): ClassMetricData {
+  const grouped: Record<string, ChampionPerformanceDistribution[]> = {};
+  for (const row of rows) {
+    const role = row.className || "Unknown";
+    grouped[role] = grouped[role] || [];
+    grouped[role].push(row);
+  }
+
+  return Object.fromEntries(
+    Object.entries(grouped).map(([role, roleRows]) => {
+      const totalMatches = roleRows.reduce((sum, row) => sum + row.totalMatches, 0);
+      const weightedAvg = totalMatches > 0
+        ? roleRows.reduce((sum, row) => sum + row.avgValue * row.totalMatches, 0) / totalMatches
+        : roleRows.reduce((sum, row) => sum + row.avgValue, 0) / Math.max(roleRows.length, 1);
+
+      return [role, {
+        avg: weightedAvg,
+        min: Math.min(...roleRows.map((row) => row.min)),
+        max: Math.max(...roleRows.map((row) => row.max)),
+        champions: roleRows
+          .map((row) => ({
+            name: row.championName,
+            value: row.avgValue,
+            matches: row.totalMatches,
+            min: row.min,
+            max: row.max,
+            median: row.median,
+            mode: row.mode,
+          }))
+          .sort((a, b) => b.value - a.value),
+      }];
+    })
+  );
+}
 
 export default function MetricDetailPage({ config }: { config: MetricConfig }) {
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [expandedChamp, setExpandedChamp] = useState<string | null>(null);
+  const [metricSummary, setMetricSummary] = useState(() => MOCK_GLOBAL_METRICS[config.key as keyof typeof MOCK_GLOBAL_METRICS] as { min: number; max: number; mean: number; mode: number });
+  const [classData, setClassData] = useState<ClassMetricData>(() => MOCK_METRIC_BY_CLASS[config.key] || {});
 
-  const globalMetrics = MOCK_GLOBAL_METRICS;
-  const d = globalMetrics[config.key as keyof typeof globalMetrics] as { min: number; max: number; mean: number; mode: number };
-  const classData = MOCK_METRIC_BY_CLASS[config.key] || {};
+  useEffect(() => {
+    const metric = config.key as PerformanceMetricKey;
+    if (!VALID_METRIC_KEYS.has(metric)) {
+      setMetricSummary(MOCK_GLOBAL_METRICS[config.key as keyof typeof MOCK_GLOBAL_METRICS] as any);
+      setClassData(MOCK_METRIC_BY_CLASS[config.key] || {});
+      return;
+    }
+
+    let cancelled = false;
+    async function load() {
+      const [summaries, championRows] = await Promise.all([
+        fetchPerformanceMetrics({ metric }),
+        fetchChampionPerformanceDistributions({ metric }),
+      ]);
+      if (cancelled) return;
+
+      const summary = summaries[metric];
+      setMetricSummary(summary ? {
+        min: summary.min,
+        max: summary.max,
+        mean: summary.mean,
+        mode: summary.mode,
+      } : MOCK_GLOBAL_METRICS[config.key as keyof typeof MOCK_GLOBAL_METRICS] as any);
+      setClassData(championRows.length > 0 ? buildClassData(championRows) : (MOCK_METRIC_BY_CLASS[config.key] || {}));
+    }
+
+    load().catch(() => {
+      if (!cancelled) {
+        setMetricSummary(MOCK_GLOBAL_METRICS[config.key as keyof typeof MOCK_GLOBAL_METRICS] as any);
+        setClassData(MOCK_METRIC_BY_CLASS[config.key] || {});
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [config.key]);
+
+  const d = metricSummary;
 
   const isDecimal = config.key === "kda";
   const formatVal = isDecimal ? (v: number) => v.toFixed(1) : (v: number) => v.toLocaleString();
@@ -41,8 +124,9 @@ export default function MetricDetailPage({ config }: { config: MetricConfig }) {
   const W = 280;
   const H = 60;
   const sigma = 0.18;
-  const meanPct = (d.mean - d.min) / (d.max - d.min);
-  const modePct = (d.mode - d.min) / (d.max - d.min);
+  const globalRange = d.max - d.min || 1;
+  const meanPct = clamp(((d.mean - d.min) / globalRange) * 100) / 100;
+  const modePct = clamp(((d.mode - d.min) / globalRange) * 100) / 100;
   const points: string[] = [];
   for (let i = 0; i <= W; i++) {
     const x = i / W;

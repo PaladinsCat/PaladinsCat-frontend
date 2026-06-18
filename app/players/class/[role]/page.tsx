@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { MOCK_CLASS_ELO } from "@/lib/mock-data";
-import { fetchBaselines } from "@/lib/api-client";
+import { fetchClassLeaderboard } from "@/lib/api-client";
 
 const VALID_ROLES = ["Frontline", "Damage", "Flank", "Support"] as const;
 type Role = (typeof VALID_ROLES)[number];
@@ -97,15 +97,23 @@ export default function ClassEloPage() {
     async function load() {
       setLoading(true);
       try {
-        // Try fetching baselines from API — not a direct ELO endpoint,
-        // but if it returns data we know the API is alive.
-        const baselines = await fetchBaselines({ role: normalizedRole! });
-
+        const leaderboard = await fetchClassLeaderboard({ role: normalizedRole!, limit: 100 });
         if (cancelled) return;
-
-        // API doesn't have per-class ELO, so always use mock data
-        const mockData = MOCK_CLASS_ELO[normalizedRole!] || [];
-        setData(mockData);
+        if (leaderboard.length > 0) {
+          setData(leaderboard.map((p) => ({
+            rank: p.rank,
+            player_id: p.playerId,
+            name: p.playerName,
+            champion: p.championName,
+            elo: p.elo,
+            winRate: p.winRate ?? 0,
+            totalMatches: p.totalMatches,
+            totalWins: p.totalWins,
+            region: p.region ?? "—",
+          })));
+        } else {
+          setData(MOCK_CLASS_ELO[normalizedRole!] || []);
+        }
       } catch {
         if (!cancelled) {
           setData(MOCK_CLASS_ELO[normalizedRole!] || []);
@@ -124,7 +132,7 @@ export default function ClassEloPage() {
   if (!normalizedRole) return null;
 
   const role = normalizedRole as Role;
-  const players = MOCK_CLASS_ELO[role] || [];
+  const players = data;
 
   return (
     <div className="space-y-6">

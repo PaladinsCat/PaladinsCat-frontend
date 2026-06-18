@@ -128,6 +128,7 @@ export interface CheaterPlayer {
 export async function fetchCheaterPlayers(params?: { cheater?: boolean; susOnly?: boolean; limit?: number }): Promise<CheaterPlayer[]> {
   const query = new URLSearchParams();
   if (params?.cheater) query.set('cheater', 'true');
+  if (params?.susOnly) query.set('susOnly', 'true');
   if (params?.limit) query.set('limit', String(params.limit));
   query.set('perPage', String(params?.limit || 100));
   try {
@@ -144,6 +145,199 @@ export async function fetchCheaterPlayers(params?: { cheater?: boolean; susOnly?
       avgDpm: r.avg_dpm ?? null, avgHpm: r.avg_hpm ?? null,
       avgGpm: r.avg_egpm ?? null, avgMpm: r.avg_mpm ?? null,
       totalMatches: r.total_matches ?? 0, winRate: r.win_rate ?? null,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+export interface ClassLeaderboardEntry {
+  rank: number;
+  playerId: number;
+  playerName: string;
+  championName: string;
+  championId: number;
+  elo: number;
+  mu: number;
+  phi: number;
+  winRate: number | null;
+  totalMatches: number;
+  totalWins: number;
+  region: string | null;
+}
+
+export async function fetchClassLeaderboard(params: { role: string; limit?: number; queueId?: number }): Promise<ClassLeaderboardEntry[]> {
+  const query = new URLSearchParams();
+  query.set('role', params.role);
+  if (params.limit != null) query.set('limit', String(params.limit));
+  if (params.queueId != null) query.set('queueId', String(params.queueId));
+  try {
+    const raw = await fetchJson<Array<{
+      rank: number; player_id: number; player_name: string;
+      champion_name: string; champion_id: number;
+      elo: number | string; mu: number | string; phi: number | string;
+      win_rate: number | string | null; total_matches: number; total_wins: number;
+      region: string | null;
+    }>>(`/players/leaderboard/class?${query.toString()}`);
+    return raw.map((r) => ({
+      rank: r.rank,
+      playerId: Number(r.player_id),
+      playerName: r.player_name,
+      championName: r.champion_name,
+      championId: r.champion_id,
+      elo: typeof r.elo === 'string' ? Number(r.elo) : r.elo,
+      mu: typeof r.mu === 'string' ? Number(r.mu) : r.mu,
+      phi: typeof r.phi === 'string' ? Number(r.phi) : r.phi,
+      winRate: r.win_rate == null ? null : (typeof r.win_rate === 'string' ? Number(r.win_rate) : r.win_rate),
+      totalMatches: Number(r.total_matches ?? 0),
+      totalWins: Number(r.total_wins ?? 0),
+      region: r.region ?? null,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+export interface PerformanceLeaderboardEntry {
+  rank: number;
+  playerId: number;
+  playerName: string;
+  championName: string | null;
+  championId: number | null;
+  className: string | null;
+  value: number;
+  totalMatches: number;
+  region: string | null;
+  platform: string | null;
+}
+
+export async function fetchPerformanceLeaderboard(params: {
+  metric: 'dpm' | 'hpm' | 'gpm' | 'mpm';
+  limit?: number;
+  role?: string;
+  region?: string;
+  queueId?: number;
+}): Promise<PerformanceLeaderboardEntry[]> {
+  const query = new URLSearchParams();
+  query.set('metric', params.metric);
+  if (params.limit != null) query.set('limit', String(params.limit));
+  if (params.role) query.set('role', params.role);
+  if (params.region) query.set('region', params.region);
+  if (params.queueId != null) query.set('queueId', String(params.queueId));
+  try {
+    const raw = await fetchJson<Array<{
+      rank: number; player_id: number; player_name: string;
+      champion_name: string | null; champion_id: number | null; class_name: string | null;
+      value: number | string; total_matches: number; region: string | null; platform: string | null;
+    }>>(`/players/leaderboard/performance?${query.toString()}`);
+    return raw.map((r) => ({
+      rank: r.rank,
+      playerId: Number(r.player_id),
+      playerName: r.player_name,
+      championName: r.champion_name ?? null,
+      championId: r.champion_id ?? null,
+      className: r.class_name ?? null,
+      value: typeof r.value === 'string' ? Number(r.value) : r.value,
+      totalMatches: Number(r.total_matches ?? 0),
+      region: r.region ?? null,
+      platform: r.platform ?? null,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+export interface PerformanceMetricSummary {
+  min: number;
+  max: number;
+  mean: number;
+  median: number;
+  mode: number;
+  p10: number;
+  p25: number;
+  p75: number;
+  p90: number;
+  sampleSize: number;
+}
+
+export type PerformanceMetricKey = 'dpm' | 'hpm' | 'gpm' | 'mpm' | 'kda';
+
+export type PerformanceMetricsResponse = Partial<Record<PerformanceMetricKey, PerformanceMetricSummary>>;
+
+function mapMetricSummary(raw: any): PerformanceMetricSummary {
+  return {
+    min: Number(raw?.min ?? 0),
+    max: Number(raw?.max ?? 0),
+    mean: Number(raw?.mean ?? 0),
+    median: Number(raw?.median ?? 0),
+    mode: Number(raw?.mode ?? 0),
+    p10: Number(raw?.p10 ?? 0),
+    p25: Number(raw?.p25 ?? 0),
+    p75: Number(raw?.p75 ?? 0),
+    p90: Number(raw?.p90 ?? 0),
+    sampleSize: Number(raw?.sample_size ?? raw?.sampleSize ?? 0),
+  };
+}
+
+export async function fetchPerformanceMetrics(params?: {
+  metric?: PerformanceMetricKey;
+  role?: string;
+  queueId?: number;
+}): Promise<PerformanceMetricsResponse> {
+  const query = new URLSearchParams();
+  if (params?.metric) query.set('metric', params.metric);
+  if (params?.role) query.set('role', params.role);
+  if (params?.queueId != null) query.set('queueId', String(params.queueId));
+  try {
+    const raw = await fetchJson<Record<string, any>>(`/stats/performance-metrics${query.toString() ? `?${query.toString()}` : ''}`);
+    return Object.fromEntries(
+      Object.entries(raw).map(([metric, summary]) => [metric, mapMetricSummary(summary)])
+    ) as PerformanceMetricsResponse;
+  } catch {
+    return {};
+  }
+}
+
+export interface ChampionPerformanceDistribution {
+  championId: number;
+  championName: string;
+  className: string;
+  min: number;
+  max: number;
+  mean: number;
+  median: number;
+  mode: number;
+  avgValue: number;
+  totalMatches: number;
+}
+
+export async function fetchChampionPerformanceDistributions(params: {
+  metric: PerformanceMetricKey;
+  championId?: number;
+  queueId?: number;
+}): Promise<ChampionPerformanceDistribution[]> {
+  const query = new URLSearchParams();
+  query.set('metric', params.metric);
+  if (params.championId != null) query.set('championId', String(params.championId));
+  if (params.queueId != null) query.set('queueId', String(params.queueId));
+  try {
+    const raw = await fetchJson<Array<{
+      champion_id: number; champion_name: string; class: string;
+      min: number | string; max: number | string; mean: number | string;
+      median: number | string; mode: number | string; avg_value: number | string;
+      total_matches: number;
+    }>>(`/stats/performance-metrics/by-champion?${query.toString()}`);
+    return raw.map((r) => ({
+      championId: r.champion_id,
+      championName: r.champion_name,
+      className: r.class,
+      min: Number(r.min ?? 0),
+      max: Number(r.max ?? 0),
+      mean: Number(r.mean ?? 0),
+      median: Number(r.median ?? 0),
+      mode: Number(r.mode ?? 0),
+      avgValue: Number(r.avg_value ?? 0),
+      totalMatches: Number(r.total_matches ?? 0),
     }));
   } catch {
     return [];

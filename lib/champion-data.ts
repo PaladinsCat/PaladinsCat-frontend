@@ -2247,7 +2247,7 @@ export const WILLO_DATA: ChampionData = {
     { name: "Wand of Overgrowth", description: "Fire a blast of Fae energy every 0.75s that deals 500 damage in an area.", category: "", iconUrl: "/images/skills/Ability_Wand_of_Overgrowth.png" },
     { name: "Dead Zone", description: "Launch a toxic spore that deals 100 damage and infects enemies in an area, preventing them from being healed.", category: "", iconUrl: "/images/skills/Ability_Dead_Zone.png" },
     { name: "Seedling", description: "Throw an explosive seed that deals 400 damage and spawns 4 more damaging seeds in an area around it.", category: "", iconUrl: "/images/skills/Ability_Seedling.png" },
-    { name: "Flutter", description: "", category: "", iconUrl: "/images/skills/Ability_Flutter.png" },
+    { name: "Flutter", description: "Dash forward while becoming Ethereal, gaining 30% Movement Speed for 1.5s.", category: "", iconUrl: "/images/skills/Ability_Flutter.png" },
     { name: "Fae Flight", description: "Take to the skies and rain down Fae vengeance.", category: "", iconUrl: "/images/skills/Ability_Fae_Flight.png" },
   ],
 };
@@ -2295,12 +2295,12 @@ export const EVIE_DATA: ChampionData = {
       key: "E",
       iconUrl: "/images/skills/Ability_Ice_Storm.png",
       cooldown: "Ultimate",
-      description: "",
+      description: "Fire a massive ice storm that lasts 4 seconds, damages for 40 every .25s, slows, and Cripples targets inside.",
     },
   ],
   talents: [
     { name: "Over the Moon", description: "Increase the damage you deal with your weapon shots by 25% for 3s after Soar ends.", category: "Soar", iconUrl: "/images/champions/Talent Evie OverTheMoon.png" },
-    { name: "Snow Globe", description: "", category: "", iconUrl: "/images/champions/Talent Evie SnowGlobe.png" },
+    { name: "Snow Globe", description: "Increase the size and duration of Ice Block.", category: "", iconUrl: "/images/champions/Talent Evie SnowGlobe.png" },
     { name: "Wormhole", description: "Blink leaves behind a magical wormhole. Refire Blink within 4s of its use to return to the wormhole.", category: "Blink", iconUrl: "/images/champions/Talent Evie Wormhole.png" },
   ],
   loadouts: [
@@ -2353,7 +2353,7 @@ export const LEX_DATA: ChampionData = {
       key: "Q",
       iconUrl: "/images/skills/Ability_Retribution.png",
       cooldown: "6s",
-      description: "",
+      description: "You have a Retribution target that is revealed to you when nearby. Killing your target grants additional Credits if they are on a killstreak. Activating Retribution randomly selects a new target.",
     },
     {
       name: "Combat Slide",
@@ -2373,7 +2373,7 @@ export const LEX_DATA: ChampionData = {
   ],
   talents: [
     { name: "Discovery", description: "Increase the damage you deal to your Retribution target by 15%.", category: "Retribution", iconUrl: "/images/champions/Talent Lex Discovery.png" },
-    { name: "Heroism", description: "", category: "", iconUrl: "/images/champions/Talent Lex Heroism.png" },
+    { name: "Heroism", description: "Increase the damage dealt by The Law and reduce the Cooldown of The Law.", category: "", iconUrl: "/images/champions/Talent Lex Heroism.png" },
     { name: "Death Hastens", description: "Your weapon shots deal 680 damage every 0.7s, but your maximum Ammo count is reduced by 6.", category: "", iconUrl: "/images/champions/Talent Lex DeathHastens.png" },
   ],
   loadouts: [

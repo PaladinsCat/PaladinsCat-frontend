@@ -1,12 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   MOCK_ITEM_STATS,
   MOCK_MAP_STATS,
   MOCK_GLOBAL_METRICS,
 } from "@/lib/mock-data";
+import { fetchChampions, fetchPerformanceMetrics, type Champion } from "@/lib/api-client";
+import { getChampionIconSafe } from "@/lib/champion-icons";
+import { championSlug } from "@/lib/utils";
+
+const ROLES = ["Frontline", "Damage", "Flank", "Support"] as const;
 
 type SortKey = "pickRate" | "winRate";
 
@@ -14,6 +20,34 @@ export default function StatsPage() {
   const [itemSort, setItemSort] = useState<SortKey>("pickRate");
   const [itemSortDir, setItemSortDir] = useState<"asc" | "desc">("desc");
   const [mapSortDir, setMapSortDir] = useState<"asc" | "desc">("desc");
+  const [metrics, setMetrics] = useState(MOCK_GLOBAL_METRICS);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchPerformanceMetrics()
+      .then((liveMetrics) => {
+        if (cancelled || Object.keys(liveMetrics).length === 0) return;
+        setMetrics((current) => ({
+          ...current,
+          ...Object.fromEntries(Object.entries(liveMetrics).map(([key, summary]) => [key, {
+            min: summary?.min ?? 0,
+            max: summary?.max ?? 0,
+            mean: summary?.mean ?? 0,
+            median: summary?.median ?? 0,
+            mode: summary?.mode ?? 0,
+          }])),
+        }));
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const [champions, setChampions] = useState<Champion[]>([]);
+  useEffect(() => {
+    fetchChampions().then(setChampions).catch(() => {});
+  }, []);
 
   const toggleItemSort = (key: SortKey) => {
     if (itemSort === key) {
@@ -34,7 +68,6 @@ export default function StatsPage() {
     return mapSortDir === "desc" ? b.matches - a.matches : a.matches - b.matches;
   });
 
-  const metrics = MOCK_GLOBAL_METRICS;
   const maxItemPick = Math.max(...MOCK_ITEM_STATS.map((i) => i.pickRate));
   const maxMapMatches = Math.max(...MOCK_MAP_STATS.map((m) => m.matches));
 
@@ -158,6 +191,78 @@ export default function StatsPage() {
                 <span className="text-pc-text font-medium text-xs">{m.value}</span>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Top Win Rate by Role ── */}
+      <section>
+        <h2 className="text-lg font-bold text-pc-text mb-4">Top Win Rate by Class</h2>
+        <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {ROLES.map((role) => {
+              const inRole = champions.filter((c) => c.roles?.includes(role));
+              const top = [...inRole].sort((a, b) => (b.winRate ?? 0) - (a.winRate ?? 0)).slice(0, 4);
+              if (top.length === 0) return null;
+              return (
+                <div key={role} className="space-y-3">
+                  <div className="flex items-center gap-2 pb-1 border-b border-pc-border">
+                    <img
+                      src={role === "Frontline" ? "/images/icons/Class_Front_Line_Icon.avif" : `/images/icons/Class_${role}_Icon.avif`}
+                      alt={role}
+                      className="w-5 h-5"
+                    />
+                    <span className="text-sm font-medium text-pc-text-muted">{role}</span>
+                  </div>
+                  <div className="space-y-2">
+                    {top.map((c, i) => (
+                      <Link key={c.id} href={`/champions/${championSlug(c.name)}`} className="flex items-center gap-2 text-xs group">
+                        <span className={`w-4 text-right shrink-0 ${i === 0 ? "text-yellow-400 font-bold" : "text-pc-text-muted"}`}>{i + 1}</span>
+                        <img src={getChampionIconSafe(c.name)} alt={c.name} className="w-7 h-7 object-contain rounded shrink-0" />
+                        <span className="text-pc-text truncate group-hover:text-pc-accent transition-colors flex-1">{c.name}</span>
+                        <span className="text-emerald-400 font-medium shrink-0">{c.winRate != null ? `${(c.winRate * 100).toFixed(1)}%` : "—"}</span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Most Banned by Role ── */}
+      <section>
+        <h2 className="text-lg font-bold text-pc-text mb-4">Most Banned by Class</h2>
+        <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {ROLES.map((role) => {
+              const inRole = champions.filter((c) => c.roles?.includes(role));
+              const top = [...inRole].sort((a, b) => (b.banRate ?? 0) - (a.banRate ?? 0)).slice(0, 4);
+              if (top.length === 0) return null;
+              return (
+                <div key={role} className="space-y-3">
+                  <div className="flex items-center gap-2 pb-1 border-b border-pc-border">
+                    <img
+                      src={role === "Frontline" ? "/images/icons/Class_Front_Line_Icon.avif" : `/images/icons/Class_${role}_Icon.avif`}
+                      alt={role}
+                      className="w-5 h-5"
+                    />
+                    <span className="text-sm font-medium text-pc-text-muted">{role}</span>
+                  </div>
+                  <div className="space-y-2">
+                    {top.map((c, i) => (
+                      <Link key={c.id} href={`/champions/${championSlug(c.name)}`} className="flex items-center gap-2 text-xs group">
+                        <span className={`w-4 text-right shrink-0 ${i === 0 ? "text-yellow-400 font-bold" : "text-pc-text-muted"}`}>{i + 1}</span>
+                        <img src={getChampionIconSafe(c.name)} alt={c.name} className="w-7 h-7 object-contain rounded shrink-0" />
+                        <span className="text-pc-text truncate group-hover:text-pc-accent transition-colors flex-1">{c.name}</span>
+                        <span className="text-rose-400 font-medium shrink-0">{c.banRate != null ? `${(c.banRate * 100).toFixed(1)}%` : "—"}</span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>

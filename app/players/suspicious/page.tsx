@@ -28,9 +28,9 @@ export default function SuspiciousPage() {
     async function load() {
       setLoading(true);
       try {
-        const players = await fetchCheaterPlayers({ limit: 100 });
+        const players = await fetchCheaterPlayers({ susOnly: true, limit: 100 });
         if (players.length > 0) {
-          setData(players.filter(p => !p.cheater && p.susCount > 0));
+          setData(players);
         } else {
           setData(MOCK_SUSPICIOUS_FULL);
         }

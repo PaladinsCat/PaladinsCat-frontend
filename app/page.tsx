@@ -136,212 +136,28 @@ export default function HomePage() {
           </form>
         </motion.div>
 
-        {/* Main content: two-column layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="space-y-6">
-            {/* Top Win Rate by Role */}
-            <motion.div initial={{ opacity: 0, y: 25 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 300, damping: 20 }}>
-              <Card style={{ maxWidth: "none" }}>
-                <div className="pc-card-title mb-4">
-                  <ScrambleText text="Top Win Rate" speed={45} iterations={3} delayFromCenter={false} />
-                </div>
-                {loading ? (
-                  <div className="space-y-4">
-                    {ROLES.map((role) => (
-                      <div key={role}>
-                        <h3 className="text-pc-text font-medium text-sm mb-3">{role}</h3>
-                        {Array.from({ length: 4 }).map((_, i) => <div key={i} className="pc-skeleton h-16 w-full mb-3" />)}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    {ROLES.map((role) => {
-                      const inRole = champions.filter((c) => c.roles?.includes(role));
-                      const safeEntries = inRole
-                        .sort((a, b) => (b.winRate ?? 0) - (a.winRate ?? 0))
-                        .slice(0, 4);
-                      if (safeEntries.length === 0) return null;
-                      return (
-                        <div key={role} className="space-y-3">
-                          <div className="flex items-center gap-2 mb-2 border-b border-pc-border pb-1">
-                            <Image
-                              src={role === "Frontline" ? "/images/icons/Class_Front_Line_Icon.avif" : `/images/icons/Class_${role}_Icon.avif`}
-                              alt={role}
-                              width={20}
-                              height={20}
-                              style={{ opacity: 0.85 }}
-                            />
-                            <span className="text-sm font-medium text-pc-text-muted">{role}</span>
-                          </div>
-                          <div className="grid grid-cols-4 gap-x-3 gap-y-4">
-                            {safeEntries.map((c) => (
-                              <Link
-                                key={c.id}
-                                href={`/champions/${championSlug(c.name)}`}
-                                className="group flex min-w-0 flex-col items-center gap-1 text-center"
-                              >
-                                <Image
-                                  src={getChampionIconSafe(c.name)}
-                                  alt={c.name}
-                                  width={48}
-                                  height={48}
-                                  className="rounded-lg group-hover:ring-2 ring-pc-accent transition-all"
-                                />
-                                <span className="max-w-full truncate text-xs leading-tight text-pc-text-muted group-hover:text-pc-accent transition-colors">
-                                  {c.name}
-                                </span>
-                                <span className="text-xs font-mono text-pc-text-muted">
-                                  {c.winRate != null ? `${(c.winRate * 100).toFixed(1)}%` : "N/A"}
-                                </span>
-                              </Link>
-                            ))}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </Card>
-            </motion.div>
-
-            {/* Most Banned */}
-            <motion.div initial={{ opacity: 0, y: 25 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.15 }}>
-              <Card style={{ maxWidth: "none" }}>
-                <div className="pc-card-title mb-4">
-                  <ScrambleText text="Most Banned" speed={45} iterations={3} delayFromCenter={false} />
-                </div>
-                {loading ? (
-                  <div className="space-y-4">
-                    {ROLES.map((role) => (
-                      <div key={role}>
-                        <h3 className="text-pc-text font-medium text-sm mb-3">{role}</h3>
-                        {Array.from({ length: 4 }).map((_, i) => <div key={i} className="pc-skeleton h-16 w-full mb-3" />)}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    {ROLES.map((role) => {
-                      const inRole = champions.filter((c) => c.roles?.includes(role));
-                      const bannedEntries = inRole
-                        .sort((a, b) => (b.banRate ?? 0) - (a.banRate ?? 0))
-                        .slice(0, 4);
-                      if (bannedEntries.length === 0) return null;
-                      return (
-                        <div key={role} className="space-y-3">
-                          <div className="flex items-center gap-2 mb-2 border-b border-pc-border pb-1">
-                            <Image
-                              src={role === "Frontline" ? "/images/icons/Class_Front_Line_Icon.avif" : `/images/icons/Class_${role}_Icon.avif`}
-                              alt={role}
-                              width={20}
-                              height={20}
-                              style={{ opacity: 0.85 }}
-                            />
-                            <span className="text-sm font-medium text-pc-text-muted">{role}</span>
-                          </div>
-                          <div className="grid grid-cols-4 gap-x-3 gap-y-4">
-                            {bannedEntries.map((c) => (
-                              <Link
-                                key={c.id}
-                                href={`/champions/${championSlug(c.name)}`}
-                                className="group flex min-w-0 flex-col items-center gap-1 text-center"
-                              >
-                                <Image
-                                  src={getChampionIconSafe(c.name)}
-                                  alt={c.name}
-                                  width={48}
-                                  height={48}
-                                  className="rounded-lg group-hover:ring-2 ring-pc-accent transition-all"
-                                />
-                                <span className="max-w-full truncate text-xs leading-tight text-pc-text-muted group-hover:text-pc-accent transition-colors">
-                                  {c.name}
-                                </span>
-                                <span className="text-xs font-mono text-pc-text-muted">
-                                  {c.banRate != null ? `${(c.banRate * 100).toFixed(1)}%` : "N/A"}
-                                </span>
-                              </Link>
-                            ))}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </Card>
-            </motion.div>
-          </div>
-
-          <div className="space-y-6">
-            {/* Leaderboard */}
-            <motion.div initial={{ opacity: 0, y: 25 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 300, damping: 20 }}>
-              <div className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
-                <div className="px-4 py-3 border-b border-pc-border">
-                  <div className="flex items-center justify-between">
-                    <span className="pc-card-title mb-0">Leaderboard</span>
-                    <Link href="/players/leaderboard" className="text-[10px] px-2 py-0.5 rounded bg-pc-bg text-pc-accent hover:bg-pc-accent hover:text-pc-bg transition-colors">
-                      Detail →
-                    </Link>
-                  </div>
-                </div>
-                {loading ? (
-                  <div className="p-4 space-y-3">
-                    <div className="pc-skeleton h-10 w-full" />
-                    <div className="pc-skeleton h-10 w-full" />
-                    <div className="pc-skeleton h-10 w-full" />
-                  </div>
-                ) : rankedPlayers.length === 0 ? (
-                  <div className="p-4">
-                    <p className="text-pc-text-muted text-sm">No data yet</p>
-                  </div>
-                ) : (
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-pc-border">
-                        <th className="text-left text-pc-text-muted font-medium py-2.5 px-3 w-10">#</th>
-                        <th className="text-left text-pc-text-muted font-medium py-2.5 px-3">Player</th>
-                        <th className="text-right text-pc-text-muted font-medium py-2.5 px-3">Points</th>
-                        <th className="text-right text-pc-text-muted font-medium py-2.5 px-3 w-12">+/−</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {rankedPlayers.map((player, i) => (
-                        <tr key={player.player_id} className={`border-b border-pc-border/50 hover:bg-pc-bg/50 transition-colors ${i < 3 ? "bg-pc-bg/30" : ""}`}>
-                          <td className="py-2 px-3">
-                            {i === 0 ? (
-                              <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-yellow-500/20 text-yellow-400 font-bold text-sm">🥇</span>
-                            ) : i === 1 ? (
-                              <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-gray-400/20 text-gray-300 font-bold text-sm">🥈</span>
-                            ) : i === 2 ? (
-                              <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-600/20 text-amber-600 font-bold text-sm">🥉</span>
-                            ) : (
-                              <span className="inline-flex items-center justify-center w-7 h-7 text-pc-text-muted text-sm">{player.rank}</span>
-                            )}
-                          </td>
-                          <td className="py-2 px-3">
-                            <Link href={`/players/${player.player_id}`} className="text-pc-text font-medium text-xs hover:text-pc-accent transition-colors">
-                              {player.name}
-                            </Link>
-                          </td>
-                          <td className="py-2 px-3 text-right text-pc-text font-medium text-xs">{player.points.toLocaleString()}</td>
-                          <td className="py-2 px-3 text-right">
-                            {player.trend != null && player.trend !== 0 ? (
-                              <span className={`text-xs ${player.trend > 0 ? "text-emerald-400" : "text-red-400"}`}>
-                                {player.trend > 0 ? "▲" : "▼"}{Math.abs(player.trend)}
-                              </span>
-                            ) : (
-                              <span className="text-pc-text-muted text-xs">—</span>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
+        {/* ── Notifications ── */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45 }}
+          className="max-w-2xl mx-auto mb-8 space-y-3"
+        >
+          <h2 className="px-2 text-sm font-bold text-pc-text">Notifications</h2>
+          {[
+            { type: "info", text: "Database ingestion running — 5,318 matches tracked and growing.", time: "2 hours ago" },
+            { type: "update", text: "Champion stats now available on the /stats page with per-class breakdowns.", time: "1 day ago" },
+            { type: "info", text: "Ranked leaderboard live with tier filters from Bronze to Grandmaster.", time: "3 days ago" },
+          ].map((n, i) => (
+            <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-pc-bg-elevated border border-pc-border">
+              <div className={`shrink-0 mt-0.5 w-2 h-2 rounded-full ${n.type === "update" ? "bg-pc-accent" : "bg-pc-text-muted"}`} />
+              <div className="flex-1 min-w-0">
+                <p className="text-pc-text-secondary text-sm leading-relaxed">{n.text}</p>
+                <span className="text-pc-text-muted text-[10px] mt-1 block">{n.time}</span>
               </div>
-            </motion.div>
-          </div>
-        </div>
+            </div>
+          ))}
+        </motion.div>
     </div>
   );
 }

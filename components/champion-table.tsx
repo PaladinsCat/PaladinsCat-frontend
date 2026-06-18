@@ -209,9 +209,9 @@ export default function ChampionTable() {
             };
             return (
               <Link key={c.id} href={`/champions/${championSlug(c.name)}`}>
-                <div className="group relative flex items-center gap-3.5 p-3 rounded-xl pc-surface border border-pc-border hover:border-pc-accent-mid transition-all duration-200 hover:shadow-[0_0_20px_rgba(51,182,177,0.08)]">
+                <div className="group relative flex items-center gap-3.5 p-3 rounded-xl bg-pc-bg-elevated border border-pc-border hover:border-pc-accent-mid transition-all duration-200 hover:shadow-[0_0_20px_rgba(51,182,177,0.08)]">
                   {/* Portrait */}
-                  <div className="shrink-0 w-12 h-12 rounded-lg pc-surface-light flex items-center justify-center overflow-hidden border border-pc-border/50 group-hover:border-pc-accent-deep/50 transition-colors">
+                  <div className="shrink-0 w-12 h-12 rounded-lg bg-pc-bg-elevated flex items-center justify-center overflow-hidden border border-pc-border/50 group-hover:border-pc-accent-deep/50 transition-colors">
                     {c.imagePath ? (
                       <img src={c.imagePath} alt={c.name} className="w-full h-full object-contain" />
                     ) : (

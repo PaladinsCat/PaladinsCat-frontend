@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { fetchBaselines, type BaselineEntry } from "@/lib/api-client";
+import { fetchBaselines, fetchPerformanceLeaderboard, type BaselineEntry } from "@/lib/api-client";
 import { MOCK_PERF_LEADERBOARD } from "@/lib/mock-data";
 
 const VALID_METRICS = ["gpm", "hpm", "dpm", "mpm"] as const;
@@ -89,21 +89,59 @@ export default function MetricLeaderboardPage() {
   const normalizedMetric = VALID_METRICS.find((m) => m === rawMetric) || null;
 
   const [baselines, setBaselines] = useState<BaselineEntry[]>([]);
+  const [entries, setEntries] = useState<PerfEntry[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!normalizedMetric) {
       router.replace("/players/stats/dpm");
       return;
     }
-    fetchBaselines()
-      .then(setBaselines)
-      .catch(() => {});
+    let cancelled = false;
+    const metric = normalizedMetric;
+
+    async function load() {
+      setLoading(true);
+      try {
+        const [baselineRows, leaderboardRows] = await Promise.all([
+          fetchBaselines(),
+          fetchPerformanceLeaderboard({ metric, limit: 100 }),
+        ]);
+        if (cancelled) return;
+        setBaselines(baselineRows);
+        if (leaderboardRows.length > 0) {
+          setEntries(leaderboardRows.map((p) => ({
+            rank: p.rank,
+            player_id: p.playerId,
+            name: p.playerName,
+            champion: p.championName ?? "—",
+            className: p.className ?? "Unknown",
+            value: p.value,
+            totalMatches: p.totalMatches,
+            region: p.region ?? "—",
+          })));
+        } else {
+          setEntries(MOCK_PERF_LEADERBOARD[metric] ?? []);
+        }
+      } catch {
+        if (!cancelled) {
+          setBaselines([]);
+          setEntries(MOCK_PERF_LEADERBOARD[metric] ?? []);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    load();
+    return () => {
+      cancelled = true;
+    };
   }, [normalizedMetric, router]);
 
   if (!normalizedMetric) return null;
 
   const m = normalizedMetric;
-  const entries: PerfEntry[] = MOCK_PERF_LEADERBOARD[m] ?? [];
   const colorClass = METRIC_COLORS[m];
 
   const avgByRole = baselines.reduce<Record<string, number>>((acc, b) => {
@@ -173,7 +211,11 @@ export default function MetricLeaderboardPage() {
       )}
 
       {/* ── Table ── */}
-      {entries.length === 0 ? (
+      {loading ? (
+        <div className="text-center py-20 text-pc-text-muted">
+          Loading {METRIC_LABELS[m]} leaderboard...
+        </div>
+      ) : entries.length === 0 ? (
         <div className="text-center py-20 text-pc-text-muted">
           No data available for {METRIC_LABELS[m]}.
         </div>

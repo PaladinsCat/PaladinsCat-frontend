@@ -118,22 +118,23 @@ export default function PlayersPage() {
 
         {/* Left: Class Leaderboards 2×2 + Performance Stats */}
         <div className="lg:w-3/5 space-y-4">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-pc-text">Top Players by Class</h2>
-          </div>
+          <div className="flex items-center justify-between mb-4 px-2">
+              <h2 className="text-lg font-bold text-pc-text">Top Players by Class</h2>
+            </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {Object.entries(MOCK_CLASS_LEADERBOARDS).map(([role, players]) => (
-              <div key={role} className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
-                <div className="flex items-center justify-between mb-3">
+              <div key={role}>
+                <div className="flex items-center justify-between mb-2 px-2">
                   <div className="flex items-center gap-2">
                     <img src={CLASS_ICONS[role]} alt={role} className="w-5 h-5" />
                     <h3 className="text-pc-text font-semibold text-sm">{role}</h3>
                   </div>
-                  <Link href={`/players/class/${role}`} className="text-[10px] px-1.5 py-0.5 rounded bg-pc-bg text-pc-accent hover:bg-pc-accent hover:text-pc-bg transition-colors">
+                  <Link href={`/players/class/${role}`} className="text-[10px] text-pc-text-secondary hover:text-pc-accent transition-colors drop-shadow-sm">
                     Detail →
                   </Link>
                 </div>
-                <div className="space-y-2">
+                <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
+                  <div className="space-y-2">
                   {players.map((p, i) => (
                     <div key={p.name} className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-2 min-w-0">
@@ -146,35 +147,40 @@ export default function PlayersPage() {
                       </div>
                     </div>
                   ))}
+                  </div>
                 </div>
               </div>
             ))}
           </div>
 
           {/* Performance Stats 2×2 */}
-          <h2 className="text-lg font-bold text-pc-text">Performance Stats</h2>
+          <div className="flex items-center justify-between mb-2 px-2">
+            <h2 className="text-lg font-bold text-pc-text">Performance Stats</h2>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {Object.entries(MOCK_STAT_LEADERBOARDS).map(([stat, players]) => (
-              <div key={stat} className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
-                <div className="flex items-center justify-between mb-3">
+              <div key={stat}>
+                <div className="flex items-center justify-between mb-2 px-2">
                   <h3 className="text-pc-text font-semibold text-sm">{STAT_LABELS[stat] || stat}</h3>
-                  <Link href={`/players/stats/${stat}`} className="text-[10px] px-1.5 py-0.5 rounded bg-pc-bg text-pc-accent hover:bg-pc-accent hover:text-pc-bg transition-colors">
+                  <Link href={`/players/stats/${stat}`} className="text-[10px] text-pc-text-secondary hover:text-pc-accent transition-colors drop-shadow-sm">
                     Detail →
                   </Link>
                 </div>
-                <div className="space-y-2">
-                  {players.map((p, i) => (
-                    <div key={p.name} className="flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <RankBadge rank={i + 1} />
-                        <span className="text-pc-text truncate">{p.name}</span>
+                <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
+                  <div className="space-y-2">
+                    {players.map((p, i) => (
+                      <div key={p.name} className="flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <RankBadge rank={i + 1} />
+                          <span className="text-pc-text truncate">{p.name}</span>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="text-pc-text-muted">{p.champion}</span>
+                          <span className="text-pc-accent font-medium">{p.value.toLocaleString()}</span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className="text-pc-text-muted">{p.champion}</span>
-                        <span className="text-pc-accent font-medium">{p.value.toLocaleString()}</span>
-                      </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               </div>
             ))}
@@ -183,18 +189,18 @@ export default function PlayersPage() {
 
         {/* Right: Ranked Leaderboard */}
         <div className="lg:w-2/5 flex flex-col min-h-0">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-4 px-2">
             <h2 className="text-lg font-bold text-pc-text">Ranked Leaderboard</h2>
-            <Link href="/players/leaderboard" className="text-[10px] px-2 py-0.5 rounded bg-pc-bg-elevated text-pc-accent hover:bg-pc-accent hover:text-pc-bg transition-colors border border-pc-border">
+            <Link href="/players/leaderboard" className="text-[10px] text-pc-text-secondary hover:text-pc-accent transition-colors drop-shadow-sm">
               Detail →
             </Link>
           </div>
-          <div className="bg-pc-bg-elevated border border-pc-border rounded-xl flex-1 flex flex-col overflow-hidden">
+          <div className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden flex flex-col flex-1">
             {/* Table */}
             <div className="flex-1 overflow-y-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-pc-border sticky top-0 bg-pc-bg-elevated z-10">
+                  <tr className="border-b border-pc-border">
                     <th className="text-left text-pc-text-muted font-medium py-2 px-3 w-8 text-xs">#</th>
                     <th className="text-left text-pc-text-muted font-medium py-2 px-2 text-xs">Player</th>
                     <th className="text-right text-pc-text-muted font-medium py-2 px-2 text-xs">+/−</th>
@@ -246,8 +252,8 @@ export default function PlayersPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
           {/* Confirmed Cheaters */}
-          <div className="bg-pc-bg-elevated border border-red-500/20 rounded-xl p-4">
-            <div className="flex items-center justify-between mb-4">
+          <div>
+            <div className="flex items-center justify-between mb-2 px-2">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-red-500" />
                 <h3 className="text-pc-text font-semibold text-sm">Confirmed Cheaters</h3>
@@ -255,11 +261,12 @@ export default function PlayersPage() {
                   {MOCK_CONFIRMED_CHEATERS.length}
                 </span>
               </div>
-              <Link href="/players/cheaters" className="text-[10px] px-2 py-0.5 rounded bg-pc-bg text-red-400 hover:bg-red-500 hover:text-pc-bg transition-colors">
+              <Link href="/players/cheaters" className="text-[10px] text-pc-text-secondary hover:text-red-400 transition-colors drop-shadow-sm">
                 Detail →
               </Link>
             </div>
-            <div className="space-y-2">
+            <div className="bg-pc-bg-elevated border border-red-500/20 rounded-xl p-4">
+              <div className="space-y-2">
               {MOCK_CONFIRMED_CHEATERS.map((p) => (
                 <div key={p.id} className="flex items-start gap-3 p-2.5 rounded-lg bg-pc-bg/50">
                   <div className="shrink-0 mt-1 w-2 h-2 rounded-full bg-red-500" />
@@ -277,12 +284,13 @@ export default function PlayersPage() {
                   </div>
                 </div>
               ))}
+              </div>
             </div>
           </div>
 
           {/* Suspicious Players */}
-          <div className="bg-pc-bg-elevated border border-amber-500/20 rounded-xl p-4">
-            <div className="flex items-center justify-between mb-4">
+          <div>
+            <div className="flex items-center justify-between mb-2 px-2">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-amber-500" />
                 <h3 className="text-pc-text font-semibold text-sm">Suspicious Players</h3>
@@ -290,11 +298,12 @@ export default function PlayersPage() {
                   {MOCK_SUSPICIOUS_PLAYERS.length}
                 </span>
               </div>
-              <Link href="/players/suspicious" className="text-[10px] px-2 py-0.5 rounded bg-pc-bg text-amber-400 hover:bg-amber-500 hover:text-pc-bg transition-colors">
+              <Link href="/players/suspicious" className="text-[10px] text-pc-text-secondary hover:text-amber-400 transition-colors drop-shadow-sm">
                 Detail →
               </Link>
             </div>
-            <div className="space-y-2">
+            <div className="bg-pc-bg-elevated border border-amber-500/20 rounded-xl p-4">
+              <div className="space-y-2">
               {MOCK_SUSPICIOUS_PLAYERS.map((p) => (
                 <div key={p.id} className="flex items-start gap-3 p-2.5 rounded-lg bg-pc-bg/50">
                   <div className={`shrink-0 mt-1 w-2 h-2 rounded-full ${p.severity === "medium" ? "bg-amber-500" : "bg-yellow-500"}`} />
@@ -312,6 +321,7 @@ export default function PlayersPage() {
                   </div>
                 </div>
               ))}
+              </div>
             </div>
           </div>
 

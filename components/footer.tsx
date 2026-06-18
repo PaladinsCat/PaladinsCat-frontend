@@ -66,6 +66,11 @@ export default function Footer() {
           </div>
 
         </div>
+
+        {/* Version */}
+        <div className="mt-6 pt-4 border-t border-pc-border/50 text-center">
+          <span className="text-pc-text-muted text-[10px]">v0.1.0-alpha</span>
+        </div>
       </div>
     </footer>
   );
