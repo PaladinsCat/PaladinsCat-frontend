@@ -1284,7 +1284,7 @@ export const BETTY_LA_BOMBA_DATA: ChampionData = {
   stats: {
     health: "2200",
     speed: "360",
-    speedUnits: "~22 units/s",
+    speedUnits: "~22.5 units/s",
     range: "275",
   },
   skills: [
@@ -1300,7 +1300,7 @@ export const BETTY_LA_BOMBA_DATA: ChampionData = {
       key: "RMB",
       iconUrl: "/images/skills/Ability_Cluster_Grenade.png",
       damage: "350, 500",
-      cooldown: "6s",
+      cooldown: "14s",
       description: "Launch a grenade that creates additional explosions based on the number of enemies hit. Can spawn up to 6 additional explosives.",
     },
     {
@@ -1308,7 +1308,7 @@ export const BETTY_LA_BOMBA_DATA: ChampionData = {
       key: "Q",
       iconUrl: "/images/skills/Ability_Hail_of_Bombs.png",
       damage: "370",
-      cooldown: "14s",
+      cooldown: "10s",
       description: "Send out a magazine chock-full of explosives that spray upward and outward to land randomly in a large area around where it deploys.",
     },
     {
