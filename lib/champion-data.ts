@@ -2611,7 +2611,7 @@ export const CASPIAN_DATA: ChampionData = {
   stats: {
     health: "2100",
     speed: "385",
-    speedUnits: "~24 units/s",
+    speedUnits: "~24.06 units/s",
     range: "100",
   },
   skills: [
@@ -2675,7 +2675,7 @@ export const CASPIAN_DATA: ChampionData = {
     { name: "Spin to Win", description: "Increase the size of the reactivation whirl of Deadly Momentum by 8%.", category: "Deadly Momentum", iconUrl: "/images/cards/Card_Spin_to_Win.png" },
     { name: "Swift Strikes", description: "Increase the travel distance of Deadly Momentum by 5%.", category: "Deadly Momentum", iconUrl: "/images/cards/Card_Swift_Strikes.png" },
     { name: "The Finer Things", description: "Increase your Movement Speed by 15% for 2s after hitting an enemy with Love.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_The_Finer_Things.png" },
-    { name: "The Rose's Thorns", description: "Each stack of Sharp Momentum Heals you for 30 after it expires.", category: "War", iconUrl: "/images/cards/Card_The_Roses_Thorns.png" },
+    { name: "The Rose's Thorns", description: "Each stack of Sharp Momentum Heals you for 30 after it expires.", category: "War", iconUrl: "/images/cards/Card_The_Rose's_Thorns.png" },
   ],
 };
 
