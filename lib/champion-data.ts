@@ -3929,28 +3929,28 @@ export const REI_DATA: ChampionData = {
       key: "RMB",
       iconUrl: "/images/skills/Ability_Chain_Heal.png",
       cooldown: "4s",
-      description: "Allows Rei to heal multiple targets at a time and Spirit Link them if needed, due to both abilities' low cooldowns."
+      description: "A magical ability that heals an ally for 1000 over 1.5s. The heal bounces to nearby allies for 500 over 1.5s, up to 3 times."
     },
     {
       name: "Spirit Link",
       key: "Q",
       iconUrl: "/images/skills/Ability_Spirit_Link.png",
       cooldown: "Ultimate",
-      description: "Spirit Link them if needed, due to both abilities' low cooldowns."
+      description: "A magical ability that shields an ally for 300 for 4s and increases their Movement Speed by 10%."
     },
     {
       name: "Envelop",
       key: "F",
       iconUrl: "/images/skills/Ability_Envelop.png",
       cooldown: "14s",
-      description: "Completely negate enemy large damaging Ultimates with damage mitigation, increased movement speed, and increased jump height, allowing you to withstand the damage dealt to you then simply heal it."
+      description: "Gain damage mitigation, increased Movement Speed, and increased Jump Height for 3s."
     },
     {
       name: "Vivify",
       key: "E",
       iconUrl: "/images/skills/Ability_Vivify.png",
       cooldown: "Ultimate",
-      description: "Entirely save a targeted ally and yourself by granting them invulnerability then healing them to seventy-five percent of their maximum health pool."
+      description: "Grant yourself and a nearby ally invulnerability for 1.5s and heal them for 75% of their maximum Health over 2s."
     },
   ],
   talents: [
