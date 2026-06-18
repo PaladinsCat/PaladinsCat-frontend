@@ -114,10 +114,10 @@ export default function PlayersPage() {
       )}
 
       {/* ── Main Content: Class LB (left) + Ranked LB (right) ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+      <div className="flex flex-col lg:flex-row gap-6">
 
-        {/* Left: Class Leaderboards 2×2 */}
-        <div className="lg:col-span-3 space-y-4">
+        {/* Left: Class Leaderboards 2×2 + Performance Stats */}
+        <div className="lg:w-3/5 space-y-4">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold text-pc-text">Top Players by Class</h2>
           </div>
@@ -182,14 +182,14 @@ export default function PlayersPage() {
         </div>
 
         {/* Right: Ranked Leaderboard */}
-        <div className="lg:col-span-2 flex flex-col min-h-0">
+        <div className="lg:w-2/5 flex flex-col min-h-0">
           <div className="flex items-center gap-3 mb-4">
             <h2 className="text-lg font-bold text-pc-text">Ranked Leaderboard</h2>
             <Link href="/players/leaderboard" className="ml-auto text-[10px] px-2 py-0.5 rounded bg-pc-bg text-pc-accent hover:bg-pc-accent hover:text-pc-bg transition-colors">
               Detail →
             </Link>
           </div>
-          <div className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden flex-1">
+          <div className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-y-auto flex-1">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-pc-border">
@@ -227,8 +227,6 @@ export default function PlayersPage() {
               </tbody>
             </table>
           </div>
-          {/* Spacer to match left column height */}
-          <div className="flex-1" />
         </div>
 
       </div>
