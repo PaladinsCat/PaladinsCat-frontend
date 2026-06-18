@@ -3812,6 +3812,79 @@ export const PIP_DATA: ChampionData = {
   ],
 };
 
+export const YING_DATA: ChampionData = {
+  name: "Ying",
+  roles: ["Support"],
+  stats: {
+    health: "2200",
+    speed: "355",
+    speedUnits: "~22 units/s",
+    range: "100",
+  },
+  skills: [
+    {
+      name: "Illusory Mirror",
+      key: "LMB",
+      iconUrl: "/images/skills/Ability_Illusory_Mirror.png",
+      damage: "90",
+      description: "Fire a burst of energy every 0.5s from your mirror over a short period of time, hitting 5 times over 0.2s for 90 damage per shot."
+    },
+    {
+      name: "Shatter",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_Shatter.png",
+      damage: "500",
+      cooldown: "3s",
+      description: "Shatter your illusions, causing them to chase down enemies and explode for 500 damage."
+    },
+    {
+      name: "Illusion",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Illusion.png",
+      cooldown: "5s",
+      description: "Create a lifelike illusion that heals nearby allies for 450 every 1.6s."
+    },
+    {
+      name: "Dimensional Link",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Dimensional_Link.png",
+      cooldown: "14s",
+      description: "For a short duration, manipulate dimensions, swapping locations with your farthest illusion."
+    },
+    {
+      name: "Illusory Rift",
+      key: "E",
+      iconUrl: "/images/skills/Ability_Illusory_Rift.png",
+      damage: "4800",
+      cooldown: "Ultimate",
+      description: "Shatter your mirror, restoring 4800 health to all allies over 8s and make them immune to Crowd Control for 1s. While active, you may teleport to any ally with Dimensional Link."
+    },
+  ],
+  talents: [
+    { name: "Focusing Lens", description: "Deal an additional 200 damage to an enemy if you hit them with all 5 shots of Illusory Mirror.", category: "Illusory Mirror", iconUrl: "/images/champions/Talent Ying FocusingLens.png" },
+    { name: "Life Exchange", description: "Shatter instantly Heals your target for 700, but its Cooldown is increased by 1s and it no longer explodes your Illusions. Reduces the Cooldown of Shatter by 2s if you miss.", category: "Shatter", iconUrl: "/images/champions/Talent Ying LifeExchange.png" },
+    { name: "Resonance", description: "If an Illusion is killed or expires, it triggers a Shatter explosion, dealing 550 damage. Also increases your Shattered Illusions' Movement Speed by 65% and Explosion Radius by 5 units.", category: "Illusion", iconUrl: "/images/champions/Talent Ying Resonance.png" },
+  ],
+  loadouts: [
+    { name: "Brittle", description: "Reduce the Cooldown of Shatter by 0.5s.", category: "Shatter", iconUrl: "/images/cards/Card_Brittle.png" },
+    { name: "Carry On", description: "Increase the duration of Illusion by 1s.", category: "Illusion", iconUrl: "/images/cards/Card_Carry_On.png" },
+    { name: "Disappear", description: "Illusions are 30% less detectable.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Disappear.png" },
+    { name: "Efficiency", description: "Reduce the Cooldown of Dimensional Link by 1.3s.", category: "Dimensional Link", iconUrl: "/images/cards/Card_Efficiency.png" },
+    { name: "Encouragement", description: "Reduce the Cooldown of Illusion by 1s.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Encouragement.png" },
+    { name: "Ephemeral", description: "Reduce your maximum Health by 0.5%.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Ephemeral.png" },
+    { name: "Fracture", description: "Increase the damage of Shatter by 20%.", category: "Shatter", iconUrl: "/images/cards/Card_Fracture.png" },
+    { name: "Harmony", description: "Increase the healing of Shatter by 13%.", category: "Shatter", iconUrl: "/images/cards/Card_Harmony.png" },
+    { name: "Mesmerism", description: "Increase the number of Illusions by 1.", category: "Illusion", iconUrl: "/images/cards/Card_Mesmerism.png" },
+    { name: "Pursuit", description: "Increase the speed of Shatter by 8%.", category: "Shatter", iconUrl: "/images/cards/Card_Pursuit.png" },
+    { name: "Rewind", description: "Increase the damage of Dimensional Link by 20%.", category: "Dimensional Link", iconUrl: "/images/cards/Card_Rewind.png" },
+    { name: "Shuffle", description: "Increase the speed of Dimensional Link by 20%.", category: "Dimensional Link", iconUrl: "/images/cards/Card_Shuffle.png" },
+    { name: "Spring Bloom", description: "Reduce the Cooldown of Illusion by 0.5s.", category: "Illusion", iconUrl: "/images/cards/Card_Spring_Bloom.png" },
+    { name: "Spring Forward", description: "Increase the duration of Dimensional Link by 0.7s.", category: "Dimensional Link", iconUrl: "/images/cards/Card_Spring_Forward.png" },
+    { name: "Squadron", description: "Increase the maximum number of Illusions by 100.", category: "Illusion", iconUrl: "/images/cards/Card_Squadron.png" },
+    { name: "Tangible", description: "Increase the size of Illusions by 50.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Tangible.png" },
+  ],
+};
+
 export const CHAMPION_DATA: Record<string, ChampionData> = {
   talus: TALUS_DATA,
   corvus: CORVUS_DATA,
@@ -3865,6 +3938,7 @@ export const CHAMPION_DATA: Record<string, ChampionData> = {
   vii: VII_DATA,
   vora: VORA_DATA,
   zhin: ZHIN_DATA,
+  ying: YING_DATA,
 };
 
 export function getChampionData(slug: string): ChampionData | undefined {

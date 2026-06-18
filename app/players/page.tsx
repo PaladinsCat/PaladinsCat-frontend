@@ -118,13 +118,20 @@ export default function PlayersPage() {
 
         {/* Left: Class Leaderboards 2×2 */}
         <div className="lg:col-span-3 space-y-4">
-          <h2 className="text-lg font-bold text-pc-text">Top Players by Class</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-pc-text">Top Players by Class</h2>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {Object.entries(MOCK_CLASS_LEADERBOARDS).map(([role, players]) => (
               <div key={role} className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
-                <div className="flex items-center gap-2 mb-3">
-                  <img src={CLASS_ICONS[role]} alt={role} className="w-5 h-5" />
-                  <h3 className="text-pc-text font-semibold text-sm">{role}</h3>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <img src={CLASS_ICONS[role]} alt={role} className="w-5 h-5" />
+                    <h3 className="text-pc-text font-semibold text-sm">{role}</h3>
+                  </div>
+                  <Link href={`/players/class/${role}`} className="text-[10px] px-1.5 py-0.5 rounded bg-pc-bg text-pc-accent hover:bg-pc-accent hover:text-pc-bg transition-colors">
+                    Detail →
+                  </Link>
                 </div>
                 <div className="space-y-2">
                   {players.map((p, i) => (
@@ -149,7 +156,12 @@ export default function PlayersPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {Object.entries(MOCK_STAT_LEADERBOARDS).map(([stat, players]) => (
               <div key={stat} className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
-                <h3 className="text-pc-text font-semibold text-sm mb-3">{STAT_LABELS[stat] || stat}</h3>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-pc-text font-semibold text-sm">{STAT_LABELS[stat] || stat}</h3>
+                  <Link href={`/players/stats/${stat}`} className="text-[10px] px-1.5 py-0.5 rounded bg-pc-bg text-pc-accent hover:bg-pc-accent hover:text-pc-bg transition-colors">
+                    Detail →
+                  </Link>
+                </div>
                 <div className="space-y-2">
                   {players.map((p, i) => (
                     <div key={p.name} className="flex items-center justify-between text-xs">
@@ -174,6 +186,9 @@ export default function PlayersPage() {
           <div className="flex items-center gap-3 mb-4">
             <h2 className="text-lg font-bold text-pc-text">Ranked Leaderboard</h2>
             <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-pc-accent/10 text-pc-accent border border-pc-accent/20">Master+</span>
+            <Link href="/players/leaderboard" className="ml-auto text-[10px] px-2 py-0.5 rounded bg-pc-bg text-pc-accent hover:bg-pc-accent hover:text-pc-bg transition-colors">
+              Detail →
+            </Link>
           </div>
           <div className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
             <table className="w-full text-sm">
@@ -219,7 +234,12 @@ export default function PlayersPage() {
 
       {/* ── Cheaters & Suspicious Players ── */}
       <section>
-        <h2 className="text-lg font-bold text-pc-text mb-4">Cheaters & Suspicious</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold text-pc-text">Cheaters & Suspicious</h2>
+          <Link href="/players/cheaters" className="text-[10px] px-2 py-0.5 rounded bg-pc-bg text-pc-accent hover:bg-pc-accent hover:text-pc-bg transition-colors">
+            Detail →
+          </Link>
+        </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
           {/* Confirmed Cheaters */}
