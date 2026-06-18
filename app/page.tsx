@@ -275,53 +275,70 @@ export default function HomePage() {
           <div className="space-y-6">
             {/* Leaderboard */}
             <motion.div initial={{ opacity: 0, y: 25 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 300, damping: 20 }}>
-              <Card>
-                <div className="pc-card-title mb-3">Leaderboard</div>
+              <div className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
+                <div className="px-4 py-3 border-b border-pc-border">
+                  <div className="flex items-center justify-between">
+                    <span className="pc-card-title mb-0">Leaderboard</span>
+                    <Link href="/players/leaderboard" className="text-[10px] px-2 py-0.5 rounded bg-pc-bg text-pc-accent hover:bg-pc-accent hover:text-pc-bg transition-colors">
+                      Detail →
+                    </Link>
+                  </div>
+                </div>
                 {loading ? (
-                  <div className="space-y-3">
+                  <div className="p-4 space-y-3">
                     <div className="pc-skeleton h-10 w-full" />
                     <div className="pc-skeleton h-10 w-full" />
                     <div className="pc-skeleton h-10 w-full" />
                   </div>
                 ) : rankedPlayers.length === 0 ? (
-                  <p className="pc-body text-sm">No data yet</p>
-                ) : (
-                  <div className="min-w-0">
-                    <table className="pc-table">
-                      <thead>
-                        <tr>
-                          <th>#</th>
-                          <th>Player</th>
-                          <th>Points</th>
-                          <th>Trend</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {rankedPlayers.map((player) => {
-                          const trend = player.trend ?? 0;
-                          const trendIcon = trend > 0 ? "↑" : trend < 0 ? "↓" : "-";
-                          const trendColor = trend > 0 ? "#4ade80" : trend < 0 ? "#f87171" : "#9ca3af";
-                          return (
-                            <tr key={player.player_id}>
-                              <td className="text-pc-text-muted text-sm">{player.rank}</td>
-                              <td>
-                                <Link
-                                  href={`/players/`}
-                                  className="text-pc-text hover:text-pc-accent transition-colors"
-                                >
-                                  {player.name}
-                                </Link>
-                              </td>
-                              <td>{player.points.toLocaleString()}</td>
-                              <td style={{ color: trendColor }} className="text-sm">{trendIcon}</td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
+                  <div className="p-4">
+                    <p className="text-pc-text-muted text-sm">No data yet</p>
                   </div>
+                ) : (
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-pc-border">
+                        <th className="text-left text-pc-text-muted font-medium py-2.5 px-3 w-10">#</th>
+                        <th className="text-left text-pc-text-muted font-medium py-2.5 px-3">Player</th>
+                        <th className="text-right text-pc-text-muted font-medium py-2.5 px-3">Points</th>
+                        <th className="text-right text-pc-text-muted font-medium py-2.5 px-3 w-12">+/−</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rankedPlayers.map((player, i) => (
+                        <tr key={player.player_id} className={`border-b border-pc-border/50 hover:bg-pc-bg/50 transition-colors ${i < 3 ? "bg-pc-bg/30" : ""}`}>
+                          <td className="py-2 px-3">
+                            {i === 0 ? (
+                              <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-yellow-500/20 text-yellow-400 font-bold text-sm">🥇</span>
+                            ) : i === 1 ? (
+                              <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-gray-400/20 text-gray-300 font-bold text-sm">🥈</span>
+                            ) : i === 2 ? (
+                              <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-600/20 text-amber-600 font-bold text-sm">🥉</span>
+                            ) : (
+                              <span className="inline-flex items-center justify-center w-7 h-7 text-pc-text-muted text-sm">{player.rank}</span>
+                            )}
+                          </td>
+                          <td className="py-2 px-3">
+                            <Link href={`/players/${player.player_id}`} className="text-pc-text font-medium text-xs hover:text-pc-accent transition-colors">
+                              {player.name}
+                            </Link>
+                          </td>
+                          <td className="py-2 px-3 text-right text-pc-text font-medium text-xs">{player.points.toLocaleString()}</td>
+                          <td className="py-2 px-3 text-right">
+                            {player.trend != null && player.trend !== 0 ? (
+                              <span className={`text-xs ${player.trend > 0 ? "text-emerald-400" : "text-red-400"}`}>
+                                {player.trend > 0 ? "▲" : "▼"}{Math.abs(player.trend)}
+                              </span>
+                            ) : (
+                              <span className="text-pc-text-muted text-xs">—</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 )}
-              </Card>
+              </div>
             </motion.div>
           </div>
         </div>

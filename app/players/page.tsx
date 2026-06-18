@@ -183,49 +183,58 @@ export default function PlayersPage() {
 
         {/* Right: Ranked Leaderboard */}
         <div className="lg:w-2/5 flex flex-col min-h-0">
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold text-pc-text">Ranked Leaderboard</h2>
-            <Link href="/players/leaderboard" className="ml-auto text-[10px] px-2 py-0.5 rounded bg-pc-bg text-pc-accent hover:bg-pc-accent hover:text-pc-bg transition-colors">
+            <Link href="/players/leaderboard" className="text-[10px] px-2 py-0.5 rounded bg-pc-bg-elevated text-pc-accent hover:bg-pc-accent hover:text-pc-bg transition-colors border border-pc-border">
               Detail →
             </Link>
           </div>
-          <div className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-y-auto flex-1">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-pc-border">
-                  <th className="text-left text-pc-text-muted font-medium py-2.5 px-3 w-10">#</th>
-                  <th className="text-left text-pc-text-muted font-medium py-2.5 px-3">Player</th>
-                  <th className="text-left text-pc-text-muted font-medium py-2.5 px-3 hidden sm:table-cell">Tier</th>
-                  <th className="text-right text-pc-text-muted font-medium py-2.5 px-3">Pts</th>
-                  <th className="text-right text-pc-text-muted font-medium py-2.5 px-3 w-12">+/−</th>
-                </tr>
-              </thead>
-              <tbody>
-                {MOCK_RANKED_PLAYERS.map((p, i) => (
-                  <tr key={p.player_id} className={`border-b border-pc-border/50 hover:bg-pc-bg/50 transition-colors ${i < 3 ? "bg-pc-bg/30" : ""}`}>
-                    <td className="py-2 px-3"><RankBadge rank={p.rank} /></td>
-                    <td className="py-2 px-3">
-                      <Link href={`/players/${p.player_id}`} className="text-pc-text font-medium text-xs hover:text-pc-accent transition-colors">
-                        {p.name}
-                      </Link>
-                    </td>
-                    <td className="py-2 px-3 text-pc-text-secondary text-xs hidden sm:table-cell">
-                      {TIER_NAMES[p.tier] || `Tier ${p.tier}`}
-                    </td>
-                    <td className="py-2 px-3 text-right text-pc-text font-medium text-xs">{p.points.toLocaleString()}</td>
-                    <td className="py-2 px-3 text-right">
-                      {p.trend != null && p.trend !== 0 ? (
-                        <span className={`text-xs ${p.trend > 0 ? "text-emerald-400" : "text-red-400"}`}>
-                          {p.trend > 0 ? "▲" : "▼"}{Math.abs(p.trend)}
-                        </span>
-                      ) : (
-                        <span className="text-pc-text-muted text-xs">—</span>
-                      )}
-                    </td>
+          <div className="bg-pc-bg-elevated border border-pc-border rounded-xl flex-1 flex flex-col overflow-hidden">
+            {/* Table */}
+            <div className="flex-1 overflow-y-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-pc-border sticky top-0 bg-pc-bg-elevated z-10">
+                    <th className="text-left text-pc-text-muted font-medium py-2 px-3 w-8 text-xs">#</th>
+                    <th className="text-left text-pc-text-muted font-medium py-2 px-2 text-xs">Player</th>
+                    <th className="text-right text-pc-text-muted font-medium py-2 px-2 text-xs">+/−</th>
+                    <th className="text-right text-pc-text-muted font-medium py-2 px-2 text-xs">Pts</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {MOCK_RANKED_PLAYERS.map((p, i) => (
+                    <tr key={p.player_id} className={`border-b border-pc-border/50 hover:bg-pc-bg/50 transition-colors ${i < 3 ? "bg-pc-bg/30" : ""}`}>
+                      <td className="py-1.5 px-3">
+                        {i === 0 ? (
+                          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-yellow-500/20 text-yellow-400 font-bold text-[11px]">🥇</span>
+                        ) : i === 1 ? (
+                          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-400/20 text-gray-300 font-bold text-[11px]">🥈</span>
+                        ) : i === 2 ? (
+                          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-600/20 text-amber-600 font-bold text-[11px]">🥉</span>
+                        ) : (
+                          <span className="inline-flex items-center justify-center w-6 h-6 text-pc-text-muted text-[11px]">{p.rank}</span>
+                        )}
+                      </td>
+                      <td className="py-1.5 px-2">
+                        <Link href={`/players/${p.player_id}`} className="text-pc-text font-medium text-xs hover:text-pc-accent transition-colors">
+                          {p.name}
+                        </Link>
+                      </td>
+                      <td className="py-1.5 px-2 text-right">
+                        {p.trend != null && p.trend !== 0 ? (
+                          <span className={`text-[11px] ${p.trend > 0 ? "text-emerald-400" : "text-red-400"}`}>
+                            {p.trend > 0 ? "▲" : "▼"}{Math.abs(p.trend)}
+                          </span>
+                        ) : (
+                          <span className="text-pc-text-muted text-[11px]">—</span>
+                        )}
+                      </td>
+                      <td className="py-1.5 px-2 text-right text-pc-text font-medium text-xs">{p.points.toLocaleString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
