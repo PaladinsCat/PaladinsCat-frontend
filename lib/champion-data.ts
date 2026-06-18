@@ -1403,11 +1403,16 @@ export const KINESSA_DATA: ChampionData = {
     { name: "Prodigy", description: "Increase the damage of Sniper Mode.", category: "Sniper Mode", iconUrl: "/images/cards/Card_Prodigy.png" },
     { name: "Beam Me Up", description: "Reduce the Cooldown of Transporter.", category: "Transporter", iconUrl: "/images/cards/Card_Beam_Me_Up.png" },
     { name: "Bob and Weave", description: "Increase your Movement Speed.", category: "Transporter", iconUrl: "/images/cards/Card_Bob_and_Weave.png" },
+    { name: "Reconfigure", description: "Activating Transporter generates 4 Ammo.", category: "Transporter", iconUrl: "/images/cards/Card_Reconfigure.png" },
+    { name: "Restore", description: "Heal for 6% of your maximum Health after Teleporting with Transporter.", category: "Transporter", iconUrl: "/images/cards/Card_Restore.png" },
     { name: "Well Stocked", description: "Increase the number of Oppressor Mines.", category: "Oppressor Mine", iconUrl: "/images/cards/Card_Well_Stocked.png" },
     { name: "Octoppressor", description: "Increase the damage of Oppressor Mine.", category: "Oppressor Mine", iconUrl: "/images/cards/Card_Octoppressor.png" },
+    { name: "Amplitude", description: "Increase the range of Oppressor Mine's beams by 20%.", category: "Oppressor Mine", iconUrl: "/images/cards/Card_Amplitude.png" },
+    { name: "Generator", description: "Reduce the Cooldown of Oppressor Mine by 1.3s.", category: "Oppressor Mine", iconUrl: "/images/cards/Card_Generator.png" },
     { name: "Lie in Wait", description: "Increase your damage.", category: "", iconUrl: "/images/cards/Card_Lie_in_Wait.png" },
     { name: "Tracking", description: "Increase your damage.", category: "", iconUrl: "/images/cards/Card_Tracking.png" },
     { name: "Power Supply", description: "Increase your Healing received.", category: "", iconUrl: "/images/cards/Card_Power_Supply.png" },
+    { name: "Queen of the Hill", description: "Increase your maximum Health by 50.", category: "", iconUrl: "/images/cards/Card_Queen_of_the_Hill.png" },
   ],
 };
 

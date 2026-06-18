@@ -182,15 +182,14 @@ export default function PlayersPage() {
         </div>
 
         {/* Right: Ranked Leaderboard */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 flex flex-col min-h-0">
           <div className="flex items-center gap-3 mb-4">
             <h2 className="text-lg font-bold text-pc-text">Ranked Leaderboard</h2>
-            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-pc-accent/10 text-pc-accent border border-pc-accent/20">Master+</span>
             <Link href="/players/leaderboard" className="ml-auto text-[10px] px-2 py-0.5 rounded bg-pc-bg text-pc-accent hover:bg-pc-accent hover:text-pc-bg transition-colors">
               Detail →
             </Link>
           </div>
-          <div className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
+          <div className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden flex-1">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-pc-border">
@@ -228,28 +227,30 @@ export default function PlayersPage() {
               </tbody>
             </table>
           </div>
+          {/* Spacer to match left column height */}
+          <div className="flex-1" />
         </div>
 
       </div>
 
       {/* ── Cheaters & Suspicious Players ── */}
       <section>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-pc-text">Cheaters & Suspicious</h2>
-          <Link href="/players/cheaters" className="text-[10px] px-2 py-0.5 rounded bg-pc-bg text-pc-accent hover:bg-pc-accent hover:text-pc-bg transition-colors">
-            Detail →
-          </Link>
-        </div>
+        <h2 className="text-lg font-bold text-pc-text mb-4">Cheaters & Suspicious</h2>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
           {/* Confirmed Cheaters */}
           <div className="bg-pc-bg-elevated border border-red-500/20 rounded-xl p-4">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-2 h-2 rounded-full bg-red-500" />
-              <h3 className="text-pc-text font-semibold text-sm">Confirmed Cheaters</h3>
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/20">
-                {MOCK_CONFIRMED_CHEATERS.length}
-              </span>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-red-500" />
+                <h3 className="text-pc-text font-semibold text-sm">Confirmed Cheaters</h3>
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/20">
+                  {MOCK_CONFIRMED_CHEATERS.length}
+                </span>
+              </div>
+              <Link href="/players/cheaters" className="text-[10px] px-2 py-0.5 rounded bg-pc-bg text-red-400 hover:bg-red-500 hover:text-pc-bg transition-colors">
+                Detail →
+              </Link>
             </div>
             <div className="space-y-2">
               {MOCK_CONFIRMED_CHEATERS.map((p) => (
@@ -274,12 +275,17 @@ export default function PlayersPage() {
 
           {/* Suspicious Players */}
           <div className="bg-pc-bg-elevated border border-amber-500/20 rounded-xl p-4">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-2 h-2 rounded-full bg-amber-500" />
-              <h3 className="text-pc-text font-semibold text-sm">Suspicious Players</h3>
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                {MOCK_SUSPICIOUS_PLAYERS.length}
-              </span>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-amber-500" />
+                <h3 className="text-pc-text font-semibold text-sm">Suspicious Players</h3>
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                  {MOCK_SUSPICIOUS_PLAYERS.length}
+                </span>
+              </div>
+              <Link href="/players/suspicious" className="text-[10px] px-2 py-0.5 rounded bg-pc-bg text-amber-400 hover:bg-amber-500 hover:text-pc-bg transition-colors">
+                Detail →
+              </Link>
             </div>
             <div className="space-y-2">
               {MOCK_SUSPICIOUS_PLAYERS.map((p) => (

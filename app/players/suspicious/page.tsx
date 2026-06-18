@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { fetchCheaterPlayers, type CheaterPlayer } from "@/lib/api-client";
-import { MOCK_CONFIRMED_FULL } from "@/lib/mock-data";
+import { MOCK_SUSPICIOUS_FULL } from "@/lib/mock-data";
 
 const CLASS_ICONS: Record<string, string> = {
   Frontline: "/images/icons/Class_Front_Line_Icon.avif",
@@ -12,9 +12,15 @@ const CLASS_ICONS: Record<string, string> = {
   Support: "/images/icons/Class_Support_Icon.avif",
 };
 
+const SEVERITY_STYLES: Record<string, string> = {
+  high: "bg-red-500/15 text-red-400 border-red-500/30",
+  medium: "bg-amber-500/15 text-amber-400 border-amber-500/30",
+  low: "bg-yellow-500/15 text-yellow-400 border-yellow-500/30",
+};
+
 const fmt = (n: number | null | undefined) => n != null ? n.toLocaleString() : "—";
 
-export default function CheatersPage() {
+export default function SuspiciousPage() {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -22,14 +28,14 @@ export default function CheatersPage() {
     async function load() {
       setLoading(true);
       try {
-        const cheaters = await fetchCheaterPlayers({ cheater: true, limit: 100 });
-        if (cheaters.length > 0) {
-          setData(cheaters.filter(c => c.cheater));
+        const players = await fetchCheaterPlayers({ limit: 100 });
+        if (players.length > 0) {
+          setData(players.filter(p => !p.cheater && p.susCount > 0));
         } else {
-          setData(MOCK_CONFIRMED_FULL);
+          setData(MOCK_SUSPICIOUS_FULL);
         }
       } catch {
-        setData(MOCK_CONFIRMED_FULL);
+        setData(MOCK_SUSPICIOUS_FULL);
       } finally {
         setLoading(false);
       }
@@ -41,21 +47,21 @@ export default function CheatersPage() {
     <div className="space-y-6">
       <div>
         <Link href="/players" className="text-pc-accent text-xs hover:underline mb-2 inline-block">← Players</Link>
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">Confirmed Cheaters</h1>
+        <h1 className="pc-heading pc-heading-lg text-pc-accent">Suspicious Players</h1>
         <p className="text-pc-text-secondary text-sm mt-1">
-          Verified cheating accounts with full performance metrics
+          Players flagged for unusual behavior — under investigation
         </p>
       </div>
 
       <div className="flex items-center gap-2">
-        <div className="w-2 h-2 rounded-full bg-red-500" />
-        <span className="text-pc-text-muted text-xs">{data.length} confirmed</span>
+        <div className="w-2 h-2 rounded-full bg-amber-500" />
+        <span className="text-pc-text-muted text-xs">{data.length} flagged</span>
       </div>
 
       {loading ? (
         <div className="text-center py-12 text-pc-text-secondary text-sm">Loading...</div>
       ) : data.length === 0 ? (
-        <div className="text-center py-12 text-pc-text-secondary text-sm">No confirmed cheaters found.</div>
+        <div className="text-center py-12 text-pc-text-secondary text-sm">No suspicious players found.</div>
       ) : (
         <div className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
@@ -71,7 +77,7 @@ export default function CheatersPage() {
                   <th className="px-3 py-3 text-right">KDA</th>
                   <th className="px-3 py-3 text-right">WR</th>
                   <th className="px-3 py-3 text-right">Matches</th>
-                  <th className="px-3 py-3">Banned</th>
+                  <th className="px-3 py-3">Severity</th>
                   <th className="px-3 py-3">Reason</th>
                 </tr>
               </thead>
@@ -103,7 +109,11 @@ export default function CheatersPage() {
                       </span>
                     </td>
                     <td className="px-3 py-2 text-right text-xs text-pc-text-secondary">{fmt(p.totalMatches)}</td>
-                    <td className="px-3 py-2 text-xs text-red-400">{p.banned || "—"}</td>
+                    <td className="px-3 py-2">
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded border ${SEVERITY_STYLES[p.severity] || ""}`}>
+                        {p.severity || "—"}
+                      </span>
+                    </td>
                     <td className="px-3 py-2 text-xs text-pc-text-muted max-w-[200px] truncate">{p.reason || "—"}</td>
                   </tr>
                 ))}
