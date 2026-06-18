@@ -3634,6 +3634,8 @@ export const JENOS_DATA: ChampionData = {
       name: "Astral Mark",
       key: "RMB",
       iconUrl: "/images/skills/Ability_Astral_Mark.png",
+      damage: "3260 over 13s",
+      cooldown: "12s",
       description: "Apply a celestial blessing that passes through obstacles to heal allies for 400 and an additional 220 every 1s for 13s.",
     },
     {
