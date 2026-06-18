@@ -1132,6 +1132,80 @@ export const CASSIE_DATA: ChampionData = {
   ],
 };
 
+export const DROGOZ_DATA: ChampionData = {
+  name: "Drogoz",
+  roles: ["Damage"],
+  stats: {
+    health: "2200",
+    speed: "350",
+    speedUnits: "~21.88 units/s",
+    range: "275",
+  },
+  skills: [
+    {
+      name: "Rocket Launcher",
+      key: "LMB",
+      iconUrl: "/images/skills/WeaponAttack_Drogoz_Icon.png",
+      damage: "850",
+      description: "Fire explosive rockets every 0.85s to decimate an area, dealing 850 damage.",
+    },
+    {
+      name: "Fire Spit",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_Fire_Spit.png",
+      damage: "150-900",
+      cooldown: "8s",
+      description: "Spit a flammable orb and shoot it to deal 900 damage to enemies in an area. Hitting an enemy directly deals 150 damage and Weakens them to all attacks for a short time.",
+    },
+    {
+      name: "Salvo",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Salvo.png",
+      damage: "6×250",
+      cooldown: "18s",
+      description: "Load all your rockets into your launcher and unleash them with your next attack for a rapid-fire assault, dealing 250 damage per rocket.",
+    },
+    {
+      name: "Thrust",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Thrust.png",
+      cooldown: "11s",
+      description: "Jet upwards into the air. Hold SpaceBar to use your Booster.",
+    },
+    {
+      name: "Dragon Punch",
+      key: "E",
+      iconUrl: "/images/skills/Ability_Dragon_Punch.png",
+      damage: "100%",
+      cooldown: "Ultimate",
+      description: "Unleash your fury to jet through the air and hunt down an enemy to execute.",
+    },
+  ],
+  talents: [
+    { name: "Combustible", description: "Fire Spit applies a Knockback and deals an additional 300 Burn damage over 2s.", category: "Fire Spit", iconUrl: "/images/champions/Talent Drogoz Combustible.png" },
+    { name: "Fusillade", description: "Damage dealt when hitting an enemy directly with Rocket Launcher or Salvo is increased by 25%.", category: "Rocket Launcher", iconUrl: "/images/champions/Talent Drogoz Fusillade.png" },
+    { name: "W.Y.R.M. Jets", description: "Increase Booster's Max Vertical Speed by 100% and Vertical Acceleration by 57%.", category: "Thrust", iconUrl: "/images/champions/Talent Drogoz WYRMJets.png" },
+  ],
+  loadouts: [
+    { name: "Altitude", description: "Restore 20% of your maximum Booster fuel after getting a Killing Blow or Elimination.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Altitude.png" },
+    { name: "Apex Predator", description: "Increase your maximum Health by 50.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Apex_Predator.png" },
+    { name: "Bask", description: "Heal for 35 for each enemy hit by your Salvo rockets.", category: "Salvo", iconUrl: "/images/cards/Card_Bask.png" },
+    { name: "Condescension", description: "Reduce the Cooldown of Thrust by 1.2s for each enemy hit with Fire Spit.", category: "Fire Spit", iconUrl: "/images/cards/Card_Condescension.png" },
+    { name: "Decimate", description: "Increase the explosion radius of Salvo by 15%.", category: "Salvo", iconUrl: "/images/cards/Card_Decimate.png" },
+    { name: "Follow the Scent", description: "Generate 1 Ammo after using Fire Spit.", category: "Fire Spit", iconUrl: "/images/cards/Card_Follow_the_Scent.png" },
+    { name: "Fuel Tank", description: "Increase your Booster fuel capacity by 10%.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Fuel_Tank.png" },
+    { name: "Hot Swap", description: "Increase your Reload Speed by 10% for 3s after hitting an enemy with your weapon.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Hot_Swap.png" },
+    { name: "Hyper Boost", description: "Restore 4% of your Booster fuel each time Salvo hits an enemy.", category: "Salvo", iconUrl: "/images/cards/Card_Hyper_Boost.png" },
+    { name: "Lung Capacity", description: "Heal for 50 for each enemy Champion hit with Fire Spit.", category: "Fire Spit", iconUrl: "/images/cards/Card_Lung_Capacity.png" },
+    { name: "Masterful", description: "Reduce the Cooldown of Fire Spit by 0.5s for each enemy hit by it.", category: "Fire Spit", iconUrl: "/images/cards/Card_Masterful.png" },
+    { name: "Propel", description: "Restore 10% of your maximum Booster fuel after using Thrust.", category: "Thrust", iconUrl: "/images/cards/Card_Propel.png" },
+    { name: "Rain of Fire", description: "Consume 15% less Booster fuel for 5s after using Thrust.", category: "Thrust", iconUrl: "/images/cards/Card_Rain_of_Fire.png" },
+    { name: "Spitfire", description: "Reduce the Cooldown of Salvo by 0.25s each time Salvo hits an enemy with its rockets.", category: "Salvo", iconUrl: "/images/cards/Card_Spitfire.png" },
+    { name: "Survival", description: "Reduce the Cooldown of Thrust by 100% after dropping below 10% Health.", category: "Thrust", iconUrl: "/images/cards/Card_Survival.png" },
+    { name: "Thrill of the Hunt", description: "Reduce the Cooldown of Thrust by 13% after getting an Elimination.", category: "Thrust", iconUrl: "/images/cards/Card_Thrill_of_the_Hunt.png" },
+  ],
+};
+
 export const DREDGE_DATA: ChampionData = {
   name: "Dredge",
   roles: ["Damage"],
@@ -4150,6 +4224,7 @@ export const CHAMPION_DATA: Record<string, ChampionData> = {
   cassie: CASSIE_DATA,
   caspian: CASPIAN_DATA,
   dredge: DREDGE_DATA,
+  drogoz: DROGOZ_DATA,
   imani: IMANI_DATA,
   kinessa: KINESSA_DATA,
   lian: LIAN_DATA,
