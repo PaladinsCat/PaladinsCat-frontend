@@ -1,12 +1,32 @@
+"use client";
+
 /**
  * Footer component — full footer on every page
  * Pattern source: Paladins.guru (footer on every page with links, social, copyright)
  * Structure: 3 columns (Links | Social | Copyright) on desktop, stacked on mobile
  * Hi-Rez Studios data attribution required per Paladins.guru footer pattern
  */
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { fetchSiteVersion } from "@/lib/api-client";
 
 export default function Footer() {
+  const [siteVersion, setSiteVersion] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetchSiteVersion().then((version) => {
+      if (!cancelled && version?.version) {
+        setSiteVersion(version.version);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     // Footer: sticky bottom layout, secondary bg, top border separation
     <footer className="bg-pc-bg-secondary border-t border-pc-border mt-auto">
@@ -68,9 +88,11 @@ export default function Footer() {
         </div>
 
         {/* Version */}
-        <div className="mt-6 pt-4 border-t border-pc-border/50 text-center">
-          <span className="text-pc-text-muted text-[10px]">v0.1.0-alpha</span>
-        </div>
+        {siteVersion && (
+          <div className="mt-6 pt-4 border-t border-pc-border/50 text-center">
+            <span className="text-pc-text-muted text-[10px]">{siteVersion}</span>
+          </div>
+        )}
       </div>
     </footer>
   );

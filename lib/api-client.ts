@@ -502,6 +502,12 @@ export interface NotificationInput {
   message: string;
 }
 
+export interface SiteVersion {
+  id: number;
+  timestamp: string;
+  version: string;
+}
+
 export interface TierStat {
   tier: string;
   tierSort: number;
@@ -670,6 +676,21 @@ export async function deleteAdminNotification(token: string, id: number): Promis
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` },
   });
+}
+
+// ── Site Metadata ──
+
+export async function fetchSiteVersion(): Promise<SiteVersion | null> {
+  try {
+    const raw = await fetchJson<any>(`/meta/version`);
+    return {
+      id: Number(raw.id ?? 0),
+      timestamp: raw.timestamp ?? "",
+      version: String(raw.version ?? ""),
+    };
+  } catch {
+    return null;
+  }
 }
 
 // ── Champions ──

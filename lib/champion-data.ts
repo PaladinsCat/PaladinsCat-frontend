@@ -38,7 +38,6 @@ export interface ChampionLoadout {
 }
 
 export interface ChampionData {
-  bannerUrl?: string;
   name: string;
   roles: string[];
   stats: ChampionStats;
@@ -50,7 +49,6 @@ export interface ChampionData {
 
 export const ANDROXUS_DATA: ChampionData = {
   name: "Androxus",
-  bannerUrl: "/images/champions/Banner_Androxus.png",
   roles: ["Flank"],
   stats: {
     health: "2100",
@@ -123,7 +121,6 @@ export const ANDROXUS_DATA: ChampionData = {
 
 export const ASH_DATA: ChampionData = {
   name: "Ash",
-  bannerUrl: "/images/champions/Banner_Ash.png",
   roles: ["Frontline"],
   stats: {
     health: "4500",
@@ -198,7 +195,6 @@ export const ASH_DATA: ChampionData = {
 
 export const ATLAS_DATA: ChampionData = {
   name: "Atlas",
-  bannerUrl: "/images/champions/Banner_Atlas.png",
   roles: ["Frontline"],
   stats: {
     health: "4000",
@@ -270,7 +266,6 @@ export const ATLAS_DATA: ChampionData = {
 
 export const AZAAN_DATA: ChampionData = {
   name: "Azaan",
-  bannerUrl: "/images/champions/Banner_Azaan.png",
   roles: ["Frontline"],
   stats: {
     health: "4500",
@@ -345,7 +340,6 @@ export const AZAAN_DATA: ChampionData = {
 
 export const BARIK_DATA: ChampionData = {
   name: "Barik",
-  bannerUrl: "/images/champions/Banner_Barik.png",
   roles: ["Frontline"],
   stats: {
     health: "3400",
@@ -420,7 +414,6 @@ export const BARIK_DATA: ChampionData = {
 
 export const FERNANDO_DATA: ChampionData = {
   name: "Fernando",
-  bannerUrl: "/images/champions/Banner_Fernando.png",
   roles: ["Frontline"],
   stats: {
     health: "4600",
@@ -495,7 +488,6 @@ export const FERNANDO_DATA: ChampionData = {
 
 export const INARA_DATA: ChampionData = {
   name: "Inara",
-  bannerUrl: "/images/champions/Banner_Inara.png",
   roles: ["Frontline"],
   stats: {
     health: "4700",
@@ -570,7 +562,6 @@ export const INARA_DATA: ChampionData = {
 
 export const KHAN_DATA: ChampionData = {
   name: "Khan",
-  bannerUrl: "/images/champions/Banner_Khan.png",
   roles: ["Frontline"],
   stats: {
     health: "4000",
@@ -642,7 +633,6 @@ export const KHAN_DATA: ChampionData = {
 
 export const MAKOA_DATA: ChampionData = {
   name: "Makoa",
-  bannerUrl: "/images/champions/Banner_Makoa.png",
   roles: ["Frontline"],
   stats: {
     health: "4500",
@@ -717,7 +707,6 @@ export const MAKOA_DATA: ChampionData = {
 
 export const NYX_DATA: ChampionData = {
   name: "Nyx",
-  bannerUrl: "/images/champions/Banner_Nyx.png",
   roles: ["Frontline"],
   stats: {
     health: "4700",
@@ -792,7 +781,6 @@ export const NYX_DATA: ChampionData = {
 
 export const RAUM_DATA: ChampionData = {
   name: "Raum",
-  bannerUrl: "/images/champions/Banner_Raum.png",
   roles: ["Frontline"],
   stats: {
     health: "4500",
@@ -1083,7 +1071,6 @@ export const TORVALD_DATA: ChampionData = {
 
 export const CASSIE_DATA: ChampionData = {
   name: "Cassie",
-  bannerUrl: "/images/champions/Banner_Cassie.png",
   roles: ["Damage"],
   stats: {
     health: "2200",
@@ -1155,7 +1142,6 @@ export const CASSIE_DATA: ChampionData = {
 
 export const DROGOZ_DATA: ChampionData = {
   name: "Drogoz",
-  bannerUrl: "/images/champions/Banner_Drogoz.png",
   roles: ["Damage"],
   stats: {
     health: "2200",
@@ -1230,7 +1216,6 @@ export const DROGOZ_DATA: ChampionData = {
 
 export const DREDGE_DATA: ChampionData = {
   name: "Dredge",
-  bannerUrl: "/images/champions/Banner_Dredge.png",
   roles: ["Damage"],
   stats: {
     health: "2200",
@@ -1302,7 +1287,6 @@ export const DREDGE_DATA: ChampionData = {
 
 export const BETTY_LA_BOMBA_DATA: ChampionData = {
   name: "Betty La Bomba",
-  bannerUrl: "/images/champions/Banner_Betty_la_Bomba.png",
   roles: ["Damage"],
   stats: {
     health: "2200",
@@ -1378,7 +1362,6 @@ export const BETTY_LA_BOMBA_DATA: ChampionData = {
 
 export const BOMB_KING_DATA: ChampionData = {
   name: "Bomb King",
-  bannerUrl: "/images/champions/Banner_Bomb_King.png",
   roles: ["Damage"],
   stats: {
     health: "2200",
@@ -1592,7 +1575,6 @@ export const KINESSA_DATA: ChampionData = {
 
 export const LIAN_DATA: ChampionData = {
   name: "Lian",
-  bannerUrl: "/images/champions/Banner_Lian.png",
   roles: ["Damage"],
   stats: {
     health: "2100",
@@ -1668,7 +1650,6 @@ export const LIAN_DATA: ChampionData = {
 
 export const OCTAVIA_DATA: ChampionData = {
   name: "Octavia",
-  bannerUrl: "/images/champions/Banner_Octavia.png",
   roles: ["Damage"],
   stats: {
     health: "2200",
@@ -2334,7 +2315,6 @@ export const WILLO_DATA: ChampionData = {
 
 export const EVIE_DATA: ChampionData = {
   name: "Evie",
-  bannerUrl: "/images/champions/Banner_Evie.png",
   roles: ["Flank"],
   stats: {
     health: "1800",
@@ -2406,7 +2386,6 @@ export const EVIE_DATA: ChampionData = {
 
 export const LEX_DATA: ChampionData = {
   name: "Lex",
-  bannerUrl: "/images/champions/Banner_Lex.png",
   roles: ["Flank"],
   stats: {
     health: "2200",
@@ -2480,7 +2459,6 @@ export const LEX_DATA: ChampionData = {
 
 export const KOGA_DATA: ChampionData = {
   name: "Koga",
-  bannerUrl: "/images/champions/Banner_Koga.png",
   roles: ["Flank"],
   stats: {
     health: "2000",
@@ -2564,7 +2542,6 @@ export const KOGA_DATA: ChampionData = {
 
 export const KASUMI_DATA: ChampionData = {
   name: "Kasumi",
-  bannerUrl: "/images/champions/Banner_Kasumi.png",
   roles: ["Flank"],
   stats: {
     health: "2200",
@@ -2639,7 +2616,6 @@ export const KASUMI_DATA: ChampionData = {
 
 export const CASPIAN_DATA: ChampionData = {
   name: "Caspian",
-  bannerUrl: "/images/champions/Banner_Caspian.png",
   roles: ["Flank"],
   stats: {
     health: "2100",
@@ -2714,7 +2690,6 @@ export const CASPIAN_DATA: ChampionData = {
 
 export const BUCK_DATA: ChampionData = {
   name: "Buck",
-  bannerUrl: "/images/champions/Banner_Buck.png",
   roles: ["Flank"],
   stats: {
     health: "2300",
@@ -2786,7 +2761,6 @@ export const BUCK_DATA: ChampionData = {
 
 export const MAEVE_DATA: ChampionData = {
   name: "Maeve",
-  bannerUrl: "/images/champions/Banner_Maeve.png",
   roles: ["Flank"],
   stats: {
     health: "1900",
@@ -3220,7 +3194,6 @@ export const VORA_DATA: ChampionData = {
 
 export const ZHIN_DATA: ChampionData = {
   name: "Zhin",
-  bannerUrl: "/images/champions/Banner_Zhin.png",
   roles: ["Flank"],
   stats: {
     health: "2000",
@@ -3295,7 +3268,6 @@ export const ZHIN_DATA: ChampionData = {
 
 export const CORVUS_DATA: ChampionData = {
   name: "Corvus",
-  bannerUrl: "/images/champions/Banner_Corvus.png",
   roles: ["Support"],
   stats: {
     health: "2200",
@@ -3367,7 +3339,6 @@ export const CORVUS_DATA: ChampionData = {
 
 export const FURIA_DATA: ChampionData = {
   name: "Furia",
-  bannerUrl: "/images/champions/Banner_Furia.png",
   roles: ["Support"],
   stats: {
     health: "2200",
@@ -3441,7 +3412,6 @@ export const FURIA_DATA: ChampionData = {
 
 export const GROHK_DATA: ChampionData = {
   name: "Grohk",
-  bannerUrl: "/images/champions/Banner_Grohk.png",
   roles: ["Support"],
   stats: {
     health: "2200",
@@ -3584,7 +3554,6 @@ export const GROVER_DATA: ChampionData = {
 
 export const IO_DATA: ChampionData = {
   name: "Io",
-  bannerUrl: "/images/champions/Banner_Io.png",
   roles: ["Support"],
   stats: {
     health: "2200",
@@ -3655,7 +3624,6 @@ export const IO_DATA: ChampionData = {
 
 export const JENOS_DATA: ChampionData = {
   name: "Jenos",
-  bannerUrl: "/images/champions/Banner_Jenos.png",
   roles: ["Support"],
   stats: {
     health: "2200",
@@ -3730,7 +3698,6 @@ export const JENOS_DATA: ChampionData = {
 
 export const LILLITH_DATA: ChampionData = {
   name: "Lillith",
-  bannerUrl: "/images/champions/Banner_Lillith.png",
   roles: ["Support"],
   stats: {
     health: "500",
@@ -3805,7 +3772,6 @@ export const LILLITH_DATA: ChampionData = {
 
 export const MAL_DAMBA_DATA: ChampionData = {
   name: "Mal'Damba",
-  bannerUrl: "/images/champions/Banner_Mal'Damba.png",
   roles: ["Support"],
   stats: {
     health: "2300",
@@ -3878,7 +3844,6 @@ export const MAL_DAMBA_DATA: ChampionData = {
 
 export const MOJI_DATA: ChampionData = {
   name: "Moji",
-  bannerUrl: "/images/champions/Banner_Moji.png",
   roles: ["Support"],
   stats: {
     health: "2400",
@@ -4087,7 +4052,6 @@ export const SERIS_DATA: ChampionData = {
 
 export const PIP_DATA: ChampionData = {
   name: "Pip",
-  bannerUrl: "/images/champions/Banner_Pip.png",
   roles: ["Support"],
   stats: {
     health: "2200",
@@ -4230,7 +4194,6 @@ export const YAGORATH_DATA: ChampionData = {
 
 export const SAATI_DATA: ChampionData = {
   name: "Saati",
-  bannerUrl: "/images/champions/Banner_Saati.png",
   roles: ["Damage"],
   stats: {
     health: "2100",
@@ -4306,7 +4269,6 @@ export const SAATI_DATA: ChampionData = {
 
 export const YING_DATA: ChampionData = {
   name: "Ying",
-  bannerUrl: "/images/champions/Banner_Ying.png",
   roles: ["Support"],
   stats: {
     health: "2200",
