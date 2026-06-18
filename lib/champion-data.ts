@@ -3771,36 +3771,37 @@ export const MAL_DAMBA_DATA: ChampionData = {
   stats: {
     health: "2300",
     speed: "365",
-    speedUnits: "~22 units/s",
+    speedUnits: "~22.81 units/s",
     range: "500",
   },
   skills: [
     {
       name: "Spitting Cobra",
       key: "LMB",
-      iconUrl: "/images/skills/Ability_Spitting_Cobra.png",
-      description: "A snake-themed weapon that fires projectiles."
+      iconUrl: "/images/skills/WeaponAttack_Mal'Damba_Icon.png",
+      damage: "425 /0.55s - 200",
+      description: "Fire a glob of venom from your cobra every 0.55s that deals 425 damage. Reloading tosses your cobra for 200 damage and a deadly Stun effect."
     },
     {
       name: "Mending Spirits",
       key: "RMB",
       iconUrl: "/images/skills/Ability_Mending_Spirits.png",
-      damage: "85",
-      cooldown: "2s",
+      damage: "1594 over 3s",
+      cooldown: "10s",
       description: "Channel the spirits to enchant an ally at your crosshair location, restoring 85 health every 0.16s for 3s. The Cooldown of this ability is reduced by 1.25s if you miss."
     },
     {
       name: "Gourd",
       key: "Q",
       iconUrl: "/images/skills/Ability_Gourd.png",
-      cooldown: "10s",
+      cooldown: "8s",
+      damage: "65 /0.2s  55 /0.2s",
       description: "Toss a potent alchemic gourd that explodes on the ground, dealing 55 damage every 0.2s to enemies and healing allies for 65 every 0.2s."
     },
     {
       name: "Slither",
       key: "F",
       iconUrl: "/images/skills/Ability_Slither.png",
-      cooldown: "8s",
       description: "Quickly slither forward, becoming Ethereal for the duration."
     },
     {
@@ -3808,31 +3809,31 @@ export const MAL_DAMBA_DATA: ChampionData = {
       key: "E",
       iconUrl: "/images/skills/Ability_Dread_Serpent.png",
       cooldown: "Ultimate",
-      description: "Summon a massive serpent that charges forward."
+      description: "Fire a dark vessel that explodes when it lands, causing all enemies close enough to flee in Fear at its sight."
     },
   ],
   talents: [
     { name: "Spirit's Chosen", description: "Mending Spirits heals an additional 350 Health instantly.", category: "Mending Spirits", iconUrl: "/images/champions/Talent Spirits Chosen MalDamba.png" },
     { name: "Ripened Gourd", description: "Your Gourd deals 40% less damage to enemies, but it Heals for twice as much.", category: "Gourd", iconUrl: "/images/champions/Talent Ripened Gourd MalDamba.png" },
-    { name: "Wekono's Wrath", description: "Your Snake Toss projectile travels 60% faster and deals an additional 500 damage.", category: "Dread Serpent", iconUrl: "/images/champions/Talent Wekono's Wrath MalDamba.png" },
+    { name: "Wekono's Wrath", description: "Your Snake Toss projectile travels 60% faster and deals an additional 500 damage.", category: "Spitting Cobra", iconUrl: "/images/champions/Talent Wekono's Wrath MalDamba.png" },
   ],
   loadouts: [
-    { name: "Eerie Presence", description: "Increase the Healing of Mending Spirits by 1%.", category: "Mending Spirits", iconUrl: "/images/cards/Card_Eerie_Presence.png" },
-    { name: "Feed the Spirits", description: "Reduce the damage of your weapon by 10%.", category: "", iconUrl: "/images/cards/Card_Feed_the_Spirits.png" },
+    { name: "Eerie Presence", description: "Generate 0.25% Ultimate charge every 1s for 1s after hitting an ally with Mending Spirits.", category: "Mending Spirits", iconUrl: "/images/cards/Card_Eerie_Presence.png" },
+    { name: "Feed the Spirits", description: "Reduce your active Cooldowns by 10% after getting an Elimination.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Feed_the_Spirits.png" },
     { name: "Fleeting", description: "Reduce the Cooldown of Slither by 0.6s.", category: "Slither", iconUrl: "/images/cards/Card_Fleeting.png" },
-    { name: "Incorporeal", description: "Increase your maximum Health by 50.", category: "", iconUrl: "/images/cards/Card_Incorporeal.png" },
-    { name: "Lighter Gourd", description: "Increase the radius of Gourd by 10%.", category: "Gourd", iconUrl: "/images/cards/Card_Lighter_Gourd.png" },
-    { name: "Liminal Passage", description: "Increase the Movement Speed bonus of Slither by 10%.", category: "Slither", iconUrl: "/images/cards/Card_Liminal_Passage.png" },
-    { name: "Many Gourds", description: "Reduce the Cooldown of Gourd by 0.8s.", category: "Gourd", iconUrl: "/images/cards/Card_Many_Gourds.png" },
-    { name: "Otherworldly", description: "Increase the distance of Slither by 75.", category: "Slither", iconUrl: "/images/cards/Card_Otherworldly.png" },
-    { name: "Possession", description: "Reduce the damage enemies take from Mending Spirits by 4%.", category: "Mending Spirits", iconUrl: "/images/cards/Card_Possession.png" },
-    { name: "Pungent Gourd", description: "Increase the damage of Gourd by 8%.", category: "Gourd", iconUrl: "/images/cards/Card_Pungent_Gourd.png" },
-    { name: "Ritual Magic", description: "Increase your maximum Ammo by 4.", category: "Mending Spirits", iconUrl: "/images/cards/Card_Ritual_Magic.png" },
-    { name: "Snake Pit", description: "Increase your weapon damage by 4%.", category: "", iconUrl: "/images/cards/Card_Snake_Pit.png" },
-    { name: "Spirit's Touch", description: "Increase the distance of Slither by 8%.", category: "Slither", iconUrl: "/images/cards/Card_Spirits_Touch.png" },
-    { name: "Sustenance", description: "Increase your maximum Health by 8%.", category: "", iconUrl: "/images/cards/Card_Sustenance.png" },
-    { name: "Swift Spirits", description: "Increase the Healing of Mending Spirits by 5%.", category: "Mending Spirits", iconUrl: "/images/cards/Card_Swift_Spirits.png" },
-    { name: "Venomous Gourd", description: "Increase the damage of Gourd by 8%.", category: "Gourd", iconUrl: "/images/cards/Card_Venomous_Gourd.png" },
+    { name: "Incorporeal", description: "Increase your maximum Health by 50.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Incorporeal.png" },
+    { name: "Lighter Gourd", description: "Increase the Projectile Speed of Gourd by 10%.", category: "Gourd", iconUrl: "/images/cards/Card_Lighter_Gourd.png" },
+    { name: "Liminal Passage", description: "Increase the travel distance of Slither by 10%.", category: "Slither", iconUrl: "/images/cards/Card_Liminal_Passage.png" },
+    { name: "Many Gourds", description: "Reduce the Cooldown on Gourd by 0.8s.", category: "Gourd", iconUrl: "/images/cards/Card_Many_Gourds.png" },
+    { name: "Otherworldly", description: "Gain a 75-Health Shield for 3s after Slither ends.", category: "Slither", iconUrl: "/images/cards/Card_Otherworldly.png" },
+    { name: "Possession", description: "Reduce your damage taken by 4% for 4s after hitting an ally with Mending Spirits.", category: "Mending Spirits", iconUrl: "/images/cards/Card_Possession.png" },
+    { name: "Pungent Gourd", description: "Increase your Allies' and your Movement Speed by 8% while in your Gourd.", category: "Gourd", iconUrl: "/images/cards/Card_Pungent_Gourd.png" },
+    { name: "Ritual Magic", description: "Heal for 4 every .2s for 5s while Healing an ally with Mending Spirits.", category: "Mending Spirits", iconUrl: "/images/cards/Card_Ritual_Magic.png" },
+    { name: "Snake Pit", description: "Increase your Movement Speed by 4%.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Snake_Pit.png" },
+    { name: "Spirit's Touch", description: "Increase your movement speed by 8% for 3 seconds after using Slither.", category: "Slither", iconUrl: "/images/cards/Card_Spirits_Touch.png" },
+    { name: "Sustenance", description: "Increase your Healing received by 8% while at or below 50% Health.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Sustenance.png" },
+    { name: "Swift Spirits", description: "Increase the Movement Speed of allies hit by Mending Spirits by 5% for 3s.", category: "Mending Spirits", iconUrl: "/images/cards/Card_Swift_Spirits.png" },
+    { name: "Venomous Gourd", description: "Standing in your Gourd grants yourself and allies 8% Lifesteal.", category: "Gourd", iconUrl: "/images/cards/Card_Venomous_Gourd.png" },
   ],
 };
 
