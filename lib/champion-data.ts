@@ -3672,6 +3672,76 @@ export const REI_DATA: ChampionData = {
   ],
 };
 
+export const SERIS_DATA: ChampionData = {
+  name: "Seris",
+  roles: ["Support"],
+  stats: {
+    health: "2200",
+    speed: "365",
+    speedUnits: "~22 units/s",
+    range: "300",
+  },
+  skills: [
+    {
+      name: "Soul Orb",
+      key: "LMB",
+      iconUrl: "/images/skills/Ability_Soul_Orb.png",
+      description: "Fire magical projectiles every 0.3s that pierce and apply a Soul Orb charge to each enemy hit, dealing 210 damage."
+    },
+    {
+      name: "Restore Soul",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_Restore_Soul.png",
+      cooldown: "1.5s",
+      description: "Target an ally, restoring 1650 health over 1.5s. Nearby allies are healed for 1000 over 1.5s."
+    },
+    {
+      name: "Rend Soul",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Rend_Soul.png",
+      cooldown: "7s",
+      description: "Detonate Soul Orb charges on enemies for additional damage. Each charge also restores Seris' health."
+    },
+    {
+      name: "Shadow Travel",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Shadow_Travel.png",
+      cooldown: "12s",
+      description: "Phase into another plane of existence, becoming Stealthed and Ethereal, immune to harmful effects."
+    },
+    {
+      name: "Convergence",
+      key: "E",
+      iconUrl: "/images/skills/Ability_Convergence.png",
+      cooldown: "Ultimate",
+      description: "Throw a soul orb forward that stuns and pulls enemies near it, making it a great tide-turner."
+    },
+  ],
+  talents: [
+    { name: "Soul Collector", description: "Increase the Health and Weapon DMG bonus of Soul Collector to 2% per charge.", category: "Soul Orb", iconUrl: "/images/champions/Talent Seris Soul Collector.png" },
+    { name: "Forsake", description: "Restore Soul now heals over .5s but its cooldown is increased to 2.5s.", category: "Restore Soul", iconUrl: "/images/champions/Talent Seris Forsake.png" },
+    { name: "Internal Torment", description: "", category: "Rend Soul", iconUrl: "/images/champions/Talent Seris Agony.png" },
+  ],
+  loadouts: [
+    { name: "Bane", description: "Increase the damage of Rend Soul by 1%.", category: "Rend Soul", iconUrl: "/images/cards/Card_Bane.png" },
+    { name: "Blood Pact", description: "Increase the Healing of Restore Soul by 105.", category: "Restore Soul", iconUrl: "/images/cards/Card_Blood_Pact.png" },
+    { name: "Dark Sight", description: "Increase the number of charges of Rend Soul by 1.", category: "Rend Soul", iconUrl: "/images/cards/Card_Dark_Sight.png" },
+    { name: "Dark Whisper", description: "Increase the duration of Shadow Travel by 8%.", category: "Shadow Travel", iconUrl: "/images/cards/Card_Dark_Whisper.png" },
+    { name: "Dusk Walker", description: "Reduce the Cooldown of Shadow Travel by 0.8s.", category: "Shadow Travel", iconUrl: "/images/cards/Card_Dusk_Walker.png" },
+    { name: "Ebon Dynamo", description: "Increase the number of charges of Soul Orb by 2.", category: "Soul Orb", iconUrl: "/images/cards/Card_Ebon_Dynamo.png" },
+    { name: "Essence Rip", description: "Increase the damage of Rend Soul by 8%.", category: "Rend Soul", iconUrl: "/images/cards/Card_Essence_Rip.png" },
+    { name: "Fade to Black", description: "Reduce the Cooldown of Restore Soul by 0.8s.", category: "Restore Soul", iconUrl: "/images/cards/Card_Fade_to_Black.png" },
+    { name: "Nether Siphon", description: "Increase the Movement Speed of Shadow Travel by 50.", category: "Shadow Travel", iconUrl: "/images/cards/Card_Nether_Siphon.png" },
+    { name: "Revenant", description: "Increase your maximum Health by 50.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Revenant.png" },
+    { name: "Sorceress", description: "Increase your maximum Health by 7%.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Sorceress.png" },
+    { name: "Soul Forge", description: "Increase the Healing of Restore Soul by 6%.", category: "Restore Soul", iconUrl: "/images/cards/Card_Soul_Forge.png" },
+    { name: "Spirit Leech", description: "Increase the number of charges of Restore Soul by 6.", category: "Restore Soul", iconUrl: "/images/cards/Card_Spirit_Leech.png" },
+    { name: "Umbral Gait", description: "Increase your Healing received by 8%.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Umbral_Gait.png" },
+    { name: "Veil", description: "Reduce the active duration of Shadow Travel by 10%.", category: "Shadow Travel", iconUrl: "/images/cards/Card_Veil.png" },
+    { name: "Wickedness", description: "Reduce the Cooldown of Rend Soul by 0.3s.", category: "Rend Soul", iconUrl: "/images/cards/Card_Wickedness.png" },
+  ],
+};
+
 export const PIP_DATA: ChampionData = {
   name: "Pip",
   roles: ["Support"],
@@ -3755,6 +3825,7 @@ export const CHAMPION_DATA: Record<string, ChampionData> = {
   moji: MOJI_DATA,
   pip: PIP_DATA,
   rei: REI_DATA,
+  seris: SERIS_DATA,
   skye: SKYE_DATA,
   androxus: ANDROXUS_DATA,
   buck: BUCK_DATA,

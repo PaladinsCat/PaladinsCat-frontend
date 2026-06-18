@@ -109,6 +109,87 @@ export async function fetchRankedLeaderboard(params?: { tier?: string; top?: num
   return fetchJson<RankedPlayer[]>(`/stats/ranked-leaderboard${query.toString() ? `?${query.toString()}` : ''}`);
 }
 
+export interface CheaterPlayer {
+  id: string;
+  name: string;
+  platform: string;
+  region: string;
+  kbmTier: string | null;
+  cheater: boolean;
+  susCount: number;
+  avgDpm: number | null;
+  avgHpm: number | null;
+  avgGpm: number | null;
+  avgMpm: number | null;
+  totalMatches: number;
+  winRate: number | null;
+}
+
+export async function fetchCheaterPlayers(params?: { cheater?: boolean; susOnly?: boolean; limit?: number }): Promise<CheaterPlayer[]> {
+  const query = new URLSearchParams();
+  if (params?.cheater) query.set('cheater', 'true');
+  if (params?.limit) query.set('limit', String(params.limit));
+  query.set('perPage', String(params?.limit || 100));
+  try {
+    const raw = await fetchJson<Array<{
+      id: string; name: string; platform: string; region: string;
+      kbm_tier?: string | null; cheater?: boolean; sus_count?: number;
+      avg_dpm?: number | null; avg_hpm?: number | null; avg_egpm?: number | null;
+      avg_mpm?: number | null; total_matches?: number; win_rate?: number | null;
+    }>>(`/players/search?${query.toString()}`);
+    return raw.map(r => ({
+      id: r.id, name: r.name, platform: r.platform, region: r.region,
+      kbmTier: r.kbm_tier ?? null, cheater: r.cheater ?? false,
+      susCount: r.sus_count ?? 0,
+      avgDpm: r.avg_dpm ?? null, avgHpm: r.avg_hpm ?? null,
+      avgGpm: r.avg_egpm ?? null, avgMpm: r.avg_mpm ?? null,
+      totalMatches: r.total_matches ?? 0, winRate: r.win_rate ?? null,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+export interface BaselineEntry {
+  role: string;
+  queueId: number;
+  avgGpm: number;
+  avgDpm: number;
+  avgHpm: number;
+  avgShpm: number;
+  avgMpm: number;
+  avgKda: number;
+  p10Gpm: number;
+  p90Gpm: number;
+  p10Dpm: number;
+  p90Dpm: number;
+  sampleSize: number;
+}
+
+export async function fetchBaselines(params?: { role?: string; queueId?: number }): Promise<BaselineEntry[]> {
+  const query = new URLSearchParams();
+  if (params?.role) query.set('role', params.role);
+  if (params?.queueId) query.set('queueId', String(params.queueId));
+  try {
+    const raw = await fetchJson<Array<{
+      role: string; queue_id: number;
+      avg_gpm: number; avg_dpm: number; avg_hpm: number;
+      avg_shpm: number; avg_mpm: number; avg_kda: number;
+      p10_gpm: number; p90_gpm: number; p10_dpm: number; p90_dpm: number;
+      sample_size: number;
+    }>>(`/stats/baselines${query.toString() ? `?${query.toString()}` : ''}`);
+    return raw.map(r => ({
+      role: r.role, queueId: r.queue_id,
+      avgGpm: r.avg_gpm, avgDpm: r.avg_dpm, avgHpm: r.avg_hpm,
+      avgShpm: r.avg_shpm, avgMpm: r.avg_mpm, avgKda: r.avg_kda,
+      p10Gpm: r.p10_gpm, p90Gpm: r.p90_gpm, p10Dpm: r.p10_dpm, p90Dpm: r.p90_dpm,
+      sampleSize: r.sample_size,
+    }));
+  } catch {
+    return [];
+  }
+}
+
 export interface PatchTrendEntry {
   trendWeek: string;
   patchVersion: string;
