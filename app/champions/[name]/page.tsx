@@ -130,6 +130,18 @@ export default function ChampionDetailPage() {
         </h1>
       </div>
 
+      {/* Banner Image */}
+      {championData?.bannerUrl && (
+        <div className="pc-card overflow-hidden">
+          <img
+            src={championData.bannerUrl}
+            alt={`${championData.name} Banner`}
+            className="w-full h-48 object-cover"
+            onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+          />
+        </div>
+      )}
+
       {/* Champion Profile Card */}
       <div className="pc-card">
         <div className="flex items-start gap-6">
