@@ -169,7 +169,7 @@ export default function StatsPage() {
           {[
             { key: "dpm", label: "Damage / Min", stroke: "#f87171", fill: "rgba(248,113,113,0.15)" },
             { key: "hpm", label: "Healing / Min", stroke: "#34d399", fill: "rgba(52,211,153,0.15)" },
-            { key: "gpm", label: "Gold / Min", stroke: "#facc15", fill: "rgba(250,204,21,0.15)" },
+            { key: "gpm", label: "Credits / Min", stroke: "#facc15", fill: "rgba(250,204,21,0.15)" },
             { key: "mpm", label: "Mitigation / Min", stroke: "#60a5fa", fill: "rgba(96,165,250,0.15)" },
             { key: "kda", label: "KDA Ratio", stroke: "#33b6b1", fill: "rgba(51,182,177,0.15)" },
           ].map(({ key, label, stroke, fill }) => {

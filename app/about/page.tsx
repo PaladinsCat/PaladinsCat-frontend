@@ -111,7 +111,7 @@ export default function AboutPage() {
             {
               icon: "📊",
               title: "Performance Benchmarks",
-              desc: "Compare your damage per minute, healing per minute, and gold per minute against the best players for your champion and class.",
+              desc: "Compare your damage per minute, healing per minute, and credits per minute against the best players for your champion and class.",
             },
           ].map((feature) => (
             <div key={feature.title} className="flex gap-4 p-4 bg-pc-bg-elevated border border-pc-border rounded-xl hover:border-pc-accent-mid transition-colors">

@@ -359,21 +359,36 @@ export default function MatchesPage() {
 function MatchRow({ match }: { match: MatchSearchResult }) {
   const duration = formatDuration(match.duration_seconds);
   const date = new Date(match.entry_datetime).toLocaleString();
+  const href = `/matches/${match.match_id}`;
 
   return (
-    <Link href={`/matches/${match.match_id}`} className="group">
-      <tr className="border-b border-pc-border/50 hover:bg-pc-bg-secondary transition-colors cursor-pointer">
-        <td className="px-4 py-3">
-          <span className="font-medium text-pc-accent group-hover:text-pc-accent-secondary transition-colors text-xs">
+    <tr className="group border-b border-pc-border/50 hover:bg-pc-bg-secondary transition-colors">
+      <td className="px-4 py-3">
+        <Link href={href} className="block font-medium text-pc-accent group-hover:text-pc-accent-secondary transition-colors text-xs">
             #{match.match_id}
-          </span>
-        </td>
-        <td className="px-4 py-3 text-pc-text-secondary text-xs">{match.map}</td>
-        <td className="px-4 py-3 text-pc-text-secondary text-xs">{match.region}</td>
-        <td className="px-4 py-3 text-pc-text-secondary text-xs">{duration}</td>
-        <td className="px-4 py-3 text-pc-text-secondary text-xs">{date}</td>
-      </tr>
-    </Link>
+        </Link>
+      </td>
+      <td className="px-4 py-3 text-pc-text-secondary text-xs">
+        <Link href={href} className="block">
+          {match.map}
+        </Link>
+      </td>
+      <td className="px-4 py-3 text-pc-text-secondary text-xs">
+        <Link href={href} className="block">
+          {match.region}
+        </Link>
+      </td>
+      <td className="px-4 py-3 text-pc-text-secondary text-xs">
+        <Link href={href} className="block">
+          {duration}
+        </Link>
+      </td>
+      <td className="px-4 py-3 text-pc-text-secondary text-xs">
+        <Link href={href} className="block">
+          {date}
+        </Link>
+      </td>
+    </tr>
   );
 }
 

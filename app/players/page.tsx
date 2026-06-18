@@ -25,7 +25,7 @@ const CLASS_ICONS: Record<string, string> = {
 };
 
 const STAT_LABELS: Record<string, string> = {
-  GPM: "Gold / Min",
+  GPM: "Credits / Min",
   HPM: "Healing / Min",
   DPM: "Damage / Min",
   Tanker: "Mitigation / Min",

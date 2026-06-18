@@ -10,7 +10,7 @@ const VALID_METRICS = ["gpm", "hpm", "dpm", "mpm"] as const;
 type Metric = (typeof VALID_METRICS)[number];
 
 const METRIC_LABELS: Record<Metric, string> = {
-  gpm: "Gold / Min",
+  gpm: "Credits / Min",
   hpm: "Healing / Min",
   dpm: "Damage / Min",
   mpm: "Mitigation / Min",
@@ -163,6 +163,12 @@ export default function MetricLeaderboardPage() {
       </div>
 
       <div className="flex items-center gap-3">
+        {m === "gpm" && (
+          <picture>
+            <source srcSet="/images/icons/Currency_Credits.avif" type="image/avif" />
+            <img src="/images/icons/Currency_Credits.png" alt="" className="w-8 h-8" />
+          </picture>
+        )}
         <h1 className="pc-heading pc-heading-lg">
           <span className={colorClass}>{METRIC_LABELS[m]}</span>{" "}
           <span className="text-pc-text">Leaderboard</span>

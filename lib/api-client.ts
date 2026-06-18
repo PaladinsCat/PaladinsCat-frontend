@@ -1051,22 +1051,22 @@ export async function fetchPlatforms(): Promise<Array<{
 }>> {
   const raw = await fetchJson<Array<{
     platform: string;
-    champion_id: number;
+    champion_id: number | string;
     champion_name: string;
-    total_matches: number;
-    win_rate: number;
-    avg_dpm: number;
-    avg_hpm: number;
+    total_matches: number | string;
+    win_rate: number | string;
+    avg_dpm: number | string;
+    avg_hpm: number | string;
   }>>(`/stats/platforms`);
 
   return raw.map((r) => ({
     platform: r.platform,
-    championId: r.champion_id,
+    championId: numberOrNull(r.champion_id) ?? 0,
     championName: r.champion_name,
-    totalMatches: r.total_matches,
-    winRate: r.win_rate,
-    avgDpm: r.avg_dpm,
-    avgHpm: r.avg_hpm,
+    totalMatches: numberOrNull(r.total_matches) ?? 0,
+    winRate: toDisplayPercent(r.win_rate) ?? 0,
+    avgDpm: numberOrNull(r.avg_dpm) ?? 0,
+    avgHpm: numberOrNull(r.avg_hpm) ?? 0,
   }));
 }
 
@@ -1086,45 +1086,48 @@ export async function fetchLoadouts(params?: {
   }
   const raw = await fetchJson<Array<{
     deck_hash: string;
-    champion_id: number;
+    champion_id: number | string;
     champion_name: string;
-    total_matches: number;
-    total_uses: number;
-    wins: number;
-    losses: number;
-    win_rate: number;
-    ranked_wins: number;
-    ranked_win_rate: number;
-    high_tier_wins: number;
-    high_tier_win_rate: number;
-    avg_kills: number;
-    avg_deaths: number;
-    avg_assists: number;
-    avg_dpm: number;
-    avg_hpm: number;
-    loadout_items: Array<{ item_name: string; usage_rate: number }> | null;
+    total_matches: number | string;
+    total_uses: number | string;
+    wins: number | string;
+    losses: number | string;
+    win_rate: number | string;
+    ranked_wins: number | string;
+    ranked_win_rate: number | string;
+    high_tier_wins: number | string;
+    high_tier_win_rate: number | string;
+    avg_kills: number | string;
+    avg_deaths: number | string;
+    avg_assists: number | string;
+    avg_dpm: number | string;
+    avg_hpm: number | string;
+    loadout_items: Array<{ item_name: string; usage_rate: number | string }> | null;
     last_refreshed: string;
   }>>(`/stats/loadouts${query.toString() ? `?${query.toString()}` : ''}`);
 
   return raw.map((r) => ({
     deckHash: r.deck_hash,
-    championId: r.champion_id,
+    championId: numberOrNull(r.champion_id) ?? 0,
     championName: r.champion_name,
-    totalMatches: r.total_matches,
-    totalUses: r.total_uses,
-    wins: r.wins,
-    losses: r.losses,
-    winRate: r.win_rate,
-    rankedWins: r.ranked_wins,
-    rankedWinRate: r.ranked_win_rate,
-    highTierWins: r.high_tier_wins,
-    highTierWinRate: r.high_tier_win_rate,
-    avgKills: r.avg_kills,
-    avgDeaths: r.avg_deaths,
-    avgAssists: r.avg_assists,
-    avgDpm: r.avg_dpm,
-    avgHpm: r.avg_hpm,
-    loadoutItems: r.loadout_items,
+    totalMatches: numberOrNull(r.total_matches) ?? 0,
+    totalUses: numberOrNull(r.total_uses) ?? 0,
+    wins: numberOrNull(r.wins) ?? 0,
+    losses: numberOrNull(r.losses) ?? 0,
+    winRate: toDisplayPercent(r.win_rate) ?? 0,
+    rankedWins: numberOrNull(r.ranked_wins) ?? 0,
+    rankedWinRate: toDisplayPercent(r.ranked_win_rate) ?? 0,
+    highTierWins: numberOrNull(r.high_tier_wins) ?? 0,
+    highTierWinRate: toDisplayPercent(r.high_tier_win_rate) ?? 0,
+    avgKills: numberOrNull(r.avg_kills) ?? 0,
+    avgDeaths: numberOrNull(r.avg_deaths) ?? 0,
+    avgAssists: numberOrNull(r.avg_assists) ?? 0,
+    avgDpm: numberOrNull(r.avg_dpm) ?? 0,
+    avgHpm: numberOrNull(r.avg_hpm) ?? 0,
+    loadoutItems: r.loadout_items?.map((item) => ({
+      item_name: item.item_name,
+      usage_rate: numberOrNull(item.usage_rate) ?? 0,
+    })) ?? null,
     lastRefreshed: r.last_refreshed,
   }));
 }
@@ -1216,16 +1219,16 @@ export async function fetchHourlyMatchCounts(params?: { date?: string; hour?: nu
 export async function fetchTiers(): Promise<TierStat[]> {
   const raw = await fetchJson<Array<{
     tier: string;
-    tier_sort: number;
-    total_plays: number;
-    avg_win_rate: number;
+    tier_sort: number | string;
+    total_plays: number | string;
+    avg_win_rate: number | string;
   }>>(`/stats/tiers`);
 
   return raw.map((r) => ({
     tier: r.tier,
-    tierSort: r.tier_sort,
-    totalPlays: r.total_plays,
-    avgWinRate: r.avg_win_rate,
+    tierSort: numberOrNull(r.tier_sort) ?? 0,
+    totalPlays: numberOrNull(r.total_plays) ?? 0,
+    avgWinRate: toDisplayPercent(r.avg_win_rate) ?? 0,
   }));
 }
 
@@ -1238,21 +1241,23 @@ export async function fetchTalents(): Promise<Array<{
   winRate: number;
 }>> {
   const raw = await fetchJson<Array<{
-    talent_id: number;
-    talent_name: string;
-    champion_id: number;
-    champion_name: string;
-    total_plays: number;
-    win_rate: number;
+    talent_id: number | string;
+    name?: string;
+    talent_name?: string;
+    champion_id?: number | string | null;
+    champion_name?: string | null;
+    total_plays?: number | string;
+    total_uses?: number | string;
+    win_rate: number | string;
   }>>(`/stats/talents`);
 
   return raw.map((r) => ({
-    talentId: r.talent_id,
-    talentName: r.talent_name,
-    championId: r.champion_id,
-    championName: r.champion_name,
-    totalPlays: r.total_plays,
-    winRate: r.win_rate,
+    talentId: numberOrNull(r.talent_id) ?? 0,
+    talentName: r.talent_name ?? r.name ?? `Talent ${r.talent_id}`,
+    championId: numberOrNull(r.champion_id) ?? 0,
+    championName: r.champion_name ?? 'Unknown',
+    totalPlays: numberOrNull(r.total_plays ?? r.total_uses) ?? 0,
+    winRate: toDisplayPercent(r.win_rate) ?? 0,
   }));
 }
 
