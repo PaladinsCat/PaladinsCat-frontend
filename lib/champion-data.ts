@@ -2477,6 +2477,80 @@ export const KASUMI_DATA: ChampionData = {
   ],
 };
 
+export const CASPIAN_DATA: ChampionData = {
+  name: "Caspian",
+  roles: ["Flank"],
+  stats: {
+    health: "2100",
+    speed: "385",
+    speedUnits: "~24.06 units/s",
+    range: "100",
+  },
+  skills: [
+    {
+      name: "Love",
+      key: "LMB",
+      iconUrl: "/images/skills/WeaponAttack_Caspian_Icon.png",
+      damage: "350",
+      description: "Fire every 0.75s dealing 350 damage per shot, effective up to 100 units. Hitting with Love grants a stack of Piercing Momentum, increasing War's fire rate.",
+    },
+    {
+      name: "War",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_War.png",
+      damage: "350/300",
+      description: "Unleash your rapier in a series of attacks, dealing up to 350 damage per hit. Hitting enemies with War gives you a stack of Sharp Momentum, increasing Love's fire rate.",
+    },
+    {
+      name: "Rogue's Tempo",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Rogue's_Tempo.png",
+      damage: "600",
+      cooldown: "9s",
+      description: "Fire a 600 damage Piercing projectile that Cripples for 1.25s.",
+    },
+    {
+      name: "Deadly Momentum",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Deadly_Momentum.png",
+      damage: "300/450",
+      cooldown: "11s",
+      description: "Twirl forwards to damage and Knockback enemies while taking less damage. Reactivate to whirl and deal damage around you to reduce the Cooldown of this ability.",
+    },
+    {
+      name: "Storm of Blades",
+      key: "E",
+      iconUrl: "/images/skills/Ability_Storm_of_Blades.png",
+      damage: "5×700",
+      cooldown: "Ultimate",
+      description: "Summon 5 ethereal swords around you and fill your ammo. Fire off one of these Piercing projectiles when you fire Love or War, dealing 700 damage.",
+    },
+  ],
+  talents: [
+    { name: "Measured Cadence", description: "Automatically fire a weaker copy of Rogue's Tempo for every 4 Ammo consumed. This copy deals 400 damage and reduces Rogue's Tempo's Cooldown by 15% on hit.", category: "Rogue's Tempo", iconUrl: "/images/champions/Talent Caspian Measured Cadence.png" },
+    { name: "Everywhere At Once", description: "The Cooldown of Deadly Momentum is reduced by 3s, and it gains 1 additional charge. Heal for 200 Health when you hit an enemy with Deadly Momentum.", category: "Deadly Momentum", iconUrl: "/images/champions/Talent Caspian Everywhere At Once.png" },
+    { name: "It's Got Some Heft", description: "War deals 50 more damage per hit and hits 20% farther, but its fire rate is decreased by 20%. War's attacks now deal an additional 20% damage to each enemy hit for each enemy hit in total with your attack.", category: "War", iconUrl: "/images/champions/Talent Caspian It's Got Some Heft.png" },
+  ],
+  loadouts: [
+    { name: "A Brief Respite", description: "Reduce the Cooldown of Deadly Momentum by 1s after hitting at least one enemy with Rogue's Tempo.", category: "Rogue's Tempo", iconUrl: "/images/cards/Card_A_Brief_Respite.png" },
+    { name: "Both Sides of the Coin", description: "Heal for 15 after hitting an enemy with War.", category: "War", iconUrl: "/images/cards/Card_Both_Sides_of_the_Coin.png" },
+    { name: "Casual Competency", description: "Hitting an enemy with Rogue's Tempo grants you 1 stack of Piercing Momentum and Sharp Momentum.", category: "Rogue's Tempo", iconUrl: "/images/cards/Card_Casual_Competency.png" },
+    { name: "Crown of Swords", description: "Increase your Reload Speed by 7% for 3s after hitting an enemy with War.", category: "War", iconUrl: "/images/cards/Card_Crown_of_Swords.png" },
+    { name: "Deadly Flourish", description: "Increase the travel speed of Deadly Momentum by 8%.", category: "Deadly Momentum", iconUrl: "/images/cards/Card_Deadly_Flourish.png" },
+    { name: "Flurry", description: "Reduce the Cooldown of Deadly Momentum by 0.7s for each enemy hit by it.", category: "Deadly Momentum", iconUrl: "/images/cards/Card_Flurry.png" },
+    { name: "He Shot First", description: "Extend the duration of Piercing Momentum stacks gained by 12%.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_He_Shot_First.png" },
+    { name: "In the Thick of It", description: "Generate 3 Ammo after hitting at least one enemy with Rogue's Tempo.", category: "Rogue's Tempo", iconUrl: "/images/cards/Card_In_the_Thick_of_It.png" },
+    { name: "Rogues of a Feather", description: "Heal for 15 after hitting an enemy with Love.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Rogues_of_a_Feather.png" },
+    { name: "Shady Dealings", description: "Gain 2 credits for each enemy Champion hit with Rogue's Tempo.", category: "Rogue's Tempo", iconUrl: "/images/cards/Card_Shady_Dealings.png" },
+    { name: "Shining Example", description: "Extend the duration of Sharp Momentum stacks gained by 12%.", category: "War", iconUrl: "/images/cards/Card_Shining_Example.png" },
+    { name: "Shoot and Dash", description: "Each stack of Piercing Momentum grants you a 40 Shield for 3s after it expires.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Shoot_and_Dash.png" },
+    { name: "Spin to Win", description: "Increase the size of the reactivation whirl of Deadly Momentum by 8%.", category: "Deadly Momentum", iconUrl: "/images/cards/Card_Spin_to_Win.png" },
+    { name: "Swift Strikes", description: "Increase the travel distance of Deadly Momentum by 5%.", category: "Deadly Momentum", iconUrl: "/images/cards/Card_Swift_Strikes.png" },
+    { name: "The Finer Things", description: "Increase your Movement Speed by 5% for 2s after hitting an enemy with Love.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_The_Finer_Things.png" },
+    { name: "The Rose's Thorns", description: "Each stack of Sharp Momentum Heals you for 30 after it expires.", category: "War", iconUrl: "/images/cards/Card_The_Rose's_Thorns.png" },
+  ],
+};
+
 export const BUCK_DATA: ChampionData = {
   name: "Buck",
   roles: ["Flank"],
@@ -4074,6 +4148,7 @@ export const CHAMPION_DATA: Record<string, ChampionData> = {
   azaan: AZAAN_DATA,
   barik: BARIK_DATA,
   cassie: CASSIE_DATA,
+  caspian: CASPIAN_DATA,
   dredge: DREDGE_DATA,
   imani: IMANI_DATA,
   kinessa: KINESSA_DATA,
