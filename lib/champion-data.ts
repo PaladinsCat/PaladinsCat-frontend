@@ -3188,14 +3188,14 @@ export const ZHIN_DATA: ChampionData = {
   stats: {
     health: "2000",
     speed: "380",
-    speedUnits: "~23 units/s",
+    speedUnits: "~23.75 units/s",
     range: "90",
   },
   skills: [
     {
       name: "Inferno Blade",
       key: "LMB",
-      iconUrl: "/images/skills/Ability_Inferno_Blade.png",
+      iconUrl: "/images/skills/WeaponAttack_Zhin_Icon.png",
       damage: "400 — 700",
       description: "Launch 3 burning oil projectiles through the air every 2s to scorch your foes to a crisp, dealing 400 damage with the first two swings and 700 damage with the final swing.",
     },
@@ -3226,8 +3226,9 @@ export const ZHIN_DATA: ChampionData = {
       name: "Spite",
       key: "E",
       iconUrl: "/images/skills/Ability_Spite.png",
+      damage: "2000",
       cooldown: "Ultimate",
-      description: "Wind up and rapidly charge forward. Making contact with an enemy will raise Zhin and the enemy into the air and stun the enemy.",
+      description: "Launch forward and Stun an enemy for a brief time while dealing 2000 damage over 1.5s in a series of vicious melee attacks.",
     },
   ],
   talents: [
@@ -3236,7 +3237,7 @@ export const ZHIN_DATA: ChampionData = {
     { name: "Smolder", description: "Heal for 15% of your maximum Health per second while using Billow.", category: "Billow", iconUrl: "/images/champions/Talent Zhin Smolder.png" },
   ],
     loadouts: [
-    { name: "Blade Dancer", description: "Increase the travel distance of Whirl by 8%.", category: "Whirl", iconUrl: "/images/cards/Card_Blade_Dancer.png" },
+    { name: "Blade Dancer", description: "Increase the travel distance of Whirl by 8%.", category: "Whirl", iconUrl: "/images/cards/Card_Blade_Dance.png" },
     { name: "Dragon Oil", description: "Increase your maximum Ammo by 1.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Dragon_Oil.png" },
     { name: "Embers", description: "Regenerate 2 Ammo every 0.5s for 0.5s after activating Billow.", category: "Billow", iconUrl: "/images/cards/Card_Embers.png" },
     { name: "Fan the Flames", description: "Reduce the Cooldown of Billow by 14% after getting an Elimination.", category: "Billow", iconUrl: "/images/cards/Card_Fan_the_Flames.png" },
