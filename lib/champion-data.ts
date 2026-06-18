@@ -2383,7 +2383,7 @@ export const LEX_DATA: ChampionData = {
   stats: {
     health: "2200",
     speed: "385",
-    speedUnits: "~24 units/s",
+    speedUnits: "~24.06 units/s",
     range: "60",
   },
   skills: [
@@ -2427,7 +2427,7 @@ export const LEX_DATA: ChampionData = {
   ],
   talents: [
     { name: "Discovery", description: "Increase the damage you deal to your Retribution target by 15%.", category: "Retribution", iconUrl: "/images/champions/Talent Lex Discovery.png" },
-    { name: "Heroism", description: "Increase the damage dealt by The Law and reduce the Cooldown of The Law.", category: "", iconUrl: "/images/champions/Talent Lex Heroism.png" },
+    { name: "Heroism", description: "Gain Immunity to Crowd Control during Combat Slide.", category: "Combat Slide", iconUrl: "/images/champions/Talent Lex Heroism.png" },
     { name: "Death Hastens", description: "Your weapon shots deal 680 damage every 0.7s, but your maximum Ammo count is reduced by 6.", category: "", iconUrl: "/images/champions/Talent Lex DeathHastens.png" },
   ],
     loadouts: [
