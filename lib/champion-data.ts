@@ -7,6 +7,7 @@ export interface ChampionSkill {
   key: string;
   iconUrl?: string;
   damage?: string;
+  healing?: string;
   cooldown?: string;
   description?: string;
 }
@@ -30,13 +31,13 @@ export interface ChampionLoadout {
   description: string;
   category: string; // Linked ability (Nether Step, Defiance, Reversal, or "")
   iconUrl?: string;
+  cooldown?: string;
   // DB fields (placeholder)
   pickRate?: number;
   winRate?: number;
 }
 
 export interface ChampionData {
-  bannerUrl?: string;
   bannerUrl?: string;
   name: string;
   roles: string[];
@@ -176,22 +177,22 @@ export const ASH_DATA: ChampionData = {
     { name: "Fortress Breaker", description: "Increase Siege Shield's maximum Health by 2750 and its size by 50%, but reduce its Movement Speed by 80%.", category: "Siege Shield" },
   ],
   loadouts: [
-    { name: "Battlement", description: "Increase the duration of Siege Shield by 0.6s.", category: "Siege Shield", iconUrl: "/images/cards/Card_Battlement.png" },
-    { name: "Brawl", description: "Heal for 150 over 2s for each enemy hit by Kinetic Burst.", category: "Kinetic Burst", iconUrl: "/images/cards/Card_Brawl.png" },
-    { name: "Castle Forged", description: "Reduce the Cooldown of Kinetic Burst by 0.6s.", category: "Kinetic Burst", iconUrl: "/images/cards/Card_Castle_Forged.png" },
-    { name: "Fervor", description: "Increase your maximum Ammo by 1.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Fervor.png" },
-    { name: "Furious Charge", description: "Increase the Knockback distance of Shoulder Bash by 8%.", category: "Shoulder Bash", iconUrl: "/images/cards/Card_Furious_Charge.png" },
-    { name: "Gate Crasher", description: "Reduce the Cooldown of Shoulder Bash by 0.8s.", category: "Shoulder Bash", iconUrl: "/images/cards/Card_Gate_Crasher.png" },
-    { name: "Heavy Metal", description: "Increase your maximum Health by 150.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Heavy_Metal.png" },
-    { name: "Indomitable", description: "Gain 10% Lifesteal.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Indomitable.png" },
-    { name: "Percussion", description: "Increase the Knockback distance of Kinetic Burst by 8%.", category: "Kinetic Burst", iconUrl: "/images/cards/Card_Percussion.png" },
-    { name: "Ramparts", description: "Reduce the Cooldown of Siege Shield by 0.8s.", category: "Siege Shield", iconUrl: "/images/cards/Card_Ramparts.png" },
-    { name: "Siege Engine", description: "Reduce the Cooldown of Siege Shield by 1s for each enemy hit with Kinetic Burst.", category: "Kinetic Burst", iconUrl: "/images/cards/Card_Siege_Engine.png" },
-    { name: "Thrive", description: "Heal for 200 after hitting an enemy with Shoulder Bash.", category: "Shoulder Bash", iconUrl: "/images/cards/Card_Thrive.png" },
-    { name: "Trebuchet", description: "Generate 2 Ammo after activating Siege Shield.", category: "Siege Shield", iconUrl: "/images/cards/Card_Trebuchet.png" },
-    { name: "Vanguard", description: "Reduce your damage taken by 8% for 2s after using Shoulder Bash.", category: "Shoulder Bash", iconUrl: "/images/cards/Card_Vanguard.png" },
-    { name: "War Machine", description: "Reduce your active Cooldowns by 10% after getting an Elimination.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_War_Machine.png" },
-    { name: "Watchtower", description: "Increase the Health of Siege Shield by 250.", category: "Siege Shield", iconUrl: "/images/cards/Card_Watchtower.png" },
+    { name: "Battlement", description: "Increase the duration of Siege Shield by {0.6|0.6}s.", category: "Siege Shield", iconUrl: "/images/cards/Card_Battlement.png" },
+    { name: "Brawl", description: "Heal for {150|150} over 2s for each enemy hit by Kinetic Burst.", category: "Kinetic Burst", iconUrl: "/images/cards/Card_Brawl.png" },
+    { name: "Castle Forged", description: "Reduce the Cooldown of Kinetic Burst by {0.6|0.6}s.", category: "Kinetic Burst", iconUrl: "/images/cards/Card_Castle_Forged.png" },
+    { name: "Fervor", description: "Increase your maximum Ammo by {1|1}.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Fervor.png" },
+    { name: "Furious Charge", description: "Increase the Knockback distance of Shoulder Bash by {8|8}%.", category: "Shoulder Bash", iconUrl: "/images/cards/Card_Furious_Charge.png" },
+    { name: "Gate Crasher", description: "Reduce the Cooldown of Shoulder Bash by {0.8|0.8}s.", category: "Shoulder Bash", iconUrl: "/images/cards/Card_Gate_Crasher.png" },
+    { name: "Heavy Metal", description: "Increase your maximum Health by {150|150}.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Heavy_Metal.png" },
+    { name: "Indomitable", description: "Gain {10|10}% Lifesteal.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Indomitable.png" },
+    { name: "Percussion", description: "Increase the Knockback distance of Kinetic Burst by {8|8}%.", category: "Kinetic Burst", iconUrl: "/images/cards/Card_Percussion.png" },
+    { name: "Ramparts", description: "Reduce the Cooldown of Siege Shield by {0.8|0.8}s.", category: "Siege Shield", iconUrl: "/images/cards/Card_Ramparts.png" },
+    { name: "Siege Engine", description: "Reduce the Cooldown of Siege Shield by {1|1}s for each enemy hit with Kinetic Burst.", category: "Kinetic Burst", iconUrl: "/images/cards/Card_Siege_Engine.png" },
+    { name: "Thrive", description: "Heal for {200|200} after hitting an enemy with Shoulder Bash.", category: "Shoulder Bash", iconUrl: "/images/cards/Card_Thrive.png" },
+    { name: "Trebuchet", description: "Generate {2|2} Ammo after activating Siege Shield.", category: "Siege Shield", iconUrl: "/images/cards/Card_Trebuchet.png" },
+    { name: "Vanguard", description: "Reduce your damage taken by {8|8}% for 2s after using Shoulder Bash.", category: "Shoulder Bash", iconUrl: "/images/cards/Card_Vanguard.png" },
+    { name: "War Machine", description: "Reduce your active Cooldowns by {10|10}% after getting an Elimination.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_War_Machine.png" },
+    { name: "Watchtower", description: "Increase the Health of Siege Shield by {250|250}.", category: "Siege Shield", iconUrl: "/images/cards/Card_Watchtower.png" },
   ],
 };
 
