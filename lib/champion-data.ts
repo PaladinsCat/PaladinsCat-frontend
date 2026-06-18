@@ -2456,7 +2456,7 @@ export const KOGA_DATA: ChampionData = {
   stats: {
     health: "2000",
     speed: "375",
-    speedUnits: "~23 units/s",
+    speedUnits: "~23.44 units/s",
     range: "75",
   },
   skills: [
