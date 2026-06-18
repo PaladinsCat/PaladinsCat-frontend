@@ -4052,14 +4052,14 @@ export const PIP_DATA: ChampionData = {
   stats: {
     health: "2200",
     speed: "350",
-    speedUnits: "~21 units/s",
+    speedUnits: "~21.88 units/s",
     range: "500",
   },
   skills: [
     {
       name: "Potion Launcher",
       key: "LMB",
-      iconUrl: "/images/skills/Ability_Potion_Launcher.png",
+      iconUrl: "/images/skills/WeaponAttack_Pip_Icon.png",
       description: "A custom-made launcher that fires volatile potions that explode in an area on impact, dealing 600 damage."
     },
     {
@@ -4067,7 +4067,7 @@ export const PIP_DATA: ChampionData = {
       key: "RMB",
       iconUrl: "/images/skills/Ability_Explosive_Flask.png",
       cooldown: "8s",
-      description: "Explodes in a large area, damaging and slowing enemies by half, allowing him to slow groups of enemies."
+      description: "A deadly concoction that bursts to deal 145 damage and Slows enemies in an area."
     },
     {
       name: "Healing Potion",
@@ -4088,11 +4088,11 @@ export const PIP_DATA: ChampionData = {
       key: "E",
       iconUrl: "/images/skills/Ability_Evil_Mojo.png",
       cooldown: "Ultimate",
-      description: "Fires a massive explosive that turns all enemies caught in its blast into tiny, helpless chickens with reduced health."
+      description: "Launch a mysterious flask that Polymorphs enemies and deals 200 damage, turning enemies caught in its blast into helpless chickens. Polymorph has a minimum duration of 2s."
     },
   ],
   talents: [
-    { name: "Mega Potion", description: "Healing Potion's Healing is increased by 1000 and now provides a stacking 200 Shield.", category: "Healing Potion", iconUrl: "/images/champions/Talent Pip Mega Potion.png" },
+    { name: "Mega Potion", description: "Healing Potion's Healing is increased by 1000 and now provides a Stacking 200 Shield.", category: "Healing Potion", iconUrl: "/images/champions/Talent Pip Mega Potion.png" },
     { name: "Catalyst", description: "Enemies hit with Explosive Flask take 40% increased damage from your weapon shots for 4s.", category: "Explosive Flask", iconUrl: "/images/champions/Talent Pip Catalyst.png" },
     { name: "Combat Medic", description: "Potion Launcher also Heals allies hit for 700 and your Potion Launcher fire rate is increased by 15%. You no longer take damage from your weapon shots.", category: "Potion Launcher", iconUrl: "/images/champions/Talent Pip Combat Medic.png" },
   ],
@@ -4102,7 +4102,7 @@ export const PIP_DATA: ChampionData = {
     { name: "Escape Artist", description: "Increase the duration of Weightless by 0.4s.", category: "Weightless", iconUrl: "/images/cards/Card_Escape_Artist.png" },
     { name: "From Above", description: "Reduces the Cooldown of Weightless by 0.6s.", category: "Weightless", iconUrl: "/images/cards/Card_From_Above.png" },
     { name: "Gift Giver", description: "Heal yourself for 20% of Healing Potion's effect if you hit an ally but not yourself.", category: "Healing Potion", iconUrl: "/images/cards/Card_Gift_Giver.png" },
-    { name: "Graviton", description: "Increase the duration of Explosive Flask's Slow by 0.3s.", category: "Explosive Flask", iconUrl: "/images/cards/Card_Graviton.png" },
+    { name: "Graviton", description: "Increase the duration of Explosive Flask's Slow by 0.25s.", category: "Explosive Flask", iconUrl: "/images/cards/Card_Graviton.png" },
     { name: "Medicinal Excellence", description: "Increase the radius of Healing Potion by 8%.", category: "Healing Potion", iconUrl: "/images/cards/Card_Medicinal_Excellence.png" },
     { name: "Moxie", description: "Increase your Healing received by 6% while at or below 50% Health.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Moxie.png" },
     { name: "Pep in the Step", description: "Allies hit by Healing Potion have their Movement Speed increased by 6% for 3s.", category: "Healing Potion", iconUrl: "/images/cards/Card_Disinfect.png" },
