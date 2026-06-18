@@ -3827,6 +3827,78 @@ export const PIP_DATA: ChampionData = {
   ],
 };
 
+export const YAGORATH_DATA: ChampionData = {
+  name: "Yagorath",
+  roles: ["Frontline"],
+  stats: {
+    health: "5750",
+    speed: "390",
+    speedUnits: "~24.38 units/s",
+    range: "105",
+  },
+  skills: [
+    {
+      name: "Caustic Spray / Trail of Acid",
+      key: "LMB",
+      iconUrl: "/images/skills/WeaponAttack_Yagorath_Icon.png",
+      damage: "38",
+      description: "Planted: Spray acid, dealing 38 damage every 0.1s and leaving behind pools of acid. Travel: Leave a series of acid pools behind as you roll. Each pool damages and Slows enemies.",
+    },
+    {
+      name: "Piercing Quills / Acceleration",
+      key: "RMB",
+      iconUrl: "/images/skills/Ability_Piercing_Quills.png",
+      damage: "200",
+      cooldown: "0.5/12s",
+      description: "Planted: Fire Piercing Quills that deal 200 damage and explode in a small area. Travel: Charge forward through enemies, dealing 500 damage and Knocking them back.",
+    },
+    {
+      name: "Hardening / Primal Vision",
+      key: "Q",
+      iconUrl: "/images/skills/Ability_Hardening.png",
+      damage: "300-1100",
+      cooldown: "15/11s",
+      description: "Planted: Reduce the damage you take for up to 4s and deal damage to nearby enemies based on ability duration. Travel: Pulse 5 times, briefly Revealing nearby enemies to allies.",
+    },
+    {
+      name: "Form Swap",
+      key: "F",
+      iconUrl: "/images/skills/Ability_Form_Swap.png",
+      description: "Swap between Planted and Travel forms, gaining access to new abilities.",
+    },
+    {
+      name: "Devour",
+      key: "E",
+      iconUrl: "/images/skills/Ability_Devour.png",
+      cooldown: "Ultimate",
+      description: "Target an enemy to pull in and devour them, gaining a new Health pool while doing so. If their team breaks your Health, they are released.",
+    },
+  ],
+  talents: [
+    { name: "Corrosive Acid", description: "Increase the damage done by Caustic Spray to 42, and your acid pools to 40. Allies within your acid pools have their Movement Speed increased by 20%.", category: "Caustic Spray" },
+    { name: "Sight Begets Strength", description: "Allied players within range of your Primal Vision gain a stackable 100-Health Shield and 15% increased Movement Speed for 5s each time you pulse.", category: "Primal Vision" },
+    { name: "Unnatural Persistence", description: "While in Hardening, increase your Healing received from others by 50%.", category: "Hardening" },
+  ],
+  loadouts: [
+    { name: "Ancient Wounds", description: "Generate 1.5% of your maximum acid after hitting an enemy with Piercing Quills.", category: "Piercing Quills", iconUrl: "/images/cards/Card_Ancient_Wounds.jpg" },
+    { name: "Collateral Damage", description: "Gain 10% Lifesteal with Caustic Spray for 3s after swapping into Planted Form.", category: "Form Swap", iconUrl: "/images/cards/Card_Collateral_Damage.jpg" },
+    { name: "Deadly Predator", description: "Increase your maximum acid capacity by 7%.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Deadly_Predator.png" },
+    { name: "Deadly Pursuit", description: "Increase your Movement Speed by 20% for 1s after swapping into Travel Form.", category: "Form Swap", iconUrl: "/images/cards/Card_Deadly_Pursuit.jpg" },
+    { name: "Dreadful Compact", description: "Reduce the Cooldown of Hardening by 0.25s after hitting an enemy with Piercing Quills.", category: "Piercing Quills", iconUrl: "/images/cards/Card_Dreadful_Compact.png" },
+    { name: "End Of An Era", description: "Increase the additional Damage Reduction benefit of Hardening by 20% but reduce its duration by 10%.", category: "Hardening", iconUrl: "/images/cards/Card_End_Of_An_Era.jpg" },
+    { name: "Extermination", description: "Reduce the duration and effectiveness of Crowd Control by 5%.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Extermination.png" },
+    { name: "Futile Efforts", description: "Increase the radius of Piercing Quills' detonation by 10%.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Futile_Efforts.jpg" },
+    { name: "Last Efforts", description: "Hitting an enemy with Piercing Quills grants 20% Lifesteal for 0.6s.", category: "Piercing Quills", iconUrl: "/images/cards/Card_Last_Efforts.png" },
+    { name: "Out Of Time", description: "Reduce the additional Damage Reduction given by Hardening by half. For 0.5s after using Hardening, gain its benefits.", category: "Hardening", iconUrl: "/images/cards/Card_Out_Of_Time.png" },
+    { name: "Raze and Burn", description: "Heal for 50 after hitting an enemy with Piercing Quills.", category: "Piercing Quills", iconUrl: "/images/cards/Card_Raze_and_Burn.jpg" },
+    { name: "Spreading Domain", description: "Heal for 100 if you do not cancel Hardening before it ends.", category: "Hardening", iconUrl: "/images/cards/Card_Spreading_Domain.png" },
+    { name: "The Great Worm", description: "Gain a 80-Health Shield for 2s after swapping into Travel Form.", category: "Form Swap", iconUrl: "/images/cards/Card_The_Great_Worm.png" },
+    { name: "Towering Presence", description: "Increase the Health of your Ultimate Health pool by 200.", category: "Armor / Weapon", iconUrl: "/images/cards/Card_Towering_Presence.jpg" },
+    { name: "Triumphant Return", description: "Reduce your acid consumption by 90% for 0.4s after swapping into Planted Form.", category: "Form Swap", iconUrl: "/images/cards/Card_Triumphant_Return.png" },
+    { name: "Violent Birth", description: "Reduce the Cooldown of Acceleration by 0.8s after activating Hardening.", category: "Hardening", iconUrl: "/images/cards/Card_Violent_Birth.jpg" },
+  ],
+};
+
 export const YING_DATA: ChampionData = {
   name: "Ying",
   roles: ["Support"],
@@ -3953,6 +4025,7 @@ export const CHAMPION_DATA: Record<string, ChampionData> = {
   vii: VII_DATA,
   vora: VORA_DATA,
   zhin: ZHIN_DATA,
+  yagorath: YAGORATH_DATA,
   ying: YING_DATA,
 };
 
