@@ -2312,7 +2312,7 @@ export const EVIE_DATA: ChampionData = {
   stats: {
     health: "1800",
     speed: "365",
-    speedUnits: "~22 units/s",
+    speedUnits: "~22.81 units/s",
     range: "300",
   },
   skills: [
@@ -2349,12 +2349,12 @@ export const EVIE_DATA: ChampionData = {
       key: "E",
       iconUrl: "/images/skills/Ability_Ice_Storm.png",
       cooldown: "Ultimate",
-      description: "Fire a massive ice storm that lasts 4 seconds, damages for 40 every .25s, slows, and Cripples targets inside.",
+      description: "Summon a massive ice storm that deals 40 damage every 0.25s, Slows, and Cripples enemies caught inside.",
     },
   ],
   talents: [
     { name: "Over the Moon", description: "Increase the damage you deal with your weapon shots by 25% for 3s after Soar ends.", category: "Soar", iconUrl: "/images/champions/Talent Evie OverTheMoon.png" },
-    { name: "Snow Globe", description: "Increase the size and duration of Ice Block.", category: "", iconUrl: "/images/champions/Talent Evie SnowGlobe.png" },
+    { name: "Snow Globe", description: "Ice Storm has its damage increased by 100% and its Ultimate charge decreased by 50%, but its duration is reduced to 3s and its Slow is reduced to 30%.", category: "", iconUrl: "/images/champions/Talent Evie SnowGlobe.png" },
     { name: "Wormhole", description: "Blink leaves behind a magical wormhole. Refire Blink within 4s of its use to return to the wormhole.", category: "Blink", iconUrl: "/images/champions/Talent Evie Wormhole.png" },
   ],
     loadouts: [
