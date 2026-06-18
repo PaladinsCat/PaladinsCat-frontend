@@ -1595,9 +1595,9 @@ export const SHA_LIN_DATA: ChampionData = {
     },
   ],
   talents: [
-    { name: "Desert Shadow", description: "Eliminations enter you into Stealth for 2s. Shots from Stealth deal 200 increased damage.", category: "Withdraw" },
-    { name: "Recurve", description: "Increase the rate at which your Longbow charges by 25%.", category: "Long Bow" },
-    { name: "Sand Trap", description: "Crippling Arrow now explodes in a 20-unit-radius area on contact, dealing up to 300 additional Area Damage to enemies hit, but its Cripple is reduced by 1s.", category: "Crippling Arrow" },
+    { name: "Desert Shadow", description: "Eliminations enter you into Stealth for 2s. Shots from Stealth deal 200 increased damage.", category: "Withdraw", iconUrl: "/images/champions/Talent ShaLin DesertShadow.png" },
+    { name: "Recurve", description: "Increase the rate at which your Longbow charges by 25%.", category: "Long Bow", iconUrl: "/images/champions/Talent ShaLin Recurve.png" },
+    { name: "Sand Trap", description: "Crippling Arrow now explodes in a 20-unit-radius area on contact, dealing up to 300 additional Area Damage to enemies hit, but its Cripple is reduced by 1s.", category: "Crippling Arrow", iconUrl: "/images/champions/Talent ShaLin SandTrap.png" },
   ],
   loadouts: [
     { name: "Bullseye", description: "Reduce your active Cooldowns by 10% when you get an Elimination.", category: "", iconUrl: "/images/cards/Card_Bullseye.png" },
