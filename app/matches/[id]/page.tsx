@@ -409,6 +409,12 @@ function PlayerRow({ player, fact }: { player: MatchPlayerDetail; fact?: MatchFa
 }
 
 function SnapshotsSection({ snapshots }: { snapshots: RatingSnapshot[] }) {
+  const formatRating = (value: number | null) => value == null ? "—" : value.toFixed(2);
+  const formatChange = (value: number | null) => {
+    if (value == null) return "—";
+    return `${value >= 0 ? "+" : ""}${value.toFixed(2)}`;
+  };
+
   return (
     <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-6">
       <h2 className="text-lg font-semibold text-pc-text mb-4">Rating Changes (Glicko-2)</h2>
@@ -428,13 +434,13 @@ function SnapshotsSection({ snapshots }: { snapshots: RatingSnapshot[] }) {
             {snapshots.map((s) => (
               <tr key={s.player_id} className="border-b border-pc-border/50 hover:bg-pc-bg-secondary transition-colors">
                 <td className="py-2 pr-4 font-medium text-pc-text">{s.player_name}</td>
-                <td className="py-2 pr-4 text-pc-text-secondary">{s.mu_before.toFixed(2)}</td>
-                <td className="py-2 pr-4 text-pc-text-secondary">{s.mu_after.toFixed(2)}</td>
-                <td className={`py-2 pr-4 font-semibold ${s.mu_change >= 0 ? "text-green-400" : "text-red-400"}`}>
-                  {s.mu_change >= 0 ? "+" : ""}{s.mu_change.toFixed(2)}
+                <td className="py-2 pr-4 text-pc-text-secondary">{formatRating(s.mu_before)}</td>
+                <td className="py-2 pr-4 text-pc-text-secondary">{formatRating(s.mu_after)}</td>
+                <td className={`py-2 pr-4 font-semibold ${s.mu_change == null ? "text-pc-text-secondary" : s.mu_change >= 0 ? "text-green-400" : "text-red-400"}`}>
+                  {formatChange(s.mu_change)}
                 </td>
-                <td className="py-2 pr-4 text-pc-text-secondary">{s.phi_before.toFixed(2)}</td>
-                <td className="py-2 text-pc-text-secondary">{s.phi_after.toFixed(2)}</td>
+                <td className="py-2 pr-4 text-pc-text-secondary">{formatRating(s.phi_before)}</td>
+                <td className="py-2 text-pc-text-secondary">{formatRating(s.phi_after)}</td>
               </tr>
             ))}
           </tbody>

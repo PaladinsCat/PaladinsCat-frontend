@@ -1913,11 +1913,11 @@ export interface RatingSnapshot {
   player_name: string;
   match_id: number;
   queue_id: number;
-  mu_before: number;
-  phi_before: number;
-  mu_after: number;
-  phi_after: number;
-  mu_change: number;
+  mu_before: number | null;
+  phi_before: number | null;
+  mu_after: number | null;
+  phi_after: number | null;
+  mu_change: number | null;
 }
 
 export interface MatchSearchResult {
@@ -1964,8 +1964,29 @@ export async function fetchMatchFact(matchId: number): Promise<MatchFact | null>
 }
 
 export async function fetchMatchSnapshots(matchId: number): Promise<RatingSnapshot[]> {
-  const raw = await fetchJson<RatingSnapshot[]>(`/ratings/snapshots/${matchId}`);
-  return raw;
+  const raw = await fetchJson<Array<{
+    player_id: number | string;
+    player_name: string | null;
+    match_id: number | string;
+    queue_id: number | string;
+    mu_before?: number | string | null;
+    phi_before?: number | string | null;
+    mu_after?: number | string | null;
+    phi_after?: number | string | null;
+    mu_change?: number | string | null;
+  }>>(`/ratings/snapshots/${matchId}`);
+
+  return raw.map((r) => ({
+    player_id: numberOrNull(r.player_id) ?? 0,
+    player_name: r.player_name ?? 'Unknown',
+    match_id: numberOrNull(r.match_id) ?? matchId,
+    queue_id: numberOrNull(r.queue_id) ?? 0,
+    mu_before: numberOrNull(r.mu_before),
+    phi_before: numberOrNull(r.phi_before),
+    mu_after: numberOrNull(r.mu_after),
+    phi_after: numberOrNull(r.phi_after),
+    mu_change: numberOrNull(r.mu_change),
+  }));
 }
 
 export async function fetchRecentMatches(limit?: number): Promise<MatchData[]> {

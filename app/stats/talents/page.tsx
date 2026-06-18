@@ -62,7 +62,7 @@ export default function TalentsPage() {
             </thead>
             <tbody>
               {filtered.slice(0, 20).map((t) => (
-                <tr key={t.talentId} className="border-t border-pc-border">
+                <tr key={`${t.championId}-${t.talentId}`} className="border-t border-pc-border">
                   <td className="px-4 py-2 text-pc-text">{t.championName}</td>
                   <td className="px-4 py-2 text-pc-text">{t.talentName}</td>
                   <td className="px-4 py-2 text-pc-text">{t.totalPlays}</td>
