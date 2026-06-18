@@ -1359,14 +1359,14 @@ export const BOMB_KING_DATA: ChampionData = {
   stats: {
     health: "2200",
     speed: "360",
-    speedUnits: "~22 units/s",
+    speedUnits: "~22.5 units/s",
     range: "500",
   },
   skills: [
     {
       name: "Sticky Bomb",
       key: "LMB",
-      iconUrl: "/images/skills/Ability_Sticky_Bomb.png",
+      iconUrl: "/images/skills/WeaponAttack_Bomb_King_Icon.png",
       description: "Throw out sticky bombs that stick to any surface, or your enemies, and can be detonated to deal damage.",
     },
     {
