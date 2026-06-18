@@ -1429,7 +1429,7 @@ export const IMANI_DATA: ChampionData = {
   stats: {
     health: "2200",
     speed: "350",
-    speedUnits: "~21 units/s",
+    speedUnits: "~21.88 units/s",
     range: "500",
   },
   skills: [
@@ -1459,7 +1459,6 @@ export const IMANI_DATA: ChampionData = {
       name: "FrostFire Glide",
       key: "F",
       iconUrl: "/images/skills/Ability_FrostFire_Glide.png",
-      cooldown: "12s",
       description: "Channel the elements to glide through the air.",
     },
     {
