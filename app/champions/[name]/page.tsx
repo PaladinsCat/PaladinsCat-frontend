@@ -7,6 +7,7 @@ import Image from "next/image";
 import { STATIC_CHAMPIONS } from "@/lib/mock-data";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import ScrambleText from "@/components/ScrambleText";
+import SmartImage from "@/components/SmartImage";
 import { championSlug } from "@/lib/utils";
 import {
   getChampionData,
@@ -15,6 +16,7 @@ import {
   type ChampionTalent,
   type ChampionLoadout,
 } from "@/lib/champion-data";
+import { fetchChampionLeaderboard, type ChampionLeaderboardEntry } from "@/lib/api-client";
 
 // Placeholder types for future DB integration
 interface ChampionStats {
@@ -35,13 +37,11 @@ interface LeaderboardEntry {
   rank: number;
   playerId: number;
   playerName: string;
-  avatarUrl: string | null;
   mu: number;
   phi: number;
   matchesPlayed: number;
   wins: number;
   losses: number;
-  winRate: number;
 }
 
 // Tier/trend types from existing API
@@ -84,7 +84,7 @@ export default function ChampionDetailPage() {
   useEffect(() => {
     if (!championData) return;
 
-    // TODO: Replace with real DB calls when ready
+    // Fetch real data from API
     Promise.all([
       Promise.resolve({
         avgMu: null,
@@ -99,7 +99,14 @@ export default function ChampionDetailPage() {
         avgDamage: null,
         avgGold: null,
       }),
-      Promise.resolve([]),
+      // Fetch champion ID from API, then leaderboard
+      fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3304"}/champions`)
+        .then((r) => r.json())
+        .then((champs: Array<{ id: number; name: string }>) => {
+          const match = champs.find((c) => c.name.toLowerCase() === championData!.name.toLowerCase());
+          return match ? fetchChampionLeaderboard(match.id, 25) : [];
+        })
+        .catch(() => [] as ChampionLeaderboardEntry[]),
       Promise.resolve([]),
       Promise.resolve([]),
     ])
@@ -130,101 +137,111 @@ export default function ChampionDetailPage() {
         </h1>
       </div>
 
-
-      {/* Champion Profile Card */}
-      <div className="pc-card">
-        <div className="flex items-start gap-6">
-          <img
-            src={getChampionIconSafe(championData?.name ?? mockChampion?.name ?? name)}
-            alt={championData?.name ?? mockChampion?.name ?? name}
-            className="w-24 h-24 rounded-xl border border-pc-border object-contain bg-pc-bg/50"
-          />
-          <div className="flex-1 space-y-3">
-            <div className="flex flex-wrap gap-2">
-              {(championData?.roles ?? mockChampion?.roles ?? []).map((role) => (
-                <span key={role} className="text-xs flex items-center gap-1.5 px-3 py-1 rounded-full bg-pc-accent/10 text-pc-accent border border-pc-accent/20">
-                  {ROLE_ICONS[role] && <img src={ROLE_ICONS[role]} alt={role} className="w-3.5 h-3.5" />}
-                  {role}
-                </span>
-              ))}
-              {/* Cost placeholder — add to STATIC_CHAMPIONS when available */}
-            </div>
-            {championData?.stats && (
-              <div className="grid grid-cols-4 gap-3 mt-4">
-                <StatBadge label="Health" value={championData.stats.health} />
-                <StatBadge label="Speed" value={`${championData.stats.speed}`} />
-                <StatBadge label="Range" value={championData.stats.range} />
-                <StatBadge label="Speed Units" value={championData.stats.speedUnits} />
+      {/* Two-column: Champion Profile (left) + Talents & Cards (right) */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Left column — Champion Profile + Skills (~1/4) */}
+        <div className="lg:col-span-1 space-y-6">
+          <div className="pc-card">
+            <div className="flex flex-col items-center text-center gap-4">
+              <SmartImage
+                src={getChampionIconSafe(championData?.name ?? mockChampion?.name ?? name)}
+                alt={championData?.name ?? mockChampion?.name ?? name}
+                className="w-28 h-28 rounded-xl border border-pc-border object-contain bg-pc-bg/50"
+              />
+              <div className="flex flex-wrap justify-center gap-2">
+                {(championData?.roles ?? mockChampion?.roles ?? []).map((role) => (
+                  <span key={role} className="text-xs flex items-center gap-1.5 px-3 py-1 rounded-full bg-pc-accent/10 text-pc-accent border border-pc-accent/20">
+                    {ROLE_ICONS[role] && <SmartImage src={ROLE_ICONS[role]} alt={role} className="w-3.5 h-3.5" />}
+                    {role}
+                  </span>
+                ))}
               </div>
-            )}
+              {championData?.stats && (
+                <div className="grid grid-cols-2 gap-x-6 gap-y-3 w-full">
+                  <StatBadge label="Health" value={championData.stats.health} />
+                  <StatBadge label="Speed" value={`${championData.stats.speed}`} />
+                  <StatBadge label="Range" value={championData.stats.range} />
+                  <StatBadge label="Speed Units" value={championData.stats.speedUnits} />
+                </div>
+              )}
+            </div>
           </div>
+
+          {/* Skills */}
+          {championData?.skills && championData.skills.length > 0 && (
+            <>
+              <h2 className="pc-card-title mb-2 shadow-sm">Skills</h2>
+              <div className="pc-card">
+              <div className="space-y-3">
+                {championData.skills.map((skill) => (
+                  <SkillCard key={skill.name} skill={skill} />
+                ))}
+              </div>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Right column — Talents & Loadout Cards (~3/4) */}
+        <div className="lg:col-span-3 space-y-6">
+          {/* Talents */}
+          {championData?.talents && championData.talents.length > 0 && (
+            <>
+              <h2 className="pc-card-title mb-2 shadow-sm">Talents</h2>
+              <div className="pc-card">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {championData.talents.map((talent) => (
+                  <TalentCard key={talent.name} talent={talent} championName={championData.name} />
+                ))}
+              </div>
+              </div>
+            </>
+          )}
+
+          {/* Loadout Cards */}
+          {championData?.loadouts && championData.loadouts.length > 0 && (
+            <>
+              <h2 className="pc-card-title mb-2 shadow-sm">Loadout Cards</h2>
+              <div className="pc-card">
+              {(() => {
+                const byCategory: Record<string, ChampionLoadout[]> = {};
+                championData.loadouts.forEach((l) => {
+                  const key = l.category || "General";
+                  if (!byCategory[key]) byCategory[key] = [];
+                  byCategory[key].push(l);
+                });
+                return Object.entries(byCategory).map(([cat, cards]) => (
+                  <div key={cat} className="mb-6 last:mb-0">
+                    <div className="text-xs font-medium text-pc-text-muted uppercase tracking-wider mb-2">{cat}</div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {cards.map((card) => (
+                        <div key={card.name} className="pc-surface-light rounded-lg p-3 border border-pc-border flex items-start gap-3">
+                          {card.iconUrl ? (
+                            <SmartImage src={card.iconUrl} alt={card.name} className="flex-shrink-0 w-12 h-10 rounded border border-pc-border bg-pc-bg/50 object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                          ) : (
+                            <div className="flex-shrink-0 w-10 h-10 rounded border border-pc-border bg-pc-bg-elevated flex items-center justify-center">
+                              <span className="text-xs text-pc-accent">?</span>
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <div className="text-xs font-medium text-pc-accent mb-0.5">{card.name}</div>
+                            <p className="text-xs text-pc-text-secondary leading-relaxed">{card.description}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ));
+              })()}
+            </div>
+            </>
+          )}
         </div>
       </div>
 
-      {/* Skills */}
-      {championData?.skills && championData.skills.length > 0 && (
-        <div className="pc-card">
-          <h2 className="pc-card-title mb-4">Skills</h2>
-          <div className="space-y-4">
-            {championData.skills.map((skill) => (
-              <SkillCard key={skill.name} skill={skill} />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Talents */}
-      {championData?.talents && championData.talents.length > 0 && (
-        <div className="pc-card">
-          <h2 className="pc-card-title mb-4">Talents</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {championData.talents.map((talent) => (
-              <TalentCard key={talent.name} talent={talent} championName={championData.name} />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Loadout Cards */}
-      {championData?.loadouts && championData.loadouts.length > 0 && (
-        <div className="pc-card">
-          <h2 className="pc-card-title mb-4">Loadout Cards</h2>
-          {(() => {
-            const byCategory: Record<string, ChampionLoadout[]> = {};
-            championData.loadouts.forEach((l) => {
-              const key = l.category || "General";
-              if (!byCategory[key]) byCategory[key] = [];
-              byCategory[key].push(l);
-            });
-            return Object.entries(byCategory).map(([cat, cards]) => (
-              <div key={cat} className="mb-6 last:mb-0">
-                <div className="text-xs font-medium text-pc-text-muted uppercase tracking-wider mb-2">{cat}</div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {cards.map((card) => (
-                    <div key={card.name} className="pc-surface-light rounded-lg p-3 border border-pc-border flex items-start gap-3">
-                      {card.iconUrl ? (
-                        <img src={card.iconUrl} alt={card.name} className="flex-shrink-0 w-10 h-10 rounded border border-pc-border bg-pc-bg/50 object-contain" />
-                      ) : (
-                        <div className="flex-shrink-0 w-10 h-10 rounded border border-pc-border bg-pc-bg-elevated flex items-center justify-center">
-                          <span className="text-xs text-pc-accent">?</span>
-                        </div>
-                      )}
-                      <div className="min-w-0">
-                        <div className="text-xs font-medium text-pc-accent mb-0.5">{card.name}</div>
-                        <p className="text-xs text-pc-text-secondary leading-relaxed">{card.description}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ));
-          })()}
-        </div>
-      )}
-
       {/* Average Player Stats */}
+      <h2 className="pc-card-title mb-2 shadow-sm">Average Player Stats</h2>
       <div className="pc-card">
-        <h2 className="pc-card-title mb-4">Average Player Stats</h2>
         {stats && (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             <StatCard label="Avg Rating" value={formatFloat(stats.avgMu)} accent />
@@ -243,10 +260,10 @@ export default function ChampionDetailPage() {
       </div>
 
       {/* Glicko-2 Leaderboard */}
+      <h2 className="pc-card-title mb-2 shadow-sm">
+        Global ELO Leaderboard — {championData?.name ?? mockChampion?.name ?? name}
+      </h2>
       <div className="pc-card">
-        <h2 className="pc-card-title mb-4">
-          Global ELO Leaderboard — {championData?.name ?? mockChampion?.name ?? name}
-        </h2>
         {leaderboard.length === 0 ? (
           <div className="text-center py-8">
             <p className="text-pc-text-muted">No leaderboard data available yet.</p>
@@ -260,38 +277,35 @@ export default function ChampionDetailPage() {
                   <th>#</th>
                   <th>Player</th>
                   <th>Rating (μ)</th>
-                  <th>Deviation (φ)</th>
                   <th>Matches</th>
-                  <th>Win Rate</th>
+                  <th>W/L</th>
                 </tr>
               </thead>
               <tbody>
-                {leaderboard.map((entry) => (
-                  <tr key={entry.playerId}>
-                    <td className="text-pc-text-muted font-mono text-sm">{entry.rank}</td>
-                    <td>
-                      <Link
-                        href={`/players/${entry.playerId}`}
-                        className="flex items-center gap-2 text-pc-text hover:text-pc-accent transition-colors"
-                      >
-                        {entry.avatarUrl ? (
-                          <img src={entry.avatarUrl} alt="" className="w-6 h-6 rounded" />
-                        ) : (
-                          <div className="w-6 h-6 rounded bg-pc-bg-elevated flex items-center justify-center text-xs text-pc-accent">
-                            {entry.playerName.charAt(0)}
-                          </div>
-                        )}
-                        <span className="text-sm font-medium">{entry.playerName}</span>
-                      </Link>
-                    </td>
-                    <td className="text-pc-text font-mono text-sm">{entry.mu.toFixed(2)}</td>
-                    <td className="text-pc-text-muted font-mono text-sm">{entry.phi.toFixed(2)}</td>
-                    <td className="text-pc-text-muted text-sm">{entry.matchesPlayed.toLocaleString()}</td>
-                    <td className={`font-mono text-sm ${entry.winRate >= 55 ? "text-emerald-400" : entry.winRate <= 45 ? "text-rose-400" : "text-pc-text"}`}>
-                      {entry.winRate.toFixed(1)}%
-                    </td>
-                  </tr>
-                ))}
+                {leaderboard.map((entry) => {
+                  const wr = entry.matchesPlayed > 0 ? (entry.wins / entry.matchesPlayed) * 100 : 0;
+                  return (
+                    <tr key={entry.playerId}>
+                      <td className="text-pc-text-muted font-mono text-sm">{entry.rank}</td>
+                      <td>
+                        <Link
+                          href={`/players/${entry.playerId}`}
+                          className="text-pc-text hover:text-pc-accent transition-colors text-sm font-medium"
+                        >
+                          {entry.playerName}
+                        </Link>
+                      </td>
+                      <td className="text-pc-accent font-mono text-sm font-semibold">{Number(entry.mu).toFixed(0)}</td>
+                      <td className="text-pc-text-muted text-sm">{entry.matchesPlayed}</td>
+                      <td className="font-mono text-sm">
+                        <span className="text-emerald-400">{entry.wins}</span>
+                        <span className="text-pc-text-muted">/</span>
+                        <span className="text-rose-400">{entry.losses}</span>
+                        <span className="text-pc-text-muted ml-1 text-xs">({wr.toFixed(0)}%)</span>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -379,14 +393,28 @@ function StatBadge({ label, value }: { label: string; value: string }) {
 }
 
 function SkillCard({ skill }: { skill: ChampionSkill }) {
+  const icons = [skill.iconUrl, skill.iconUrl2, skill.iconUrl3].filter(Boolean) as string[];
+  const [activeIdx, setActiveIdx] = useState(0);
+
+  // Cycle through available icons every 2.5s
+  useEffect(() => {
+    if (icons.length <= 1) return;
+    const interval = setInterval(() => {
+      setActiveIdx((prev) => (prev + 1) % icons.length);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, [icons.length]);
+
+  const activeIcon = icons[activeIdx] || "";
+
   return (
     <div className="pc-surface-light rounded-lg p-4 border border-pc-border flex items-start gap-4">
       <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-pc-bg-elevated border border-pc-border flex items-center justify-center overflow-hidden">
-        {skill.iconUrl ? (
-          <img
-            src={skill.iconUrl}
+        {activeIcon ? (
+          <SmartImage
+            src={activeIcon}
             alt={skill.name}
-            className="w-full h-full object-contain"
+            className="w-full h-full object-contain transition-opacity duration-300"
             onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
           />
         ) : (
@@ -412,12 +440,12 @@ function SkillCard({ skill }: { skill: ChampionSkill }) {
 }
 
 function TalentCard({ talent, championName }: { talent: ChampionTalent; championName: string }) {
-  const talentImageUrl = `/images/champions/Talent ${championName} ${talent.name.replace(/\s+/g, "")}.png`;
+  const talentImageUrl = `/images/champions/Talent ${championName} ${talent.name}.png`;
 
   return (
     <div className="pc-surface-light rounded-lg p-3 border border-pc-border flex items-start gap-3">
-      <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-pc-bg-elevated border border-pc-border flex items-center justify-center overflow-hidden">
-        <img
+      <div className="flex-shrink-0 w-14 h-14 flex items-center justify-center overflow-hidden">
+        <SmartImage
           src={talentImageUrl}
           alt={talent.name}
           className="w-full h-full object-contain"

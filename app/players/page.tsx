@@ -15,7 +15,6 @@ import {
   type RankedPlayer,
 } from "@/lib/api-client";
 import ScrambleText from "@/components/ScrambleText";
-import { TIER_NAMES } from "@/lib/mock-data";
 
 const CLASS_ICONS: Record<string, string> = {
   Frontline: "/images/icons/Class_Front_Line_Icon.avif",
@@ -25,18 +24,18 @@ const CLASS_ICONS: Record<string, string> = {
 };
 
 const STAT_LABELS: Record<string, string> = {
-  GPM: "Credits / Min",
-  HPM: "Healing / Min",
-  DPM: "Damage / Min",
-  Tanker: "Mitigation / Min",
+  gpm: "Credits / Min",
+  hpm: "Healing / Min",
+  dpm: "Damage / Min",
+  mpm: "Mitigation / Min",
 };
 
 const ROLES = ["Frontline", "Damage", "Flank", "Support"] as const;
 const PERFORMANCE_METRICS = [
-  { key: "GPM", metric: "gpm" },
-  { key: "HPM", metric: "hpm" },
-  { key: "DPM", metric: "dpm" },
-  { key: "Tanker", metric: "mpm" },
+  { key: "gpm", metric: "gpm" },
+  { key: "hpm", metric: "hpm" },
+  { key: "dpm", metric: "dpm" },
+  { key: "mpm", metric: "mpm" },
 ] as const;
 
 function RankBadge({ rank }: { rank: number }) {
@@ -54,6 +53,7 @@ export default function PlayersPage() {
   const [classLeaderboards, setClassLeaderboards] = useState<Record<string, ClassLeaderboardEntry[]>>({});
   const [performanceLeaderboards, setPerformanceLeaderboards] = useState<Record<string, PerformanceLeaderboardEntry[]>>({});
   const [rankedPlayers, setRankedPlayers] = useState<RankedPlayer[]>([]);
+  const [accountEloPlayers, setAccountEloPlayers] = useState<ClassLeaderboardEntry[]>([]);
   const [cheaterPlayers, setCheaterPlayers] = useState<CheaterPlayer[]>([]);
   const [suspiciousPlayers, setSuspiciousPlayers] = useState<CheaterPlayer[]>([]);
   const [overviewLoading, setOverviewLoading] = useState(true);
@@ -63,10 +63,17 @@ export default function PlayersPage() {
 
     async function loadOverview() {
       setOverviewLoading(true);
-      const [classRows, performanceRows, ranked, cheaters, suspicious] = await Promise.all([
+      const [classRows, performanceRows, ranked, accountElo, cheaters, suspicious] = await Promise.all([
         Promise.all(ROLES.map(async (role) => [role, await fetchClassLeaderboard({ role, limit: 5, queueId: 486 })] as const)),
         Promise.all(PERFORMANCE_METRICS.map(async ({ key, metric }) => [key, await fetchPerformanceLeaderboard({ metric, limit: 5, queueId: 486 })] as const)),
-        fetchRankedLeaderboard({ tier: "26", top: 20 }),
+        fetchRankedLeaderboard({ tier: "26", top: 10 }),
+        /*
+         * Account ELO comes from player_queue_ratings, while the four class
+         * cards above come from player_champion_ratings. The backend still
+         * requires a role query parameter for this shared endpoint, but ignores
+         * it in account mode so the account list stays one row per player.
+         */
+        fetchClassLeaderboard({ role: "Frontline", limit: 10, queueId: 486, mode: "account" }),
         fetchCheaterPlayers({ cheater: true, limit: 5 }),
         fetchCheaterPlayers({ susOnly: true, limit: 5 }),
       ]);
@@ -75,6 +82,7 @@ export default function PlayersPage() {
       setClassLeaderboards(Object.fromEntries(classRows));
       setPerformanceLeaderboards(Object.fromEntries(performanceRows));
       setRankedPlayers(ranked);
+      setAccountEloPlayers(accountElo);
       setCheaterPlayers(cheaters);
       setSuspiciousPlayers(suspicious);
       setOverviewLoading(false);
@@ -186,7 +194,7 @@ export default function PlayersPage() {
                     <div key={`${role}-${p.playerId}`} className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-2 min-w-0">
                         <RankBadge rank={i + 1} />
-                        <span className="text-pc-text truncate">{p.playerName}</span>
+                        <Link href={`/players/${p.playerId}`} className="text-pc-text truncate hover:text-pc-accent transition-colors">{p.playerName}</Link>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         <span className="text-pc-text-muted">{p.championName}</span>
@@ -224,7 +232,7 @@ export default function PlayersPage() {
                       <div key={`${stat}-${p.playerId}`} className="flex items-center justify-between text-xs">
                         <div className="flex items-center gap-2 min-w-0">
                           <RankBadge rank={i + 1} />
-                          <span className="text-pc-text truncate">{p.playerName}</span>
+                          <Link href={`/players/${p.playerId}`} className="text-pc-text truncate hover:text-pc-accent transition-colors">{p.playerName}</Link>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
                           <span className="text-pc-text-muted">{p.championName ?? p.className ?? ""}</span>
@@ -239,68 +247,124 @@ export default function PlayersPage() {
           </div>
         </div>
 
-        {/* Right: Ranked Leaderboard */}
-        <div className="lg:w-2/5 flex flex-col min-h-0">
-          <div className="flex items-center justify-between mb-4 px-2">
-            <h2 className="text-lg font-bold text-pc-text">Ranked Leaderboard</h2>
-            <Link href="/players/leaderboard" className="text-[10px] text-pc-text-secondary hover:text-pc-accent transition-colors drop-shadow-sm">
-              Detail →
-            </Link>
-          </div>
-          <div className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden flex flex-col flex-1">
-            {/* Table */}
-            <div className="flex-1 overflow-y-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-pc-border">
-                    <th className="text-left text-pc-text-muted font-medium py-2 px-3 w-8 text-xs">#</th>
-                    <th className="text-left text-pc-text-muted font-medium py-2 px-2 text-xs">Player</th>
-                    <th className="text-right text-pc-text-muted font-medium py-2 px-2 text-xs">+/−</th>
-                    <th className="text-right text-pc-text-muted font-medium py-2 px-2 text-xs">Pts</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rankedPlayers.length === 0 && (
-                    <tr>
-                      <td colSpan={4} className="py-4 px-3 text-center text-pc-text-muted text-xs">
-                        {overviewLoading ? "Loading..." : "No ranked leaderboard data"}
-                      </td>
-                    </tr>
-                  )}
-                  {rankedPlayers.map((p, i) => (
-                    <tr key={p.player_id} className={`border-b border-pc-border/50 hover:bg-pc-bg/50 transition-colors ${i < 3 ? "bg-pc-bg/30" : ""}`}>
-                      <td className="py-1.5 px-3">
-                        {i === 0 ? (
-                          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-yellow-500/20 text-yellow-400 font-bold text-[11px]">🥇</span>
-                        ) : i === 1 ? (
-                          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-400/20 text-gray-300 font-bold text-[11px]">🥈</span>
-                        ) : i === 2 ? (
-                          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-600/20 text-amber-600 font-bold text-[11px]">🥉</span>
-                        ) : (
-                          <span className="inline-flex items-center justify-center w-6 h-6 text-pc-text-muted text-[11px]">{p.rank}</span>
-                        )}
-                      </td>
-                      <td className="py-1.5 px-2">
-                        <Link href={`/players/${p.player_id}`} className="text-pc-text font-medium text-xs hover:text-pc-accent transition-colors">
-                          {p.name}
-                        </Link>
-                      </td>
-                      <td className="py-1.5 px-2 text-right">
-                        {p.trend != null && p.trend !== 0 ? (
-                          <span className={`text-[11px] ${p.trend > 0 ? "text-emerald-400" : "text-red-400"}`}>
-                            {p.trend > 0 ? "▲" : "▼"}{Math.abs(p.trend)}
-                          </span>
-                        ) : (
-                          <span className="text-pc-text-muted text-[11px]">—</span>
-                        )}
-                      </td>
-                      <td className="py-1.5 px-2 text-right text-pc-text font-medium text-xs">{p.points.toLocaleString()}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        {/* Right: compact official ranked list + account-level ELO list */}
+        <div className="lg:w-2/5 space-y-4">
+          <section>
+            <div className="flex items-center justify-between mb-4 px-2">
+              <h2 className="text-lg font-bold text-pc-text">Ranked Leaderboard</h2>
+              <Link href="/players/leaderboard" className="text-[10px] text-pc-text-secondary hover:text-pc-accent transition-colors drop-shadow-sm">
+                Detail →
+              </Link>
             </div>
-          </div>
+            <div className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
+              {/* Both overview leaderboards fetch 10 rows, so avoid an inner
+                  vertical scroller here. Let the cards grow downward and keep
+                  every row visible in the normal page flow. */}
+              <div>
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-pc-border">
+                      <th className="text-left text-pc-text-muted font-medium py-2 px-3 w-8 text-xs">#</th>
+                      <th className="text-left text-pc-text-muted font-medium py-2 px-2 text-xs">Player</th>
+                      <th className="text-right text-pc-text-muted font-medium py-2 px-2 text-xs">+/−</th>
+                      <th className="text-right text-pc-text-muted font-medium py-2 px-2 text-xs">Pts</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rankedPlayers.length === 0 && (
+                      <tr>
+                        <td colSpan={4} className="py-4 px-3 text-center text-pc-text-muted text-xs">
+                          {overviewLoading ? "Loading..." : "No ranked leaderboard data"}
+                        </td>
+                      </tr>
+                    )}
+                    {rankedPlayers.map((p, i) => (
+                      <tr key={p.player_id} className={`border-b border-pc-border/50 hover:bg-pc-bg/50 transition-colors ${i < 3 ? "bg-pc-bg/30" : ""}`}>
+                        <td className="py-1.5 px-3">
+                          {i === 0 ? (
+                            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-yellow-500/20 text-yellow-400 font-bold text-[11px]">🥇</span>
+                          ) : i === 1 ? (
+                            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-400/20 text-gray-300 font-bold text-[11px]">🥈</span>
+                          ) : i === 2 ? (
+                            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-600/20 text-amber-600 font-bold text-[11px]">🥉</span>
+                          ) : (
+                            <span className="inline-flex items-center justify-center w-6 h-6 text-pc-text-muted text-[11px]">{p.rank}</span>
+                          )}
+                        </td>
+                        <td className="py-1.5 px-2">
+                          <Link href={`/players/${p.player_id}`} className="text-pc-text font-medium text-xs hover:text-pc-accent transition-colors">
+                            {p.name}
+                          </Link>
+                        </td>
+                        <td className="py-1.5 px-2 text-right">
+                          {p.trend != null && p.trend !== 0 ? (
+                            <span className={`text-[11px] ${p.trend > 0 ? "text-emerald-400" : "text-red-400"}`}>
+                              {p.trend > 0 ? "▲" : "▼"}{Math.abs(p.trend)}
+                            </span>
+                          ) : (
+                            <span className="text-pc-text-muted text-[11px]">—</span>
+                          )}
+                        </td>
+                        <td className="py-1.5 px-2 text-right text-pc-text font-medium text-xs">{p.points.toLocaleString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <section>
+            <div className="flex items-center justify-between mb-4 px-2">
+              <h2 className="text-lg font-bold text-pc-text">Account ELO</h2>
+              <Link href="/players/elo" className="text-[10px] text-pc-text-secondary hover:text-pc-accent transition-colors drop-shadow-sm">
+                Detail →
+              </Link>
+            </div>
+            <div className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
+              {/* Account ELO mirrors the ranked card: 10 fetched rows, no
+                  vertical clamp, and only horizontal overflow protection. */}
+              <div>
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-pc-border">
+                      <th className="text-left text-pc-text-muted font-medium py-2 px-3 w-8 text-xs">#</th>
+                      <th className="text-left text-pc-text-muted font-medium py-2 px-2 text-xs">Player</th>
+                      <th className="text-right text-pc-text-muted font-medium py-2 px-2 text-xs">ELO</th>
+                      <th className="text-right text-pc-text-muted font-medium py-2 px-2 text-xs">Matches</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {accountEloPlayers.length === 0 && (
+                      <tr>
+                        <td colSpan={4} className="py-4 px-3 text-center text-pc-text-muted text-xs">
+                          {overviewLoading ? "Loading..." : "No account ELO data"}
+                        </td>
+                      </tr>
+                    )}
+                    {accountEloPlayers.map((p, i) => (
+                      <tr key={`account-elo-${p.playerId}`} className={`border-b border-pc-border/50 hover:bg-pc-bg/50 transition-colors ${i < 3 ? "bg-pc-bg/30" : ""}`}>
+                        <td className="py-1.5 px-3">
+                          <RankBadge rank={p.rank} />
+                        </td>
+                        <td className="py-1.5 px-2">
+                          <Link href={`/players/${p.playerId}`} className="text-pc-text font-medium text-xs hover:text-pc-accent transition-colors">
+                            {p.playerName}
+                          </Link>
+                        </td>
+                        <td className="py-1.5 px-2 text-right text-pc-accent font-medium text-xs">
+                          {p.elo.toLocaleString()}
+                        </td>
+                        <td className="py-1.5 px-2 text-right text-pc-text-muted text-xs">
+                          {p.totalMatches.toLocaleString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
         </div>
 
       </div>

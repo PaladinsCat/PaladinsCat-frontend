@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
 
+const apiDestination = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3304";
+
 const nextConfig: NextConfig = {
   output: undefined,
   images: {
@@ -7,8 +9,8 @@ const nextConfig: NextConfig = {
   },
   async rewrites() {
     return [
-      { source: "/stats/:path*", destination: "http://localhost:3005/stats/:path*" },
-      { source: "/api/:path*", destination: "http://localhost:3005/api/:path*" },
+      { source: "/stats/:path*", destination: `${apiDestination}/stats/:path*` },
+      { source: "/api/:path*", destination: `${apiDestination}/api/:path*` },
     ];
   },
 };

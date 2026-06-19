@@ -66,11 +66,8 @@ export default function ClassEloPage() {
   const router = useRouter();
   const rawRole = params?.role as string;
 
-  // Normalize: handle "front-line" / "Frontline" / "frontline" etc.
   const normalizedRole =
-    VALID_ROLES.find(
-      (r) => r.toLowerCase() === rawRole?.toLowerCase()
-    ) ||
+    VALID_ROLES.find((r) => r.toLowerCase() === rawRole?.toLowerCase()) ||
     VALID_ROLES.find(
       (r) =>
         r.toLowerCase().replace("-", "") ===
@@ -81,14 +78,12 @@ export default function ClassEloPage() {
   const [data, setData] = useState<ClassEloEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Redirect invalid roles to Frontline
   useEffect(() => {
     if (!normalizedRole) {
       router.replace("/players/class/Frontline");
     }
   }, [normalizedRole, router]);
 
-  // Fetch data — try API first, fall back to mock
   useEffect(() => {
     if (!normalizedRole) return;
 
@@ -97,20 +92,32 @@ export default function ClassEloPage() {
     async function load() {
       setLoading(true);
       try {
-        const leaderboard = await fetchClassLeaderboard({ role: normalizedRole!, limit: 100 });
+        /*
+         * This route is strictly the role-specific champion leaderboard.
+         * It reads player_champion_ratings through mode=champion so the table
+         * stays scoped to player/champion averages for the selected role.
+         */
+        const leaderboard = await fetchClassLeaderboard({
+          role: normalizedRole!,
+          limit: 100,
+          queueId: 486,
+          mode: "champion",
+        });
         if (cancelled) return;
         if (leaderboard.length > 0) {
-          setData(leaderboard.map((p) => ({
-            rank: p.rank,
-            player_id: p.playerId,
-            name: p.playerName,
-            champion: p.championName,
-            elo: p.elo,
-            winRate: p.winRate ?? 0,
-            totalMatches: p.totalMatches,
-            totalWins: p.totalWins,
-            region: p.region ?? "—",
-          })));
+          setData(
+            leaderboard.map((p) => ({
+              rank: p.rank,
+              player_id: p.playerId,
+              name: p.playerName,
+              champion: p.championName ?? "Unknown",
+              elo: p.elo,
+              winRate: p.winRate ?? 0,
+              totalMatches: p.totalMatches,
+              totalWins: p.totalWins,
+              region: p.region ?? "—",
+            }))
+          );
         } else {
           setData(MOCK_CLASS_ELO[normalizedRole!] || []);
         }
@@ -136,7 +143,6 @@ export default function ClassEloPage() {
 
   return (
     <div className="space-y-6">
-      {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-4">
         <Link
           href="/players"
@@ -146,19 +152,16 @@ export default function ClassEloPage() {
         </Link>
       </div>
 
-      <div className="flex items-center gap-3">
-        <img
-          src={CLASS_ICONS[role]}
-          alt={role}
-          className="w-8 h-8"
-        />
-        <h1 className="pc-heading pc-heading-lg">
-          <span className={ROLE_COLORS[role]}>{role}</span>{" "}
-          <span className="text-pc-text">ELO Leaderboard</span>
-        </h1>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <img src={CLASS_ICONS[role]} alt={role} className="w-8 h-8" />
+          <h1 className="pc-heading pc-heading-lg">
+            <span className={ROLE_COLORS[role]}>{role}</span>{" "}
+            <span className="text-pc-text">Champion ELO</span>
+          </h1>
+        </div>
       </div>
 
-      {/* ── Class Selector Tabs ── */}
       <div className="flex gap-2 flex-wrap">
         {VALID_ROLES.map((r) => (
           <Link
@@ -176,16 +179,15 @@ export default function ClassEloPage() {
         ))}
       </div>
 
-      {/* ── Table ── */}
       {loading ? (
         <div className="flex items-center justify-center py-20">
           <div className="animate-pulse text-pc-text-muted text-sm">
-            Loading {role} leaderboard...
+            Loading {role} champion leaderboard...
           </div>
         </div>
       ) : players.length === 0 ? (
         <div className="text-center py-20 text-pc-text-muted">
-          No data available for {role}.
+          No champion data available for {role}.
         </div>
       ) : (
         <div className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
@@ -224,7 +226,7 @@ export default function ClassEloPage() {
                   const rowBg = i < 3 ? "bg-pc-bg/30" : "";
                   return (
                     <tr
-                      key={`${p.player_id}-${p.rank}`}
+                      key={`${p.player_id}-${p.champion}-${p.rank}`}
                       className={`border-b border-pc-border/50 hover:bg-pc-bg/60 transition-colors ${rowBg}`}
                     >
                       <td className="py-2.5 px-4">
@@ -279,10 +281,8 @@ export default function ClassEloPage() {
         </div>
       )}
 
-      {/* ── Footer note ── */}
       <p className="text-pc-text-muted text-xs text-center">
-        Showing {players.length} players — ELO ratings are per-class and update
-        after each ranked match.
+        Showing {players.length} player/champion ratings
       </p>
     </div>
   );

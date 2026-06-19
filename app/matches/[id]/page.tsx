@@ -458,9 +458,9 @@ function RelatedMatches({ related, matchId, loading }: { related: MatchSearchRes
     <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-6">
       <h2 className="text-lg font-semibold text-pc-text mb-4">Related Matches</h2>
       <div className="space-y-2">
-        {related.map((m) => (
+        {related.map((m, i) => (
           <Link
-            key={m.match_id}
+            key={`${m.match_id}-${i}`}
             href={`/matches/${m.match_id}`}
             className="flex items-center justify-between p-3 rounded-lg bg-pc-bg-secondary hover:bg-pc-bg-elevated border border-transparent hover:border-pc-border transition-colors"
           >

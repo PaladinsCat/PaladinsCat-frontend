@@ -1,4 +1,10 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005";
+// Browser-facing backend URL.
+//
+// The Docker backend listens on 3005 inside its container but is exposed on the
+// desktop as 3304. The frontend runs in the user's browser, so its fallback must
+// use the host-visible port. Production/local overrides should still set
+// NEXT_PUBLIC_API_URL explicitly.
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3304";
 
 // ── Types ──
 
@@ -178,8 +184,8 @@ export interface ClassLeaderboardEntry {
   rank: number;
   playerId: number;
   playerName: string;
-  championName: string;
-  championId: number;
+  championName: string | null;
+  championId: number | null;
   elo: number;
   mu: number;
   phi: number;
@@ -189,25 +195,26 @@ export interface ClassLeaderboardEntry {
   region: string | null;
 }
 
-export async function fetchClassLeaderboard(params: { role: string; limit?: number; queueId?: number }): Promise<ClassLeaderboardEntry[]> {
+export async function fetchClassLeaderboard(params: { role: string; limit?: number; queueId?: number; mode?: 'account' | 'champion' }): Promise<ClassLeaderboardEntry[]> {
   const query = new URLSearchParams();
   query.set('role', params.role);
   if (params.limit != null) query.set('limit', String(params.limit));
   if (params.queueId != null) query.set('queueId', String(params.queueId));
+  if (params.mode) query.set('mode', params.mode);
   try {
     const raw = await fetchJson<Array<{
       rank: number; player_id: number; player_name: string;
-      champion_name: string; champion_id: number;
+      champion_name: string | null; champion_id: number | null;
       elo: number | string; mu: number | string; phi: number | string;
       win_rate: number | string | null; total_matches: number; total_wins: number;
       region: string | null;
     }>>(`/players/leaderboard/class?${query.toString()}`);
     return raw.map((r) => ({
-      rank: r.rank,
+      rank: Number(r.rank),
       playerId: Number(r.player_id),
       playerName: r.player_name,
-      championName: r.champion_name,
-      championId: r.champion_id,
+      championName: r.champion_name ?? null,
+      championId: r.champion_id == null ? null : Number(r.champion_id),
       elo: typeof r.elo === 'string' ? Number(r.elo) : r.elo,
       mu: typeof r.mu === 'string' ? Number(r.mu) : r.mu,
       phi: typeof r.phi === 'string' ? Number(r.phi) : r.phi,
@@ -254,7 +261,7 @@ export async function fetchPerformanceLeaderboard(params: {
       value: number | string; total_matches: number; region: string | null; platform: string | null;
     }>>(`/players/leaderboard/performance?${query.toString()}`);
     return raw.map((r) => ({
-      rank: r.rank,
+      rank: Number(r.rank),
       playerId: Number(r.player_id),
       playerName: r.player_name,
       championName: r.champion_name ?? null,
@@ -397,10 +404,10 @@ export async function fetchBaselines(params?: { role?: string; queueId?: number 
     }>>(`/stats/baselines${query.toString() ? `?${query.toString()}` : ''}`);
     return raw.map(r => ({
       role: r.role, queueId: r.queue_id,
-      avgGpm: r.avg_gpm, avgDpm: r.avg_dpm, avgHpm: r.avg_hpm,
-      avgShpm: r.avg_shpm, avgMpm: r.avg_mpm, avgKda: r.avg_kda,
-      p10Gpm: r.p10_gpm, p90Gpm: r.p90_gpm, p10Dpm: r.p10_dpm, p90Dpm: r.p90_dpm,
-      sampleSize: r.sample_size,
+      avgGpm: Number(r.avg_gpm ?? 0), avgDpm: Number(r.avg_dpm ?? 0), avgHpm: Number(r.avg_hpm ?? 0),
+      avgShpm: Number(r.avg_shpm ?? 0), avgMpm: Number(r.avg_mpm ?? 0), avgKda: Number(r.avg_kda ?? 0),
+      p10Gpm: Number(r.p10_gpm ?? 0), p90Gpm: Number(r.p90_gpm ?? 0), p10Dpm: Number(r.p10_dpm ?? 0), p90Dpm: Number(r.p90_dpm ?? 0),
+      sampleSize: Number(r.sample_size ?? 0),
     }));
   } catch {
     return [];
@@ -1195,6 +1202,29 @@ export async function fetchMapStats(params?: { queueId?: number; limit?: number 
   }
 }
 
+export interface ChampionLeaderboardEntry {
+  rank: number;
+  playerId: number;
+  playerName: string;
+  mu: number;
+  phi: number;
+  matchesPlayed: number;
+  wins: number;
+  losses: number;
+}
+
+export async function fetchChampionLeaderboard(championId: number, limit = 25): Promise<ChampionLeaderboardEntry[]> {
+  const query = new URLSearchParams({ championId: String(championId), limit: String(limit) });
+  const raw = await fetchJson<Array<{
+    rank: number; playerId: number; playerName: string;
+    mu: number; phi: number; matchesPlayed: number; wins: number; losses: number;
+  }>>(`/stats/champion-leaderboard?${query.toString()}`);
+  return raw.map((r) => ({
+    rank: r.rank, playerId: r.playerId, playerName: r.playerName,
+    mu: r.mu, phi: r.phi, matchesPlayed: r.matchesPlayed, wins: r.wins, losses: r.losses,
+  }));
+}
+
 export async function fetchHourlyMatchCounts(params?: { date?: string; hour?: number; queueId?: number }): Promise<HourlyMatchCount[]> {
   const query = new URLSearchParams();
   if (params?.date) query.set('date', params.date);
@@ -1963,6 +1993,8 @@ export interface MatchHourlyStats {
   totalToday: number;
   rankedToday: number;
   regions: Array<{ region: string; matchesPerHour: number; totalToday: number }>;
+  hourly?: Array<{ hour: number; date?: string; NA: number; EU: number; Asia: number; BR: number; OCE: number; LATAM: number; total: number }>;
+  currentHour?: number;
 }
 
 export async function fetchMatchHourlyStats(): Promise<MatchHourlyStats> {

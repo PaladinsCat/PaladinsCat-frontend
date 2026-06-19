@@ -151,6 +151,7 @@ body {
   letter-spacing: 0.5px;
   color: var(--pc-text);
   margin-bottom: 16px;
+  padding-left: 0.75rem;
 }
 
 /* Stats grid: 3-column, value + label */
