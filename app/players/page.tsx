@@ -266,10 +266,10 @@ export default function PlayersPage() {
                   <thead>
                     <tr className="border-b border-pc-border">
                       <th className="text-left text-pc-text-muted font-medium py-2 px-3 w-8 text-xs">#</th>
-                      <th className="text-left text-pc-text-muted font-medium py-2 px-2 text-xs">Player</th>
                       <th className="text-center text-pc-text-muted font-medium py-2 px-2 text-xs w-10">Rank</th>
+                      <th className="text-left text-pc-text-muted font-medium py-2 px-2 text-xs">Player</th>
                       <th className="text-right text-pc-text-muted font-medium py-2 px-2 text-xs">+/−</th>
-                      <th className="text-right text-pc-text-muted font-medium py-2 px-2 text-xs">Pts</th>
+                      <th className="text-right text-pc-text-muted font-medium py-2 px-4 text-xs">Pts</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -296,11 +296,6 @@ export default function PlayersPage() {
                             <span className="inline-flex items-center justify-center w-6 h-6 text-pc-text-muted text-[11px]">{p.rank}</span>
                           )}
                         </td>
-                        <td className="py-1.5 px-2">
-                          <Link href={`/players/${p.player_id}`} className="text-pc-text font-medium text-xs hover:text-pc-accent transition-colors">
-                            {p.name}
-                          </Link>
-                        </td>
                         <td className="py-1.5 px-2 text-center">
                           <img
                             src={iconPath}
@@ -308,6 +303,11 @@ export default function PlayersPage() {
                             className="w-6 h-6 object-contain inline-block"
                             title={effective.displayName}
                           />
+                        </td>
+                        <td className="py-1.5 px-2">
+                          <Link href={`/players/${p.player_id}`} className="text-pc-text font-medium text-xs hover:text-pc-accent transition-colors">
+                            {p.name}
+                          </Link>
                         </td>
                         <td className="py-1.5 px-2 text-right">
                           {p.trend != null && p.trend !== 0 ? (
@@ -318,7 +318,7 @@ export default function PlayersPage() {
                             <span className="text-pc-text-muted text-[11px]">—</span>
                           )}
                         </td>
-                        <td className="py-1.5 px-2 text-right text-pc-text font-medium text-xs">{p.points.toLocaleString()}</td>
+                        <td className="py-1.5 px-4 text-right text-pc-text font-medium text-xs">{p.points.toLocaleString()}</td>
                       </tr>
                     )}
                     )}
