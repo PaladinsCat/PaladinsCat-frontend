@@ -93,10 +93,10 @@ export function getRankIconPath(kbmTier: number, kbmRank: number): string {
   // Tiers 1-25: sub-tier (1-5), inverted — tier 1 = sub 5 (V), tier 5 = sub 1 (I)
   const sub = 5 - (displayTier - 1) % 5;
   const folderMap: Record<number, string> = {
-    1: "bronze", 2: "silver", 3: "gold", 4: "platinum", 5: "diamond",
+    0: "bronze", 1: "silver", 2: "gold", 3: "platinum", 4: "diamond",
   };
   const baseMap: Record<number, string> = {
-    1: "Bronze", 2: "Silver", 3: "Gold", 4: "Platinum", 5: "Diamond",
+    0: "Bronze", 1: "Silver", 2: "Gold", 3: "Platinum", 4: "Diamond",
   };
   const group = Math.floor((displayTier - 1) / 5);
   const folder = folderMap[group] || "bronze";
