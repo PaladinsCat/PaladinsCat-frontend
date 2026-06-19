@@ -155,34 +155,55 @@ export default function PlayerProfilePage() {
 
   const [response, setResponse] = useState<PlayerResponse | null>(null);
   const [matches, setMatches] = useState<MatchRecord[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(true);
+  const [matchesLoading, setMatchesLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Fetch profile — render as soon as this arrives
   useEffect(() => {
     if (!id) return;
     let cancelled = false;
-    setLoading(true);
+    setProfileLoading(true);
 
-    Promise.all([
-      fetch(`${API_BASE}/players/${id}`).then((r) => r.json()),
-      fetchPlayerMatches(id, { limit: "20" }).catch(() => []),
-    ])
-      .then(([profileData, matchData]) => {
-        if (cancelled) return;
-        setResponse(profileData);
-        setMatches(matchData);
+    fetch(`${API_BASE}/players/${id}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (!cancelled) {
+          setResponse(data);
+          setProfileLoading(false);
+        }
       })
       .catch(() => {
-        if (!cancelled) setError("Failed to load player profile");
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setError("Failed to load player profile");
+          setProfileLoading(false);
+        }
       });
 
     return () => { cancelled = true; };
   }, [id]);
 
-  if (loading) {
+  // Fetch matches independently — doesn't block profile rendering
+  useEffect(() => {
+    if (!id) return;
+    let cancelled = false;
+    setMatchesLoading(true);
+
+    fetchPlayerMatches(id, { limit: "20" })
+      .then((data) => {
+        if (!cancelled) setMatches(data);
+      })
+      .catch(() => {
+        if (!cancelled) setMatches([]);
+      })
+      .finally(() => {
+        if (!cancelled) setMatchesLoading(false);
+      });
+
+    return () => { cancelled = true; };
+  }, [id]);
+
+  if (profileLoading) {
     return (
       <div className="flex items-center justify-center py-20">
         <div className="text-pc-text-muted text-sm">Loading player profile...</div>
@@ -485,7 +506,9 @@ export default function PlayerProfilePage() {
               <h2 className="pc-card-title shadow-sm">Champion Ratings</h2>
               <div className="pc-card">
                 <div className="space-y-2">
-                  {championRatings.slice(0, 10).map((cr) => (
+                  {championRatings.slice(0, 10).map((cr) => {
+                    if (!cr.champion_name) return null;
+                    return (
                     <div key={cr.champion_id} className="flex items-center gap-2 py-1.5 border-b border-pc-border/30 last:border-0">
                       <img
                         src={getChampionIconSafe(cr.champion_name)}
@@ -513,7 +536,8 @@ export default function PlayerProfilePage() {
                         </div>
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </div>
