@@ -15,6 +15,7 @@ import {
   type RankedPlayer,
 } from "@/lib/api-client";
 import ScrambleText from "@/components/ScrambleText";
+import { getRankIconPath, resolveEffectiveTier } from "@/lib/tier-utils";
 
 const CLASS_ICONS: Record<string, string> = {
   Frontline: "/images/icons/Class_Front_Line_Icon.avif",
@@ -266,6 +267,7 @@ export default function PlayersPage() {
                     <tr className="border-b border-pc-border">
                       <th className="text-left text-pc-text-muted font-medium py-2 px-3 w-8 text-xs">#</th>
                       <th className="text-left text-pc-text-muted font-medium py-2 px-2 text-xs">Player</th>
+                      <th className="text-center text-pc-text-muted font-medium py-2 px-2 text-xs w-10">Rank</th>
                       <th className="text-right text-pc-text-muted font-medium py-2 px-2 text-xs">+/−</th>
                       <th className="text-right text-pc-text-muted font-medium py-2 px-2 text-xs">Pts</th>
                     </tr>
@@ -273,12 +275,15 @@ export default function PlayersPage() {
                   <tbody>
                     {rankedPlayers.length === 0 && (
                       <tr>
-                        <td colSpan={4} className="py-4 px-3 text-center text-pc-text-muted text-xs">
+                        <td colSpan={5} className="py-4 px-3 text-center text-pc-text-muted text-xs">
                           {overviewLoading ? "Loading..." : "No ranked leaderboard data"}
                         </td>
                       </tr>
                     )}
-                    {rankedPlayers.map((p, i) => (
+                    {rankedPlayers.map((p, i) => {
+                      const iconPath = getRankIconPath(p.tier, p.rank);
+                      const effective = resolveEffectiveTier(p.tier, p.rank);
+                      return (
                       <tr key={p.player_id} className={`border-b border-pc-border/50 hover:bg-pc-bg/50 transition-colors ${i < 3 ? "bg-pc-bg/30" : ""}`}>
                         <td className="py-1.5 px-3">
                           {i === 0 ? (
@@ -296,6 +301,14 @@ export default function PlayersPage() {
                             {p.name}
                           </Link>
                         </td>
+                        <td className="py-1.5 px-2 text-center">
+                          <img
+                            src={iconPath}
+                            alt={effective.displayName}
+                            className="w-6 h-6 object-contain inline-block"
+                            title={effective.displayName}
+                          />
+                        </td>
                         <td className="py-1.5 px-2 text-right">
                           {p.trend != null && p.trend !== 0 ? (
                             <span className={`text-[11px] ${p.trend > 0 ? "text-emerald-400" : "text-red-400"}`}>
@@ -307,7 +320,8 @@ export default function PlayersPage() {
                         </td>
                         <td className="py-1.5 px-2 text-right text-pc-text font-medium text-xs">{p.points.toLocaleString()}</td>
                       </tr>
-                    ))}
+                    )}
+                    )}
                   </tbody>
                 </table>
               </div>
