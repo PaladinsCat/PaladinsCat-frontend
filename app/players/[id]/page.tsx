@@ -107,6 +107,84 @@ function getTierColor(tier: number): string {
   return TIER_COLORS[0];
 }
 
+/**
+ * Resolve the effective display tier from kbm_tier + kbm_rank.
+ *
+ * Grandmaster logic: top 100 Masters (rank 1-100) display as Grandmaster.
+ * Masters ranked 101+ are offset by 100 and display as Master with the
+ * adjusted rank (e.g. rank 101 → Master #1).
+ */
+function resolveEffectiveTier(kbmTier: number, kbmRank: number): {
+  displayTier: number;
+  displayName: string;
+  displayRank: number;
+  isGrandmaster: boolean;
+} {
+  if (kbmTier === 26) {
+    if (kbmRank <= 100) {
+      return {
+        displayTier: 27,
+        displayName: "Grandmaster",
+        displayRank: kbmRank,
+        isGrandmaster: true,
+      };
+    }
+    return {
+      displayTier: 26,
+      displayName: "Master",
+      displayRank: kbmRank - 100,
+      isGrandmaster: false,
+    };
+  }
+  return {
+    displayTier: kbmTier,
+    displayName: TIER_NAMES[kbmTier] || "Unranked",
+    displayRank: kbmRank,
+    isGrandmaster: false,
+  };
+}
+
+/**
+ * Build the rank tier icon path from kbm_tier + kbm_rank.
+ * Uses resolveEffectiveTier so Grandmaster logic is consistent.
+ *
+ * Path structure:
+ *   rank-tiers/qualifying/RankIcon_Qualifying.avif   — tier 0
+ *   rank-tiers/bronze/RankIcon_Bronze_1.avif          — tier 1-5 (sub = tier % 5 || 5)
+ *   rank-tiers/silver/RankIcon_Silver_1.avif          — tier 6-10
+ *   rank-tiers/gold/RankIcon_Gold_1.avif              — tier 11-15
+ *   rank-tiers/platinum/RankIcon_Platinum_1.avif      — tier 16-20
+ *   rank-tiers/diamond/RankIcon_Diamond_1.avif        — tier 21-25
+ *   rank-tiers/master/RankIcon_Master.avif            — tier 26
+ *   rank-tiers/grandmaster/RankIcon_Grandmaster.avif  — tier 27
+ */
+function getRankIconPath(kbmTier: number, kbmRank: number): string {
+  const { displayTier } = resolveEffectiveTier(kbmTier, kbmRank);
+
+  const tierMap: Record<number, { folder: string; base: string }> = {
+    0: { folder: "qualifying", base: "RankIcon_Qualifying" },
+    26: { folder: "master", base: "RankIcon_Master" },
+    27: { folder: "grandmaster", base: "RankIcon_Grandmaster" },
+  };
+
+  if (tierMap[displayTier]) {
+    return `/images/rank-tiers/${tierMap[displayTier].folder}/${tierMap[displayTier].base}.avif`;
+  }
+
+  // Tiers 1-25: sub-tier (1-5)
+  const sub = displayTier % 5 || 5;
+  const folderMap: Record<number, string> = {
+    1: "bronze", 2: "silver", 3: "gold", 4: "platinum", 5: "diamond",
+  };
+  const baseMap: Record<number, string> = {
+    1: "Bronze", 2: "Silver", 3: "Gold", 4: "Platinum", 5: "Diamond",
+  };
+  const group = Math.floor((displayTier - 1) / 5);
+  const folder = folderMap[group] || "bronze";
+  const base = baseMap[group] || "Bronze";
+  return `/images/rank-tiers/${folder}/RankIcon_${base}_${sub}.avif`;
+}
+
 function formatNumber(n: number | null | undefined): string {
   if (n == null || !Number.isFinite(n)) return "—";
   return n.toLocaleString();
@@ -229,8 +307,9 @@ export default function PlayerProfilePage() {
   const winRate = totalMatches > 0 ? (totalWins / totalMatches) * 100 : 0;
   const kbmRating = queueRatings.find((r) => r.queue_id === 486);
   const kbmMu = kbmRating ? Number(kbmRating.mu) : null;
-  const tierName = TIER_NAMES[player.kbm_tier] || "Unranked";
-  const tierColor = getTierColor(player.kbm_tier);
+  const effectiveTier = resolveEffectiveTier(player.kbm_tier, player.kbm_rank);
+  const tierColor = getTierColor(effectiveTier.displayTier);
+  const rankIcon = getRankIconPath(player.kbm_tier, player.kbm_rank);
   const kbmWr = player.kbm_wins + player.kbm_losses > 0
     ? ((player.kbm_wins / (player.kbm_wins + player.kbm_losses)) * 100).toFixed(1)
     : "—";
@@ -282,7 +361,10 @@ export default function PlayerProfilePage() {
             </div>
             {/* Meta badges */}
             <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
-              <span className={`text-[10px] font-semibold ${tierColor} bg-pc-bg px-1.5 py-0.5 rounded`}>{tierName}</span>
+              <span className={`text-[10px] font-semibold ${tierColor} bg-pc-bg px-1.5 py-0.5 rounded flex items-center gap-1`}>
+                <img src={rankIcon} alt={effectiveTier.displayName} className="w-4 h-4 object-contain" />
+                {effectiveTier.displayName}
+              </span>
               {player.kbm_points > 0 && (
                 <span className="text-[10px] text-pc-text-muted font-mono">{player.kbm_points} TP</span>
               )}
@@ -334,12 +416,12 @@ export default function PlayerProfilePage() {
               <div className="flex items-center gap-4 mb-3">
                 {/* Tier display */}
                 <div className="text-center">
-                  <div className={`text-2xl font-bold font-mono ${tierColor}`}>{tierName}</div>
+                  <img src={rankIcon} alt={effectiveTier.displayName} className="w-12 h-12 object-contain mx-auto" />
                   <div className="text-[10px] text-pc-text-muted mt-0.5">Season {player.kbm_season}</div>
                 </div>
                 <div className="flex-1 border-l border-pc-border/50 pl-4">
                   <StatGrid>
-                    <StatRow label="Rank" value={`#${player.kbm_rank}`} color="text-pc-accent" />
+                    <StatRow label="Rank" value={`#${effectiveTier.displayRank}`} color="text-pc-accent" />
                     <StatRow label="Prev Rank" value={`#${player.kbm_prev_rank}`} />
                     <StatRow label="Trend" value={`${trendArrow(player.kbm_trend)} ${Math.abs(player.kbm_trend)}`} color={trendColor(player.kbm_trend)} />
                     <StatRow label="Leaves" value={formatNumber(player.kbm_leaves)} />
