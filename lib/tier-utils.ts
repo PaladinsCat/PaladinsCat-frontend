@@ -90,8 +90,8 @@ export function getRankIconPath(kbmTier: number, kbmRank: number): string {
     return `/images/rank-tiers/${tierMap[displayTier].folder}/${tierMap[displayTier].base}.avif`;
   }
 
-  // Tiers 1-25: sub-tier (1-5)
-  const sub = displayTier % 5 || 5;
+  // Tiers 1-25: sub-tier (1-5), inverted — tier 1 = sub 5 (V), tier 5 = sub 1 (I)
+  const sub = 5 - (displayTier - 1) % 5;
   const folderMap: Record<number, string> = {
     1: "bronze", 2: "silver", 3: "gold", 4: "platinum", 5: "diamond",
   };
