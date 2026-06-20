@@ -196,80 +196,44 @@ export default function PlayersPage() {
           </div>
         </div>
 
-        {/* Right: Ranked Leaderboard + compact side-by-side cards */}
+        {/* Right: compact cards — all same format */}
         <div className="lg:w-2/5 space-y-4">
           {/* Ranked Leaderboard */}
           <section>
-            <div className="flex items-center justify-between mb-4 px-2">
-              <h2 className="text-lg font-bold text-pc-text">Ranked Leaderboard</h2>
+            <div className="flex items-center justify-between mb-2 px-2">
+              <h2 className="text-sm font-bold text-pc-text">Ranked Leaderboard</h2>
               <Link href="/players/leaderboard" className="text-[10px] text-pc-text-secondary hover:text-pc-accent transition-colors drop-shadow-sm">
                 Detail →
               </Link>
             </div>
-            <div className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
-              <div>
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-pc-border">
-                      <th className="text-left text-pc-text-muted font-medium py-2 px-3 w-8 text-xs">#</th>
-                      <th className="text-center text-pc-text-muted font-medium py-2 px-2 text-xs w-10">Rank</th>
-                      <th className="text-left text-pc-text-muted font-medium py-2 px-2 text-xs">Player</th>
-                      <th className="text-right text-pc-text-muted font-medium py-2 px-2 text-xs">+/−</th>
-                      <th className="text-right text-pc-text-muted font-medium py-2 px-4 text-xs">Pts</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rankedPlayers.length === 0 && (
-                      <tr>
-                        <td colSpan={5} className="py-4 px-3 text-center text-pc-text-muted text-xs">
-                          {overviewLoading ? "Loading..." : "No ranked leaderboard data"}
-                        </td>
-                      </tr>
-                    )}
-                    {rankedPlayers.map((p, i) => {
-                      const iconPath = getRankIconPath(p.tier, p.rank);
-                      const effective = resolveEffectiveTier(p.tier, p.rank);
-                      return (
-                      <tr key={p.player_id} className={`border-b border-pc-border/50 hover:bg-pc-bg/50 transition-colors ${i < 3 ? "bg-pc-bg/30" : ""}`}>
-                        <td className="py-1.5 px-3">
-                          {i === 0 ? (
-                            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-yellow-500/20 text-yellow-400 font-bold text-[11px]">🥇</span>
-                          ) : i === 1 ? (
-                            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-400/20 text-gray-300 font-bold text-[11px]">🥈</span>
-                          ) : i === 2 ? (
-                            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-600/20 text-amber-600 font-bold text-[11px]">🥉</span>
-                          ) : (
-                            <span className="inline-flex items-center justify-center w-6 h-6 text-pc-text-muted text-[11px]">{p.rank}</span>
-                          )}
-                        </td>
-                        <td className="py-1.5 px-2 text-center">
-                          <img
-                            src={iconPath}
-                            alt={effective.displayName}
-                            className="w-6 h-6 object-contain inline-block"
-                            title={effective.displayName}
-                          />
-                        </td>
-                        <td className="py-1.5 px-2">
-                          <Link href={`/players/${p.player_id}`} className="text-pc-text font-medium text-xs hover:text-pc-accent transition-colors">
-                            {p.name}
-                          </Link>
-                        </td>
-                        <td className="py-1.5 px-2 text-right">
-                          {p.trend != null && p.trend !== 0 ? (
-                            <span className={`text-[11px] ${p.trend > 0 ? "text-emerald-400" : "text-red-400"}`}>
-                              {p.trend > 0 ? "▲" : "▼"}{Math.abs(p.trend)}
-                            </span>
-                          ) : (
-                            <span className="text-pc-text-muted text-[11px]">—</span>
-                          )}
-                        </td>
-                        <td className="py-1.5 px-4 text-right text-pc-text font-medium text-xs">{p.points.toLocaleString()}</td>
-                      </tr>
-                    )}
-                    )}
-                  </tbody>
-                </table>
+            <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-3">
+              <div className="space-y-1.5">
+                {rankedPlayers.length === 0 && (
+                  <div className="text-[11px] text-pc-text-muted">{overviewLoading ? "Loading..." : "No ranked leaderboard data"}</div>
+                )}
+                {rankedPlayers.map((p, i) => {
+                  const iconPath = getRankIconPath(p.tier, p.rank);
+                  const effective = resolveEffectiveTier(p.tier, p.rank);
+                  return (
+                  <div key={p.player_id} className="flex items-center justify-between text-[11px]">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <RankBadge rank={i + 1} />
+                      <img src={iconPath} alt={effective.displayName} className="w-4 h-4 object-contain shrink-0" title={effective.displayName} />
+                      <Link href={`/players/${p.player_id}`} className="text-pc-text truncate hover:text-pc-accent transition-colors">{p.name}</Link>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {p.trend != null && p.trend !== 0 ? (
+                        <span className={p.trend > 0 ? "text-emerald-400" : "text-red-400"}>
+                          {p.trend > 0 ? "▲" : "▼"}{Math.abs(p.trend)}
+                        </span>
+                      ) : (
+                        <span className="text-pc-text-muted">—</span>
+                      )}
+                      <span className="text-pc-text font-medium">{p.points.toLocaleString()}</span>
+                    </div>
+                  </div>
+                  );
+                })}
               </div>
             </div>
           </section>
@@ -313,40 +277,21 @@ export default function PlayersPage() {
                   Detail →
                 </Link>
               </div>
-              <div className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
-                <table className="w-full text-[11px]">
-                  <thead>
-                    <tr className="border-b border-pc-border">
-                      <th className="text-left text-pc-text-muted font-medium py-1.5 px-2 w-6">#</th>
-                      <th className="text-left text-pc-text-muted font-medium py-1.5 px-2">Player</th>
-                      <th className="text-right text-pc-text-muted font-medium py-1.5 px-2">ELO</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {accountEloPlayers.length === 0 && (
-                      <tr>
-                        <td colSpan={3} className="py-3 px-2 text-center text-pc-text-muted text-[11px]">
-                          {overviewLoading ? "Loading..." : "No data"}
-                        </td>
-                      </tr>
-                    )}
-                    {accountEloPlayers.map((p) => (
-                      <tr key={`account-elo-${p.playerId}`} className="border-b border-pc-border/50 hover:bg-pc-bg/50 transition-colors">
-                        <td className="py-1 px-2">
-                          <RankBadge rank={p.rank} />
-                        </td>
-                        <td className="py-1 px-2">
-                          <Link href={`/players/${p.playerId}`} className="text-pc-text font-medium hover:text-pc-accent transition-colors truncate block">
-                            {p.playerName}
-                          </Link>
-                        </td>
-                        <td className="py-1 px-2 text-right text-pc-accent font-medium">
-                          {p.elo.toLocaleString()}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-3">
+                <div className="space-y-1.5">
+                  {accountEloPlayers.length === 0 && (
+                    <div className="text-[11px] text-pc-text-muted">{overviewLoading ? "Loading..." : "No data"}</div>
+                  )}
+                  {accountEloPlayers.map((p) => (
+                    <div key={`account-elo-${p.playerId}`} className="flex items-center justify-between text-[11px]">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <RankBadge rank={p.rank} />
+                        <Link href={`/players/${p.playerId}`} className="text-pc-text truncate hover:text-pc-accent transition-colors">{p.playerName}</Link>
+                      </div>
+                      <span className="text-pc-accent font-medium">{p.elo.toLocaleString()}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </section>
           </div>
