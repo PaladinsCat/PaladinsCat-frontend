@@ -4,10 +4,14 @@ import { useEffect, useMemo, useState, useRef } from "react";
 import Link from "next/link";
 import {
   fetchChampionElo,
+  fetchClassLeaderboard,
   type ChampionEloEntry,
+  type ClassLeaderboardEntry,
 } from "@/lib/api-client";
 import { STATIC_CHAMPIONS } from "@/lib/mock-data";
 import { getChampionIconSafe } from "@/lib/champion-icons";
+
+type ELOMode = "champion" | "account";
 
 const CLASS_ICONS: Record<string, string> = {
   Frontline: "/images/icons/Class_Front_Line_Icon.avif",
@@ -37,8 +41,10 @@ function RankBadge({ rank }: { rank: number }) {
 }
 
 export default function ChampionEloPage() {
+  const [eloMode, setEloMode] = useState<ELOMode>("champion");
   const [activeTab, setActiveTab] = useState<TabKey>("global");
   const [players, setPlayers] = useState<ChampionEloEntry[]>([]);
+  const [accountPlayers, setAccountPlayers] = useState<ClassLeaderboardEntry[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
 
@@ -122,6 +128,27 @@ export default function ChampionEloPage() {
     };
   }, [activeTab, selectedChampionId, activeRole]);
 
+  // Fetch account-level ELO when in account mode
+  useEffect(() => {
+    if (eloMode !== "account") return;
+    let cancelled = false;
+    setLoading(true);
+
+    fetchClassLeaderboard({ role: "Frontline", limit: 100, queueId: 486, mode: "account" })
+      .then((result) => {
+        if (cancelled) return;
+        setAccountPlayers(result);
+      })
+      .catch(() => {
+        if (!cancelled) setAccountPlayers([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => { cancelled = true; };
+  }, [eloMode]);
+
   // Reset champion selection when switching tabs
   const handleTabChange = (key: TabKey) => {
     setActiveTab(key);
@@ -155,18 +182,47 @@ export default function ChampionEloPage() {
       {/* Header */}
       <div>
         <Link href="/players" className="text-pc-accent text-xs hover:underline mb-2 inline-block">← Players</Link>
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">Champion ELO</h1>
+        <h1 className="pc-heading pc-heading-lg text-pc-accent">
+          {eloMode === "champion" ? "Champion ELO" : "Account ELO"}
+        </h1>
         <p className="text-pc-text-muted text-sm mt-2">
-          {selectedChampion
-            ? `Top players for ${selectedChampion.name}`
-            : activeTab === "global"
-              ? "Top 100 players by their best champion's Glicko-2 rating"
-              : `Top ${activeTab} players by their best champion's Glicko-2 rating`}
+          {eloMode === "account"
+            ? "Top players by their overall account Glicko-2 rating (all champions combined)"
+            : selectedChampion
+              ? `Top players for ${selectedChampion.name}`
+              : activeTab === "global"
+                ? "Top 100 players by their best champion's Glicko-2 rating"
+                : `Top ${activeTab} players by their best champion's Glicko-2 rating`}
           {total > 0 && <span className="text-pc-text-secondary ml-1">({total.toLocaleString()} rated)</span>}
         </p>
       </div>
 
+      {/* Mode toggle: Champion vs Account */}
+      <div className="flex gap-2">
+        <button
+          onClick={() => setEloMode("champion")}
+          className={`text-xs px-4 py-2 rounded-lg font-medium transition-colors ${
+            eloMode === "champion"
+              ? "bg-pc-accent/20 text-pc-accent border border-pc-accent/40"
+              : "bg-pc-bg-elevated text-pc-text-muted border border-pc-border hover:text-pc-text"
+          }`}
+        >
+          Champion ELO
+        </button>
+        <button
+          onClick={() => setEloMode("account")}
+          className={`text-xs px-4 py-2 rounded-lg font-medium transition-colors ${
+            eloMode === "account"
+              ? "bg-pc-accent/20 text-pc-accent border border-pc-accent/40"
+              : "bg-pc-bg-elevated text-pc-text-muted border border-pc-border hover:text-pc-text"
+          }`}
+        >
+          Account ELO
+        </button>
+      </div>
+
       {/* Tabs + Champion Dropdown + Search */}
+      {eloMode === "champion" && (
       <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4">
         <div className="flex flex-col sm:flex-row sm:items-center gap-3">
           {/* Class tabs */}
@@ -295,91 +351,162 @@ export default function ChampionEloPage() {
             </div>
           )}
         </div>
-      </div>
+      </div>)}
 
       {/* Table */}
-      {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <div className="text-pc-text-muted text-sm animate-pulse">Loading champion ELO...</div>
-        </div>
-      ) : players.length === 0 ? (
-        <div className="bg-pc-bg-elevated border border-pc-border rounded-xl text-center py-12">
-          <p className="text-pc-text-muted">
-            {selectedChampion
-              ? `No ELO data for ${selectedChampion.name} yet.`
-              : `No champion ELO data available.`}
-          </p>
-        </div>
-      ) : (
-        <div className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-pc-border">
-                  <th className="text-left text-pc-text-muted font-medium py-3 px-4 w-14">Rank</th>
-                  <th className="text-left text-pc-text-muted font-medium py-3 px-4">Player</th>
-                  <th className="text-left text-pc-text-muted font-medium py-3 px-4">Champion</th>
-                  <th className="text-left text-pc-text-muted font-medium py-3 px-4 hidden md:table-cell">Class</th>
-                  <th className="text-right text-pc-text-muted font-medium py-3 px-4">ELO</th>
-                  <th className="text-right text-pc-text-muted font-medium py-3 px-4">Win Rate</th>
-                  <th className="text-right text-pc-text-muted font-medium py-3 px-4 hidden md:table-cell">Matches</th>
-                  <th className="text-center text-pc-text-muted font-medium py-3 px-4 hidden lg:table-cell">Region</th>
-                </tr>
-              </thead>
-              <tbody>
-                {players.map((p, i) => (
-                  <tr
-                    key={`${p.player_id}-${p.champion_id}`}
-                    className={`border-b border-pc-border/50 hover:bg-pc-bg/60 transition-colors ${i < 3 ? "bg-pc-bg/30" : ""}`}
-                  >
-                    <td className="py-2.5 px-4">
-                      <RankBadge rank={p.rank} />
-                    </td>
-                    <td className="py-2.5 px-4">
-                      <Link href={`/players/${p.player_id}`} className="text-pc-text font-medium hover:text-pc-accent transition-colors">
-                        {p.player_name}
-                      </Link>
-                    </td>
-                    <td className="py-2.5 px-4">
-                      <div className="flex items-center gap-2">
-                        <img src={getChampionIconSafe(p.champion_name)} alt={p.champion_name} className="w-6 h-6 object-contain rounded" />
-                        <span className="text-pc-text-secondary text-xs">{p.champion_name}</span>
-                      </div>
-                    </td>
-                    <td className="py-2.5 px-4 hidden md:table-cell">
-                      <div className="flex items-center gap-1.5">
-                        {CLASS_ICONS[p.class_name] && (
-                          <img src={CLASS_ICONS[p.class_name]} alt={p.class_name} className="w-4 h-4" />
-                        )}
-                        <span className="text-pc-text-muted text-xs">{p.class_name}</span>
-                      </div>
-                    </td>
-                    <td className="py-2.5 px-4 text-right text-pc-accent font-bold">
-                      {Math.round(p.elo)}
-                    </td>
-                    <td className="py-2.5 px-4 text-right">
-                      {p.win_rate != null ? (
-                        <span className={p.win_rate >= 50 ? "text-emerald-400 font-medium" : "text-red-400"}>
-                          {p.win_rate.toFixed(1)}%
-                        </span>
-                      ) : (
-                        <span className="text-pc-text-muted">—</span>
-                      )}
-                    </td>
-                    <td className="py-2.5 px-4 text-right text-pc-text-secondary hidden md:table-cell">
-                      {p.total_matches.toLocaleString()}
-                    </td>
-                    <td className="py-2.5 px-4 text-center hidden lg:table-cell">
-                      <span className="text-xs px-2 py-0.5 rounded bg-pc-bg text-pc-text-muted">
-                        {p.region ?? "—"}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      {eloMode === "champion" ? (
+        loading ? (
+          <div className="flex items-center justify-center py-20">
+            <div className="text-pc-text-muted text-sm animate-pulse">Loading champion ELO...</div>
           </div>
-        </div>
+        ) : players.length === 0 ? (
+          <div className="bg-pc-bg-elevated border border-pc-border rounded-xl text-center py-12">
+            <p className="text-pc-text-muted">
+              {selectedChampion
+                ? `No ELO data for ${selectedChampion.name} yet.`
+                : `No champion ELO data available.`}
+            </p>
+          </div>
+        ) : (
+          <div className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-pc-border">
+                    <th className="text-left text-pc-text-muted font-medium py-3 px-4 w-14">Rank</th>
+                    <th className="text-left text-pc-text-muted font-medium py-3 px-4">Player</th>
+                    <th className="text-left text-pc-text-muted font-medium py-3 px-4">Champion</th>
+                    <th className="text-left text-pc-text-muted font-medium py-3 px-4 hidden md:table-cell">Class</th>
+                    <th className="text-right text-pc-text-muted font-medium py-3 px-4">ELO</th>
+                    <th className="text-right text-pc-text-muted font-medium py-3 px-4">Win Rate</th>
+                    <th className="text-right text-pc-text-muted font-medium py-3 px-4 hidden md:table-cell">Matches</th>
+                    <th className="text-center text-pc-text-muted font-medium py-3 px-4 hidden lg:table-cell">Region</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {players.map((p, i) => (
+                    <tr
+                      key={`${p.player_id}-${p.champion_id}`}
+                      className={`border-b border-pc-border/50 hover:bg-pc-bg/60 transition-colors ${i < 3 ? "bg-pc-bg/30" : ""}`}
+                    >
+                      <td className="py-2.5 px-4">
+                        <RankBadge rank={p.rank} />
+                      </td>
+                      <td className="py-2.5 px-4">
+                        <Link href={`/players/${p.player_id}`} className="text-pc-text font-medium hover:text-pc-accent transition-colors">
+                          {p.player_name}
+                        </Link>
+                      </td>
+                      <td className="py-2.5 px-4">
+                        <div className="flex items-center gap-2">
+                          <img src={getChampionIconSafe(p.champion_name)} alt={p.champion_name} className="w-6 h-6 object-contain rounded" />
+                          <span className="text-pc-text-secondary text-xs">{p.champion_name}</span>
+                        </div>
+                      </td>
+                      <td className="py-2.5 px-4 hidden md:table-cell">
+                        <div className="flex items-center gap-1.5">
+                          {CLASS_ICONS[p.class_name] && (
+                            <img src={CLASS_ICONS[p.class_name]} alt={p.class_name} className="w-4 h-4" />
+                          )}
+                          <span className="text-pc-text-muted text-xs">{p.class_name}</span>
+                        </div>
+                      </td>
+                      <td className="py-2.5 px-4 text-right text-pc-accent font-bold">
+                        {Math.round(p.elo)}
+                      </td>
+                      <td className="py-2.5 px-4 text-right">
+                        {p.win_rate != null ? (
+                          <span className={p.win_rate >= 50 ? "text-emerald-400 font-medium" : "text-red-400"}>
+                            {p.win_rate.toFixed(1)}%
+                          </span>
+                        ) : (
+                          <span className="text-pc-text-muted">—</span>
+                        )}
+                      </td>
+                      <td className="py-2.5 px-4 text-right text-pc-text-secondary hidden md:table-cell">
+                        {p.total_matches.toLocaleString()}
+                      </td>
+                      <td className="py-2.5 px-4 text-center hidden lg:table-cell">
+                        <span className="text-xs px-2 py-0.5 rounded bg-pc-bg text-pc-text-muted">
+                          {p.region ?? "—"}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )
+      ) : (
+        /* Account ELO table */
+        loading ? (
+          <div className="flex items-center justify-center py-20">
+            <div className="text-pc-text-muted text-sm animate-pulse">Loading account ELO...</div>
+          </div>
+        ) : accountPlayers.length === 0 ? (
+          <div className="bg-pc-bg-elevated border border-pc-border rounded-xl text-center py-12">
+            <p className="text-pc-text-muted">No account ELO data available.</p>
+          </div>
+        ) : (
+          <div className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-pc-border">
+                    <th className="text-left text-pc-text-muted font-medium py-3 px-4 w-14">Rank</th>
+                    <th className="text-left text-pc-text-muted font-medium py-3 px-4">Player</th>
+                    <th className="text-right text-pc-text-muted font-medium py-3 px-4">ELO</th>
+                    <th className="text-right text-pc-text-muted font-medium py-3 px-4">Win Rate</th>
+                    <th className="text-right text-pc-text-muted font-medium py-3 px-4 hidden md:table-cell">Matches</th>
+                    <th className="text-right text-pc-text-muted font-medium py-3 px-4 hidden md:table-cell">Wins</th>
+                    <th className="text-center text-pc-text-muted font-medium py-3 px-4 hidden lg:table-cell">Region</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {accountPlayers.map((p, i) => (
+                    <tr
+                      key={`account-${p.playerId}`}
+                      className={`border-b border-pc-border/50 hover:bg-pc-bg/60 transition-colors ${i < 3 ? "bg-pc-bg/30" : ""}`}
+                    >
+                      <td className="py-2.5 px-4">
+                        <RankBadge rank={p.rank} />
+                      </td>
+                      <td className="py-2.5 px-4">
+                        <Link href={`/players/${p.playerId}`} className="text-pc-text font-medium hover:text-pc-accent transition-colors">
+                          {p.playerName}
+                        </Link>
+                      </td>
+                      <td className="py-2.5 px-4 text-right text-pc-accent font-bold">
+                        {p.elo.toLocaleString()}
+                      </td>
+                      <td className="py-2.5 px-4 text-right">
+                        {p.winRate != null ? (
+                          <span className={p.winRate >= 50 ? "text-emerald-400 font-medium" : "text-red-400"}>
+                            {p.winRate.toFixed(1)}%
+                          </span>
+                        ) : (
+                          <span className="text-pc-text-muted">—</span>
+                        )}
+                      </td>
+                      <td className="py-2.5 px-4 text-right text-pc-text-secondary hidden md:table-cell">
+                        {p.totalMatches.toLocaleString()}
+                      </td>
+                      <td className="py-2.5 px-4 text-right text-pc-text-secondary hidden md:table-cell">
+                        {p.totalWins.toLocaleString()}
+                      </td>
+                      <td className="py-2.5 px-4 text-center hidden lg:table-cell">
+                        <span className="text-xs px-2 py-0.5 rounded bg-pc-bg text-pc-text-muted">
+                          {p.region ?? "—"}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )
       )}
     </div>
   );
