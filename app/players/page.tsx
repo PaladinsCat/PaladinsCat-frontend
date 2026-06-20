@@ -159,31 +159,31 @@ export default function PlayersPage() {
         {/* Left: Performance Stats 2×2 */}
         <div className="lg:w-3/5 space-y-4">
           <div className="flex items-center justify-between mb-2 px-2">
-            <h2 className="text-lg font-bold text-pc-text">Performance Stats</h2>
+            <h2 className="text-sm font-bold text-pc-text">Performance Stats</h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {PERFORMANCE_METRICS.map(({ key: stat }) => {
               const players = performanceLeaderboards[stat] ?? [];
               return (
               <div key={stat}>
                 <div className="flex items-center justify-between mb-2 px-2">
-                  <h3 className="text-pc-text font-semibold text-sm">{STAT_LABELS[stat] || stat}</h3>
+                  <h3 className="text-pc-text font-semibold text-[11px]">{STAT_LABELS[stat] || stat}</h3>
                   <Link href={`/players/stats/${stat}`} className="text-[10px] text-pc-text-secondary hover:text-pc-accent transition-colors drop-shadow-sm">
                     Detail →
                   </Link>
                 </div>
-                <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
-                  <div className="space-y-2">
+                <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-3 hover:border-pc-accent-mid transition-colors">
+                  <div className="space-y-1.5">
                     {players.length === 0 && (
-                      <div className="text-xs text-pc-text-muted">{overviewLoading ? "Loading..." : "No ranked data"}</div>
+                      <div className="text-[11px] text-pc-text-muted">{overviewLoading ? "Loading..." : "No ranked data"}</div>
                     )}
                     {players.map((p, i) => (
-                      <div key={`${stat}-${p.playerId}`} className="flex items-center justify-between text-xs">
-                        <div className="flex items-center gap-2 min-w-0">
+                      <div key={`${stat}-${p.playerId}`} className="flex items-center justify-between text-[11px]">
+                        <div className="flex items-center gap-1.5 min-w-0">
                           <RankBadge rank={i + 1} />
                           <Link href={`/players/${p.playerId}`} className="text-pc-text truncate hover:text-pc-accent transition-colors">{p.playerName}</Link>
                         </div>
-                        <div className="flex items-center gap-2 shrink-0">
+                        <div className="flex items-center gap-1 shrink-0">
                           <span className="text-pc-text-muted">{p.championName ?? p.className ?? ""}</span>
                           <span className="text-pc-accent font-medium">{p.value.toLocaleString()}</span>
                         </div>
@@ -196,50 +196,49 @@ export default function PlayersPage() {
           </div>
         </div>
 
-        {/* Right: compact cards — all same format */}
+        {/* Right: compact cards grid — all same format */}
         <div className="lg:w-2/5 space-y-4">
-          {/* Ranked Leaderboard */}
-          <section>
-            <div className="flex items-center justify-between mb-2 px-2">
-              <h2 className="text-sm font-bold text-pc-text">Ranked Leaderboard</h2>
-              <Link href="/players/leaderboard" className="text-[10px] text-pc-text-secondary hover:text-pc-accent transition-colors drop-shadow-sm">
-                Detail →
-              </Link>
-            </div>
-            <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-3">
-              <div className="space-y-1.5">
-                {rankedPlayers.length === 0 && (
-                  <div className="text-[11px] text-pc-text-muted">{overviewLoading ? "Loading..." : "No ranked leaderboard data"}</div>
-                )}
-                {rankedPlayers.map((p, i) => {
-                  const iconPath = getRankIconPath(p.tier, p.rank);
-                  const effective = resolveEffectiveTier(p.tier, p.rank);
-                  return (
-                  <div key={p.player_id} className="flex items-center justify-between text-[11px]">
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      <RankBadge rank={i + 1} />
-                      <img src={iconPath} alt={effective.displayName} className="w-4 h-4 object-contain shrink-0" title={effective.displayName} />
-                      <Link href={`/players/${p.player_id}`} className="text-pc-text truncate hover:text-pc-accent transition-colors">{p.name}</Link>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      {p.trend != null && p.trend !== 0 ? (
-                        <span className={p.trend > 0 ? "text-emerald-400" : "text-red-400"}>
-                          {p.trend > 0 ? "▲" : "▼"}{Math.abs(p.trend)}
-                        </span>
-                      ) : (
-                        <span className="text-pc-text-muted">—</span>
-                      )}
-                      <span className="text-pc-text font-medium">{p.points.toLocaleString()}</span>
-                    </div>
-                  </div>
-                  );
-                })}
+          <div className="grid grid-cols-2 gap-3">
+            {/* Ranked Leaderboard */}
+            <section>
+              <div className="flex items-center justify-between mb-2 px-2">
+                <h2 className="text-sm font-bold text-pc-text">Ranked Leaderboard</h2>
+                <Link href="/players/leaderboard" className="text-[10px] text-pc-text-secondary hover:text-pc-accent transition-colors drop-shadow-sm">
+                  Detail →
+                </Link>
               </div>
-            </div>
-          </section>
+              <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-3">
+                <div className="space-y-1.5">
+                  {rankedPlayers.length === 0 && (
+                    <div className="text-[11px] text-pc-text-muted">{overviewLoading ? "Loading..." : "No ranked leaderboard data"}</div>
+                  )}
+                  {rankedPlayers.map((p, i) => {
+                    const iconPath = getRankIconPath(p.tier, p.rank);
+                    const effective = resolveEffectiveTier(p.tier, p.rank);
+                    return (
+                    <div key={p.player_id} className="flex items-center justify-between text-[11px]">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <RankBadge rank={i + 1} />
+                        <img src={iconPath} alt={effective.displayName} className="w-4 h-4 object-contain shrink-0" title={effective.displayName} />
+                        <Link href={`/players/${p.player_id}`} className="text-pc-text truncate hover:text-pc-accent transition-colors">{p.name}</Link>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {p.trend != null && p.trend !== 0 ? (
+                          <span className={p.trend > 0 ? "text-emerald-400" : "text-red-400"}>
+                            {p.trend > 0 ? "▲" : "▼"}{Math.abs(p.trend)}
+                          </span>
+                        ) : (
+                          <span className="text-pc-text-muted">—</span>
+                        )}
+                        <span className="text-pc-text font-medium">{p.points.toLocaleString()}</span>
+                      </div>
+                    </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </section>
 
-          {/* Top Players by Champion + Account ELO side-by-side */}
-          <div className="grid grid-cols-2 gap-4">
             {/* Top Players by Champion */}
             <section>
               <div className="flex items-center justify-between mb-2 px-2">
@@ -301,15 +300,15 @@ export default function PlayersPage() {
 
       {/* ── Cheaters & Suspicious Players ── */}
       <section>
-        <h2 className="text-lg font-bold text-pc-text mb-4">Cheaters & Suspicious</h2>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <h2 className="text-sm font-bold text-pc-text mb-2">Cheaters & Suspicious</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
 
           {/* Confirmed Cheaters */}
           <div>
             <div className="flex items-center justify-between mb-2 px-2">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-red-500" />
-                <h3 className="text-pc-text font-semibold text-sm">Confirmed Cheaters</h3>
+                <h3 className="text-pc-text font-semibold text-[11px]">Confirmed Cheaters</h3>
                 <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/20">
                   {cheaterPlayers.length}
                 </span>
@@ -318,27 +317,26 @@ export default function PlayersPage() {
                 Detail →
               </Link>
             </div>
-            <div className="bg-pc-bg-elevated border border-red-500/20 rounded-xl p-4">
-              <div className="space-y-2">
+            <div className="bg-pc-bg-elevated border border-red-500/20 rounded-xl p-3">
+              <div className="space-y-1.5">
               {cheaterPlayers.length === 0 && (
-                <div className="text-xs text-pc-text-muted">{overviewLoading ? "Loading..." : "No confirmed cheaters"}</div>
+                <div className="text-[11px] text-pc-text-muted">{overviewLoading ? "Loading..." : "No confirmed cheaters"}</div>
               )}
               {cheaterPlayers.map((p) => (
-                <div key={p.id} className="flex items-start gap-3 p-2.5 rounded-lg bg-pc-bg/50">
-                  <div className="shrink-0 mt-1 w-2 h-2 rounded-full bg-red-500" />
+                <div key={p.id} className="flex items-start gap-2 p-2 rounded-lg bg-pc-bg/50">
+                  <div className="shrink-0 mt-0.5 w-1.5 h-1.5 rounded-full bg-red-500" />
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <Link href={`/players/${p.id}`} className="text-pc-text font-medium text-sm hover:text-pc-accent transition-colors truncate">
+                    <div className="flex items-center gap-1.5">
+                      <Link href={`/players/${p.id}`} className="text-pc-text font-medium text-[11px] hover:text-pc-accent transition-colors truncate">
                         {p.name}
                       </Link>
-                      <span className="shrink-0 text-[10px] px-1.5 py-0.5 rounded border bg-red-500/15 text-red-400 border-red-500/30">
+                      <span className="shrink-0 text-[10px] px-1 py-0.5 rounded border bg-red-500/15 text-red-400 border-red-500/30">
                         banned
                       </span>
                     </div>
-                    <p className="text-pc-text-muted text-xs mt-0.5">
+                    <p className="text-pc-text-muted text-[10px] mt-0.5">
                       {p.totalMatches.toLocaleString()} matches{p.winRate != null ? ` · ${p.winRate.toFixed(1)}% WR` : ""}
                     </p>
-                    <p className="text-pc-text-muted/50 text-[10px] mt-0.5">Suspicion count {p.susCount}</p>
                   </div>
                 </div>
               ))}
@@ -351,7 +349,7 @@ export default function PlayersPage() {
             <div className="flex items-center justify-between mb-2 px-2">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-amber-500" />
-                <h3 className="text-pc-text font-semibold text-sm">Suspicious Players</h3>
+                <h3 className="text-pc-text font-semibold text-[11px]">Suspicious Players</h3>
                 <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
                   {suspiciousPlayers.length}
                 </span>
@@ -360,27 +358,26 @@ export default function PlayersPage() {
                 Detail →
               </Link>
             </div>
-            <div className="bg-pc-bg-elevated border border-amber-500/20 rounded-xl p-4">
-              <div className="space-y-2">
+            <div className="bg-pc-bg-elevated border border-amber-500/20 rounded-xl p-3">
+              <div className="space-y-1.5">
               {suspiciousPlayers.length === 0 && (
-                <div className="text-xs text-pc-text-muted">{overviewLoading ? "Loading..." : "No suspicious players"}</div>
+                <div className="text-[11px] text-pc-text-muted">{overviewLoading ? "Loading..." : "No suspicious players"}</div>
               )}
               {suspiciousPlayers.map((p) => (
-                <div key={p.id} className="flex items-start gap-3 p-2.5 rounded-lg bg-pc-bg/50">
-                  <div className="shrink-0 mt-1 w-2 h-2 rounded-full bg-amber-500" />
+                <div key={p.id} className="flex items-start gap-2 p-2 rounded-lg bg-pc-bg/50">
+                  <div className="shrink-0 mt-0.5 w-1.5 h-1.5 rounded-full bg-amber-500" />
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <Link href={`/players/${p.id}`} className="text-pc-text font-medium text-sm hover:text-pc-accent transition-colors truncate">
+                    <div className="flex items-center gap-1.5">
+                      <Link href={`/players/${p.id}`} className="text-pc-text font-medium text-[11px] hover:text-pc-accent transition-colors truncate">
                         {p.name}
                       </Link>
-                      <span className="shrink-0 text-[10px] px-1.5 py-0.5 rounded border bg-amber-500/15 text-amber-400 border-amber-500/30">
+                      <span className="shrink-0 text-[10px] px-1 py-0.5 rounded border bg-amber-500/15 text-amber-400 border-amber-500/30">
                         {p.susCount} flags
                       </span>
                     </div>
-                    <p className="text-pc-text-muted text-xs mt-0.5">
+                    <p className="text-pc-text-muted text-[10px] mt-0.5">
                       {p.totalMatches.toLocaleString()} matches{p.winRate != null ? ` · ${p.winRate.toFixed(1)}% WR` : ""}
                     </p>
-                    <p className="text-pc-text-muted/50 text-[10px] mt-0.5">{p.region} · {p.platform}</p>
                   </div>
                 </div>
               ))}
