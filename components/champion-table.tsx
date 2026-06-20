@@ -54,14 +54,21 @@ export default function ChampionTable() {
         if (cancelled) return;
 
         if (data.length > 0) {
-          // DB is up — merge stats into the static base by champion name
-          const statsByName = new Map(data.map((d) => [d.name.toLowerCase(), d]));
+          // DB is up: merge stats into the guaranteed static champion list.
+          //
+          // The static fallback data predates the canonical reference import and
+          // has a few punctuation differences, most visibly "Mal Damba" vs the
+          // database/reference spelling "Mal'Damba".  Joining by the route slug
+          // keeps the visible list durable without requiring every fallback name
+          // to exactly match the live database string.
+          const statsByName = new Map(data.map((d) => [championSlug(d.name), d]));
           setChampions((prev) =>
             prev.map((c) => {
-              const dbData = statsByName.get(c.name.toLowerCase());
+              const dbData = statsByName.get(championSlug(c.name));
               if (dbData) {
                 return {
                   ...c,
+                  name: dbData.name || c.name,
                   winRate: dbData.winRate ?? c.winRate,
                   pickRate: dbData.pickRate ?? c.pickRate,
                   banRate: dbData.banRate ?? c.banRate,

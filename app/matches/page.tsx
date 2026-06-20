@@ -7,6 +7,8 @@ import {
   fetchMatchSearch,
   fetchRecentMatches,
   fetchMatchHourlyStats,
+  fetchDroppedMatchSummary,
+  fetchDroppedMatches,
   type MatchSearchResult,
   type MatchData,
   type MatchHourlyStats,
@@ -44,6 +46,8 @@ export default function MatchesPage() {
   const [referenceRegions, setReferenceRegions] = useState<Array<{ region?: string; region_code?: string; name?: string; region_name?: string }>>([]);
 
   const [hourlyStats, setHourlyStats] = useState<MatchHourlyStats | null>(null);
+  const [droppedByHour, setDroppedByHour] = useState<Record<string, number>>({});
+  const [droppedIdsByHour, setDroppedIdsByHour] = useState<Record<string, string[]>>({});
   const [statsLoading, setStatsLoading] = useState(true);
   const [tzOffset, setTzOffset] = useState(() => -new Date().getTimezoneOffset() / 60);
 
@@ -53,7 +57,39 @@ export default function MatchesPage() {
       setStatsLoading(true);
       try {
         const stats = await fetchMatchHourlyStats();
-        if (active) setHourlyStats(stats);
+        const dates = Array.from(new Set((stats.hourly ?? []).map((entry) => entry.date).filter(Boolean))) as string[];
+        const droppedSummaries = await Promise.all(
+          dates.map((date) => fetchDroppedMatchSummary({ date, queueId: Number(RANKED_QUEUE_ID) }).catch(() => null)),
+        );
+        const droppedLists = await Promise.all(
+          dates.map((date) => fetchDroppedMatches({
+            date,
+            queueId: Number(RANKED_QUEUE_ID),
+            status: "dropped",
+            limit: 500,
+            refresh: false,
+          }).catch(() => null)),
+        );
+        const nextDroppedByHour: Record<string, number> = {};
+        for (const day of droppedSummaries) {
+          if (!day) continue;
+          for (const entry of day.summary ?? []) {
+            nextDroppedByHour[`${day.date}|${entry.hour}`] = Number(entry.dropped ?? 0);
+          }
+        }
+        const nextDroppedIdsByHour: Record<string, string[]> = {};
+        for (const day of droppedLists) {
+          if (!day) continue;
+          for (const match of day.matches ?? []) {
+            const key = `${day.date}|${match.hour}`;
+            nextDroppedIdsByHour[key] = [...(nextDroppedIdsByHour[key] ?? []), String(match.match_id)];
+          }
+        }
+        if (active) {
+          setHourlyStats(stats);
+          setDroppedByHour(nextDroppedByHour);
+          setDroppedIdsByHour(nextDroppedIdsByHour);
+        }
       } catch {} finally {
         if (active) setStatsLoading(false);
       }
@@ -114,6 +150,12 @@ export default function MatchesPage() {
 
   const hourly = hourlyStats?.hourly ?? [];
   const maxHourly = Math.max(...hourly.map((h: any) => h.NA + h.EU), 1);
+  const droppedRows = hourly
+    .map((entry: any) => {
+      const ids = droppedIdsByHour[`${entry.date}|${entry.hour}`] ?? [];
+      return { ...entry, droppedIds: ids };
+    })
+    .filter((entry: any) => entry.droppedIds.length > 0);
 
   // Convert UTC hour to local time with offset
   const formatHour = (utcHour: number) => {
@@ -276,11 +318,14 @@ export default function MatchesPage() {
                   <span className="w-px h-3 bg-pc-border/30" />
                   <span className="flex-1 text-[10px] text-pc-text-muted font-medium text-center">EU</span>
                   <span className="w-px h-3 bg-pc-border/30" />
+                  <span className="w-8 text-[10px] text-pc-text-muted font-medium text-right">Drop</span>
+                  <span className="w-px h-3 bg-pc-border/30" />
                   <span className="w-8 text-[10px] text-pc-text-muted font-medium text-right">Σ</span>
                 </div>
                 {hourly.map((entry: any, idx: number) => {
                   const na = entry.NA ?? 0;
                   const eu = entry.EU ?? 0;
+                  const dropped = droppedByHour[`${entry.date}|${entry.hour}`] ?? 0;
                   const sum = na + eu;
                   const naW = maxHourly > 0 ? (na / maxHourly) * 100 : 0;
                   const euW = maxHourly > 0 ? (eu / maxHourly) * 100 : 0;
@@ -317,6 +362,12 @@ export default function MatchesPage() {
                         </span>
                       </div>
                       <span className="w-px h-3 bg-pc-border/20 shrink-0" />
+                      {/* Dropped/corrupt match debt is operator-visible only: this number is sourced from
+                         dropped_matches via the canonical debt ledger and must not drive any frontend fetch loop. */}
+                      <span className={`w-8 text-right text-xs font-mono shrink-0 ${dropped > 0 ? "text-amber-300" : "text-pc-text-muted/30"}`}>
+                        {dropped > 0 ? dropped : "-"}
+                      </span>
+                      <span className="w-px h-3 bg-pc-border/20 shrink-0" />
                       {/* Total */}
                       <span className={`w-8 text-right text-xs font-mono font-semibold shrink-0 ${now ? "text-pc-accent" : sum > 0 ? "text-pc-text" : "text-pc-text-muted/30"}`}>
                         {sum > 0 ? sum : "-"}
@@ -337,6 +388,35 @@ export default function MatchesPage() {
                     <div className="text-[10px] text-pc-text-muted">{r.matchesPerHour}/hr</div>
                   </div>
                 ))}
+              </div>
+            )}
+
+            {!statsLoading && droppedRows.length > 0 && (
+              <div className="mt-3 pt-3 border-t border-pc-border/50">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] uppercase tracking-wider text-amber-300/90">True dropped</span>
+                  <span className="text-[10px] text-pc-text-muted">
+                    {droppedRows.reduce((sum: number, row: any) => sum + row.droppedIds.length, 0)} IDs
+                  </span>
+                </div>
+                <div className="space-y-1">
+                  {droppedRows.map((row: any) => (
+                    <div key={`${row.date}|${row.hour}`} className="flex items-start gap-2 text-[11px]">
+                      <span className="w-10 shrink-0 text-right font-mono text-pc-text-muted">{formatHour(row.hour)}</span>
+                      <div className="flex flex-wrap gap-1">
+                        {row.droppedIds.map((id: string) => (
+                          <Link
+                            key={id}
+                            href={`/matches/${id}`}
+                            className="font-mono text-amber-200 hover:text-pc-accent transition-colors"
+                          >
+                            #{id}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>

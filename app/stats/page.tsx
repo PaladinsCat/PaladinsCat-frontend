@@ -8,14 +8,19 @@ import {
   fetchItems,
   fetchMapStats,
   fetchPerformanceMetrics,
+  fetchTiers,
   type Champion,
   type ItemStat,
   type MapStat,
+  type TierStat,
 } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
+import { getRankIconPath } from "@/lib/tier-utils";
+import { BellCurveChart } from "@/components/BellCurveChart";
 
 const ROLES = ["Frontline", "Damage", "Flank", "Support"] as const;
+const DETAIL_LINK_CLASS = "text-[10px] text-pc-text-secondary hover:text-pc-accent transition-colors drop-shadow-sm";
 
 type SortKey = "pickRate" | "winRate";
 type ItemCategory = "Defense" | "Utility" | "Healing" | "Offense";
@@ -23,11 +28,11 @@ type PageItemStat = { name: string; pickRate: number; winRate: number; category:
 type PageMapStat = { name: string; matches: number; avgDurationSeconds: number };
 
 const EMPTY_METRICS = {
-  dpm: { min: 0, max: 0, mean: 0, median: 0, mode: 0 },
-  hpm: { min: 0, max: 0, mean: 0, median: 0, mode: 0 },
-  gpm: { min: 0, max: 0, mean: 0, median: 0, mode: 0 },
-  mpm: { min: 0, max: 0, mean: 0, median: 0, mode: 0 },
-  kda: { min: 0, max: 0, mean: 0, median: 0, mode: 0 },
+  dpm: { p10: 0, p25: 0, p75: 0, p90: 0, mean: 0, median: 0, mode: 0 },
+  hpm: { p10: 0, p25: 0, p75: 0, p90: 0, mean: 0, median: 0, mode: 0 },
+  gpm: { p10: 0, p25: 0, p75: 0, p90: 0, mean: 0, median: 0, mode: 0 },
+  mpm: { p10: 0, p25: 0, p75: 0, p90: 0, mean: 0, median: 0, mode: 0 },
+  kda: { p10: 0, p25: 0, p75: 0, p90: 0, mean: 0, median: 0, mode: 0 },
 };
 
 const ITEM_CATEGORIES: Record<string, ItemCategory> = {
@@ -91,6 +96,7 @@ export default function StatsPage() {
   const [datasetCounts, setDatasetCounts] = useState({ matches: 0, players: 0 });
   const [items, setItems] = useState<PageItemStat[]>([]);
   const [maps, setMaps] = useState<PageMapStat[]>([]);
+  const [tiers, setTiers] = useState<TierStat[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -100,8 +106,10 @@ export default function StatsPage() {
         setMetrics((current) => ({
           ...current,
           ...Object.fromEntries(Object.entries(liveMetrics).map(([key, summary]) => [key, {
-            min: summary?.min ?? 0,
-            max: summary?.max ?? 0,
+            p10: summary?.p10 ?? 0,
+            p25: summary?.p25 ?? 0,
+            p75: summary?.p75 ?? 0,
+            p90: summary?.p90 ?? 0,
             mean: summary?.mean ?? 0,
             median: summary?.median ?? 0,
             mode: summary?.mode ?? 0,
@@ -119,6 +127,7 @@ export default function StatsPage() {
     fetchChampions().then(setChampions).catch(() => {});
     fetchItems({ mode: "ranked", limit: 50 }).then((rows) => setItems(mapItemStats(rows))).catch(() => {});
     fetchMapStats({ queueId: 486, limit: 25 }).then((rows) => setMaps(mapMapStats(rows))).catch(() => {});
+    fetchTiers({ source: "profiles" }).then(setTiers).catch(() => {});
     fetchDatabaseStats()
       .then((stats) => {
         if (!stats) return;
@@ -151,6 +160,18 @@ export default function StatsPage() {
   });
 
   const avgDurationSeconds = maps.reduce((sum, map) => sum + map.avgDurationSeconds * map.matches, 0) / Math.max(1, maps.reduce((sum, map) => sum + map.matches, 0));
+  const normalizedTiers = Array.from({ length: 27 }, (_, index) => {
+    const tierSort = index + 1;
+    return tiers.find((tier) => tier.tierSort === tierSort) ?? {
+      tier: tierSort === 27 ? "Grandmaster" : `Tier ${tierSort}`,
+      tierSort,
+      totalPlays: 0,
+      avgWinRate: 0,
+      percentage: 0,
+    };
+  });
+  const tierTotal = normalizedTiers.reduce((sum, tier) => sum + tier.totalPlays, 0);
+  const maxTierCount = Math.max(1, ...normalizedTiers.map((tier) => tier.totalPlays));
 
   return (
     <div className="space-y-8">
@@ -172,70 +193,28 @@ export default function StatsPage() {
             { key: "gpm", label: "Credits / Min", stroke: "#facc15", fill: "rgba(250,204,21,0.15)" },
             { key: "mpm", label: "Mitigation / Min", stroke: "#60a5fa", fill: "rgba(96,165,250,0.15)" },
             { key: "kda", label: "KDA Ratio", stroke: "#33b6b1", fill: "rgba(51,182,177,0.15)" },
-          ].map(({ key, label, stroke, fill }) => {
-            const d = metrics[key as keyof typeof metrics] as { min: number; max: number; mean: number; mode: number };
-            const range = Math.max(1, d.max - d.min);
-            const meanPct = (d.mean - d.min) / range;
-            const modePct = (d.mode - d.min) / range;
+          ].map(({ key, label, stroke }) => {
+            const d = metrics[key as keyof typeof metrics] as { p10: number; p25: number; p75: number; p90: number; mean: number; mode: number };
             const formatVal = key === "kda" ? (v: number) => v.toFixed(1) : (v: number) => v.toLocaleString();
 
-            // Generate bell curve points — skewed so mode != mean
-            const W = 280;
-            const H = 60;
-            const sigma = 0.18; // controls spread
-            const points: string[] = [];
-            for (let i = 0; i <= W; i++) {
-              const x = i / W;
-              // Blend two gaussians centered at mean and mode for a realistic skewed shape
-              const g1 = Math.exp(-0.5 * ((x - meanPct) / sigma) ** 2);
-              const g2 = Math.exp(-0.5 * ((x - modePct) / (sigma * 0.8)) ** 2);
-              const y = 0.6 * g1 + 0.4 * g2;
-              const px = i;
-              const py = H - y * (H - 4);
-              points.push(`${px},${py}`);
-            }
-            const linePath = `M0,${H} L${points.join(" L")} L${W},${H} Z`;
-
             return (
-              <div key={key} className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
-                {/* Header */}
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-pc-text font-semibold text-sm">{label}</span>
-                  <Link
-                    href={`/stats/${key}`}
-                    className="text-[10px] px-2 py-0.5 rounded bg-pc-bg text-pc-accent hover:bg-pc-accent hover:text-pc-bg transition-colors"
-                  >
+              <div key={key}>
+                <div className="flex items-center justify-between mb-2 px-2">
+                  <h3 className="text-pc-text font-semibold text-sm">{label}</h3>
+                  <Link href={`/stats/${key}`} className={DETAIL_LINK_CLASS}>
                     Detail →
                   </Link>
                 </div>
+                <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
 
-                {/* Bell curve SVG */}
-                <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-16 mb-1" preserveAspectRatio="none">
-                  <defs>
-                    <linearGradient id={`grad-${key}`} x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor={stroke} stopOpacity="0.3" />
-                      <stop offset="100%" stopColor={stroke} stopOpacity="0.02" />
-                    </linearGradient>
-                  </defs>
-                  {/* Fill */}
-                  <path d={linePath} fill={`url(#grad-${key})`} />
-                  {/* Stroke */}
-                  <path
-                    d={`M${points.join(" L")}`}
-                    fill="none"
-                    stroke={stroke}
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
-                  {/* Mean line */}
-                  <line x1={meanPct * W} y1="0" x2={meanPct * W} y2={H} stroke={stroke} strokeWidth="1.5" strokeDasharray="4 3" opacity="0.6" />
-                  {/* Mode line */}
-                  <line x1={modePct * W} y1="4" x2={modePct * W} y2={H} stroke="#6a6a71" strokeWidth="1" strokeDasharray="2 3" opacity="0.5" />
-                  {/* Mean dot */}
-                  <circle cx={meanPct * W} cy="2" r="3" fill={stroke} />
-                  {/* Mode dot */}
-                  <circle cx={modePct * W} cy="6" r="2.5" fill="#6a6a71" />
-                </svg>
+                <BellCurveChart
+                  mean={d.mean}
+                  mode={d.mode}
+                  p10={d.p10}
+                  p90={d.p90}
+                  stroke={stroke}
+                  height={110}
+                />
 
                 {/* Legend dots */}
                 <div className="flex items-center gap-4 mb-2">
@@ -247,12 +226,14 @@ export default function StatsPage() {
                   </span>
                 </div>
 
-                {/* Min / Mode / Mean / Max */}
+                {/* P10 / P25 / Mean / P75 / P90 */}
                 <div className="flex items-center justify-between text-[10px]">
-                  <span className="text-pc-text-muted">min <span className="text-pc-text-secondary">{formatVal(d.min)}</span></span>
-                  <span className="text-pc-text-muted">mode <span className="text-pc-text-secondary">{formatVal(d.mode)}</span></span>
+                  <span className="text-pc-text-muted">p10 <span className="text-pc-text-secondary">{formatVal(d.p10)}</span></span>
+                  <span className="text-pc-text-muted">p25 <span className="text-pc-text-secondary">{formatVal(d.p25)}</span></span>
                   <span className="text-pc-text-muted">mean <span className="font-bold" style={{ color: stroke }}>{formatVal(d.mean)}</span></span>
-                  <span className="text-pc-text-muted">max <span className="text-pc-text-secondary">{formatVal(d.max)}</span></span>
+                  <span className="text-pc-text-muted">p75 <span className="text-pc-text-secondary">{formatVal(d.p75)}</span></span>
+                  <span className="text-pc-text-muted">p90 <span className="text-pc-text-secondary">{formatVal(d.p90)}</span></span>
+                </div>
                 </div>
               </div>
             );
@@ -276,26 +257,78 @@ export default function StatsPage() {
         </div>
       </section>
 
+      {/* ── Ranked Tier Distribution ── */}
+      <section>
+        <div className="flex items-center justify-between gap-3 mb-4 px-2">
+          <h2 className="text-lg font-bold text-pc-text">Tier Distribution</h2>
+          <div className="text-xs text-pc-text-secondary">
+            {tierTotal.toLocaleString()} players
+          </div>
+        </div>
+        <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
+          <div className="flex items-end gap-1.5 h-40 overflow-x-auto pb-2">
+            {normalizedTiers.map((tier) => {
+              const height = Math.max(4, Math.round((tier.totalPlays / maxTierCount) * 116));
+              const rankIcon = getRankIconPath(tier.tierSort, tier.tierSort === 26 ? 101 : tier.tierSort === 27 ? 1 : 0);
+              return (
+                <div key={tier.tierSort} className="flex flex-col items-center justify-end gap-1 min-w-8 h-full group">
+                  <div className="text-[9px] text-pc-text-muted tabular-nums opacity-0 group-hover:opacity-100 transition-opacity">
+                    {tier.percentage.toFixed(1)}%
+                  </div>
+                  <div
+                    className="w-5 rounded-t-sm bg-pc-accent-mid group-hover:bg-pc-accent transition-colors"
+                    style={{ height }}
+                    title={`${tier.tier}: ${tier.totalPlays.toLocaleString()} (${tier.percentage.toFixed(1)}%)`}
+                  />
+                  <img
+                    src={rankIcon}
+                    alt={tier.tier}
+                    title={tier.tier}
+                    className="h-5 w-5 object-contain drop-shadow"
+                    loading="lazy"
+                  />
+                </div>
+              );
+            })}
+          </div>
+          <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+            {[
+              { label: "Ranked players", value: tierTotal },
+              { label: "Highest bucket", value: Math.max(...normalizedTiers.map((tier) => tier.totalPlays)) },
+              { label: "Tracked buckets", value: normalizedTiers.filter((tier) => tier.totalPlays > 0).length },
+              { label: "Tier range", value: normalizedTiers.length },
+            ].map((item) => (
+              <div key={item.label} className="pc-surface-light rounded-lg px-3 py-2">
+                <div className="text-pc-text-muted">{item.label}</div>
+                <div className="text-pc-text font-semibold tabular-nums">{item.value.toLocaleString()}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── Top Win Rate by Role ── */}
       <section>
-        <h2 className="text-lg font-bold text-pc-text mb-4">Top Win Rate by Class</h2>
-        <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-5">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="flex items-center justify-between gap-3 mb-4 px-2">
+          <h2 className="text-lg font-bold text-pc-text">Top Win Rate by Class</h2>
+          <Link href="/stats/winrate" className={DETAIL_LINK_CLASS}>Detail →</Link>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {ROLES.map((role) => {
               const inRole = champions.filter((c) => c.roles?.includes(role));
               const top = [...inRole].sort((a, b) => (b.winRate ?? 0) - (a.winRate ?? 0)).slice(0, 4);
               if (top.length === 0) return null;
               return (
-                <div key={role} className="space-y-3">
-                  <div className="flex items-center gap-2 pb-1 border-b border-pc-border">
+                <div key={role}>
+                  <div className="flex items-center gap-2 mb-2 px-2">
                     <img
                       src={role === "Frontline" ? "/images/icons/Class_Front_Line_Icon.avif" : `/images/icons/Class_${role}_Icon.avif`}
                       alt={role}
                       className="w-5 h-5"
                     />
-                    <span className="text-sm font-medium text-pc-text-muted">{role}</span>
+                    <h3 className="text-pc-text font-semibold text-sm">{role}</h3>
                   </div>
-                  <div className="space-y-2">
+                  <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors space-y-2">
                     {top.map((c, i) => (
                       <Link key={c.id} href={`/champions/${championSlug(c.name)}`} className="flex items-center gap-2 text-xs group">
                         <span className={`w-4 text-right shrink-0 ${i === 0 ? "text-yellow-400 font-bold" : "text-pc-text-muted"}`}>{i + 1}</span>
@@ -308,30 +341,31 @@ export default function StatsPage() {
                 </div>
               );
             })}
-          </div>
         </div>
       </section>
 
       {/* ── Most Banned by Role ── */}
       <section>
-        <h2 className="text-lg font-bold text-pc-text mb-4">Most Banned by Class</h2>
-        <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-5">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="flex items-center justify-between gap-3 mb-4 px-2">
+          <h2 className="text-lg font-bold text-pc-text">Most Banned by Class</h2>
+          <Link href="/stats/banrate" className={DETAIL_LINK_CLASS}>Detail →</Link>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {ROLES.map((role) => {
               const inRole = champions.filter((c) => c.roles?.includes(role));
               const top = [...inRole].sort((a, b) => (b.banRate ?? 0) - (a.banRate ?? 0)).slice(0, 4);
               if (top.length === 0) return null;
               return (
-                <div key={role} className="space-y-3">
-                  <div className="flex items-center gap-2 pb-1 border-b border-pc-border">
+                <div key={role}>
+                  <div className="flex items-center gap-2 mb-2 px-2">
                     <img
                       src={role === "Frontline" ? "/images/icons/Class_Front_Line_Icon.avif" : `/images/icons/Class_${role}_Icon.avif`}
                       alt={role}
                       className="w-5 h-5"
                     />
-                    <span className="text-sm font-medium text-pc-text-muted">{role}</span>
+                    <h3 className="text-pc-text font-semibold text-sm">{role}</h3>
                   </div>
-                  <div className="space-y-2">
+                  <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors space-y-2">
                     {top.map((c, i) => (
                       <Link key={c.id} href={`/champions/${championSlug(c.name)}`} className="flex items-center gap-2 text-xs group">
                         <span className={`w-4 text-right shrink-0 ${i === 0 ? "text-yellow-400 font-bold" : "text-pc-text-muted"}`}>{i + 1}</span>
@@ -344,7 +378,6 @@ export default function StatsPage() {
                 </div>
               );
             })}
-          </div>
         </div>
       </section>
 

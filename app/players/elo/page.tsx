@@ -1,8 +1,30 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import Link from "next/link";
-import { fetchClassLeaderboard, type ClassLeaderboardEntry } from "@/lib/api-client";
+import {
+  fetchChampionElo,
+  type ChampionEloEntry,
+} from "@/lib/api-client";
+import { STATIC_CHAMPIONS } from "@/lib/mock-data";
+import { getChampionIconSafe } from "@/lib/champion-icons";
+
+const CLASS_ICONS: Record<string, string> = {
+  Frontline: "/images/icons/Class_Front_Line_Icon.avif",
+  Damage: "/images/icons/Class_Damage_Icon.avif",
+  Flank: "/images/icons/Class_Flank_Icon.avif",
+  Support: "/images/icons/Class_Support_Icon.avif",
+};
+
+const TABS = [
+  { key: "global", label: "Global", role: undefined },
+  { key: "Frontline", label: "Frontline", role: "Frontline" },
+  { key: "Damage", label: "Damage", role: "Damage" },
+  { key: "Flank", label: "Flank", role: "Flank" },
+  { key: "Support", label: "Support", role: "Support" },
+] as const;
+
+type TabKey = (typeof TABS)[number]["key"];
 
 function RankBadge({ rank }: { rank: number }) {
   if (rank === 1)
@@ -14,103 +36,278 @@ function RankBadge({ rank }: { rank: number }) {
   return <span className="inline-flex items-center justify-center w-7 h-7 text-pc-text-muted text-sm">{rank}</span>;
 }
 
-export default function AccountEloPage() {
-  const [players, setPlayers] = useState<ClassLeaderboardEntry[]>([]);
+export default function ChampionEloPage() {
+  const [activeTab, setActiveTab] = useState<TabKey>("global");
+  const [players, setPlayers] = useState<ChampionEloEntry[]>([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
 
+  // Champion dropdown state (only shown within a class tab)
+  const [selectedChampionId, setSelectedChampionId] = useState<number | null>(null);
+  const [championSearch, setChampionSearch] = useState("");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const activeRole = TABS.find((t) => t.key === activeTab)?.role;
+
+  // Build champion name → real ID mapping from ELO data
+  const championNameToId = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const p of players) {
+      map.set(p.champion_name.toLowerCase(), p.champion_id);
+    }
+    return map;
+  }, [players]);
+
+  // Champions filtered by active class (from STATIC_CHAMPIONS)
+  const classChampions = useMemo(() => {
+    if (!activeRole) return [];
+    return STATIC_CHAMPIONS.filter((c) => {
+      const roles = Array.isArray(c.roles) ? c.roles : [c.roles];
+      return roles.some((r) => r.toLowerCase() === activeRole.toLowerCase());
+    }).sort((a, b) => a.name.localeCompare(b.name));
+  }, [activeRole]);
+
+  // Filtered champions for dropdown search
+  const filteredChampions = useMemo(() => {
+    const q = championSearch.trim().toLowerCase();
+    if (!q) return classChampions;
+    return classChampions.filter((c) => c.name.toLowerCase().includes(q));
+  }, [classChampions, championSearch]);
+
+  // Close dropdown on outside click
   useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      setLoading(true);
-      setError(null);
-      try {
-        /*
-         * Account ELO is one row per player from player_queue_ratings. The
-         * shared backend endpoint still validates a role parameter because its
-         * original contract was class/champion ELO; mode=account intentionally
-         * ignores that role so this page does not mix champion dimensions into
-         * the account leaderboard.
-         */
-        const data = await fetchClassLeaderboard({
-          role: "Frontline",
-          limit: 100,
-          queueId: 486,
-          mode: "account",
-        });
-        if (!cancelled) setPlayers(data);
-      } catch {
-        if (!cancelled) setError("Failed to load account ELO leaderboard.");
-      } finally {
-        if (!cancelled) setLoading(false);
+    function handleClick(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
       }
     }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
 
-    load();
+  // Fetch data when tab or champion changes
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+
+    const params: { role?: string; championId?: number; limit: number; queueId: number } = {
+      limit: 100,
+      queueId: 486,
+    };
+
+    if (selectedChampionId) {
+      params.championId = selectedChampionId;
+    } else if (activeRole) {
+      params.role = activeRole;
+    }
+
+    fetchChampionElo(params)
+      .then((result) => {
+        if (cancelled) return;
+        setPlayers(result.data);
+        setTotal(result.total);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setPlayers([]);
+        setTotal(0);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [activeTab, selectedChampionId, activeRole]);
 
-  const filtered = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
-    if (!query) return players;
-    return players.filter((p) => p.playerName.toLowerCase().includes(query));
-  }, [players, searchQuery]);
+  // Reset champion selection when switching tabs
+  const handleTabChange = (key: TabKey) => {
+    setActiveTab(key);
+    setSelectedChampionId(null);
+    setChampionSearch("");
+    setDropdownOpen(false);
+  };
+
+  const handleSelectChampion = (championId: number) => {
+    // Convert STATIC_CHAMPIONS mock ID to real ID via name mapping
+    const champ = STATIC_CHAMPIONS.find((c) => c.id === championId);
+    if (champ) {
+      const realId = championNameToId.get(champ.name.toLowerCase());
+      setSelectedChampionId(realId ?? championId);
+      setChampionSearch(champ.name);
+      setDropdownOpen(false);
+    }
+  };
+
+  const handleClearChampion = () => {
+    setSelectedChampionId(null);
+    setChampionSearch("");
+  };
+
+  const selectedChampion = selectedChampionId
+    ? STATIC_CHAMPIONS.find((c) => championNameToId.get(c.name.toLowerCase()) === selectedChampionId)
+    : null;
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div>
         <Link href="/players" className="text-pc-accent text-xs hover:underline mb-2 inline-block">← Players</Link>
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">Account ELO</h1>
+        <h1 className="pc-heading pc-heading-lg text-pc-accent">Champion ELO</h1>
         <p className="text-pc-text-muted text-sm mt-2">
-          Ranked account ratings from completed match snapshots.
+          {selectedChampion
+            ? `Top players for ${selectedChampion.name}`
+            : activeTab === "global"
+              ? "Top 100 players by their best champion's Glicko-2 rating"
+              : `Top ${activeTab} players by their best champion's Glicko-2 rating`}
+          {total > 0 && <span className="text-pc-text-secondary ml-1">({total.toLocaleString()} rated)</span>}
         </p>
       </div>
 
+      {/* Tabs + Champion Dropdown + Search */}
       <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <h2 className="text-pc-text font-semibold text-sm">Leaderboard</h2>
-            <p className="text-pc-text-muted text-xs mt-0.5">
-              {filtered.length} player{filtered.length !== 1 ? "s" : ""}
-            </p>
-          </div>
-          <div className="relative w-full sm:w-72">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Filter players..."
-              className="pc-input pr-8 w-full text-sm"
-            />
-            {searchQuery && (
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          {/* Class tabs */}
+          <div className="flex flex-wrap gap-2">
+            {TABS.map((tab) => (
               <button
-                onClick={() => setSearchQuery("")}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-pc-text-muted hover:text-pc-text text-xs"
-                aria-label="Clear search"
+                key={tab.key}
+                onClick={() => handleTabChange(tab.key)}
+                className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-colors ${
+                  activeTab === tab.key
+                    ? "bg-pc-accent text-pc-bg font-medium"
+                    : "bg-pc-card text-pc-text-muted hover:text-pc-text"
+                }`}
               >
-                ✕
+                {tab.role && (
+                  <img src={CLASS_ICONS[tab.role]} alt={tab.role} className="w-4 h-4" />
+                )}
+                {tab.label}
               </button>
-            )}
+            ))}
           </div>
+
+          {/* Champion dropdown (only in class tabs) */}
+          {activeRole && (
+            <div className="flex items-center gap-2 ml-auto" ref={dropdownRef}>
+              <div className="relative">
+                <button
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-pc-card text-pc-text-muted hover:text-pc-text border border-pc-border transition-colors"
+                >
+                  {selectedChampion ? (
+                    <>
+                      <img src={getChampionIconSafe(selectedChampion.name)} alt={selectedChampion.name} className="w-4 h-4 object-contain" />
+                      {selectedChampion.name}
+                    </>
+                  ) : (
+                    "All Champions"
+                  )}
+                  <span className="text-[10px] ml-1">▾</span>
+                </button>
+
+                {dropdownOpen && (
+                  <div className="absolute top-full left-0 mt-1 w-56 bg-pc-bg-elevated border border-pc-border rounded-xl shadow-lg z-50 overflow-hidden">
+                    {/* Search inside dropdown */}
+                    <div className="p-2 border-b border-pc-border">
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={championSearch}
+                          onChange={(e) => setChampionSearch(e.target.value)}
+                          placeholder="Search champion..."
+                          className="pc-input pr-6 w-full text-xs"
+                          autoFocus
+                        />
+                        {championSearch && (
+                          <button
+                            onClick={() => setChampionSearch("")}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 text-pc-text-muted hover:text-pc-text text-[10px]"
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    <div className="max-h-64 overflow-y-auto">
+                      {/* "All" option */}
+                      <button
+                        onClick={() => { setSelectedChampionId(null); setChampionSearch(""); setDropdownOpen(false); }}
+                        className={`w-full text-left text-xs px-3 py-2 hover:bg-pc-bg/50 transition-colors flex items-center gap-2 ${
+                          !selectedChampionId ? "text-pc-accent bg-pc-accent/10" : "text-pc-text"
+                        }`}
+                      >
+                        All {activeRole} Champions
+                      </button>
+                      {filteredChampions.map((c) => (
+                        <button
+                          key={c.id}
+                          onClick={() => handleSelectChampion(c.id)}
+                          className={`w-full text-left text-xs px-3 py-2 hover:bg-pc-bg/50 transition-colors flex items-center gap-2 ${
+                            selectedChampionId === c.id ? "text-pc-accent bg-pc-accent/10" : "text-pc-text"
+                          }`}
+                        >
+                          <img src={getChampionIconSafe(c.name)} alt={c.name} className="w-5 h-5 object-contain rounded" />
+                          {c.name}
+                        </button>
+                      ))}
+                      {filteredChampions.length === 0 && (
+                        <div className="text-xs text-pc-text-muted px-3 py-2">No champions found</div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Champion search bar */}
+              <div className="relative w-48">
+                <input
+                  type="text"
+                  value={championSearch}
+                  onChange={(e) => {
+                    setChampionSearch(e.target.value);
+                    // If typing matches a champion exactly, auto-select
+                    const match = classChampions.find(
+                      (c) => c.name.toLowerCase() === e.target.value.trim().toLowerCase()
+                    );
+                    if (match) {
+                      const realId = championNameToId.get(match.name.toLowerCase());
+                      setSelectedChampionId(realId ?? match.id);
+                      setDropdownOpen(false);
+                    }
+                  }}
+                  onFocus={() => setDropdownOpen(true)}
+                  placeholder="Search champion..."
+                  className="pc-input pr-8 w-full text-xs"
+                />
+                {championSearch && (
+                  <button
+                    onClick={handleClearChampion}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-pc-text-muted hover:text-pc-text text-xs"
+                    aria-label="Clear search"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
+      {/* Table */}
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <div className="text-pc-text-muted text-sm animate-pulse">Loading account ELO...</div>
+          <div className="text-pc-text-muted text-sm animate-pulse">Loading champion ELO...</div>
         </div>
-      ) : error ? (
-        <div className="bg-pc-bg-elevated border border-pc-border rounded-xl text-center py-12">
-          <p className="text-pc-text-muted">{error}</p>
-        </div>
-      ) : filtered.length === 0 ? (
+      ) : players.length === 0 ? (
         <div className="bg-pc-bg-elevated border border-pc-border rounded-xl text-center py-12">
           <p className="text-pc-text-muted">
-            {searchQuery ? `No players matching "${searchQuery}".` : "No account ELO data available."}
+            {selectedChampion
+              ? `No ELO data for ${selectedChampion.name} yet.`
+              : `No champion ELO data available.`}
           </p>
         </div>
       ) : (
@@ -121,44 +318,56 @@ export default function AccountEloPage() {
                 <tr className="border-b border-pc-border">
                   <th className="text-left text-pc-text-muted font-medium py-3 px-4 w-14">Rank</th>
                   <th className="text-left text-pc-text-muted font-medium py-3 px-4">Player</th>
+                  <th className="text-left text-pc-text-muted font-medium py-3 px-4">Champion</th>
+                  <th className="text-left text-pc-text-muted font-medium py-3 px-4 hidden md:table-cell">Class</th>
                   <th className="text-right text-pc-text-muted font-medium py-3 px-4">ELO</th>
                   <th className="text-right text-pc-text-muted font-medium py-3 px-4">Win Rate</th>
                   <th className="text-right text-pc-text-muted font-medium py-3 px-4 hidden md:table-cell">Matches</th>
-                  <th className="text-right text-pc-text-muted font-medium py-3 px-4 hidden md:table-cell">Wins</th>
                   <th className="text-center text-pc-text-muted font-medium py-3 px-4 hidden lg:table-cell">Region</th>
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((p, i) => (
+                {players.map((p, i) => (
                   <tr
-                    key={`account-elo-${p.playerId}`}
+                    key={`${p.player_id}-${p.champion_id}`}
                     className={`border-b border-pc-border/50 hover:bg-pc-bg/60 transition-colors ${i < 3 ? "bg-pc-bg/30" : ""}`}
                   >
                     <td className="py-2.5 px-4">
                       <RankBadge rank={p.rank} />
                     </td>
                     <td className="py-2.5 px-4">
-                      <Link href={`/players/${p.playerId}`} className="text-pc-text font-medium hover:text-pc-accent transition-colors">
-                        {p.playerName}
+                      <Link href={`/players/${p.player_id}`} className="text-pc-text font-medium hover:text-pc-accent transition-colors">
+                        {p.player_name}
                       </Link>
                     </td>
+                    <td className="py-2.5 px-4">
+                      <div className="flex items-center gap-2">
+                        <img src={getChampionIconSafe(p.champion_name)} alt={p.champion_name} className="w-6 h-6 object-contain rounded" />
+                        <span className="text-pc-text-secondary text-xs">{p.champion_name}</span>
+                      </div>
+                    </td>
+                    <td className="py-2.5 px-4 hidden md:table-cell">
+                      <div className="flex items-center gap-1.5">
+                        {CLASS_ICONS[p.class_name] && (
+                          <img src={CLASS_ICONS[p.class_name]} alt={p.class_name} className="w-4 h-4" />
+                        )}
+                        <span className="text-pc-text-muted text-xs">{p.class_name}</span>
+                      </div>
+                    </td>
                     <td className="py-2.5 px-4 text-right text-pc-accent font-bold">
-                      {p.elo.toLocaleString()}
+                      {Math.round(p.elo)}
                     </td>
                     <td className="py-2.5 px-4 text-right">
-                      {p.winRate != null ? (
-                        <span className={p.winRate >= 50 ? "text-emerald-400 font-medium" : "text-red-400"}>
-                          {p.winRate.toFixed(1)}%
+                      {p.win_rate != null ? (
+                        <span className={p.win_rate >= 50 ? "text-emerald-400 font-medium" : "text-red-400"}>
+                          {p.win_rate.toFixed(1)}%
                         </span>
                       ) : (
                         <span className="text-pc-text-muted">—</span>
                       )}
                     </td>
                     <td className="py-2.5 px-4 text-right text-pc-text-secondary hidden md:table-cell">
-                      {p.totalMatches.toLocaleString()}
-                    </td>
-                    <td className="py-2.5 px-4 text-right text-pc-text-secondary hidden md:table-cell">
-                      {p.totalWins.toLocaleString()}
+                      {p.total_matches.toLocaleString()}
                     </td>
                     <td className="py-2.5 px-4 text-center hidden lg:table-cell">
                       <span className="text-xs px-2 py-0.5 rounded bg-pc-bg text-pc-text-muted">

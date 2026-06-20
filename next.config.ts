@@ -11,6 +11,8 @@ const nextConfig: NextConfig = {
     return [
       { source: "/stats/:path*", destination: `${apiDestination}/stats/:path*` },
       { source: "/api/:path*", destination: `${apiDestination}/api/:path*` },
+      { source: "/players/:path*", destination: `${apiDestination}/players/:path*` },
+      { source: "/champions/:path*", destination: `${apiDestination}/champions/:path*` },
     ];
   },
 };

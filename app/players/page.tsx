@@ -8,21 +8,17 @@ import {
   fetchPerformanceLeaderboard,
   fetchPlayerSearch,
   fetchRankedLeaderboard,
+  fetchChampionElo,
   type CheaterPlayer,
   type ClassLeaderboardEntry,
   type PerformanceLeaderboardEntry,
   type PlayerSearchResult,
   type RankedPlayer,
+  type ChampionEloEntry,
 } from "@/lib/api-client";
 import ScrambleText from "@/components/ScrambleText";
 import { getRankIconPath, resolveEffectiveTier } from "@/lib/tier-utils";
-
-const CLASS_ICONS: Record<string, string> = {
-  Frontline: "/images/icons/Class_Front_Line_Icon.avif",
-  Damage: "/images/icons/Class_Damage_Icon.avif",
-  Flank: "/images/icons/Class_Flank_Icon.avif",
-  Support: "/images/icons/Class_Support_Icon.avif",
-};
+import { getChampionIconSafe } from "@/lib/champion-icons";
 
 const STAT_LABELS: Record<string, string> = {
   gpm: "Credits / Min",
@@ -31,7 +27,6 @@ const STAT_LABELS: Record<string, string> = {
   mpm: "Mitigation / Min",
 };
 
-const ROLES = ["Frontline", "Damage", "Flank", "Support"] as const;
 const PERFORMANCE_METRICS = [
   { key: "gpm", metric: "gpm" },
   { key: "hpm", metric: "hpm" },
@@ -51,7 +46,7 @@ export default function PlayersPage() {
   const [results, setResults] = useState<PlayerSearchResult[]>([]);
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
-  const [classLeaderboards, setClassLeaderboards] = useState<Record<string, ClassLeaderboardEntry[]>>({});
+  const [championEloPlayers, setChampionEloPlayers] = useState<ChampionEloEntry[]>([]);
   const [performanceLeaderboards, setPerformanceLeaderboards] = useState<Record<string, PerformanceLeaderboardEntry[]>>({});
   const [rankedPlayers, setRankedPlayers] = useState<RankedPlayer[]>([]);
   const [accountEloPlayers, setAccountEloPlayers] = useState<ClassLeaderboardEntry[]>([]);
@@ -64,23 +59,17 @@ export default function PlayersPage() {
 
     async function loadOverview() {
       setOverviewLoading(true);
-      const [classRows, performanceRows, ranked, accountElo, cheaters, suspicious] = await Promise.all([
-        Promise.all(ROLES.map(async (role) => [role, await fetchClassLeaderboard({ role, limit: 5, queueId: 486 })] as const)),
+      const [championEloResult, performanceRows, ranked, accountElo, cheaters, suspicious] = await Promise.all([
+        fetchChampionElo({ limit: 10, queueId: 486 }),
         Promise.all(PERFORMANCE_METRICS.map(async ({ key, metric }) => [key, await fetchPerformanceLeaderboard({ metric, limit: 5, queueId: 486 })] as const)),
         fetchRankedLeaderboard({ tier: "26", top: 10 }),
-        /*
-         * Account ELO comes from player_queue_ratings, while the four class
-         * cards above come from player_champion_ratings. The backend still
-         * requires a role query parameter for this shared endpoint, but ignores
-         * it in account mode so the account list stays one row per player.
-         */
         fetchClassLeaderboard({ role: "Frontline", limit: 10, queueId: 486, mode: "account" }),
         fetchCheaterPlayers({ cheater: true, limit: 5 }),
         fetchCheaterPlayers({ susOnly: true, limit: 5 }),
       ]);
 
       if (cancelled) return;
-      setClassLeaderboards(Object.fromEntries(classRows));
+      setChampionEloPlayers(championEloResult.data);
       setPerformanceLeaderboards(Object.fromEntries(performanceRows));
       setRankedPlayers(ranked);
       setAccountEloPlayers(accountElo);
@@ -167,46 +156,33 @@ export default function PlayersPage() {
       {/* ── Main Content: Class LB (left) + Ranked LB (right) ── */}
       <div className="flex flex-col lg:flex-row gap-6">
 
-        {/* Left: Class Leaderboards 2×2 + Performance Stats */}
+        {/* Left: Top Players by Champion + Performance Stats */}
         <div className="lg:w-3/5 space-y-4">
           <div className="flex items-center justify-between mb-4 px-2">
-              <h2 className="text-lg font-bold text-pc-text">Top Players by Class</h2>
+              <h2 className="text-lg font-bold text-pc-text">Top Players by Champion</h2>
+              <Link href="/players/elo" className="text-[10px] text-pc-text-secondary hover:text-pc-accent transition-colors drop-shadow-sm">
+                Detail →
+              </Link>
             </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {ROLES.map((role) => {
-              const players = classLeaderboards[role] ?? [];
-              return (
-              <div key={role}>
-                <div className="flex items-center justify-between mb-2 px-2">
-                  <div className="flex items-center gap-2">
-                    <img src={CLASS_ICONS[role]} alt={role} className="w-5 h-5" />
-                    <h3 className="text-pc-text font-semibold text-sm">{role}</h3>
+          <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
+            <div className="space-y-2">
+              {championEloPlayers.length === 0 && (
+                <div className="text-xs text-pc-text-muted">{overviewLoading ? "Loading..." : "No champion ELO data"}</div>
+              )}
+              {championEloPlayers.map((p, i) => (
+                <div key={`champ-elo-${p.player_id}`} className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <RankBadge rank={i + 1} />
+                    <Link href={`/players/${p.player_id}`} className="text-pc-text truncate hover:text-pc-accent transition-colors">{p.player_name}</Link>
                   </div>
-                  <Link href={`/players/class/${role}`} className="text-[10px] text-pc-text-secondary hover:text-pc-accent transition-colors drop-shadow-sm">
-                    Detail →
-                  </Link>
-                </div>
-                <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
-                  <div className="space-y-2">
-                  {players.length === 0 && (
-                    <div className="text-xs text-pc-text-muted">{overviewLoading ? "Loading..." : "No ranked data"}</div>
-                  )}
-                  {players.map((p, i) => (
-                    <div key={`${role}-${p.playerId}`} className="flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <RankBadge rank={i + 1} />
-                        <Link href={`/players/${p.playerId}`} className="text-pc-text truncate hover:text-pc-accent transition-colors">{p.playerName}</Link>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className="text-pc-text-muted">{p.championName}</span>
-                        <span className="text-emerald-400 font-medium">{p.winRate != null ? `${p.winRate.toFixed(1)}%` : "--"}</span>
-                      </div>
-                    </div>
-                  ))}
+                  <div className="flex items-center gap-2 shrink-0">
+                    <img src={getChampionIconSafe(p.champion_name)} alt={p.champion_name} className="w-5 h-5 object-contain rounded" />
+                    <span className="text-pc-text-muted">{p.champion_name}</span>
+                    <span className="text-pc-accent font-medium">{Math.round(p.elo)}</span>
                   </div>
                 </div>
-              </div>
-            )})}
+              ))}
+            </div>
           </div>
 
           {/* Performance Stats 2×2 */}

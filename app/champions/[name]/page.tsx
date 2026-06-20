@@ -20,8 +20,7 @@ import { fetchChampionLeaderboard, type ChampionLeaderboardEntry } from "@/lib/a
 
 // Placeholder types for future DB integration
 interface ChampionStats {
-  avgMu: number | null;
-  avgPhi: number | null;
+  avgRating: number | null;
   avgWinRate: number | null;
   totalPlays: number | null;
   totalMatches: number | null;
@@ -84,37 +83,50 @@ export default function ChampionDetailPage() {
   useEffect(() => {
     if (!championData) return;
 
-    // Fetch real data from API
-    Promise.all([
-      Promise.resolve({
-        avgMu: null,
-        avgPhi: null,
-        avgWinRate: null,
-        totalPlays: null,
-        totalMatches: null,
-        totalWins: null,
-        avgKills: null,
-        avgDeaths: null,
-        avgAssists: null,
-        avgDamage: null,
-        avgGold: null,
-      }),
-      // Fetch champion ID from API, then leaderboard
-      fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3304"}/champions`)
-        .then((r) => r.json())
-        .then((champs: Array<{ id: number; name: string }>) => {
-          const match = champs.find((c) => c.name.toLowerCase() === championData!.name.toLowerCase());
-          return match ? fetchChampionLeaderboard(match.id, 25) : [];
-        })
-        .catch(() => [] as ChampionLeaderboardEntry[]),
-      Promise.resolve([]),
-      Promise.resolve([]),
-    ])
-      .then(([statsData, lbData, tierData, trendData]) => {
-        setStats(statsData);
+    // Resolve champion ID, then fetch stats + leaderboard in parallel
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3304"}/champions`)
+      .then((r) => r.json())
+      .then((champs: Array<{ id: number; name: string }>) => {
+        const match = champs.find((c) => c.name.toLowerCase() === championData!.name.toLowerCase());
+        if (!match) return;
+
+        return Promise.all([
+          // Champion aggregate stats from /champions/:id
+          fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3304"}/champions/${match.id}`)
+            .then((r) => r.json())
+            .then((data: { stats?: Record<string, unknown> | null }) => {
+              const s = data.stats;
+              if (!s) return null;
+              return {
+                // This page's "Avg Rating" is the ranked player tier average
+                // for the champion, not the Glicko/ELO μ used by the player
+                // leaderboard below. The backend exposes it from
+                // champion_stats_ranked.sum_league_tier / total_matches, which
+                // is maintained during ingest and rebuilt by the projection
+                // tracker, so the detail page does not need to aggregate over
+                // match_players on every request.
+                avgRating: s.avg_league_tier != null ? Number(s.avg_league_tier) : null,
+                avgWinRate: s.win_rate != null ? Number(s.win_rate) : null,
+                totalPlays: s.total_matches != null ? Number(s.total_matches) : null,
+                totalMatches: s.total_matches != null ? Number(s.total_matches) : null,
+                totalWins: s.wins != null ? Number(s.wins) : null,
+                avgKills: s.avg_kills != null ? Number(s.avg_kills) : null,
+                avgDeaths: s.avg_deaths != null ? Number(s.avg_deaths) : null,
+                avgAssists: s.avg_assists != null ? Number(s.avg_assists) : null,
+                avgDamage: s.avg_damage != null ? Number(s.avg_damage) : null,
+                avgGold: s.avg_gold != null ? Number(s.avg_gold) : null,
+              } as ChampionStats;
+            })
+            .catch(() => null as ChampionStats | null),
+          // Per-champion leaderboard from player_champion_ratings
+          fetchChampionLeaderboard(match.id, 25).catch(() => [] as ChampionLeaderboardEntry[]),
+        ]);
+      })
+      .then((result) => {
+        if (!result) return;
+        const [statsData, lbData] = result;
+        if (statsData) setStats(statsData);
         setLeaderboard(lbData);
-        setTierStats(tierData);
-        setPatchTrends(trendData);
       })
       .finally(() => setLoading(false));
   }, [championData]);
@@ -244,8 +256,7 @@ export default function ChampionDetailPage() {
       <div className="pc-card">
         {stats && (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            <StatCard label="Avg Rating" value={formatFloat(stats.avgMu)} accent />
-            <StatCard label="Avg Deviation" value={formatFloat(stats.avgPhi)} />
+            <StatCard label="Avg Rating" value={formatFloat(stats.avgRating)} accent />
             <StatCard label="Avg Win Rate" value={formatPct(stats.avgWinRate)} />
             <StatCard label="Total Plays" value={formatNum(stats.totalPlays)} />
             <StatCard label="Total Matches" value={formatNum(stats.totalMatches)} />

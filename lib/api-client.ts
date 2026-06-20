@@ -25,6 +25,7 @@ import type {
   CommentResponse,
   BuildResponse,
 } from "./types.gen";
+import { championSlug } from "./utils";
 
 export type {
   Champion,
@@ -225,6 +226,57 @@ export async function fetchClassLeaderboard(params: { role: string; limit?: numb
     }));
   } catch {
     return [];
+  }
+}
+
+export interface ChampionEloEntry {
+  rank: number;
+  player_id: number;
+  player_name: string;
+  champion_id: number;
+  champion_name: string;
+  class_name: string;
+  elo: number;
+  phi: number;
+  total_matches: number;
+  total_wins: number;
+  win_rate: number | null;
+  region: string | null;
+}
+
+export async function fetchChampionElo(params: {
+  role?: string;
+  championId?: number;
+  limit?: number;
+  queueId?: number;
+}): Promise<{ data: ChampionEloEntry[]; total: number }> {
+  const query = new URLSearchParams();
+  if (params.role) query.set('role', params.role);
+  if (params.championId) query.set('championId', String(params.championId));
+  if (params.limit) query.set('limit', String(params.limit));
+  if (params.queueId) query.set('queueId', String(params.queueId));
+  try {
+    const raw = await fetchJson<{ data: Array<any>; total: number }>(
+      `/players/leaderboard/champion-elo?${query.toString()}`
+    );
+    // Coerce PostgreSQL NUMERIC strings to numbers
+    const coerced: ChampionEloEntry[] = (raw.data ?? []).map((r) => ({
+      rank: Number(r.rank),
+      player_id: Number(r.player_id),
+      player_name: String(r.player_name),
+      champion_id: Number(r.champion_id),
+      champion_name: String(r.champion_name),
+      class_name: String(r.class_name),
+      elo: Number(r.elo),
+      phi: Number(r.phi),
+      total_matches: Number(r.total_matches),
+      total_wins: Number(r.total_wins),
+      win_rate: r.win_rate != null ? Number(r.win_rate) : null,
+      region: r.region ?? null,
+    }));
+    return { data: coerced, total: raw.total ?? 0 };
+  } catch {
+    return { data: [], total: 0 };
   }
 }
 
@@ -520,6 +572,7 @@ export interface TierStat {
   tierSort: number;
   totalPlays: number;
   avgWinRate: number;
+  percentage: number;
 }
 
 // ── Fetch helpers ──
@@ -731,22 +784,33 @@ export async function fetchChampions(params?: {
   ]);
   const statsById = new Map(stats.map((stat) => [stat.championId, stat]));
   const statsByName = new Map(stats.map((stat) => [stat.championName.toLowerCase(), stat]));
+  const statsBySlug = new Map(stats.map((stat) => [championSlug(stat.championName), stat]));
 
-  return raw.map((r): Champion => ({
-    id: r.id,
-    name: r.name,
-    roles: splitRoles(r.roles),
-    winRate: statsById.get(r.id)?.winRate ?? statsByName.get(r.name.toLowerCase())?.winRate ?? null,
-    pickRate: statsById.get(r.id)?.pickRate ?? statsByName.get(r.name.toLowerCase())?.pickRate ?? null,
-    banRate: statsById.get(r.id)?.banRate ?? statsByName.get(r.name.toLowerCase())?.banRate ?? null,
-    rating: null,
-    ratingDeviation: null,
-    volatility: null,
-    totalMatches: statsById.get(r.id)?.totalPlays ?? statsByName.get(r.name.toLowerCase())?.totalPlays ?? null,
-    totalPlays: statsById.get(r.id)?.totalPlays ?? statsByName.get(r.name.toLowerCase())?.totalPlays ?? null,
-    wins: null,
-    imagePath: r.image_path || null,
-  }));
+  return raw.map((r): Champion => {
+    // Prefer the immutable champion id, then exact canonical name, then route
+    // slug. The slug fallback protects punctuation drift such as Mal'Damba vs
+    // Mal Damba while still avoiding fuzzy matches that could merge wrong rows.
+    const stat =
+      statsById.get(r.id) ??
+      statsByName.get(r.name.toLowerCase()) ??
+      statsBySlug.get(championSlug(r.name));
+
+    return {
+      id: r.id,
+      name: r.name,
+      roles: splitRoles(r.roles),
+      winRate: stat?.winRate ?? null,
+      pickRate: stat?.pickRate ?? null,
+      banRate: stat?.banRate ?? null,
+      rating: null,
+      ratingDeviation: null,
+      volatility: null,
+      totalMatches: stat?.totalPlays ?? null,
+      totalPlays: stat?.totalPlays ?? null,
+      wins: null,
+      imagePath: r.image_path || null,
+    };
+  });
 }
 
 export async function fetchTopWinrate(): Promise<TopWinrateEntry[]> {
@@ -1267,19 +1331,23 @@ export async function fetchHourlyMatchCounts(params?: { date?: string; hour?: nu
   }
 }
 
-export async function fetchTiers(): Promise<TierStat[]> {
+export async function fetchTiers(params?: { source?: 'profiles' | 'matches' }): Promise<TierStat[]> {
+  const query = new URLSearchParams();
+  if (params?.source) query.set('source', params.source);
   const raw = await fetchJson<Array<{
     tier: string;
     tier_sort: number | string;
     total_plays: number | string;
-    avg_win_rate: number | string;
-  }>>(`/stats/tiers`);
+    avg_win_rate: number | string | null;
+    percentage?: number | string | null;
+  }>>(`/stats/tiers${query.toString() ? `?${query.toString()}` : ''}`);
 
   return raw.map((r) => ({
     tier: r.tier,
     tierSort: numberOrNull(r.tier_sort) ?? 0,
     totalPlays: numberOrNull(r.total_plays) ?? 0,
     avgWinRate: toDisplayPercent(r.avg_win_rate) ?? 0,
+    percentage: numberOrNull(r.percentage) ?? 0,
   }));
 }
 
@@ -2001,6 +2069,83 @@ export async function fetchMatchHourlyStats(): Promise<MatchHourlyStats> {
   return fetchJson<MatchHourlyStats>('/matches/hourly-stats');
 }
 
+export interface DroppedMatchHourlySummary {
+  hour: number;
+  tracked: number;
+  open: number;
+  pending: number;
+  staged: number;
+  resolved: number;
+  dropped: number;
+  broken_recovery_pending: number;
+  no_authoritative_payload: number;
+  no_history_anchor: number;
+  partial_history_anchor: number;
+  local_ingest_failed: number;
+  invalid_payload: number;
+  next_retry_at: string | null;
+}
+
+export interface DroppedMatchSummaryResponse {
+  date: string;
+  queue_id: number;
+  refreshed: number;
+  summary: DroppedMatchHourlySummary[];
+}
+
+export async function fetchDroppedMatchSummary(params: { date: string; queueId?: number; refresh?: boolean }): Promise<DroppedMatchSummaryResponse> {
+  const query = new URLSearchParams({
+    date: params.date,
+    queueId: String(params.queueId ?? 486),
+  });
+  if (params.refresh === false) query.set('refresh', 'false');
+  return fetchJson<DroppedMatchSummaryResponse>(`/matches/dropped/summary?${query.toString()}`);
+}
+
+export interface DroppedMatchRecord {
+  match_id: string;
+  date: string;
+  hour: number;
+  queue_id: number;
+  status: string;
+  drop_category: string;
+  reason: string | null;
+  attempts: number;
+  observed_players: number;
+  updated_at: string | null;
+}
+
+export interface DroppedMatchListResponse {
+  date: string;
+  queue_id: number;
+  status: string;
+  category: string | null;
+  hour: number | null;
+  refreshed: number;
+  count: number;
+  summary: DroppedMatchHourlySummary[];
+  matches: DroppedMatchRecord[];
+}
+
+export async function fetchDroppedMatches(params: {
+  date: string;
+  queueId?: number;
+  status?: 'dropped' | 'open' | 'all' | 'pending' | 'staged' | 'complete' | 'resolved' | 'unrecoverable';
+  hour?: number;
+  limit?: number;
+  refresh?: boolean;
+}): Promise<DroppedMatchListResponse> {
+  const query = new URLSearchParams({
+    date: params.date,
+    queueId: String(params.queueId ?? 486),
+    status: params.status ?? 'dropped',
+    limit: String(params.limit ?? 500),
+  });
+  if (params.hour !== undefined) query.set('hour', String(params.hour));
+  if (params.refresh === false) query.set('refresh', 'false');
+  return fetchJson<DroppedMatchListResponse>(`/matches/dropped?${query.toString()}`);
+}
+
 export async function fetchMatchDetail(matchId: number): Promise<MatchDetailWithBans | null> {
   const raw = await fetchJson<{ matches: MatchDetailWithBans[]; count: number; notFound?: number[] }>(`/matches/${matchId}`);
   if (raw.matches.length === 0) return null;
@@ -2021,25 +2166,45 @@ export async function fetchMatchSnapshots(matchId: number): Promise<RatingSnapsh
     player_id: number | string;
     player_name: string | null;
     match_id: number | string;
-    queue_id: number | string;
+    queue_id?: number | string | null;
     mu_before?: number | string | null;
     phi_before?: number | string | null;
     mu_after?: number | string | null;
     phi_after?: number | string | null;
     mu_change?: number | string | null;
+    queue_mu_pre?: number | string | null;
+    queue_mu_post?: number | string | null;
+    queue_phi_pre?: number | string | null;
+    queue_phi_post?: number | string | null;
   }>>(`/ratings/snapshots/${matchId}`);
 
-  return raw.map((r) => ({
-    player_id: numberOrNull(r.player_id) ?? 0,
-    player_name: r.player_name ?? 'Unknown',
-    match_id: numberOrNull(r.match_id) ?? matchId,
-    queue_id: numberOrNull(r.queue_id) ?? 0,
-    mu_before: numberOrNull(r.mu_before),
-    phi_before: numberOrNull(r.phi_before),
-    mu_after: numberOrNull(r.mu_after),
-    phi_after: numberOrNull(r.phi_after),
-    mu_change: numberOrNull(r.mu_change),
-  }));
+  return raw.map((r) => {
+    // The current backend returns the persisted match_rating_snapshots column
+    // names (`queue_mu_pre`, `queue_mu_post`, `queue_phi_pre`, `queue_phi_post`).
+    // Older frontend code expected the display names below. Normalize here so
+    // the match page remains a pure renderer and so future DB column additions
+    // do not make rating rows silently display as blank.
+    const muBefore = numberOrNull(r.mu_before) ?? numberOrNull(r.queue_mu_pre);
+    const muAfter = numberOrNull(r.mu_after) ?? numberOrNull(r.queue_mu_post);
+    const explicitChange = numberOrNull(r.mu_change);
+    const muChange = explicitChange ?? (
+      muBefore != null && muAfter != null
+        ? Math.round((muAfter - muBefore) * 100) / 100
+        : null
+    );
+
+    return {
+      player_id: numberOrNull(r.player_id) ?? 0,
+      player_name: r.player_name ?? 'Unknown',
+      match_id: numberOrNull(r.match_id) ?? matchId,
+      queue_id: numberOrNull(r.queue_id) ?? 0,
+      mu_before: muBefore,
+      phi_before: numberOrNull(r.phi_before) ?? numberOrNull(r.queue_phi_pre),
+      mu_after: muAfter,
+      phi_after: numberOrNull(r.phi_after) ?? numberOrNull(r.queue_phi_post),
+      mu_change: muChange,
+    };
+  });
 }
 
 export async function fetchRecentMatches(limit?: number): Promise<MatchData[]> {
@@ -2068,7 +2233,20 @@ export async function fetchMatchSearch(params?: {
     `/matches/search${query.toString() ? `?${query.toString()}` : ''}`,
     { unwrapData: false }
   );
-  return raw;
+  return {
+    ...raw,
+    data: raw.data.map((match) => ({
+      ...match,
+      match_id: numberOrNull(match.match_id) ?? 0,
+      queue_id: numberOrNull(match.queue_id) ?? 0,
+      duration_seconds: numberOrNull(match.duration_seconds) ?? 0,
+      champion_id: numberOrNull(match.champion_id) ?? 0,
+      kills: numberOrNull(match.kills) ?? 0,
+      deaths: numberOrNull(match.deaths) ?? 0,
+      assists: numberOrNull(match.assists) ?? 0,
+      player_count: numberOrNull(match.player_count) ?? 0,
+    })),
+  };
 }
 
 // ── Reference Data ──
