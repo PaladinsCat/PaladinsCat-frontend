@@ -418,7 +418,7 @@ export default function PlayerProfilePage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {matches.map((m) => {
+                      {matches.filter((m) => m.championName).map((m) => {
                         const dpm = m.duration > 0 ? ((m.damageDone / m.duration) * 60).toFixed(0) : "—";
                         const kda = formatKDA(m.kills, m.deaths, m.assists);
                         return (

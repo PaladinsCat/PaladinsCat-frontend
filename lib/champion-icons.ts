@@ -33,12 +33,12 @@ export function getGenericChampionIcon(): string {
  * Get the icon path for a champion, automatically falling back to generic.
  * All 59 real Paladins champions have icon files. This always returns the correct path.
  */
-export function getChampionIconSafe(name: string): string {
+export function getChampionIconSafe(name: string | null | undefined): string {
+  if (!name) return GENERIC_ICON;
   // Check for special name mapping
   if (ICON_NAME_MAP[name]) {
     return `/images/champions/${ICON_NAME_MAP[name]}`;
   }
-  
   // Default: name matches filename directly
   return `/images/champions/Champion ${name} Icon.avif`;
 }

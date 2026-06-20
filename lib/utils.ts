@@ -6,6 +6,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /** Convert champion name to URL-safe slug: lowercase, no spaces/special chars */
-export function championSlug(name: string): string {
+export function championSlug(name: string | null | undefined): string {
+  if (!name) return "";
   return name.toLowerCase().replace(/[^a-z0-9]/g, "");
 }
