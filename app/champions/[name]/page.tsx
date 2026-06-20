@@ -17,6 +17,7 @@ import {
   type ChampionLoadout,
 } from "@/lib/champion-data";
 import { fetchChampionLeaderboard, type ChampionLeaderboardEntry } from "@/lib/api-client";
+import { getRankIconPath, getTierColor, resolveEffectiveTier } from "@/lib/tier-utils";
 
 // Placeholder types for future DB integration
 interface ChampionStats {
@@ -256,7 +257,7 @@ export default function ChampionDetailPage() {
       <div className="pc-card">
         {stats && (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            <StatCard label="Avg Rating" value={formatFloat(stats.avgRating)} accent />
+            <AvgTierCard stats={stats} />
             <StatCard label="Avg Win Rate" value={formatPct(stats.avgWinRate)} />
             <StatCard label="Total Plays" value={formatNum(stats.totalPlays)} />
             <StatCard label="Total Matches" value={formatNum(stats.totalMatches)} />
@@ -390,6 +391,30 @@ function StatCard({ label, value, accent }: { label: string; value: string; acce
     <div className="pc-surface-light rounded-lg p-4 border border-pc-border text-center">
       <div className="text-xs text-pc-text-muted mb-1">{label}</div>
       <div className={`text-lg font-mono ${accent ? "text-pc-accent" : "text-pc-text"}`}>{value}</div>
+    </div>
+  );
+}
+
+function AvgTierCard({ stats }: { stats: ChampionStats }) {
+  if (stats.avgRating == null) {
+    return (
+      <div className="pc-surface-light rounded-lg p-4 border border-pc-border text-center">
+        <div className="text-xs text-pc-text-muted mb-1">Avg Tier</div>
+        <div className="text-lg font-mono text-pc-text">—</div>
+      </div>
+    );
+  }
+  const tier = Math.round(stats.avgRating);
+  const effective = resolveEffectiveTier(tier, 0);
+  const iconPath = getRankIconPath(tier, 0);
+  const color = getTierColor(effective.displayTier);
+
+  return (
+    <div className="pc-surface-light rounded-lg p-4 border border-pc-border text-center">
+      <div className="text-xs text-pc-text-muted mb-2">Avg Tier</div>
+      <img src={iconPath} alt={effective.displayName} className="w-12 h-12 object-contain mx-auto" />
+      <div className={`text-xs font-semibold ${color} mt-1`}>{effective.displayName}</div>
+      <div className="text-xs font-mono text-pc-text-muted mt-0.5">{stats.avgRating.toFixed(1)}</div>
     </div>
   );
 }
