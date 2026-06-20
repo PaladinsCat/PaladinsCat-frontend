@@ -257,7 +257,8 @@ export async function fetchChampionElo(params: {
   if (params.queueId) query.set('queueId', String(params.queueId));
   try {
     const raw = await fetchJson<{ data: Array<any>; total: number }>(
-      `/players/leaderboard/champion-elo?${query.toString()}`
+      `/players/leaderboard/champion-elo?${query.toString()}`,
+      { unwrapData: false }
     );
     // Coerce PostgreSQL NUMERIC strings to numbers
     const coerced: ChampionEloEntry[] = (raw.data ?? []).map((r) => ({
@@ -573,6 +574,17 @@ export interface TierStat {
   totalPlays: number;
   avgWinRate: number;
   percentage: number;
+}
+
+export interface TierSummary {
+  profilePlayers: number;
+  avgProfileTier: number;
+  matchPlayerRows: number;
+  activePlayers: number;
+  rankedMatches: number;
+  avgParticipationTier: number;
+  avgMatchTier: number;
+  medianMatchTier: number;
 }
 
 // ── Fetch helpers ──
@@ -1349,6 +1361,30 @@ export async function fetchTiers(params?: { source?: 'profiles' | 'matches' }): 
     avgWinRate: toDisplayPercent(r.avg_win_rate) ?? 0,
     percentage: numberOrNull(r.percentage) ?? 0,
   }));
+}
+
+export async function fetchTierSummary(): Promise<TierSummary> {
+  const raw = await fetchJson<{
+    profile_players: number | string | null;
+    avg_profile_tier: number | string | null;
+    match_player_rows: number | string | null;
+    active_players: number | string | null;
+    ranked_matches: number | string | null;
+    avg_participation_tier: number | string | null;
+    avg_match_tier: number | string | null;
+    median_match_tier: number | string | null;
+  }>('/stats/tiers/summary');
+
+  return {
+    profilePlayers: numberOrNull(raw.profile_players) ?? 0,
+    avgProfileTier: numberOrNull(raw.avg_profile_tier) ?? 0,
+    matchPlayerRows: numberOrNull(raw.match_player_rows) ?? 0,
+    activePlayers: numberOrNull(raw.active_players) ?? 0,
+    rankedMatches: numberOrNull(raw.ranked_matches) ?? 0,
+    avgParticipationTier: numberOrNull(raw.avg_participation_tier) ?? 0,
+    avgMatchTier: numberOrNull(raw.avg_match_tier) ?? 0,
+    medianMatchTier: numberOrNull(raw.median_match_tier) ?? 0,
+  };
 }
 
 export async function fetchTalents(): Promise<Array<{
