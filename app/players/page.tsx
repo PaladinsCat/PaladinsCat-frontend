@@ -153,39 +153,11 @@ export default function PlayersPage() {
         </div>
       )}
 
-      {/* ── Main Content: Class LB (left) + Ranked LB (right) ── */}
+      {/* ── Main Content: Performance (left) + Leaderboards (right) ── */}
       <div className="flex flex-col lg:flex-row gap-6">
 
-        {/* Left: Top Players by Champion + Performance Stats */}
+        {/* Left: Performance Stats 2×2 */}
         <div className="lg:w-3/5 space-y-4">
-          <div className="flex items-center justify-between mb-4 px-2">
-              <h2 className="text-lg font-bold text-pc-text">Top Players by Champion</h2>
-              <Link href="/players/elo" className="text-[10px] text-pc-text-secondary hover:text-pc-accent transition-colors drop-shadow-sm">
-                Detail →
-              </Link>
-            </div>
-          <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
-            <div className="space-y-2">
-              {championEloPlayers.length === 0 && (
-                <div className="text-xs text-pc-text-muted">{overviewLoading ? "Loading..." : "No champion ELO data"}</div>
-              )}
-              {championEloPlayers.map((p, i) => (
-                <div key={`champ-elo-${p.player_id}`} className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <RankBadge rank={i + 1} />
-                    <Link href={`/players/${p.player_id}`} className="text-pc-text truncate hover:text-pc-accent transition-colors">{p.player_name}</Link>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <img src={getChampionIconSafe(p.champion_name)} alt={p.champion_name} className="w-5 h-5 object-contain rounded" />
-                    <span className="text-pc-text-muted">{p.champion_name}</span>
-                    <span className="text-pc-accent font-medium">{Math.round(p.elo)}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Performance Stats 2×2 */}
           <div className="flex items-center justify-between mb-2 px-2">
             <h2 className="text-lg font-bold text-pc-text">Performance Stats</h2>
           </div>
@@ -224,8 +196,9 @@ export default function PlayersPage() {
           </div>
         </div>
 
-        {/* Right: compact official ranked list + account-level ELO list */}
+        {/* Right: Ranked Leaderboard + compact side-by-side cards */}
         <div className="lg:w-2/5 space-y-4">
+          {/* Ranked Leaderboard */}
           <section>
             <div className="flex items-center justify-between mb-4 px-2">
               <h2 className="text-lg font-bold text-pc-text">Ranked Leaderboard</h2>
@@ -234,9 +207,6 @@ export default function PlayersPage() {
               </Link>
             </div>
             <div className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
-              {/* Both overview leaderboards fetch 10 rows, so avoid an inner
-                  vertical scroller here. Let the cards grow downward and keep
-                  every row visible in the normal page flow. */}
               <div>
                 <table className="w-full text-sm">
                   <thead>
@@ -304,57 +274,82 @@ export default function PlayersPage() {
             </div>
           </section>
 
-          <section>
-            <div className="flex items-center justify-between mb-4 px-2">
-              <h2 className="text-lg font-bold text-pc-text">Account ELO</h2>
-              <Link href="/players/elo" className="text-[10px] text-pc-text-secondary hover:text-pc-accent transition-colors drop-shadow-sm">
-                Detail →
-              </Link>
-            </div>
-            <div className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
-              {/* Account ELO mirrors the ranked card: 10 fetched rows, no
-                  vertical clamp, and only horizontal overflow protection. */}
-              <div>
-                <table className="w-full text-sm">
+          {/* Top Players by Champion + Account ELO side-by-side */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* Top Players by Champion */}
+            <section>
+              <div className="flex items-center justify-between mb-2 px-2">
+                <h2 className="text-sm font-bold text-pc-text">Top Players by Champion</h2>
+                <Link href="/players/elo" className="text-[10px] text-pc-text-secondary hover:text-pc-accent transition-colors drop-shadow-sm">
+                  Detail →
+                </Link>
+              </div>
+              <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-3">
+                <div className="space-y-1.5">
+                  {championEloPlayers.length === 0 && (
+                    <div className="text-[11px] text-pc-text-muted">{overviewLoading ? "Loading..." : "No data"}</div>
+                  )}
+                  {championEloPlayers.map((p, i) => (
+                    <div key={`champ-elo-${p.player_id}`} className="flex items-center justify-between text-[11px]">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <RankBadge rank={i + 1} />
+                        <Link href={`/players/${p.player_id}`} className="text-pc-text truncate hover:text-pc-accent transition-colors">{p.player_name}</Link>
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <img src={getChampionIconSafe(p.champion_name)} alt="" className="w-4 h-4 object-contain rounded" />
+                        <span className="text-pc-accent font-medium">{Math.round(p.elo)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            {/* Account ELO */}
+            <section>
+              <div className="flex items-center justify-between mb-2 px-2">
+                <h2 className="text-sm font-bold text-pc-text">Account ELO</h2>
+                <Link href="/players/elo" className="text-[10px] text-pc-text-secondary hover:text-pc-accent transition-colors drop-shadow-sm">
+                  Detail →
+                </Link>
+              </div>
+              <div className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
+                <table className="w-full text-[11px]">
                   <thead>
                     <tr className="border-b border-pc-border">
-                      <th className="text-left text-pc-text-muted font-medium py-2 px-3 w-8 text-xs">#</th>
-                      <th className="text-left text-pc-text-muted font-medium py-2 px-2 text-xs">Player</th>
-                      <th className="text-right text-pc-text-muted font-medium py-2 px-2 text-xs">ELO</th>
-                      <th className="text-right text-pc-text-muted font-medium py-2 px-2 text-xs">Matches</th>
+                      <th className="text-left text-pc-text-muted font-medium py-1.5 px-2 w-6">#</th>
+                      <th className="text-left text-pc-text-muted font-medium py-1.5 px-2">Player</th>
+                      <th className="text-right text-pc-text-muted font-medium py-1.5 px-2">ELO</th>
                     </tr>
                   </thead>
                   <tbody>
                     {accountEloPlayers.length === 0 && (
                       <tr>
-                        <td colSpan={4} className="py-4 px-3 text-center text-pc-text-muted text-xs">
-                          {overviewLoading ? "Loading..." : "No account ELO data"}
+                        <td colSpan={3} className="py-3 px-2 text-center text-pc-text-muted text-[11px]">
+                          {overviewLoading ? "Loading..." : "No data"}
                         </td>
                       </tr>
                     )}
-                    {accountEloPlayers.map((p, i) => (
-                      <tr key={`account-elo-${p.playerId}`} className={`border-b border-pc-border/50 hover:bg-pc-bg/50 transition-colors ${i < 3 ? "bg-pc-bg/30" : ""}`}>
-                        <td className="py-1.5 px-3">
+                    {accountEloPlayers.map((p) => (
+                      <tr key={`account-elo-${p.playerId}`} className="border-b border-pc-border/50 hover:bg-pc-bg/50 transition-colors">
+                        <td className="py-1 px-2">
                           <RankBadge rank={p.rank} />
                         </td>
-                        <td className="py-1.5 px-2">
-                          <Link href={`/players/${p.playerId}`} className="text-pc-text font-medium text-xs hover:text-pc-accent transition-colors">
+                        <td className="py-1 px-2">
+                          <Link href={`/players/${p.playerId}`} className="text-pc-text font-medium hover:text-pc-accent transition-colors truncate block">
                             {p.playerName}
                           </Link>
                         </td>
-                        <td className="py-1.5 px-2 text-right text-pc-accent font-medium text-xs">
+                        <td className="py-1 px-2 text-right text-pc-accent font-medium">
                           {p.elo.toLocaleString()}
-                        </td>
-                        <td className="py-1.5 px-2 text-right text-pc-text-muted text-xs">
-                          {p.totalMatches.toLocaleString()}
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
-            </div>
-          </section>
+            </section>
+          </div>
         </div>
 
       </div>
