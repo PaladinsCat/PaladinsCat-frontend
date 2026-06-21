@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { fetchCheaterPlayers, type CheaterPlayer } from "@/lib/api-client";
-import { MOCK_SUSPICIOUS_FULL } from "@/lib/mock-data";
+import { fetchCheaterPlayers } from "@/lib/api-client";
 
 const CLASS_ICONS: Record<string, string> = {
   Frontline: "/images/icons/Class_Front_Line_Icon.avif",

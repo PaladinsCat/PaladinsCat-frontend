@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { fetchCheaterPlayers, type CheaterPlayer } from "@/lib/api-client";
-import { MOCK_CONFIRMED_FULL } from "@/lib/mock-data";
+import { fetchCheaterPlayers } from "@/lib/api-client";
 
 const CLASS_ICONS: Record<string, string> = {
   Frontline: "/images/icons/Class_Front_Line_Icon.avif",
@@ -23,13 +22,9 @@ export default function CheatersPage() {
       setLoading(true);
       try {
         const cheaters = await fetchCheaterPlayers({ cheater: true, limit: 100 });
-        if (cheaters.length > 0) {
-          setData(cheaters.filter(c => c.cheater));
-        } else {
-          setData(MOCK_CONFIRMED_FULL);
-        }
+        setData(cheaters.filter(c => c.cheater));
       } catch {
-        setData(MOCK_CONFIRMED_FULL);
+        setData([]);
       } finally {
         setLoading(false);
       }
