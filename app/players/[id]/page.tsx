@@ -81,7 +81,7 @@ interface PlayerResponse {
   championRatings: ChampionRating[];
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3304";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api";
 
 function formatNumber(n: number | null | undefined): string {
   if (n == null || !Number.isFinite(n)) return "—";
@@ -159,8 +159,15 @@ export default function PlayerProfilePage() {
   const [matchesLoading, setMatchesLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch profile — render as soon as this arrives
-  useEffect(() => {
+  // Button states
+  const [refreshing, setRefreshing] = useState(false);
+  const [reporting, setReporting] = useState<string | null>(null);
+  const [currentMatch, setCurrentMatch] = useState<any>(null);
+  const [showCurrentMatch, setShowCurrentMatch] = useState(false);
+  const [fetchKey, setFetchKey] = useState(0);
+
+  // Fetch profile
+  const fetchProfile = useCallback(async () => {
     if (!id) return;
     let cancelled = false;
     setProfileLoading(true);
@@ -181,6 +188,54 @@ export default function PlayerProfilePage() {
       });
 
     return () => { cancelled = true; };
+  }, [id]);
+
+  // Initial fetch
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchKey]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Refresh handler — force API refresh then re-fetch
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await fetch(`${API_BASE}/players/${id}/refresh`, { method: 'POST' });
+      setFetchKey(k => k + 1);
+    } catch {
+      setError("Failed to refresh profile");
+    } finally {
+      setRefreshing(false);
+    }
+  }, [id]);
+
+  // Report handler
+  const handleReport = useCallback(async (type: 'suspicious' | 'cheater') => {
+    setReporting(type);
+    try {
+      await fetch(`${API_BASE}/players/${id}/report`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type }),
+      });
+      setFetchKey(k => k + 1);
+    } catch {
+      setError(`Failed to report player as ${type}`);
+    } finally {
+      setReporting(null);
+    }
+  }, [id]);
+
+  // Current match handler
+  const handleCurrentMatch = useCallback(async () => {
+    setShowCurrentMatch(true);
+    setCurrentMatch(null);
+    try {
+      const res = await fetch(`${API_BASE}/live/players/${id}`);
+      const data = await res.json();
+      setCurrentMatch(data);
+    } catch {
+      setCurrentMatch({ error: 'Failed to fetch live match data' });
+    }
   }, [id]);
 
   // Fetch matches independently — doesn't block profile rendering
@@ -242,6 +297,45 @@ export default function PlayerProfilePage() {
 
       {/* ── Header ── */}
       <div className="pc-card">
+        {/* Action buttons — top right */}
+        <div className="flex items-center justify-end gap-2 mb-3">
+          <button
+            onClick={handleCurrentMatch}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-pc-bg-secondary/80 hover:bg-pc-bg-secondary text-pc-text border border-pc-border/50 transition-colors"
+            title="Check current match"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+            Current
+          </button>
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-pc-bg-secondary/80 hover:bg-pc-bg-secondary text-pc-text border border-pc-border/50 transition-colors ${refreshing ? 'opacity-50 cursor-not-allowed' : ''}`}
+            title="Refresh profile from API"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={refreshing ? 'animate-spin' : ''}><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+            {refreshing ? 'Refreshing...' : 'Refresh'}
+          </button>
+          <button
+            onClick={() => handleReport('suspicious')}
+            disabled={reporting !== null}
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 transition-colors ${reporting !== null ? 'opacity-50 cursor-not-allowed' : ''}`}
+            title="Report as suspicious"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            {reporting === 'suspicious' ? 'Reporting...' : 'Suspicious'}
+          </button>
+          <button
+            onClick={() => handleReport('cheater')}
+            disabled={reporting !== null}
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition-colors ${reporting !== null ? 'opacity-50 cursor-not-allowed' : ''}`}
+            title="Report as cheater"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            {reporting === 'cheater' ? 'Reporting...' : 'Cheater'}
+          </button>
+        </div>
+
         <div className="flex items-start gap-4">
           {/* Avatar */}
           <div className="w-16 h-16 rounded-xl border-2 border-pc-accent/30 overflow-hidden shrink-0 bg-pc-bg flex items-center justify-center">
@@ -564,6 +658,60 @@ export default function PlayerProfilePage() {
           )}
         </div>
       </div>
+
+      {/* ── Current Match Modal ── */}
+      {showCurrentMatch && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowCurrentMatch(false)}>
+          <div className="pc-card max-w-lg w-full mx-4 p-5" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-base font-bold text-pc-text">Current Match</h3>
+              <button onClick={() => setShowCurrentMatch(false)} className="text-pc-text-muted hover:text-pc-text transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            {!currentMatch ? (
+              <div className="text-center py-8 text-pc-text-muted text-sm">Checking live matches...</div>
+            ) : currentMatch.error ? (
+              <div className="text-center py-8 text-pc-text-muted text-sm">{currentMatch.error}</div>
+            ) : !currentMatch.match_id ? (
+              <div className="text-center py-8">
+                <div className="text-pc-text-muted text-sm mb-2">Not in a live match</div>
+                <div className="text-[11px] text-pc-text-muted/60">This player is not currently playing a tracked match.</div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-pc-text-muted">Match</span>
+                  <Link href={`/matches/${currentMatch.match_id}`} className="text-xs font-mono text-pc-accent hover:text-pc-accent-secondary">
+                    #{currentMatch.match_id}
+                  </Link>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-pc-text-muted">Status</span>
+                  <span className={`text-xs font-medium ${currentMatch.status === 'active' ? 'text-emerald-400' : 'text-pc-text-muted'}`}>
+                    {currentMatch.status}
+                  </span>
+                </div>
+                {currentMatch.players && currentMatch.players.length > 0 && (
+                  <div className="pt-3 border-t border-pc-border/50">
+                    <div className="text-[10px] text-pc-text-muted uppercase tracking-wider mb-2">Players</div>
+                    <div className="grid grid-cols-2 gap-2">
+                      {currentMatch.players.slice(0, 10).map((p: any) => (
+                        <div key={p.player_id} className="flex items-center gap-2 text-xs">
+                          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${p.team === 'Alliance' ? 'bg-blue-400' : 'bg-red-400'}`}></span>
+                          <Link href={`/players/${p.player_id}`} className="text-pc-text hover:text-pc-accent truncate">
+                            {p.player_name || `#${p.player_id}`}
+                          </Link>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
