@@ -179,7 +179,7 @@ export async function fetchCheaterPlayers(params?: { cheater?: boolean; susOnly?
       susCount: r.sus_count ?? 0,
       avgDpm: r.avg_dpm ?? null, avgHpm: r.avg_hpm ?? null,
       avgGpm: r.avg_egpm ?? null, avgMpm: r.avg_mpm ?? null,
-      totalMatches: r.total_matches ?? 0, winRate: r.win_rate ?? null,
+      totalMatches: Number(r.total_matches) || 0, winRate: r.win_rate != null ? Number(r.win_rate) : null,
     }));
   } catch {
     return [];
@@ -989,6 +989,7 @@ export async function fetchPlayerSearch(query: string): Promise<PlayerSearchResu
 }
 
 export type UniversalSearchType = "player" | "match" | "champion" | "item" | "card" | "talent";
+export type UniversalSearchRemoteTarget = "player-id" | "player-name" | "match-id";
 
 export interface UniversalSearchResult {
   type: UniversalSearchType;
@@ -1004,13 +1005,28 @@ export interface UniversalSearchResponse {
   query: string;
   total: number;
   data: UniversalSearchResult[];
+  remote?: {
+    attempted: boolean;
+    target?: UniversalSearchRemoteTarget;
+    cacheHit?: boolean;
+    skipped?: boolean;
+    reason?: string;
+    status?: "hit" | "miss" | "error";
+    error?: string;
+  };
 }
 
-export async function fetchUniversalSearch(queryText: string, limit = 30): Promise<UniversalSearchResponse> {
+export async function fetchUniversalSearch(
+  queryText: string,
+  limit = 30,
+  options?: { remote?: boolean; remoteTarget?: UniversalSearchRemoteTarget },
+): Promise<UniversalSearchResponse> {
   const query = new URLSearchParams({
     q: queryText,
     limit: String(limit),
   });
+  if (options?.remote) query.set("remote", "true");
+  if (options?.remoteTarget) query.set("remoteTarget", options.remoteTarget);
   return fetchJson<UniversalSearchResponse>(`/search/universal?${query.toString()}`, { unwrapData: false });
 }
 
