@@ -156,7 +156,7 @@ export default function PlayersPage() {
       {/* ── Main Content: Performance (left) + Leaderboards (right) ── */}
       <div className="flex flex-col lg:flex-row gap-6">
 
-        {/* Left: Performance Stats 2×2 + Cheaters & Suspicious */}
+        {/* Left: Performance Stats 2×2 + Cheaters & Suspicious in one grid */}
         <div className="lg:w-3/5 space-y-4">
           <div className="flex items-center justify-between mb-2 px-2">
             <h2 className="text-sm font-bold text-pc-text">Performance Stats</h2>
@@ -193,96 +193,89 @@ export default function PlayersPage() {
                 </div>
               </div>
             )})}
-          </div>
 
-          {/* Cheaters & Suspicious */}
-          <div>
-            <h2 className="text-sm font-bold text-pc-text mb-2 px-2">Cheaters & Suspicious</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-
-              {/* Confirmed Cheaters */}
-              <div>
-                <div className="flex items-center justify-between mb-2 px-2">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-red-500" />
-                    <h3 className="text-pc-text font-semibold text-[11px]">Confirmed Cheaters</h3>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/20">
-                      {cheaterPlayers.length}
-                    </span>
-                  </div>
-                  <Link href="/players/cheaters" className="text-[10px] text-pc-text-secondary hover:text-red-400 transition-colors drop-shadow-sm">
-                    Detail →
-                  </Link>
+            {/* Confirmed Cheaters */}
+            <div className="flex flex-col h-full">
+              <div className="flex items-center justify-between mb-2 px-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-red-500" />
+                  <h3 className="text-pc-text font-semibold text-[11px]">Cheaters</h3>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/20">
+                    {cheaterPlayers.length}
+                  </span>
                 </div>
-                <div className="bg-pc-bg-elevated border border-red-500/20 rounded-xl p-3">
-                  <div className="space-y-1.5">
-                  {cheaterPlayers.length === 0 && (
-                    <div className="text-[11px] text-pc-text-muted">{overviewLoading ? "Loading..." : "No confirmed cheaters"}</div>
-                  )}
-                  {cheaterPlayers.map((p) => (
-                    <div key={p.id} className="flex items-start gap-2 p-2 rounded-lg bg-pc-bg/50">
-                      <div className="shrink-0 mt-0.5 w-1.5 h-1.5 rounded-full bg-red-500" />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <Link href={`/players/${p.id}`} className="text-pc-text font-medium text-[11px] hover:text-pc-accent transition-colors truncate">
-                            {p.name}
-                          </Link>
-                          <span className="shrink-0 text-[10px] px-1 py-0.5 rounded border bg-red-500/15 text-red-400 border-red-500/30">
-                            banned
-                          </span>
-                        </div>
-                        <p className="text-pc-text-muted text-[10px] mt-0.5">
-                          {p.totalMatches.toLocaleString()} matches{p.winRate != null ? ` · ${p.winRate.toFixed(1)}% WR` : ""}
-                        </p>
+                <Link href="/players/cheaters" className="text-[10px] text-pc-text-secondary hover:text-red-400 transition-colors drop-shadow-sm">
+                  Detail →
+                </Link>
+              </div>
+              <div className="bg-pc-bg-elevated border border-red-500/20 rounded-xl p-3 flex-1 flex flex-col justify-center">
+                <div className="space-y-1.5">
+                {cheaterPlayers.length === 0 && (
+                  <div className="text-[11px] text-pc-text-muted">{overviewLoading ? "Loading..." : "No confirmed cheaters"}</div>
+                )}
+                {cheaterPlayers.map((p) => (
+                  <div key={p.id} className="flex items-start gap-2 p-2 rounded-lg bg-pc-bg/50">
+                    <div className="shrink-0 mt-0.5 w-1.5 h-1.5 rounded-full bg-red-500" />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <Link href={`/players/${p.id}`} className="text-pc-text font-medium text-[11px] hover:text-pc-accent transition-colors truncate">
+                          {p.name}
+                        </Link>
+                        <span className="shrink-0 text-[10px] px-1 py-0.5 rounded border bg-red-500/15 text-red-400 border-red-500/30">
+                          banned
+                        </span>
                       </div>
+                      <p className="text-pc-text-muted text-[10px] mt-0.5">
+                        {p.totalMatches.toLocaleString()} matches{p.winRate != null ? ` · ${p.winRate.toFixed(1)}% WR` : ""}
+                      </p>
                     </div>
-                  ))}
                   </div>
+                ))}
                 </div>
               </div>
-
-              {/* Suspicious Players */}
-              <div>
-                <div className="flex items-center justify-between mb-2 px-2">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-amber-500" />
-                    <h3 className="text-pc-text font-semibold text-[11px]">Suspicious Players</h3>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                      {suspiciousPlayers.length}
-                    </span>
-                  </div>
-                  <Link href="/players/suspicious" className="text-[10px] text-pc-text-secondary hover:text-amber-400 transition-colors drop-shadow-sm">
-                    Detail →
-                  </Link>
-                </div>
-                <div className="bg-pc-bg-elevated border border-amber-500/20 rounded-xl p-3">
-                  <div className="space-y-1.5">
-                  {suspiciousPlayers.length === 0 && (
-                    <div className="text-[11px] text-pc-text-muted">{overviewLoading ? "Loading..." : "No suspicious players"}</div>
-                  )}
-                  {suspiciousPlayers.map((p) => (
-                    <div key={p.id} className="flex items-start gap-2 p-2 rounded-lg bg-pc-bg/50">
-                      <div className="shrink-0 mt-0.5 w-1.5 h-1.5 rounded-full bg-amber-500" />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <Link href={`/players/${p.id}`} className="text-pc-text font-medium text-[11px] hover:text-pc-accent transition-colors truncate">
-                            {p.name}
-                          </Link>
-                          <span className="shrink-0 text-[10px] px-1 py-0.5 rounded border bg-amber-500/15 text-amber-400 border-amber-500/30">
-                            {p.susCount} flags
-                          </span>
-                        </div>
-                        <p className="text-pc-text-muted text-[10px] mt-0.5">
-                          {p.totalMatches.toLocaleString()} matches{p.winRate != null ? ` · ${p.winRate.toFixed(1)}% WR` : ""}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                  </div>
-                </div>
-              </div>
-
             </div>
+
+            {/* Suspicious Players */}
+            <div className="flex flex-col h-full">
+              <div className="flex items-center justify-between mb-2 px-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-amber-500" />
+                  <h3 className="text-pc-text font-semibold text-[11px]">Suspicious</h3>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                    {suspiciousPlayers.length}
+                  </span>
+                </div>
+                <Link href="/players/suspicious" className="text-[10px] text-pc-text-secondary hover:text-amber-400 transition-colors drop-shadow-sm">
+                  Detail →
+                </Link>
+              </div>
+              <div className="bg-pc-bg-elevated border border-amber-500/20 rounded-xl p-3 flex-1 flex flex-col justify-center">
+                <div className="space-y-1.5">
+                {suspiciousPlayers.length === 0 && (
+                  <div className="text-[11px] text-pc-text-muted">{overviewLoading ? "Loading..." : "No suspicious players"}</div>
+                )}
+                {suspiciousPlayers.map((p) => (
+                  <div key={p.id} className="flex items-start gap-2 p-2 rounded-lg bg-pc-bg/50">
+                    <div className="shrink-0 mt-0.5 w-1.5 h-1.5 rounded-full bg-amber-500" />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <Link href={`/players/${p.id}`} className="text-pc-text font-medium text-[11px] hover:text-pc-accent transition-colors truncate">
+                          {p.name}
+                        </Link>
+                        <span className="shrink-0 text-[10px] px-1 py-0.5 rounded border bg-amber-500/15 text-amber-400 border-amber-500/30">
+                          {p.susCount} flags
+                        </span>
+                      </div>
+                      <p className="text-pc-text-muted text-[10px] mt-0.5">
+                        {p.totalMatches.toLocaleString()} matches{p.winRate != null ? ` · ${p.winRate.toFixed(1)}% WR` : ""}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
 
