@@ -1,7 +1,9 @@
 {
   "androxus": {
     "name": "Androxus",
-    "roles": [],
+    "roles": [
+      "Flank"
+    ],
     "stats": {
       "health": "2100",
       "speed": "365",
@@ -218,7 +220,9 @@
   },
   "ash": {
     "name": "Ash",
-    "roles": [],
+    "roles": [
+      "Frontline"
+    ],
     "stats": {
       "health": "4500",
       "speed": "340",
@@ -435,7 +439,9 @@
   },
   "atlas": {
     "name": "Atlas",
-    "roles": [],
+    "roles": [
+      "Frontline"
+    ],
     "stats": {
       "health": "4000",
       "speed": "360",
@@ -652,7 +658,9 @@
   },
   "azaan": {
     "name": "Azaan",
-    "roles": [],
+    "roles": [
+      "Frontline"
+    ],
     "stats": {
       "health": "4500",
       "speed": "365",
@@ -869,7 +877,9 @@
   },
   "barik": {
     "name": "Barik",
-    "roles": [],
+    "roles": [
+      "Frontline"
+    ],
     "stats": {
       "health": "3400",
       "speed": "345",
@@ -1086,7 +1096,9 @@
   },
   "bettylabomba": {
     "name": "Betty La Bomba",
-    "roles": [],
+    "roles": [
+      "Damage"
+    ],
     "stats": {
       "health": "2200",
       "speed": "360",
@@ -1303,7 +1315,9 @@
   },
   "bombking": {
     "name": "Bomb King",
-    "roles": [],
+    "roles": [
+      "Damage"
+    ],
     "stats": {
       "health": "2200",
       "speed": "360",
@@ -1520,7 +1534,9 @@
   },
   "buck": {
     "name": "Buck",
-    "roles": [],
+    "roles": [
+      "Flank"
+    ],
     "stats": {
       "health": "2300",
       "speed": "370",
@@ -1737,7 +1753,9 @@
   },
   "caspian": {
     "name": "Caspian",
-    "roles": [],
+    "roles": [
+      "Flank"
+    ],
     "stats": {
       "health": "2100",
       "speed": "385",
@@ -1954,7 +1972,9 @@
   },
   "cassie": {
     "name": "Cassie",
-    "roles": [],
+    "roles": [
+      "Damage"
+    ],
     "stats": {
       "health": "2200",
       "speed": "355",
@@ -2171,7 +2191,9 @@
   },
   "corvus": {
     "name": "Corvus",
-    "roles": [],
+    "roles": [
+      "Support"
+    ],
     "stats": {
       "health": "2200",
       "speed": "360",
@@ -2388,7 +2410,9 @@
   },
   "dredge": {
     "name": "Dredge",
-    "roles": [],
+    "roles": [
+      "Damage"
+    ],
     "stats": {
       "health": "2200",
       "speed": "350",
@@ -2605,7 +2629,9 @@
   },
   "drogoz": {
     "name": "Drogoz",
-    "roles": [],
+    "roles": [
+      "Damage"
+    ],
     "stats": {
       "health": "2200",
       "speed": "350",
@@ -2822,7 +2848,9 @@
   },
   "evie": {
     "name": "Evie",
-    "roles": [],
+    "roles": [
+      "Flank"
+    ],
     "stats": {
       "health": "1800",
       "speed": "365",
@@ -3039,7 +3067,9 @@
   },
   "fernando": {
     "name": "Fernando",
-    "roles": [],
+    "roles": [
+      "Frontline"
+    ],
     "stats": {
       "health": "4600",
       "speed": "350",
@@ -3256,7 +3286,9 @@
   },
   "furia": {
     "name": "Furia",
-    "roles": [],
+    "roles": [
+      "Support"
+    ],
     "stats": {
       "health": "2200",
       "speed": "365",
@@ -3473,7 +3505,9 @@
   },
   "grohk": {
     "name": "Grohk",
-    "roles": [],
+    "roles": [
+      "Support"
+    ],
     "stats": {
       "health": "2200",
       "speed": "350",
@@ -3698,7 +3732,9 @@
   },
   "grover": {
     "name": "Grover",
-    "roles": [],
+    "roles": [
+      "Support"
+    ],
     "stats": {
       "health": "2300",
       "speed": "360",
@@ -3915,7 +3951,9 @@
   },
   "imani": {
     "name": "Imani",
-    "roles": [],
+    "roles": [
+      "Damage"
+    ],
     "stats": {
       "health": "2200",
       "speed": "350",
@@ -4132,7 +4170,9 @@
   },
   "inara": {
     "name": "Inara",
-    "roles": [],
+    "roles": [
+      "Frontline"
+    ],
     "stats": {
       "health": "4700",
       "speed": "350",
@@ -4349,7 +4389,9 @@
   },
   "io": {
     "name": "Io",
-    "roles": [],
+    "roles": [
+      "Support"
+    ],
     "stats": {
       "health": "2200",
       "speed": "370",
@@ -4566,7 +4608,9 @@
   },
   "jenos": {
     "name": "Jenos",
-    "roles": [],
+    "roles": [
+      "Support"
+    ],
     "stats": {
       "health": "2200",
       "speed": "360",
@@ -4783,7 +4827,9 @@
   },
   "kasumi": {
     "name": "Kasumi",
-    "roles": [],
+    "roles": [
+      "Flank"
+    ],
     "stats": {
       "health": "2200",
       "speed": "355",
@@ -5000,7 +5046,9 @@
   },
   "khan": {
     "name": "Khan",
-    "roles": [],
+    "roles": [
+      "Frontline"
+    ],
     "stats": {
       "health": "4000",
       "speed": "350",
@@ -5217,7 +5265,9 @@
   },
   "kinessa": {
     "name": "Kinessa",
-    "roles": [],
+    "roles": [
+      "Damage"
+    ],
     "stats": {
       "health": "2100",
       "speed": "350",
@@ -5434,7 +5484,9 @@
   },
   "koga": {
     "name": "Koga",
-    "roles": [],
+    "roles": [
+      "Flank"
+    ],
     "stats": {
       "health": "2000",
       "speed": "375",
@@ -5651,7 +5703,9 @@
   },
   "lex": {
     "name": "Lex",
-    "roles": [],
+    "roles": [
+      "Flank"
+    ],
     "stats": {
       "health": "2200",
       "speed": "385",
@@ -5868,7 +5922,9 @@
   },
   "lian": {
     "name": "Lian",
-    "roles": [],
+    "roles": [
+      "Damage"
+    ],
     "stats": {
       "health": "2100",
       "speed": "355",
@@ -6085,7 +6141,9 @@
   },
   "lillith": {
     "name": "Lillith",
-    "roles": [],
+    "roles": [
+      "Support"
+    ],
     "stats": {
       "health": "500",
       "speed": "375",
@@ -6302,7 +6360,9 @@
   },
   "maeve": {
     "name": "Maeve",
-    "roles": [],
+    "roles": [
+      "Flank"
+    ],
     "stats": {
       "health": "1900",
       "speed": "370",
@@ -6519,7 +6579,9 @@
   },
   "makoa": {
     "name": "Makoa",
-    "roles": [],
+    "roles": [
+      "Frontline"
+    ],
     "stats": {
       "health": "4500",
       "speed": "350",
@@ -6736,7 +6798,9 @@
   },
   "maldamba": {
     "name": "Mal'Damba",
-    "roles": [],
+    "roles": [
+      "Support"
+    ],
     "stats": {
       "health": "2300",
       "speed": "365",
@@ -6953,7 +7017,9 @@
   },
   "moji": {
     "name": "Moji",
-    "roles": [],
+    "roles": [
+      "Support"
+    ],
     "stats": {
       "health": "2400",
       "speed": "370",
@@ -7170,7 +7236,9 @@
   },
   "nyx": {
     "name": "Nyx",
-    "roles": [],
+    "roles": [
+      "Frontline"
+    ],
     "stats": {
       "health": "4700",
       "speed": "350",
@@ -7387,7 +7455,9 @@
   },
   "octavia": {
     "name": "Octavia",
-    "roles": [],
+    "roles": [
+      "Damage"
+    ],
     "stats": {
       "health": "2200",
       "speed": "360",
@@ -7604,7 +7674,9 @@
   },
   "omen": {
     "name": "Omen",
-    "roles": [],
+    "roles": [
+      "Damage"
+    ],
     "stats": {
       "health": "2200",
       "speed": "360",
@@ -7821,7 +7893,9 @@
   },
   "pip": {
     "name": "Pip",
-    "roles": [],
+    "roles": [
+      "Support"
+    ],
     "stats": {
       "health": "2200",
       "speed": "350",
@@ -8038,7 +8112,9 @@
   },
   "raum": {
     "name": "Raum",
-    "roles": [],
+    "roles": [
+      "Frontline"
+    ],
     "stats": {
       "health": "4500",
       "speed": "365",
@@ -8255,7 +8331,9 @@
   },
   "rei": {
     "name": "Rei",
-    "roles": [],
+    "roles": [
+      "Support"
+    ],
     "stats": {
       "health": "2200",
       "speed": "375",
@@ -8472,7 +8550,9 @@
   },
   "ruckus": {
     "name": "Ruckus",
-    "roles": [],
+    "roles": [
+      "Frontline"
+    ],
     "stats": {
       "health": "4000",
       "speed": "365",
@@ -8689,7 +8769,9 @@
   },
   "saati": {
     "name": "Saati",
-    "roles": [],
+    "roles": [
+      "Damage"
+    ],
     "stats": {
       "health": "2100",
       "speed": "370",
@@ -8906,7 +8988,9 @@
   },
   "seris": {
     "name": "Seris",
-    "roles": [],
+    "roles": [
+      "Support"
+    ],
     "stats": {
       "health": "2200",
       "speed": "365",
@@ -9123,7 +9207,9 @@
   },
   "shalin": {
     "name": "Sha Lin",
-    "roles": [],
+    "roles": [
+      "Damage"
+    ],
     "stats": {
       "health": "2150",
       "speed": "350",
@@ -9340,7 +9426,9 @@
   },
   "skye": {
     "name": "Skye",
-    "roles": [],
+    "roles": [
+      "Flank"
+    ],
     "stats": {
       "health": "2000",
       "speed": "390",
@@ -9557,7 +9645,9 @@
   },
   "strix": {
     "name": "Strix",
-    "roles": [],
+    "roles": [
+      "Damage"
+    ],
     "stats": {
       "health": "2150",
       "speed": "350",
@@ -9774,7 +9864,9 @@
   },
   "talus": {
     "name": "Talus",
-    "roles": [],
+    "roles": [
+      "Flank"
+    ],
     "stats": {
       "health": "1900",
       "speed": "385",
@@ -9991,7 +10083,9 @@
   },
   "terminus": {
     "name": "Terminus",
-    "roles": [],
+    "roles": [
+      "Frontline"
+    ],
     "stats": {
       "health": "4000",
       "speed": "350",
@@ -10208,7 +10302,9 @@
   },
   "tiberius": {
     "name": "Tiberius",
-    "roles": [],
+    "roles": [
+      "Damage"
+    ],
     "stats": {
       "health": "2200",
       "speed": "360",
@@ -10425,7 +10521,9 @@
   },
   "torvald": {
     "name": "Torvald",
-    "roles": [],
+    "roles": [
+      "Frontline"
+    ],
     "stats": {
       "health": "3000",
       "speed": "350",
@@ -10642,7 +10740,9 @@
   },
   "tyra": {
     "name": "Tyra",
-    "roles": [],
+    "roles": [
+      "Damage"
+    ],
     "stats": {
       "health": "2400",
       "speed": "370",
@@ -10859,7 +10959,9 @@
   },
   "vatu": {
     "name": "Vatu",
-    "roles": [],
+    "roles": [
+      "Flank"
+    ],
     "stats": {
       "health": "1900",
       "speed": "370",
@@ -11076,7 +11178,9 @@
   },
   "vii": {
     "name": "Vii",
-    "roles": [],
+    "roles": [
+      "Flank"
+    ],
     "stats": {
       "health": "1900",
       "speed": "370",
@@ -11293,7 +11397,9 @@
   },
   "viktor": {
     "name": "Viktor",
-    "roles": [],
+    "roles": [
+      "Damage"
+    ],
     "stats": {
       "health": "2200",
       "speed": "365",
@@ -11510,7 +11616,9 @@
   },
   "vivian": {
     "name": "Vivian",
-    "roles": [],
+    "roles": [
+      "Damage"
+    ],
     "stats": {
       "health": "2200",
       "speed": "370",
@@ -11727,7 +11835,9 @@
   },
   "vora": {
     "name": "Vora",
-    "roles": [],
+    "roles": [
+      "Flank"
+    ],
     "stats": {
       "health": "2000",
       "speed": "380",
@@ -11944,7 +12054,9 @@
   },
   "willo": {
     "name": "Willo",
-    "roles": [],
+    "roles": [
+      "Damage"
+    ],
     "stats": {
       "health": "2200",
       "speed": "370",
@@ -12161,7 +12273,9 @@
   },
   "yagorath": {
     "name": "Yagorath",
-    "roles": [],
+    "roles": [
+      "Frontline"
+    ],
     "stats": {
       "health": "5750",
       "speed": "390",
@@ -12378,7 +12492,9 @@
   },
   "ying": {
     "name": "Ying",
-    "roles": [],
+    "roles": [
+      "Support"
+    ],
     "stats": {
       "health": "2200",
       "speed": "355",
@@ -12595,7 +12711,9 @@
   },
   "zhin": {
     "name": "Zhin",
-    "roles": [],
+    "roles": [
+      "Flank"
+    ],
     "stats": {
       "health": "2000",
       "speed": "380",
