@@ -8,6 +8,12 @@ ARG MODE=prod
 # Build stage (shared)
 FROM node:22-alpine AS builder
 WORKDIR /app
+ARG NEXT_PUBLIC_API_URL=/api
+ARG NEXT_SERVER_API_URL=http://localhost:3304
+ARG NEXT_BUILD_CPUS=2
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+ENV NEXT_SERVER_API_URL=${NEXT_SERVER_API_URL}
+ENV NEXT_BUILD_CPUS=${NEXT_BUILD_CPUS}
 COPY package.json package-lock.json tsconfig.json ./
 RUN npm ci
 COPY . .
