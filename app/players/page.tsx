@@ -217,14 +217,9 @@ export default function PlayersPage() {
                   <div key={p.id} className="flex items-start gap-2 p-2 rounded-lg bg-pc-bg/50">
                     <div className="shrink-0 mt-0.5 w-1.5 h-1.5 rounded-full bg-red-500" />
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <Link href={`/players/${p.id}`} className="text-pc-text font-medium text-[11px] hover:text-pc-accent transition-colors truncate">
-                          {p.name}
-                        </Link>
-                        <span className="shrink-0 text-[10px] px-1 py-0.5 rounded border bg-red-500/15 text-red-400 border-red-500/30">
-                          banned
-                        </span>
-                      </div>
+                      <Link href={`/players/${p.id}`} className="text-pc-text font-medium text-[11px] hover:text-pc-accent transition-colors truncate">
+                        {p.name}
+                      </Link>
                       <p className="text-pc-text-muted text-[10px] mt-0.5">
                         {p.totalMatches.toLocaleString()} matches{p.winRate != null ? ` · ${p.winRate.toFixed(1)}% WR` : ""}
                       </p>

@@ -66,7 +66,6 @@ export default function CheatersPage() {
                   <th className="px-3 py-3 text-right">KDA</th>
                   <th className="px-3 py-3 text-right">WR</th>
                   <th className="px-3 py-3 text-right">Matches</th>
-                  <th className="px-3 py-3">Banned</th>
                   <th className="px-3 py-3">Reason</th>
                 </tr>
               </thead>
@@ -98,7 +97,6 @@ export default function CheatersPage() {
                       </span>
                     </td>
                     <td className="px-3 py-2 text-right text-xs text-pc-text-secondary">{fmt(p.totalMatches)}</td>
-                    <td className="px-3 py-2 text-xs text-red-400">{p.banned || "—"}</td>
                     <td className="px-3 py-2 text-xs text-pc-text-muted max-w-[200px] truncate">{p.reason || "—"}</td>
                   </tr>
                 ))}
