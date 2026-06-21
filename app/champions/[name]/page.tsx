@@ -93,7 +93,8 @@ function AvgTierCard({ stats }: { stats: ChampionStats }) {
 
 export default function ChampionDetailPage() {
   const params = useParams();
-  const name = params?.name as string;
+  const rawName = params?.name;
+  const name = Array.isArray(rawName) ? rawName[0] ?? "" : rawName ?? "";
 
   const [championData, setChampionData] = useState<ChampionData | null>(null);
   const [dataLoaded, setDataLoaded] = useState(false);
@@ -103,8 +104,10 @@ export default function ChampionDetailPage() {
   const [patchTrends, setPatchTrends] = useState<PatchTrend[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Find champion by slug
-  const mockChampion = STATIC_CHAMPIONS.find(
+  // Static champion reference metadata lets direct /champions/[name] routes
+  // resolve icons/roles before DB-backed stats load. It must never provide
+  // synthetic match, leaderboard, or performance numbers.
+  const staticChampion = STATIC_CHAMPIONS.find(
     (c) => championSlug(c.name) === name.toLowerCase()
   );
 
@@ -115,7 +118,7 @@ export default function ChampionDetailPage() {
     getChampionData(name)
       .then((data) => {
         if (cancelled) return;
-        setChampionData(data ? { ...data, roles: data.roles.length > 0 ? data.roles : mockChampion?.roles ?? [] } : null);
+        setChampionData(data ? { ...data, roles: data.roles.length > 0 ? data.roles : staticChampion?.roles ?? [] } : null);
       })
       .catch(() => {
         if (!cancelled) setChampionData(null);
@@ -127,7 +130,7 @@ export default function ChampionDetailPage() {
     return () => {
       cancelled = true;
     };
-  }, [mockChampion?.roles, name]);
+  }, [staticChampion?.roles, name]);
 
   useEffect(() => {
     if (!championData) {
@@ -184,7 +187,7 @@ export default function ChampionDetailPage() {
       .finally(() => setLoading(false));
   }, [championData]);
 
-  if (dataLoaded && !championData && !mockChampion) return notFound();
+  if (dataLoaded && !championData && !staticChampion) return notFound();
 
   const formatNum = (n: number | null) => (n != null ? n.toLocaleString() : "—");
   const formatPct = (n: number | null) => (n != null ? `${n.toFixed(1)}%` : "—");
@@ -198,7 +201,7 @@ export default function ChampionDetailPage() {
           ← Back to champions
         </Link>
         <h1 className="pc-heading pc-heading-lg text-pc-accent">
-          <ScrambleText text={championData?.name ?? mockChampion?.name ?? name} speed={30} iterations={15} delayFromCenter={false} />
+          <ScrambleText text={championData?.name ?? staticChampion?.name ?? name} speed={30} iterations={15} delayFromCenter={false} />
         </h1>
       </div>
 
@@ -209,12 +212,12 @@ export default function ChampionDetailPage() {
           <div className="pc-card">
             <div className="flex flex-col items-center text-center gap-4">
               <SmartImage
-                src={getChampionIconSafe(championData?.name ?? mockChampion?.name ?? name)}
-                alt={championData?.name ?? mockChampion?.name ?? name}
+                src={getChampionIconSafe(championData?.name ?? staticChampion?.name ?? name)}
+                alt={championData?.name ?? staticChampion?.name ?? name}
                 className="w-28 h-28 rounded-xl border border-pc-border object-contain bg-pc-bg/50"
               />
               <div className="flex flex-wrap justify-center gap-2">
-                {(championData?.roles ?? mockChampion?.roles ?? []).map((role) => (
+                {(championData?.roles ?? staticChampion?.roles ?? []).map((role) => (
                   <span key={role} className="text-xs flex items-center gap-1.5 px-3 py-1 rounded-full bg-pc-accent/10 text-pc-accent border border-pc-accent/20">
                     {ROLE_ICONS[role] && <SmartImage src={ROLE_ICONS[role]} alt={role} className="w-3.5 h-3.5" />}
                     {role}
@@ -325,7 +328,7 @@ export default function ChampionDetailPage() {
 
       {/* Glicko-2 Leaderboard */}
       <h2 className="pc-card-title mb-2 shadow-sm">
-        Global ELO Leaderboard — {championData?.name ?? mockChampion?.name ?? name}
+        Global ELO Leaderboard — {championData?.name ?? staticChampion?.name ?? name}
       </h2>
       <div className="pc-card">
         {leaderboard.length === 0 ? (
