@@ -8,13 +8,31 @@ import {
   fetchMatchFact,
   fetchMatchSnapshots,
   fetchMatchSearch,
+  fetchReferenceChampions,
+  fetchReferenceCards,
+  fetchReferenceItems,
+  fetchReferenceTalents,
   type MatchDetailWithBans,
   type MatchFact,
   type MatchPlayerDetail,
   type MatchFactPlayer,
+  type MatchBan,
   type RatingSnapshot,
   type MatchSearchResult,
 } from "@/lib/api-client";
+import { getChampionIconSafe } from "@/lib/champion-icons";
+import { championSlug } from "@/lib/utils";
+
+type MaterialReference = {
+  id: number;
+  name: string;
+  description?: string | null;
+  shortDescription?: string | null;
+  championId?: number | null;
+  championName?: string | null;
+  itemType?: string | null;
+  iconUrl?: string | null;
+};
 
 /**
  * Match Detail Page — /matches/[id]
@@ -37,6 +55,8 @@ export default function MatchDetailPage() {
   const [match, setMatch] = useState<MatchDetailWithBans | null>(null);
   const [fact, setFact] = useState<MatchFact | null>(null);
   const [snapshots, setSnapshots] = useState<RatingSnapshot[]>([]);
+  const [championNameById, setChampionNameById] = useState<Map<number, string>>(new Map());
+  const [materialById, setMaterialById] = useState<Map<number, MaterialReference>>(new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -53,10 +73,17 @@ export default function MatchDetailPage() {
 
     async function load() {
       try {
-        const [detail, factData, snaps] = await Promise.all([
+        const [detail, factData, snaps, champions, items, talents, cards, staticMaterials, staticCardMaterials, staticTalentMaterials] = await Promise.all([
           fetchMatchDetail(matchId),
           fetchMatchFact(matchId),
           fetchMatchSnapshots(matchId).catch(() => [] as RatingSnapshot[]),
+          fetchReferenceChampions().catch(() => []),
+          fetchReferenceItems().catch(() => []),
+          fetchReferenceTalents().catch(() => []),
+          fetchReferenceCards().catch(() => []),
+          fetch("/data/paladins-items-reference.json").then((res) => res.ok ? res.json() : []).catch(() => []),
+          fetch("/data/paladins-card-reference.json").then((res) => res.ok ? res.json() : []).catch(() => []),
+          fetch("/data/paladins-talent-reference.json").then((res) => res.ok ? res.json() : []).catch(() => []),
         ]);
 
         if (!detail) {
@@ -67,6 +94,8 @@ export default function MatchDetailPage() {
         setMatch(detail);
         setFact(factData);
         setSnapshots(snaps);
+        setChampionNameById(new Map(champions.map((champion) => [Number(champion.id), champion.name])));
+        setMaterialById(buildMaterialReferenceMap(items, talents, cards, staticMaterials, staticCardMaterials, staticTalentMaterials));
 
         // Load related matches (same queue, same region, nearby time)
         setRelatedLoading(true);
@@ -128,8 +157,14 @@ export default function MatchDetailPage() {
   // Fact lookup by player_id
   const factMap = new Map<number, MatchFactPlayer>();
   if (fact) {
-    for (const fp of fact.players) factMap.set(fp.player_id, fp);
+    for (const fp of fact.players) {
+      factMap.set(Number(fp.player_id), resolveFactPlayerMaterials(fp, materialById, championNameById));
+    }
   }
+  const resolvedBans = match?.bans.map((ban) => ({
+    ...ban,
+    champion_name: ban.champion_name || championNameById.get(Number(ban.champion_id)),
+  })) ?? [];
 
   /* ── Skeleton ── */
   if (loading) {
@@ -181,7 +216,7 @@ export default function MatchDetailPage() {
       />
 
       {/* ── Bans ── */}
-      {match.bans.length > 0 && <BansSection bans={match.bans} />}
+      {resolvedBans.length > 0 && <BansSection bans={resolvedBans} />}
 
       {/* ── Teams ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -288,19 +323,36 @@ function MatchHeader(props: {
   );
 }
 
-function BansSection({ bans }: { bans: Array<{ champion_id: number; champion_name?: string }> }) {
+function BansSection({ bans }: { bans: MatchBan[] }) {
   return (
     <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-6">
       <h2 className="text-lg font-semibold text-pc-text mb-3">Bans</h2>
-      <div className="flex flex-wrap gap-2">
-        {bans.map((b, i) => (
-          <span
-            key={i}
-            className="px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-sm"
-          >
-            {b.champion_name || `#${b.champion_id}`}
-          </span>
-        ))}
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-8">
+        {bans.map((ban, i) => {
+          const label = ban.champion_name || `Champion #${ban.champion_id}`;
+          const content = (
+            <div className="flex min-w-0 items-center gap-2 rounded-md border border-red-500/20 bg-red-500/10 p-2 text-red-300">
+              <MaterialIcon
+                src={getChampionIconSafe(ban.champion_name)}
+                alt={label}
+                className="h-9 w-9 shrink-0 rounded border border-red-500/20 bg-pc-bg-secondary"
+              />
+              <div className="min-w-0">
+                <div className="text-[10px] uppercase tracking-wide text-red-300/70">
+                  Ban {ban.ban_slot ?? i + 1}
+                </div>
+                <div className="truncate text-xs font-medium">{label}</div>
+              </div>
+            </div>
+          );
+          return ban.champion_name ? (
+            <Link key={`${ban.ban_slot ?? i}-${ban.champion_id}`} href={`/champions/${championSlug(ban.champion_name)}`}>
+              {content}
+            </Link>
+          ) : (
+            <div key={`${ban.ban_slot ?? i}-${ban.champion_id}`}>{content}</div>
+          );
+        })}
       </div>
     </div>
   );
@@ -325,7 +377,7 @@ function TeamColumn({
       </div>
       <div className="divide-y divide-pc-border">
         {players.map((p) => (
-          <PlayerRow key={p.player_id} player={p} fact={factMap.get(p.player_id)} />
+          <PlayerRow key={p.player_id} player={p} fact={factMap.get(Number(p.player_id))} />
         ))}
       </div>
     </div>
@@ -334,77 +386,258 @@ function TeamColumn({
 
 function PlayerRow({ player, fact }: { player: MatchPlayerDetail; fact?: MatchFactPlayer }) {
   const isWinner = player.win_status === "Winner";
-  const kda = `${player.kills} / ${player.deaths} / ${player.assists}`;
-  const dpm = player.damage_per_minute?.toFixed(0) ?? "—";
-  const hpm = player.healing_per_minute?.toFixed(0) ?? "—";
+  const championHref = player.champion_name ? `/champions/${championSlug(player.champion_name)}` : undefined;
+  const totalDamage = statNumber(player.damage_done_physical) + statNumber(player.damage_done_magical);
+  const weaponDamage = statNumber(player.damage_done_in_hand);
+  // Recovered matches can be reconstructed from player history / recovery
+  // endpoints that do not include `Damage_Done_In_Hand`. In that case total
+  // damage is still useful for DPM and rankings, but the weapon-vs-ability
+  // split is unknown. Treat missing recovered weapon data as unavailable
+  // instead of showing a misleading 0 weapon / full ability breakdown.
+  const hasWeaponBreakdown = player.source !== "recovered" || weaponDamage > 0 || totalDamage === 0;
+  const nonWeaponDamage = hasWeaponBreakdown ? Math.max(totalDamage - weaponDamage, 0) : null;
+  const weaponShare = hasWeaponBreakdown && totalDamage > 0 ? `${fixed((weaponDamage / totalDamage) * 100, 0)}%` : "—";
+
+  const coreStats = [
+    { label: "K/D/A", value: `${num(player.kills)} / ${num(player.deaths)} / ${num(player.assists)}` },
+    { label: "KDA", value: fixed(player.kda, 2) },
+    { label: "DPM", value: fixed(player.damage_per_minute, 0) },
+    { label: "HPM", value: fixed(player.healing_per_minute, 0) },
+    { label: "SHPM", value: fixed(player.healing_self_per_minute, 0) },
+    { label: "GPM", value: fixed(player.gold_per_minute, 0) },
+    { label: "eGPM", value: fixed(player.egpm, 0) },
+    { label: "MPM", value: fixed(player.mitigation_per_minute, 0) },
+  ];
+
+  const detailStats = [
+    // `damage_done_physical` is the historical DB column name, but for Paladins
+    // match details it stores Hi-Rez `Damage_Player`, which is already total
+    // player damage. `damage_done_in_hand` is weapon-only damage and is a
+    // subset of that total. Show weapon and ability/other damage as breakdown
+    // metrics, but keep total damage/DPM sourced from `Damage_Player`.
+    { label: "Damage", value: num(totalDamage) },
+    { label: "Weapon", value: hasWeaponBreakdown ? num(weaponDamage) : "—" },
+    { label: "Ability", value: nonWeaponDamage == null ? "—" : num(nonWeaponDamage) },
+    { label: "Weapon %", value: weaponShare },
+    { label: "Healing", value: num(player.healing) },
+    { label: "Self Heal", value: num(player.healing_self) },
+    { label: "Taken", value: num(player.damage_taken) },
+    { label: "Mitigated", value: num(player.damage_mitigated) },
+    { label: "Gold", value: num(player.gold_earned) },
+    { label: "Objective", value: num(player.objective_assists) },
+    { label: "Spree", value: num(player.killing_spree) },
+    { label: "Multi", value: num(player.multi_kill_max) },
+    { label: "Tier", value: player.league_tier ?? "—" },
+    { label: "Source", value: player.source ?? "—" },
+    { label: "AFK", value: num(player.afk_rate) },
+  ];
 
   return (
-    <div className={`px-4 py-3 hover:bg-pc-bg-secondary transition-colors ${isWinner ? "bg-green-500/5" : ""}`}>
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-3">
-          <span className={`w-2 h-2 rounded-full ${isWinner ? "bg-green-400" : "bg-red-400"}`} />
-          <Link
-            href={`/players/${player.player_id}`}
-            className="font-medium text-pc-text hover:text-pc-accent transition-colors"
-          >
-            {player.player_name || "PRIVATEACCOUNT"}
-          </Link>
+    <div className={`px-4 py-4 hover:bg-pc-bg-secondary transition-colors ${isWinner ? "bg-green-500/5" : ""}`}>
+      <div className="flex items-start justify-between gap-3 mb-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <span className={`mt-1 h-2 w-2 shrink-0 rounded-full ${isWinner ? "bg-green-400" : "bg-red-400"}`} />
+          <MaterialIcon
+            src={getChampionIconSafe(player.champion_name)}
+            alt={player.champion_name || "Champion"}
+            className="h-12 w-12 rounded-md border border-pc-border bg-pc-bg-secondary"
+          />
+          <div className="min-w-0">
+            <Link
+              href={`/players/${player.player_id}`}
+              className="block truncate font-medium text-pc-text hover:text-pc-accent transition-colors"
+            >
+              {player.player_name || "PRIVATEACCOUNT"}
+            </Link>
+            {championHref ? (
+              <Link href={championHref} className="text-sm text-pc-text-secondary hover:text-pc-accent">
+                {player.champion_name}
+              </Link>
+            ) : (
+              <span className="text-sm text-pc-text-secondary">Champion #{player.champion_id}</span>
+            )}
+            {player.skin_name && <div className="truncate text-xs text-pc-text-muted">{player.skin_name}</div>}
+          </div>
         </div>
-        <div className="text-sm text-pc-text-secondary">
-          {player.champion_name}
-          {player.skin_name ? ` · ${player.skin_name}` : ""}
+        <div className={`shrink-0 rounded-full px-2 py-0.5 text-xs ${isWinner ? "bg-green-500/10 text-green-400" : "bg-red-500/10 text-red-400"}`}>
+          {player.win_status || (isWinner ? "Winner" : "Defeat")}
         </div>
       </div>
 
-      {/* Stats row */}
-      <div className="grid grid-cols-3 gap-2 text-xs text-pc-text-muted mb-2">
-        <div>KDA: <span className="text-pc-text-secondary">{kda}</span></div>
-        <div>DPM: <span className="text-pc-text-secondary">{dpm}</span></div>
-        <div>HPM: <span className="text-pc-text-secondary">{hpm}</span></div>
+      <MetricGrid metrics={coreStats} compact />
+      <MetricGrid metrics={detailStats} />
+
+      <div className="mt-3 space-y-3">
+        <TalentStrip talents={fact?.talents ?? []} />
+        <ItemStrip items={fact?.items ?? []} />
+        <CardStrip cards={fact?.cards ?? []} />
       </div>
-
-      {/* Items */}
-      {fact?.items && fact.items.length > 0 && (
-        <div className="flex flex-wrap gap-1 mb-1">
-          {fact.items.map((item, i) => (
-            <span
-              key={i}
-              className="px-2 py-0.5 rounded bg-pc-bg-secondary border border-pc-border text-xs text-pc-text-secondary"
-            >
-              Item #{item.item_id}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* Cards */}
-      {fact?.cards && fact.cards.length > 0 && (
-        <div className="flex flex-wrap gap-1 mb-1">
-          {fact.cards.map((card, i) => (
-            <span
-              key={i}
-              className="px-2 py-0.5 rounded bg-blue-500/10 border border-blue-500/20 text-xs text-blue-400"
-            >
-              Card #{card.card_id}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* Talents */}
-      {fact?.talents && fact.talents.length > 0 && (
-        <div className="flex flex-wrap gap-1">
-          {fact.talents.map((talent, i) => (
-            <span
-              key={i}
-              className="px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-xs text-amber-400"
-            >
-              Talent #{talent.talent_id}
-            </span>
-          ))}
-        </div>
-      )}
     </div>
+  );
+}
+
+function TalentStrip({ talents }: { talents: MatchFactPlayer["talents"] }) {
+  if (talents.length === 0) return null;
+  return (
+    <div className="flex flex-wrap gap-2">
+      {talents.map((talent) => (
+        <MaterialPill
+          key={talent.talent_id}
+          label={talent.talent_name || "Unknown Talent"}
+          src={talent.icon_url}
+          fallbackSrc={talent.fallback_icon_url}
+          accent="amber"
+        />
+      ))}
+    </div>
+  );
+}
+
+function ItemStrip({ items }: { items: MatchFactPlayer["items"] }) {
+  if (items.length === 0) return null;
+  return (
+    <div>
+      <div className="mb-1 text-[11px] uppercase tracking-wide text-pc-text-muted">Items</div>
+      <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 xl:grid-cols-6">
+        {items.map((item) => {
+          const itemLevel = formatItemDisplayLevel(item.item_level);
+          return (
+            <MaterialTile
+              key={`${item.slot}-${item.item_id}`}
+              label={item.item_name || `Item #${item.item_id}`}
+              detail={itemLevel ? `Level ${itemLevel} · Slot ${item.slot ?? "—"}` : `Slot ${item.slot ?? "—"}`}
+              badge={itemLevel ? `Lv ${itemLevel}` : undefined}
+              src={item.icon_url}
+              fallbackSrc={item.fallback_icon_url}
+              title={item.description || undefined}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function CardStrip({ cards }: { cards: MatchFactPlayer["cards"] }) {
+  if (cards.length === 0) return null;
+  return (
+    <div>
+      <div className="mb-1 text-[11px] uppercase tracking-wide text-pc-text-muted">Loadout Cards</div>
+      <div className="grid grid-cols-5 gap-2">
+        {cards.map((card) => {
+          const cardLevel = formatCardDisplayLevel(card.card_level);
+          return (
+            <MaterialTile
+              key={card.card_id}
+              label={card.card_name || `Card #${card.card_id}`}
+              detail={cardLevel ? `Level ${cardLevel}` : undefined}
+              badge={cardLevel ? `Lv ${cardLevel}` : undefined}
+              src={card.icon_url}
+              fallbackSrc={card.fallback_icon_url}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function formatItemDisplayLevel(level?: number | null): number | null {
+  if (level == null || !Number.isFinite(Number(level))) return null;
+  // Hi-Rez active item levels are persisted zero-based in match_player_items
+  // after normalization: 0, 1, 2 represent in-game item levels 1, 2, 3.
+  // Keep the DB value unchanged for analytics, but show the player-facing
+  // level on the match page so purchased items are not displayed as "Lv 0".
+  return Number(level) + 1;
+}
+
+function formatCardDisplayLevel(level?: number | null): number | null {
+  if (level == null || !Number.isFinite(Number(level))) return null;
+  return Number(level);
+}
+
+function MetricGrid({ metrics, compact = false }: { metrics: Array<{ label: string; value: string }>; compact?: boolean }) {
+  return (
+    <div className={`grid gap-1.5 ${compact ? "grid-cols-4 mb-2" : "grid-cols-3 sm:grid-cols-4"}`}>
+      {metrics.map((metric) => (
+        <div key={metric.label} className="rounded bg-pc-bg-secondary/70 px-2 py-1">
+          <div className="text-[10px] uppercase tracking-wide text-pc-text-muted">{metric.label}</div>
+          <div className="truncate text-xs font-medium text-pc-text-secondary">{metric.value}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function MaterialPill(props: {
+  label: string;
+  detail?: string;
+  src?: string | null;
+  fallbackSrc?: string | null;
+  accent: "amber" | "red";
+}) {
+  const colors = props.accent === "amber"
+    ? "border-amber-500/25 bg-amber-500/10 text-amber-300"
+    : "border-red-500/25 bg-red-500/10 text-red-300";
+  return (
+    <div className={`flex min-w-0 items-center gap-2 rounded-md border px-2 py-1 ${colors}`}>
+      <MaterialIcon src={props.src} fallbackSrc={props.fallbackSrc} alt={props.label} className="h-8 w-8 rounded" />
+      <div className="min-w-0">
+        <div className="truncate text-xs font-medium">{props.label}</div>
+        {props.detail && <div className="truncate text-[10px] opacity-75">{props.detail}</div>}
+      </div>
+    </div>
+  );
+}
+
+function MaterialTile(props: {
+  label: string;
+  detail?: string;
+  badge?: string;
+  src?: string | null;
+  fallbackSrc?: string | null;
+  title?: string;
+}) {
+  return (
+    <div className="relative min-w-0 rounded-md border border-pc-border bg-pc-bg-secondary p-1" title={props.title || props.label}>
+      <div className="relative">
+        {props.badge && (
+          <span className="absolute right-1 top-1 z-10 rounded border border-pc-accent/40 bg-black/80 px-1.5 py-0.5 text-[10px] font-semibold leading-none text-pc-accent shadow">
+            {props.badge}
+          </span>
+        )}
+        <MaterialIcon src={props.src} fallbackSrc={props.fallbackSrc} alt={props.label} className="aspect-square w-full rounded bg-pc-bg-elevated" />
+      </div>
+      <div className="mt-1 flex min-w-0 items-center justify-between gap-1">
+        <div className="truncate text-[11px] font-medium text-pc-text-secondary">{props.label}</div>
+        {props.badge && <div className="shrink-0 text-[10px] font-semibold text-pc-accent">{props.badge}</div>}
+      </div>
+      {props.detail && <div className="truncate text-[10px] text-pc-text-muted">{props.detail}</div>}
+    </div>
+  );
+}
+
+function MaterialIcon({ src, fallbackSrc, alt, className }: { src?: string | null; fallbackSrc?: string | null; alt: string; className: string }) {
+  const [failed, setFailed] = useState(false);
+  useEffect(() => {
+    setFailed(false);
+  }, [src, fallbackSrc]);
+  const imageSrc = failed ? fallbackSrc : src;
+  if (!imageSrc) {
+    return (
+      <div className={`flex items-center justify-center text-xs text-pc-text-muted ${className}`}>
+        #
+      </div>
+    );
+  }
+  return (
+    <img
+      src={imageSrc}
+      alt={alt}
+      className={`object-cover ${className}`}
+      loading="lazy"
+      onError={() => setFailed(true)}
+    />
   );
 }
 
@@ -481,6 +714,210 @@ function RelatedMatches({ related, matchId, loading }: { related: MatchSearchRes
 
 /* ── Helpers ── */
 
+function buildMaterialReferenceMap(
+  items: any[],
+  talents: any[],
+  cards: any[],
+  staticMaterials: any[],
+  staticCardMaterials: any[],
+  staticTalentMaterials: any[],
+): Map<number, MaterialReference> {
+  const map = new Map<number, MaterialReference>();
+  const put = (candidate: MaterialReference) => {
+    if (!Number.isFinite(candidate.id) || candidate.id <= 0 || !candidate.name) return;
+    const existing = map.get(candidate.id);
+    map.set(candidate.id, {
+      ...existing,
+      ...candidate,
+      description: candidate.description || existing?.description || null,
+      shortDescription: candidate.shortDescription || existing?.shortDescription || null,
+      iconUrl: candidate.iconUrl || existing?.iconUrl || null,
+      championId: candidate.championId ?? existing?.championId ?? null,
+      championName: candidate.championName ?? existing?.championName ?? null,
+      itemType: candidate.itemType || existing?.itemType || null,
+    });
+  };
+
+  // The live DB reference endpoints may be sparse after recovery ingest, while
+  // the local Hi-Rez get-items snapshot carries the canonical names and remote
+  // image URLs for champion cards, active items, and talents. Load the static
+  // snapshot first, then let DB rows override it when the DB has fresher data.
+  for (const row of staticMaterials || []) {
+    put({
+      id: Number(row.id ?? row.ItemId),
+      name: String(row.name ?? row.DeviceName ?? "").trim(),
+      description: row.description ?? row.Description ?? null,
+      shortDescription: row.shortDescription ?? row.ShortDesc ?? null,
+      championId: row.championId == null ? Number(row.champion_id ?? 0) : Number(row.championId),
+      itemType: row.itemType ?? row.item_type ?? null,
+      iconUrl: row.iconUrl ?? row.itemIcon_URL ?? null,
+    });
+  }
+
+  // Generated local card references close the gap between recovered match
+  // payloads and sparse reference tables. The generator combines the checked-in
+  // item snapshot, local champion-page card names, observed DB card ids, and
+  // local card image files, so match rendering remains DB/local-first and never
+  // burns a Hi-Rez call just to label a loadout card.
+  for (const row of staticCardMaterials || []) {
+    put({
+      id: Number(row.id ?? row.card_id),
+      name: String(row.name ?? row.card_name ?? "").trim(),
+      description: row.description ?? null,
+      shortDescription: row.shortDescription ?? null,
+      championId: row.championId == null ? Number(row.champion_id ?? 0) : Number(row.championId),
+      itemType: row.itemType ?? "Champion Card",
+      iconUrl: row.iconUrl ?? row.icon_url ?? null,
+    });
+  }
+
+  // Talents have the same local-reference problem as cards, but with extra
+  // renamed-talent edge cases. For example Seris "Resuscitate" intentionally
+  // reuses the old Soul Collector asset, so a blind
+  // /images/champions/Talent Seris Resuscitate.avif guess will always 404.
+  // The generated reference knows these aliases and exact local filenames.
+  for (const row of staticTalentMaterials || []) {
+    put({
+      id: Number(row.id ?? row.talent_id),
+      name: String(row.name ?? row.talent_name ?? "").trim(),
+      description: row.description ?? null,
+      shortDescription: row.shortDescription ?? null,
+      championId: row.championId == null ? Number(row.champion_id ?? 0) : Number(row.championId),
+      championName: row.championName ?? row.champion_name ?? null,
+      itemType: row.itemType ?? "Talent",
+      iconUrl: row.iconUrl ?? row.icon_url ?? null,
+    });
+  }
+
+  for (const row of items || []) {
+    put({
+      id: Number(row.item_id ?? row.id),
+      name: String(row.item_name ?? row.name ?? "").trim(),
+      description: row.description ?? null,
+      championId: row.champion_id == null ? null : Number(row.champion_id),
+      itemType: row.item_type ?? null,
+      iconUrl: row.icon_url ?? null,
+    });
+  }
+
+  for (const row of cards || []) {
+    put({
+      id: Number(row.card_id ?? row.id),
+      name: String(row.card_name ?? row.name ?? "").trim(),
+      championId: row.champion_id == null ? null : Number(row.champion_id),
+      itemType: "Champion Card",
+    });
+  }
+
+  for (const row of talents || []) {
+    put({
+      id: Number(row.talent_id ?? row.id),
+      name: String(row.talent_name ?? row.name ?? "").trim(),
+      championId: row.champion_id == null ? null : Number(row.champion_id),
+      itemType: "Talent",
+    });
+  }
+
+  return map;
+}
+
+function resolveFactPlayerMaterials(
+  player: MatchFactPlayer,
+  materialById: Map<number, MaterialReference>,
+  championNameById: Map<number, string>,
+): MatchFactPlayer {
+  return {
+    ...player,
+    items: player.items
+      .slice()
+      .sort((a, b) => Number(a.slot ?? 0) - Number(b.slot ?? 0))
+      .map((item) => {
+      const ref = materialById.get(Number(item.item_id));
+      const name = item.item_name || ref?.name || null;
+      return {
+        ...item,
+        item_name: name,
+        description: item.description || ref?.description || ref?.shortDescription || null,
+        item_type: item.item_type || ref?.itemType || null,
+        icon_url: item.icon_url || itemIconPath(name) || ref?.iconUrl || null,
+        fallback_icon_url: item.fallback_icon_url || itemFallbackIconPath(name) || ref?.iconUrl || null,
+      };
+    }),
+    cards: player.cards
+      .slice()
+      .sort((a, b) => Number(a.card_id ?? 0) - Number(b.card_id ?? 0))
+      .map((card) => {
+      const ref = materialById.get(Number(card.card_id));
+      const name = card.card_name || ref?.name || null;
+      const localIcon = cardIconPath(name);
+      const localFallbackIcon = cardFallbackIconPath(name);
+      return {
+        ...card,
+        card_name: name,
+        champion_id: card.champion_id ?? ref?.championId ?? null,
+        // Card art is shipped with the frontend as name-based local files. The
+        // backend and older DB rows can still carry stale space-form paths such
+        // as "/images/cards/Card Survival.avif", which Next will 404 because
+        // the actual asset is "Card_Survival.avif". Prefer the canonical local
+        // path from the generated mapper first because it knows local aliases
+        // like Blade Dancer -> Card_Blade_Dance.avif. Then try the canonical
+        // name-derived local path, and only use incoming URLs as a last resort
+        // for truly unknown cards.
+        icon_url: ref?.iconUrl || localIcon || card.icon_url || null,
+        fallback_icon_url: ref?.iconUrl || localFallbackIcon || card.fallback_icon_url || null,
+      };
+    }),
+    talents: player.talents.map((talent) => {
+      const ref = materialById.get(Number(talent.talent_id));
+      const name = talent.talent_name || ref?.name || null;
+      const championId = talent.champion_id ?? ref?.championId ?? player.champion_id ?? null;
+      const championName = talent.champion_name || ref?.championName || (championId ? championNameById.get(Number(championId)) : null) || player.champion_name || null;
+      const externalIconUrl = isExternalUrl(talent.icon_url) ? talent.icon_url : null;
+      const externalFallbackIconUrl = isExternalUrl(talent.fallback_icon_url) ? talent.fallback_icon_url : null;
+      return {
+        ...talent,
+        talent_name: name,
+        champion_id: championId,
+        champion_name: championName,
+        // Never emit guessed local talent URLs here. If a generated reference
+        // cannot resolve a local/remote icon, render the placeholder instead of
+        // making the browser request a path that may not exist.
+        icon_url: ref?.iconUrl || externalIconUrl || null,
+        fallback_icon_url: ref?.iconUrl || externalFallbackIconUrl || null,
+      };
+    }),
+  };
+}
+
+function assetSegment(name: string | null | undefined): string | null {
+  const trimmed = String(name || "").trim();
+  return trimmed ? trimmed.replace(/[^\w\s'-]/g, "").replace(/\s+/g, "_") : null;
+}
+
+function itemIconPath(name: string | null | undefined): string | null {
+  const segment = assetSegment(name);
+  return segment ? `/images/items/${segment}_Icon.avif` : null;
+}
+
+function itemFallbackIconPath(name: string | null | undefined): string | null {
+  const segment = assetSegment(name);
+  return segment ? `/images/items/${segment}_Icon.png` : null;
+}
+
+function cardIconPath(name: string | null | undefined): string | null {
+  const segment = assetSegment(name);
+  return segment ? `/images/cards/Card_${segment}.avif` : null;
+}
+
+function cardFallbackIconPath(name: string | null | undefined): string | null {
+  const segment = assetSegment(name);
+  return segment ? `/images/cards/Card_${segment}.png` : null;
+}
+
+function isExternalUrl(value: string | null | undefined): boolean {
+  return /^https?:\/\//i.test(String(value || ""));
+}
+
 function queueName(id: number): string {
   const map: Record<number, string> = {
     486: "Ranked 10v10",
@@ -496,4 +933,22 @@ function formatDuration(seconds: number): string {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
   return `${m}:${s.toString().padStart(2, "0")}`;
+}
+
+function num(value: number | string | null | undefined): string {
+  if (value == null) return "—";
+  const parsed = typeof value === "string" ? Number(value) : value;
+  return Number.isFinite(parsed) ? Math.round(parsed).toLocaleString() : "—";
+}
+
+function statNumber(value: number | string | null | undefined): number {
+  if (value == null) return 0;
+  const parsed = typeof value === "string" ? Number(value) : value;
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function fixed(value: number | string | null | undefined, digits: number): string {
+  if (value == null) return "—";
+  const parsed = typeof value === "string" ? Number(value) : value;
+  return Number.isFinite(parsed) ? parsed.toFixed(digits) : "—";
 }

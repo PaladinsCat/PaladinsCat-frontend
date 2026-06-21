@@ -1019,7 +1019,7 @@ export interface UniversalSearchResponse {
 export async function fetchUniversalSearch(
   queryText: string,
   limit = 30,
-  options?: { remote?: boolean; remoteTarget?: UniversalSearchRemoteTarget },
+  options?: { remote?: boolean; remoteTarget?: UniversalSearchRemoteTarget; refresh?: boolean },
 ): Promise<UniversalSearchResponse> {
   const query = new URLSearchParams({
     q: queryText,
@@ -1027,6 +1027,7 @@ export async function fetchUniversalSearch(
   });
   if (options?.remote) query.set("remote", "true");
   if (options?.remoteTarget) query.set("remoteTarget", options.remoteTarget);
+  if (options?.refresh) query.set("refresh", "true");
   return fetchJson<UniversalSearchResponse>(`/search/universal?${query.toString()}`, { unwrapData: false });
 }
 

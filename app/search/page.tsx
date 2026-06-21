@@ -1,0 +1,515 @@
+"use client";
+
+import { Suspense, useEffect, useMemo, useState } from "react";
+import type { FormEvent } from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import {
+  fetchUniversalSearch,
+  fetchReferenceChampions,
+  type UniversalSearchResult,
+  type UniversalSearchResponse,
+  type UniversalSearchRemoteTarget,
+  type UniversalSearchType,
+} from "@/lib/api-client";
+import { getChampionIconSafe } from "@/lib/champion-icons";
+
+const TYPE_LABEL: Record<UniversalSearchType, string> = {
+  player: "Player",
+  match: "Match",
+  champion: "Champion",
+  item: "Item",
+  card: "Card",
+  talent: "Talent",
+};
+
+const TYPE_STYLE: Record<UniversalSearchType, string> = {
+  player: "border-cyan-400/30 bg-cyan-400/10 text-cyan-300",
+  match: "border-emerald-400/30 bg-emerald-400/10 text-emerald-300",
+  champion: "border-pc-accent/30 bg-pc-accent/10 text-pc-accent",
+  item: "border-amber-400/30 bg-amber-400/10 text-amber-300",
+  card: "border-violet-400/30 bg-violet-400/10 text-violet-300",
+  talent: "border-rose-400/30 bg-rose-400/10 text-rose-300",
+};
+
+type StaticReferenceRow = {
+  id: number;
+  name: string;
+  description?: string | null;
+  shortDescription?: string | null;
+  championId?: number | null;
+  championName?: string | null;
+  itemType?: string | null;
+};
+
+type StaticReferenceIndex = {
+  items: StaticReferenceRow[];
+  cards: StaticReferenceRow[];
+  talents: StaticReferenceRow[];
+  championNames: Map<number, string>;
+};
+
+let staticReferencePromise: Promise<StaticReferenceIndex> | null = null;
+
+function normalize(value: unknown) {
+  return String(value ?? "").trim().toLowerCase();
+}
+
+function slug(name: string | null | undefined) {
+  return String(name ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+function rankStaticName(name: string, q: string, base: number) {
+  const n = normalize(name);
+  const query = normalize(q);
+  if (n === query) return base + 30;
+  if (n.startsWith(query)) return base + 18;
+  if (n.includes(query)) return base + 8;
+  return base;
+}
+
+function uniqueByName(rows: StaticReferenceRow[]) {
+  const seen = new Set<string>();
+  return rows.filter((row) => {
+    const key = `${normalize(row.name)}:${row.championId ?? 0}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+async function loadStaticReferenceIndex(): Promise<StaticReferenceIndex> {
+  if (!staticReferencePromise) {
+    staticReferencePromise = Promise.all([
+      fetch("/data/paladins-items-reference.json").then((res) => res.ok ? res.json() : []),
+      fetch("/data/paladins-card-reference.json").then((res) => res.ok ? res.json() : []),
+      fetch("/data/paladins-talent-reference.json").then((res) => res.ok ? res.json() : []),
+      fetchReferenceChampions().catch(() => []),
+    ]).then(([items, cards, talents, champions]) => {
+      const championNames = new Map<number, string>(
+        champions.map((champion) => [Number(champion.id), champion.name])
+      );
+      return {
+        // The item reference file also carries champion cards/talents from the
+        // Hi-Rez item endpoint. Universal item search should keep the vendor
+        // item lane focused on buyable match items; card/talent lanes below use
+        // their dedicated local reference files.
+        items: uniqueByName((items as StaticReferenceRow[]).filter((item) => Number(item.championId ?? 0) === 0)),
+        cards: uniqueByName(cards as StaticReferenceRow[]),
+        talents: uniqueByName(talents as StaticReferenceRow[]),
+        championNames,
+      };
+    });
+  }
+  return staticReferencePromise;
+}
+
+function staticReferenceResults(q: string, index: StaticReferenceIndex): UniversalSearchResult[] {
+  const query = normalize(q);
+  if (query.length < 2) return [];
+
+  const matches = (row: StaticReferenceRow) => normalize(row.name).includes(query);
+  const championName = (row: StaticReferenceRow) => row.championName || index.championNames.get(Number(row.championId ?? 0)) || null;
+
+  const itemResults: UniversalSearchResult[] = index.items
+    .filter(matches)
+    .slice(0, 8)
+    .map((row) => ({
+      type: "item",
+      id: String(row.id),
+      title: row.name,
+      subtitle: row.itemType || "Item",
+      href: "/stats/items",
+      score: rankStaticName(row.name, q, 74),
+      meta: { itemType: row.itemType },
+    }));
+
+  const cardResults: UniversalSearchResult[] = index.cards
+    .filter(matches)
+    .slice(0, 10)
+    .map((row) => {
+      const champ = championName(row);
+      return {
+        type: "card",
+        id: String(row.id),
+        title: row.name,
+        subtitle: champ ? `${champ} loadout card` : "Loadout card",
+        href: champ ? `/champions/${slug(champ)}` : "/stats/loadouts",
+        score: rankStaticName(row.name, q, 78),
+        meta: { championId: row.championId, championName: champ },
+      };
+    });
+
+  const talentResults: UniversalSearchResult[] = index.talents
+    .filter(matches)
+    .slice(0, 10)
+    .map((row) => {
+      const champ = championName(row);
+      return {
+        type: "talent",
+        id: String(row.id),
+        title: row.name,
+        subtitle: champ ? `${champ} talent` : "Champion talent",
+        href: champ ? `/champions/${slug(champ)}` : "/stats/talents",
+        score: rankStaticName(row.name, q, 80),
+        meta: { championId: row.championId, championName: champ },
+      };
+    });
+
+  return [...talentResults, ...cardResults, ...itemResults];
+}
+
+function mergeResults(results: UniversalSearchResult[]) {
+  const seen = new Set<string>();
+  return results
+    .filter((result) => {
+      const key = `${result.type}:${normalize(result.title)}:${result.meta?.championId ?? ""}:${result.href}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .sort((a, b) => b.score - a.score || typeSort(a.type) - typeSort(b.type) || a.title.localeCompare(b.title));
+}
+
+function resultInitial(type: UniversalSearchType) {
+  return TYPE_LABEL[type].slice(0, 1);
+}
+
+function typeSort(type: UniversalSearchType) {
+  return ["player", "match", "champion", "talent", "card", "item"].indexOf(type);
+}
+
+function isNumericQuery(value: string) {
+  return /^\d{2,}$/.test(value.trim());
+}
+
+function isLikelyMatchId(value: string) {
+  const q = value.trim();
+  return /^\d{10,13}$/.test(q) && Number(q) >= 1_000_000_000;
+}
+
+function canRemotePlayerNameLookup(value: string) {
+  const q = value.trim();
+  if (/^(xbox|xbl|psn|ps|playstation|switch|nintendo)[:/].{2,64}$/i.test(q)) {
+    return !/[,%*?]/.test(q);
+  }
+  return q.length >= 3 && q.length <= 32 && !/^\d+$/.test(q) && !/[,%*?]/.test(q);
+}
+
+function ResultIcon({ result }: { result: UniversalSearchResult }) {
+  if (result.type === "champion") {
+    return (
+      <img
+        src={getChampionIconSafe(result.title)}
+        alt=""
+        className="h-10 w-10 rounded-lg object-contain bg-pc-bg border border-pc-border"
+        loading="lazy"
+      />
+    );
+  }
+
+  const championName = typeof result.meta?.championName === "string" ? result.meta.championName : null;
+  if ((result.type === "card" || result.type === "talent") && championName) {
+    return (
+      <img
+        src={getChampionIconSafe(championName)}
+        alt=""
+        className="h-10 w-10 rounded-lg object-contain bg-pc-bg border border-pc-border"
+        loading="lazy"
+      />
+    );
+  }
+
+  return (
+    <div className="h-10 w-10 rounded-lg bg-pc-bg border border-pc-border flex items-center justify-center text-xs font-bold text-pc-accent">
+      {resultInitial(result.type)}
+    </div>
+  );
+}
+
+function remoteLookupNotice(target: UniversalSearchRemoteTarget, remote: UniversalSearchResponse["remote"]) {
+  if (!remote) return null;
+  if (remote.skipped) {
+    return target === "match-id" && remote.reason === "match already exists locally"
+      ? null
+      : remote.reason || "Lookup skipped.";
+  }
+  if (remote.status === "hit") {
+    if (target === "match-id") {
+      return remote.cacheHit ? "Served from recent match lookup cache." : "Match fetched and stored.";
+    }
+    return remote.cacheHit ? "Served from recent lookup cache." : "Hi-Rez lookup found a result.";
+  }
+  if (remote.status === "miss") {
+    if (target === "match-id") {
+      return remote.cacheHit
+        ? "Recent match lookup returned no match data. You can try lookup again."
+        : "Hi-Rez returned no match data for this ID.";
+    }
+    return remote.cacheHit ? "Recent Hi-Rez lookup already found no result." : "Hi-Rez returned no result.";
+  }
+  if (remote.status === "error") {
+    return remote.error || "Hi-Rez lookup failed.";
+  }
+  return null;
+}
+
+function SearchPageBody() {
+  const searchParams = useSearchParams();
+  const initialQuery = searchParams.get("q") ?? "";
+  const [query, setQuery] = useState(initialQuery);
+  const [results, setResults] = useState<UniversalSearchResult[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [searched, setSearched] = useState(initialQuery.trim().length > 0);
+  const [error, setError] = useState<string | null>(null);
+  const [remoteLoadingTarget, setRemoteLoadingTarget] = useState<UniversalSearchRemoteTarget | null>(null);
+  const [remoteNotice, setRemoteNotice] = useState<string | null>(null);
+
+  useEffect(() => {
+    setQuery(initialQuery);
+  }, [initialQuery]);
+
+  useEffect(() => {
+    const q = query.trim();
+    setError(null);
+    setRemoteNotice(null);
+    if (q.length < 2 && !/^\d+$/.test(q)) {
+      setResults([]);
+      setLoading(false);
+      setSearched(false);
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setLoading(true);
+      setSearched(true);
+      Promise.all([
+        fetchUniversalSearch(q, 36).catch(() => ({ data: [] as UniversalSearchResult[] })),
+        loadStaticReferenceIndex().then((index) => staticReferenceResults(q, index)).catch(() => [] as UniversalSearchResult[]),
+      ])
+        .then(([response, staticResults]) => {
+          setResults(mergeResults([...response.data, ...staticResults]).slice(0, 48));
+          if (isLikelyMatchId(q)) {
+            setRemoteNotice(remoteLookupNotice("match-id", response.remote));
+          }
+          const params = new URLSearchParams(window.location.search);
+          params.set("q", q);
+          window.history.replaceState(null, "", `/search?${params.toString()}`);
+        })
+        .catch(() => {
+          setError("Search unavailable");
+          setResults([]);
+        })
+        .finally(() => setLoading(false));
+    }, 180);
+
+    return () => window.clearTimeout(timer);
+  }, [query]);
+
+  const grouped = useMemo(() => {
+    const byType = new Map<UniversalSearchType, UniversalSearchResult[]>();
+    for (const result of results) {
+      const list = byType.get(result.type) ?? [];
+      list.push(result);
+      byType.set(result.type, list);
+    }
+    return Array.from(byType.entries()).sort(([a], [b]) => typeSort(a) - typeSort(b));
+  }, [results]);
+
+  const submit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const q = query.trim();
+    if (!q) return;
+    window.history.replaceState(null, "", `/search?q=${encodeURIComponent(q)}`);
+  };
+
+  const runRemoteLookup = async (target: UniversalSearchRemoteTarget) => {
+    const q = query.trim();
+    if (!q || remoteLoadingTarget) return;
+
+    setRemoteLoadingTarget(target);
+    setRemoteNotice(null);
+    setError(null);
+    try {
+      const response = await fetchUniversalSearch(q, 36, {
+        remote: true,
+        remoteTarget: target,
+        refresh: target === "match-id",
+      });
+      setResults((current) => mergeResults([...current, ...response.data]).slice(0, 48));
+      setRemoteNotice(remoteLookupNotice(target, response.remote));
+    } catch {
+      setError("Remote lookup unavailable");
+    } finally {
+      setRemoteLoadingTarget(null);
+    }
+  };
+
+  const q = query.trim();
+  // Keep explicit Hi-Rez fallback actions visible even after local search finds
+  // nearby results. A fuzzy/local player hit is not proof that the desired
+  // account exists locally. Match-ID shaped numeric queries are handled
+  // automatically by the backend through the same DB-first `fetchMatches`
+  // path as the match detail page. The manual match button stays available for
+  // match-shaped IDs so a user can retry a recent miss; that click bypasses
+  // only the short miss cache and still cannot spend a call for an existing DB
+  // row because the backend preflight wins first.
+  const remoteActions: Array<{ target: UniversalSearchRemoteTarget; label: string; show: boolean }> = [
+    { target: "player-id", label: "Look up player ID", show: isNumericQuery(q) && !isLikelyMatchId(q) },
+    { target: "match-id", label: "Look up match ID", show: isLikelyMatchId(q) },
+    { target: "player-name", label: "Search Hi-Rez exact player name", show: canRemotePlayerNameLookup(q) },
+  ];
+  const visibleRemoteActions = remoteActions.filter((action) => action.show);
+
+  return (
+    <div className="space-y-6">
+      <div className="space-y-3">
+        <h1 className="pc-heading pc-heading-lg text-pc-accent">Search</h1>
+        <form onSubmit={submit} className="flex max-w-3xl gap-2">
+          <div className="relative flex-1">
+            <input
+              type="search"
+              name="q"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              aria-label="Search players, matches, champions, items, cards, talents"
+              autoFocus
+              className="pc-input w-full text-sm pr-10"
+            />
+            {query && (
+              <button
+                type="button"
+                aria-label="Clear search"
+                title="Clear search"
+                onClick={() => {
+                  setQuery("");
+                  setResults([]);
+                  setSearched(false);
+                  window.history.replaceState(null, "", "/search");
+                }}
+                className="absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-pc-text-muted hover:bg-pc-bg hover:text-pc-text transition-colors"
+              >
+                <svg viewBox="0 0 20 20" aria-hidden="true" className="h-4 w-4">
+                  <path
+                    d="M5.6 5.6 10 10m0 0 4.4 4.4M10 10l4.4-4.4M10 10l-4.4 4.4"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </button>
+            )}
+          </div>
+          <button
+            type="submit"
+            aria-label="Search"
+            title="Search"
+            className="pc-glass flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-pc-border text-pc-text-muted hover:border-pc-accent-mid hover:text-pc-accent transition-colors"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4">
+              <path
+                d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.35-4.35"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        </form>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        {(["player", "match", "champion", "talent", "card", "item"] as UniversalSearchType[]).map((type) => {
+          const count = results.filter((result) => result.type === type).length;
+          return (
+            <span key={type} className={`text-[10px] px-2 py-1 rounded-full border ${TYPE_STYLE[type]}`}>
+              {TYPE_LABEL[type]} {count}
+            </span>
+          );
+        })}
+      </div>
+
+      {searched && visibleRemoteActions.length > 0 && (
+        <div className="pc-glass flex flex-wrap items-center gap-2 rounded-lg border border-pc-border p-3">
+          {visibleRemoteActions.map((action) => (
+            <button
+              key={action.target}
+              type="button"
+              onClick={() => runRemoteLookup(action.target)}
+              disabled={remoteLoadingTarget !== null}
+              className="px-3 py-1.5 rounded-md border border-pc-accent/30 bg-pc-accent/10 text-xs font-semibold text-pc-accent hover:bg-pc-accent/15 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {remoteLoadingTarget === action.target ? "Looking up..." : action.label}
+            </button>
+          ))}
+          <span className="text-xs text-pc-text-muted">Exact lookup. Local DB is checked first.</span>
+        </div>
+      )}
+
+      {remoteNotice && (
+        <div className="pc-card text-xs text-pc-text-muted">{remoteNotice}</div>
+      )}
+
+      {loading && (
+        <div className="pc-card text-sm text-pc-text-muted">Searching...</div>
+      )}
+
+      {error && (
+        <div className="pc-card border-red-500/30 text-sm text-red-300">{error}</div>
+      )}
+
+      {!loading && searched && results.length === 0 && !error && (
+        <div className="pc-card text-sm text-pc-text-muted">No results found.</div>
+      )}
+
+      {!loading && grouped.length > 0 && (
+        <div className="space-y-5">
+          {grouped.map(([type, rows]) => (
+            <section key={type} className="space-y-2">
+              <div className="flex items-center gap-2 px-1">
+                <h2 className="text-sm font-semibold text-pc-text">{TYPE_LABEL[type]}</h2>
+                <span className="text-[10px] text-pc-text-muted">{rows.length}</span>
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                {rows.map((result) => (
+                  <Link
+                    key={`${result.type}-${result.id}-${result.href}`}
+                    href={result.href}
+                    className="group flex items-center gap-3 rounded-lg border border-pc-border bg-pc-bg-elevated p-3 hover:border-pc-accent-mid transition-colors"
+                  >
+                    <ResultIcon result={result} />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="truncate text-sm font-semibold text-pc-text group-hover:text-pc-accent transition-colors">
+                          {result.title}
+                        </span>
+                        <span className={`shrink-0 text-[9px] px-1.5 py-0.5 rounded-full border ${TYPE_STYLE[result.type]}`}>
+                          {TYPE_LABEL[result.type]}
+                        </span>
+                      </div>
+                      <p className="truncate text-xs text-pc-text-muted mt-0.5">{result.subtitle}</p>
+                    </div>
+                    <span className="text-xs text-pc-text-muted group-hover:text-pc-accent transition-colors">
+                      View
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={<div className="pc-card text-sm text-pc-text-muted">Loading search...</div>}>
+      <SearchPageBody />
+    </Suspense>
+  );
+}
