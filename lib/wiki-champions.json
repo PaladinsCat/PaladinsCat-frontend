@@ -12,35 +12,40 @@
         "key": "LMB",
         "damage": "550",
         "cooldown": "",
-        "description": "A cursed automatic revolver that deals 550 damage every 0.5s."
+        "description": "A cursed automatic revolver that deals 550 damage every 0.5s.",
+        "iconUrl": "/images/skills/WeaponAttack_Androxus_Icon.png"
       },
       {
         "name": "Defiance",
         "key": "RMB",
         "damage": "520",
         "cooldown": "",
-        "description": "Punch forward, striking enemies in front of you for 520 damage."
+        "description": "Punch forward, striking enemies in front of you for 520 damage.",
+        "iconUrl": "/images/skills/Ability_Defiance.png"
       },
       {
         "name": "Reversal",
         "key": "Q",
         "damage": "",
         "cooldown": "14s",
-        "description": "Absorb ranged attacks and fire a blast back that deals damage equal to 75% of the damage absorbed."
+        "description": "Absorb ranged attacks and fire a blast back that deals damage equal to 75% of the damage absorbed.",
+        "iconUrl": "/images/skills/Ability_Reversal.png"
       },
       {
         "name": "Nether Step",
         "key": "F",
         "damage": "",
         "cooldown": "10s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Nether_Step.png"
       },
       {
         "name": "Accursed Arm",
         "key": "E",
         "damage": "1000",
         "cooldown": "Ultimate",
-        "description": "Transform your weapon into an explosive revolver that deals 1000 damage in an area."
+        "description": "Transform your weapon into an explosive revolver that deals 1000 damage in an area.",
+        "iconUrl": "/images/skills/Ability_Accursed_Arm.png"
       }
     ],
     "talents": [
@@ -158,35 +163,40 @@
         "key": "LMB",
         "damage": "400",
         "cooldown": "",
-        "description": "Fire a burst of shrapnel every 0.9s that explodes to deal 400 damage in a small area."
+        "description": "Fire a burst of shrapnel every 0.9s that explodes to deal 400 damage in a small area.",
+        "iconUrl": "/images/skills/WeaponAttack_Ash_Icon.png"
       },
       {
         "name": "Kinetic Burst",
         "key": "RMB",
         "damage": "",
         "cooldown": "6s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Kinetic_Burst.png"
       },
       {
         "name": "Siege Shield",
         "key": "Q",
         "damage": "4750",
         "cooldown": "10s",
-        "description": "Create a moving shield with 4750 health that advances along the ground."
+        "description": "Create a moving shield with 4750 health that advances along the ground.",
+        "iconUrl": "/images/skills/Ability_Siege_Shield.png"
       },
       {
         "name": "Shoulder Bash",
         "key": "F",
         "damage": "",
         "cooldown": "13s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Shoulder_Bash.png"
       },
       {
         "name": "Assert Dominance",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Assert_Dominance.png"
       }
     ],
     "talents": [
@@ -309,35 +319,40 @@
         "key": "LMB",
         "damage": "780",
         "cooldown": "",
-        "description": "A futuristic weapon you can charge up to increase its accuracy and damage while firing fewer shots. Deals 780 damage every 1.4s if fully charging your shots."
+        "description": "A futuristic weapon you can charge up to increase its accuracy and damage while firing fewer shots. Deals 780 damage every 1.4s if fully charging your shots.",
+        "iconUrl": "/images/skills/WeaponAttack_Atlas_Icon.png"
       },
       {
         "name": "Setback",
         "key": "RMB",
         "damage": "",
         "cooldown": "10s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Setback.png"
       },
       {
         "name": "Stasis Field",
         "key": "Q",
         "damage": "",
         "cooldown": "14s",
-        "description": "Create a barrier in front of you to absorb all ranged attacks and projectiles."
+        "description": "Create a barrier in front of you to absorb all ranged attacks and projectiles.",
+        "iconUrl": "/images/skills/Ability_Stasis_Field.png"
       },
       {
         "name": "Second Chance",
         "key": "F",
         "damage": "",
         "cooldown": "16s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Second_Chance.png"
       },
       {
         "name": "Exile",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Exile.png"
       }
     ],
     "talents": [
@@ -460,35 +475,40 @@
         "key": "LMB",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": "Throw your hammer in an attack chain, dealing 525, 525, 630 damage. Dealing and taking damage increases your Ire, which can augment your abilities and provide passive benefits."
+        "description": "Throw your hammer in an attack chain, dealing 525, 525, 630 damage. Dealing and taking damage increases your Ire, which can augment your abilities and provide passive benefits.",
+        "iconUrl": "/images/skills/WeaponAttack_Azaan_Icon.png"
       },
       {
         "name": "Reckoning",
         "key": "RMB",
         "damage": "",
         "cooldown": "9s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Reckoning.png"
       },
       {
         "name": "Sanctuary",
         "key": "Q",
         "damage": "",
         "cooldown": "12s",
-        "description": "Create a series of Deployable wall segments, each with 2500 Health. Using Sanctuary above the Ire threshold increases the Health of segments."
+        "description": "Create a series of Deployable wall segments, each with 2500 Health. Using Sanctuary above the Ire threshold increases the Health of segments.",
+        "iconUrl": "/images/skills/Ability_Sanctuary.png"
       },
       {
         "name": "Conviction",
         "key": "F",
         "damage": "",
         "cooldown": "9s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Conviction.png"
       },
       {
         "name": "Deliverance",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Deliverance.png"
       }
     ],
     "talents": [
@@ -611,35 +631,40 @@
         "key": "LMB",
         "damage": "500",
         "cooldown": "",
-        "description": "A short-range blunderbuss that deals 500 damage every 1s."
+        "description": "A short-range blunderbuss that deals 500 damage every 1s.",
+        "iconUrl": "/images/skills/WeaponAttack_Barik_Icon.png"
       },
       {
         "name": "Barricade",
         "key": "RMB",
         "damage": "4500",
         "cooldown": "12s",
-        "description": "Create a barricade with 4500 health to protect allies and yourself from harm."
+        "description": "Create a barricade with 4500 health to protect allies and yourself from harm.",
+        "iconUrl": "/images/skills/Ability_Barricade.png"
       },
       {
         "name": "Turret",
         "key": "Q",
         "damage": "120, 1000",
         "cooldown": "10s",
-        "description": "Deploy a turret that targets nearby enemies, dealing 120 damage every 1s."
+        "description": "Deploy a turret that targets nearby enemies, dealing 120 damage every 1s.",
+        "iconUrl": "/images/skills/Ability_Turret.png"
       },
       {
         "name": "Rocket Boots",
         "key": "F",
         "damage": "",
         "cooldown": "12s",
-        "description": "Activate your rocket-boots, charging you forward with great speed for a short time."
+        "description": "Activate your rocket-boots, charging you forward with great speed for a short time.",
+        "iconUrl": "/images/skills/Ability_Rocket_Boots.png"
       },
       {
         "name": "Dome Shield",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Dome_Shield.png"
       }
     ],
     "talents": [
@@ -762,35 +787,40 @@
         "key": "LMB",
         "damage": "560, 700",
         "cooldown": "",
-        "description": "Fire a grenade from your launcher that deals more damage and hits in a lager area if you hit an enemy directly."
+        "description": "Fire a grenade from your launcher that deals more damage and hits in a lager area if you hit an enemy directly.",
+        "iconUrl": "/images/skills/WeaponAttack_Betty_La_Bomba_Icon.png"
       },
       {
         "name": "Cluster Grenade",
         "key": "RMB",
         "damage": "350, 500",
         "cooldown": "6s",
-        "description": "Launch a grenade that creates additional explosions based on the number of enemies hit. Can spawn up to 6 additional explosives."
+        "description": "Launch a grenade that creates additional explosions based on the number of enemies hit. Can spawn up to 6 additional explosives.",
+        "iconUrl": "/images/skills/Ability_Cluster_Grenade.png"
       },
       {
         "name": "Hail of Bombs",
         "key": "Q",
         "damage": "370",
         "cooldown": "14s",
-        "description": "Send out a magazine chock-full of explosives that spray upward and outward to land randomly in a large area around where it deploys."
+        "description": "Send out a magazine chock-full of explosives that spray upward and outward to land randomly in a large area around where it deploys.",
+        "iconUrl": "/images/skills/Ability_Hail_of_Bombs.png"
       },
       {
         "name": "Explosive Personality",
         "key": "F",
         "damage": "",
         "cooldown": "10s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Explosive_Personality.png"
       },
       {
         "name": "Long Live The Queen",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": "Summon and control a large rocket that you can ride into enemies or send flying in the direction of your crosshairs by reactivating the ability."
+        "description": "Summon and control a large rocket that you can ride into enemies or send flying in the direction of your crosshairs by reactivating the ability.",
+        "iconUrl": "/images/skills/Ability_Long_Live_The_Queen.png"
       }
     ],
     "talents": [
@@ -913,35 +943,40 @@
         "key": "LMB",
         "damage": "",
         "cooldown": "",
-        "description": "Throw out sticky bombs that stick to any surface, or your enemies, and can be detonated to deal damage."
+        "description": "Throw out sticky bombs that stick to any surface, or your enemies, and can be detonated to deal damage.",
+        "iconUrl": "/images/skills/WeaponAttack_Bomb_King_Icon.png"
       },
       {
         "name": "Detonate",
         "key": "RMB",
         "damage": "",
         "cooldown": "",
-        "description": "Detonate your active sticky bombs to blast away nearby enemies, dealing 850 damage per explosion."
+        "description": "Detonate your active sticky bombs to blast away nearby enemies, dealing 850 damage per explosion.",
+        "iconUrl": "/images/skills/Ability_Detonate.png"
       },
       {
         "name": "Grumpy Bomb",
         "key": "Q",
         "damage": "",
         "cooldown": "12s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Grumpy_Bomb.png"
       },
       {
         "name": "Poppy Bomb",
         "key": "F",
         "damage": "",
         "cooldown": "8s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Poppy_Bomb.png"
       },
       {
         "name": "King Bomb",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_King_Bomb.png"
       }
     ],
     "talents": [
@@ -996,7 +1031,7 @@
       },
       {
         "name": "Fallout",
-        "description": "Increase Grumpy Bombâ€™s Stun duration by {0.1|0.1}s.",
+        "description": "Increase Grumpy Bomb\u00e2\u20ac\u2122s Stun duration by {0.1|0.1}s.",
         "category": "Grumpy Bomb"
       },
       {
@@ -1064,35 +1099,40 @@
         "key": "LMB",
         "damage": "700",
         "cooldown": "",
-        "description": "A massive shotgun that destroys your enemies at close range, dealing 700 damage every 1s."
+        "description": "A massive shotgun that destroys your enemies at close range, dealing 700 damage every 1s.",
+        "iconUrl": "/images/skills/WeaponAttack_Buck_Icon.png"
       },
       {
         "name": "Net Shot",
         "key": "RMB",
         "damage": "",
         "cooldown": "8s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Net_Shot.png"
       },
       {
         "name": "Recovery",
         "key": "Q",
         "damage": "",
         "cooldown": "8s",
-        "description": "Channel your inner energy and heal for 1000 over 1.2s."
+        "description": "Channel your inner energy and heal for 1000 over 1.2s.",
+        "iconUrl": "/images/skills/Ability_Recovery.png"
       },
       {
         "name": "Heroic Leap",
         "key": "F",
         "damage": "",
         "cooldown": "10s",
-        "description": "Leap a great height and distance."
+        "description": "Leap a great height and distance.",
+        "iconUrl": "/images/skills/Ability_Heroic_Leap.png"
       },
       {
         "name": "Buck Wild",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": "Go Buck Wild, refilling your ammo and enhancing your rate of fire by 60%. Consumes no Ammo."
+        "description": "Go Buck Wild, refilling your ammo and enhancing your rate of fire by 60%. Consumes no Ammo.",
+        "iconUrl": "/images/skills/Ability_Buck_Wild.png"
       }
     ],
     "talents": [
@@ -1215,41 +1255,46 @@
         "key": "LMB",
         "damage": "",
         "cooldown": "",
-        "description": "Fire every 0.75s dealing 350 damage per shot, effective up to 100 units. Hitting with Love grants a stack of Piercing Momentum, increasing War's fire rate."
+        "description": "Fire every 0.75s dealing 350 damage per shot, effective up to 100 units. Hitting with Love grants a stack of Piercing Momentum, increasing War's fire rate.",
+        "iconUrl": "/images/skills/WeaponAttack_Caspian_Icon.png"
       },
       {
         "name": "War",
         "key": "RMB",
         "damage": "",
         "cooldown": "",
-        "description": "Unleash your rapier in a series of attacks, dealing up to 350 damage per hit. Hitting enemies with War gives you a stack of Sharp Momentum, increasing Love's fire rate."
+        "description": "Unleash your rapier in a series of attacks, dealing up to 350 damage per hit. Hitting enemies with War gives you a stack of Sharp Momentum, increasing Love's fire rate.",
+        "iconUrl": "/images/skills/Ability_War.png"
       },
       {
         "name": "Rogue's Tempo",
         "key": "Q",
         "damage": "",
         "cooldown": "9s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Rogue's_Tempo.png"
       },
       {
         "name": "Deadly Momentum",
         "key": "F",
         "damage": "",
         "cooldown": "11s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Deadly_Momentum.png"
       },
       {
         "name": "Storm of Blades",
         "key": "E",
         "damage": "700",
         "cooldown": "Ultimate",
-        "description": "Summon 5 ethereal swords around you and fill your ammo. Fire off one of these Piercing projectiles when you fire Love or War, dealing 700 damage."
+        "description": "Summon 5 ethereal swords around you and fill your ammo. Fire off one of these Piercing projectiles when you fire Love or War, dealing 700 damage.",
+        "iconUrl": "/images/skills/Ability_Storm_of_Blades.png"
       }
     ],
     "talents": [
       {
         "name": "Measured Cadence",
-        "effect": "Automatically fire a weaker copy of Rogueâ€™s Tempo for every 4 Ammo consumed. This copy deals 400 damage and reduces Rogue's Tempo's Cooldown by 15% on hit."
+        "effect": "Automatically fire a weaker copy of Rogue\u00e2\u20ac\u2122s Tempo for every 4 Ammo consumed. This copy deals 400 damage and reduces Rogue's Tempo's Cooldown by 15% on hit."
       },
       {
         "name": "Everywhere At Once",
@@ -1263,7 +1308,7 @@
     "cards": [
       {
         "name": "A Brief Respite",
-        "description": "Reduce the Cooldown of Deadly Momentum by {1|1}s after hitting at least one enemy with Rogueâ€™s Tempo.",
+        "description": "Reduce the Cooldown of Deadly Momentum by {1|1}s after hitting at least one enemy with Rogue\u00e2\u20ac\u2122s Tempo.",
         "category": "Rogue&#39;s Tempo"
       },
       {
@@ -1273,7 +1318,7 @@
       },
       {
         "name": "Casual Competency",
-        "description": "Hitting an enemy with Rogueâ€™s Tempo grants you {1|1}",
+        "description": "Hitting an enemy with Rogue\u00e2\u20ac\u2122s Tempo grants you {1|1}",
         "category": "Rogue&#39;s Tempo"
       },
       {
@@ -1366,35 +1411,40 @@
         "key": "LMB",
         "damage": "680",
         "cooldown": "",
-        "description": "A hunting crossbow that deals 680 damage every 0.75s."
+        "description": "A hunting crossbow that deals 680 damage every 0.75s.",
+        "iconUrl": "/images/skills/WeaponAttack_Cassie_Icon.png"
       },
       {
         "name": "Disengage",
         "key": "RMB",
         "damage": "",
         "cooldown": "11s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Disengage.png"
       },
       {
         "name": "Blast Shot",
         "key": "Q",
         "damage": "",
         "cooldown": "10s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Blast_Shot.png"
       },
       {
         "name": "Dodge Roll",
         "key": "F",
         "damage": "",
         "cooldown": "6s",
-        "description": "Quickly roll out of danger."
+        "description": "Quickly roll out of danger.",
+        "iconUrl": "/images/skills/Ability_Dodge_Roll.png"
       },
       {
         "name": "Scout",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Scout.png"
       }
     ],
     "talents": [
@@ -1517,35 +1567,40 @@
         "key": "LMB",
         "damage": "75",
         "cooldown": "",
-        "description": "An automatic machine pistol that deals 75 damage every 0.075s."
+        "description": "An automatic machine pistol that deals 75 damage every 0.075s.",
+        "iconUrl": "/images/skills/WeaponAttack_Corvus_Icon.png"
       },
       {
         "name": "Abyssal Reconstruction",
         "key": "RMB",
         "damage": "800",
         "cooldown": "4s",
-        "description": "Channel the Abyss to heal an ally for 450 over 0.5s and then a burst of 800 health."
+        "description": "Channel the Abyss to heal an ally for 450 over 0.5s and then a burst of 800 health.",
+        "iconUrl": "/images/skills/Ability_Abyssal_Reconstruction.png"
       },
       {
         "name": "Mark of Fate",
         "key": "Q",
         "damage": "",
         "cooldown": "2s",
-        "description": "Mark an ally to have them receive a portion of the healing done to allies or increased effects if healing them directly."
+        "description": "Mark an ally to have them receive a portion of the healing done to allies or increased effects if healing them directly.",
+        "iconUrl": "/images/skills/Ability_Mark_of_Fate.png"
       },
       {
         "name": "Projection",
         "key": "F",
         "damage": "",
         "cooldown": "8s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Projection.png"
       },
       {
         "name": "Entropic Breach",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Entropic_Breach.png"
       }
     ],
     "talents": [
@@ -1600,7 +1655,7 @@
       },
       {
         "name": "Grand Design",
-        "description": "Grants Marked ally {2.5|2.5}% Lifesteal and Corvus shares 100% of the Healing done due to the Marked targetâ€™s granted Lifesteal.",
+        "description": "Grants Marked ally {2.5|2.5}% Lifesteal and Corvus shares 100% of the Healing done due to the Marked target\u00e2\u20ac\u2122s granted Lifesteal.",
         "category": "Mark of Fate"
       },
       {
@@ -1668,35 +1723,40 @@
         "key": "LMB",
         "damage": "",
         "cooldown": "",
-        "description": "Fire Abyssal mortars every 0.7s that bounce and explode, dealing 850 damage."
+        "description": "Fire Abyssal mortars every 0.7s that bounce and explode, dealing 850 damage.",
+        "iconUrl": "/images/skills/WeaponAttack_Dredge_Icon.png"
       },
       {
         "name": "Broadside",
         "key": "RMB",
         "damage": "950",
         "cooldown": "",
-        "description": "Launch three depth charges that hover and arm after contacting the ground, dealing 950 damage when they explode."
+        "description": "Launch three depth charges that hover and arm after contacting the ground, dealing 950 damage when they explode.",
+        "iconUrl": "/images/skills/Ability_Broadside.png"
       },
       {
         "name": "Harpoon",
         "key": "Q",
         "damage": "",
         "cooldown": "14s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Harpoon.png"
       },
       {
         "name": "Shortcut",
         "key": "F",
         "damage": "",
         "cooldown": "1s",
-        "description": "Create shortcuts that allow you to traverse through the Abyss."
+        "description": "Create shortcuts that allow you to traverse through the Abyss.",
+        "iconUrl": "/images/skills/Ability_Shortcut.png"
       },
       {
         "name": "Kraken",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Kraken.png"
       }
     ],
     "talents": [
@@ -1721,7 +1781,7 @@
       },
       {
         "name": "Blow the Man Down",
-        "description": "Enemies hit by Harpoonâ€™s Slow have their Movement Speed reduced by an additional {6|6}%.",
+        "description": "Enemies hit by Harpoon\u00e2\u20ac\u2122s Slow have their Movement Speed reduced by an additional {6|6}%.",
         "category": "Harpoon"
       },
       {
@@ -1819,35 +1879,40 @@
         "key": "LMB",
         "damage": "850",
         "cooldown": "",
-        "description": "Fire explosive rockets every 0.85s to decimate an area, dealing 850 damage."
+        "description": "Fire explosive rockets every 0.85s to decimate an area, dealing 850 damage.",
+        "iconUrl": "/images/skills/WeaponAttack_Drogoz_Icon.png"
       },
       {
         "name": "Fire Spit",
         "key": "RMB",
         "damage": "",
         "cooldown": "8s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Fire_Spit.png"
       },
       {
         "name": "Salvo",
         "key": "Q",
         "damage": "",
         "cooldown": "18s",
-        "description": "Load all your rockets into your launcher and unleash them with your next attack for a rapid-fire assault, dealing 250 damage per rocket."
+        "description": "Load all your rockets into your launcher and unleash them with your next attack for a rapid-fire assault, dealing 250 damage per rocket.",
+        "iconUrl": "/images/skills/Ability_Salvo.png"
       },
       {
         "name": "Thrust",
         "key": "F",
         "damage": "",
         "cooldown": "11s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Thrust.png"
       },
       {
         "name": "Dragon Punch",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": "Unleash your fury to jet through the air and hunt down an enemy to execute."
+        "description": "Unleash your fury to jet through the air and hunt down an enemy to execute.",
+        "iconUrl": "/images/skills/Ability_Dragon_Punch.png"
       }
     ],
     "talents": [
@@ -1970,35 +2035,40 @@
         "key": "LMB",
         "damage": "850",
         "cooldown": "",
-        "description": "Fire a frozen blast every 1s that deals 850 damage to enemies near its impact."
+        "description": "Fire a frozen blast every 1s that deals 850 damage to enemies near its impact.",
+        "iconUrl": "/images/skills/WeaponAttack_Evie_Icon.png"
       },
       {
         "name": "Ice Block",
         "key": "RMB",
         "damage": "",
         "cooldown": "14s",
-        "description": "Encase yourself in ice to become immune to all damage."
+        "description": "Encase yourself in ice to become immune to all damage.",
+        "iconUrl": "/images/skills/Ability_Ice_Block.png"
       },
       {
         "name": "Blink",
         "key": "Q",
         "damage": "",
         "cooldown": "4s",
-        "description": "Magically teleport forward a short distance."
+        "description": "Magically teleport forward a short distance.",
+        "iconUrl": "/images/skills/Ability_Blink.png"
       },
       {
         "name": "Soar",
         "key": "F",
         "damage": "",
         "cooldown": "10s",
-        "description": "Take flight on your staff."
+        "description": "Take flight on your staff.",
+        "iconUrl": "/images/skills/Ability_Soar.png"
       },
       {
         "name": "Ice Storm",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Ice_Storm.png"
       }
     ],
     "talents": [
@@ -2121,35 +2191,40 @@
         "key": "LMB",
         "damage": "",
         "cooldown": "",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/WeaponAttack_Fernando_Icon.png"
       },
       {
         "name": "Chivalry",
         "key": "RMB",
         "damage": "4000",
         "cooldown": "",
-        "description": "Hold up a large shield with 4000 health in front of you that blocks attacks."
+        "description": "Hold up a large shield with 4000 health in front of you that blocks attacks.",
+        "iconUrl": "/images/skills/Ability_Shield.png"
       },
       {
         "name": "Fireball",
         "key": "Q",
         "damage": "450",
         "cooldown": "7s",
-        "description": "Shoot a fireball that pierces through enemies and deals 450 damage to them."
+        "description": "Shoot a fireball that pierces through enemies and deals 450 damage to them.",
+        "iconUrl": "/images/skills/Ability_Fireball.png"
       },
       {
         "name": "Charge",
         "key": "F",
         "damage": "400",
         "cooldown": "10s",
-        "description": "Charge through your enemies, dealing 400 damage to them."
+        "description": "Charge through your enemies, dealing 400 damage to them.",
+        "iconUrl": "/images/skills/Ability_Charge.png"
       },
       {
         "name": "Immortal",
         "key": "E",
         "damage": "1500",
         "cooldown": "Ultimate",
-        "description": "Rally your allies around you, preventing them from falling below 1500 health."
+        "description": "Rally your allies around you, preventing them from falling below 1500 health.",
+        "iconUrl": "/images/skills/Ability_Immortal.png"
       }
     ],
     "talents": [
@@ -2272,35 +2347,40 @@
         "key": "LMB",
         "damage": "",
         "cooldown": "",
-        "description": "A Pyre-forged weapon that deals 330 damage every 0.5s. Healing allies generates Wrath, which increases your fire rate and decays over time."
+        "description": "A Pyre-forged weapon that deals 330 damage every 0.5s. Healing allies generates Wrath, which increases your fire rate and decays over time.",
+        "iconUrl": "/images/skills/WeaponAttack_Furia_Icon.png"
       },
       {
         "name": "Kindle Soul",
         "key": "RMB",
         "damage": "",
         "cooldown": "3s",
-        "description": "Target an ally and kindle their soul, restoring health instantly and an additional health over 2s."
+        "description": "Target an ally and kindle their soul, restoring health instantly and an additional health over 2s.",
+        "iconUrl": "/images/skills/Ability_Kindle_Soul.png"
       },
       {
         "name": "Pyre Strike",
         "key": "Q",
         "damage": "",
         "cooldown": "12s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Pyre_Strike.png"
       },
       {
         "name": "Wings of Wrath",
         "key": "F",
         "damage": "250",
         "cooldown": "10s",
-        "description": "Surge backwards while launching seeking projectiles that each deal 250 damage."
+        "description": "Surge backwards while launching seeking projectiles that each deal 250 damage.",
+        "iconUrl": "/images/skills/Ability_Wings_of_Wrath.png"
       },
       {
         "name": "Inflame",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": "Channel the power of the Pyre to become untargetable, granting your allies 30% weapon damage and movement speed for a duration."
+        "description": "Channel the power of the Pyre to become untargetable, granting your allies 30% weapon damage and movement speed for a duration.",
+        "iconUrl": "/images/skills/Ability_Inflame.png"
       }
     ],
     "talents": [
@@ -2360,7 +2440,7 @@
       },
       {
         "name": "Light Forge",
-        "description": "Hitting Kindle Soul increases you and your targetâ€™s Movement Speed by {5|5}% for 2s.",
+        "description": "Hitting Kindle Soul increases you and your target\u00e2\u20ac\u2122s Movement Speed by {5|5}% for 2s.",
         "category": "Kindle Soul"
       },
       {
@@ -2423,35 +2503,40 @@
         "key": "LMB",
         "damage": "70",
         "cooldown": "",
-        "description": "A staff that channels lightning, dealing 70 damage every 0.1s at base and increasing in damage the longer it strikes an enemy."
+        "description": "A staff that channels lightning, dealing 70 damage every 0.1s at base and increasing in damage the longer it strikes an enemy.",
+        "iconUrl": "/images/skills/WeaponAttack_Grohk_Icon.png"
       },
       {
         "name": "Shock Pulse",
         "key": "RMB",
         "damage": "",
         "cooldown": "6s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Shock_Pulse.png"
       },
       {
         "name": "Healing Totem",
         "key": "Q",
         "damage": "1250",
         "cooldown": "13s",
-        "description": "Deploy a healing totem that restores 325 health every 1s to allies within its area."
+        "description": "Deploy a healing totem that restores 325 health every 1s to allies within its area.",
+        "iconUrl": "/images/skills/Ability_Healing_Totem.png"
       },
       {
         "name": "Ghost Walk",
         "key": "F",
         "damage": "",
         "cooldown": "15s",
-        "description": "Commune with the spirits to remove negative effects and become Ethereal for a short time."
+        "description": "Commune with the spirits to remove negative effects and become Ethereal for a short time.",
+        "iconUrl": "/images/skills/Ability_Ghost_Walk.png"
       },
       {
         "name": "Tempest",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Tempest.png"
       }
     ],
     "talents": [
@@ -2574,35 +2659,40 @@
         "key": "LMB",
         "damage": "370, 740",
         "cooldown": "",
-        "description": "Hurl your massive axe every 0.9s, dealing 370 damage and additional damage to targets farther away."
+        "description": "Hurl your massive axe every 0.9s, dealing 370 damage and additional damage to targets farther away.",
+        "iconUrl": "/images/skills/WeaponAttack_Grover_Icon.png"
       },
       {
         "name": "Crippling Throw",
         "key": "RMB",
         "damage": "",
         "cooldown": "7s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Crippling_Throw.png"
       },
       {
         "name": "Blossom",
         "key": "Q",
         "damage": "",
         "cooldown": "10s",
-        "description": "Passively heal allies around you for 80 every 1s. Activate this ability to provide nearby allies a large burst of 700 healing and 350 healing over 2.5s."
+        "description": "Passively heal allies around you for 80 every 1s. Activate this ability to provide nearby allies a large burst of 700 healing and 350 healing over 2.5s.",
+        "iconUrl": "/images/skills/Ability_Blossom.png"
       },
       {
         "name": "Vine",
         "key": "F",
         "damage": "",
         "cooldown": "8s",
-        "description": "Launch a vine from your body and pull yourself to a targeted location or ally."
+        "description": "Launch a vine from your body and pull yourself to a targeted location or ally.",
+        "iconUrl": "/images/skills/Ability_Vine.png"
       },
       {
         "name": "Whirlwind",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": "Channel nature's power, rapidly healing nearby allies for 250 every .1s and providing Movement Speed for a short duration."
+        "description": "Channel nature's power, rapidly healing nearby allies for 250 every .1s and providing Movement Speed for a short duration.",
+        "iconUrl": "/images/skills/Ability_Whirlwind.png"
       }
     ],
     "talents": [
@@ -2725,35 +2815,43 @@
         "key": "LMB",
         "damage": "",
         "cooldown": "",
-        "description": "Throw out ice shards that deal 440 damage every 0.5s or charged pyre balls that deal 1000 damage after charging for 1.2s, depending on your elemental alignment."
+        "description": "Throw out ice shards that deal 440 damage every 0.5s or charged pyre balls that deal 1000 damage after charging for 1.2s, depending on your elemental alignment.",
+        "iconUrl": "/images/skills/WeaponAttack_Imani_Icon.png",
+        "iconUrl2": "/images/skills/WeaponAttack_Imani_Icon_2.png"
       },
       {
         "name": "Frost Bomb / Inferno Cannon",
         "key": "RMB",
         "damage": "",
         "cooldown": "13s",
-        "description": "Channel ice or fire into a powerful frost orb that deals 800 damage at max range or scorching fire rays that deal 100 damage every 0.09s, depending on your elemental alignment."
+        "description": "Channel ice or fire into a powerful frost orb that deals 800 damage at max range or scorching fire rays that deal 100 damage every 0.09s, depending on your elemental alignment.",
+        "iconUrl": "/images/skills/Ability_Frost_Bomb.png",
+        "iconUrl2": "/images/skills/Ability_Inferno_Cannon.png"
       },
       {
         "name": "Elemental Shift",
         "key": "Q",
         "damage": "",
         "cooldown": "1s",
-        "description": "Shift your elemental alignment between freezing ice and scorching fire, gaining access to new abilities."
+        "description": "Shift your elemental alignment between freezing ice and scorching fire, gaining access to new abilities.",
+        "iconUrl": "/images/skills/Ability_Elemental_Shift.png",
+        "iconUrl2": "/images/skills/Ability_Elemental_Shift_2.png"
       },
       {
         "name": "FrostFire Glide",
         "key": "F",
         "damage": "",
         "cooldown": "12s",
-        "description": "Channel the elements to glide through the air."
+        "description": "Channel the elements to glide through the air.",
+        "iconUrl": "/images/skills/Ability_Frostfire_Glide.png"
       },
       {
         "name": "Dragon's Call",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": "Summon a deadly Draconic Avatar to rain down FrostFire breath on your helpless foes, dealing 170 damage every 0.1s."
+        "description": "Summon a deadly Draconic Avatar to rain down FrostFire breath on your helpless foes, dealing 170 damage every 0.1s.",
+        "iconUrl": "/images/skills/Ability_Dragons_Call.png"
       }
     ],
     "talents": [
@@ -2876,35 +2974,40 @@
         "key": "LMB",
         "damage": "225",
         "cooldown": "",
-        "description": "Fire a burst of 3 sharp stone projectiles across the battlefield every 1.25s that each do 225 damage."
+        "description": "Fire a burst of 3 sharp stone projectiles across the battlefield every 1.25s that each do 225 damage.",
+        "iconUrl": "/images/skills/WeaponAttack_Inara_Icon.png"
       },
       {
         "name": "Earthen Guard",
         "key": "RMB",
         "damage": "",
         "cooldown": "11s",
-        "description": "Channel the Realm's strength, reducing damage taken by you and your deployables and increasing your healing received for a brief period of time."
+        "description": "Channel the Realm's strength, reducing damage taken by you and your deployables and increasing your healing received for a brief period of time.",
+        "iconUrl": "/images/skills/Ability_Earthen_Guard.png"
       },
       {
         "name": "Impasse",
         "key": "Q",
         "damage": "5500",
         "cooldown": "14s",
-        "description": "Deploy a 5500-Health stone wall from the ground to hinder enemies and protect allies."
+        "description": "Deploy a 5500-Health stone wall from the ground to hinder enemies and protect allies.",
+        "iconUrl": "/images/skills/Ability_Impasse.png"
       },
       {
         "name": "Warder's Field",
         "key": "F",
         "damage": "",
         "cooldown": "12s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Warder's_Field.png"
       },
       {
         "name": "Seismic Crash",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Seismic_Crash.png"
       }
     ],
     "talents": [
@@ -3027,35 +3130,41 @@
         "key": "LMB",
         "damage": "425",
         "cooldown": "",
-        "description": "A celestial bow that fires godly energy, dealing 425 damage every 0.6s."
+        "description": "A celestial bow that fires godly energy, dealing 425 damage every 0.6s.",
+        "iconUrl": "/images/skills/WeaponAttack_Io_Icon.png"
       },
       {
         "name": "Moonlight",
         "key": "RMB",
         "damage": "",
         "cooldown": "",
-        "description": "Channel the healing power of the moon to restore an ally, healing for 135 every 0.15s while channeling."
+        "description": "Channel the healing power of the moon to restore an ally, healing for 135 every 0.15s while channeling.",
+        "iconUrl": "/images/skills/Ability_Moonlight.png"
       },
       {
         "name": "Guardian Spirit",
         "key": "Q",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Guardian_Spirit.png",
+        "iconUrl2": "/images/skills/Ability_Guardian_Spirit_2.png"
       },
       {
         "name": "Lunar Leap",
         "key": "F",
         "damage": "",
         "cooldown": "10s",
-        "description": "Quickly leap backwards through the air."
+        "description": "Quickly leap backwards through the air.",
+        "iconUrl": "/images/skills/Ability_Lunar_Leap.png"
       },
       {
         "name": "Begone",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Begone.png"
       }
     ],
     "talents": [
@@ -3064,7 +3173,7 @@
         "effect": "When Io or Luna heal an ally other than each other, the other is also healed at 50% efficiency."
       },
       {
-        "name": "Goddessâ€™ Blessing",
+        "name": "Goddess\u00e2\u20ac\u2122 Blessing",
         "effect": "Allies being Healed by Moonlight take 15% reduced damage."
       },
       {
@@ -3173,35 +3282,40 @@
         "key": "LMB",
         "damage": "115",
         "cooldown": "",
-        "description": "An automatic carbine that channels the power of the cosmos, dealing 115 damage every 0.13s."
+        "description": "An automatic carbine that channels the power of the cosmos, dealing 115 damage every 0.13s.",
+        "iconUrl": "/images/skills/WeaponAttack_Jenos_Icon.png"
       },
       {
         "name": "Astral Mark",
         "key": "RMB",
         "damage": "",
         "cooldown": "5s",
-        "description": "Apply a celestial blessing that passes through obstacles to heal allies for 400 and an additional 220 every 1s for 13s."
+        "description": "Apply a celestial blessing that passes through obstacles to heal allies for 400 and an additional 220 every 1s for 13s.",
+        "iconUrl": "/images/skills/Ability_Astral_Mark.png"
       },
       {
         "name": "Void Grip",
         "key": "Q",
         "damage": "",
         "cooldown": "12s",
-        "description": "Channel gravitational energy, lifting an enemy into the air and dealing 400 damage over 2.5s."
+        "description": "Channel gravitational energy, lifting an enemy into the air and dealing 400 damage over 2.5s.",
+        "iconUrl": "/images/skills/Ability_Void_Grip.png"
       },
       {
         "name": "Stellar Wind",
         "key": "F",
         "damage": "",
         "cooldown": "1s",
-        "description": "Lower your weapon and start to glide, increasing your movement speed and jump height."
+        "description": "Lower your weapon and start to glide, increasing your movement speed and jump height.",
+        "iconUrl": "/images/skills/Ability_Stellar_Wind.png"
       },
       {
         "name": "Through Time and Space",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Through_Time_and_Space.png"
       }
     ],
     "talents": [
@@ -3324,35 +3438,40 @@
         "key": "LMB",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": "Stab your doll to deal damage to foes and Curse them, increasing the damage they take from you and lowering the damage they deal."
+        "description": "Stab your doll to deal damage to foes and Curse them, increasing the damage they take from you and lowering the damage they deal.",
+        "iconUrl": "/images/skills/WeaponAttack_Kasumi_Icon.png"
       },
       {
         "name": "Savage Tear",
         "key": "RMB",
         "damage": "300, 80, 300",
         "cooldown": "7s",
-        "description": "Viciously rip through your Yokai Doll, dealing damage and apply 3 stacks of Curse. Deals increased damage and heals you per stack of Curse on your target."
+        "description": "Viciously rip through your Yokai Doll, dealing damage and apply 3 stacks of Curse. Deals increased damage and heals you per stack of Curse on your target.",
+        "iconUrl": "/images/skills/Ability_Savage_Tear.png"
       },
       {
         "name": "Spirit Traps",
         "key": "Q",
         "damage": "",
         "cooldown": "8s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Spirit_Lure.png"
       },
       {
         "name": "Body and Soul",
         "key": "F",
         "damage": "",
         "cooldown": "14s",
-        "description": "Project yourself outward, becoming Ethereal and increasing your Movement Speed, but leaving your vulnerable body behind. Reactivate to have your body teleport to you."
+        "description": "Project yourself outward, becoming Ethereal and increasing your Movement Speed, but leaving your vulnerable body behind. Reactivate to have your body teleport to you.",
+        "iconUrl": "/images/skills/Ability_Body_and_Soul.png"
       },
       {
         "name": "Bitter Betrayal",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Bitter_Betrayal.png"
       }
     ],
     "talents": [
@@ -3475,35 +3594,40 @@
         "key": "LMB",
         "damage": "210",
         "cooldown": "",
-        "description": "An automatic heavy repeater that riddles enemies with high-caliber bullets, dealing 210 damage every 0.22s."
+        "description": "An automatic heavy repeater that riddles enemies with high-caliber bullets, dealing 210 damage every 0.22s.",
+        "iconUrl": "/images/skills/WeaponAttack_Khan_Icon.png"
       },
       {
         "name": "Bulwark",
         "key": "RMB",
         "damage": "4500",
         "cooldown": "",
-        "description": "Activate a shield that blocks up to 4500 damage and regenerates itself while not active."
+        "description": "Activate a shield that blocks up to 4500 damage and regenerates itself while not active.",
+        "iconUrl": "/images/skills/Ability_Bulwark.png"
       },
       {
         "name": "Battle Shout",
         "key": "Q",
         "damage": "",
         "cooldown": "12s",
-        "description": "Release a battle-shout, becoming immune and healing yourself and nearby allies for 1350."
+        "description": "Release a battle-shout, becoming immune and healing yourself and nearby allies for 1350.",
+        "iconUrl": "/images/skills/Ability_Battle_Shout.png"
       },
       {
         "name": "Commander's Grab",
         "key": "F",
         "damage": "",
         "cooldown": "12s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Commander's_Grab.png"
       },
       {
         "name": "Overpower",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Overpower.png"
       }
     ],
     "talents": [
@@ -3626,35 +3750,40 @@
         "key": "LMB",
         "damage": "",
         "cooldown": "",
-        "description": "A combination sniper rifle and carbine for both long-range and short-range engagements. Your carbine deals 200 damage every 0.17s."
+        "description": "A combination sniper rifle and carbine for both long-range and short-range engagements. Your carbine deals 200 damage every 0.17s.",
+        "iconUrl": "/images/skills/WeaponAttack_Kinessa_Icon.png"
       },
       {
         "name": "Sniper Mode",
         "key": "RMB",
         "damage": "",
         "cooldown": "",
-        "description": "Scope up to charge your sniper rifle for increased damage, dealing up to 1000 damage after 1.1s."
+        "description": "Scope up to charge your sniper rifle for increased damage, dealing up to 1000 damage after 1.1s.",
+        "iconUrl": "/images/skills/Ability_Sniper_Mode.png"
       },
       {
         "name": "Oppressor Mine",
         "key": "Q",
         "damage": "",
         "cooldown": "10s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Oppressor_Mine.png"
       },
       {
         "name": "Transporter",
         "key": "F",
         "damage": "",
         "cooldown": "10s",
-        "description": "Throw out a teleporter that transports you to its location."
+        "description": "Throw out a teleporter that transports you to its location.",
+        "iconUrl": "/images/skills/Ability_Transporter.png"
       },
       {
         "name": "Headhunter",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": "After 0.25s, channel your inner focus to gain 50% additional damage against enemies' vital locations."
+        "description": "After 0.25s, channel your inner focus to gain 50% additional damage against enemies' vital locations.",
+        "iconUrl": "/images/skills/Ability_Headhunter.png"
       }
     ],
     "talents": [
@@ -3777,35 +3906,43 @@
         "key": "LMB",
         "damage": "",
         "cooldown": "",
-        "description": "Dual submachine guns or fiery claws depending on your stance. Your SMGs fire 2 rounds every 0.06s, each dealing 38 damage. Your claws deal 650 damage every 0.55s."
+        "description": "Dual submachine guns or fiery claws depending on your stance. Your SMGs fire 2 rounds every 0.06s, each dealing 38 damage. Your claws deal 650 damage every 0.55s.",
+        "iconUrl": "/images/skills/WeaponAttack_Koga_Icon.png",
+        "iconUrl2": "/images/skills/WeaponAttack_Koga_Icon_2.png"
       },
       {
         "name": "Shadow Step / Skewer",
         "key": "RMB",
         "damage": "",
         "cooldown": "",
-        "description": "Consume 1 bar of Stamina to dash forward while ethereal or drain all your Stamina to dash forward and deal 700 damage to all enemies hit with your claws."
+        "description": "Consume 1 bar of Stamina to dash forward while ethereal or drain all your Stamina to dash forward and deal 700 damage to all enemies hit with your claws.",
+        "iconUrl": "/images/skills/Ability_Shadow_Step.png",
+        "iconUrl2": "/images/skills/Ability_Skewer.png"
       },
       {
         "name": "Dragon Stance",
         "key": "Q",
         "damage": "",
         "cooldown": "",
-        "description": "Unleash your Hellkite claws, draining your Stamina. Requires at least 1 bar of Stamina to activate. All attacks while in Dragon Stance are Area Damage."
+        "description": "Unleash your Hellkite claws, draining your Stamina. Requires at least 1 bar of Stamina to activate. All attacks while in Dragon Stance are Area Damage.",
+        "iconUrl": "/images/skills/Ability_Dragon_Stance.png",
+        "iconUrl2": "/images/skills/Ability_SMG_Stance.png"
       },
       {
         "name": "Agility",
         "key": "F",
         "damage": "",
         "cooldown": "",
-        "description": "Consume 1 bar of Stamina to move faster and increase your jump height."
+        "description": "Consume 1 bar of Stamina to move faster and increase your jump height.",
+        "iconUrl": "/images/skills/Ability_Agility.png"
       },
       {
         "name": "Cyclone Strike",
         "key": "E",
         "damage": "1500",
         "cooldown": "Ultimate",
-        "description": "Embody death, becoming ethereal and deal 1500 damage every 1s in an area around you as you move, bypassing shields."
+        "description": "Embody death, becoming ethereal and deal 1500 damage every 1s in an area around you as you move, bypassing shields.",
+        "iconUrl": "/images/skills/Ability_Cyclone_Strike.png"
       }
     ],
     "talents": [
@@ -3928,35 +4065,40 @@
         "key": "LMB",
         "damage": "320",
         "cooldown": "",
-        "description": "Dual automatic magnums that bring the law, dealing 320 damage every 0.25s."
+        "description": "Dual automatic magnums that bring the law, dealing 320 damage every 0.25s.",
+        "iconUrl": "/images/skills/WeaponAttack_Lex_Icon.png"
       },
       {
         "name": "In Pursuit",
         "key": "RMB",
         "damage": "960",
         "cooldown": "15s",
-        "description": "Target the nearest enemy and rapidly fire your magnums with perfect accuracy, dealing 960 damage over 1.4s."
+        "description": "Target the nearest enemy and rapidly fire your magnums with perfect accuracy, dealing 960 damage over 1.4s.",
+        "iconUrl": "/images/skills/Ability_In_Pursuit.png"
       },
       {
         "name": "Retribution",
         "key": "Q",
         "damage": "",
         "cooldown": "6s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Retribution.png"
       },
       {
         "name": "Combat Slide",
         "key": "F",
         "damage": "",
         "cooldown": "3s",
-        "description": "Quickly slide forward while being able to fire."
+        "description": "Quickly slide forward while being able to fire.",
+        "iconUrl": "/images/skills/Ability_Combat_Slide.png"
       },
       {
         "name": "The Law",
         "key": "E",
         "damage": "600",
         "cooldown": "Ultimate",
-        "description": "Bring retribution down on your enemies, executing targets below 65% health and destroying all shields. Enemies above 65% health take 600 damage. Reset the cooldown of In Pursuit."
+        "description": "Bring retribution down on your enemies, executing targets below 65% health and destroying all shields. Enemies above 65% health take 600 damage. Reset the cooldown of In Pursuit.",
+        "iconUrl": "/images/skills/Ability_The_Law.png"
       }
     ],
     "talents": [
@@ -4079,35 +4221,40 @@
         "key": "LMB",
         "damage": "",
         "cooldown": "",
-        "description": "A automatic rifle passed down through House Aico that deals 425 damage every 0.45s."
+        "description": "A automatic rifle passed down through House Aico that deals 425 damage every 0.45s.",
+        "iconUrl": "/images/skills/WeaponAttack_Lian_Icon.png"
       },
       {
         "name": "Valor",
         "key": "RMB",
         "damage": "350",
         "cooldown": "8s",
-        "description": "Fire a charged weapon shot to hit all enemies in sight with your rifle for 350 damage."
+        "description": "Fire a charged weapon shot to hit all enemies in sight with your rifle for 350 damage.",
+        "iconUrl": "/images/skills/Ability_Valor.png"
       },
       {
         "name": "Presence",
         "key": "Q",
         "damage": "800",
         "cooldown": "15s",
-        "description": "Charge your rifle to fire a long-range piercing weapon attack that deals 800 damage to enemies hit."
+        "description": "Charge your rifle to fire a long-range piercing weapon attack that deals 800 damage to enemies hit.",
+        "iconUrl": "/images/skills/Ability_Presence.png"
       },
       {
         "name": "Grace",
         "key": "F",
         "damage": "400",
         "cooldown": "5s",
-        "description": "Quickly dodge and fire off a deadly shot with your weapon that deals 400 damage."
+        "description": "Quickly dodge and fire off a deadly shot with your weapon that deals 400 damage.",
+        "iconUrl": "/images/skills/Ability_Grace.png"
       },
       {
         "name": "Enlightenment",
         "key": "E",
         "damage": "1600",
         "cooldown": "Ultimate",
-        "description": "Channel the power of your noble blood and take reduced damage and launch the embodiment of your house to deal 1600 damage to your target."
+        "description": "Channel the power of your noble blood and take reduced damage and launch the embodiment of your house to deal 1600 damage to your target.",
+        "iconUrl": "/images/skills/Ability_Enlightenment.png"
       }
     ],
     "talents": [
@@ -4230,35 +4377,40 @@
         "key": "LMB",
         "damage": "",
         "cooldown": "",
-        "description": "The Heart-Cube fires blood, dealing 650 damage per shot. Consume no ammo while Hex or Swarm affect Champions. Your Blood pool acts as health and is used to cast abilities."
+        "description": "The Heart-Cube fires blood, dealing 650 damage per shot. Consume no ammo while Hex or Swarm affect Champions. Your Blood pool acts as health and is used to cast abilities.",
+        "iconUrl": "/images/skills/WeaponAttack_Lillith_Icon.png"
       },
       {
         "name": "Blood Hex",
         "key": "RMB",
         "damage": "",
         "cooldown": "4s",
-        "description": "Lillith hexes an enemy or ally, dealing current Health damage to enemies or Healing allies for an increasing value based on duration. You regenerate Blood while this ability is active."
+        "description": "Lillith hexes an enemy or ally, dealing current Health damage to enemies or Healing allies for an increasing value based on duration. You regenerate Blood while this ability is active.",
+        "iconUrl": "/images/skills/Ability_Blood_Hex.png"
       },
       {
         "name": "Swarm",
         "key": "Q",
         "damage": "",
         "cooldown": "3s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Swarm.png"
       },
       {
         "name": "Death Wings",
         "key": "F",
         "damage": "",
         "cooldown": "2s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Death_Wings.png"
       },
       {
         "name": "Blood Moon",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": "Lillith grants her team True Lifesteal (unaffected by Anti-heal) for 8s while gaining increased Movement Speed, jump height, and Blood regeneration."
+        "description": "Lillith grants her team True Lifesteal (unaffected by Anti-heal) for 8s while gaining increased Movement Speed, jump height, and Blood regeneration.",
+        "iconUrl": "/images/skills/Ability_Blood_Moon.png"
       }
     ],
     "talents": [
@@ -4272,7 +4424,7 @@
       },
       {
         "name": "Murderous Intent",
-        "effect": "Hitting an enemy with Heart of Crimson while theyâ€™re affected by Blood Hex or Swarm increases your movement speed by 10% and attack speed by 11% for 4s. Stacks up to 3 times."
+        "effect": "Hitting an enemy with Heart of Crimson while they\u00e2\u20ac\u2122re affected by Blood Hex or Swarm increases your movement speed by 10% and attack speed by 11% for 4s. Stacks up to 3 times."
       }
     ],
     "cards": [
@@ -4288,7 +4440,7 @@
       },
       {
         "name": "Charmed",
-        "description": "Increase your allyâ€™s Movement Speed by {4|4}% while they are marked by Blood Hex.",
+        "description": "Increase your ally\u00e2\u20ac\u2122s Movement Speed by {4|4}% while they are marked by Blood Hex.",
         "category": "Blood Hex"
       },
       {
@@ -4376,35 +4528,40 @@
         "key": "LMB",
         "damage": "",
         "cooldown": "",
-        "description": "Fling two daggers to impale your enemies, each dealing 400 damage."
+        "description": "Fling two daggers to impale your enemies, each dealing 400 damage.",
+        "iconUrl": "/images/skills/WeaponAttack_Maeve_Icon.png"
       },
       {
         "name": "Pounce",
         "key": "RMB",
         "damage": "",
         "cooldown": "10s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Pounce.png"
       },
       {
         "name": "Nine Lives",
         "key": "Q",
         "damage": "",
         "cooldown": "20s",
-        "description": "Reset the cooldowns of your other abilities and heal for 400."
+        "description": "Reset the cooldowns of your other abilities and heal for 400.",
+        "iconUrl": "/images/skills/Ability_Nine_Lives.png"
       },
       {
         "name": "Prowl",
         "key": "F",
         "damage": "",
         "cooldown": "12s",
-        "description": "Go on the prowl, moving faster and jumping higher until you use your weapon or another ability."
+        "description": "Go on the prowl, moving faster and jumping higher until you use your weapon or another ability.",
+        "iconUrl": "/images/skills/Ability_Prowl.png"
       },
       {
         "name": "Midnight",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Midnight.png"
       }
     ],
     "talents": [
@@ -4527,35 +4684,40 @@
         "key": "LMB",
         "damage": "575",
         "cooldown": "",
-        "description": "A salvaged ship cannon that fires cannonballs every 1s, each dealing 575 damage."
+        "description": "A salvaged ship cannon that fires cannonballs every 1s, each dealing 575 damage.",
+        "iconUrl": "/images/skills/WeaponAttack_Makoa_Icon.png"
       },
       {
         "name": "Dredge Anchor",
         "key": "RMB",
         "damage": "",
         "cooldown": "14s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Dredge_Anchor.png"
       },
       {
         "name": "Shell Shield",
         "key": "Q",
         "damage": "",
         "cooldown": "14s",
-        "description": "Create a shield in an area around you to protect yourself and allies from up to 4500 damage."
+        "description": "Create a shield in an area around you to protect yourself and allies from up to 4500 damage.",
+        "iconUrl": "/images/skills/Ability_Shell_Shield.png"
       },
       {
         "name": "Shell Spin",
         "key": "F",
         "damage": "",
         "cooldown": "12s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Shell_Spin.png"
       },
       {
         "name": "Ancient Rage",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": "Call on the powers of the Ancients, increasing your health and trading your cannon for an anchor that deals 600 damage per swing."
+        "description": "Call on the powers of the Ancients, increasing your health and trading your cannon for an anchor that deals 600 damage per swing.",
+        "iconUrl": "/images/skills/Ability_Ancient_Rage.png"
       }
     ],
     "talents": [
@@ -4678,35 +4840,40 @@
         "key": "LMB",
         "damage": "",
         "cooldown": "",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/WeaponAttack_Mal'Damba_Icon.png"
       },
       {
         "name": "Mending Spirits",
         "key": "RMB",
         "damage": "85",
         "cooldown": "2s",
-        "description": "Channel the spirits to enchant an ally at your crosshair location, restoring 85 health every 0.16s for 3s. The Cooldown of this ability is reduced by 1.25s if you miss."
+        "description": "Channel the spirits to enchant an ally at your crosshair location, restoring 85 health every 0.16s for 3s. The Cooldown of this ability is reduced by 1.25s if you miss.",
+        "iconUrl": "/images/skills/Ability_Mending_Spirits.png"
       },
       {
         "name": "Gourd",
         "key": "Q",
         "damage": "",
         "cooldown": "10s",
-        "description": "Toss a potent alchemic gourd that explodes on the ground, dealing 55 damage every 0.2s to enemies and healing allies for 65 every 0.2s."
+        "description": "Toss a potent alchemic gourd that explodes on the ground, dealing 55 damage every 0.2s to enemies and healing allies for 65 every 0.2s.",
+        "iconUrl": "/images/skills/Ability_Gourd.png"
       },
       {
         "name": "Slither",
         "key": "F",
         "damage": "",
         "cooldown": "8s",
-        "description": "Quickly slither forward, becoming Ethereal for the duration."
+        "description": "Quickly slither forward, becoming Ethereal for the duration.",
+        "iconUrl": "/images/skills/Ability_Slither.png"
       },
       {
         "name": "Dread Serpent",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Dread_Serpent.png"
       }
     ],
     "talents": [
@@ -4771,7 +4938,7 @@
       },
       {
         "name": "Pungent Gourd",
-        "description": "Increase your Alliesâ€™ and your Movement Speed by {8|8}% while in your Gourd.",
+        "description": "Increase your Allies\u00e2\u20ac\u2122 and your Movement Speed by {8|8}% while in your Gourd.",
         "category": "Gourd"
       },
       {
@@ -4829,35 +4996,40 @@
         "key": "LMB",
         "damage": "",
         "cooldown": "",
-        "description": "Spit out an explosive magical projectile that deals 450 damage and heals allies for 300."
+        "description": "Spit out an explosive magical projectile that deals 450 damage and heals allies for 300.",
+        "iconUrl": "/images/skills/WeaponAttack_Moji_Icon.png"
       },
       {
         "name": "Sparkle",
         "key": "RMB",
         "damage": "",
         "cooldown": "",
-        "description": "Spray magical energy, dealing 20 damage to enemies while healing allies for 50. Applies Magic Mark to allies."
+        "description": "Spray magical energy, dealing 20 damage to enemies while healing allies for 50. Applies Magic Mark to allies.",
+        "iconUrl": "/images/skills/Ability_Familiar_Spray.png"
       },
       {
         "name": "Magic Shield",
         "key": "Q",
         "damage": "",
         "cooldown": "10s",
-        "description": "Generate a 1000 Shield on yourself and 600 Shield for allies within 55 units."
+        "description": "Generate a 1000 Shield on yourself and 600 Shield for allies within 55 units.",
+        "iconUrl": "/images/skills/Ability_Magic_Shield.png"
       },
       {
         "name": "Scamper",
         "key": "F",
         "damage": "",
         "cooldown": "4s",
-        "description": "Quickly Scamper forward, doubling your movement speed. Refire to cancel."
+        "description": "Quickly Scamper forward, doubling your movement speed. Refire to cancel.",
+        "iconUrl": "/images/skills/Ability_Scamper.png"
       },
       {
         "name": "Bon Appetit",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Bon_Appetit.png"
       }
     ],
     "talents": [
@@ -4980,35 +5152,40 @@
         "key": "LMB",
         "damage": "",
         "cooldown": "",
-        "description": "Punch in a five hit attack chain, dealing 200 three times and 425 two times. Resets to the first hit after missing 2 hits or after 1.25s."
+        "description": "Punch in a five hit attack chain, dealing 200 three times and 425 two times. Resets to the first hit after missing 2 hits or after 1.25s.",
+        "iconUrl": "/images/skills/WeaponAttack_Nyx_Icon.png"
       },
       {
         "name": "Rift Slash",
         "key": "RMB",
         "damage": "200, 275, 350, 50, 200",
         "cooldown": "11s",
-        "description": "Fire a projectile that deals damage and leaves behind an Abyssal Rift. The Rift slows enemies within 30 units and explodes after 2s."
+        "description": "Fire a projectile that deals damage and leaves behind an Abyssal Rift. The Rift slows enemies within 30 units and explodes after 2s.",
+        "iconUrl": "/images/skills/Ability_Rift_Slash.png"
       },
       {
         "name": "Abyssal Fortress",
         "key": "Q",
         "damage": "5000, 1500",
         "cooldown": "12s",
-        "description": "Place a 5000 shield at the target location. The shield loses health the farther it is placed from you."
+        "description": "Place a 5000 shield at the target location. The shield loses health the farther it is placed from you.",
+        "iconUrl": "/images/skills/Ability_Abyssal_Fortress.png"
       },
       {
         "name": "Royal Presence",
         "key": "F",
         "damage": "",
         "cooldown": "14s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Royal_Presence.png"
       },
       {
         "name": "Chaos Nexus",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Chaos_Nexus.png"
       }
     ],
     "talents": [
@@ -5131,35 +5308,40 @@
         "key": "LMB",
         "damage": "",
         "cooldown": "",
-        "description": "A fully-automatic marksman rifle that deals 415 damage every 0.3s while scoped, and 250 damage every 0.2s from the hip."
+        "description": "A fully-automatic marksman rifle that deals 415 damage every 0.3s while scoped, and 250 damage every 0.2s from the hip.",
+        "iconUrl": "/images/skills/WeaponAttack_Octavia_Icon.png"
       },
       {
         "name": "Designated Sights",
         "key": "RMB",
         "damage": "",
         "cooldown": "",
-        "description": "Look down your sights and gain increased accuracy; stopping in air when looking down your sights."
+        "description": "Look down your sights and gain increased accuracy; stopping in air when looking down your sights.",
+        "iconUrl": "/images/skills/Ability_Designated_Sights.png"
       },
       {
         "name": "Distortion Field",
         "key": "Q",
         "damage": "",
         "cooldown": "16s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Distortion_Field.png"
       },
       {
         "name": "Commanding Leap",
         "key": "F",
         "damage": "",
         "cooldown": "12s",
-        "description": "Leap into the air to gain control of the battlefield, then place a healing rally point at your landing zone."
+        "description": "Leap into the air to gain control of the battlefield, then place a healing rally point at your landing zone.",
+        "iconUrl": "/images/skills/Ability_Commanding_Leap.png"
       },
       {
         "name": "Creeping Barrage",
         "key": "E",
         "damage": "850, 100",
         "cooldown": "Ultimate",
-        "description": "Rain down a laser barrage upon your enemies that deals 850 damage per beam."
+        "description": "Rain down a laser barrage upon your enemies that deals 850 damage per beam.",
+        "iconUrl": "/images/skills/Ability_Creeping_Barrage.png"
       }
     ],
     "talents": [
@@ -5214,7 +5396,7 @@
       },
       {
         "name": "High Ground",
-        "description": "Increase the jump strength of Octaviaâ€™s Commanding Leap by {5|5}%.",
+        "description": "Increase the jump strength of Octavia\u00e2\u20ac\u2122s Commanding Leap by {5|5}%.",
         "category": "Commanding Leap"
       },
       {
@@ -5277,41 +5459,46 @@
         "key": "LMB",
         "damage": "",
         "cooldown": "",
-        "description": "A hybrid weapon that deals 450 damage every 0.3s in a wide spread, and with a narrower spread and slower fire rate while the trigger is held down. Applies Ominous Brand"
+        "description": "A hybrid weapon that deals 450 damage every 0.3s in a wide spread, and with a narrower spread and slower fire rate while the trigger is held down. Applies Ominous Brand",
+        "iconUrl": "/images/skills/WeaponAttack_Omen_Icon.png"
       },
       {
         "name": "Deadly Domain",
         "key": "RMB",
         "damage": "",
         "cooldown": "12s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Deadly_Domain.png"
       },
       {
         "name": "Gravity Vice",
         "key": "Q",
         "damage": "",
         "cooldown": "10s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Gravity_Vice.png"
       },
       {
         "name": "Dark Stride",
         "key": "F",
         "damage": "",
         "cooldown": "10s",
-        "description": "Dash in the direction you're moving, leaving a trail that deals 30 damage every 0.2s. Colliding with an enemy deals 200 damage and knocks them back. Applies Ominous Brand"
+        "description": "Dash in the direction you're moving, leaving a trail that deals 30 damage every 0.2s. Colliding with an enemy deals 200 damage and knocks them back. Applies Ominous Brand",
+        "iconUrl": "/images/skills/Ability_Dark_Stride.png"
       },
       {
         "name": "Heavens Asunder",
         "key": "E",
         "damage": "666",
         "cooldown": "Ultimate",
-        "description": "Call forth a Rift into the Abyss which Blinds enemies in its range. After a delay, a beam fires upwards dealing 666 damage every 0.15s. Applies Ominous Brand."
+        "description": "Call forth a Rift into the Abyss which Blinds enemies in its range. After a delay, a beam fires upwards dealing 666 damage every 0.15s. Applies Ominous Brand.",
+        "iconUrl": "/images/skills/Ability_Heavens_Asunder.png"
       }
     ],
     "talents": [
       {
         "name": "Everyone Dies",
-        "effect": "Hitting an enemy with Dark Stride now reduces Gravity Viceâ€™s Cooldown by 50%, and Dark Strideâ€™s damage is increased by 100."
+        "effect": "Hitting an enemy with Dark Stride now reduces Gravity Vice\u00e2\u20ac\u2122s Cooldown by 50%, and Dark Stride\u00e2\u20ac\u2122s damage is increased by 100."
       },
       {
         "name": "Umbral Lance",
@@ -5365,7 +5552,7 @@
       },
       {
         "name": "Lightless",
-        "description": "Increase the duration of Dark Strideâ€™s trail by {1|1}s.",
+        "description": "Increase the duration of Dark Stride\u00e2\u20ac\u2122s trail by {1|1}s.",
         "category": "Dark Stride"
       },
       {
@@ -5423,35 +5610,40 @@
         "key": "LMB",
         "damage": "600",
         "cooldown": "",
-        "description": "A custom-made launcher that fires volatile potions that explode in an area on impact, dealing 600 damage."
+        "description": "A custom-made launcher that fires volatile potions that explode in an area on impact, dealing 600 damage.",
+        "iconUrl": "/images/skills/WeaponAttack_Pip_Icon.png"
       },
       {
         "name": "Explosive Flask",
         "key": "RMB",
         "damage": "",
         "cooldown": "8s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Explosive_Flask.png"
       },
       {
         "name": "Healing Potion",
         "key": "Q",
         "damage": "",
         "cooldown": "7s",
-        "description": "Throw a potion that heals allies for 1200 when it explodes. Reactivate this ability to explode the potion in the air."
+        "description": "Throw a potion that heals allies for 1200 when it explodes. Reactivate this ability to explode the potion in the air.",
+        "iconUrl": "/images/skills/Ability_Healing_Potion.png"
       },
       {
         "name": "Weightless",
         "key": "F",
         "damage": "",
         "cooldown": "10s",
-        "description": "Launch yourself upwards, increasing your Movement Speed and jump strength for 3s."
+        "description": "Launch yourself upwards, increasing your Movement Speed and jump strength for 3s.",
+        "iconUrl": "/images/skills/Ability_Weightless.png"
       },
       {
         "name": "Evil Mojo",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Evil_Mojo.png"
       }
     ],
     "talents": [
@@ -5574,35 +5766,40 @@
         "key": "LMB",
         "damage": "",
         "cooldown": "",
-        "description": "An Abyssal Gatling gun that shreds its targets' souls every 5 hits. Deals 40 damage every 0.05s when fully spun up. Each soul fragment can be consumed to gain soul armor."
+        "description": "An Abyssal Gatling gun that shreds its targets' souls every 5 hits. Deals 40 damage every 0.05s when fully spun up. Each soul fragment can be consumed to gain soul armor.",
+        "iconUrl": "/images/skills/WeaponAttack_Raum_Icon.png"
       },
       {
         "name": "Ignition",
         "key": "RMB",
         "damage": "",
         "cooldown": "10s",
-        "description": "Ignite your Gatling gun to fully spin it up and consume no ammo for 3s."
+        "description": "Ignite your Gatling gun to fully spin it up and consume no ammo for 3s.",
+        "iconUrl": "/images/skills/Ability_Ignition.png"
       },
       {
         "name": "Soul Harvest",
         "key": "Q",
         "damage": "",
         "cooldown": "10s",
-        "description": "Harvest your enemies' shattered souls, drawing loose souls in and gaining 2000 soul armor on activation, as well as an additional 200 soul armor for each fragment collected."
+        "description": "Harvest your enemies' shattered souls, drawing loose souls in and gaining 2000 soul armor on activation, as well as an additional 200 soul armor for each fragment collected.",
+        "iconUrl": "/images/skills/Ability_Soul_Harvest.png"
       },
       {
         "name": "Juggernaut",
         "key": "F",
         "damage": "",
         "cooldown": "15s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Juggernaut.png"
       },
       {
         "name": "Cataclysm",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Cataclysm.png"
       }
     ],
     "talents": [
@@ -5637,7 +5834,7 @@
       },
       {
         "name": "Declaration of War",
-        "description": "Increase the potency of Juggernautâ€™s Knockup and Knockback by {7|7}%.",
+        "description": "Increase the potency of Juggernaut\u00e2\u20ac\u2122s Knockup and Knockback by {7|7}%.",
         "category": "Juggernaut"
       },
       {
@@ -5725,35 +5922,40 @@
         "key": "LMB",
         "damage": "",
         "cooldown": "",
-        "description": "Unleash magical energy from your hands, dealing 450 damage every 0.7s."
+        "description": "Unleash magical energy from your hands, dealing 450 damage every 0.7s.",
+        "iconUrl": "/images/skills/WeaponAttack_Rei_Icon.png"
       },
       {
         "name": "Chain Heal",
         "key": "RMB",
         "damage": "",
         "cooldown": "4s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Chain_Heal.png"
       },
       {
         "name": "Spirit Link",
         "key": "Q",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Spirit_Link.png"
       },
       {
         "name": "Envelop",
         "key": "F",
         "damage": "",
         "cooldown": "14s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Envelop.png"
       },
       {
         "name": "Vivify",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Vivify.png"
       }
     ],
     "talents": [
@@ -5767,7 +5969,7 @@
       },
       {
         "name": "Focus",
-        "effect": "Spirit Linkâ€™s Cooldown is increased to 6s and it now only lasts for 3s, but its base effects are tripled."
+        "effect": "Spirit Link\u00e2\u20ac\u2122s Cooldown is increased to 6s and it now only lasts for 3s, but its base effects are tripled."
       }
     ],
     "cards": [
@@ -5783,7 +5985,7 @@
       },
       {
         "name": "Arcane Maelstrom",
-        "description": "Using Envelop reduces your linked friendly targetâ€™s Cooldowns by {7|7}%.",
+        "description": "Using Envelop reduces your linked friendly target\u00e2\u20ac\u2122s Cooldowns by {7|7}%.",
         "category": "Envelop"
       },
       {
@@ -5876,35 +6078,40 @@
         "key": "LMB",
         "damage": "40",
         "cooldown": "",
-        "description": "Fast-firing miniguns that shred your enemies with bullets, dealing 40 damage every 0.05s when fully spun up."
+        "description": "Fast-firing miniguns that shred your enemies with bullets, dealing 40 damage every 0.05s when fully spun up.",
+        "iconUrl": "/images/skills/WeaponAttack_Ruckus_Icon.png"
       },
       {
         "name": "Missile Launcher",
         "key": "RMB",
         "damage": "225",
         "cooldown": "10s",
-        "description": "Fire large missiles that explode and deal 225 damage each. Has 3 charges."
+        "description": "Fire large missiles that explode and deal 225 damage each. Has 3 charges.",
+        "iconUrl": "/images/skills/Ability_Missile_Launcher.png"
       },
       {
         "name": "Emitter",
         "key": "Q",
         "damage": "2500",
         "cooldown": "12s",
-        "description": "Shield yourself for up to 2500 damage for a brief time."
+        "description": "Shield yourself for up to 2500 damage for a brief time.",
+        "iconUrl": "/images/skills/Ability_Emitter.png"
       },
       {
         "name": "Advance",
         "key": "F",
         "damage": "",
         "cooldown": "5s",
-        "description": "Jet in the direction you're moving, maintaining your ability to fire. Stationary use launches upward."
+        "description": "Jet in the direction you're moving, maintaining your ability to fire. Stationary use launches upward.",
+        "iconUrl": "/images/skills/Ability_Advance.png"
       },
       {
         "name": "Hexa Fire",
         "key": "E",
         "damage": "120, 250",
         "cooldown": "Ultimate",
-        "description": "Unleash 2 miniguns and rocket launchers that unload their ammo over a short duration. The guns deal 120 damage every 0.04s and the launchers deal 250 damage every 0.25s."
+        "description": "Unleash 2 miniguns and rocket launchers that unload their ammo over a short duration. The guns deal 120 damage every 0.04s and the launchers deal 250 damage every 0.25s.",
+        "iconUrl": "/images/skills/Ability_Hexa_Fire.png"
       }
     ],
     "talents": [
@@ -6027,35 +6234,40 @@
         "key": "LMB",
         "damage": "",
         "cooldown": "",
-        "description": "A heavy pistol that deals 530 damage every 0.5s."
+        "description": "A heavy pistol that deals 530 damage every 0.5s.",
+        "iconUrl": "/images/skills/WeaponAttack_Saati_Icon.png"
       },
       {
         "name": "Ricochet",
         "key": "RMB",
         "damage": "",
         "cooldown": "",
-        "description": "Costs 3 Pips. Toss & fire a coin to deal damage to the weakest enemy in range. Shoot at it again to cause an explosion."
+        "description": "Costs 3 Pips. Toss & fire a coin to deal damage to the weakest enemy in range. Shoot at it again to cause an explosion.",
+        "iconUrl": "/images/skills/Ability_Ricochet.png"
       },
       {
         "name": "Dead Ringer",
         "key": "Q",
         "damage": "",
         "cooldown": "",
-        "description": "Costs 4 Pips. Place a decoy that fires in a line & Reveals enemies that damage it."
+        "description": "Costs 4 Pips. Place a decoy that fires in a line & Reveals enemies that damage it.",
+        "iconUrl": "/images/skills/Ability_Dead_Ringer.png"
       },
       {
         "name": "Blast Back",
         "key": "F",
         "damage": "",
         "cooldown": "",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Blast_Back.png"
       },
       {
         "name": "Wallbang",
         "key": "E",
         "damage": "777",
         "cooldown": "Ultimate",
-        "description": "You have 3 shots that deal 777 damage and can Pierce all enemies and the world."
+        "description": "You have 3 shots that deal 777 damage and can Pierce all enemies and the world.",
+        "iconUrl": "/images/skills/Ability_Wallbang.png"
       }
     ],
     "talents": [
@@ -6105,12 +6317,12 @@
       },
       {
         "name": "Hide",
-        "description": "Increase the duration of Saatiâ€™s invisibility by {0.12|0.125}s after deployment of Dead Ringer.",
+        "description": "Increase the duration of Saati\u00e2\u20ac\u2122s invisibility by {0.12|0.125}s after deployment of Dead Ringer.",
         "category": "Dead Ringer"
       },
       {
         "name": "Paper Design",
-        "description": "Decrease the time between bursts of Dead Ringerâ€™s inhand fire by {8|8}%.",
+        "description": "Decrease the time between bursts of Dead Ringer\u00e2\u20ac\u2122s inhand fire by {8|8}%.",
         "category": "Dead Ringer"
       },
       {
@@ -6125,7 +6337,7 @@
       },
       {
         "name": "Seek",
-        "description": "Increase the duration of Dead Ringerâ€™s reveal on destruction by {0.5|0.5}s.",
+        "description": "Increase the duration of Dead Ringer\u00e2\u20ac\u2122s reveal on destruction by {0.5|0.5}s.",
         "category": "Dead Ringer"
       },
       {
@@ -6178,35 +6390,40 @@
         "key": "LMB",
         "damage": "210",
         "cooldown": "",
-        "description": "Fire magical projectiles every 0.3s that pierce and apply a Soul Orb charge to each enemy hit, dealing 210 damage."
+        "description": "Fire magical projectiles every 0.3s that pierce and apply a Soul Orb charge to each enemy hit, dealing 210 damage.",
+        "iconUrl": "/images/skills/WeaponAttack_Seris_Icon.png"
       },
       {
         "name": "Restore Soul",
         "key": "RMB",
         "damage": "",
         "cooldown": "",
-        "description": "Target an ally, restoring 1650 health over 1.5s. Nearby allies are healed for 1000 over 1.5s."
+        "description": "Target an ally, restoring 1650 health over 1.5s. Nearby allies are healed for 1000 over 1.5s.",
+        "iconUrl": "/images/skills/Ability_Restore_Soul.png"
       },
       {
         "name": "Rend Soul",
         "key": "Q",
         "damage": "",
         "cooldown": "7s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Rend_Soul.png"
       },
       {
         "name": "Shadow Travel",
         "key": "F",
         "damage": "",
         "cooldown": "12s",
-        "description": "Phase into another plane of existence for a brief duration, increasing your Movement Speed and becoming Stealthed and Ethereal, immune to harmful effects."
+        "description": "Phase into another plane of existence for a brief duration, increasing your Movement Speed and becoming Stealthed and Ethereal, immune to harmful effects.",
+        "iconUrl": "/images/skills/Ability_Shadow_Travel.png"
       },
       {
         "name": "Convergence",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Convergence.png"
       }
     ],
     "talents": [
@@ -6329,35 +6546,40 @@
         "key": "LMB",
         "damage": "1000",
         "cooldown": "",
-        "description": "Draw back your longbow every 1.4s to fire deadly arrows that deals up to 1000 damage."
+        "description": "Draw back your longbow every 1.4s to fire deadly arrows that deals up to 1000 damage.",
+        "iconUrl": "/images/skills/WeaponAttack_ShaLin_Icon.png"
       },
       {
         "name": "Crippling Arrow",
         "key": "RMB",
         "damage": "",
         "cooldown": "8s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Crippling_Arrow.png"
       },
       {
         "name": "Rapid Shot",
         "key": "Q",
         "damage": "625",
         "cooldown": "12s",
-        "description": "Rapidly fire off a barrage of arrows while moving, each dealing 625 damage."
+        "description": "Rapidly fire off a barrage of arrows while moving, each dealing 625 damage.",
+        "iconUrl": "/images/skills/Ability_Rapid_Shot.png"
       },
       {
         "name": "Withdraw",
         "key": "F",
         "damage": "",
         "cooldown": "11s",
-        "description": "Leap backwards and become stealthed."
+        "description": "Leap backwards and become stealthed.",
+        "iconUrl": "/images/skills/Ability_Withdraw.png"
       },
       {
         "name": "Heat Haze",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": "Become a desert mirage, stealthing and enhancing your combat skills, only revealing yourself when you fire."
+        "description": "Become a desert mirage, stealthing and enhancing your combat skills, only revealing yourself when you fire.",
+        "iconUrl": "/images/skills/Ability_Heat_Haze.png"
       }
     ],
     "talents": [
@@ -6480,35 +6702,40 @@
         "key": "LMB",
         "damage": "",
         "cooldown": "",
-        "description": "A fast-firing wrist-mounted crossbow for close-range engagements that deals 130 damage every 0.1s."
+        "description": "A fast-firing wrist-mounted crossbow for close-range engagements that deals 130 damage every 0.1s.",
+        "iconUrl": "/images/skills/WeaponAttack_Skye_Icon.png"
       },
       {
         "name": "Poison Bolts",
         "key": "RMB",
         "damage": "",
         "cooldown": "8s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Poison_Bolts.png"
       },
       {
         "name": "Smoke Screen",
         "key": "Q",
         "damage": "",
         "cooldown": "14s",
-        "description": "Throw a smoke screen that grants stealth to you if you stand in it. Has 2 Charges."
+        "description": "Throw a smoke screen that grants stealth to you if you stand in it. Has 2 Charges.",
+        "iconUrl": "/images/skills/Ability_Smoke_Screen.png"
       },
       {
         "name": "Hidden",
         "key": "F",
         "damage": "",
         "cooldown": "14s",
-        "description": "Blend with the shadows and become stealthed."
+        "description": "Blend with the shadows and become stealthed.",
+        "iconUrl": "/images/skills/Ability_Hidden.png"
       },
       {
         "name": "Time Bomb",
         "key": "E",
         "damage": "3000",
         "cooldown": "Ultimate",
-        "description": "Throw a massive bomb that destroys shields and deals 3000 damage to enemies caught in its blast."
+        "description": "Throw a massive bomb that destroys shields and deals 3000 damage to enemies caught in its blast.",
+        "iconUrl": "/images/skills/Ability_Toxic_Time_Bomb.png"
       }
     ],
     "talents": [
@@ -6631,35 +6858,43 @@
         "key": "LMB",
         "damage": "",
         "cooldown": "",
-        "description": "A rifle and pistol combination for eliminating your targets. Your rifle deals 1200 damage every 1.2s and your pistol deals 165 damage every 0.15s while regenerating Stealth energy."
+        "description": "A rifle and pistol combination for eliminating your targets. Your rifle deals 1200 damage every 1.2s and your pistol deals 165 damage every 0.15s while regenerating Stealth energy.",
+        "iconUrl": "/images/skills/WeaponAttack_Strix_Icon.png",
+        "iconUrl2": "/images/skills/WeaponAttack_Strix_Icon_2.png"
       },
       {
         "name": "Scope / Flare",
         "key": "RMB",
         "damage": "",
         "cooldown": "",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Scope.png",
+        "iconUrl2": "/images/skills/Ability_Flare.png"
       },
       {
         "name": "Quick Switch",
         "key": "Q",
         "damage": "",
         "cooldown": "",
-        "description": "Swap between your Talon Rifle and Pistol."
+        "description": "Swap between your Talon Rifle and Pistol.",
+        "iconUrl": "/images/skills/Ability_Quick_Switch.png",
+        "iconUrl2": "/images/skills/Ability_Quick_Switch_2.png"
       },
       {
         "name": "Stealth",
         "key": "F",
         "damage": "",
         "cooldown": "1s",
-        "description": "Enter stealth and hide yourself from vision. While in Stealth your energy is consumed."
+        "description": "Enter stealth and hide yourself from vision. While in Stealth your energy is consumed.",
+        "iconUrl": "/images/skills/Ability_Stealth.png"
       },
       {
         "name": "Flashbang",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Flashbang.png"
       }
     ],
     "talents": [
@@ -6777,35 +7012,40 @@
         "key": "LMB",
         "damage": "110",
         "cooldown": "",
-        "description": "A fast-firing weapon for short-range engagements that deals 110 damage every 0.095s."
+        "description": "A fast-firing weapon for short-range engagements that deals 110 damage every 0.095s.",
+        "iconUrl": "/images/skills/WeaponAttack_Talus_Icon.png"
       },
       {
         "name": "Blitz Upper",
         "key": "RMB",
         "damage": "",
         "cooldown": "10s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Blitz_Upper.png"
       },
       {
         "name": "Overcharge",
         "key": "Q",
         "damage": "",
         "cooldown": "10s",
-        "description": "Overcharge your weapon to enhance its attack speed by 33% and consume no ammo."
+        "description": "Overcharge your weapon to enhance its attack speed by 33% and consume no ammo.",
+        "iconUrl": "/images/skills/Ability_Overcharge.png"
       },
       {
         "name": "Rune of Travel",
         "key": "F",
         "damage": "",
         "cooldown": "15s",
-        "description": "Inscribe a rune on the ground that can be used to escape back to its location after 10s and heal you for 500. You can reactivate the rune to teleport sooner."
+        "description": "Inscribe a rune on the ground that can be used to escape back to its location after 10s and heal you for 500. You can reactivate the rune to teleport sooner.",
+        "iconUrl": "/images/skills/Ability_Rune_of_Travel.png"
       },
       {
         "name": "True Power",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_True_Power.png"
       }
     ],
     "talents": [
@@ -6928,35 +7168,40 @@
         "key": "LMB",
         "damage": "650",
         "cooldown": "",
-        "description": "Swing a massive axe every 1.1s to rend foes in front of you for 650 damage."
+        "description": "Swing a massive axe every 1.1s to rend foes in front of you for 650 damage.",
+        "iconUrl": "/images/skills/WeaponAttack_Terminus_Icon.png"
       },
       {
         "name": "Calamity Blast",
         "key": "RMB",
         "damage": "250",
         "cooldown": "2s",
-        "description": "Fire a mass of Calamity from your hand and an additional one for every stored charge, dealing 250 damage per blast."
+        "description": "Fire a mass of Calamity from your hand and an additional one for every stored charge, dealing 250 damage per blast.",
+        "iconUrl": "/images/skills/Ability_Calamity_Blast.png"
       },
       {
         "name": "Power Siphon",
         "key": "Q",
         "damage": "1200",
         "cooldown": "1s",
-        "description": "Create a powerful funnel that absorbs enemy attacks to generate Calamity Charges."
+        "description": "Create a powerful funnel that absorbs enemy attacks to generate Calamity Charges.",
+        "iconUrl": "/images/skills/Ability_Power_Siphon.png"
       },
       {
         "name": "Shatterfall",
         "key": "F",
         "damage": "",
         "cooldown": "12s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Shatterfall.png"
       },
       {
         "name": "Reanimate",
         "key": "E",
         "damage": "2600",
         "cooldown": "Ultimate",
-        "description": "Revive yourself after a short time and deal 2600 damage to enemies upon reviving."
+        "description": "Revive yourself after a short time and deal 2600 damage to enemies upon reviving.",
+        "iconUrl": "/images/skills/Ability_Reanimate.png"
       }
     ],
     "talents": [
@@ -7079,35 +7324,43 @@
         "key": "LMB",
         "damage": "675, 525",
         "cooldown": "",
-        "description": "Sling Bladed Chakrams from your hand every 0.7s, dealing 675 damage with each, and bouncing off floors and walls up to 4 times."
+        "description": "Sling Bladed Chakrams from your hand every 0.7s, dealing 675 damage with each, and bouncing off floors and walls up to 4 times.",
+        "iconUrl": "/images/skills/WeaponAttack_Tiberius_Icon.png"
       },
       {
         "name": "Heavy Blade",
         "key": "RMB",
         "damage": "",
         "cooldown": "12s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Heavy_Blade.png",
+        "iconUrl2": "/images/skills/Ability_Recall.png"
       },
       {
         "name": "Combat Trance",
         "key": "Q",
         "damage": "",
         "cooldown": "15s",
-        "description": "Channel your energy, increasing your Attack and Movement Speed for 4s."
+        "description": "Channel your energy, increasing your Attack and Movement Speed for 4s.",
+        "iconUrl": "/images/skills/Ability_Combat_Trance.png"
       },
       {
         "name": "Crouching Tigron",
         "key": "F",
         "damage": "",
         "cooldown": "12s",
-        "description": "Crouch down, then launch yourself forward through the air."
+        "description": "Crouch down, then launch yourself forward through the air.",
+        "iconUrl": "/images/skills/Ability_Crouching_Tigron.png"
       },
       {
         "name": "Blade Dance",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": "Flourish your Heavy Blade and gain the ability to use Striking Tigron and Whirling Blades up to 5 times for 15s."
+        "description": "Flourish your Heavy Blade and gain the ability to use Striking Tigron and Whirling Blades up to 5 times for 15s.",
+        "iconUrl": "/images/skills/Ability_Blade_Dance.png",
+        "iconUrl2": "/images/skills/Ability_Striking_Tigron.png",
+        "iconUrl3": "/images/skills/Ability_Whirling_Blades.png"
       }
     ],
     "talents": [
@@ -7116,7 +7369,7 @@
         "effect": "Combat Trance now resets your other abilities' cooldowns when activated."
       },
       {
-        "name": "Tigronâ€™s Fury",
+        "name": "Tigron\u00e2\u20ac\u2122s Fury",
         "effect": "Heavy Blade now explodes on reactivation instead of recalling, but the initial throw deals reduced damage."
       },
       {
@@ -7230,35 +7483,40 @@
         "key": "LMB",
         "damage": "195",
         "cooldown": "",
-        "description": "Fire bursts of magical energy from your Gauntlet every 0.25s, dealing 195 damage per shot."
+        "description": "Fire bursts of magical energy from your Gauntlet every 0.25s, dealing 195 damage per shot.",
+        "iconUrl": "/images/skills/WeaponAttack_Torvald_Icon.png"
       },
       {
         "name": "Nullify",
         "key": "RMB",
         "damage": "",
         "cooldown": "11s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Nullify.png"
       },
       {
         "name": "Protection",
         "key": "Q",
         "damage": "",
         "cooldown": "8s",
-        "description": "Project a shield onto an ally for a short duration that prevents up to 500 damage."
+        "description": "Project a shield onto an ally for a short duration that prevents up to 500 damage.",
+        "iconUrl": "/images/skills/Ability_Protection.png"
       },
       {
         "name": "Recharge",
         "key": "F",
         "damage": "",
         "cooldown": "12s",
-        "description": "Regenerate 2750 of your shield over a short duration."
+        "description": "Regenerate 2750 of your shield over a short duration.",
+        "iconUrl": "/images/skills/Ability_Recharge.png"
       },
       {
         "name": "Hyper Beam",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Hyper_Beam.png"
       }
     ],
     "talents": [
@@ -7381,35 +7639,40 @@
         "key": "LMB",
         "damage": "115",
         "cooldown": "",
-        "description": "A fast-firing automatic rifle that deals 115 damage every 0.09s."
+        "description": "A fast-firing automatic rifle that deals 115 damage every 0.09s.",
+        "iconUrl": "/images/skills/WeaponAttack_Tyra_Icon.png"
       },
       {
         "name": "Nade Launcher",
         "key": "RMB",
         "damage": "700",
         "cooldown": "9s",
-        "description": "Fire a grenade that explodes on impact, dealing 700 damage."
+        "description": "Fire a grenade that explodes on impact, dealing 700 damage.",
+        "iconUrl": "/images/skills/Ability_Nade_Launcher.png"
       },
       {
         "name": "Fire Bomb",
         "key": "Q",
         "damage": "",
         "cooldown": "15s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Fire_Bomb.png"
       },
       {
         "name": "Hunter's Mark",
         "key": "F",
         "damage": "",
         "cooldown": "14s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Hunter's_Mark.png"
       },
       {
         "name": "Crossfire",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": "Enhance your rate of fire by 67% and increase your speed while no longer consuming ammo."
+        "description": "Enhance your rate of fire by 67% and increase your speed while no longer consuming ammo.",
+        "iconUrl": "/images/skills/Ability_Crossfire.png"
       }
     ],
     "talents": [
@@ -7434,7 +7697,7 @@
       },
       {
         "name": "Favored Quarry",
-        "description": "Increase the duration of Hunterâ€™s Mark by {0.6|0.6}s.",
+        "description": "Increase the duration of Hunter\u00e2\u20ac\u2122s Mark by {0.6|0.6}s.",
         "category": "Hunter&#39;s Mark"
       },
       {
@@ -7532,35 +7795,40 @@
         "key": "LMB",
         "damage": "280",
         "cooldown": "",
-        "description": "Launch 3 Kunai in an arc from your hands, dealing 280 damage per Kunai."
+        "description": "Launch 3 Kunai in an arc from your hands, dealing 280 damage per Kunai.",
+        "iconUrl": "/images/skills/WeaponAttack_Vatu_Icon.png"
       },
       {
         "name": "Shadow Bombs",
         "key": "RMB",
         "damage": "10, 200",
         "cooldown": "8s",
-        "description": "Throw out 3 explosive projectiles that stick to their target and deal a small amount of damage on hit and an additional damage when they explode."
+        "description": "Throw out 3 explosive projectiles that stick to their target and deal a small amount of damage on hit and an additional damage when they explode.",
+        "iconUrl": "/images/skills/Ability_Shadow_Bombs.png"
       },
       {
         "name": "Ambush",
         "key": "Q",
         "damage": "200",
         "cooldown": "11s",
-        "description": "Teleport next to your target, dealing damage in an area on arrival. Can be refired on another enemy within 4s of teleporting."
+        "description": "Teleport next to your target, dealing damage in an area on arrival. Can be refired on another enemy within 4s of teleporting.",
+        "iconUrl": "/images/skills/Ability_Ambush.png"
       },
       {
         "name": "Dash",
         "key": "F",
         "damage": "",
         "cooldown": "5s",
-        "description": "Quickly dash in the direction of your movement input."
+        "description": "Quickly dash in the direction of your movement input.",
+        "iconUrl": "/images/skills/Ability_Dash.png"
       },
       {
         "name": "Nightfall",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Nightfall.png"
       }
     ],
     "talents": [
@@ -7678,35 +7946,42 @@
         "key": "LMB",
         "damage": "",
         "cooldown": "",
-        "description": "A weapon with 3 fire modes that is fit for an assassin. Mag Dump is only effective at short range. Automatic is effective at mid-range, and Burst is effective at longer ranges."
+        "description": "A weapon with 3 fire modes that is fit for an assassin. Mag Dump is only effective at short range. Automatic is effective at mid-range, and Burst is effective at longer ranges.",
+        "iconUrl": "/images/skills/WeaponAttack_VII_Burst_Icon.png",
+        "iconUrl2": "/images/skills/WeaponAttack_VII_Mag_Dump_Icon.png",
+        "iconUrl3": "/images/skills/WeaponAttack_VII_Icon.png"
       },
       {
         "name": "Trigger Discipline",
         "key": "RMB",
         "damage": "",
         "cooldown": "",
-        "description": "Swap between the 3 fire modes of your Heavy SMG on activation, from Burst to Mag Dump to Automatic."
+        "description": "Swap between the 3 fire modes of your Heavy SMG on activation, from Burst to Mag Dump to Automatic.",
+        "iconUrl": "/images/skills/Ability_Trigger_Discipline.png"
       },
       {
         "name": "Explosive Dodge",
         "key": "Q",
         "damage": "200",
         "cooldown": "7s",
-        "description": "Dodge in 8 different directions while leaving behind an explosive trap for your enemies."
+        "description": "Dodge in 8 different directions while leaving behind an explosive trap for your enemies.",
+        "iconUrl": "/images/skills/Ability_Explosive_Dodge.png"
       },
       {
         "name": "Grappling Hook",
         "key": "F",
         "damage": "200",
         "cooldown": "Ultimate",
-        "description": "Grapple to walls and stick to them for up to 5s becoming stealthed for the duration."
+        "description": "Grapple to walls and stick to them for up to 5s becoming stealthed for the duration.",
+        "iconUrl": "/images/skills/Ability_Grappling_Hook.png"
       },
       {
         "name": "Decree 77",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Decree_77.png"
       }
     ],
     "talents": [
@@ -7829,35 +8104,40 @@
         "key": "LMB",
         "damage": "140",
         "cooldown": "",
-        "description": "A Sentinel-issued military assault rifle that deals 140 damage every 0.1s."
+        "description": "A Sentinel-issued military assault rifle that deals 140 damage every 0.1s.",
+        "iconUrl": "/images/skills/WeaponAttack_Viktor_Icon.png"
       },
       {
         "name": "Iron Sights",
         "key": "RMB",
         "damage": "",
         "cooldown": "",
-        "description": "Look down your sights and increase your accuracy."
+        "description": "Look down your sights and increase your accuracy.",
+        "iconUrl": "/images/skills/Ability_Iron_Sights.png"
       },
       {
         "name": "Frag Grenade",
         "key": "Q",
         "damage": "",
         "cooldown": "8s",
-        "description": "Throw a cookable frag grenade that deals 750 damage when it explodes."
+        "description": "Throw a cookable frag grenade that deals 750 damage when it explodes.",
+        "iconUrl": "/images/skills/Ability_Frag_Grenade.png"
       },
       {
         "name": "Hustle",
         "key": "F",
         "damage": "",
         "cooldown": "",
-        "description": "Start hustling, gaining 65% movement speed while runnning."
+        "description": "Start hustling, gaining 65% movement speed while runnning.",
+        "iconUrl": "/images/skills/Ability_Hustle.png"
       },
       {
         "name": "Barrage",
         "key": "E",
         "damage": "1400",
         "cooldown": "Ultimate",
-        "description": "Call down your wrath in a series of artillery barrages on your foes' heads, dealing 1400 damage in an area per shell."
+        "description": "Call down your wrath in a series of artillery barrages on your foes' heads, dealing 1400 damage in an area per shell.",
+        "iconUrl": "/images/skills/Ability_Barrage.png"
       }
     ],
     "talents": [
@@ -7980,35 +8260,40 @@
         "key": "LMB",
         "damage": "165",
         "cooldown": "",
-        "description": "A versatile light machine gun that deals 165 damage every 0.14s."
+        "description": "A versatile light machine gun that deals 165 damage every 0.14s.",
+        "iconUrl": "/images/skills/WeaponAttack_Vivian_Icon.png"
       },
       {
         "name": "Precision Sights",
         "key": "RMB",
         "damage": "",
         "cooldown": "",
-        "description": "Look down the barrel of your gun and gain increased accuracy."
+        "description": "Look down the barrel of your gun and gain increased accuracy.",
+        "iconUrl": "/images/skills/Ability_Precision_Sights.png"
       },
       {
         "name": "Deflector Shield",
         "key": "Q",
         "damage": "1200",
         "cooldown": "13s",
-        "description": "Project a shield in front of your gun to prevent up to 1500 damage."
+        "description": "Project a shield in front of your gun to prevent up to 1500 damage.",
+        "iconUrl": "/images/skills/Ability_Deflector_Shield.png"
       },
       {
         "name": "Sensor Drone",
         "key": "F",
         "damage": "",
         "cooldown": "10s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Sensor_Drone.png"
       },
       {
         "name": "Sentinels",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Sentinels.png"
       }
     ],
     "talents": [
@@ -8131,41 +8416,46 @@
         "key": "LMB",
         "damage": "",
         "cooldown": "",
-        "description": "Fire projectiles to deal damage over time and gain a stack of Darkness. Consuming Darkness heals Vora over time. Consuming maximum stacks augments other abilities."
+        "description": "Fire projectiles to deal damage over time and gain a stack of Darkness. Consuming Darkness heals Vora over time. Consuming maximum stacks augments other abilities.",
+        "iconUrl": "/images/skills/WeaponAttack_Vora_Icon.png"
       },
       {
         "name": "Obliteration",
         "key": "RMB",
         "damage": "",
         "cooldown": "11s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Obliteration.png"
       },
       {
         "name": "Dark Siphon",
         "key": "Q",
         "damage": "",
         "cooldown": "6s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Dark_Siphon.png"
       },
       {
         "name": "Tendril",
         "key": "F",
         "damage": "",
         "cooldown": "12s",
-        "description": "Manifest your will, propelling yourself towards your target with a tendril. Can hit players to pull you to them."
+        "description": "Manifest your will, propelling yourself towards your target with a tendril. Can hit players to pull you to them.",
+        "iconUrl": "/images/skills/Ability_Tendril.png"
       },
       {
         "name": "Harbinger's Wrath",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": "Hunt your enemies, increasing Movement Speed and reducing the damage you take. Select a nearby target to lock down, damaging or executing them if they are low health."
+        "description": "Hunt your enemies, increasing Movement Speed and reducing the damage you take. Select a nearby target to lock down, damaging or executing them if they are low health.",
+        "iconUrl": "/images/skills/Ability_Harbinger's_Wrath.png"
       }
     ],
     "talents": [
       {
         "name": "Unyielding Pressure",
-        "effect": "Your Dark Siphon now deals an additional 10% of the targetâ€™s maximum Health as damage over 1.5s."
+        "effect": "Your Dark Siphon now deals an additional 10% of the target\u00e2\u20ac\u2122s maximum Health as damage over 1.5s."
       },
       {
         "name": "Parasitic Pull",
@@ -8282,35 +8572,40 @@
         "key": "LMB",
         "damage": "500",
         "cooldown": "",
-        "description": "Fire a blast of Fae energy every 0.75s that deals 500 damage in an area."
+        "description": "Fire a blast of Fae energy every 0.75s that deals 500 damage in an area.",
+        "iconUrl": "/images/skills/WeaponAttack_Willo_Icon.png"
       },
       {
         "name": "Dead Zone",
         "key": "RMB",
         "damage": "100",
         "cooldown": "16s",
-        "description": "Launch a toxic spore that deals 100 damage and infects enemies in an area, preventing them from being healed."
+        "description": "Launch a toxic spore that deals 100 damage and infects enemies in an area, preventing them from being healed.",
+        "iconUrl": "/images/skills/Ability_Dead_Zone.png"
       },
       {
         "name": "Seedling",
         "key": "Q",
         "damage": "400, 400",
         "cooldown": "13s",
-        "description": "Throw an explosive seed that deals 400 damage and spawns 4 more damaging seeds in an area around it."
+        "description": "Throw an explosive seed that deals 400 damage and spawns 4 more damaging seeds in an area around it.",
+        "iconUrl": "/images/skills/Ability_Seedling.png"
       },
       {
         "name": "Flutter",
         "key": "F",
         "damage": "",
         "cooldown": "10s",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Flutter.png"
       },
       {
         "name": "Fae Flight",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": "Take to the skies and rain down Fae vengeance."
+        "description": "Take to the skies and rain down Fae vengeance.",
+        "iconUrl": "/images/skills/Ability_Fae_Flight.png"
       }
     ],
     "talents": [
@@ -8433,35 +8728,44 @@
         "key": "LMB",
         "damage": "",
         "cooldown": "",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/WeaponAttack_Yagorath_Icon.png",
+        "iconUrl2": "/images/skills/WeaponAttack_Yagorath_Icon_2.png"
       },
       {
         "name": "Piercing Quills / Acceleration",
         "key": "RMB",
         "damage": "",
         "cooldown": "",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Piercing_Quill.png",
+        "iconUrl2": "/images/skills/Ability_Acceleration.png"
       },
       {
         "name": "Hardening / Primal Vision",
         "key": "Q",
         "damage": "",
         "cooldown": "",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Hardening.png",
+        "iconUrl2": "/images/skills/Ability_Primal_Vision.png"
       },
       {
         "name": "Form Swap",
         "key": "F",
         "damage": "",
         "cooldown": "",
-        "description": "Swap between Planted and Travel forms, gaining access to new abilities."
+        "description": "Swap between Planted and Travel forms, gaining access to new abilities.",
+        "iconUrl": "/images/skills/Ability_Form_Swap.png",
+        "iconUrl2": "/images/skills/Ability_Form_Swap_2.png"
       },
       {
         "name": "Devour",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": "Target an enemy to pull in and devour them, gaining a new Health pool while doing so. If their team breaks your Health, they are released."
+        "description": "Target an enemy to pull in and devour them, gaining a new Health pool while doing so. If their team breaks your Health, they are released.",
+        "iconUrl": "/images/skills/Ability_Devour.png"
       }
     ],
     "talents": [
@@ -8584,35 +8888,40 @@
         "key": "LMB",
         "damage": "90",
         "cooldown": "",
-        "description": "Fire a burst of energy every 0.5s from your mirror over a short period of time, hitting 5 times over 0.2s for 90 damage per shot."
+        "description": "Fire a burst of energy every 0.5s from your mirror over a short period of time, hitting 5 times over 0.2s for 90 damage per shot.",
+        "iconUrl": "/images/skills/WeaponAttack_Ying_Icon.png"
       },
       {
         "name": "Shatter",
         "key": "RMB",
         "damage": "500",
         "cooldown": "3s",
-        "description": "Shatter your illusions, causing them to chase down enemies and explode for 500 damage."
+        "description": "Shatter your illusions, causing them to chase down enemies and explode for 500 damage.",
+        "iconUrl": "/images/skills/Ability_Shatter.png"
       },
       {
         "name": "Illusion",
         "key": "Q",
         "damage": "",
         "cooldown": "5s",
-        "description": "Create a lifelike illusion that heals nearby allies for 450 every 1.6s."
+        "description": "Create a lifelike illusion that heals nearby allies for 450 every 1.6s.",
+        "iconUrl": "/images/skills/Ability_Illusion.png"
       },
       {
         "name": "Dimensional Link",
         "key": "F",
         "damage": "",
         "cooldown": "14s",
-        "description": "For a short duration, manipulate dimensions, swapping locations with your farthest illusion."
+        "description": "For a short duration, manipulate dimensions, swapping locations with your farthest illusion.",
+        "iconUrl": "/images/skills/Ability_Dimensional_Link.png"
       },
       {
         "name": "Illusory Rift",
         "key": "E",
         "damage": "4800",
         "cooldown": "Ultimate",
-        "description": "Shatter your mirror, restoring 4800 health to all allies over 8s and make them immune to Crowd Control for 1s. While active, you may teleport to any ally with Dimensional Link."
+        "description": "Shatter your mirror, restoring 4800 health to all allies over 8s and make them immune to Crowd Control for 1s. While active, you may teleport to any ally with Dimensional Link.",
+        "iconUrl": "/images/skills/Ability_Illusory_Rift.png"
       }
     ],
     "talents": [
@@ -8735,35 +9044,40 @@
         "key": "LMB",
         "damage": "",
         "cooldown": "",
-        "description": "Launch 3 burning oil projectiles through the air every 2s to scorch your foes to a crisp, dealing 400 damage with the first two swings and 700 damage with the final swing."
+        "description": "Launch 3 burning oil projectiles through the air every 2s to scorch your foes to a crisp, dealing 400 damage with the first two swings and 700 damage with the final swing.",
+        "iconUrl": "/images/skills/WeaponAttack_Zhin_Icon.png"
       },
       {
         "name": "Counter",
         "key": "RMB",
         "damage": "600",
         "cooldown": "7s",
-        "description": "Counter a single attack from the front and unleash a vicious counterattack that deals 600 damage."
+        "description": "Counter a single attack from the front and unleash a vicious counterattack that deals 600 damage.",
+        "iconUrl": "/images/skills/Ability_Counter.png"
       },
       {
         "name": "Billow",
         "key": "Q",
         "damage": "",
         "cooldown": "15s",
-        "description": "Disperse into smoke to become ethereal and increase your movement speed by 10%."
+        "description": "Disperse into smoke to become ethereal and increase your movement speed by 10%.",
+        "iconUrl": "/images/skills/Ability_Billow.png"
       },
       {
         "name": "Whirl",
         "key": "F",
         "damage": "400",
         "cooldown": "7s",
-        "description": "Lunge forward while swinging your blade, dealing 400 damage to enemies caught in the path."
+        "description": "Lunge forward while swinging your blade, dealing 400 damage to enemies caught in the path.",
+        "iconUrl": "/images/skills/Ability_Whirl.png"
       },
       {
         "name": "Spite",
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": ""
+        "description": "",
+        "iconUrl": "/images/skills/Ability_Spite.png"
       }
     ],
     "talents": [
