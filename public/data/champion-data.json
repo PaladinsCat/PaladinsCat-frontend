@@ -88,7 +88,7 @@
     "loadouts": [
       {
         "name": "Abyss Walker",
-        "description": "Heal for {40|40}",
+        "description": "Heal for {40|40} after activating Nether Step.",
         "category": "Nether Step",
         "iconUrl": "/images/cards/Card_Abyss_Walker.avif",
         "cooldown": null,
@@ -104,7 +104,7 @@
       },
       {
         "name": "Buying Time",
-        "description": "Generate {1|1}",
+        "description": "Generate {1|1} Ammo after activating Reversal.",
         "category": "Reversal",
         "iconUrl": "/images/cards/Card_Buying_Time.avif",
         "cooldown": null,
@@ -136,7 +136,7 @@
       },
       {
         "name": "Featherweight",
-        "description": "Heal for {50|50}",
+        "description": "Heal for {50|50} every 1s while drifting.",
         "category": "General",
         "iconUrl": "/images/cards/Card_Featherweight.avif",
         "cooldown": null,
@@ -144,7 +144,7 @@
       },
       {
         "name": "Marksman",
-        "description": "Generate {1|1}",
+        "description": "Generate {1|1} Ammo after hitting an enemy with Defiance.",
         "category": "Defiance",
         "iconUrl": "/images/cards/Card_Marksman.avif",
         "cooldown": null,
@@ -176,7 +176,7 @@
       },
       {
         "name": "Sleight of Hand",
-        "description": "Generate {1|1}",
+        "description": "Generate {1|1} Ammo after activating Nether Step.",
         "category": "Nether Step",
         "iconUrl": "/images/cards/Card_Sleight_of_Hand.avif",
         "cooldown": null,
@@ -200,7 +200,7 @@
       },
       {
         "name": "Vengeance",
-        "description": "Heal for {30|30}",
+        "description": "Heal for {30|30} after hitting at least one enemy with Defiance.",
         "category": "Defiance",
         "iconUrl": "/images/cards/Card_Vengeance.avif",
         "cooldown": null,
@@ -313,7 +313,7 @@
       },
       {
         "name": "Brawl",
-        "description": "Heal for {150|150}",
+        "description": "Heal for {150|150} over 2s for each enemy hit by Kinetic Burst.",
         "category": "Kinetic Burst",
         "iconUrl": "/images/cards/Card_Brawl.avif",
         "cooldown": null,
@@ -393,7 +393,7 @@
       },
       {
         "name": "Thrive",
-        "description": "Heal for {200|200}",
+        "description": "Heal for {200|200} after hitting an enemy with Shoulder Bash.",
         "category": "Shoulder Bash",
         "iconUrl": "/images/cards/Card_Thrive.avif",
         "cooldown": null,
@@ -401,7 +401,7 @@
       },
       {
         "name": "Trebuchet",
-        "description": "Generate {2|2}",
+        "description": "Generate {2|2} Ammo after activating Siege Shield.",
         "category": "Siege Shield",
         "iconUrl": "/images/cards/Card_Trebuchet.avif",
         "cooldown": null,
@@ -502,7 +502,7 @@
     "talents": [
       {
         "name": "Unstable Fissure",
-        "description": "",
+        "description": "When you use Second Chance you also Rewind enemies within 20 units 3s into the past.",
         "category": "",
         "iconUrl": "/images/champions/Talent Atlas Unstable Fissure.avif"
       },
@@ -546,7 +546,7 @@
       },
       {
         "name": "Hell Hunter",
-        "description": "Generate {1|1}",
+        "description": "Generate {1|1} Ammo after hitting a fully-charged weapon shot.",
         "category": "General",
         "iconUrl": "/images/cards/Card_Hell_Hunter.avif",
         "cooldown": null,
@@ -570,7 +570,7 @@
       },
       {
         "name": "Life Unlived",
-        "description": "Heal for an additional {150|150}",
+        "description": "Heal for an additional {150|150} when using Second Chance.",
         "category": "Second Chance",
         "iconUrl": "/images/cards/Card_Life_Unlived.avif",
         "cooldown": null,
@@ -578,7 +578,7 @@
       },
       {
         "name": "Lost Legacy",
-        "description": "Heal for {80|80}",
+        "description": "Heal for {80|80} every 1s for 3s after activating Stasis Field.",
         "category": "Stasis Field",
         "iconUrl": "/images/cards/Card_Lost_Legacy.avif",
         "cooldown": null,
@@ -626,7 +626,7 @@
       },
       {
         "name": "Rewritten History",
-        "description": "Generate {1|1}",
+        "description": "Generate {1|1} Ammo after using Second Chance.",
         "category": "Second Chance",
         "iconUrl": "/images/cards/Card_Rewritten_History.avif",
         "cooldown": null,
@@ -642,7 +642,7 @@
       },
       {
         "name": "Steady Arm",
-        "description": "Generate {1|1}",
+        "description": "Generate {1|1} Ammo after hitting an enemy with Setback.",
         "category": "Setback",
         "iconUrl": "/images/cards/Card_Steady_Arm.avif",
         "cooldown": null,
@@ -719,7 +719,7 @@
     "talents": [
       {
         "name": "Persistence",
-        "description": "Gain 30% Lifesteal on your hits with Judgement.",
+        "description": "Reduce the damage you take by {4|4}% while at or below 40% Health.",
         "category": "",
         "iconUrl": "/images/champions/Talent Azaan Persistence.avif"
       },
@@ -795,7 +795,7 @@
       },
       {
         "name": "Gathering Power",
-        "description": "Heal for {70|70}",
+        "description": "Heal for {70|70} for each enemy hit with Reckoning.",
         "category": "Reckoning",
         "iconUrl": "/images/cards/Card_Gathering_Power.avif",
         "cooldown": null,
@@ -803,7 +803,7 @@
       },
       {
         "name": "Grim Deliverance",
-        "description": "Heal for {5|5}",
+        "description": "Heal for {5|5} for every percentage point of Ire consumed by abilities.",
         "category": "General",
         "iconUrl": "/images/cards/Card_Grim_Deliverance.avif",
         "cooldown": null,
@@ -819,7 +819,7 @@
       },
       {
         "name": "Overwhelming Presence",
-        "description": "Heal for {12|12}",
+        "description": "Heal for {12|12} every 0.5s while at least one wall segment of Sanctuary is active.",
         "category": "Sanctuary",
         "iconUrl": "/images/cards/Card_Overwhelming_Presence.avif",
         "cooldown": null,
@@ -988,7 +988,7 @@
       },
       {
         "name": "Combat Repair",
-        "description": "Heal your Turret for {100|100}",
+        "description": "Heal your Turret for {100|100} every 1s while you are standing near it.",
         "category": "Turret",
         "iconUrl": "/images/cards/Card_Combat_Repair.avif",
         "cooldown": null,
@@ -996,7 +996,7 @@
       },
       {
         "name": "Double Time",
-        "description": "Heal for {65|65}",
+        "description": "Heal for {65|65} every 1s for 3s after activating Rocket Boots.",
         "category": "Rocket Boots",
         "iconUrl": "/images/cards/Card_Double_Time.avif",
         "cooldown": null,
@@ -1012,7 +1012,7 @@
       },
       {
         "name": "Field Deploy",
-        "description": "Heal for {50|50}",
+        "description": "Heal for {50|50} each time one of your Turrets hits an enemy.",
         "category": "Turret",
         "iconUrl": "/images/cards/Card_Field_Deploy.avif",
         "cooldown": null,
@@ -1044,7 +1044,7 @@
       },
       {
         "name": "Healing Station",
-        "description": "Heal for {50|50}",
+        "description": "Heal for {50|50} every 1s while standing near any of your Turrets.",
         "category": "Turret",
         "iconUrl": "/images/cards/Card_Healing_Station.avif",
         "cooldown": null,
@@ -1153,21 +1153,21 @@
     "talents": [
       {
         "name": "Fiery Disposition",
-        "description": "",
+        "description": "Hitting an enemy with Grenade Launcher Burns them for 0.175% of their maximum Health every 0.1s for 1.5s. Additional hits refresh the duration.",
         "category": "",
-        "iconUrl": null
+        "iconUrl": "/images/champions/Talent Betty La Bomba Fiery Disposition.avif"
       },
       {
         "name": "Controlled Fury",
         "description": "Reduce the range of Hail of Bombs by 50%, concentrating the explosions in a smaller area, and reduce the Cooldown of Hail of Bombs by 2s.",
         "category": "",
-        "iconUrl": null
+        "iconUrl": "/images/champions/Talent Betty La Bomba Controlled Fury.avif"
       },
       {
         "name": "Gotta Bounce",
         "description": "Reduce the Cooldown of Explosive Personality by 5s.",
         "category": "",
-        "iconUrl": null
+        "iconUrl": "/images/champions/Talent Betty La Bomba Gotta Bounce.avif"
       }
     ],
     "loadouts": [
@@ -1175,7 +1175,7 @@
         "name": "A Lost Realm",
         "description": "Increase the area of effect of all your explosions by {4|4}%.",
         "category": "General",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_A_Lost_Realm.avif",
         "cooldown": null,
         "values": null
       },
@@ -1183,15 +1183,15 @@
         "name": "A Runaway",
         "description": "Increase the explosion radius of Hail of Bombs' explosives by {10|10}%.",
         "category": "Hail of Bombs",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_A_Runaway.avif",
         "cooldown": null,
         "values": null
       },
       {
         "name": "Bouncing Betty",
-        "description": "Heal for {30|30}",
+        "description": "Heal for {30|30} for each use of Explosive Personality.",
         "category": "Explosive Personality",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Bouncing_Betty.avif",
         "cooldown": null,
         "values": null
       },
@@ -1199,15 +1199,15 @@
         "name": "Creator's Claim",
         "description": "Increase your maximum Health by {50|50}.",
         "category": "General",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Creators_Claim.avif",
         "cooldown": null,
         "values": null
       },
       {
         "name": "Eureka Moment",
-        "description": "Generate 1 ammo for every {2,000|-200}",
+        "description": "Generate 1 ammo for every {2,000|-200}explosive damage done.",
         "category": "General",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Eureka_Moment.avif",
         "cooldown": null,
         "values": null
       },
@@ -1215,7 +1215,7 @@
         "name": "Fire From Above",
         "description": "Increase the vertical movement from each use of Explosive Personality by {40|40}%.",
         "category": "Explosive Personality",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Fire_From_Above.avif",
         "cooldown": null,
         "values": null
       },
@@ -1223,7 +1223,7 @@
         "name": "From Betty With Love",
         "description": "Increase the explosion radius of Cluster Grenade's initial explosion by {6|6}%.",
         "category": "Cluster Grenade",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_From_Betty_With_Love.avif",
         "cooldown": null,
         "values": null
       },
@@ -1231,7 +1231,7 @@
         "name": "He Can Run",
         "description": "Increase your Movement Speed by {15|15}% for 2s after activating Hail of Bombs.",
         "category": "Hail of Bombs",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_He_Can_Run.avif",
         "cooldown": null,
         "values": null
       },
@@ -1239,7 +1239,7 @@
         "name": "He Could Hide",
         "description": "Increase the travel speed of Hail of Bombs when deploying it by {15|15}%.",
         "category": "Hail of Bombs",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_He_Could_Hide.avif",
         "cooldown": null,
         "values": null
       },
@@ -1247,7 +1247,7 @@
         "name": "He Will Explode",
         "description": "Reduce the Cooldown of Explosive Personality by {6|6}% after activating Hail of Bombs.",
         "category": "Hail of Bombs",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_He_Will_Explode.avif",
         "cooldown": null,
         "values": null
       },
@@ -1255,7 +1255,7 @@
         "name": "Labor of Genius",
         "description": "Hits with Grenade Launcher increase Reload Speed by 5% for {0.5|0.5}s, stacking up to 3 times. Additional hits refresh the duration.",
         "category": "General",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Labor_of_Genius.avif",
         "cooldown": null,
         "values": null
       },
@@ -1263,7 +1263,7 @@
         "name": "Queen's Entrance",
         "description": "Increase the lateral movement from each use of Explosive Personality by {40|40}%.",
         "category": "Explosive Personality",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Queen's_Entrance.avif",
         "cooldown": null,
         "values": null
       },
@@ -1271,7 +1271,7 @@
         "name": "Queen's Reign",
         "description": "Reduce the Cooldown of Cluster Grenade by {0.1|0.1}s for each enemy hit by the initial and secondary explosions.",
         "category": "Cluster Grenade",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Queen's_Reign.avif",
         "cooldown": null,
         "values": null
       },
@@ -1279,15 +1279,15 @@
         "name": "Ride the Rocket",
         "description": "Increase the Projectile Speed of Cluster Grenade by {6|6}%.",
         "category": "Cluster Grenade",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Ride_the_Rocket.avif",
         "cooldown": null,
         "values": null
       },
       {
         "name": "Stunning Entrance",
-        "description": "Heal for {10|10}",
+        "description": "Heal for {10|10} for each enemy hit by the initial and secondary explosions of Cluster Grenade.",
         "category": "Cluster Grenade",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Stunning_Entrance.avif",
         "cooldown": null,
         "values": null
       },
@@ -1295,7 +1295,7 @@
         "name": "Stylish Destruction",
         "description": "Increase your Air Control for 2s after using Explosive Personality by {20|20}%.",
         "category": "Explosive Personality",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Stylish_Destruction.avif",
         "cooldown": null,
         "values": null
       }
@@ -1390,9 +1390,9 @@
     "loadouts": [
       {
         "name": "Ablative Coating",
-        "description": "Heal for {100|100}",
+        "description": "Heal for {100|100}for each enemy hit with Poppy Bomb.",
         "category": "Poppy Bomb",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Ablative_Coating.avif",
         "cooldown": null,
         "values": null
       },
@@ -1400,7 +1400,7 @@
         "name": "Air Blast",
         "description": "Increase your Air Control by {10|10}% until you land after launching yourself with Poppy Bomb.",
         "category": "Poppy Bomb",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Air_Blast.avif",
         "cooldown": null,
         "values": null
       },
@@ -1408,7 +1408,7 @@
         "name": "Backdraft",
         "description": "Reduce the Cooldown of Poppy Bomb by {0.1|0.1}s for each Sticky Bomb you Detonate.",
         "category": "Detonate",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Backdraft.avif",
         "cooldown": null,
         "values": null
       },
@@ -1416,7 +1416,7 @@
         "name": "Bomb Shelter",
         "description": "Reduce the damage you deal to yourself with Sticky Bombs by {20|20}%.",
         "category": "General",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Bomb_Shelter.avif",
         "cooldown": null,
         "values": null
       },
@@ -1424,23 +1424,23 @@
         "name": "Countdown",
         "description": "Reduce the Cooldown of Grumpy Bomb by {0.8|0.8}s.",
         "category": "Grumpy Bomb",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Countdown.avif",
         "cooldown": null,
         "values": null
       },
       {
         "name": "Doomsday",
-        "description": "Heals for {130|130}",
+        "description": "Heals for {130|130}after using Grumpy Bomb.",
         "category": "Grumpy Bomb",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Doomsday.avif",
         "cooldown": null,
         "values": null
       },
       {
         "name": "Explosive Entrance",
-        "description": "Heal for {75|75}",
+        "description": "Heal for {75|75}after using Poppy Bomb.",
         "category": "Poppy Bomb",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Explosive_Entrance.avif",
         "cooldown": null,
         "values": null
       },
@@ -1448,7 +1448,7 @@
         "name": "Fallout",
         "description": "Increase Grumpy Bomb\u00e2\u20ac\u2122s Stun duration by {0.1|0.1}s.",
         "category": "Grumpy Bomb",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Fallout.avif",
         "cooldown": null,
         "values": null
       },
@@ -1456,15 +1456,15 @@
         "name": "Jolt",
         "description": "Increase the effect of Poppy Bomb's Knockback by {15|15}% and cause Poppy Bomb to explode on contact with any surface.",
         "category": "Poppy Bomb",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Jolt.avif",
         "cooldown": null,
         "values": null
       },
       {
         "name": "King's Court",
-        "description": "Heal for {15|15}",
+        "description": "Heal for {15|15}for each Sticky Bomb you Detonate.",
         "category": "Detonate",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Kings_Court.avif",
         "cooldown": null,
         "values": null
       },
@@ -1472,7 +1472,7 @@
         "name": "King's New Cloak",
         "description": "Increase your maximum Health by {50|50}.",
         "category": "General",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Kings_New_Cloak.avif",
         "cooldown": null,
         "values": null
       },
@@ -1480,7 +1480,7 @@
         "name": "Mad Bomber",
         "description": "Increase your Movement Speed by {7|7}% for 3s after using Grumpy Bomb.",
         "category": "Grumpy Bomb",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Mad_Bomber.avif",
         "cooldown": null,
         "values": null
       },
@@ -1488,7 +1488,7 @@
         "name": "Reinforced Casing",
         "description": "Increase your maximum Ammo by {1|1}.",
         "category": "General",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Reinforced_Casing.avif",
         "cooldown": null,
         "values": null
       },
@@ -1496,7 +1496,7 @@
         "name": "Royal Decree",
         "description": "Increase your Reload Speed by {4|4}% for 3s after using Detonate.",
         "category": "Detonate",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Royal_Decree.avif",
         "cooldown": null,
         "values": null
       },
@@ -1504,7 +1504,7 @@
         "name": "Shock and Awe",
         "description": "Increase your Movement Speed by {2.75|2.75}% for 3s after hitting at least one enemy with Detonate.",
         "category": "Detonate",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Shock_and_Awe.avif",
         "cooldown": null,
         "values": null
       },
@@ -1512,7 +1512,7 @@
         "name": "Uncontrolled",
         "description": "Reduce your active Cooldowns by {8|8}% after getting an Elimination.",
         "category": "General",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Uncontrolled.avif",
         "cooldown": null,
         "values": null
       }
@@ -1587,7 +1587,7 @@
     "talents": [
       {
         "name": "Ensnare",
-        "description": "",
+        "description": "Increase the damage you deal to targets Slowed by Net Shot by 25% and increases the duration of Net Shot's Slows by 0.5s. The damage increase lasts a minimum of 2s.",
         "category": "",
         "iconUrl": "/images/champions/Talent Buck Ensnare.avif"
       },
@@ -1599,7 +1599,7 @@
       },
       {
         "name": "Bounce House",
-        "description": "",
+        "description": "Heroic Leap deals 600 damage and applies a Knockup to enemies within 20 units of your landing location.",
         "category": "",
         "iconUrl": "/images/champions/Talent Buck Bounce House.avif"
       }
@@ -1816,7 +1816,7 @@
       },
       {
         "name": "It's Got Some Heft",
-        "description": "War deals 50 more damage per hit and hits 20% farther, but its fire rate is decreased by 20%. War's attacks now deal an additional 20% damage to each enemy hit for each enemy hit in total with your attack",
+        "description": "War deals 50 more damage per hit and hits 20% farther, but its fire rate is decreased by 20%. War's attacks now deal an additional 20% damage to each enemy hit for each enemy hit in total with your attack.",
         "category": "",
         "iconUrl": "/images/champions/Talent Caspian It's Got Some Heft.avif"
       }
@@ -1832,7 +1832,7 @@
       },
       {
         "name": "Both Sides of the Coin",
-        "description": "Heal for {15|15}",
+        "description": "Heal for {15|15} after hitting an enemy with War.",
         "category": "War",
         "iconUrl": "/images/cards/Card_Both_Sides_of_the_Coin.avif",
         "cooldown": null,
@@ -1840,7 +1840,7 @@
       },
       {
         "name": "Casual Competency",
-        "description": "Hitting an enemy with Rogue\u00e2\u20ac\u2122s Tempo grants you {1|1}",
+        "description": "Hitting an enemy with Rogue\u2019s Tempo grants you {1|1} stacks of Piercing Momentum and Sharp Momentum.",
         "category": "Rogue&#39;s Tempo",
         "iconUrl": "/images/cards/Card_Casual_Competency.avif",
         "cooldown": null,
@@ -1880,7 +1880,7 @@
       },
       {
         "name": "In the Thick of It",
-        "description": "Generate {3|3}",
+        "description": "Generate {3|3} Ammo after hitting at least one enemy with Rogue\u2019s Tempo.",
         "category": "Rogue&#39;s Tempo",
         "iconUrl": "/images/cards/Card_In_the_Thick_of_It.avif",
         "cooldown": null,
@@ -1888,7 +1888,7 @@
       },
       {
         "name": "Rogues of a Feather",
-        "description": "Heal for {15|15}",
+        "description": "Heal for {15|15} after hitting an enemy with Love.",
         "category": "General",
         "iconUrl": "/images/cards/Card_Rogues_of_a_Feather.avif",
         "cooldown": null,
@@ -1896,7 +1896,7 @@
       },
       {
         "name": "Shady Dealings",
-        "description": "Gain {2|2}",
+        "description": "Gain {2|2} credits for each enemy Champion hit with Rogue\u2019s Tempo.",
         "category": "Rogue&#39;s Tempo",
         "iconUrl": "/images/cards/Card_Shady_Dealings.avif",
         "cooldown": null,
@@ -1912,7 +1912,7 @@
       },
       {
         "name": "Shoot and Dash",
-        "description": "Each stack of Piercing Momentum grants you a {40|40}",
+        "description": "Each stack of Piercing Momentum grants you a {40|40} Shield for 3s after it expires.",
         "category": "General",
         "iconUrl": "/images/cards/Card_Shoot_and_Dash.avif",
         "cooldown": null,
@@ -1944,7 +1944,7 @@
       },
       {
         "name": "The Rose's Thorns",
-        "description": "Each stack of Sharp Momentum Heals you for {30|30}",
+        "description": "Each stack of Sharp Momentum Heals you for {30|30} after it expires.",
         "category": "War",
         "iconUrl": null,
         "cooldown": null,
@@ -2049,7 +2049,7 @@
       },
       {
         "name": "Drain Life",
-        "description": "Heal for {85|85}",
+        "description": "Heal for {85|85} over 2s for each enemy hit by Blast Shot.",
         "category": "Blast Shot",
         "iconUrl": "/images/cards/Card_Drain_Life.avif",
         "cooldown": null,
@@ -2089,7 +2089,7 @@
       },
       {
         "name": "Kinetics",
-        "description": "Generate {1|1}",
+        "description": "Generate {1|1} Ammo for each enemy hit by Blast Shot.",
         "category": "Blast Shot",
         "iconUrl": "/images/cards/Card_Kinetics.avif",
         "cooldown": null,
@@ -2137,7 +2137,7 @@
       },
       {
         "name": "Sky Warden",
-        "description": "Heal for {125|125}",
+        "description": "Heal for {125|125} after hitting an enemy with Disengage.",
         "category": "Disengage",
         "iconUrl": "/images/cards/Card_Sky_Warden.avif",
         "cooldown": null,
@@ -2244,7 +2244,7 @@
       },
       {
         "name": "Stunning Visage",
-        "description": "",
+        "description": "Enemies hit by Projection are Stunned for 1s and any enemy caught between your Projection and you when you Teleport takes 800 damage. Reduce Projection's Cooldown by 3s.",
         "category": "",
         "iconUrl": "/images/champions/Talent Corvus Stunning Visage.avif"
       },
@@ -2338,7 +2338,7 @@
       },
       {
         "name": "Ominous Relic",
-        "description": "Generate {3|3}",
+        "description": "Generate {3|3} Ammo after Healing an ally with Abyssal Reconstruction.",
         "category": "Abyssal Reconstruction",
         "iconUrl": "/images/cards/Card_Ominous_Relic.avif",
         "cooldown": null,
@@ -2362,7 +2362,7 @@
       },
       {
         "name": "The Price of Salvation",
-        "description": "Heal for {80|80}",
+        "description": "Heal for {80|80} over 1s after Healing an ally with Abyssal Reconstruction.",
         "category": "Abyssal Reconstruction",
         "iconUrl": "/images/cards/Card_The_Price_of_Salvation.avif",
         "cooldown": null,
@@ -2461,7 +2461,7 @@
       },
       {
         "name": "Hurl",
-        "description": "",
+        "description": "Hits with Harpoon refund its cooldown and generate 50% more Ultimate charge, but no longer Slows enemies hit.",
         "category": "",
         "iconUrl": "/images/champions/Talent Dredge Hurl.avif"
       },
@@ -2475,7 +2475,7 @@
     "loadouts": [
       {
         "name": "Abyss Cannon",
-        "description": "Generate {1|1}",
+        "description": "Generate {1|1} Ammo for each enemy hit by Broadside.",
         "category": "Broadside",
         "iconUrl": "/images/cards/Card_Abyss_Cannon.avif",
         "cooldown": null,
@@ -2499,7 +2499,7 @@
       },
       {
         "name": "Cursed Weaponry",
-        "description": "Generate {1|1}",
+        "description": "Generate {1|1} Ammo for each enemy hit by Harpoon.",
         "category": "Harpoon",
         "iconUrl": "/images/cards/Card_Cursed_Weaponry.avif",
         "cooldown": null,
@@ -2507,7 +2507,7 @@
       },
       {
         "name": "Dark Bargain",
-        "description": "Heal for {50|50}",
+        "description": "Heal for {50|50} every 1s while standing near a Shortcut.",
         "category": "Shortcut",
         "iconUrl": "/images/cards/Card_Dark_Bargain.avif",
         "cooldown": null,
@@ -2571,7 +2571,7 @@
       },
       {
         "name": "Mortal Skewer",
-        "description": "Heal for {80|80}",
+        "description": "Heal for {80|80} for each enemy hit with Harpoon.",
         "category": "Harpoon",
         "iconUrl": "/images/cards/Card_Mortal_Skewer.avif",
         "cooldown": null,
@@ -2579,7 +2579,7 @@
       },
       {
         "name": "Plank Walker",
-        "description": "Heal for {120|120}",
+        "description": "Heal for {120|120} after exiting a Shortcut.",
         "category": "Shortcut",
         "iconUrl": "/images/cards/Card_Plank_Walker.avif",
         "cooldown": null,
@@ -2587,7 +2587,7 @@
       },
       {
         "name": "Reckless Barrage",
-        "description": "Heal for {50|50}",
+        "description": "Heal for {50|50} for each enemy hit by Broadside.",
         "category": "Broadside",
         "iconUrl": "/images/cards/Card_Reckless_Barrage.avif",
         "cooldown": null,
@@ -2672,7 +2672,7 @@
     "talents": [
       {
         "name": "Combustible",
-        "description": "",
+        "description": "Fire Spit applies a Knockback and deals an additional 300 Burn damage over 2s.",
         "category": "",
         "iconUrl": "/images/champions/Talent Drogoz Combustible.avif"
       },
@@ -2708,7 +2708,7 @@
       },
       {
         "name": "Bask",
-        "description": "Heal for {35|35}",
+        "description": "Heal for {35|35} for each enemy hit by your Salvo rockets.",
         "category": "Salvo",
         "iconUrl": "/images/cards/Card_Bask.avif",
         "cooldown": null,
@@ -2732,7 +2732,7 @@
       },
       {
         "name": "Follow the Scent",
-        "description": "Generate {1|1}",
+        "description": "Generate {1|1} Ammo after using Fire Spit.",
         "category": "Fire Spit",
         "iconUrl": "/images/cards/Card_Follow_the_Scent.avif",
         "cooldown": null,
@@ -2764,7 +2764,7 @@
       },
       {
         "name": "Lung Capacity",
-        "description": "Heal for {50|50}",
+        "description": "Heal for {50|50} for each enemy Champion hit with Fire Spit.",
         "category": "Fire Spit",
         "iconUrl": "/images/cards/Card_Lung_Capacity.avif",
         "cooldown": null,
@@ -2895,7 +2895,7 @@
       },
       {
         "name": "Snow Globe",
-        "description": "",
+        "description": "Ice Storm has its damage increased by 100% and its Ultimate charge decreased by 50%, but its duration is reduced to 3s and its Slow is reduced to 30%.",
         "category": "",
         "iconUrl": "/images/champions/Talent Evie Snow Globe.avif"
       },
@@ -2917,7 +2917,7 @@
       },
       {
         "name": "Biting Cold",
-        "description": "Generate {2|2}",
+        "description": "Generate {2|2} Ammo after activating Ice Block.",
         "category": "Ice Block",
         "iconUrl": "/images/cards/Card_Biting_Cold.avif",
         "cooldown": null,
@@ -2925,7 +2925,7 @@
       },
       {
         "name": "Cantrip",
-        "description": "Generate {1|1}",
+        "description": "Generate {1|1} Ammo after activating Soar.",
         "category": "Soar",
         "iconUrl": "/images/cards/Card_Cantrip.avif",
         "cooldown": null,
@@ -2941,7 +2941,7 @@
       },
       {
         "name": "Cold Acclimation",
-        "description": "While within your Ice Storm, heal for {32|32}",
+        "description": "While within your Ice Storm, heal for {32|32} every 1s and gain {10|10}% Movement Speed. The Movement Speed lingers for 3s after leaving Ice Storm.",
         "category": "General",
         "iconUrl": "/images/cards/Card_Cold_Acclimation.avif",
         "cooldown": null,
@@ -2957,7 +2957,7 @@
       },
       {
         "name": "Flicker",
-        "description": "Heal for {30|30}",
+        "description": "Heal for {30|30} after using Blink.",
         "category": "Blink",
         "iconUrl": "/images/cards/Card_Flicker.avif",
         "cooldown": null,
@@ -2965,7 +2965,7 @@
       },
       {
         "name": "Frigid Field",
-        "description": "Heal for {60|60}",
+        "description": "Heal for {60|60} every 1s while Ice Block is active.",
         "category": "Ice Block",
         "iconUrl": "/images/cards/Card_Frigid_Field.avif",
         "cooldown": null,
@@ -3126,7 +3126,7 @@
     "loadouts": [
       {
         "name": "Brand",
-        "description": "Heal for {100|100}",
+        "description": "Heal for {100|100} for each enemy hit with Fireball.",
         "category": "Fireball",
         "iconUrl": "/images/cards/Card_Brand.avif",
         "cooldown": null,
@@ -3190,7 +3190,7 @@
       },
       {
         "name": "Last Stand",
-        "description": "Heal for {90|90}",
+        "description": "Heal for {90|90} every 1s while Chivalry is active and you are at or below 35% Health.",
         "category": "Shield",
         "iconUrl": "/images/cards/Card_Last_Stand.avif",
         "cooldown": null,
@@ -3343,7 +3343,7 @@
     "loadouts": [
       {
         "name": "Burning Oath",
-        "description": "Heal for {105|105}",
+        "description": "Heal for {105|105} over 3s after Healing an ally with Kindle Soul.",
         "category": "Kindle Soul",
         "iconUrl": "/images/cards/Card_Burning_Oath.avif",
         "cooldown": null,
@@ -3359,7 +3359,7 @@
       },
       {
         "name": "Devout Dexterity",
-        "description": "Regenerate {1|1}",
+        "description": "Regenerate {1|1} Ammo every 0.5s for 1s after earning an Elimination.",
         "category": "General",
         "iconUrl": "/images/cards/Card_Devout_Dexterity.avif",
         "cooldown": null,
@@ -3367,7 +3367,7 @@
       },
       {
         "name": "Fire Siphon",
-        "description": "Heal for {75|75}",
+        "description": "Heal for {75|75} for each enemy hit with Wings of Wrath.",
         "category": "Wings of Wrath",
         "iconUrl": "/images/cards/Card_Fire_Siphon.avif",
         "cooldown": null,
@@ -3399,7 +3399,7 @@
       },
       {
         "name": "Inner Fire",
-        "description": "Generate {1|1}",
+        "description": "Generate {1|1} Ammo after Healing an ally with Kindle Soul.",
         "category": "Kindle Soul",
         "iconUrl": "/images/cards/Card_Inner_Fire.avif",
         "cooldown": null,
@@ -3616,7 +3616,7 @@
       },
       {
         "name": "Lightning Rod",
-        "description": "Heal for {30|30}",
+        "description": "Heal for {30|30} for each enemy hit with Shock Pulse.",
         "category": "Shock Pulse",
         "iconUrl": "/images/cards/Card_Lightning_Rod.avif",
         "cooldown": null,
@@ -3640,7 +3640,7 @@
       },
       {
         "name": "Phantom",
-        "description": "Heal for {100|100}",
+        "description": "Heal for {100|100} over the duration of Ghost Walk.",
         "category": "Ghost Walk",
         "iconUrl": "/images/cards/Card_Phantom.avif",
         "cooldown": null,
@@ -3688,7 +3688,7 @@
       },
       {
         "name": "Unstable",
-        "description": "",
+        "description": "When you use Second Chance you also Rewind enemies within 20 units 3s into the past.",
         "category": "Shock Pulse",
         "iconUrl": null,
         "cooldown": null,
@@ -3777,7 +3777,7 @@
       },
       {
         "name": "Deep Roots",
-        "description": "",
+        "description": "Crippling Throw travels 35% slower, but now instead Roots targets affected.",
         "category": "",
         "iconUrl": "/images/champions/Talent Grover Deep Roots.avif"
       }
@@ -3809,7 +3809,7 @@
       },
       {
         "name": "Chopper",
-        "description": "Heal for {100|100}",
+        "description": "Heal for {100|100} after hitting an enemy with Crippling Throw.",
         "category": "Crippling Throw",
         "iconUrl": "/images/cards/Card_Chopper.avif",
         "cooldown": null,
@@ -3841,7 +3841,7 @@
       },
       {
         "name": "Heavenly Agility",
-        "description": "Gain a {100|100}",
+        "description": "Gain a {100|100} Shield for 3s after using Vine.",
         "category": "Vine",
         "iconUrl": "/images/cards/Card_Heavenly_Agility.avif",
         "cooldown": null,
@@ -4058,7 +4058,7 @@
       },
       {
         "name": "Elemental Barrier",
-        "description": "Heal for {50|50}",
+        "description": "Heal for {50|50} after using Elemental Shift.",
         "category": "Elemental Shift",
         "iconUrl": "/images/cards/Card_Elemental_Barrier.avif",
         "cooldown": null,
@@ -4082,7 +4082,7 @@
       },
       {
         "name": "Ice in her Veins",
-        "description": "Heal for {50|50}",
+        "description": "Heal for {50|50} every 1s while using FrostFire Glide.",
         "category": "Frostfire Glide",
         "iconUrl": "/images/cards/Card_Ice_in_her_Veins.avif",
         "cooldown": null,
@@ -4211,7 +4211,7 @@
       },
       {
         "name": "Treacherous Ground",
-        "description": "",
+        "description": "The radius of Warder's Field is increased by 50% and it Cripples enemies within it.",
         "category": "",
         "iconUrl": "/images/champions/Talent Inara Treacherous Ground.avif"
       }
@@ -4219,7 +4219,7 @@
     "loadouts": [
       {
         "name": "Caretaker",
-        "description": "Heal for {22|22}",
+        "description": "Heal for {22|22} every 1s while standing in Warder's Field.",
         "category": "Warder&#39;s Field",
         "iconUrl": "/images/cards/Card_Caretaker.avif",
         "cooldown": null,
@@ -4235,7 +4235,7 @@
       },
       {
         "name": "Crag",
-        "description": "Heal for {150|150}",
+        "description": "Heal for {150|150} after activating Impasse.",
         "category": "Impasse",
         "iconUrl": "/images/cards/Card_Crag.avif",
         "cooldown": null,
@@ -4267,7 +4267,7 @@
       },
       {
         "name": "Lodestone",
-        "description": "Generate {2|2}",
+        "description": "Generate {2|2} Ammo after activating Warder's Field.",
         "category": "Warder&#39;s Field",
         "iconUrl": "/images/cards/Card_Lodestone.avif",
         "cooldown": null,
@@ -4299,7 +4299,7 @@
       },
       {
         "name": "Shear",
-        "description": "Generate {1|1}",
+        "description": "Generate {1|1} Ammo after activating Earthen Guard.",
         "category": "Earthen Guard",
         "iconUrl": "/images/cards/Card_Shear.avif",
         "cooldown": null,
@@ -4323,7 +4323,7 @@
       },
       {
         "name": "Stone Bulwark",
-        "description": "Heal for {28|28}",
+        "description": "Heal for {28|28} every 1s while Earthen Guard is active.",
         "category": "Earthen Guard",
         "iconUrl": "/images/cards/Card_Stone_Bulwark.avif",
         "cooldown": null,
@@ -4460,7 +4460,7 @@
       },
       {
         "name": "Eternal Reliquary",
-        "description": "Generate {2|2}",
+        "description": "Generate {2|2} Ammo after using Lunar Leap.",
         "category": "Lunar Leap",
         "iconUrl": "/images/cards/Card_Eternal_Reliquary.avif",
         "cooldown": null,
@@ -4524,7 +4524,7 @@
       },
       {
         "name": "Restored Faith",
-        "description": "Heal for {10|10}",
+        "description": "Heal for {10|10} every time you Heal an ally with Moonlight.",
         "category": "Moonlight",
         "iconUrl": "/images/cards/Card_Restored_Faith.avif",
         "cooldown": null,
@@ -4645,7 +4645,7 @@
       },
       {
         "name": "The Power Cosmeum",
-        "description": "",
+        "description": "Enemies affected by Void Grip are Crippled and take an additional 480 damage over its duration.",
         "category": "",
         "iconUrl": "/images/champions/Talent Jenos The Power Cosmeum.avif"
       }
@@ -4669,7 +4669,7 @@
       },
       {
         "name": "Eclipse",
-        "description": "Heal for {50|50}",
+        "description": "Heal for {50|50} every 1s while using Void Grip.",
         "category": "Void Grip",
         "iconUrl": "/images/cards/Card_Eclipse.avif",
         "cooldown": null,
@@ -4733,7 +4733,7 @@
       },
       {
         "name": "Relativity",
-        "description": "Heal for {40|40}",
+        "description": "Heal for {40|40} every 1s for 10s after applying Astral Mark.",
         "category": "Astral Mark",
         "iconUrl": "/images/cards/Card_Relativity.avif",
         "cooldown": null,
@@ -4757,7 +4757,7 @@
       },
       {
         "name": "Solar Sails",
-        "description": "Regenerate {2|2}",
+        "description": "Regenerate {2|2} Ammo every 1s while Stellar Wind is active.",
         "category": "Stellar Wind",
         "iconUrl": "/images/cards/Card_Solar_Sails.avif",
         "cooldown": null,
@@ -4856,7 +4856,7 @@
       },
       {
         "name": "Haunted Ground",
-        "description": "",
+        "description": "When a Spirit Trap is triggered, reactivate to teleport to the trap and detonate it. Increase the explosion radius by 25%, Curse stacks applied by 2, and it Fears instead of Slowing.",
         "category": "",
         "iconUrl": "/images/champions/Talent Kasumi Haunted Ground.avif"
       },
@@ -4886,7 +4886,7 @@
       },
       {
         "name": "Cursed Doll",
-        "description": "When an enemy dies to Savage Tear, a random enemy within 30 units has {1|1}",
+        "description": "When an enemy dies to Savage Tear, a random enemy within 30 units has {1|1} Curse stacks placed on them.",
         "category": "Savage Tear",
         "iconUrl": "/images/cards/Card_Cursed_Doll.avif",
         "cooldown": null,
@@ -4934,7 +4934,7 @@
       },
       {
         "name": "Moonlit Haunting",
-        "description": "Heal for {17|17}",
+        "description": "Heal for {17|17} every 0.25s during Body and Soul.",
         "category": "Body and Soul",
         "iconUrl": "/images/cards/Card_Moonlit_Haunting.avif",
         "cooldown": null,
@@ -4942,7 +4942,7 @@
       },
       {
         "name": "Sealed Fate",
-        "description": "Heal for {35|35}",
+        "description": "Heal for {35|35} after an enemy survives being hit With Yokai Doll or Savage Tear at maximum Curse stacks.",
         "category": "General",
         "iconUrl": "/images/cards/Card_Sealed_Fate.avif",
         "cooldown": null,
@@ -4958,7 +4958,7 @@
       },
       {
         "name": "Soulfire",
-        "description": "Heal for {50|50}",
+        "description": "Heal for {50|50} each time one of your Spirit Traps triggers.",
         "category": "Spirit Lure",
         "iconUrl": "/images/cards/Card_Soulfire.avif",
         "cooldown": null,
@@ -4982,7 +4982,7 @@
       },
       {
         "name": "Unseen Eyes",
-        "description": "Increase the base heal from Savage Tear by {10|10}",
+        "description": "Increase the base heal from Savage Tear by {10|10} per stack.",
         "category": "Savage Tear",
         "iconUrl": "/images/cards/Card_Unseen_Eyes.avif",
         "cooldown": null,
@@ -5079,7 +5079,7 @@
       },
       {
         "name": "Vortex Grip",
-        "description": "",
+        "description": "Targets are Stunned by Commander's Grab for an additional 1.4s and Weakened to weapon attacks by 15% during.",
         "category": "",
         "iconUrl": "/images/champions/Talent Khan Vortex Grip.avif"
       }
@@ -5119,7 +5119,7 @@
       },
       {
         "name": "Hold The Line!",
-        "description": "Heal for an additional {80|80}",
+        "description": "Heal for an additional {80|80} after activating Battle Shout.",
         "category": "Battle Shout",
         "iconUrl": "/images/cards/Card_Hold_The_Line!.avif",
         "cooldown": null,
@@ -5159,7 +5159,7 @@
       },
       {
         "name": "Martial Law",
-        "description": "Generate {5|5}",
+        "description": "Generate {5|5} Ammo after activating Commander's Grab.",
         "category": "Commander&#39;s Grab",
         "iconUrl": "/images/cards/Card_Martial_Law.avif",
         "cooldown": null,
@@ -5175,7 +5175,7 @@
       },
       {
         "name": "Open Fire!",
-        "description": "Generate {4|4}",
+        "description": "Generate {4|4} Ammo after activating Battle Shout.",
         "category": "Battle Shout",
         "iconUrl": "/images/cards/Card_Open_Fire!.avif",
         "cooldown": null,
@@ -5207,7 +5207,7 @@
       },
       {
         "name": "Vigorous Defense",
-        "description": "Heal for {25|25}",
+        "description": "Heal for {25|25} every 1s while Bulwark is active.",
         "category": "Bulwark",
         "iconUrl": "/images/cards/Card_Vigorous_Defense.avif",
         "cooldown": null,
@@ -5290,7 +5290,7 @@
       },
       {
         "name": "High Voltage",
-        "description": "",
+        "description": "Carbine Rifle now deals 20% bonus damage to Shocked targets.",
         "category": "",
         "iconUrl": "/images/champions/Talent Kinessa High Voltage.avif"
       },
@@ -5376,7 +5376,7 @@
       },
       {
         "name": "Open Season",
-        "description": "Hitting an enemy with a fully-charged Sniper Mode shot generates {1|1}",
+        "description": "Hitting an enemy with a fully-charged Sniper Mode shot generates {1|1} Ammo.",
         "category": "Sniper Mode",
         "iconUrl": "/images/cards/Card_Open_Season.avif",
         "cooldown": null,
@@ -5400,7 +5400,7 @@
       },
       {
         "name": "Reconfigure",
-        "description": "Activating Transporter generates {4|4}",
+        "description": "Activating Transporter generates {4|4} Ammo.",
         "category": "Transporter",
         "iconUrl": "/images/cards/Card_Reconfigure.avif",
         "cooldown": null,
@@ -5424,7 +5424,7 @@
       },
       {
         "name": "Well Stocked",
-        "description": "Activating Oppressor Mine generates {3|3}",
+        "description": "Activating Oppressor Mine generates {3|3} Ammo.",
         "category": "Oppressor Mine",
         "iconUrl": "/images/cards/Card_Well_Stocked.avif",
         "cooldown": null,
@@ -5537,7 +5537,7 @@
       },
       {
         "name": "Guild Tactics",
-        "description": "Heal for {160|160}",
+        "description": "Heal for {160|160} after hitting at least one enemy with Skewer.",
         "category": "Skewer",
         "iconUrl": "/images/cards/Card_Guild_Tactics.avif",
         "cooldown": null,
@@ -5577,7 +5577,7 @@
       },
       {
         "name": "Surprise!",
-        "description": "Generate {5|5}",
+        "description": "Generate {5|5} Ammo after activating Shadow Step.",
         "category": "Shadow Step",
         "iconUrl": null,
         "cooldown": null,
@@ -5593,7 +5593,7 @@
       },
       {
         "name": "Tenacious",
-        "description": "Heal for {40|40}",
+        "description": "Heal for {40|40} after activating Shadow Step.",
         "category": "Shadow Step",
         "iconUrl": "/images/cards/Card_Tenacious.avif",
         "cooldown": null,
@@ -5601,7 +5601,7 @@
       },
       {
         "name": "Trained Killer",
-        "description": "While in Dragon Stance regenerate {6|6}",
+        "description": "While in Dragon Stance regenerate {6|6} Ammo every 1s.",
         "category": "Dragon Stance",
         "iconUrl": "/images/cards/Card_Trained_Killer.avif",
         "cooldown": null,
@@ -5633,7 +5633,7 @@
       },
       {
         "name": "Wanted",
-        "description": "Regenerate {4|4}",
+        "description": "Regenerate {4|4} Ammo every 1s while Agility is active.",
         "category": "Agility",
         "iconUrl": "/images/cards/Card_Wanted.avif",
         "cooldown": null,
@@ -5641,7 +5641,7 @@
       },
       {
         "name": "Wind's Embrace",
-        "description": "Heal for {20|20}",
+        "description": "Heal for {20|20} every 1s while Agility is active.",
         "category": "Agility",
         "iconUrl": "/images/cards/Card_Winds_Embrace.avif",
         "cooldown": null,
@@ -5724,7 +5724,7 @@
       },
       {
         "name": "Heroism",
-        "description": "",
+        "description": "Gain Immunity to Crowd Control during Combat Slide.",
         "category": "",
         "iconUrl": "/images/champions/Talent Lex Heroism.avif"
       },
@@ -5738,7 +5738,7 @@
     "loadouts": [
       {
         "name": "Assail",
-        "description": "Generate {3|3}",
+        "description": "Generate {3|3} Ammo after activating In Pursuit.",
         "category": "In Pursuit",
         "iconUrl": "/images/cards/Card_Assail.avif",
         "cooldown": null,
@@ -5770,7 +5770,7 @@
       },
       {
         "name": "Fortitude",
-        "description": "Heal for {25|25}",
+        "description": "Heal for {25|25} for each shot hit while using In Pursuit.",
         "category": "In Pursuit",
         "iconUrl": "/images/cards/Card_Fortitude.avif",
         "cooldown": null,
@@ -5810,7 +5810,7 @@
       },
       {
         "name": "Keen Sight",
-        "description": "Increase the range at which your Retribution target is Revealed by {10|10}",
+        "description": "Increase the range at which your Retribution target is Revealed by {10|10} units.",
         "category": "Retribution",
         "iconUrl": "/images/cards/Card_Keen_Sight.avif",
         "cooldown": null,
@@ -5818,7 +5818,7 @@
       },
       {
         "name": "Requip",
-        "description": "Generate {2|2}",
+        "description": "Generate {2|2} Ammo after activating Combat Slide.",
         "category": "Combat Slide",
         "iconUrl": "/images/cards/Card_Requip.avif",
         "cooldown": null,
@@ -5826,7 +5826,7 @@
       },
       {
         "name": "Restock",
-        "description": "Generate {1|1}",
+        "description": "Generate {1|1} Ammo after getting a Killing Blow or Elimination.",
         "category": "General",
         "iconUrl": "/images/cards/Card_Restock.avif",
         "cooldown": null,
@@ -5955,7 +5955,7 @@
     "loadouts": [
       {
         "name": "Bloodline",
-        "description": "Generate {1|1}",
+        "description": "Generate {1|1} Ammo after using Grace.",
         "category": "Grace",
         "iconUrl": "/images/cards/Card_Bloodline.avif",
         "cooldown": null,
@@ -5971,7 +5971,7 @@
       },
       {
         "name": "Eagle's Emerald",
-        "description": "Generate {1|1}",
+        "description": "Generate {1|1} Ammo for each enemy hit with Valor.",
         "category": "Valor",
         "iconUrl": null,
         "cooldown": null,
@@ -6011,7 +6011,7 @@
       },
       {
         "name": "Manifest Destiny",
-        "description": "Increase the travel distance of Grace by {5|5}",
+        "description": "Increase the travel distance of Grace by {5|5} units.",
         "category": "Grace",
         "iconUrl": "/images/cards/Card_Manifest_Destiny.avif",
         "cooldown": null,
@@ -6027,7 +6027,7 @@
       },
       {
         "name": "Present Arms",
-        "description": "Heal for {100|100}",
+        "description": "Heal for {100|100} after using Presence.",
         "category": "Presence",
         "iconUrl": "/images/cards/Card_Present_Arms.avif",
         "cooldown": null,
@@ -6035,7 +6035,7 @@
       },
       {
         "name": "Revitalizing Gem",
-        "description": "Heal for {60|60}",
+        "description": "Heal for {60|60} for each enemy hit with Valor.",
         "category": "Valor",
         "iconUrl": "/images/cards/Card_Revitalizing_Gem.avif",
         "cooldown": null,
@@ -6212,7 +6212,7 @@
       },
       {
         "name": "Gloomy Nook",
-        "description": "Gain a {150|150}",
+        "description": "Gain a {150|150} Shield for 1.75s after falling to or below 75% Health. Can only happen once every 35s.",
         "category": "General",
         "iconUrl": "/images/cards/Card_Gloomy_Nook.avif",
         "cooldown": null,
@@ -6429,7 +6429,7 @@
       },
       {
         "name": "Patch Up",
-        "description": "Heal for an additional {80|80}",
+        "description": "Heal for an additional {80|80} with Nine Lives.",
         "category": "Nine Lives",
         "iconUrl": "/images/cards/Card_Patch Up.avif",
         "cooldown": null,
@@ -6453,7 +6453,7 @@
       },
       {
         "name": "Savagery",
-        "description": "Heal for {70|70}",
+        "description": "Heal for {70|70} after using Pounce.",
         "category": "Pounce",
         "iconUrl": "/images/cards/Card_Savagery.avif",
         "cooldown": null,
@@ -6509,7 +6509,7 @@
       },
       {
         "name": "Walk it Off",
-        "description": "Heal for {40|40}",
+        "description": "Heal for {40|40} every 1s while Prowl is active.",
         "category": "Prowl",
         "iconUrl": "/images/cards/Card_Walk it Off.avif",
         "cooldown": null,
@@ -6598,7 +6598,7 @@
       },
       {
         "name": "Leviathan",
-        "description": "Increase your Ultimate charge rate by 25% and Health by 500. Ancient Rage now causes Makoa to grow 50% in size, resets all his Cooldowns, and increases his Movement Speed by 45%.",
+        "description": "Dredge Anchor now also pulls you toward the enemy and Stuns them. Increase your Ultimate charge rate by 25% and Health by 500. Ancient Rage now also increases your Movement Speed by 45%.",
         "category": "",
         "iconUrl": "/images/champions/Talent Makoa Leviathan.avif"
       }
@@ -6686,7 +6686,7 @@
       },
       {
         "name": "Sea Legs",
-        "description": "Heal for {120|120}",
+        "description": "Heal for {120|120} after using Dredge Anchor.",
         "category": "Dredge Anchor",
         "iconUrl": "/images/cards/Card_Sea_Legs.avif",
         "cooldown": null,
@@ -6694,7 +6694,7 @@
       },
       {
         "name": "Spring Tide",
-        "description": "Heal for {250|250}",
+        "description": "Heal for {250|250} for each enemy hit with Shell Spin.",
         "category": "Shell Spin",
         "iconUrl": "/images/cards/Card_Spring_Tide.avif",
         "cooldown": null,
@@ -6718,7 +6718,7 @@
       },
       {
         "name": "Tidal Grace",
-        "description": "Heal for {60|60}",
+        "description": "Heal for {60|60} every 1s while Shell Shield is active.",
         "category": "Shell Shield",
         "iconUrl": "/images/cards/Card_Tidal_Grace.avif",
         "cooldown": null,
@@ -6805,19 +6805,19 @@
         "name": "Spirit's Chosen",
         "description": "Mending Spirits heals an additional 350 Health instantly.",
         "category": "",
-        "iconUrl": null
+        "iconUrl": "/images/champions/Talent Mal'Damba Spirit's Chosen.avif"
       },
       {
         "name": "Ripened Gourd",
         "description": "Your Gourd deals 40% less damage to enemies, but it Heals for twice as much.",
         "category": "",
-        "iconUrl": null
+        "iconUrl": "/images/champions/Talent Mal'Damba Ripened Gourd.avif"
       },
       {
         "name": "Wekono's Wrath",
         "description": "Your Snake Toss projectile travels 60% faster and deals an additional 500 damage.",
         "category": "",
-        "iconUrl": null
+        "iconUrl": "/images/champions/Talent Mal'Damba Wekono's Wrath.avif"
       }
     ],
     "loadouts": [
@@ -6825,7 +6825,7 @@
         "name": "Eerie Presence",
         "description": "Generate 0.25% Ultimate charge every 1s for {1|1}s after hitting an ally with Mending Spirits.",
         "category": "Mending Spirits",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Eerie_Presence.avif",
         "cooldown": null,
         "values": null
       },
@@ -6833,7 +6833,7 @@
         "name": "Feed the Spirits",
         "description": "Reduce your active Cooldowns by {10|10}% after getting an Elimination.",
         "category": "General",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Feed_the_Spirits.avif",
         "cooldown": null,
         "values": null
       },
@@ -6841,7 +6841,7 @@
         "name": "Fleeting",
         "description": "Reduce the Cooldown of Slither by {0.6|0.6}s.",
         "category": "Slither",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Fleeting.avif",
         "cooldown": null,
         "values": null
       },
@@ -6849,7 +6849,7 @@
         "name": "Incorporeal",
         "description": "Increase your maximum Health by {50|50}.",
         "category": "General",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Incorporeal.avif",
         "cooldown": null,
         "values": null
       },
@@ -6857,7 +6857,7 @@
         "name": "Lighter Gourd",
         "description": "Increase the Projectile Speed of Gourd by {10|10}%.",
         "category": "Gourd",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Lighter_Gourd.avif",
         "cooldown": null,
         "values": null
       },
@@ -6865,7 +6865,7 @@
         "name": "Liminal Passage",
         "description": "Increase the travel distance of Slither by {10|10}%.",
         "category": "Slither",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Liminal_Passage.avif",
         "cooldown": null,
         "values": null
       },
@@ -6873,7 +6873,7 @@
         "name": "Many Gourds",
         "description": "Reduce the Cooldown on Gourd by {0.8|0.8}s.",
         "category": "Gourd",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Many_Gourds.avif",
         "cooldown": null,
         "values": null
       },
@@ -6881,7 +6881,7 @@
         "name": "Otherworldly",
         "description": "Gain a {75|75}-Health Shield for 3s after Slither ends.",
         "category": "Slither",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Otherworldly.avif",
         "cooldown": null,
         "values": null
       },
@@ -6889,7 +6889,7 @@
         "name": "Possession",
         "description": "Reduce your damage taken by {4|4}% for 4s after hitting an ally with Mending Spirits.",
         "category": "Mending Spirits",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Possession.avif",
         "cooldown": null,
         "values": null
       },
@@ -6897,15 +6897,15 @@
         "name": "Pungent Gourd",
         "description": "Increase your Allies\u00e2\u20ac\u2122 and your Movement Speed by {8|8}% while in your Gourd.",
         "category": "Gourd",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Pungent_Gourd.avif",
         "cooldown": null,
         "values": null
       },
       {
         "name": "Ritual Magic",
-        "description": "Heal for {4|4}",
+        "description": "Heal for {4|4} every .2s for 5s while Healing an ally with Mending Spirits.",
         "category": "Mending Spirits",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Ritual_Magic.avif",
         "cooldown": null,
         "values": null
       },
@@ -6913,7 +6913,7 @@
         "name": "Snake Pit",
         "description": "Increase your Movement Speed by {4|4}%.",
         "category": "General",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Snake_Pit.avif",
         "cooldown": null,
         "values": null
       },
@@ -6921,7 +6921,7 @@
         "name": "Spirit's Touch",
         "description": "Increase your movement speed by {8|8}% for 3 seconds after using Slither.",
         "category": "Slither",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Spirits_Touch.avif",
         "cooldown": null,
         "values": null
       },
@@ -6929,7 +6929,7 @@
         "name": "Sustenance",
         "description": "Increase your Healing received by {8|8}% while at or below 50% Health.",
         "category": "General",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Sustenance.avif",
         "cooldown": null,
         "values": null
       },
@@ -6937,7 +6937,7 @@
         "name": "Swift Spirits",
         "description": "Increase the Movement Speed of allies hit by Mending Spirits by {5|5}% for 3s.",
         "category": "Mending Spirits",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Swift_Spirits.avif",
         "cooldown": null,
         "values": null
       },
@@ -6945,7 +6945,7 @@
         "name": "Venomous Gourd",
         "description": "Standing in your Gourd grants yourself and allies {8|8}% Lifesteal.",
         "category": "Gourd",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Venomous_Gourd.avif",
         "cooldown": null,
         "values": null
       }
@@ -7048,7 +7048,7 @@
       },
       {
         "name": "Cozy",
-        "description": "Magic Shield Heals allies for {6|6}",
+        "description": "Magic Shield Heals allies for {6|6} every 0.25s while it's being channeled.",
         "category": "Magic Shield",
         "iconUrl": "/images/cards/Card_Cozy.avif",
         "cooldown": null,
@@ -7080,7 +7080,7 @@
       },
       {
         "name": "Greater Good",
-        "description": "When an ally receives max Magic Marks, they gain a {20|20}",
+        "description": "When an ally receives max Magic Marks, they gain a {20|20}Health Shield while marked.",
         "category": "Familiar Spray",
         "iconUrl": "/images/cards/Card_Greater_Good.avif",
         "cooldown": null,
@@ -7128,7 +7128,7 @@
       },
       {
         "name": "Scurry",
-        "description": "Heal for {20|20}",
+        "description": "Heal for {20|20} every 0.3s during Scamper.",
         "category": "Scamper",
         "iconUrl": "/images/cards/Card_Scurry.avif",
         "cooldown": null,
@@ -7237,19 +7237,19 @@
     "talents": [
       {
         "name": "Show of Force",
-        "description": "",
+        "description": "Rift Slash Cripples enemies it hits for 1.25s, and the resulting Abyssal Rift lasts 1s longer.",
         "category": "",
         "iconUrl": "/images/champions/Talent Nyx Show of Force.avif"
       },
       {
         "name": "Abyssal Breach",
-        "description": "",
+        "description": "Enemies that pass through Abyssal Fortress are Revealed and take 10% additional weapon damage from you and your allies for 3s. Reduce Abyssal Fortress' Cooldown by 2s.",
         "category": "",
         "iconUrl": "/images/champions/Talent Nyx Abyssal Breach.avif"
       },
       {
         "name": "Subjugation",
-        "description": "",
+        "description": "Increase the distance traveled by Juggernaut by {8|8}%.",
         "category": "",
         "iconUrl": "/images/champions/Talent Nyx Subjugation.avif"
       }
@@ -7297,7 +7297,7 @@
       },
       {
         "name": "Devastating Blows",
-        "description": "Increase the trigger distance of Realm Breaker's bonus damage by {5|5}",
+        "description": "Increase the trigger distance of Realm Breaker's bonus damage by {5|5} units.",
         "category": "General",
         "iconUrl": "/images/cards/Card_Devastating_Blows.avif",
         "cooldown": null,
@@ -7337,7 +7337,7 @@
       },
       {
         "name": "The New Order",
-        "description": "Cain a {60|60}",
+        "description": "Cain a {60|60} health Shield for each enemy hit by Royal Presence's chain grab.",
         "category": "Royal Presence",
         "iconUrl": "/images/cards/Card_The_New_Order.avif",
         "cooldown": null,
@@ -7345,7 +7345,7 @@
       },
       {
         "name": "True Freedom",
-        "description": "Heal for {75|75}",
+        "description": "Heal for {75|75} when landing the final hit of Realm Breaker's combo.",
         "category": "General",
         "iconUrl": "/images/cards/Card_True_Freedom.avif",
         "cooldown": null,
@@ -7460,7 +7460,7 @@
       },
       {
         "name": "Display of Force",
-        "description": "",
+        "description": "Enemies are Rooted in place when they are hit by the pre-fire beam and the Creeping Barrage deals 1450 damage.",
         "category": "",
         "iconUrl": "/images/champions/Talent Octavia Display of Force.avif"
       },
@@ -7578,7 +7578,7 @@
       },
       {
         "name": "Tactical Fire",
-        "description": "Generate {1|1}",
+        "description": "Generate {1|1} Ammo after getting a Killing Blow or Elimination while Designated Sights is active.",
         "category": "Designated Sights",
         "iconUrl": "/images/cards/Card_Tactical Fire.avif",
         "cooldown": null,
@@ -7691,7 +7691,7 @@
     "loadouts": [
       {
         "name": "Coming End",
-        "description": "Regenerate {1|1}",
+        "description": "Regenerate {1|1} Ammo every 0.5s for 1s after casting Deadly Domain.",
         "category": "Deadly Domain",
         "iconUrl": "/images/cards/Card_Coming_End.avif",
         "cooldown": null,
@@ -7699,7 +7699,7 @@
       },
       {
         "name": "Dark Leech",
-        "description": "Heal for {55|55}",
+        "description": "Heal for {55|55} every 1s for 3s after activating Gravity Vice.",
         "category": "Gravity Vice",
         "iconUrl": "/images/cards/Card_Dark_Leech.avif",
         "cooldown": null,
@@ -7707,7 +7707,7 @@
       },
       {
         "name": "Dusk Trail",
-        "description": "Heal for {15|15}",
+        "description": "Heal for {15|15} each time Dark Stride\u2019s trail deals damage to an enemy.",
         "category": "Dark Stride",
         "iconUrl": "/images/cards/Card_Dusk_Trail.avif",
         "cooldown": null,
@@ -7763,7 +7763,7 @@
       },
       {
         "name": "More, More, More!",
-        "description": "While at least 2 enemies are marked by Ominous Brand, heal for {60|60}",
+        "description": "While at least 2 enemies are marked by Ominous Brand, heal for {60|60} every 1s.",
         "category": "General",
         "iconUrl": null,
         "cooldown": null,
@@ -7771,7 +7771,7 @@
       },
       {
         "name": "Noxious Guard",
-        "description": "Gain a {70|70}",
+        "description": "Gain a {70|70} Shield for 3s after casting Deadly Domain.",
         "category": "Deadly Domain",
         "iconUrl": "/images/cards/Card_Noxious_Guard.avif",
         "cooldown": null,
@@ -7980,7 +7980,7 @@
       },
       {
         "name": "Refreshing Jog",
-        "description": "Heal for {60|60}",
+        "description": "Heal for {60|60} every 1s while Weightless is active.",
         "category": "Weightless",
         "iconUrl": "/images/cards/Card_Refreshing_Jog.avif",
         "cooldown": null,
@@ -8012,7 +8012,7 @@
       },
       {
         "name": "Smithereens",
-        "description": "Generate {1|1}",
+        "description": "Generate {1|1} Ammo for each enemy hit by Explosive Flask.",
         "category": "Explosive Flask",
         "iconUrl": "/images/cards/Card_Smithereens.avif",
         "cooldown": null,
@@ -8141,7 +8141,7 @@
       },
       {
         "name": "Apocalypse",
-        "description": "Heal for {150|150}",
+        "description": "Heal for {150|150}for each champion hit by Juggernaut.",
         "category": "Juggernaut",
         "iconUrl": "/images/cards/Card_Apocalypse.avif",
         "cooldown": null,
@@ -8221,7 +8221,7 @@
       },
       {
         "name": "Tormented Fissure",
-        "description": "Generate {25|25}",
+        "description": "Generate {25|25}Ammo after activating Ignition.",
         "category": "Ignition",
         "iconUrl": "/images/cards/Card_Tormented_Fissure.avif",
         "cooldown": null,
@@ -8229,7 +8229,7 @@
       },
       {
         "name": "Triumphant Ascension",
-        "description": "Heal for {100|100}",
+        "description": "Heal for {100|100}after activating Soul Harvest.",
         "category": "Soul Harvest",
         "iconUrl": "/images/cards/Card_Triumphant_Ascension.avif",
         "cooldown": null,
@@ -8328,7 +8328,7 @@
       },
       {
         "name": "Restraint",
-        "description": "",
+        "description": "Increase the duration of Focus and grant Reload Speed.",
         "category": "",
         "iconUrl": "/images/champions/Talent Rei Restraint.avif"
       },
@@ -8350,7 +8350,7 @@
       },
       {
         "name": "Arcane Focus",
-        "description": "Heal for {20|20}",
+        "description": "Heal for {20|20} every 1s while Spirit Linked to an ally.",
         "category": "Spirit Link",
         "iconUrl": "/images/cards/Card_Arcane_Focus.avif",
         "cooldown": null,
@@ -8382,7 +8382,7 @@
       },
       {
         "name": "Desperate Defense",
-        "description": "Heal for {80|80}",
+        "description": "Heal for {80|80} when you use Envelop.",
         "category": "Envelop",
         "iconUrl": "/images/cards/Card_Desperate_Defense.avif",
         "cooldown": null,
@@ -8398,7 +8398,7 @@
       },
       {
         "name": "Future Generations",
-        "description": "After taking {2000|-125}",
+        "description": "After taking {2000|-125} damage, your next use of Chain Heal does not cause it to go on Cooldown.",
         "category": "Chain Heal",
         "iconUrl": "/images/cards/Card_Future_Generations.avif",
         "cooldown": null,
@@ -8454,7 +8454,7 @@
       },
       {
         "name": "Spring to Action",
-        "description": "Increase the Healing Spirit Links provides every 1s to your linked friendly target by {20|20}",
+        "description": "Increase the Healing Spirit Links provides every 1s to your linked friendly target by {20|20} Health.",
         "category": "Spirit Link",
         "iconUrl": "/images/cards/Card_Spring_to_Action.avif",
         "cooldown": null,
@@ -8559,7 +8559,7 @@
     "loadouts": [
       {
         "name": "Air Cooled",
-        "description": "Heal for {80|80}",
+        "description": "Heal for {80|80} after activating Advance.",
         "category": "Advance",
         "iconUrl": "/images/cards/Card_Air_Cooled.avif",
         "cooldown": null,
@@ -8567,7 +8567,7 @@
       },
       {
         "name": "At The Ready",
-        "description": "Generate {10|10}",
+        "description": "Generate {10|10} Ammo per missile for each enemy hit by Missile Launcher.",
         "category": "Missile Launcher",
         "iconUrl": "/images/cards/Card_At_The_Ready.avif",
         "cooldown": null,
@@ -8599,7 +8599,7 @@
       },
       {
         "name": "Extended Magazines",
-        "description": "Generate {15|15}",
+        "description": "Generate {15|15} Ammo after using Advance.",
         "category": "Advance",
         "iconUrl": "/images/cards/Card_Extended_Magazines.avif",
         "cooldown": null,
@@ -8623,7 +8623,7 @@
       },
       {
         "name": "Nanotechnology",
-        "description": "Heal for {50|50}",
+        "description": "Heal for {50|50} every 1s while Emitter is active.",
         "category": "Emitter",
         "iconUrl": "/images/cards/Card_Nanotechnology.avif",
         "cooldown": null,
@@ -8639,7 +8639,7 @@
       },
       {
         "name": "Opulence",
-        "description": "Heal {60|60}",
+        "description": "Heal {60|60} health per missile for each player hit by Missile Launcher.",
         "category": "Missile Launcher",
         "iconUrl": "/images/cards/Card_Opulence.avif",
         "cooldown": null,
@@ -8671,7 +8671,7 @@
       },
       {
         "name": "Regenerative Alloy",
-        "description": "Generate {5|5}",
+        "description": "Generate {5|5} Ammo every 1s while Emitter is active.",
         "category": "Emitter",
         "iconUrl": "/images/cards/Card_Regenerative_Alloy.avif",
         "cooldown": null,
@@ -8768,7 +8768,7 @@
       },
       {
         "name": "Window of Opportunity",
-        "description": "",
+        "description": "Blast Back now instead applies a Knockup and enemies take 20% more DMG from Saati for 1.5s.",
         "category": "",
         "iconUrl": "/images/champions/Talent Saati Window of Opportunity.avif"
       }
@@ -8816,7 +8816,7 @@
       },
       {
         "name": "Grab and Go",
-        "description": "Generate {1|1}",
+        "description": "Generate {1|1} Ammo for each enemy hit with Blast Back.",
         "category": "Blast Back",
         "iconUrl": "/images/cards/Card_Grab_and_Go.avif",
         "cooldown": null,
@@ -8985,7 +8985,7 @@
       },
       {
         "name": "Internal Torment",
-        "description": "",
+        "description": "Resuscitate yourself when defeated, restoring a portion of your Health.",
         "category": "",
         "iconUrl": "/images/champions/Talent Seris Internal Torment.avif"
       }
@@ -9001,7 +9001,7 @@
       },
       {
         "name": "Blood Pact",
-        "description": "Heal for {105|105}",
+        "description": "Heal for {105|105} over 1.5s after casting Restore Soul.",
         "category": "Restore Soul",
         "iconUrl": "/images/cards/Card_Blood_Pact.avif",
         "cooldown": null,
@@ -9009,7 +9009,7 @@
       },
       {
         "name": "Dark Sight",
-        "description": "Every Soul Orb Charge you detonate generates {1|1}",
+        "description": "Every Soul Orb Charge you detonate generates {1|1} Ammo.",
         "category": "Rend Soul",
         "iconUrl": "/images/cards/Card_Dark_Sight.avif",
         "cooldown": null,
@@ -9057,7 +9057,7 @@
       },
       {
         "name": "Nether Siphon",
-        "description": "Heal for {50|50}",
+        "description": "Heal for {50|50} every 1s while using Shadow Travel.",
         "category": "Shadow Travel",
         "iconUrl": "/images/cards/Card_Nether_Siphon.avif",
         "cooldown": null,
@@ -9089,7 +9089,7 @@
       },
       {
         "name": "Spirit Leech",
-        "description": "Regenerate {6|6}",
+        "description": "Regenerate {6|6} Ammo over 1.5s after casting Restore Soul.",
         "category": "Restore Soul",
         "iconUrl": "/images/cards/Card_Spirit_Leech.avif",
         "cooldown": null,
@@ -9202,7 +9202,7 @@
       },
       {
         "name": "Sand Trap",
-        "description": "",
+        "description": "Crippling Arrow now explodes in a 20-unit-radius area on contact, dealing up to 300 additional Area Damage to enemies hit, but its Cripple is reduced by 1s.",
         "category": "",
         "iconUrl": null
       }
@@ -9212,7 +9212,7 @@
         "name": "Bullseye",
         "description": "Reduce your active Cooldowns by {10|10}% when you get an Elimination.",
         "category": "General",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Bullseye.avif",
         "cooldown": null,
         "values": null
       },
@@ -9220,15 +9220,15 @@
         "name": "Daring Escape",
         "description": "Increase your Movement Speed by {10|10}% for 3s after Rapid Shot ends.",
         "category": "Rapid Shot",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Daring_Escape.avif",
         "cooldown": null,
         "values": null
       },
       {
         "name": "Grounded",
-        "description": "Regenerate {60|60}",
+        "description": "Regenerate {60|60} Health every 1s while using Rapid Shot.",
         "category": "Rapid Shot",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Grounded.avif",
         "cooldown": null,
         "values": null
       },
@@ -9236,7 +9236,7 @@
         "name": "Master Archer",
         "description": "Reduce the Cooldown of Rapid Shot by {0.6|0.6}s.",
         "category": "Rapid Shot",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Master_Archer.avif",
         "cooldown": null,
         "values": null
       },
@@ -9244,15 +9244,15 @@
         "name": "Mirage",
         "description": "Reduce the Cooldown of Withdraw by {0.6|0.6}.",
         "category": "Withdraw",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Mirage.avif",
         "cooldown": null,
         "values": null
       },
       {
         "name": "Oasis",
-        "description": "Heal for {80|80}",
+        "description": "Heal for {80|80} after using Withdraw.",
         "category": "Withdraw",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Oasis.avif",
         "cooldown": null,
         "values": null
       },
@@ -9260,7 +9260,7 @@
         "name": "Poise",
         "description": "While in Stealth, gain {40|40}% increased Jump Height.",
         "category": "General",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Poise.avif",
         "cooldown": null,
         "values": null
       },
@@ -9268,7 +9268,7 @@
         "name": "Quick Sand",
         "description": "Reduce the Cooldown of Crippling Arrow by {0.6|0.6}s.",
         "category": "Crippling Arrow",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Quick_Sand.avif",
         "cooldown": null,
         "values": null
       },
@@ -9276,7 +9276,7 @@
         "name": "Run Like the Wind",
         "description": "Increase your Movement Speed by {7|7}% for 3s after using Withdraw.",
         "category": "Withdraw",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Run_Like_the_Wind.avif",
         "cooldown": null,
         "values": null
       },
@@ -9284,7 +9284,7 @@
         "name": "Run Them Down",
         "description": "Increase the duration of the Cripple effect applied by Crippling Arrow by {0.1|0.1}s.",
         "category": "Crippling Arrow",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Run_Them_Down.avif",
         "cooldown": null,
         "values": null
       },
@@ -9292,7 +9292,7 @@
         "name": "Shimmer",
         "description": "Reset the Cooldown of Withdraw after dropping to or below {15|15}% Health.",
         "category": "Withdraw",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Shimmer.avif",
         "cooldown": null,
         "values": null
       },
@@ -9300,15 +9300,15 @@
         "name": "Skewer",
         "description": "Hitting an enemy with Crippling Arrow reduces the Cooldown of Rapid Shot by {0.6|0.6}s.",
         "category": "Crippling Arrow",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Skewer.avif",
         "cooldown": null,
         "values": null
       },
       {
         "name": "Strike True",
-        "description": "Heal for {70|70}",
+        "description": "Heal for {70|70} after hitting an enemy with Crippling Arrow.",
         "category": "Crippling Arrow",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Strike_True.avif",
         "cooldown": null,
         "values": null
       },
@@ -9316,7 +9316,7 @@
         "name": "Swagger",
         "description": "Increase your maximum Health by {50|50}.",
         "category": "General",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Swagger.avif",
         "cooldown": null,
         "values": null
       },
@@ -9324,7 +9324,7 @@
         "name": "Wanderlust",
         "description": "Increase your Movement Speed by {3|3}%.",
         "category": "General",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Wanderlust.avif",
         "cooldown": null,
         "values": null
       },
@@ -9332,7 +9332,7 @@
         "name": "Windwall",
         "description": "Each arrow of Rapid Shot reduces the Movement Speed of any enemy hit by {5|5}% for 2s.",
         "category": "Rapid Shot",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Windwall.avif",
         "cooldown": null,
         "values": null
       }
@@ -9467,7 +9467,7 @@
       },
       {
         "name": "Healing Vapors",
-        "description": "Heal for {125|125}",
+        "description": "Heal for {125|125} over 2s after entering Smoke Screen.",
         "category": "Smoke Screen",
         "iconUrl": "/images/cards/Card_Healing_Vapors.avif",
         "cooldown": null,
@@ -9523,7 +9523,7 @@
       },
       {
         "name": "Specter",
-        "description": "Generate {4|4}",
+        "description": "Generate {4|4} Ammo after entering Smoke Screen. You must spend at least 4s out of Smoke Screen before this effect can apply again.",
         "category": "Smoke Screen",
         "iconUrl": null,
         "cooldown": null,
@@ -9630,7 +9630,7 @@
       },
       {
         "name": "Unauthorized Use",
-        "description": "",
+        "description": "Flare has 200% base damage and Projectile Speed, and Weakens targets by 20% to your weapons on a direct hit for 2s, but it no longer Reveals. Reduce Flare's Cooldown by 8s.",
         "category": "",
         "iconUrl": "/images/champions/Talent Strix Unauthorized Use.avif"
       },
@@ -9652,7 +9652,7 @@
       },
       {
         "name": "Cooled Mags",
-        "description": "Your inactive weapon generates {2|2}",
+        "description": "Your inactive weapon generates {2|2} Ammo every 2s.",
         "category": "Quick Switch",
         "iconUrl": "/images/cards/Card_Cooled_Mags.avif",
         "cooldown": null,
@@ -9668,7 +9668,7 @@
       },
       {
         "name": "Escape Plan",
-        "description": "Heal for {100|100}",
+        "description": "Heal for {100|100} after entering Stealth at or below 65% Health.",
         "category": "Stealth",
         "iconUrl": "/images/cards/Card_Escape_Plan.avif",
         "cooldown": null,
@@ -9692,7 +9692,7 @@
       },
       {
         "name": "Guerilla Tactics",
-        "description": "Generate {12|12}",
+        "description": "Generate {12|12} Energy after getting an Elimination.",
         "category": "Stealth",
         "iconUrl": "/images/cards/Card_Guerilla_Tactics.avif",
         "cooldown": null,
@@ -9740,7 +9740,7 @@
       },
       {
         "name": "Stalker",
-        "description": "Heal for {15|15}",
+        "description": "Heal for {15|15} every 1s while Stealth is active.",
         "category": "Stealth",
         "iconUrl": "/images/cards/Card_Stalker.avif",
         "cooldown": null,
@@ -9853,7 +9853,7 @@
       },
       {
         "name": "Nothing Personal",
-        "description": "",
+        "description": "Increase the damage dealt by Inner Strength.",
         "category": "",
         "iconUrl": "/images/champions/Talent Talus Nothing Personal.avif"
       }
@@ -9885,7 +9885,7 @@
       },
       {
         "name": "Daredevil",
-        "description": "Heal for {70|70}",
+        "description": "Heal for {70|70} after activating Blitz Upper.",
         "category": "Blitz Upper",
         "iconUrl": "/images/cards/Card_Daredevil.avif",
         "cooldown": null,
@@ -9965,7 +9965,7 @@
       },
       {
         "name": "Revitalize",
-        "description": "Heal for {100|100}",
+        "description": "Heal for {100|100} after Teleporting to your Rune of Travel.",
         "category": "Rune of Travel",
         "iconUrl": "/images/cards/Card_Revitalize.avif",
         "cooldown": null,
@@ -10064,7 +10064,7 @@
       },
       {
         "name": "Crush",
-        "description": "",
+        "description": "Shatterfall deals 50% more damage and has a larger area of effect, but its Cooldown is increased by 4s.",
         "category": "",
         "iconUrl": "/images/champions/Talent Terminus Crush.avif"
       },
@@ -10094,7 +10094,7 @@
       },
       {
         "name": "Despoiler",
-        "description": "Heal for {100|100}",
+        "description": "Heal for {100|100} for each enemy hit with Shatterfall.",
         "category": "Shatterfall",
         "iconUrl": "/images/cards/Card_Despoiler.avif",
         "cooldown": null,
@@ -10102,7 +10102,7 @@
       },
       {
         "name": "Devastation",
-        "description": "Heal for {60|60}",
+        "description": "Heal for {60|60} for each enemy hit by Calamity Blast.",
         "category": "Calamity Blast",
         "iconUrl": "/images/cards/Card_Devastation.avif",
         "cooldown": null,
@@ -10327,7 +10327,7 @@
       },
       {
         "name": "Crowd-Pleaser",
-        "description": "Generate {1|1}",
+        "description": "Generate {1|1} Ammo after activating Combat Trance.",
         "category": "Combat Trance",
         "iconUrl": "/images/cards/Card_Crowd-Pleaser.avif",
         "cooldown": null,
@@ -10367,7 +10367,7 @@
       },
       {
         "name": "Making the Cut",
-        "description": "Heal for {40|40}",
+        "description": "Heal for {40|40} for each enemy hit by Heavy Blade.",
         "category": "Heavy Blade",
         "iconUrl": "/images/cards/Card_Making_the_Cut.avif",
         "cooldown": null,
@@ -10399,7 +10399,7 @@
       },
       {
         "name": "Test of Strength",
-        "description": "Heal for {45|45}",
+        "description": "Heal for {45|45} every 1s while Combat Trance is active.",
         "category": "Combat Trance",
         "iconUrl": "/images/cards/Card_Test_of_Strength.avif",
         "cooldown": null,
@@ -10568,7 +10568,7 @@
       },
       {
         "name": "Hearthwarder",
-        "description": "Generate {75|75}",
+        "description": "Generate {75|75} Shield after using Protection.",
         "category": "Protection",
         "iconUrl": "/images/cards/Card_Hearthwarder.avif",
         "cooldown": null,
@@ -10576,7 +10576,7 @@
       },
       {
         "name": "Induction",
-        "description": "Reduce Protection's Cooldown by {0.4|0.4}",
+        "description": "Reduce Protection's Cooldown by {0.4|0.4} after activating Recharge.",
         "category": "Recharge",
         "iconUrl": "/images/cards/Card_Induction.avif",
         "cooldown": null,
@@ -10584,7 +10584,7 @@
       },
       {
         "name": "Infusion",
-        "description": "Heal for {30|30}",
+        "description": "Heal for {30|30} every 0.5s while channeling Nullify.",
         "category": "Nullify",
         "iconUrl": "/images/cards/Card_Infusion.avif",
         "cooldown": null,
@@ -10600,7 +10600,7 @@
       },
       {
         "name": "Rune Torrent",
-        "description": "Regenerate {2|2}",
+        "description": "Regenerate {2|2} Ammo every 1s while using Nullify.",
         "category": "Nullify",
         "iconUrl": "/images/cards/Card_Rune_Torrent.avif",
         "cooldown": null,
@@ -10616,7 +10616,7 @@
       },
       {
         "name": "Timeshaper",
-        "description": "Generate {2|1}",
+        "description": "Generate {2|1} Ammo for the target of your Protection.",
         "category": "Protection",
         "iconUrl": "/images/cards/Card_Timeshaper.avif",
         "cooldown": null,
@@ -10624,7 +10624,7 @@
       },
       {
         "name": "Vital Grasp",
-        "description": "Heal for {75|75}",
+        "description": "Heal for {75|75} after activating Recharge.",
         "category": "Recharge",
         "iconUrl": "/images/cards/Card_Vital_Grasp.avif",
         "cooldown": null,
@@ -10715,7 +10715,7 @@
       },
       {
         "name": "Hunting Party",
-        "description": "",
+        "description": "Hunter's Mark now Weakens its target for all allies.",
         "category": "",
         "iconUrl": "/images/champions/Talent Tyra Hunting Party.avif"
       },
@@ -10745,7 +10745,7 @@
       },
       {
         "name": "Hunting Season",
-        "description": "Heal for {200|200}",
+        "description": "Heal for {200|200} after getting a Killing Blow on an enemy affected by Hunter's Mark.",
         "category": "Hunter&#39;s Mark",
         "iconUrl": "/images/cards/Card_Hunting_Season.avif",
         "cooldown": null,
@@ -10777,7 +10777,7 @@
       },
       {
         "name": "Napalm",
-        "description": "Activating Fire Bomb Heals you for {100|100}",
+        "description": "Activating Fire Bomb Heals you for {100|100} over 2s.",
         "category": "Fire Bomb",
         "iconUrl": "/images/cards/Card_Napalm.avif",
         "cooldown": null,
@@ -10793,7 +10793,7 @@
       },
       {
         "name": "Quick Release",
-        "description": "Generate {2|2}",
+        "description": "Generate {2|2} Ammo after using Nade Launcher.",
         "category": "Nade Launcher",
         "iconUrl": "/images/cards/Card_Quick_Release.avif",
         "cooldown": null,
@@ -10833,7 +10833,7 @@
       },
       {
         "name": "Trail Blazer",
-        "description": "Generate {3|3}",
+        "description": "Generate {3|3} Ammo after getting an Elimination.",
         "category": "General",
         "iconUrl": "/images/cards/Card_Trail_Blazer.avif",
         "cooldown": null,
@@ -10841,7 +10841,7 @@
       },
       {
         "name": "Turn The Table",
-        "description": "Heal for {60|60}",
+        "description": "Heal for {60|60} for each enemy hit with Nade Launcher.",
         "category": "Nade Launcher",
         "iconUrl": "/images/cards/Card_Turn_The_Table.avif",
         "cooldown": null,
@@ -10954,7 +10954,7 @@
       },
       {
         "name": "Contemplation",
-        "description": "Heal for {100|-7.5}",
+        "description": "Heal for {100|-7.5} every 0.5s for {0.5|0.5}s after activating Dash. This effect stacks.",
         "category": "Dash",
         "iconUrl": "/images/cards/Card_Contemplation.avif",
         "cooldown": null,
@@ -10994,7 +10994,7 @@
       },
       {
         "name": "Infiltration",
-        "description": "Heal for {70|70}",
+        "description": "Heal for {70|70} after activating Ambush. This applies to each Ambush in the chain.",
         "category": "Ambush",
         "iconUrl": "/images/cards/Card_Infiltration.avif",
         "cooldown": null,
@@ -11018,7 +11018,7 @@
       },
       {
         "name": "Outnumbered",
-        "description": "Generate {1|1}",
+        "description": "Generate {1|1} Ammo after hitting at least one enemy with Shadow Bombs.",
         "category": "Shadow Bombs",
         "iconUrl": "/images/cards/Card_Outnumbered.avif",
         "cooldown": null,
@@ -11042,7 +11042,7 @@
       },
       {
         "name": "Shadow's Gaze",
-        "description": "Heal for {40|40}",
+        "description": "Heal for {40|40} for after activating Shadow Bombs.",
         "category": "Shadow Bombs",
         "iconUrl": "/images/cards/Card_Shadows_Gaze.avif",
         "cooldown": null,
@@ -11143,7 +11143,7 @@
     "talents": [
       {
         "name": "Tribunal Upgrades",
-        "description": "",
+        "description": "Burst Mode now deals additional Shock damage that Reveals targets, Mag Dump adds a Burn over time, and Automatic freezes to Slow enemies.",
         "category": "",
         "iconUrl": "/images/champions/Talent Vii Tribunal Upgrades.avif"
       },
@@ -11171,7 +11171,7 @@
       },
       {
         "name": "Equivocate",
-        "description": "Heal for {100|100}",
+        "description": "Heal for {100|100} after hitting an enemy with Grappling Hook. Heal for {200|100} if the enemy is a Frontline.",
         "category": "Grappling Hook",
         "iconUrl": "/images/cards/Card_Equivocate.avif",
         "cooldown": null,
@@ -11203,7 +11203,7 @@
       },
       {
         "name": "Nasty Surprise",
-        "description": "Generate {10|10}",
+        "description": "Generate {10|10} Ammo after activating Explosive Dodge.",
         "category": "Explosive Dodge",
         "iconUrl": "/images/cards/Card_Nasty_Surprise.avif",
         "cooldown": null,
@@ -11219,7 +11219,7 @@
       },
       {
         "name": "Night Watch",
-        "description": "Generate {4|4}",
+        "description": "Generate {4|4} Ammo when you activate Trigger Discipline.",
         "category": "Trigger Discipline",
         "iconUrl": "/images/cards/Card_Night_Watch.avif",
         "cooldown": null,
@@ -11251,7 +11251,7 @@
       },
       {
         "name": "Terror",
-        "description": "Gain a {50|50}",
+        "description": "Gain a {50|50} Shield for 4s after using Grappling Hook.",
         "category": "Grappling Hook",
         "iconUrl": "/images/cards/Card_Terror.avif",
         "cooldown": null,
@@ -11388,7 +11388,7 @@
       },
       {
         "name": "Fire in the Hole",
-        "description": "Generate {6|6}",
+        "description": "Generate {6|6} Ammo for each enemy hit with Frag Grenade.",
         "category": "Frag Grenade",
         "iconUrl": "/images/cards/Card_Fire_in_the_Hole.avif",
         "cooldown": null,
@@ -11468,7 +11468,7 @@
       },
       {
         "name": "Run and Gun",
-        "description": "Regenerate {2|2}",
+        "description": "Regenerate {2|2} Ammo every 1s while using Hustle.",
         "category": "Hustle",
         "iconUrl": "/images/cards/Card_Run_and_Gun.avif",
         "cooldown": null,
@@ -11492,7 +11492,7 @@
       },
       {
         "name": "Speed Load",
-        "description": "Generate {7|7}",
+        "description": "Generate {7|7} Ammo after getting a Killing Blow or Elimination.",
         "category": "General",
         "iconUrl": "/images/cards/Card_Speed_Load.avif",
         "cooldown": null,
@@ -11583,7 +11583,7 @@
       },
       {
         "name": "Booby Trap",
-        "description": "",
+        "description": "Your Sensor Drones explode, dealing 600 Area Damage and applying a Knockback to those hit when an enemy is within 20 units.",
         "category": "",
         "iconUrl": "/images/champions/Talent Vivian Booby Trap.avif"
       },
@@ -11637,7 +11637,7 @@
       },
       {
         "name": "Informants",
-        "description": "Heal for {85|85}",
+        "description": "Heal for {85|85} after an enemy that is Revealed by your Sensor Drone dies.",
         "category": "Sensor Drone",
         "iconUrl": "/images/cards/Card_Informants.avif",
         "cooldown": null,
@@ -11685,7 +11685,7 @@
       },
       {
         "name": "Plans Within Plans",
-        "description": "Heal for {20|20}",
+        "description": "Heal for {20|20} every 1s while Deflector Shield is active.",
         "category": "Deflector Shield",
         "iconUrl": "/images/cards/Card_Plans_Within_Plans.avif",
         "cooldown": null,
@@ -11814,7 +11814,7 @@
     "loadouts": [
       {
         "name": "A Broken Path",
-        "description": "Increase the Healing received from Dark Siphon by {50|50}",
+        "description": "Increase the Healing received from Dark Siphon by {50|50} Health.",
         "category": "Dark Siphon",
         "iconUrl": "/images/cards/Card_A_Broken_Path.avif",
         "cooldown": null,
@@ -11838,7 +11838,7 @@
       },
       {
         "name": "Broken Promises",
-        "description": "Heal for {100|100}",
+        "description": "Heal for {100|100} for each enemy hit with Obliteration.",
         "category": "Obliteration",
         "iconUrl": "/images/cards/Card_Broken_Promises.avif",
         "cooldown": null,
@@ -11894,7 +11894,7 @@
       },
       {
         "name": "Otherworldly Tether",
-        "description": "Gain a {75|75}",
+        "description": "Gain a {75|75} Shield for 5s after activating Tendril.",
         "category": "Tendril",
         "iconUrl": "/images/cards/Card_Otherworldly_Tether.avif",
         "cooldown": null,
@@ -11910,7 +11910,7 @@
       },
       {
         "name": "Sharpened Resolve",
-        "description": "Consuming Darkness stacks Heals you for an additional {10|10}",
+        "description": "Consuming Darkness stacks Heals you for an additional {10|10} per stack.",
         "category": "General",
         "iconUrl": "/images/cards/Card_Sharpened_Resolve.avif",
         "cooldown": null,
@@ -12063,7 +12063,7 @@
       },
       {
         "name": "Germination",
-        "description": "Generate {1|1}",
+        "description": "Generate {1|1} Ammo after using Seedling.",
         "category": "Seedling",
         "iconUrl": "/images/cards/Card_Germination.avif",
         "cooldown": null,
@@ -12071,7 +12071,7 @@
       },
       {
         "name": "Hijinks",
-        "description": "Heal for {50|50}",
+        "description": "Heal for {50|50} after activating Flutter.",
         "category": "Flutter",
         "iconUrl": "/images/cards/Card_Hijinks.avif",
         "cooldown": null,
@@ -12079,7 +12079,7 @@
       },
       {
         "name": "Hummingbird",
-        "description": "Generate {1|1}",
+        "description": "Generate {1|1} Ammo after activating Flutter.",
         "category": "Flutter",
         "iconUrl": "/images/cards/Card_Hummingbird.avif",
         "cooldown": null,
@@ -12095,7 +12095,7 @@
       },
       {
         "name": "Nectar",
-        "description": "Heal for {75|75}",
+        "description": "Heal for {75|75} after using Seedling.",
         "category": "Seedling",
         "iconUrl": "/images/cards/Card_Nectar.avif",
         "cooldown": null,
@@ -12111,7 +12111,7 @@
       },
       {
         "name": "Pixie Dust",
-        "description": "Heal for {75|75}",
+        "description": "Heal for {75|75} every 1s while standing in Dead Zone.",
         "category": "Dead Zone",
         "iconUrl": "/images/cards/Card_Pixie_Dust.avif",
         "cooldown": null,
@@ -12328,7 +12328,7 @@
       },
       {
         "name": "Raze and Burn",
-        "description": "Heal for {50|50}",
+        "description": "Heal for {50|50} after hitting an enemy with Piercing Quills.",
         "category": "Piercing Quills",
         "iconUrl": "/images/cards/Card_Raze_and_Burn.avif",
         "cooldown": null,
@@ -12336,7 +12336,7 @@
       },
       {
         "name": "Spreading Domain",
-        "description": "Heal for {100|100}",
+        "description": "Heal for {100|100} if you do not cancel Hardening before it ends.",
         "category": "Hardening",
         "iconUrl": "/images/cards/Card_Spreading_Domain.avif",
         "cooldown": null,
@@ -12529,7 +12529,7 @@
       },
       {
         "name": "Mesmerism",
-        "description": "Generate {1|1}",
+        "description": "Generate {1|1} Ammo after activating Illusion.",
         "category": "Illusion",
         "iconUrl": "/images/cards/Card_Mesmerism.avif",
         "cooldown": null,
@@ -12668,7 +12668,7 @@
       },
       {
         "name": "Yomi",
-        "description": "",
+        "description": "Whirl now Ignites enemies hit for 3s. Your Inferno Blade deals 20% Increased damage to targets Burning or Ignited.",
         "category": "",
         "iconUrl": "/images/champions/Talent Zhin Yomi.avif"
       },
@@ -12698,7 +12698,7 @@
       },
       {
         "name": "Embers",
-        "description": "Regenerate {2|2}",
+        "description": "Regenerate {2|2} Ammo every 0.5s for 0.5s after activating Billow.",
         "category": "Billow",
         "iconUrl": "/images/cards/Card_Embers.avif",
         "cooldown": null,
@@ -12754,7 +12754,7 @@
       },
       {
         "name": "Kindling",
-        "description": "Generate {1|1}",
+        "description": "Generate {1|1} Ammo after activating Whirl.",
         "category": "Whirl",
         "iconUrl": "/images/cards/Card_Kindling.avif",
         "cooldown": null,
@@ -12778,7 +12778,7 @@
       },
       {
         "name": "Perfect Block",
-        "description": "Heal for {100|100}",
+        "description": "Heal for {100|100} after successfully Countering an attack.",
         "category": "Counter",
         "iconUrl": "/images/cards/Card_Perfect_Block.avif",
         "cooldown": null,

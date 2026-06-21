@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, notFound } from "next/navigation";
 import Image from "next/image";
-import { STATIC_CHAMPIONS } from "@/lib/mock-data";
+import { STATIC_CHAMPIONS } from "@/lib/static-champions";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import ScrambleText from "@/components/ScrambleText";
 import SmartImage from "@/components/SmartImage";
@@ -18,6 +18,8 @@ import {
 } from "@/lib/champion-data";
 import { fetchChampionLeaderboard, type ChampionLeaderboardEntry } from "@/lib/api-client";
 import { getRankIconPath, getTierColor, resolveEffectiveTier } from "@/lib/tier-utils";
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api";
 
 // Placeholder types for future DB integration
 interface ChampionStats {
@@ -65,10 +67,36 @@ const ROLE_ICONS: Record<string, string> = {
   Support: "/images/icons/Class_Support_Icon.avif",
 };
 
+function AvgTierCard({ stats }: { stats: ChampionStats }) {
+  if (stats.avgRating == null) {
+    return (
+      <div className="pc-surface-light rounded-lg p-4 border border-pc-border text-center">
+        <div className="text-xs text-pc-text-muted mb-1">Avg Tier</div>
+        <div className="text-lg font-mono text-pc-text">—</div>
+      </div>
+    );
+  }
+  const tier = Math.round(stats.avgRating);
+  const effective = resolveEffectiveTier(tier, 0);
+  const iconPath = getRankIconPath(tier, 0);
+  const color = getTierColor(effective.displayTier);
+
+  return (
+    <div className="pc-surface-light rounded-lg p-4 border border-pc-border text-center">
+      <div className="text-xs text-pc-text-muted mb-2">Avg Tier</div>
+      <img src={iconPath} alt={effective.displayName} className="w-12 h-12 object-contain mx-auto" />
+      <div className={`text-xs font-semibold ${color} mt-1`}>{effective.displayName}</div>
+      <div className="text-xs font-mono text-pc-text-muted mt-0.5">{stats.avgRating.toFixed(1)}</div>
+    </div>
+  );
+}
+
 export default function ChampionDetailPage() {
   const params = useParams();
   const name = params?.name as string;
 
+  const [championData, setChampionData] = useState<ChampionData | null>(null);
+  const [dataLoaded, setDataLoaded] = useState(false);
   const [stats, setStats] = useState<ChampionStats | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [tierStats, setTierStats] = useState<TierStat[]>([]);
@@ -76,16 +104,40 @@ export default function ChampionDetailPage() {
   const [loading, setLoading] = useState(true);
 
   // Find champion by slug
-  const championData = getChampionData(name);
   const mockChampion = STATIC_CHAMPIONS.find(
     (c) => championSlug(c.name) === name.toLowerCase()
   );
 
   useEffect(() => {
-    if (!championData) return;
+    let cancelled = false;
+
+    setDataLoaded(false);
+    getChampionData(name)
+      .then((data) => {
+        if (cancelled) return;
+        setChampionData(data ? { ...data, roles: data.roles.length > 0 ? data.roles : mockChampion?.roles ?? [] } : null);
+      })
+      .catch(() => {
+        if (!cancelled) setChampionData(null);
+      })
+      .finally(() => {
+        if (!cancelled) setDataLoaded(true);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [mockChampion?.roles, name]);
+
+  useEffect(() => {
+    if (!championData) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
 
     // Resolve champion ID, then fetch stats + leaderboard in parallel
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3304"}/champions`)
+    fetch(`${API_BASE}/champions`)
       .then((r) => r.json())
       .then((champs: Array<{ id: number; name: string }>) => {
         const match = champs.find((c) => c.name.toLowerCase() === championData!.name.toLowerCase());
@@ -93,7 +145,7 @@ export default function ChampionDetailPage() {
 
         return Promise.all([
           // Champion aggregate stats from /champions/:id
-          fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3304"}/champions/${match.id}`)
+          fetch(`${API_BASE}/champions/${match.id}`)
             .then((r) => r.json())
             .then((data: { stats?: Record<string, unknown> | null }) => {
               const s = data.stats;
@@ -132,7 +184,7 @@ export default function ChampionDetailPage() {
       .finally(() => setLoading(false));
   }, [championData]);
 
-  if (!championData && !mockChampion) return notFound();
+  if (dataLoaded && !championData && !mockChampion) return notFound();
 
   const formatNum = (n: number | null) => (n != null ? n.toLocaleString() : "—");
   const formatPct = (n: number | null) => (n != null ? `${n.toFixed(1)}%` : "—");
@@ -395,30 +447,6 @@ function StatCard({ label, value, accent }: { label: string; value: string; acce
   );
 }
 
-function AvgTierCard({ stats }: { stats: ChampionStats }) {
-  if (stats.avgRating == null) {
-    return (
-      <div className="pc-surface-light rounded-lg p-4 border border-pc-border text-center">
-        <div className="text-xs text-pc-text-muted mb-1">Avg Tier</div>
-        <div className="text-lg font-mono text-pc-text">—</div>
-      </div>
-    );
-  }
-  const tier = Math.round(stats.avgRating);
-  const effective = resolveEffectiveTier(tier, 0);
-  const iconPath = getRankIconPath(tier, 0);
-  const color = getTierColor(effective.displayTier);
-
-  return (
-    <div className="pc-surface-light rounded-lg p-4 border border-pc-border text-center">
-      <div className="text-xs text-pc-text-muted mb-2">Avg Tier</div>
-      <img src={iconPath} alt={effective.displayName} className="w-12 h-12 object-contain mx-auto" />
-      <div className={`text-xs font-semibold ${color} mt-1`}>{effective.displayName}</div>
-      <div className="text-xs font-mono text-pc-text-muted mt-0.5">{stats.avgRating.toFixed(1)}</div>
-    </div>
-  );
-}
-
 function StatBadge({ label, value }: { label: string; value: string }) {
   return (
     <div className="text-center">
@@ -476,7 +504,7 @@ function SkillCard({ skill }: { skill: ChampionSkill }) {
 }
 
 function TalentCard({ talent, championName }: { talent: ChampionTalent; championName: string }) {
-  const talentImageUrl = `/images/champions/Talent ${championName} ${talent.name}.png`;
+  const talentImageUrl = talent.iconUrl || `/images/champions/Talent ${championName} ${talent.name}.png`;
 
   return (
     <div className="pc-surface-light rounded-lg p-3 border border-pc-border flex items-start gap-3">
