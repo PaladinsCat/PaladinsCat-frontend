@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { login } from "@/lib/api-client";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectPath = searchParams.get("redirect") || "/";
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -19,7 +21,7 @@ export default function LoginPage() {
 
     try {
       await login(username.trim(), password);
-      router.push("/");
+      router.push(redirectPath);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {

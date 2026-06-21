@@ -2,11 +2,13 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
 import { fetchPlayerMatches, type MatchRecord } from "@/lib/api-client";
 import { getTierColor, resolveEffectiveTier, getRankIconPath } from "@/lib/tier-utils";
+import { useAuth } from "@/lib/auth-context";
+import ReportModal from "@/components/ReportModal";
 
 interface PlayerData {
   id: string;
@@ -151,7 +153,9 @@ function StatGrid({ children }: { children: React.ReactNode }) {
 
 export default function PlayerProfilePage() {
   const params = useParams();
+  const router = useRouter();
   const id = params?.id as string;
+  const { isLoggedIn, isAdmin, isApproved } = useAuth();
 
   const [response, setResponse] = useState<PlayerResponse | null>(null);
   const [matches, setMatches] = useState<MatchRecord[]>([]);
@@ -165,6 +169,30 @@ export default function PlayerProfilePage() {
   const [currentMatch, setCurrentMatch] = useState<any>(null);
   const [showCurrentMatch, setShowCurrentMatch] = useState(false);
   const [fetchKey, setFetchKey] = useState(0);
+
+  // Report modal state
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportType, setReportType] = useState<'suspicious' | 'cheater'>('suspicious');
+
+  // Open report modal — redirect to login if not authenticated
+  const openReportModal = useCallback((type: 'suspicious' | 'cheater') => {
+    if (!isLoggedIn) {
+      router.push(`/auth/login?redirect=/players/${id}`);
+      return;
+    }
+    setReportType(type);
+    setShowReportModal(true);
+  }, [isLoggedIn, router, id]);
+
+  const closeReportModal = useCallback(() => {
+    setShowReportModal(false);
+    setReportType('suspicious');
+  }, []);
+
+  const handleReportSuccess = useCallback(() => {
+    setShowReportModal(false);
+    setFetchKey(k => k + 1);
+  }, []);
 
   // Fetch profile
   const fetchProfile = useCallback(async () => {
@@ -205,23 +233,6 @@ export default function PlayerProfilePage() {
       setError("Failed to refresh profile");
     } finally {
       setRefreshing(false);
-    }
-  }, [id]);
-
-  // Report handler
-  const handleReport = useCallback(async (type: 'suspicious' | 'cheater') => {
-    setReporting(type);
-    try {
-      await fetch(`${API_BASE}/players/${id}/report`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type }),
-      });
-      setFetchKey(k => k + 1);
-    } catch {
-      setError(`Failed to report player as ${type}`);
-    } finally {
-      setReporting(null);
     }
   }, [id]);
 
@@ -317,23 +328,23 @@ export default function PlayerProfilePage() {
             {refreshing ? 'Refreshing...' : 'Refresh'}
           </button>
           <button
-            onClick={() => handleReport('suspicious')}
-            disabled={reporting !== null}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 transition-colors ${reporting !== null ? 'opacity-50 cursor-not-allowed' : ''}`}
-            title="Report as suspicious"
+            onClick={() => openReportModal('suspicious')}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 transition-colors"
+            title={isLoggedIn ? "Report as suspicious" : "Log in to report"}
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            {reporting === 'suspicious' ? 'Reporting...' : 'Suspicious'}
+            Suspicious
           </button>
-          <button
-            onClick={() => handleReport('cheater')}
-            disabled={reporting !== null}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition-colors ${reporting !== null ? 'opacity-50 cursor-not-allowed' : ''}`}
-            title="Report as cheater"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            {reporting === 'cheater' ? 'Reporting...' : 'Cheater'}
-          </button>
+          {(isAdmin || isApproved) && (
+            <button
+              onClick={() => openReportModal('cheater')}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition-colors"
+              title="Flag as cheater"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              Cheater
+            </button>
+          )}
         </div>
 
         <div className="flex items-start gap-4">
@@ -711,6 +722,15 @@ export default function PlayerProfilePage() {
             )}
           </div>
         </div>
+      )}
+      {/* ── Report Modal ── */}
+      {showReportModal && (
+        <ReportModal
+          playerId={id}
+          type={reportType}
+          onClose={closeReportModal}
+          onSuccess={handleReportSuccess}
+        />
       )}
     </div>
   );
