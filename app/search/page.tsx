@@ -284,7 +284,11 @@ function SearchPageBody() {
       setLoading(true);
       setSearched(true);
       Promise.all([
-        fetchUniversalSearch(q, 36).catch(() => ({ data: [] as UniversalSearchResult[] })),
+        fetchUniversalSearch(q, 36).catch((): UniversalSearchResponse => ({
+          query: q,
+          total: 0,
+          data: [],
+        })),
         loadStaticReferenceIndex().then((index) => staticReferenceResults(q, index)).catch(() => [] as UniversalSearchResult[]),
       ])
         .then(([response, staticResults]) => {
