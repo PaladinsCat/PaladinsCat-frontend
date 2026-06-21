@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { MOCK_CLASS_ELO } from "@/lib/mock-data";
 import { fetchClassLeaderboard } from "@/lib/api-client";
 
 const VALID_ROLES = ["Frontline", "Damage", "Flank", "Support"] as const;
@@ -104,26 +103,22 @@ export default function ClassEloPage() {
           mode: "champion",
         });
         if (cancelled) return;
-        if (leaderboard.length > 0) {
-          setData(
-            leaderboard.map((p) => ({
-              rank: p.rank,
-              player_id: p.playerId,
-              name: p.playerName,
-              champion: p.championName ?? "Unknown",
-              elo: p.elo,
-              winRate: p.winRate ?? 0,
-              totalMatches: p.totalMatches,
-              totalWins: p.totalWins,
-              region: p.region ?? "—",
-            }))
-          );
-        } else {
-          setData(MOCK_CLASS_ELO[normalizedRole!] || []);
-        }
+        setData(
+          leaderboard.map((p) => ({
+            rank: p.rank,
+            player_id: p.playerId,
+            name: p.playerName,
+            champion: p.championName ?? "Unknown",
+            elo: p.elo,
+            winRate: p.winRate ?? 0,
+            totalMatches: p.totalMatches,
+            totalWins: p.totalWins,
+            region: p.region ?? "—",
+          }))
+        );
       } catch {
         if (!cancelled) {
-          setData(MOCK_CLASS_ELO[normalizedRole!] || []);
+          setData([]);
         }
       } finally {
         if (!cancelled) setLoading(false);

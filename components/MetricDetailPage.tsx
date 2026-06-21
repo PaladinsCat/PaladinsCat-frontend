@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { MOCK_GLOBAL_METRICS, MOCK_METRIC_BY_CLASS } from "@/lib/mock-data";
 import { championSlug } from "@/lib/utils";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import {
@@ -79,22 +78,7 @@ function normalizeSummary(summary?: Partial<PerformanceMetricSummary>): Performa
   };
 }
 
-function mockClassSummary(metric: string, className: string): PerformanceMetricSummary {
-  const mock = (MOCK_METRIC_BY_CLASS[metric] || {})[className];
-  return normalizeSummary({
-    min: mock?.min,
-    max: mock?.max,
-    mean: mock?.avg,
-    median: mock?.avg,
-    mode: mock?.avg,
-    p10: mock?.min,
-    p90: mock?.max,
-    sampleSize: mock?.champions?.reduce((sum: number, row: { matches?: number }) => sum + (row.matches || 0), 0) || 0,
-  });
-}
-
 function buildClassData(
-  metric: string,
   rows: ChampionPerformanceDistribution[],
   classSummaries: Partial<Record<(typeof CLASS_ORDER)[number], PerformanceMetricSummary>>,
 ): ClassMetricData[] {
@@ -126,7 +110,7 @@ function buildClassData(
           mode: champions.reduce((sum, row) => sum + row.mode * row.matches, 0) / Math.max(champions.reduce((sum, row) => sum + row.matches, 0), 1),
           sampleSize: champions.reduce((sum, row) => sum + row.matches, 0),
         })
-      : mockClassSummary(metric, className);
+      : emptySummary();
 
     return {
       className,
@@ -141,16 +125,14 @@ function pctDiff(value: number, base: number): number {
 }
 
 export default function MetricDetailPage({ config }: { config: MetricConfig }) {
-  const [metricSummary, setMetricSummary] = useState<PerformanceMetricSummary>(() =>
-    normalizeSummary(MOCK_GLOBAL_METRICS[config.key as keyof typeof MOCK_GLOBAL_METRICS] as Partial<PerformanceMetricSummary>)
-  );
-  const [classData, setClassData] = useState<ClassMetricData[]>(() => buildClassData(config.key, [], {}));
+  const [metricSummary, setMetricSummary] = useState<PerformanceMetricSummary>(() => emptySummary());
+  const [classData, setClassData] = useState<ClassMetricData[]>(() => buildClassData([], {}));
 
   useEffect(() => {
     const metric = config.key as PerformanceMetricKey;
     if (!VALID_METRIC_KEYS.has(metric)) {
-      setMetricSummary(normalizeSummary(MOCK_GLOBAL_METRICS[config.key as keyof typeof MOCK_GLOBAL_METRICS] as Partial<PerformanceMetricSummary>));
-      setClassData(buildClassData(config.key, [], {}));
+      setMetricSummary(emptySummary());
+      setClassData(buildClassData([], {}));
       return;
     }
 
@@ -170,13 +152,13 @@ export default function MetricDetailPage({ config }: { config: MetricConfig }) {
       ) as Partial<Record<(typeof CLASS_ORDER)[number], PerformanceMetricSummary>>;
 
       setMetricSummary(normalizeSummary(summaries[metric]));
-      setClassData(buildClassData(config.key, championRows, classSummaries));
+      setClassData(buildClassData(championRows, classSummaries));
     }
 
     load().catch(() => {
       if (!cancelled) {
-        setMetricSummary(normalizeSummary(MOCK_GLOBAL_METRICS[config.key as keyof typeof MOCK_GLOBAL_METRICS] as Partial<PerformanceMetricSummary>));
-        setClassData(buildClassData(config.key, [], {}));
+        setMetricSummary(emptySummary());
+        setClassData(buildClassData([], {}));
       }
     });
 

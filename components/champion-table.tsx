@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import ScrambleText from "@/components/ScrambleText";
 import { fetchChampions, type Champion } from "@/lib/api-client";
-import { STATIC_CHAMPIONS } from "@/lib/mock-data";
+import { STATIC_CHAMPIONS } from "@/lib/static-champions";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useRef } from "react";
+import { Suspense, useEffect, useMemo, useState, useRef } from "react";
 import Link from "next/link";
 import {
   fetchChampionElo,
@@ -8,9 +8,10 @@ import {
   type ChampionEloEntry,
   type ClassLeaderboardEntry,
 } from "@/lib/api-client";
-import { STATIC_CHAMPIONS } from "@/lib/mock-data";
+import { STATIC_CHAMPIONS } from "@/lib/static-champions";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 
+import { useSearchParams } from "next/navigation";
 type ELOMode = "champion" | "account";
 
 const CLASS_ICONS: Record<string, string> = {
@@ -41,7 +42,19 @@ function RankBadge({ rank }: { rank: number }) {
 }
 
 export default function ChampionEloPage() {
-  const [eloMode, setEloMode] = useState<ELOMode>("champion");
+  return (
+    <Suspense fallback={<div className="pc-card">Loading ELO leaderboard...</div>}>
+      <ChampionEloContent />
+    </Suspense>
+  );
+}
+
+function ChampionEloContent() {
+  const searchParams = useSearchParams();
+  const initialMode = (searchParams.get("mode") === "account" || searchParams.get("mode") === "champion") 
+    ? searchParams.get("mode") as ELOMode 
+    : "champion";
+  const [eloMode, setEloMode] = useState<ELOMode>(initialMode);
   const [activeTab, setActiveTab] = useState<TabKey>("global");
   const [players, setPlayers] = useState<ChampionEloEntry[]>([]);
   const [accountPlayers, setAccountPlayers] = useState<ClassLeaderboardEntry[]>([]);
@@ -158,7 +171,7 @@ export default function ChampionEloPage() {
   };
 
   const handleSelectChampion = (championId: number) => {
-    // Convert STATIC_CHAMPIONS mock ID to real ID via name mapping
+    // Convert the lightweight STATIC_CHAMPIONS roster ID to the DB champion ID.
     const champ = STATIC_CHAMPIONS.find((c) => c.id === championId);
     if (champ) {
       const realId = championNameToId.get(champ.name.toLowerCase());

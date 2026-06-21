@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { fetchBaselines, fetchPerformanceLeaderboard, type BaselineEntry } from "@/lib/api-client";
-import { MOCK_PERF_LEADERBOARD } from "@/lib/mock-data";
 
 const VALID_METRICS = ["gpm", "hpm", "dpm", "mpm"] as const;
 type Metric = (typeof VALID_METRICS)[number];
@@ -109,24 +108,20 @@ export default function MetricLeaderboardPage() {
         ]);
         if (cancelled) return;
         setBaselines(baselineRows);
-        if (leaderboardRows.length > 0) {
-          setEntries(leaderboardRows.map((p) => ({
-            rank: p.rank,
-            player_id: p.playerId,
-            name: p.playerName,
-            champion: p.championName ?? "—",
-            className: p.className ?? "Unknown",
-            value: p.value,
-            totalMatches: p.totalMatches,
-            region: p.region ?? "—",
-          })));
-        } else {
-          setEntries(MOCK_PERF_LEADERBOARD[metric] ?? []);
-        }
+        setEntries(leaderboardRows.map((p) => ({
+          rank: p.rank,
+          player_id: p.playerId,
+          name: p.playerName,
+          champion: p.championName ?? "—",
+          className: p.className ?? "Unknown",
+          value: p.value,
+          totalMatches: p.totalMatches,
+          region: p.region ?? "—",
+        })));
       } catch {
         if (!cancelled) {
           setBaselines([]);
-          setEntries(MOCK_PERF_LEADERBOARD[metric] ?? []);
+          setEntries([]);
         }
       } finally {
         if (!cancelled) setLoading(false);
