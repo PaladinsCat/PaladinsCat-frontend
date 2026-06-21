@@ -161,18 +161,18 @@ export default function PlayersPage() {
           <div className="flex items-center justify-between mb-2 px-2">
             <h2 className="text-sm font-bold text-pc-text">Performance Stats</h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-4 gap-3">
             {PERFORMANCE_METRICS.map(({ key: stat }) => {
               const players = performanceLeaderboards[stat] ?? [];
               return (
-              <div key={stat}>
+              <div key={stat} className="flex flex-col h-full">
                 <div className="flex items-center justify-between mb-2 px-2">
                   <h3 className="text-pc-text font-semibold text-[11px]">{STAT_LABELS[stat] || stat}</h3>
                   <Link href={`/players/stats/${stat}`} className="text-[10px] text-pc-text-secondary hover:text-pc-accent transition-colors drop-shadow-sm">
                     Detail →
                   </Link>
                 </div>
-                <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-3 hover:border-pc-accent-mid transition-colors">
+                <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-3 hover:border-pc-accent-mid transition-colors flex-1 flex flex-col justify-center">
                   <div className="space-y-1.5">
                     {players.length === 0 && (
                       <div className="text-[11px] text-pc-text-muted">{overviewLoading ? "Loading..." : "No ranked data"}</div>
@@ -362,7 +362,7 @@ export default function PlayersPage() {
             <section>
               <div className="flex items-center justify-between mb-2 px-2">
                 <h2 className="text-sm font-bold text-pc-text">Account ELO</h2>
-                <Link href="/players/elo" className="text-[10px] text-pc-text-secondary hover:text-pc-accent transition-colors drop-shadow-sm">
+                <Link href="/players/elo?mode=account" className="text-[10px] text-pc-text-secondary hover:text-pc-accent transition-colors drop-shadow-sm">
                   Detail →
                 </Link>
               </div>
