@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { fetchRankedLeaderboard, type RankedPlayer } from "@/lib/api-client";
-import { TIER_NAMES } from "@/lib/mock-data";
+import { TIER_NAMES } from "@/lib/tier-utils";
 
 const TIER_GROUPS = [
   { group: "Grandmaster", tiers: [{ tier: 27, label: "Grandmaster" }] },
@@ -85,7 +85,7 @@ export default function LeaderboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>("points");
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(["Grandmaster", "Master", "Diamond"]));
 
