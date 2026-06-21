@@ -1472,6 +1472,8 @@ export interface AuthUser {
   email: string;
   avatarUrl: string | null;
   bio: string | null;
+  isAdmin: boolean;
+  isApproved: boolean;
   createdAt: string;
   lastLogin: string | null;
 }
@@ -1538,7 +1540,7 @@ export async function register(username: string, email: string, password: string
 
 export async function login(username: string, password: string): Promise<AuthSession> {
   const raw = await fetchJson<{
-    user: { id: number; username: string; email?: string | null; avatar_url?: string | null; bio?: string | null; created_at?: string; last_login?: string | null };
+    user: { id: number; username: string; email?: string | null; avatar_url?: string | null; bio?: string | null; is_admin?: boolean; is_approved?: boolean; created_at?: string; last_login?: string | null };
     token: string;
     expires_at?: string;
   }>(`/auth/login`, {
@@ -1554,6 +1556,8 @@ export async function login(username: string, password: string): Promise<AuthSes
       email: raw.user.email ?? "",
       avatarUrl: raw.user.avatar_url ?? null,
       bio: raw.user.bio ?? null,
+      isAdmin: raw.user.is_admin ?? false,
+      isApproved: raw.user.is_approved ?? false,
       createdAt: raw.user.created_at ?? new Date().toISOString(),
       lastLogin: raw.user.last_login ?? null,
     },
@@ -1592,6 +1596,8 @@ export async function getMe(_userId?: number): Promise<AuthUser> {
     email: string;
     avatar_url: string | null;
     bio: string | null;
+    is_admin?: boolean;
+    is_approved?: boolean;
     created_at?: string;
     last_login?: string | null;
   }>(`/auth/me`, {
@@ -1604,6 +1610,8 @@ export async function getMe(_userId?: number): Promise<AuthUser> {
     email: raw.email,
     avatarUrl: raw.avatar_url,
     bio: raw.bio,
+    isAdmin: raw.is_admin ?? false,
+    isApproved: raw.is_approved ?? false,
     createdAt: raw.created_at ?? "",
     lastLogin: raw.last_login ?? null,
   };
@@ -1616,6 +1624,8 @@ export async function getUserProfile(userId: number): Promise<AuthUser> {
     email: string;
     avatar_url: string | null;
     bio: string | null;
+    is_admin?: boolean;
+    is_approved?: boolean;
     created_at: string;
     last_login: string | null;
   }>(`/players/${userId}`);
@@ -1626,9 +1636,35 @@ export async function getUserProfile(userId: number): Promise<AuthUser> {
     email: raw.email,
     avatarUrl: raw.avatar_url,
     bio: raw.bio,
+    isAdmin: raw.is_admin ?? false,
+    isApproved: raw.is_approved ?? false,
     createdAt: raw.created_at,
     lastLogin: raw.last_login,
   };
+}
+
+// ── Player Report ──
+
+export type ReportType = 'suspicious' | 'cheater' | 'approve';
+
+export interface ReportOptions {
+  type: ReportType;
+  reason?: string;
+}
+
+export async function reportPlayer(playerId: string | number, opts: ReportOptions): Promise<{ success: boolean; message: string }> {
+  const token = getAuthToken();
+  if (!token) {
+    throw new Error("Authentication required — please log in");
+  }
+  const body: Record<string, string> = { type: opts.type };
+  if (opts.reason?.trim()) body.reason = opts.reason.trim();
+  const raw = await fetchJson<{ success: boolean; message: string }>(`/players/${playerId}/report`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+    body: JSON.stringify(body),
+  });
+  return raw;
 }
 
 // ── Community Types ──
