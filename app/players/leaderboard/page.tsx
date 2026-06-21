@@ -309,8 +309,8 @@ export default function LeaderboardPage() {
                       <th className="text-left text-pc-text-muted font-medium py-3 px-4">Player</th>
                       <th className="text-right text-pc-text-muted font-medium py-3 px-4">Points</th>
                       <th className="text-right text-pc-text-muted font-medium py-3 px-4 w-16">Trend</th>
-                      <th className="text-right text-pc-text-muted font-medium py-3 px-4 hidden md:table-cell">Win Rate</th>
                       <th className="text-right text-pc-text-muted font-medium py-3 px-4 hidden lg:table-cell">Wins</th>
+                      <th className="text-right text-pc-text-muted font-medium py-3 px-4 hidden md:table-cell">Win Rate</th>
                       <th className="text-right text-pc-text-muted font-medium py-3 px-4 hidden lg:table-cell">Leaves</th>
                       <th className="text-right text-pc-text-muted font-medium py-3 px-4 hidden lg:table-cell">Leave Rate</th>
                     </tr>
@@ -346,8 +346,11 @@ export default function LeaderboardPage() {
                             ) : (
                               <span className="text-pc-text-muted text-xs">—</span>
                             )}
-                          </td>
-                          <td className="py-2.5 px-4 text-right text-xs hidden md:table-cell">
+                            </td>
+                            <td className="py-2.5 px-4 text-right text-pc-text-secondary text-xs hidden lg:table-cell">
+                            {wins != null ? wins.toLocaleString() : "—"}
+                            </td>
+                            <td className="py-2.5 px-4 text-right text-xs hidden md:table-cell">
                             {winRate != null ? (
                               <span className={winRate >= 50 ? "text-emerald-400 font-medium" : "text-red-400"}>
                                 {winRate.toFixed(1)}%
@@ -355,11 +358,8 @@ export default function LeaderboardPage() {
                             ) : (
                               <span className="text-pc-text-muted">—</span>
                             )}
-                          </td>
-                          <td className="py-2.5 px-4 text-right text-pc-text-secondary text-xs hidden lg:table-cell">
-                            {wins != null ? wins.toLocaleString() : "—"}
-                          </td>
-                          <td className="py-2.5 px-4 text-right text-xs hidden lg:table-cell">
+                            </td>
+                            <td className="py-2.5 px-4 text-right text-xs hidden lg:table-cell">
                             {leaves != null ? (
                               <span className={leaves > 10 ? "text-red-400" : "text-pc-text-secondary"}>
                                 {leaves}
