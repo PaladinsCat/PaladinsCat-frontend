@@ -3,61 +3,44 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { fetchRankedLeaderboard, type RankedPlayer } from "@/lib/api-client";
-import { TIER_NAMES } from "@/lib/tier-utils";
+import { resolveEffectiveTier, getRankIconPath } from "@/lib/tier-utils";
 
 const TIER_GROUPS = [
-  { group: "Grandmaster", tiers: [{ tier: 27, label: "Grandmaster" }] },
-  { group: "Master", tiers: [{ tier: 26, label: "Master" }] },
-  {
-    group: "Diamond",
-    tiers: [
-      { tier: 25, label: "Diamond I" },
-      { tier: 24, label: "Diamond II" },
-      { tier: 23, label: "Diamond III" },
-      { tier: 22, label: "Diamond IV" },
-      { tier: 21, label: "Diamond V" },
-    ],
-  },
-  {
-    group: "Platinum",
-    tiers: [
-      { tier: 20, label: "Platinum I" },
-      { tier: 19, label: "Platinum II" },
-      { tier: 18, label: "Platinum III" },
-      { tier: 17, label: "Platinum IV" },
-      { tier: 16, label: "Platinum V" },
-    ],
-  },
-  {
-    group: "Gold",
-    tiers: [
-      { tier: 15, label: "Gold I" },
-      { tier: 14, label: "Gold II" },
-      { tier: 13, label: "Gold III" },
-      { tier: 12, label: "Gold IV" },
-      { tier: 11, label: "Gold V" },
-    ],
-  },
-  {
-    group: "Silver",
-    tiers: [
-      { tier: 10, label: "Silver I" },
-      { tier: 9, label: "Silver II" },
-      { tier: 8, label: "Silver III" },
-      { tier: 7, label: "Silver IV" },
-      { tier: 6, label: "Silver V" },
-    ],
-  },
-  {
-    group: "Bronze",
-    tiers: [
-      { tier: 5, label: "Bronze I" },
-      { tier: 4, label: "Bronze II" },
-      { tier: 3, label: "Bronze III" },
-      { tier: 2, label: "Bronze IV" },
-      { tier: 1, label: "Bronze V" },
-    ],
-  },
+  { group: "Diamond", tiers: [
+    { tier: 25, label: "Diamond I" },
+    { tier: 24, label: "Diamond II" },
+    { tier: 23, label: "Diamond III" },
+    { tier: 22, label: "Diamond IV" },
+    { tier: 21, label: "Diamond V" },
+  ]},
+  { group: "Platinum", tiers: [
+    { tier: 20, label: "Platinum I" },
+    { tier: 19, label: "Platinum II" },
+    { tier: 18, label: "Platinum III" },
+    { tier: 17, label: "Platinum IV" },
+    { tier: 16, label: "Platinum V" },
+  ]},
+  { group: "Gold", tiers: [
+    { tier: 15, label: "Gold I" },
+    { tier: 14, label: "Gold II" },
+    { tier: 13, label: "Gold III" },
+    { tier: 12, label: "Gold IV" },
+    { tier: 11, label: "Gold V" },
+  ]},
+  { group: "Silver", tiers: [
+    { tier: 10, label: "Silver I" },
+    { tier: 9, label: "Silver II" },
+    { tier: 8, label: "Silver III" },
+    { tier: 7, label: "Silver IV" },
+    { tier: 6, label: "Silver V" },
+  ]},
+  { group: "Bronze", tiers: [
+    { tier: 5, label: "Bronze I" },
+    { tier: 4, label: "Bronze II" },
+    { tier: 3, label: "Bronze III" },
+    { tier: 2, label: "Bronze IV" },
+    { tier: 1, label: "Bronze V" },
+  ]},
 ];
 
 type SortKey = "points" | "winRate" | "totalWins" | "trend";
@@ -81,13 +64,14 @@ function RankBadge({ rank }: { rank: number }) {
 
 export default function LeaderboardPage() {
   const [tier, setTier] = useState(26);
+  const [masterSubTab, setMasterSubTab] = useState<"gm" | "master">("gm");
   const [players, setPlayers] = useState<RankedPlayer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>("points");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [searchQuery, setSearchQuery] = useState("");
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(["Grandmaster", "Master", "Diamond"]));
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(["Diamond"]));
 
   const toggleGroup = (group: string) => {
     setExpandedGroups((prev) => {
@@ -104,7 +88,9 @@ export default function LeaderboardPage() {
       setLoading(true);
       setError(null);
       try {
-        const data = await fetchRankedLeaderboard({ tier: String(tier), top: 100 });
+        // GM fetches top 100; Master fetches more so we have enough after filtering
+        const top = tier === 26 && masterSubTab === "master" ? 500 : 100;
+        const data = await fetchRankedLeaderboard({ tier: String(tier), top });
         if (cancelled) return;
         setPlayers(data);
       } catch {
@@ -115,27 +101,33 @@ export default function LeaderboardPage() {
     }
     load();
     return () => { cancelled = true; };
-  }, [tier]);
+  }, [tier, masterSubTab]);
 
-  // Sort
-  const sorted = [...players]
-    .filter((p) => !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase()))
-    .sort((a, b) => {
-      const getVal = (p: RankedPlayer, key: SortKey) => {
-        switch (key) {
-          case "points": return p.points;
-          case "winRate": return (p as any).winRate ?? 0;
-          case "totalWins": return (p as any).totalWins ?? (p as any).wins ?? 0;
-          case "trend": return p.trend ?? 0;
-          default: return 0;
-        }
-      };
-      const av = getVal(a, sortKey);
-      const bv = getVal(b, sortKey);
-      return sortDir === "asc" ? av - bv : bv - av;
-    });
+  // Filter by GM/Master sub-tab, then search, then sort
+  const filtered = players.filter((p) => {
+    if (tier === 26 && masterSubTab === "gm") return p.rank <= 100;
+    if (tier === 26 && masterSubTab === "master") return p.rank > 100;
+    return true;
+  }).filter((p) => !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
-  const currentTierLabel = TIER_GROUPS.flatMap((g) => g.tiers).find((t) => t.tier === tier)?.label || `Tier ${tier}`;
+  const sorted = [...filtered].sort((a, b) => {
+    const getVal = (p: RankedPlayer, key: SortKey) => {
+      switch (key) {
+        case "points": return p.points;
+        case "winRate": return p.winRate ?? 0;
+        case "totalWins": return p.wins ?? 0;
+        case "trend": return p.trend ?? 0;
+        default: return 0;
+      }
+    };
+    const av = getVal(a, sortKey);
+    const bv = getVal(b, sortKey);
+    return sortDir === "asc" ? av - bv : bv - av;
+  });
+
+  const currentTierLabel = tier === 26
+    ? (masterSubTab === "gm" ? "Grandmaster" : "Master")
+    : (TIER_GROUPS.flatMap((g) => g.tiers).find((t) => t.tier === tier)?.label || `Tier ${tier}`);
 
   return (
     <div className="space-y-6">
@@ -154,29 +146,35 @@ export default function LeaderboardPage() {
           <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-3">
             <h3 className="text-pc-text-muted text-[10px] uppercase tracking-wider mb-2 px-1">Tier</h3>
             <div className="space-y-0.5">
+              {/* Grandmaster */}
+              <button
+                onClick={() => { setTier(26); setMasterSubTab("gm"); }}
+                className={`w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                  tier === 26 && masterSubTab === "gm"
+                    ? "bg-pc-accent/20 text-pc-accent border border-pc-accent/30"
+                    : "text-pc-text-secondary hover:text-pc-text hover:bg-pc-bg/50"
+                }`}
+              >
+                Grandmaster
+              </button>
+
+              {/* Master */}
+              <button
+                onClick={() => { setTier(26); setMasterSubTab("master"); }}
+                className={`w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                  tier === 26 && masterSubTab === "master"
+                    ? "bg-pc-accent/20 text-pc-accent border border-pc-accent/30"
+                    : "text-pc-text-secondary hover:text-pc-text hover:bg-pc-bg/50"
+                }`}
+              >
+                Master
+              </button>
+
+              {/* Multi-tier groups */}
               {TIER_GROUPS.map((group) => {
                 const isExpanded = expandedGroups.has(group.group);
-                const isSingle = group.tiers.length === 1;
                 const isActive = group.tiers.some((t) => t.tier === tier);
 
-                // Single-tier groups (Master, Grandmaster) — click to select
-                if (isSingle) {
-                  return (
-                    <button
-                      key={group.group}
-                      onClick={() => setTier(group.tiers[0].tier)}
-                      className={`w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                        tier === group.tiers[0].tier
-                          ? "bg-pc-accent/20 text-pc-accent border border-pc-accent/30"
-                          : "text-pc-text-secondary hover:text-pc-text hover:bg-pc-bg/50"
-                      }`}
-                    >
-                      {group.group}
-                    </button>
-                  );
-                }
-
-                // Multi-tier groups — collapsible
                 return (
                   <div key={group.group}>
                     <button
@@ -307,25 +305,33 @@ export default function LeaderboardPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-pc-border">
-                      <th className="text-left text-pc-text-muted font-medium py-3 px-4 w-14">Rank</th>
+                      <th className="text-left text-pc-text-muted font-medium py-3 px-4 w-28">Rank</th>
                       <th className="text-left text-pc-text-muted font-medium py-3 px-4">Player</th>
                       <th className="text-right text-pc-text-muted font-medium py-3 px-4">Points</th>
                       <th className="text-right text-pc-text-muted font-medium py-3 px-4 w-16">Trend</th>
                       <th className="text-right text-pc-text-muted font-medium py-3 px-4 hidden md:table-cell">Win Rate</th>
                       <th className="text-right text-pc-text-muted font-medium py-3 px-4 hidden lg:table-cell">Wins</th>
-                      <th className="text-center text-pc-text-muted font-medium py-3 px-4 hidden lg:table-cell">Region</th>
+                      <th className="text-right text-pc-text-muted font-medium py-3 px-4 hidden lg:table-cell">Leaves</th>
+                      <th className="text-right text-pc-text-muted font-medium py-3 px-4 hidden lg:table-cell">Leave Rate</th>
                     </tr>
                   </thead>
                   <tbody>
                     {sorted.map((p, i) => {
                       const rowBg = i < 3 ? "bg-pc-bg/30" : "";
-                      const winRate = (p as any).winRate as number | undefined;
-                      const wins = (p as any).totalWins ?? (p as any).wins;
-                      const region = (p as any).region as string | undefined;
+                      const effective = resolveEffectiveTier(p.tier, p.rank);
+                      const winRate = p.winRate;
+                      const wins = p.wins;
+                      const leaves = p.leaves;
+                      const leaveRate = p.leaveRate;
 
                       return (
                         <tr key={p.player_id} className={`border-b border-pc-border/50 hover:bg-pc-bg/60 transition-colors ${rowBg}`}>
-                          <td className="py-2.5 px-4"><RankBadge rank={p.rank} /></td>
+                          <td className="py-2.5 px-4">
+                            <div className="flex items-center gap-3">
+                              <RankBadge rank={effective.displayRank} />
+                              <img src={getRankIconPath(p.tier, p.rank)} alt={effective.displayName} className="w-5 h-5 object-contain shrink-0" />
+                            </div>
+                          </td>
                           <td className="py-2.5 px-4">
                             <Link href={`/players/${p.player_id}`} className="text-pc-text font-medium hover:text-pc-accent transition-colors">
                               {p.name}
@@ -353,8 +359,23 @@ export default function LeaderboardPage() {
                           <td className="py-2.5 px-4 text-right text-pc-text-secondary text-xs hidden lg:table-cell">
                             {wins != null ? wins.toLocaleString() : "—"}
                           </td>
-                          <td className="py-2.5 px-4 text-center hidden lg:table-cell">
-                            <span className="text-xs px-2 py-0.5 rounded bg-pc-bg text-pc-text-muted">{region || "—"}</span>
+                          <td className="py-2.5 px-4 text-right text-xs hidden lg:table-cell">
+                            {leaves != null ? (
+                              <span className={leaves > 10 ? "text-red-400" : "text-pc-text-secondary"}>
+                                {leaves}
+                              </span>
+                            ) : (
+                              <span className="text-pc-text-muted">—</span>
+                            )}
+                          </td>
+                          <td className="py-2.5 px-4 text-right text-xs hidden lg:table-cell">
+                            {leaveRate != null ? (
+                              <span className={leaveRate > 5 ? "text-red-400" : leaveRate > 2 ? "text-yellow-400" : "text-pc-text-secondary"}>
+                                {leaveRate.toFixed(1)}%
+                              </span>
+                            ) : (
+                              <span className="text-pc-text-muted">—</span>
+                            )}
                           </td>
                         </tr>
                       );
@@ -368,7 +389,7 @@ export default function LeaderboardPage() {
           {/* Footer */}
           {!loading && sorted.length > 0 && (
             <p className="text-pc-text-muted text-xs text-center mt-4">
-              Showing {sorted.length} of {players.length} players in {currentTierLabel}
+              Showing {sorted.length} of {filtered.length} players in {currentTierLabel}
             </p>
           )}
         </div>

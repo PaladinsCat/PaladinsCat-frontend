@@ -1,10 +1,11 @@
 // Browser-facing backend URL.
 //
-// The Docker backend listens on 3005 inside its container but is exposed on the
-// desktop as 3304. The frontend runs in the user's browser, so its fallback must
-// use the host-visible port. Production/local overrides should still set
-// NEXT_PUBLIC_API_URL explicitly.
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3304";
+// In production the public website is served on port 80, while the direct
+// backend debug port can be firewalled. The default is therefore same-origin
+// `/api`, with Next rewrites forwarding `/api/*` to the backend service. Set
+// NEXT_PUBLIC_API_URL only when the browser should intentionally call a
+// different public backend origin.
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api";
 
 // ── Types ──
 
@@ -109,7 +110,9 @@ export interface RankedPlayer {
   trend?: number;
   wins?: number;
   losses?: number;
+  leaves?: number;
   winRate?: number;
+  leaveRate?: number;
 }
 
 export async function fetchRankedLeaderboard(params?: { tier?: string; top?: number }): Promise<RankedPlayer[]> {
@@ -120,7 +123,7 @@ export async function fetchRankedLeaderboard(params?: { tier?: string; top?: num
     const raw = await fetchJson<Array<{
       player_id: string; name: string; tier: number; points: number;
       rank: number; prev_rank?: number; trend?: number; tier_change?: number;
-      wins?: number; losses?: number; winrate?: number;
+      wins?: number; losses?: number; leaves?: number; winrate?: number; leaverate?: number;
     }>>(`/stats/ranked-leaderboard${query.toString() ? `?${query.toString()}` : ''}`);
     return raw.map(r => ({
       rank: r.rank,
@@ -132,7 +135,9 @@ export async function fetchRankedLeaderboard(params?: { tier?: string; top?: num
       trend: r.trend,
       wins: r.wins,
       losses: r.losses,
+      leaves: r.leaves,
       winRate: r.winrate,
+      leaveRate: r.leaverate,
     }));
   } catch {
     return [];
@@ -981,6 +986,32 @@ export async function fetchPlayerSearch(query: string): Promise<PlayerSearchResu
     region: r.region,
     kbmTier: r.kbm_tier,
   }));
+}
+
+export type UniversalSearchType = "player" | "match" | "champion" | "item" | "card" | "talent";
+
+export interface UniversalSearchResult {
+  type: UniversalSearchType;
+  id: string;
+  title: string;
+  subtitle: string;
+  href: string;
+  score: number;
+  meta?: Record<string, unknown>;
+}
+
+export interface UniversalSearchResponse {
+  query: string;
+  total: number;
+  data: UniversalSearchResult[];
+}
+
+export async function fetchUniversalSearch(queryText: string, limit = 30): Promise<UniversalSearchResponse> {
+  const query = new URLSearchParams({
+    q: queryText,
+    limit: String(limit),
+  });
+  return fetchJson<UniversalSearchResponse>(`/search/universal?${query.toString()}`, { unwrapData: false });
 }
 
 export async function fetchPlayerMatches(id: string, params?: { limit?: string; offset?: string }): Promise<MatchRecord[]> {
@@ -2006,10 +2037,36 @@ export interface MatchPlayerDetail {
   assists: number;
   damage_done_physical: number;
   damage_done_magical: number;
+  damage_done_in_hand?: number;
+  damage_taken?: number;
+  damage_mitigated?: number;
+  mitigation_per_minute?: number;
+  healing?: number;
+  healing_self?: number;
+  healing_bot?: number;
+  healing_player_self?: number;
   gold_earned: number;
+  gold_per_minute?: number;
+  egpm?: number | null;
+  objective_assists?: number;
+  camps_cleared?: number;
+  structure_damage?: number;
+  wards_placed?: number;
+  towers_destroyed?: number;
+  distance_traveled?: number;
+  multi_kill_max?: number;
+  killing_spree?: number;
+  kills_first_blood?: number;
+  kills_double?: number;
+  kills_triple?: number;
+  kills_quadra?: number;
+  kills_penta?: number;
   win_status: string;
   task_force: number;
   league_tier: string | null;
+  tier?: number | null;
+  source?: string | null;
+  party_number?: number | null;
   kda: number;
   damage_per_minute: number;
   healing_per_minute: number;
@@ -2019,6 +2076,7 @@ export interface MatchPlayerDetail {
 }
 
 export interface MatchBan {
+  ban_slot?: number;
   champion_id: number;
   champion_name?: string;
 }
@@ -2053,9 +2111,35 @@ export interface MatchDetailWithBans {
 export interface MatchFactPlayer {
   player_id: number;
   player_name: string;
-  items: Array<{ item_id: number; slot: number }>;
-  cards: Array<{ card_id: number }>;
-  talents: Array<{ talent_id: number }>;
+  champion_id?: number;
+  champion_name?: string;
+  items: Array<{
+    item_id: number;
+    slot: number;
+    item_level?: number | null;
+    item_name?: string | null;
+    description?: string | null;
+    item_type?: string | null;
+    cost?: number | null;
+    icon_url?: string | null;
+    fallback_icon_url?: string | null;
+  }>;
+  cards: Array<{
+    card_id: number;
+    card_level?: number | null;
+    card_name?: string | null;
+    champion_id?: number | null;
+    icon_url?: string | null;
+    fallback_icon_url?: string | null;
+  }>;
+  talents: Array<{
+    talent_id: number;
+    talent_name?: string | null;
+    champion_id?: number | null;
+    champion_name?: string | null;
+    icon_url?: string | null;
+    fallback_icon_url?: string | null;
+  }>;
 }
 
 export interface MatchFact {
