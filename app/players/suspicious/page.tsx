@@ -28,13 +28,9 @@ export default function SuspiciousPage() {
       setLoading(true);
       try {
         const players = await fetchCheaterPlayers({ susOnly: true, limit: 100 });
-        if (players.length > 0) {
-          setData(players);
-        } else {
-          setData(MOCK_SUSPICIOUS_FULL);
-        }
+        setData(players);
       } catch {
-        setData(MOCK_SUSPICIOUS_FULL);
+        setData([]);
       } finally {
         setLoading(false);
       }
