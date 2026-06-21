@@ -62,7 +62,7 @@ export default function PlayersPage() {
       const [championEloResult, performanceRows, ranked, accountElo, cheaters, suspicious] = await Promise.all([
         fetchChampionElo({ limit: 10, queueId: 486 }),
         Promise.all(PERFORMANCE_METRICS.map(async ({ key, metric }) => [key, await fetchPerformanceLeaderboard({ metric, limit: 5, queueId: 486 })] as const)),
-        fetchRankedLeaderboard({ tier: "26", top: 10 }),
+        fetchRankedLeaderboard({ tier: "26", top: 20 }),
         fetchClassLeaderboard({ role: "Frontline", limit: 10, queueId: 486, mode: "account" }),
         fetchCheaterPlayers({ cheater: true, limit: 5 }),
         fetchCheaterPlayers({ susOnly: true, limit: 5 }),
@@ -286,49 +286,50 @@ export default function PlayersPage() {
           </div>
         </div>
 
-        {/* Right: compact cards grid — all same format */}
+        {/* Right: expanded ranked leaderboard on top, two cards below */}
         <div className="lg:w-2/5 space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-            {/* Ranked Leaderboard */}
-            <section>
-              <div className="flex items-center justify-between mb-2 px-2">
-                <h2 className="text-sm font-bold text-pc-text">Ranked Leaderboard</h2>
-                <Link href="/players/leaderboard" className="text-[10px] text-pc-text-secondary hover:text-pc-accent transition-colors drop-shadow-sm">
-                  Detail →
-                </Link>
-              </div>
-              <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-3">
-                <div className="space-y-1.5">
-                  {rankedPlayers.length === 0 && (
-                    <div className="text-[11px] text-pc-text-muted">{overviewLoading ? "Loading..." : "No ranked leaderboard data"}</div>
-                  )}
-                  {rankedPlayers.map((p, i) => {
-                    const iconPath = getRankIconPath(p.tier, p.rank);
-                    const effective = resolveEffectiveTier(p.tier, p.rank);
-                    return (
-                    <div key={p.player_id} className="flex items-center justify-between text-[11px]">
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        <RankBadge rank={i + 1} />
-                        <img src={iconPath} alt={effective.displayName} className="w-4 h-4 object-contain shrink-0" title={effective.displayName} />
-                        <Link href={`/players/${p.player_id}`} className="text-pc-text truncate hover:text-pc-accent transition-colors">{p.name}</Link>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        {p.trend != null && p.trend !== 0 ? (
-                          <span className={p.trend > 0 ? "text-emerald-400" : "text-red-400"}>
-                            {p.trend > 0 ? "▲" : "▼"}{Math.abs(p.trend)}
-                          </span>
-                        ) : (
-                          <span className="text-pc-text-muted">—</span>
-                        )}
-                        <span className="text-pc-text font-medium">{p.points.toLocaleString()}</span>
-                      </div>
+          {/* Ranked Leaderboard — expanded, full width */}
+          <section>
+            <div className="flex items-center justify-between mb-2 px-2">
+              <h2 className="text-sm font-bold text-pc-text">Ranked Leaderboard</h2>
+              <Link href="/players/leaderboard" className="text-[10px] text-pc-text-secondary hover:text-pc-accent transition-colors drop-shadow-sm">
+                Detail →
+              </Link>
+            </div>
+            <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4">
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+                {rankedPlayers.length === 0 && (
+                  <div className="col-span-2 text-[11px] text-pc-text-muted">{overviewLoading ? "Loading..." : "No ranked leaderboard data"}</div>
+                )}
+                {rankedPlayers.map((p, i) => {
+                  const iconPath = getRankIconPath(p.tier, p.rank);
+                  const effective = resolveEffectiveTier(p.tier, p.rank);
+                  return (
+                  <div key={p.player_id} className="flex items-center justify-between text-[11px]">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <RankBadge rank={i + 1} />
+                      <img src={iconPath} alt={effective.displayName} className="w-4 h-4 object-contain shrink-0" title={effective.displayName} />
+                      <Link href={`/players/${p.player_id}`} className="text-pc-text truncate hover:text-pc-accent transition-colors">{p.name}</Link>
                     </div>
-                    );
-                  })}
-                </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {p.trend != null && p.trend !== 0 ? (
+                        <span className={p.trend > 0 ? "text-emerald-400" : "text-red-400"}>
+                          {p.trend > 0 ? "▲" : "▼"}{Math.abs(p.trend)}
+                        </span>
+                      ) : (
+                        <span className="text-pc-text-muted">—</span>
+                      )}
+                      <span className="text-pc-text font-medium">{p.points.toLocaleString()}</span>
+                    </div>
+                  </div>
+                  );
+                })}
               </div>
-            </section>
+            </div>
+          </section>
 
+          {/* Two cards below */}
+          <div className="grid grid-cols-2 gap-3">
             {/* Top Players by Champion */}
             <section>
               <div className="flex items-center justify-between mb-2 px-2">
