@@ -16,7 +16,11 @@ import {
   type ChampionTalent,
   type ChampionLoadout,
 } from "@/lib/champion-data";
-import { fetchChampionLeaderboard, type ChampionLeaderboardEntry } from "@/lib/api-client";
+import { fetchChampionLeaderboard, type ChampionLeaderboardEntry,
+  fetchChampionTalentStats, fetchChampionCardStats,
+  type ChampionTalentStatsResponse, type ChampionCardStatsResponse,
+  type ChampionTalentStat, type ChampionCardStat,
+} from "@/lib/api-client";
 import { getRankIconPath, getTierColor, resolveEffectiveTier } from "@/lib/tier-utils";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api";
@@ -100,6 +104,8 @@ export default function ChampionDetailPage() {
   const [dataLoaded, setDataLoaded] = useState(false);
   const [stats, setStats] = useState<ChampionStats | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [talentStats, setTalentStats] = useState<ChampionTalentStatsResponse | null>(null);
+  const [cardStats, setCardStats] = useState<ChampionCardStatsResponse | null>(null);
   const [tierStats, setTierStats] = useState<TierStat[]>([]);
   const [patchTrends, setPatchTrends] = useState<PatchTrend[]>([]);
   const [loading, setLoading] = useState(true);
@@ -176,13 +182,19 @@ export default function ChampionDetailPage() {
             .catch(() => null as ChampionStats | null),
           // Per-champion leaderboard from player_champion_ratings
           fetchChampionLeaderboard(match.id, 25).catch(() => [] as ChampionLeaderboardEntry[]),
+          // Talent stats for this champion
+          fetchChampionTalentStats(match.id).catch(() => null as ChampionTalentStatsResponse | null),
+          // Card stats for this champion
+          fetchChampionCardStats(match.id).catch(() => null as ChampionCardStatsResponse | null),
         ]);
       })
       .then((result) => {
         if (!result) return;
-        const [statsData, lbData] = result;
+        const [statsData, lbData, talentData, cardData] = result;
         if (statsData) setStats(statsData);
         setLeaderboard(lbData);
+        if (talentData) setTalentStats(talentData);
+        if (cardData) setCardStats(cardData);
       })
       .finally(() => setLoading(false));
   }, [championData]);
@@ -258,9 +270,12 @@ export default function ChampionDetailPage() {
               <h2 className="pc-card-title mb-2 shadow-sm">Talents</h2>
               <div className="pc-card">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {championData.talents.map((talent) => (
-                  <TalentCard key={talent.name} talent={talent} championName={championData.name} />
-                ))}
+                {championData.talents.map((talent) => {
+                  const stat = talentStats?.talents.find((t) => t.talentName === talent.name);
+                  return (
+                    <TalentCard key={talent.name} talent={talent} championName={championData.name} stat={stat ?? undefined} />
+                  );
+                })}
               </div>
               </div>
             </>
@@ -282,21 +297,53 @@ export default function ChampionDetailPage() {
                   <div key={cat} className="mb-6 last:mb-0">
                     <div className="text-xs font-medium text-pc-text-muted uppercase tracking-wider mb-2">{cat}</div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                      {cards.map((card) => (
-                        <div key={card.name} className="pc-surface-light rounded-lg p-3 border border-pc-border flex items-start gap-3">
-                          {card.iconUrl ? (
-                            <SmartImage src={card.iconUrl} alt={card.name} className="flex-shrink-0 w-12 h-10 rounded border border-pc-border bg-pc-bg/50 object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
-                          ) : (
-                            <div className="flex-shrink-0 w-10 h-10 rounded border border-pc-border bg-pc-bg-elevated flex items-center justify-center">
-                              <span className="text-xs text-pc-accent">?</span>
+                      {cards.map((card) => {
+                        const stat = cardStats?.cards.find((c) => c.cardName === card.name);
+                        return (
+                          <div key={card.name} className="pc-surface-light rounded-lg p-3 border border-pc-border">
+                            <div className="flex items-start gap-3">
+                              {card.iconUrl ? (
+                                <SmartImage src={card.iconUrl} alt={card.name} className="flex-shrink-0 w-12 h-10 rounded border border-pc-border bg-pc-bg/50 object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                              ) : (
+                                <div className="flex-shrink-0 w-10 h-10 rounded border border-pc-border bg-pc-bg-elevated flex items-center justify-center">
+                                  <span className="text-xs text-pc-accent">?</span>
+                                </div>
+                              )}
+                              <div className="min-w-0 flex-1">
+                                <div className="text-xs font-medium text-pc-accent mb-0.5">{card.name}</div>
+                                <p className="text-xs text-pc-text-secondary leading-relaxed">{card.description}</p>
+                                {stat && stat.totalPlays > 0 && (
+                                  <div className="mt-2 space-y-1.5">
+                                    <div className="flex items-center gap-2">
+                                      <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold ${winRateBadgeClass(stat.winRate)}`}>
+                                        {stat.winRate.toFixed(1)}%
+                                      </span>
+                                      <span className="text-[10px] text-pc-text-muted">{stat.totalPlays.toLocaleString()} plays</span>
+                                      <span className="text-[10px] text-pc-text-muted">{stat.wins.toLocaleString()}W/{stat.losses.toLocaleString()}L</span>
+                                    </div>
+                                    {stat.levels.length > 0 && (
+                                      <div className="flex items-center gap-1">
+                                        {stat.levels.map((l) => (
+                                          <div key={l.level} className="flex-1 flex flex-col items-center">
+                                            <div className="text-[9px] text-pc-text-muted">L{l.level}</div>
+                                            <div className="w-full h-1.5 rounded-full bg-pc-bg-elevated overflow-hidden">
+                                              <div
+                                                className={`h-full rounded-full ${winRateBadgeClass(l.winRate).replace('bg-emerald-500/20', 'bg-emerald-400').replace('bg-rose-500/20', 'bg-rose-400')}`}
+                                                style={{ width: `${Math.min(l.plays > 0 ? 100 : 0, 100)}%` }}
+                                              />
+                                            </div>
+                                            <div className="text-[9px] text-pc-text-muted">{l.plays}</div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
                             </div>
-                          )}
-                          <div className="min-w-0">
-                            <div className="text-xs font-medium text-pc-accent mb-0.5">{card.name}</div>
-                            <p className="text-xs text-pc-text-secondary leading-relaxed">{card.description}</p>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 ));
@@ -506,7 +553,13 @@ function SkillCard({ skill }: { skill: ChampionSkill }) {
   );
 }
 
-function TalentCard({ talent, championName }: { talent: ChampionTalent; championName: string }) {
+function winRateBadgeClass(wr: number): string {
+  if (wr >= 50) return 'bg-emerald-500/20 text-emerald-400';
+  if (wr <= 40) return 'bg-rose-500/20 text-rose-400';
+  return 'bg-pc-bg text-pc-text-secondary';
+}
+
+function TalentCard({ talent, championName, stat }: { talent: ChampionTalent; championName: string; stat?: { totalPlays: number; winRate: number; wins: number; losses: number } }) {
   const talentImageUrl = talent.iconUrl || `/images/champions/Talent ${championName} ${talent.name}.png`;
 
   return (
@@ -528,6 +581,15 @@ function TalentCard({ talent, championName }: { talent: ChampionTalent; champion
         )}
         {talent.category && (
           <div className="text-xs text-pc-text-muted mt-1">Linked: {talent.category}</div>
+        )}
+        {stat && stat.totalPlays > 0 && (
+          <div className="flex items-center gap-2 mt-2">
+            <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold ${winRateBadgeClass(stat.winRate)}`}>
+              {stat.winRate.toFixed(1)}%
+            </span>
+            <span className="text-[10px] text-pc-text-muted">{stat.totalPlays.toLocaleString()} plays</span>
+            <span className="text-[10px] text-pc-text-muted">{stat.wins.toLocaleString()}W/{stat.losses.toLocaleString()}L</span>
+          </div>
         )}
       </div>
     </div>

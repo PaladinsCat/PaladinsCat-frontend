@@ -1349,6 +1349,121 @@ export async function fetchChampionLeaderboard(championId: number, limit = 25): 
   }));
 }
 
+// ── Champion Talent Stats ──
+
+export interface ChampionTalentStat {
+  talentId: number;
+  talentName: string;
+  totalPlays: number;
+  wins: number;
+  losses: number;
+  winRate: number;
+}
+
+export interface ChampionTalentStatsResponse {
+  totalMatches: number;
+  talents: ChampionTalentStat[];
+}
+
+export async function fetchChampionTalentStats(
+  championId: number,
+  mode: 'ranked' | 'casual' = 'ranked'
+): Promise<ChampionTalentStatsResponse> {
+  try {
+    const raw = await fetchJson<{
+      totalMatches: number | string;
+      talents: Array<{
+        talentId: number | string;
+        talentName: string;
+        totalPlays: number | string;
+        wins: number | string;
+        losses: number | string;
+        winRate: number | string;
+      }>;
+    }>(`/stats/talents/${championId}?mode=${mode}`);
+
+    return {
+      totalMatches: Number(raw.totalMatches) ?? 0,
+      talents: (raw.talents ?? []).map((t) => ({
+        talentId: Number(t.talentId) ?? 0,
+        talentName: t.talentName ?? 'Unknown',
+        totalPlays: Number(t.totalPlays) ?? 0,
+        wins: Number(t.wins) ?? 0,
+        losses: Number(t.losses) ?? 0,
+        winRate: toDisplayPercent(t.winRate) ?? 0,
+      })),
+    };
+  } catch {
+    return { totalMatches: 0, talents: [] };
+  }
+}
+
+// ── Champion Card Stats ──
+
+export interface ChampionCardLevelStat {
+  level: number;
+  plays: number;
+  winRate: number;
+}
+
+export interface ChampionCardStat {
+  cardId: number;
+  cardName: string;
+  totalPlays: number;
+  wins: number;
+  losses: number;
+  winRate: number;
+  levels: ChampionCardLevelStat[];
+}
+
+export interface ChampionCardStatsResponse {
+  totalMatches: number;
+  cards: ChampionCardStat[];
+}
+
+export async function fetchChampionCardStats(
+  championId: number,
+  mode: 'ranked' | 'casual' = 'ranked'
+): Promise<ChampionCardStatsResponse> {
+  try {
+    const raw = await fetchJson<{
+      totalMatches: number | string;
+      cards: Array<{
+        cardId: number | string;
+        cardName: string;
+        totalPlays: number | string;
+        wins: number | string;
+        losses: number | string;
+        winRate: number | string;
+        levels: Array<{
+          level: number | string;
+          plays: number | string;
+          winRate: number | string;
+        }>;
+      }>;
+    }>(`/stats/cards/${championId}?mode=${mode}`);
+
+    return {
+      totalMatches: Number(raw.totalMatches) ?? 0,
+      cards: (raw.cards ?? []).map((c) => ({
+        cardId: Number(c.cardId) ?? 0,
+        cardName: c.cardName ?? 'Unknown',
+        totalPlays: Number(c.totalPlays) ?? 0,
+        wins: Number(c.wins) ?? 0,
+        losses: Number(c.losses) ?? 0,
+        winRate: toDisplayPercent(c.winRate) ?? 0,
+        levels: (c.levels ?? []).map((l) => ({
+          level: Number(l.level) ?? 0,
+          plays: Number(l.plays) ?? 0,
+          winRate: toDisplayPercent(l.winRate) ?? 0,
+        })),
+      })),
+    };
+  } catch {
+    return { totalMatches: 0, cards: [] };
+  }
+}
+
 export async function fetchHourlyMatchCounts(params?: { date?: string; hour?: number; queueId?: number }): Promise<HourlyMatchCount[]> {
   const query = new URLSearchParams();
   if (params?.date) query.set('date', params.date);
