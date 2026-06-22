@@ -1641,16 +1641,39 @@ export function clearAuth() {
 // ── Auth ──
 
 export async function register(username: string, email: string, password: string): Promise<AuthSession> {
-  await fetchJson<{
+  const raw = await fetchJson<{
     message: string;
-    user: { id: number; username: string; created_at: string };
+    user: { id: number; username: string; email?: string | null; avatar_url?: string | null; bio?: string | null; is_admin?: boolean; is_approved?: boolean; created_at?: string; last_login?: string | null };
+    token: string;
+    expires_at?: string;
   }>(`/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, email, password }),
   });
 
-  return login(username, password);
+  // The backend creates the session in the same transaction window as the user
+  // insert. Do not re-login here: that turns a successful registration into a
+  // user-visible failure if a later login read hits schema drift or a transient
+  // DB issue. Store the returned session exactly like login() does.
+  const session: AuthSession = {
+    user: {
+      id: raw.user.id,
+      username: raw.user.username,
+      email: raw.user.email ?? email,
+      avatarUrl: raw.user.avatar_url ?? null,
+      bio: raw.user.bio ?? null,
+      isAdmin: raw.user.is_admin ?? false,
+      isApproved: raw.user.is_approved ?? false,
+      createdAt: raw.user.created_at ?? new Date().toISOString(),
+      lastLogin: raw.user.last_login ?? null,
+    },
+    token: raw.token,
+    expiresAt: raw.expires_at ?? new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(),
+  };
+
+  setAuthSession(session);
+  return session;
 }
 
 export async function login(username: string, password: string): Promise<AuthSession> {
