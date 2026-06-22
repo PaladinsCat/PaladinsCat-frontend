@@ -261,17 +261,21 @@ export default function StatsPage() {
       <section>
         <div className="flex items-center justify-between gap-3 mb-4 px-2">
           <h2 className="text-lg font-bold text-pc-text">Tier Distribution</h2>
-          <div className="text-xs text-pc-text-secondary">
-            {tierTotal.toLocaleString()} players
-          </div>
+          <Link href="/stats/tiers" className={DETAIL_LINK_CLASS}>Detail →</Link>
         </div>
         <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
-          <div className="flex items-end gap-1.5 h-40 overflow-x-auto pb-2">
+          <div className="flex items-center justify-between gap-3 mb-3">
+            <span className="text-xs text-pc-text-muted">Ranked player profiles</span>
+            <span className="text-xs font-semibold text-pc-text tabular-nums">
+              {tierTotal.toLocaleString()} players
+            </span>
+          </div>
+          <div className="flex items-end gap-1.5 h-48 overflow-x-auto pb-2">
             {normalizedTiers.map((tier) => {
               const height = Math.max(4, Math.round((tier.totalPlays / maxTierCount) * 116));
               const rankIcon = getRankIconPath(tier.tierSort, tier.tierSort === 26 ? 101 : tier.tierSort === 27 ? 1 : 0);
               return (
-                <div key={tier.tierSort} className="flex flex-col items-center justify-end gap-1 min-w-8 h-full group">
+                <div key={tier.tierSort} className="flex flex-col items-center justify-end gap-1 min-w-9 h-full group">
                   <div className="text-[9px] text-pc-text-muted tabular-nums opacity-0 group-hover:opacity-100 transition-opacity">
                     {tier.percentage.toFixed(1)}%
                   </div>
@@ -287,22 +291,12 @@ export default function StatsPage() {
                     className="h-5 w-5 object-contain drop-shadow"
                     loading="lazy"
                   />
+                  <div className="text-[9px] text-pc-text-secondary tabular-nums leading-none">
+                    {tier.totalPlays.toLocaleString()}
+                  </div>
                 </div>
               );
             })}
-          </div>
-          <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-            {[
-              { label: "Ranked players", value: tierTotal },
-              { label: "Highest bucket", value: Math.max(...normalizedTiers.map((tier) => tier.totalPlays)) },
-              { label: "Tracked buckets", value: normalizedTiers.filter((tier) => tier.totalPlays > 0).length },
-              { label: "Tier range", value: normalizedTiers.length },
-            ].map((item) => (
-              <div key={item.label} className="pc-surface-light rounded-lg px-3 py-2">
-                <div className="text-pc-text-muted">{item.label}</div>
-                <div className="text-pc-text font-semibold tabular-nums">{item.value.toLocaleString()}</div>
-              </div>
-            ))}
           </div>
         </div>
       </section>

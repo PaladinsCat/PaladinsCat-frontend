@@ -99,9 +99,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <html lang="en" className={cn("dark", "font-sans")}>
-      <head>
-        <link rel="stylesheet" href="/glass-surfaces.css" />
-      </head>
+      <head></head>
       <body className="min-h-screen bg-pc-bg text-pc-text flex flex-col">
         <script
           type="application/ld+json"
