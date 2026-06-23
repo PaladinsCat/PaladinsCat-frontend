@@ -25,6 +25,17 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
   },
+  icons: {
+    icon: [
+      {
+        url: "/images/icons/paladinscat.png",
+        type: "image/png",
+        sizes: "512x512",
+      },
+    ],
+    shortcut: "/images/icons/paladinscat.png",
+    apple: "/images/icons/paladinscat.png",
+  },
   openGraph: {
     type: "website",
     url: SITE_URL,
