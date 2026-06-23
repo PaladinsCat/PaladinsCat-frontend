@@ -918,7 +918,7 @@ export async function fetchChampions(params?: {
       winRate: stat?.winRate ?? null,
       pickRate: stat?.pickRate ?? null,
       banRate: stat?.banRate ?? null,
-      rating: null,
+      rating: stat?.avgLeagueTier ?? null,
       ratingDeviation: null,
       volatility: null,
       totalMatches: stat?.totalPlays ?? null,
@@ -1234,6 +1234,7 @@ export interface StatsChampion {
   avgGold?: number;
   avgHeal?: number;
   avgMitigation?: number;
+  avgLeagueTier?: number;
 }
 
 export async function fetchStatsChampions(params?: { sort?: string; limit?: number }): Promise<StatsChampion[]> {
@@ -1247,6 +1248,7 @@ export async function fetchStatsChampions(params?: { sort?: string; limit?: numb
       ban_rate?: number | string; pick_rate?: number | string; kda?: number | string;
       avg_damage?: number | string; avg_gold?: number | string;
       avg_heal?: number | string; avg_mitigation?: number | string;
+      avg_league_tier?: number | string;
     }>>(`/stats/champions${query.toString() ? `?${query.toString()}` : ''}`);
     const num = (v: number | string | undefined) => v != null ? (typeof v === 'string' ? Number(v) : v) : undefined;
     return raw.map((r) => ({
@@ -1261,6 +1263,7 @@ export async function fetchStatsChampions(params?: { sort?: string; limit?: numb
       avgGold: num(r.avg_gold),
       avgHeal: num(r.avg_heal),
       avgMitigation: num(r.avg_mitigation),
+      avgLeagueTier: num(r.avg_league_tier),
     }));
   } catch {
     return [];
