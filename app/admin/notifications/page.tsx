@@ -65,7 +65,7 @@ export default function AdminNotificationsPage() {
   const [status, setStatus] = useState<string | null>(null);
 
   // Wait for auth to resolve, then check admin status
-  const isAdmin = user?.is_admin ?? false;
+  const isAdmin = user?.isAdmin ?? false;
 
   // Load notifications once auth is resolved and user is admin
   async function load() {
