@@ -591,7 +591,7 @@ function TalentCard({ talent, championName, stat, totalMatches }: { talent: Cham
             <span className="text-pc-border">|</span>
             <span className="text-pc-text-muted">
               <span className="mr-1">PR</span>
-              <span className="text-pc-text-secondary">{totalMatches > 0 ? ((stat.totalPlays / totalMatches) * 100).toFixed(1) : '0.0'}%</span>
+              <span className="text-pc-text-secondary">{totalMatches != null && totalMatches > 0 ? ((stat.totalPlays / totalMatches) * 100).toFixed(1) : '0.0'}%</span>
             </span>
             <span className="text-pc-border">|</span>
             <span className="text-pc-text-muted whitespace-nowrap">
