@@ -796,7 +796,7 @@ export async function deleteAdminNotification(token: string, id: number): Promis
 
 export async function fetchChangelogPreview(): Promise<ChangelogEntry | null> {
   try {
-    const raw = await fetchJson<any>('/meta/changelog?preview=true');
+    const raw = await fetchJson<any>('/meta/changelog?preview=true', { unwrapData: false });
     return raw ? mapChangelogEntry(raw) : null;
   } catch {
     return null;
@@ -808,7 +808,7 @@ export async function fetchChangelog(params?: { page?: number; perPage?: number 
   if (params?.page != null) query.set('page', String(params.page));
   if (params?.perPage != null) query.set('perPage', String(params.perPage));
   try {
-    const raw = await fetchJson<any>(`/meta/changelog${query.toString() ? `?${query.toString()}` : ''}`);
+    const raw = await fetchJson<any>(`/meta/changelog${query.toString() ? `?${query.toString()}` : ''}`, { unwrapData: false });
     return {
       data: (raw.data ?? []).map(mapChangelogEntry),
       total: raw.total ?? 0,
