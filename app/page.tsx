@@ -149,9 +149,6 @@ export default function HomePage() {
             <div>
               {notifications.length > 0 ? (
                 <div className="space-y-3">
-                  <h2 className="px-2 text-sm font-bold text-pc-text">
-                    {notifications.length === 1 ? "Notification" : "Notifications"}
-                  </h2>
                   {notifications.map((notification) => (
                     <div key={notification.id} className="group relative flex items-start gap-3 p-3 rounded-xl bg-pc-bg-elevated border border-pc-border shadow-sm">
                       <div className={`shrink-0 mt-0.5 w-2 h-2 rounded-full ${notificationDot(notification.importance)}`} />

@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { fetchChangelog, type ChangelogPage } from "@/lib/api-client";
 import { formatLocalDateTime, formatRelativeTime } from "@/lib/time-format";
 
-const PER_PAGE = 15;
+const PER_PAGE = 10;
 
 type ChangelogSection = {
   title: string;
@@ -50,7 +49,6 @@ function parseChangelog(text: string): ChangelogSection[] {
         }
       }
     } else if (line.trim() && !line.match(/^\s*$/)) {
-      // Non-bullet paragraph text — treat as orphan
       if (currentSection) {
         currentSection.items.push(line.trim());
       } else {
@@ -61,7 +59,6 @@ function parseChangelog(text: string): ChangelogSection[] {
 
   if (currentSection && currentSection.items.length > 0) sections.push(currentSection);
 
-  // Orphan items get grouped under "Changes"
   if (orphanItems.length > 0) {
     sections.unshift({ title: "Changes", items: orphanItems, color: "text-pc-text" });
   }
@@ -80,74 +77,163 @@ function sourceLabel(source: string | null) {
   return labels[source] || source;
 }
 
+// Parse version string v<major>.<minor>.<patch> to determine change type
+function getVersionChangeType(version: string): "major" | "minor" | "patch" {
+  const match = version.match(/v?(\d+)\.(\d+)\.(\d+)/);
+  if (!match) return "patch";
+  const major = parseInt(match[1], 10);
+  const minor = parseInt(match[2], 10);
+  const patch = parseInt(match[3], 10);
+  if (major > 0) return "major";
+  if (minor > 0) return "minor";
+  return "patch";
+}
+
+function getVersionColor(type: "major" | "minor" | "patch") {
+  switch (type) {
+    case "major": return "bg-rose-500";
+    case "minor": return "bg-amber-500";
+    case "patch": return "bg-pc-accent";
+  }
+}
+
+function getVersionTextColor(type: "major" | "minor" | "patch") {
+  switch (type) {
+    case "major": return "text-rose-400";
+    case "minor": return "text-amber-400";
+    case "patch": return "text-pc-accent";
+  }
+}
+
+// Version History Graph - compact timeline visualization
+function VersionHistoryGraph({ entries }: { entries: ChangelogPage["data"] }) {
+  if (entries.length === 0) return null;
+
+  return (
+    <div className="pc-card sticky top-20">
+      <h2 className="text-sm font-bold text-pc-text mb-4 flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-pc-accent"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>
+        Version History
+      </h2>
+
+      <div className="space-y-0">
+        {entries.map((entry, i) => {
+          const changeType = getVersionChangeType(entry.version);
+          const color = getVersionColor(changeType);
+          const textColor = getVersionTextColor(changeType);
+          const hasChangelog = entry.changelog && entry.changelog.trim().length > 0;
+
+          return (
+            <div key={entry.id} className="flex items-start gap-3 group">
+              {/* Timeline */}
+              <div className="flex flex-col items-center pt-1">
+                <div className={`w-2.5 h-2.5 rounded-full ${color} ${hasChangelog ? "ring-2 ring-white/10" : "opacity-50"} transition-all group-hover:scale-125`} />
+                {i < entries.length - 1 && (
+                  <div className="w-px flex-1 bg-pc-border min-h-[20px] mt-1" />
+                )}
+              </div>
+
+              {/* Info */}
+              <div className="pb-4 flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className={`text-xs font-bold font-mono ${textColor}`}>
+                    {entry.version}
+                  </span>
+                  <span className="text-[10px] font-mono text-pc-text-muted truncate">
+                    {entry.gitCommitShort}
+                  </span>
+                </div>
+                {entry.deployedAt && (
+                  <time dateTime={entry.deployedAt} className="text-[10px] text-pc-text-muted block mt-0.5">
+                    {formatRelativeTime(entry.deployedAt)}
+                  </time>
+                )}
+                {!hasChangelog && (
+                  <span className="text-[10px] text-pc-text-muted italic block mt-0.5">
+                    deployment
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Legend */}
+      <div className="mt-4 pt-3 border-t border-pc-border">
+        <div className="flex items-center gap-3 text-[10px] text-pc-text-muted">
+          <span className="flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-rose-500" /> Major
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" /> Minor
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-pc-accent" /> Patch
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ChangelogEntry({ entry, index }: { entry: ChangelogPage["data"][number]; index: number }) {
   const sections = useMemo(() => parseChangelog(entry.changelog), [entry.changelog]);
   const hasChangelog = sections.length > 0;
 
   return (
-    <article className="group">
-      {/* Timeline dot + line */}
-      <div className="flex gap-4">
-        <div className="flex flex-col items-center">
-          <div className={`w-3 h-3 rounded-full border-2 shrink-0 ${hasChangelog ? "bg-pc-accent border-pc-accent" : "bg-pc-bg border-pc-text-muted"}`} />
-          {index > 0 && <div className="w-px flex-1 bg-pc-border mt-1" />}
-        </div>
-
-        {/* Content */}
-        <div className="pb-6 flex-1 min-w-0">
-          {/* Header row */}
-          <div className="flex items-center gap-2 flex-wrap mb-1">
-            <span className="text-sm font-bold text-pc-text">{entry.version}</span>
-            <span className="font-mono text-xs text-pc-text-muted bg-pc-bg-secondary px-1.5 py-0.5 rounded">
-              {entry.gitCommitShort}
-            </span>
-            {entry.gitBranch && (
-              <span className="text-xs text-pc-text-muted">
-                {entry.gitBranch}
-              </span>
-            )}
-          </div>
-
-          {/* Meta row */}
-          <div className="flex items-center gap-3 text-xs text-pc-text-muted mb-2">
-            {entry.deployedAt && (
-              <time dateTime={entry.deployedAt} title={formatLocalDateTime(entry.deployedAt)}>
-                {formatRelativeTime(entry.deployedAt)}
-              </time>
-            )}
-            {sourceLabel(entry.source) && (
-              <>
-                <span>·</span>
-                <span>{sourceLabel(entry.source)}</span>
-              </>
-            )}
-          </div>
-
-          {/* Changelog sections */}
-          {hasChangelog ? (
-            <div className="space-y-2">
-              {sections.map((section) => (
-                <div key={section.title}>
-                  <h3 className={`text-xs font-semibold ${section.color} mb-1`}>
-                    {section.title}
-                  </h3>
-                  <ul className="space-y-0.5">
-                    {section.items.map((item, i) => (
-                      <li key={i} className="text-sm text-pc-text-secondary leading-relaxed">
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-xs text-pc-text-muted italic">
-              Deployment recorded — no changelog provided.
-            </p>
-          )}
-        </div>
+    <article className="group pb-6 border-b border-pc-border last:border-b-0">
+      {/* Header row */}
+      <div className="flex items-center gap-2 flex-wrap mb-1">
+        <span className="text-sm font-bold text-pc-text">{entry.version}</span>
+        <span className="font-mono text-xs text-pc-text-muted bg-pc-bg-secondary px-1.5 py-0.5 rounded">
+          {entry.gitCommitShort}
+        </span>
+        {entry.gitBranch && (
+          <span className="text-xs text-pc-text-muted">
+            {entry.gitBranch}
+          </span>
+        )}
       </div>
+
+      {/* Meta row */}
+      <div className="flex items-center gap-3 text-xs text-pc-text-muted mb-2">
+        {entry.deployedAt && (
+          <time dateTime={entry.deployedAt} title={formatLocalDateTime(entry.deployedAt)}>
+            {formatRelativeTime(entry.deployedAt)}
+          </time>
+        )}
+        {sourceLabel(entry.source) && (
+          <>
+            <span>·</span>
+            <span>{sourceLabel(entry.source)}</span>
+          </>
+        )}
+      </div>
+
+      {/* Changelog sections */}
+      {hasChangelog ? (
+        <div className="space-y-2">
+          {sections.map((section) => (
+            <div key={section.title}>
+              <h3 className={`text-xs font-semibold ${section.color} mb-1`}>
+                {section.title}
+              </h3>
+              <ul className="space-y-0.5">
+                {section.items.map((item, i) => (
+                  <li key={i} className="text-sm text-pc-text-secondary leading-relaxed">
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-xs text-pc-text-muted italic">
+          Deployment recorded — no changelog provided.
+        </p>
+      )}
     </article>
   );
 }
@@ -236,32 +322,55 @@ export default function ChangelogPage() {
         </p>
       </div>
 
-      {/* Timeline */}
+      {/* Content: Graph + Entries */}
       {loading ? (
-        <div className="space-y-6">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="flex gap-4 animate-pulse">
-              <div className="w-3">
-                <div className="w-3 h-3 rounded-full bg-pc-bg-secondary" />
-                {i > 0 && <div className="w-px bg-pc-bg-secondary mt-1" style={{ height: "80px" }} />}
-              </div>
-              <div className="flex-1 space-y-2">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Skeleton: Graph */}
+          <div className="pc-card animate-pulse">
+            <div className="h-4 bg-pc-bg-secondary rounded w-1/3 mb-4" />
+            <div className="space-y-4">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex items-start gap-3">
+                  <div className="w-2.5 h-2.5 rounded-full bg-pc-bg-secondary mt-1" />
+                  <div className="flex-1 space-y-1">
+                    <div className="h-3 bg-pc-bg-secondary rounded w-1/2" />
+                    <div className="h-2 bg-pc-bg-secondary rounded w-1/3" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* Skeleton: Entries */}
+          <div className="lg:col-span-2 pc-card animate-pulse space-y-6">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="space-y-2">
                 <div className="h-4 bg-pc-bg-secondary rounded w-1/4" />
                 <div className="h-3 bg-pc-bg-secondary rounded w-1/6" />
-                <div className="h-3 bg-pc-bg-secondary rounded w-3/4" />
+                <div className="space-y-1">
+                  <div className="h-3 bg-pc-bg-secondary rounded w-3/4" />
+                  <div className="h-3 bg-pc-bg-secondary rounded w-2/3" />
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       ) : totalEntries === 0 ? (
         <div className="pc-card text-center py-12">
           <p className="text-pc-text-muted text-sm">No deployment history yet.</p>
         </div>
       ) : (
-        <div className="pc-card">
-          {data?.data.map((entry, i) => (
-            <ChangelogEntry key={entry.id} entry={entry} index={i} />
-          ))}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left: Version History Graph */}
+          <div className="lg:col-span-1">
+            <VersionHistoryGraph entries={data?.data ?? []} />
+          </div>
+
+          {/* Right: Detailed Entries */}
+          <div className="lg:col-span-2 pc-card">
+            {data?.data.map((entry, i) => (
+              <ChangelogEntry key={entry.id} entry={entry} index={i} />
+            ))}
+          </div>
         </div>
       )}
 
