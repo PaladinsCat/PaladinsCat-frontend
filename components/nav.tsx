@@ -2,17 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
-import { getAuthUser, logout } from "@/lib/api-client";
+import { useState } from "react";
+import { useAuth } from "@/lib/auth-context";
 
 export default function Nav() {
   const pathname = usePathname();
-  const [user, setUser] = useState<ReturnType<typeof getAuthUser>>(null);
+  const { user, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
-
-  useEffect(() => {
-    setUser(getAuthUser());
-  }, []);
 
   const navLinks = [
     { href: "/champions", label: "Champions" },
@@ -25,7 +21,7 @@ export default function Nav() {
 
   async function handleLogout() {
     await logout();
-    setUser(null);
+    setMobileOpen(false);
   }
 
   const isActive = (href: string) =>

@@ -32,9 +32,7 @@ export default function HomePage() {
   return (
     <div className="relative z-10 min-h-screen py-8">
         <motion.div
-          initial={{ opacity: 0, y: -30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ type: "spring", stiffness: 100, damping: 15 }}
+          initial={false}
           className="text-center mb-12"
         >
           <Image
@@ -42,6 +40,9 @@ export default function HomePage() {
             alt="PaladinsCat logo"
             width={80}
             height={80}
+            unoptimized
+            preload
+            fetchPriority="high"
             className="mx-auto mb-2 opacity-90 drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]"
           />
           <h1 className="text-4xl font-semibold tracking-wide drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)]">

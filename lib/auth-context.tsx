@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
-import { getAuthToken, getAuthUser, getMe, login, logout, type AuthUser } from "./api-client";
+import { clearAuth, getAuthToken, getMe, login, logout, type AuthUser } from "./api-client";
 
 interface AuthContextValue {
   user: AuthUser | null;
@@ -29,7 +29,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refresh = useCallback(async () => {
     const token = getAuthToken();
     if (!token) {
-      setUser(getAuthUser());
+      clearAuth();
+      setUser(null);
       setIsLoading(false);
       return;
     }
@@ -37,8 +38,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const me = await getMe();
       setUser(me);
     } catch {
-      // Token may be stale — fall back to localStorage
-      setUser(getAuthUser());
+      // A cached user without a confirmed token is only a display ghost. Clear
+      // it so protected UI does not stay unlocked after the server rejects the
+      // session or the browser loses the token.
+      clearAuth();
+      setUser(null);
     } finally {
       setIsLoading(false);
     }
