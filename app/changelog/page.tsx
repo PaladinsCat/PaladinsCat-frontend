@@ -139,17 +139,17 @@ function VersionHistoryGraph({ entries }: { entries: ChangelogPage["data"] }) {
                   <span className={`text-xs font-bold font-mono ${textColor}`}>
                     {entry.version}
                   </span>
-                  <span className="text-[10px] font-mono text-pc-text-muted truncate">
+                  <span className="text-xs font-mono text-pc-text-muted truncate">
                     {entry.gitCommitShort}
                   </span>
                 </div>
                 {entry.deployedAt && (
-                  <time dateTime={entry.deployedAt} className="text-[10px] text-pc-text-muted block mt-0.5">
+                  <time dateTime={entry.deployedAt} className="text-xs text-pc-text-muted block mt-0.5">
                     {formatRelativeTime(entry.deployedAt)}
                   </time>
                 )}
                 {!hasChangelog && (
-                  <span className="text-[10px] text-pc-text-muted italic block mt-0.5">
+                  <span className="text-xs text-pc-text-muted italic block mt-0.5">
                     deployment
                   </span>
                 )}
@@ -161,7 +161,7 @@ function VersionHistoryGraph({ entries }: { entries: ChangelogPage["data"] }) {
 
       {/* Legend */}
       <div className="mt-4 pt-3 border-t border-pc-border">
-        <div className="flex items-center gap-3 text-[10px] text-pc-text-muted">
+        <div className="flex items-center gap-3 text-xs text-pc-text-muted">
           <span className="flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-rose-500" /> Major
           </span>
