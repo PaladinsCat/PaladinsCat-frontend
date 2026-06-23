@@ -759,7 +759,9 @@ export async function fetchNotifications(params?: { limit?: number }): Promise<N
   }
 }
 
-export async function fetchAdminNotifications(token: string): Promise<Notification[]> {
+export async function fetchAdminNotifications(): Promise<Notification[]> {
+  const token = getAuthToken();
+  if (!token) throw new Error('Not authenticated');
   const raw = await fetchJson<any[]>(
     `/admin/notifications`,
     { headers: { Authorization: `Bearer ${token}` } }
@@ -767,7 +769,9 @@ export async function fetchAdminNotifications(token: string): Promise<Notificati
   return raw.map(mapNotification);
 }
 
-export async function createAdminNotification(token: string, input: NotificationInput): Promise<Notification> {
+export async function createAdminNotification(input: NotificationInput): Promise<Notification> {
+  const token = getAuthToken();
+  if (!token) throw new Error('Not authenticated');
   const raw = await fetchJson<any>(`/admin/notifications`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
@@ -776,7 +780,9 @@ export async function createAdminNotification(token: string, input: Notification
   return mapNotification(raw);
 }
 
-export async function updateAdminNotification(token: string, id: number, input: Partial<NotificationInput>): Promise<Notification> {
+export async function updateAdminNotification(id: number, input: Partial<NotificationInput>): Promise<Notification> {
+  const token = getAuthToken();
+  if (!token) throw new Error('Not authenticated');
   const raw = await fetchJson<any>(`/admin/notifications/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
@@ -785,7 +791,9 @@ export async function updateAdminNotification(token: string, id: number, input: 
   return mapNotification(raw);
 }
 
-export async function deleteAdminNotification(token: string, id: number): Promise<void> {
+export async function deleteAdminNotification(id: number): Promise<void> {
+  const token = getAuthToken();
+  if (!token) throw new Error('Not authenticated');
   await fetchJson<{ deleted: boolean; id: number }>(`/admin/notifications/${id}`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` },

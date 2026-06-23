@@ -10,8 +10,7 @@ import {
   type NotificationInput,
 } from "@/lib/api-client";
 import { formatLocalDateTime, parseBackendDate } from "@/lib/time-format";
-
-const TOKEN_KEY = "pc_admin_token";
+import { useAuth } from "@/lib/auth-context";
 
 type Draft = {
   timestamp: string;
@@ -56,7 +55,7 @@ function toInput(draft: Draft): NotificationInput {
 }
 
 export default function AdminNotificationsPage() {
-  const [token, setToken] = useState("");
+  const { user, isLoading } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [drafts, setDrafts] = useState<Record<number, Draft>>({});
   const [newDraft, setNewDraft] = useState<Draft>(emptyDraft);
@@ -65,22 +64,16 @@ export default function AdminNotificationsPage() {
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
 
-  useEffect(() => {
-    const saved = localStorage.getItem(TOKEN_KEY);
-    if (saved) setToken(saved);
-  }, []);
+  // Wait for auth to resolve, then check admin status
+  const isAdmin = user?.is_admin ?? false;
 
-  async function load(currentToken = token) {
-    if (!currentToken.trim()) {
-      setError("Admin token is required.");
-      return;
-    }
+  // Load notifications once auth is resolved and user is admin
+  async function load() {
     setLoading(true);
     setError(null);
     setStatus(null);
     try {
-      localStorage.setItem(TOKEN_KEY, currentToken.trim());
-      const rows = await fetchAdminNotifications(currentToken.trim());
+      const rows = await fetchAdminNotifications();
       setNotifications(rows);
       setDrafts(Object.fromEntries(rows.map((notification) => [notification.id, fromNotification(notification)])));
       setStatus("Loaded notifications.");
@@ -91,12 +84,18 @@ export default function AdminNotificationsPage() {
     }
   }
 
+  useEffect(() => {
+    if (!isLoading && isAdmin) {
+      load();
+    }
+  }, [isLoading, isAdmin]);
+
   async function createNotification() {
     setError(null);
     setStatus(null);
     try {
       if (!newDraft.message.trim()) throw new Error("Message is required.");
-      await createAdminNotification(token.trim(), toInput(newDraft));
+      await createAdminNotification(toInput(newDraft));
       setNewDraft(emptyDraft);
       await load();
       setStatus("Notification created.");
@@ -110,7 +109,7 @@ export default function AdminNotificationsPage() {
     setError(null);
     setStatus(null);
     try {
-      await updateAdminNotification(token.trim(), id, toInput(drafts[id]));
+      await updateAdminNotification(id, toInput(drafts[id]));
       await load();
       setStatus("Notification saved.");
     } catch (err) {
@@ -125,7 +124,7 @@ export default function AdminNotificationsPage() {
     setError(null);
     setStatus(null);
     try {
-      await deleteAdminNotification(token.trim(), id);
+      await deleteAdminNotification(id);
       await load();
       setStatus("Notification deleted.");
     } catch (err) {
@@ -143,34 +142,42 @@ export default function AdminNotificationsPage() {
     setNewDraft((current) => ({ ...current, ...patch }));
   }
 
+  // Show loading state while auth resolves
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <h1 className="pc-heading pc-heading-lg text-pc-accent">Notifications Admin</h1>
+        <div className="text-sm text-pc-text-muted">Checking admin access...</div>
+      </div>
+    );
+  }
+
+  // Not admin — deny access
+  if (!isAdmin) {
+    return (
+      <div className="space-y-6">
+        <h1 className="pc-heading pc-heading-lg text-pc-accent">Notifications Admin</h1>
+        <div className="bg-pc-bg-elevated border border-red-500/30 rounded-lg p-6 text-center space-y-2">
+          <div className="text-lg font-bold text-red-400">Access Denied</div>
+          <div className="text-sm text-pc-text-muted">
+            This page is restricted to admin accounts only.
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      <div>
+      <div className="flex items-center justify-between">
         <h1 className="pc-heading pc-heading-lg text-pc-accent">Notifications Admin</h1>
+        <div className="text-xs text-pc-text-muted">
+          Logged in as <span className="text-pc-text">{user?.username}</span>
+        </div>
       </div>
 
-      <section className="bg-pc-bg-elevated border border-pc-border rounded-lg p-4 space-y-3">
-        <label className="block text-xs text-pc-text-muted">Admin Token</label>
-        <div className="flex flex-col sm:flex-row gap-2">
-          <input
-            type="password"
-            value={token}
-            onChange={(event) => setToken(event.target.value)}
-            className="pc-input flex-1"
-            placeholder="ADMIN_SECRET"
-          />
-          <button
-            type="button"
-            onClick={() => load()}
-            disabled={loading}
-            className="px-4 py-2 rounded-lg bg-pc-accent text-pc-bg font-semibold text-sm disabled:opacity-50"
-          >
-            {loading ? "Loading..." : "Load"}
-          </button>
-        </div>
-        {error && <div className="text-sm text-red-400">{error}</div>}
-        {status && <div className="text-sm text-emerald-400">{status}</div>}
-      </section>
+      {error && <div className="text-sm text-red-400">{error}</div>}
+      {status && <div className="text-sm text-emerald-400">{status}</div>}
 
       <section className="bg-pc-bg-elevated border border-pc-border rounded-lg p-4 space-y-4">
         <h2 className="text-lg font-bold text-pc-text">Create Notification</h2>
@@ -221,7 +228,7 @@ export default function AdminNotificationsPage() {
         })}
         {!loading && notifications.length === 0 && (
           <div className="bg-pc-bg-elevated border border-pc-border rounded-lg p-4 text-sm text-pc-text-muted">
-            No notifications loaded.
+            No notifications found.
           </div>
         )}
       </section>
