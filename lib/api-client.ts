@@ -567,6 +567,25 @@ export interface NotificationInput {
   message: string;
 }
 
+// ── Changelog ──
+
+export interface ChangelogEntry {
+  id: number;
+  version: string;
+  gitCommit: string;
+  gitCommitShort: string;
+  deployedAt: string | null;
+  changelog: string;
+}
+
+export interface ChangelogPage {
+  data: ChangelogEntry[];
+  total: number;
+  page: number;
+  perPage: number;
+  totalPages: number;
+}
+
 export interface SiteVersionComponent {
   id: number;
   component: string;
@@ -769,6 +788,46 @@ export async function deleteAdminNotification(token: string, id: number): Promis
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` },
   });
+}
+
+// ── Changelog ──
+
+export async function fetchChangelogPreview(): Promise<ChangelogEntry | null> {
+  try {
+    const raw = await fetchJson<any>('/meta/changelog?preview=true');
+    return raw ? mapChangelogEntry(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchChangelog(params?: { page?: number; perPage?: number }): Promise<ChangelogPage> {
+  const query = new URLSearchParams();
+  if (params?.page != null) query.set('page', String(params.page));
+  if (params?.perPage != null) query.set('perPage', String(params.perPage));
+  try {
+    const raw = await fetchJson<any>(`/meta/changelog${query.toString() ? `?${query.toString()}` : ''}`);
+    return {
+      data: (raw.data ?? []).map(mapChangelogEntry),
+      total: raw.total ?? 0,
+      page: raw.page ?? 1,
+      perPage: raw.perPage ?? 10,
+      totalPages: raw.totalPages ?? 1,
+    };
+  } catch {
+    return { data: [], total: 0, page: 1, perPage: 10, totalPages: 1 };
+  }
+}
+
+function mapChangelogEntry(raw: any): ChangelogEntry {
+  return {
+    id: Number(raw?.id ?? 0),
+    version: String(raw?.version ?? ''),
+    gitCommit: String(raw?.gitCommit ?? ''),
+    gitCommitShort: String(raw?.gitCommitShort ?? ''),
+    deployedAt: raw?.deployedAt ?? null,
+    changelog: String(raw?.changelog ?? ''),
+  };
 }
 
 // ── Site Metadata ──
@@ -1876,59 +1935,29 @@ export interface PostDetail {
   comments: Comment[];
 }
 
-// ── Community ──
+type RawPost = {
+  id: number;
+  user_id: number;
+  username: string;
+  title: string;
+  content: string;
+  build_id: number | null;
+  likes: number;
+  view_count: number;
+  created_at: string;
+};
 
-export async function fetchPosts(params?: { userId?: string; buildId?: string; limit?: string; offset?: string }): Promise<Post[]> {
-  const query = new URLSearchParams();
-  if (params) {
-    for (const [key, value] of Object.entries(params)) {
-      if (value !== undefined && value !== null) {
-        query.set(key, String(value));
-      }
-    }
-  }
-  const raw = await fetchJson<Array<{
-    id: number;
-    user_id: number;
-    username: string;
-    title: string;
-    content: string;
-    build_id: number | null;
-    likes: number;
-    view_count: number;
-    created_at: string;
-  }>>(`/community/posts${query.toString() ? `?${query.toString()}` : ''}`);
+type RawComment = {
+  id: number;
+  post_id: number;
+  user_id: number;
+  username: string;
+  parent_id: number | null;
+  content: string;
+  created_at: string;
+};
 
-  return raw.map((r) => ({
-    id: r.id,
-    userId: r.user_id,
-    username: r.username,
-    title: r.title,
-    content: r.content,
-    buildId: r.build_id,
-    likes: r.likes,
-    viewCount: r.view_count,
-    createdAt: r.created_at,
-  }));
-}
-
-export async function createPost(userId: number, title: string, content: string, buildId: number | null, token: string): Promise<Post> {
-  const raw = await fetchJson<{
-    id: number;
-    user_id: number;
-    username: string;
-    title: string;
-    content: string;
-    build_id: number | null;
-    likes: number;
-    view_count: number;
-    created_at: string;
-  }>(`/community/posts`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-    body: JSON.stringify({ title, content, build_id: buildId }),
-  });
-
+function mapPost(raw: RawPost): Post {
   return {
     id: raw.id,
     userId: raw.user_id,
@@ -1942,69 +1971,7 @@ export async function createPost(userId: number, title: string, content: string,
   };
 }
 
-export async function getPostDetail(postId: number): Promise<PostDetail> {
-  const raw = await fetchJson<{
-    post: {
-      id: number;
-      user_id: number;
-      username: string;
-      title: string;
-      content: string;
-      build_id: number | null;
-      likes: number;
-      view_count: number;
-      created_at: string;
-    };
-    comments: Array<{
-      id: number;
-      post_id: number;
-      user_id: number;
-      username: string;
-      parent_id: number | null;
-      content: string;
-      created_at: string;
-    }>;
-  }>(`/community/posts/${postId}`);
-
-  return {
-    post: {
-      id: raw.post.id,
-      userId: raw.post.user_id,
-      username: raw.post.username,
-      title: raw.post.title,
-      content: raw.post.content,
-      buildId: raw.post.build_id,
-      likes: raw.post.likes,
-      viewCount: raw.post.view_count,
-      createdAt: raw.post.created_at,
-    },
-    comments: raw.comments.map((c) => ({
-      id: c.id,
-      postId: c.post_id,
-      userId: c.user_id,
-      username: c.username,
-      parentId: c.parent_id,
-      content: c.content,
-      createdAt: c.created_at,
-    })),
-  };
-}
-
-export async function addComment(postId: number, userId: number, content: string, parentId: number | null, token: string): Promise<Comment> {
-  const raw = await fetchJson<{
-    id: number;
-    post_id: number;
-    user_id: number;
-    username: string;
-    parent_id: number | null;
-    content: string;
-    created_at: string;
-  }>(`/community/posts/${postId}/comments`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-    body: JSON.stringify({ content, parent_id: parentId }),
-  });
-
+function mapComment(raw: RawComment): Comment {
   return {
     id: raw.id,
     postId: raw.post_id,
@@ -2016,6 +1983,87 @@ export async function addComment(postId: number, userId: number, content: string
   };
 }
 
+// ── Community ──
+
+export async function fetchPosts(params?: { userId?: string; buildId?: string; limit?: string; offset?: string }): Promise<Post[]> {
+  const query = new URLSearchParams();
+  if (params) {
+    for (const [key, value] of Object.entries(params)) {
+      if (value !== undefined && value !== null) {
+        query.set(key, String(value));
+      }
+    }
+  }
+  const raw = await fetchJson<RawPost[]>(`/community/posts${query.toString() ? `?${query.toString()}` : ''}`);
+  return raw.map(mapPost);
+}
+
+export async function createPost(userId: number, title: string, content: string, buildId: number | null, token: string): Promise<Post> {
+  const raw = await fetchJson<RawPost>(`/community/posts`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+    body: JSON.stringify({ title, content, build_id: buildId }),
+  });
+
+  return mapPost(raw);
+}
+
+export async function getPostDetail(postId: number): Promise<PostDetail> {
+  const raw = await fetchJson<{
+    post: RawPost;
+    comments: RawComment[];
+  }>(`/community/posts/${postId}`);
+
+  return {
+    post: mapPost(raw.post),
+    comments: raw.comments.map(mapComment),
+  };
+}
+
+export async function updatePost(postId: number, title: string, content: string, token: string): Promise<Post> {
+  const raw = await fetchJson<RawPost>(`/community/posts/${postId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+    body: JSON.stringify({ title, content }),
+  });
+
+  return mapPost(raw);
+}
+
+export async function deletePost(postId: number, token: string): Promise<void> {
+  await fetchJson<{ deleted: boolean; id: number }>(`/community/posts/${postId}`, {
+    method: "DELETE",
+    headers: { "Authorization": `Bearer ${token}` },
+  });
+}
+
+export async function addComment(postId: number, userId: number, content: string, parentId: number | null, token: string): Promise<Comment> {
+  const raw = await fetchJson<RawComment>(`/community/posts/${postId}/comments`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+    body: JSON.stringify({ content, parent_id: parentId }),
+  });
+
+  return mapComment(raw);
+}
+
+export async function updateComment(commentId: number, content: string, token: string): Promise<Comment> {
+  const raw = await fetchJson<RawComment>(`/community/comments/${commentId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+    body: JSON.stringify({ content }),
+  });
+
+  return mapComment(raw);
+}
+
+export async function deleteComment(commentId: number, token: string): Promise<void> {
+  await fetchJson<{ deleted: boolean; id: number }>(`/community/comments/${commentId}`, {
+    method: "DELETE",
+    headers: { "Authorization": `Bearer ${token}` },
+  });
+}
+
 export async function togglePostLike(postId: number, userId: number, token: string): Promise<number> {
   const raw = await fetchJson<{ likes: number }>(`/community/posts/${postId}/like`, {
     method: "POST",
@@ -2024,7 +2072,6 @@ export async function togglePostLike(postId: number, userId: number, token: stri
 
   return raw.likes;
 }
-
 // ── Build Types ──
 
 export interface Build {
@@ -2638,3 +2685,4 @@ export async function fetchReferenceChampions(): Promise<Array<{ id: number; nam
   const raw = await fetchJson<any[]>(`/reference/champions`);
   return raw;
 }
+

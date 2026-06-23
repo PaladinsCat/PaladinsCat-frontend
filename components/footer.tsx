@@ -73,6 +73,11 @@ export default function Footer() {
                   Contact
                 </Link>
               </li>
+              <li>
+                <Link href="/changelog" className="text-pc-text-secondary hover:text-pc-accent transition-colors text-sm">
+                  Changelog
+                </Link>
+              </li>
             </ul>
             <div className="mt-4">
               <a
