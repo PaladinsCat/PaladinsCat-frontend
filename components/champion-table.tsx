@@ -243,8 +243,8 @@ export default function ChampionTable() {
                       )}
                     </div>
 
-                    {/* Row 2: stats */}
-                    <div className="flex items-center gap-3 text-xs">
+                    {/* Row 2: stats — wraps on narrow cards */}
+                    <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs">
                       <span className={c.winRate != null ? "text-emerald-400" : "text-pc-text-muted"}>
                         <span className="text-pc-text-muted mr-1">WR</span>
                         {c.winRate != null ? `${c.winRate}%` : "—"}
@@ -255,7 +255,7 @@ export default function ChampionTable() {
                         {c.banRate != null ? `${c.banRate}%` : "—"}
                       </span>
                       <span className="text-pc-border">|</span>
-                      <span className="text-pc-text-muted">
+                      <span className="text-pc-text-muted whitespace-nowrap">
                         <span className="mr-1">Plays</span>
                         <span className="text-pc-text-secondary">{formatPlays(c.totalPlays)}</span>
                       </span>
