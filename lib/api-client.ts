@@ -2072,6 +2072,7 @@ export async function togglePostLike(postId: number, userId: number, token: stri
   const raw = await fetchJson<{ likes: number }>(`/community/posts/${postId}/like`, {
     method: "POST",
     headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+    body: JSON.stringify({}),
   });
 
   return raw.likes;
