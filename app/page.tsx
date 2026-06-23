@@ -11,6 +11,7 @@ import {
   type Notification,
   type ChangelogEntry,
 } from "@/lib/api-client";
+import { formatLocalDateTime } from "@/lib/time-format";
 
 function notificationDot(importance: number) {
   if (importance >= 75) return "bg-amber-500";
@@ -157,7 +158,7 @@ export default function HomePage() {
                       <div className="flex-1 min-w-0">
                         <p className="text-pc-text-secondary text-sm leading-relaxed">{notification.message}</p>
                         <span className="text-pc-text-muted text-[10px] mt-1 block">
-                          {notification.timestamp ? new Date(notification.timestamp).toLocaleString() : ""}
+                          {formatLocalDateTime(notification.timestamp)}
                         </span>
                       </div>
                       <button
@@ -202,7 +203,7 @@ export default function HomePage() {
                     </p>
                     {changelogPreview.deployedAt && (
                       <span className="text-pc-text-muted text-[10px] mt-2 block">
-                        {new Date(changelogPreview.deployedAt).toLocaleString()}
+                        {formatLocalDateTime(changelogPreview.deployedAt)}
                       </span>
                     )}
                   </div>

@@ -2,15 +2,40 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { getPostDetail, addComment, togglePostLike, getAuthUser, getAuthToken, type PostDetail } from "@/lib/api-client";
+import { useRouter } from "next/navigation";
+import {
+
+  getPostDetail,
+  addComment,
+  deleteComment,
+  deletePost,
+  togglePostLike,
+  updateComment,
+  updatePost,
+  getAuthUser,
+  getAuthToken,
+  type Comment,
+  type PostDetail,
+} from "@/lib/api-client";
+import { formatLocalDateTime } from "@/lib/time-format";
 
 export default function PostDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const router = useRouter();
   const [detail, setDetail] = useState<PostDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [newComment, setNewComment] = useState("");
   const [commenting, setCommenting] = useState(false);
   const [id, setId] = useState<string | null>(null);
+  const [editingPost, setEditingPost] = useState(false);
+  const [postTitle, setPostTitle] = useState("");
+  const [postContent, setPostContent] = useState("");
+  const [savingPost, setSavingPost] = useState(false);
+  const [deletingPost, setDeletingPost] = useState(false);
+  const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
+  const [commentContent, setCommentContent] = useState("");
+  const [busyCommentId, setBusyCommentId] = useState<number | null>(null);
 
   useEffect(() => {
     params.then((p) => setId(p.id));
@@ -21,6 +46,8 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
     try {
       const data = await getPostDetail(parseInt(id, 10));
       setDetail(data);
+      setPostTitle(data.post.title);
+      setPostContent(data.post.content);
     } catch {
       setError("Failed to load post");
     } finally {
@@ -32,58 +59,137 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
     loadPost();
   }, [loadPost]);
 
-  async function handleLike() {
-    if (!detail) return;
+  function requireAuth() {
     const token = getAuthToken();
     const user = getAuthUser();
     if (!token || !user) {
       window.location.href = "/auth/login";
-      return;
+      return null;
     }
+    return { token, user };
+  }
+
+  async function handleLike() {
+    if (!detail) return;
+    setActionError(null);
+    const auth = requireAuth();
+    if (!auth) return;
+
     try {
-      const newLikes = await togglePostLike(detail.post.id, user.id, token);
+      const newLikes = await togglePostLike(detail.post.id, auth.user.id, auth.token);
       setDetail((prev) => prev ? {
         ...prev,
         post: { ...prev.post, likes: newLikes },
       } : null);
-    } catch {
-      // Ignore like errors
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : "Failed to update like");
+    }
+  }
+
+  async function handleSavePost(e: React.FormEvent) {
+    e.preventDefault();
+    if (!detail || !postTitle.trim() || !postContent.trim()) return;
+    setActionError(null);
+    const auth = requireAuth();
+    if (!auth) return;
+
+    setSavingPost(true);
+    try {
+      const post = await updatePost(detail.post.id, postTitle.trim(), postContent.trim(), auth.token);
+      setDetail((prev) => prev ? { ...prev, post } : null);
+      setEditingPost(false);
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : "Failed to save post");
+    } finally {
+      setSavingPost(false);
+    }
+  }
+
+  async function handleDeletePost() {
+    if (!detail || !window.confirm("Delete this post?")) return;
+    setActionError(null);
+    const auth = requireAuth();
+    if (!auth) return;
+
+    setDeletingPost(true);
+    try {
+      await deletePost(detail.post.id, auth.token);
+      router.push("/community");
+      router.refresh();
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : "Failed to delete post");
+      setDeletingPost(false);
     }
   }
 
   async function handleComment(e: React.FormEvent) {
     e.preventDefault();
     if (!detail || !newComment.trim()) return;
-    const token = getAuthToken();
-    const user = getAuthUser();
-    if (!token || !user) {
-      window.location.href = "/auth/login";
-      return;
-    }
+    setActionError(null);
+    const auth = requireAuth();
+    if (!auth) return;
+
     setCommenting(true);
     try {
-      const comment = await addComment(detail.post.id, user.id, newComment.trim(), null, token);
+      const comment = await addComment(detail.post.id, auth.user.id, newComment.trim(), null, auth.token);
       setDetail((prev) => prev ? {
         ...prev,
         comments: [...prev.comments, comment],
       } : null);
       setNewComment("");
-    } catch {
-      // Ignore comment errors
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : "Failed to add comment");
     } finally {
       setCommenting(false);
     }
   }
 
-  function formatDate(dateStr: string) {
-    const date = new Date(dateStr);
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    if (days === 0) return "Today";
-    if (days === 1) return "Yesterday";
-    if (days < 7) return `${days}d ago`;
-    return date.toLocaleDateString();
+  function startCommentEdit(comment: Comment) {
+    setEditingCommentId(comment.id);
+    setCommentContent(comment.content);
+    setActionError(null);
+  }
+
+  async function handleSaveComment(commentId: number) {
+    if (!commentContent.trim()) return;
+    setActionError(null);
+    const auth = requireAuth();
+    if (!auth) return;
+
+    setBusyCommentId(commentId);
+    try {
+      const updated = await updateComment(commentId, commentContent.trim(), auth.token);
+      setDetail((prev) => prev ? {
+        ...prev,
+        comments: prev.comments.map((comment) => comment.id === commentId ? updated : comment),
+      } : null);
+      setEditingCommentId(null);
+      setCommentContent("");
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : "Failed to save comment");
+    } finally {
+      setBusyCommentId(null);
+    }
+  }
+
+  async function handleDeleteComment(commentId: number) {
+    if (!window.confirm("Delete this comment?")) return;
+    setActionError(null);
+    const auth = requireAuth();
+    if (!auth) return;
+
+    setBusyCommentId(commentId);
+    try {
+      await deleteComment(commentId, auth.token);
+      setDetail((prev) => prev ? {
+        ...prev,
+        comments: prev.comments.filter((comment) => comment.id !== commentId),
+      } : null);
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : "Failed to delete comment");
+    } finally {
+      setBusyCommentId(null);
+    }
   }
 
   if (loading) return <div className="text-center py-12 text-pc-text-secondary">Loading post...</div>;
@@ -91,6 +197,8 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
   if (!detail) return <div className="text-center py-12 text-pc-text-muted">Post not found</div>;
 
   const { post, comments } = detail;
+  const currentUser = getAuthUser();
+  const canEditPost = currentUser ? currentUser.id === post.userId || currentUser.isAdmin : false;
 
   return (
     <div className="space-y-6">
@@ -98,17 +206,83 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
         ← Back to community
       </Link>
 
-      {/* Post content */}
-      <div className="bg-pc-bg-elevated rounded-lg border border-pc-border p-6">
-        <h1 className="text-2xl font-bold text-pc-text">{post.title}</h1>
-        <div className="flex items-center gap-4 mt-3 text-pc-text-secondary text-sm">
-          <span>by {post.username}</span>
-          <span>{formatDate(post.createdAt)}</span>
-          <span>👁 {post.viewCount}</span>
+      {actionError && (
+        <div className="rounded-lg border border-red-700/50 bg-red-900/30 p-3 text-sm text-red-400">
+          {actionError}
         </div>
-        <div className="mt-4 text-pc-text whitespace-pre-wrap">{post.content}</div>
+      )}
+
+      <div className="bg-pc-bg-elevated rounded-lg border border-pc-border p-6">
+        {editingPost ? (
+          <form onSubmit={handleSavePost} className="space-y-4">
+            <input
+              type="text"
+              value={postTitle}
+              onChange={(e) => setPostTitle(e.target.value)}
+              className="w-full rounded-lg border border-pc-border bg-pc-bg-secondary px-3 py-2 text-xl font-bold text-pc-text outline-none focus:ring-2 focus:ring-pc-accent/50"
+            />
+            <textarea
+              value={postContent}
+              onChange={(e) => setPostContent(e.target.value)}
+              rows={10}
+              className="w-full rounded-lg border border-pc-border bg-pc-bg-secondary px-3 py-2 text-pc-text outline-none focus:ring-2 focus:ring-pc-accent/50"
+            />
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="submit"
+                disabled={savingPost || !postTitle.trim() || !postContent.trim()}
+                className="rounded-lg bg-pc-accent px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-pc-accent-secondary disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {savingPost ? "Saving..." : "Save"}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingPost(false);
+                  setPostTitle(post.title);
+                  setPostContent(post.content);
+                }}
+                className="rounded-lg border border-pc-border px-4 py-2 text-sm text-pc-text-secondary transition-colors hover:text-pc-text"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        ) : (
+          <>
+            <div className="flex items-start justify-between gap-4">
+              <h1 className="text-2xl font-bold text-pc-text">{post.title}</h1>
+              {canEditPost && (
+                <div className="flex shrink-0 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditingPost(true)}
+                    className="rounded-lg border border-pc-border px-3 py-1.5 text-xs text-pc-text-secondary transition-colors hover:text-pc-text"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDeletePost}
+                    disabled={deletingPost}
+                    className="rounded-lg border border-red-700/50 px-3 py-1.5 text-xs text-red-400 transition-colors hover:bg-red-900/20 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {deletingPost ? "Deleting..." : "Delete"}
+                  </button>
+                </div>
+              )}
+            </div>
+            <div className="flex items-center gap-4 mt-3 text-pc-text-secondary text-sm">
+              <span>by {post.username}</span>
+              <span>{formatLocalDateTime(post.createdAt)}</span>
+              <span>👁 {post.viewCount}</span>
+            </div>
+            <div className="mt-4 text-pc-text whitespace-pre-wrap">{post.content}</div>
+          </>
+        )}
         <div className="flex items-center gap-4 mt-4 pt-4 border-t border-pc-border">
           <button
+            type="button"
             onClick={handleLike}
             className="flex items-center gap-2 text-pc-text-secondary hover:text-pc-accent transition-colors"
           >
@@ -117,13 +291,11 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
         </div>
       </div>
 
-      {/* Comments */}
       <div className="bg-pc-bg-elevated rounded-lg border border-pc-border p-6">
         <h2 className="text-xl font-semibold text-pc-accent mb-4">
           Comments ({comments.length})
         </h2>
 
-        {/* Comment form */}
         <form onSubmit={handleComment} className="mb-6 flex gap-3">
           <input
             type="text"
@@ -141,20 +313,77 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
           </button>
         </form>
 
-        {/* Comment list */}
         {comments.length === 0 ? (
           <p className="text-pc-text-muted text-center py-4">No comments yet</p>
         ) : (
           <div className="space-y-3">
-            {comments.map((comment) => (
-              <div key={comment.id} className="bg-pc-bg-secondary rounded-lg p-4">
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="text-pc-text font-medium">{comment.username}</span>
-                  <span className="text-pc-text-muted">{formatDate(comment.createdAt)}</span>
+            {comments.map((comment) => {
+              const canEditComment = currentUser ? currentUser.id === comment.userId || currentUser.isAdmin : false;
+              const isEditing = editingCommentId === comment.id;
+              const isBusy = busyCommentId === comment.id;
+
+              return (
+                <div key={comment.id} className="bg-pc-bg-secondary rounded-lg p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-pc-text font-medium">{comment.username}</span>
+                      <span className="text-pc-text-muted">{formatLocalDateTime(comment.createdAt)}</span>
+                    </div>
+                    {canEditComment && !isEditing && (
+                      <div className="flex shrink-0 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => startCommentEdit(comment)}
+                          className="text-xs text-pc-text-muted transition-colors hover:text-pc-text"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteComment(comment.id)}
+                          disabled={isBusy}
+                          className="text-xs text-red-400 transition-colors hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          {isBusy ? "Deleting..." : "Delete"}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  {isEditing ? (
+                    <div className="mt-3 space-y-3">
+                      <textarea
+                        value={commentContent}
+                        onChange={(e) => setCommentContent(e.target.value)}
+                        rows={3}
+                        className="w-full rounded-lg border border-pc-border bg-pc-bg px-3 py-2 text-pc-text outline-none focus:ring-2 focus:ring-pc-accent/50"
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleSaveComment(comment.id)}
+                          disabled={isBusy || !commentContent.trim()}
+                          className="rounded-lg bg-pc-accent px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-pc-accent-secondary disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          {isBusy ? "Saving..." : "Save"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingCommentId(null);
+                            setCommentContent("");
+                          }}
+                          className="rounded-lg border border-pc-border px-3 py-1.5 text-xs text-pc-text-secondary transition-colors hover:text-pc-text"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-pc-text mt-2 whitespace-pre-wrap">{comment.content}</p>
+                  )}
                 </div>
-                <p className="text-pc-text mt-2">{comment.content}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { fetchKdaHistory, fetchDpmHistory, fetchGlickoHistory, type KdaHistoryEntry, type DpmHistoryEntry, type GlickoHistoryEntry } from "@/lib/api-client";
+import { formatLocalMonthDay } from "@/lib/time-format";
 
 export default function PlayerChartsPage({ params }: { params: Promise<{ id: string }> }) {
   const [kdaData, setKdaData] = useState<KdaHistoryEntry[]>([]);
@@ -41,10 +42,6 @@ export default function PlayerChartsPage({ params }: { params: Promise<{ id: str
     loadData();
   }, [loadData]);
 
-  function formatDate(dateStr: string) {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
-  }
 
   if (loading) return <div className="text-center py-12 text-pc-text-secondary">Loading charts...</div>;
   if (error) return <div className="text-center py-12 text-pc-text-muted">{error}</div>;
@@ -76,7 +73,7 @@ export default function PlayerChartsPage({ params }: { params: Promise<{ id: str
           <p className="text-pc-text-muted text-center py-8">No KDA data available</p>
         ) : (
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={kdaData.map((d) => ({ ...d, label: formatDate(d.date) }))} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
+            <LineChart data={kdaData.map((d) => ({ ...d, label: formatLocalMonthDay(d.date) }))} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
               <XAxis dataKey="label" stroke="#9CA3AF" fontSize={12} />
               <YAxis stroke="#9CA3AF" fontSize={12} />
@@ -100,7 +97,7 @@ export default function PlayerChartsPage({ params }: { params: Promise<{ id: str
           <p className="text-pc-text-muted text-center py-8">No DPM data available</p>
         ) : (
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={dpmData.map((d) => ({ ...d, label: formatDate(d.date) }))} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
+            <LineChart data={dpmData.map((d) => ({ ...d, label: formatLocalMonthDay(d.date) }))} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
               <XAxis dataKey="label" stroke="#9CA3AF" fontSize={12} />
               <YAxis stroke="#9CA3AF" fontSize={12} />
@@ -123,7 +120,7 @@ export default function PlayerChartsPage({ params }: { params: Promise<{ id: str
           <p className="text-pc-text-muted text-center py-8">No rating data available</p>
         ) : (
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={glickoData.map((d) => ({ ...d, label: formatDate(d.date) }))} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
+            <LineChart data={glickoData.map((d) => ({ ...d, label: formatLocalMonthDay(d.date) }))} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
               <XAxis dataKey="label" stroke="#9CA3AF" fontSize={12} />
               <YAxis stroke="#9CA3AF" fontSize={12} />

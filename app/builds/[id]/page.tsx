@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { getBuildDetail, toggleBuildLike, getAuthUser, getAuthToken, type Build } from "@/lib/api-client";
+import { formatLocalDateTime } from "@/lib/time-format";
 
 export default function BuildDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const [build, setBuild] = useState<Build | null>(null);
@@ -46,16 +47,6 @@ export default function BuildDetailPage({ params }: { params: Promise<{ id: stri
     }
   }
 
-  function formatDate(dateStr: string) {
-    const date = new Date(dateStr);
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    if (days === 0) return "Today";
-    if (days === 1) return "Yesterday";
-    if (days < 7) return `${days}d ago`;
-    return date.toLocaleDateString();
-  }
 
   if (loading) return <div className="text-center py-12 text-pc-text-secondary">Loading build...</div>;
   if (error) return <div className="text-center py-12 text-pc-text-muted">{error}</div>;
@@ -74,7 +65,7 @@ export default function BuildDetailPage({ params }: { params: Promise<{ id: stri
             <div className="flex items-center gap-4 mt-3 text-pc-text-secondary text-sm">
               <span>{build.championName}</span>
               <span>by {build.username}</span>
-              <span>{formatDate(build.createdAt)}</span>
+              <span>{formatLocalDateTime(build.createdAt)}</span>
               <span className={build.visibility === "public" ? "text-green-400" : "text-yellow-400"}>
                 {build.visibility === "public" ? "🌐" : "🔒"} {build.visibility}
               </span>

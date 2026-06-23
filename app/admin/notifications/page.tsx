@@ -9,6 +9,7 @@ import {
   type Notification,
   type NotificationInput,
 } from "@/lib/api-client";
+import { formatLocalDateTime, parseBackendDate } from "@/lib/time-format";
 
 const TOKEN_KEY = "pc_admin_token";
 
@@ -26,8 +27,8 @@ const emptyDraft: Draft = {
 
 function toLocalInput(value: string | null) {
   if (!value) return "";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
+  const date = parseBackendDate(value);
+  if (!date) return "";
   const offsetMs = date.getTimezoneOffset() * 60_000;
   return new Date(date.getTime() - offsetMs).toISOString().slice(0, 16);
 }
@@ -192,7 +193,7 @@ export default function AdminNotificationsPage() {
                 <div>
                   <div className="text-xs text-pc-text-muted">#{notification.id}</div>
                   <div className="text-sm text-pc-text-secondary">
-                    {notification.timestamp ? new Date(notification.timestamp).toLocaleString() : "--"}
+                    {formatLocalDateTime(notification.timestamp)}
                   </div>
                 </div>
                 <div className="flex gap-2">

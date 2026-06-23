@@ -9,6 +9,7 @@ import { fetchPlayerMatches, type MatchRecord } from "@/lib/api-client";
 import { getTierColor, resolveEffectiveTier, getRankIconPath } from "@/lib/tier-utils";
 import { useAuth } from "@/lib/auth-context";
 import ReportModal from "@/components/ReportModal";
+import { formatLocalDate, formatLocalDateTime } from "@/lib/time-format";
 
 interface PlayerData {
   id: string;
@@ -102,19 +103,6 @@ function formatKDA(kills: number, deaths: number, assists: number): string {
   return ((kills + assists) / deaths).toFixed(2);
 }
 
-function formatDate(dateStr: string | null): string {
-  if (!dateStr) return "—";
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return "—";
-  return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
-}
-
-function formatDateTime(dateStr: string | null): string {
-  if (!dateStr) return "—";
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return "—";
-  return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
-}
 
 function formatHours(hours: number): string {
   if (!hours) return "—";
@@ -417,8 +405,8 @@ export default function PlayerProfilePage() {
             <h2 className="pc-card-title shadow-sm">Account</h2>
             <div className="pc-card">
               <StatGrid>
-                <StatRow label="Created" value={formatDate(player.created_datetime)} />
-                <StatRow label="Last Login" value={formatDateTime(player.last_login_datetime)} />
+                <StatRow label="Created" value={formatLocalDate(player.created_datetime)} />
+                <StatRow label="Last Login" value={formatLocalDateTime(player.last_login_datetime)} />
                 <StatRow label="Playtime" value={formatHours(player.hours_played)} />
                 <StatRow label="Achievements" value={formatNumber(player.total_achievements)} />
                 <StatRow label="Total XP" value={formatLargeNumber(player.total_xp)} />

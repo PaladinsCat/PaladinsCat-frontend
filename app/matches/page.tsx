@@ -14,20 +14,9 @@ import {
   type MatchHourlyStats,
 } from "@/lib/api-client";
 import { useChampions } from "@/lib/champion-names";
+import { formatLocalDateTime, formatLocalHourFromUtcBucket } from "@/lib/time-format";
 
 const RANKED_QUEUE_ID = "486";
-const TIMEZONES = [
-  { offset: -12, label: "UTC-12" }, { offset: -11, label: "UTC-11" }, { offset: -10, label: "UTC-10" },
-  { offset: -9, label: "UTC-9" }, { offset: -8, label: "UTC-8 (PST)" }, { offset: -7, label: "UTC-7 (MST)" },
-  { offset: -6, label: "UTC-6 (CST)" }, { offset: -5, label: "UTC-5 (EST)" }, { offset: -4, label: "UTC-4" },
-  { offset: -3, label: "UTC-3" }, { offset: -2, label: "UTC-2" }, { offset: -1, label: "UTC-1" },
-  { offset: 0, label: "UTC+0" }, { offset: 1, label: "UTC+1 (CET)" }, { offset: 2, label: "UTC+2" },
-  { offset: 3, label: "UTC+3" }, { offset: 4, label: "UTC+4" }, { offset: 5, label: "UTC+5" },
-  { offset: 5.5, label: "UTC+5:30 (IST)" }, { offset: 6, label: "UTC+6" }, { offset: 7, label: "UTC+7" },
-  { offset: 8, label: "UTC+8 (CST)" }, { offset: 9, label: "UTC+9 (JST)" }, { offset: 10, label: "UTC+10" },
-  { offset: 11, label: "UTC+11" }, { offset: 12, label: "UTC+12" },
-];
-
 export default function MatchesPage() {
   const [matches, setMatches] = useState<MatchSearchResult[]>([]);
   const [total, setTotal] = useState(0);
@@ -49,7 +38,6 @@ export default function MatchesPage() {
   const [droppedByHour, setDroppedByHour] = useState<Record<string, number>>({});
   const [droppedIdsByHour, setDroppedIdsByHour] = useState<Record<string, string[]>>({});
   const [statsLoading, setStatsLoading] = useState(true);
-  const [tzOffset, setTzOffset] = useState(() => -new Date().getTimezoneOffset() / 60);
 
   useEffect(() => {
     let active = true;
@@ -157,12 +145,7 @@ export default function MatchesPage() {
     })
     .filter((entry: any) => entry.droppedIds.length > 0);
 
-  // Convert UTC hour to local time with offset
-  const formatHour = (utcHour: number) => {
-    let h = (utcHour + tzOffset) % 24;
-    if (h < 0) h += 24;
-    return `${String(Math.floor(h)).padStart(2, "0")}:00`;
-  };
+  const formatHour = (date: string | undefined, utcHour: number) => formatLocalHourFromUtcBucket(date, utcHour);
 
   const isCurrentHour = (entry: any, idx: number) => idx === hourly.length - 1;
 
@@ -280,15 +263,7 @@ export default function MatchesPage() {
           {/* Title outside card */}
           <div className="flex items-center justify-between">
             <h2 className="pc-card-title mb-0 shadow-sm">24h Ranked Activity</h2>
-            <select
-              value={tzOffset}
-              onChange={(e) => setTzOffset(Number(e.target.value))}
-              className="text-[10px] px-1.5 py-0.5 rounded bg-pc-bg border border-pc-border text-pc-text-muted focus:outline-none focus:border-pc-accent"
-            >
-              {TIMEZONES.map((tz) => (
-                <option key={tz.offset} value={tz.offset}>{tz.label}</option>
-              ))}
-            </select>
+            <span className="text-[10px] uppercase tracking-wider text-pc-text-muted">Local time</span>
           </div>
 
           <div className="pc-card p-3">
@@ -331,7 +306,7 @@ export default function MatchesPage() {
                   const euW = maxHourly > 0 ? (eu / maxHourly) * 100 : 0;
                   const now = isCurrentHour(entry, idx);
                   const active = sum > 0;
-                  const time = formatHour(entry.hour);
+                  const time = formatHour(entry.date, entry.hour);
                   return (
                     <div
                       key={idx}
@@ -402,7 +377,7 @@ export default function MatchesPage() {
                 <div className="space-y-1">
                   {droppedRows.map((row: any) => (
                     <div key={`${row.date}|${row.hour}`} className="flex items-start gap-2 text-[11px]">
-                      <span className="w-10 shrink-0 text-right font-mono text-pc-text-muted">{formatHour(row.hour)}</span>
+                      <span className="w-10 shrink-0 text-right font-mono text-pc-text-muted">{formatHour(row.date, row.hour)}</span>
                       <div className="flex flex-wrap gap-1">
                         {row.droppedIds.map((id: string) => (
                           <Link
@@ -435,7 +410,7 @@ export default function MatchesPage() {
 
 function MatchRow({ match }: { match: MatchSearchResult }) {
   const duration = formatDuration(match.duration_seconds);
-  const date = new Date(match.entry_datetime).toLocaleString();
+  const date = formatLocalDateTime(match.entry_datetime);
   const href = `/matches/${match.match_id}`;
   return (
     <tr className="group border-b border-pc-border/50 hover:bg-pc-bg-secondary transition-colors">

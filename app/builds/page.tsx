@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { fetchBuilds, type Build } from "@/lib/api-client";
 import ScrambleText from "@/components/ScrambleText";
+import { formatLocalDateTime } from "@/lib/time-format";
 
 export default function BuildsPage() {
   const [builds, setBuilds] = useState<Build[]>([]);
@@ -29,17 +30,6 @@ export default function BuildsPage() {
     load();
   }, [visibilityFilter]);
 
-  function formatDate(dateStr: string) {
-    const date = new Date(dateStr);
-    if (isNaN(date.getTime())) return "—";
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    if (days === 0) return "Today";
-    if (days === 1) return "Yesterday";
-    if (days < 7) return `${days}d ago`;
-    return date.toLocaleDateString();
-  }
 
   const filteredBuilds = championFilter
     ? builds.filter((b) => b.championName.toLowerCase().includes(championFilter.toLowerCase()))
@@ -104,7 +94,7 @@ export default function BuildsPage() {
                     {build.championName} • by {build.username}
                   </p>
                   <div className="flex items-center gap-3 mt-3 text-pc-text-muted text-sm">
-                    <span>{formatDate(build.createdAt)}</span>
+                    <span>{formatLocalDateTime(build.createdAt)}</span>
                     <span>❤ {build.likes}</span>
                     <span>👁 {build.viewCount}</span>
                     <span className={build.visibility === "public" ? "text-green-400" : "text-yellow-400"}>

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { fetchPosts, type Post } from "@/lib/api-client";
 import ScrambleText from "@/components/ScrambleText";
+import { formatLocalDateTime } from "@/lib/time-format";
 
 export default function CommunityPage() {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -23,24 +24,6 @@ export default function CommunityPage() {
     }
     load();
   }, []);
-
-  function formatDate(dateStr: string) {
-    const date = new Date(dateStr);
-    // CRITICAL: Guard against Invalid Date. If dateStr is malformed, getTime()
-    // returns NaN, diff is NaN, Math.floor(NaN) is NaN. All comparisons with
-    // NaN are false, so it falls through to toLocaleDateString() which returns
-    // "Invalid Date". Source: Fault #12 — "formatDate crashes on bad date"
-    if (isNaN(date.getTime())) return "—";
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-
-    if (days === 0) return "Today";
-    if (days === 1) return "Yesterday";
-    if (days < 7) return `${days}d ago`;
-    if (days < 30) return `${Math.floor(days / 7)}w ago`;
-    return date.toLocaleDateString();
-  }
 
   if (loading) return <div className="text-center py-12 text-pc-text-secondary">Loading community...</div>;
   if (error) return <div className="text-center py-12 text-pc-text-muted">{error}</div>;
@@ -82,7 +65,7 @@ export default function CommunityPage() {
                   </p>
                   <div className="flex items-center gap-4 mt-3 text-pc-text-muted text-sm">
                     <span>by {post.username}</span>
-                    <span>{formatDate(post.createdAt)}</span>
+                    <span>{formatLocalDateTime(post.createdAt)}</span>
                     <span>❤ {post.likes}</span>
                     <span>👁 {post.viewCount}</span>
                   </div>

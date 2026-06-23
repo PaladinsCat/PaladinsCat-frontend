@@ -22,6 +22,7 @@ import {
 } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
+import { formatLocalDateTime, parseBackendDate } from "@/lib/time-format";
 
 type MaterialReference = {
   id: number;
@@ -104,8 +105,8 @@ export default function MatchDetailPage() {
         // produces NaN, toISOString() returns "Invalid Date". The backend
         // receives "Invalid Date" as the date range → unexpected results.
         // Source: Fault #11 — "Invalid Date propagates to backend"
-        const window = new Date(detail.match.entry_datetime);
-        if (!isNaN(window.getTime())) {
+        const window = parseBackendDate(detail.match.entry_datetime);
+        if (window) {
           const from = new Date(window.getTime() - 2 * 3600 * 1000).toISOString();
           const to = new Date(window.getTime() + 2 * 3600 * 1000).toISOString();
           const searchResult = await fetchMatchSearch({
@@ -135,7 +136,7 @@ export default function MatchDetailPage() {
   const queueLabel = match ? queueName(match.match.queue_id) : "";
   const isRanked = match?.match.is_ranked ?? false;
   const duration = match ? formatDuration(match.match.duration_seconds) : "";
-  const timestamp = match ? new Date(match.match.entry_datetime).toLocaleString() : "";
+  const timestamp = match ? formatLocalDateTime(match.match.entry_datetime) : "";
 
   // Split players into two teams
   const team1: MatchPlayerDetail[] = match

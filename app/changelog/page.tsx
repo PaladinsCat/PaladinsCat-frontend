@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { fetchChangelog, type ChangelogPage } from "@/lib/api-client";
+import { formatLocalDateTime } from "@/lib/time-format";
 
 const PER_PAGE = 10;
 
@@ -85,7 +86,7 @@ export default function ChangelogPage() {
                     </h2>
                     {entry.deployedAt && (
                       <span className="text-pc-text-muted text-[10px]">
-                        {new Date(entry.deployedAt).toLocaleString()}
+                        {formatLocalDateTime(entry.deployedAt)}
                       </span>
                     )}
                   </div>
