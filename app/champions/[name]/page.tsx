@@ -273,7 +273,7 @@ export default function ChampionDetailPage() {
                 {championData.talents.map((talent) => {
                   const stat = talentStats?.talents.find((t) => t.talentName === talent.name);
                   return (
-                    <TalentCard key={talent.name} talent={talent} championName={championData.name} stat={stat ?? undefined} />
+                    <TalentCard key={talent.name} talent={talent} championName={championData.name} stat={stat ?? undefined} totalMatches={talentStats?.totalMatches ?? 0} />
                   );
                 })}
               </div>
@@ -559,7 +559,7 @@ function winRateBadgeClass(wr: number): string {
   return 'bg-pc-bg text-pc-text-secondary';
 }
 
-function TalentCard({ talent, championName, stat }: { talent: ChampionTalent; championName: string; stat?: { totalPlays: number; winRate: number; wins: number; losses: number } }) {
+function TalentCard({ talent, championName, stat, totalMatches }: { talent: ChampionTalent; championName: string; stat?: { totalPlays: number; winRate: number; wins: number; losses: number }; totalMatches?: number }) {
   const talentImageUrl = talent.iconUrl || `/images/champions/Talent ${championName} ${talent.name}.png`;
 
   return (
@@ -583,15 +583,37 @@ function TalentCard({ talent, championName, stat }: { talent: ChampionTalent; ch
           <div className="text-xs text-pc-text-muted mt-1">Linked: {talent.category}</div>
         )}
         {stat && stat.totalPlays > 0 && (
-          <div className="flex items-center gap-2 mt-2">
-            <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-mono font-semibold ${winRateBadgeClass(stat.winRate)}`}>
+          <div className="flex items-center gap-2 mt-2 text-xs">
+            <span className={winRateColor(stat.winRate)}>
+              <span className="text-pc-text-muted mr-1">WR</span>
               {stat.winRate.toFixed(1)}%
             </span>
-            <span className="text-xs text-pc-text-muted">{stat.totalPlays.toLocaleString()} plays</span>
-            <span className="text-xs text-pc-text-muted">{stat.wins.toLocaleString()}W/{stat.losses.toLocaleString()}L</span>
+            <span className="text-pc-border">|</span>
+            <span className="text-pc-text-muted">
+              <span className="mr-1">PR</span>
+              <span className="text-pc-text-secondary">{totalMatches > 0 ? ((stat.totalPlays / totalMatches) * 100).toFixed(1) : '0.0'}%</span>
+            </span>
+            <span className="text-pc-border">|</span>
+            <span className="text-pc-text-muted whitespace-nowrap">
+              <span className="mr-1">Matches</span>
+              <span className="text-pc-text-secondary">{formatPlays(stat.totalPlays)}</span>
+            </span>
           </div>
         )}
       </div>
     </div>
   );
+}
+
+function formatPlays(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
+  return String(n);
+}
+
+function winRateColor(wr: number): string {
+  if (wr >= 55) return "text-emerald-400";
+  if (wr >= 50) return "text-pc-text";
+  if (wr >= 45) return "text-amber-400";
+  return "text-rose-400";
 }
