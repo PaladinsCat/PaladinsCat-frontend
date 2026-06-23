@@ -567,10 +567,26 @@ export interface NotificationInput {
   message: string;
 }
 
-export interface SiteVersion {
+export interface SiteVersionComponent {
   id: number;
-  timestamp: string;
+  component: string;
+  environment: string;
   version: string;
+  gitCommit: string;
+  gitCommitShort: string;
+  gitBranch: string;
+  gitDirty: boolean;
+  buildTimestamp: string | null;
+  deployedAt: string | null;
+  dbSchemaVersion: string;
+  source: string;
+  metadata: Record<string, unknown>;
+}
+
+export interface SiteVersion extends SiteVersionComponent {
+  timestamp: string | null;
+  notes?: string;
+  components: SiteVersionComponent[];
 }
 
 export interface TierStat {
@@ -757,13 +773,33 @@ export async function deleteAdminNotification(token: string, id: number): Promis
 
 // ── Site Metadata ──
 
+function mapSiteVersionComponent(raw: any): SiteVersionComponent {
+  return {
+    id: Number(raw?.id ?? 0),
+    component: String(raw?.component ?? "stack"),
+    environment: String(raw?.environment ?? "unknown"),
+    version: String(raw?.version ?? ""),
+    gitCommit: String(raw?.gitCommit ?? ""),
+    gitCommitShort: String(raw?.gitCommitShort ?? ""),
+    gitBranch: String(raw?.gitBranch ?? ""),
+    gitDirty: Boolean(raw?.gitDirty),
+    buildTimestamp: raw?.buildTimestamp ?? null,
+    deployedAt: raw?.deployedAt ?? raw?.timestamp ?? null,
+    dbSchemaVersion: String(raw?.dbSchemaVersion ?? ""),
+    source: String(raw?.source ?? ""),
+    metadata: raw?.metadata && typeof raw.metadata === "object" ? raw.metadata : {},
+  };
+}
+
 export async function fetchSiteVersion(): Promise<SiteVersion | null> {
   try {
-    const raw = await fetchJson<any>(`/meta/version`);
+    const raw = await fetchJson<any>(`/meta/version`, { retries: 0 });
+    const mapped = mapSiteVersionComponent(raw);
     return {
-      id: Number(raw.id ?? 0),
-      timestamp: raw.timestamp ?? "",
-      version: String(raw.version ?? ""),
+      ...mapped,
+      timestamp: raw?.timestamp ?? mapped.deployedAt,
+      notes: raw?.notes ? String(raw.notes) : undefined,
+      components: Array.isArray(raw?.components) ? raw.components.map(mapSiteVersionComponent) : [],
     };
   } catch {
     return null;
@@ -1709,17 +1745,23 @@ export async function login(username: string, password: string): Promise<AuthSes
 
 export async function logout(): Promise<void> {
   const token = getAuthToken();
-  if (token) {
-    // CRITICAL: Send token in Authorization header. The backend auth routes
-    // expect the token in the header (see backend routes/auth.ts). Sending it
-    // in the body means the backend never finds it → session never invalidated.
-    // Source: Fault #3 — "Logout sends token in body, backend expects header"
-    await fetchJson<unknown>(`/auth/logout`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-    });
+  try {
+    if (token) {
+      // Logout must be local-first from the user's perspective. The server call
+      // invalidates the remote session when reachable, but a stale token,
+      // offline backend, or dev proxy failure must not trap the browser in a
+      // zombie logged-in state. Local storage is cleared in finally below.
+      await fetchJson<unknown>(`/auth/logout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        retries: 0,
+      });
+    }
+  } catch (err) {
+    console.warn("Server logout failed; clearing local session anyway.", err);
+  } finally {
+    clearAuth();
   }
-  clearAuth();
 }
 
 export async function getMe(_userId?: number): Promise<AuthUser> {

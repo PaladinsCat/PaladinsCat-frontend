@@ -6,19 +6,19 @@
  * Structure: 3 columns (Links | Social | Copyright) on desktop, stacked on mobile
  * Hi-Rez Studios data attribution required per Paladins.guru footer pattern
  */
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { fetchSiteVersion } from "@/lib/api-client";
+import { fetchSiteVersion, type SiteVersion } from "@/lib/api-client";
 
 export default function Footer() {
-  const [siteVersion, setSiteVersion] = useState<string | null>(null);
+  const [siteVersion, setSiteVersion] = useState<SiteVersion | null>(null);
 
   useEffect(() => {
     let cancelled = false;
 
     fetchSiteVersion().then((version) => {
       if (!cancelled && version?.version) {
-        setSiteVersion(version.version);
+        setSiteVersion(version);
       }
     });
 
@@ -26,6 +26,23 @@ export default function Footer() {
       cancelled = true;
     };
   }, []);
+
+  const versionLabel = useMemo(() => {
+    if (!siteVersion?.version) return "";
+    return [siteVersion.version, siteVersion.gitCommitShort].filter(Boolean).join(" · ");
+  }, [siteVersion]);
+
+  const versionTitle = useMemo(() => {
+    if (!siteVersion) return "";
+    const parts = [
+      siteVersion.gitCommit ? `Commit: ${siteVersion.gitCommit}` : "",
+      siteVersion.gitBranch ? `Branch: ${siteVersion.gitBranch}` : "",
+      siteVersion.gitDirty ? "Dirty worktree at deploy" : "",
+      siteVersion.dbSchemaVersion ? `DB schema: ${siteVersion.dbSchemaVersion}` : "",
+      siteVersion.deployedAt ? `Deployed: ${siteVersion.deployedAt}` : "",
+    ].filter(Boolean);
+    return parts.join("\n");
+  }, [siteVersion]);
 
   return (
     // Footer: sticky bottom layout, secondary bg, top border separation
@@ -88,9 +105,9 @@ export default function Footer() {
         </div>
 
         {/* Version */}
-        {siteVersion && (
+        {versionLabel && (
           <div className="mt-6 pt-4 border-t border-pc-border/50 text-center">
-            <span className="text-pc-text-muted text-[10px]">{siteVersion}</span>
+            <span className="text-pc-text-muted text-[10px]" title={versionTitle}>{versionLabel}</span>
           </div>
         )}
       </div>
