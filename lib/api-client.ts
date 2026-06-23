@@ -574,7 +574,9 @@ export interface ChangelogEntry {
   version: string;
   gitCommit: string;
   gitCommitShort: string;
+  gitBranch: string | null;
   deployedAt: string | null;
+  source: string | null;
   changelog: string;
 }
 
@@ -825,7 +827,9 @@ function mapChangelogEntry(raw: any): ChangelogEntry {
     version: String(raw?.version ?? ''),
     gitCommit: String(raw?.gitCommit ?? ''),
     gitCommitShort: String(raw?.gitCommitShort ?? ''),
+    gitBranch: raw?.gitBranch ?? null,
     deployedAt: raw?.deployedAt ?? null,
+    source: raw?.source ?? null,
     changelog: String(raw?.changelog ?? ''),
   };
 }

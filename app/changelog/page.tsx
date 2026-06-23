@@ -1,11 +1,211 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { fetchChangelog, type ChangelogPage } from "@/lib/api-client";
-import { formatLocalDateTime } from "@/lib/time-format";
+import { formatLocalDateTime, formatRelativeTime } from "@/lib/time-format";
 
-const PER_PAGE = 10;
+const PER_PAGE = 15;
+
+type ChangelogSection = {
+  title: string;
+  items: string[];
+  color: string;
+};
+
+function parseChangelog(text: string): ChangelogSection[] {
+  if (!text || !text.trim()) return [];
+
+  const sections: ChangelogSection[] = [];
+  const lines = text.split("\n").filter((l) => l.trim());
+  let currentSection: ChangelogSection | null = null;
+  const orphanItems: string[] = [];
+
+  for (const line of lines) {
+    const sectionMatch = line.match(/^\s*[-*]?\s*\*\*(Added|Changed|Fixed|Removed|Refactored|Improved|Security)\*\*\s*[-:–—]*\s*(.*)/i);
+    if (sectionMatch) {
+      if (currentSection && currentSection.items.length > 0) sections.push(currentSection);
+      const title = sectionMatch[1];
+      const colorMap: Record<string, string> = {
+        Added: "text-emerald-400",
+        Changed: "text-amber-400",
+        Fixed: "text-red-400",
+        Removed: "text-gray-400",
+        Refactored: "text-violet-400",
+        Improved: "text-blue-400",
+        Security: "text-rose-400",
+      };
+      currentSection = {
+        title,
+        items: sectionMatch[2].trim() ? [sectionMatch[2].trim()] : [],
+        color: colorMap[title] || "text-pc-text",
+      };
+    } else if (line.match(/^[-*•]\s+/)) {
+      const item = line.replace(/^[-*•]\s+/, "").trim();
+      if (item) {
+        if (currentSection) {
+          currentSection.items.push(item);
+        } else {
+          orphanItems.push(item);
+        }
+      }
+    } else if (line.trim() && !line.match(/^\s*$/)) {
+      // Non-bullet paragraph text — treat as orphan
+      if (currentSection) {
+        currentSection.items.push(line.trim());
+      } else {
+        orphanItems.push(line.trim());
+      }
+    }
+  }
+
+  if (currentSection && currentSection.items.length > 0) sections.push(currentSection);
+
+  // Orphan items get grouped under "Changes"
+  if (orphanItems.length > 0) {
+    sections.unshift({ title: "Changes", items: orphanItems, color: "text-pc-text" });
+  }
+
+  return sections;
+}
+
+function sourceLabel(source: string | null) {
+  if (!source) return null;
+  const labels: Record<string, string> = {
+    "deploy-script": "Automated deploy",
+    "manual-migration": "Manual migration",
+    "runtime_env_fallback": "Runtime fallback",
+    "site_versions_legacy": "Legacy version",
+  };
+  return labels[source] || source;
+}
+
+function ChangelogEntry({ entry, index }: { entry: ChangelogPage["data"][number]; index: number }) {
+  const sections = useMemo(() => parseChangelog(entry.changelog), [entry.changelog]);
+  const hasChangelog = sections.length > 0;
+
+  return (
+    <article className="group">
+      {/* Timeline dot + line */}
+      <div className="flex gap-4">
+        <div className="flex flex-col items-center">
+          <div className={`w-3 h-3 rounded-full border-2 shrink-0 ${hasChangelog ? "bg-pc-accent border-pc-accent" : "bg-pc-bg border-pc-text-muted"}`} />
+          {index > 0 && <div className="w-px flex-1 bg-pc-border mt-1" />}
+        </div>
+
+        {/* Content */}
+        <div className="pb-6 flex-1 min-w-0">
+          {/* Header row */}
+          <div className="flex items-center gap-2 flex-wrap mb-1">
+            <span className="text-sm font-bold text-pc-text">{entry.version}</span>
+            <span className="font-mono text-xs text-pc-text-muted bg-pc-bg-secondary px-1.5 py-0.5 rounded">
+              {entry.gitCommitShort}
+            </span>
+            {entry.gitBranch && (
+              <span className="text-[10px] text-pc-text-muted">
+                {entry.gitBranch}
+              </span>
+            )}
+          </div>
+
+          {/* Meta row */}
+          <div className="flex items-center gap-3 text-[10px] text-pc-text-muted mb-2">
+            {entry.deployedAt && (
+              <time dateTime={entry.deployedAt} title={formatLocalDateTime(entry.deployedAt)}>
+                {formatRelativeTime(entry.deployedAt)}
+              </time>
+            )}
+            {sourceLabel(entry.source) && (
+              <>
+                <span>·</span>
+                <span>{sourceLabel(entry.source)}</span>
+              </>
+            )}
+          </div>
+
+          {/* Changelog sections */}
+          {hasChangelog ? (
+            <div className="space-y-2">
+              {sections.map((section) => (
+                <div key={section.title}>
+                  <h3 className={`text-xs font-semibold ${section.color} mb-1`}>
+                    {section.title}
+                  </h3>
+                  <ul className="space-y-0.5">
+                    {section.items.map((item, i) => (
+                      <li key={i} className="text-sm text-pc-text-secondary leading-relaxed">
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-pc-text-muted italic">
+              Deployment recorded — no changelog provided.
+            </p>
+          )}
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function Pagination({ page, totalPages, onChange }: { page: number; totalPages: number; onChange: (p: number) => void }) {
+  if (totalPages <= 1) return null;
+
+  const pages: (number | "...")[] = [];
+  if (totalPages <= 7) {
+    for (let i = 1; i <= totalPages; i++) pages.push(i);
+  } else {
+    pages.push(1);
+    if (page > 3) pages.push("...");
+    const start = Math.max(2, page - 1);
+    const end = Math.min(totalPages - 1, page + 1);
+    for (let i = start; i <= end; i++) pages.push(i);
+    if (page < totalPages - 2) pages.push("...");
+    pages.push(totalPages);
+  }
+
+  return (
+    <nav className="flex items-center justify-center gap-1 pt-4" aria-label="Pagination">
+      <button
+        onClick={() => onChange(Math.max(1, page - 1))}
+        disabled={page <= 1}
+        className="px-3 py-1.5 rounded-lg text-xs text-pc-text-muted hover:text-pc-accent disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+      >
+        ← Prev
+      </button>
+      <div className="flex items-center gap-1 mx-2">
+        {pages.map((pn, i) =>
+          pn === "..." ? (
+            <span key={`e-${i}`} className="px-1 text-pc-text-muted text-xs">…</span>
+          ) : (
+            <button
+              key={pn}
+              onClick={() => onChange(pn as number)}
+              className={`w-8 h-8 rounded-lg text-xs transition-colors ${
+                page === pn
+                  ? "bg-pc-accent text-pc-bg font-bold"
+                  : "text-pc-text-muted hover:text-pc-accent"
+              }`}
+            >
+              {pn}
+            </button>
+          )
+        )}
+      </div>
+      <button
+        onClick={() => onChange(Math.min(totalPages, page + 1))}
+        disabled={page >= totalPages}
+        className="px-3 py-1.5 rounded-lg text-xs text-pc-text-muted hover:text-pc-accent disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+      >
+        Next →
+      </button>
+    </nav>
+  );
+}
 
 export default function ChangelogPage() {
   const [page, setPage] = useState(1);
@@ -24,124 +224,48 @@ export default function ChangelogPage() {
   }, [page]);
 
   const totalPages = data?.totalPages ?? 1;
-
-  // Generate page numbers to show (with ellipsis for large ranges)
-  const pageNumbers = (() => {
-    const pages: (number | "...")[] = [];
-    if (totalPages <= 7) {
-      for (let i = 1; i <= totalPages; i++) pages.push(i);
-    } else {
-      pages.push(1);
-      if (page > 3) pages.push("...");
-      const start = Math.max(2, page - 1);
-      const end = Math.min(totalPages - 1, page + 1);
-      for (let i = start; i <= end; i++) pages.push(i);
-      if (page < totalPages - 2) pages.push("...");
-      pages.push(totalPages);
-    }
-    return pages;
-  })();
+  const totalEntries = data?.total ?? 0;
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <Link href="/" className="text-pc-text-muted hover:text-pc-accent transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
-        </Link>
-        <h1 className="text-2xl font-semibold text-pc-text">Changelog</h1>
+      <div className="space-y-1">
+        <h1 className="pc-heading pc-heading-lg text-pc-accent">Changelog</h1>
+        <p className="text-sm text-pc-text-muted">
+          {totalEntries} deployment{totalEntries !== 1 ? "s" : ""} recorded
+        </p>
       </div>
 
+      {/* Timeline */}
       {loading ? (
-        <div className="space-y-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 animate-pulse">
-              <div className="h-4 bg-pc-bg-secondary rounded w-1/3 mb-2" />
-              <div className="h-3 bg-pc-bg-secondary rounded w-2/3 mb-1" />
-              <div className="h-3 bg-pc-bg-secondary rounded w-1/2" />
+        <div className="space-y-6">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="flex gap-4 animate-pulse">
+              <div className="w-3">
+                <div className="w-3 h-3 rounded-full bg-pc-bg-secondary" />
+                {i > 0 && <div className="w-px bg-pc-bg-secondary mt-1" style={{ height: "80px" }} />}
+              </div>
+              <div className="flex-1 space-y-2">
+                <div className="h-4 bg-pc-bg-secondary rounded w-1/4" />
+                <div className="h-3 bg-pc-bg-secondary rounded w-1/6" />
+                <div className="h-3 bg-pc-bg-secondary rounded w-3/4" />
+              </div>
             </div>
           ))}
         </div>
-      ) : data?.data.length ?? 0 === 0 ? (
-        <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-8 text-center">
-          <p className="text-pc-text-muted text-sm">No changelog entries yet.</p>
+      ) : totalEntries === 0 ? (
+        <div className="pc-card text-center py-12">
+          <p className="text-pc-text-muted text-sm">No deployment history yet.</p>
         </div>
       ) : (
-        <>
-          <div className="space-y-3">
-            {data?.data.map((entry) => (
-              <div
-                key={entry.id}
-                className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 shadow-sm"
-              >
-                <div className="flex items-start justify-between gap-3 mb-2">
-                  <div className="min-w-0">
-                    <h2 className="text-sm font-bold text-pc-text truncate">
-                      {entry.version}
-                      {entry.gitCommitShort && (
-                        <span className="text-pc-text-muted font-mono ml-2 text-xs">
-                          {entry.gitCommitShort}
-                        </span>
-                      )}
-                    </h2>
-                    {entry.deployedAt && (
-                      <span className="text-pc-text-muted text-[10px]">
-                        {formatLocalDateTime(entry.deployedAt)}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div className="text-pc-text-secondary text-sm leading-relaxed whitespace-pre-wrap">
-                  {entry.changelog}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-1 pt-2">
-              <button
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page <= 1}
-                className="px-3 py-1.5 rounded-lg text-sm text-pc-text-muted hover:text-pc-accent disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-              >
-                &larr; Prev
-              </button>
-
-              <div className="flex items-center gap-1 mx-2">
-                {pageNumbers.map((pn, i) =>
-                  pn === "..." ? (
-                    <span key={`e-${i}`} className="px-1 text-pc-text-muted text-sm">
-                      …
-                    </span>
-                  ) : (
-                    <button
-                      key={pn}
-                      onClick={() => setPage(pn as number)}
-                      className={`w-8 h-8 rounded-lg text-sm transition-colors ${
-                        page === pn
-                          ? "bg-pc-accent text-pc-bg font-bold"
-                          : "text-pc-text-muted hover:text-pc-accent"
-                      }`}
-                    >
-                      {pn}
-                    </button>
-                  )
-                )}
-              </div>
-
-              <button
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page >= totalPages}
-                className="px-3 py-1.5 rounded-lg text-sm text-pc-text-muted hover:text-pc-accent disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-              >
-                Next &rarr;
-              </button>
-            </div>
-          )}
-        </>
+        <div className="pc-card">
+          {data?.data.map((entry, i) => (
+            <ChangelogEntry key={entry.id} entry={entry} index={i} />
+          ))}
+        </div>
       )}
+
+      <Pagination page={page} totalPages={totalPages} onChange={setPage} />
     </div>
   );
 }

@@ -50,3 +50,25 @@ export function formatLocalHourFromUtcBucket(date: string | null | undefined, ho
     minute: "2-digit",
   });
 }
+
+const MINUTE = 60 * 1000;
+const HOUR = 60 * MINUTE;
+const DAY = 24 * HOUR;
+
+export function formatRelativeTime(value: string | null | undefined): string {
+  const date = parseBackendDate(value);
+  if (!date) return "-";
+  const diff = Date.now() - date.getTime();
+  const abs = Math.abs(diff);
+
+  if (abs < MINUTE) return "just now";
+  if (abs < HOUR) return `${Math.floor(abs / MINUTE)}m ago`;
+  if (abs < DAY) return `${Math.floor(abs / HOUR)}h ago`;
+  if (abs < 7 * DAY) return `${Math.floor(abs / DAY)}d ago`;
+
+  return date.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
