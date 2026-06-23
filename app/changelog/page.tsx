@@ -102,14 +102,14 @@ function ChangelogEntry({ entry, index }: { entry: ChangelogPage["data"][number]
               {entry.gitCommitShort}
             </span>
             {entry.gitBranch && (
-              <span className="text-[10px] text-pc-text-muted">
+              <span className="text-xs text-pc-text-muted">
                 {entry.gitBranch}
               </span>
             )}
           </div>
 
           {/* Meta row */}
-          <div className="flex items-center gap-3 text-[10px] text-pc-text-muted mb-2">
+          <div className="flex items-center gap-3 text-xs text-pc-text-muted mb-2">
             {entry.deployedAt && (
               <time dateTime={entry.deployedAt} title={formatLocalDateTime(entry.deployedAt)}>
                 {formatRelativeTime(entry.deployedAt)}

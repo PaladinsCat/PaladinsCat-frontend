@@ -144,7 +144,7 @@ export default function LeaderboardPage() {
         <aside className="w-56 shrink-0 space-y-4">
           {/* Tier selector */}
           <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-3">
-            <h3 className="text-pc-text-muted text-[10px] uppercase tracking-wider mb-2 px-1">Tier</h3>
+            <h3 className="text-pc-text-muted text-xs uppercase tracking-wider mb-2 px-1">Tier</h3>
             <div className="space-y-0.5">
               {/* Grandmaster */}
               <button
@@ -186,7 +186,7 @@ export default function LeaderboardPage() {
                       }`}
                     >
                       <span>{group.group}</span>
-                      <span className="text-[10px] text-pc-text-muted">{isExpanded ? "▾" : "▸"}</span>
+                      <span className="text-xs text-pc-text-muted">{isExpanded ? "▾" : "▸"}</span>
                     </button>
                     {isExpanded && (
                       <div className="ml-2 mt-0.5 space-y-0.5 border-l border-pc-border/50 pl-2">
@@ -213,7 +213,7 @@ export default function LeaderboardPage() {
 
           {/* Sort controls */}
           <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-3">
-            <h3 className="text-pc-text-muted text-[10px] uppercase tracking-wider mb-2 px-1">Sort By</h3>
+            <h3 className="text-pc-text-muted text-xs uppercase tracking-wider mb-2 px-1">Sort By</h3>
             <div className="space-y-1">
               {SORT_OPTIONS.map((opt) => (
                 <button
@@ -234,7 +234,7 @@ export default function LeaderboardPage() {
                 >
                   <span>{opt.label}</span>
                   {sortKey === opt.key && (
-                    <span className="text-[10px]">{sortDir === "asc" ? "↑" : "↓"}</span>
+                    <span className="text-xs">{sortDir === "asc" ? "↑" : "↓"}</span>
                   )}
                 </button>
               ))}
@@ -243,7 +243,7 @@ export default function LeaderboardPage() {
 
           {/* Player search */}
           <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-3">
-            <h3 className="text-pc-text-muted text-[10px] uppercase tracking-wider mb-2 px-1">Search</h3>
+            <h3 className="text-pc-text-muted text-xs uppercase tracking-wider mb-2 px-1">Search</h3>
             <div className="relative">
               <input
                 type="text"
@@ -265,7 +265,7 @@ export default function LeaderboardPage() {
 
           {/* Current selection summary */}
           <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-3">
-            <div className="text-pc-text-muted text-[10px] uppercase tracking-wider mb-1">Viewing</div>
+            <div className="text-pc-text-muted text-xs uppercase tracking-wider mb-1">Viewing</div>
             <div className="text-pc-text font-semibold text-sm">{currentTierLabel}</div>
             <div className="text-pc-text-secondary text-xs mt-0.5">
               {sorted.length} player{sorted.length !== 1 ? "s" : ""}

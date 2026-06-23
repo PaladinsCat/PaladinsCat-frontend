@@ -20,7 +20,7 @@ import { getRankIconPath } from "@/lib/tier-utils";
 import { BellCurveChart } from "@/components/BellCurveChart";
 
 const ROLES = ["Frontline", "Damage", "Flank", "Support"] as const;
-const DETAIL_LINK_CLASS = "text-[10px] text-pc-text-secondary hover:text-pc-accent transition-colors drop-shadow-sm";
+const DETAIL_LINK_CLASS = "text-xs text-pc-text-secondary hover:text-pc-accent transition-colors drop-shadow-sm";
 
 type SortKey = "pickRate" | "winRate";
 type ItemCategory = "Defense" | "Utility" | "Healing" | "Offense";
@@ -218,16 +218,16 @@ export default function StatsPage() {
 
                 {/* Legend dots */}
                 <div className="flex items-center gap-4 mb-2">
-                  <span className="flex items-center gap-1 text-[10px] text-pc-text-muted">
+                  <span className="flex items-center gap-1 text-xs text-pc-text-muted">
                     <span className="w-2 h-2 rounded-full" style={{ background: stroke }} /> Mean
                   </span>
-                  <span className="flex items-center gap-1 text-[10px] text-pc-text-muted">
+                  <span className="flex items-center gap-1 text-xs text-pc-text-muted">
                     <span className="w-2 h-2 rounded-full bg-pc-text-muted" /> Mode
                   </span>
                 </div>
 
                 {/* P10 / P25 / Mean / P75 / P90 */}
-                <div className="flex items-center justify-between text-[10px]">
+                <div className="flex items-center justify-between text-xs">
                   <span className="text-pc-text-muted">p10 <span className="text-pc-text-secondary">{formatVal(d.p10)}</span></span>
                   <span className="text-pc-text-muted">p25 <span className="text-pc-text-secondary">{formatVal(d.p25)}</span></span>
                   <span className="text-pc-text-muted">mean <span className="font-bold" style={{ color: stroke }}>{formatVal(d.mean)}</span></span>
@@ -412,7 +412,7 @@ export default function StatsPage() {
               if (catItems.length === 0) return null;
               return (
                 <div key={cat}>
-                  <span className={`text-[10px] font-bold uppercase tracking-wider ${catColor} mb-2 block`}>{cat}</span>
+                  <span className={`text-xs font-bold uppercase tracking-wider ${catColor} mb-2 block`}>{cat}</span>
                   <div className="grid grid-cols-5 gap-2">
                     {catItems.map((item) => (
                       <div key={item.name} className="flex flex-col items-center text-center py-1">
@@ -423,7 +423,7 @@ export default function StatsPage() {
                             <span className="text-sm text-pc-text-muted font-bold">{item.name.charAt(0)}</span>
                           </div>
                         )}
-                        <div className="text-pc-text font-medium text-[10px] leading-tight truncate w-full">{item.name}</div>
+                        <div className="text-pc-text font-medium text-xs leading-tight truncate w-full">{item.name}</div>
                         <div className="flex items-center gap-1 text-[9px] mt-0.5">
                           <span className={item.winRate >= 50 ? "text-emerald-400" : "text-red-400"}>
                             WR {item.winRate}%

@@ -157,7 +157,7 @@ export default function HomePage() {
                       <div className={`shrink-0 mt-0.5 w-2 h-2 rounded-full ${notificationDot(notification.importance)}`} />
                       <div className="flex-1 min-w-0">
                         <p className="text-pc-text-secondary text-sm leading-relaxed">{notification.message}</p>
-                        <span className="text-pc-text-muted text-[10px] mt-1 block">
+                        <span className="text-pc-text-muted text-xs mt-1 block">
                           {formatLocalDateTime(notification.timestamp)}
                         </span>
                       </div>
@@ -193,7 +193,7 @@ export default function HomePage() {
                         {changelogPreview.version}
                       </span>
                       {changelogPreview.gitCommitShort && (
-                        <span className="text-[10px] font-mono text-pc-text-muted">
+                        <span className="text-xs font-mono text-pc-text-muted">
                           {changelogPreview.gitCommitShort}
                         </span>
                       )}
@@ -202,7 +202,7 @@ export default function HomePage() {
                       {changelogPreview.changelog}
                     </p>
                     {changelogPreview.deployedAt && (
-                      <span className="text-pc-text-muted text-[10px] mt-2 block">
+                      <span className="text-pc-text-muted text-xs mt-2 block">
                         {formatLocalDateTime(changelogPreview.deployedAt)}
                       </span>
                     )}

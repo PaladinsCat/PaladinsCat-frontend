@@ -112,7 +112,7 @@ export default function Footer() {
         {/* Version */}
         {versionLabel && (
           <div className="mt-6 pt-4 border-t border-pc-border/50 text-center">
-            <span className="text-pc-text-muted text-[10px]" title={versionTitle}>{versionLabel}</span>
+            <span className="text-pc-text-muted text-xs" title={versionTitle}>{versionLabel}</span>
           </div>
         )}
       </div>

@@ -236,7 +236,7 @@ export default function ChampionTable() {
                         {c.name}
                       </h3>
                       {c.roles && c.roles.length > 0 && (
-                        <span className="shrink-0 flex items-center gap-1 text-pc-text-muted text-[10px] px-1.5 py-0.5 rounded pc-surface-subtle">
+                        <span className="shrink-0 flex items-center gap-1 text-pc-text-muted text-xs px-1.5 py-0.5 rounded pc-surface-subtle">
                           {roleIcon && <img src={roleIcon} alt={c.roles[0]} className="w-3 h-3" />}
                           {c.roles[0]}
                         </span>
@@ -244,7 +244,7 @@ export default function ChampionTable() {
                     </div>
 
                     {/* Row 2: stats */}
-                    <div className="flex items-center gap-3 text-[11px]">
+                    <div className="flex items-center gap-3 text-xs">
                       <span className={c.winRate != null ? "text-emerald-400" : "text-pc-text-muted"}>
                         <span className="text-pc-text-muted mr-1">WR</span>
                         {c.winRate != null ? `${c.winRate}%` : "—"}

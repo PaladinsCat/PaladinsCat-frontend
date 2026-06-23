@@ -153,7 +153,7 @@ export default function ChampionRateDetailPage({ config }: { config: RateMetricC
             { label: "Top Value", value: allRows[0] ? formatRate(allRows[0].value) : "--" },
           ].map((item) => (
             <div key={item.label} className="min-w-0">
-              <div className="text-pc-text-muted text-[10px] uppercase tracking-wider mb-1">{item.label}</div>
+              <div className="text-pc-text-muted text-xs uppercase tracking-wider mb-1">{item.label}</div>
               <div className="text-xl font-bold truncate" style={{ color: item.accent ? config.stroke : undefined }}>
                 {item.value}
               </div>
@@ -180,23 +180,23 @@ export default function ChampionRateDetailPage({ config }: { config: RateMetricC
                     <h2 className="text-pc-text font-semibold truncate">{section.className}</h2>
                   </div>
                   <div className="text-right shrink-0">
-                    <div className="text-[10px] text-pc-text-muted uppercase tracking-wider">Class Avg</div>
+                    <div className="text-xs text-pc-text-muted uppercase tracking-wider">Class Avg</div>
                     <div className="text-lg font-bold" style={{ color: config.stroke }}>{formatRate(section.average)}</div>
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-3 mt-4 text-xs">
                   <div>
-                    <div className="text-pc-text-muted text-[10px] uppercase tracking-wider">vs Global</div>
+                    <div className="text-pc-text-muted text-xs uppercase tracking-wider">vs Global</div>
                     <div className={vsGlobal >= 0 ? "text-emerald-400" : "text-red-400"}>
                       {formatSigned(vsGlobal)} ({formatSignedDeltaPercent(vsGlobalPct)})
                     </div>
                   </div>
                   <div>
-                    <div className="text-pc-text-muted text-[10px] uppercase tracking-wider">Champions</div>
+                    <div className="text-pc-text-muted text-xs uppercase tracking-wider">Champions</div>
                     <div className="text-pc-text-secondary">{section.champions.length.toLocaleString()}</div>
                   </div>
                   <div>
-                    <div className="text-pc-text-muted text-[10px] uppercase tracking-wider">Matches</div>
+                    <div className="text-pc-text-muted text-xs uppercase tracking-wider">Matches</div>
                     <div className="text-pc-text-secondary">{section.matches.toLocaleString()}</div>
                   </div>
                 </div>

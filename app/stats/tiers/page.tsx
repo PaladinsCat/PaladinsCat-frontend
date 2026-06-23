@@ -205,7 +205,7 @@ export default function TiersPage() {
                     <span className="tabular-nums">{item.value.toLocaleString()}</span>
                   )}
                 </div>
-                {item.kind === "count" ? <div className="text-[10px] text-pc-text-secondary">{item.suffix}</div> : null}
+                {item.kind === "count" ? <div className="text-xs text-pc-text-secondary">{item.suffix}</div> : null}
               </div>
             ))}
           </section>

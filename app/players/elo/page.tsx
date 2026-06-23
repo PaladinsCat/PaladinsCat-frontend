@@ -274,7 +274,7 @@ function ChampionEloContent() {
                   ) : (
                     "All Champions"
                   )}
-                  <span className="text-[10px] ml-1">▾</span>
+                  <span className="text-xs ml-1">▾</span>
                 </button>
 
                 {dropdownOpen && (
@@ -293,7 +293,7 @@ function ChampionEloContent() {
                         {championSearch && (
                           <button
                             onClick={() => setChampionSearch("")}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 text-pc-text-muted hover:text-pc-text text-[10px]"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 text-pc-text-muted hover:text-pc-text text-xs"
                           >
                             ✕
                           </button>

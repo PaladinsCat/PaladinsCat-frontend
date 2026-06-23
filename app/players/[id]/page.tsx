@@ -128,7 +128,7 @@ function trendColor(trend: number): string {
 function StatRow({ label, value, color }: { label: string; value: string; color?: string }) {
   return (
     <div className="flex items-center justify-between">
-      <span className="text-[11px] text-pc-text-muted">{label}</span>
+      <span className="text-xs text-pc-text-muted">{label}</span>
       <span className={`text-xs font-mono font-medium ${color || "text-pc-text"}`}>{value}</span>
     </div>
   );
@@ -356,41 +356,41 @@ export default function PlayerProfilePage() {
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-xl font-bold text-pc-text truncate">{player.name}</h1>
               {player.cheater && (
-                <span className="text-[10px] font-bold text-red-400 bg-red-500/10 px-1.5 py-0.5 rounded">CHEATER</span>
+                <span className="text-xs font-bold text-red-400 bg-red-500/10 px-1.5 py-0.5 rounded">CHEATER</span>
               )}
               {player.sus_count > 0 && !player.cheater && (
-                <span className="text-[10px] font-bold text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded">SUSPICIOUS ({player.sus_count})</span>
+                <span className="text-xs font-bold text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded">SUSPICIOUS ({player.sus_count})</span>
               )}
             </div>
             {/* Title + loading frame */}
             <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-0.5">
               {player.title && (
-                <span className="text-[11px] text-pc-text-secondary" dangerouslySetInnerHTML={{ __html: player.title }} />
+                <span className="text-xs text-pc-text-secondary" dangerouslySetInnerHTML={{ __html: player.title }} />
               )}
               {player.loading_frame && (
-                <span className="text-[11px] text-pc-accent/80 font-medium">▸ {player.loading_frame}</span>
+                <span className="text-xs text-pc-accent/80 font-medium">▸ {player.loading_frame}</span>
               )}
             </div>
             {/* Meta badges */}
             <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
-              <span className={`text-[10px] font-semibold ${tierColor} bg-pc-bg px-1.5 py-0.5 rounded flex items-center gap-1`}>
+              <span className={`text-xs font-semibold ${tierColor} bg-pc-bg px-1.5 py-0.5 rounded flex items-center gap-1`}>
                 <img src={rankIcon} alt={effectiveTier.displayName} className="w-4 h-4 object-contain" />
                 {effectiveTier.displayName}
               </span>
               {player.kbm_points > 0 && (
-                <span className="text-[10px] text-pc-text-muted font-mono">{player.kbm_points} TP</span>
+                <span className="text-xs text-pc-text-muted font-mono">{player.kbm_points} TP</span>
               )}
               <span className="text-pc-border">·</span>
-              <span className="text-[10px] text-pc-text-muted">{player.region}</span>
+              <span className="text-xs text-pc-text-muted">{player.region}</span>
               <span className="text-pc-border">·</span>
-              <span className="text-[10px] text-pc-text-muted">{player.platform}</span>
+              <span className="text-xs text-pc-text-muted">{player.platform}</span>
               {player.platform_name && (
-                <span className="text-[10px] text-pc-text-muted">({player.platform_name})</span>
+                <span className="text-xs text-pc-text-muted">({player.platform_name})</span>
               )}
               <span className="text-pc-border">·</span>
-              <span className="text-[10px] text-pc-text-muted">Lvl {player.level}</span>
+              <span className="text-xs text-pc-text-muted">Lvl {player.level}</span>
               <span className="text-pc-border">·</span>
-              <span className="text-[10px] text-pc-text-muted">Mastery {player.mastery_level}</span>
+              <span className="text-xs text-pc-text-muted">Mastery {player.mastery_level}</span>
             </div>
           </div>
         </div>
@@ -414,7 +414,7 @@ export default function PlayerProfilePage() {
               </StatGrid>
               {player.personal_status_message && (
                 <div className="mt-3 pt-3 border-t border-pc-border/50">
-                  <span className="text-[11px] text-pc-text-muted">Status: </span>
+                  <span className="text-xs text-pc-text-muted">Status: </span>
                   <span className="text-xs text-pc-text-secondary italic">{player.personal_status_message}</span>
                 </div>
               )}
@@ -429,8 +429,8 @@ export default function PlayerProfilePage() {
                 {/* Tier display */}
                 <div className="text-center">
                   <img src={rankIcon} alt={effectiveTier.displayName} className="w-12 h-12 object-contain mx-auto" />
-                  <div className={`text-[11px] font-semibold ${tierColor} mt-1`}>{effectiveTier.displayName}</div>
-                  <div className="text-[10px] text-pc-text-muted mt-0.5">Season {player.kbm_season}</div>
+                  <div className={`text-xs font-semibold ${tierColor} mt-1`}>{effectiveTier.displayName}</div>
+                  <div className="text-xs text-pc-text-muted mt-0.5">Season {player.kbm_season}</div>
                 </div>
                 <div className="flex-1 border-l border-pc-border/50 pl-4">
                   <StatGrid>
@@ -443,15 +443,15 @@ export default function PlayerProfilePage() {
               </div>
               <div className="grid grid-cols-3 gap-2 text-center pt-3 border-t border-pc-border/50">
                 <div>
-                  <div className="text-[10px] text-pc-text-muted">Wins</div>
+                  <div className="text-xs text-pc-text-muted">Wins</div>
                   <div className="text-sm font-mono text-emerald-400">{player.kbm_wins}</div>
                 </div>
                 <div>
-                  <div className="text-[10px] text-pc-text-muted">Losses</div>
+                  <div className="text-xs text-pc-text-muted">Losses</div>
                   <div className="text-sm font-mono text-rose-400">{player.kbm_losses}</div>
                 </div>
                 <div>
-                  <div className="text-[10px] text-pc-text-muted">Win Rate</div>
+                  <div className="text-xs text-pc-text-muted">Win Rate</div>
                   <div className="text-sm font-mono text-pc-text">{kbmWr}%</div>
                 </div>
               </div>
@@ -464,7 +464,7 @@ export default function PlayerProfilePage() {
             <div className="pc-card">
               <div className="grid grid-cols-2 gap-x-6 gap-y-2">
                 <div>
-                  <div className="text-[10px] text-pc-text-muted uppercase tracking-wider mb-2">Averages</div>
+                  <div className="text-xs text-pc-text-muted uppercase tracking-wider mb-2">Averages</div>
                   <div className="space-y-1.5">
                     <StatRow label="Damage / Min" value={formatNumber(player.avg_dpm)} color="text-red-400" />
                     <StatRow label="Healing / Min" value={formatNumber(player.avg_hpm)} color="text-emerald-400" />
@@ -476,7 +476,7 @@ export default function PlayerProfilePage() {
                   </div>
                 </div>
                 <div>
-                  <div className="text-[10px] text-pc-text-muted uppercase tracking-wider mb-2">Overall</div>
+                  <div className="text-xs text-pc-text-muted uppercase tracking-wider mb-2">Overall</div>
                   <div className="space-y-1.5">
                     <StatRow label="Total Matches" value={formatNumber(player.total_matches)} />
                     <StatRow label="Total Wins" value={formatNumber(player.total_wins)} color="text-emerald-400" />
@@ -558,29 +558,29 @@ export default function PlayerProfilePage() {
                 <div className="space-y-3">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-pc-accent font-mono">{Number(kbmRating.mu).toFixed(0)}</div>
-                    <div className="text-[10px] text-pc-text-muted mt-0.5">Glicko-2 Rating</div>
+                    <div className="text-xs text-pc-text-muted mt-0.5">Glicko-2 Rating</div>
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-center">
                     <div className="pc-surface-light rounded p-2 border border-pc-border/50">
-                      <div className="text-[10px] text-pc-text-muted">Deviation</div>
+                      <div className="text-xs text-pc-text-muted">Deviation</div>
                       <div className="text-xs font-mono text-pc-text">{Number(kbmRating.phi).toFixed(0)}</div>
                     </div>
                     <div className="pc-surface-light rounded p-2 border border-pc-border/50">
-                      <div className="text-[10px] text-pc-text-muted">Volatility</div>
+                      <div className="text-xs text-pc-text-muted">Volatility</div>
                       <div className="text-xs font-mono text-pc-text">{Number(kbmRating.volatility).toFixed(4)}</div>
                     </div>
                   </div>
                   <div className="grid grid-cols-3 gap-2 text-center pt-2 border-t border-pc-border/50">
                     <div>
-                      <div className="text-[10px] text-pc-text-muted">W</div>
+                      <div className="text-xs text-pc-text-muted">W</div>
                       <div className="text-xs font-mono text-emerald-400">{Number(kbmRating.wins)}</div>
                     </div>
                     <div>
-                      <div className="text-[10px] text-pc-text-muted">L</div>
+                      <div className="text-xs text-pc-text-muted">L</div>
                       <div className="text-xs font-mono text-rose-400">{Number(kbmRating.losses)}</div>
                     </div>
                     <div>
-                      <div className="text-[10px] text-pc-text-muted">WR</div>
+                      <div className="text-xs text-pc-text-muted">WR</div>
                       <div className="text-xs font-mono text-pc-text">
                         {kbmRating.matches_played > 0 ? ((Number(kbmRating.wins) / Number(kbmRating.matches_played)) * 100).toFixed(0) : "—"}%
                       </div>
@@ -618,7 +618,7 @@ export default function PlayerProfilePage() {
                           </Link>
                           <span className="text-xs font-mono text-pc-accent ml-2">{Number(cr.mu).toFixed(0)}</span>
                         </div>
-                        <div className="flex items-center gap-2 text-[10px] text-pc-text-muted">
+                        <div className="flex items-center gap-2 text-xs text-pc-text-muted">
                           <span>{cr.matches_played} games</span>
                           <span>·</span>
                           <span>
@@ -647,7 +647,7 @@ export default function PlayerProfilePage() {
                       <span className="text-xs text-pc-text-muted">Queue {qr.queue_id}</span>
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-mono text-pc-accent">{Number(qr.mu).toFixed(0)}</span>
-                        <span className="text-[10px] text-pc-text-muted">φ{Number(qr.phi).toFixed(0)}</span>
+                        <span className="text-xs text-pc-text-muted">φ{Number(qr.phi).toFixed(0)}</span>
                       </div>
                     </div>
                   ))}
@@ -675,7 +675,7 @@ export default function PlayerProfilePage() {
             ) : !currentMatch.match_id ? (
               <div className="text-center py-8">
                 <div className="text-pc-text-muted text-sm mb-2">Not in a live match</div>
-                <div className="text-[11px] text-pc-text-muted/60">This player is not currently playing a tracked match.</div>
+                <div className="text-xs text-pc-text-muted/60">This player is not currently playing a tracked match.</div>
               </div>
             ) : (
               <div className="space-y-3">
@@ -693,7 +693,7 @@ export default function PlayerProfilePage() {
                 </div>
                 {currentMatch.players && currentMatch.players.length > 0 && (
                   <div className="pt-3 border-t border-pc-border/50">
-                    <div className="text-[10px] text-pc-text-muted uppercase tracking-wider mb-2">Players</div>
+                    <div className="text-xs text-pc-text-muted uppercase tracking-wider mb-2">Players</div>
                     <div className="grid grid-cols-2 gap-2">
                       {currentMatch.players.slice(0, 10).map((p: any) => (
                         <div key={p.player_id} className="flex items-center gap-2 text-xs">

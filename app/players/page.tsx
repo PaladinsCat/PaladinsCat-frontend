@@ -167,18 +167,18 @@ export default function PlayersPage() {
               return (
               <div key={stat} className="flex flex-col h-full">
                 <div className="flex items-center justify-between mb-2 px-2">
-                  <h3 className="text-pc-text font-semibold text-[11px]">{STAT_LABELS[stat] || stat}</h3>
-                  <Link href={`/players/stats/${stat}`} className="text-[10px] text-pc-text-secondary hover:text-pc-accent transition-colors drop-shadow-sm">
+                  <h3 className="text-pc-text font-semibold text-xs">{STAT_LABELS[stat] || stat}</h3>
+                  <Link href={`/players/stats/${stat}`} className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors drop-shadow-sm">
                     Detail →
                   </Link>
                 </div>
                 <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-3 hover:border-pc-accent-mid transition-colors flex-1 flex flex-col justify-center">
                   <div className="space-y-1.5">
                     {players.length === 0 && (
-                      <div className="text-[11px] text-pc-text-muted">{overviewLoading ? "Loading..." : "No ranked data"}</div>
+                      <div className="text-xs text-pc-text-muted">{overviewLoading ? "Loading..." : "No ranked data"}</div>
                     )}
                     {players.map((p, i) => (
-                      <div key={`${stat}-${p.playerId}`} className="flex items-center justify-between text-[11px]">
+                      <div key={`${stat}-${p.playerId}`} className="flex items-center justify-between text-xs">
                         <div className="flex items-center gap-1.5 min-w-0">
                           <RankBadge rank={i + 1} />
                           <Link href={`/players/${p.playerId}`} className="text-pc-text truncate hover:text-pc-accent transition-colors">{p.playerName}</Link>
@@ -199,28 +199,28 @@ export default function PlayersPage() {
               <div className="flex items-center justify-between mb-2 px-2">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-red-500" />
-                  <h3 className="text-pc-text font-semibold text-[11px]">Cheaters</h3>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/20">
+                  <h3 className="text-pc-text font-semibold text-xs">Cheaters</h3>
+                  <span className="text-xs px-1.5 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/20">
                     {cheaterPlayers.length}
                   </span>
                 </div>
-                <Link href="/players/cheaters" className="text-[10px] text-pc-text-secondary hover:text-red-400 transition-colors drop-shadow-sm">
+                <Link href="/players/cheaters" className="text-xs text-pc-text-secondary hover:text-red-400 transition-colors drop-shadow-sm">
                   Detail →
                 </Link>
               </div>
               <div className="bg-pc-bg-elevated border border-red-500/20 rounded-xl p-3 flex-1 flex flex-col justify-center">
                 <div className="space-y-1.5">
                 {cheaterPlayers.length === 0 && (
-                  <div className="text-[11px] text-pc-text-muted">{overviewLoading ? "Loading..." : "No confirmed cheaters"}</div>
+                  <div className="text-xs text-pc-text-muted">{overviewLoading ? "Loading..." : "No confirmed cheaters"}</div>
                 )}
                 {cheaterPlayers.map((p) => (
                   <div key={p.id} className="flex items-start gap-2 p-2 rounded-lg bg-pc-bg/50">
                     <div className="shrink-0 mt-0.5 w-1.5 h-1.5 rounded-full bg-red-500" />
                     <div className="flex-1 min-w-0">
-                      <Link href={`/players/${p.id}`} className="text-pc-text font-medium text-[11px] hover:text-pc-accent transition-colors truncate">
+                      <Link href={`/players/${p.id}`} className="text-pc-text font-medium text-xs hover:text-pc-accent transition-colors truncate">
                         {p.name}
                       </Link>
-                      <p className="text-pc-text-muted text-[10px] mt-0.5">
+                      <p className="text-pc-text-muted text-xs mt-0.5">
                         {p.totalMatches.toLocaleString()} matches{p.winRate != null ? ` · ${p.winRate.toFixed(1)}% WR` : ""}
                       </p>
                     </div>
@@ -235,33 +235,33 @@ export default function PlayersPage() {
               <div className="flex items-center justify-between mb-2 px-2">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-amber-500" />
-                  <h3 className="text-pc-text font-semibold text-[11px]">Suspicious</h3>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                  <h3 className="text-pc-text font-semibold text-xs">Suspicious</h3>
+                  <span className="text-xs px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
                     {suspiciousPlayers.length}
                   </span>
                 </div>
-                <Link href="/players/suspicious" className="text-[10px] text-pc-text-secondary hover:text-amber-400 transition-colors drop-shadow-sm">
+                <Link href="/players/suspicious" className="text-xs text-pc-text-secondary hover:text-amber-400 transition-colors drop-shadow-sm">
                   Detail →
                 </Link>
               </div>
               <div className="bg-pc-bg-elevated border border-amber-500/20 rounded-xl p-3 flex-1 flex flex-col justify-center">
                 <div className="space-y-1.5">
                 {suspiciousPlayers.length === 0 && (
-                  <div className="text-[11px] text-pc-text-muted">{overviewLoading ? "Loading..." : "No suspicious players"}</div>
+                  <div className="text-xs text-pc-text-muted">{overviewLoading ? "Loading..." : "No suspicious players"}</div>
                 )}
                 {suspiciousPlayers.map((p) => (
                   <div key={p.id} className="flex items-start gap-2 p-2 rounded-lg bg-pc-bg/50">
                     <div className="shrink-0 mt-0.5 w-1.5 h-1.5 rounded-full bg-amber-500" />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">
-                        <Link href={`/players/${p.id}`} className="text-pc-text font-medium text-[11px] hover:text-pc-accent transition-colors truncate">
+                        <Link href={`/players/${p.id}`} className="text-pc-text font-medium text-xs hover:text-pc-accent transition-colors truncate">
                           {p.name}
                         </Link>
-                        <span className="shrink-0 text-[10px] px-1 py-0.5 rounded border bg-amber-500/15 text-amber-400 border-amber-500/30">
+                        <span className="shrink-0 text-xs px-1 py-0.5 rounded border bg-amber-500/15 text-amber-400 border-amber-500/30">
                           {p.susCount} flags
                         </span>
                       </div>
-                      <p className="text-pc-text-muted text-[10px] mt-0.5">
+                      <p className="text-pc-text-muted text-xs mt-0.5">
                         {p.totalMatches.toLocaleString()} matches{p.winRate != null ? ` · ${p.winRate.toFixed(1)}% WR` : ""}
                       </p>
                     </div>
@@ -280,20 +280,20 @@ export default function PlayersPage() {
           <section>
             <div className="flex items-center justify-between mb-2 px-2">
               <h2 className="text-sm font-bold text-pc-text">Ranked Leaderboard</h2>
-              <Link href="/players/leaderboard" className="text-[10px] text-pc-text-secondary hover:text-pc-accent transition-colors drop-shadow-sm">
+              <Link href="/players/leaderboard" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors drop-shadow-sm">
                 Detail →
               </Link>
             </div>
             <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4">
               <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
                 {rankedPlayers.length === 0 && (
-                  <div className="col-span-2 text-[11px] text-pc-text-muted">{overviewLoading ? "Loading..." : "No ranked leaderboard data"}</div>
+                  <div className="col-span-2 text-xs text-pc-text-muted">{overviewLoading ? "Loading..." : "No ranked leaderboard data"}</div>
                 )}
                 {rankedPlayers.map((p, i) => {
                   const iconPath = getRankIconPath(p.tier, p.rank);
                   const effective = resolveEffectiveTier(p.tier, p.rank);
                   return (
-                  <div key={p.player_id} className="flex items-center justify-between text-[11px]">
+                  <div key={p.player_id} className="flex items-center justify-between text-xs">
                     <div className="flex items-center gap-1.5 min-w-0">
                       <RankBadge rank={i + 1} />
                       <img src={iconPath} alt={effective.displayName} className="w-4 h-4 object-contain shrink-0" title={effective.displayName} />
@@ -322,17 +322,17 @@ export default function PlayersPage() {
             <section>
               <div className="flex items-center justify-between mb-2 px-2">
                 <h2 className="text-sm font-bold text-pc-text">Top Players by Champion</h2>
-                <Link href="/players/elo" className="text-[10px] text-pc-text-secondary hover:text-pc-accent transition-colors drop-shadow-sm">
+                <Link href="/players/elo" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors drop-shadow-sm">
                   Detail →
                 </Link>
               </div>
               <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-3">
                 <div className="space-y-1.5">
                   {championEloPlayers.length === 0 && (
-                    <div className="text-[11px] text-pc-text-muted">{overviewLoading ? "Loading..." : "No data"}</div>
+                    <div className="text-xs text-pc-text-muted">{overviewLoading ? "Loading..." : "No data"}</div>
                   )}
                   {championEloPlayers.map((p, i) => (
-                    <div key={`champ-elo-${p.player_id}`} className="flex items-center justify-between text-[11px]">
+                    <div key={`champ-elo-${p.player_id}`} className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-1.5 min-w-0">
                         <RankBadge rank={i + 1} />
                         <Link href={`/players/${p.player_id}`} className="text-pc-text truncate hover:text-pc-accent transition-colors">{p.player_name}</Link>
@@ -351,17 +351,17 @@ export default function PlayersPage() {
             <section>
               <div className="flex items-center justify-between mb-2 px-2">
                 <h2 className="text-sm font-bold text-pc-text">Account ELO</h2>
-                <Link href="/players/elo?mode=account" className="text-[10px] text-pc-text-secondary hover:text-pc-accent transition-colors drop-shadow-sm">
+                <Link href="/players/elo?mode=account" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors drop-shadow-sm">
                   Detail →
                 </Link>
               </div>
               <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-3">
                 <div className="space-y-1.5">
                   {accountEloPlayers.length === 0 && (
-                    <div className="text-[11px] text-pc-text-muted">{overviewLoading ? "Loading..." : "No data"}</div>
+                    <div className="text-xs text-pc-text-muted">{overviewLoading ? "Loading..." : "No data"}</div>
                   )}
                   {accountEloPlayers.map((p) => (
-                    <div key={`account-elo-${p.playerId}`} className="flex items-center justify-between text-[11px]">
+                    <div key={`account-elo-${p.playerId}`} className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-1.5 min-w-0">
                         <RankBadge rank={p.rank} />
                         <Link href={`/players/${p.playerId}`} className="text-pc-text truncate hover:text-pc-accent transition-colors">{p.playerName}</Link>

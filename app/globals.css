@@ -181,7 +181,7 @@ body {
 }
 
 .pc-stats-label {
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   letter-spacing: 0.5px;
   color: var(--pc-text-muted);
   margin-top: 2px;

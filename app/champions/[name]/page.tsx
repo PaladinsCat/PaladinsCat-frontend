@@ -315,11 +315,11 @@ export default function ChampionDetailPage() {
                                 {stat && stat.totalPlays > 0 && (
                                   <div className="mt-2 space-y-1.5">
                                     <div className="flex items-center gap-2">
-                                      <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold ${winRateBadgeClass(stat.winRate)}`}>
+                                      <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-mono font-semibold ${winRateBadgeClass(stat.winRate)}`}>
                                         {stat.winRate.toFixed(1)}%
                                       </span>
-                                      <span className="text-[10px] text-pc-text-muted">{stat.totalPlays.toLocaleString()} plays</span>
-                                      <span className="text-[10px] text-pc-text-muted">{stat.wins.toLocaleString()}W/{stat.losses.toLocaleString()}L</span>
+                                      <span className="text-xs text-pc-text-muted">{stat.totalPlays.toLocaleString()} plays</span>
+                                      <span className="text-xs text-pc-text-muted">{stat.wins.toLocaleString()}W/{stat.losses.toLocaleString()}L</span>
                                     </div>
                                     {stat.levels.length > 0 && (
                                       <div className="flex items-center gap-1">
@@ -584,11 +584,11 @@ function TalentCard({ talent, championName, stat }: { talent: ChampionTalent; ch
         )}
         {stat && stat.totalPlays > 0 && (
           <div className="flex items-center gap-2 mt-2">
-            <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold ${winRateBadgeClass(stat.winRate)}`}>
+            <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-mono font-semibold ${winRateBadgeClass(stat.winRate)}`}>
               {stat.winRate.toFixed(1)}%
             </span>
-            <span className="text-[10px] text-pc-text-muted">{stat.totalPlays.toLocaleString()} plays</span>
-            <span className="text-[10px] text-pc-text-muted">{stat.wins.toLocaleString()}W/{stat.losses.toLocaleString()}L</span>
+            <span className="text-xs text-pc-text-muted">{stat.totalPlays.toLocaleString()} plays</span>
+            <span className="text-xs text-pc-text-muted">{stat.wins.toLocaleString()}W/{stat.losses.toLocaleString()}L</span>
           </div>
         )}
       </div>

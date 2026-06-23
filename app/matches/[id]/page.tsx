@@ -339,7 +339,7 @@ function BansSection({ bans }: { bans: MatchBan[] }) {
                 className="h-9 w-9 shrink-0 rounded border border-red-500/20 bg-pc-bg-secondary"
               />
               <div className="min-w-0">
-                <div className="text-[10px] uppercase tracking-wide text-red-300/70">
+                <div className="text-xs uppercase tracking-wide text-red-300/70">
                   Ban {ban.ban_slot ?? i + 1}
                 </div>
                 <div className="truncate text-xs font-medium">{label}</div>
@@ -498,7 +498,7 @@ function ItemStrip({ items }: { items: MatchFactPlayer["items"] }) {
   if (items.length === 0) return null;
   return (
     <div>
-      <div className="mb-1 text-[11px] uppercase tracking-wide text-pc-text-muted">Items</div>
+      <div className="mb-1 text-xs uppercase tracking-wide text-pc-text-muted">Items</div>
       <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 xl:grid-cols-6">
         {items.map((item) => {
           const itemLevel = formatItemDisplayLevel(item.item_level);
@@ -523,7 +523,7 @@ function CardStrip({ cards }: { cards: MatchFactPlayer["cards"] }) {
   if (cards.length === 0) return null;
   return (
     <div>
-      <div className="mb-1 text-[11px] uppercase tracking-wide text-pc-text-muted">Loadout Cards</div>
+      <div className="mb-1 text-xs uppercase tracking-wide text-pc-text-muted">Loadout Cards</div>
       <div className="grid grid-cols-5 gap-2">
         {cards.map((card) => {
           const cardLevel = formatCardDisplayLevel(card.card_level);
@@ -562,7 +562,7 @@ function MetricGrid({ metrics, compact = false }: { metrics: Array<{ label: stri
     <div className={`grid gap-1.5 ${compact ? "grid-cols-4 mb-2" : "grid-cols-3 sm:grid-cols-4"}`}>
       {metrics.map((metric) => (
         <div key={metric.label} className="rounded bg-pc-bg-secondary/70 px-2 py-1">
-          <div className="text-[10px] uppercase tracking-wide text-pc-text-muted">{metric.label}</div>
+          <div className="text-xs uppercase tracking-wide text-pc-text-muted">{metric.label}</div>
           <div className="truncate text-xs font-medium text-pc-text-secondary">{metric.value}</div>
         </div>
       ))}
@@ -585,7 +585,7 @@ function MaterialPill(props: {
       <MaterialIcon src={props.src} fallbackSrc={props.fallbackSrc} alt={props.label} className="h-8 w-8 rounded" />
       <div className="min-w-0">
         <div className="truncate text-xs font-medium">{props.label}</div>
-        {props.detail && <div className="truncate text-[10px] opacity-75">{props.detail}</div>}
+        {props.detail && <div className="truncate text-xs opacity-75">{props.detail}</div>}
       </div>
     </div>
   );
@@ -603,17 +603,17 @@ function MaterialTile(props: {
     <div className="relative min-w-0 rounded-md border border-pc-border bg-pc-bg-secondary p-1" title={props.title || props.label}>
       <div className="relative">
         {props.badge && (
-          <span className="absolute right-1 top-1 z-10 rounded border border-pc-accent/40 bg-black/80 px-1.5 py-0.5 text-[10px] font-semibold leading-none text-pc-accent shadow">
+          <span className="absolute right-1 top-1 z-10 rounded border border-pc-accent/40 bg-black/80 px-1.5 py-0.5 text-xs font-semibold leading-none text-pc-accent shadow">
             {props.badge}
           </span>
         )}
         <MaterialIcon src={props.src} fallbackSrc={props.fallbackSrc} alt={props.label} className="aspect-square w-full rounded bg-pc-bg-elevated" />
       </div>
       <div className="mt-1 flex min-w-0 items-center justify-between gap-1">
-        <div className="truncate text-[11px] font-medium text-pc-text-secondary">{props.label}</div>
-        {props.badge && <div className="shrink-0 text-[10px] font-semibold text-pc-accent">{props.badge}</div>}
+        <div className="truncate text-xs font-medium text-pc-text-secondary">{props.label}</div>
+        {props.badge && <div className="shrink-0 text-xs font-semibold text-pc-accent">{props.badge}</div>}
       </div>
-      {props.detail && <div className="truncate text-[10px] text-pc-text-muted">{props.detail}</div>}
+      {props.detail && <div className="truncate text-xs text-pc-text-muted">{props.detail}</div>}
     </div>
   );
 }

@@ -89,7 +89,7 @@ export default function SuspiciousPage() {
                           <Link href={`/players/${p.id}`} className="text-pc-text font-medium text-xs hover:text-pc-accent transition-colors block truncate">
                             {p.name}
                           </Link>
-                          <span className="text-pc-text-muted text-[10px]">{p.region}</span>
+                          <span className="text-pc-text-muted text-xs">{p.region}</span>
                         </div>
                       </div>
                     </td>
@@ -105,7 +105,7 @@ export default function SuspiciousPage() {
                     </td>
                     <td className="px-3 py-2 text-right text-xs text-pc-text-secondary">{fmt(p.totalMatches)}</td>
                     <td className="px-3 py-2">
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded border ${SEVERITY_STYLES[p.severity] || ""}`}>
+                      <span className={`text-xs px-1.5 py-0.5 rounded border ${SEVERITY_STYLES[p.severity] || ""}`}>
                         {p.severity || "—"}
                       </span>
                     </td>

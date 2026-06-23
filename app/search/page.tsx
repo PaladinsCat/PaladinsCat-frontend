@@ -429,7 +429,7 @@ function SearchPageBody() {
         {(["player", "match", "champion", "talent", "card", "item"] as UniversalSearchType[]).map((type) => {
           const count = results.filter((result) => result.type === type).length;
           return (
-            <span key={type} className={`text-[10px] px-2 py-1 rounded-full border ${TYPE_STYLE[type]}`}>
+            <span key={type} className={`text-xs px-2 py-1 rounded-full border ${TYPE_STYLE[type]}`}>
               {TYPE_LABEL[type]} {count}
             </span>
           );
@@ -475,7 +475,7 @@ function SearchPageBody() {
             <section key={type} className="space-y-2">
               <div className="flex items-center gap-2 px-1">
                 <h2 className="text-sm font-semibold text-pc-text">{TYPE_LABEL[type]}</h2>
-                <span className="text-[10px] text-pc-text-muted">{rows.length}</span>
+                <span className="text-xs text-pc-text-muted">{rows.length}</span>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                 {rows.map((result) => (

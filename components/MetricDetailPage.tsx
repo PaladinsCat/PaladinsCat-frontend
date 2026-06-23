@@ -202,7 +202,7 @@ export default function MetricDetailPage({ config }: { config: MetricConfig }) {
             { label: "Samples", value: metricSummary.sampleSize.toLocaleString() },
           ].map((item) => (
             <div key={item.label} className="min-w-0">
-              <div className="text-pc-text-muted text-[10px] uppercase tracking-wider mb-1">{item.label}</div>
+              <div className="text-pc-text-muted text-xs uppercase tracking-wider mb-1">{item.label}</div>
               <div className="text-xl font-bold truncate" style={{ color: item.accent ? config.stroke : undefined }}>
                 {item.value}
               </div>
@@ -230,27 +230,27 @@ export default function MetricDetailPage({ config }: { config: MetricConfig }) {
                     <h2 className="text-pc-text font-semibold truncate">{section.className}</h2>
                   </div>
                   <div className="text-right shrink-0">
-                    <div className="text-[10px] text-pc-text-muted uppercase tracking-wider">Class Avg</div>
+                    <div className="text-xs text-pc-text-muted uppercase tracking-wider">Class Avg</div>
                     <div className="text-lg font-bold" style={{ color: config.stroke }}>{formatVal(classMean)}</div>
                   </div>
                 </div>
                 <div className="grid grid-cols-4 gap-3 mt-4 text-xs">
                   <div>
-                    <div className="text-pc-text-muted text-[10px] uppercase tracking-wider">vs Global</div>
+                    <div className="text-pc-text-muted text-xs uppercase tracking-wider">vs Global</div>
                     <div className={classVsGlobal >= 0 ? "text-emerald-400" : "text-red-400"}>
                       {formatSigned(classVsGlobal)} ({classVsGlobalPct >= 0 ? "+" : ""}{classVsGlobalPct.toFixed(1)}%)
                     </div>
                   </div>
                   <div>
-                    <div className="text-pc-text-muted text-[10px] uppercase tracking-wider">P10</div>
+                    <div className="text-pc-text-muted text-xs uppercase tracking-wider">P10</div>
                     <div className="text-pc-text-secondary">{formatVal(section.summary.p10)}</div>
                   </div>
                   <div>
-                    <div className="text-pc-text-muted text-[10px] uppercase tracking-wider">P90</div>
+                    <div className="text-pc-text-muted text-xs uppercase tracking-wider">P90</div>
                     <div className="text-pc-text-secondary">{formatVal(section.summary.p90)}</div>
                   </div>
                   <div>
-                    <div className="text-pc-text-muted text-[10px] uppercase tracking-wider">Samples</div>
+                    <div className="text-pc-text-muted text-xs uppercase tracking-wider">Samples</div>
                     <div className="text-pc-text-secondary">{section.summary.sampleSize.toLocaleString()}</div>
                   </div>
                 </div>

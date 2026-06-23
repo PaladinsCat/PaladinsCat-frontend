@@ -263,7 +263,7 @@ export default function MatchesPage() {
           {/* Title outside card */}
           <div className="flex items-center justify-between">
             <h2 className="pc-card-title mb-0 shadow-sm">24h Ranked Activity</h2>
-            <span className="text-[10px] uppercase tracking-wider text-pc-text-muted">Local time</span>
+            <span className="text-xs uppercase tracking-wider text-pc-text-muted">Local time</span>
           </div>
 
           <div className="pc-card p-3">
@@ -288,14 +288,14 @@ export default function MatchesPage() {
               <div className="space-y-px">
                 {/* Header */}
                 <div className="flex items-center gap-2 px-1 pb-1 border-b border-pc-border/30">
-                  <span className="w-10 text-[10px] text-pc-text-muted font-medium" />
-                  <span className="flex-1 text-[10px] text-pc-text-muted font-medium text-center">NA</span>
+                  <span className="w-10 text-xs text-pc-text-muted font-medium" />
+                  <span className="flex-1 text-xs text-pc-text-muted font-medium text-center">NA</span>
                   <span className="w-px h-3 bg-pc-border/30" />
-                  <span className="flex-1 text-[10px] text-pc-text-muted font-medium text-center">EU</span>
+                  <span className="flex-1 text-xs text-pc-text-muted font-medium text-center">EU</span>
                   <span className="w-px h-3 bg-pc-border/30" />
-                  <span className="w-8 text-[10px] text-pc-text-muted font-medium text-right">Drop</span>
+                  <span className="w-8 text-xs text-pc-text-muted font-medium text-right">Drop</span>
                   <span className="w-px h-3 bg-pc-border/30" />
-                  <span className="w-8 text-[10px] text-pc-text-muted font-medium text-right">Σ</span>
+                  <span className="w-8 text-xs text-pc-text-muted font-medium text-right">Σ</span>
                 </div>
                 {hourly.map((entry: any, idx: number) => {
                   const na = entry.NA ?? 0;
@@ -322,7 +322,7 @@ export default function MatchesPage() {
                         <div className="flex-1 h-3 bg-pc-bg rounded-full overflow-hidden">
                           {na > 0 && <div className="h-full rounded-full bg-emerald-500/80 transition-all duration-500" style={{ width: `${naW}%` }} />}
                         </div>
-                        <span className={`w-5 text-right text-[11px] font-mono shrink-0 ${na > 0 ? "text-pc-text" : "text-pc-text-muted/30"}`}>
+                        <span className={`w-5 text-right text-xs font-mono shrink-0 ${na > 0 ? "text-pc-text" : "text-pc-text-muted/30"}`}>
                           {na > 0 ? na : "0"}
                         </span>
                       </div>
@@ -332,7 +332,7 @@ export default function MatchesPage() {
                         <div className="flex-1 h-3 bg-pc-bg rounded-full overflow-hidden">
                           {eu > 0 && <div className="h-full rounded-full bg-sky-500/80 transition-all duration-500" style={{ width: `${euW}%` }} />}
                         </div>
-                        <span className={`w-5 text-right text-[11px] font-mono shrink-0 ${eu > 0 ? "text-pc-text" : "text-pc-text-muted/30"}`}>
+                        <span className={`w-5 text-right text-xs font-mono shrink-0 ${eu > 0 ? "text-pc-text" : "text-pc-text-muted/30"}`}>
                           {eu > 0 ? eu : "0"}
                         </span>
                       </div>
@@ -358,9 +358,9 @@ export default function MatchesPage() {
               <div className="mt-3 pt-3 border-t border-pc-border/50 grid grid-cols-2 gap-3">
                 {hourlyStats.regions.filter((r) => r.region === "NA" || r.region === "EU").map((r) => (
                   <div key={r.region} className="pc-surface-light rounded-lg p-2 text-center border border-pc-border/50">
-                    <div className="text-[10px] text-pc-text-muted uppercase tracking-wider">{r.region}</div>
+                    <div className="text-xs text-pc-text-muted uppercase tracking-wider">{r.region}</div>
                     <div className="text-lg font-mono font-bold text-pc-accent">{r.totalToday.toLocaleString()}</div>
-                    <div className="text-[10px] text-pc-text-muted">{r.matchesPerHour}/hr</div>
+                    <div className="text-xs text-pc-text-muted">{r.matchesPerHour}/hr</div>
                   </div>
                 ))}
               </div>
@@ -369,14 +369,14 @@ export default function MatchesPage() {
             {!statsLoading && droppedRows.length > 0 && (
               <div className="mt-3 pt-3 border-t border-pc-border/50">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] uppercase tracking-wider text-amber-300/90">True dropped</span>
-                  <span className="text-[10px] text-pc-text-muted">
+                  <span className="text-xs uppercase tracking-wider text-amber-300/90">True dropped</span>
+                  <span className="text-xs text-pc-text-muted">
                     {droppedRows.reduce((sum: number, row: any) => sum + row.droppedIds.length, 0)} IDs
                   </span>
                 </div>
                 <div className="space-y-1">
                   {droppedRows.map((row: any) => (
-                    <div key={`${row.date}|${row.hour}`} className="flex items-start gap-2 text-[11px]">
+                    <div key={`${row.date}|${row.hour}`} className="flex items-start gap-2 text-xs">
                       <span className="w-10 shrink-0 text-right font-mono text-pc-text-muted">{formatHour(row.date, row.hour)}</span>
                       <div className="flex flex-wrap gap-1">
                         {row.droppedIds.map((id: string) => (
