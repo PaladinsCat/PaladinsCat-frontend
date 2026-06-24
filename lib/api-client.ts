@@ -2254,6 +2254,11 @@ export async function togglePostLike(postId: number, userId: number, token: stri
 }
 // ── Build Types ──
 
+export interface BuildCardSelection {
+  cardId: number;
+  level: number;
+}
+
 export interface Build {
   id: number;
   userId: number;
@@ -2262,6 +2267,7 @@ export interface Build {
   championName: string;
   name: string;
   items: number[];
+  cards: BuildCardSelection[];
   actives: number[];
   talents: number[];
   notes: string | null;
@@ -2269,6 +2275,62 @@ export interface Build {
   likes: number;
   viewCount: number;
   createdAt: string;
+}
+
+type RawBuild = {
+  id: number;
+  user_id: number;
+  username?: string;
+  champion_id: number;
+  champion_name?: string;
+  name: string;
+  items?: number[] | null;
+  cards?: unknown;
+  actives?: number[] | null;
+  talents?: number[] | null;
+  notes: string | null;
+  visibility: string;
+  likes: number;
+  view_count: number;
+  created_at: string;
+};
+
+function mapBuildCards(cards: unknown): BuildCardSelection[] {
+  if (!Array.isArray(cards)) return [];
+  return cards
+    .map((card) => {
+      if (typeof card === "number") return { cardId: card, level: 1 };
+      if (!card || typeof card !== "object") return null;
+      const row = card as { cardId?: unknown; card_id?: unknown; level?: unknown; card_level?: unknown };
+      const cardId = Number(row.cardId ?? row.card_id);
+      const level = Number(row.level ?? row.card_level ?? 1);
+      if (!Number.isFinite(cardId) || cardId === 0) return null;
+      return {
+        cardId,
+        level: Number.isFinite(level) ? Math.min(5, Math.max(1, Math.round(level))) : 1,
+      };
+    })
+    .filter((card): card is BuildCardSelection => card !== null);
+}
+
+function mapBuild(raw: RawBuild): Build {
+  return {
+    id: raw.id,
+    userId: raw.user_id,
+    username: raw.username ?? "Unknown",
+    championId: raw.champion_id,
+    championName: raw.champion_name ?? `Champion ${raw.champion_id}`,
+    name: raw.name,
+    items: raw.items ?? [],
+    cards: mapBuildCards(raw.cards),
+    actives: raw.actives ?? [],
+    talents: raw.talents ?? [],
+    notes: raw.notes,
+    visibility: raw.visibility,
+    likes: raw.likes,
+    viewCount: raw.view_count,
+    createdAt: raw.created_at,
+  };
 }
 
 // ── Builds ──
@@ -2282,118 +2344,47 @@ export async function fetchBuilds(params?: { championId?: string; visibility?: s
       }
     }
   }
-  const raw = await fetchJson<Array<{
-    id: number;
-    user_id: number;
-    username: string;
-    champion_id: number;
-    champion_name: string;
-    name: string;
-    items: number[];
-    actives: number[];
-    talents: number[];
-    notes: string | null;
-    visibility: string;
-    likes: number;
-    view_count: number;
-    created_at: string;
-  }>>(`/builds${query.toString() ? `?${query.toString()}` : ''}`);
-
-  return raw.map((r) => ({
-    id: r.id,
-    userId: r.user_id,
-    username: r.username,
-    championId: r.champion_id,
-    championName: r.champion_name,
-    name: r.name,
-    items: r.items,
-    actives: r.actives,
-    talents: r.talents,
-    notes: r.notes,
-    visibility: r.visibility,
-    likes: r.likes,
-    viewCount: r.view_count,
-    createdAt: r.created_at,
-  }));
+  const raw = await fetchJson<RawBuild[]>(`/builds${query.toString() ? `?${query.toString()}` : ''}`);
+  return raw.map(mapBuild);
 }
 
-export async function createBuild(userId: number, championId: number, name: string, items: number[], actives: number[], talents: number[], notes: string | null, visibility: string, token: string): Promise<Build> {
-  const raw = await fetchJson<{
-    id: number;
-    user_id: number;
-    username: string;
-    champion_id: number;
-    champion_name: string;
-    name: string;
-    items: number[];
-    actives: number[];
-    talents: number[];
-    notes: string | null;
-    visibility: string;
-    likes: number;
-    view_count: number;
-    created_at: string;
-  }>(`/builds`, {
+export async function createBuild(
+  userId: number,
+  championId: number,
+  name: string,
+  items: number[],
+  cards: BuildCardSelection[],
+  talents: number[],
+  notes: string | null,
+  visibility: string,
+  token: string,
+): Promise<Build> {
+  void userId;
+  const raw = await fetchJson<RawBuild>(`/builds`, {
     method: "POST",
     headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-    body: JSON.stringify({ champion_id: championId, name, items, actives, talents, notes, visibility }),
+    body: JSON.stringify({
+      champion_id: championId,
+      name,
+      items,
+      cards: cards.map((card) => ({ card_id: card.cardId, level: card.level })),
+      actives: [],
+      talents,
+      notes,
+      visibility,
+    }),
   });
 
-  return {
-    id: raw.id,
-    userId: raw.user_id,
-    username: raw.username,
-    championId: raw.champion_id,
-    championName: raw.champion_name,
-    name: raw.name,
-    items: raw.items,
-    actives: raw.actives,
-    talents: raw.talents,
-    notes: raw.notes,
-    visibility: raw.visibility,
-    likes: raw.likes,
-    viewCount: raw.view_count,
-    createdAt: raw.created_at,
-  };
+  return mapBuild(raw);
 }
 
 export async function getBuildDetail(buildId: number): Promise<Build> {
-  const raw = await fetchJson<{
-    id: number;
-    user_id: number;
-    username: string;
-    champion_id: number;
-    champion_name: string;
-    name: string;
-    items: number[];
-    actives: number[];
-    talents: number[];
-    notes: string | null;
-    visibility: string;
-    likes: number;
-    view_count: number;
-    created_at: string;
-  }>(`/builds/${buildId}`);
-
-  return {
-    id: raw.id,
-    userId: raw.user_id,
-    username: raw.username,
-    championId: raw.champion_id,
-    championName: raw.champion_name,
-    name: raw.name,
-    items: raw.items,
-    actives: raw.actives,
-    talents: raw.talents,
-    notes: raw.notes,
-    visibility: raw.visibility,
-    likes: raw.likes,
-    viewCount: raw.view_count,
-    createdAt: raw.created_at,
-  };
+  const raw = await fetchJson<RawBuild>(`/builds/${buildId}`);
+  return mapBuild(raw);
 }
 
 export async function toggleBuildLike(buildId: number, userId: number, token: string): Promise<number> {
+  void userId;
   const raw = await fetchJson<{ likes: number }>(`/builds/${buildId}/like`, {
     method: "POST",
     headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
@@ -2401,7 +2392,6 @@ export async function toggleBuildLike(buildId: number, userId: number, token: st
 
   return raw.likes;
 }
-
 // ── Chart Types ──
 
 export interface KdaHistoryEntry {

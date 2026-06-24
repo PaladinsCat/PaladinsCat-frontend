@@ -93,12 +93,15 @@ export default function BuildsPage() {
                   <p className="text-pc-text-secondary text-sm mt-1">
                     {build.championName} • by {build.username}
                   </p>
-                  <div className="flex items-center gap-3 mt-3 text-pc-text-muted text-sm">
+                  <div className="flex flex-wrap items-center gap-3 mt-3 text-pc-text-muted text-sm">
                     <span>{formatLocalDateTime(build.createdAt)}</span>
-                    <span>❤ {build.likes}</span>
-                    <span>👁 {build.viewCount}</span>
+                    <span>{build.items.length}/4 items</span>
+                    <span>{build.cards.length}/5 cards</span>
+                    <span>{build.talents.length}/1 talent</span>
+                    <span>{build.likes} likes</span>
+                    <span>{build.viewCount} views</span>
                     <span className={build.visibility === "public" ? "text-green-400" : "text-yellow-400"}>
-                      {build.visibility === "public" ? "🌐" : "🔒"} {build.visibility}
+                      {build.visibility}
                     </span>
                   </div>
                 </div>
