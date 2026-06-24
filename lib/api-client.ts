@@ -554,6 +554,47 @@ export interface SystemStatus {
   timestamp: string;
 }
 
+export interface HirezOutageItem {
+  serviceKey: string;
+  status: string;
+  title: string;
+  severity: "critical" | "warning";
+  message: string;
+  reason: string | null;
+  firstDetectedAt: string | null;
+  lastDetectedAt: string | null;
+  nextProbeAt: string | null;
+  probeDue: boolean;
+  probeCount: number;
+  updatedAt: string | null;
+}
+
+export interface HirezOutageSignal {
+  source: string;
+  message: string;
+  observedAt: string | null;
+  code: string;
+  serviceKey: string;
+  title: string;
+  severity: "critical" | "warning";
+  publicMessage: string;
+}
+
+export interface HirezServiceStatus {
+  status: "ok" | "degraded" | "outage";
+  outage: boolean;
+  degraded: boolean;
+  message: string;
+  activeOutages: HirezOutageItem[];
+  recentSignals: HirezOutageSignal[];
+  pendingVendorDebt: number;
+  dueVendorDebt: number;
+  affectedHours: number;
+  nextDebtRetryAt: string | null;
+  signalLookbackMinutes: number;
+  timestamp: string;
+}
+
 export interface Notification {
   id: number;
   timestamp: string;
@@ -726,6 +767,23 @@ export async function fetchSystemStatus(): Promise<SystemStatus | null> {
       pendingPulls: Number(raw.pendingPulls ?? 0),
       lastMatch: raw.lastMatch ?? null,
       timestamp: raw.timestamp,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchHirezServiceStatus(): Promise<HirezServiceStatus | null> {
+  try {
+    const raw = await fetchJson<HirezServiceStatus>(`/system/hirez-status`, { retries: 0, unwrapData: false });
+    return {
+      ...raw,
+      activeOutages: Array.isArray(raw.activeOutages) ? raw.activeOutages : [],
+      recentSignals: Array.isArray(raw.recentSignals) ? raw.recentSignals : [],
+      pendingVendorDebt: Number(raw.pendingVendorDebt || 0),
+      dueVendorDebt: Number(raw.dueVendorDebt || 0),
+      affectedHours: Number(raw.affectedHours || 0),
+      signalLookbackMinutes: Number(raw.signalLookbackMinutes || 0),
     };
   } catch {
     return null;

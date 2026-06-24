@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Nav from "@/components/nav";
+import HirezOutageBanner from "@/components/HirezOutageBanner";
 import Footer from "@/components/footer";
 import BottomNav from "@/components/bottom-nav";
 import MapSlideshow from "@/components/MapSlideshow";
@@ -119,6 +120,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AuthProvider>
           <MapSlideshow />
           <Nav />
+          <HirezOutageBanner />
           {/* Content container: responsive width that fills common desktop sizes */}
           <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-8 pb-24">
             {/* Responsive max-width: 1280px up to xl, wider on larger screens */}
