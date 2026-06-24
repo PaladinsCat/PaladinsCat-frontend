@@ -328,7 +328,10 @@ export default function ChampionDetailPage() {
           {championData?.talents && championData.talents.length > 0 && (
             <>
               <div className="flex items-center justify-between gap-3 mb-2">
-                <h2 className="pc-card-title shadow-sm">Talents</h2>
+                <div className="flex items-baseline gap-2">
+                  <h2 className="pc-card-title shadow-sm">Talents</h2>
+                  <span className="text-xs text-pc-text-muted">Select to sort cards</span>
+                </div>
                 {selectedTalentId != null && (
                   <button
                     type="button"
