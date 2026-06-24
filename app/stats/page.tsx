@@ -17,6 +17,7 @@ import {
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
 import { getRankIconPath } from "@/lib/tier-utils";
+import { getStatQuality } from "@/lib/stat-quality";
 import { BellCurveChart } from "@/components/BellCurveChart";
 
 const ROLES = ["Frontline", "Damage", "Flank", "Support"] as const;
@@ -172,6 +173,8 @@ export default function StatsPage() {
   });
   const tierTotal = normalizedTiers.reduce((sum, tier) => sum + tier.totalPlays, 0);
   const maxTierCount = Math.max(1, ...normalizedTiers.map((tier) => tier.totalPlays));
+  const maxItemPickRate = Math.max(1, ...items.map((item) => item.pickRate));
+  const maxChampionPickRate = Math.max(1, ...champions.map((champion) => champion.pickRate ?? 0));
 
   return (
     <div className="space-y-8">
@@ -328,7 +331,12 @@ export default function StatsPage() {
                         <span className={`w-4 text-right shrink-0 ${i === 0 ? "text-yellow-400 font-bold" : "text-pc-text-muted"}`}>{i + 1}</span>
                         <img src={getChampionIconSafe(c.name)} alt={c.name} className="w-7 h-7 object-contain rounded shrink-0" />
                         <span className="text-pc-text truncate group-hover:text-pc-accent transition-colors flex-1">{c.name}</span>
-                        <span className="text-emerald-400 font-medium shrink-0">{c.winRate != null ? `${c.winRate.toFixed(1)}%` : "—"}</span>
+                        {(() => {
+                          const quality = c.winRate != null ? getStatQuality(c.winRate, c.pickRate, maxChampionPickRate) : null;
+                          return (
+                            <span className={quality?.textClass ?? "text-pc-text-muted"} style={quality ? { color: quality.color } : undefined}>{c.winRate != null ? `${c.winRate.toFixed(1)}%` : "—"}</span>
+                          );
+                        })()}
                       </Link>
                     ))}
                   </div>
@@ -414,8 +422,14 @@ export default function StatsPage() {
                 <div key={cat}>
                   <span className={`text-xs font-bold uppercase tracking-wider ${catColor} mb-2 block`}>{cat}</span>
                   <div className="grid grid-cols-5 gap-2">
-                    {catItems.map((item) => (
-                      <div key={item.name} className="flex flex-col items-center text-center py-1">
+                    {catItems.map((item) => {
+                      const quality = getStatQuality(item.winRate, item.pickRate, maxItemPickRate);
+                      return (
+                      <div
+                        key={item.name}
+                        className="flex flex-col items-center text-center py-1 rounded-lg border border-transparent transition-colors"
+                        style={{ borderColor: quality.borderColor, background: quality.background }}
+                      >
                         {item.icon ? (
                           <img src={item.icon} alt={item.name} className="w-12 h-12 object-contain rounded-md mb-1" />
                         ) : (
@@ -425,14 +439,15 @@ export default function StatsPage() {
                         )}
                         <div className="text-pc-text font-medium text-xs leading-tight truncate w-full">{item.name}</div>
                         <div className="flex items-center gap-1 text-[9px] mt-0.5">
-                          <span className={item.winRate >= 50 ? "text-emerald-400" : "text-red-400"}>
+                          <span style={{ color: quality.color }}>
                             WR {item.winRate}%
                           </span>
                           <span className="text-pc-text-muted">·</span>
-                          <span className="text-pc-text-muted">PR {item.pickRate}%</span>
+                          <span style={{ color: quality.color }}>PR {item.pickRate}%</span>
                         </div>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               );

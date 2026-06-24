@@ -8,6 +8,7 @@ import { STATIC_CHAMPIONS } from "@/lib/static-champions";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
 import { getRankIconPath, getTierColor } from "@/lib/tier-utils";
+import { getStatQuality } from "@/lib/stat-quality";
 
 const ROLES = [
   { label: "Frontline", icon: "/images/icons/Class_Front_Line_Icon.avif" },
@@ -117,6 +118,7 @@ export default function ChampionTable() {
         default:           return sortDir === "asc" ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
       }
     });
+  const maxChampionPickRate = Math.max(1, ...champions.map((champion) => champion.pickRate ?? 0));
 
   return (
     <div className="space-y-6">
@@ -215,9 +217,13 @@ export default function ChampionTable() {
               if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
               return String(n);
             };
+            const quality = c.winRate != null ? getStatQuality(c.winRate, c.pickRate, maxChampionPickRate) : null;
             return (
               <Link key={c.id} href={`/champions/${championSlug(c.name)}`}>
-                <div className="group relative flex items-center gap-3.5 p-3 rounded-xl bg-pc-bg-elevated border border-pc-border hover:border-pc-accent-mid transition-all duration-200 hover:shadow-[0_0_20px_rgba(51,182,177,0.08)]">
+                <div
+                  className="group relative flex items-center gap-3.5 p-3 rounded-xl bg-pc-bg-elevated border border-pc-border hover:border-pc-accent-mid transition-all duration-200 hover:shadow-[0_0_20px_rgba(51,182,177,0.08)]"
+                  style={quality ? { borderColor: quality.borderColor, background: quality.background } : undefined}
+                >
                   {/* Rank icon — top right */}
                   {c.rating != null && (
                     <div className="absolute top-2 right-2">
@@ -257,7 +263,7 @@ export default function ChampionTable() {
 
                     {/* Row 2: stats — wraps on narrow cards */}
                     <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs">
-                      <span className={c.winRate != null ? "text-emerald-400" : "text-pc-text-muted"}>
+                      <span className={quality?.textClass ?? "text-pc-text-muted"} style={quality ? { color: quality.color } : undefined}>
                         <span className="text-pc-text-muted mr-1">WR</span>
                         {c.winRate != null ? `${c.winRate}%` : "—"}
                       </span>

@@ -1611,9 +1611,79 @@ export interface ChampionCardStatsResponse {
   cards: ChampionCardStat[];
 }
 
+function statNameKeyForCards(value: string | null | undefined): string {
+  return String(value ?? '')
+    .normalize('NFKD')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '');
+}
+export interface ChampionCardTalentStat {
+  talentId: number;
+  talentName: string;
+  totalPlays: number;
+  wins: number;
+  losses: number;
+  winRate: number;
+}
+
+export interface ChampionCardDetailResponse {
+  cardId: number;
+  cardName: string;
+  championId: number;
+  championName: string;
+  mode: 'ranked' | 'casual';
+  talentId: number | null;
+  totalPlays: number;
+  wins: number;
+  losses: number;
+  winRate: number;
+  levels: ChampionCardLevelStat[];
+  talents: ChampionCardTalentStat[];
+}
+
+
+export async function fetchChampionCardDetail(
+  championId: number,
+  cardId: number,
+  mode: 'ranked' | 'casual' = 'ranked',
+  talentId?: number | null
+): Promise<ChampionCardDetailResponse | null> {
+  try {
+    const raw = await fetchJson<ChampionCardDetailResponse>(
+      `/stats/cards/${championId}/${cardId}?mode=${mode}${talentId ? `&talentId=${talentId}` : ''}`
+    );
+
+    return {
+      ...raw,
+      cardId: Number(raw.cardId) || cardId,
+      championId: Number(raw.championId) || championId,
+      talentId: raw.talentId == null ? null : Number(raw.talentId),
+      totalPlays: Number(raw.totalPlays) || 0,
+      wins: Number(raw.wins) || 0,
+      losses: Number(raw.losses) || 0,
+      winRate: toDisplayPercent(raw.winRate) ?? 0,
+      levels: (raw.levels ?? []).map((level) => ({
+        level: Number(level.level) || 0,
+        plays: Number(level.plays) || 0,
+        winRate: toDisplayPercent(level.winRate) ?? 0,
+      })),
+      talents: (raw.talents ?? []).map((talent) => ({
+        talentId: Number(talent.talentId) || 0,
+        talentName: talent.talentName ?? 'Unknown',
+        totalPlays: Number(talent.totalPlays) || 0,
+        wins: Number(talent.wins) || 0,
+        losses: Number(talent.losses) || 0,
+        winRate: toDisplayPercent(talent.winRate) ?? 0,
+      })),
+    };
+  } catch {
+    return null;
+  }
+}
 export async function fetchChampionCardStats(
   championId: number,
-  mode: 'ranked' | 'casual' = 'ranked'
+  mode: 'ranked' | 'casual' = 'ranked',
+  talentId?: number | null
 ): Promise<ChampionCardStatsResponse> {
   try {
     const raw = await fetchJson<{
@@ -1631,23 +1701,37 @@ export async function fetchChampionCardStats(
           winRate: number | string;
         }>;
       }>;
-    }>(`/stats/cards/${championId}?mode=${mode}`);
+    }>(`/stats/cards/${championId}?mode=${mode}${talentId ? `&talentId=${talentId}` : ''}`);
+
+    const mappedCards = (raw.cards ?? []).map((c) => ({
+      cardId: Number(c.cardId) ?? 0,
+      cardName: c.cardName ?? 'Unknown',
+      totalPlays: Number(c.totalPlays) ?? 0,
+      wins: Number(c.wins) ?? 0,
+      losses: Number(c.losses) ?? 0,
+      winRate: toDisplayPercent(c.winRate) ?? 0,
+      levels: (c.levels ?? []).map((l) => ({
+        level: Number(l.level) ?? 0,
+        plays: Number(l.plays) ?? 0,
+        winRate: toDisplayPercent(l.winRate) ?? 0,
+      })),
+    }));
+    const dedupedByName = new Map<string, ChampionCardStat>();
+    for (const card of mappedCards) {
+      const key = statNameKeyForCards(card.cardName);
+      const existing = dedupedByName.get(key);
+      if (!existing || card.totalPlays > existing.totalPlays) {
+        dedupedByName.set(key, card);
+      }
+    }
 
     return {
       totalMatches: Number(raw.totalMatches) ?? 0,
-      cards: (raw.cards ?? []).map((c) => ({
-        cardId: Number(c.cardId) ?? 0,
-        cardName: c.cardName ?? 'Unknown',
-        totalPlays: Number(c.totalPlays) ?? 0,
-        wins: Number(c.wins) ?? 0,
-        losses: Number(c.losses) ?? 0,
-        winRate: toDisplayPercent(c.winRate) ?? 0,
-        levels: (c.levels ?? []).map((l) => ({
-          level: Number(l.level) ?? 0,
-          plays: Number(l.plays) ?? 0,
-          winRate: toDisplayPercent(l.winRate) ?? 0,
-        })),
-      })),
+      cards: Array.from(dedupedByName.values()).sort((a, b) => {
+        const playsDelta = b.totalPlays - a.totalPlays;
+        if (playsDelta !== 0) return playsDelta;
+        return a.cardName.localeCompare(b.cardName);
+      }),
     };
   } catch {
     return { totalMatches: 0, cards: [] };
@@ -2781,4 +2865,5 @@ export async function fetchReferenceChampions(): Promise<Array<{ id: number; nam
   const raw = await fetchJson<any[]>(`/reference/champions`);
   return raw;
 }
+
 

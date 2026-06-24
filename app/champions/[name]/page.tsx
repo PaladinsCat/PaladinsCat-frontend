@@ -8,6 +8,7 @@ import { getChampionIconSafe } from "@/lib/champion-icons";
 import ScrambleText from "@/components/ScrambleText";
 import SmartImage from "@/components/SmartImage";
 import { championSlug } from "@/lib/utils";
+import { getStatQuality } from "@/lib/stat-quality";
 import {
   getChampionData,
   type ChampionData,
@@ -124,6 +125,7 @@ export default function ChampionDetailPage() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [talentStats, setTalentStats] = useState<ChampionTalentStatsResponse | null>(null);
   const [cardStats, setCardStats] = useState<ChampionCardStatsResponse | null>(null);
+  const [selectedTalentId, setSelectedTalentId] = useState<number | null>(null);
   const [globalPerformance, setGlobalPerformance] = useState<PerformanceMetricsResponse>({});
   const [championPerformance, setChampionPerformance] = useState<Partial<Record<PerformanceMetricKey, ChampionPerformanceDistribution>>>({});
   const [tierStats, setTierStats] = useState<TierStat[]>([]);
@@ -136,6 +138,10 @@ export default function ChampionDetailPage() {
   const staticChampion = STATIC_CHAMPIONS.find(
     (c) => championSlug(c.name) === name.toLowerCase()
   );
+
+  useEffect(() => {
+    setSelectedTalentId(null);
+  }, [name]);
 
   useEffect(() => {
     let cancelled = false;
@@ -200,7 +206,7 @@ export default function ChampionDetailPage() {
           // Talent stats for this champion
           fetchChampionTalentStats(match.id).catch(() => null as ChampionTalentStatsResponse | null),
           // Card stats for this champion
-          fetchChampionCardStats(match.id).catch(() => null as ChampionCardStatsResponse | null),
+          fetchChampionCardStats(match.id, 'ranked', selectedTalentId).catch(() => null as ChampionCardStatsResponse | null),
           // Global ranked distributions plus champion-specific distributions
           // use the same metric contract as /stats/dpm, /stats/gpm, etc. This
           // keeps the champion page from comparing raw damage/gold totals across
@@ -228,7 +234,7 @@ export default function ChampionDetailPage() {
         );
       })
       .finally(() => setLoading(false));
-  }, [championData]);
+  }, [championData, selectedTalentId]);
 
 
   const talentStatsByName = useMemo(() => {
@@ -238,6 +244,22 @@ export default function ChampionDetailPage() {
   const cardStatsByName = useMemo(() => {
     return new Map((cardStats?.cards ?? []).map((stat) => [statNameKey(stat.cardName), stat]));
   }, [cardStats]);
+  const selectedTalentStat = useMemo(() => {
+    if (selectedTalentId == null) return null;
+    return (talentStats?.talents ?? []).find((talent) => talent.talentId === selectedTalentId) ?? null;
+  }, [selectedTalentId, talentStats]);
+  const maxTalentPickRate = useMemo(() => {
+    const total = talentStats?.totalMatches ?? 0;
+    if (total <= 0) return 100;
+    return Math.max(1, ...(talentStats?.talents ?? []).map((stat) => (stat.totalPlays / total) * 100));
+  }, [talentStats]);
+  const maxCardPickRate = useMemo(() => {
+    const total = cardStats?.totalMatches ?? 0;
+    if (total <= 0) return 100;
+    return Math.max(1, ...(cardStats?.cards ?? []).map((stat) => (stat.totalPlays / total) * 100));
+  }, [cardStats]);
+  const maxTierPickRate = useMemo(() => Math.max(1, ...tierStats.map((tier) => tier.pickRate)), [tierStats]);
+  const maxTrendPlays = useMemo(() => Math.max(1, ...patchTrends.map((trend) => trend.weeklyPlays)), [patchTrends]);
   if (dataLoaded && !championData && !staticChampion) return notFound();
 
   const formatNum = (n: number | null) => (n != null ? n.toLocaleString() : "—");
@@ -305,13 +327,33 @@ export default function ChampionDetailPage() {
           {/* Talents */}
           {championData?.talents && championData.talents.length > 0 && (
             <>
-              <h2 className="pc-card-title mb-2 shadow-sm">Talents</h2>
+              <div className="flex items-center justify-between gap-3 mb-2">
+                <h2 className="pc-card-title shadow-sm">Talents</h2>
+                {selectedTalentId != null && (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedTalentId(null)}
+                    className="text-xs px-3 py-1 rounded-lg border border-pc-border text-pc-text-secondary hover:text-pc-accent hover:border-pc-accent-mid transition-colors"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
               <div className="pc-card">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {championData.talents.map((talent) => {
                   const stat: ChampionTalentStat | undefined = talentStatsByName.get(statNameKey(talent.name));
                   return (
-                    <TalentCard key={talent.name} talent={talent} championName={championData.name} stat={stat ?? undefined} totalMatches={talentStats?.totalMatches ?? 0} />
+                    <TalentCard
+                      key={talent.name}
+                      talent={talent}
+                      championName={championData.name}
+                      stat={stat ?? undefined}
+                      totalMatches={talentStats?.totalMatches ?? 0}
+                      maxPickRate={maxTalentPickRate}
+                      selected={stat?.talentId === selectedTalentId}
+                      onSelect={stat ? () => setSelectedTalentId(stat.talentId) : undefined}
+                    />
                   );
                 })}
               </div>
@@ -322,7 +364,14 @@ export default function ChampionDetailPage() {
           {/* Loadout Cards */}
           {championData?.loadouts && championData.loadouts.length > 0 && (
             <>
-              <h2 className="pc-card-title mb-2 shadow-sm">Loadout Cards</h2>
+              <div className="flex items-center justify-between gap-3 mb-2">
+                <h2 className="pc-card-title shadow-sm">Loadout Cards</h2>
+                {selectedTalentStat && (
+                  <div className="text-xs text-pc-text-secondary">
+                    Filtered by <span className="text-pc-accent font-medium">{selectedTalentStat.talentName}</span> · {cardStats?.totalMatches ?? 0} plays
+                  </div>
+                )}
+              </div>
               <div className="pc-card">
               {(() => {
                 const byCategory: Record<string, ChampionLoadout[]> = {};
@@ -337,54 +386,81 @@ export default function ChampionDetailPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                       {cards.map((card) => {
                         const stat: ChampionCardStat | undefined = cardStatsByName.get(statNameKey(card.name));
+                        const cardHref = stat ? `/champions/${name}/cards/${stat.cardId}${selectedTalentId ? `?talentId=${selectedTalentId}` : ""}` : null;
                         const pickRate = stat && cardStats?.totalMatches ? (stat.totalPlays / cardStats.totalMatches) * 100 : 0;
+                        const quality = stat ? getStatQuality(stat.winRate, pickRate, maxCardPickRate) : null;
                         return (
-                          <div key={card.name} className="pc-surface-light rounded-lg p-3 border border-pc-border">
+                          <div
+                            key={card.name}
+                            className="pc-surface-light rounded-lg p-3 border transition-colors"
+                            style={quality ? { borderColor: quality.borderColor, background: quality.background } : undefined}
+                          >
                             <div className="flex items-start gap-3">
                               {card.iconUrl ? (
-                                <SmartImage src={card.iconUrl} alt={card.name} className="flex-shrink-0 w-12 h-10 rounded border border-pc-border bg-pc-bg/50 object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                                cardHref ? (
+                                  <Link href={cardHref} className="flex-shrink-0">
+                                    <SmartImage src={card.iconUrl} alt={card.name} className="w-12 h-10 rounded border border-pc-border bg-pc-bg/50 object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                                  </Link>
+                                ) : (
+                                  <SmartImage src={card.iconUrl} alt={card.name} className="flex-shrink-0 w-12 h-10 rounded border border-pc-border bg-pc-bg/50 object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                                )
                               ) : (
                                 <div className="flex-shrink-0 w-10 h-10 rounded border border-pc-border bg-pc-bg-elevated flex items-center justify-center">
                                   <span className="text-xs text-pc-accent">?</span>
                                 </div>
                               )}
                               <div className="min-w-0 flex-1">
-                                <div className="text-xs font-medium text-pc-accent mb-0.5">{card.name}</div>
+                                {cardHref ? (
+                                  <Link href={cardHref} className="text-xs font-medium text-pc-accent hover:text-pc-accent-light transition-colors mb-0.5 inline-block">{card.name}</Link>
+                                ) : (
+                                  <div className="text-xs font-medium text-pc-accent mb-0.5">{card.name}</div>
+                                )}
                                 <p className="text-xs text-pc-text-secondary leading-relaxed">{card.description}</p>
                                 {stat && stat.totalPlays > 0 && (
                                   <div className="mt-2 space-y-1.5">
                                     <div className="flex flex-wrap items-center gap-2 text-xs">
-                                      <span className={winRateColor(stat.winRate)}>
+                                      <span className={quality?.textClass ?? winRateColor(stat.winRate)} style={quality ? { color: quality.color } : undefined}>
                                         <span className="text-pc-text-muted mr-1">WR</span>
                                         {stat.winRate.toFixed(1)}%
                                       </span>
                                       <span className="text-pc-border">|</span>
                                       <span className="text-pc-text-muted">
                                         <span className="mr-1">PR</span>
-                                        <span className="text-pc-text-secondary">{pickRate.toFixed(1)}%</span>
+                                        <span style={quality ? { color: quality.color } : undefined}>{pickRate.toFixed(1)}%</span>
                                       </span>
                                       <span className="text-pc-border">|</span>
                                       <span className="text-pc-text-muted whitespace-nowrap">
                                         <span className="mr-1">Picks</span>
-                                        <span className="text-pc-text-secondary">{formatPlays(stat.totalPlays)}</span>
+                                        <span style={quality ? { color: quality.color } : undefined}>{formatPlays(stat.totalPlays)}</span>
                                       </span>
                                       <span className="text-pc-border">|</span>
                                       <span className="text-pc-text-muted whitespace-nowrap">{stat.wins.toLocaleString()}W/{stat.losses.toLocaleString()}L</span>
                                     </div>
                                     {stat.levels.length > 0 && (
                                       <div className="flex items-center gap-1">
-                                        {stat.levels.map((l) => (
-                                          <div key={l.level} className="flex-1 flex flex-col items-center">
-                                            <div className="text-[9px] text-pc-text-muted">L{l.level}</div>
-                                            <div className="w-full h-1.5 rounded-full bg-pc-bg-elevated overflow-hidden">
-                                              <div
-                                                className={`h-full rounded-full ${winRateBadgeClass(l.winRate).replace('bg-emerald-500/20', 'bg-emerald-400').replace('bg-rose-500/20', 'bg-rose-400')}`}
-                                                style={{ width: `${Math.min(l.plays > 0 ? 100 : 0, 100)}%` }}
-                                              />
-                                            </div>
-                                            <div className="text-[9px] text-pc-text-muted">{l.plays}</div>
-                                          </div>
-                                        ))}
+                                        {(() => {
+                                          const maxLevelPlays = Math.max(1, ...stat.levels.map((level) => level.plays));
+                                          const maxLevelPickRate = Math.max(1, ...stat.levels.map((level) => (level.plays / Math.max(1, stat.totalPlays)) * 100));
+                                          return stat.levels.map((l) => {
+                                            const levelPickRate = (l.plays / Math.max(1, stat.totalPlays)) * 100;
+                                            const levelQuality = getStatQuality(l.winRate, levelPickRate, maxLevelPickRate);
+                                            return (
+                                              <div key={l.level} className="flex-1 flex flex-col items-center">
+                                                <div className="text-[9px] text-pc-text-muted">L{l.level}</div>
+                                                <div className="w-full h-1.5 rounded-full bg-pc-bg-elevated overflow-hidden">
+                                                  <div
+                                                    className="h-full rounded-full"
+                                                    style={{
+                                                      width: `${Math.max(l.plays > 0 ? 8 : 0, Math.round((l.plays / maxLevelPlays) * 100))}%`,
+                                                      background: levelQuality.track,
+                                                    }}
+                                                  />
+                                                </div>
+                                                <div className="text-[9px] text-pc-text-muted">{l.plays}</div>
+                                              </div>
+                                            );
+                                          });
+                                        })()}
                                       </div>
                                     )}
                                   </div>
@@ -485,27 +561,34 @@ export default function ChampionDetailPage() {
         <div className="pc-card">
           <h2 className="pc-card-title mb-4">Performance by Tier</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {tierStats.map((t) => (
-              <div key={t.tier} className="pc-surface-light rounded-lg p-4 border border-pc-border">
-                <div className="text-sm font-medium text-pc-accent mb-2">{t.tier}</div>
-                <div className="grid grid-cols-3 gap-2 text-center">
-                  <div>
-                    <div className="text-xs text-pc-text-muted">WR</div>
-                    <div className={`text-sm font-mono ${t.winRate >= 55 ? "text-emerald-400" : t.winRate <= 45 ? "text-rose-400" : "text-pc-text"}`}>
-                      {t.winRate.toFixed(1)}%
+            {tierStats.map((t) => {
+              const quality = getStatQuality(t.winRate, t.pickRate, maxTierPickRate);
+              return (
+                <div
+                  key={t.tier}
+                  className="pc-surface-light rounded-lg p-4 border transition-colors"
+                  style={{ borderColor: quality.borderColor, background: quality.background }}
+                >
+                  <div className="text-sm font-medium text-pc-accent mb-2">{t.tier}</div>
+                  <div className="grid grid-cols-3 gap-2 text-center">
+                    <div>
+                      <div className="text-xs text-pc-text-muted">WR</div>
+                      <div className={`text-sm font-mono ${quality.textClass}`} style={{ color: quality.color }}>
+                        {t.winRate.toFixed(1)}%
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-pc-text-muted">PR</div>
+                      <div className="text-sm font-mono" style={{ color: quality.color }}>{t.pickRate.toFixed(1)}%</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-pc-text-muted">Plays</div>
+                      <div className="text-sm font-mono text-pc-text">{t.totalPlays.toLocaleString()}</div>
                     </div>
                   </div>
-                  <div>
-                    <div className="text-xs text-pc-text-muted">PR</div>
-                    <div className="text-sm font-mono text-pc-text">{t.pickRate.toFixed(1)}%</div>
-                  </div>
-                  <div>
-                    <div className="text-xs text-pc-text-muted">Plays</div>
-                    <div className="text-sm font-mono text-pc-text">{t.totalPlays.toLocaleString()}</div>
-                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
@@ -524,15 +607,18 @@ export default function ChampionDetailPage() {
                 </tr>
               </thead>
               <tbody>
-                {patchTrends.map((t) => (
-                  <tr key={t.trendWeek}>
-                    <td className="text-pc-text text-sm">{t.trendWeek}</td>
-                    <td className={`font-mono text-sm ${t.weeklyWinRate >= 55 ? "text-emerald-400" : t.weeklyWinRate <= 45 ? "text-rose-400" : "text-pc-text"}`}>
-                      {t.weeklyWinRate.toFixed(1)}%
-                    </td>
-                    <td className="text-pc-text-muted text-sm">{t.weeklyPlays.toLocaleString()}</td>
-                  </tr>
-                ))}
+                {patchTrends.map((t) => {
+                  const quality = getStatQuality(t.weeklyWinRate, t.weeklyPlays, maxTrendPlays);
+                  return (
+                    <tr key={t.trendWeek}>
+                      <td className="text-pc-text text-sm">{t.trendWeek}</td>
+                      <td className={`font-mono text-sm ${quality.textClass}`} style={{ color: quality.color }}>
+                        {t.weeklyWinRate.toFixed(1)}%
+                      </td>
+                      <td className="text-pc-text-muted text-sm">{t.weeklyPlays.toLocaleString()}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -677,17 +763,35 @@ function SkillCard({ skill }: { skill: ChampionSkill }) {
   );
 }
 
-function winRateBadgeClass(wr: number): string {
-  if (wr >= 50) return 'bg-emerald-500/20 text-emerald-400';
-  if (wr <= 40) return 'bg-rose-500/20 text-rose-400';
-  return 'bg-pc-bg text-pc-text-secondary';
-}
-
-function TalentCard({ talent, championName, stat, totalMatches }: { talent: ChampionTalent; championName: string; stat?: ChampionTalentStat; totalMatches?: number }) {
+function TalentCard({
+  talent,
+  championName,
+  stat,
+  totalMatches,
+  maxPickRate,
+  selected,
+  onSelect,
+}: {
+  talent: ChampionTalent;
+  championName: string;
+  stat?: ChampionTalentStat;
+  totalMatches?: number;
+  maxPickRate?: number;
+  selected?: boolean;
+  onSelect?: () => void;
+}) {
   const talentImageUrl = talent.iconUrl || `/images/champions/Talent ${championName} ${talent.name}.png`;
+  const pickRate = stat && totalMatches && totalMatches > 0 ? (stat.totalPlays / totalMatches) * 100 : 0;
+  const quality = stat ? getStatQuality(stat.winRate, pickRate, maxPickRate ?? 100) : null;
 
   return (
-    <div className="pc-surface-light rounded-lg p-3 border border-pc-border flex items-start gap-3">
+    <button
+      type="button"
+      onClick={onSelect}
+      disabled={!onSelect}
+      className={`pc-surface-light rounded-lg p-3 border flex items-start gap-3 transition-colors text-left w-full ${selected ? "ring-1 ring-pc-accent border-pc-accent-mid" : ""} ${onSelect ? "cursor-pointer hover:border-pc-accent-mid" : "cursor-default"}`}
+      style={quality ? { borderColor: selected ? quality.color : quality.borderColor, background: quality.background } : undefined}
+    >
       <div className="flex-shrink-0 w-14 h-14 flex items-center justify-center overflow-hidden">
         <SmartImage
           src={talentImageUrl}
@@ -708,24 +812,24 @@ function TalentCard({ talent, championName, stat, totalMatches }: { talent: Cham
         )}
         {stat && stat.totalPlays > 0 && (
           <div className="flex items-center gap-2 mt-2 text-xs">
-            <span className={winRateColor(stat.winRate)}>
+            <span className={quality?.textClass ?? winRateColor(stat.winRate)} style={quality ? { color: quality.color } : undefined}>
               <span className="text-pc-text-muted mr-1">WR</span>
               {stat.winRate.toFixed(1)}%
             </span>
             <span className="text-pc-border">|</span>
             <span className="text-pc-text-muted">
               <span className="mr-1">PR</span>
-              <span className="text-pc-text-secondary">{totalMatches != null && totalMatches > 0 ? ((stat.totalPlays / totalMatches) * 100).toFixed(1) : '0.0'}%</span>
+              <span style={quality ? { color: quality.color } : undefined}>{pickRate.toFixed(1)}%</span>
             </span>
             <span className="text-pc-border">|</span>
             <span className="text-pc-text-muted whitespace-nowrap">
               <span className="mr-1">Matches</span>
-              <span className="text-pc-text-secondary">{formatPlays(stat.totalPlays)}</span>
+              <span style={quality ? { color: quality.color } : undefined}>{formatPlays(stat.totalPlays)}</span>
             </span>
           </div>
         )}
       </div>
-    </div>
+    </button>
   );
 }
 
@@ -741,3 +845,4 @@ function winRateColor(wr: number): string {
   if (wr >= 45) return "text-amber-400";
   return "text-rose-400";
 }
+
