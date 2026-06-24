@@ -3719,14 +3719,6 @@
         "iconUrl": "/images/cards/Card_Totemic_Rescue.avif",
         "cooldown": null,
         "values": null
-      },
-      {
-        "name": "Unstable",
-        "description": "When you use Second Chance you also Rewind enemies within 20 units 3s into the past.",
-        "category": "Shock Pulse",
-        "iconUrl": "/images/cards/Card_Unstable.png",
-        "cooldown": null,
-        "values": null
       }
     ]
   },
