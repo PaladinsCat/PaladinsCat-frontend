@@ -395,6 +395,8 @@ export interface ChampionPerformanceDistribution {
   mean: number;
   median: number;
   mode: number;
+  p10: number;
+  p90: number;
   avgValue: number;
   totalMatches: number;
 }
@@ -412,7 +414,7 @@ export async function fetchChampionPerformanceDistributions(params: {
     const raw = await fetchJson<Array<{
       champion_id: number; champion_name: string; class: string;
       min: number | string; max: number | string; mean: number | string;
-      median: number | string; mode: number | string; avg_value: number | string;
+      median: number | string; mode: number | string; p10?: number | string; p90?: number | string; avg_value: number | string;
       total_matches: number;
     }>>(`/stats/performance-metrics/by-champion?${query.toString()}`);
     return raw.map((r) => ({
@@ -424,6 +426,8 @@ export async function fetchChampionPerformanceDistributions(params: {
       mean: Number(r.mean ?? 0),
       median: Number(r.median ?? 0),
       mode: Number(r.mode ?? 0),
+      p10: Number(r.p10 ?? 0),
+      p90: Number(r.p90 ?? 0),
       avgValue: Number(r.avg_value ?? 0),
       totalMatches: Number(r.total_matches ?? 0),
     }));

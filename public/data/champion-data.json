@@ -1211,7 +1211,7 @@
         "name": "Creator's Claim",
         "description": "Increase your maximum Health by {50|50}.",
         "category": "General",
-        "iconUrl": "/images/cards/Card_Creators_Claim.avif",
+        "iconUrl": "/images/cards/Card_Creator's_Claim.avif",
         "cooldown": null,
         "values": null
       },
@@ -1625,7 +1625,7 @@
         "name": "Bully",
         "description": "Gain {10|10}% Lifesteal for 2.5s after using Net Shot.",
         "category": "Net Shot",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Cull_the_Weak.avif",
         "cooldown": null,
         "values": null
       },
@@ -1964,7 +1964,7 @@
         "name": "The Rose's Thorns",
         "description": "Each stack of Sharp Momentum Heals you for {30|30} after it expires.",
         "category": "War",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_The_Rose's_Thorns.avif",
         "cooldown": null,
         "values": null
       }
@@ -2346,7 +2346,7 @@
         "name": "Magistrate's Might",
         "description": "Gain a {130|130}-Health Shield for 3s after dropping to or below 35% Health.",
         "category": "General",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Magistrate's_Might.avif",
         "cooldown": null,
         "values": null
       },
@@ -2517,7 +2517,7 @@
         "name": "Crow's Nest",
         "description": "Hitting yourself with Broadside now applies a",
         "category": "Broadside",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Crow's_Nest.avif",
         "cooldown": null,
         "values": null
       },
@@ -2565,7 +2565,7 @@
         "name": "Hangman's Ire",
         "description": "Gain a {150|150}-Health Shield for 3s after dropping to or below 50% Health.",
         "category": "General",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Hangman's_Ire.avif",
         "cooldown": null,
         "values": null
       },
@@ -3724,7 +3724,7 @@
         "name": "Unstable",
         "description": "When you use Second Chance you also Rewind enemies within 20 units 3s into the past.",
         "category": "Shock Pulse",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Unstable.png",
         "cooldown": null,
         "values": null
       }
@@ -5631,7 +5631,7 @@
         "name": "Surprise!",
         "description": "Generate {5|5} Ammo after activating Shadow Step.",
         "category": "Shadow Step",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Surprise.avif",
         "cooldown": null,
         "values": null
       },
@@ -6029,7 +6029,7 @@
         "name": "Eagle's Emerald",
         "description": "Generate {1|1} Ammo for each enemy hit with Valor.",
         "category": "Valor",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Eagle's_Emerald.avif",
         "cooldown": null,
         "values": null
       },
@@ -7172,7 +7172,7 @@
         "name": "Nature's Blessing",
         "description": "Allies gain {5|5}% Movement Speed for 3s after being healed by Sparkle.",
         "category": "Familiar Spray",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Nature_s_Blessing.avif",
         "cooldown": null,
         "values": null
       },
@@ -7837,7 +7837,7 @@
         "name": "More, More, More!",
         "description": "While at least 2 enemies are marked by Ominous Brand, heal for {60|60} every 1s.",
         "category": "General",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_More_More_More.avif",
         "cooldown": null,
         "values": null
       },
@@ -7984,7 +7984,7 @@
         "name": "Acrobat's Trick",
         "description": "Reduce the Cooldown of Healing Potion by {0.1|0.1}s after hitting an enemy with your weapon.",
         "category": "General",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Acrobat_s_Trick.avif",
         "cooldown": null,
         "values": null
       },
@@ -8048,7 +8048,7 @@
         "name": "Pep in the Step",
         "description": "Allies hit by Healing Potion have their Movement Speed increased by {6|6}% for 3s.",
         "category": "Healing Potion",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Disinfect.avif",
         "cooldown": null,
         "values": null
       },
@@ -8104,7 +8104,7 @@
         "name": "Sturdy",
         "description": "Gain {3|3}% Movement Speed.",
         "category": "General",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Undying.avif",
         "cooldown": null,
         "values": null
       }
@@ -9059,7 +9059,7 @@
         "name": "Resuscitate",
         "description": "Increase the Health and Weapon DMG bonus of Soul Collector to 2% per charge.",
         "category": "",
-        "iconUrl": null
+        "iconUrl": "/images/cards/Card_Resuscitate.png"
       },
       {
         "name": "Forsake",
@@ -9278,19 +9278,19 @@
         "name": "Desert Shadow",
         "description": "Eliminations enter you into Stealth for 2s. Shots from Stealth deal 200 increased damage.",
         "category": "",
-        "iconUrl": null
+        "iconUrl": "/images/champions/Talent Sha Lin Desert Shadow.avif"
       },
       {
         "name": "Recurve",
         "description": "Increase the rate at which your Longbow charges by 25%.",
         "category": "",
-        "iconUrl": null
+        "iconUrl": "/images/champions/Talent Sha Lin Recurve.avif"
       },
       {
         "name": "Sand Trap",
         "description": "Crippling Arrow now explodes in a 20-unit-radius area on contact, dealing up to 300 additional Area Damage to enemies hit, but its Cripple is reduced by 1s.",
         "category": "",
-        "iconUrl": null
+        "iconUrl": "/images/champions/Talent Sha Lin Sand Trap.avif"
       }
     ],
     "loadouts": [
@@ -9533,7 +9533,7 @@
         "name": "Decrepify",
         "description": "You do not consume Ammo for {0.5|0.5}s after hitting an enemy with Poison Bolts.",
         "category": "Poison Bolts",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Diminish.avif",
         "cooldown": null,
         "values": null
       },
@@ -9541,7 +9541,7 @@
         "name": "Dissipate",
         "description": "Increase your Movement Speed by {8|8}% for 2s after entering Smoke Screen.",
         "category": "Smoke Screen",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Endure.avif",
         "cooldown": null,
         "values": null
       },
@@ -9581,7 +9581,7 @@
         "name": "Poisoner",
         "description": "Reduce the Cooldown of Poison Bolts by {0.8|0.8}s.",
         "category": "Poison Bolts",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Pollute.avif",
         "cooldown": null,
         "values": null
       },
@@ -9589,7 +9589,7 @@
         "name": "Quick Smoker",
         "description": "Reduce the Cooldown of Smoke Screen by {0.6|0.6}s.",
         "category": "Smoke Screen",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Acid_Cloud.avif",
         "cooldown": null,
         "values": null
       },
@@ -9597,7 +9597,7 @@
         "name": "Shadow Affinity",
         "description": "Reduce the Cooldown of Hidden by {1|1}s.",
         "category": "Hidden",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Affinity.avif",
         "cooldown": null,
         "values": null
       },
@@ -9613,7 +9613,7 @@
         "name": "Specter",
         "description": "Generate {4|4} Ammo after entering Smoke Screen. You must spend at least 4s out of Smoke Screen before this effect can apply again.",
         "category": "Smoke Screen",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Backstab.avif",
         "cooldown": null,
         "values": null
       },
@@ -9629,7 +9629,7 @@
         "name": "Twilight Armor",
         "description": "Increase your maximum Health by {50|50}.",
         "category": "General",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Twilight.avif",
         "cooldown": null,
         "values": null
       },
@@ -9637,7 +9637,7 @@
         "name": "Victory Rush",
         "description": "Increase your Movement Speed by {10|10}% for 4s after getting an Elimination.",
         "category": "General",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Victory_Rush.png",
         "cooldown": null,
         "values": null
       }
@@ -12802,7 +12802,7 @@
         "name": "Blade Dancer",
         "description": "Increase the travel distance of Whirl by {8|8}%.",
         "category": "Whirl",
-        "iconUrl": null,
+        "iconUrl": "/images/cards/Card_Blade_Dance.avif",
         "cooldown": null,
         "values": null
       },

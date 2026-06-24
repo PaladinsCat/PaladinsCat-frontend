@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams, notFound } from "next/navigation";
-import Image from "next/image";
 import { STATIC_CHAMPIONS } from "@/lib/static-champions";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import ScrambleText from "@/components/ScrambleText";
@@ -16,27 +15,40 @@ import {
   type ChampionTalent,
   type ChampionLoadout,
 } from "@/lib/champion-data";
-import { fetchChampionLeaderboard, type ChampionLeaderboardEntry,
-  fetchChampionTalentStats, fetchChampionCardStats,
-  type ChampionTalentStatsResponse, type ChampionCardStatsResponse,
-  type ChampionTalentStat, type ChampionCardStat,
+import {
+  fetchChampionLeaderboard,
+  fetchChampionTalentStats,
+  fetchChampionCardStats,
+  fetchPerformanceMetrics,
+  fetchChampionPerformanceDistributions,
+  type ChampionLeaderboardEntry,
+  type ChampionTalentStatsResponse,
+  type ChampionCardStatsResponse,
+  type ChampionTalentStat,
+  type ChampionCardStat,
+  type PerformanceMetricsResponse,
+  type PerformanceMetricKey,
+  type PerformanceMetricSummary,
+  type ChampionPerformanceDistribution,
 } from "@/lib/api-client";
 import { getRankIconPath, getTierColor, resolveEffectiveTier } from "@/lib/tier-utils";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api";
+const RANKED_QUEUE_ID = 486;
+const CHAMPION_METRICS: Array<{ key: PerformanceMetricKey; label: string; colorClass: string; accent: string }> = [
+  { key: "dpm", label: "Damage / Min", colorClass: "text-red-400", accent: "#f87171" },
+  { key: "gpm", label: "Credits / Min", colorClass: "text-yellow-400", accent: "#facc15" },
+  { key: "hpm", label: "Healing / Min", colorClass: "text-emerald-400", accent: "#34d399" },
+  { key: "mpm", label: "Mitigation / Min", colorClass: "text-blue-400", accent: "#60a5fa" },
+  { key: "kda", label: "KDA", colorClass: "text-violet-400", accent: "#a78bfa" },
+];
 
-// Placeholder types for future DB integration
 interface ChampionStats {
   avgRating: number | null;
   avgWinRate: number | null;
   totalPlays: number | null;
   totalMatches: number | null;
   totalWins: number | null;
-  avgKills: number | null;
-  avgDeaths: number | null;
-  avgAssists: number | null;
-  avgDamage: number | null;
-  avgGold: number | null;
 }
 
 interface LeaderboardEntry {
@@ -71,6 +83,12 @@ const ROLE_ICONS: Record<string, string> = {
   Support: "/images/icons/Class_Support_Icon.avif",
 };
 
+function statNameKey(value: string | null | undefined): string {
+  return String(value ?? "")
+    .normalize("NFKD")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+}
 function AvgTierCard({ stats }: { stats: ChampionStats }) {
   if (stats.avgRating == null) {
     return (
@@ -106,6 +124,8 @@ export default function ChampionDetailPage() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [talentStats, setTalentStats] = useState<ChampionTalentStatsResponse | null>(null);
   const [cardStats, setCardStats] = useState<ChampionCardStatsResponse | null>(null);
+  const [globalPerformance, setGlobalPerformance] = useState<PerformanceMetricsResponse>({});
+  const [championPerformance, setChampionPerformance] = useState<Partial<Record<PerformanceMetricKey, ChampionPerformanceDistribution>>>({});
   const [tierStats, setTierStats] = useState<TierStat[]>([]);
   const [patchTrends, setPatchTrends] = useState<PatchTrend[]>([]);
   const [loading, setLoading] = useState(true);
@@ -172,11 +192,6 @@ export default function ChampionDetailPage() {
                 totalPlays: s.total_matches != null ? Number(s.total_matches) : null,
                 totalMatches: s.total_matches != null ? Number(s.total_matches) : null,
                 totalWins: s.wins != null ? Number(s.wins) : null,
-                avgKills: s.avg_kills != null ? Number(s.avg_kills) : null,
-                avgDeaths: s.avg_deaths != null ? Number(s.avg_deaths) : null,
-                avgAssists: s.avg_assists != null ? Number(s.avg_assists) : null,
-                avgDamage: s.avg_damage != null ? Number(s.avg_damage) : null,
-                avgGold: s.avg_gold != null ? Number(s.avg_gold) : null,
               } as ChampionStats;
             })
             .catch(() => null as ChampionStats | null),
@@ -186,24 +201,47 @@ export default function ChampionDetailPage() {
           fetchChampionTalentStats(match.id).catch(() => null as ChampionTalentStatsResponse | null),
           // Card stats for this champion
           fetchChampionCardStats(match.id).catch(() => null as ChampionCardStatsResponse | null),
+          // Global ranked distributions plus champion-specific distributions
+          // use the same metric contract as /stats/dpm, /stats/gpm, etc. This
+          // keeps the champion page from comparing raw damage/gold totals across
+          // matches of different lengths.
+          fetchPerformanceMetrics({ queueId: RANKED_QUEUE_ID }).catch(() => ({} as PerformanceMetricsResponse)),
+          Promise.all(
+            CHAMPION_METRICS.map(({ key }) =>
+              fetchChampionPerformanceDistributions({ metric: key, championId: match.id, queueId: RANKED_QUEUE_ID })
+                .then((rows) => [key, rows[0] ?? null] as const)
+                .catch(() => [key, null] as const)
+            )
+          ),
         ]);
       })
       .then((result) => {
         if (!result) return;
-        const [statsData, lbData, talentData, cardData] = result;
+        const [statsData, lbData, talentData, cardData, globalMetrics, championMetricPairs] = result;
         if (statsData) setStats(statsData);
         setLeaderboard(lbData);
         if (talentData) setTalentStats(talentData);
         if (cardData) setCardStats(cardData);
+        setGlobalPerformance(globalMetrics ?? {});
+        setChampionPerformance(
+          Object.fromEntries(championMetricPairs.filter(([, row]) => row != null)) as Partial<Record<PerformanceMetricKey, ChampionPerformanceDistribution>>
+        );
       })
       .finally(() => setLoading(false));
   }, [championData]);
 
+
+  const talentStatsByName = useMemo(() => {
+    return new Map((talentStats?.talents ?? []).map((stat) => [statNameKey(stat.talentName), stat]));
+  }, [talentStats]);
+
+  const cardStatsByName = useMemo(() => {
+    return new Map((cardStats?.cards ?? []).map((stat) => [statNameKey(stat.cardName), stat]));
+  }, [cardStats]);
   if (dataLoaded && !championData && !staticChampion) return notFound();
 
   const formatNum = (n: number | null) => (n != null ? n.toLocaleString() : "—");
   const formatPct = (n: number | null) => (n != null ? `${n.toFixed(1)}%` : "—");
-  const formatFloat = (n: number | null) => (n != null ? n.toFixed(1) : "—");
 
   return (
     <div className="space-y-6">
@@ -271,7 +309,7 @@ export default function ChampionDetailPage() {
               <div className="pc-card">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {championData.talents.map((talent) => {
-                  const stat = talentStats?.talents.find((t) => t.talentName === talent.name);
+                  const stat: ChampionTalentStat | undefined = talentStatsByName.get(statNameKey(talent.name));
                   return (
                     <TalentCard key={talent.name} talent={talent} championName={championData.name} stat={stat ?? undefined} totalMatches={talentStats?.totalMatches ?? 0} />
                   );
@@ -298,7 +336,8 @@ export default function ChampionDetailPage() {
                     <div className="text-xs font-medium text-pc-text-muted uppercase tracking-wider mb-2">{cat}</div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                       {cards.map((card) => {
-                        const stat = cardStats?.cards.find((c) => c.cardName === card.name);
+                        const stat: ChampionCardStat | undefined = cardStatsByName.get(statNameKey(card.name));
+                        const pickRate = stat && cardStats?.totalMatches ? (stat.totalPlays / cardStats.totalMatches) * 100 : 0;
                         return (
                           <div key={card.name} className="pc-surface-light rounded-lg p-3 border border-pc-border">
                             <div className="flex items-start gap-3">
@@ -314,12 +353,23 @@ export default function ChampionDetailPage() {
                                 <p className="text-xs text-pc-text-secondary leading-relaxed">{card.description}</p>
                                 {stat && stat.totalPlays > 0 && (
                                   <div className="mt-2 space-y-1.5">
-                                    <div className="flex items-center gap-2">
-                                      <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-mono font-semibold ${winRateBadgeClass(stat.winRate)}`}>
+                                    <div className="flex flex-wrap items-center gap-2 text-xs">
+                                      <span className={winRateColor(stat.winRate)}>
+                                        <span className="text-pc-text-muted mr-1">WR</span>
                                         {stat.winRate.toFixed(1)}%
                                       </span>
-                                      <span className="text-xs text-pc-text-muted">{stat.totalPlays.toLocaleString()} plays</span>
-                                      <span className="text-xs text-pc-text-muted">{stat.wins.toLocaleString()}W/{stat.losses.toLocaleString()}L</span>
+                                      <span className="text-pc-border">|</span>
+                                      <span className="text-pc-text-muted">
+                                        <span className="mr-1">PR</span>
+                                        <span className="text-pc-text-secondary">{pickRate.toFixed(1)}%</span>
+                                      </span>
+                                      <span className="text-pc-border">|</span>
+                                      <span className="text-pc-text-muted whitespace-nowrap">
+                                        <span className="mr-1">Picks</span>
+                                        <span className="text-pc-text-secondary">{formatPlays(stat.totalPlays)}</span>
+                                      </span>
+                                      <span className="text-pc-border">|</span>
+                                      <span className="text-pc-text-muted whitespace-nowrap">{stat.wins.toLocaleString()}W/{stat.losses.toLocaleString()}L</span>
                                     </div>
                                     {stat.levels.length > 0 && (
                                       <div className="flex items-center gap-1">
@@ -354,23 +404,27 @@ export default function ChampionDetailPage() {
         </div>
       </div>
 
-      {/* Average Player Stats */}
-      <h2 className="pc-card-title mb-2 shadow-sm">Average Player Stats</h2>
-      <div className="pc-card">
+      {/* Ranked performance summary */}
+      <h2 className="pc-card-title mb-2 shadow-sm">Ranked Performance</h2>
+      <div className="pc-card space-y-5">
         {stats && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <AvgTierCard stats={stats} />
-            <StatCard label="Avg Win Rate" value={formatPct(stats.avgWinRate)} />
-            <StatCard label="Total Plays" value={formatNum(stats.totalPlays)} />
-            <StatCard label="Total Matches" value={formatNum(stats.totalMatches)} />
-            <StatCard label="Total Wins" value={formatNum(stats.totalWins)} />
-            <StatCard label="Avg Kills" value={formatFloat(stats.avgKills)} />
-            <StatCard label="Avg Deaths" value={formatFloat(stats.avgDeaths)} />
-            <StatCard label="Avg Assists" value={formatFloat(stats.avgAssists)} />
-            <StatCard label="Avg Damage" value={formatNum(stats.avgDamage)} />
-            <StatCard label="Avg Gold" value={formatNum(stats.avgGold)} />
+            <StatCard label="Win Rate" value={formatPct(stats.avgWinRate)} accent />
+            <StatCard label="Plays" value={formatNum(stats.totalPlays)} />
+            <StatCard label="Wins" value={formatNum(stats.totalWins)} />
           </div>
         )}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3">
+          {CHAMPION_METRICS.map((metric) => (
+            <ChampionMetricCard
+              key={metric.key}
+              metric={metric}
+              champion={championPerformance[metric.key]}
+              global={globalPerformance[metric.key]}
+            />
+          ))}
+        </div>
       </div>
 
       {/* Glicko-2 Leaderboard */}
@@ -497,6 +551,76 @@ function StatCard({ label, value, accent }: { label: string; value: string; acce
   );
 }
 
+function ChampionMetricCard({
+  metric,
+  champion,
+  global,
+}: {
+  metric: (typeof CHAMPION_METRICS)[number];
+  champion?: ChampionPerformanceDistribution;
+  global?: PerformanceMetricSummary;
+}) {
+  const isDecimal = metric.key === "kda";
+  const formatMetric = (value: number | null | undefined) => {
+    const numeric = Number(value ?? 0);
+    return isDecimal ? numeric.toFixed(1) : Math.round(numeric).toLocaleString();
+  };
+  const championMean = champion?.avgValue ?? champion?.mean ?? 0;
+  const globalMean = global?.mean ?? 0;
+  const delta = championMean - globalMean;
+  const deltaPct = globalMean !== 0 ? (delta / globalMean) * 100 : 0;
+  const p10 = champion?.p10 && champion.p10 > 0 ? champion.p10 : champion?.min ?? 0;
+  const p90 = champion?.p90 && champion.p90 > 0 ? champion.p90 : champion?.max ?? 0;
+  const rangeMax = Math.max(p90, championMean, globalMean, 1);
+  const meanPct = Math.max(0, Math.min(100, (championMean / rangeMax) * 100));
+  const globalPct = Math.max(0, Math.min(100, (globalMean / rangeMax) * 100));
+  const deltaClass = delta >= 0 ? "text-emerald-400" : "text-rose-400";
+
+  return (
+    <div className="pc-surface-light rounded-lg border border-pc-border p-3 min-w-0">
+      <div className="flex items-start justify-between gap-2 mb-3">
+        <div className="min-w-0">
+          <div className="text-xs text-pc-text-muted uppercase tracking-wider">{metric.label}</div>
+          <div className={`text-xl font-bold ${metric.colorClass}`}>{formatMetric(championMean)}</div>
+        </div>
+        <div className="text-right text-[10px] text-pc-text-muted shrink-0">
+          <div>Matches</div>
+          <div className="text-pc-text-secondary font-mono">{(champion?.totalMatches ?? 0).toLocaleString()}</div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-2 text-[10px] mb-3">
+        <div>
+          <div className="text-pc-text-muted uppercase tracking-wider">P10</div>
+          <div className="text-pc-text-secondary font-mono">{formatMetric(p10)}</div>
+        </div>
+        <div>
+          <div className="text-pc-text-muted uppercase tracking-wider">Mode</div>
+          <div className="text-pc-text-secondary font-mono">{formatMetric(champion?.mode ?? 0)}</div>
+        </div>
+        <div>
+          <div className="text-pc-text-muted uppercase tracking-wider">P90</div>
+          <div className="text-pc-text-secondary font-mono">{formatMetric(p90)}</div>
+        </div>
+      </div>
+
+      <div className="relative h-2 rounded-full bg-pc-bg overflow-hidden mb-2">
+        <div className="absolute inset-y-0 left-0 rounded-full opacity-60" style={{ width: `${meanPct}%`, backgroundColor: metric.accent }} />
+        <div className="absolute top-1/2 h-4 w-0.5 -translate-y-1/2 bg-pc-text-muted" style={{ left: `${globalPct}%` }} />
+      </div>
+      <div className="flex items-center justify-between gap-2 text-[10px]">
+        <span className="text-pc-text-muted">Global {formatMetric(globalMean)}</span>
+        <span className={deltaClass}>{formatSignedMetric(delta, isDecimal)} ({deltaPct >= 0 ? "+" : ""}{deltaPct.toFixed(1)}%)</span>
+      </div>
+    </div>
+  );
+}
+
+function formatSignedMetric(value: number, decimal: boolean): string {
+  const sign = value >= 0 ? "+" : "";
+  const formatted = decimal ? value.toFixed(1) : Math.round(value).toLocaleString();
+  return `${sign}${formatted}`;
+}
 function StatBadge({ label, value }: { label: string; value: string }) {
   return (
     <div className="text-center">
@@ -559,7 +683,7 @@ function winRateBadgeClass(wr: number): string {
   return 'bg-pc-bg text-pc-text-secondary';
 }
 
-function TalentCard({ talent, championName, stat, totalMatches }: { talent: ChampionTalent; championName: string; stat?: { totalPlays: number; winRate: number; wins: number; losses: number }; totalMatches?: number }) {
+function TalentCard({ talent, championName, stat, totalMatches }: { talent: ChampionTalent; championName: string; stat?: ChampionTalentStat; totalMatches?: number }) {
   const talentImageUrl = talent.iconUrl || `/images/champions/Talent ${championName} ${talent.name}.png`;
 
   return (
