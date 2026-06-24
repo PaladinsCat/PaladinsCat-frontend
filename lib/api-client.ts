@@ -1530,6 +1530,12 @@ export interface ChampionTalentStat {
 
 export interface ChampionTalentStatsResponse {
   totalMatches: number;
+  talentCoveredMatches: number;
+  disconnectedPlayers: number;
+  disconnectedWins: number;
+  disconnectedLosses: number;
+  disconnectedWinRate: number | null;
+  talentCoverageRate: number | null;
   talents: ChampionTalentStat[];
 }
 
@@ -1540,6 +1546,12 @@ export async function fetchChampionTalentStats(
   try {
     const raw = await fetchJson<{
       totalMatches: number | string;
+      talentCoveredMatches?: number | string;
+      disconnectedPlayers?: number | string;
+      disconnectedWins?: number | string;
+      disconnectedLosses?: number | string;
+      disconnectedWinRate?: number | string | null;
+      talentCoverageRate?: number | string | null;
       talents: Array<{
         talentId: number | string;
         talentName: string;
@@ -1552,6 +1564,12 @@ export async function fetchChampionTalentStats(
 
     return {
       totalMatches: Number(raw.totalMatches) ?? 0,
+      talentCoveredMatches: Number(raw.talentCoveredMatches ?? 0),
+      disconnectedPlayers: Number(raw.disconnectedPlayers ?? 0),
+      disconnectedWins: Number(raw.disconnectedWins ?? 0),
+      disconnectedLosses: Number(raw.disconnectedLosses ?? 0),
+      disconnectedWinRate: raw.disconnectedWinRate == null ? null : Number(raw.disconnectedWinRate),
+      talentCoverageRate: raw.talentCoverageRate == null ? null : Number(raw.talentCoverageRate),
       talents: (raw.talents ?? []).map((t) => ({
         talentId: Number(t.talentId) ?? 0,
         talentName: t.talentName ?? 'Unknown',
@@ -1562,7 +1580,7 @@ export async function fetchChampionTalentStats(
       })),
     };
   } catch {
-    return { totalMatches: 0, talents: [] };
+    return { totalMatches: 0, talentCoveredMatches: 0, disconnectedPlayers: 0, disconnectedWins: 0, disconnectedLosses: 0, disconnectedWinRate: null, talentCoverageRate: null, talents: [] };
   }
 }
 
