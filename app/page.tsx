@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import ScrambleText from "@/components/ScrambleText";
+import SmartImage from "@/components/SmartImage";
 import {
   fetchNotifications,
   fetchChangelogPreview,
@@ -134,6 +135,24 @@ export default function HomePage() {
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`transition-colors ${searchHovered || searchFocused ? "text-pc-accent" : "text-pc-text-muted group-hover:text-pc-accent group-focus-within:text-pc-accent"}`}><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
           </button>
         </form>
+      </motion.div>
+
+      {/* ── Community Screenshot ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.38 }}
+        className="max-w-3xl mx-auto mb-8"
+      >
+        <div className="rounded-xl border border-pc-border shadow-sm overflow-hidden bg-pc-bg-elevated">
+          <SmartImage
+            src="/images/discord-general-screenshot.png"
+            alt="Discord #general channel screenshot"
+            width={960}
+            height={280}
+            className="w-full h-auto"
+          />
+        </div>
       </motion.div>
 
       {/* ── 2×1 Grid: Notifications | Changelog ── */}
