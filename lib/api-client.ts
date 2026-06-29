@@ -2061,6 +2061,80 @@ export async function getUserProfile(userId: number): Promise<AuthUser> {
   };
 }
 
+// ── Account Management ──
+
+export interface AccountDetails {
+  user: AuthUser & { linked_player_id: number | null };
+  linkedPlayer: {
+    id: number;
+    name: string;
+    platform_name: string | null;
+    level: number | null;
+    wins: number | null;
+    losses: number | null;
+    kbm_tier: string | null;
+    kbm_points: number | null;
+  } | null;
+}
+
+export async function getAccountDetails(): Promise<AccountDetails> {
+  const token = getAuthToken();
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
+  return fetchJson<AccountDetails>("/auth/account", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export async function linkPlayerId(playerId: number): Promise<{ message: string; player: { id: number; name: string } }> {
+  const token = getAuthToken();
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
+  return fetchJson<{ message: string; player: { id: number; name: string } }>("/auth/account/player-link", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ action: "link", playerId }),
+  });
+}
+
+export async function unlinkPlayer(): Promise<{ message: string }> {
+  const token = getAuthToken();
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
+  return fetchJson<{ message: string }>("/auth/account/player-link", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ action: "unlink" }),
+  });
+}
+
+export async function changePassword(currentPassword: string, newPassword: string): Promise<{ message: string }> {
+  const token = getAuthToken();
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
+  return fetchJson<{ message: string }>("/auth/account/password", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+    body: JSON.stringify({ currentPassword, newPassword }),
+  });
+}
+
+export async function updateProfile(data: { avatar_url?: string; bio?: string }): Promise<{ message: string }> {
+  const token = getAuthToken();
+  if (!token) {
+    throw new Error("Not authenticated");
+  }
+  return fetchJson<{ message: string }>("/auth/profile", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+    body: JSON.stringify(data),
+  });
+}
+
 // ── Player Report ──
 
 export type ReportType = 'suspicious' | 'cheater' | 'approve';

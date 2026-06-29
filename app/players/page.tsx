@@ -285,34 +285,74 @@ export default function PlayersPage() {
               </Link>
             </div>
             <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4">
-              <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
-                {rankedPlayers.length === 0 && (
-                  <div className="col-span-2 text-xs text-pc-text-muted">{overviewLoading ? "Loading..." : "No ranked leaderboard data"}</div>
-                )}
-                {rankedPlayers.map((p, i) => {
-                  const iconPath = getRankIconPath(p.tier, p.rank);
-                  const effective = resolveEffectiveTier(p.tier, p.rank);
-                  return (
-                  <div key={p.player_id} className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      <RankBadge rank={i + 1} />
-                      <img src={iconPath} alt={effective.displayName} className="w-4 h-4 object-contain shrink-0" title={effective.displayName} />
-                      <Link href={`/players/${p.player_id}`} className="text-pc-text truncate hover:text-pc-accent transition-colors">{p.name}</Link>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      {p.trend != null && p.trend !== 0 ? (
-                        <span className={p.trend > 0 ? "text-emerald-400" : "text-red-400"}>
-                          {p.trend > 0 ? "▲" : "▼"}{Math.abs(p.trend)}
-                        </span>
-                      ) : (
-                        <span className="text-pc-text-muted">—</span>
-                      )}
-                      <span className="text-pc-text font-medium">{p.points.toLocaleString()}</span>
-                    </div>
-                  </div>
-                  );
-                })}
-              </div>
+              {rankedPlayers.length === 0 ? (
+                <div className="text-xs text-pc-text-muted">{overviewLoading ? "Loading..." : "No ranked leaderboard data"}</div>
+              ) : (
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+                  {(() => {
+                    const mid = Math.ceil(rankedPlayers.length / 2);
+                    const left = rankedPlayers.slice(0, mid);
+                    const right = rankedPlayers.slice(mid);
+                    return (
+                      <>
+                        {/* Left column: ranks 1..mid */}
+                        <div className="space-y-1.5">
+                          {left.map((p, i) => {
+                            const iconPath = getRankIconPath(p.tier, p.rank);
+                            const effective = resolveEffectiveTier(p.tier, p.rank);
+                            return (
+                              <div key={p.player_id} className="flex items-center justify-between text-xs">
+                                <div className="flex items-center gap-1.5 min-w-0">
+                                  <RankBadge rank={i + 1} />
+                                  <img src={iconPath} alt={effective.displayName} className="w-4 h-4 object-contain shrink-0" title={effective.displayName} />
+                                  <Link href={`/players/${p.player_id}`} className="text-pc-text truncate hover:text-pc-accent transition-colors">{p.name}</Link>
+                                </div>
+                                <div className="flex items-center gap-2 shrink-0">
+                                  {p.trend != null && p.trend !== 0 ? (
+                                    <span className={p.trend > 0 ? "text-emerald-400" : "text-red-400"}>
+                                      {p.trend > 0 ? "▲" : "▼"}{Math.abs(p.trend)}
+                                    </span>
+                                  ) : (
+                                    <span className="text-pc-text-muted">—</span>
+                                  )}
+                                  <span className="text-pc-text font-medium">{p.points.toLocaleString()}</span>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        {/* Right column: ranks mid+1..end */}
+                        <div className="space-y-1.5">
+                          {right.map((p, i) => {
+                            const iconPath = getRankIconPath(p.tier, p.rank);
+                            const effective = resolveEffectiveTier(p.tier, p.rank);
+                            const rank = mid + i + 1;
+                            return (
+                              <div key={p.player_id} className="flex items-center justify-between text-xs">
+                                <div className="flex items-center gap-1.5 min-w-0">
+                                  <RankBadge rank={rank} />
+                                  <img src={iconPath} alt={effective.displayName} className="w-4 h-4 object-contain shrink-0" title={effective.displayName} />
+                                  <Link href={`/players/${p.player_id}`} className="text-pc-text truncate hover:text-pc-accent transition-colors">{p.name}</Link>
+                                </div>
+                                <div className="flex items-center gap-2 shrink-0">
+                                  {p.trend != null && p.trend !== 0 ? (
+                                    <span className={p.trend > 0 ? "text-emerald-400" : "text-red-400"}>
+                                      {p.trend > 0 ? "▲" : "▼"}{Math.abs(p.trend)}
+                                    </span>
+                                  ) : (
+                                    <span className="text-pc-text-muted">—</span>
+                                  )}
+                                  <span className="text-pc-text font-medium">{p.points.toLocaleString()}</span>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
+              )}
             </div>
           </section>
 

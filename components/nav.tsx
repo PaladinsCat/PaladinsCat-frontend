@@ -61,9 +61,12 @@ export default function Nav() {
             <div className="flex-1 flex justify-end">
               {user ? (
                 <div className="flex items-center gap-3">
-                  <span className="text-pc-text-secondary text-sm">
+                  <Link
+                    href="/account"
+                    className="text-pc-text-secondary text-sm hover:text-pc-accent transition-colors underline underline-offset-2"
+                  >
                     Hi, {user.username}
-                  </span>
+                  </Link>
                   <button onClick={handleLogout} className="pc-btn-ghost text-sm">
                     Logout
                   </button>
