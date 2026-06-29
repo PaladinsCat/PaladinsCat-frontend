@@ -18,7 +18,7 @@ import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
 import { getRankIconPath } from "@/lib/tier-utils";
 import { getStatQuality } from "@/lib/stat-quality";
-import { BellCurveChart } from "@/components/BellCurveChart";
+import { PerformanceOverviewCard } from "@/components/PerformanceOverviewCard";
 
 const ROLES = ["Frontline", "Damage", "Flank", "Support"] as const;
 const DETAIL_LINK_CLASS = "text-xs text-pc-text-secondary hover:text-pc-accent transition-colors drop-shadow-sm";
@@ -186,78 +186,46 @@ export default function StatsPage() {
         </p>
       </div>
 
-      {/* ── Global Metrics ── */}
+      {/* ── Global Metrics (consolidated card) ── */}
       <section>
-        <h2 className="text-lg font-bold text-pc-text mb-4">Performance Overview</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[
-            { key: "dpm", label: "Damage / Min", stroke: "#f87171", fill: "rgba(248,113,113,0.15)" },
-            { key: "hpm", label: "Healing / Min", stroke: "#34d399", fill: "rgba(52,211,153,0.15)" },
-            { key: "gpm", label: "Credits / Min", stroke: "#facc15", fill: "rgba(250,204,21,0.15)" },
-            { key: "mpm", label: "Mitigation / Min", stroke: "#60a5fa", fill: "rgba(96,165,250,0.15)" },
-            { key: "kda", label: "KDA Ratio", stroke: "#33b6b1", fill: "rgba(51,182,177,0.15)" },
-          ].map(({ key, label, stroke }) => {
-            const d = metrics[key as keyof typeof metrics] as { p10: number; p25: number; p75: number; p90: number; mean: number; mode: number };
-            const formatVal = key === "kda" ? (v: number) => v.toFixed(1) : (v: number) => v.toLocaleString();
+        {(() => {
+          const perfRows = [
+            { key: "dpm", label: "DPM", color: "#f87171" },
+            { key: "hpm", label: "HPM", color: "#34d399" },
+            { key: "gpm", label: "GPM", color: "#facc15" },
+            { key: "mpm", label: "MPM", color: "#60a5fa" },
+            { key: "kda", label: "KDA", color: "#33b6b1" },
+          ].map(({ key, label, color }) => {
+            const d = metrics[key as keyof typeof metrics] as {
+              p10: number;
+              p25: number;
+              p75: number;
+              p90: number;
+              mean: number;
+            };
+            return {
+              key,
+              label,
+              color,
+              p10: d.p10,
+              p25: d.p25,
+              mean: d.mean,
+              p75: d.p75,
+              p90: d.p90,
+            };
+          });
 
-            return (
-              <div key={key}>
-                <div className="flex items-center justify-between mb-2 px-2">
-                  <h3 className="text-pc-text font-semibold text-sm">{label}</h3>
-                  <Link href={`/stats/${key}`} className={DETAIL_LINK_CLASS}>
-                    Detail →
-                  </Link>
-                </div>
-                <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
+          const datasetPayload = {
+            matches: datasetCounts.matches,
+            players: datasetCounts.players,
+            avgDuration: formatDuration(avgDurationSeconds),
+            avgKda: metrics.kda.mean ? metrics.kda.mean.toFixed(2) : "--",
+          };
 
-                <BellCurveChart
-                  mean={d.mean}
-                  mode={d.mode}
-                  p10={d.p10}
-                  p90={d.p90}
-                  stroke={stroke}
-                  height={110}
-                />
-
-                {/* Legend dots */}
-                <div className="flex items-center gap-4 mb-2">
-                  <span className="flex items-center gap-1 text-xs text-pc-text-muted">
-                    <span className="w-2 h-2 rounded-full" style={{ background: stroke }} /> Mean
-                  </span>
-                  <span className="flex items-center gap-1 text-xs text-pc-text-muted">
-                    <span className="w-2 h-2 rounded-full bg-pc-text-muted" /> Mode
-                  </span>
-                </div>
-
-                {/* P10 / P25 / Mean / P75 / P90 */}
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-pc-text-muted">p10 <span className="text-pc-text-secondary">{formatVal(d.p10)}</span></span>
-                  <span className="text-pc-text-muted">p25 <span className="text-pc-text-secondary">{formatVal(d.p25)}</span></span>
-                  <span className="text-pc-text-muted">mean <span className="font-bold" style={{ color: stroke }}>{formatVal(d.mean)}</span></span>
-                  <span className="text-pc-text-muted">p75 <span className="text-pc-text-secondary">{formatVal(d.p75)}</span></span>
-                  <span className="text-pc-text-muted">p90 <span className="text-pc-text-secondary">{formatVal(d.p90)}</span></span>
-                </div>
-                </div>
-              </div>
-            );
-          })}
-
-          {/* Summary stats card */}
-          <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 space-y-3">
-            <span className="text-pc-text font-semibold text-sm">Dataset</span>
-            {[
-              { label: "Matches Tracked", value: datasetCounts.matches.toLocaleString() },
-              { label: "Players Tracked", value: datasetCounts.players.toLocaleString() },
-              { label: "Avg Match Duration", value: formatDuration(avgDurationSeconds) },
-              { label: "Avg KDA", value: metrics.kda.mean ? metrics.kda.mean.toFixed(2) : "--" },
-            ].map((m) => (
-              <div key={m.label} className="flex items-center justify-between">
-                <span className="text-pc-text-muted text-xs">{m.label}</span>
-                <span className="text-pc-text font-medium text-xs">{m.value}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+          return (
+            <PerformanceOverviewCard metrics={perfRows} dataset={datasetPayload} />
+          );
+        })()}
       </section>
 
       {/* ── Ranked Tier Distribution ── */}
