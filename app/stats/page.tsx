@@ -190,6 +190,12 @@ export default function StatsPage() {
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Performance Overview (1/3) */}
         <div>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-bold text-pc-text">Performance Overview</h2>
+            <Link href="/stats/metrics" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">
+              Detail →
+            </Link>
+          </div>
         {(() => {
           const perfRows = [
             { key: "dpm", label: "DPM", color: "#f87171" },

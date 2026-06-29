@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { championSlug } from "@/lib/utils";
 import { getChampionIconSafe } from "@/lib/champion-icons";
@@ -12,13 +13,24 @@ import {
   type PerformanceMetricSummary,
 } from "@/lib/api-client";
 
+/* ── Metric configs ── */
+
 interface MetricConfig {
   key: string;
   label: string;
-  unit: string;
-  stroke: string;
+  fullLabel: string;
+  color: string;
   fill: string;
+  isDecimal: boolean;
 }
+
+const METRIC_CONFIGS: MetricConfig[] = [
+  { key: "dpm", label: "DPM", fullLabel: "Damage / Min", color: "#f87171", fill: "rgba(248,113,113,0.15)", isDecimal: false },
+  { key: "hpm", label: "HPM", fullLabel: "Healing / Min", color: "#34d399", fill: "rgba(52,211,153,0.15)", isDecimal: false },
+  { key: "gpm", label: "GPM", fullLabel: "Credits / Min", color: "#facc15", fill: "rgba(250,204,21,0.15)", isDecimal: false },
+  { key: "mpm", label: "MPM", fullLabel: "Mitigation / Min", color: "#60a5fa", fill: "rgba(96,165,250,0.15)", isDecimal: false },
+  { key: "kda", label: "KDA", fullLabel: "KDA Ratio", color: "#33b6b1", fill: "rgba(51,182,177,0.15)", isDecimal: true },
+];
 
 const CLASS_ICONS: Record<string, string> = {
   Frontline: "/images/icons/Class_Front_Line_Icon.avif",
@@ -26,9 +38,10 @@ const CLASS_ICONS: Record<string, string> = {
   Flank: "/images/icons/Class_Flank_Icon.avif",
   Support: "/images/icons/Class_Support_Icon.avif",
 };
-
 const CLASS_ORDER = ["Frontline", "Damage", "Flank", "Support"] as const;
 const VALID_METRIC_KEYS = new Set<PerformanceMetricKey>(["dpm", "hpm", "gpm", "mpm", "kda"]);
+
+/* ── Types ── */
 
 type ChampionMetricRow = {
   name: string;
@@ -49,16 +62,8 @@ type ClassMetricData = {
 
 function emptySummary(): PerformanceMetricSummary {
   return {
-    min: 0,
-    max: 0,
-    mean: 0,
-    median: 0,
-    mode: 0,
-    p10: 0,
-    p25: 0,
-    p75: 0,
-    p90: 0,
-    sampleSize: 0,
+    min: 0, max: 0, mean: 0, median: 0, mode: 0,
+    p10: 0, p25: 0, p75: 0, p90: 0, sampleSize: 0,
   };
 }
 
@@ -124,7 +129,40 @@ function pctDiff(value: number, base: number): number {
   return base !== 0 ? ((value - base) / base) * 100 : 0;
 }
 
-export default function MetricDetailPage({ config }: { config: MetricConfig }) {
+/* ── Tab bar component ── */
+
+function TabBar({
+  configs,
+  activeKey,
+  onChange,
+}: {
+  configs: MetricConfig[];
+  activeKey: string;
+  onChange: (key: string) => void;
+}) {
+  return (
+    <div className="flex gap-1 bg-pc-bg-elevated border border-pc-border rounded-xl p-1 overflow-x-auto">
+      {configs.map((cfg) => (
+        <button
+          key={cfg.key}
+          onClick={() => onChange(cfg.key)}
+          className={`px-4 py-2 rounded-lg text-sm font-bold transition-all whitespace-nowrap ${
+            activeKey === cfg.key
+              ? "text-white shadow-sm"
+              : "text-pc-text-secondary hover:text-pc-text"
+          }`}
+          style={activeKey === cfg.key ? { background: cfg.color } : {}}
+        >
+          {cfg.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/* ── Metric panel (same as MetricDetailPage content) ── */
+
+function MetricPanel({ config }: { config: MetricConfig }) {
   const [metricSummary, setMetricSummary] = useState<PerformanceMetricSummary>(() => emptySummary());
   const [classData, setClassData] = useState<ClassMetricData[]>(() => buildClassData([], {}));
 
@@ -167,11 +205,10 @@ export default function MetricDetailPage({ config }: { config: MetricConfig }) {
     };
   }, [config.key]);
 
-  const isDecimal = config.key === "kda";
-  const formatVal = (value: number) => isDecimal ? value.toFixed(1) : Math.round(value).toLocaleString();
+  const formatVal = (value: number) => config.isDecimal ? value.toFixed(1) : Math.round(value).toLocaleString();
   const formatSigned = (value: number) => {
     const sign = value >= 0 ? "+" : "";
-    return `${sign}${isDecimal ? value.toFixed(1) : Math.round(value).toLocaleString()}`;
+    return `${sign}${config.isDecimal ? value.toFixed(1) : Math.round(value).toLocaleString()}`;
   };
 
   const globalRank = useMemo(() => {
@@ -186,12 +223,8 @@ export default function MetricDetailPage({ config }: { config: MetricConfig }) {
   const globalMeanPct = Math.max(0, Math.min(100, ((globalMean - metricSummary.min) / globalRange) * 100));
 
   return (
-    <div className="space-y-8">
-      <div>
-        <Link href="/stats" className="text-pc-accent text-xs hover:underline mb-2 inline-block">Back to Global Stats</Link>
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">{config.label}</h1>
-      </div>
-
+    <div className="space-y-6">
+      {/* Global summary card */}
       <section className="bg-pc-bg-elevated border border-pc-border rounded-xl p-5">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           {[
@@ -203,7 +236,7 @@ export default function MetricDetailPage({ config }: { config: MetricConfig }) {
           ].map((item) => (
             <div key={item.label} className="min-w-0">
               <div className="text-pc-text-muted text-xs uppercase tracking-wider mb-1">{item.label}</div>
-              <div className="text-xl font-bold truncate" style={{ color: item.accent ? config.stroke : undefined }}>
+              <div className="text-xl font-bold truncate" style={{ color: item.accent ? config.color : undefined }}>
                 {item.value}
               </div>
             </div>
@@ -211,10 +244,11 @@ export default function MetricDetailPage({ config }: { config: MetricConfig }) {
         </div>
         <div className="mt-5 relative h-2 rounded-full bg-pc-bg overflow-hidden">
           <div className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${globalMeanPct}%`, background: config.fill }} />
-          <div className="absolute top-1/2 h-4 w-1 -translate-y-1/2 rounded-full" style={{ left: `${globalMeanPct}%`, background: config.stroke }} />
+          <div className="absolute top-1/2 h-4 w-1 -translate-y-1/2 rounded-full" style={{ left: `${globalMeanPct}%`, background: config.color }} />
         </div>
       </section>
 
+      {/* Class tables */}
       <section className="grid grid-cols-1 xl:grid-cols-2 gap-5">
         {classData.map((section) => {
           const classMean = section.summary.mean;
@@ -231,7 +265,7 @@ export default function MetricDetailPage({ config }: { config: MetricConfig }) {
                   </div>
                   <div className="text-right shrink-0">
                     <div className="text-xs text-pc-text-muted uppercase tracking-wider">Class Avg</div>
-                    <div className="text-lg font-bold" style={{ color: config.stroke }}>{formatVal(classMean)}</div>
+                    <div className="text-lg font-bold" style={{ color: config.color }}>{formatVal(classMean)}</div>
                   </div>
                 </div>
                 <div className="grid grid-cols-4 gap-3 mt-4 text-xs">
@@ -263,7 +297,7 @@ export default function MetricDetailPage({ config }: { config: MetricConfig }) {
                       <th className="px-3 py-2 w-12">Class</th>
                       <th className="px-3 py-2 w-12">Global</th>
                       <th className="px-3 py-2">Name</th>
-                      <th className="px-3 py-2 text-right">{config.label}</th>
+                      <th className="px-3 py-2 text-right">{config.fullLabel}</th>
                       <th className="px-3 py-2 text-right">vs Class</th>
                       <th className="px-3 py-2 text-right">vs Global</th>
                       <th className="px-3 py-2 text-right">Matches</th>
@@ -286,7 +320,7 @@ export default function MetricDetailPage({ config }: { config: MetricConfig }) {
                               <span className="text-pc-text font-medium truncate group-hover:text-pc-accent transition-colors">{champion.name}</span>
                             </Link>
                           </td>
-                          <td className="px-3 py-2 text-right font-semibold" style={{ color: config.stroke }}>{formatVal(champion.value)}</td>
+                          <td className="px-3 py-2 text-right font-semibold" style={{ color: config.color }}>{formatVal(champion.value)}</td>
                           <td className="px-3 py-2 text-right">
                             <span className={vsClass >= 0 ? "text-emerald-400" : "text-red-400"}>
                               {formatSigned(vsClass)} ({vsClassPct >= 0 ? "+" : ""}{vsClassPct.toFixed(1)}%)
@@ -316,5 +350,48 @@ export default function MetricDetailPage({ config }: { config: MetricConfig }) {
         })}
       </section>
     </div>
+  );
+}
+
+/* ── Client page wrapper (reads search params) ── */
+
+function MetricsPageClient() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const tab = searchParams.get("tab") || "dpm";
+
+  const activeConfig = useMemo(
+    () => METRIC_CONFIGS.find((c) => c.key === tab) || METRIC_CONFIGS[0],
+    [tab],
+  );
+
+  const handleTabChange = (key: string) => {
+    const params = new URLSearchParams(searchParams);
+    params.set("tab", key);
+    router.replace(`/stats/metrics?${params.toString()}`, { scroll: false });
+  };
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <Link href="/stats" className="text-pc-accent text-xs hover:underline mb-2 inline-block">
+          Back to Global Stats
+        </Link>
+        <h1 className="pc-heading pc-heading-lg text-pc-accent">Performance Metrics</h1>
+        <p className="text-pc-text-muted text-sm mt-1">Compare champion performance across all metrics</p>
+      </div>
+
+      <TabBar configs={METRIC_CONFIGS} activeKey={activeConfig.key} onChange={handleTabChange} />
+
+      <MetricPanel config={activeConfig} />
+    </div>
+  );
+}
+
+export default function MetricsPage() {
+  return (
+    <Suspense fallback={<div className="text-pc-text-muted">Loading...</div>}>
+      <MetricsPageClient />
+    </Suspense>
   );
 }

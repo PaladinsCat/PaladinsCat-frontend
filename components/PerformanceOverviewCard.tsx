@@ -1,7 +1,5 @@
 "use client";
 
-import Link from "next/link";
-
 interface MetricRow {
   key: string;
   label: string;
@@ -13,17 +11,9 @@ interface MetricRow {
   p90: number;
 }
 
-const DETAIL_LINK_CLASS =
-  "text-xs text-pc-text-secondary hover:text-pc-accent transition-colors drop-shadow-sm";
-
 function formatMetric(key: string, value: number): string {
   if (key === "kda") return value.toFixed(1);
   return Math.round(value).toLocaleString();
-}
-
-function formatCompact(value: number): string {
-  if (Math.abs(value) >= 1000) return Math.round(value).toLocaleString();
-  return value.toFixed(1);
 }
 
 export function PerformanceOverviewCard({
@@ -38,21 +28,18 @@ export function PerformanceOverviewCard({
     avgKda: string;
   };
 }) {
+  const formatCompact = (value: number) => {
+    if (Math.abs(value) >= 1000) return Math.round(value).toLocaleString();
+    return value.toFixed(1);
+  };
   return (
     <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-sm font-bold text-pc-text">Performance Overview</h2>
-      </div>
-
       <div className="space-y-2">
         {metrics.map(({ key, label, color, p10, p25, mean, p75, p90 }) => (
           <div key={key} className="flex items-center gap-3">
             <div className="w-14 shrink-0 text-right">
               <div className="flex items-center justify-between gap-1">
                 <span className="text-[10px] font-bold text-pc-text">{label}</span>
-                <Link href={`/stats/${key}`} className={DETAIL_LINK_CLASS} style={{ fontSize: 10 }}>
-                  →
-                </Link>
               </div>
               <div className="text-xs font-bold tabular-nums" style={{ color }}>
                 {formatMetric(key, mean)}
