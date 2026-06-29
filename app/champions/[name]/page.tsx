@@ -208,7 +208,7 @@ export default function ChampionDetailPage() {
           // Card stats for this champion
           fetchChampionCardStats(match.id, 'ranked', selectedTalentId).catch(() => null as ChampionCardStatsResponse | null),
           // Global ranked distributions plus champion-specific distributions
-          // use the same metric contract as /stats/dpm, /stats/gpm, etc. This
+          // use the same metric contract as /stats/metrics. This
           // keeps the champion page from comparing raw damage/gold totals across
           // matches of different lengths.
           fetchPerformanceMetrics({ queueId: RANKED_QUEUE_ID }).catch(() => ({} as PerformanceMetricsResponse)),
