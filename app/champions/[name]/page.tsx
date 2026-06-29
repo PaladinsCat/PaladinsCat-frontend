@@ -432,12 +432,12 @@ export default function ChampionDetailPage() {
                                         <span style={quality ? { color: quality.color } : undefined}>{pickRate.toFixed(1)}%</span>
                                       </span>
                                       <span className="text-pc-border">|</span>
-                                      <span className="text-pc-text-muted whitespace-nowrap">
+                                      <span className="text-pc-text-muted overflow-wrap break-word">
                                         <span className="mr-1">Picks</span>
                                         <span style={quality ? { color: quality.color } : undefined}>{formatPlays(stat.totalPlays)}</span>
                                       </span>
                                       <span className="text-pc-border">|</span>
-                                      <span className="text-pc-text-muted whitespace-nowrap">{stat.wins.toLocaleString()}W/{stat.losses.toLocaleString()}L</span>
+                                      <span className="text-pc-text-muted overflow-wrap break-word">{stat.wins.toLocaleString()}W/{stat.losses.toLocaleString()}L</span>
                                     </div>
                                     {stat.levels.length > 0 && (
                                       <div className="flex items-center gap-1">
@@ -672,9 +672,9 @@ function ChampionMetricCard({
           <div className="text-xs text-pc-text-muted uppercase tracking-wider">{metric.label}</div>
           <div className={`text-xl font-bold ${metric.colorClass}`}>{formatMetric(championMean)}</div>
         </div>
-        <div className="text-right text-[10px] text-pc-text-muted shrink-0">
-          <div>Matches</div>
-          <div className="text-pc-text-secondary font-mono">{(champion?.totalMatches ?? 0).toLocaleString()}</div>
+        <div className="text-right text-[10px] text-pc-text-muted shrink min-w-0 overflow-hidden">
+          <div className="truncate">Matches</div>
+          <div className="text-pc-text-secondary font-mono overflow-wrap break-all">{(champion?.totalMatches ?? 0).toLocaleString()}</div>
         </div>
       </div>
 
@@ -814,7 +814,7 @@ function TalentCard({
           <div className="text-xs text-pc-text-muted mt-1">Linked: {talent.category}</div>
         )}
         {stat && stat.totalPlays > 0 && (
-          <div className="flex items-center gap-2 mt-2 text-xs">
+          <div className="flex items-center gap-2 mt-2 text-xs flex-wrap">
             <span className={quality?.textClass ?? winRateColor(stat.winRate)} style={quality ? { color: quality.color } : undefined}>
               <span className="text-pc-text-muted mr-1">WR</span>
               {stat.winRate.toFixed(1)}%
@@ -825,7 +825,7 @@ function TalentCard({
               <span style={quality ? { color: quality.color } : undefined}>{pickRate.toFixed(1)}%</span>
             </span>
             <span className="text-pc-border">|</span>
-            <span className="text-pc-text-muted whitespace-nowrap">
+            <span className="text-pc-text-muted overflow-wrap break-word">
               <span className="mr-1">Matches</span>
               <span style={quality ? { color: quality.color } : undefined}>{formatPlays(stat.totalPlays)}</span>
             </span>
