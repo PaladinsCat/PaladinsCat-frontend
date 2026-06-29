@@ -39,53 +39,40 @@ export function PerformanceOverviewCard({
   };
 }) {
   return (
-    <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-5 hover:border-pc-accent-mid transition-colors space-y-5">
-      {/* Header */}
+    <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold text-pc-text">Performance Overview</h2>
+        <h2 className="text-sm font-bold text-pc-text">Performance Overview</h2>
       </div>
 
-      {/* Metric rows */}
-      <div className="space-y-4">
+      <div className="space-y-2">
         {metrics.map(({ key, label, color, p10, p25, mean, p75, p90 }) => (
-          <div key={key} className="flex items-center gap-4">
-            {/* Label column */}
-            <div className="w-20 shrink-0 text-right">
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-xs font-bold text-pc-text">{label}</span>
-                <Link href={`/stats/${key}`} className={DETAIL_LINK_CLASS}>
+          <div key={key} className="flex items-center gap-3">
+            <div className="w-14 shrink-0 text-right">
+              <div className="flex items-center justify-between gap-1">
+                <span className="text-[10px] font-bold text-pc-text">{label}</span>
+                <Link href={`/stats/${key}`} className={DETAIL_LINK_CLASS} style={{ fontSize: 10 }}>
                   →
                 </Link>
               </div>
-              <div className="text-sm font-bold mt-0.5 tabular-nums" style={{ color }}>
+              <div className="text-xs font-bold tabular-nums" style={{ color }}>
                 {formatMetric(key, mean)}
               </div>
             </div>
 
-            {/* Range bar */}
             <div className="flex-1">
-              <RangeBar
-                color={color}
-                mean={mean}
-                p10={p10}
-                p25={p25}
-                p75={p75}
-                p90={p90}
-              />
+              <RangeBar color={color} mean={mean} p10={p10} p25={p25} p75={p75} p90={p90} />
             </div>
 
-            {/* Range endpoint labels */}
-            <div className="w-14 shrink-0 text-[10px] text-pc-text-muted tabular-nums leading-tight">
+            <div className="w-12 shrink-0 text-[9px] text-pc-text-muted tabular-nums leading-tight">
               <div>{formatCompact(p10)}</div>
-              <div className="text-pc-text-secondary mt-0.5">{formatCompact(p90)}</div>
+              <div className="text-pc-text-secondary">{formatCompact(p90)}</div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Dataset summary bar */}
-      <div className="border-t border-pc-border pt-4">
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-xs">
+      <div className="border-t border-pc-border pt-2">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px]">
           <span className="text-pc-text-muted font-semibold">Dataset</span>
           <span className="text-pc-text-secondary tabular-nums">
             {dataset.matches.toLocaleString()} matches
@@ -105,7 +92,7 @@ export function PerformanceOverviewCard({
   );
 }
 
-/* ── Horizontal range bar ── */
+/* ── Range bar: IQR box with mean marker ── */
 
 function RangeBar({
   color,
@@ -123,39 +110,55 @@ function RangeBar({
   p90: number;
 }) {
   const range = Math.max(1, p90 - p10);
-
   const toPct = (v: number) => Math.max(1, Math.min(99, ((v - p10) / range) * 100));
   const meanPct = toPct(mean);
   const p25Pct = toPct(p25);
   const p75Pct = toPct(p75);
 
   return (
-    <div className="relative h-8">
-      {/* Track — full p10→p90 range (subtle background) */}
-      <div
-        className="absolute inset-x-0 top-2 h-4 rounded-full"
-        style={{ background: color, opacity: 0.1 }}
-      />
+    <div className="relative h-6">
+      {/* Track — full range background */}
+      <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-1 rounded-full bg-pc-text-muted/10" />
 
-      {/* IQR box — p25 to p75 (medium opacity solid block) */}
+      {/* Whisker line — p10 to p25 and p75 to p90 */}
       <div
-        className="absolute top-2 h-4 rounded-md"
+        className="absolute top-1/2 -translate-y-1/2 h-0.5 rounded-full"
         style={{
-          left: `${p25Pct}%`,
-          width: `${Math.max(2, p75Pct - p25Pct)}%`,
+          left: "0%",
+          width: `${p25Pct}%`,
           background: color,
-          opacity: 0.25,
+          opacity: 0.3,
+        }}
+      />
+      <div
+        className="absolute top-1/2 -translate-y-1/2 h-0.5 rounded-full"
+        style={{
+          left: `${p75Pct}%`,
+          width: `${100 - p75Pct}%`,
+          background: color,
+          opacity: 0.3,
         }}
       />
 
-      {/* Mean marker — vertical line with glow */}
+      {/* IQR box — p25 to p75 (solid block) */}
       <div
-        className="absolute top-1 h-6 w-1.5 rounded-full"
+        className="absolute top-1/2 -translate-y-1/2 h-3 rounded-sm"
+        style={{
+          left: `${p25Pct}%`,
+          width: `${Math.max(4, p75Pct - p25Pct)}%`,
+          background: color,
+          opacity: 0.35,
+        }}
+      />
+
+      {/* Mean marker — bold vertical line */}
+      <div
+        className="absolute top-0 h-full w-[2px] rounded-full"
         style={{
           left: `${meanPct}%`,
           background: color,
-          boxShadow: `0 0 10px ${color}aa`,
           transform: "translateX(-50%)",
+          boxShadow: `0 0 8px ${color}88`,
         }}
       />
     </div>

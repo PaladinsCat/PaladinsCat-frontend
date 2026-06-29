@@ -186,8 +186,10 @@ export default function StatsPage() {
         </p>
       </div>
 
-      {/* ── Global Metrics (consolidated card) ── */}
-      <section>
+      {/* ── Global Metrics (consolidated card) + Tier Distribution ── */}
+      <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Performance Overview (1/3) */}
+        <div>
         {(() => {
           const perfRows = [
             { key: "dpm", label: "DPM", color: "#f87171" },
@@ -226,20 +228,14 @@ export default function StatsPage() {
             <PerformanceOverviewCard metrics={perfRows} dataset={datasetPayload} />
           );
         })()}
-      </section>
-
-      {/* ── Ranked Tier Distribution ── */}
-      <section>
-        <div className="flex items-center justify-between gap-3 mb-4 px-2">
-          <h2 className="text-lg font-bold text-pc-text">Tier Distribution</h2>
-          <Link href="/stats/tiers" className={DETAIL_LINK_CLASS}>Detail →</Link>
         </div>
+
+        {/* Tier Distribution (2/3) */}
+        <div className="lg:col-span-2">
         <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
           <div className="flex items-center justify-between gap-3 mb-3">
-            <span className="text-xs text-pc-text-muted">Ranked player profiles</span>
-            <span className="text-xs font-semibold text-pc-text tabular-nums">
-              {tierTotal.toLocaleString()} players
-            </span>
+            <h2 className="text-lg font-bold text-pc-text">Tier Distribution</h2>
+            <Link href="/stats/tiers" className={DETAIL_LINK_CLASS}>Detail →</Link>
           </div>
           <div className="flex items-end gap-1.5 h-48 overflow-x-auto pb-2">
             {normalizedTiers.map((tier) => {
@@ -270,7 +266,8 @@ export default function StatsPage() {
             })}
           </div>
         </div>
-      </section>
+        </div>
+        </section>
 
       {/* ── Top Win Rate by Role ── */}
       <section>
