@@ -267,7 +267,7 @@ export default function StatsPage() {
               {/* Left: Profile Tier Distribution */}
               <div>
                 <div className="text-xs font-semibold text-pc-text-secondary mb-2 px-2">Ranked Player Distribution</div>
-                <div className="flex items-end gap-1.5 h-48 overflow-x-auto pb-2">
+                <div className="flex items-end justify-center gap-1.5 h-48 overflow-x-auto pb-2">
                   {displayTiers.map((tier) => {
                     const height = Math.max(4, Math.round((tier.totalPlays / maxTierCount) * 116));
                     const rankIcon = getRankIconPath(tier.tierSort, tier.tierSort === 26 ? 101 : tier.tierSort === 27 ? 1 : 0);
@@ -299,7 +299,7 @@ export default function StatsPage() {
               {/* Right: Active Ranked Match Distribution (with left border divider) */}
               <div className="pl-3 border-l border-pc-border">
                 <div className="text-xs font-semibold text-pc-text-secondary mb-2 px-2">Active Ranked Matches</div>
-                <div className="flex items-end gap-1.5 h-48 overflow-x-auto pb-2">
+                <div className="flex items-end justify-center gap-1.5 h-48 overflow-x-auto pb-2">
                   {activeDisplayTiers.map((tier) => {
                     const height = Math.max(4, Math.round((tier.totalPlays / maxActiveTierCount) * 116));
                     const rankIcon = getRankIconPath(tier.tierSort, tier.tierSort === 26 ? 101 : tier.tierSort === 27 ? 1 : 0);
