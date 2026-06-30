@@ -333,45 +333,73 @@ export default function StatsPage() {
         </div>
         </section>
 
-      {/* ── Top Win Rate by Role ── */}
+      {/* ── Top Win Rate (consolidated horizontal view) ── */}
       <section>
         <div className="flex items-center justify-between mb-3 px-2">
           <h2 className="text-sm font-bold text-pc-text">Top Win Rate by Class</h2>
           <Link href="/stats/winrate" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">Detail →</Link>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {ROLES.map((role) => {
-              const inRole = champions.filter((c) => c.roles?.includes(role));
-              const top = [...inRole].sort((a, b) => (b.winRate ?? 0) - (a.winRate ?? 0)).slice(0, 4);
-              if (top.length === 0) return null;
-              return (
-                <div key={role}>
-                  <div className="flex items-center gap-2 mb-2 px-2">
-                    <img
-                      src={role === "Frontline" ? "/images/icons/Class_Front_Line_Icon.avif" : `/images/icons/Class_${role}_Icon.avif`}
-                      alt={role}
-                      className="w-5 h-5"
-                    />
-                    <h3 className="text-pc-text font-semibold text-sm">{role}</h3>
-                  </div>
-                  <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors space-y-2">
-                    {top.map((c, i) => (
-                      <Link key={c.id} href={`/champions/${championSlug(c.name)}`} className="flex items-center gap-2 text-xs group">
-                        <span className={`w-4 text-right shrink-0 ${i === 0 ? "text-yellow-400 font-bold" : "text-pc-text-muted"}`}>{i + 1}</span>
-                        <img src={getChampionIconSafe(c.name)} alt={c.name} className="w-7 h-7 object-contain rounded shrink-0" />
-                        <span className="text-pc-text truncate group-hover:text-pc-accent transition-colors flex-1">{c.name}</span>
-                        {(() => {
-                          const quality = c.winRate != null ? getStatQuality(c.winRate, c.pickRate, maxChampionPickRate) : null;
-                          return (
-                            <span className={quality?.textClass ?? "text-pc-text-muted"} style={quality ? { color: quality.color } : undefined}>{c.winRate != null ? `${c.winRate.toFixed(1)}%` : "—"}</span>
-                          );
-                        })()}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
+        <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
+          {/* Class legend row */}
+          <div className="flex items-center gap-3 mb-3 px-2">
+            {ROLES.map((role) => (
+              <div key={role} className="flex items-center gap-1.5">
+                <img
+                  src={role === "Frontline" ? "/images/icons/Class_Front_Line_Icon.avif" : `/images/icons/Class_${role}_Icon.avif`}
+                  alt={role}
+                  className="w-4 h-4"
+                />
+                <span className="text-pc-text-muted text-xs">{role}</span>
+              </div>
+            ))}
+          </div>
+          {/* Horizontal champion list */}
+          <div className="flex gap-3 overflow-x-auto pb-1">
+            {[...champions]
+              .filter((c) => c.winRate != null && Number.isFinite(c.winRate))
+              .sort((a, b) => (b.winRate ?? 0) - (a.winRate ?? 0))
+              .slice(0, 10)
+              .map((c) => {
+                const quality = getStatQuality(c.winRate!, c.pickRate, maxChampionPickRate);
+                return (
+                  <Link
+                    key={c.id}
+                    href={`/champions/${championSlug(c.name)}`}
+                    className="flex-shrink-0 w-36 group"
+                  >
+                    <div
+                      className="rounded-lg p-3 border border-pc-border/50 group-hover:border-pc-accent-mid transition-all bg-pc-card/50 group-hover:bg-pc-card flex flex-col items-center gap-2"
+                      style={{ borderColor: quality.borderColor }}
+                    >
+                      <img
+                        src={getChampionIconSafe(c.name)}
+                        alt={c.name}
+                        className="w-14 h-14 object-contain rounded-full bg-pc-bg/60"
+                      />
+                      <span className="text-pc-text text-xs font-semibold truncate w-full text-center group-hover:text-pc-accent transition-colors">
+                        {c.name}
+                      </span>
+                      <span className="text-sm font-bold tabular-nums" style={{ color: quality.color }}>
+                        {c.winRate!.toFixed(1)}%
+                      </span>
+                      {/* Role icon chips */}
+                      <div className="flex gap-1">
+                        {ROLES.map((role) =>
+                          c.roles?.includes(role) ? (
+                            <img
+                              key={role}
+                              src={role === "Frontline" ? "/images/icons/Class_Front_Line_Icon.avif" : `/images/icons/Class_${role}_Icon.avif`}
+                              alt={role}
+                              className="w-3.5 h-3.5 opacity-60 group-hover:opacity-100 transition-opacity"
+                            />
+                          ) : null
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+          </div>
         </div>
       </section>
 
