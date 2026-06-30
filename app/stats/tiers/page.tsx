@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { fetchTierSummary, fetchTiers, type TierStat, type TierSummary } from "@/lib/api-client";
-import { getRankIconPath, TIER_NAMES } from "@/lib/tier-utils";
+import { getRankIconPath } from "@/lib/tier-utils";
 
 const EMPTY_SUMMARY: TierSummary = {
   profilePlayers: 0,
@@ -38,10 +38,6 @@ function rankIconForTier(tierSort: number): string {
   return getRankIconPath(tierSort, tierSort === 26 ? 101 : tierSort === 27 ? 1 : 0);
 }
 
-function tierNameForSort(tierSort: number): string {
-  return TIER_NAMES[tierSort] ?? (tierSort === 27 ? "Grandmaster" : `Tier ${tierSort}`);
-}
-
 function roundedTier(value: number): number {
   if (!Number.isFinite(value) || value <= 0) return 0;
   return Math.max(1, Math.min(27, Math.round(value)));
@@ -63,7 +59,7 @@ function TierValue({
     <span className={`inline-flex items-center gap-2 tabular-nums ${className}`}>
       <img
         src={rankIconForTier(tierSort)}
-        alt={tierNameForSort(tierSort)}
+        alt={`Tier ${tierSort}`}
         className="h-6 w-6 object-contain"
         loading="lazy"
       />
@@ -72,7 +68,7 @@ function TierValue({
   );
 }
 
-function DistributionTable({
+function DistributionChart({
   title,
   rows,
   label,
@@ -92,51 +88,38 @@ function DistributionTable({
           {total.toLocaleString()} {label}
         </span>
       </div>
-      <div className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
-        <table className="w-full text-left">
-          <thead className="bg-pc-bg">
-            <tr>
-              <th className="px-4 py-3 text-pc-accent font-semibold text-xs">Tier</th>
-              <th className="px-4 py-3 text-pc-accent font-semibold text-xs text-right">{label}</th>
-              <th className="px-4 py-3 text-pc-accent font-semibold text-xs text-right">Share</th>
-              <th className="px-4 py-3 text-pc-accent font-semibold text-xs">Distribution</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row) => {
-              const share = total > 0 ? (row.totalPlays / total) * 100 : 0;
-              return (
-                <tr key={row.tierSort} className="border-t border-pc-border">
-                  <td className="px-4 py-2">
-                    <div className="flex items-center gap-2">
-                      <img
-                        src={rankIconForTier(row.tierSort)}
-                        alt={row.tier}
-                        className="h-6 w-6 object-contain"
-                        loading="lazy"
-                      />
-                      <span className="text-pc-text text-sm font-semibold">{tierNameForSort(row.tierSort)}</span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-2 text-pc-text text-sm text-right tabular-nums">
-                    {row.totalPlays.toLocaleString()}
-                  </td>
-                  <td className="px-4 py-2 text-pc-text-secondary text-sm text-right tabular-nums">
-                    {share.toFixed(1)}%
-                  </td>
-                  <td className="px-4 py-2 min-w-36">
-                    <div className="h-2 rounded-full bg-pc-bg">
-                      <div
-                        className="h-2 rounded-full bg-pc-accent-mid"
-                        style={{ width: row.totalPlays > 0 ? `${Math.max(2, (row.totalPlays / max) * 100)}%` : 0 }}
-                      />
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+      <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4">
+        <div className="flex items-end gap-2 h-80 overflow-x-auto pb-2">
+          {rows.map((row) => {
+            const height = Math.max(2, Math.round((row.totalPlays / max) * 308));
+            const share = total > 0 ? (row.totalPlays / total) * 100 : 0;
+            return (
+              <div
+                key={row.tierSort}
+                className="flex flex-col items-center justify-end gap-1 min-w-6 h-full group"
+              >
+                <div className="text-[9px] text-pc-text-muted tabular-nums opacity-0 group-hover:opacity-100 transition-opacity">
+                  {share.toFixed(1)}%
+                </div>
+                <div
+                  className="w-3 rounded-t-sm bg-pc-accent-mid group-hover:bg-pc-accent transition-colors"
+                  style={{ height }}
+                  title={`${row.tier}: ${row.totalPlays.toLocaleString()} (${share.toFixed(1)}%)`}
+                />
+                <img
+                  src={rankIconForTier(row.tierSort)}
+                  alt={row.tier}
+                  title={row.tier}
+                  className="h-5 w-5 object-contain drop-shadow"
+                  loading="lazy"
+                />
+                <div className="text-[8px] text-pc-text-secondary tabular-nums leading-none">
+                  {row.totalPlays > 0 ? row.totalPlays.toLocaleString() : ""}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </section>
   );
@@ -165,7 +148,7 @@ export default function TiersPage() {
   }, []);
 
   const normalizedProfiles = useMemo(() => normalizeTiers(profileTiers, 27), [profileTiers]);
-  const normalizedMatches = useMemo(() => normalizeTiers(matchTiers, 26), [matchTiers]);
+  const normalizedMatches = useMemo(() => normalizeTiers(matchTiers, 27), [matchTiers]);
   const profileAvg = summary.avgProfileTier || weightedAverage(normalizedProfiles);
   const activeAvg = summary.avgParticipationTier || weightedAverage(normalizedMatches);
   const cards: Array<
@@ -210,13 +193,13 @@ export default function TiersPage() {
             ))}
           </section>
 
-          <DistributionTable
+          <DistributionChart
             title="Player Profile Distribution"
             rows={normalizedProfiles}
             label="players"
           />
 
-          <DistributionTable
+          <DistributionChart
             title="Active Ranked Match Distribution"
             rows={normalizedMatches}
             label="player rows"
