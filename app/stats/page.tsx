@@ -97,6 +97,7 @@ export default function StatsPage() {
   const [items, setItems] = useState<PageItemStat[]>([]);
   const [maps, setMaps] = useState<PageMapStat[]>([]);
   const [tiers, setTiers] = useState<TierStat[]>([]);
+  const [activeTiers, setActiveTiers] = useState<TierStat[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -128,6 +129,7 @@ export default function StatsPage() {
     fetchItems({ mode: "ranked", limit: 50 }).then((rows) => setItems(mapItemStats(rows))).catch(() => {});
     fetchMapStats({ queueId: 486, limit: 25 }).then((rows) => setMaps(mapMapStats(rows))).catch(() => {});
     fetchTiers({ source: "profiles" }).then(setTiers).catch(() => {});
+    fetchTiers({ source: "matches" }).then(setActiveTiers).catch(() => {});
     fetchDatabaseStats()
       .then((stats) => {
         if (!stats) return;
@@ -159,39 +161,38 @@ export default function StatsPage() {
     return mapSortDir === "desc" ? b.matches - a.matches : a.matches - b.matches;
   });
 
-  const avgDurationSeconds = maps.reduce((sum, map) => sum + map.avgDurationSeconds * map.matches, 0) / Math.max(1, maps.reduce((sum, map) => sum + map.matches, 0));
-  const normalizedTiers = Array.from({ length: 27 }, (_, index) => {
-    const tierSort = index + 1;
-    return tiers.find((tier) => tier.tierSort === tierSort) ?? {
-      tier: tierSort === 27 ? "Grandmaster" : `Tier ${tierSort}`,
-      tierSort,
-      totalPlays: 0,
-      avgWinRate: 0,
-      percentage: 0,
-    };
-  });
-  // Consolidate all major tiers for the main page (Bronze–I, Silver–I, Gold–I, Platinum–I, Diamond–I)
-  function sumTierSlice(start: number, end: number) {
-    const slice = normalizedTiers.slice(start, end);
-    const total = slice.reduce((s, t) => s + t.totalPlays, 0);
-    const pct = slice.reduce((s, t) => s + t.percentage, 0);
-    return { total, pct };
+  // Consolidate tier slices into major tiers for display
+  function consolidateTiers(tierData: TierStat[]): TierStat[] {
+    const normalized = Array.from({ length: 27 }, (_, index) => {
+      const tierSort = index + 1;
+      return tierData.find((tier) => tier.tierSort === tierSort) ?? {
+        tier: tierSort === 27 ? "Grandmaster" : `Tier ${tierSort}`,
+        tierSort,
+        totalPlays: 0,
+        avgWinRate: 0,
+        percentage: 0,
+      };
+    });
+    function sumSlice(start: number, end: number) {
+      const slice = normalized.slice(start, end);
+      const total = slice.reduce((s, t) => s + t.totalPlays, 0);
+      const pct = slice.reduce((s, t) => s + t.percentage, 0);
+      return { total, pct };
+    }
+    return [
+      { tier: "Bronze", tierSort: 5, totalPlays: sumSlice(0, 5).total, avgWinRate: 0, percentage: sumSlice(0, 5).pct },
+      { tier: "Silver", tierSort: 10, totalPlays: sumSlice(5, 10).total, avgWinRate: 0, percentage: sumSlice(5, 10).pct },
+      { tier: "Gold", tierSort: 15, totalPlays: sumSlice(10, 15).total, avgWinRate: 0, percentage: sumSlice(10, 15).pct },
+      { tier: "Platinum", tierSort: 20, totalPlays: sumSlice(15, 20).total, avgWinRate: 0, percentage: sumSlice(15, 20).pct },
+      { tier: "Diamond", tierSort: 25, totalPlays: sumSlice(20, 25).total, avgWinRate: 0, percentage: sumSlice(20, 25).pct },
+      ...normalized.slice(25),
+    ];
   }
-  const bronzeSlice = sumTierSlice(0, 5);
-  const silverSlice = sumTierSlice(5, 10);
-  const goldSlice = sumTierSlice(10, 15);
-  const platinumSlice = sumTierSlice(15, 20);
-  const diamondSlice = sumTierSlice(20, 25);
-  const displayTiers = [
-    { tier: "Bronze", tierSort: 5, totalPlays: bronzeSlice.total, avgWinRate: 0, percentage: bronzeSlice.pct },
-    { tier: "Silver", tierSort: 10, totalPlays: silverSlice.total, avgWinRate: 0, percentage: silverSlice.pct },
-    { tier: "Gold", tierSort: 15, totalPlays: goldSlice.total, avgWinRate: 0, percentage: goldSlice.pct },
-    { tier: "Platinum", tierSort: 20, totalPlays: platinumSlice.total, avgWinRate: 0, percentage: platinumSlice.pct },
-    { tier: "Diamond", tierSort: 25, totalPlays: diamondSlice.total, avgWinRate: 0, percentage: diamondSlice.pct },
-    ...normalizedTiers.slice(25),
-  ];
-  const tierTotal = displayTiers.reduce((sum, tier) => sum + tier.totalPlays, 0);
+  const displayTiers = consolidateTiers(tiers);
+  const activeDisplayTiers = consolidateTiers(activeTiers);
   const maxTierCount = Math.max(1, ...displayTiers.map((tier) => tier.totalPlays));
+  const maxActiveTierCount = Math.max(1, ...activeDisplayTiers.map((tier) => tier.totalPlays));
+  const avgDurationSeconds = maps.reduce((sum, map) => sum + map.avgDurationSeconds * map.matches, 0) / Math.max(1, maps.reduce((sum, map) => sum + map.matches, 0));
   const maxItemPickRate = Math.max(1, ...items.map((item) => item.pickRate));
   const maxChampionPickRate = Math.max(1, ...champions.map((champion) => champion.pickRate ?? 0));
 
@@ -255,42 +256,80 @@ export default function StatsPage() {
         })()}
         </div>
 
-        {/* Tier Distribution (2/3) */}
+        {/* Tier Distribution + Active Ranked (2/3, split 50/50) */}
         <div className="lg:col-span-2">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-bold text-pc-text">Tier Distribution</h2>
+            <h2 className="text-sm font-bold text-pc-text">Rank Distribution</h2>
             <Link href="/stats/tiers" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">Detail →</Link>
           </div>
           <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
-          <div className="flex items-end gap-1.5 h-48 overflow-x-auto pb-2">
-            {displayTiers.map((tier) => {
-              const height = Math.max(4, Math.round((tier.totalPlays / maxTierCount) * 116));
-              const rankIcon = getRankIconPath(tier.tierSort, tier.tierSort === 26 ? 101 : tier.tierSort === 27 ? 1 : 0);
-              return (
-                <div key={tier.tierSort} className="flex flex-col items-center justify-end gap-1 min-w-9 h-full group">
-                  <div className="text-[9px] text-pc-text-muted tabular-nums opacity-0 group-hover:opacity-100 transition-opacity">
-                    {tier.percentage.toFixed(1)}%
-                  </div>
-                  <div
-                    className="w-5 rounded-t-sm bg-pc-accent-mid group-hover:bg-pc-accent transition-colors"
-                    style={{ height }}
-                    title={`${tier.tier}: ${tier.totalPlays.toLocaleString()} (${tier.percentage.toFixed(1)}%)`}
-                  />
-                  <img
-                    src={rankIcon}
-                    alt={tier.tier}
-                    title={tier.tier}
-                    className="h-5 w-5 object-contain drop-shadow"
-                    loading="lazy"
-                  />
-                  <div className="text-[9px] text-pc-text-secondary tabular-nums leading-none">
-                    {tier.totalPlays.toLocaleString()}
-                  </div>
+            <div className="grid grid-cols-2 gap-0">
+              {/* Left: Profile Tier Distribution */}
+              <div>
+                <div className="text-xs font-semibold text-pc-text-secondary mb-2 px-2">Ranked Player Distribution</div>
+                <div className="flex items-end gap-1.5 h-48 overflow-x-auto pb-2">
+                  {displayTiers.map((tier) => {
+                    const height = Math.max(4, Math.round((tier.totalPlays / maxTierCount) * 116));
+                    const rankIcon = getRankIconPath(tier.tierSort, tier.tierSort === 26 ? 101 : tier.tierSort === 27 ? 1 : 0);
+                    return (
+                      <div key={tier.tierSort} className="flex flex-col items-center justify-end gap-1 min-w-9 h-full group">
+                        <div className="text-[9px] text-pc-text-muted tabular-nums opacity-0 group-hover:opacity-100 transition-opacity">
+                          {tier.percentage.toFixed(1)}%
+                        </div>
+                        <div
+                          className="w-5 rounded-t-sm bg-pc-accent-mid group-hover:bg-pc-accent transition-colors"
+                          style={{ height }}
+                          title={`${tier.tier}: ${tier.totalPlays.toLocaleString()} (${tier.percentage.toFixed(1)}%)`}
+                        />
+                        <img
+                          src={rankIcon}
+                          alt={tier.tier}
+                          title={tier.tier}
+                          className="h-5 w-5 object-contain drop-shadow"
+                          loading="lazy"
+                        />
+                        <div className="text-[9px] text-pc-text-secondary tabular-nums leading-none">
+                          {tier.totalPlays.toLocaleString()}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              );
-            })}
+              </div>
+              {/* Right: Active Ranked Match Distribution (with left border divider) */}
+              <div className="pl-3 border-l border-pc-border">
+                <div className="text-xs font-semibold text-pc-text-secondary mb-2 px-2">Active Ranked Matches</div>
+                <div className="flex items-end gap-1.5 h-48 overflow-x-auto pb-2">
+                  {activeDisplayTiers.map((tier) => {
+                    const height = Math.max(4, Math.round((tier.totalPlays / maxActiveTierCount) * 116));
+                    const rankIcon = getRankIconPath(tier.tierSort, tier.tierSort === 26 ? 101 : tier.tierSort === 27 ? 1 : 0);
+                    return (
+                      <div key={tier.tierSort} className="flex flex-col items-center justify-end gap-1 min-w-9 h-full group">
+                        <div className="text-[9px] text-pc-text-muted tabular-nums opacity-0 group-hover:opacity-100 transition-opacity">
+                          {tier.percentage.toFixed(1)}%
+                        </div>
+                        <div
+                          className="w-5 rounded-t-sm bg-pc-accent-mid/60 group-hover:bg-pc-accent-mid transition-colors"
+                          style={{ height }}
+                          title={`${tier.tier}: ${tier.totalPlays.toLocaleString()} (${tier.percentage.toFixed(1)}%)`}
+                        />
+                        <img
+                          src={rankIcon}
+                          alt={tier.tier}
+                          title={tier.tier}
+                          className="h-5 w-5 object-contain drop-shadow"
+                          loading="lazy"
+                        />
+                        <div className="text-[9px] text-pc-text-secondary tabular-nums leading-none">
+                          {tier.totalPlays.toLocaleString()}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
         </div>
         </section>
 
