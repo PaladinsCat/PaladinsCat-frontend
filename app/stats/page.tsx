@@ -170,13 +170,25 @@ export default function StatsPage() {
       percentage: 0,
     };
   });
-  // Consolidate Bronze V–I (tiers 1–5) into a single "Bronze" for the main page
-  const bronzeTier = normalizedTiers.slice(0, 5);
-  const bronzeTotal = bronzeTier.reduce((s, t) => s + t.totalPlays, 0);
-  const bronzePct = bronzeTier.reduce((s, t) => s + t.percentage, 0);
+  // Consolidate all major tiers for the main page (Bronze–I, Silver–I, Gold–I, Platinum–I, Diamond–I)
+  function sumTierSlice(start: number, end: number) {
+    const slice = normalizedTiers.slice(start, end);
+    const total = slice.reduce((s, t) => s + t.totalPlays, 0);
+    const pct = slice.reduce((s, t) => s + t.percentage, 0);
+    return { total, pct };
+  }
+  const bronzeSlice = sumTierSlice(0, 5);
+  const silverSlice = sumTierSlice(5, 10);
+  const goldSlice = sumTierSlice(10, 15);
+  const platinumSlice = sumTierSlice(15, 20);
+  const diamondSlice = sumTierSlice(20, 25);
   const displayTiers = [
-    { tier: "Bronze", tierSort: 5, totalPlays: bronzeTotal, avgWinRate: 0, percentage: bronzePct },
-    ...normalizedTiers.slice(5),
+    { tier: "Bronze", tierSort: 5, totalPlays: bronzeSlice.total, avgWinRate: 0, percentage: bronzeSlice.pct },
+    { tier: "Silver", tierSort: 10, totalPlays: silverSlice.total, avgWinRate: 0, percentage: silverSlice.pct },
+    { tier: "Gold", tierSort: 15, totalPlays: goldSlice.total, avgWinRate: 0, percentage: goldSlice.pct },
+    { tier: "Platinum", tierSort: 20, totalPlays: platinumSlice.total, avgWinRate: 0, percentage: platinumSlice.pct },
+    { tier: "Diamond", tierSort: 25, totalPlays: diamondSlice.total, avgWinRate: 0, percentage: diamondSlice.pct },
+    ...normalizedTiers.slice(25),
   ];
   const tierTotal = displayTiers.reduce((sum, tier) => sum + tier.totalPlays, 0);
   const maxTierCount = Math.max(1, ...displayTiers.map((tier) => tier.totalPlays));
