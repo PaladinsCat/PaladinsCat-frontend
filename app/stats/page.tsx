@@ -21,7 +21,6 @@ import { getStatQuality } from "@/lib/stat-quality";
 import { PerformanceOverviewCard } from "@/components/PerformanceOverviewCard";
 
 const ROLES = ["Frontline", "Damage", "Flank", "Support"] as const;
-const DETAIL_LINK_CLASS = "text-xs text-pc-text-secondary hover:text-pc-accent transition-colors drop-shadow-sm";
 
 type SortKey = "pickRate" | "winRate";
 type ItemCategory = "Defense" | "Utility" | "Healing" | "Offense";
@@ -171,8 +170,16 @@ export default function StatsPage() {
       percentage: 0,
     };
   });
-  const tierTotal = normalizedTiers.reduce((sum, tier) => sum + tier.totalPlays, 0);
-  const maxTierCount = Math.max(1, ...normalizedTiers.map((tier) => tier.totalPlays));
+  // Consolidate Bronze V–I (tiers 1–5) into a single "Bronze" for the main page
+  const bronzeTier = normalizedTiers.slice(0, 5);
+  const bronzeTotal = bronzeTier.reduce((s, t) => s + t.totalPlays, 0);
+  const bronzePct = bronzeTier.reduce((s, t) => s + t.percentage, 0);
+  const displayTiers = [
+    { tier: "Bronze", tierSort: 5, totalPlays: bronzeTotal, avgWinRate: 0, percentage: bronzePct },
+    ...normalizedTiers.slice(5),
+  ];
+  const tierTotal = displayTiers.reduce((sum, tier) => sum + tier.totalPlays, 0);
+  const maxTierCount = Math.max(1, ...displayTiers.map((tier) => tier.totalPlays));
   const maxItemPickRate = Math.max(1, ...items.map((item) => item.pickRate));
   const maxChampionPickRate = Math.max(1, ...champions.map((champion) => champion.pickRate ?? 0));
 
@@ -238,13 +245,13 @@ export default function StatsPage() {
 
         {/* Tier Distribution (2/3) */}
         <div className="lg:col-span-2">
-        <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
-          <div className="flex items-center justify-between gap-3 mb-3">
-            <h2 className="text-lg font-bold text-pc-text">Tier Distribution</h2>
-            <Link href="/stats/tiers" className={DETAIL_LINK_CLASS}>Detail →</Link>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-bold text-pc-text">Tier Distribution</h2>
+            <Link href="/stats/tiers" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">Detail →</Link>
           </div>
+          <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
           <div className="flex items-end gap-1.5 h-48 overflow-x-auto pb-2">
-            {normalizedTiers.map((tier) => {
+            {displayTiers.map((tier) => {
               const height = Math.max(4, Math.round((tier.totalPlays / maxTierCount) * 116));
               const rankIcon = getRankIconPath(tier.tierSort, tier.tierSort === 26 ? 101 : tier.tierSort === 27 ? 1 : 0);
               return (
@@ -277,9 +284,9 @@ export default function StatsPage() {
 
       {/* ── Top Win Rate by Role ── */}
       <section>
-        <div className="flex items-center justify-between gap-3 mb-4 px-2">
-          <h2 className="text-lg font-bold text-pc-text">Top Win Rate by Class</h2>
-          <Link href="/stats/winrate" className={DETAIL_LINK_CLASS}>Detail →</Link>
+        <div className="flex items-center justify-between mb-3 px-2">
+          <h2 className="text-sm font-bold text-pc-text">Top Win Rate by Class</h2>
+          <Link href="/stats/winrate" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">Detail →</Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {ROLES.map((role) => {
@@ -319,9 +326,9 @@ export default function StatsPage() {
 
       {/* ── Most Banned by Role ── */}
       <section>
-        <div className="flex items-center justify-between gap-3 mb-4 px-2">
-          <h2 className="text-lg font-bold text-pc-text">Most Banned by Class</h2>
-          <Link href="/stats/banrate" className={DETAIL_LINK_CLASS}>Detail →</Link>
+        <div className="flex items-center justify-between mb-3 px-2">
+          <h2 className="text-sm font-bold text-pc-text">Most Banned by Class</h2>
+          <Link href="/stats/banrate" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">Detail →</Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {ROLES.map((role) => {
@@ -359,8 +366,8 @@ export default function StatsPage() {
 
         {/* Item Stats (3/5) */}
         <section className="lg:col-span-3">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-pc-text">Item Stats</h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-bold text-pc-text">Item Stats</h2>
             <div className="flex gap-2">
               {(["pickRate", "winRate"] as const).map((key) => (
                 <button
@@ -428,8 +435,8 @@ export default function StatsPage() {
 
         {/* Map Stats (2/5) */}
         <section className="lg:col-span-2">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-pc-text">Map Stats</h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-bold text-pc-text">Map Stats</h2>
             <button
               onClick={() => setMapSortDir((d) => (d === "desc" ? "asc" : "desc"))}
               className="text-xs px-2.5 py-1 rounded-lg bg-pc-accent text-pc-bg"
