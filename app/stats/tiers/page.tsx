@@ -89,7 +89,7 @@ function DistributionChart({
         </span>
       </div>
       <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4">
-        <div className="flex items-end gap-2 h-80 overflow-x-auto pb-2">
+        <div className="flex items-end justify-center gap-1.5 h-80 overflow-x-auto pb-2">
           {rows.map((row) => {
             const height = Math.max(2, Math.round((row.totalPlays / max) * 308));
             const share = total > 0 ? (row.totalPlays / total) * 100 : 0;
