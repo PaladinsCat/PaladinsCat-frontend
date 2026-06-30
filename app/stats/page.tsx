@@ -334,15 +334,18 @@ export default function StatsPage() {
         </div>
         </section>
 
-      {/* ── Top Win Rate (consolidated horizontal view) ── */}
+      {/* ── Top Champions (win rate + ban rate, consolidated) ── */}
       <section>
         <div className="flex items-center justify-between mb-3 px-2">
-          <h2 className="text-sm font-bold text-pc-text">Top Win Rate by Class</h2>
-          <Link href="/stats/winrate" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">Detail →</Link>
+          <h2 className="text-sm font-bold text-pc-text">Top Champions</h2>
+          <div className="flex gap-3">
+            <Link href="/stats/winrate" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">Win Rate Detail →</Link>
+            <Link href="/stats/banrate" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">Ban Rate Detail →</Link>
+          </div>
         </div>
-        <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
+        <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors space-y-4">
           {/* Class legend row */}
-          <div className="flex items-center gap-3 mb-3 px-2">
+          <div className="flex items-center gap-3 px-2">
             {ROLES.map((role) => (
               <div key={role} className="flex items-center gap-1.5">
                 <img
@@ -354,151 +357,139 @@ export default function StatsPage() {
               </div>
             ))}
           </div>
-          {/* Horizontal champion list */}
-          <div className="flex gap-3 overflow-x-auto pb-1">
-            {[...champions]
-              .filter((c) => c.winRate != null && Number.isFinite(c.winRate))
-              .sort((a, b) => (b.winRate ?? 0) - (a.winRate ?? 0))
-              .slice(0, 10)
-              .map((c) => {
-                const quality = getStatQuality(c.winRate!, c.pickRate, maxChampionPickRate);
-                return (
-                  <Link
-                    key={c.id}
-                    href={`/champions/${championSlug(c.name)}`}
-                    className="flex-shrink-0 w-36 group"
-                  >
-                    <div
-                      className="rounded-lg p-3 border border-pc-border/50 group-hover:border-pc-accent-mid transition-all bg-pc-card/50 group-hover:bg-pc-card flex flex-col items-center gap-2"
-                      style={{ borderColor: quality.borderColor }}
-                    >
-                      <img
-                        src={getChampionIconSafe(c.name)}
-                        alt={c.name}
-                        className="w-14 h-14 object-contain rounded-full bg-pc-bg/60"
-                      />
-                      <span className="text-pc-text text-xs font-semibold truncate w-full text-center group-hover:text-pc-accent transition-colors">
-                        {c.name}
-                      </span>
-                      <span className="text-sm font-bold tabular-nums" style={{ color: quality.color }}>
-                        {c.winRate!.toFixed(1)}%
-                      </span>
-                      {/* Role icon chips */}
-                      <div className="flex gap-1">
-                        {ROLES.map((role) =>
-                          c.roles?.includes(role) ? (
-                            <img
-                              key={role}
-                              src={role === "Frontline" ? "/images/icons/Class_Front_Line_Icon.avif" : `/images/icons/Class_${role}_Icon.avif`}
-                              alt={role}
-                              className="w-3.5 h-3.5 opacity-60 group-hover:opacity-100 transition-opacity"
-                            />
-                          ) : null
-                        )}
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
-          </div>
-        </div>
-      </section>
 
-      {/* ── Most Banned by Class ── */}
-      <section>
-        <div className="flex items-center justify-between mb-3 px-2">
-          <h2 className="text-sm font-bold text-pc-text">Most Banned by Class</h2>
-          <Link href="/stats/banrate" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">Detail →</Link>
-        </div>
-        <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
-          {/* Class legend row */}
-          <div className="flex items-center gap-3 mb-3 px-2">
-            {ROLES.map((role) => (
-              <div key={role} className="flex items-center gap-1.5">
-                <img
-                  src={role === "Frontline" ? "/images/icons/Class_Front_Line_Icon.avif" : `/images/icons/Class_${role}_Icon.avif`}
-                  alt={role}
-                  className="w-4 h-4"
-                />
-                <span className="text-pc-text-muted text-xs">{role}</span>
-              </div>
-            ))}
-          </div>
-          {/* Horizontal champion list */}
-          <div className="flex gap-3 overflow-x-auto pb-1">
-            {[...champions]
-              .filter((c) => c.banRate != null && Number.isFinite(c.banRate))
-              .sort((a, b) => (b.banRate ?? 0) - (a.banRate ?? 0))
-              .slice(0, 10)
-              .map((c) => {
-                const expanded = expandedBannedId === c.id;
-                return (
-                  <div
-                    key={c.id}
-                    className="flex-shrink-0 w-36"
-                  >
-                    <div
-                      className={`rounded-lg p-3 border transition-all flex flex-col items-center gap-2 cursor-pointer ${
-                        expanded
-                          ? "border-pc-accent-mid bg-pc-card ring-1 ring-pc-accent-mid/50"
-                          : "border-pc-border/50 bg-pc-card/50 hover:border-pc-accent-mid hover:bg-pc-card"
-                      }`}
-                      onClick={() => setExpandedBannedId(expanded ? null : c.id)}
+          {/* Win Rate row */}
+          <div>
+            <div className="text-xs font-semibold text-pc-text-secondary mb-2 px-2">Top Win Rate</div>
+            <div className="flex gap-3 overflow-x-auto pb-1">
+              {[...champions]
+                .filter((c) => c.winRate != null && Number.isFinite(c.winRate))
+                .sort((a, b) => (b.winRate ?? 0) - (a.winRate ?? 0))
+                .slice(0, 10)
+                .map((c) => {
+                  const quality = getStatQuality(c.winRate!, c.pickRate, maxChampionPickRate);
+                  return (
+                    <Link
+                      key={c.id}
+                      href={`/champions/${championSlug(c.name)}`}
+                      className="flex-shrink-0 w-36 group"
                     >
-                      <img
-                        src={getChampionIconSafe(c.name)}
-                        alt={c.name}
-                        className="w-14 h-14 object-contain rounded-full bg-pc-bg/60"
-                      />
-                      <span className="text-pc-text text-xs font-semibold truncate w-full text-center">
-                        {c.name}
-                      </span>
-                      <span className="text-sm font-bold text-rose-400 tabular-nums">
-                        {c.banRate!.toFixed(1)}%
-                      </span>
-                      {/* Role icon chips */}
-                      <div className="flex gap-1">
-                        {ROLES.map((role) =>
-                          c.roles?.includes(role) ? (
-                            <img
-                              key={role}
-                              src={role === "Frontline" ? "/images/icons/Class_Front_Line_Icon.avif" : `/images/icons/Class_${role}_Icon.avif`}
-                              alt={role}
-                              className="w-3.5 h-3.5 opacity-60 group-hover:opacity-100 transition-opacity"
-                            />
-                          ) : null
+                      <div
+                        className="rounded-lg p-3 border border-pc-border/50 group-hover:border-pc-accent-mid transition-all bg-pc-card/50 group-hover:bg-pc-card flex flex-col items-center gap-2"
+                        style={{ borderColor: quality.borderColor }}
+                      >
+                        <img
+                          src={getChampionIconSafe(c.name)}
+                          alt={c.name}
+                          className="w-14 h-14 object-contain rounded-full bg-pc-bg/60"
+                        />
+                        <span className="text-pc-text text-xs font-semibold truncate w-full text-center group-hover:text-pc-accent transition-colors">
+                          {c.name}
+                        </span>
+                        <span className="text-sm font-bold tabular-nums" style={{ color: quality.color }}>
+                          {c.winRate!.toFixed(1)}%
+                        </span>
+                        {/* Role icon chips */}
+                        <div className="flex gap-1">
+                          {ROLES.map((role) =>
+                            c.roles?.includes(role) ? (
+                              <img
+                                key={role}
+                                src={role === "Frontline" ? "/images/icons/Class_Front_Line_Icon.avif" : `/images/icons/Class_${role}_Icon.avif`}
+                                alt={role}
+                                className="w-3.5 h-3.5 opacity-60 group-hover:opacity-100 transition-opacity"
+                              />
+                            ) : null
+                          )}
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="border-t border-pc-border/50" />
+
+          {/* Ban Rate row */}
+          <div>
+            <div className="text-xs font-semibold text-pc-text-secondary mb-2 px-2">Most Banned</div>
+            <div className="flex gap-3 overflow-x-auto pb-1">
+              {[...champions]
+                .filter((c) => c.banRate != null && Number.isFinite(c.banRate))
+                .sort((a, b) => (b.banRate ?? 0) - (a.banRate ?? 0))
+                .slice(0, 10)
+                .map((c) => {
+                  const expanded = expandedBannedId === c.id;
+                  return (
+                    <div
+                      key={c.id}
+                      className="flex-shrink-0 w-36"
+                    >
+                      <div
+                        className={`rounded-lg p-3 border transition-all flex flex-col items-center gap-2 cursor-pointer ${
+                          expanded
+                            ? "border-pc-accent-mid bg-pc-card ring-1 ring-pc-accent-mid/50"
+                            : "border-pc-border/50 bg-pc-card/50 hover:border-pc-accent-mid hover:bg-pc-card"
+                        }`}
+                        onClick={() => setExpandedBannedId(expanded ? null : c.id)}
+                      >
+                        <img
+                          src={getChampionIconSafe(c.name)}
+                          alt={c.name}
+                          className="w-14 h-14 object-contain rounded-full bg-pc-bg/60"
+                        />
+                        <span className="text-pc-text text-xs font-semibold truncate w-full text-center">
+                          {c.name}
+                        </span>
+                        <span className="text-sm font-bold text-rose-400 tabular-nums">
+                          {c.banRate!.toFixed(1)}%
+                        </span>
+                        {/* Role icon chips */}
+                        <div className="flex gap-1">
+                          {ROLES.map((role) =>
+                            c.roles?.includes(role) ? (
+                              <img
+                                key={role}
+                                src={role === "Frontline" ? "/images/icons/Class_Front_Line_Icon.avif" : `/images/icons/Class_${role}_Icon.avif`}
+                                alt={role}
+                                className="w-3.5 h-3.5 opacity-60 group-hover:opacity-100 transition-opacity"
+                              />
+                            ) : null
+                          )}
+                        </div>
+                        {/* Expandable: per-class context */}
+                        {expanded && (
+                          <div className="w-full pt-2 mt-1 border-t border-pc-border/50 space-y-1.5">
+                            {ROLES.map((role) => {
+                              const inRole = champions.filter((ch) => ch.roles?.includes(role) && ch.banRate != null && Number.isFinite(ch.banRate));
+                              if (inRole.length === 0) return null;
+                              const sorted = [...inRole].sort((a, b) => (b.banRate ?? 0) - (a.banRate ?? 0));
+                              const rank = sorted.findIndex((ch) => ch.id === c.id) + 1;
+                              const classAvg = sorted.reduce((s, ch) => s + (ch.banRate ?? 0), 0) / sorted.length;
+                              if (rank === 0) return null;
+                              return (
+                                <div key={role} className="flex items-center gap-1.5 text-[9px]">
+                                  <img
+                                    src={role === "Frontline" ? "/images/icons/Class_Front_Line_Icon.avif" : `/images/icons/Class_${role}_Icon.avif`}
+                                    alt={role}
+                                    className="w-3 h-3 shrink-0"
+                                  />
+                                  <span className="text-pc-text-muted">#{rank}</span>
+                                  <span className="text-pc-text-secondary">
+                                    {c.banRate!.toFixed(1)}% vs {classAvg.toFixed(1)}% avg
+                                  </span>
+                                </div>
+                              );
+                            })}
+                          </div>
                         )}
                       </div>
-                      {/* Expandable: per-class context */}
-                      {expanded && (
-                        <div className="w-full pt-2 mt-1 border-t border-pc-border/50 space-y-1.5">
-                          {ROLES.map((role) => {
-                            const inRole = champions.filter((ch) => ch.roles?.includes(role) && ch.banRate != null && Number.isFinite(ch.banRate));
-                            if (inRole.length === 0) return null;
-                            const sorted = [...inRole].sort((a, b) => (b.banRate ?? 0) - (a.banRate ?? 0));
-                            const rank = sorted.findIndex((ch) => ch.id === c.id) + 1;
-                            const classAvg = sorted.reduce((s, ch) => s + (ch.banRate ?? 0), 0) / sorted.length;
-                            if (rank === 0) return null;
-                            return (
-                              <div key={role} className="flex items-center gap-1.5 text-[9px]">
-                                <img
-                                  src={role === "Frontline" ? "/images/icons/Class_Front_Line_Icon.avif" : `/images/icons/Class_${role}_Icon.avif`}
-                                  alt={role}
-                                  className="w-3 h-3 shrink-0"
-                                />
-                                <span className="text-pc-text-muted">#{rank}</span>
-                                <span className="text-pc-text-secondary">
-                                  {c.banRate!.toFixed(1)}% vs {classAvg.toFixed(1)}% avg
-                                </span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+            </div>
           </div>
         </div>
       </section>
