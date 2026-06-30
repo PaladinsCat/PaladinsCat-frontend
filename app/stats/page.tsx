@@ -185,7 +185,7 @@ export default function StatsPage() {
       { tier: "Gold", tierSort: 15, totalPlays: sumSlice(10, 15).total, avgWinRate: 0, percentage: sumSlice(10, 15).pct },
       { tier: "Platinum", tierSort: 20, totalPlays: sumSlice(15, 20).total, avgWinRate: 0, percentage: sumSlice(15, 20).pct },
       { tier: "Diamond", tierSort: 25, totalPlays: sumSlice(20, 25).total, avgWinRate: 0, percentage: sumSlice(20, 25).pct },
-      ...normalized.slice(25),
+      { tier: "Master", tierSort: 26, totalPlays: sumSlice(25, 27).total, avgWinRate: 0, percentage: sumSlice(25, 27).pct },
     ];
   }
   const displayTiers = consolidateTiers(tiers);
