@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
-import { fetchPlayerMatches, reportPlayer, type MatchRecord, type ReportType } from "@/lib/api-client";
+import { fetchPlayerMatches, type MatchRecord, type ReportType } from "@/lib/api-client";
 import { getTierColor, resolveEffectiveTier, getRankIconPath } from "@/lib/tier-utils";
 import { useAuth } from "@/lib/auth-context";
 import ReportModal from "@/components/ReportModal";
@@ -155,17 +155,16 @@ export default function PlayerProfilePage() {
 
   // Button states
   const [refreshing, setRefreshing] = useState(false);
-  const [reporting, setReporting] = useState<string | null>(null);
   const [currentMatch, setCurrentMatch] = useState<any>(null);
   const [showCurrentMatch, setShowCurrentMatch] = useState(false);
   const [fetchKey, setFetchKey] = useState(0);
 
   // Report modal state
   const [showReportModal, setShowReportModal] = useState(false);
-  const [reportType, setReportType] = useState<'suspicious' | 'cheater'>('suspicious');
+  const [reportType, setReportType] = useState<Exclude<ReportType, 'approve'>>('suspicious');
 
   // Open report modal — redirect to login if not authenticated
-  const openReportModal = useCallback((type: 'suspicious' | 'cheater') => {
+  const openReportModal = useCallback((type: Exclude<ReportType, 'approve'>) => {
     if (!isLoggedIn) {
       router.push(`/auth/login?redirect=/players/${id}`);
       return;
@@ -183,23 +182,6 @@ export default function PlayerProfilePage() {
     setShowReportModal(false);
     setFetchKey(k => k + 1);
   }, []);
-
-  const handleCommunityVote = useCallback(async (type: Extract<ReportType, 'weirdo' | 'hall_of_fame'>) => {
-    if (!isLoggedIn) {
-      router.push(`/auth/login?redirect=/players/${id}`);
-      return;
-    }
-    setReporting(type);
-    setError(null);
-    try {
-      await reportPlayer(id, { type });
-      setFetchKey((key) => key + 1);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not submit your vote");
-    } finally {
-      setReporting(null);
-    }
-  }, [id, isLoggedIn, router]);
 
   // Fetch profile
   const fetchProfile = useCallback(async () => {
@@ -343,22 +325,20 @@ export default function PlayerProfilePage() {
             Suspicious
           </button>
           <button
-            onClick={() => handleCommunityVote('weirdo')}
-            disabled={reporting !== null}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-violet-500/10 hover:bg-violet-500/20 text-violet-300 border border-violet-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={() => openReportModal('weirdo')}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-violet-500/10 hover:bg-violet-500/20 text-violet-300 border border-violet-500/20 transition-colors"
             title={isLoggedIn ? "Vote Weirdo" : "Log in to vote"}
           >
             <span aria-hidden>✦</span>
-            {reporting === 'weirdo' ? 'Voting...' : `Weirdo${player?.weirdo_count ? ` (${player.weirdo_count})` : ''}`}
+            {`Weirdo${player.weirdo_count ? ` (${player.weirdo_count})` : ''}`}
           </button>
           <button
-            onClick={() => handleCommunityVote('hall_of_fame')}
-            disabled={reporting !== null}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={() => openReportModal('hall_of_fame')}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/20 transition-colors"
             title={isLoggedIn ? "Vote for Hall of Fame" : "Log in to vote"}
           >
             <span aria-hidden>♥</span>
-            {reporting === 'hall_of_fame' ? 'Voting...' : `Hall of Fame${player?.hall_of_fame_count ? ` (${player.hall_of_fame_count})` : ''}`}
+            {`Hall of Fame${player.hall_of_fame_count ? ` (${player.hall_of_fame_count})` : ''}`}
           </button>
           {(isAdmin || isApproved) && (
             <button
