@@ -1331,7 +1331,7 @@ export interface ItemDimensionStat {
 export interface ItemDetailStats {
   itemId: number;
   itemName: string;
-  mode: 'ranked' | 'casual';
+  mode: 'ranked';
   totalUses: number;
   wins: number;
   losses: number;
@@ -1797,7 +1797,7 @@ export async function fetchItems(params?: { mode?: string; limit?: number; champ
   }
 }
 
-export async function fetchItemDetail(itemId: number, mode: 'ranked' | 'casual' = 'ranked'): Promise<ItemDetailStats | null> {
+export async function fetchItemDetail(itemId: number, mode: 'ranked' = 'ranked'): Promise<ItemDetailStats | null> {
   try {
     const raw = await fetchJson<any>(`/stats/items/${itemId}?mode=${mode}`);
     const number = (value: unknown) => Number(value ?? 0);
@@ -1812,7 +1812,7 @@ export async function fetchItemDetail(itemId: number, mode: 'ranked' | 'casual' 
     return {
       itemId: number(raw.item_id),
       itemName: raw.item_name ?? 'Unknown item',
-      mode: raw.mode === 'casual' ? 'casual' : 'ranked',
+      mode: 'ranked',
       totalUses: number(raw.total_uses),
       wins: number(raw.wins),
       losses: number(raw.losses),
@@ -1980,7 +1980,7 @@ export interface ChampionTalentStatsResponse {
 
 export async function fetchChampionTalentStats(
   championId: number,
-  mode: 'ranked' | 'casual' = 'ranked'
+  mode: 'ranked' = 'ranked'
 ): Promise<ChampionTalentStatsResponse> {
   try {
     const raw = await fetchJson<{
@@ -2066,7 +2066,7 @@ export interface ChampionCardDetailResponse {
   cardName: string;
   championId: number;
   championName: string;
-  mode: 'ranked' | 'casual';
+  mode: 'ranked';
   talentId: number | null;
   totalPlays: number;
   wins: number;
@@ -2080,7 +2080,7 @@ export interface ChampionCardDetailResponse {
 export async function fetchChampionCardDetail(
   championId: number,
   cardId: number,
-  mode: 'ranked' | 'casual' = 'ranked',
+  mode: 'ranked' = 'ranked',
   talentId?: number | null
 ): Promise<ChampionCardDetailResponse | null> {
   try {
@@ -2117,7 +2117,7 @@ export async function fetchChampionCardDetail(
 }
 export async function fetchChampionCardStats(
   championId: number,
-  mode: 'ranked' | 'casual' = 'ranked',
+  mode: 'ranked' = 'ranked',
   talentId?: number | null
 ): Promise<ChampionCardStatsResponse> {
   try {
