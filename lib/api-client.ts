@@ -535,9 +535,7 @@ export interface ItemStat {
 export interface MapStat {
   name: string;
   totalMatches: number;
-  wins: number;
-  losses: number;
-  winRate: number;
+  distributionRate: number;
   avgDurationSeconds: number;
 }
 
@@ -1633,17 +1631,13 @@ export async function fetchMapStats(params?: { queueId?: number; limit?: number 
     const raw = await fetchJson<Array<{
       map: string;
       total_matches: number | string;
-      wins: number | string;
-      losses: number | string;
-      win_rate: number | string;
+      distribution_rate: number | string;
       avg_duration_seconds: number | string;
     }>>(`/stats/maps${query.toString() ? `?${query.toString()}` : ''}`);
     return raw.map((r) => ({
       name: r.map,
       totalMatches: Number(r.total_matches ?? 0),
-      wins: Number(r.wins ?? 0),
-      losses: Number(r.losses ?? 0),
-      winRate: Number(r.win_rate ?? 0),
+      distributionRate: Number(r.distribution_rate ?? 0),
       avgDurationSeconds: Number(r.avg_duration_seconds ?? 0),
     }));
   } catch {
@@ -1657,7 +1651,7 @@ export async function fetchMapDetail(mapName: string): Promise<MapDetailStats | 
     const number = (value: unknown) => Number(value ?? 0);
     const map = raw.map;
     return {
-      map: { name: map.map, totalMatches: number(map.total_matches), wins: number(map.wins), losses: number(map.losses), winRate: number(map.win_rate), avgDurationSeconds: number(map.avg_duration_seconds) },
+      map: { name: map.map, totalMatches: number(map.total_matches), distributionRate: number(map.distribution_rate), avgDurationSeconds: number(map.avg_duration_seconds) },
       champions: (raw.champions ?? []).map((row: any) => ({ championId: number(row.champion_id), championName: row.champion_name, totalPlays: number(row.total_plays), wins: number(row.wins), losses: number(row.losses), winRate: number(row.win_rate), pickRate: number(row.pick_rate), banRate: number(row.ban_rate) })),
       talents: (raw.talents ?? []).map((row: any) => ({ talentId: number(row.talent_id), talentName: row.talent_name, championId: number(row.champion_id), championName: row.champion_name, totalPlays: number(row.total_plays), wins: number(row.wins), losses: number(row.losses), winRate: number(row.win_rate), pickRate: number(row.pick_rate) })),
       items: (raw.items ?? []).map((row: any) => ({ itemId: number(row.item_id), itemName: row.item_name, totalUses: number(row.total_uses), wins: number(row.wins), losses: number(row.losses), winRate: number(row.win_rate), pickRate: number(row.pick_rate) })),

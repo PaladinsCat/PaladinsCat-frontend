@@ -11,8 +11,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const canonicalName = encodeURIComponent(decodeURIComponent(mapName));
 
   return {
-    title: `${name} Paladins Map Stats, Win Rate and Meta`,
-    description: `Explore Paladins ranked stats for ${name}: side win rate, champion picks and bans, talent performance, and item choices.`,
+    title: `${name} Paladins Map Stats, Distribution and Meta`,
+    description: `Explore Paladins ranked stats for ${name}: map distribution, champion picks and bans, talent performance, and item choices.`,
     alternates: { canonical: `/stats/maps/${canonicalName}` },
   };
 }

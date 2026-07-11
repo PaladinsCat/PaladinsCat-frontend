@@ -24,7 +24,7 @@ const ROLES = ["Frontline", "Damage", "Flank", "Support"] as const;
 type SortKey = "pickRate" | "winRate";
 type ItemCategory = "Defense" | "Utility" | "Healing" | "Offense";
 type PageItemStat = { itemId: number; name: string; pickRate: number; winRate: number; category: ItemCategory; icon: string };
-type PageMapStat = { name: string; matches: number; wins: number; losses: number; winRate: number; avgDurationSeconds: number };
+type PageMapStat = { name: string; matches: number; distributionRate: number; avgDurationSeconds: number };
 
 const EMPTY_METRICS = {
   dpm: { p10: 0, p25: 0, p75: 0, p90: 0, mean: 0, median: 0, mode: 0 },
@@ -77,9 +77,7 @@ function mapMapStats(maps: MapStat[]): PageMapStat[] {
   return maps.map((map) => ({
     name: map.name,
     matches: map.totalMatches,
-    wins: map.wins,
-    losses: map.losses,
-    winRate: map.winRate,
+    distributionRate: map.distributionRate,
     avgDurationSeconds: map.avgDurationSeconds,
   }));
 }
@@ -477,19 +475,15 @@ export default function StatsPage() {
               <thead>
                 <tr className="border-b border-pc-border text-pc-text-muted text-left text-xs">
                   <th className="px-3 py-3">Map</th>
-                  <th className="px-2 py-3 text-right">WR</th>
-                  <th className="px-2 py-3 text-right">W</th>
-                  <th className="px-2 py-3 text-right">L</th>
-                  <th className="px-3 py-3 text-right">Total</th>
+                  <th className="px-2 py-3 text-right">Map Share</th>
+                  <th className="px-3 py-3 text-right">Matches</th>
                 </tr>
               </thead>
               <tbody>
                 {sortedMaps.map((map) => (
                   <tr key={map.name} className="border-b border-pc-border/50 hover:bg-pc-bg/50 transition-colors">
                     <td className="px-3 py-2 text-pc-text font-medium text-xs">{map.name}</td>
-                    <td className="px-2 py-2 text-xs text-right font-semibold" style={{ color: getStatQuality(map.winRate, 1, 1).color }}>{map.winRate.toFixed(1)}%</td>
-                    <td className="px-2 py-2 text-pc-text-secondary text-xs text-right">{map.wins.toLocaleString()}</td>
-                    <td className="px-2 py-2 text-pc-text-secondary text-xs text-right">{map.losses.toLocaleString()}</td>
+                    <td className="px-2 py-2 text-xs text-right font-semibold text-pc-accent">{map.distributionRate.toFixed(1)}%</td>
                     <td className="px-3 py-2 text-pc-text text-xs text-right">{map.matches.toLocaleString()}</td>
                   </tr>
                 ))}
