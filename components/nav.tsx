@@ -29,8 +29,6 @@ export default function Nav() {
         { href: "/stats/banrate", label: "Champion Ban Rates" },
         { href: "/stats/items", label: "Item Meta" },
         { href: "/stats/maps", label: "Map Stats" },
-        { href: "/stats/talents", label: "Talent Meta" },
-        { href: "/stats/loadouts", label: "Loadouts" },
         { href: "/stats/tiers", label: "Tier Distribution" },
         { href: "/stats/metrics", label: "Performance Metrics" },
         { href: "/stats/regions", label: "Regions" },
@@ -59,6 +57,12 @@ export default function Nav() {
     return () => window.removeEventListener("keydown", closeOnEscape);
   }, [sideMenuOpen]);
 
+  useEffect(() => {
+    const openSiteMenu = () => setSideMenuOpen(true);
+    window.addEventListener("paladinscat:open-site-menu", openSiteMenu);
+    return () => window.removeEventListener("paladinscat:open-site-menu", openSiteMenu);
+  }, []);
+
   async function handleLogout() {
     await logout();
     setSideMenuOpen(false);
@@ -72,19 +76,18 @@ export default function Nav() {
       {/* Nav: sticky top, secondary bg, subtle bottom border, shadow for depth */}
       <nav className="sticky top-0 z-50 bg-pc-bg-secondary border-b border-pc-border shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* ── Desktop Layout: Logo (left) | Links (center) | Auth (right) ── */}
-          {/* Three equal flex zones: left logo, center links, right auth */}
-          <div className="hidden md:flex items-center" style={{ height: 64 }}>
-            {/* Left: Logo — flex-1 gives it one-third of the space */}
-            <div className="flex-1">
+          {/* ── Desktop Layout: fixed edges with a flexible link group ── */}
+          <div className="hidden items-center lg:flex" style={{ height: 64 }}>
+            {/* Left: fixed-width logo */}
+            <div className="shrink-0">
               <Link href="/" className="text-xl font-bold text-pc-text hover:text-pc-text-muted transition-colors flex items-center gap-2">
                 <img src="/images/icons/paladinscat.avif" alt="" className="w-7 h-7" />
                 PaladinsCat
               </Link>
             </div>
 
-            {/* Center: All nav links — flex-1, centered */}
-            <div className="flex-1 flex items-center justify-center gap-6">
+            {/* Center: links absorb the remaining space */}
+            <div className="flex min-w-0 flex-1 items-center justify-center gap-4 px-6 xl:gap-6">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
@@ -96,9 +99,9 @@ export default function Nav() {
               ))}
             </div>
 
-            {/* Right: Auth only — flex-1 justify-end pushes it to the far right */}
+            {/* Right: grouped menu and account controls */}
             {/* Player search lives on /players page; champion search on /champions page */}
-            <div className="flex-1 flex items-center justify-end gap-3">
+            <div className="flex shrink-0 items-center justify-end gap-3">
               <button
                 onClick={() => setSideMenuOpen(true)}
                 className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm text-pc-text-secondary transition-colors hover:bg-pc-bg-elevated hover:text-pc-accent"
@@ -112,7 +115,7 @@ export default function Nav() {
                 <div className="flex items-center gap-3">
                   <Link
                     href="/account"
-                    className="text-pc-text-secondary text-sm hover:text-pc-accent transition-colors underline underline-offset-2"
+                    className="max-w-32 truncate text-sm text-pc-text-secondary underline underline-offset-2 transition-colors hover:text-pc-accent"
                   >
                     Hi, {user.username}
                   </Link>
@@ -129,7 +132,7 @@ export default function Nav() {
           </div>
 
           {/* ── Mobile Layout ── */}
-          <div className="flex md:hidden items-center justify-between" style={{ height: 64 }}>
+          <div className="flex items-center justify-between lg:hidden" style={{ height: 64 }}>
             <Link href="/" className="text-xl font-bold text-pc-text hover:text-pc-text-muted transition-colors flex items-center gap-2">
               <img src="/images/icons/paladinscat.avif" alt="" className="w-7 h-7" />
               PaladinsCat

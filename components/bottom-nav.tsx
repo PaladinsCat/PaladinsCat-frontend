@@ -6,28 +6,23 @@ import {
   Home,
   Sword,
   BarChart3,
-  Wrench,
   Users,
-  MessageCircle,
-  ListTodo,
+  Menu,
 } from "lucide-react";
 
 const items = [
   { href: "/", label: "Home", icon: Home },
   { href: "/champions", label: "Champions", icon: Sword },
   { href: "/stats", label: "Stats", icon: BarChart3 },
-  { href: "/builds", label: "Builds", icon: Wrench },
   { href: "/players", label: "Players", icon: Users },
-  { href: "/community", label: "Community", icon: MessageCircle },
-  { href: "/matches", label: "Matches", icon: ListTodo },
 ];
 
 export default function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
-      <div className="flex items-center gap-1 px-2 py-2 rounded-2xl bg-pc-bg-elevated/90 backdrop-blur-md border border-pc-border shadow-lg">
+    <div className="fixed bottom-4 left-1/2 z-50 w-max max-w-[calc(100vw-1rem)] -translate-x-1/2 sm:bottom-6">
+      <div className="flex items-center gap-1 rounded-2xl border border-pc-border bg-pc-bg-elevated/90 px-2 py-2 shadow-lg backdrop-blur-md">
         {items.map((item) => {
           const isActive =
             item.href === "/"
@@ -38,7 +33,7 @@ export default function BottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center justify-center w-12 h-10 rounded-xl transition-all duration-200 ${
+              className={`flex h-11 w-12 min-w-0 flex-col items-center justify-center rounded-xl transition-all duration-200 ${
                 isActive
                   ? "text-pc-accent bg-pc-accent/10"
                   : "text-pc-text-muted hover:text-pc-text hover:bg-pc-bg-secondary"
@@ -52,6 +47,15 @@ export default function BottomNav() {
             </Link>
           );
         })}
+        <button
+          type="button"
+          onClick={() => window.dispatchEvent(new Event("paladinscat:open-site-menu"))}
+          className="flex h-11 w-12 min-w-0 flex-col items-center justify-center rounded-xl text-pc-text-muted transition-all duration-200 hover:bg-pc-bg-secondary hover:text-pc-text"
+          aria-label="More navigation"
+        >
+          <Menu className="h-5 w-5 stroke-[1.5]" />
+          <span className="mt-0.5 text-xs font-medium">More</span>
+        </button>
       </div>
     </div>
   );

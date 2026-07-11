@@ -128,7 +128,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <PageLayout>{children}</PageLayout>
             </div>
           </main>
-          <div className="block md:hidden"><BottomNav /></div>
+          <div className="block lg:hidden"><BottomNav /></div>
           <Footer />
         </AuthProvider>
       </body>

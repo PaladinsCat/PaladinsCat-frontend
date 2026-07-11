@@ -407,9 +407,10 @@ export default function PlayerProfilePage() {
       </Link>
 
       {/* ── Header ── */}
-      <div className="pc-card">
+      <div className={`pc-card relative ${actionMenuOpen ? 'z-40' : 'z-10'}`}>
         {/* Action buttons — top right */}
-        <div className="relative flex items-center justify-end gap-2 mb-3">
+        <div ref={actionMenuRef} className="relative mb-3 flex items-center justify-end">
+          <div className="hidden flex-wrap items-center justify-end gap-2 md:flex">
           <button
             onClick={handleCurrentMatch}
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-pc-bg-secondary/80 hover:bg-pc-bg-secondary text-pc-text border border-pc-border/50 transition-colors"
@@ -461,22 +462,90 @@ export default function PlayerProfilePage() {
               Cheater
             </button>
           )}
-          {refreshFeedback && (
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              setRefreshFeedback(null);
+              setActionMenuOpen((open) => !open);
+            }}
+            className="inline-flex items-center gap-2 rounded-lg border border-pc-border/70 bg-pc-bg-secondary/90 px-3 py-2 text-xs font-semibold text-pc-text transition-colors hover:border-pc-accent-mid hover:text-pc-accent md:hidden"
+            aria-haspopup="menu"
+            aria-expanded={actionMenuOpen}
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
+            Actions
+          </button>
+
+          {actionMenuOpen && (
             <div
-              className={`pointer-events-none absolute right-0 top-full z-20 mt-2 w-max max-w-[min(24rem,calc(100vw-3rem))] rounded-lg border px-3 py-2 text-xs shadow-lg ${refreshFeedbackColor}`}
+              className="absolute right-0 top-full z-30 mt-2 w-60 max-w-[calc(100vw-3rem)] overflow-hidden rounded-xl border border-pc-border bg-pc-bg-secondary p-2 shadow-2xl md:hidden"
+              role="menu"
+              aria-label="Player actions"
+            >
+              <div className="px-2 pb-1 pt-1 text-[10px] font-bold uppercase tracking-widest text-pc-text-muted">Player</div>
+              <button type="button" role="menuitem" onClick={() => { setActionMenuOpen(false); void handleCurrentMatch(); }} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-pc-text transition-colors hover:bg-pc-bg-elevated hover:text-pc-accent">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+                Current match
+              </button>
+              <button type="button" role="menuitem" disabled={refreshing} onClick={() => { setActionMenuOpen(false); void handleRefresh(); }} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-pc-text transition-colors hover:bg-pc-bg-elevated hover:text-pc-accent disabled:cursor-not-allowed disabled:opacity-50">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className={refreshing ? 'animate-spin' : ''} aria-hidden="true"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+                {refreshing ? 'Refreshing profile…' : 'Refresh profile'}
+              </button>
+
+              <div className="my-2 border-t border-pc-border/70" />
+              <div className="px-2 pb-1 text-[10px] font-bold uppercase tracking-widest text-pc-text-muted">Community</div>
+              <button type="button" role="menuitem" onClick={() => { setActionMenuOpen(false); openReportModal('suspicious'); }} className="flex w-full items-center justify-between gap-3 rounded-lg px-2.5 py-2 text-left text-sm text-amber-400 transition-colors hover:bg-amber-500/10">
+                <span>Report suspicious</span>
+                {player.sus_count > 0 && <span className="text-xs tabular-nums">{player.sus_count}</span>}
+              </button>
+              <button type="button" role="menuitem" onClick={() => { setActionMenuOpen(false); openReportModal('weirdo'); }} className="flex w-full items-center justify-between gap-3 rounded-lg px-2.5 py-2 text-left text-sm text-violet-300 transition-colors hover:bg-violet-500/10">
+                <span>Vote Weirdo</span>
+                {player.weirdo_count > 0 && <span className="text-xs tabular-nums">{player.weirdo_count}</span>}
+              </button>
+              <button type="button" role="menuitem" onClick={() => { setActionMenuOpen(false); openReportModal('hall_of_fame'); }} className="flex w-full items-center justify-between gap-3 rounded-lg px-2.5 py-2 text-left text-sm text-emerald-300 transition-colors hover:bg-emerald-500/10">
+                <span>Vote Hall of Fame</span>
+                {player.hall_of_fame_count > 0 && <span className="text-xs tabular-nums">{player.hall_of_fame_count}</span>}
+              </button>
+
+              {(isAdmin || isApproved) && (
+                <>
+                  <div className="my-2 border-t border-pc-border/70" />
+                  <div className="px-2 pb-1 text-[10px] font-bold uppercase tracking-widest text-pc-text-muted">Moderation</div>
+                  <button type="button" role="menuitem" onClick={() => { setActionMenuOpen(false); openReportModal('cheater'); }} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-red-400 transition-colors hover:bg-red-500/10">
+                    Flag as cheater
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+
+          {!actionMenuOpen && refreshFeedback && (
+            <div
+              className={`pointer-events-none absolute left-0 top-1/2 z-20 w-max max-w-[calc(100%-7rem)] -translate-y-1/2 rounded-lg border px-2.5 py-1.5 text-xs shadow-lg md:left-auto md:right-0 md:top-full md:mt-2 md:max-w-[min(24rem,calc(100vw-3rem))] md:translate-y-0 md:px-3 md:py-2 ${refreshFeedbackColor}`}
               role="status"
               aria-live="polite"
             >
-              {refreshCooldownUntil
-                ? refreshRemainingMs > 0
-                  ? `${refreshFeedback.message} ${formatCooldown(refreshRemainingMs)}.`
-                  : 'Profile can now be refreshed.'
-                : refreshFeedback.message}
+              <span className="md:hidden">
+                {refreshCooldownUntil
+                  ? refreshRemainingMs > 0
+                    ? `Refresh in ${formatCooldown(refreshRemainingMs)}.`
+                    : 'Refresh available.'
+                  : refreshFeedback.message}
+              </span>
+              <span className="hidden md:inline">
+                {refreshCooldownUntil
+                  ? refreshRemainingMs > 0
+                    ? `${refreshFeedback.message} ${formatCooldown(refreshRemainingMs)}.`
+                    : 'Profile can now be refreshed.'
+                  : refreshFeedback.message}
+              </span>
             </div>
           )}
         </div>
 
-        <div className="flex items-start gap-4">
+        <div className="flex flex-col items-start gap-4 min-[420px]:flex-row">
           {/* Avatar */}
           <div className="w-16 h-16 rounded-xl border-2 border-pc-accent/30 overflow-hidden shrink-0 bg-pc-bg flex items-center justify-center">
             {player.avatar_url ? (
@@ -495,7 +564,7 @@ export default function PlayerProfilePage() {
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-xl font-bold text-pc-text truncate">{player.name}</h1>
+              <h1 className="min-w-0 break-words text-xl font-bold text-pc-text">{player.name}</h1>
               {player.cheater && (
                 <span className="text-xs font-bold text-red-400 bg-red-500/10 px-1.5 py-0.5 rounded">CHEATER</span>
               )}
@@ -588,7 +657,7 @@ export default function PlayerProfilePage() {
                   </StatGrid>
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-2 text-center pt-3 border-t border-pc-border/50">
+              <div className="grid grid-cols-1 gap-2 border-t border-pc-border/50 pt-3 text-center min-[360px]:grid-cols-3">
                 <div>
                   <div className="text-xs text-pc-text-muted">Wins</div>
                   <div className="text-sm font-mono text-emerald-400">{player.kbm_wins}</div>
@@ -609,7 +678,7 @@ export default function PlayerProfilePage() {
           <div>
             <h2 className="pc-card-title shadow-sm">Performance</h2>
             <div className="pc-card">
-              <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+              <div className="grid grid-cols-1 gap-x-6 gap-y-2 min-[400px]:grid-cols-2">
                 <div>
                   <div className="text-xs text-pc-text-muted uppercase tracking-wider mb-2">Averages</div>
                   <div className="space-y-1.5">
@@ -707,7 +776,7 @@ export default function PlayerProfilePage() {
                     <div className="text-2xl font-bold text-pc-accent font-mono">{Number(kbmRating.mu).toFixed(0)}</div>
                     <div className="text-xs text-pc-text-muted mt-0.5">Glicko-2 Rating</div>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 text-center">
+                  <div className="grid grid-cols-1 gap-2 text-center min-[400px]:grid-cols-2">
                     <div className="pc-surface-light rounded p-2 border border-pc-border/50">
                       <div className="text-xs text-pc-text-muted">Deviation</div>
                       <div className="text-xs font-mono text-pc-text">{Number(kbmRating.phi).toFixed(0)}</div>
@@ -717,7 +786,7 @@ export default function PlayerProfilePage() {
                       <div className="text-xs font-mono text-pc-text">{Number(kbmRating.volatility).toFixed(4)}</div>
                     </div>
                   </div>
-                  <div className="grid grid-cols-3 gap-2 text-center pt-2 border-t border-pc-border/50">
+                  <div className="grid grid-cols-1 gap-2 border-t border-pc-border/50 pt-2 text-center min-[360px]:grid-cols-3">
                     <div>
                       <div className="text-xs text-pc-text-muted">W</div>
                       <div className="text-xs font-mono text-emerald-400">{Number(kbmRating.wins)}</div>
