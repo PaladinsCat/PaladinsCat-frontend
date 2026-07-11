@@ -12,6 +12,7 @@ import { championSlug } from "@/lib/utils";
 import { getStatQuality } from "@/lib/stat-quality";
 import {
   getChampionData,
+  getTalentIconPath,
   type ChampionData,
   type ChampionSkill,
   type ChampionTalent,
@@ -630,7 +631,7 @@ function TalentCard({
   maxPickRate?: number;
   href?: string;
 }) {
-  const talentImageUrl = talent.iconUrl || `/images/champions/Talent ${championName} ${talent.name}.png`;
+  const talentImageUrl = talent.iconUrl || getTalentIconPath(championName, talent.name);
   const pickRate = stat && totalMatches && totalMatches > 0 ? (stat.totalPlays / totalMatches) * 100 : 0;
   const quality = stat ? getStatQuality(stat.winRate, pickRate, maxPickRate ?? 100) : null;
 

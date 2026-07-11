@@ -10584,7 +10584,7 @@
         "name": "Thanks, Grandpa",
         "description": "Increase Protection's Shield Health by 200.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Torvald Thanks, Grandpa.avif"
+        "iconUrl": "/images/champions/Talent Torvald Thanks Grandpa.avif"
       },
       {
         "name": "Direct Current",
@@ -10815,7 +10815,7 @@
         "name": "Burn, Monster!",
         "description": "Fire Bomb deals 30% increased damage and applies a 60% reduced healing effect.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Tyra Burn, Monster!.avif"
+        "iconUrl": "/images/champions/Talent Tyra Burn Monster!.avif"
       }
     ],
     "loadouts": [

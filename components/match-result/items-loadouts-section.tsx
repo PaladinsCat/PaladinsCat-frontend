@@ -6,6 +6,7 @@ import type { MatchFactPlayer, MatchPlayerDetail } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { loadBuildReferenceData, type BuildReferenceData } from "@/lib/build-reference";
 import { championSlug } from "@/lib/utils";
+import { canonicalLocalImageUrl } from "@/lib/image-assets";
 
 type Props = { team1Players: MatchPlayerDetail[]; team2Players: MatchPlayerDetail[]; team1Wins: boolean; team2Wins: boolean; factMap: Map<string, MatchFactPlayer> };
 
@@ -33,7 +34,7 @@ function getBuildReference(championId: number, championName: string) {
 }
 
 function Asset({ sources, alt, level, tone = "border-pc-border" }: { sources: Array<string | null | undefined>; alt: string; level?: number | null; tone?: string }) {
-  const candidates = [...new Set(sources.filter((source): source is string => Boolean(source)))];
+  const candidates = [...new Set(sources.filter((source): source is string => Boolean(source)).map(canonicalLocalImageUrl))];
   const [index, setIndex] = useState(0);
   useEffect(() => setIndex(0), [alt, candidates.join("|")]);
   const src = candidates[index];

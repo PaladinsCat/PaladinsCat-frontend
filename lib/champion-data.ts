@@ -1,4 +1,5 @@
 import { championSlug } from "@/lib/utils";
+import { getTalentImageUrl } from "@/lib/image-assets";
 
 export interface ChampionSkill {
   name: string;
@@ -76,5 +77,5 @@ export async function getChampionData(slug: string): Promise<ChampionData | unde
 
 // Talent image paths.
 export function getTalentIconPath(championName: string, talentName: string): string {
-  return `/images/champions/Talent ${championName} ${talentName}.png`;
+  return getTalentImageUrl(championName, talentName);
 }
