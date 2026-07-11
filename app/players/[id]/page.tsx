@@ -58,6 +58,7 @@ interface PlayerData {
   platform_name: string;
   last_seen: string;
   first_seen: string;
+  hirez_profile_refreshed_at: string | null;
 }
 
 interface QueueRating {
@@ -84,6 +85,23 @@ interface PlayerResponse {
   player: PlayerData;
   queueRatings: QueueRating[];
   championRatings: ChampionRating[];
+  profileRefresh: {
+    ttl_seconds: number;
+    refreshed_at: string | null;
+    expires_at: string | null;
+    remaining_seconds: number;
+    expired: boolean;
+    was_expired?: boolean;
+    attempted: boolean;
+    refreshed: boolean;
+    source: 'database' | 'hirez' | 'stale-database';
+    error?: string;
+  };
+}
+
+interface RefreshFeedback {
+  kind: 'warning' | 'success' | 'error';
+  message: string;
 }
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api";
@@ -112,6 +130,13 @@ function formatHours(hours: number): string {
   const h = hours % 24;
   if (d > 0) return `${d}d ${h}h`;
   return `${h}h`;
+}
+
+function formatCooldown(remainingMs: number): string {
+  const totalSeconds = Math.max(0, Math.ceil(remainingMs / 1000));
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
 }
 
 function trendArrow(trend: number): string {
@@ -155,6 +180,9 @@ export default function PlayerProfilePage() {
 
   // Button states
   const [refreshing, setRefreshing] = useState(false);
+  const [refreshFeedback, setRefreshFeedback] = useState<RefreshFeedback | null>(null);
+  const [refreshCooldownUntil, setRefreshCooldownUntil] = useState<number | null>(null);
+  const [refreshClock, setRefreshClock] = useState(() => Date.now());
   const [currentMatch, setCurrentMatch] = useState<any>(null);
   const [showCurrentMatch, setShowCurrentMatch] = useState(false);
   const [fetchKey, setFetchKey] = useState(0);
@@ -190,16 +218,21 @@ export default function PlayerProfilePage() {
     setProfileLoading(true);
 
     fetch(`${API_BASE}/players/${id}`)
-      .then((r) => r.json())
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.error?.message || 'Failed to load player profile');
+        return data as PlayerResponse;
+      })
       .then((data) => {
         if (!cancelled) {
           setResponse(data);
+          setError(null);
           setProfileLoading(false);
         }
       })
-      .catch(() => {
+      .catch((err) => {
         if (!cancelled) {
-          setError("Failed to load player profile");
+          setError(err instanceof Error ? err.message : "Failed to load player profile");
           setProfileLoading(false);
         }
       });
@@ -212,18 +245,70 @@ export default function PlayerProfilePage() {
     fetchProfile();
   }, [fetchKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Refresh handler — force API refresh then re-fetch
+  useEffect(() => {
+    if (!refreshCooldownUntil) return;
+    const timer = window.setInterval(() => {
+      const now = Date.now();
+      setRefreshClock(now);
+      if (now >= refreshCooldownUntil) window.clearInterval(timer);
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [refreshCooldownUntil]);
+
+  const showRefreshCooldown = useCallback((
+    expiresAt: string | null | undefined,
+    remainingSeconds: number | null | undefined,
+    kind: RefreshFeedback['kind'] = 'warning',
+    message = 'Profile is current. Next refresh available in',
+  ) => {
+    const parsedExpiry = expiresAt ? new Date(expiresAt).getTime() : Number.NaN;
+    const fallbackExpiry = Date.now() + Math.max(0, Number(remainingSeconds) || 0) * 1000;
+    setRefreshCooldownUntil(Number.isFinite(parsedExpiry) ? parsedExpiry : fallbackExpiry);
+    setRefreshClock(Date.now());
+    setRefreshFeedback({ kind, message });
+  }, []);
+
+  // Refresh handler — use the database during the TTL and only ask the backend
+  // for an expired profile. The backend independently enforces the same rule.
   const handleRefresh = useCallback(async () => {
+    const freshness = response?.profileRefresh;
+    const expiresAt = freshness?.expires_at ? new Date(freshness.expires_at).getTime() : Number.NaN;
+    if (freshness && Number.isFinite(expiresAt) && expiresAt > Date.now()) {
+      showRefreshCooldown(freshness.expires_at, freshness.remaining_seconds);
+      return;
+    }
+
     setRefreshing(true);
+    setRefreshFeedback(null);
     try {
-      await fetch(`${API_BASE}/players/${id}/refresh`, { method: 'POST' });
+      const res = await fetch(`${API_BASE}/players/${id}/refresh`, { method: 'POST' });
+      const data = await res.json();
+      if (res.status === 429 && data?.error?.code === 'PROFILE_REFRESH_COOLDOWN') {
+        const details = data.error.details || {};
+        showRefreshCooldown(details.expires_at, details.remaining_seconds);
+        return;
+      }
+      if (!res.ok) {
+        throw new Error(data?.error?.message || 'Failed to refresh profile');
+      }
+
+      showRefreshCooldown(
+        data?.profileRefresh?.expires_at,
+        data?.profileRefresh?.remaining_seconds,
+        'success',
+        'Profile refreshed. Next refresh available in',
+      );
       setFetchKey(k => k + 1);
-    } catch {
-      setError("Failed to refresh profile");
+    } catch (err) {
+      setRefreshCooldownUntil(null);
+      setRefreshFeedback({
+        kind: 'error',
+        message: err instanceof Error ? err.message : 'Failed to refresh profile',
+      });
     } finally {
       setRefreshing(false);
     }
-  }, [id]);
+  }, [id, response?.profileRefresh, showRefreshCooldown]);
 
   // Current match handler
   const handleCurrentMatch = useCallback(async () => {
@@ -287,6 +372,14 @@ export default function PlayerProfilePage() {
   const kbmWr = player.kbm_wins + player.kbm_losses > 0
     ? ((player.kbm_wins / (player.kbm_wins + player.kbm_losses)) * 100).toFixed(1)
     : "—";
+  const refreshRemainingMs = refreshCooldownUntil
+    ? Math.max(0, refreshCooldownUntil - refreshClock)
+    : 0;
+  const refreshFeedbackColor = refreshFeedback?.kind === 'error'
+    ? 'text-red-400 bg-red-500/10 border-red-500/20'
+    : refreshFeedback?.kind === 'success'
+      ? 'text-emerald-300 bg-emerald-500/10 border-emerald-500/20'
+      : 'text-amber-300 bg-amber-500/10 border-amber-500/20';
 
   return (
     <div className="space-y-5">
@@ -311,7 +404,7 @@ export default function PlayerProfilePage() {
             onClick={handleRefresh}
             disabled={refreshing}
             className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-pc-bg-secondary/80 hover:bg-pc-bg-secondary text-pc-text border border-pc-border/50 transition-colors ${refreshing ? 'opacity-50 cursor-not-allowed' : ''}`}
-            title="Refresh profile from API"
+            title="Refresh profile (10-minute cooldown)"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={refreshing ? 'animate-spin' : ''}><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
             {refreshing ? 'Refreshing...' : 'Refresh'}
@@ -351,6 +444,19 @@ export default function PlayerProfilePage() {
             </button>
           )}
         </div>
+        {refreshFeedback && (
+          <div
+            className={`mb-3 ml-auto w-fit max-w-full rounded-lg border px-3 py-2 text-xs ${refreshFeedbackColor}`}
+            role="status"
+            aria-live="polite"
+          >
+            {refreshCooldownUntil
+              ? refreshRemainingMs > 0
+                ? `${refreshFeedback.message} ${formatCooldown(refreshRemainingMs)}.`
+                : 'Profile can now be refreshed.'
+              : refreshFeedback.message}
+          </div>
+        )}
 
         <div className="flex items-start gap-4">
           {/* Avatar */}
