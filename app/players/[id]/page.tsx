@@ -629,7 +629,7 @@ export default function PlayerProfilePage() {
                 <StatRow label="Playtime" value={formatHours(player.hours_played)} />
                 <StatRow label="Achievements" value={formatNumber(player.total_achievements)} />
                 <StatRow label="Total XP" value={formatLargeNumber(player.total_xp)} />
-                <StatRow label="Worshippers" value={formatLargeNumber(player.total_worshippers)} />
+                <StatRow label="Champion XP" value={formatLargeNumber(player.total_worshippers)} />
               </StatGrid>
               {player.personal_status_message && (
                 <div className="mt-3 pt-3 border-t border-pc-border/50">
