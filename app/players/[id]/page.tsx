@@ -391,7 +391,7 @@ export default function PlayerProfilePage() {
       {/* ── Header ── */}
       <div className="pc-card">
         {/* Action buttons — top right */}
-        <div className="flex items-center justify-end gap-2 mb-3">
+        <div className="relative flex items-center justify-end gap-2 mb-3">
           <button
             onClick={handleCurrentMatch}
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-pc-bg-secondary/80 hover:bg-pc-bg-secondary text-pc-text border border-pc-border/50 transition-colors"
@@ -443,20 +443,20 @@ export default function PlayerProfilePage() {
               Cheater
             </button>
           )}
+          {refreshFeedback && (
+            <div
+              className={`pointer-events-none absolute right-0 top-full z-20 mt-2 w-max max-w-[min(24rem,calc(100vw-3rem))] rounded-lg border px-3 py-2 text-xs shadow-lg ${refreshFeedbackColor}`}
+              role="status"
+              aria-live="polite"
+            >
+              {refreshCooldownUntil
+                ? refreshRemainingMs > 0
+                  ? `${refreshFeedback.message} ${formatCooldown(refreshRemainingMs)}.`
+                  : 'Profile can now be refreshed.'
+                : refreshFeedback.message}
+            </div>
+          )}
         </div>
-        {refreshFeedback && (
-          <div
-            className={`mb-3 ml-auto w-fit max-w-full rounded-lg border px-3 py-2 text-xs ${refreshFeedbackColor}`}
-            role="status"
-            aria-live="polite"
-          >
-            {refreshCooldownUntil
-              ? refreshRemainingMs > 0
-                ? `${refreshFeedback.message} ${formatCooldown(refreshRemainingMs)}.`
-                : 'Profile can now be refreshed.'
-              : refreshFeedback.message}
-          </div>
-        )}
 
         <div className="flex items-start gap-4">
           {/* Avatar */}
