@@ -12,6 +12,7 @@ import ReportModal from "@/components/ReportModal";
 import { formatLocalDate, formatLocalDateTime } from "@/lib/time-format";
 import { ErrorState, LoadingOverlay, LoadingPanel } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
+import SmartImage from "@/components/SmartImage";
 
 interface PlayerData {
   id: string;
@@ -801,6 +802,16 @@ export default function PlayerProfilePage() {
 
         {/* Right column: Rating + Champion Ratings (1/3) */}
         <div className="lg:col-span-1 space-y-5">
+          {/* Saved Loadouts */}
+          <div>
+            <h2 className="pc-card-title shadow-sm">Loadouts</h2>
+            <Link href={`/players/${id}/loadouts`} className="group flex items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-3 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary">
+              <SmartImage src="/images/icons/Player_Loadouts_Icon.png" alt="" className="h-11 w-11 shrink-0 object-contain" />
+              <div className="min-w-0 flex-1"><div className="text-sm font-semibold text-pc-text group-hover:text-pc-accent">Player Loadouts</div><div className="mt-0.5 text-xs text-pc-text-muted">View saved decks by champion</div></div>
+              <span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent">→</span>
+            </Link>
+          </div>
+
           {/* Glicko Rating */}
           <div>
             <h2 className="pc-card-title shadow-sm">Rating</h2>

@@ -1442,6 +1442,90 @@ export async function fetchPlayerMatches(id: string, params?: { limit?: string; 
   }));
 }
 
+export interface PlayerLoadoutFreshness {
+  ttlSeconds: number;
+  refreshedAt: string | null;
+  expiresAt: string | null;
+  remainingSeconds: number;
+  expired: boolean;
+  manualRefreshAvailableAt: string | null;
+  manualRefreshRemainingSeconds: number;
+}
+
+export interface PlayerLoadout {
+  id: number;
+  deckId: number | null;
+  deckKey: string;
+  championId: number;
+  championName: string;
+  loadoutName: string;
+  cardIds: number[];
+  cardLevels: number[];
+  talentId: number | null;
+  fetchedAt: string;
+  updatedAt: string;
+}
+
+export interface PlayerLoadoutsResponse {
+  loadouts: PlayerLoadout[];
+  freshness: PlayerLoadoutFreshness;
+  refreshed: boolean;
+  refreshError: string | null;
+}
+
+function mapPlayerLoadoutFreshness(raw: any): PlayerLoadoutFreshness {
+  return {
+    ttlSeconds: Number(raw?.ttl_seconds ?? 86_400),
+    refreshedAt: raw?.refreshed_at ?? null,
+    expiresAt: raw?.expires_at ?? null,
+    remainingSeconds: Number(raw?.remaining_seconds ?? 0),
+    expired: raw?.expired !== false,
+    manualRefreshAvailableAt: raw?.manual_refresh_available_at ?? null,
+    manualRefreshRemainingSeconds: Number(raw?.manual_refresh_remaining_seconds ?? 0),
+  };
+}
+
+function mapPlayerLoadout(raw: any): PlayerLoadout {
+  return {
+    id: Number(raw.id),
+    deckId: raw.deck_id == null ? null : Number(raw.deck_id),
+    deckKey: String(raw.deck_key ?? ""),
+    championId: Number(raw.champion_id),
+    championName: String(raw.champion_name ?? `Champion ${raw.champion_id}`),
+    loadoutName: String(raw.loadout_name ?? "Unnamed Loadout"),
+    cardIds: Array.isArray(raw.card_ids) ? raw.card_ids.map(Number) : [],
+    cardLevels: Array.isArray(raw.card_levels) ? raw.card_levels.map(Number) : [],
+    talentId: raw.talent_id == null ? null : Number(raw.talent_id),
+    fetchedAt: String(raw.fetched_at ?? ""),
+    updatedAt: String(raw.updated_at ?? ""),
+  };
+}
+
+export async function fetchPlayerLoadouts(playerId: string | number): Promise<PlayerLoadoutsResponse> {
+  const raw = await fetchJson<any>(`/players/${playerId}/loadouts`);
+  return {
+    loadouts: Array.isArray(raw.loadouts) ? raw.loadouts.map(mapPlayerLoadout) : [],
+    freshness: mapPlayerLoadoutFreshness(raw.freshness),
+    refreshed: raw.refreshed === true,
+    refreshError: raw.refresh_error ?? null,
+  };
+}
+
+export async function refreshPlayerLoadouts(playerId: string | number): Promise<PlayerLoadoutsResponse> {
+  const raw = await fetchJson<any>(`/players/${playerId}/loadouts/refresh`, { method: "POST" });
+  return {
+    loadouts: Array.isArray(raw.loadouts) ? raw.loadouts.map(mapPlayerLoadout) : [],
+    freshness: mapPlayerLoadoutFreshness(raw.freshness),
+    refreshed: raw.refreshed === true,
+    refreshError: null,
+  };
+}
+
+export async function fetchPlayerLoadoutDeck(playerId: string | number, loadoutId: string | number): Promise<{ loadout: PlayerLoadout; freshness: PlayerLoadoutFreshness }> {
+  const raw = await fetchJson<any>(`/players/${playerId}/loadouts/decks/${loadoutId}`);
+  return { loadout: mapPlayerLoadout(raw.loadout), freshness: mapPlayerLoadoutFreshness(raw.freshness) };
+}
+
 // ── Stats ──
 
 export async function fetchLeaderboard(params?: { tier?: string; region?: string }): Promise<LeaderboardEntry[]> {
