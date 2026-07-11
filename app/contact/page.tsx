@@ -27,13 +27,6 @@ export default function ContactPage() {
             primary: true,
           },
           {
-            title: "GitHub",
-            desc: "Found a bug or want to contribute? Open an issue or submit a pull request on our repository.",
-            cta: "View on GitHub",
-            href: "https://github.com",
-            primary: false,
-          },
-          {
             title: "Email",
             desc: "For business inquiries, partnerships, or anything else — drop us a line directly.",
             cta: "nabicook@proton.me",
