@@ -3,20 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, Clock, RefreshCw } from "lucide-react";
 import { fetchHirezServiceStatus, type HirezServiceStatus } from "@/lib/api-client";
+import { formatLocalTime } from "@/lib/time-format";
 
 const REFRESH_MS = 60_000;
-
-function formatUtc(value: string | null | undefined): string | null {
-  if (!value) return null;
-  const timestamp = new Date(value);
-  if (!Number.isFinite(timestamp.getTime())) return null;
-  return timestamp.toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-    timeZone: "UTC",
-    timeZoneName: "short",
-  });
-}
 
 export default function HirezOutageBanner() {
   const [status, setStatus] = useState<HirezServiceStatus | null>(null);
@@ -38,7 +27,7 @@ export default function HirezOutageBanner() {
   }, []);
 
   const primary = status?.activeOutages[0] ?? null;
-  const nextProbe = useMemo(() => formatUtc(primary?.nextProbeAt), [primary?.nextProbeAt]);
+  const nextProbe = useMemo(() => formatLocalTime(primary?.nextProbeAt), [primary?.nextProbeAt]);
 
   if (!status || status.status === "ok") return null;
 

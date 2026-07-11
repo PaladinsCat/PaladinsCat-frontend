@@ -2030,6 +2030,7 @@ export interface AuthUser {
   isApproved: boolean;
   createdAt: string;
   lastLogin: string | null;
+  timeZone: string | null;
 }
 
 export interface AuthSession {
@@ -2082,7 +2083,7 @@ export function clearAuth() {
 export async function register(username: string, email: string, password: string): Promise<AuthSession> {
   const raw = await fetchJson<{
     message: string;
-    user: { id: number; username: string; email?: string | null; avatar_url?: string | null; bio?: string | null; is_admin?: boolean; is_approved?: boolean; created_at?: string; last_login?: string | null };
+    user: { id: number; username: string; email?: string | null; avatar_url?: string | null; bio?: string | null; is_admin?: boolean; is_approved?: boolean; created_at?: string; last_login?: string | null; time_zone?: string | null };
     token: string;
     expires_at?: string;
   }>(`/auth/register`, {
@@ -2106,6 +2107,7 @@ export async function register(username: string, email: string, password: string
       isApproved: raw.user.is_approved ?? false,
       createdAt: raw.user.created_at ?? new Date().toISOString(),
       lastLogin: raw.user.last_login ?? null,
+      timeZone: raw.user.time_zone ?? null,
     },
     token: raw.token,
     expiresAt: raw.expires_at ?? new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(),
@@ -2117,7 +2119,7 @@ export async function register(username: string, email: string, password: string
 
 export async function login(username: string, password: string): Promise<AuthSession> {
   const raw = await fetchJson<{
-    user: { id: number; username: string; email?: string | null; avatar_url?: string | null; bio?: string | null; is_admin?: boolean; is_approved?: boolean; created_at?: string; last_login?: string | null };
+    user: { id: number; username: string; email?: string | null; avatar_url?: string | null; bio?: string | null; is_admin?: boolean; is_approved?: boolean; created_at?: string; last_login?: string | null; time_zone?: string | null };
     token: string;
     expires_at?: string;
   }>(`/auth/login`, {
@@ -2137,6 +2139,7 @@ export async function login(username: string, password: string): Promise<AuthSes
       isApproved: raw.user.is_approved ?? false,
       createdAt: raw.user.created_at ?? new Date().toISOString(),
       lastLogin: raw.user.last_login ?? null,
+      timeZone: raw.user.time_zone ?? null,
     },
     token: raw.token,
     expiresAt: raw.expires_at ?? new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(),
@@ -2183,6 +2186,7 @@ export async function getMe(_userId?: number): Promise<AuthUser> {
     is_approved?: boolean;
     created_at?: string;
     last_login?: string | null;
+    time_zone?: string | null;
   }>(`/auth/me`, {
     headers: { "Authorization": `Bearer ${token}` },
   });
@@ -2197,6 +2201,7 @@ export async function getMe(_userId?: number): Promise<AuthUser> {
     isApproved: raw.is_approved ?? false,
     createdAt: raw.created_at ?? "",
     lastLogin: raw.last_login ?? null,
+    timeZone: raw.time_zone ?? null,
   };
 }
 
@@ -2223,6 +2228,7 @@ export async function getUserProfile(userId: number): Promise<AuthUser> {
     isApproved: raw.is_approved ?? false,
     createdAt: raw.created_at,
     lastLogin: raw.last_login,
+    timeZone: null,
   };
 }
 
@@ -2247,9 +2253,28 @@ export async function getAccountDetails(): Promise<AccountDetails> {
   if (!token) {
     throw new Error("Not authenticated");
   }
-  return fetchJson<AccountDetails>("/auth/account", {
+  const raw = await fetchJson<{
+    user: { id: number; username: string; email: string; avatar_url: string | null; bio: string | null; is_admin?: boolean; is_approved?: boolean; linked_player_id: number | null; created_at: string; last_login: string | null; time_zone?: string | null };
+    linkedPlayer: AccountDetails["linkedPlayer"];
+  }>("/auth/account", {
     headers: { Authorization: `Bearer ${token}` },
   });
+  return {
+    user: {
+      id: raw.user.id,
+      username: raw.user.username,
+      email: raw.user.email,
+      avatarUrl: raw.user.avatar_url,
+      bio: raw.user.bio,
+      isAdmin: raw.user.is_admin ?? false,
+      isApproved: raw.user.is_approved ?? false,
+      createdAt: raw.user.created_at,
+      lastLogin: raw.user.last_login,
+      timeZone: raw.user.time_zone ?? null,
+      linked_player_id: raw.user.linked_player_id,
+    },
+    linkedPlayer: raw.linkedPlayer,
+  };
 }
 
 export async function linkPlayerId(playerId: number): Promise<{ message: string; player: { id: number; name: string } }> {
@@ -2288,7 +2313,7 @@ export async function changePassword(currentPassword: string, newPassword: strin
   });
 }
 
-export async function updateProfile(data: { avatar_url?: string; bio?: string }): Promise<{ message: string }> {
+export async function updateProfile(data: { avatar_url?: string | null; bio?: string | null; time_zone?: string }): Promise<{ message: string }> {
   const token = getAuthToken();
   if (!token) {
     throw new Error("Not authenticated");
@@ -3028,6 +3053,7 @@ export async function fetchMatchSearch(params?: {
   region?: string;
   date?: string;
   hour?: string;
+  timeZone?: string;
   from?: string;
   to?: string;
   page?: string;

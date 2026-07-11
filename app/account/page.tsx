@@ -3,6 +3,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
+import { useTimeZone } from "@/lib/time-zone-context";
+import { formatLocalDate } from "@/lib/time-format";
+import { fixedUtcOffsetFromTimeZone, fixedUtcOffsetToTimeZone, getFixedUtcOffsetOptions, getSupportedTimeZones } from "@/lib/time-zone";
 import {
   getAccountDetails,
   linkPlayerId,
@@ -16,6 +19,7 @@ import {
 
 export default function AccountPage() {
   const { user: authUser, refresh } = useAuth();
+  const { timeZone, setTimeZone } = useTimeZone();
   const router = useRouter();
   const [account, setAccount] = useState<AccountDetails | null>(null);
   const [loading, setLoading] = useState(true);
@@ -38,6 +42,16 @@ export default function AccountPage() {
   // ── Profile update state ──
   const [bio, setBio] = useState("");
   const [savingProfile, setSavingProfile] = useState(false);
+  const [savingTimeZone, setSavingTimeZone] = useState(false);
+  const [selectedTimeZone, setSelectedTimeZone] = useState(timeZone);
+  const [selectedUtcOffset, setSelectedUtcOffset] = useState(fixedUtcOffsetFromTimeZone(timeZone));
+  const timeZones = getSupportedTimeZones();
+  const utcOffsetOptions = getFixedUtcOffsetOptions();
+
+  useEffect(() => {
+    setSelectedTimeZone(timeZone);
+    setSelectedUtcOffset(fixedUtcOffsetFromTimeZone(timeZone));
+  }, [timeZone]);
 
   const loadAccount = useCallback(async () => {
     try {
@@ -172,6 +186,22 @@ export default function AccountPage() {
     }
   };
 
+  const handleSaveTimeZone = async () => {
+    setSavingTimeZone(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      await updateProfile({ time_zone: selectedTimeZone });
+      setTimeZone(selectedTimeZone);
+      await refresh();
+      setSuccess("Time zone updated");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update time zone");
+    } finally {
+      setSavingTimeZone(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-[50vh] flex items-center justify-center">
@@ -212,6 +242,51 @@ export default function AccountPage() {
         </div>
       )}
 
+      {/* ── Time Zone ── */}
+      <div className="bg-pc-bg-elevated rounded-lg border border-pc-border p-6 mb-6">
+        <h2 className="text-lg font-semibold text-pc-text mb-2">Time Zone</h2>
+        <p className="text-pc-text-secondary text-sm mb-4">
+          All timestamps and match-search hour windows use this time zone. Choose an IANA zone for daylight saving time, or a fixed UTC offset.
+        </p>
+        <div className="flex flex-col lg:flex-row gap-3">
+          <div className="flex-1">
+            <label className="block text-xs text-pc-text-muted mb-1">IANA time zone</label>
+            <select
+              value={selectedUtcOffset ? "" : selectedTimeZone}
+              onChange={(event) => {
+                setSelectedUtcOffset("");
+                setSelectedTimeZone(event.target.value);
+              }}
+              className="w-full px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
+            >
+              <option value="" disabled>Select a time zone</option>
+              {timeZones.map((zone) => <option key={zone} value={zone}>{zone}</option>)}
+            </select>
+          </div>
+          <div className="flex-1">
+            <label className="block text-xs text-pc-text-muted mb-1">Fixed UTC offset</label>
+            <select
+              value={selectedUtcOffset}
+              onChange={(event) => {
+                setSelectedUtcOffset(event.target.value);
+                if (event.target.value) setSelectedTimeZone(fixedUtcOffsetToTimeZone(Number(event.target.value)));
+              }}
+              className="w-full px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
+            >
+              <option value="">Use IANA time zone</option>
+              {utcOffsetOptions.map((offset) => <option key={offset.value} value={offset.value}>{offset.label}</option>)}
+            </select>
+          </div>
+          <button
+            onClick={handleSaveTimeZone}
+            disabled={savingTimeZone || selectedTimeZone === timeZone}
+            className="px-4 py-2 lg:self-end bg-pc-accent hover:bg-pc-accent-secondary text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+          >
+            {savingTimeZone ? "Saving..." : "Save Time Zone"}
+          </button>
+        </div>
+      </div>
+
       {/* ── Profile Info ── */}
       <div className="bg-pc-bg-elevated rounded-lg border border-pc-border p-6 mb-6">
         <h2 className="text-lg font-semibold text-pc-text mb-4">Profile</h2>
@@ -238,7 +313,7 @@ export default function AccountPage() {
               Member Since
             </label>
             <div className="px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text">
-              {new Date(user.createdAt).toLocaleDateString()}
+              {formatLocalDate(user.createdAt)}
             </div>
           </div>
           <div>
@@ -246,7 +321,7 @@ export default function AccountPage() {
               Last Login
             </label>
             <div className="px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text">
-              {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : "—"}
+              {formatLocalDate(user.lastLogin)}
             </div>
           </div>
         </div>

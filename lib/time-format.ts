@@ -1,3 +1,5 @@
+import { getPreferredTimeZone } from "@/lib/time-zone";
+
 const HAS_EXPLICIT_TIME_ZONE = /(?:Z|[+-]\d{2}:?\d{2})$/i;
 const SQL_TIMESTAMP = /^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?)$/;
 
@@ -20,6 +22,7 @@ export function formatLocalDateTime(value: string | null | undefined): string {
   return date.toLocaleString(undefined, {
     dateStyle: "medium",
     timeStyle: "short",
+    timeZone: getPreferredTimeZone(),
   });
 }
 
@@ -28,6 +31,7 @@ export function formatLocalDate(value: string | null | undefined): string {
   if (!date) return "-";
   return date.toLocaleDateString(undefined, {
     dateStyle: "medium",
+    timeZone: getPreferredTimeZone(),
   });
 }
 
@@ -37,6 +41,7 @@ export function formatLocalMonthDay(value: string | null | undefined): string {
   return date.toLocaleDateString(undefined, {
     month: "short",
     day: "numeric",
+    timeZone: getPreferredTimeZone(),
   });
 }
 
@@ -48,6 +53,7 @@ export function formatLocalHourFromUtcBucket(date: string | null | undefined, ho
   return localDate.toLocaleTimeString(undefined, {
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: getPreferredTimeZone(),
   });
 }
 
@@ -70,5 +76,17 @@ export function formatRelativeTime(value: string | null | undefined): string {
     month: "short",
     day: "numeric",
     year: "numeric",
+    timeZone: getPreferredTimeZone(),
+  });
+}
+
+export function formatLocalTime(value: string | null | undefined): string {
+  const date = parseBackendDate(value);
+  if (!date) return "-";
+  return date.toLocaleTimeString(undefined, {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: getPreferredTimeZone(),
+    timeZoneName: "short",
   });
 }
