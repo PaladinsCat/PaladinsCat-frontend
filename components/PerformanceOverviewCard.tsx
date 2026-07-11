@@ -18,62 +18,33 @@ function formatMetric(key: string, value: number): string {
 
 export function PerformanceOverviewCard({
   metrics,
-  dataset,
 }: {
   metrics: MetricRow[];
-  dataset: {
-    matches: number;
-    players: number;
-    avgDuration: string;
-    avgKda: string;
-  };
 }) {
   const formatCompact = (value: number) => {
     if (Math.abs(value) >= 1000) return Math.round(value).toLocaleString();
     return value.toFixed(1);
   };
   return (
-    <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 space-y-4">
+    <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4">
       <div className="space-y-2">
         {metrics.map(({ key, label, color, p10, p25, mean, p75, p90 }) => (
           <div key={key} className="flex items-center gap-3">
             <div className="w-14 shrink-0 text-right">
-              <div className="flex items-center justify-between gap-1">
-                <span className="text-[10px] font-bold text-pc-text">{label}</span>
-              </div>
+              <span className="text-[10px] font-bold text-pc-text">{label}</span>
               <div className="text-xs font-bold tabular-nums" style={{ color }}>
                 {formatMetric(key, mean)}
               </div>
             </div>
-
             <div className="flex-1">
               <RangeBar color={color} mean={mean} p10={p10} p25={p25} p75={p75} p90={p90} />
             </div>
-
             <div className="w-12 shrink-0 text-[9px] text-pc-text-muted tabular-nums leading-tight">
               <div>{formatCompact(p10)}</div>
               <div className="text-pc-text-secondary">{formatCompact(p90)}</div>
             </div>
           </div>
         ))}
-      </div>
-
-      <div className="border-t border-pc-border pt-2">
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px]">
-          <span className="text-pc-text-muted font-semibold">Dataset</span>
-          <span className="text-pc-text-secondary tabular-nums">
-            {dataset.matches.toLocaleString()} matches
-          </span>
-          <span className="text-pc-text-secondary tabular-nums">
-            {dataset.players.toLocaleString()} players
-          </span>
-          <span className="text-pc-text-secondary tabular-nums">
-            Avg {dataset.avgDuration}
-          </span>
-          <span className="text-pc-text-secondary tabular-nums">
-            KDA {dataset.avgKda}
-          </span>
-        </div>
       </div>
     </div>
   );

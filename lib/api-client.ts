@@ -520,12 +520,57 @@ export interface ItemStat {
   itemName: string;
   totalUsage: number;
   winRate: number;
+  slots: ItemDimensionStat[];
+  levels: ItemDimensionStat[];
 }
 
 export interface MapStat {
   name: string;
   totalMatches: number;
+  wins: number;
+  losses: number;
+  winRate: number;
   avgDurationSeconds: number;
+}
+
+export interface MapChampionStat {
+  championId: number;
+  championName: string;
+  totalPlays: number;
+  wins: number;
+  losses: number;
+  winRate: number;
+  pickRate: number;
+  banRate: number;
+}
+
+export interface MapTalentStat {
+  talentId: number;
+  talentName: string;
+  championId: number;
+  championName: string;
+  totalPlays: number;
+  wins: number;
+  losses: number;
+  winRate: number;
+  pickRate: number;
+}
+
+export interface MapItemStat {
+  itemId: number;
+  itemName: string;
+  totalUses: number;
+  wins: number;
+  losses: number;
+  winRate: number;
+  pickRate: number;
+}
+
+export interface MapDetailStats {
+  map: MapStat;
+  champions: MapChampionStat[];
+  talents: MapTalentStat[];
+  items: MapItemStat[];
 }
 
 export interface HourlyMatchCount {
@@ -1171,6 +1216,28 @@ export interface UniversalSearchResult {
 }
 
 export interface UniversalSearchResponse {
+export interface ItemDimensionStat {
+  slot?: number;
+  level?: number;
+  totalUses: number;
+  wins: number;
+  losses: number;
+  winRate: number;
+}
+
+export interface ItemDetailStats {
+  itemId: number;
+  itemName: string;
+  mode: 'ranked' | 'casual';
+  totalUses: number;
+  wins: number;
+  losses: number;
+  winRate: number;
+  slots: ItemDimensionStat[];
+  levels: ItemDimensionStat[];
+  breakdown: ItemDimensionStat[];
+}
+
   query: string;
   total: number;
   data: UniversalSearchResult[];
@@ -1497,6 +1564,8 @@ export async function fetchMapStats(params?: { queueId?: number; limit?: number 
     return [];
   }
 }
+      slots?: Array<{ slot: number | string; total_uses: number | string; win_rate: number | string }>;
+      levels?: Array<{ item_level: number | string; total_uses: number | string; win_rate: number | string }>;
 
 export interface ChampionLeaderboardEntry {
   rank: number;
@@ -1504,12 +1573,47 @@ export interface ChampionLeaderboardEntry {
   playerName: string;
   mu: number;
   phi: number;
+      slots: (r.slots ?? []).map((slot) => ({
+        slot: num(slot.slot), totalUses: num(slot.total_uses), wins: 0, losses: 0, winRate: num(slot.win_rate),
+      })),
+      levels: (r.levels ?? []).map((level) => ({
+        level: num(level.item_level), totalUses: num(level.total_uses), wins: 0, losses: 0, winRate: num(level.win_rate),
+      })),
   matchesPlayed: number;
   wins: number;
   losses: number;
 }
 
 export async function fetchChampionLeaderboard(championId: number, limit = 25): Promise<ChampionLeaderboardEntry[]> {
+export async function fetchItemDetail(itemId: number, mode: 'ranked' | 'casual' = 'ranked'): Promise<ItemDetailStats | null> {
+  try {
+    const raw = await fetchJson<any>(`/stats/items/${itemId}?mode=${mode}`);
+    const number = (value: unknown) => Number(value ?? 0);
+    const dimension = (row: any): ItemDimensionStat => ({
+      slot: row.slot == null ? undefined : number(row.slot),
+      level: row.item_level == null ? undefined : number(row.item_level),
+      totalUses: number(row.total_uses),
+      wins: number(row.wins),
+      losses: number(row.losses),
+      winRate: number(row.win_rate),
+    });
+    return {
+      itemId: number(raw.item_id),
+      itemName: raw.item_name ?? 'Unknown item',
+      mode: raw.mode === 'casual' ? 'casual' : 'ranked',
+      totalUses: number(raw.total_uses),
+      wins: number(raw.wins),
+      losses: number(raw.losses),
+      winRate: number(raw.win_rate),
+      slots: (raw.slots ?? []).map(dimension),
+      levels: (raw.levels ?? []).map(dimension),
+      breakdown: (raw.breakdown ?? []).map(dimension),
+    };
+  } catch {
+    return null;
+  }
+}
+
   const query = new URLSearchParams({ championId: String(championId), limit: String(limit) });
   const raw = await fetchJson<Array<{
     rank: number; playerId: number; playerName: string;
@@ -1518,11 +1622,17 @@ export async function fetchChampionLeaderboard(championId: number, limit = 25): 
   return raw.map((r) => ({
     rank: r.rank, playerId: r.playerId, playerName: r.playerName,
     mu: r.mu, phi: r.phi, matchesPlayed: r.matchesPlayed, wins: r.wins, losses: r.losses,
+      wins: number | string;
+      losses: number | string;
+      win_rate: number | string;
   }));
 }
 
 // ── Champion Talent Stats ──
 
+      wins: Number(r.wins ?? 0),
+      losses: Number(r.losses ?? 0),
+      winRate: Number(r.win_rate ?? 0),
 export interface ChampionTalentStat {
   talentId: number;
   talentName: string;
@@ -1530,6 +1640,22 @@ export interface ChampionTalentStat {
   wins: number;
   losses: number;
   winRate: number;
+export async function fetchMapDetail(mapName: string): Promise<MapDetailStats | null> {
+  try {
+    const raw = await fetchJson<any>(`/stats/maps/${encodeURIComponent(mapName)}`);
+    const number = (value: unknown) => Number(value ?? 0);
+    const map = raw.map;
+    return {
+      map: { name: map.map, totalMatches: number(map.total_matches), wins: number(map.wins), losses: number(map.losses), winRate: number(map.win_rate), avgDurationSeconds: number(map.avg_duration_seconds) },
+      champions: (raw.champions ?? []).map((row: any) => ({ championId: number(row.champion_id), championName: row.champion_name, totalPlays: number(row.total_plays), wins: number(row.wins), losses: number(row.losses), winRate: number(row.win_rate), pickRate: number(row.pick_rate), banRate: number(row.ban_rate) })),
+      talents: (raw.talents ?? []).map((row: any) => ({ talentId: number(row.talent_id), talentName: row.talent_name, championId: number(row.champion_id), championName: row.champion_name, totalPlays: number(row.total_plays), wins: number(row.wins), losses: number(row.losses), winRate: number(row.win_rate), pickRate: number(row.pick_rate) })),
+      items: (raw.items ?? []).map((row: any) => ({ itemId: number(row.item_id), itemName: row.item_name, totalUses: number(row.total_uses), wins: number(row.wins), losses: number(row.losses), winRate: number(row.win_rate), pickRate: number(row.pick_rate) })),
+    };
+  } catch {
+    return null;
+  }
+}
+
 }
 
 export interface ChampionTalentStatsResponse {

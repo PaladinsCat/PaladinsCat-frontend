@@ -29,7 +29,6 @@ const nextConfig: NextConfig = {
     ];
     return [
       ...pages.map((src) => ({ source: src, destination: src })),
-      { source: "/stats/:path*", destination: `${apiDestination}/stats/:path*` },
       // Browser clients call same-origin /api/*; the Next server strips that
       // proxy prefix and forwards to the backend service. This keeps the public
       // website working even when the direct backend debug port is filtered.

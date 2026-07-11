@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   fetchChampions,
-  fetchDatabaseStats,
   fetchItems,
   fetchMapStats,
   fetchPerformanceMetrics,
@@ -24,8 +23,8 @@ const ROLES = ["Frontline", "Damage", "Flank", "Support"] as const;
 
 type SortKey = "pickRate" | "winRate";
 type ItemCategory = "Defense" | "Utility" | "Healing" | "Offense";
-type PageItemStat = { name: string; pickRate: number; winRate: number; category: ItemCategory; icon: string };
-type PageMapStat = { name: string; matches: number; avgDurationSeconds: number };
+type PageItemStat = { itemId: number; name: string; pickRate: number; winRate: number; category: ItemCategory; icon: string };
+type PageMapStat = { name: string; matches: number; wins: number; losses: number; winRate: number; avgDurationSeconds: number };
 
 const EMPTY_METRICS = {
   dpm: { p10: 0, p25: 0, p75: 0, p90: 0, mean: 0, median: 0, mode: 0 },
@@ -65,6 +64,7 @@ function itemIcon(name: string) {
 function mapItemStats(items: ItemStat[]): PageItemStat[] {
   const totalUsage = items.reduce((sum, item) => sum + item.totalUsage, 0);
   return items.map((item) => ({
+    itemId: item.itemId,
     name: item.itemName,
     pickRate: totalUsage > 0 ? Number(((item.totalUsage / totalUsage) * 100).toFixed(1)) : 0,
     winRate: Number(item.winRate.toFixed(1)),
@@ -77,24 +77,18 @@ function mapMapStats(maps: MapStat[]): PageMapStat[] {
   return maps.map((map) => ({
     name: map.name,
     matches: map.totalMatches,
+    wins: map.wins,
+    losses: map.losses,
+    winRate: map.winRate,
     avgDurationSeconds: map.avgDurationSeconds,
   }));
-}
-
-function formatDuration(seconds: number) {
-  if (!Number.isFinite(seconds) || seconds <= 0) return "--";
-  const minutes = Math.floor(seconds / 60);
-  const secs = Math.round(seconds % 60);
-  return `${minutes}:${secs.toString().padStart(2, "0")}`;
 }
 
 export default function StatsPage() {
   const [itemSort, setItemSort] = useState<SortKey>("pickRate");
   const [itemSortDir, setItemSortDir] = useState<"asc" | "desc">("desc");
-  const [mapSortDir, setMapSortDir] = useState<"asc" | "desc">("desc");
   const [expandedBannedId, setExpandedBannedId] = useState<number | null>(null);
   const [metrics, setMetrics] = useState(EMPTY_METRICS);
-  const [datasetCounts, setDatasetCounts] = useState({ matches: 0, players: 0 });
   const [items, setItems] = useState<PageItemStat[]>([]);
   const [maps, setMaps] = useState<PageMapStat[]>([]);
   const [tiers, setTiers] = useState<TierStat[]>([]);
@@ -131,16 +125,6 @@ export default function StatsPage() {
     fetchMapStats({ queueId: 486, limit: 25 }).then((rows) => setMaps(mapMapStats(rows))).catch(() => {});
     fetchTiers({ source: "profiles" }).then(setTiers).catch(() => {});
     fetchTiers({ source: "matches" }).then(setActiveTiers).catch(() => {});
-    fetchDatabaseStats()
-      .then((stats) => {
-        if (!stats) return;
-        const tableCounts = new Map(stats.tables.map((table) => [table.name, table.rowCount]));
-        setDatasetCounts({
-          matches: tableCounts.get("matches") ?? 0,
-          players: tableCounts.get("players") ?? 0,
-        });
-      })
-      .catch(() => {});
   }, []);
 
   const toggleItemSort = (key: SortKey) => {
@@ -158,9 +142,7 @@ export default function StatsPage() {
     return itemSortDir === "desc" ? bv - av : av - bv;
   });
 
-  const sortedMaps = [...maps].sort((a, b) => {
-    return mapSortDir === "desc" ? b.matches - a.matches : a.matches - b.matches;
-  });
+  const sortedMaps = maps;
 
   // Consolidate tier slices into major tiers for display
   function consolidateTiers(tierData: TierStat[]): TierStat[] {
@@ -193,9 +175,6 @@ export default function StatsPage() {
   const activeDisplayTiers = consolidateTiers(activeTiers);
   const maxTierCount = Math.max(1, ...displayTiers.map((tier) => tier.totalPlays));
   const maxActiveTierCount = Math.max(1, ...activeDisplayTiers.map((tier) => tier.totalPlays));
-  const avgDurationSeconds = maps.reduce((sum, map) => sum + map.avgDurationSeconds * map.matches, 0) / Math.max(1, maps.reduce((sum, map) => sum + map.matches, 0));
-  const maxItemPickRate = Math.max(1, ...items.map((item) => item.pickRate));
-  const maxChampionPickRate = Math.max(1, ...champions.map((champion) => champion.pickRate ?? 0));
 
   return (
     <div className="space-y-8">
@@ -244,15 +223,8 @@ export default function StatsPage() {
             };
           });
 
-          const datasetPayload = {
-            matches: datasetCounts.matches,
-            players: datasetCounts.players,
-            avgDuration: formatDuration(avgDurationSeconds),
-            avgKda: metrics.kda.mean ? metrics.kda.mean.toFixed(2) : "--",
-          };
-
           return (
-            <PerformanceOverviewCard metrics={perfRows} dataset={datasetPayload} />
+            <PerformanceOverviewCard metrics={perfRows} />
           );
         })()}
         </div>
@@ -335,7 +307,8 @@ export default function StatsPage() {
         </section>
 
       {/* ── Top Champions (win rate + ban rate, consolidated) ── */}
-      <section>
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+      <section className="lg:col-span-3 lg:order-1">
         <div className="flex items-center justify-between mb-3 px-2">
           <h2 className="text-sm font-bold text-pc-text">Top Champions</h2>
           <div className="flex gap-3">
@@ -354,18 +327,21 @@ export default function StatsPage() {
                   .sort((a, b) => (b.winRate ?? 0) - (a.winRate ?? 0))
                   .slice(0, 10)
                   .map((c) => {
-                    const quality = getStatQuality(c.winRate!, c.pickRate, maxChampionPickRate);
+                    // This is a win-rate ranking, so its color must be driven
+                    // by win rate alone; pick-rate confidence would make lower
+                    // win-rate champions appear greener.
+                    const quality = getStatQuality(c.winRate!, 1, 1);
                     return (
                       <Link
                         key={c.id}
                         href={`/champions/${championSlug(c.name)}`}
-                        className="flex items-center gap-2 px-2 py-1.5 rounded-lg border border-pc-border/50 bg-pc-card/50 hover:bg-pc-card hover:border-pc-accent-mid transition-all group"
+                        className="flex items-center gap-2 px-2 py-1 rounded-lg border border-pc-border/50 bg-pc-card/50 hover:bg-pc-card hover:border-pc-accent-mid transition-all group"
                         style={{ borderColor: quality.borderColor }}
                       >
                         <img
                           src={getChampionIconSafe(c.name)}
                           alt={c.name}
-                          className="w-8 h-8 object-contain rounded-full bg-pc-bg/60 shrink-0"
+                          className="w-7 h-7 object-contain rounded-full bg-pc-bg/60 shrink-0"
                         />
                         <span className="text-pc-text text-xs font-semibold truncate group-hover:text-pc-accent transition-colors">
                           {c.name}
@@ -391,12 +367,12 @@ export default function StatsPage() {
                     <Link
                       key={c.id}
                       href={`/champions/${championSlug(c.name)}`}
-                      className="flex items-center gap-2 px-2 py-1.5 rounded-lg border border-pc-border/50 bg-pc-card/50 hover:bg-pc-card hover:border-pc-accent-mid transition-all group"
+                      className="flex items-center gap-2 px-2 py-1 rounded-lg border border-pc-border/50 bg-pc-card/50 hover:bg-pc-card hover:border-pc-accent-mid transition-all group"
                     >
                       <img
                         src={getChampionIconSafe(c.name)}
                         alt={c.name}
-                        className="w-8 h-8 object-contain rounded-full bg-pc-bg/60 shrink-0"
+                        className="w-7 h-7 object-contain rounded-full bg-pc-bg/60 shrink-0"
                       />
                       <span className="text-pc-text text-xs font-semibold truncate group-hover:text-pc-accent transition-colors">
                         {c.name}
@@ -413,13 +389,12 @@ export default function StatsPage() {
       </section>
 
       {/* ── Item Stats + Map Stats ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
 
         {/* Item Stats (3/5) */}
-        <section className="lg:col-span-3">
+        <section className="lg:col-span-5 lg:order-3">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-bold text-pc-text">Item Stats</h2>
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2">
               {(["pickRate", "winRate"] as const).map((key) => (
                 <button
                   key={key}
@@ -434,6 +409,9 @@ export default function StatsPage() {
                   {itemSort === key && (itemSortDir === "desc" ? " ↓" : " ↑")}
                 </button>
               ))}
+              <Link href="/stats/items" className="ml-1 text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">
+                Detail →
+              </Link>
             </div>
           </div>
           <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 space-y-4">
@@ -452,10 +430,11 @@ export default function StatsPage() {
                   <span className={`text-xs font-bold uppercase tracking-wider ${catColor} mb-2 block`}>{cat}</span>
                   <div className="grid grid-cols-5 gap-2">
                     {catItems.map((item) => {
-                      const quality = getStatQuality(item.winRate, item.pickRate, maxItemPickRate);
+                      const quality = getStatQuality(item.winRate, 1, 1);
                       return (
-                      <div
+                      <Link
                         key={item.name}
+                        href={`/stats/items/${item.itemId}`}
                         className="flex flex-col items-center text-center py-1 rounded-lg border border-transparent transition-colors"
                         style={{ borderColor: quality.borderColor, background: quality.background }}
                       >
@@ -474,7 +453,7 @@ export default function StatsPage() {
                           <span className="text-pc-text-muted">·</span>
                           <span style={{ color: quality.color }}>PR {item.pickRate}%</span>
                         </div>
-                      </div>
+                      </Link>
                       );
                     })}
                   </div>
@@ -485,15 +464,10 @@ export default function StatsPage() {
         </section>
 
         {/* Map Stats (2/5) */}
-        <section className="lg:col-span-2">
+        <section className="lg:col-span-2 lg:order-2">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-bold text-pc-text">Map Stats</h2>
-            <button
-              onClick={() => setMapSortDir((d) => (d === "desc" ? "asc" : "desc"))}
-              className="text-xs px-2.5 py-1 rounded-lg bg-pc-accent text-pc-bg"
-            >
-              Most Played {mapSortDir === "desc" ? "↓" : "↑"}
-            </button>
+            <Link href="/stats/maps" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">Detail →</Link>
           </div>
           <div className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
             {sortedMaps.length === 0 ? (
@@ -502,17 +476,21 @@ export default function StatsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-pc-border text-pc-text-muted text-left text-xs">
-                  <th className="px-3 py-3 w-8">#</th>
                   <th className="px-3 py-3">Map</th>
-                  <th className="px-3 py-3 text-right">Matches</th>
+                  <th className="px-2 py-3 text-right">WR</th>
+                  <th className="px-2 py-3 text-right">W</th>
+                  <th className="px-2 py-3 text-right">L</th>
+                  <th className="px-3 py-3 text-right">Total</th>
                 </tr>
               </thead>
               <tbody>
-                {sortedMaps.map((map, i) => (
+                {sortedMaps.map((map) => (
                   <tr key={map.name} className="border-b border-pc-border/50 hover:bg-pc-bg/50 transition-colors">
-                    <td className="px-3 py-2 text-pc-text-muted text-xs">{i + 1}</td>
                     <td className="px-3 py-2 text-pc-text font-medium text-xs">{map.name}</td>
-                    <td className="px-3 py-2 text-pc-text-secondary text-xs text-right">{map.matches.toLocaleString()}</td>
+                    <td className="px-2 py-2 text-xs text-right font-semibold" style={{ color: getStatQuality(map.winRate, 1, 1).color }}>{map.winRate.toFixed(1)}%</td>
+                    <td className="px-2 py-2 text-pc-text-secondary text-xs text-right">{map.wins.toLocaleString()}</td>
+                    <td className="px-2 py-2 text-pc-text-secondary text-xs text-right">{map.losses.toLocaleString()}</td>
+                    <td className="px-3 py-2 text-pc-text text-xs text-right">{map.matches.toLocaleString()}</td>
                   </tr>
                 ))}
               </tbody>
