@@ -90,9 +90,9 @@ function statNameKey(value: string | null | undefined): string {
 function AvgTierCard({ stats }: { stats: ChampionStats }) {
   if (stats.avgRating == null) {
     return (
-      <div className="pc-surface-light rounded-lg p-4 border border-pc-border text-center">
+      <div className="pc-surface-light rounded-lg border border-pc-border p-3 text-center">
         <div className="text-xs text-pc-text-muted mb-1">Avg Tier</div>
-        <div className="text-lg font-mono text-pc-text">—</div>
+        <div className="font-mono text-base text-pc-text">—</div>
       </div>
     );
   }
@@ -102,10 +102,10 @@ function AvgTierCard({ stats }: { stats: ChampionStats }) {
   const color = getTierColor(effective.displayTier);
 
   return (
-    <div className="pc-surface-light rounded-lg p-4 border border-pc-border text-center">
-      <div className="text-xs text-pc-text-muted mb-2">Avg Tier</div>
-      <img src={iconPath} alt={effective.displayName} className="w-12 h-12 object-contain mx-auto" />
-      <div className={`text-xs font-semibold ${color} mt-1`}>{effective.displayName}</div>
+    <div className="pc-surface-light rounded-lg border border-pc-border p-3 text-center">
+      <div className="mb-1 text-xs text-pc-text-muted">Avg Tier</div>
+      <img src={iconPath} alt={effective.displayName} className="mx-auto h-9 w-9 object-contain" />
+      <div className={`mt-0.5 text-[11px] font-semibold ${color}`}>{effective.displayName}</div>
       <div className="text-xs font-mono text-pc-text-muted mt-0.5">{stats.avgRating.toFixed(1)}</div>
     </div>
   );
@@ -333,29 +333,31 @@ export default function ChampionDetailPage() {
             </>
           )}
 
-        </div>
-      </div>
+          {/* Compact ranked summary fills the analysis column beneath talents. */}
+          <section className="space-y-2">
+            <h2 className="pc-card-title shadow-sm">Ranked Performance</h2>
+            <div className="pc-card space-y-3 p-4">
+              {stats && (
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  <AvgTierCard stats={stats} />
+                  <StatCard label="Win Rate" value={formatPct(stats.avgWinRate)} accent />
+                  <StatCard label="Plays" value={formatNum(stats.totalPlays)} />
+                  <StatCard label="Wins" value={formatNum(stats.totalWins)} />
+                </div>
+              )}
+              <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-5">
+                {CHAMPION_METRICS.map((metric) => (
+                  <ChampionMetricCard
+                    key={metric.key}
+                    metric={metric}
+                    champion={championPerformance[metric.key]}
+                    global={globalPerformance[metric.key]}
+                  />
+                ))}
+              </div>
+            </div>
+          </section>
 
-      {/* Ranked performance summary */}
-      <h2 className="pc-card-title mb-2 shadow-sm">Ranked Performance</h2>
-      <div className="pc-card space-y-5">
-        {stats && (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <AvgTierCard stats={stats} />
-            <StatCard label="Win Rate" value={formatPct(stats.avgWinRate)} accent />
-            <StatCard label="Plays" value={formatNum(stats.totalPlays)} />
-            <StatCard label="Wins" value={formatNum(stats.totalWins)} />
-          </div>
-        )}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3">
-          {CHAMPION_METRICS.map((metric) => (
-            <ChampionMetricCard
-              key={metric.key}
-              metric={metric}
-              champion={championPerformance[metric.key]}
-              global={globalPerformance[metric.key]}
-            />
-          ))}
         </div>
       </div>
 
@@ -486,9 +488,9 @@ export default function ChampionDetailPage() {
 
 function StatCard({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
-    <div className="pc-surface-light rounded-lg p-4 border border-pc-border text-center">
+    <div className="pc-surface-light flex min-h-20 flex-col justify-center rounded-lg border border-pc-border p-3 text-center">
       <div className="text-xs text-pc-text-muted mb-1">{label}</div>
-      <div className={`text-lg font-mono ${accent ? "text-pc-accent" : "text-pc-text"}`}>{value}</div>
+      <div className={`font-mono text-base ${accent ? "text-pc-accent" : "text-pc-text"}`}>{value}</div>
     </div>
   );
 }
@@ -519,11 +521,11 @@ function ChampionMetricCard({
   const deltaClass = delta >= 0 ? "text-emerald-400" : "text-rose-400";
 
   return (
-    <div className="pc-surface-light rounded-lg border border-pc-border p-3 min-w-0">
-      <div className="flex items-start justify-between gap-2 mb-3">
+    <div className="pc-surface-light min-w-0 rounded-lg border border-pc-border p-2.5">
+      <div className="mb-2 flex items-start justify-between gap-2">
         <div className="min-w-0">
           <div className="text-xs text-pc-text-muted uppercase tracking-wider">{metric.label}</div>
-          <div className={`text-xl font-bold ${metric.colorClass}`}>{formatMetric(championMean)}</div>
+          <div className={`text-lg font-bold ${metric.colorClass}`}>{formatMetric(championMean)}</div>
         </div>
         <div className="text-right text-[10px] text-pc-text-muted shrink min-w-0 overflow-hidden">
           <div className="truncate">Matches</div>
@@ -531,7 +533,7 @@ function ChampionMetricCard({
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-2 text-[10px] mb-3">
+      <div className="mb-2 grid grid-cols-3 gap-1.5 text-[10px]">
         <div>
           <div className="text-pc-text-muted uppercase tracking-wider">P10</div>
           <div className="text-pc-text-secondary font-mono">{formatMetric(p10)}</div>
