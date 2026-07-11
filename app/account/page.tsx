@@ -4,17 +4,21 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { useTimeZone } from "@/lib/time-zone-context";
-import { formatLocalDate } from "@/lib/time-format";
+import { formatLocalDate, formatLocalTime } from "@/lib/time-format";
 import { fixedUtcOffsetFromTimeZone, fixedUtcOffsetToTimeZone, getFixedUtcOffsetOptions, getSupportedTimeZones } from "@/lib/time-zone";
 import {
   getAccountDetails,
-  linkPlayerId,
   unlinkPlayer,
   changePassword,
   fetchPlayerSearch,
   updateProfile,
   type AccountDetails,
   type PlayerSearchResult,
+  getPlayerLinkVerification,
+  startPlayerLinkVerification,
+  verifyPlayerLink,
+  cancelPlayerLinkVerification,
+  type PlayerLinkVerification,
 } from "@/lib/api-client";
 
 export default function AccountPage() {
@@ -31,6 +35,7 @@ export default function AccountPage() {
   const [searchResults, setSearchResults] = useState<PlayerSearchResult[]>([]);
   const [searching, setSearching] = useState(false);
   const [linking, setLinking] = useState(false);
+  const [verification, setVerification] = useState<PlayerLinkVerification | null>(null);
 
   // ── Password change state ──
   const [currentPw, setCurrentPw] = useState("");
@@ -55,9 +60,10 @@ export default function AccountPage() {
 
   const loadAccount = useCallback(async () => {
     try {
-      const data = await getAccountDetails();
+      const [data, pendingVerification] = await Promise.all([getAccountDetails(), getPlayerLinkVerification()]);
       setAccount(data);
       setBio(data.user.bio ?? "");
+      setVerification(pendingVerification);
     } catch (err) {
       if (err instanceof Error) {
         if (err.message === "Not authenticated" || err.message.includes("401")) {
@@ -110,20 +116,19 @@ export default function AccountPage() {
     debouncedSearch(val);
   };
 
-  const handleLinkPlayer = async (result: PlayerSearchResult) => {
+  const handleStartLinkVerification = async (result: PlayerSearchResult) => {
     if (!result.id) return;
     setLinking(true);
     setError(null);
     setSuccess(null);
     try {
-      const numericId = parseInt(result.id, 10);
-      await linkPlayerId(numericId);
-      setSuccess(`Linked to ${result.name}`);
+      const nextVerification = await startPlayerLinkVerification(parseInt(result.id, 10));
+      setVerification(nextVerification);
+      setSuccess(`Verification code generated for ${result.name}`);
       setSearchResults([]);
       setSearchQuery("");
-      await loadAccount();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to link player");
+      setError(err instanceof Error ? err.message : "Failed to generate verification code");
     } finally {
       setLinking(false);
     }
@@ -183,6 +188,32 @@ export default function AccountPage() {
       setError(err instanceof Error ? err.message : "Failed to update profile");
     } finally {
       setSavingProfile(false);
+    }
+  };
+
+  const handleVerifyPlayerLink = async () => {
+    setLinking(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      const result = await verifyPlayerLink();
+      setVerification(null);
+      setSuccess(`Linked to ${result.player.name}`);
+      await loadAccount();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to verify player ownership");
+    } finally {
+      setLinking(false);
+    }
+  };
+
+  const handleCancelVerification = async () => {
+    try {
+      await cancelPlayerLinkVerification();
+      setVerification(null);
+      setSuccess(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to cancel verification");
     }
   };
 
@@ -398,7 +429,37 @@ export default function AccountPage() {
         ) : (
           /* ── Player search ── */
           <div>
-            <div className="relative mb-4">
+            {verification ? (
+              <div className="bg-pc-bg-secondary border border-pc-border rounded-lg p-4 mb-4">
+                <div className="text-pc-text font-medium">Verify {verification.player.name}</div>
+                <ol className="mt-3 space-y-1.5 text-sm text-pc-text-secondary list-decimal list-inside">
+                  <li>In Paladins, rename any saved loadout to this exact code.</li>
+                  <li>Save the loadout, then return here and verify it.</li>
+                </ol>
+                <div className="mt-3 rounded-lg border border-pc-accent/40 bg-pc-bg px-4 py-3 font-mono text-center text-lg font-bold tracking-wider text-pc-accent">
+                  {verification.code}
+                </div>
+                <div className="mt-2 text-xs text-pc-text-muted">Expires {formatLocalTime(verification.expiresAt)}</div>
+                <div className="mt-4 flex gap-2">
+                  <button
+                    onClick={handleVerifyPlayerLink}
+                    disabled={linking}
+                    className="flex-1 px-3 py-2 rounded-lg bg-pc-accent text-pc-bg font-semibold text-sm hover:bg-pc-accent-secondary disabled:opacity-50"
+                  >
+                    {linking ? "Checking..." : "Verify & Link"}
+                  </button>
+                  <button
+                    onClick={handleCancelVerification}
+                    disabled={linking}
+                    className="px-3 py-2 rounded-lg border border-pc-border text-pc-text-secondary text-sm hover:bg-pc-bg-elevated disabled:opacity-50"
+                  >
+                    Choose another
+                  </button>
+                </div>
+              </div>
+            ) : (
+            <>
+              <div className="relative mb-4">
               <input
                 type="text"
                 value={searchQuery}
@@ -418,7 +479,7 @@ export default function AccountPage() {
                 {searchResults.map((result) => (
                   <button
                     key={result.id}
-                    onClick={() => handleLinkPlayer(result)}
+                    onClick={() => handleStartLinkVerification(result)}
                     disabled={linking}
                     className="w-full flex items-center justify-between px-4 py-3 border-b border-pc-border last:border-b-0 hover:bg-pc-bg-elevated transition-colors disabled:opacity-50"
                   >
@@ -440,6 +501,8 @@ export default function AccountPage() {
               <div className="text-pc-text-muted text-sm text-center py-2">
                 No players found
               </div>
+              )}
+            </>
             )}
           </div>
         )}

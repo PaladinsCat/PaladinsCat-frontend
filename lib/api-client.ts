@@ -2289,6 +2289,50 @@ export async function linkPlayerId(playerId: number): Promise<{ message: string;
   });
 }
 
+export interface PlayerLinkVerification {
+  player: { id: number; name: string };
+  code: string;
+  expiresAt: string;
+}
+
+export async function getPlayerLinkVerification(): Promise<PlayerLinkVerification | null> {
+  const token = getAuthToken();
+  if (!token) throw new Error("Not authenticated");
+  const raw = await fetchJson<{ verification: PlayerLinkVerification | null }>("/auth/account/player-link/verification", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return raw.verification;
+}
+
+export async function startPlayerLinkVerification(playerId: number): Promise<PlayerLinkVerification> {
+  const token = getAuthToken();
+  if (!token) throw new Error("Not authenticated");
+  const raw = await fetchJson<{ verification: PlayerLinkVerification }>("/auth/account/player-link/verification", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ playerId }),
+  });
+  return raw.verification;
+}
+
+export async function verifyPlayerLink(): Promise<{ message: string; player: { id: number; name: string } }> {
+  const token = getAuthToken();
+  if (!token) throw new Error("Not authenticated");
+  return fetchJson<{ message: string; player: { id: number; name: string } }>("/auth/account/player-link/verification/check", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+  });
+}
+
+export async function cancelPlayerLinkVerification(): Promise<void> {
+  const token = getAuthToken();
+  if (!token) throw new Error("Not authenticated");
+  await fetchJson<{ message: string }>("/auth/account/player-link/verification", {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
 export async function unlinkPlayer(): Promise<{ message: string }> {
   const token = getAuthToken();
   if (!token) {
