@@ -436,7 +436,7 @@ export default function StatsPage() {
                         key={item.name}
                         href={`/stats/items/${item.itemId}`}
                         className="flex flex-col items-center text-center py-1 rounded-lg border border-transparent transition-colors"
-                        style={{ borderColor: quality.borderColor, background: quality.background }}
+                        style={{ borderColor: quality.borderColor }}
                       >
                         {item.icon ? (
                           <img src={item.icon} alt={item.name} className="w-12 h-12 object-contain rounded-md mb-1" />

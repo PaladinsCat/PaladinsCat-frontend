@@ -396,7 +396,7 @@ export default function ChampionDetailPage() {
                           <div
                             key={card.name}
                             className="pc-surface-light rounded-lg p-3 border transition-colors"
-                            style={quality ? { borderColor: quality.borderColor, background: quality.background } : undefined}
+                            style={quality ? { borderColor: quality.borderColor } : undefined}
                           >
                             <div className="flex items-start gap-3">
                               {card.iconUrl ? (
@@ -570,7 +570,7 @@ export default function ChampionDetailPage() {
                 <div
                   key={t.tier}
                   className="pc-surface-light rounded-lg p-4 border transition-colors"
-                  style={{ borderColor: quality.borderColor, background: quality.background }}
+                  style={{ borderColor: quality.borderColor }}
                 >
                   <div className="text-sm font-medium text-pc-accent mb-2">{t.tier}</div>
                   <div className="grid grid-cols-3 gap-2 text-center">
@@ -793,7 +793,7 @@ function TalentCard({
       onClick={onSelect}
       disabled={!onSelect}
       className={`pc-surface-light rounded-lg p-3 border flex items-start gap-3 transition-colors text-left w-full ${selected ? "ring-1 ring-pc-accent border-pc-accent-mid" : ""} ${onSelect ? "cursor-pointer hover:border-pc-accent-mid" : "cursor-default"}`}
-      style={quality ? { borderColor: selected ? quality.color : quality.borderColor, background: quality.background } : undefined}
+      style={quality ? { borderColor: selected ? quality.color : quality.borderColor } : undefined}
     >
       <div className="flex-shrink-0 w-14 h-14 flex items-center justify-center overflow-hidden">
         <SmartImage

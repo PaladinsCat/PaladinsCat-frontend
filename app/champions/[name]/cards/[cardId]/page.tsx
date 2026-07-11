@@ -264,7 +264,7 @@ function TalentPairingCard({
       type="button"
       onClick={onSelect}
       className={`pc-surface-light rounded-lg p-3 border text-left transition-colors ${selected ? "ring-1 ring-pc-accent border-pc-accent-mid" : "hover:border-pc-accent-mid"}`}
-      style={{ borderColor: selected ? quality.color : quality.borderColor, background: quality.background }}
+      style={{ borderColor: selected ? quality.color : quality.borderColor }}
     >
       <div className="flex items-start gap-3">
         <div className="w-12 h-12 rounded-md border border-pc-border bg-pc-bg/50 overflow-hidden flex-shrink-0">
@@ -297,7 +297,7 @@ function LevelCard({ level, maxLevelPlays }: { level: ChampionCardLevelStat; max
   const width = Math.max(level.plays > 0 ? 8 : 0, Math.round((level.plays / Math.max(1, maxLevelPlays)) * 100));
 
   return (
-    <div className="pc-surface-light rounded-lg p-4 border transition-colors" style={{ borderColor: quality.borderColor, background: quality.background }}>
+    <div className="pc-surface-light rounded-lg p-4 border transition-colors" style={{ borderColor: quality.borderColor }}>
       <div className="flex items-center justify-between gap-3 mb-3">
         <div className="text-sm font-semibold text-pc-text">L{level.level}</div>
         <div className="text-xs font-mono" style={{ color: quality.color }}>{formatPct(level.winRate)}</div>
