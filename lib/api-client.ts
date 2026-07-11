@@ -527,6 +527,7 @@ export interface ItemStat {
   itemName: string;
   totalUsage: number;
   winRate: number;
+  pickRate?: number;
   slots: ItemDimensionStat[];
   levels: ItemDimensionStat[];
 }
@@ -1562,15 +1563,17 @@ export async function fetchLoadouts(params?: {
   }));
 }
 
-export async function fetchItems(params?: { mode?: string; limit?: number }): Promise<ItemStat[]> {
+export async function fetchItems(params?: { mode?: string; limit?: number; championId?: number }): Promise<ItemStat[]> {
   const query = new URLSearchParams();
   if (params?.mode) query.set('mode', params.mode);
   if (params?.limit != null) query.set('limit', String(params.limit));
+  if (params?.championId != null) query.set('championId', String(params.championId));
   try {
     const raw = await fetchJson<Array<{
       item_id: number; item_name: string;
       total_uses?: number | string; total_usage?: number | string;
       win_rate: number | string;
+      pick_rate?: number | string;
       slots?: Array<{ slot: number | string; total_uses: number | string; win_rate: number | string }>;
       levels?: Array<{ item_level: number | string; total_uses: number | string; win_rate: number | string }>;
     }>>(`/stats/items${query.toString() ? `?${query.toString()}` : ''}`);
@@ -1580,6 +1583,7 @@ export async function fetchItems(params?: { mode?: string; limit?: number }): Pr
       itemName: r.item_name,
       totalUsage: num(r.total_uses) || num(r.total_usage),
       winRate: num(r.win_rate),
+      pickRate: r.pick_rate == null ? undefined : num(r.pick_rate),
       slots: (r.slots ?? []).map((slot) => ({
         slot: num(slot.slot), totalUses: num(slot.total_uses), wins: 0, losses: 0, winRate: num(slot.win_rate),
       })),
@@ -2422,6 +2426,22 @@ export interface PostDetail {
   comments: Comment[];
 }
 
+export interface TwitchStream {
+  userLogin: string;
+  userName: string;
+  title: string;
+  viewerCount: number;
+  language: string;
+  thumbnailUrl: string;
+  tags: string[];
+  url: string;
+}
+
+export interface TwitchStreamsResponse {
+  configured: boolean;
+  streams: TwitchStream[];
+}
+
 type RawPost = {
   id: number;
   user_id: number;
@@ -2483,6 +2503,30 @@ export async function fetchPosts(params?: { userId?: string; buildId?: string; l
   }
   const raw = await fetchJson<RawPost[]>(`/community/posts${query.toString() ? `?${query.toString()}` : ''}`);
   return raw.map(mapPost);
+}
+
+export async function fetchTwitchStreams(): Promise<TwitchStreamsResponse> {
+  const raw = await fetchJson<{
+    configured?: boolean;
+    streams?: Array<{
+      userLogin: string;
+      userName: string;
+      title: string;
+      viewerCount: number | string;
+      language: string;
+      thumbnailUrl: string;
+      tags?: string[];
+      url: string;
+    }>;
+  }>('/community/streams');
+  return {
+    configured: raw.configured === true,
+    streams: (raw.streams ?? []).map((stream) => ({
+      ...stream,
+      viewerCount: Number(stream.viewerCount) || 0,
+      tags: stream.tags ?? [],
+    })),
+  };
 }
 
 export async function createPost(userId: number, title: string, content: string, buildId: number | null, token: string): Promise<Post> {
