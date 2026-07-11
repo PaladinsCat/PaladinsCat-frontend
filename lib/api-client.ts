@@ -1507,8 +1507,9 @@ function mapPlayerLoadout(raw: any): PlayerLoadout {
   };
 }
 
-export async function fetchPlayerLoadouts(playerId: string | number): Promise<PlayerLoadoutsResponse> {
-  const raw = await fetchJson<any>(`/players/${playerId}/loadouts`);
+export async function fetchPlayerLoadouts(playerId: string | number, options?: { refresh?: boolean }): Promise<PlayerLoadoutsResponse> {
+  const query = options?.refresh === false ? "?refresh=false" : "";
+  const raw = await fetchJson<any>(`/players/${playerId}/loadouts${query}`);
   return {
     loadouts: Array.isArray(raw.loadouts) ? raw.loadouts.map(mapPlayerLoadout) : [],
     freshness: mapPlayerLoadoutFreshness(raw.freshness),
