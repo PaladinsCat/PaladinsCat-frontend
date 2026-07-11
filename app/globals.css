@@ -167,6 +167,36 @@ body {
   padding-left: 0.75rem;
 }
 
+/* Shape-preserving async placeholders. A moving highlight communicates work
+   without changing the eventual layout dimensions. */
+.pc-skeleton {
+  position: relative;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--pc-bg-elevated) 82%, var(--pc-border));
+}
+
+.pc-skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--pc-accent) 13%, transparent),
+    transparent
+  );
+  animation: pc-skeleton-shimmer 1.45s ease-in-out infinite;
+}
+
+@keyframes pc-skeleton-shimmer {
+  100% { transform: translateX(100%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pc-skeleton::after { animation: none; }
+}
+
 /* Stats grid: 3-column, value + label */
 .pc-stats-grid {
   display: flex;

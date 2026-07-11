@@ -6,6 +6,7 @@ import { useParams, notFound } from "next/navigation";
 import { STATIC_CHAMPIONS } from "@/lib/static-champions";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import ScrambleText from "@/components/ScrambleText";
+import { LoadingPanel } from "@/components/async-state";
 import SmartImage from "@/components/SmartImage";
 import { championSlug } from "@/lib/utils";
 import { getStatQuality } from "@/lib/stat-quality";
@@ -324,6 +325,9 @@ export default function ChampionDetailPage() {
 
         {/* Right column — Talents & Loadout Cards (~3/4) */}
         <div className="lg:col-span-3 space-y-6">
+          {loading && (
+            <LoadingPanel compact className="pc-card" label="Loading champion analytics…" detail="Combining ranked performance, talent, card, and leaderboard data." />
+          )}
           {/* Talents */}
           {championData?.talents && championData.talents.length > 0 && (
             <>

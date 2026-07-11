@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { fetchTalents } from "@/lib/api-client";
+import { EmptyState, ErrorState } from "@/components/async-state";
+import { DataTableSkeleton } from "@/components/route-skeleton";
 
 export default function TalentsPage() {
   const [talents, setTalents] = useState<Array<{ talentId: number; talentName: string; championId: number; championName: string; totalPlays: number; winRate: number }>>([]);
@@ -46,9 +48,11 @@ export default function TalentsPage() {
         ))}
       </div>
       {loading ? (
-        <div className="text-center py-8 text-pc-text-secondary">Loading...</div>
+        <DataTableSkeleton />
       ) : error ? (
-        <div className="text-center py-8 text-pc-text-muted">{error}</div>
+        <ErrorState message={String(error)} />
+      ) : filtered.length === 0 ? (
+        <EmptyState title="No talent statistics" description="Talent performance will appear after ranked matches are processed." />
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-left">

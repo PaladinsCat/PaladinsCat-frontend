@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { fetchTierSummary, fetchTiers, type TierStat, type TierSummary } from "@/lib/api-client";
 import { getRankIconPath } from "@/lib/tier-utils";
+import { EmptyState, ErrorState } from "@/components/async-state";
+import { RouteSkeleton } from "@/components/route-skeleton";
 
 const EMPTY_SUMMARY: TierSummary = {
   profilePlayers: 0,
@@ -172,9 +174,11 @@ export default function TiersPage() {
       </div>
 
       {loading ? (
-        <div className="text-center py-8 text-pc-text-secondary">Loading...</div>
+        <RouteSkeleton variant="dashboard" />
       ) : error ? (
-        <div className="text-center py-8 text-pc-text-muted">{error}</div>
+        <ErrorState message={error} />
+      ) : profileTiers.length === 0 && matchTiers.length === 0 ? (
+        <EmptyState title="No tier statistics" description="Tier distributions will appear after ranked profiles and matches are processed." />
       ) : (
         <>
           <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

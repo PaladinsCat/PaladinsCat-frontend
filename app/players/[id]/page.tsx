@@ -10,6 +10,8 @@ import { getTierColor, resolveEffectiveTier, getRankIconPath } from "@/lib/tier-
 import { useAuth } from "@/lib/auth-context";
 import ReportModal from "@/components/ReportModal";
 import { formatLocalDate, formatLocalDateTime } from "@/lib/time-format";
+import { ErrorState, LoadingOverlay, LoadingPanel } from "@/components/async-state";
+import { RouteSkeleton } from "@/components/route-skeleton";
 
 interface PlayerData {
   id: string;
@@ -66,9 +68,9 @@ interface QueueRating {
   mu: number;
   phi: number;
   volatility: number;
-  matches_played: number;
-  wins: number;
-  losses: number;
+  matches_played?: number;
+  wins?: number;
+  losses?: number;
 }
 
 interface ChampionRating {
@@ -362,17 +364,17 @@ export default function PlayerProfilePage() {
   }, [id]);
 
   if (profileLoading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <div className="text-pc-text-muted text-sm">Loading player profile...</div>
-      </div>
-    );
+    return <RouteSkeleton variant="profile" />;
   }
 
   if (error || !response) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 gap-3">
-        <div className="text-pc-text-muted text-sm">{error || "Player not found"}</div>
+      <div className="space-y-4">
+        <ErrorState
+          title={response ? "Could not refresh this profile" : "Player profile unavailable"}
+          message={error || "The player could not be found."}
+          onRetry={() => setFetchKey((key) => key + 1)}
+        />
         <Link href="/players" className="text-pc-accent text-sm hover:underline">← Back to Players</Link>
       </div>
     );
@@ -408,6 +410,7 @@ export default function PlayerProfilePage() {
 
       {/* ── Header ── */}
       <div className={`pc-card relative ${actionMenuOpen ? 'z-40' : 'z-10'}`}>
+        <LoadingOverlay visible={refreshing} label="Refreshing Hi-Rez profile…" />
         {/* Action buttons — top right */}
         <div ref={actionMenuRef} className="relative mb-3 flex items-center justify-end">
           <div className="hidden flex-wrap items-center justify-end gap-2 md:flex">
@@ -709,7 +712,9 @@ export default function PlayerProfilePage() {
           <div>
             <h2 className="pc-card-title shadow-sm">Recent Matches</h2>
             <div className="pc-card">
-              {matches.length === 0 ? (
+              {matchesLoading ? (
+                <LoadingPanel compact label="Loading recent matches…" detail="Profile details remain available while match history loads." />
+              ) : matches.length === 0 ? (
                 <p className="text-pc-text-muted text-sm">No matches recorded yet.</p>
               ) : (
                 <div className="overflow-x-auto">
@@ -789,16 +794,18 @@ export default function PlayerProfilePage() {
                   <div className="grid grid-cols-1 gap-2 border-t border-pc-border/50 pt-2 text-center min-[360px]:grid-cols-3">
                     <div>
                       <div className="text-xs text-pc-text-muted">W</div>
-                      <div className="text-xs font-mono text-emerald-400">{Number(kbmRating.wins)}</div>
+                      <div className="text-xs font-mono text-emerald-400">{formatNumber(Number.isFinite(Number(kbmRating.wins)) ? Number(kbmRating.wins) : null)}</div>
                     </div>
                     <div>
                       <div className="text-xs text-pc-text-muted">L</div>
-                      <div className="text-xs font-mono text-rose-400">{Number(kbmRating.losses)}</div>
+                      <div className="text-xs font-mono text-rose-400">{formatNumber(Number.isFinite(Number(kbmRating.losses)) ? Number(kbmRating.losses) : null)}</div>
                     </div>
                     <div>
                       <div className="text-xs text-pc-text-muted">WR</div>
                       <div className="text-xs font-mono text-pc-text">
-                        {kbmRating.matches_played > 0 ? ((Number(kbmRating.wins) / Number(kbmRating.matches_played)) * 100).toFixed(0) : "—"}%
+                        {Number.isFinite(Number(kbmRating.wins)) && Number(kbmRating.matches_played) > 0
+                          ? `${((Number(kbmRating.wins) / Number(kbmRating.matches_played)) * 100).toFixed(0)}%`
+                          : "—"}
                       </div>
                     </div>
                   </div>

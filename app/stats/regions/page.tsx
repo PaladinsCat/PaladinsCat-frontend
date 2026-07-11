@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Card from "@/components/Card";
 import { fetchRegions, type RegionStat } from "@/lib/api-client";
+import { EmptyState, ErrorState } from "@/components/async-state";
+import { RouteSkeleton } from "@/components/route-skeleton";
 
 export default function RegionsPage() {
   const [regions, setRegions] = useState<RegionStat[]>([]);
@@ -21,9 +23,11 @@ export default function RegionsPage() {
       <h1 className="pc-heading pc-heading-lg text-pc-accent">Regional Meta</h1>
 
       {loading ? (
-        <div className="text-center py-8 text-pc-text-secondary">Loading...</div>
+        <RouteSkeleton variant="dashboard" />
       ) : error ? (
-        <div className="text-center py-8 text-pc-text-muted">{error}</div>
+        <ErrorState message={String(error)} />
+      ) : regions.length === 0 ? (
+        <EmptyState title="No regional statistics" description="Regional champion trends will appear when ranked data is available." />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {regions.map((r) => (

@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { fetchPlatforms, type LoadoutStat } from "@/lib/api-client";
 import { BarChartComponent } from "@/components/Chart";
+import { EmptyState, ErrorState } from "@/components/async-state";
+import { RouteSkeleton } from "@/components/route-skeleton";
 
 export default function PlatformsPage() {
   const [platforms, setPlatforms] = useState<Array<{ platform: string; championId: number; championName: string; totalMatches: number; winRate: number; avgDpm: number; avgHpm: number }>>([]);
@@ -54,9 +56,11 @@ export default function PlatformsPage() {
         ))}
       </div>
       {loading ? (
-        <div className="text-center py-8 text-pc-text-secondary">Loading...</div>
+        <RouteSkeleton variant="detail" />
       ) : error ? (
-        <div className="text-center py-8 text-pc-text-muted">{error}</div>
+        <ErrorState message={String(error)} />
+      ) : chartData.length === 0 ? (
+        <EmptyState title="No platform statistics" description="Platform comparisons will appear when ranked data is available." />
       ) : (
         <BarChartComponent
           data={chartData}

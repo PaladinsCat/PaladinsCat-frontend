@@ -19,6 +19,8 @@ import {
 import ScrambleText from "@/components/ScrambleText";
 import { getRankIconPath, resolveEffectiveTier } from "@/lib/tier-utils";
 import { getChampionIconSafe } from "@/lib/champion-icons";
+import { LoadingPanel } from "@/components/async-state";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const STAT_LABELS: Record<string, string> = {
   gpm: "Credits / Min",
@@ -39,6 +41,10 @@ function RankBadge({ rank }: { rank: number }) {
   if (rank === 2) return <span className="text-gray-300 font-bold">{rank}</span>;
   if (rank === 3) return <span className="text-amber-600 font-bold">{rank}</span>;
   return <span className="text-pc-text-muted">{rank}</span>;
+}
+
+function InlineLoading() {
+  return <Skeleton className="h-3 w-20" />;
 }
 
 export default function PlayersPage() {
@@ -136,7 +142,7 @@ export default function PlayersPage() {
       {/* Search results */}
       {query.length >= 2 && (
         <div className="space-y-1">
-          {searching && <p className="text-pc-text-muted text-sm">Searching...</p>}
+          {searching && <LoadingPanel compact label="Searching players…" />}
           {searchError && <p className="text-pc-text-muted text-sm">{searchError}</p>}
           {results.map((p) => (
             <Link
@@ -167,7 +173,7 @@ export default function PlayersPage() {
           <div className="flex items-center justify-between mb-2 px-2">
             <h2 className="text-sm font-bold text-pc-text">Performance Stats</h2>
           </div>
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 gap-3 min-[480px]:grid-cols-2 xl:grid-cols-4">
             {PERFORMANCE_METRICS.map(({ key: stat }) => {
               const players = performanceLeaderboards[stat] ?? [];
               return (
@@ -181,7 +187,7 @@ export default function PlayersPage() {
                 <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-3 hover:border-pc-accent-mid transition-colors flex-1 flex flex-col justify-center">
                   <div className="space-y-1.5">
                     {players.length === 0 && (
-                      <div className="text-xs text-pc-text-muted">{overviewLoading ? "Loading..." : "No ranked data"}</div>
+                      <div className="text-xs text-pc-text-muted">{overviewLoading ? <InlineLoading /> : "No ranked data"}</div>
                     )}
                     {players.map((p, i) => (
                       <div key={`${stat}-${p.playerId}`} className="flex items-center justify-between text-xs">
@@ -217,7 +223,7 @@ export default function PlayersPage() {
               <div className="bg-pc-bg-elevated border border-red-500/20 rounded-xl p-3 flex-1 flex flex-col justify-center">
                 <div className="space-y-1.5">
                 {cheaterPlayers.length === 0 && (
-                  <div className="text-xs text-pc-text-muted">{overviewLoading ? "Loading..." : "No confirmed cheaters"}</div>
+                  <div className="text-xs text-pc-text-muted">{overviewLoading ? <InlineLoading /> : "No confirmed cheaters"}</div>
                 )}
                 {cheaterPlayers.map((p) => (
                   <div key={p.id} className="flex items-start gap-2 p-2 rounded-lg bg-pc-bg/50">
@@ -253,7 +259,7 @@ export default function PlayersPage() {
               <div className="bg-pc-bg-elevated border border-amber-500/20 rounded-xl p-3 flex-1 flex flex-col justify-center">
                 <div className="space-y-1.5">
                 {suspiciousPlayers.length === 0 && (
-                  <div className="text-xs text-pc-text-muted">{overviewLoading ? "Loading..." : "No suspicious players"}</div>
+                  <div className="text-xs text-pc-text-muted">{overviewLoading ? <InlineLoading /> : "No suspicious players"}</div>
                 )}
                 {suspiciousPlayers.map((p) => (
                   <div key={p.id} className="flex items-start gap-2 p-2 rounded-lg bg-pc-bg/50">
@@ -294,7 +300,7 @@ export default function PlayersPage() {
               <div className="bg-pc-bg-elevated border border-violet-500/20 rounded-xl p-3 flex-1 flex flex-col justify-center">
                 <div className="space-y-1.5">
                   {weirdoPlayers.length === 0 && (
-                    <div className="text-xs text-pc-text-muted">{overviewLoading ? "Loading..." : "No Weirdo votes yet"}</div>
+                    <div className="text-xs text-pc-text-muted">{overviewLoading ? <InlineLoading /> : "No Weirdo votes yet"}</div>
                   )}
                   {weirdoPlayers.map((p) => (
                     <div key={p.id} className="flex items-start gap-2 p-2 rounded-lg bg-pc-bg/50">
@@ -329,7 +335,7 @@ export default function PlayersPage() {
               <div className="bg-pc-bg-elevated border border-emerald-500/20 rounded-xl p-3 flex-1 flex flex-col justify-center">
                 <div className="space-y-1.5">
                   {hallOfFamePlayers.length === 0 && (
-                    <div className="text-xs text-pc-text-muted">{overviewLoading ? "Loading..." : "No Hall of Fame votes yet"}</div>
+                    <div className="text-xs text-pc-text-muted">{overviewLoading ? <InlineLoading /> : "No Hall of Fame votes yet"}</div>
                   )}
                   {hallOfFamePlayers.map((p) => (
                     <div key={p.id} className="flex items-start gap-2 p-2 rounded-lg bg-pc-bg/50">
@@ -362,7 +368,7 @@ export default function PlayersPage() {
             </div>
             <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4">
               {rankedPlayers.length === 0 ? (
-                <div className="text-xs text-pc-text-muted">{overviewLoading ? "Loading..." : "No ranked leaderboard data"}</div>
+                <div className="text-xs text-pc-text-muted">{overviewLoading ? <InlineLoading /> : "No ranked leaderboard data"}</div>
               ) : (
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
                   {(() => {
@@ -445,7 +451,7 @@ export default function PlayersPage() {
               <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-3">
                 <div className="space-y-1.5">
                   {championEloPlayers.length === 0 && (
-                    <div className="text-xs text-pc-text-muted">{overviewLoading ? "Loading..." : "No data"}</div>
+                    <div className="text-xs text-pc-text-muted">{overviewLoading ? <InlineLoading /> : "No data"}</div>
                   )}
                   {championEloPlayers.map((p, i) => (
                     <div key={`champ-elo-${p.player_id}`} className="flex items-center justify-between text-xs">
@@ -474,7 +480,7 @@ export default function PlayersPage() {
               <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-3">
                 <div className="space-y-1.5">
                   {accountEloPlayers.length === 0 && (
-                    <div className="text-xs text-pc-text-muted">{overviewLoading ? "Loading..." : "No data"}</div>
+                    <div className="text-xs text-pc-text-muted">{overviewLoading ? <InlineLoading /> : "No data"}</div>
                   )}
                   {accountEloPlayers.map((p) => (
                     <div key={`account-elo-${p.playerId}`} className="flex items-center justify-between text-xs">

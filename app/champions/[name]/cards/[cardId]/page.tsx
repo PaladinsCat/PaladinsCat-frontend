@@ -14,6 +14,8 @@ import {
 } from "@/lib/api-client";
 import { championSlug } from "@/lib/utils";
 import { getStatQuality } from "@/lib/stat-quality";
+import { ErrorState } from "@/components/async-state";
+import { RouteSkeleton } from "@/components/route-skeleton";
 
 function parseMaybeNumber(value: string | string[] | null | undefined): number | null {
   const raw = Array.isArray(value) ? value[0] : value;
@@ -123,11 +125,7 @@ export default function ChampionCardDetailPage() {
   }
 
   if (loading) {
-    return (
-      <div className="pc-card py-12 text-center text-pc-text-muted">
-        Loading card stats...
-      </div>
-    );
+    return <RouteSkeleton variant="detail" />;
   }
 
   if (error || !detail) {
@@ -136,9 +134,7 @@ export default function ChampionCardDetailPage() {
         <Link href={`/champions/${name}`} className="text-pc-text-secondary hover:text-pc-accent transition-colors">
           Back to champion
         </Link>
-        <div className="pc-card py-12 text-center">
-          <p className="text-pc-text-muted">{error ?? "No card data available."}</p>
-        </div>
+        <ErrorState title="Card statistics unavailable" message={error ?? "No card data is available for this queue."} />
       </div>
     );
   }

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { register } from "@/lib/api-client";
+import { AsyncButton } from "@/components/async-state";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -114,13 +115,14 @@ export default function RegisterPage() {
             />
           </div>
 
-          <button
+          <AsyncButton
             type="submit"
-            disabled={loading}
+            loading={loading}
+            loadingLabel="Creating account…"
             className="w-full py-2.5 bg-pc-accent hover:bg-pc-accent-secondary text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? "Creating account..." : "Create Account"}
-          </button>
+            Create Account
+          </AsyncButton>
 
           <p className="text-center text-pc-text-secondary text-sm">
             Already have an account?{" "}

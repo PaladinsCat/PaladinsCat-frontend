@@ -4,10 +4,11 @@ import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
+import { AsyncButton, LoadingPanel } from "@/components/async-state";
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-[60vh] flex items-center justify-center text-pc-text-secondary text-sm">Loading login...</div>}>
+    <Suspense fallback={<LoadingPanel label="Preparing sign in…" className="min-h-[60vh]" />}>
       <LoginForm />
     </Suspense>
   );
@@ -83,13 +84,14 @@ function LoginForm() {
             />
           </div>
 
-          <button
+          <AsyncButton
             type="submit"
-            disabled={loading}
+            loading={loading}
+            loadingLabel="Signing in…"
             className="w-full py-2.5 bg-pc-accent hover:bg-pc-accent-secondary text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? "Signing in..." : "Sign In"}
-          </button>
+            Sign In
+          </AsyncButton>
 
           <p className="text-center text-pc-text-secondary text-sm">
             Don&apos;t have an account?{" "}

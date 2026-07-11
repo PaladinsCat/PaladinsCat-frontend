@@ -5,6 +5,8 @@ import Link from "next/link";
 import { fetchPosts, type Post } from "@/lib/api-client";
 import ScrambleText from "@/components/ScrambleText";
 import { formatLocalDateTime } from "@/lib/time-format";
+import { EmptyState, ErrorState } from "@/components/async-state";
+import { RouteSkeleton } from "@/components/route-skeleton";
 
 export default function CommunityPage() {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -25,8 +27,8 @@ export default function CommunityPage() {
     load();
   }, []);
 
-  if (loading) return <div className="text-center py-12 text-pc-text-secondary">Loading community...</div>;
-  if (error) return <div className="text-center py-12 text-pc-text-muted">{error}</div>;
+  if (loading) return <RouteSkeleton variant="list" />;
+  if (error) return <ErrorState title="Community unavailable" message={error} />;
 
   return (
     <div className="space-y-6">
@@ -43,10 +45,7 @@ export default function CommunityPage() {
       </div>
 
       {posts.length === 0 ? (
-        <div className="text-center py-12 bg-pc-bg-elevated rounded-lg border border-pc-border">
-          <p className="text-pc-text-secondary text-lg">No posts yet</p>
-          <p className="text-pc-text-muted mt-2">Be the first to share something!</p>
-        </div>
+        <EmptyState title="No posts yet" description="Be the first to share something with the community." />
       ) : (
         <div className="space-y-4">
           {posts.map((post) => (

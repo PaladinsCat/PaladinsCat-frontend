@@ -5,6 +5,8 @@ import Link from "next/link";
 import { fetchBuilds, type Build } from "@/lib/api-client";
 import ScrambleText from "@/components/ScrambleText";
 import { formatLocalDateTime } from "@/lib/time-format";
+import { EmptyState, ErrorState } from "@/components/async-state";
+import { RouteSkeleton } from "@/components/route-skeleton";
 
 export default function BuildsPage() {
   const [builds, setBuilds] = useState<Build[]>([]);
@@ -35,8 +37,8 @@ export default function BuildsPage() {
     ? builds.filter((b) => b.championName.toLowerCase().includes(championFilter.toLowerCase()))
     : builds;
 
-  if (loading) return <div className="text-center py-12 text-pc-text-secondary">Loading builds...</div>;
-  if (error) return <div className="text-center py-12 text-pc-text-muted">{error}</div>;
+  if (loading) return <RouteSkeleton variant="list" />;
+  if (error) return <ErrorState title="Builds unavailable" message={error} />;
 
   return (
     <div className="space-y-6">
@@ -73,10 +75,7 @@ export default function BuildsPage() {
       </div>
 
       {filteredBuilds.length === 0 ? (
-        <div className="text-center py-12 bg-pc-bg-elevated rounded-lg border border-pc-border">
-          <p className="text-pc-text-secondary text-lg">No builds found</p>
-          <p className="text-pc-text-muted mt-2">Share your first deck build!</p>
-        </div>
+        <EmptyState title="No builds found" description="Share the first deck build for this selection." />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filteredBuilds.map((build) => (

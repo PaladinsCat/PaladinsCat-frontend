@@ -13,10 +13,14 @@ import {
   type MatchHourlyStats,
 } from "@/lib/api-client";
 import { useChampions } from "@/lib/champion-names";
+import { useTimeZone } from "@/lib/time-zone-context";
 import { formatLocalDateTime, formatLocalHourFromUtcBucket } from "@/lib/time-format";
+import { AsyncButton, EmptyState, ErrorState, LoadingPanel } from "@/components/async-state";
+import { DataTableSkeleton } from "@/components/route-skeleton";
 
 const RANKED_QUEUE_ID = "486";
 export default function MatchesPage() {
+  const { timeZone } = useTimeZone();
   const [matches, setMatches] = useState<MatchSearchResult[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -101,6 +105,7 @@ export default function MatchesPage() {
           region: appliedFilters.region || undefined,
           date: appliedFilters.date || undefined,
           hour: appliedFilters.hour || undefined,
+          timeZone,
           page: String(page),
           perPage: String(perPage),
         });
@@ -127,7 +132,7 @@ export default function MatchesPage() {
     } finally {
       setLoading(false);
     }
-  }, [appliedFilters, page, perPage]);
+  }, [appliedFilters, timeZone, page, perPage]);
 
   useEffect(() => { loadMatches(); }, [loadMatches]);
 
@@ -192,12 +197,12 @@ export default function MatchesPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs text-pc-text-muted mb-1">Date (UTC)</label>
+                <label className="block text-xs text-pc-text-muted mb-1">Date ({timeZone})</label>
                 <input type="date" value={date} onChange={(e) => setDate(e.target.value)}
                   className="w-full px-3 py-1.5 rounded-lg bg-pc-bg border border-pc-border text-pc-text text-sm focus:outline-none focus:border-pc-accent" />
               </div>
               <div>
-                <label className="block text-xs text-pc-text-muted mb-1">Hour (UTC)</label>
+                <label className="block text-xs text-pc-text-muted mb-1">Hour ({timeZone})</label>
                 <select value={hour} onChange={(e) => setHour(e.target.value)} disabled={!date}
                   className="w-full px-3 py-1.5 rounded-lg bg-pc-bg border border-pc-border text-pc-text text-sm focus:outline-none focus:border-pc-accent disabled:opacity-50">
                   <option value="">All hours</option>
@@ -210,10 +215,10 @@ export default function MatchesPage() {
               </div>
             </div>
             <div className="flex gap-2 mt-3">
-              <button onClick={handleSearch}
+              <AsyncButton onClick={handleSearch} loading={loading} loadingLabel="Searching…"
                 className="flex-1 px-4 py-1.5 rounded-lg bg-pc-accent text-pc-bg font-semibold text-sm hover:bg-pc-accent-secondary transition-colors">
                 Search
-              </button>
+              </AsyncButton>
               <button onClick={handleReset}
                 className="px-4 py-1.5 rounded-lg bg-pc-bg border border-pc-border text-pc-text-secondary text-sm hover:bg-pc-bg-elevated transition-colors">
                 Reset
@@ -222,12 +227,13 @@ export default function MatchesPage() {
           </div>
 
           {/* Results */}
-          {loading && <div className="text-center py-12 text-pc-text-secondary text-sm">Loading matches...</div>}
-          {error && <div className="text-center py-12 text-red-400 text-sm">{error}</div>}
+          {loading && <DataTableSkeleton rows={8} />}
+          {error && !loading && <ErrorState message={error} onRetry={() => void loadMatches()} />}
           {!loading && !error && matches.length === 0 && (
-            <div className="text-center py-12 text-pc-text-secondary text-sm">
-              {hasFilters ? "No matches found for these filters." : "No ranked matches available."}
-            </div>
+            <EmptyState
+              title={hasFilters ? "No matching games" : "No ranked matches available"}
+              description={hasFilters ? "Try widening the champion, region, date, or hour filters." : "New ranked matches will appear here after ingestion."}
+            />
           )}
           {!loading && !error && matches.length > 0 && (
             <>
@@ -296,7 +302,7 @@ export default function MatchesPage() {
             </div>
 
             {statsLoading ? (
-              <div className="text-pc-text-muted text-sm text-center py-8">Loading…</div>
+              <LoadingPanel compact label="Loading activity…" detail="Combining regional and dropped-match totals." />
             ) : (
               <div className="space-y-px">
                 {/* Header */}

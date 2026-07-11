@@ -42,6 +42,8 @@ import MatchupSection from "@/components/match-result/matchup-section";
 import MatchStatsSection from "@/components/match-result/match-stats-section";
 import ItemsLoadoutsSection from "@/components/match-result/items-loadouts-section";
 import RatingSnapshots from "@/components/match-result/rating-snapshots";
+import { ErrorState } from "@/components/async-state";
+import { RouteSkeleton } from "@/components/route-skeleton";
 
 /* ── Helpers ── */
 
@@ -97,6 +99,7 @@ export default function MatchDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [profileMap, setProfileMap] = useState<ProfileByPlayerId | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -134,7 +137,7 @@ export default function MatchDetailPage() {
 
     load();
     return () => { cancelled = true; };
-  }, [matchId]);
+  }, [matchId, reloadKey]);
 
   /* ── Derived data ── */
 
@@ -185,24 +188,13 @@ export default function MatchDetailPage() {
 
   /* ── Skeleton ── */
   if (loading) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="animate-pulse space-y-6">
-          <div className="h-8 bg-pc-bg-elevated rounded w-1/3" />
-          <div className="h-4 bg-pc-bg-elevated rounded w-1/2" />
-          <div className="grid grid-cols-2 gap-6">
-            <div className="h-64 bg-pc-bg-elevated rounded" />
-            <div className="h-64 bg-pc-bg-elevated rounded" />
-          </div>
-        </div>
-      </div>
-    );
+    return <RouteSkeleton variant="match" />;
   }
 
   if (error) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-red-400 text-lg">{error}</div>
+      <div className="space-y-4">
+        <ErrorState title="Match details unavailable" message={error} onRetry={() => setReloadKey((key) => key + 1)} />
         <Link href="/matches" className="text-pc-accent hover:underline mt-4 inline-block">
           ← Back to matches
         </Link>

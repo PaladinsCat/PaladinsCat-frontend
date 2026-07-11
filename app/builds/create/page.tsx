@@ -20,6 +20,7 @@ import {
   type BuildTalentReference,
 } from "@/lib/build-reference";
 import { championSlug } from "@/lib/utils";
+import { AsyncButton, LoadingPanel } from "@/components/async-state";
 
 const MAX_ITEMS = 4;
 const MAX_CARDS = 5;
@@ -380,7 +381,7 @@ export default function CreateBuildPage() {
         )}
 
         {loadingReference && (
-          <div className="pc-card text-sm text-pc-text-secondary">Loading champion build options...</div>
+          <LoadingPanel label="Loading champion build options…" detail="Preparing talents, cards, and items." />
         )}
 
         {referenceData && (
@@ -473,13 +474,15 @@ export default function CreateBuildPage() {
           <div className="text-sm text-pc-text-secondary">
             {canSubmit ? "Ready to save." : "A valid build needs 1 talent and 5 cards totaling 15 points."}
           </div>
-          <button
+          <AsyncButton
             type="submit"
-            disabled={!canSubmit || submitting}
+            disabled={!canSubmit}
+            loading={submitting}
+            loadingLabel="Saving build…"
             className="rounded-lg bg-pc-accent px-5 py-2 font-semibold text-black transition-colors hover:bg-pc-accent-secondary disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {submitting ? "Saving..." : "Save Build"}
-          </button>
+            Save Build
+          </AsyncButton>
         </div>
       </form>
     </div>

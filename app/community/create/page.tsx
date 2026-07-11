@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createPost, getAuthUser, getAuthToken } from "@/lib/api-client";
+import { AsyncButton } from "@/components/async-state";
 
 export default function CreatePostPage() {
   const router = useRouter();
@@ -86,13 +87,14 @@ export default function CreatePostPage() {
           />
         </div>
 
-        <button
+        <AsyncButton
           type="submit"
-          disabled={loading}
+          loading={loading}
+          loadingLabel="Creating post…"
           className="w-full py-2.5 bg-pc-accent hover:bg-pc-accent-secondary text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? "Creating..." : "Create Post"}
-        </button>
+          Create Post
+        </AsyncButton>
       </form>
     </div>
   );

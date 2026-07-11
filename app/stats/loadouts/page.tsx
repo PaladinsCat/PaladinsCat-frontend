@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Card from "@/components/Card";
 import { fetchLoadouts, type LoadoutStat } from "@/lib/api-client";
+import { EmptyState, ErrorState } from "@/components/async-state";
+import { DataTableSkeleton } from "@/components/route-skeleton";
 
 type SortKey = "championName" | "totalUses" | "winRate" | "avgDpm" | "avgHpm";
 type SortDir = "asc" | "desc";
@@ -44,9 +46,11 @@ export default function LoadoutsPage() {
       <h1 className="pc-heading pc-heading-lg text-pc-accent">Loadout Meta</h1>
 
       {loading ? (
-        <div className="text-center py-8 text-pc-text-secondary">Loading...</div>
+        <DataTableSkeleton />
       ) : error ? (
-        <div className="text-center py-8 text-pc-text-muted">{error}</div>
+        <ErrorState message={String(error)} />
+      ) : sorted.length === 0 ? (
+        <EmptyState title="No loadout statistics" description="Loadout combinations will appear after enough ranked matches are processed." />
       ) : (
         <Card>
           <div className="overflow-x-auto">

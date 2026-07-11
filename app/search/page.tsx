@@ -13,6 +13,8 @@ import {
   type UniversalSearchType,
 } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
+import { AsyncButton, EmptyState, ErrorState, LoadingPanel } from "@/components/async-state";
+import { RouteSkeleton } from "@/components/route-skeleton";
 
 const TYPE_LABEL: Record<UniversalSearchType, string> = {
   player: "Player",
@@ -439,15 +441,17 @@ function SearchPageBody() {
       {searched && visibleRemoteActions.length > 0 && (
         <div className="pc-glass flex flex-wrap items-center gap-2 rounded-lg border border-pc-border p-3">
           {visibleRemoteActions.map((action) => (
-            <button
+            <AsyncButton
               key={action.target}
               type="button"
               onClick={() => runRemoteLookup(action.target)}
               disabled={remoteLoadingTarget !== null}
+              loading={remoteLoadingTarget === action.target}
+              loadingLabel="Looking up…"
               className="px-3 py-1.5 rounded-md border border-pc-accent/30 bg-pc-accent/10 text-xs font-semibold text-pc-accent hover:bg-pc-accent/15 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {remoteLoadingTarget === action.target ? "Looking up..." : action.label}
-            </button>
+              {action.label}
+            </AsyncButton>
           ))}
           <span className="text-xs text-pc-text-muted">Exact lookup. Local DB is checked first.</span>
         </div>
@@ -458,15 +462,15 @@ function SearchPageBody() {
       )}
 
       {loading && (
-        <div className="pc-card text-sm text-pc-text-muted">Searching...</div>
+        <LoadingPanel label="Searching PaladinsCat…" detail="Checking players, matches, champions, items, cards, and talents." />
       )}
 
       {error && (
-        <div className="pc-card border-red-500/30 text-sm text-red-300">{error}</div>
+        <ErrorState title="Search unavailable" message={error} />
       )}
 
       {!loading && searched && results.length === 0 && !error && (
-        <div className="pc-card text-sm text-pc-text-muted">No results found.</div>
+        <EmptyState title="No results found" description="Try a broader name, player ID, match ID, champion, item, card, or talent." />
       )}
 
       {!loading && grouped.length > 0 && (
@@ -512,7 +516,7 @@ function SearchPageBody() {
 
 export default function SearchPage() {
   return (
-    <Suspense fallback={<div className="pc-card text-sm text-pc-text-muted">Loading search...</div>}>
+    <Suspense fallback={<RouteSkeleton variant="list" />}>
       <SearchPageBody />
     </Suspense>
   );
