@@ -24,6 +24,8 @@ const nextConfig: NextConfig = {
       "/players/leaderboard",
       "/players/cheaters",
       "/players/suspicious",
+      "/players/weirdos",
+      "/players/hall-of-fame",
       "/players/stats/:metric",
       "/players/class/:role",
     ];

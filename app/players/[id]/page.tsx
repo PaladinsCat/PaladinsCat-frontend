@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
-import { fetchPlayerMatches, type MatchRecord } from "@/lib/api-client";
+import { fetchPlayerMatches, reportPlayer, type MatchRecord, type ReportType } from "@/lib/api-client";
 import { getTierColor, resolveEffectiveTier, getRankIconPath } from "@/lib/tier-utils";
 import { useAuth } from "@/lib/auth-context";
 import ReportModal from "@/components/ReportModal";
@@ -53,6 +53,8 @@ interface PlayerData {
   avg_mpm: number | null;
   cheater: boolean;
   sus_count: number;
+  weirdo_count: number;
+  hall_of_fame_count: number;
   platform_name: string;
   last_seen: string;
   first_seen: string;
@@ -181,6 +183,23 @@ export default function PlayerProfilePage() {
     setShowReportModal(false);
     setFetchKey(k => k + 1);
   }, []);
+
+  const handleCommunityVote = useCallback(async (type: Extract<ReportType, 'weirdo' | 'hall_of_fame'>) => {
+    if (!isLoggedIn) {
+      router.push(`/auth/login?redirect=/players/${id}`);
+      return;
+    }
+    setReporting(type);
+    setError(null);
+    try {
+      await reportPlayer(id, { type });
+      setFetchKey((key) => key + 1);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not submit your vote");
+    } finally {
+      setReporting(null);
+    }
+  }, [id, isLoggedIn, router]);
 
   // Fetch profile
   const fetchProfile = useCallback(async () => {
@@ -323,6 +342,24 @@ export default function PlayerProfilePage() {
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
             Suspicious
           </button>
+          <button
+            onClick={() => handleCommunityVote('weirdo')}
+            disabled={reporting !== null}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-violet-500/10 hover:bg-violet-500/20 text-violet-300 border border-violet-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            title={isLoggedIn ? "Vote Weirdo" : "Log in to vote"}
+          >
+            <span aria-hidden>✦</span>
+            {reporting === 'weirdo' ? 'Voting...' : `Weirdo${player?.weirdo_count ? ` (${player.weirdo_count})` : ''}`}
+          </button>
+          <button
+            onClick={() => handleCommunityVote('hall_of_fame')}
+            disabled={reporting !== null}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            title={isLoggedIn ? "Vote for Hall of Fame" : "Log in to vote"}
+          >
+            <span aria-hidden>♥</span>
+            {reporting === 'hall_of_fame' ? 'Voting...' : `Hall of Fame${player?.hall_of_fame_count ? ` (${player.hall_of_fame_count})` : ''}`}
+          </button>
           {(isAdmin || isApproved) && (
             <button
               onClick={() => openReportModal('cheater')}
@@ -360,6 +397,12 @@ export default function PlayerProfilePage() {
               )}
               {player.sus_count > 0 && !player.cheater && (
                 <span className="text-xs font-bold text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded">SUSPICIOUS ({player.sus_count})</span>
+              )}
+              {player.weirdo_count > 0 && (
+                <span className="text-xs font-bold text-violet-300 bg-violet-500/10 px-1.5 py-0.5 rounded">WEIRDO ({player.weirdo_count})</span>
+              )}
+              {player.hall_of_fame_count > 0 && (
+                <span className="text-xs font-bold text-emerald-300 bg-emerald-500/10 px-1.5 py-0.5 rounded">HALL OF FAME ({player.hall_of_fame_count})</span>
               )}
             </div>
             {/* Title + loading frame */}
