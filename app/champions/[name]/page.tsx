@@ -17,13 +17,13 @@ import {
   type ChampionTalent,
 } from "@/lib/champion-data";
 import {
-  fetchChampionLeaderboard,
+  fetchItems,
   fetchChampionTalentStats,
   fetchPerformanceMetrics,
   fetchChampionPerformanceDistributions,
-  type ChampionLeaderboardEntry,
   type ChampionTalentStatsResponse,
   type ChampionTalentStat,
+  type ItemStat,
   type PerformanceMetricsResponse,
   type PerformanceMetricKey,
   type PerformanceMetricSummary,
@@ -41,23 +41,29 @@ const CHAMPION_METRICS: Array<{ key: PerformanceMetricKey; label: string; colorC
   { key: "kda", label: "KDA", colorClass: "text-violet-400", accent: "#a78bfa" },
 ];
 
+const ITEM_CATEGORY_BY_NAME: Record<string, string> = {
+  "Blast Shields": "Defense", Guardian: "Defense", Haven: "Defense", Illuminate: "Defense", Resilience: "Defense", Sentinel: "Defense",
+  Chronos: "Utility", Hoard: "Utility", "Master Riding": "Utility", "Morale Boost": "Utility", Nimble: "Utility",
+  Bloodbath: "Healing", "Kill to Heal": "Healing", "Life Rip": "Healing", Meditation: "Healing", Rejuvenate: "Healing", Veteran: "Healing",
+  Bulldozer: "Offense", "Deft Hands": "Offense", Lethality: "Offense", "Trigger Scent": "Offense", Wrecker: "Offense",
+};
+
+const ITEM_CATEGORIES = ["Defense", "Utility", "Healing", "Offense"] as const;
+
+function itemIcon(name: string) {
+  return `/images/items/${name.replace(/\s+/g, "_")}_Icon.avif`;
+}
+
+function itemCategoryColor(category: string) {
+  return category === "Offense" ? "text-red-400" : category === "Defense" ? "text-blue-400" : category === "Healing" ? "text-emerald-400" : "text-amber-400";
+}
+
 interface ChampionStats {
   avgRating: number | null;
   avgWinRate: number | null;
   totalPlays: number | null;
   totalMatches: number | null;
   totalWins: number | null;
-}
-
-interface LeaderboardEntry {
-  rank: number;
-  playerId: number;
-  playerName: string;
-  mu: number;
-  phi: number;
-  matchesPlayed: number;
-  wins: number;
-  losses: number;
 }
 
 // Tier/trend types from existing API
@@ -119,8 +125,8 @@ export default function ChampionDetailPage() {
   const [championData, setChampionData] = useState<ChampionData | null>(null);
   const [dataLoaded, setDataLoaded] = useState(false);
   const [stats, setStats] = useState<ChampionStats | null>(null);
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [talentStats, setTalentStats] = useState<ChampionTalentStatsResponse | null>(null);
+  const [championItems, setChampionItems] = useState<ItemStat[]>([]);
   const [globalPerformance, setGlobalPerformance] = useState<PerformanceMetricsResponse>({});
   const [championPerformance, setChampionPerformance] = useState<Partial<Record<PerformanceMetricKey, ChampionPerformanceDistribution>>>({});
   const [tierStats, setTierStats] = useState<TierStat[]>([]);
@@ -129,7 +135,7 @@ export default function ChampionDetailPage() {
 
   // Static champion reference metadata lets direct /champions/[name] routes
   // resolve icons/roles before DB-backed stats load. It must never provide
-  // synthetic match, leaderboard, or performance numbers.
+  // synthetic match or performance numbers.
   const staticChampion = STATIC_CHAMPIONS.find(
     (c) => championSlug(c.name) === name.toLowerCase()
   );
@@ -161,8 +167,9 @@ export default function ChampionDetailPage() {
       return;
     }
     setLoading(true);
+    setChampionItems([]);
 
-    // Resolve champion ID, then fetch stats + leaderboard in parallel
+    // Resolve the champion ID, then fetch its ranked stats in parallel.
     fetch(`${API_BASE}/champions`)
       .then((r) => r.json())
       .then((champs: Array<{ id: number; name: string }>) => {
@@ -178,8 +185,7 @@ export default function ChampionDetailPage() {
               if (!s) return null;
               return {
                 // This page's "Avg Rating" is the ranked player tier average
-                // for the champion, not the Glicko/ELO μ used by the player
-                // leaderboard below. The backend exposes it from
+                // for the champion, not a player Glicko/ELO μ. The backend exposes it from
                 // champion_stats_ranked.sum_league_tier / total_matches, which
                 // is maintained during ingest and rebuilt by the projection
                 // tracker, so the detail page does not need to aggregate over
@@ -192,10 +198,10 @@ export default function ChampionDetailPage() {
               } as ChampionStats;
             })
             .catch(() => null as ChampionStats | null),
-          // Per-champion leaderboard from player_champion_ratings
-          fetchChampionLeaderboard(match.id, 25).catch(() => [] as ChampionLeaderboardEntry[]),
           // Talent stats for this champion
           fetchChampionTalentStats(match.id).catch(() => null as ChampionTalentStatsResponse | null),
+          // Champion-filtered ranked item stats are aggregated from the match facts.
+          fetchItems({ mode: "ranked", championId: match.id, limit: 200 }).catch(() => [] as ItemStat[]),
           // Global ranked distributions plus champion-specific distributions
           // use the same metric contract as /stats/metrics. This
           // keeps the champion page from comparing raw damage/gold totals across
@@ -212,10 +218,10 @@ export default function ChampionDetailPage() {
       })
       .then((result) => {
         if (!result) return;
-        const [statsData, lbData, talentData, globalMetrics, championMetricPairs] = result;
+        const [statsData, talentData, itemData, globalMetrics, championMetricPairs] = result;
         if (statsData) setStats(statsData);
-        setLeaderboard(lbData);
         if (talentData) setTalentStats(talentData);
+        setChampionItems(itemData);
         setGlobalPerformance(globalMetrics ?? {});
         setChampionPerformance(
           Object.fromEntries(championMetricPairs.filter(([, row]) => row != null)) as Partial<Record<PerformanceMetricKey, ChampionPerformanceDistribution>>
@@ -301,8 +307,33 @@ export default function ChampionDetailPage() {
         {/* Right column — talent summaries (~3/4) */}
         <div className="lg:col-span-3 space-y-6">
           {loading && (
-            <LoadingPanel compact className="pc-card" label="Loading champion analytics…" detail="Combining ranked performance, talent, and leaderboard data." />
+            <LoadingPanel compact className="pc-card" label="Loading champion analytics…" detail="Combining ranked performance and talent data." />
           )}
+          {/* Compact ranked summary leads the analysis column. */}
+          <section className="space-y-2">
+            <h2 className="pc-card-title shadow-sm">Ranked Performance</h2>
+            <div className="pc-card space-y-3 p-4">
+              {stats && (
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  <AvgTierCard stats={stats} />
+                  <StatCard label="Win Rate" value={formatPct(stats.avgWinRate)} accent />
+                  <StatCard label="Plays" value={formatNum(stats.totalPlays)} />
+                  <StatCard label="Wins" value={formatNum(stats.totalWins)} />
+                </div>
+              )}
+              <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-5">
+                {CHAMPION_METRICS.map((metric) => (
+                  <ChampionMetricCard
+                    key={metric.key}
+                    metric={metric}
+                    champion={championPerformance[metric.key]}
+                    global={globalPerformance[metric.key]}
+                  />
+                ))}
+              </div>
+            </div>
+          </section>
+
           {/* Talents */}
           {championData?.talents && championData.talents.length > 0 && (
             <>
@@ -333,85 +364,48 @@ export default function ChampionDetailPage() {
             </>
           )}
 
-          {/* Compact ranked summary fills the analysis column beneath talents. */}
+          {/* Champion-specific ranked item purchases. */}
           <section className="space-y-2">
-            <h2 className="pc-card-title shadow-sm">Ranked Performance</h2>
-            <div className="pc-card space-y-3 p-4">
-              {stats && (
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                  <AvgTierCard stats={stats} />
-                  <StatCard label="Win Rate" value={formatPct(stats.avgWinRate)} accent />
-                  <StatCard label="Plays" value={formatNum(stats.totalPlays)} />
-                  <StatCard label="Wins" value={formatNum(stats.totalWins)} />
-                </div>
+            <h2 className="pc-card-title shadow-sm">Item Stats</h2>
+            <div className="pc-card space-y-4 p-4">
+              {championItems.length === 0 ? (
+                <div className="text-sm text-pc-text-muted">No ranked item statistics are available yet.</div>
+              ) : (
+                ITEM_CATEGORIES.map((category) => {
+                  const items = championItems.filter((item) => (ITEM_CATEGORY_BY_NAME[item.itemName] ?? "Utility") === category);
+                  if (items.length === 0) return null;
+                  return (
+                    <div key={category}>
+                      <span className={`mb-2 block text-xs font-bold uppercase tracking-wider ${itemCategoryColor(category)}`}>{category}</span>
+                      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-5">
+                        {items.map((item) => {
+                          const quality = getStatQuality(item.winRate, 1, 1);
+                          return (
+                            <Link
+                              key={item.itemId}
+                              href={`/stats/items/${item.itemId}`}
+                              className="group flex flex-col items-center rounded-lg border border-transparent py-1 text-center transition-colors hover:border-pc-accent-mid"
+                              style={{ borderColor: quality.borderColor }}
+                            >
+                              <img src={itemIcon(item.itemName)} alt="" className="mb-1 h-12 w-12 rounded-md object-contain" />
+                              <div className="w-full truncate text-xs font-medium leading-tight text-pc-text group-hover:text-pc-accent">{item.itemName}</div>
+                              <div className="mt-0.5 flex items-center gap-1 text-[9px]">
+                                <span style={{ color: quality.color }}>WR {item.winRate.toFixed(1)}%</span>
+                                <span className="text-pc-text-muted">·</span>
+                                <span style={{ color: quality.color }}>PR {(item.pickRate ?? 0).toFixed(1)}%</span>
+                              </div>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })
               )}
-              <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-5">
-                {CHAMPION_METRICS.map((metric) => (
-                  <ChampionMetricCard
-                    key={metric.key}
-                    metric={metric}
-                    champion={championPerformance[metric.key]}
-                    global={globalPerformance[metric.key]}
-                  />
-                ))}
-              </div>
             </div>
           </section>
 
         </div>
-      </div>
-
-      {/* Glicko-2 Leaderboard */}
-      <h2 className="pc-card-title mb-2 shadow-sm">
-        Global ELO Leaderboard — {championData?.name ?? staticChampion?.name ?? name}
-      </h2>
-      <div className="pc-card">
-        {leaderboard.length === 0 ? (
-          <div className="text-center py-8">
-            <p className="text-pc-text-muted">No leaderboard data available yet.</p>
-            <p className="text-pc-text-muted text-sm mt-1">Player ratings will appear once the database is populated.</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="pc-table w-full">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Player</th>
-                  <th>Rating (μ)</th>
-                  <th>Matches</th>
-                  <th>W/L</th>
-                </tr>
-              </thead>
-              <tbody>
-                {leaderboard.map((entry) => {
-                  const wr = entry.matchesPlayed > 0 ? (entry.wins / entry.matchesPlayed) * 100 : 0;
-                  return (
-                    <tr key={entry.playerId}>
-                      <td className="text-pc-text-muted font-mono text-sm">{entry.rank}</td>
-                      <td>
-                        <Link
-                          href={`/players/${entry.playerId}`}
-                          className="text-pc-text hover:text-pc-accent transition-colors text-sm font-medium"
-                        >
-                          {entry.playerName}
-                        </Link>
-                      </td>
-                      <td className="text-pc-accent font-mono text-sm font-semibold">{Number(entry.mu).toFixed(0)}</td>
-                      <td className="text-pc-text-muted text-sm">{entry.matchesPlayed}</td>
-                      <td className="font-mono text-sm">
-                        <span className="text-emerald-400">{entry.wins}</span>
-                        <span className="text-pc-text-muted">/</span>
-                        <span className="text-rose-400">{entry.losses}</span>
-                        <span className="text-pc-text-muted ml-1 text-xs">({wr.toFixed(0)}%)</span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
       </div>
 
       {/* Tier Performance */}
