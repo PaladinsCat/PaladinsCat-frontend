@@ -40,7 +40,9 @@ export function resolveEffectiveTier(kbmTier: number, kbmRank: number): {
   isGrandmaster: boolean;
 } {
   if (kbmTier === 26) {
-    if (kbmRank <= 100) {
+    // A rank of 0/null means the leaderboard position is unknown, not #0.
+    // Only an actual live leaderboard rank in 1–100 earns Grandmaster.
+    if (kbmRank > 0 && kbmRank <= 100) {
       return {
         displayTier: 27,
         displayName: "Grandmaster",
@@ -51,7 +53,7 @@ export function resolveEffectiveTier(kbmTier: number, kbmRank: number): {
     return {
       displayTier: 26,
       displayName: "Master",
-      displayRank: kbmRank - 100,
+      displayRank: kbmRank > 100 ? kbmRank - 100 : 0,
       isGrandmaster: false,
     };
   }

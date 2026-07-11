@@ -52,6 +52,8 @@ export default function PlayersPage() {
   const [accountEloPlayers, setAccountEloPlayers] = useState<ClassLeaderboardEntry[]>([]);
   const [cheaterPlayers, setCheaterPlayers] = useState<CheaterPlayer[]>([]);
   const [suspiciousPlayers, setSuspiciousPlayers] = useState<CheaterPlayer[]>([]);
+  const [weirdoPlayers, setWeirdoPlayers] = useState<CheaterPlayer[]>([]);
+  const [hallOfFamePlayers, setHallOfFamePlayers] = useState<CheaterPlayer[]>([]);
   const [overviewLoading, setOverviewLoading] = useState(true);
 
   useEffect(() => {
@@ -59,13 +61,15 @@ export default function PlayersPage() {
 
     async function loadOverview() {
       setOverviewLoading(true);
-      const [championEloResult, performanceRows, ranked, accountElo, cheaters, suspicious] = await Promise.all([
+      const [championEloResult, performanceRows, ranked, accountElo, cheaters, suspicious, weirdos, hallOfFame] = await Promise.all([
         fetchChampionElo({ limit: 10, queueId: 486 }),
         Promise.all(PERFORMANCE_METRICS.map(async ({ key, metric }) => [key, await fetchPerformanceLeaderboard({ metric, limit: 5, queueId: 486 })] as const)),
         fetchRankedLeaderboard({ tier: "26", top: 20 }),
         fetchClassLeaderboard({ role: "Frontline", limit: 10, queueId: 486, mode: "account" }),
         fetchCheaterPlayers({ cheater: true, limit: 5 }),
         fetchCheaterPlayers({ susOnly: true, limit: 5 }),
+        fetchCheaterPlayers({ weirdoOnly: true, limit: 5 }),
+        fetchCheaterPlayers({ hallOfFameOnly: true, limit: 5 }),
       ]);
 
       if (cancelled) return;
@@ -75,6 +79,8 @@ export default function PlayersPage() {
       setAccountEloPlayers(accountElo);
       setCheaterPlayers(cheaters);
       setSuspiciousPlayers(suspicious);
+      setWeirdoPlayers(weirdos);
+      setHallOfFamePlayers(hallOfFame);
       setOverviewLoading(false);
     }
 
@@ -267,6 +273,76 @@ export default function PlayersPage() {
                     </div>
                   </div>
                 ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Community Weirdo Votes */}
+            <div className="flex flex-col h-full">
+              <div className="flex items-center justify-between mb-2 px-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-violet-500" />
+                  <h3 className="text-pc-text font-semibold text-xs">Weirdo</h3>
+                  <span className="text-xs px-1.5 py-0.5 rounded-full bg-violet-500/10 text-violet-300 border border-violet-500/20">
+                    {weirdoPlayers.length}
+                  </span>
+                </div>
+                <Link href="/players/weirdos" className="text-xs text-pc-text-secondary hover:text-violet-300 transition-colors drop-shadow-sm">
+                  Detail →
+                </Link>
+              </div>
+              <div className="bg-pc-bg-elevated border border-violet-500/20 rounded-xl p-3 flex-1 flex flex-col justify-center">
+                <div className="space-y-1.5">
+                  {weirdoPlayers.length === 0 && (
+                    <div className="text-xs text-pc-text-muted">{overviewLoading ? "Loading..." : "No Weirdo votes yet"}</div>
+                  )}
+                  {weirdoPlayers.map((p) => (
+                    <div key={p.id} className="flex items-start gap-2 p-2 rounded-lg bg-pc-bg/50">
+                      <div className="shrink-0 mt-0.5 text-violet-300 text-xs">✦</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <Link href={`/players/${p.id}`} className="text-pc-text font-medium text-xs hover:text-pc-accent transition-colors truncate">{p.name}</Link>
+                          <span className="shrink-0 text-xs px-1 py-0.5 rounded border bg-violet-500/15 text-violet-300 border-violet-500/30">{p.weirdoCount} votes</span>
+                        </div>
+                        <p className="text-pc-text-muted text-xs mt-0.5">{p.totalMatches.toLocaleString()} matches{p.winRate != null ? ` · ${p.winRate.toFixed(1)}% WR` : ""}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Community Hall of Fame Votes */}
+            <div className="flex flex-col h-full">
+              <div className="flex items-center justify-between mb-2 px-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                  <h3 className="text-pc-text font-semibold text-xs">Hall of Fame</h3>
+                  <span className="text-xs px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+                    {hallOfFamePlayers.length}
+                  </span>
+                </div>
+                <Link href="/players/hall-of-fame" className="text-xs text-pc-text-secondary hover:text-emerald-300 transition-colors drop-shadow-sm">
+                  Detail →
+                </Link>
+              </div>
+              <div className="bg-pc-bg-elevated border border-emerald-500/20 rounded-xl p-3 flex-1 flex flex-col justify-center">
+                <div className="space-y-1.5">
+                  {hallOfFamePlayers.length === 0 && (
+                    <div className="text-xs text-pc-text-muted">{overviewLoading ? "Loading..." : "No Hall of Fame votes yet"}</div>
+                  )}
+                  {hallOfFamePlayers.map((p) => (
+                    <div key={p.id} className="flex items-start gap-2 p-2 rounded-lg bg-pc-bg/50">
+                      <div className="shrink-0 mt-0.5 text-emerald-300 text-xs">♥</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <Link href={`/players/${p.id}`} className="text-pc-text font-medium text-xs hover:text-pc-accent transition-colors truncate">{p.name}</Link>
+                          <span className="shrink-0 text-xs px-1 py-0.5 rounded border bg-emerald-500/15 text-emerald-300 border-emerald-500/30">{p.hallOfFameCount} votes</span>
+                        </div>
+                        <p className="text-pc-text-muted text-xs mt-0.5">{p.totalMatches.toLocaleString()} matches{p.winRate != null ? ` · ${p.winRate.toFixed(1)}% WR` : ""}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>

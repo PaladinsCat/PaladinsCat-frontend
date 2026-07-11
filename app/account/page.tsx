@@ -303,7 +303,7 @@ export default function AccountPage() {
               {linkedPlayer.kbm_tier && (
                 <div className="text-pc-text-secondary text-sm mt-1">
                   Tier: {linkedPlayer.kbm_tier}
-                  {linkedPlayer.kbm_points !== null && ` · ${linkedPlayer.kbm_points} pts`}
+                  {linkedPlayer.kbm_points !== null && ` · ${linkedPlayer.kbm_points} TP`}
                 </div>
               )}
               {linkedPlayer.wins !== null && (

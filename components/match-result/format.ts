@@ -1,0 +1,151 @@
+/**
+ * Formatting helpers for match-result components.
+ * Centralized stat math, number formatting, and team average computation.
+ */
+
+import type { MatchPlayerDetail, MatchFactPlayer } from "@/lib/api-client";
+import type { MatchResultPlayer, PlayerProfileData, TeamAverages } from "./types";
+
+/* ── Number formatting ── */
+
+export function num(n: number | null | undefined): string {
+  if (n == null || !Number.isFinite(n)) return "—";
+  return n.toLocaleString();
+}
+
+export function fixed(n: number | null | undefined, digits: number): string {
+  if (n == null || !Number.isFinite(n)) return "—";
+  return n.toFixed(digits);
+}
+
+/** Format duration seconds → "mm:ss" */
+export function formatDuration(seconds: number): string {
+  if (!Number.isFinite(seconds) || seconds < 0) return "—";
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m}:${s.toString().padStart(2, "0")}`;
+}
+
+/** Format percentage for win/loss bars (0–100 range). */
+export function winPct(wins: number, total: number): string {
+  if (total <= 0) return "—";
+  return `${Math.round((wins / total) * 100)}%`;
+}
+
+/* ── Damage math (preserves recovered-match guard) ── */
+
+export function computeDamageStats(p: MatchPlayerDetail) {
+  const totalDamage = p.damage_done_physical + p.damage_done_magical;
+  const weaponDamage = p.damage_done_in_hand ?? 0;
+
+  // Recovered matches can be reconstructed from player history / recovery
+  // endpoints that do not include `Damage_Done_In_Hand`. In that case total
+  // damage is still useful for DPM and rankings, but the weapon-vs-ability
+  // split is unknown. Treat missing recovered weapon data as unavailable
+  // instead of showing a misleading 0 weapon / full ability breakdown.
+  const hasWeaponBreakdown =
+    p.source !== "recovered" || weaponDamage > 0 || totalDamage === 0;
+  const nonWeaponDamage = hasWeaponBreakdown
+    ? Math.max(totalDamage - weaponDamage, 0)
+    : null;
+  const weaponShare =
+    hasWeaponBreakdown && totalDamage > 0
+      ? `${Math.round((weaponDamage / totalDamage) * 100)}%`
+      : "—";
+
+  return { totalDamage, weaponDamage, nonWeaponDamage, weaponShare };
+}
+
+/* ── Player profile helpers ── */
+
+/**
+ * Get champion-specific stats from player profile, or null if not found.
+ */
+export function getChampionStats(
+  profile: PlayerProfileData | null | undefined,
+  championName: string | null | undefined,
+) {
+  if (!profile || !championName) return null;
+  const tc = profile.topChampions.find(
+    (c) => c.championName === championName,
+  );
+  if (!tc) return null;
+  return {
+    championName: tc.championName,
+    wins: tc.wins,
+    totalPlays: tc.totalPlays,
+    winRate: tc.winRate,
+  };
+}
+
+/**
+ * Format KBM tier label for display.
+ */
+export function formatKBMTier(tier: string | null | undefined): string {
+  if (!tier) return "Unranked";
+  return tier;
+}
+
+/* ── Team averages ── */
+
+export function computeTeamAverages(
+  players: MatchResultPlayer[],
+): TeamAverages {
+  if (players.length === 0) {
+    return {
+      avgLevel: "—",
+      avgEloPlus: "—",
+      avgWinRate: "—",
+      avgKDA: "—",
+    };
+  }
+
+  // KDA average
+  let kdaSum = 0;
+  let kdaCount = 0;
+
+  // Global in-game win rate (from Hi-Rez profile wins/losses, not tracked matches).
+  let winRateSum = 0;
+  let winRateCount = 0;
+
+  // Account level is profile data; it is unrelated to the ranked tier.
+  let levelSum = 0;
+  let levelCount = 0;
+
+  for (const p of players) {
+    const md = p.matchData;
+
+    // KDA
+    if (Number.isFinite(md.kda)) { kdaSum += md.kda; kdaCount++; }
+
+    // Profile-based stats
+    if (p.profileData) {
+      if (p.profileData.level != null && Number.isFinite(p.profileData.level)) {
+        levelSum += p.profileData.level;
+        levelCount++;
+      }
+      if (p.profileData.globalWinRate != null && Number.isFinite(p.profileData.globalWinRate)) {
+        winRateSum += p.profileData.globalWinRate;
+        winRateCount++;
+      }
+    }
+  }
+
+  return {
+    avgLevel: levelCount > 0 ? fixed(levelSum / levelCount, 0) : "—",
+    avgEloPlus: (() => {
+      const values = players.map((player) => player.profileData?.queueElo).filter((value): value is number => value != null && Number.isFinite(value));
+      return values.length > 0 ? fixed(values.reduce((sum, value) => sum + value, 0) / values.length, 0) : "—";
+    })(),
+    // globalWinRate is already expressed in percentage points (0–100).
+    avgWinRate: winRateCount > 0 ? `${fixed(winRateSum / winRateCount, 1)}%` : "—",
+    avgKDA: kdaCount > 0 ? fixed(kdaSum / kdaCount, 2) : "—",
+  };
+}
+
+/* ── Stat helpers for tables ── */
+
+export function formatStat(n: number | null | undefined, decimals = 0): string {
+  if (n == null || !Number.isFinite(n)) return "—";
+  return decimals > 0 ? n.toFixed(decimals) : n.toLocaleString();
+}

@@ -35,10 +35,11 @@ export function getGenericChampionIcon(): string {
  */
 export function getChampionIconSafe(name: string | null | undefined): string {
   if (!name) return GENERIC_ICON;
+  const normalizedName = name.trim();
   // Check for special name mapping
-  if (ICON_NAME_MAP[name]) {
-    return `/images/champions/${ICON_NAME_MAP[name]}`;
+  if (ICON_NAME_MAP[normalizedName]) {
+    return `/images/champions/${ICON_NAME_MAP[normalizedName]}`;
   }
   // Default: name matches filename directly
-  return `/images/champions/Champion ${name} Icon.avif`;
+  return `/images/champions/Champion ${normalizedName} Icon.avif`;
 }

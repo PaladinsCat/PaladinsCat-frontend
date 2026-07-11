@@ -1,0 +1,20 @@
+/**
+ * Team averages — extracted from team-matchup for standalone use.
+ * Computed averages are in format.ts → computeTeamAverages.
+ */
+import type { MatchResultPlayer, TeamAverages } from "./types";
+
+export default function TeamAverages({ averages }: { averages: TeamAverages }) {
+  return (
+    <div className="flex flex-wrap gap-4 justify-center text-center">
+      <div>
+        <div className="text-[10px] uppercase text-pc-text-muted">Avg Level</div>
+        <div className="text-sm font-semibold text-pc-text">{averages.avgLevel}</div>
+      </div>
+      <div>
+        <div className="text-[10px] uppercase text-pc-text-muted">Avg Player Elo</div>
+        <div className="text-sm font-semibold text-pc-text">{averages.avgEloPlus}</div>
+      </div>
+    </div>
+  );
+}

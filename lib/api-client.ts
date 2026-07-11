@@ -152,6 +152,8 @@ export interface CheaterPlayer {
   kbmTier: string | null;
   cheater: boolean;
   susCount: number;
+  weirdoCount: number;
+  hallOfFameCount: number;
   avgDpm: number | null;
   avgHpm: number | null;
   avgGpm: number | null;
@@ -160,16 +162,19 @@ export interface CheaterPlayer {
   winRate: number | null;
 }
 
-export async function fetchCheaterPlayers(params?: { cheater?: boolean; susOnly?: boolean; limit?: number }): Promise<CheaterPlayer[]> {
+export async function fetchCheaterPlayers(params?: { cheater?: boolean; susOnly?: boolean; weirdoOnly?: boolean; hallOfFameOnly?: boolean; limit?: number }): Promise<CheaterPlayer[]> {
   const query = new URLSearchParams();
   if (params?.cheater) query.set('cheater', 'true');
   if (params?.susOnly) query.set('susOnly', 'true');
+  if (params?.weirdoOnly) query.set('weirdoOnly', 'true');
+  if (params?.hallOfFameOnly) query.set('hallOfFameOnly', 'true');
   if (params?.limit) query.set('limit', String(params.limit));
   query.set('perPage', String(params?.limit || 100));
   try {
     const raw = await fetchJson<Array<{
       id: string; name: string; platform: string; region: string;
       kbm_tier?: string | null; cheater?: boolean; sus_count?: number;
+      weirdo_count?: number; hall_of_fame_count?: number;
       avg_dpm?: number | null; avg_hpm?: number | null; avg_egpm?: number | null;
       avg_mpm?: number | null; total_matches?: number; win_rate?: number | null;
     }>>(`/players/search?${query.toString()}`);
@@ -177,6 +182,8 @@ export async function fetchCheaterPlayers(params?: { cheater?: boolean; susOnly?
       id: r.id, name: r.name, platform: r.platform, region: r.region,
       kbmTier: r.kbm_tier ?? null, cheater: r.cheater ?? false,
       susCount: r.sus_count ?? 0,
+      weirdoCount: r.weirdo_count ?? 0,
+      hallOfFameCount: r.hall_of_fame_count ?? 0,
       avgDpm: r.avg_dpm ?? null, avgHpm: r.avg_hpm ?? null,
       avgGpm: r.avg_egpm ?? null, avgMpm: r.avg_mpm ?? null,
       totalMatches: Number(r.total_matches) || 0, winRate: r.win_rate != null ? Number(r.win_rate) : null,
@@ -1148,40 +1155,94 @@ export async function fetchChampionCounters(id: number): Promise<CounterStats> {
 
 // ── Players ──
 
-export async function fetchPlayerProfile(id: string): Promise<PlayerProfile> {
-  const raw = await fetchJson<{
-    id: string;
-    name: string;
-    platform: string;
-    region: string;
-    kbm_tier: string | null;
-    kbm_points: number | null;
-    total_matches: number;
-    total_wins: number;
-    win_rate: number | null;
-    total_plays: number;
-    top_champions: Array<{ champion_name: string; champion_id: number; wins: number; total_plays: number; win_rate: number }>;
-  }>(`/players/${id}`);
+export async function fetchPlayerProfile(id: string, queueId?: number, championId?: number): Promise<PlayerProfile & { level?: number | null; kbmRank?: number | null; queueElo?: number | null; championElo?: number | null; globalWins?: number | null; globalLosses?: number | null; globalWinRate?: number | null }> {
+  type RawChampion = { champion_name: string; champion_id: number; wins: number; total_plays?: number; matches_played?: number; losses?: number; win_rate?: number | null; mu?: number | string | null };
+  type RawPlayer = {
+    id: string | number; name: string; level?: number | string | null; platform?: string | null; region?: string | null;
+    kbm_tier?: string | number | null; kbm_points?: number | string | null; kbm_rank?: number | string | null;
+    total_matches?: number | string | null; total_wins?: number | string | null;
+    wins?: number | string | null; losses?: number | string | null;
+    win_rate?: number | string | null; total_plays?: number | string | null;
+    top_champions?: RawChampion[] | null;
+  };
+  type QueueRating = { queue_id?: number | string; mu?: number | string | null };
+  type ProfileResponse = RawPlayer | { player: RawPlayer; championRatings?: RawChampion[] | null; queueRatings?: QueueRating[] | null };
+  const raw = await fetchJson<ProfileResponse>(`/players/${id}`);
+  // The current backend wraps profile data in { player, championRatings }.
+  // Accept the legacy flat shape too, so cached/older deployments remain usable.
+  const response = "player" in raw ? raw : null;
+  const player = response?.player ?? raw as RawPlayer;
+  const champions = response?.championRatings ?? player.top_champions ?? [];
+  const numberOrNull = (value: number | string | null | undefined) => {
+    if (value == null || value === "") return null;
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  };
+  const totalMatches = numberOrNull(player.total_matches) ?? numberOrNull(player.total_plays) ?? ((numberOrNull(player.wins) ?? 0) + (numberOrNull(player.losses) ?? 0));
+  const totalWins = numberOrNull(player.total_wins) ?? numberOrNull(player.wins) ?? 0;
+  const reportedWinRate = numberOrNull(player.win_rate);
+  const queueRatings = response?.queueRatings ?? [];
+  const requestedQueueRating = queueRatings.find((rating) => Number(rating.queue_id) === queueId)
+    ?? queueRatings.find((rating) => Number(rating.queue_id) === 486)
+    ?? queueRatings[0];
+  const selectedChampionRating = champions.find((rating) => Number(rating.champion_id) === championId);
+  const globalWins = numberOrNull(player.wins);
+  const globalLosses = numberOrNull(player.losses);
 
   return {
-    id: raw.id,
-    name: raw.name,
-    platform: raw.platform,
-    region: raw.region,
-    kbmTier: raw.kbm_tier,
-    kbmPoints: raw.kbm_points,
-    totalMatches: raw.total_matches,
-    totalWins: raw.total_wins,
-    winRate: raw.win_rate,
-    totalPlays: raw.total_plays,
-    topChampions: raw.top_champions.map((c) => ({
+    id: String(player.id),
+    name: player.name,
+    level: numberOrNull(player.level),
+    platform: player.platform ?? null,
+    region: player.region ?? null,
+    kbmTier: player.kbm_tier == null ? null : String(player.kbm_tier),
+    kbmPoints: numberOrNull(player.kbm_points),
+    kbmRank: numberOrNull(player.kbm_rank),
+    queueElo: numberOrNull(requestedQueueRating?.mu),
+    championElo: numberOrNull(selectedChampionRating?.mu),
+    globalWins,
+    globalLosses,
+    globalWinRate: globalWins != null && globalLosses != null && globalWins + globalLosses > 0
+      ? (globalWins / (globalWins + globalLosses)) * 100
+      : null,
+    totalMatches,
+    totalWins,
+    winRate: reportedWinRate ?? (totalMatches > 0 ? (totalWins / totalMatches) * 100 : null),
+    totalPlays: numberOrNull(player.total_plays) ?? totalMatches,
+    topChampions: champions.map((c) => {
+      const plays = numberOrNull(c.total_plays) ?? numberOrNull(c.matches_played) ?? 0;
+      const wins = numberOrNull(c.wins) ?? 0;
+      return {
       championName: c.champion_name,
       championId: c.champion_id,
-      wins: c.wins,
-      totalPlays: c.total_plays,
-      winRate: c.win_rate,
-    })),
+      wins,
+      totalPlays: plays,
+      winRate: numberOrNull(c.win_rate) ?? (plays > 0 ? (wins / plays) * 100 : 0),
+    };
+    }),
   };
+}
+
+export interface ItemDimensionStat {
+  slot?: number;
+  level?: number;
+  totalUses: number;
+  wins: number;
+  losses: number;
+  winRate: number;
+}
+
+export interface ItemDetailStats {
+  itemId: number;
+  itemName: string;
+  mode: 'ranked' | 'casual';
+  totalUses: number;
+  wins: number;
+  losses: number;
+  winRate: number;
+  slots: ItemDimensionStat[];
+  levels: ItemDimensionStat[];
+  breakdown: ItemDimensionStat[];
 }
 
 export async function fetchPlayerSearch(query: string): Promise<PlayerSearchResult[]> {
@@ -1216,28 +1277,6 @@ export interface UniversalSearchResult {
 }
 
 export interface UniversalSearchResponse {
-export interface ItemDimensionStat {
-  slot?: number;
-  level?: number;
-  totalUses: number;
-  wins: number;
-  losses: number;
-  winRate: number;
-}
-
-export interface ItemDetailStats {
-  itemId: number;
-  itemName: string;
-  mode: 'ranked' | 'casual';
-  totalUses: number;
-  wins: number;
-  losses: number;
-  winRate: number;
-  slots: ItemDimensionStat[];
-  levels: ItemDimensionStat[];
-  breakdown: ItemDimensionStat[];
-}
-
   query: string;
   total: number;
   data: UniversalSearchResult[];
@@ -1532,6 +1571,8 @@ export async function fetchItems(params?: { mode?: string; limit?: number }): Pr
       item_id: number; item_name: string;
       total_uses?: number | string; total_usage?: number | string;
       win_rate: number | string;
+      slots?: Array<{ slot: number | string; total_uses: number | string; win_rate: number | string }>;
+      levels?: Array<{ item_level: number | string; total_uses: number | string; win_rate: number | string }>;
     }>>(`/stats/items${query.toString() ? `?${query.toString()}` : ''}`);
     const num = (v: number | string | undefined) => v != null ? (typeof v === 'string' ? Number(v) : v) : 0;
     return raw.map((r) => ({
@@ -1539,52 +1580,18 @@ export async function fetchItems(params?: { mode?: string; limit?: number }): Pr
       itemName: r.item_name,
       totalUsage: num(r.total_uses) || num(r.total_usage),
       winRate: num(r.win_rate),
-    }));
-  } catch {
-    return [];
-  }
-}
-
-export async function fetchMapStats(params?: { queueId?: number; limit?: number }): Promise<MapStat[]> {
-  const query = new URLSearchParams();
-  if (params?.queueId != null) query.set('queueId', String(params.queueId));
-  if (params?.limit != null) query.set('limit', String(params.limit));
-  try {
-    const raw = await fetchJson<Array<{
-      map: string;
-      total_matches: number | string;
-      avg_duration_seconds: number | string;
-    }>>(`/stats/maps${query.toString() ? `?${query.toString()}` : ''}`);
-    return raw.map((r) => ({
-      name: r.map,
-      totalMatches: Number(r.total_matches ?? 0),
-      avgDurationSeconds: Number(r.avg_duration_seconds ?? 0),
-    }));
-  } catch {
-    return [];
-  }
-}
-      slots?: Array<{ slot: number | string; total_uses: number | string; win_rate: number | string }>;
-      levels?: Array<{ item_level: number | string; total_uses: number | string; win_rate: number | string }>;
-
-export interface ChampionLeaderboardEntry {
-  rank: number;
-  playerId: number;
-  playerName: string;
-  mu: number;
-  phi: number;
       slots: (r.slots ?? []).map((slot) => ({
         slot: num(slot.slot), totalUses: num(slot.total_uses), wins: 0, losses: 0, winRate: num(slot.win_rate),
       })),
       levels: (r.levels ?? []).map((level) => ({
         level: num(level.item_level), totalUses: num(level.total_uses), wins: 0, losses: 0, winRate: num(level.win_rate),
       })),
-  matchesPlayed: number;
-  wins: number;
-  losses: number;
+    }));
+  } catch {
+    return [];
+  }
 }
 
-export async function fetchChampionLeaderboard(championId: number, limit = 25): Promise<ChampionLeaderboardEntry[]> {
 export async function fetchItemDetail(itemId: number, mode: 'ranked' | 'casual' = 'ranked'): Promise<ItemDetailStats | null> {
   try {
     const raw = await fetchJson<any>(`/stats/items/${itemId}?mode=${mode}`);
@@ -1614,32 +1621,32 @@ export async function fetchItemDetail(itemId: number, mode: 'ranked' | 'casual' 
   }
 }
 
-  const query = new URLSearchParams({ championId: String(championId), limit: String(limit) });
-  const raw = await fetchJson<Array<{
-    rank: number; playerId: number; playerName: string;
-    mu: number; phi: number; matchesPlayed: number; wins: number; losses: number;
-  }>>(`/stats/champion-leaderboard?${query.toString()}`);
-  return raw.map((r) => ({
-    rank: r.rank, playerId: r.playerId, playerName: r.playerName,
-    mu: r.mu, phi: r.phi, matchesPlayed: r.matchesPlayed, wins: r.wins, losses: r.losses,
+export async function fetchMapStats(params?: { queueId?: number; limit?: number }): Promise<MapStat[]> {
+  const query = new URLSearchParams();
+  if (params?.queueId != null) query.set('queueId', String(params.queueId));
+  if (params?.limit != null) query.set('limit', String(params.limit));
+  try {
+    const raw = await fetchJson<Array<{
+      map: string;
+      total_matches: number | string;
       wins: number | string;
       losses: number | string;
       win_rate: number | string;
-  }));
-}
-
-// ── Champion Talent Stats ──
-
+      avg_duration_seconds: number | string;
+    }>>(`/stats/maps${query.toString() ? `?${query.toString()}` : ''}`);
+    return raw.map((r) => ({
+      name: r.map,
+      totalMatches: Number(r.total_matches ?? 0),
       wins: Number(r.wins ?? 0),
       losses: Number(r.losses ?? 0),
       winRate: Number(r.win_rate ?? 0),
-export interface ChampionTalentStat {
-  talentId: number;
-  talentName: string;
-  totalPlays: number;
-  wins: number;
-  losses: number;
-  winRate: number;
+      avgDurationSeconds: Number(r.avg_duration_seconds ?? 0),
+    }));
+  } catch {
+    return [];
+  }
+}
+
 export async function fetchMapDetail(mapName: string): Promise<MapDetailStats | null> {
   try {
     const raw = await fetchJson<any>(`/stats/maps/${encodeURIComponent(mapName)}`);
@@ -1656,6 +1663,38 @@ export async function fetchMapDetail(mapName: string): Promise<MapDetailStats | 
   }
 }
 
+export interface ChampionLeaderboardEntry {
+  rank: number;
+  playerId: number;
+  playerName: string;
+  mu: number;
+  phi: number;
+  matchesPlayed: number;
+  wins: number;
+  losses: number;
+}
+
+export async function fetchChampionLeaderboard(championId: number, limit = 25): Promise<ChampionLeaderboardEntry[]> {
+  const query = new URLSearchParams({ championId: String(championId), limit: String(limit) });
+  const raw = await fetchJson<Array<{
+    rank: number; playerId: number; playerName: string;
+    mu: number; phi: number; matchesPlayed: number; wins: number; losses: number;
+  }>>(`/stats/champion-leaderboard?${query.toString()}`);
+  return raw.map((r) => ({
+    rank: r.rank, playerId: r.playerId, playerName: r.playerName,
+    mu: r.mu, phi: r.phi, matchesPlayed: r.matchesPlayed, wins: r.wins, losses: r.losses,
+  }));
+}
+
+// ── Champion Talent Stats ──
+
+export interface ChampionTalentStat {
+  talentId: number;
+  talentName: string;
+  totalPlays: number;
+  wins: number;
+  losses: number;
+  winRate: number;
 }
 
 export interface ChampionTalentStatsResponse {
@@ -2263,7 +2302,7 @@ export async function updateProfile(data: { avatar_url?: string; bio?: string })
 
 // ── Player Report ──
 
-export type ReportType = 'suspicious' | 'cheater' | 'approve';
+export type ReportType = 'suspicious' | 'cheater' | 'approve' | 'weirdo' | 'hall_of_fame';
 
 export interface ReportOptions {
   type: ReportType;
@@ -2717,6 +2756,7 @@ export interface MatchPlayerDetail {
   tier?: number | null;
   source?: string | null;
   party_number?: number | null;
+  final_match_level?: number | null;
   kda: number;
   damage_per_minute: number;
   healing_per_minute: number;
