@@ -4,10 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import {
   fetchMatchSearch,
-  fetchRecentMatches,
-  fetchMatchHourlyStats,
-  fetchDroppedMatchSummary,
-  fetchDroppedMatches,
+  fetchMatchesOverview,
   type MatchSearchResult,
   type MatchData,
   type MatchHourlyStats,
@@ -51,39 +48,11 @@ export default function MatchesPage() {
     const load = async () => {
       setStatsLoading(true);
       try {
-        const stats = await fetchMatchHourlyStats();
-        const dates = Array.from(new Set((stats.hourly ?? []).map((entry) => entry.date).filter(Boolean))) as string[];
-        const droppedSummaries = await Promise.all(
-          dates.map((date) => fetchDroppedMatchSummary({ date, queueId: Number(RANKED_QUEUE_ID) }).catch(() => null)),
-        );
-        const droppedLists = await Promise.all(
-          dates.map((date) => fetchDroppedMatches({
-            date,
-            queueId: Number(RANKED_QUEUE_ID),
-            status: "dropped",
-            limit: 500,
-            refresh: false,
-          }).catch(() => null)),
-        );
-        const nextDroppedByHour: Record<string, number> = {};
-        for (const day of droppedSummaries) {
-          if (!day) continue;
-          for (const entry of day.summary ?? []) {
-            nextDroppedByHour[`${day.date}|${entry.hour}`] = Number(entry.dropped ?? 0);
-          }
-        }
-        const nextDroppedIdsByHour: Record<string, string[]> = {};
-        for (const day of droppedLists) {
-          if (!day) continue;
-          for (const match of day.matches ?? []) {
-            const key = `${day.date}|${match.hour}`;
-            nextDroppedIdsByHour[key] = [...(nextDroppedIdsByHour[key] ?? []), String(match.match_id)];
-          }
-        }
+        const overview = await fetchMatchesOverview();
         if (active) {
-          setHourlyStats(stats);
-          setDroppedByHour(nextDroppedByHour);
-          setDroppedIdsByHour(nextDroppedIdsByHour);
+          setHourlyStats(overview.hourly);
+          setDroppedByHour(overview.droppedByHour);
+          setDroppedIdsByHour(overview.droppedIdsByHour);
         }
       } catch {} finally {
         if (active) setStatsLoading(false);
@@ -113,7 +82,7 @@ export default function MatchesPage() {
         setTotal(result.total);
         setTotalPages(result.page.totalPages);
       } else {
-        const recent = await fetchRecentMatches(perPage);
+        const recent = (await fetchMatchesOverview()).recent.slice(0, perPage);
         if (recent.length > 0) {
           setMatches(recent.map((m: MatchData) => ({
             match_id: m.match_id, entry_datetime: m.entry_datetime, map: m.map,

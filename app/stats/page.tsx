@@ -3,14 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
-  fetchChampions,
-  fetchItems,
-  fetchMapStats,
-  fetchPerformanceMetrics,
-  fetchTiers,
+  fetchStatsOverview,
   type Champion,
-  type ItemStat,
-  type MapStat,
   type TierStat,
 } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
@@ -61,7 +55,7 @@ function itemIcon(name: string) {
   return `/images/items/${name.replace(/\s+/g, "_")}_Icon.avif`;
 }
 
-function mapItemStats(items: ItemStat[]): PageItemStat[] {
+function mapItemStats(items: Array<{ itemId: number; itemName: string; totalUsage: number; winRate: number }>): PageItemStat[] {
   const totalUsage = items.reduce((sum, item) => sum + item.totalUsage, 0);
   return items.map((item) => ({
     itemId: item.itemId,
@@ -73,7 +67,7 @@ function mapItemStats(items: ItemStat[]): PageItemStat[] {
   }));
 }
 
-function mapMapStats(maps: MapStat[]): PageMapStat[] {
+function mapMapStats(maps: Array<{ name: string; totalMatches: number; distributionRate: number; avgDurationSeconds: number }>): PageMapStat[] {
   return maps.map((map) => ({
     name: map.name,
     matches: map.totalMatches,
@@ -94,9 +88,11 @@ export default function StatsPage() {
 
   useEffect(() => {
     let cancelled = false;
-    fetchPerformanceMetrics()
-      .then((liveMetrics) => {
-        if (cancelled || Object.keys(liveMetrics).length === 0) return;
+    fetchStatsOverview()
+      .then((overview) => {
+        if (cancelled) return;
+        const liveMetrics = overview.metrics;
+        if (Object.keys(liveMetrics).length > 0) {
         setMetrics((current) => ({
           ...current,
           ...Object.fromEntries(Object.entries(liveMetrics).map(([key, summary]) => [key, {
@@ -109,6 +105,12 @@ export default function StatsPage() {
             mode: summary?.mode ?? 0,
           }])),
         }));
+        }
+        setChampions(overview.champions);
+        setItems(mapItemStats(overview.items));
+        setMaps(mapMapStats(overview.maps));
+        setTiers(overview.profileTiers);
+        setActiveTiers(overview.activeTiers);
       })
       .catch(() => {});
     return () => {
@@ -117,13 +119,6 @@ export default function StatsPage() {
   }, []);
 
   const [champions, setChampions] = useState<Champion[]>([]);
-  useEffect(() => {
-    fetchChampions().then(setChampions).catch(() => {});
-    fetchItems({ mode: "ranked", limit: 50 }).then((rows) => setItems(mapItemStats(rows))).catch(() => {});
-    fetchMapStats({ queueId: 486, limit: 25 }).then((rows) => setMaps(mapMapStats(rows))).catch(() => {});
-    fetchTiers({ source: "profiles" }).then(setTiers).catch(() => {});
-    fetchTiers({ source: "matches" }).then(setActiveTiers).catch(() => {});
-  }, []);
 
   const toggleItemSort = (key: SortKey) => {
     if (itemSort === key) {

@@ -532,6 +532,88 @@ export interface ItemStat {
   levels: ItemDimensionStat[];
 }
 
+export interface PlayersOverview {
+  championEloPlayers: ChampionEloEntry[];
+  performanceLeaderboards: Record<string, PerformanceLeaderboardEntry[]>;
+  rankedPlayers: RankedPlayer[];
+  accountEloPlayers: ClassLeaderboardEntry[];
+  cheaterPlayers: CheaterPlayer[];
+  suspiciousPlayers: CheaterPlayer[];
+  weirdoPlayers: CheaterPlayer[];
+  hallOfFamePlayers: CheaterPlayer[];
+}
+
+let playersOverviewCache: { value: PlayersOverview; expiresAt: number } | null = null;
+let playersOverviewInFlight: Promise<PlayersOverview> | null = null;
+
+/**
+ * Fetch the directory landing-page data in one request. The short module cache
+ * prevents navigation between top-level pages from immediately refetching the
+ * same mostly-static leaderboard cards.
+ */
+export async function fetchPlayersOverview(): Promise<PlayersOverview> {
+  if (playersOverviewCache && playersOverviewCache.expiresAt > Date.now()) {
+    return playersOverviewCache.value;
+  }
+  if (playersOverviewInFlight) return playersOverviewInFlight;
+
+  playersOverviewInFlight = (async () => {
+    const raw = await fetchJson<any>('/players/overview', { unwrapData: false });
+    const mapChampionElo = (row: any): ChampionEloEntry => ({
+      rank: Number(row.rank), player_id: Number(row.player_id), player_name: String(row.player_name),
+      champion_id: Number(row.champion_id), champion_name: String(row.champion_name), class_name: String(row.class_name),
+      elo: Number(row.elo), phi: Number(row.phi), total_matches: Number(row.total_matches),
+      total_wins: Number(row.total_wins), win_rate: row.win_rate == null ? null : Number(row.win_rate), region: row.region ?? null,
+    });
+    const mapPerformance = (row: any): PerformanceLeaderboardEntry => ({
+      rank: Number(row.rank), playerId: Number(row.player_id), playerName: row.player_name,
+      championName: row.champion_name ?? null, championId: row.champion_id == null ? null : Number(row.champion_id),
+      className: row.class_name ?? null, value: Number(row.value), totalMatches: Number(row.total_matches ?? 0),
+      region: row.region ?? null, platform: row.platform ?? null,
+    });
+    const mapRanked = (row: any): RankedPlayer => ({
+      rank: Number(row.rank), player_id: String(row.player_id), name: row.name, tier: Number(row.tier), points: Number(row.points),
+      prev_rank: row.prev_rank, trend: row.trend, wins: row.wins, losses: row.losses, leaves: row.leaves,
+      winRate: row.winrate == null ? undefined : Number(row.winrate), leaveRate: row.leaverate == null ? undefined : Number(row.leaverate),
+    });
+    const mapAccountElo = (row: any): ClassLeaderboardEntry => ({
+      rank: Number(row.rank), playerId: Number(row.player_id), playerName: row.player_name,
+      championName: row.champion_name ?? null, championId: row.champion_id == null ? null : Number(row.champion_id),
+      elo: Number(row.elo), mu: Number(row.mu), phi: Number(row.phi),
+      winRate: row.win_rate == null ? null : Number(row.win_rate), totalMatches: Number(row.total_matches ?? 0),
+      totalWins: Number(row.total_wins ?? 0), region: row.region ?? null,
+    });
+    const mapCommunity = (row: any): CheaterPlayer => ({
+      id: String(row.id), name: row.name, platform: row.platform, region: row.region,
+      kbmTier: row.kbm_tier ?? null, cheater: row.cheater ?? false, susCount: Number(row.sus_count ?? 0),
+      weirdoCount: Number(row.weirdo_count ?? 0), hallOfFameCount: Number(row.hall_of_fame_count ?? 0),
+      avgDpm: row.avg_dpm == null ? null : Number(row.avg_dpm), avgHpm: row.avg_hpm == null ? null : Number(row.avg_hpm),
+      avgGpm: row.avg_egpm == null ? null : Number(row.avg_egpm), avgMpm: row.avg_mpm == null ? null : Number(row.avg_mpm),
+      totalMatches: Number(row.total_matches ?? 0), winRate: row.win_rate == null ? null : Number(row.win_rate),
+    });
+    const overview: PlayersOverview = {
+      championEloPlayers: (raw.champion_elo?.data ?? []).map(mapChampionElo),
+      performanceLeaderboards: Object.fromEntries(
+        Object.entries(raw.performance ?? {}).map(([metric, response]) => [metric, ((response as any)?.data ?? []).map(mapPerformance)]),
+      ),
+      rankedPlayers: (raw.ranked ?? []).map(mapRanked),
+      accountEloPlayers: (raw.account_elo?.data ?? []).map(mapAccountElo),
+      cheaterPlayers: (raw.cheaters ?? []).map(mapCommunity),
+      suspiciousPlayers: (raw.suspicious ?? []).map(mapCommunity),
+      weirdoPlayers: (raw.weirdos ?? []).map(mapCommunity),
+      hallOfFamePlayers: (raw.hall_of_fame ?? []).map(mapCommunity),
+    };
+    playersOverviewCache = { value: overview, expiresAt: Date.now() + 60_000 };
+    return overview;
+  })();
+
+  try {
+    return await playersOverviewInFlight;
+  } finally {
+    playersOverviewInFlight = null;
+  }
+}
+
 export interface MapStat {
   name: string;
   totalMatches: number;
@@ -992,41 +1074,24 @@ export async function fetchSiteVersion(): Promise<SiteVersion | null> {
 
 // ── Champions ──
 
-export async function fetchChampions(params?: {
-  limit?: string;
-  offset?: string;
-  tier?: string;
-  region?: string;
-  patch?: string;
-}): Promise<Champion[]> {
-  const query = new URLSearchParams();
-  if (params) {
-    for (const [key, value] of Object.entries(params)) {
-      if (value !== undefined && value !== null) {
-        query.set(key, String(value));
-      }
-    }
-  }
-  const [raw, stats] = await Promise.all([
-    fetchJson<Array<{
-    id: number;
-    name: string;
-    roles?: string;
-    title?: string;
-    health?: number;
-    speed?: number;
-    image_path?: string | null;
-  }>>(`/champions${query.toString() ? `?${query.toString()}` : ''}`),
-    fetchStatsChampions({ limit: 200 }).catch(() => [] as StatsChampion[]),
-  ]);
+type ChampionOverviewRaw = {
+  champions?: Array<{
+    id: number; name: string; roles?: string; title?: string; health?: number; speed?: number; image_path?: string | null;
+  }>;
+  stats?: any[];
+};
+
+let championsOverviewCache: { value: Champion[]; expiresAt: number } | null = null;
+let championsOverviewInFlight: Promise<Champion[]> | null = null;
+
+function mapChampionsOverview(raw: ChampionOverviewRaw): Champion[] {
+  const catalog = raw.champions ?? [];
+  const stats = mapStatsChampionRows(raw.stats ?? []);
   const statsById = new Map(stats.map((stat) => [stat.championId, stat]));
   const statsByName = new Map(stats.map((stat) => [stat.championName.toLowerCase(), stat]));
   const statsBySlug = new Map(stats.map((stat) => [championSlug(stat.championName), stat]));
 
-  return raw.map((r): Champion => {
-    // Prefer the immutable champion id, then exact canonical name, then route
-    // slug. The slug fallback protects punctuation drift such as Mal'Damba vs
-    // Mal Damba while still avoiding fuzzy matches that could merge wrong rows.
+  return catalog.map((r): Champion => {
     const stat =
       statsById.get(r.id) ??
       statsByName.get(r.name.toLowerCase()) ??
@@ -1048,6 +1113,28 @@ export async function fetchChampions(params?: {
       imagePath: r.image_path || null,
     };
   });
+}
+
+export async function fetchChampions(_params?: {
+  limit?: string;
+  offset?: string;
+  tier?: string;
+  region?: string;
+  patch?: string;
+}): Promise<Champion[]> {
+  if (championsOverviewCache && championsOverviewCache.expiresAt > Date.now()) return championsOverviewCache.value;
+  if (championsOverviewInFlight) return championsOverviewInFlight;
+  championsOverviewInFlight = fetchJson<ChampionOverviewRaw>('/champions/overview', { unwrapData: false })
+    .then((raw) => {
+      const value = mapChampionsOverview(raw);
+      championsOverviewCache = { value, expiresAt: Date.now() + 300_000 };
+      return value;
+    });
+  try {
+    return await championsOverviewInFlight;
+  } finally {
+    championsOverviewInFlight = null;
+  }
 }
 
 export async function fetchTopWinrate(): Promise<TopWinrateEntry[]> {
@@ -1412,6 +1499,31 @@ export interface StatsChampion {
   avgLeagueTier?: number;
 }
 
+function mapStatsChampionRows(raw: Array<{
+  champion_id: number; champion_name: string;
+  win_rate: number | string; total_matches?: number | string; total_plays?: number | string;
+  ban_rate?: number | string; pick_rate?: number | string; kda?: number | string;
+  avg_damage?: number | string; avg_gold?: number | string;
+  avg_heal?: number | string; avg_mitigation?: number | string;
+  avg_league_tier?: number | string;
+}>): StatsChampion[] {
+  const num = (v: number | string | undefined) => v != null ? (typeof v === 'string' ? Number(v) : v) : undefined;
+  return raw.map((r) => ({
+    championId: r.champion_id,
+    championName: r.champion_name,
+    winRate: toDisplayPercent(r.win_rate) ?? 0,
+    totalPlays: num(r.total_matches) ?? num(r.total_plays) ?? 0,
+    banRate: toDisplayPercent(r.ban_rate) ?? undefined,
+    pickRate: toDisplayPercent(r.pick_rate) ?? undefined,
+    kda: num(r.kda),
+    avgDamage: num(r.avg_damage),
+    avgGold: num(r.avg_gold),
+    avgHeal: num(r.avg_heal),
+    avgMitigation: num(r.avg_mitigation),
+    avgLeagueTier: num(r.avg_league_tier),
+  }));
+}
+
 export async function fetchStatsChampions(params?: { sort?: string; limit?: number }): Promise<StatsChampion[]> {
   const query = new URLSearchParams();
   if (params?.sort) query.set('sort', params.sort);
@@ -1425,21 +1537,7 @@ export async function fetchStatsChampions(params?: { sort?: string; limit?: numb
       avg_heal?: number | string; avg_mitigation?: number | string;
       avg_league_tier?: number | string;
     }>>(`/stats/champions${query.toString() ? `?${query.toString()}` : ''}`);
-    const num = (v: number | string | undefined) => v != null ? (typeof v === 'string' ? Number(v) : v) : undefined;
-    return raw.map((r) => ({
-      championId: r.champion_id,
-      championName: r.champion_name,
-      winRate: toDisplayPercent(r.win_rate) ?? 0,
-      totalPlays: num(r.total_matches) ?? num(r.total_plays) ?? 0,
-      banRate: toDisplayPercent(r.ban_rate) ?? undefined,
-      pickRate: toDisplayPercent(r.pick_rate) ?? undefined,
-      kda: num(r.kda),
-      avgDamage: num(r.avg_damage),
-      avgGold: num(r.avg_gold),
-      avgHeal: num(r.avg_heal),
-      avgMitigation: num(r.avg_mitigation),
-      avgLeagueTier: num(r.avg_league_tier),
-    }));
+    return mapStatsChampionRows(raw);
   } catch {
     return [];
   }
@@ -1961,6 +2059,57 @@ export async function fetchTiers(params?: { source?: 'profiles' | 'matches' }): 
     avgWinRate: toDisplayPercent(r.avg_win_rate) ?? 0,
     percentage: numberOrNull(r.percentage) ?? 0,
   }));
+}
+
+export interface StatsOverview {
+  metrics: PerformanceMetricsResponse;
+  champions: Champion[];
+  items: ItemStat[];
+  maps: MapStat[];
+  profileTiers: TierStat[];
+  activeTiers: TierStat[];
+}
+
+let statsOverviewCache: { value: StatsOverview; expiresAt: number } | null = null;
+let statsOverviewInFlight: Promise<StatsOverview> | null = null;
+
+export async function fetchStatsOverview(): Promise<StatsOverview> {
+  if (statsOverviewCache && statsOverviewCache.expiresAt > Date.now()) return statsOverviewCache.value;
+  if (statsOverviewInFlight) return statsOverviewInFlight;
+  statsOverviewInFlight = (async () => {
+    const raw = await fetchJson<any>('/stats/overview', { unwrapData: false });
+    const number = (value: unknown) => Number(value ?? 0);
+    const mapItems = (rows: any[]): ItemStat[] => rows.map((row) => ({
+      itemId: number(row.item_id), itemName: String(row.item_name ?? ''),
+      totalUsage: number(row.total_uses ?? row.total_usage), winRate: number(row.win_rate),
+      pickRate: row.pick_rate == null ? undefined : number(row.pick_rate),
+      slots: (row.slots ?? []).map((slot: any) => ({ slot: number(slot.slot), totalUses: number(slot.total_uses), wins: 0, losses: 0, winRate: number(slot.win_rate) })),
+      levels: (row.levels ?? []).map((level: any) => ({ level: number(level.item_level), totalUses: number(level.total_uses), wins: 0, losses: 0, winRate: number(level.win_rate) })),
+    }));
+    const mapMaps = (rows: any[]): MapStat[] => rows.map((row) => ({
+      name: String(row.map ?? ''), totalMatches: number(row.total_matches),
+      distributionRate: number(row.distribution_rate), avgDurationSeconds: number(row.avg_duration_seconds),
+    }));
+    const mapTiers = (rows: any[]): TierStat[] => rows.map((row) => ({
+      tier: String(row.tier ?? ''), tierSort: number(row.tier_sort), totalPlays: number(row.total_plays),
+      avgWinRate: toDisplayPercent(row.avg_win_rate) ?? 0, percentage: number(row.percentage),
+    }));
+    const overview: StatsOverview = {
+      metrics: Object.fromEntries(Object.entries(raw.metrics ?? {}).map(([metric, summary]) => [metric, mapMetricSummary(summary)])),
+      champions: mapChampionsOverview(raw.champions ?? {}),
+      items: mapItems(raw.items ?? []),
+      maps: mapMaps(raw.maps ?? []),
+      profileTiers: mapTiers(raw.profile_tiers ?? []),
+      activeTiers: mapTiers(raw.active_tiers ?? []),
+    };
+    statsOverviewCache = { value: overview, expiresAt: Date.now() + 300_000 };
+    return overview;
+  })();
+  try {
+    return await statsOverviewInFlight;
+  } finally {
+    statsOverviewInFlight = null;
+  }
 }
 
 export async function fetchTierSummary(): Promise<TierSummary> {
@@ -3127,6 +3276,36 @@ export async function fetchMatchSnapshots(matchId: number): Promise<RatingSnapsh
 export async function fetchRecentMatches(limit?: number): Promise<MatchData[]> {
   const raw = await fetchJson<MatchData[]>(`/matches/recent${limit ? `?limit=${limit}` : ''}`);
   return raw;
+}
+
+export interface MatchesOverview {
+  hourly: MatchHourlyStats | null;
+  recent: MatchData[];
+  droppedByHour: Record<string, number>;
+  droppedIdsByHour: Record<string, string[]>;
+}
+
+let matchesOverviewCache: { value: MatchesOverview; expiresAt: number } | null = null;
+let matchesOverviewInFlight: Promise<MatchesOverview> | null = null;
+
+export async function fetchMatchesOverview(): Promise<MatchesOverview> {
+  if (matchesOverviewCache && matchesOverviewCache.expiresAt > Date.now()) return matchesOverviewCache.value;
+  if (matchesOverviewInFlight) return matchesOverviewInFlight;
+  matchesOverviewInFlight = fetchJson<any>('/matches/overview', { unwrapData: false }).then((raw) => {
+    const value: MatchesOverview = {
+      hourly: raw.hourly ?? null,
+      recent: Array.isArray(raw.recent) ? raw.recent : [],
+      droppedByHour: raw.dropped_by_hour ?? {},
+      droppedIdsByHour: raw.dropped_ids_by_hour ?? {},
+    };
+    matchesOverviewCache = { value, expiresAt: Date.now() + 60_000 };
+    return value;
+  });
+  try {
+    return await matchesOverviewInFlight;
+  } finally {
+    matchesOverviewInFlight = null;
+  }
 }
 
 export async function fetchMatchSearch(params?: {

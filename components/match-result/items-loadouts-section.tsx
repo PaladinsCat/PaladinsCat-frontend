@@ -39,7 +39,7 @@ function Asset({ sources, alt, level, tone = "border-pc-border" }: { sources: Ar
   const src = candidates[index];
   if (!src) return <div className="h-9 w-9 rounded border border-pc-border bg-pc-bg-secondary" title={alt} />;
   return <div className="relative shrink-0" title={alt}>
-    <img src={src} alt={alt} className={`h-9 w-9 rounded border ${tone} object-cover`} loading="lazy" onError={() => setIndex(current => current + 1)} />
+    <img src={src} alt={alt} className={`h-9 w-9 rounded border ${tone} object-cover`} loading="eager" onError={() => setIndex(current => Math.min(current + 1, candidates.length))} />
     {level != null && <span className="absolute -right-1 -top-1 min-w-3 rounded bg-pc-bg px-1 text-center text-[9px] font-bold text-pc-text ring-1 ring-pc-border">{level}</span>}
   </div>;
 }
@@ -58,8 +58,8 @@ function PlayerBuildRow({ player, fact, wins }: { player: MatchPlayerDetail; fac
 
   return <div className={`grid min-w-[780px] grid-cols-[240px_1fr_1fr] items-center gap-4 border-b border-pc-border/60 px-4 py-3 last:border-b-0 ${wins ? "bg-emerald-400/[0.025]" : ""}`}>
     <div className="flex min-w-0 items-center gap-3"><img src={getChampionIconSafe(player.champion_name)} alt={champion} className="h-11 w-11 rounded-lg border border-pc-border object-cover" onError={(event) => { event.currentTarget.src = "/images/champions/Champion_Generic_Icon.avif"; }} /><div className="min-w-0"><Link href={`/players/${player.player_id}`} className="block truncate text-sm font-semibold text-pc-text hover:text-pc-accent">{player.player_name || "PRIVATE"}</Link>{player.champion_name && <Link href={`/champions/${championSlug(player.champion_name)}`} className="text-xs text-pc-text-secondary hover:text-pc-accent">{champion}</Link>}</div></div>
-    <div className="flex items-center gap-1.5">{(fact?.talents ?? []).map(t => <Asset key={`talent-${t.talent_id}`} sources={[t.icon_url, t.fallback_icon_url, findIcon("talents", t.talent_id, t.talent_name)]} alt={t.talent_name ?? "Talent"} tone="border-amber-400/40" />)}{(fact?.cards ?? []).map(c => <Asset key={`card-${c.card_id}`} sources={[c.icon_url, c.fallback_icon_url, findIcon("cards", c.card_id, c.card_name)]} alt={c.card_name ?? "Loadout card"} level={c.card_level ?? undefined} tone="border-pc-accent/30" />)}</div>
-    <div className="flex items-center gap-1.5">{(fact?.items ?? []).map(i => <Asset key={`item-${i.slot}-${i.item_id}`} sources={[i.icon_url, i.fallback_icon_url, findIcon("items", i.item_id, i.item_name)]} alt={i.item_name ?? "Item"} level={i.item_level == null ? undefined : i.item_level + 1} />)}</div>
+    <div className="flex items-center gap-1.5">{(fact?.talents ?? []).map(t => <Asset key={`talent-${t.talent_id}`} sources={[findIcon("talents", t.talent_id, t.talent_name), t.icon_url, t.fallback_icon_url]} alt={t.talent_name ?? "Talent"} tone="border-amber-400/40" />)}{(fact?.cards ?? []).map(c => <Asset key={`card-${c.card_id}`} sources={[findIcon("cards", c.card_id, c.card_name), c.icon_url, c.fallback_icon_url]} alt={c.card_name ?? "Loadout card"} level={c.card_level ?? undefined} tone="border-pc-accent/30" />)}</div>
+    <div className="flex items-center gap-1.5">{(fact?.items ?? []).map(i => <Asset key={`item-${i.slot}-${i.item_id}`} sources={[findIcon("items", i.item_id, i.item_name), i.icon_url, i.fallback_icon_url]} alt={i.item_name ?? "Item"} level={i.item_level == null ? undefined : i.item_level + 1} />)}</div>
   </div>;
 }
 

@@ -3,12 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
-  fetchCheaterPlayers,
-  fetchClassLeaderboard,
-  fetchPerformanceLeaderboard,
   fetchPlayerSearch,
-  fetchRankedLeaderboard,
-  fetchChampionElo,
+  fetchPlayersOverview,
   type CheaterPlayer,
   type ClassLeaderboardEntry,
   type PerformanceLeaderboardEntry,
@@ -67,26 +63,17 @@ export default function PlayersPage() {
 
     async function loadOverview() {
       setOverviewLoading(true);
-      const [championEloResult, performanceRows, ranked, accountElo, cheaters, suspicious, weirdos, hallOfFame] = await Promise.all([
-        fetchChampionElo({ limit: 10, queueId: 486 }),
-        Promise.all(PERFORMANCE_METRICS.map(async ({ key, metric }) => [key, await fetchPerformanceLeaderboard({ metric, limit: 5, queueId: 486 })] as const)),
-        fetchRankedLeaderboard({ tier: "26", top: 20 }),
-        fetchClassLeaderboard({ role: "Frontline", limit: 10, queueId: 486, mode: "account" }),
-        fetchCheaterPlayers({ cheater: true, limit: 5 }),
-        fetchCheaterPlayers({ susOnly: true, limit: 5 }),
-        fetchCheaterPlayers({ weirdoOnly: true, limit: 5 }),
-        fetchCheaterPlayers({ hallOfFameOnly: true, limit: 5 }),
-      ]);
+      const overview = await fetchPlayersOverview();
 
       if (cancelled) return;
-      setChampionEloPlayers(championEloResult.data);
-      setPerformanceLeaderboards(Object.fromEntries(performanceRows));
-      setRankedPlayers(ranked);
-      setAccountEloPlayers(accountElo);
-      setCheaterPlayers(cheaters);
-      setSuspiciousPlayers(suspicious);
-      setWeirdoPlayers(weirdos);
-      setHallOfFamePlayers(hallOfFame);
+      setChampionEloPlayers(overview.championEloPlayers);
+      setPerformanceLeaderboards(overview.performanceLeaderboards);
+      setRankedPlayers(overview.rankedPlayers);
+      setAccountEloPlayers(overview.accountEloPlayers);
+      setCheaterPlayers(overview.cheaterPlayers);
+      setSuspiciousPlayers(overview.suspiciousPlayers);
+      setWeirdoPlayers(overview.weirdoPlayers);
+      setHallOfFamePlayers(overview.hallOfFamePlayers);
       setOverviewLoading(false);
     }
 
