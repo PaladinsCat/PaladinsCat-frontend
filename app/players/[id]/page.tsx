@@ -190,6 +190,7 @@ export default function PlayerProfilePage() {
   const [currentMatch, setCurrentMatch] = useState<any>(null);
   const [showCurrentMatch, setShowCurrentMatch] = useState(false);
   const [fetchKey, setFetchKey] = useState(0);
+  const [historyFetchKey, setHistoryFetchKey] = useState(0);
 
   // Report modal state
   const [showReportModal, setShowReportModal] = useState(false);
@@ -294,6 +295,11 @@ export default function PlayerProfilePage() {
     const freshness = response?.profileRefresh;
     const expiresAt = freshness?.expires_at ? new Date(freshness.expires_at).getTime() : Number.NaN;
     if (freshness && Number.isFinite(expiresAt) && expiresAt > Date.now()) {
+      // Profile fields have their own 10-minute TTL. Match history is a
+      // separate database-backed cache, so still re-read it when a visitor
+      // presses Refresh; this surfaces newly persisted casual matches without
+      // spending an unnecessary profile API call.
+      setHistoryFetchKey((key) => key + 1);
       showRefreshCooldown(freshness.expires_at, freshness.remaining_seconds);
       return;
     }
@@ -319,6 +325,7 @@ export default function PlayerProfilePage() {
         'Profile refreshed. Next refresh available in',
       );
       setFetchKey(k => k + 1);
+      setHistoryFetchKey((key) => key + 1);
     } catch (err) {
       setRefreshCooldownUntil(null);
       setRefreshFeedback({
@@ -349,7 +356,7 @@ export default function PlayerProfilePage() {
     let cancelled = false;
     setMatchesLoading(true);
 
-    fetchPlayerMatches(id, { limit: "20" })
+    fetchPlayerMatches(id, { limit: "20", refresh: true })
       .then((data) => {
         if (!cancelled) setMatches(data);
       })
@@ -361,7 +368,7 @@ export default function PlayerProfilePage() {
       });
 
     return () => { cancelled = true; };
-  }, [id]);
+  }, [id, historyFetchKey]);
 
   if (profileLoading) {
     return <RouteSkeleton variant="profile" />;
@@ -710,7 +717,10 @@ export default function PlayerProfilePage() {
 
           {/* Recent Matches */}
           <div>
-            <h2 className="pc-card-title shadow-sm">Recent Matches</h2>
+            <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+              <h2 className="pc-card-title shadow-sm">Recent Matches</h2>
+              <span className="text-[11px] text-pc-text-muted">All queues · served from the history cache</span>
+            </div>
             <div className="pc-card">
               {matchesLoading ? (
                 <LoadingPanel compact label="Loading recent matches…" detail="Profile details remain available while match history loads." />
@@ -723,6 +733,7 @@ export default function PlayerProfilePage() {
                       <tr className="border-b border-pc-border text-pc-text-muted text-left text-xs">
                         <th className="px-3 py-1.5">Match</th>
                         <th className="px-3 py-1.5">Champion</th>
+                        <th className="px-3 py-1.5">Queue</th>
                         <th className="px-3 py-1.5">K</th>
                         <th className="px-3 py-1.5">D</th>
                         <th className="px-3 py-1.5">A</th>
@@ -747,6 +758,12 @@ export default function PlayerProfilePage() {
                                 <img src={getChampionIconSafe(m.championName)} alt={m.championName} className="w-5 h-5 rounded object-contain" />
                                 <span className="text-xs text-pc-text">{m.championName}</span>
                               </div>
+                            </td>
+                            <td className="px-3 py-1.5">
+                              <div className="text-xs text-pc-text-secondary">
+                                {m.queueId === 486 ? "Ranked" : m.queueId ? "Casual" : "Unknown"}
+                              </div>
+                              <div className="max-w-28 truncate text-[10px] text-pc-text-muted" title={m.mapGame}>{m.mapGame}</div>
                             </td>
                             <td className="px-3 py-1.5 text-xs font-mono text-pc-text">{m.kills}</td>
                             <td className="px-3 py-1.5 text-xs font-mono text-pc-text">{m.deaths}</td>
@@ -884,7 +901,7 @@ export default function PlayerProfilePage() {
       {/* ── Current Match Modal ── */}
       {showCurrentMatch && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowCurrentMatch(false)}>
-          <div className="pc-card max-w-lg w-full mx-4 p-5" onClick={(e) => e.stopPropagation()}>
+          <div className="pc-card max-h-[calc(100vh-2rem)] w-full max-w-5xl overflow-y-auto mx-4 p-5" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-base font-bold text-pc-text">Current Match</h3>
               <button onClick={() => setShowCurrentMatch(false)} className="text-pc-text-muted hover:text-pc-text transition-colors">
@@ -895,38 +912,66 @@ export default function PlayerProfilePage() {
               <div className="text-center py-8 text-pc-text-muted text-sm">Checking live matches...</div>
             ) : currentMatch.error ? (
               <div className="text-center py-8 text-pc-text-muted text-sm">{currentMatch.error}</div>
-            ) : !currentMatch.match_id ? (
+            ) : !currentMatch.match ? (
               <div className="text-center py-8">
                 <div className="text-pc-text-muted text-sm mb-2">Not in a live match</div>
                 <div className="text-xs text-pc-text-muted/60">This player is not currently playing a tracked match.</div>
               </div>
             ) : (
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-pc-text-muted">Match</span>
-                  <Link href={`/matches/${currentMatch.match_id}`} className="text-xs font-mono text-pc-accent hover:text-pc-accent-secondary">
-                    #{currentMatch.match_id}
-                  </Link>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-pc-text-muted">Status</span>
-                  <span className={`text-xs font-medium ${currentMatch.status === 'active' ? 'text-emerald-400' : 'text-pc-text-muted'}`}>
-                    {currentMatch.status}
+                <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-pc-border/70 bg-pc-bg-secondary/60 px-3 py-2">
+                  <div className="flex min-w-0 items-center gap-2 text-xs">
+                    <span className="text-pc-text-muted">Match</span>
+                    <Link href={`/matches/${currentMatch.match.match_id}`} className="font-mono text-pc-accent hover:text-pc-accent-secondary">
+                      #{currentMatch.match.match_id}
+                    </Link>
+                    <span className="truncate text-pc-text-secondary">{currentMatch.match.map || "Unknown map"}</span>
+                  </div>
+                  <span className={`text-xs font-medium ${currentMatch.match.status === 'active' ? 'text-emerald-400' : 'text-pc-text-muted'}`}>
+                    {currentMatch.match.status}
                   </span>
                 </div>
                 {currentMatch.players && currentMatch.players.length > 0 && (
-                  <div className="pt-3 border-t border-pc-border/50">
-                    <div className="text-xs text-pc-text-muted uppercase tracking-wider mb-2">Players</div>
-                    <div className="grid grid-cols-2 gap-2">
-                      {currentMatch.players.slice(0, 10).map((p: any) => (
-                        <div key={p.player_id} className="flex items-center gap-2 text-xs">
-                          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${p.team === 'Alliance' ? 'bg-blue-400' : 'bg-red-400'}`}></span>
-                          <Link href={`/players/${p.player_id}`} className="text-pc-text hover:text-pc-accent truncate">
-                            {p.player_name || `#${p.player_id}`}
-                          </Link>
-                        </div>
-                      ))}
-                    </div>
+                  <div className="grid grid-cols-1 gap-3 border-t border-pc-border/50 pt-3 md:grid-cols-2">
+                    {[1, 2].map((taskForce) => {
+                      const team = currentMatch.players.filter((p: any) => Number(p.task_force) === taskForce);
+                      return (
+                        <section key={taskForce} className="overflow-hidden rounded-lg border border-pc-border/70 bg-pc-bg-secondary/40">
+                          <div className={`flex items-center justify-between border-b border-pc-border/60 px-3 py-2 text-xs font-semibold ${taskForce === 1 ? 'text-sky-300' : 'text-rose-300'}`}>
+                            <span>Team {taskForce}</span>
+                            <span className="text-[10px] font-normal text-pc-text-muted">{team.length} players</span>
+                          </div>
+                          <div className="divide-y divide-pc-border/50">
+                            {team.map((p: any) => {
+                              const total = Number(p.total_matches ?? 0);
+                              const wins = Number(p.total_wins ?? 0);
+                              const winRate = total > 0 ? `${((wins / total) * 100).toFixed(0)}% WR` : "No profile data";
+                              const tier = Number(p.kbm_tier ?? p.live_tier ?? 0);
+                              const rank = Number(p.kbm_rank ?? 0);
+                              const tierName = tier > 0 ? resolveEffectiveTier(tier, rank).displayName : "Unranked";
+                              return (
+                                <div key={p.player_id} className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 px-3 py-2.5">
+                                  <div className="flex min-w-0 items-center gap-2">
+                                    <img src={getChampionIconSafe(p.champion_name || "")} alt="" className="h-7 w-7 shrink-0 rounded object-contain" />
+                                    <div className="min-w-0">
+                                      <Link href={`/players/${p.player_id}`} className="block truncate text-xs font-medium text-pc-text hover:text-pc-accent">
+                                        {p.player_name || `#${p.player_id}`}
+                                      </Link>
+                                      <div className="truncate text-[10px] text-pc-text-muted">{p.champion_name || "Unknown champion"} · Lvl {p.profile_level ?? p.account_level ?? "—"}</div>
+                                    </div>
+                                  </div>
+                                  <div className="text-right text-[10px] leading-4">
+                                    <div className="font-mono text-pc-accent">{p.queue_elo != null ? Math.round(Number(p.queue_elo)) : "—"} ELO</div>
+                                    <div className="text-pc-text-secondary">{tierName} · {winRate}</div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                            {team.length === 0 && <div className="px-3 py-4 text-center text-xs text-pc-text-muted">No players recorded yet.</div>}
+                          </div>
+                        </section>
+                      );
+                    })}
                   </div>
                 )}
               </div>

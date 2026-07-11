@@ -29,6 +29,8 @@ export default function Nav() {
         { href: "/stats/banrate", label: "Champion Ban Rates" },
         { href: "/stats/items", label: "Item Meta" },
         { href: "/stats/maps", label: "Map Stats" },
+        { href: "/stats/skins", label: "Skin Stats" },
+        { href: "/stats/compositions", label: "Composition Stats" },
         { href: "/stats/tiers", label: "Tier Distribution" },
         { href: "/stats/metrics", label: "Performance Metrics" },
         { href: "/stats/regions", label: "Regions" },

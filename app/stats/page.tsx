@@ -4,7 +4,11 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   fetchStatsOverview,
+  fetchMatchCompositions,
+  fetchSkinStats,
   type Champion,
+  type MatchCompositionStat,
+  type SkinStat,
   type TierStat,
 } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
@@ -85,6 +89,8 @@ export default function StatsPage() {
   const [maps, setMaps] = useState<PageMapStat[]>([]);
   const [tiers, setTiers] = useState<TierStat[]>([]);
   const [activeTiers, setActiveTiers] = useState<TierStat[]>([]);
+  const [skinStats, setSkinStats] = useState<SkinStat[]>([]);
+  const [compositions, setCompositions] = useState<MatchCompositionStat[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -116,6 +122,19 @@ export default function StatsPage() {
     return () => {
       cancelled = true;
     };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([
+      fetchSkinStats({ limit: 5 }),
+      fetchMatchCompositions({ limit: 10 }),
+    ]).then(([skins, comps]) => {
+      if (cancelled) return;
+      setSkinStats(skins);
+      setCompositions(comps);
+    }).catch(() => {});
+    return () => { cancelled = true; };
   }, []);
 
   const [champions, setChampions] = useState<Champion[]>([]);
@@ -489,6 +508,54 @@ export default function StatsPage() {
         </section>
 
       </div>
+
+      <section className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div>
+          <div className="mb-3 flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-bold text-pc-text">Skin Stats</h2>
+              <p className="text-[11px] text-pc-text-muted">Ranked cosmetics, including recovered skin IDs</p>
+            </div>
+            <Link href="/stats/skins" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">Detail →</Link>
+          </div>
+          <div className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated">
+            {skinStats.length === 0 ? <div className="p-4 text-sm text-pc-text-muted">Skin stats unavailable.</div> : (
+              <div className="divide-y divide-pc-border/50">
+                {skinStats.map((skin) => (
+                  <Link key={`${skin.championId}-${skin.skinId}`} href={`/stats/skins?champion=${skin.championId}`} className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-pc-bg-secondary/60">
+                    <img src={getChampionIconSafe(skin.championName)} alt="" className="h-7 w-7 rounded object-contain" />
+                    <div className="min-w-0 flex-1"><div className="truncate text-xs font-medium text-pc-text">{skin.skinName}</div><div className="text-[10px] text-pc-text-muted">{skin.championName} · {skin.totalPlays.toLocaleString()} plays</div></div>
+                    <span className="text-xs font-bold text-emerald-400">{skin.winRate.toFixed(1)}%</span>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div>
+          <div className="mb-3 flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-bold text-pc-text">Composition Stats</h2>
+              <p className="text-[11px] text-pc-text-muted">Team shape: Frontline · Damage · Flank · Support</p>
+            </div>
+            <Link href="/stats/compositions" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">Detail →</Link>
+          </div>
+          <div className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated">
+            {compositions.length === 0 ? <div className="p-4 text-sm text-pc-text-muted">Composition stats unavailable.</div> : (
+              <div className="divide-y divide-pc-border/50">
+                {compositions.slice(0, 5).map((composition) => (
+                  <Link key={composition.composition} href="/stats/compositions" className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-pc-bg-secondary/60">
+                    <div className="w-20 font-mono text-xs font-semibold text-pc-text">{composition.composition}</div>
+                    <div className="min-w-0 flex-1 text-[10px] text-pc-text-muted">{composition.totalMatches.toLocaleString()} ranked matches</div>
+                    <span className={composition.winRate >= 50 ? "text-xs font-bold text-emerald-400" : "text-xs font-bold text-rose-400"}>{composition.winRate.toFixed(1)}%</span>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

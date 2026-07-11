@@ -76,6 +76,7 @@ export default function CreatePostPage() {
           <label htmlFor="content" className="block text-sm font-medium text-pc-text-secondary mb-1">
             Content *
           </label>
+          <p className="mb-1 text-xs text-pc-text-muted">Paste a YouTube or Vimeo link on its own line to embed it; other HTTPS links stay clickable.</p>
           <textarea
             id="content"
             required

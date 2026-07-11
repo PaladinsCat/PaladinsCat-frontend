@@ -18,6 +18,7 @@ import {
   type PostDetail,
 } from "@/lib/api-client";
 import { formatLocalDateTime } from "@/lib/time-format";
+import CommunityRichContent from "@/components/CommunityRichContent";
 
 export default function PostDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
@@ -277,7 +278,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
               <span>{formatLocalDateTime(post.createdAt)}</span>
               <span>👁 {post.viewCount}</span>
             </div>
-            <div className="mt-4 text-pc-text whitespace-pre-wrap">{post.content}</div>
+            <div className="mt-4"><CommunityRichContent content={post.content} /></div>
           </>
         )}
         <div className="flex items-center gap-4 mt-4 pt-4 border-t border-pc-border">
@@ -379,7 +380,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                       </div>
                     </div>
                   ) : (
-                    <p className="text-pc-text mt-2 whitespace-pre-wrap">{comment.content}</p>
+                    <div className="mt-2 text-sm"><CommunityRichContent content={comment.content} /></div>
                   )}
                 </div>
               );

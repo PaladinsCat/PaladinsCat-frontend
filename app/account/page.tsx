@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { useTimeZone } from "@/lib/time-zone-context";
-import { formatLocalDate, formatLocalTime } from "@/lib/time-format";
+import { formatLocalDate, formatLocalDateTime, formatLocalTime } from "@/lib/time-format";
 import { fixedUtcOffsetFromTimeZone, fixedUtcOffsetToTimeZone, getFixedUtcOffsetOptions, getSupportedTimeZones } from "@/lib/time-zone";
 import {
   getAccountDetails,
@@ -18,7 +19,10 @@ import {
   startPlayerLinkVerification,
   verifyPlayerLink,
   cancelPlayerLinkVerification,
+  getAccountNotifications,
+  markAccountNotificationRead,
   type PlayerLinkVerification,
+  type AccountNotification,
 } from "@/lib/api-client";
 
 export default function AccountPage() {
@@ -36,6 +40,7 @@ export default function AccountPage() {
   const [searching, setSearching] = useState(false);
   const [linking, setLinking] = useState(false);
   const [verification, setVerification] = useState<PlayerLinkVerification | null>(null);
+  const [notifications, setNotifications] = useState<AccountNotification[]>([]);
 
   // ── Password change state ──
   const [currentPw, setCurrentPw] = useState("");
@@ -60,10 +65,15 @@ export default function AccountPage() {
 
   const loadAccount = useCallback(async () => {
     try {
-      const [data, pendingVerification] = await Promise.all([getAccountDetails(), getPlayerLinkVerification()]);
+      const [data, pendingVerification, inbox] = await Promise.all([
+        getAccountDetails(),
+        getPlayerLinkVerification(),
+        getAccountNotifications().catch(() => []),
+      ]);
       setAccount(data);
       setBio(data.user.bio ?? "");
       setVerification(pendingVerification);
+      setNotifications(inbox);
     } catch (err) {
       if (err instanceof Error) {
         if (err.message === "Not authenticated" || err.message.includes("401")) {
@@ -191,6 +201,14 @@ export default function AccountPage() {
     }
   };
 
+  const handleNotificationOpen = (notification: AccountNotification) => {
+    if (notification.readAt) return;
+    setNotifications((current) => current.map((entry) => entry.id === notification.id ? { ...entry, readAt: new Date().toISOString() } : entry));
+    void markAccountNotificationRead(notification.id).catch(() => {
+      setNotifications((current) => current.map((entry) => entry.id === notification.id ? { ...entry, readAt: null } : entry));
+    });
+  };
+
   const handleVerifyPlayerLink = async () => {
     setLinking(true);
     setError(null);
@@ -272,6 +290,27 @@ export default function AccountPage() {
           {success}
         </div>
       )}
+
+      {/* ── Community notifications ── */}
+      <div className="mb-6 rounded-lg border border-pc-border bg-pc-bg-elevated p-6">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-semibold text-pc-text">Notifications</h2>
+            <p className="text-sm text-pc-text-secondary">Replies to your community posts appear here.</p>
+          </div>
+          {notifications.some((notification) => !notification.readAt) && <span className="rounded-full bg-pc-accent/15 px-2 py-1 text-xs font-semibold text-pc-accent">{notifications.filter((notification) => !notification.readAt).length} new</span>}
+        </div>
+        {notifications.length === 0 ? <p className="rounded-lg bg-pc-bg-secondary px-3 py-4 text-sm text-pc-text-muted">No community notifications yet.</p> : (
+          <div className="divide-y divide-pc-border overflow-hidden rounded-lg border border-pc-border/70">
+            {notifications.map((notification) => {
+              const href = notification.postId ? `/community/${notification.postId}` : "/community";
+              return <Link key={notification.id} href={href} onClick={() => handleNotificationOpen(notification)} className={`block px-4 py-3 transition-colors hover:bg-pc-bg-secondary ${notification.readAt ? "text-pc-text-secondary" : "bg-pc-accent/5 text-pc-text"}`}>
+                <div className="flex items-start justify-between gap-3"><div className="min-w-0"><div className="text-sm"><span className="font-semibold">{notification.actorUsername}</span> replied to <span className="font-medium">{notification.postTitle ?? "your post"}</span></div>{notification.commentContent && <div className="mt-1 line-clamp-1 text-xs text-pc-text-muted">{notification.commentContent}</div>}</div><time className="shrink-0 text-[10px] text-pc-text-muted">{formatLocalDateTime(notification.createdAt)}</time></div>
+              </Link>;
+            })}
+          </div>
+        )}
+      </div>
 
       {/* ── Time Zone ── */}
       <div className="bg-pc-bg-elevated rounded-lg border border-pc-border p-6 mb-6">
@@ -400,9 +439,9 @@ export default function AccountPage() {
                   Connected
                 </span>
               </div>
-              <div className="font-semibold text-pc-text text-lg mb-1">
+              <Link href={`/players/${linkedPlayer.id}`} className="mb-1 block text-lg font-semibold text-pc-text hover:text-pc-accent">
                 {linkedPlayer.name}
-              </div>
+              </Link>
               {linkedPlayer.platform_name && (
                 <div className="text-pc-text-secondary text-sm">{linkedPlayer.platform_name}</div>
               )}
@@ -425,6 +464,7 @@ export default function AccountPage() {
             >
               Unlink Player
             </button>
+            <Link href={`/players/${linkedPlayer.id}`} className="ml-3 text-sm text-pc-accent hover:underline">Open player profile →</Link>
           </div>
         ) : (
           /* ── Player search ── */

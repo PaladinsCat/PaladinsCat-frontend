@@ -42,6 +42,7 @@ import MatchupSection from "@/components/match-result/matchup-section";
 import MatchStatsSection from "@/components/match-result/match-stats-section";
 import ItemsLoadoutsSection from "@/components/match-result/items-loadouts-section";
 import RatingSnapshots from "@/components/match-result/rating-snapshots";
+import MatchExportButton from "@/components/match-result/match-export-button";
 import { ErrorState } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
 
@@ -223,6 +224,22 @@ export default function MatchDetailPage() {
         recovered={match.match.recovered}
         private={match.match.private}
       />
+
+      <div className="-mt-3 flex justify-end">
+        <MatchExportButton
+          matchId={match.match.match_id}
+          map={match.match.map}
+          queueLabel={queueLabel}
+          region={match.match.region}
+          duration={duration}
+          team1Score={match.match.team1_score}
+          team2Score={match.match.team2_score}
+          team1Wins={team1Wins}
+          team2Wins={team2Wins}
+          team1={team1}
+          team2={team2}
+        />
+      </div>
 
       {/* Player Matchup — pre-match view */}
       <MatchupSection
