@@ -125,6 +125,18 @@ function formatKDA(kills: number, deaths: number, assists: number): string {
   return ((kills + assists) / deaths).toFixed(2);
 }
 
+function formatMatchDuration(seconds: number): string {
+  const total = Math.max(0, Math.round(seconds || 0));
+  const minutes = Math.floor(total / 60);
+  const remaining = total % 60;
+  return `${minutes}:${String(remaining).padStart(2, "0")}`;
+}
+
+function displayMatchMap(mapName: string, queueId: number | null): string {
+  const name = mapName || "Unknown map";
+  return queueId === 486 ? name.replace(/^Ranked\s+/i, "") : name;
+}
+
 
 function formatHours(hours: number): string {
   if (!hours) return "—";
@@ -738,13 +750,13 @@ export default function PlayerProfilePage() {
                         <th className="px-3 py-1.5">D</th>
                         <th className="px-3 py-1.5">A</th>
                         <th className="px-3 py-1.5">KDA</th>
-                        <th className="px-3 py-1.5">DPM</th>
                         <th className="px-3 py-1.5">Result</th>
+                        <th className="px-3 py-1.5">Time</th>
+                        <th className="px-3 py-1.5">Played</th>
                       </tr>
                     </thead>
                     <tbody>
                       {matches.filter((m) => m.championName).map((m) => {
-                        const dpm = m.duration > 0 ? ((m.damageDone / m.duration) * 60).toFixed(0) : "—";
                         const kda = formatKDA(m.kills, m.deaths, m.assists);
                         return (
                           <tr key={m.matchId} className="border-b border-pc-border/30 hover:bg-pc-bg-secondary/50 transition-colors">
@@ -763,18 +775,19 @@ export default function PlayerProfilePage() {
                               <div className="text-xs text-pc-text-secondary">
                                 {m.queueId === 486 ? "Ranked" : m.queueId ? "Casual" : "Unknown"}
                               </div>
-                              <div className="max-w-28 truncate text-[10px] text-pc-text-muted" title={m.mapGame}>{m.mapGame}</div>
+                              <div className="max-w-28 truncate text-[10px] text-pc-text-muted" title={displayMatchMap(m.mapGame, m.queueId)}>{displayMatchMap(m.mapGame, m.queueId)}</div>
                             </td>
                             <td className="px-3 py-1.5 text-xs font-mono text-pc-text">{m.kills}</td>
                             <td className="px-3 py-1.5 text-xs font-mono text-pc-text">{m.deaths}</td>
                             <td className="px-3 py-1.5 text-xs font-mono text-pc-text">{m.assists}</td>
                             <td className="px-3 py-1.5 text-xs font-mono text-pc-text">{kda}</td>
-                            <td className="px-3 py-1.5 text-xs font-mono text-pc-text-muted">{dpm}</td>
                             <td className="px-3 py-1.5">
                               <span className={`text-xs font-medium ${m.isWinner ? "text-emerald-400" : "text-rose-400"}`}>
                                 {m.isWinner ? "W" : "L"}
                               </span>
                             </td>
+                            <td className="px-3 py-1.5 text-xs font-mono text-pc-text-secondary">{formatMatchDuration(m.duration)}</td>
+                            <td className="whitespace-nowrap px-3 py-1.5 text-xs text-pc-text-muted">{formatLocalDateTime(m.entryDatetime)}</td>
                           </tr>
                         );
                       })}
