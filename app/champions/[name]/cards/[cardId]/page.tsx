@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import SmartImage from "@/components/SmartImage";
+import ContextBackLink, { safeInternalReturnTo } from "@/components/context-back-link";
 import { getChampionData, type ChampionData, type ChampionTalent } from "@/lib/champion-data";
 import {
   fetchChampionCardDetail,
@@ -50,6 +50,7 @@ export default function ChampionCardDetailPage() {
   const cardParam = params?.cardId;
   const name = Array.isArray(nameParam) ? nameParam[0] ?? "" : nameParam ?? "";
   const cardId = parseMaybeNumber(cardParam);
+  const returnTo = safeInternalReturnTo(searchParams.get("returnTo"));
 
   const [championData, setChampionData] = useState<ChampionData | null>(null);
   const [detail, setDetail] = useState<ChampionCardDetailResponse | null>(null);
@@ -121,7 +122,10 @@ export default function ChampionCardDetailPage() {
     setSelectedTalentId(talentId);
     if (!cardId) return;
     const base = `/champions/${name}/cards/${cardId}`;
-    router.replace(talentId ? `${base}?talentId=${talentId}` : base, { scroll: false });
+    const query = new URLSearchParams();
+    if (talentId) query.set("talentId", String(talentId));
+    if (returnTo) query.set("returnTo", returnTo);
+    router.replace(query.size > 0 ? `${base}?${query.toString()}` : base, { scroll: false });
   }
 
   if (loading) {
@@ -131,9 +135,7 @@ export default function ChampionCardDetailPage() {
   if (error || !detail) {
     return (
       <div className="space-y-4">
-        <Link href={`/champions/${name}`} className="text-pc-text-secondary hover:text-pc-accent transition-colors">
-          Back to champion
-        </Link>
+        <ContextBackLink fallbackHref={`/champions/${name}`} />
         <ErrorState title="Card statistics unavailable" message={error ?? "No card data is available for this queue."} />
       </div>
     );
@@ -145,9 +147,7 @@ export default function ChampionCardDetailPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-3">
-        <Link href={`/champions/${name}`} className="text-pc-text-secondary hover:text-pc-accent transition-colors">
-          Back to {championDisplayName}
-        </Link>
+        <ContextBackLink fallbackHref={`/champions/${name}`} />
         <span className="text-pc-text-muted">/</span>
         <h1 className="pc-heading pc-heading-lg text-pc-accent">{detail.cardName}</h1>
       </div>

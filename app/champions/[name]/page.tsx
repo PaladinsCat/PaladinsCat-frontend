@@ -15,19 +15,15 @@ import {
   type ChampionData,
   type ChampionSkill,
   type ChampionTalent,
-  type ChampionLoadout,
 } from "@/lib/champion-data";
 import {
   fetchChampionLeaderboard,
   fetchChampionTalentStats,
-  fetchChampionCardStats,
   fetchPerformanceMetrics,
   fetchChampionPerformanceDistributions,
   type ChampionLeaderboardEntry,
   type ChampionTalentStatsResponse,
-  type ChampionCardStatsResponse,
   type ChampionTalentStat,
-  type ChampionCardStat,
   type PerformanceMetricsResponse,
   type PerformanceMetricKey,
   type PerformanceMetricSummary,
@@ -125,8 +121,6 @@ export default function ChampionDetailPage() {
   const [stats, setStats] = useState<ChampionStats | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [talentStats, setTalentStats] = useState<ChampionTalentStatsResponse | null>(null);
-  const [cardStats, setCardStats] = useState<ChampionCardStatsResponse | null>(null);
-  const [selectedTalentId, setSelectedTalentId] = useState<number | null>(null);
   const [globalPerformance, setGlobalPerformance] = useState<PerformanceMetricsResponse>({});
   const [championPerformance, setChampionPerformance] = useState<Partial<Record<PerformanceMetricKey, ChampionPerformanceDistribution>>>({});
   const [tierStats, setTierStats] = useState<TierStat[]>([]);
@@ -139,10 +133,6 @@ export default function ChampionDetailPage() {
   const staticChampion = STATIC_CHAMPIONS.find(
     (c) => championSlug(c.name) === name.toLowerCase()
   );
-
-  useEffect(() => {
-    setSelectedTalentId(null);
-  }, [name]);
 
   useEffect(() => {
     let cancelled = false;
@@ -206,8 +196,6 @@ export default function ChampionDetailPage() {
           fetchChampionLeaderboard(match.id, 25).catch(() => [] as ChampionLeaderboardEntry[]),
           // Talent stats for this champion
           fetchChampionTalentStats(match.id).catch(() => null as ChampionTalentStatsResponse | null),
-          // Card stats for this champion
-          fetchChampionCardStats(match.id, 'ranked', selectedTalentId).catch(() => null as ChampionCardStatsResponse | null),
           // Global ranked distributions plus champion-specific distributions
           // use the same metric contract as /stats/metrics. This
           // keeps the champion page from comparing raw damage/gold totals across
@@ -224,41 +212,28 @@ export default function ChampionDetailPage() {
       })
       .then((result) => {
         if (!result) return;
-        const [statsData, lbData, talentData, cardData, globalMetrics, championMetricPairs] = result;
+        const [statsData, lbData, talentData, globalMetrics, championMetricPairs] = result;
         if (statsData) setStats(statsData);
         setLeaderboard(lbData);
         if (talentData) setTalentStats(talentData);
-        if (cardData) setCardStats(cardData);
         setGlobalPerformance(globalMetrics ?? {});
         setChampionPerformance(
           Object.fromEntries(championMetricPairs.filter(([, row]) => row != null)) as Partial<Record<PerformanceMetricKey, ChampionPerformanceDistribution>>
         );
       })
       .finally(() => setLoading(false));
-  }, [championData, selectedTalentId]);
+  }, [championData]);
 
 
   const talentStatsByName = useMemo(() => {
     return new Map((talentStats?.talents ?? []).map((stat) => [statNameKey(stat.talentName), stat]));
   }, [talentStats]);
 
-  const cardStatsByName = useMemo(() => {
-    return new Map((cardStats?.cards ?? []).map((stat) => [statNameKey(stat.cardName), stat]));
-  }, [cardStats]);
-  const selectedTalentStat = useMemo(() => {
-    if (selectedTalentId == null) return null;
-    return (talentStats?.talents ?? []).find((talent) => talent.talentId === selectedTalentId) ?? null;
-  }, [selectedTalentId, talentStats]);
   const maxTalentPickRate = useMemo(() => {
     const total = talentStats?.totalMatches ?? 0;
     if (total <= 0) return 100;
     return Math.max(1, ...(talentStats?.talents ?? []).map((stat) => (stat.totalPlays / total) * 100));
   }, [talentStats]);
-  const maxCardPickRate = useMemo(() => {
-    const total = cardStats?.totalMatches ?? 0;
-    if (total <= 0) return 100;
-    return Math.max(1, ...(cardStats?.cards ?? []).map((stat) => (stat.totalPlays / total) * 100));
-  }, [cardStats]);
   const maxTierPickRate = useMemo(() => Math.max(1, ...tierStats.map((tier) => tier.pickRate)), [tierStats]);
   const maxTrendPlays = useMemo(() => Math.max(1, ...patchTrends.map((trend) => trend.weeklyPlays)), [patchTrends]);
   if (dataLoaded && !championData && !staticChampion) return notFound();
@@ -278,7 +253,7 @@ export default function ChampionDetailPage() {
         </h1>
       </div>
 
-      {/* Two-column: Champion Profile (left) + Talents & Cards (right) */}
+      {/* Two-column: Champion Profile (left) + talent summaries (right) */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Left column — Champion Profile + Skills (~1/4) */}
         <div className="lg:col-span-1 space-y-6">
@@ -323,28 +298,19 @@ export default function ChampionDetailPage() {
           )}
         </div>
 
-        {/* Right column — Talents & Loadout Cards (~3/4) */}
+        {/* Right column — talent summaries (~3/4) */}
         <div className="lg:col-span-3 space-y-6">
           {loading && (
-            <LoadingPanel compact className="pc-card" label="Loading champion analytics…" detail="Combining ranked performance, talent, card, and leaderboard data." />
+            <LoadingPanel compact className="pc-card" label="Loading champion analytics…" detail="Combining ranked performance, talent, and leaderboard data." />
           )}
           {/* Talents */}
           {championData?.talents && championData.talents.length > 0 && (
             <>
-              <div className="flex items-center justify-between gap-3 mb-2">
-                <div className="flex items-baseline gap-2">
-                  <h2 className="pc-card-title shadow-sm">Talents</h2>
-                  <span className="text-xs font-medium text-pc-accent-light drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]">Select to sort cards</span>
-                </div>
-                {selectedTalentId != null && (
-                  <button
-                    type="button"
-                    onClick={() => setSelectedTalentId(null)}
-                    className="text-xs px-3 py-1 rounded-lg border border-pc-border text-pc-text-secondary hover:text-pc-accent hover:border-pc-accent-mid transition-colors"
-                  >
-                    Clear
-                  </button>
-                )}
+              <div className="mb-2 flex flex-wrap items-baseline gap-2">
+                <h2 className="pc-card-title shadow-sm">Talents</h2>
+                <span className="text-xs font-medium text-pc-accent-light drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]">
+                  Open a talent to view its loadout cards
+                </span>
               </div>
               <div className="pc-card">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -358,8 +324,7 @@ export default function ChampionDetailPage() {
                       stat={stat ?? undefined}
                       totalMatches={talentStats?.totalMatches ?? 0}
                       maxPickRate={maxTalentPickRate}
-                      selected={stat?.talentId === selectedTalentId}
-                      onSelect={stat ? () => setSelectedTalentId(stat.talentId) : undefined}
+                      href={stat ? `/champions/${name}/talents/${stat.talentId}?returnTo=${encodeURIComponent(`/champions/${name}`)}` : undefined}
                     />
                   );
                 })}
@@ -368,122 +333,6 @@ export default function ChampionDetailPage() {
             </>
           )}
 
-          {/* Loadout Cards */}
-          {championData?.loadouts && championData.loadouts.length > 0 && (
-            <>
-              <div className="flex items-center justify-between gap-3 mb-2">
-                <h2 className="pc-card-title shadow-sm">Loadout Cards</h2>
-                {selectedTalentStat && (
-                  <div className="text-xs text-pc-text-secondary">
-                    Filtered by <span className="text-pc-accent font-medium">{selectedTalentStat.talentName}</span> · {cardStats?.totalMatches ?? 0} plays
-                  </div>
-                )}
-              </div>
-              <div className="pc-card">
-              {(() => {
-                const byCategory: Record<string, ChampionLoadout[]> = {};
-                championData.loadouts.forEach((l) => {
-                  const key = l.category || "General";
-                  if (!byCategory[key]) byCategory[key] = [];
-                  byCategory[key].push(l);
-                });
-                return Object.entries(byCategory).map(([cat, cards]) => (
-                  <div key={cat} className="mb-6 last:mb-0">
-                    <div className="text-xs font-medium text-pc-text-muted uppercase tracking-wider mb-2">{cat}</div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                      {cards.map((card) => {
-                        const stat: ChampionCardStat | undefined = cardStatsByName.get(statNameKey(card.name));
-                        const cardHref = stat ? `/champions/${name}/cards/${stat.cardId}${selectedTalentId ? `?talentId=${selectedTalentId}` : ""}` : null;
-                        const pickRate = stat && cardStats?.totalMatches ? (stat.totalPlays / cardStats.totalMatches) * 100 : 0;
-                        const quality = stat ? getStatQuality(stat.winRate, pickRate, maxCardPickRate) : null;
-                        return (
-                          <div
-                            key={card.name}
-                            className="pc-surface-light rounded-lg p-3 border transition-colors"
-                            style={quality ? { borderColor: quality.borderColor } : undefined}
-                          >
-                            <div className="flex items-start gap-3">
-                              {card.iconUrl ? (
-                                cardHref ? (
-                                  <Link href={cardHref} className="flex-shrink-0">
-                                    <SmartImage src={card.iconUrl} alt={card.name} className="w-12 h-10 rounded border border-pc-border bg-pc-bg/50 object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
-                                  </Link>
-                                ) : (
-                                  <SmartImage src={card.iconUrl} alt={card.name} className="flex-shrink-0 w-12 h-10 rounded border border-pc-border bg-pc-bg/50 object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
-                                )
-                              ) : (
-                                <div className="flex-shrink-0 w-10 h-10 rounded border border-pc-border bg-pc-bg-elevated flex items-center justify-center">
-                                  <span className="text-xs text-pc-accent">?</span>
-                                </div>
-                              )}
-                              <div className="min-w-0 flex-1">
-                                {cardHref ? (
-                                  <Link href={cardHref} className="text-xs font-medium text-pc-accent hover:text-pc-accent-light transition-colors mb-0.5 inline-block">{card.name}</Link>
-                                ) : (
-                                  <div className="text-xs font-medium text-pc-accent mb-0.5">{card.name}</div>
-                                )}
-                                <p className="text-xs text-pc-text-secondary leading-relaxed">{card.description}</p>
-                                {stat && stat.totalPlays > 0 && (
-                                  <div className="mt-2 space-y-1.5">
-                                    <div className="flex flex-wrap items-center gap-2 text-xs">
-                                      <span className={quality?.textClass ?? winRateColor(stat.winRate)} style={quality ? { color: quality.color } : undefined}>
-                                        <span className="text-pc-text-muted mr-1">WR</span>
-                                        {stat.winRate.toFixed(1)}%
-                                      </span>
-                                      <span className="text-pc-border">|</span>
-                                      <span className="text-pc-text-muted">
-                                        <span className="mr-1">PR</span>
-                                        <span style={quality ? { color: quality.color } : undefined}>{pickRate.toFixed(1)}%</span>
-                                      </span>
-                                      <span className="text-pc-border">|</span>
-                                      <span className="text-pc-text-muted overflow-wrap break-word">
-                                        <span className="mr-1">Picks</span>
-                                        <span style={quality ? { color: quality.color } : undefined}>{formatPlays(stat.totalPlays)}</span>
-                                      </span>
-                                      <span className="text-pc-border">|</span>
-                                      <span className="text-pc-text-muted overflow-wrap break-word">{stat.wins.toLocaleString()}W/{stat.losses.toLocaleString()}L</span>
-                                    </div>
-                                    {stat.levels.length > 0 && (
-                                      <div className="flex items-center gap-1">
-                                        {(() => {
-                                          const maxLevelPlays = Math.max(1, ...stat.levels.map((level) => level.plays));
-                                          const maxLevelPickRate = Math.max(1, ...stat.levels.map((level) => (level.plays / Math.max(1, stat.totalPlays)) * 100));
-                                          return stat.levels.map((l) => {
-                                            const levelPickRate = (l.plays / Math.max(1, stat.totalPlays)) * 100;
-                                            const levelQuality = getStatQuality(l.winRate, levelPickRate, maxLevelPickRate);
-                                            return (
-                                              <div key={l.level} className="flex-1 flex flex-col items-center">
-                                                <div className="text-[9px] text-pc-text-muted">L{l.level}</div>
-                                                <div className="w-full h-1.5 rounded-full bg-pc-bg-elevated overflow-hidden">
-                                                  <div
-                                                    className="h-full rounded-full"
-                                                    style={{
-                                                      width: `${Math.max(l.plays > 0 ? 8 : 0, Math.round((l.plays / maxLevelPlays) * 100))}%`,
-                                                      background: levelQuality.track,
-                                                    }}
-                                                  />
-                                                </div>
-                                                <div className="text-[9px] text-pc-text-muted">{l.plays}</div>
-                                              </div>
-                                            );
-                                          });
-                                        })()}
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ));
-              })()}
-            </div>
-            </>
-          )}
         </div>
       </div>
 
@@ -776,29 +625,21 @@ function TalentCard({
   stat,
   totalMatches,
   maxPickRate,
-  selected,
-  onSelect,
+  href,
 }: {
   talent: ChampionTalent;
   championName: string;
   stat?: ChampionTalentStat;
   totalMatches?: number;
   maxPickRate?: number;
-  selected?: boolean;
-  onSelect?: () => void;
+  href?: string;
 }) {
   const talentImageUrl = talent.iconUrl || `/images/champions/Talent ${championName} ${talent.name}.png`;
   const pickRate = stat && totalMatches && totalMatches > 0 ? (stat.totalPlays / totalMatches) * 100 : 0;
   const quality = stat ? getStatQuality(stat.winRate, pickRate, maxPickRate ?? 100) : null;
 
-  return (
-    <button
-      type="button"
-      onClick={onSelect}
-      disabled={!onSelect}
-      className={`pc-surface-light rounded-lg p-3 border flex items-start gap-3 transition-colors text-left w-full ${selected ? "ring-1 ring-pc-accent border-pc-accent-mid" : ""} ${onSelect ? "cursor-pointer hover:border-pc-accent-mid" : "cursor-default"}`}
-      style={quality ? { borderColor: selected ? quality.color : quality.borderColor } : undefined}
-    >
+  const content = (
+    <>
       <div className="flex-shrink-0 w-14 h-14 flex items-center justify-center overflow-hidden">
         <SmartImage
           src={talentImageUrl}
@@ -836,7 +677,20 @@ function TalentCard({
           </div>
         )}
       </div>
-    </button>
+    </>
+  );
+
+  const className = `pc-surface-light flex w-full items-start gap-3 rounded-lg border p-3 text-left transition-colors ${href ? "cursor-pointer hover:border-pc-accent-mid" : "cursor-default"}`;
+  const style = quality ? { borderColor: quality.borderColor } : undefined;
+
+  return href ? (
+    <Link href={href} className={className} style={style}>
+      {content}
+    </Link>
+  ) : (
+    <div className={className} style={style}>
+      {content}
+    </div>
   );
 }
 
