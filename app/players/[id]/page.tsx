@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { getChampionIconSafe } from "@/lib/champion-icons";
@@ -154,16 +154,16 @@ function trendColor(trend: number): string {
 // Inline stat row: label + value
 function StatRow({ label, value, color }: { label: string; value: string; color?: string }) {
   return (
-    <div className="flex items-center justify-between">
-      <span className="text-xs text-pc-text-muted">{label}</span>
-      <span className={`text-xs font-mono font-medium ${color || "text-pc-text"}`}>{value}</span>
+    <div className="flex min-w-0 items-start justify-between gap-3">
+      <span className="min-w-0 break-words text-xs text-pc-text-muted">{label}</span>
+      <span className={`min-w-0 break-words text-right text-xs font-mono font-medium ${color || "text-pc-text"}`}>{value}</span>
     </div>
   );
 }
 
 // Compact 2-column stat grid
 function StatGrid({ children }: { children: React.ReactNode }) {
-  return <div className="grid grid-cols-2 gap-y-2 gap-x-4">{children}</div>;
+  return <div className="grid grid-cols-1 gap-x-4 gap-y-2 min-[400px]:grid-cols-2">{children}</div>;
 }
 
 export default function PlayerProfilePage() {
@@ -183,6 +183,8 @@ export default function PlayerProfilePage() {
   const [refreshFeedback, setRefreshFeedback] = useState<RefreshFeedback | null>(null);
   const [refreshCooldownUntil, setRefreshCooldownUntil] = useState<number | null>(null);
   const [refreshClock, setRefreshClock] = useState(() => Date.now());
+  const [actionMenuOpen, setActionMenuOpen] = useState(false);
+  const actionMenuRef = useRef<HTMLDivElement>(null);
   const [currentMatch, setCurrentMatch] = useState<any>(null);
   const [showCurrentMatch, setShowCurrentMatch] = useState(false);
   const [fetchKey, setFetchKey] = useState(0);
@@ -254,6 +256,22 @@ export default function PlayerProfilePage() {
     }, 1000);
     return () => window.clearInterval(timer);
   }, [refreshCooldownUntil]);
+
+  useEffect(() => {
+    if (!actionMenuOpen) return;
+    const closeOnOutsideClick = (event: PointerEvent) => {
+      if (!actionMenuRef.current?.contains(event.target as Node)) setActionMenuOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setActionMenuOpen(false);
+    };
+    document.addEventListener('pointerdown', closeOnOutsideClick);
+    document.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.removeEventListener('pointerdown', closeOnOutsideClick);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [actionMenuOpen]);
 
   const showRefreshCooldown = useCallback((
     expiresAt: string | null | undefined,
