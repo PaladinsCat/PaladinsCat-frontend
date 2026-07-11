@@ -6,21 +6,26 @@ const GENERIC_ICON = "/images/champions/Champion_Generic_Icon.avif";
 
 /**
  * Mapping for champions whose display name doesn't directly match the file name.
- * 
- * Pattern: all icons live at `/images/champions/Champion {Name} Icon.avif`
- * Most champions (57/59) have name = filename.
- * These 4 need special mapping:
- *   "Betty La Bomba" → "Champion BettyLaBomba Icon.avif"
- *   "Bomb King"      → "Champion BombKing Icon.avif"
- *   "Sha Lin"        → "Champion ShaLin Icon.avif"
- *   "Mal Damba"      → "Champion Mal'Damba Icon.avif" (apostrophe in filename)
+ *
+ * Keys are normalized (lowercased, spaces/punctuation stripped) for fuzzy matching.
+ * Values are the actual filename stem (without "Champion " prefix and " Icon.avif" suffix).
+ *
+ * Covers 4 special cases:
+ *   Betty La Bomba / Betty la Bomba      → "BettyLaBomba"
+ *   Bomb King / Bomb king                → "BombKing"
+ *   Sha Lin / Sha Lin                    → "ShaLin"
+ *   Mal'Damba / Mal Damba                → "Mal'Damba" (apostrophe in filename)
  */
-const ICON_NAME_MAP: Record<string, string> = {
-  'Betty La Bomba': 'Champion BettyLaBomba Icon.avif',
-  'Bomb King': 'Champion BombKing Icon.avif',
-  'Sha Lin': 'Champion ShaLin Icon.avif',
-  'Mal Damba': "Champion Mal'Damba Icon.avif",
+const ICON_EXCEPTIONS: Record<string, string> = {
+  'bettylabomba': 'BettyLaBomba',
+  'bombking': 'BombKing',
+  'shalin': 'ShaLin',
+  'maldamba': "Mal'Damba",
 };
+
+function normalizeChampionName(name: string): string {
+  return name.toLowerCase().replace(/[^a-z]/g, '');
+}
 
 /**
  * Return the generic champion icon path.
@@ -32,14 +37,21 @@ export function getGenericChampionIcon(): string {
 /**
  * Get the icon path for a champion, automatically falling back to generic.
  * All 59 real Paladins champions have icon files. This always returns the correct path.
+ *
+ * Handles case and punctuation variations in champion names from different sources
+ * (database, API responses, static data).
  */
 export function getChampionIconSafe(name: string | null | undefined): string {
   if (!name) return GENERIC_ICON;
-  const normalizedName = name.trim();
-  // Check for special name mapping
-  if (ICON_NAME_MAP[normalizedName]) {
-    return `/images/champions/${ICON_NAME_MAP[normalizedName]}`;
+  const trimmed = name.trim();
+  const normalized = normalizeChampionName(trimmed);
+
+  // Check for special icon naming
+  const exception = ICON_EXCEPTIONS[normalized];
+  if (exception) {
+    return `/images/champions/Champion ${exception} Icon.avif`;
   }
-  // Default: name matches filename directly
-  return `/images/champions/Champion ${normalizedName} Icon.avif`;
+
+  // Default: name matches filename directly (most champions)
+  return `/images/champions/Champion ${trimmed} Icon.avif`;
 }
