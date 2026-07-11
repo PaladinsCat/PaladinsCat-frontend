@@ -3026,6 +3026,8 @@ export async function fetchMatchSearch(params?: {
   championId?: string;
   queueId?: string;
   region?: string;
+  date?: string;
+  hour?: string;
   from?: string;
   to?: string;
   page?: string;

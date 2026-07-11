@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import {
-  fetchReferenceRegions,
   fetchMatchSearch,
   fetchRecentMatches,
   fetchMatchHourlyStats,
@@ -28,11 +27,15 @@ export default function MatchesPage() {
 
   const [championId, setChampionId] = useState("");
   const [region, setRegion] = useState("");
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
-  const [hasFilters, setHasFilters] = useState(false);
+  const [date, setDate] = useState("");
+  const [hour, setHour] = useState("");
+  const [appliedFilters, setAppliedFilters] = useState<{
+    championId: string;
+    region: string;
+    date: string;
+    hour: string;
+  } | null>(null);
   const { champions, loading: championsLoading } = useChampions();
-  const [referenceRegions, setReferenceRegions] = useState<Array<{ region?: string; region_code?: string; name?: string; region_name?: string }>>([]);
 
   const [hourlyStats, setHourlyStats] = useState<MatchHourlyStats | null>(null);
   const [droppedByHour, setDroppedByHour] = useState<Record<string, number>>({});
@@ -87,21 +90,17 @@ export default function MatchesPage() {
     return () => { active = false; clearInterval(interval); };
   }, []);
 
-  useEffect(() => {
-    fetchReferenceRegions().then(setReferenceRegions).catch(() => {});
-  }, []);
-
   const loadMatches = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      if (hasFilters) {
+      if (appliedFilters) {
         const result = await fetchMatchSearch({
-          championId: championId || undefined,
+          championId: appliedFilters.championId || undefined,
           queueId: RANKED_QUEUE_ID,
-          region: region || undefined,
-          from: from || undefined,
-          to: to || undefined,
+          region: appliedFilters.region || undefined,
+          date: appliedFilters.date || undefined,
+          hour: appliedFilters.hour || undefined,
           page: String(page),
           perPage: String(perPage),
         });
@@ -128,13 +127,23 @@ export default function MatchesPage() {
     } finally {
       setLoading(false);
     }
-  }, [hasFilters, championId, region, from, to, page, perPage]);
+  }, [appliedFilters, page, perPage]);
 
   useEffect(() => { loadMatches(); }, [loadMatches]);
 
-  const handleSearch = () => { setHasFilters(!!championId || !!region || !!from || !!to); setPage(1); };
-  const handleReset = () => { setChampionId(""); setRegion(""); setFrom(""); setTo(""); setHasFilters(false); setPage(1); };
-  useEffect(() => { if (hasFilters) loadMatches(); }, [page, hasFilters, loadMatches]);
+  const hasFilters = appliedFilters !== null;
+  const handleSearch = () => {
+    setAppliedFilters({ championId, region, date, hour });
+    setPage(1);
+  };
+  const handleReset = () => {
+    setChampionId("");
+    setRegion("");
+    setDate("");
+    setHour("");
+    setAppliedFilters(null);
+    setPage(1);
+  };
 
   const hourly = hourlyStats?.hourly ?? [];
   const maxHourly = Math.max(...hourly.map((h: any) => h.NA + h.EU), 1);
@@ -178,22 +187,26 @@ export default function MatchesPage() {
                 <select value={region} onChange={(e) => setRegion(e.target.value)}
                   className="w-full px-3 py-1.5 rounded-lg bg-pc-bg border border-pc-border text-pc-text text-sm focus:outline-none focus:border-pc-accent">
                   <option value="">All</option>
-                  {referenceRegions.map((r) => {
-                    const value = r.region ?? r.region_code ?? "";
-                    if (!value) return null;
-                    return <option key={value} value={value}>{r.name ?? r.region_name ?? value}</option>;
-                  })}
+                  <option value="NA">NA</option>
+                  <option value="EU">EU</option>
                 </select>
               </div>
               <div>
-                <label className="block text-xs text-pc-text-muted mb-1">From</label>
-                <input type="date" value={from} onChange={(e) => setFrom(e.target.value)}
+                <label className="block text-xs text-pc-text-muted mb-1">Date (UTC)</label>
+                <input type="date" value={date} onChange={(e) => setDate(e.target.value)}
                   className="w-full px-3 py-1.5 rounded-lg bg-pc-bg border border-pc-border text-pc-text text-sm focus:outline-none focus:border-pc-accent" />
               </div>
               <div>
-                <label className="block text-xs text-pc-text-muted mb-1">To</label>
-                <input type="date" value={to} onChange={(e) => setTo(e.target.value)}
-                  className="w-full px-3 py-1.5 rounded-lg bg-pc-bg border border-pc-border text-pc-text text-sm focus:outline-none focus:border-pc-accent" />
+                <label className="block text-xs text-pc-text-muted mb-1">Hour (UTC)</label>
+                <select value={hour} onChange={(e) => setHour(e.target.value)} disabled={!date}
+                  className="w-full px-3 py-1.5 rounded-lg bg-pc-bg border border-pc-border text-pc-text text-sm focus:outline-none focus:border-pc-accent disabled:opacity-50">
+                  <option value="">All hours</option>
+                  {Array.from({ length: 24 }, (_, value) => (
+                    <option key={value} value={String(value)}>
+                      {String(value).padStart(2, "0")}:00 – {String(value).padStart(2, "0")}:59
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
             <div className="flex gap-2 mt-3">
