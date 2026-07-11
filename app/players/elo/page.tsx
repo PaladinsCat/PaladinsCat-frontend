@@ -236,7 +236,7 @@ function ChampionEloContent() {
 
       {/* Tabs + Champion Dropdown + Search */}
       {eloMode === "champion" && (
-      <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4">
+      <div className="relative z-20 bg-pc-bg-elevated border border-pc-border rounded-xl p-4">
         <div className="flex flex-col sm:flex-row sm:items-center gap-3">
           {/* Class tabs */}
           <div className="flex flex-wrap gap-2">
@@ -278,28 +278,7 @@ function ChampionEloContent() {
                 </button>
 
                 {dropdownOpen && (
-                  <div className="absolute top-full left-0 mt-1 w-56 bg-pc-bg-elevated border border-pc-border rounded-xl shadow-lg z-50 overflow-hidden">
-                    {/* Search inside dropdown */}
-                    <div className="p-2 border-b border-pc-border">
-                      <div className="relative">
-                        <input
-                          type="text"
-                          value={championSearch}
-                          onChange={(e) => setChampionSearch(e.target.value)}
-                          placeholder="Search champion..."
-                          className="pc-input pr-6 w-full text-xs"
-                          autoFocus
-                        />
-                        {championSearch && (
-                          <button
-                            onClick={() => setChampionSearch("")}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 text-pc-text-muted hover:text-pc-text text-xs"
-                          >
-                            ✕
-                          </button>
-                        )}
-                      </div>
-                    </div>
+                  <div className="pc-card--opaque absolute top-full left-0 mt-1 z-50 w-56 overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated shadow-lg">
                     <div className="max-h-64 overflow-y-auto">
                       {/* "All" option */}
                       <button
@@ -348,6 +327,13 @@ function ChampionEloContent() {
                     }
                   }}
                   onFocus={() => setDropdownOpen(true)}
+                  onKeyDown={(event) => {
+                    if (event.key !== "Enter") return;
+                    const nearestChampion = filteredChampions[0];
+                    if (!nearestChampion) return;
+                    event.preventDefault();
+                    handleSelectChampion(nearestChampion.id);
+                  }}
                   placeholder="Search champion..."
                   className="pc-input pr-8 w-full text-xs"
                 />
