@@ -550,6 +550,55 @@ export interface PlayersOverview {
 let playersOverviewCache: { value: PlayersOverview; expiresAt: number } | null = null;
 let playersOverviewInFlight: Promise<PlayersOverview> | null = null;
 
+/** Normalize the backend overview payload for both server and browser renders. */
+export function mapPlayersOverviewResponse(raw: any): PlayersOverview {
+  const mapChampionElo = (row: any): ChampionEloEntry => ({
+    rank: Number(row.rank), player_id: Number(row.player_id), player_name: String(row.player_name),
+    champion_id: Number(row.champion_id), champion_name: String(row.champion_name), class_name: String(row.class_name),
+    elo: Number(row.elo), phi: Number(row.phi), total_matches: Number(row.total_matches),
+    total_wins: Number(row.total_wins), win_rate: row.win_rate == null ? null : Number(row.win_rate), region: row.region ?? null,
+  });
+  const mapPerformance = (row: any): PerformanceLeaderboardEntry => ({
+    rank: Number(row.rank), playerId: Number(row.player_id), playerName: row.player_name,
+    championName: row.champion_name ?? null, championId: row.champion_id == null ? null : Number(row.champion_id),
+    className: row.class_name ?? null, value: Number(row.value), totalMatches: Number(row.total_matches ?? 0),
+    region: row.region ?? null, platform: row.platform ?? null,
+  });
+  const mapRanked = (row: any): RankedPlayer => ({
+    rank: Number(row.rank), player_id: String(row.player_id), name: row.name, tier: Number(row.tier), points: Number(row.points),
+    prev_rank: row.prev_rank, trend: row.trend, wins: row.wins, losses: row.losses, leaves: row.leaves,
+    winRate: row.winrate == null ? undefined : Number(row.winrate), leaveRate: row.leaverate == null ? undefined : Number(row.leaverate),
+  });
+  const mapAccountElo = (row: any): ClassLeaderboardEntry => ({
+    rank: Number(row.rank), playerId: Number(row.player_id), playerName: row.player_name,
+    championName: row.champion_name ?? null, championId: row.champion_id == null ? null : Number(row.champion_id),
+    elo: Number(row.elo), mu: Number(row.mu), phi: Number(row.phi),
+    winRate: row.win_rate == null ? null : Number(row.win_rate), totalMatches: Number(row.total_matches ?? 0),
+    totalWins: Number(row.total_wins ?? 0), region: row.region ?? null,
+  });
+  const mapCommunity = (row: any): CheaterPlayer => ({
+    id: String(row.id), name: row.name, platform: row.platform, region: row.region,
+    kbmTier: row.kbm_tier ?? null, cheater: row.cheater ?? false, susCount: Number(row.sus_count ?? 0),
+    weirdoCount: Number(row.weirdo_count ?? 0), hallOfFameCount: Number(row.hall_of_fame_count ?? 0),
+    avgDpm: row.avg_dpm == null ? null : Number(row.avg_dpm), avgHpm: row.avg_hpm == null ? null : Number(row.avg_hpm),
+    avgGpm: row.avg_egpm == null ? null : Number(row.avg_egpm), avgMpm: row.avg_mpm == null ? null : Number(row.avg_mpm),
+    totalMatches: Number(row.total_matches ?? 0), winRate: row.win_rate == null ? null : Number(row.win_rate),
+  });
+
+  return {
+    championEloPlayers: (raw.champion_elo?.data ?? []).map(mapChampionElo),
+    performanceLeaderboards: Object.fromEntries(
+      Object.entries(raw.performance ?? {}).map(([metric, response]) => [metric, ((response as any)?.data ?? []).map(mapPerformance)]),
+    ),
+    rankedPlayers: (raw.ranked ?? []).map(mapRanked),
+    accountEloPlayers: (raw.account_elo?.data ?? []).map(mapAccountElo),
+    cheaterPlayers: (raw.cheaters ?? []).map(mapCommunity),
+    suspiciousPlayers: (raw.suspicious ?? []).map(mapCommunity),
+    weirdoPlayers: (raw.weirdos ?? []).map(mapCommunity),
+    hallOfFamePlayers: (raw.hall_of_fame ?? []).map(mapCommunity),
+  };
+}
+
 /**
  * Fetch the directory landing-page data in one request. The short module cache
  * prevents navigation between top-level pages from immediately refetching the
@@ -563,50 +612,7 @@ export async function fetchPlayersOverview(): Promise<PlayersOverview> {
 
   playersOverviewInFlight = (async () => {
     const raw = await fetchJson<any>('/players/overview', { unwrapData: false });
-    const mapChampionElo = (row: any): ChampionEloEntry => ({
-      rank: Number(row.rank), player_id: Number(row.player_id), player_name: String(row.player_name),
-      champion_id: Number(row.champion_id), champion_name: String(row.champion_name), class_name: String(row.class_name),
-      elo: Number(row.elo), phi: Number(row.phi), total_matches: Number(row.total_matches),
-      total_wins: Number(row.total_wins), win_rate: row.win_rate == null ? null : Number(row.win_rate), region: row.region ?? null,
-    });
-    const mapPerformance = (row: any): PerformanceLeaderboardEntry => ({
-      rank: Number(row.rank), playerId: Number(row.player_id), playerName: row.player_name,
-      championName: row.champion_name ?? null, championId: row.champion_id == null ? null : Number(row.champion_id),
-      className: row.class_name ?? null, value: Number(row.value), totalMatches: Number(row.total_matches ?? 0),
-      region: row.region ?? null, platform: row.platform ?? null,
-    });
-    const mapRanked = (row: any): RankedPlayer => ({
-      rank: Number(row.rank), player_id: String(row.player_id), name: row.name, tier: Number(row.tier), points: Number(row.points),
-      prev_rank: row.prev_rank, trend: row.trend, wins: row.wins, losses: row.losses, leaves: row.leaves,
-      winRate: row.winrate == null ? undefined : Number(row.winrate), leaveRate: row.leaverate == null ? undefined : Number(row.leaverate),
-    });
-    const mapAccountElo = (row: any): ClassLeaderboardEntry => ({
-      rank: Number(row.rank), playerId: Number(row.player_id), playerName: row.player_name,
-      championName: row.champion_name ?? null, championId: row.champion_id == null ? null : Number(row.champion_id),
-      elo: Number(row.elo), mu: Number(row.mu), phi: Number(row.phi),
-      winRate: row.win_rate == null ? null : Number(row.win_rate), totalMatches: Number(row.total_matches ?? 0),
-      totalWins: Number(row.total_wins ?? 0), region: row.region ?? null,
-    });
-    const mapCommunity = (row: any): CheaterPlayer => ({
-      id: String(row.id), name: row.name, platform: row.platform, region: row.region,
-      kbmTier: row.kbm_tier ?? null, cheater: row.cheater ?? false, susCount: Number(row.sus_count ?? 0),
-      weirdoCount: Number(row.weirdo_count ?? 0), hallOfFameCount: Number(row.hall_of_fame_count ?? 0),
-      avgDpm: row.avg_dpm == null ? null : Number(row.avg_dpm), avgHpm: row.avg_hpm == null ? null : Number(row.avg_hpm),
-      avgGpm: row.avg_egpm == null ? null : Number(row.avg_egpm), avgMpm: row.avg_mpm == null ? null : Number(row.avg_mpm),
-      totalMatches: Number(row.total_matches ?? 0), winRate: row.win_rate == null ? null : Number(row.win_rate),
-    });
-    const overview: PlayersOverview = {
-      championEloPlayers: (raw.champion_elo?.data ?? []).map(mapChampionElo),
-      performanceLeaderboards: Object.fromEntries(
-        Object.entries(raw.performance ?? {}).map(([metric, response]) => [metric, ((response as any)?.data ?? []).map(mapPerformance)]),
-      ),
-      rankedPlayers: (raw.ranked ?? []).map(mapRanked),
-      accountEloPlayers: (raw.account_elo?.data ?? []).map(mapAccountElo),
-      cheaterPlayers: (raw.cheaters ?? []).map(mapCommunity),
-      suspiciousPlayers: (raw.suspicious ?? []).map(mapCommunity),
-      weirdoPlayers: (raw.weirdos ?? []).map(mapCommunity),
-      hallOfFamePlayers: (raw.hall_of_fame ?? []).map(mapCommunity),
-    };
+    const overview = mapPlayersOverviewResponse(raw);
     playersOverviewCache = { value: overview, expiresAt: Date.now() + 60_000 };
     return overview;
   })();
