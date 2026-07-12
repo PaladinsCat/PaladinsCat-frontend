@@ -77,24 +77,16 @@ function sourceLabel(source: string | null) {
   return labels[source] || source;
 }
 
-// Parse version string v<major>.<minor>.<patch> to determine change type
-function getVersionChangeType(version: string): "major" | "minor" | "patch" {
-  const match = version.match(/v?(\d+)\.(\d+)\.(\d+)/);
-  if (!match) return "patch";
-  const major = parseInt(match[1], 10);
-  const minor = parseInt(match[2], 10);
-  const patch = parseInt(match[3], 10);
-  if (major > 0) return "major";
-  if (minor > 0) return "minor";
-  return "patch";
-}
-
 function getVersionColor(type: "major" | "minor" | "patch") {
   switch (type) {
     case "major": return "bg-rose-500";
     case "minor": return "bg-amber-500";
     case "patch": return "bg-pc-accent";
   }
+}
+
+function releaseLabel(type: "major" | "minor" | "patch") {
+  return type.charAt(0).toUpperCase() + type.slice(1);
 }
 
 function getVersionTextColor(type: "major" | "minor" | "patch") {
@@ -118,7 +110,7 @@ function VersionHistoryGraph({ entries }: { entries: ChangelogPage["data"] }) {
 
       <div className="space-y-0">
         {entries.map((entry, i) => {
-          const changeType = getVersionChangeType(entry.version);
+          const changeType = entry.releaseType;
           const color = getVersionColor(changeType);
           const textColor = getVersionTextColor(changeType);
           const hasChangelog = entry.changelog && entry.changelog.trim().length > 0;
@@ -143,6 +135,9 @@ function VersionHistoryGraph({ entries }: { entries: ChangelogPage["data"] }) {
                     {entry.gitCommitShort}
                   </span>
                 </div>
+                <span className={`text-[10px] font-semibold uppercase tracking-wide ${textColor}`}>
+                  {releaseLabel(changeType)} · {entry.changeCount} change{entry.changeCount !== 1 ? "s" : ""}
+                </span>
                 {entry.deployedAt && (
                   <time dateTime={entry.deployedAt} className="text-xs text-pc-text-muted block mt-0.5">
                     {formatRelativeTime(entry.deployedAt)}
@@ -161,15 +156,15 @@ function VersionHistoryGraph({ entries }: { entries: ChangelogPage["data"] }) {
 
       {/* Legend */}
       <div className="mt-4 pt-3 border-t border-pc-border">
-        <div className="flex items-center gap-3 text-xs text-pc-text-muted">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-pc-text-muted">
           <span className="flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-rose-500" /> Major
+            <span className="w-1.5 h-1.5 rounded-full bg-rose-500" /> Major · 10+
           </span>
           <span className="flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" /> Minor
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" /> Minor · 5–9
           </span>
           <span className="flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-pc-accent" /> Patch
+            <span className="w-1.5 h-1.5 rounded-full bg-pc-accent" /> Patch · 0–4
           </span>
         </div>
       </div>
@@ -186,6 +181,15 @@ function ChangelogEntry({ entry, index }: { entry: ChangelogPage["data"][number]
       {/* Header row */}
       <div className="flex items-center gap-2 flex-wrap mb-1">
         <span className="text-sm font-bold text-pc-text">{entry.version}</span>
+        <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
+          entry.releaseType === "major"
+            ? "border-rose-500/40 bg-rose-500/10 text-rose-400"
+            : entry.releaseType === "minor"
+              ? "border-amber-500/40 bg-amber-500/10 text-amber-400"
+              : "border-pc-accent/40 bg-pc-accent/10 text-pc-accent"
+        }`}>
+          {releaseLabel(entry.releaseType)} · {entry.changeCount} change{entry.changeCount !== 1 ? "s" : ""}
+        </span>
         <span className="font-mono text-xs text-pc-text-muted bg-pc-bg-secondary px-1.5 py-0.5 rounded">
           {entry.gitCommitShort}
         </span>

@@ -767,6 +767,8 @@ export interface ChangelogEntry {
   deployedAt: string | null;
   source: string | null;
   changelog: string;
+  changeCount: number;
+  releaseType: "major" | "minor" | "patch";
 }
 
 export interface ChangelogPage {
@@ -1037,6 +1039,15 @@ export async function fetchChangelog(params?: { page?: number; perPage?: number 
 }
 
 function mapChangelogEntry(raw: any): ChangelogEntry {
+  const changelog = String(raw?.changelog ?? '');
+  const lines = changelog.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+  const commitLines = lines.filter((line) => /^[0-9a-f]{7,40}\s+\S/i.test(line));
+  const fallbackCount = commitLines.length > 0
+    ? commitLines.length
+    : lines.filter((line) => !/^[-*]?\s*\*\*(added|changed|fixed|removed|refactored|improved|security)\*\*/i.test(line)).length;
+  const suppliedCount = raw?.changeCount == null ? Number.NaN : Number(raw.changeCount);
+  const changeCount = Number.isInteger(suppliedCount) && suppliedCount >= 0 ? suppliedCount : fallbackCount;
+  const releaseType = changeCount >= 10 ? 'major' : changeCount >= 5 ? 'minor' : 'patch';
   return {
     id: Number(raw?.id ?? 0),
     version: String(raw?.version ?? ''),
@@ -1045,7 +1056,9 @@ function mapChangelogEntry(raw: any): ChangelogEntry {
     gitBranch: raw?.gitBranch ?? null,
     deployedAt: raw?.deployedAt ?? null,
     source: raw?.source ?? null,
-    changelog: String(raw?.changelog ?? ''),
+    changelog,
+    changeCount,
+    releaseType,
   };
 }
 
