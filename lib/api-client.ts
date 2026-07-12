@@ -535,6 +535,7 @@ export interface ItemStat {
   pickRate?: number;
   slots: ItemDimensionStat[];
   levels: ItemDimensionStat[];
+  breakdown: ItemDimensionStat[];
 }
 
 export interface PlayersOverview {
@@ -1356,6 +1357,7 @@ export interface ItemDimensionStat {
   wins: number;
   losses: number;
   winRate: number;
+  pickRate?: number;
 }
 
 export interface ItemDetailStats {
@@ -1809,6 +1811,7 @@ export async function fetchItems(params?: { mode?: string; limit?: number; champ
       pick_rate?: number | string;
       slots?: Array<{ slot: number | string; total_uses: number | string; win_rate: number | string }>;
       levels?: Array<{ item_level: number | string; total_uses: number | string; win_rate: number | string }>;
+      breakdown?: Array<{ slot: number | string; item_level: number | string; total_uses: number | string; win_rate: number | string; pick_rate?: number | string }>;
     }>>(`/stats/items${query.toString() ? `?${query.toString()}` : ''}`);
     const num = (v: number | string | undefined) => v != null ? (typeof v === 'string' ? Number(v) : v) : 0;
     return raw.map((r) => ({
@@ -1822,6 +1825,10 @@ export async function fetchItems(params?: { mode?: string; limit?: number; champ
       })),
       levels: (r.levels ?? []).map((level) => ({
         level: num(level.item_level), totalUses: num(level.total_uses), wins: 0, losses: 0, winRate: num(level.win_rate),
+      })),
+      breakdown: (r.breakdown ?? []).map((row) => ({
+        slot: num(row.slot), level: num(row.item_level), totalUses: num(row.total_uses), wins: 0, losses: 0, winRate: num(row.win_rate),
+        pickRate: row.pick_rate == null ? undefined : num(row.pick_rate),
       })),
     }));
   } catch {
@@ -2303,6 +2310,7 @@ export async function fetchStatsOverview(): Promise<StatsOverview> {
       pickRate: row.pick_rate == null ? undefined : number(row.pick_rate),
       slots: (row.slots ?? []).map((slot: any) => ({ slot: number(slot.slot), totalUses: number(slot.total_uses), wins: 0, losses: 0, winRate: number(slot.win_rate) })),
       levels: (row.levels ?? []).map((level: any) => ({ level: number(level.item_level), totalUses: number(level.total_uses), wins: 0, losses: 0, winRate: number(level.win_rate) })),
+      breakdown: (row.breakdown ?? []).map((entry: any) => ({ slot: number(entry.slot), level: number(entry.item_level), totalUses: number(entry.total_uses), wins: 0, losses: 0, winRate: number(entry.win_rate), pickRate: entry.pick_rate == null ? undefined : number(entry.pick_rate) })),
     }));
     const mapMaps = (rows: any[]): MapStat[] => rows.map((row) => ({
       name: String(row.map ?? ''), totalMatches: number(row.total_matches),

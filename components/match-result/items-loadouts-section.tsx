@@ -216,7 +216,6 @@ function PlayerBuildRow({
     ?? reference?.[kind].find((entry) => normalizeName(entry.name) === normalizeName(name))
   );
   const playerName = player.player_name || "PRIVATE";
-  const maxItemPickRate = Math.max(1, ...(itemMetrics ?? []).map((metric) => metric.pickRate ?? 0));
   const findItemMetric = (itemId: number, itemName: string | null | undefined) => (
     itemMetrics?.find((metric) => metric.itemId === itemId)
     ?? itemMetrics?.find((metric) => normalizeName(metric.itemName) === normalizeName(itemName))
@@ -244,6 +243,19 @@ function PlayerBuildRow({
       plays: levelMetric.plays,
     };
   };
+  const itemMetricAtRecordedSlotAndLevel = (itemId: number, itemName: string | null | undefined, slot: number, level: number): DetailMetric | undefined => {
+    const itemMetric = findItemMetric(itemId, itemName);
+    const breakdown = itemMetric?.breakdown.find((metric) => metric.slot === slot && metric.level === level);
+    if (!itemMetric || !breakdown) return undefined;
+    return {
+      winRate: breakdown.winRate,
+      pickRate: breakdown.pickRate ?? (itemMetric.totalUsage > 0 ? (itemMetric.pickRate ?? 0) * breakdown.totalUses / itemMetric.totalUsage : 0),
+      plays: breakdown.totalUses,
+    };
+  };
+  const maxItemPickRate = Math.max(1, ...items.map((item) => (
+    itemMetricAtRecordedSlotAndLevel(item.item_id, item.item_name, item.slot, item.item_level ?? 0)?.pickRate ?? 0
+  )));
 
   return <div className={`border-b border-pc-border/60 last:border-b-0 ${wins ? "bg-emerald-400/[0.025]" : ""}`}>
     <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-3 px-3 py-3 lg:min-w-[780px] lg:grid-cols-[240px_1fr_1fr_36px] lg:items-center lg:gap-4 lg:px-4">
@@ -304,8 +316,8 @@ function PlayerBuildRow({
             const level = Math.max(1, (item.item_level ?? 0) + 1);
             const name = item.item_name ?? entry?.name ?? `Item #${item.item_id}`;
             const description = entry?.description ?? item.description;
-            const itemMetric = findItemMetric(item.item_id, item.item_name);
-            return <DetailEntry key={`item-detail-${item.slot}-${item.item_id}`} name={name} label={`Item · level ${level}`} description={formatDescription(description, level) ?? (reference ? "Description unavailable." : "Loading description…")} sources={[entry?.iconUrl, item.icon_url, item.fallback_icon_url]} level={level} metric={itemMetric ? { winRate: itemMetric.winRate, pickRate: itemMetric.pickRate ?? 0, plays: itemMetric.totalUsage } : undefined} showMetrics metricsLoaded={itemMetrics !== null} maxPickRate={maxItemPickRate} playsLabel="uses" loadingLabel="Loading scoped item metrics…" />;
+            const itemMetric = itemMetricAtRecordedSlotAndLevel(item.item_id, item.item_name, item.slot, item.item_level ?? 0);
+            return <DetailEntry key={`item-detail-${item.slot}-${item.item_id}`} name={name} label={`Item · slot ${item.slot} · level ${level}`} description={formatDescription(description, level) ?? (reference ? "Description unavailable." : "Loading description…")} sources={[entry?.iconUrl, item.icon_url, item.fallback_icon_url]} level={level} metric={itemMetric} showMetrics metricsLoaded={itemMetrics !== null} maxPickRate={maxItemPickRate} playsLabel="uses" loadingLabel="Loading scoped item metrics…" />;
           })}
           {items.length === 0 && <p className="text-xs text-pc-text-muted">No purchased items were recorded.</p>}
         </section>
