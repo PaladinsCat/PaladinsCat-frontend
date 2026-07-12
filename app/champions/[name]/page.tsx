@@ -31,6 +31,7 @@ import {
   type ChampionPerformanceDistribution,
 } from "@/lib/api-client";
 import { getRankIconPath, getTierColor, resolveEffectiveTier } from "@/lib/tier-utils";
+import { withStoredLobbyTier } from "@/lib/lobby-tier";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api";
 const RANKED_QUEUE_ID = 486;
@@ -179,7 +180,7 @@ export default function ChampionDetailPage() {
 
         return Promise.all([
           // Champion aggregate stats from /champions/:id
-          fetch(`${API_BASE}/champions/${match.id}`)
+          fetch(`${API_BASE}${withStoredLobbyTier(`/champions/${match.id}`)}`)
             .then((r) => r.json())
             .then((data: { stats?: Record<string, unknown> | null }) => {
               const s = data.stats;

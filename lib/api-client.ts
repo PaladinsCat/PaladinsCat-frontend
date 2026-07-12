@@ -27,6 +27,7 @@ import type {
   BuildResponse,
 } from "./types.gen";
 import { championSlug } from "./utils";
+import { getStoredLobbyTierFilter, withStoredLobbyTier } from "./lobby-tier";
 
 export type {
   Champion,
@@ -840,7 +841,8 @@ async function fetchJson<T>(path: string, options?: RequestInit & { retries?: nu
     // Source: Fault #1 — "No timeout on fetch()"
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-    const res = await fetch(`${API_BASE}${path}`, { ...fetchOptions, signal: controller.signal });
+    const scopedPath = withStoredLobbyTier(path);
+    const res = await fetch(`${API_BASE}${scopedPath}`, { ...fetchOptions, signal: controller.signal });
     clearTimeout(timeoutId);
     if (!res.ok) {
       if (res.status >= 500 && attempt < retries) {
@@ -1091,8 +1093,8 @@ type ChampionOverviewRaw = {
   stats?: any[];
 };
 
-let championsOverviewCache: { value: Champion[]; expiresAt: number } | null = null;
-let championsOverviewInFlight: Promise<Champion[]> | null = null;
+let championsOverviewCache: { key: string; value: Champion[]; expiresAt: number } | null = null;
+let championsOverviewInFlight: { key: string; promise: Promise<Champion[]> } | null = null;
 
 function mapChampionsOverview(raw: ChampionOverviewRaw): Champion[] {
   const catalog = raw.champions ?? [];
@@ -1132,23 +1134,25 @@ export async function fetchChampions(_params?: {
   region?: string;
   patch?: string;
 }): Promise<Champion[]> {
-  if (championsOverviewCache && championsOverviewCache.expiresAt > Date.now()) return championsOverviewCache.value;
-  if (championsOverviewInFlight) return championsOverviewInFlight;
-  championsOverviewInFlight = fetchJson<ChampionOverviewRaw>('/champions/overview', { unwrapData: false })
+  const cacheKey = getStoredLobbyTierFilter();
+  if (championsOverviewCache?.key === cacheKey && championsOverviewCache.expiresAt > Date.now()) return championsOverviewCache.value;
+  if (championsOverviewInFlight?.key === cacheKey) return championsOverviewInFlight.promise;
+  const promise = fetchJson<ChampionOverviewRaw>('/champions/overview', { unwrapData: false })
     .then((raw) => {
       const value = mapChampionsOverview(raw);
-      championsOverviewCache = { value, expiresAt: Date.now() + 300_000 };
+      championsOverviewCache = { key: cacheKey, value, expiresAt: Date.now() + 300_000 };
       return value;
     });
+  championsOverviewInFlight = { key: cacheKey, promise };
   try {
-    return await championsOverviewInFlight;
+    return await promise;
   } finally {
-    championsOverviewInFlight = null;
+    if (championsOverviewInFlight?.promise === promise) championsOverviewInFlight = null;
   }
 }
 
 export async function fetchTopWinrate(): Promise<TopWinrateEntry[]> {
-  const res = await fetch(`${API_BASE}/champions/top-winrate`);
+  const res = await fetch(`${API_BASE}${withStoredLobbyTier('/champions/top-winrate')}`);
   if (!res.ok) return [];
   // Backend returns a bare array, not wrapped in { value: [...] }
   return (await res.json()) as TopWinrateEntry[];
@@ -2244,13 +2248,14 @@ export interface StatsOverview {
   activeTiers: TierStat[];
 }
 
-let statsOverviewCache: { value: StatsOverview; expiresAt: number } | null = null;
-let statsOverviewInFlight: Promise<StatsOverview> | null = null;
+let statsOverviewCache: { key: string; value: StatsOverview; expiresAt: number } | null = null;
+let statsOverviewInFlight: { key: string; promise: Promise<StatsOverview> } | null = null;
 
 export async function fetchStatsOverview(): Promise<StatsOverview> {
-  if (statsOverviewCache && statsOverviewCache.expiresAt > Date.now()) return statsOverviewCache.value;
-  if (statsOverviewInFlight) return statsOverviewInFlight;
-  statsOverviewInFlight = (async () => {
+  const cacheKey = getStoredLobbyTierFilter();
+  if (statsOverviewCache?.key === cacheKey && statsOverviewCache.expiresAt > Date.now()) return statsOverviewCache.value;
+  if (statsOverviewInFlight?.key === cacheKey) return statsOverviewInFlight.promise;
+  const promise = (async () => {
     const raw = await fetchJson<any>('/stats/overview', { unwrapData: false });
     const number = (value: unknown) => Number(value ?? 0);
     const mapItems = (rows: any[]): ItemStat[] => rows.map((row) => ({
@@ -2276,13 +2281,14 @@ export async function fetchStatsOverview(): Promise<StatsOverview> {
       profileTiers: mapTiers(raw.profile_tiers ?? []),
       activeTiers: mapTiers(raw.active_tiers ?? []),
     };
-    statsOverviewCache = { value: overview, expiresAt: Date.now() + 300_000 };
+    statsOverviewCache = { key: cacheKey, value: overview, expiresAt: Date.now() + 300_000 };
     return overview;
   })();
+  statsOverviewInFlight = { key: cacheKey, promise };
   try {
-    return await statsOverviewInFlight;
+    return await promise;
   } finally {
-    statsOverviewInFlight = null;
+    if (statsOverviewInFlight?.promise === promise) statsOverviewInFlight = null;
   }
 }
 
