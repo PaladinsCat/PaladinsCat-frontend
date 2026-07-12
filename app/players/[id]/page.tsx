@@ -331,11 +331,14 @@ export default function PlayerProfilePage() {
         throw new Error(data?.error?.message || 'Failed to refresh profile');
       }
 
+      const historyRefreshError = data?.historyRefresh?.error;
       showRefreshCooldown(
         data?.profileRefresh?.expires_at,
         data?.profileRefresh?.remaining_seconds,
-        'success',
-        'Profile refreshed. Next refresh available in',
+        historyRefreshError ? 'warning' : 'success',
+        historyRefreshError
+          ? 'Profile refreshed, but match history could not be updated. Next refresh available in'
+          : 'Profile and match history refreshed. Next refresh available in',
       );
       setFetchKey(k => k + 1);
       setHistoryFetchKey((key) => key + 1);
