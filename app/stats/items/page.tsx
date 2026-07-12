@@ -59,7 +59,7 @@ function DimensionBars({ label, rows, total }: { label: "S" | "L"; rows: ItemSta
             <div
               key={dimension}
               className="flex min-w-0 flex-1 flex-col items-center"
-              title={`${label === "S" ? "Slot" : "Level"} ${displayDimension}: ${row.winRate.toFixed(1)}% win rate, ${rate.toFixed(1)}% purchase rate, ${row.totalUses.toLocaleString()} purchases`}
+              title={`${label === "S" ? "Slot" : "Level"} ${displayDimension}: ${row.winRate.toFixed(1)}% win rate, ${rate.toFixed(1)}% purchase share, ${row.totalUses.toLocaleString()} purchases`}
             >
               <div className="text-[9px] text-pc-text-muted">{label}{displayDimension}</div>
               <div className="h-1.5 w-full overflow-hidden rounded-full bg-pc-bg-elevated">
