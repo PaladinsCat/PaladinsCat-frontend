@@ -53,6 +53,10 @@ function cleanNumber(value: number) {
 function formatDescription(description: string | null | undefined, level: number, multiplyPlainValues = false) {
   if (!description) return null;
   return description
+    // Hi-Rez reference descriptions carry legacy category/ability markers
+    // such as "[Armor]" and "[Dimensional Link]". They are metadata, can be
+    // stale, and should not be presented as part of the effect sentence.
+    .replace(/^\s*(?:\[[^\]]+\]\s*)+/, "")
     .replace(/\{(?:scale=)?(-?\d*\.?\d+)\|(-?\d*\.?\d+)\}/gi, (_match, base: string, step: string) => (
       cleanNumber(Number(base) + Number(step) * Math.max(0, level - 1))
     ))
