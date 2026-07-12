@@ -17,6 +17,8 @@ import { getRankIconPath } from "@/lib/tier-utils";
 import { getStatQuality } from "@/lib/stat-quality";
 import { PerformanceOverviewCard } from "@/components/PerformanceOverviewCard";
 import { useLobbyTier } from "@/lib/lobby-tier-context";
+import { ContentFade } from "@/components/async-state";
+import { ChartCardSkeleton, DataCardSkeleton } from "@/components/route-skeleton";
 
 const ROLES = ["Frontline", "Damage", "Flank", "Support"] as const;
 
@@ -93,6 +95,9 @@ export default function StatsPage() {
   const [activeTiers, setActiveTiers] = useState<TierStat[]>([]);
   const [skinStats, setSkinStats] = useState<SkinStat[]>([]);
   const [compositions, setCompositions] = useState<MatchCompositionStat[]>([]);
+  const [overviewLoading, setOverviewLoading] = useState(true);
+  const [skinsLoading, setSkinsLoading] = useState(true);
+  const [compositionsLoading, setCompositionsLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
@@ -120,7 +125,8 @@ export default function StatsPage() {
         setTiers(overview.profileTiers);
         setActiveTiers(overview.activeTiers);
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setOverviewLoading(false); });
     return () => {
       cancelled = true;
     };
@@ -129,6 +135,7 @@ export default function StatsPage() {
   useEffect(() => {
     let cancelled = false;
     if (!lobbyTierReady) return () => {};
+    setSkinsLoading(true);
     fetchSkinStats({
       limit: 5,
       tierMin: lobbyTier.tierMin,
@@ -136,13 +143,15 @@ export default function StatsPage() {
     }).then((skins) => {
       if (cancelled) return;
       setSkinStats(skins);
-    }).catch(() => {});
+    }).catch(() => {})
+      .finally(() => { if (!cancelled) setSkinsLoading(false); });
     return () => { cancelled = true; };
   }, [lobbyTierReady, lobbyTier.tierMin, lobbyTier.tierMax]);
 
   useEffect(() => {
     let cancelled = false;
     if (!lobbyTierReady) return () => {};
+    setCompositionsLoading(true);
     fetchMatchCompositions({
       limit: 10,
       tierMin: lobbyTier.tierMin,
@@ -150,7 +159,8 @@ export default function StatsPage() {
     }).then((comps) => {
       if (cancelled) return;
       setCompositions(comps);
-    }).catch(() => {});
+    }).catch(() => {})
+      .finally(() => { if (!cancelled) setCompositionsLoading(false); });
     return () => { cancelled = true; };
   }, [lobbyTierReady, lobbyTier.tierMin, lobbyTier.tierMax]);
 
@@ -225,7 +235,9 @@ export default function StatsPage() {
               Detail →
             </Link>
           </div>
-        {(() => {
+        {overviewLoading ? (
+          <DataCardSkeleton rows={5} />
+        ) : <ContentFade>{(() => {
           const perfRows = [
             { key: "dpm", label: "DPM", color: "#f87171" },
             { key: "hpm", label: "HPM", color: "#34d399" },
@@ -255,7 +267,7 @@ export default function StatsPage() {
           return (
             <PerformanceOverviewCard metrics={perfRows} />
           );
-        })()}
+        })()}</ContentFade>}
         </div>
 
         {/* Tier Distribution + Active Ranked (2/3, split 50/50) */}
@@ -264,7 +276,7 @@ export default function StatsPage() {
             <h2 className="text-sm font-bold text-pc-text">Rank Distribution</h2>
             <Link href="/stats/tiers" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">Detail →</Link>
           </div>
-          <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
+          {overviewLoading ? <ChartCardSkeleton /> : <ContentFade className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
             <div className="grid grid-cols-2 gap-0">
               {/* Left: Profile Tier Distribution */}
               <div>
@@ -331,7 +343,7 @@ export default function StatsPage() {
                 </div>
               </div>
             </div>
-          </div>
+          </ContentFade>}
         </div>
         </section>
 
@@ -345,7 +357,7 @@ export default function StatsPage() {
             <Link href="/stats/banrate" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">Ban Rate Detail →</Link>
           </div>
         </div>
-        <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
+        {overviewLoading ? <DataCardSkeleton rows={10} columns={2} /> : <ContentFade className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
           <div className="grid grid-cols-2 gap-4">
             {/* Left: Top Win Rate */}
             <div>
@@ -414,7 +426,7 @@ export default function StatsPage() {
               </div>
             </div>
           </div>
-        </div>
+        </ContentFade>}
       </section>
 
       {/* ── Item Stats + Map Stats ── */}
@@ -443,7 +455,7 @@ export default function StatsPage() {
               </Link>
             </div>
           </div>
-          <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 space-y-4">
+          {overviewLoading ? <DataCardSkeleton rows={4} columns={2} /> : <ContentFade className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 space-y-4">
             {sortedItems.length === 0 && (
               <div className="text-sm text-pc-text-muted">Item stats unavailable.</div>
             )}
@@ -489,7 +501,7 @@ export default function StatsPage() {
                 </div>
               );
             })}
-          </div>
+          </ContentFade>}
         </section>
 
         {/* Map Stats (2/5) */}
@@ -498,7 +510,7 @@ export default function StatsPage() {
             <h2 className="text-sm font-bold text-pc-text">Map Stats</h2>
             <Link href="/stats/maps" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">Detail →</Link>
           </div>
-          <div className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
+          {overviewLoading ? <DataCardSkeleton rows={8} /> : <ContentFade className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
             {sortedMaps.length === 0 ? (
               <div className="p-4 text-sm text-pc-text-muted">Map stats unavailable.</div>
             ) : (
@@ -521,7 +533,7 @@ export default function StatsPage() {
               </tbody>
             </table>
             )}
-          </div>
+          </ContentFade>}
         </section>
 
       </div>
@@ -535,7 +547,7 @@ export default function StatsPage() {
             </div>
             <Link href="/stats/skins" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">Detail →</Link>
           </div>
-          <div className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated">
+          {skinsLoading ? <DataCardSkeleton rows={5} /> : <ContentFade className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated">
             {skinStats.length === 0 ? <div className="p-4 text-sm text-pc-text-muted">Skin stats unavailable.</div> : (
               <div className="divide-y divide-pc-border/50">
                 {skinStats.map((skin) => (
@@ -547,7 +559,7 @@ export default function StatsPage() {
                 ))}
               </div>
             )}
-          </div>
+          </ContentFade>}
         </div>
 
         <div>
@@ -558,7 +570,7 @@ export default function StatsPage() {
             </div>
             <Link href="/stats/compositions" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">Detail →</Link>
           </div>
-          <div className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated">
+          {compositionsLoading ? <DataCardSkeleton rows={5} /> : <ContentFade className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated">
             {compositions.length === 0 ? <div className="p-4 text-sm text-pc-text-muted">Composition stats unavailable.</div> : (
               <div className="divide-y divide-pc-border/50">
                 {compositions.slice(0, 5).map((composition) => (
@@ -570,7 +582,7 @@ export default function StatsPage() {
                 ))}
               </div>
             )}
-          </div>
+          </ContentFade>}
         </div>
       </section>
     </div>

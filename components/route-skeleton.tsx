@@ -32,6 +32,64 @@ function CardSkeleton({ lines = 4, className }: { lines?: number; className?: st
   );
 }
 
+export function DataCardSkeleton({
+  rows = 5,
+  columns = 1,
+  className,
+}: {
+  rows?: number;
+  columns?: 1 | 2;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn("pc-card", className)}
+      role="status"
+      aria-live="polite"
+      aria-label="Loading statistics"
+    >
+      <div className={cn("grid gap-4", columns === 2 && "grid-cols-2")}>
+        {Array.from({ length: columns }, (_, column) => (
+          <div key={column} className="space-y-2.5">
+            <SkeletonLine className="mb-3 w-1/3" />
+            {Array.from({ length: rows }, (__, row) => (
+              <div key={row} className="flex items-center gap-2.5">
+                <Skeleton className="h-7 w-7 shrink-0 rounded-lg" />
+                <SkeletonLine className={row % 2 === 0 ? "w-1/2" : "w-2/3"} />
+                <SkeletonLine className="ml-auto w-12" />
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function ChartCardSkeleton({ className }: { className?: string }) {
+  const heights = [44, 72, 108, 86, 128, 98];
+  return (
+    <div className={cn("pc-card", className)} role="status" aria-live="polite" aria-label="Loading chart statistics">
+      <div className="grid grid-cols-2 gap-4">
+        {[0, 1].map((group) => (
+          <div key={group} className={cn("space-y-3", group === 1 && "border-l border-pc-border pl-4")}>
+            <SkeletonLine className="w-2/5" />
+            <div className="flex h-48 items-end justify-center gap-2 pb-2">
+              {heights.map((height, index) => (
+                <div key={index} className="flex h-full w-7 flex-col items-center justify-end gap-2">
+                  <div className="pc-skeleton w-5 rounded-t-sm" style={{ height }} aria-hidden="true" />
+                  <Skeleton className="h-5 w-5 rounded-full" />
+                  <SkeletonLine className="h-2 w-7" />
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function DataTableSkeleton({ rows = 7, className }: { rows?: number; className?: string }) {
   return (
     <div className={cn("overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated", className)} role="status" aria-label="Loading table data">
