@@ -13,6 +13,7 @@ import { formatLocalDate, formatLocalDateTime } from "@/lib/time-format";
 import { ErrorState, LoadingOverlay, LoadingPanel } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import SmartImage from "@/components/SmartImage";
+import { formatKda } from "@/lib/kda";
 
 interface PlayerData {
   id: string;
@@ -119,11 +120,6 @@ function formatLargeNumber(n: string | number | null | undefined): string {
   const num = typeof n === "string" ? parseInt(n, 10) : n;
   if (!Number.isFinite(num)) return "—";
   return num.toLocaleString();
-}
-
-function formatKDA(kills: number, deaths: number, assists: number): string {
-  if (deaths === 0) return (kills + assists).toFixed(1);
-  return ((kills + assists) / deaths).toFixed(2);
 }
 
 function formatMatchDuration(seconds: number): string {
@@ -768,7 +764,7 @@ export default function PlayerProfilePage() {
                     </thead>
                     <tbody>
                       {matches.filter((m) => m.championName).map((m) => {
-                        const kda = formatKDA(m.kills, m.deaths, m.assists);
+                        const kda = formatKda(m.kills, m.deaths, m.assists);
                         return (
                           <tr key={m.matchId} className="border-b border-pc-border/30 hover:bg-pc-bg-secondary/50 transition-colors">
                             <td className="px-3 py-1.5">
