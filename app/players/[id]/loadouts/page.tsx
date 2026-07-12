@@ -22,7 +22,11 @@ export default function PlayerLoadoutsPage() {
     if (!playerId) return;
     setLoading(true);
     setError(null);
-    try { setData(await fetchPlayerLoadouts(playerId, { refresh: false })); }
+    try {
+      const response = await fetchPlayerLoadouts(playerId);
+      setData(response);
+      setError(response.refreshError);
+    }
     catch (cause) { setError(cause instanceof Error ? cause.message : "Could not load player loadouts."); }
     finally { setLoading(false); }
   }, [playerId]);

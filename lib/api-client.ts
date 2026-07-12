@@ -1524,7 +1524,7 @@ export async function refreshPlayerLoadouts(playerId: string | number): Promise<
     loadouts: Array.isArray(raw.loadouts) ? raw.loadouts.map(mapPlayerLoadout) : [],
     freshness: mapPlayerLoadoutFreshness(raw.freshness),
     refreshed: raw.refreshed === true,
-    refreshError: null,
+    refreshError: raw.refresh_error ?? null,
   };
 }
 
