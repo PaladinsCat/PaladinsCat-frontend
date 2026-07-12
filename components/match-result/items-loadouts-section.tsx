@@ -3,17 +3,20 @@
 import { useEffect, useId, useState } from "react";
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
-import type { MatchFactPlayer, MatchPlayerDetail } from "@/lib/api-client";
+import { fetchItems, type ItemStat, type MatchFactPlayer, type MatchPlayerDetail } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { loadBuildReferenceData, type BuildReferenceData } from "@/lib/build-reference";
 import { championSlug } from "@/lib/utils";
 import { canonicalLocalImageUrl } from "@/lib/image-assets";
+import { useLobbyTier } from "@/lib/lobby-tier-context";
+import { getStatQuality } from "@/lib/stat-quality";
 
 type Props = { team1Players: MatchPlayerDetail[]; team2Players: MatchPlayerDetail[]; team1Wins: boolean; team2Wins: boolean; factMap: Map<string, MatchFactPlayer> };
 
 // Reuse the exact resolver and source data used by champion/build pages.
 // Cache per champion so the 10 match rows do not issue duplicate reference requests.
 const referenceByChampion = new Map<number, Promise<BuildReferenceData>>();
+const itemMetricsByChampionScope = new Map<string, Promise<ItemStat[]>>();
 
 function normalizeName(value: string | null | undefined) {
   return String(value ?? "")
@@ -30,6 +33,16 @@ function getBuildReference(championId: number, championName: string) {
   if (!promise) {
     promise = loadBuildReferenceData(championId, championSlug(championName)).catch(() => ({ items: [], cards: [], talents: [] }));
     referenceByChampion.set(championId, promise);
+  }
+  return promise;
+}
+
+function getScopedItemMetrics(championId: number, scope: string, tierMin?: number, tierMax?: number) {
+  const key = `${championId}:${scope}`;
+  let promise = itemMetricsByChampionScope.get(key);
+  if (!promise) {
+    promise = fetchItems({ mode: "ranked", championId, limit: 200, tierMin, tierMax }).catch(() => []);
+    itemMetricsByChampionScope.set(key, promise);
   }
   return promise;
 }
@@ -72,6 +85,10 @@ function DetailEntry({
   level,
   tone,
   label,
+  itemMetric,
+  showItemMetrics = false,
+  itemMetricsLoaded = false,
+  maxItemPickRate = 1,
 }: {
   name: string;
   description: string;
@@ -79,7 +96,12 @@ function DetailEntry({
   level?: number | null;
   tone?: string;
   label: string;
+  itemMetric?: ItemStat;
+  showItemMetrics?: boolean;
+  itemMetricsLoaded?: boolean;
+  maxItemPickRate?: number;
 }) {
+  const quality = itemMetric ? getStatQuality(itemMetric.winRate, itemMetric.pickRate, maxItemPickRate) : null;
   return <article className="flex min-w-0 items-start gap-3 rounded-lg border border-pc-border/70 bg-pc-bg-secondary/45 p-3">
     <Asset sources={sources} alt={name} level={level} tone={tone} />
     <div className="min-w-0 flex-1">
@@ -88,13 +110,39 @@ function DetailEntry({
         <span className="text-[9px] font-semibold uppercase tracking-wider text-pc-text-muted">{label}</span>
       </div>
       <p className="mt-1 text-xs leading-5 text-pc-text-secondary">{description}</p>
+      {showItemMetrics && <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[10px] tabular-nums">
+        {itemMetric ? <>
+          <span className="rounded-md border px-1.5 py-0.5 font-semibold" style={{ color: quality?.color, borderColor: quality?.borderColor, background: quality?.background }}>WR {itemMetric.winRate.toFixed(1)}%</span>
+          <span className="rounded-md border border-pc-border bg-pc-bg px-1.5 py-0.5 text-pc-text-secondary">PR {(itemMetric.pickRate ?? 0).toFixed(1)}%</span>
+          <span className="text-pc-text-muted">{itemMetric.totalUsage.toLocaleString()} uses</span>
+        </> : <span className="text-pc-text-muted">{itemMetricsLoaded ? "No ranked sample in this lobby scope." : "Loading scoped item metrics…"}</span>}
+      </div>}
     </div>
   </article>;
 }
 
-function PlayerBuildRow({ player, fact, wins }: { player: MatchPlayerDetail; fact?: MatchFactPlayer; wins: boolean }) {
+function PlayerBuildRow({
+  player,
+  fact,
+  wins,
+  lobbyScope,
+  lobbyScopeLabel,
+  lobbyTierMin,
+  lobbyTierMax,
+  lobbyTierReady,
+}: {
+  player: MatchPlayerDetail;
+  fact?: MatchFactPlayer;
+  wins: boolean;
+  lobbyScope: string;
+  lobbyScopeLabel: string;
+  lobbyTierMin?: number;
+  lobbyTierMax?: number;
+  lobbyTierReady: boolean;
+}) {
   const champion = player.champion_name || `Champion #${player.champion_id}`;
   const [reference, setReference] = useState<BuildReferenceData | null>(null);
+  const [itemMetrics, setItemMetrics] = useState<ItemStat[] | null>(null);
   const [expanded, setExpanded] = useState(false);
   const disclosureId = useId();
   useEffect(() => {
@@ -102,6 +150,14 @@ function PlayerBuildRow({ player, fact, wins }: { player: MatchPlayerDetail; fac
     getBuildReference(player.champion_id, player.champion_name || "").then((data) => { if (!cancelled) setReference(data); });
     return () => { cancelled = true; };
   }, [player.champion_id, player.champion_name]);
+  useEffect(() => {
+    if (!expanded || !lobbyTierReady) return;
+    let cancelled = false;
+    setItemMetrics(null);
+    getScopedItemMetrics(player.champion_id, lobbyScope, lobbyTierMin, lobbyTierMax)
+      .then((rows) => { if (!cancelled) setItemMetrics(rows); });
+    return () => { cancelled = true; };
+  }, [expanded, lobbyScope, lobbyTierMax, lobbyTierMin, lobbyTierReady, player.champion_id]);
   const findReference = (kind: "items" | "cards" | "talents", id: number, name: string | null | undefined) => (
     reference?.[kind].find((entry) => entry.id === id)
     ?? reference?.[kind].find((entry) => normalizeName(entry.name) === normalizeName(name))
@@ -110,6 +166,11 @@ function PlayerBuildRow({ player, fact, wins }: { player: MatchPlayerDetail; fac
   const cards = fact?.cards ?? [];
   const items = fact?.items ?? [];
   const playerName = player.player_name || "PRIVATE";
+  const maxItemPickRate = Math.max(1, ...(itemMetrics ?? []).map((metric) => metric.pickRate ?? 0));
+  const findItemMetric = (itemId: number, itemName: string | null | undefined) => (
+    itemMetrics?.find((metric) => metric.itemId === itemId)
+    ?? itemMetrics?.find((metric) => normalizeName(metric.itemName) === normalizeName(itemName))
+  );
 
   return <div className={`border-b border-pc-border/60 last:border-b-0 ${wins ? "bg-emerald-400/[0.025]" : ""}`}>
     <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-3 px-3 py-3 lg:min-w-[780px] lg:grid-cols-[240px_1fr_1fr_36px] lg:items-center lg:gap-4 lg:px-4">
@@ -157,13 +218,16 @@ function PlayerBuildRow({ player, fact, wins }: { player: MatchPlayerDetail; fac
         </section>
 
         <section className="space-y-2">
-          <h3 className="text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted">Purchased items</h3>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h3 className="text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted">Purchased items</h3>
+            <span className="text-[9px] font-semibold text-pc-accent">{lobbyTierReady ? lobbyScopeLabel : "Loading lobby scope…"}</span>
+          </div>
           {items.map((item) => {
             const entry = findReference("items", item.item_id, item.item_name);
             const level = Math.max(1, (item.item_level ?? 0) + 1);
             const name = item.item_name ?? entry?.name ?? `Item #${item.item_id}`;
             const description = entry?.description ?? item.description;
-            return <DetailEntry key={`item-detail-${item.slot}-${item.item_id}`} name={name} label={`Item · level ${level}`} description={formatDescription(description, level) ?? (reference ? "Description unavailable." : "Loading description…")} sources={[entry?.iconUrl, item.icon_url, item.fallback_icon_url]} level={level} />;
+            return <DetailEntry key={`item-detail-${item.slot}-${item.item_id}`} name={name} label={`Item · level ${level}`} description={formatDescription(description, level) ?? (reference ? "Description unavailable." : "Loading description…")} sources={[entry?.iconUrl, item.icon_url, item.fallback_icon_url]} level={level} itemMetric={findItemMetric(item.item_id, item.item_name)} showItemMetrics itemMetricsLoaded={itemMetrics !== null} maxItemPickRate={maxItemPickRate} />;
           })}
           {items.length === 0 && <p className="text-xs text-pc-text-muted">No purchased items were recorded.</p>}
         </section>
@@ -173,6 +237,7 @@ function PlayerBuildRow({ player, fact, wins }: { player: MatchPlayerDetail; fac
 }
 
 export default function ItemsLoadoutsSection({ team1Players, team2Players, team1Wins, team2Wins, factMap }: Props) {
-  const rows = (players: MatchPlayerDetail[], wins: boolean) => players.map(p => <PlayerBuildRow key={p.player_id} player={p} fact={factMap.get(String(p.player_id))} wins={wins} />);
+  const { filter: lobbyScope, definition: lobbyTier, ready: lobbyTierReady } = useLobbyTier();
+  const rows = (players: MatchPlayerDetail[], wins: boolean) => players.map(p => <PlayerBuildRow key={p.player_id} player={p} fact={factMap.get(String(p.player_id))} wins={wins} lobbyScope={lobbyScope} lobbyScopeLabel={lobbyTier.label} lobbyTierMin={lobbyTier.tierMin} lobbyTierMax={lobbyTier.tierMax} lobbyTierReady={lobbyTierReady} />);
   return <section className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated"><div className="flex flex-wrap items-end justify-between gap-3 border-b border-pc-border px-4 py-3"><div><h2 className="text-lg font-bold uppercase tracking-wide text-pc-text">Items &amp; Loadouts</h2><p className="mt-0.5 text-xs text-pc-text-muted">Talent and cards · purchased items · expand a row for descriptions</p></div></div><div className="overflow-x-hidden lg:overflow-x-auto"><div className="hidden min-w-[780px] grid-cols-[240px_1fr_1fr_36px] gap-4 border-b border-pc-border bg-pc-bg-secondary/60 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted lg:grid"><span>Champion / player</span><span>Loadout</span><span>Items</span><span className="sr-only">Details</span></div>{rows(team1Players, team1Wins)}<div className="flex items-center gap-3 bg-pc-bg-secondary/60 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-pc-text-muted"><span className={`h-1.5 w-1.5 rounded-full ${team2Wins ? "bg-emerald-400" : "bg-red-400"}`} />Opposing team</div>{rows(team2Players, team2Wins)}</div></section>;
 }
