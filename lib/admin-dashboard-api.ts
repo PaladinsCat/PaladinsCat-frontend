@@ -1,0 +1,88 @@
+import { getAuthToken } from "./api-client";
+
+export type AdminDailyTraffic = { date: string; visitors: number; pageViews: number; matches: number };
+export type AdminApiKey = {
+  devId: string;
+  status: string;
+  used: number;
+  dailyLimit: number;
+  remaining: number;
+  callsTotal: number;
+  consecutiveFailures: number;
+  lastUsed: string | null;
+  lastSyncAt: string | null;
+  lastSyncError: string | null;
+};
+
+export type AdminDashboard = {
+  generatedAt: string;
+  traffic: {
+    summary: { visitorsToday: number; viewsToday: number; visitorsYesterday: number; visitorDays7d: number; views7d: number };
+    daily: AdminDailyTraffic[];
+    topPages: Array<{ path: string; pageViews: number }>;
+  };
+  site: {
+    totals: { matches: number; rankedMatches: number; players: number; registeredUsers: number; communityBuilds: number; databaseBytes: number };
+    pipeline: { bufferPending: number; bufferProcessing: number; bufferFailed: number; bufferProcessed: number };
+  };
+  hirez: {
+    keys: AdminApiKey[];
+    hourly: Array<{ hour: string; calls: number }>;
+    endpoints: Array<{ endpoint: string; calls: number; avgResponseMs: number }>;
+  };
+};
+
+const numberValue = (value: unknown) => Number(value ?? 0) || 0;
+
+export async function fetchAdminDashboard(): Promise<AdminDashboard> {
+  const token = getAuthToken();
+  if (!token) throw new Error("Admin session required.");
+  const response = await fetch("/api/admin/dashboard", {
+    headers: { Authorization: `Bearer ${token}` },
+    credentials: "same-origin",
+    cache: "no-store",
+  });
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(body?.error?.message || body?.error || `Dashboard request failed (${response.status}).`);
+  const raw = body?.data && !body?.generated_at ? body.data : body;
+  const summary = raw.traffic?.summary ?? {};
+  const totals = raw.site?.totals ?? {};
+  const pipeline = raw.site?.pipeline ?? {};
+
+  return {
+    generatedAt: String(raw.generated_at ?? new Date().toISOString()),
+    traffic: {
+      summary: {
+        visitorsToday: numberValue(summary.visitors_today),
+        viewsToday: numberValue(summary.views_today),
+        visitorsYesterday: numberValue(summary.visitors_yesterday),
+        visitorDays7d: numberValue(summary.visitor_days_7d),
+        views7d: numberValue(summary.views_7d),
+      },
+      daily: (raw.traffic?.daily ?? []).map((row: any) => ({
+        date: String(row.date), visitors: numberValue(row.visitors), pageViews: numberValue(row.page_views), matches: numberValue(row.matches),
+      })),
+      topPages: (raw.traffic?.top_pages ?? []).map((row: any) => ({ path: String(row.path), pageViews: numberValue(row.page_views) })),
+    },
+    site: {
+      totals: {
+        matches: numberValue(totals.matches), rankedMatches: numberValue(totals.ranked_matches), players: numberValue(totals.players),
+        registeredUsers: numberValue(totals.registered_users), communityBuilds: numberValue(totals.community_builds), databaseBytes: numberValue(totals.database_bytes),
+      },
+      pipeline: {
+        bufferPending: numberValue(pipeline.buffer_pending), bufferProcessing: numberValue(pipeline.buffer_processing),
+        bufferFailed: numberValue(pipeline.buffer_failed), bufferProcessed: numberValue(pipeline.buffer_processed),
+      },
+    },
+    hirez: {
+      keys: (raw.hirez?.keys ?? []).map((row: any) => ({
+        devId: String(row.dev_id), status: String(row.status ?? "unknown"), used: numberValue(row.used), dailyLimit: numberValue(row.daily_limit),
+        remaining: numberValue(row.remaining), callsTotal: numberValue(row.calls_total), consecutiveFailures: numberValue(row.consecutive_failures),
+        lastUsed: row.last_used ? String(row.last_used) : null, lastSyncAt: row.last_sync_at ? String(row.last_sync_at) : null,
+        lastSyncError: row.last_sync_error ? String(row.last_sync_error) : null,
+      })),
+      hourly: (raw.hirez?.hourly ?? []).map((row: any) => ({ hour: String(row.hour), calls: numberValue(row.calls) })),
+      endpoints: (raw.hirez?.endpoints ?? []).map((row: any) => ({ endpoint: String(row.endpoint), calls: numberValue(row.calls), avgResponseMs: numberValue(row.avg_response_ms) })),
+    },
+  };
+}

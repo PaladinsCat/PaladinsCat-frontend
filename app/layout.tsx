@@ -10,6 +10,7 @@ import { AuthProvider } from "@/lib/auth-context";
 import { TimeZoneProvider } from "@/lib/time-zone-context";
 import { LobbyTierProvider } from "@/lib/lobby-tier-context";
 import LobbyTierBanner from "@/components/LobbyTierBanner";
+import SiteAnalytics from "@/components/SiteAnalytics";
 import { cn } from "@/lib/utils";
 import { SEO_KEYWORDS, SITE_NAME, SITE_URL } from "@/lib/seo";
 
@@ -123,6 +124,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AuthProvider>
           <TimeZoneProvider>
             <LobbyTierProvider>
+              <SiteAnalytics />
               <MapSlideshow />
               <Nav />
               <LobbyTierBanner />

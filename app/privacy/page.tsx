@@ -21,7 +21,7 @@ export default function PrivacyPage() {
         {[
           {
             title: "1. Information We Collect",
-            body: "When you create an account, we collect your email address and username. Game-related data (match history, player stats, ranked information) is sourced from the Hi-Rez Studios API and is publicly available information. We do not collect any personal data beyond what is necessary to operate your account.",
+            body: "When you create an account, we collect your email address and username. Game-related data (match history, player stats, ranked information) is sourced from the Hi-Rez Studios API and is publicly available information. We also count page views and daily visitors using an anonymous browser identifier that is hashed before server storage; raw identifiers and IP addresses are not retained for analytics.",
           },
           {
             title: "2. How We Use Your Information",
@@ -29,7 +29,7 @@ export default function PrivacyPage() {
           },
           {
             title: "3. Cookies & Local Storage",
-            body: "We use essential cookies and local storage for authentication, session management, and user preferences (such as theme settings). We do not use tracking cookies, advertising pixels, or third-party analytics that profile your behaviour.",
+            body: "We use essential cookies and local storage for authentication, session management, user preferences, and one random first-party identifier used to calculate anonymous daily traffic. We do not use advertising pixels or third-party behavioural analytics, and browser Do Not Track requests disable this traffic measurement.",
           },
           {
             title: "4. Data Retention",
