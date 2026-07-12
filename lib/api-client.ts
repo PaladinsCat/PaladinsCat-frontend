@@ -693,7 +693,6 @@ export interface MapChampionStat {
 export interface MapTalentStat {
   talentId: number;
   talentName: string;
-  iconUrl?: string;
   championId: number;
   championName: string;
   totalPlays: number;
@@ -1933,7 +1932,7 @@ export async function fetchMapDetail(mapName: string): Promise<MapDetailStats | 
     return {
       map: { name: map.map, totalMatches: number(map.total_matches), distributionRate: number(map.distribution_rate), avgDurationSeconds: number(map.avg_duration_seconds) },
       champions: (raw.champions ?? []).map((row: any) => ({ championId: number(row.champion_id), championName: row.champion_name, totalPlays: number(row.total_plays), wins: number(row.wins), losses: number(row.losses), winRate: number(row.win_rate), pickRate: number(row.pick_rate), banRate: number(row.ban_rate) })),
-      talents: (raw.talents ?? []).map((row: any) => ({ talentId: number(row.talent_id), talentName: row.talent_name, iconUrl: row.talent_icon_url || undefined, championId: number(row.champion_id), championName: row.champion_name, totalPlays: number(row.total_plays), wins: number(row.wins), losses: number(row.losses), winRate: number(row.win_rate), pickRate: number(row.pick_rate) })),
+      talents: (raw.talents ?? []).map((row: any) => ({ talentId: number(row.talent_id), talentName: row.talent_name, championId: number(row.champion_id), championName: row.champion_name, totalPlays: number(row.total_plays), wins: number(row.wins), losses: number(row.losses), winRate: number(row.win_rate), pickRate: number(row.pick_rate) })),
       items: (raw.items ?? []).map((row: any) => ({ itemId: number(row.item_id), itemName: row.item_name, totalUses: number(row.total_uses), wins: number(row.wins), losses: number(row.losses), winRate: number(row.win_rate), pickRate: number(row.pick_rate) })),
     };
   } catch {

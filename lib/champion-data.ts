@@ -79,3 +79,23 @@ export async function getChampionData(slug: string): Promise<ChampionData | unde
 export function getTalentIconPath(championName: string, talentName: string): string {
   return getTalentImageUrl(championName, talentName);
 }
+
+export function normalizeChampionReferenceName(value: string | null | undefined): string {
+  return String(value ?? "")
+    // Reference snapshots contain both real smart punctuation and occasional
+    // UTF-8 mojibake (for example Goddessâ€™ Blessing). Collapse those variants
+    // before applying the strict alphanumeric identity used by DB/API names.
+    .replace(/\u00e2\u20ac[\u2122\u02dc]/g, "'")
+    .replace(/[’‘´`]/g, "'")
+    .normalize("NFKD")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+}
+
+export async function getCanonicalTalentIconPath(championName: string, talentName: string): Promise<string> {
+  const champion = await getChampionData(championName);
+  const talentKey = normalizeChampionReferenceName(talentName);
+  const talent = champion?.talents.find((entry) => normalizeChampionReferenceName(entry.name) === talentKey);
+  if (talent?.iconUrl) return talent.iconUrl;
+  return getTalentIconPath(champion?.name ?? championName, talent?.name ?? talentName);
+}

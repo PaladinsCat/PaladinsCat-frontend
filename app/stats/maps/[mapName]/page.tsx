@@ -10,7 +10,7 @@ import { championSlug } from "@/lib/utils";
 import { getStatQuality } from "@/lib/stat-quality";
 import { mapImagePath } from "@/lib/map-images";
 import { STATIC_CHAMPIONS } from "@/lib/static-champions";
-import { getTalentImageUrl } from "@/lib/image-assets";
+import { getCanonicalTalentIconPath } from "@/lib/champion-data";
 
 function itemIcon(name: string) { return `/images/items/${name.replace(/\s+/g, "_")}_Icon.png`; }
 function rateColor(rate: number) { return getStatQuality(rate, 1, 1).color; }
@@ -52,21 +52,6 @@ const ROLES = [
 ] as const;
 
 const CHAMPION_ROLE_BY_SLUG = new Map(STATIC_CHAMPIONS.map((champion) => [championSlug(champion.name), champion.roles[0] ?? ""]));
-const CHAMPION_NAME_BY_SLUG = new Map(STATIC_CHAMPIONS.map((champion) => [championSlug(champion.name), champion.name]));
-const TALENT_ICON_ALIASES = new Map([
-  ["maldamba:wekonoswrath", "/images/champions/Talent Mal'Damba Wekono's Wrath.avif"],
-  ["maldamba:ripenedgourd", "/images/champions/Talent Mal'Damba Ripened Gourd.avif"],
-  ["maldamba:spiritschosen", "/images/champions/Talent Mal'Damba Spirit's Chosen.avif"],
-  ["seris:resuscitate", "/images/champions/Talent Seris Soul Collector.avif"],
-  ["barik:tinkerin", "/images/champions/Talent Barik Tinkerin'.avif"],
-  ["io:goddessblessing", "/images/champions/Talent Io Goddess's Blessing.avif"],
-]);
-
-function talentIcon(championName: string, talentName: string) {
-  const alias = TALENT_ICON_ALIASES.get(`${championSlug(championName)}:${championSlug(talentName)}`);
-  if (alias) return alias;
-  return getTalentImageUrl(CHAMPION_NAME_BY_SLUG.get(championSlug(championName)) ?? championName, talentName, "avif");
-}
 
 const ITEM_CLASS_BY_NAME: Record<string, string> = {
   "Blast Shields": "Defense", Guardian: "Defense", Haven: "Defense", Illuminate: "Defense", Resilience: "Defense", Sentinel: "Defense",
@@ -87,6 +72,7 @@ export default function MapDetailPage() {
   const [championSort, setChampionSort] = useState<ChampionSort>("winRate");
   const [talentRole, setTalentRole] = useState<string | null>(null);
   const [talentSort, setTalentSort] = useState<TalentSort>("winRate");
+  const [talentIcons, setTalentIcons] = useState<Map<number, string>>(() => new Map());
 
   useEffect(() => {
     let cancelled = false;
@@ -94,6 +80,21 @@ export default function MapDetailPage() {
     fetchMapDetail(mapName).then((data) => { if (!cancelled) setDetail(data); }).finally(() => { if (!cancelled) setLoaded(true); });
     return () => { cancelled = true; };
   }, [mapName]);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!detail) {
+      setTalentIcons(new Map());
+      return () => { cancelled = true; };
+    }
+    Promise.all(detail.talents.map(async (talent) => [
+      talent.talentId,
+      await getCanonicalTalentIconPath(talent.championName, talent.talentName),
+    ] as const)).then((entries) => {
+      if (!cancelled) setTalentIcons(new Map(entries));
+    });
+    return () => { cancelled = true; };
+  }, [detail]);
 
   const talentsByChampion = useMemo(() => {
     const grouped = new Map<number, MapDetailStats["talents"]>();
@@ -193,7 +194,7 @@ export default function MapDetailPage() {
               {TALENT_SORTS.map((sort) => <button key={sort.key} type="button" onClick={() => setTalentSort(sort.key)} className={`shrink-0 rounded-lg px-3 py-2 text-xs font-medium transition-colors ${talentSort === sort.key ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-text-secondary hover:text-pc-text"}`}>{sort.label}</button>)}
             </div>
           </div>
-          {talentGroups.length > 0 ? <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">{talentGroups.map(({ champion, talents }) => <div key={champion.championId} className="overflow-hidden rounded-lg border border-pc-border bg-pc-bg-elevated"><div className="flex items-center gap-2 border-b border-pc-border px-2.5 py-2"><img src={getChampionIconSafe(champion.championName)} alt="" className="h-6 w-6 rounded object-contain" /><span className="min-w-0 flex-1 truncate text-xs font-semibold text-pc-text">{champion.championName}</span><span className="text-[10px] uppercase text-pc-text-muted">{CHAMPION_ROLE_BY_SLUG.get(championSlug(champion.championName))}</span></div><div className="divide-y divide-pc-border/50">{talents.map((talent) => <div key={talent.talentId} className="flex items-center gap-2 px-2.5 py-2"><SmartImage src={talent.iconUrl ?? talentIcon(champion.championName, talent.talentName)} alt="" className="h-8 w-8 shrink-0 rounded object-cover" /><div className="min-w-0 flex-1"><div className="truncate text-xs font-medium text-pc-text-secondary" title={talent.talentName}>{talent.talentName}</div><div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px]"><span style={{ color: rateColor(talent.winRate) }}>{talent.winRate.toFixed(1)}% WR</span><span className="text-pc-text-muted">{talent.pickRate.toFixed(1)}% PR</span><span className="text-pc-text-muted">{talent.totalPlays.toLocaleString()} picks</span></div></div></div>)}</div></div>)}</div> : <div className="rounded-xl border border-dashed border-pc-border bg-pc-bg-elevated p-8 text-center text-sm text-pc-text-muted">No talent observations match this role.</div>}
+          {talentGroups.length > 0 ? <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">{talentGroups.map(({ champion, talents }) => <div key={champion.championId} className="overflow-hidden rounded-lg border border-pc-border bg-pc-bg-elevated"><div className="flex items-center gap-2 border-b border-pc-border px-2.5 py-2"><img src={getChampionIconSafe(champion.championName)} alt="" className="h-6 w-6 rounded object-contain" /><span className="min-w-0 flex-1 truncate text-xs font-semibold text-pc-text">{champion.championName}</span><span className="text-[10px] uppercase text-pc-text-muted">{CHAMPION_ROLE_BY_SLUG.get(championSlug(champion.championName))}</span></div><div className="divide-y divide-pc-border/50">{talents.map((talent) => <div key={talent.talentId} className="flex items-center gap-2 px-2.5 py-2"><SmartImage src={talentIcons.get(talent.talentId) ?? "/images/icons/Player_Loadouts_Icon.png"} alt="" className="h-8 w-8 shrink-0 rounded object-cover" /><div className="min-w-0 flex-1"><div className="truncate text-xs font-medium text-pc-text-secondary" title={talent.talentName}>{talent.talentName}</div><div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px]"><span style={{ color: rateColor(talent.winRate) }}>{talent.winRate.toFixed(1)}% WR</span><span className="text-pc-text-muted">{talent.pickRate.toFixed(1)}% PR</span><span className="text-pc-text-muted">{talent.totalPlays.toLocaleString()} picks</span></div></div></div>)}</div></div>)}</div> : <div className="rounded-xl border border-dashed border-pc-border bg-pc-bg-elevated p-8 text-center text-sm text-pc-text-muted">No talent observations match this role.</div>}
         </section>
       )}
 
