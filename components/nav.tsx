@@ -27,12 +27,15 @@ export default function Nav() {
         { href: "/stats", label: "Global Stats" },
         { href: "/stats/winrate", label: "Champion Win Rates" },
         { href: "/stats/banrate", label: "Champion Ban Rates" },
+        { href: "/stats/talents", label: "Talent Performance" },
+        { href: "/stats/loadouts", label: "Loadout Meta" },
         { href: "/stats/items", label: "Item Meta" },
         { href: "/stats/maps", label: "Map Stats" },
-        { href: "/stats/skins", label: "Skin Stats" },
         { href: "/stats/compositions", label: "Composition Stats" },
-        { href: "/stats/tiers", label: "Tier Distribution" },
         { href: "/stats/metrics", label: "Performance Metrics" },
+        { href: "/stats/egpm", label: "Effective Credits (eGPM)" },
+        { href: "/stats/tiers", label: "Ranked Player Distribution" },
+        { href: "/stats/skins", label: "Skin Stats" },
         { href: "/stats/regions", label: "Regions" },
         { href: "/stats/platforms", label: "Platforms" },
       ],
@@ -45,6 +48,8 @@ export default function Nav() {
         { href: "/players/elo", label: "ELO Leaderboard" },
         { href: "/players/cheaters", label: "Cheater Reports" },
         { href: "/players/suspicious", label: "Suspicious Players" },
+        { href: "/players/weirdos", label: "Weirdos" },
+        { href: "/players/hall-of-fame", label: "Hall of Fame" },
       ],
     },
     { title: "Site", links: [{ href: "/about", label: "About" }, { href: "/changelog", label: "Changelog" }, { href: "/contact", label: "Contact" }, { href: "/privacy", label: "Privacy" }, { href: "/terms", label: "Terms" }] },
@@ -72,6 +77,10 @@ export default function Nav() {
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
+  const isMenuActive = (href: string) => {
+    if (href === "/" || href === "/stats" || href === "/players") return pathname === href;
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
 
   return (
     <>
@@ -162,7 +171,7 @@ export default function Nav() {
             </div>
             <div className="flex-1 overflow-y-auto px-4 py-5">
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                {menuSections.map((section) => <section key={section.title}><h2 className="mb-2 px-2 text-[10px] font-bold uppercase tracking-widest text-pc-text-muted">{section.title}</h2><div className="space-y-0.5">{section.links.map((link) => <Link key={link.href} href={link.href} onClick={() => setSideMenuOpen(false)} className={`block rounded-lg px-2.5 py-2 text-sm transition-colors ${isActive(link.href) ? "bg-pc-bg-elevated text-pc-accent" : "text-pc-text-secondary hover:bg-pc-bg-elevated hover:text-pc-text"}`}>{link.label}</Link>)}</div></section>)}
+                {menuSections.map((section) => <section key={section.title}><h2 className="mb-2 px-2 text-[10px] font-bold uppercase tracking-widest text-pc-text-muted">{section.title}</h2><div className="space-y-0.5">{section.links.map((link) => <Link key={link.href} href={link.href} onClick={() => setSideMenuOpen(false)} className={`block rounded-lg px-2.5 py-2 text-sm transition-colors ${isMenuActive(link.href) ? "bg-pc-bg-elevated text-pc-accent" : "text-pc-text-secondary hover:bg-pc-bg-elevated hover:text-pc-text"}`}>{link.label}</Link>)}</div></section>)}
               </div>
             </div>
             <div className="border-t border-pc-border px-5 py-4">
