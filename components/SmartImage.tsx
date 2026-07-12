@@ -7,39 +7,19 @@ interface SmartImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, "src
   src: string;
 }
 
-/**
- * Tries .avif first, falls back to original format (png/webp).
- * Properly cancels stale probes when src changes rapidly (icon cycling).
- */
+/** Tries .avif first and lets the rendered image fall back to the source asset. */
 export default function SmartImage({ src, onError, ...props }: SmartImageProps) {
   const canonicalSrc = canonicalLocalImageUrl(src);
+  const preferredSrc = !canonicalSrc || canonicalSrc.startsWith("http")
+    ? canonicalSrc
+    : canonicalSrc.replace(/\.[^.]+$/, ".avif");
   const [currentSrc, setCurrentSrc] = useState(() => {
-    if (!canonicalSrc || canonicalSrc.startsWith("http")) return canonicalSrc;
-    return canonicalSrc.replace(/\.[^.]+$/, ".avif");
+    return preferredSrc;
   });
 
   useEffect(() => {
-    if (!canonicalSrc) return;
-
-    if (canonicalSrc.startsWith("http")) {
-      setCurrentSrc(canonicalSrc);
-      return;
-    }
-
-    const avifSrc = canonicalSrc.replace(/\.[^.]+$/, ".avif");
-    let cancelled = false;
-
-    const probe = new Image();
-    probe.onload = () => {
-      if (!cancelled) setCurrentSrc(avifSrc);
-    };
-    probe.onerror = () => {
-      if (!cancelled) setCurrentSrc(canonicalSrc);
-    };
-    probe.src = avifSrc;
-
-    return () => { cancelled = true; };
-  }, [canonicalSrc]);
+    setCurrentSrc(preferredSrc);
+  }, [preferredSrc]);
 
   const handleError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     if (currentSrc !== canonicalSrc) {

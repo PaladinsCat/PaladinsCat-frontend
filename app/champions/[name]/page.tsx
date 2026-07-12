@@ -270,6 +270,9 @@ export default function ChampionDetailPage() {
               <SmartImage
                 src={getChampionIconSafe(championData?.name ?? staticChampion?.name ?? name)}
                 alt={championData?.name ?? staticChampion?.name ?? name}
+                width={112}
+                height={112}
+                fetchPriority="high"
                 className="w-28 h-28 rounded-xl border border-pc-border object-contain bg-pc-bg/50"
               />
               <div className="flex flex-wrap justify-center gap-2">

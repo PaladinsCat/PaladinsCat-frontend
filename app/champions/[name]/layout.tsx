@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { preload } from "react-dom";
 import { STATIC_CHAMPIONS } from "@/lib/static-champions";
+import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
 
 type Props = {
@@ -31,6 +33,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default function ChampionDetailLayout({ children }: Props) {
+export default async function ChampionDetailLayout({ children, params }: Props) {
+  const { name } = await params;
+  const champion = championFromSlug(name);
+
+  // The page body is client-rendered, so advertise its above-the-fold hero
+  // image from the server layout instead of waiting for hydration to discover
+  // it. This is the champion detail page's most common LCP candidate.
+  preload(getChampionIconSafe(champion?.name ?? name), {
+    as: "image",
+    fetchPriority: "high",
+  });
+
   return children;
 }
