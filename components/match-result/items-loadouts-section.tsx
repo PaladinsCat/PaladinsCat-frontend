@@ -6,6 +6,7 @@ import { ChevronDown } from "lucide-react";
 import {
   fetchChampionCardStats,
   fetchChampionTalentStats,
+  fetchItemDetail,
   fetchItems,
   type ChampionCardStatsResponse,
   type ChampionTalentStatsResponse,
@@ -26,6 +27,7 @@ type Props = { team1Players: MatchPlayerDetail[]; team2Players: MatchPlayerDetai
 // Cache per champion so the 10 match rows do not issue duplicate reference requests.
 const referenceByChampion = new Map<number, Promise<BuildReferenceData>>();
 const itemMetricsByChampionScope = new Map<string, Promise<ItemStat[]>>();
+const itemDetailByChampionScope = new Map<string, ReturnType<typeof fetchItemDetail>>();
 const loadoutMetricsByChampionTalentScope = new Map<string, Promise<{
   talents: ChampionTalentStatsResponse;
   cards: ChampionCardStatsResponse;
@@ -56,6 +58,16 @@ function getScopedItemMetrics(championId: number, scope: string, tierMin?: numbe
   if (!promise) {
     promise = fetchItems({ mode: "ranked", championId, limit: 200, tierMin, tierMax }).catch(() => []);
     itemMetricsByChampionScope.set(key, promise);
+  }
+  return promise;
+}
+
+function getScopedItemDetail(itemId: number, championId: number, scope: string, tierMin?: number, tierMax?: number) {
+  const key = `${itemId}:${championId}:${scope}`;
+  let promise = itemDetailByChampionScope.get(key);
+  if (!promise) {
+    promise = fetchItemDetail(itemId, "ranked", { championId, tierMin, tierMax });
+    itemDetailByChampionScope.set(key, promise);
   }
   return promise;
 }
@@ -181,6 +193,7 @@ function PlayerBuildRow({
   const talents = fact?.talents ?? [];
   const cards = fact?.cards ?? [];
   const items = fact?.items ?? [];
+  const itemIdsKey = items.map((item) => item.item_id).join(",");
   const selectedTalent = talents[0] ?? null;
   const [reference, setReference] = useState<BuildReferenceData | null>(null);
   const [itemMetrics, setItemMetrics] = useState<ItemStat[] | null>(null);
@@ -200,9 +213,28 @@ function PlayerBuildRow({
     let cancelled = false;
     setItemMetrics(null);
     getScopedItemMetrics(player.champion_id, lobbyScope, lobbyTierMin, lobbyTierMax)
+      .then(async (rows) => {
+        const missingBreakdowns = [...new Set(items.map((item) => item.item_id))]
+          .filter((itemId) => !rows.find((row) => row.itemId === itemId)?.breakdown.length);
+        if (missingBreakdowns.length === 0) return rows;
+        const details = await Promise.all(missingBreakdowns.map((itemId) => (
+          getScopedItemDetail(itemId, player.champion_id, lobbyScope, lobbyTierMin, lobbyTierMax)
+        )));
+        const detailByItem = new Map(details.filter((detail) => detail != null).map((detail) => [detail.itemId, detail]));
+        return rows.map((row) => {
+          const detail = detailByItem.get(row.itemId);
+          return detail ? {
+            ...row,
+            breakdown: detail.breakdown.map((entry) => ({
+              ...entry,
+              pickRate: detail.totalUses > 0 ? (row.pickRate ?? 0) * entry.totalUses / detail.totalUses : 0,
+            })),
+          } : row;
+        });
+      })
       .then((rows) => { if (!cancelled) setItemMetrics(rows); });
     return () => { cancelled = true; };
-  }, [expanded, lobbyScope, lobbyTierMax, lobbyTierMin, lobbyTierReady, player.champion_id]);
+  }, [expanded, itemIdsKey, lobbyScope, lobbyTierMax, lobbyTierMin, lobbyTierReady, player.champion_id]);
   useEffect(() => {
     if (!expanded || !lobbyTierReady) return;
     let cancelled = false;

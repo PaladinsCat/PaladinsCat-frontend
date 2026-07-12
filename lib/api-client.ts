@@ -1836,9 +1836,13 @@ export async function fetchItems(params?: { mode?: string; limit?: number; champ
   }
 }
 
-export async function fetchItemDetail(itemId: number, mode: 'ranked' = 'ranked'): Promise<ItemDetailStats | null> {
+export async function fetchItemDetail(itemId: number, mode: 'ranked' = 'ranked', params?: { championId?: number; tierMin?: number; tierMax?: number }): Promise<ItemDetailStats | null> {
   try {
-    const raw = await fetchJson<any>(`/stats/items/${itemId}?mode=${mode}`);
+    const query = new URLSearchParams({ mode });
+    if (params?.championId != null) query.set('championId', String(params.championId));
+    if (params?.tierMin != null) query.set('tierMin', String(params.tierMin));
+    if (params?.tierMax != null) query.set('tierMax', String(params.tierMax));
+    const raw = await fetchJson<any>(`/stats/items/${itemId}?${query.toString()}`);
     const number = (value: unknown) => Number(value ?? 0);
     const dimension = (row: any): ItemDimensionStat => ({
       slot: row.slot == null ? undefined : number(row.slot),

@@ -27,8 +27,9 @@ function RateStrip({ label, rows, total }: { label: "S" | "L"; rows: ItemStat["s
     {rows.map((row) => {
       const dimension = label === "S" ? row.slot : row.level;
       const rate = row.totalUses / Math.max(1, total) * 100;
-      return <span key={dimension} className="min-w-0 truncate rounded bg-pc-bg px-1 py-0.5 text-pc-text-secondary" title={`${label === "S" ? "Buy" : "Level"} ${dimension}: ${row.winRate.toFixed(1)}% win rate, ${rate.toFixed(1)}% of purchases`}>
-        {label}{dimension} <span className="text-pc-text">{row.winRate.toFixed(0)}</span><span className="text-pc-text-muted">/{rate.toFixed(0)}</span>
+      const displayDimension = label === "L" ? Number(dimension) + 1 : dimension;
+      return <span key={dimension} className="min-w-0 truncate rounded bg-pc-bg px-1 py-0.5 text-pc-text-secondary" title={`${label === "S" ? "Slot" : "Level"} ${displayDimension}: ${row.winRate.toFixed(1)}% win rate, ${rate.toFixed(1)}% of purchases`}>
+        {label}{displayDimension} <span className="text-pc-text">{row.winRate.toFixed(0)}</span><span className="text-pc-text-muted">/{rate.toFixed(0)}</span>
       </span>;
     })}
   </div>;
