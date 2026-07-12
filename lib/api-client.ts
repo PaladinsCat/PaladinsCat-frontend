@@ -360,7 +360,7 @@ export interface PerformanceMetricSummary {
   sampleSize: number;
 }
 
-export type PerformanceMetricKey = 'dpm' | 'hpm' | 'gpm' | 'mpm' | 'kda';
+export type PerformanceMetricKey = 'dpm' | 'hpm' | 'gpm' | 'egpm' | 'mpm' | 'kda';
 
 export type PerformanceMetricsResponse = Partial<Record<PerformanceMetricKey, PerformanceMetricSummary>>;
 
@@ -502,8 +502,8 @@ export async function fetchBaselines(params?: { role?: string; queueId?: number;
     }));
     if (!mapped.some((row) => row.role === 'Global')) {
       const global = (await fetchPerformanceMetrics({
-        metric: 'gpm', queueId: params?.queueId, tierMin: params?.tierMin, tierMax: params?.tierMax,
-      })).gpm;
+        metric: 'egpm', queueId: params?.queueId, tierMin: params?.tierMin, tierMax: params?.tierMax,
+      })).egpm;
       if (global) {
         mapped.unshift({
           role: 'Global', queueId: params?.queueId ?? 486,
