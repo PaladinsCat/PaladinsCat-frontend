@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { fetchItemDetail, type ItemDetailStats, type ItemDimensionStat } from "@/lib/api-client";
 import { getStatQuality } from "@/lib/stat-quality";
+import ContextBackLink from "@/components/context-back-link";
 
 function itemIcon(name: string) { return `/images/items/${name.replace(/\s+/g, "_")}_Icon.avif`; }
 function percent(value: number) { return `${value.toFixed(1)}%`; }
@@ -38,7 +38,7 @@ export default function ItemDetailPage() {
   if (!detail) return <div className="pc-card py-12 text-center text-sm text-pc-text-secondary">{loaded ? "No item statistics are available for this queue." : "Loading item statistics…"}</div>;
   const overallQuality = getStatQuality(detail.winRate, 1, 1);
   return <div className="space-y-6">
-    <div><Link href="/stats/items" className="text-sm text-pc-text-secondary hover:text-pc-accent">← All items</Link></div>
+    <div><ContextBackLink fallbackHref="/stats/items" label="Back" /></div>
     <section className="rounded-xl border border-pc-border bg-pc-bg-elevated p-5" style={{ borderColor: overallQuality.borderColor }}>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center"><img src={itemIcon(detail.itemName)} alt="" className="h-16 w-16 rounded-lg object-contain" /><div className="min-w-0 flex-1"><h1 className="pc-heading pc-heading-lg text-pc-accent">{detail.itemName}</h1><p className="mt-1 text-sm text-pc-text-secondary">Ranked item performance by purchase slot and final upgrade level.</p></div><div className="grid w-full grid-cols-2 gap-3 text-left sm:w-auto sm:grid-cols-3 sm:gap-5 sm:text-right"><div><div className="text-[10px] uppercase text-pc-text-muted">Win rate</div><div className="text-xl font-bold" style={{ color: overallQuality.color }}>{percent(detail.winRate)}</div></div><div><div className="text-[10px] uppercase text-pc-text-muted">Purchases</div><div className="text-xl font-bold text-pc-text">{detail.totalUses.toLocaleString()}</div></div><div className="col-span-2 sm:col-span-1"><div className="text-[10px] uppercase text-pc-text-muted">Record</div><div className="text-sm font-semibold text-pc-text">{detail.wins.toLocaleString()}W / {detail.losses.toLocaleString()}L</div></div></div></div>
     </section>

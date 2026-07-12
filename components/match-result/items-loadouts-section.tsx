@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useState } from "react";
 import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
 import { ChevronDown } from "lucide-react";
 import {
   fetchChampionCardStats,
@@ -20,6 +21,7 @@ import { championSlug } from "@/lib/utils";
 import { canonicalLocalImageUrl } from "@/lib/image-assets";
 import { useLobbyTier } from "@/lib/lobby-tier-context";
 import { getStatQuality } from "@/lib/stat-quality";
+import { readBrowserResult, writeBrowserResult } from "@/lib/browser-result-cache";
 
 type Props = { team1Players: MatchPlayerDetail[]; team2Players: MatchPlayerDetail[]; team1Wins: boolean; team2Wins: boolean; factMap: Map<string, MatchFactPlayer> };
 
@@ -32,6 +34,9 @@ const loadoutMetricsByChampionTalentScope = new Map<string, Promise<{
   talents: ChampionTalentStatsResponse;
   cards: ChampionCardStatsResponse;
 }>>();
+const RESULT_CACHE_PREFIX = "paladinscat:match-build:v1";
+const REFERENCE_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+const METRIC_CACHE_TTL_MS = 5 * 60 * 1000;
 
 function normalizeName(value: string | null | undefined) {
   return String(value ?? "")
@@ -46,7 +51,13 @@ function normalizeName(value: string | null | undefined) {
 function getBuildReference(championId: number, championName: string) {
   let promise = referenceByChampion.get(championId);
   if (!promise) {
-    promise = loadBuildReferenceData(championId, championSlug(championName)).catch(() => ({ items: [], cards: [], talents: [] }));
+    const cacheKey = `${RESULT_CACHE_PREFIX}:reference:${championId}`;
+    const cached = readBrowserResult<BuildReferenceData>(cacheKey);
+    promise = cached
+      ? Promise.resolve(cached)
+      : loadBuildReferenceData(championId, championSlug(championName))
+          .then((value) => writeBrowserResult(cacheKey, value, REFERENCE_CACHE_TTL_MS))
+          .catch(() => ({ items: [], cards: [], talents: [] }));
     referenceByChampion.set(championId, promise);
   }
   return promise;
@@ -56,7 +67,13 @@ function getScopedItemMetrics(championId: number, scope: string, tierMin?: numbe
   const key = `${championId}:${scope}`;
   let promise = itemMetricsByChampionScope.get(key);
   if (!promise) {
-    promise = fetchItems({ mode: "ranked", championId, limit: 200, tierMin, tierMax }).catch(() => []);
+    const cacheKey = `${RESULT_CACHE_PREFIX}:items:${key}`;
+    const cached = readBrowserResult<ItemStat[]>(cacheKey);
+    promise = cached
+      ? Promise.resolve(cached)
+      : fetchItems({ mode: "ranked", championId, limit: 200, tierMin, tierMax })
+          .then((value) => writeBrowserResult(cacheKey, value, METRIC_CACHE_TTL_MS))
+          .catch(() => []);
     itemMetricsByChampionScope.set(key, promise);
   }
   return promise;
@@ -66,7 +83,12 @@ function getScopedItemDetail(itemId: number, championId: number, scope: string, 
   const key = `${itemId}:${championId}:${scope}`;
   let promise = itemDetailByChampionScope.get(key);
   if (!promise) {
-    promise = fetchItemDetail(itemId, "ranked", { championId, tierMin, tierMax });
+    const cacheKey = `${RESULT_CACHE_PREFIX}:item-detail:${key}`;
+    const cached = readBrowserResult<Awaited<ReturnType<typeof fetchItemDetail>>>(cacheKey);
+    promise = cached !== null
+      ? Promise.resolve(cached)
+      : fetchItemDetail(itemId, "ranked", { championId, tierMin, tierMax })
+          .then((value) => writeBrowserResult(cacheKey, value, METRIC_CACHE_TTL_MS));
     itemDetailByChampionScope.set(key, promise);
   }
   return promise;
@@ -77,10 +99,14 @@ function getScopedLoadoutMetrics(championId: number, talentId: number | null, sc
   let promise = loadoutMetricsByChampionTalentScope.get(key);
   if (!promise) {
     const tier = { tierMin, tierMax };
-    promise = Promise.all([
-      fetchChampionTalentStats(championId, "ranked", tier),
-      fetchChampionCardStats(championId, "ranked", talentId, tier),
-    ]).then(([talents, cards]) => ({ talents, cards }));
+    const cacheKey = `${RESULT_CACHE_PREFIX}:loadout:${key}`;
+    const cached = readBrowserResult<Awaited<typeof promise>>(cacheKey);
+    promise = cached
+      ? Promise.resolve(cached)
+      : Promise.all([
+          fetchChampionTalentStats(championId, "ranked", tier),
+          fetchChampionCardStats(championId, "ranked", talentId, tier),
+        ]).then(([talents, cards]) => writeBrowserResult(cacheKey, { talents, cards }, METRIC_CACHE_TTL_MS));
     loadoutMetricsByChampionTalentScope.set(key, promise);
   }
   return promise;
@@ -136,6 +162,7 @@ function DetailEntry({
   maxPickRate = 1,
   playsLabel = "plays",
   loadingLabel = "Loading scoped metrics…",
+  href,
 }: {
   name: string;
   description: string;
@@ -149,13 +176,14 @@ function DetailEntry({
   maxPickRate?: number;
   playsLabel?: string;
   loadingLabel?: string;
+  href?: string;
 }) {
   const quality = metric ? getStatQuality(metric.winRate, metric.pickRate, maxPickRate) : null;
   return <article className="flex min-w-0 items-start gap-3 rounded-lg border border-pc-border/70 bg-pc-bg-secondary/45 p-3">
     <Asset sources={sources} alt={name} level={level} tone={tone} />
     <div className="min-w-0 flex-1">
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-        <h4 className="text-xs font-semibold text-pc-text">{name}</h4>
+        {href ? <Link href={href} className="text-xs font-semibold text-pc-text transition-colors hover:text-pc-accent hover:underline">{name}</Link> : <h4 className="text-xs font-semibold text-pc-text">{name}</h4>}
         <span className="text-[9px] font-semibold uppercase tracking-wider text-pc-text-muted">{label}</span>
       </div>
       <p className="mt-1 text-xs leading-5 text-pc-text-secondary">{description}</p>
@@ -179,6 +207,7 @@ function PlayerBuildRow({
   lobbyTierMin,
   lobbyTierMax,
   lobbyTierReady,
+  returnTo,
 }: {
   player: MatchPlayerDetail;
   fact?: MatchFactPlayer;
@@ -188,6 +217,7 @@ function PlayerBuildRow({
   lobbyTierMin?: number;
   lobbyTierMax?: number;
   lobbyTierReady: boolean;
+  returnTo: string;
 }) {
   const champion = player.champion_name || `Champion #${player.champion_id}`;
   const talents = fact?.talents ?? [];
@@ -195,6 +225,8 @@ function PlayerBuildRow({
   const items = fact?.items ?? [];
   const itemIdsKey = items.map((item) => item.item_id).join(",");
   const selectedTalent = talents[0] ?? null;
+  const championPath = `/champions/${championSlug(player.champion_name || "")}`;
+  const returnToQuery = encodeURIComponent(returnTo);
   const [reference, setReference] = useState<BuildReferenceData | null>(null);
   const [itemMetrics, setItemMetrics] = useState<ItemStat[] | null>(null);
   const [loadoutMetrics, setLoadoutMetrics] = useState<{
@@ -330,13 +362,15 @@ function PlayerBuildRow({
           {talents.map((talent) => {
             const entry = findReference("talents", talent.talent_id, talent.talent_name);
             const name = talent.talent_name ?? entry?.name ?? `Talent #${talent.talent_id}`;
-            return <DetailEntry key={`talent-detail-${talent.talent_id}`} name={name} label="Talent" description={formatDescription(entry?.description, 1) ?? (reference ? "Description unavailable." : "Loading description…")} sources={[entry?.iconUrl, talent.icon_url, talent.fallback_icon_url]} tone="border-amber-400/40" metric={talentMetric} showMetrics metricsLoaded={loadoutMetrics !== null} maxPickRate={100} />;
+            return <DetailEntry key={`talent-detail-${talent.talent_id}`} name={name} href={`${championPath}/talents/${talent.talent_id}?returnTo=${returnToQuery}`} label="Talent" description={formatDescription(entry?.description, 1) ?? (reference ? "Description unavailable." : "Loading description…")} sources={[entry?.iconUrl, talent.icon_url, talent.fallback_icon_url]} tone="border-amber-400/40" metric={talentMetric} showMetrics metricsLoaded={loadoutMetrics !== null} maxPickRate={100} />;
           })}
           {cards.map((card) => {
             const entry = findReference("cards", card.card_id, card.card_name);
             const level = Math.max(1, card.card_level ?? 1);
             const name = card.card_name ?? entry?.name ?? `Card #${card.card_id}`;
-            return <DetailEntry key={`card-detail-${card.card_id}`} name={name} label={`Card · level ${level}`} description={formatDescription(entry?.description, level) ?? (reference ? "Description unavailable." : "Loading description…")} sources={[entry?.iconUrl, card.icon_url, card.fallback_icon_url]} level={level} tone="border-pc-accent/30" metric={cardMetricAtRecordedLevel(card.card_id, card.card_name, level)} showMetrics metricsLoaded={loadoutMetrics !== null} maxPickRate={maxLoadoutLevelPickRate} playsLabel="picks" />;
+            const query = new URLSearchParams({ returnTo });
+            if (selectedTalent) query.set("talentId", String(selectedTalent.talent_id));
+            return <DetailEntry key={`card-detail-${card.card_id}`} name={name} href={`${championPath}/cards/${card.card_id}?${query.toString()}`} label={`Card · level ${level}`} description={formatDescription(entry?.description, level) ?? (reference ? "Description unavailable." : "Loading description…")} sources={[entry?.iconUrl, card.icon_url, card.fallback_icon_url]} level={level} tone="border-pc-accent/30" metric={cardMetricAtRecordedLevel(card.card_id, card.card_name, level)} showMetrics metricsLoaded={loadoutMetrics !== null} maxPickRate={maxLoadoutLevelPickRate} playsLabel="picks" />;
           })}
           {talents.length === 0 && cards.length === 0 && <p className="text-xs text-pc-text-muted">No talent or loadout cards were recorded.</p>}
         </section>
@@ -349,7 +383,7 @@ function PlayerBuildRow({
             const name = item.item_name ?? entry?.name ?? `Item #${item.item_id}`;
             const description = entry?.description ?? item.description;
             const itemMetric = itemMetricAtRecordedSlotAndLevel(item.item_id, item.item_name, item.slot, item.item_level ?? 0);
-            return <DetailEntry key={`item-detail-${item.slot}-${item.item_id}`} name={name} label={`Item · slot ${item.slot} · level ${level}`} description={formatDescription(description, level) ?? (reference ? "Description unavailable." : "Loading description…")} sources={[entry?.iconUrl, item.icon_url, item.fallback_icon_url]} level={level} metric={itemMetric} showMetrics metricsLoaded={itemMetrics !== null} maxPickRate={maxItemPickRate} playsLabel="uses" loadingLabel="Loading scoped item metrics…" />;
+            return <DetailEntry key={`item-detail-${item.slot}-${item.item_id}`} name={name} href={`/stats/items/${item.item_id}?returnTo=${returnToQuery}`} label={`Item · slot ${item.slot} · level ${level}`} description={formatDescription(description, level) ?? (reference ? "Description unavailable." : "Loading description…")} sources={[entry?.iconUrl, item.icon_url, item.fallback_icon_url]} level={level} metric={itemMetric} showMetrics metricsLoaded={itemMetrics !== null} maxPickRate={maxItemPickRate} playsLabel="uses" loadingLabel="Loading scoped item metrics…" />;
           })}
           {items.length === 0 && <p className="text-xs text-pc-text-muted">No purchased items were recorded.</p>}
         </section>
@@ -360,6 +394,9 @@ function PlayerBuildRow({
 
 export default function ItemsLoadoutsSection({ team1Players, team2Players, team1Wins, team2Wins, factMap }: Props) {
   const { filter: lobbyScope, definition: lobbyTier, ready: lobbyTierReady } = useLobbyTier();
-  const rows = (players: MatchPlayerDetail[], wins: boolean) => players.map(p => <PlayerBuildRow key={p.player_id} player={p} fact={factMap.get(String(p.player_id))} wins={wins} lobbyScope={lobbyScope} lobbyScopeLabel={lobbyTier.label} lobbyTierMin={lobbyTier.tierMin} lobbyTierMax={lobbyTier.tierMax} lobbyTierReady={lobbyTierReady} />);
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const returnTo = searchParams.size > 0 ? `${pathname}?${searchParams.toString()}` : pathname;
+  const rows = (players: MatchPlayerDetail[], wins: boolean) => players.map(p => <PlayerBuildRow key={p.player_id} player={p} fact={factMap.get(String(p.player_id))} wins={wins} lobbyScope={lobbyScope} lobbyScopeLabel={lobbyTier.label} lobbyTierMin={lobbyTier.tierMin} lobbyTierMax={lobbyTier.tierMax} lobbyTierReady={lobbyTierReady} returnTo={returnTo} />);
   return <section className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated"><div className="flex flex-wrap items-end justify-between gap-3 border-b border-pc-border px-4 py-3"><div><h2 className="text-lg font-bold uppercase tracking-wide text-pc-text">Items &amp; Loadouts</h2><p className="mt-0.5 text-xs text-pc-text-muted">Talent and cards · purchased items · expand a row for descriptions</p></div></div><div className="overflow-x-hidden lg:overflow-x-auto"><div className="hidden min-w-[780px] grid-cols-[240px_1fr_1fr_36px] gap-4 border-b border-pc-border bg-pc-bg-secondary/60 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted lg:grid"><span>Champion / player</span><span>Loadout</span><span>Items</span><span className="sr-only">Details</span></div>{rows(team1Players, team1Wins)}<div className="flex items-center gap-3 bg-pc-bg-secondary/60 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-pc-text-muted"><span className={`h-1.5 w-1.5 rounded-full ${team2Wins ? "bg-emerald-400" : "bg-red-400"}`} />Opposing team</div>{rows(team2Players, team2Wins)}</div></section>;
 }

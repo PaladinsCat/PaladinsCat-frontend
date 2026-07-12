@@ -1,0 +1,31 @@
+type CacheEnvelope<T> = {
+  expiresAt: number;
+  value: T;
+};
+
+export function readBrowserResult<T>(key: string): T | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.sessionStorage.getItem(key);
+    if (!raw) return null;
+    const cached = JSON.parse(raw) as CacheEnvelope<T>;
+    if (!cached || cached.expiresAt <= Date.now()) {
+      window.sessionStorage.removeItem(key);
+      return null;
+    }
+    return cached.value;
+  } catch {
+    return null;
+  }
+}
+
+export function writeBrowserResult<T>(key: string, value: T, ttlMs: number): T {
+  if (typeof window === "undefined") return value;
+  try {
+    const cached: CacheEnvelope<T> = { expiresAt: Date.now() + ttlMs, value };
+    window.sessionStorage.setItem(key, JSON.stringify(cached));
+  } catch {
+    // Storage may be unavailable or full. The in-memory request cache remains.
+  }
+  return value;
+}

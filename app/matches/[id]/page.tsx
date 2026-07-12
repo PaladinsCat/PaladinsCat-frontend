@@ -45,6 +45,16 @@ import RatingSnapshots from "@/components/match-result/rating-snapshots";
 import MatchExportButton from "@/components/match-result/match-export-button";
 import { ErrorState } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
+import { readBrowserResult, writeBrowserResult } from "@/lib/browser-result-cache";
+
+const MATCH_RESULT_CACHE_TTL_MS = 5 * 60 * 1000;
+
+type CachedMatchResult = {
+  match: MatchDetailWithBans | null;
+  fact: MatchFact | null;
+  snapshots: RatingSnapshot[];
+  profiles: Array<[string, any]>;
+};
 
 /* ── Helpers ── */
 
@@ -109,7 +119,18 @@ export default function MatchDetailPage() {
     async function load() {
       setLoading(true);
       setError(null);
+      setProfileMap(null);
+      const cacheKey = `paladinscat:match-result:v1:${numericMatchId}`;
       try {
+        const cached = reloadKey === 0 ? readBrowserResult<CachedMatchResult>(cacheKey) : null;
+        if (cached) {
+          setMatch(cached.match);
+          setFact(cached.fact);
+          setSnapshots(cached.snapshots);
+          setProfileMap(new Map(cached.profiles));
+          return;
+        }
+
         // Match detail + fact + snapshots in parallel
         const detailResult = await fetchMatchDetail(numericMatchId);
         if (cancelled) return;
@@ -124,10 +145,19 @@ export default function MatchDetailPage() {
         setSnapshots(snapResult);
 
         // Fetch player profiles in parallel (optional — page renders without them)
+        let profiles = new Map<string, any>();
         if (detailResult?.players) {
-          const profiles = await fetchProfilesForMatch(detailResult.players, detailResult.match.queue_id);
-          if (!cancelled) setProfileMap(profiles);
+          profiles = await fetchProfilesForMatch(detailResult.players, detailResult.match.queue_id);
+          if (cancelled) return;
+          setProfileMap(profiles);
         }
+
+        writeBrowserResult(cacheKey, {
+          match: detailResult,
+          fact: factResult,
+          snapshots: snapResult,
+          profiles: Array.from(profiles.entries()),
+        }, MATCH_RESULT_CACHE_TTL_MS);
 
       } catch (err: any) {
         if (!cancelled) setError(err.message || "Failed to load match");
