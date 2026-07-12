@@ -50,18 +50,18 @@ function cleanNumber(value: number) {
   return Number.isInteger(value) ? String(value) : value.toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
 }
 
-function formatDescription(description: string | null | undefined, level: number, multiplyPlainValues = false) {
+function formatDescription(description: string | null | undefined, level: number) {
   if (!description) return null;
   return description
     // Hi-Rez reference descriptions carry legacy category/ability markers
     // such as "[Armor]" and "[Dimensional Link]". They are metadata, can be
     // stale, and should not be presented as part of the effect sentence.
     .replace(/^\s*(?:\[[^\]]+\]\s*)+/, "")
-    .replace(/\{(?:scale=)?(-?\d*\.?\d+)\|(-?\d*\.?\d+)\}/gi, (_match, base: string, step: string) => (
-      cleanNumber(Number(base) + Number(step) * Math.max(0, level - 1))
+    .replace(/\{\s*(?:scale\s*=\s*)?(-?(?:\d+(?:\.\d*)?|\.\d+))\s*\|\s*(-?(?:\d+(?:\.\d*)?|\.\d+))\s*\}/gi, (_match, base: string, increase: string) => (
+      cleanNumber(Number(base) + Number(increase) * Math.max(0, level - 1))
     ))
-    .replace(/\{(-?\d*\.?\d+)\}/g, (_match, value: string) => (
-      cleanNumber(Number(value) * (multiplyPlainValues ? Math.max(1, level) : 1))
+    .replace(/\{\s*(-?(?:\d+(?:\.\d*)?|\.\d+))\s*\}/g, (_match, value: string) => (
+      cleanNumber(Number(value))
     ));
 }
 
@@ -163,7 +163,7 @@ function PlayerBuildRow({ player, fact, wins }: { player: MatchPlayerDetail; fac
             const level = Math.max(1, (item.item_level ?? 0) + 1);
             const name = item.item_name ?? entry?.name ?? `Item #${item.item_id}`;
             const description = entry?.description ?? item.description;
-            return <DetailEntry key={`item-detail-${item.slot}-${item.item_id}`} name={name} label={`Item · level ${level}`} description={formatDescription(description, level, true) ?? (reference ? "Description unavailable." : "Loading description…")} sources={[entry?.iconUrl, item.icon_url, item.fallback_icon_url]} level={level} />;
+            return <DetailEntry key={`item-detail-${item.slot}-${item.item_id}`} name={name} label={`Item · level ${level}`} description={formatDescription(description, level) ?? (reference ? "Description unavailable." : "Loading description…")} sources={[entry?.iconUrl, item.icon_url, item.fallback_icon_url]} level={level} />;
           })}
           {items.length === 0 && <p className="text-xs text-pc-text-muted">No purchased items were recorded.</p>}
         </section>
