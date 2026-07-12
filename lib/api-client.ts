@@ -1927,14 +1927,16 @@ export interface MatchCompositionStat {
   winRate: number;
 }
 
-export async function fetchMatchCompositions(params?: { limit?: number; sortBy?: 'count' | 'winrate' | 'wins' | 'frontline' | 'damage' | 'flank' | 'support'; order?: 'asc' | 'desc' }): Promise<MatchCompositionStat[]> {
+export async function fetchMatchCompositions(params?: { tierMin?: number; tierMax?: number; limit?: number; sortBy?: 'count' | 'winrate' | 'wins' | 'frontline' | 'damage' | 'flank' | 'support'; order?: 'asc' | 'desc' }): Promise<MatchCompositionStat[]> {
   const query = new URLSearchParams();
+  if (params?.tierMin != null) query.set('tierMin', String(params.tierMin));
+  if (params?.tierMax != null) query.set('tierMax', String(params.tierMax));
   if (params?.limit != null) query.set('limit', String(params.limit));
   if (params?.sortBy) query.set('sortBy', params.sortBy);
   if (params?.order) query.set('order', params.order);
   try {
-    const raw = await fetchJson<{ data?: any[] }>(`/meta/compositions${query.toString() ? `?${query.toString()}` : ''}`);
-    return (raw.data ?? []).map((row) => ({
+    const raw = await fetchJson<any[]>(`/matches/compositions${query.toString() ? `?${query.toString()}` : ''}`);
+    return raw.map((row) => ({
       composition: String(row.comp_id),
       frontline: Number(row.frontline ?? 0),
       damage: Number(row.damage ?? 0),

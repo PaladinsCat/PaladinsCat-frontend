@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { fetchMatchCompositions, type MatchCompositionStat } from "@/lib/api-client";
+import { useLobbyTier } from "@/lib/lobby-tier-context";
 
 type SortKey = "totalMatches" | "winRate";
 
@@ -10,14 +11,18 @@ export default function CompositionStatsPage() {
   const [rows, setRows] = useState<MatchCompositionStat[]>([]);
   const [sortKey, setSortKey] = useState<SortKey>("totalMatches");
   const [descending, setDescending] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const { definition: lobbyTier, ready: lobbyTierReady } = useLobbyTier();
 
   useEffect(() => {
     let cancelled = false;
-    fetchMatchCompositions({ limit: 200 }).then((data) => {
-      if (!cancelled) setRows(data);
-    });
+    if (!lobbyTierReady) return;
+    setLoading(true);
+    fetchMatchCompositions({ tierMin: lobbyTier.tierMin, tierMax: lobbyTier.tierMax, limit: 200 })
+      .then((data) => { if (!cancelled) setRows(data); })
+      .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, []);
+  }, [lobbyTier.tierMin, lobbyTier.tierMax, lobbyTierReady]);
 
   const sorted = useMemo(() => [...rows].sort((a, b) => {
     const diff = a[sortKey] - b[sortKey];
@@ -74,7 +79,7 @@ export default function CompositionStatsPage() {
               <td className="px-3 py-3 text-right text-pc-text-secondary">{row.wins.toLocaleString()} / {row.losses.toLocaleString()}</td>
               <td className={row.winRate >= 50 ? "px-4 py-3 text-right font-semibold text-emerald-400" : "px-4 py-3 text-right font-semibold text-rose-400"}>{row.winRate.toFixed(1)}%</td>
             </tr>)}
-            {sorted.length === 0 && <tr><td colSpan={8} className="px-4 py-10 text-center text-pc-text-muted">Composition statistics are not available yet.</td></tr>}
+            {sorted.length === 0 && <tr><td colSpan={8} className="px-4 py-10 text-center text-pc-text-muted">{loading ? "Loading composition statistics…" : "Composition statistics are not available for this lobby scope yet."}</td></tr>}
           </tbody>
         </table>
       </div>

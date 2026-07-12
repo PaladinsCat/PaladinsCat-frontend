@@ -142,12 +142,17 @@ export default function StatsPage() {
 
   useEffect(() => {
     let cancelled = false;
-    fetchMatchCompositions({ limit: 10 }).then((comps) => {
+    if (!lobbyTierReady) return () => {};
+    fetchMatchCompositions({
+      limit: 10,
+      tierMin: lobbyTier.tierMin,
+      tierMax: lobbyTier.tierMax,
+    }).then((comps) => {
       if (cancelled) return;
       setCompositions(comps);
     }).catch(() => {});
     return () => { cancelled = true; };
-  }, []);
+  }, [lobbyTierReady, lobbyTier.tierMin, lobbyTier.tierMax]);
 
   const [champions, setChampions] = useState<Champion[]>([]);
 
