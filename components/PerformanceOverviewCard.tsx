@@ -26,7 +26,7 @@ export function PerformanceOverviewCard({
     return value.toFixed(1);
   };
   return (
-    <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4">
+    <div className="h-full bg-pc-bg-elevated border border-pc-border rounded-xl p-4">
       <div className="space-y-2">
         {metrics.map(({ key, label, color, p10, p25, mean, p75, p90 }) => (
           <div key={key} className="flex items-center gap-3">

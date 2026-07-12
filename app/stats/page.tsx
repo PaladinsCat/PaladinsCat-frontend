@@ -240,7 +240,7 @@ export default function StatsPage() {
 
       {/* ── Performance, eGPM, and ranked-player distribution ── */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div>
+        <div className="flex h-full flex-col">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-bold text-pc-text">Performance Overview</h2>
             <Link href="/stats/metrics" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">
@@ -249,7 +249,7 @@ export default function StatsPage() {
           </div>
         {overviewLoading ? (
           <DataCardSkeleton rows={5} />
-        ) : <ContentFade>{(() => {
+        ) : <ContentFade className="flex-1">{(() => {
           const perfRows = [
             { key: "dpm", label: "DPM", color: "#f87171" },
             { key: "hpm", label: "HPM", color: "#34d399" },
@@ -282,16 +282,13 @@ export default function StatsPage() {
         })()}</ContentFade>}
         </div>
 
-        <div>
+        <div className="flex h-full flex-col">
           <div className="flex items-center justify-between mb-3">
-            <div>
-              <h2 className="text-sm font-bold text-pc-text">eGPM by Role</h2>
-              <div className="text-[9px] text-pc-text-muted">{lobbyTier.label}</div>
-            </div>
+            <h2 className="text-sm font-bold text-pc-text">eGPM by Role</h2>
             <Link href="/stats/egpm" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">Detail →</Link>
           </div>
           {egpmLoading ? <DataCardSkeleton rows={5} /> : (
-            <ContentFade>
+            <ContentFade className="flex-1">
               <PerformanceOverviewCard metrics={orderedEgpmBaselines.map((row) => ({
                 key: `egpm-${row.role}`,
                 label: row.role === "Frontline" ? "Front" : row.role === "Support" ? "Supp" : row.role === "Damage" ? "Dmg" : row.role,
@@ -306,13 +303,13 @@ export default function StatsPage() {
           )}
         </div>
 
-        <div>
+        <div className="flex h-full flex-col">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-bold text-pc-text">Ranked Player Distribution</h2>
             <Link href="/stats/tiers" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">Detail →</Link>
           </div>
-          {overviewLoading ? <ChartCardSkeleton /> : <ContentFade className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
-            <div className="flex h-48 items-end justify-center gap-1.5 pb-2">
+          {overviewLoading ? <ChartCardSkeleton /> : <ContentFade className="flex-1 bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
+            <div className="flex h-full min-h-48 items-end justify-center gap-1.5 pb-2">
               {displayTiers.map((tier) => {
                 const height = Math.max(4, Math.round((tier.totalPlays / maxTierCount) * 116));
                 const rankIcon = getRankIconPath(tier.tierSort, tier.tierSort === 26 ? 101 : tier.tierSort === 27 ? 1 : 0);
