@@ -14,10 +14,17 @@ import { useTimeZone } from "@/lib/time-zone-context";
 import { formatLocalDateTime, formatLocalHourFromUtcBucket } from "@/lib/time-format";
 import { AsyncButton, EmptyState, ErrorState, LoadingPanel } from "@/components/async-state";
 import { DataTableSkeleton } from "@/components/route-skeleton";
+import { useAuth } from "@/lib/auth-context";
+import { useLobbyTier } from "@/lib/lobby-tier-context";
 
 const RANKED_QUEUE_ID = "486";
 export default function MatchesPage() {
   const { timeZone } = useTimeZone();
+  const { isLoggedIn, isLoading: authLoading } = useAuth();
+  const { definition: lobbyTier, ready: lobbyTierReady } = useLobbyTier();
+  const tierParams = isLoggedIn
+    ? { tierMin: lobbyTier.tierMin, tierMax: lobbyTier.tierMax }
+    : undefined;
   const [matches, setMatches] = useState<MatchSearchResult[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -45,10 +52,11 @@ export default function MatchesPage() {
 
   useEffect(() => {
     let active = true;
+    if (authLoading || !lobbyTierReady) return;
     const load = async () => {
       setStatsLoading(true);
       try {
-        const overview = await fetchMatchesOverview();
+        const overview = await fetchMatchesOverview(tierParams);
         if (active) {
           setHourlyStats(overview.hourly);
           setDroppedByHour(overview.droppedByHour);
@@ -61,7 +69,7 @@ export default function MatchesPage() {
     load();
     const interval = setInterval(load, 60_000);
     return () => { active = false; clearInterval(interval); };
-  }, []);
+  }, [authLoading, isLoggedIn, lobbyTierReady, lobbyTier.tierMin, lobbyTier.tierMax]);
 
   const loadMatches = useCallback(async () => {
     setLoading(true);
@@ -82,7 +90,7 @@ export default function MatchesPage() {
         setTotal(result.total);
         setTotalPages(result.page.totalPages);
       } else {
-        const recent = (await fetchMatchesOverview()).recent.slice(0, perPage);
+        const recent = (await fetchMatchesOverview(tierParams)).recent.slice(0, perPage);
         if (recent.length > 0) {
           setMatches(recent.map((m: MatchData) => ({
             match_id: m.match_id, entry_datetime: m.entry_datetime, map: m.map,
@@ -101,7 +109,7 @@ export default function MatchesPage() {
     } finally {
       setLoading(false);
     }
-  }, [appliedFilters, timeZone, page, perPage]);
+  }, [appliedFilters, timeZone, page, perPage, isLoggedIn, lobbyTier.tierMin, lobbyTier.tierMax]);
 
   useEffect(() => { loadMatches(); }, [loadMatches]);
 

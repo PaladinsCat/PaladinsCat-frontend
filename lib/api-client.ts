@@ -3522,26 +3522,33 @@ export interface MatchesOverview {
   droppedIdsByHour: Record<string, string[]>;
 }
 
-let matchesOverviewCache: { value: MatchesOverview; expiresAt: number } | null = null;
-let matchesOverviewInFlight: Promise<MatchesOverview> | null = null;
+const matchesOverviewCache = new Map<string, { value: MatchesOverview; expiresAt: number }>();
+const matchesOverviewInFlight = new Map<string, Promise<MatchesOverview>>();
 
-export async function fetchMatchesOverview(): Promise<MatchesOverview> {
-  if (matchesOverviewCache && matchesOverviewCache.expiresAt > Date.now()) return matchesOverviewCache.value;
-  if (matchesOverviewInFlight) return matchesOverviewInFlight;
-  matchesOverviewInFlight = fetchJson<any>('/matches/overview', { unwrapData: false }).then((raw) => {
+export async function fetchMatchesOverview(params?: { tierMin?: number; tierMax?: number }): Promise<MatchesOverview> {
+  const query = new URLSearchParams();
+  if (params?.tierMin != null) query.set('tierMin', String(params.tierMin));
+  if (params?.tierMax != null) query.set('tierMax', String(params.tierMax));
+  const cacheKey = query.toString() || 'all';
+  const cached = matchesOverviewCache.get(cacheKey);
+  if (cached && cached.expiresAt > Date.now()) return cached.value;
+  const activeRequest = matchesOverviewInFlight.get(cacheKey);
+  if (activeRequest) return activeRequest;
+  const request = fetchJson<any>(`/matches/overview${query.toString() ? `?${query.toString()}` : ''}`, { unwrapData: false }).then((raw) => {
     const value: MatchesOverview = {
       hourly: raw.hourly ?? null,
       recent: Array.isArray(raw.recent) ? raw.recent : [],
       droppedByHour: raw.dropped_by_hour ?? {},
       droppedIdsByHour: raw.dropped_ids_by_hour ?? {},
     };
-    matchesOverviewCache = { value, expiresAt: Date.now() + 60_000 };
+    matchesOverviewCache.set(cacheKey, { value, expiresAt: Date.now() + 60_000 });
     return value;
   });
+  matchesOverviewInFlight.set(cacheKey, request);
   try {
-    return await matchesOverviewInFlight;
+    return await request;
   } finally {
-    matchesOverviewInFlight = null;
+    matchesOverviewInFlight.delete(cacheKey);
   }
 }
 

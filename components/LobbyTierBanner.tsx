@@ -1,11 +1,21 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useAuth } from "@/lib/auth-context";
 import { useLobbyTier } from "@/lib/lobby-tier-context";
 import { LOBBY_TIER_OPTIONS, type LobbyTierFilter } from "@/lib/lobby-tier";
 
 export default function LobbyTierBanner() {
+  const pathname = usePathname();
+  const { isLoggedIn, isLoading: authLoading } = useAuth();
   const { filter, definition, ready, setFilter } = useLobbyTier();
+
+  const statisticsRoute = ["/champions", "/matches", "/stats"].some(
+    (root) => pathname === root || pathname.startsWith(`${root}/`),
+  );
+
+  if (authLoading || !isLoggedIn || !statisticsRoute) return null;
 
   const changeScope = (next: LobbyTierFilter) => {
     if (next === filter) return;
