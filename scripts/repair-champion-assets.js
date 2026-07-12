@@ -35,7 +35,7 @@ const CARD_ICON_ALIASES = new Map([
 ]);
 
 const TALENT_ICON_ALIASES = new Map([
-  ["seris:resuscitate", "/images/cards/Card_Resuscitate.png"],
+  ["seris:resuscitate", "/images/champions/Talent Seris Soul Collector.avif"],
 ]);
 
 function looseKey(value) {
