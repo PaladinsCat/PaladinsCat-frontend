@@ -53,6 +53,12 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
   const [performanceLeaderboards, setPerformanceLeaderboards] = useState<Record<string, PerformanceLeaderboardEntry[]>>(initialOverview?.performanceLeaderboards ?? {});
   const [rankedPlayers, setRankedPlayers] = useState<RankedPlayer[]>(initialOverview?.rankedPlayers ?? []);
   const [accountEloPlayers, setAccountEloPlayers] = useState<ClassLeaderboardEntry[]>(initialOverview?.accountEloPlayers ?? []);
+  const [communityCounts, setCommunityCounts] = useState<PlayersOverview["communityCounts"]>(initialOverview?.communityCounts ?? {
+    cheaters: initialOverview?.cheaterPlayers.length ?? 0,
+    suspicious: initialOverview?.suspiciousPlayers.length ?? 0,
+    weirdos: initialOverview?.weirdoPlayers.length ?? 0,
+    hallOfFame: initialOverview?.hallOfFamePlayers.length ?? 0,
+  });
   const [cheaterPlayers, setCheaterPlayers] = useState<CheaterPlayer[]>(initialOverview?.cheaterPlayers ?? []);
   const [suspiciousPlayers, setSuspiciousPlayers] = useState<CheaterPlayer[]>(initialOverview?.suspiciousPlayers ?? []);
   const [weirdoPlayers, setWeirdoPlayers] = useState<CheaterPlayer[]>(initialOverview?.weirdoPlayers ?? []);
@@ -74,6 +80,7 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
         setPerformanceLeaderboards(overview.performanceLeaderboards);
         setRankedPlayers(overview.rankedPlayers);
         setAccountEloPlayers(overview.accountEloPlayers);
+        setCommunityCounts(overview.communityCounts);
         setCheaterPlayers(overview.cheaterPlayers);
         setSuspiciousPlayers(overview.suspiciousPlayers);
         setWeirdoPlayers(overview.weirdoPlayers);
@@ -207,7 +214,7 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
                   <div className="w-2 h-2 rounded-full bg-red-500" />
                   <h3 className="text-pc-text font-semibold text-xs">Cheaters</h3>
                   <span className="text-xs px-1.5 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/20">
-                    {cheaterPlayers.length}
+                    {communityCounts.cheaters}
                   </span>
                 </div>
                 <Link href="/players/cheaters" className="text-xs text-pc-text-secondary hover:text-red-400 transition-colors drop-shadow-sm">
@@ -243,7 +250,7 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
                   <div className="w-2 h-2 rounded-full bg-amber-500" />
                   <h3 className="text-pc-text font-semibold text-xs">Suspicious</h3>
                   <span className="text-xs px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                    {suspiciousPlayers.length}
+                    {communityCounts.suspicious}
                   </span>
                 </div>
                 <Link href="/players/suspicious" className="text-xs text-pc-text-secondary hover:text-amber-400 transition-colors drop-shadow-sm">
@@ -284,7 +291,7 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
                   <div className="w-2 h-2 rounded-full bg-violet-500" />
                   <h3 className="text-pc-text font-semibold text-xs">Weirdo</h3>
                   <span className="text-xs px-1.5 py-0.5 rounded-full bg-violet-500/10 text-violet-300 border border-violet-500/20">
-                    {weirdoPlayers.length}
+                    {communityCounts.weirdos}
                   </span>
                 </div>
                 <Link href="/players/weirdos" className="text-xs text-pc-text-secondary hover:text-violet-300 transition-colors drop-shadow-sm">
@@ -319,7 +326,7 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
                   <div className="w-2 h-2 rounded-full bg-emerald-500" />
                   <h3 className="text-pc-text font-semibold text-xs">Hall of Fame</h3>
                   <span className="text-xs px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
-                    {hallOfFamePlayers.length}
+                    {communityCounts.hallOfFame}
                   </span>
                 </div>
                 <Link href="/players/hall-of-fame" className="text-xs text-pc-text-secondary hover:text-emerald-300 transition-colors drop-shadow-sm">

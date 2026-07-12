@@ -546,6 +546,12 @@ export interface PlayersOverview {
   suspiciousPlayers: CheaterPlayer[];
   weirdoPlayers: CheaterPlayer[];
   hallOfFamePlayers: CheaterPlayer[];
+  communityCounts: {
+    cheaters: number;
+    suspicious: number;
+    weirdos: number;
+    hallOfFame: number;
+  };
 }
 
 let playersOverviewCache: { value: PlayersOverview; expiresAt: number } | null = null;
@@ -585,6 +591,12 @@ export function mapPlayersOverviewResponse(raw: any): PlayersOverview {
     avgGpm: row.avg_egpm == null ? null : Number(row.avg_egpm), avgMpm: row.avg_mpm == null ? null : Number(row.avg_mpm),
     totalMatches: Number(row.total_matches ?? 0), winRate: row.win_rate == null ? null : Number(row.win_rate),
   });
+  const communityCounts = {
+    cheaters: Number(raw.community_counts?.cheaters ?? raw.cheaters?.[0]?.total_count ?? raw.cheaters?.length ?? 0),
+    suspicious: Number(raw.community_counts?.suspicious ?? raw.suspicious?.[0]?.total_count ?? raw.suspicious?.length ?? 0),
+    weirdos: Number(raw.community_counts?.weirdos ?? raw.weirdos?.[0]?.total_count ?? raw.weirdos?.length ?? 0),
+    hallOfFame: Number(raw.community_counts?.hall_of_fame ?? raw.hall_of_fame?.[0]?.total_count ?? raw.hall_of_fame?.length ?? 0),
+  };
 
   return {
     championEloPlayers: (raw.champion_elo?.data ?? []).map(mapChampionElo),
@@ -597,6 +609,7 @@ export function mapPlayersOverviewResponse(raw: any): PlayersOverview {
     suspiciousPlayers: (raw.suspicious ?? []).map(mapCommunity),
     weirdoPlayers: (raw.weirdos ?? []).map(mapCommunity),
     hallOfFamePlayers: (raw.hall_of_fame ?? []).map(mapCommunity),
+    communityCounts,
   };
 }
 
