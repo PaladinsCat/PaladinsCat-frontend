@@ -81,12 +81,7 @@ export default function CompositionStatsPage() {
           <thead className="border-b border-pc-border text-left text-xs text-pc-text-muted">
             <tr>
               <th className="w-[18%] px-4 py-3">Composition</th>
-              {CLASS_COLUMNS.map((column) => <th key={column.key} className="w-[10%] px-2 py-3 text-right">
-                <span className="inline-flex items-center justify-end gap-1.5">
-                  <img src={column.icon} alt="" aria-hidden="true" className="h-4 w-4 object-contain" />
-                  <span>{column.label}</span>
-                </span>
-              </th>)}
+              {CLASS_COLUMNS.map((column) => <th key={column.key} className="w-[10%] px-2 py-3 text-right">{column.label}</th>)}
               <th className="px-3 py-3 text-right"><button onClick={() => changeSort("totalMatches")} className="hover:text-pc-accent">Matches {sortKey === "totalMatches" && (descending ? "↓" : "↑")}</button></th>
               <th className="px-3 py-3 text-right">W / L</th>
               <th className="px-4 py-3 text-right"><button onClick={() => changeSort("winRate")} className="hover:text-pc-accent">Win Rate {sortKey === "winRate" && (descending ? "↓" : "↑")}</button></th>
