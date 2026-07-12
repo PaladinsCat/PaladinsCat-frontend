@@ -16,7 +16,7 @@ const SEVERITY_STYLES: Record<string, string> = {
 const value = (input: unknown) => input == null || input === "" ? "—" : Number.isFinite(Number(input)) ? Number(input).toLocaleString() : String(input);
 
 export default function PlayerModerationCards({ players, showSeverity = false }: { players: any[]; showSeverity?: boolean }) {
-  return <div className="space-y-2 md:hidden">
+  return <div className="space-y-2 lg:hidden">
     {players.map((player, index) => <article key={player.id} className="pc-mobile-panel overflow-hidden">
       <div className="flex min-w-0 items-center gap-3 p-3">
         <span className="w-6 shrink-0 text-center text-xs text-pc-text-muted">{index + 1}</span>

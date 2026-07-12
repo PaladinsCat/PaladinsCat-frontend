@@ -46,7 +46,7 @@ export default function MatchupCard({ player }: { player: MatchResultPlayer }) {
 
   return (
     <article className="relative min-w-0 overflow-hidden rounded-lg border border-pc-border bg-pc-bg-elevated p-3 shadow-sm transition-colors hover:border-pc-accent-mid">
-      <div className="absolute -right-7 top-12 text-[132px] font-bold leading-none text-pc-text/[0.025] select-none">?</div>
+      <div className="absolute right-0 top-12 select-none text-[96px] font-bold leading-none text-pc-text/[0.025] sm:text-[132px]">?</div>
       <div className="relative flex flex-col items-center text-center">
         <img src={getChampionIconSafe(champion)} alt={champion || "Champion"} className="h-14 w-14 rounded-full border-2 border-pc-border object-cover" onError={(event) => { event.currentTarget.src = "/images/champions/Champion_Generic_Icon.avif"; }} />
         <div className="mt-2 flex w-full items-center justify-center gap-1 text-sm font-bold">

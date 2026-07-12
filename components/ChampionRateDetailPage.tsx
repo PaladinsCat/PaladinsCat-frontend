@@ -202,7 +202,7 @@ export default function ChampionRateDetailPage({ config }: { config: RateMetricC
                 </div>
               </div>
 
-              <div className="divide-y divide-pc-border/50 sm:hidden">
+              <div className="divide-y divide-pc-border/50 md:hidden">
                 {section.champions.map((champion, index) => {
                   const rowVsClassPct = pctDiff(champion.value, section.average);
                   const rowVsGlobalPct = pctDiff(champion.value, globalAverage);
@@ -216,7 +216,7 @@ export default function ChampionRateDetailPage({ config }: { config: RateMetricC
                 {section.champions.length === 0 && <div className="px-3 py-6 text-center text-sm text-pc-text-muted">No champion data</div>}
               </div>
 
-              <div className="hidden overflow-x-auto sm:block">
+              <div className="hidden overflow-x-auto md:block">
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="text-left text-pc-text-muted border-b border-pc-border/60">

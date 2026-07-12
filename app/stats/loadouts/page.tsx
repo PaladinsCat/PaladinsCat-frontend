@@ -48,7 +48,7 @@ export default function LoadoutsPage() {
     <div className="space-y-6">
       <h1 className="pc-heading pc-heading-lg text-pc-accent">Loadout Meta</h1>
 
-      <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 sm:hidden">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 md:hidden">
         <label className="min-w-0"><span className="pc-label">Sort loadouts</span><select value={sortKey} onChange={(event) => { setSortKey(event.target.value as SortKey); setSortDir("desc"); }} className="pc-select w-full"><option value="winRate">Win rate</option><option value="totalUses">Plays</option><option value="avgDpm">Average DPM</option><option value="avgHpm">Average HPM</option><option value="championName">Champion</option></select></label>
         <button type="button" onClick={() => setSortDir((direction) => direction === "asc" ? "desc" : "asc")} className="pc-touch-target mt-[1.35rem] rounded-lg border border-pc-border bg-pc-bg-elevated px-3 text-pc-accent" aria-label={`Sort ${sortDir === "asc" ? "descending" : "ascending"}`}>{sortDir === "asc" ? "↑" : "↓"}</button>
       </div>
@@ -61,13 +61,13 @@ export default function LoadoutsPage() {
         <EmptyState title="No loadout statistics" description="Loadout combinations will appear after enough ranked matches are processed." />
       ) : (
         <>
-          <div className="space-y-2 sm:hidden">
+          <div className="space-y-2 md:hidden">
             {sorted.slice(0, 20).map((loadout) => <Link key={loadout.deckHash} href={`/champions/${championSlug(loadout.championName)}`} className="pc-mobile-panel block p-3">
               <div className="flex min-w-0 items-center gap-3"><img src={getChampionIconSafe(loadout.championName)} alt="" className="h-10 w-10 shrink-0 rounded-lg object-contain" /><div className="min-w-0 flex-1"><div className="truncate text-sm font-semibold text-pc-text">{loadout.championName}</div><div className="truncate font-mono text-[10px] text-pc-text-muted">{loadout.deckHash}</div></div><div className={loadout.winRate >= 50 ? "shrink-0 text-right font-bold text-emerald-400" : "shrink-0 text-right font-bold text-rose-400"}>{loadout.winRate?.toFixed(1)}%<div className="text-[9px] font-normal uppercase tracking-wide text-pc-text-muted">win rate</div></div></div>
               <div className="mt-3 grid grid-cols-3 gap-1.5">{[["Plays", loadout.totalUses.toLocaleString()], ["Avg DPM", loadout.avgDpm?.toFixed(0)], ["Avg HPM", loadout.avgHpm?.toFixed(0)]].map(([label, metric]) => <div key={label} className="rounded-lg bg-pc-bg-secondary/60 p-2 text-center"><div className="text-[8px] uppercase text-pc-text-muted">{label}</div><div className="mt-0.5 font-mono text-xs font-semibold text-pc-text">{metric ?? "—"}</div></div>)}</div>
             </Link>)}
           </div>
-        <Card className="hidden sm:block">
+        <Card className="hidden md:block">
           <div className="overflow-x-auto">
             <table className="pc-table">
               <thead>

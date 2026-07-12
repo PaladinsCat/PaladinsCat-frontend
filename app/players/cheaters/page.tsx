@@ -55,7 +55,7 @@ export default function CheatersPage() {
       ) : (
         <>
           <PlayerModerationCards players={data} />
-        <div className="hidden overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated md:block">
+        <div className="hidden overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated lg:block">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>

@@ -162,6 +162,13 @@ canvas {
   .pc-search-pill {
     min-height: 44px;
   }
+
+  main button,
+  main input:not([type="checkbox"]):not([type="radio"]),
+  main select,
+  main textarea {
+    min-height: 44px;
+  }
 }
 
 .pc-section-heading {
@@ -179,11 +186,17 @@ canvas {
   background: var(--pc-glass-bg);
   backdrop-filter: var(--pc-glass-blur);
   -webkit-backdrop-filter: var(--pc-glass-blur);
+  overflow-wrap: anywhere;
 }
 
 .pc-touch-target {
   min-height: 44px;
   min-width: 44px;
+}
+
+main :where(a, button, input, select, textarea):focus-visible {
+  outline: 2px solid var(--pc-accent);
+  outline-offset: 2px;
 }
 
 /* Opaque variant for leaderboard */
