@@ -72,24 +72,24 @@ type RawTalent = {
   category?: string | null;
 };
 
-const CURRENT_ITEMS: Array<{ name: string; category: BuildItemCategory; fallbackId: number }> = [
+const CURRENT_ITEMS: Array<{ name: string; category: BuildItemCategory; fallbackId: number; fallbackDescription?: string }> = [
   { name: "Bulldozer", category: "Offense", fallbackId: 13079 },
   { name: "Deft Hands", category: "Offense", fallbackId: 13235 },
-  { name: "Lethality", category: "Offense", fallbackId: 31100 },
-  { name: "Trigger Scent", category: "Offense", fallbackId: 33071 },
+  { name: "Lethality", category: "Offense", fallbackId: 31100, fallbackDescription: "Increase your Movement Speed by {20}% and Jump Height by {60}% for 5s after getting an Elimination." },
+  { name: "Trigger Scent", category: "Offense", fallbackId: 33071, fallbackDescription: "Increase your in-hand weapon damage dealt by {6}% for 5s after getting an Elimination." },
   { name: "Wrecker", category: "Offense", fallbackId: 13071 },
   { name: "Blast Shields", category: "Defense", fallbackId: 33618 },
-  { name: "Guardian", category: "Defense", fallbackId: 13228 },
+  { name: "Guardian", category: "Defense", fallbackId: 13228, fallbackDescription: "Increase the effectiveness of Shields you create by {20}%." },
   { name: "Haven", category: "Defense", fallbackId: 13229 },
   { name: "Resilience", category: "Defense", fallbackId: 11683 },
-  { name: "Sentinel", category: "Defense", fallbackId: 33075 },
-  { name: "Bloodbath", category: "Healing", fallbackId: 33070 },
+  { name: "Sentinel", category: "Defense", fallbackId: 33075, fallbackDescription: "Gain a {200}-Health Shield for 5s after an Elimination. Stacks up to 3 times." },
+  { name: "Bloodbath", category: "Healing", fallbackId: 33070, fallbackDescription: "Kills True Heal you, and Eliminations True Heal you and the ally who got the kill, for {360} Health over 4s. Stacks up to 2 times." },
   { name: "Life Rip", category: "Healing", fallbackId: 12010 },
-  { name: "Meditation", category: "Healing", fallbackId: 33082 },
+  { name: "Meditation", category: "Healing", fallbackId: 33082, fallbackDescription: "Heal for an additional {2.5}% of your maximum Health every 0.25s while out of combat." },
   { name: "Rejuvenate", category: "Healing", fallbackId: 14633 },
   { name: "Veteran", category: "Healing", fallbackId: 13224 },
   { name: "Chronos", category: "Utility", fallbackId: 11723 },
-  { name: "Hoard", category: "Utility", fallbackId: 33081 },
+  { name: "Hoard", category: "Utility", fallbackId: 33081, fallbackDescription: "Gain bonus Credits over time and on Eliminations. At level 3, gain 10% Movement, Mount, Cooldown, and Ultimate Charge speed instead." },
   { name: "Master Riding", category: "Utility", fallbackId: 11646 },
   { name: "Morale Boost", category: "Utility", fallbackId: 13165 },
   { name: "Nimble", category: "Utility", fallbackId: 11826 },
@@ -105,6 +105,11 @@ function normalizeName(value: string | null | undefined) {
     .replace(/[’']/g, "")
     .replace(/[^a-z0-9]+/g, "")
     .trim();
+}
+
+function usableDescription(value: string | null | undefined) {
+  const description = String(value ?? "").trim();
+  return description && !/^reference placeholder\b/i.test(description) ? description : null;
 }
 
 function itemIconPath(name: string) {
@@ -160,18 +165,23 @@ async function buildItems(): Promise<BuildItemReference[]> {
     loadLocalItems(),
   ]);
   const byName = new Map<string, RawItem>();
+  const localByName = new Map<string, RawItem>();
+  for (const row of localItems) {
+    localByName.set(normalizeName(nameOf(row, "item")), row);
+  }
   for (const row of [...localItems, ...(dbItems as RawItem[])]) {
     byName.set(normalizeName(nameOf(row, "item")), row);
   }
 
   return CURRENT_ITEMS.map((item) => {
     const row = byName.get(normalizeName(item.name));
+    const localRow = localByName.get(normalizeName(item.name));
     const id = row ? idOf(row, "item") : item.fallbackId;
     return {
       id: Number.isFinite(id) && id > 0 ? id : item.fallbackId,
       name: item.name,
       category: item.category,
-      description: row?.description ?? null,
+      description: usableDescription(row?.description) ?? usableDescription(localRow?.description) ?? item.fallbackDescription ?? null,
       iconUrl: row?.icon_url ?? row?.iconUrl ?? itemIconPath(item.name),
     };
   });
