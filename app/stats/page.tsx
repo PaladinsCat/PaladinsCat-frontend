@@ -277,16 +277,16 @@ export default function StatsPage() {
             <Link href="/stats/tiers" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">Detail →</Link>
           </div>
           {overviewLoading ? <ChartCardSkeleton /> : <ContentFade className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
-            <div className="grid grid-cols-2 gap-0">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-0">
               {/* Left: Profile Tier Distribution */}
               <div>
                 <div className="text-xs font-semibold text-pc-text-secondary mb-2 px-2">Ranked Player Distribution</div>
-                <div className="flex items-end justify-center gap-1.5 h-48 overflow-x-auto pb-2">
+                <div className="flex h-48 items-end justify-center gap-1.5 pb-2">
                   {displayTiers.map((tier) => {
                     const height = Math.max(4, Math.round((tier.totalPlays / maxTierCount) * 116));
                     const rankIcon = getRankIconPath(tier.tierSort, tier.tierSort === 26 ? 101 : tier.tierSort === 27 ? 1 : 0);
                     return (
-                      <div key={tier.tierSort} className="flex flex-col items-center justify-end gap-1 min-w-9 h-full group">
+                      <div key={tier.tierSort} className="group flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1">
                         <div className="text-[9px] text-pc-text-muted tabular-nums opacity-0 group-hover:opacity-100 transition-opacity">
                           {tier.percentage.toFixed(1)}%
                         </div>
@@ -311,14 +311,14 @@ export default function StatsPage() {
                 </div>
               </div>
               {/* Right: Active Ranked Match Distribution (with left border divider) */}
-              <div className="pl-3 border-l border-pc-border">
+              <div className="border-t border-pc-border pt-4 sm:border-l sm:border-t-0 sm:pl-3 sm:pt-0">
                 <div className="text-xs font-semibold text-pc-text-secondary mb-2 px-2">Active Ranked Matches</div>
-                <div className="flex items-end justify-center gap-1.5 h-48 overflow-x-auto pb-2">
+                <div className="flex h-48 items-end justify-center gap-1.5 pb-2">
                   {activeDisplayTiers.map((tier) => {
                     const height = Math.max(4, Math.round((tier.totalPlays / maxActiveTierCount) * 116));
                     const rankIcon = getRankIconPath(tier.tierSort, tier.tierSort === 26 ? 101 : tier.tierSort === 27 ? 1 : 0);
                     return (
-                      <div key={tier.tierSort} className="flex flex-col items-center justify-end gap-1 min-w-9 h-full group">
+                      <div key={tier.tierSort} className="group flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1">
                         <div className="text-[9px] text-pc-text-muted tabular-nums opacity-0 group-hover:opacity-100 transition-opacity">
                           {tier.percentage.toFixed(1)}%
                         </div>
@@ -350,15 +350,15 @@ export default function StatsPage() {
       {/* ── Top Champions (win rate + ban rate, consolidated) ── */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
       <section className="lg:col-span-3 lg:order-1">
-        <div className="flex items-center justify-between mb-3 px-2">
+        <div className="pc-section-heading mb-3 px-1 sm:px-2">
           <h2 className="text-sm font-bold text-pc-text">Top Champions</h2>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-x-3 gap-y-1">
             <Link href="/stats/winrate" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">Win Rate Detail →</Link>
             <Link href="/stats/banrate" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">Ban Rate Detail →</Link>
           </div>
         </div>
         {overviewLoading ? <DataCardSkeleton rows={10} columns={2} /> : <ContentFade className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-5 min-[480px]:grid-cols-2 min-[480px]:gap-4">
             {/* Left: Top Win Rate */}
             <div>
               <div className="text-xs font-semibold text-pc-text-secondary mb-2 px-2">Top Win Rate</div>

@@ -141,12 +141,12 @@ function TabBar({
   onChange: (key: string) => void;
 }) {
   return (
-    <div className="flex gap-1 bg-pc-bg-elevated border border-pc-border rounded-xl p-1 overflow-x-auto">
+    <div className="grid grid-cols-5 gap-1 overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated p-1">
       {configs.map((cfg) => (
         <button
           key={cfg.key}
           onClick={() => onChange(cfg.key)}
-          className={`px-4 py-2 rounded-lg text-sm font-bold transition-all whitespace-nowrap ${
+          className={`pc-touch-target min-w-0 rounded-lg px-1 py-2 text-xs font-bold transition-all sm:px-4 sm:text-sm ${
             activeKey === cfg.key
               ? "text-white shadow-sm"
               : "text-pc-text-secondary hover:text-pc-text"
@@ -226,7 +226,7 @@ function MetricPanel({ config }: { config: MetricConfig }) {
     <div className="space-y-6">
       {/* Global summary card */}
       <section className="bg-pc-bg-elevated border border-pc-border rounded-xl p-5">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-5">
           {[
             { label: "Global Avg", value: formatVal(metricSummary.mean), accent: true },
             { label: "P10", value: formatVal(metricSummary.p10) },
@@ -268,7 +268,7 @@ function MetricPanel({ config }: { config: MetricConfig }) {
                     <div className="text-lg font-bold" style={{ color: config.color }}>{formatVal(classMean)}</div>
                   </div>
                 </div>
-                <div className="grid grid-cols-4 gap-3 mt-4 text-xs">
+                <div className="mt-4 grid grid-cols-2 gap-3 text-xs sm:grid-cols-4">
                   <div>
                     <div className="text-pc-text-muted text-xs uppercase tracking-wider">vs Global</div>
                     <div className={classVsGlobal >= 0 ? "text-emerald-400" : "text-red-400"}>
@@ -290,7 +290,30 @@ function MetricPanel({ config }: { config: MetricConfig }) {
                 </div>
               </div>
 
-              <div className="overflow-x-auto">
+              <div className="divide-y divide-pc-border/50 sm:hidden">
+                {section.champions.map((champion, index) => {
+                  const vsClassPct = pctDiff(champion.value, classMean);
+                  const vsGlobalPct = pctDiff(champion.value, globalMean);
+                  return (
+                    <Link key={champion.name} href={`/champions/${championSlug(champion.name)}`} className="flex min-w-0 items-center gap-3 p-3 transition-colors hover:bg-pc-bg/50">
+                      <div className="w-7 shrink-0 text-center text-xs text-pc-text-muted">#{index + 1}</div>
+                      <img src={getChampionIconSafe(champion.name)} alt="" className="h-9 w-9 shrink-0 rounded-lg object-contain" />
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-sm font-semibold text-pc-text">{champion.name}</div>
+                        <div className="mt-0.5 flex flex-wrap gap-x-2 text-[10px]">
+                          <span className={vsClassPct >= 0 ? "text-emerald-400" : "text-red-400"}>{vsClassPct >= 0 ? "+" : ""}{vsClassPct.toFixed(1)}% class</span>
+                          <span className={vsGlobalPct >= 0 ? "text-emerald-400" : "text-red-400"}>{vsGlobalPct >= 0 ? "+" : ""}{vsGlobalPct.toFixed(1)}% global</span>
+                          <span className="text-pc-text-muted">{champion.matches.toLocaleString()} matches</span>
+                        </div>
+                      </div>
+                      <span className="shrink-0 font-mono text-sm font-bold" style={{ color: config.color }}>{formatVal(champion.value)}</span>
+                    </Link>
+                  );
+                })}
+                {section.champions.length === 0 && <div className="px-3 py-6 text-center text-sm text-pc-text-muted">No champion data</div>}
+              </div>
+
+              <div className="hidden overflow-x-auto sm:block">
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="text-left text-pc-text-muted border-b border-pc-border/60">

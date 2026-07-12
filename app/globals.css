@@ -107,6 +107,23 @@ body {
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
+html,
+body {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+main,
+main > div {
+  min-width: 0;
+}
+
+img,
+video,
+canvas {
+  max-width: 100%;
+}
+
 /* ── Component Utilities ── */
 
 /* Card: elevated bg, 16px radius, 1px border, default shadow */
@@ -121,6 +138,52 @@ body {
   -webkit-backdrop-filter: var(--pc-glass-blur);
   background-clip: padding-box;
   transform: translateZ(0);
+}
+
+@media (max-width: 639px) {
+  .pc-card {
+    border-radius: 14px;
+    padding: 16px;
+  }
+
+  .pc-card-flush {
+    border-radius: 14px;
+  }
+
+  .pc-heading-lg {
+    font-size: 1.5rem;
+  }
+
+  .pc-btn-primary,
+  .pc-btn-secondary,
+  .pc-btn-ghost,
+  .pc-input,
+  .pc-select,
+  .pc-search-pill {
+    min-height: 44px;
+  }
+}
+
+.pc-section-heading {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 0.75rem;
+}
+
+.pc-mobile-panel {
+  border: 1px solid var(--pc-border);
+  border-radius: 14px;
+  background: var(--pc-glass-bg);
+  backdrop-filter: var(--pc-glass-blur);
+  -webkit-backdrop-filter: var(--pc-glass-blur);
+}
+
+.pc-touch-target {
+  min-height: 44px;
+  min-width: 44px;
 }
 
 /* Opaque variant for leaderboard */

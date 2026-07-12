@@ -38,20 +38,20 @@ export default function CommunityPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-pc-accent">
+      <div className="pc-section-heading">
+        <h1 className="text-2xl font-bold text-pc-accent sm:text-3xl">
           <ScrambleText text="Community" speed={30} iterations={15} delayFromCenter={false} />
         </h1>
         <Link
           href="/community/create"
-          className="px-4 py-2 bg-pc-accent hover:bg-pc-accent-secondary text-white font-semibold rounded-lg transition-colors text-sm"
+          className="pc-touch-target inline-flex items-center px-4 py-2 bg-pc-accent hover:bg-pc-accent-secondary text-white font-semibold rounded-lg transition-colors text-sm"
         >
           New Post
         </Link>
       </div>
 
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(17rem,1fr)]">
-        <section>
+        <section className="min-w-0">
           {posts.length === 0 ? (
             <EmptyState title="No posts yet" description="Be the first to share something with the community." />
           ) : (
@@ -60,24 +60,24 @@ export default function CommunityPage() {
                 <Link
                   key={post.id}
                   href={`/community/${post.id}`}
-                  className="block bg-pc-bg-elevated rounded-lg border border-pc-border p-5 hover:border-pc-accent/50 transition-colors"
+                  className="block min-w-0 overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated p-4 transition-colors hover:border-pc-accent/50 sm:p-5"
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h2 className="text-lg font-semibold text-pc-text hover:text-pc-accent transition-colors">
+                  <div className="flex min-w-0 items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <h2 className="break-words text-base font-semibold text-pc-text transition-colors hover:text-pc-accent sm:text-lg">
                         {post.title}
                       </h2>
-                      <p className="text-pc-text-secondary text-sm mt-1 line-clamp-2">
+                      <p className="mt-1 line-clamp-2 break-words text-sm text-pc-text-secondary [overflow-wrap:anywhere]">
                         {post.content}
                       </p>
-                      <div className="flex items-center gap-4 mt-3 text-pc-text-muted text-sm">
-                        <span>by {post.username}</span>
+                      <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-pc-text-muted sm:text-sm">
+                        <span className="min-w-0 truncate">by {post.username}</span>
                         <span>{formatLocalDateTime(post.createdAt)}</span>
-                        <span>❤ {post.likes}</span>
-                        <span>👁 {post.viewCount}</span>
+                        <span aria-label={`${post.likes} likes`}>❤ {post.likes}</span>
+                        <span aria-label={`${post.viewCount} views`}>👁 {post.viewCount}</span>
                       </div>
                     </div>
-                    <span className="text-pc-text-muted ml-4">→</span>
+                    <span className="shrink-0 text-pc-text-muted">→</span>
                   </div>
                 </Link>
               ))}

@@ -52,6 +52,15 @@ const SORT_OPTIONS: { key: SortKey; label: string }[] = [
   { key: "trend", label: "Trend" },
 ];
 
+const MOBILE_TIER_OPTIONS = [
+  { value: "26-gm", label: "Grandmaster" },
+  { value: "26-master", label: "Master" },
+  ...TIER_GROUPS.flatMap((group) => group.tiers.map((item) => ({
+    value: String(item.tier),
+    label: item.label,
+  }))),
+];
+
 function RankBadge({ rank }: { rank: number }) {
   if (rank === 1)
     return <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-yellow-500/20 text-yellow-400 font-bold text-sm">🥇</span>;
@@ -129,19 +138,63 @@ export default function LeaderboardPage() {
     ? (masterSubTab === "gm" ? "Grandmaster" : "Master")
     : (TIER_GROUPS.flatMap((g) => g.tiers).find((t) => t.tier === tier)?.label || `Tier ${tier}`);
 
+  const mobileTierValue = tier === 26 ? `26-${masterSubTab}` : String(tier);
+  const selectMobileTier = (value: string) => {
+    if (value === "26-gm" || value === "26-master") {
+      setTier(26);
+      setMasterSubTab(value === "26-gm" ? "gm" : "master");
+      return;
+    }
+    setTier(Number(value));
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
+      <div className="min-w-0">
         <Link href="/players" className="text-pc-accent text-xs hover:underline mb-2 inline-block">← Players</Link>
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">Ranked Leaderboard</h1>
+        <h1 className="pc-heading pc-heading-lg break-words text-pc-accent">Ranked Leaderboard</h1>
       </div>
 
       {/* Main layout: sidebar + content */}
-      <div className="flex gap-6">
+      <div className="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-[14rem_minmax(0,1fr)] lg:gap-6">
+
+        <section className="pc-mobile-panel space-y-3 p-3 lg:hidden" aria-label="Leaderboard filters">
+          <div className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2">
+            <label className="block min-w-0">
+              <span className="pc-label">Tier</span>
+              <select
+                value={mobileTierValue}
+                onChange={(event) => selectMobileTier(event.target.value)}
+                className="pc-select w-full"
+              >
+                {MOBILE_TIER_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+              </select>
+            </label>
+            <label className="block min-w-0">
+              <span className="pc-label">Sort</span>
+              <div className="flex gap-2">
+                <select value={sortKey} onChange={(event) => setSortKey(event.target.value as SortKey)} className="pc-select min-w-0 flex-1">
+                  {SORT_OPTIONS.map((option) => <option key={option.key} value={option.key}>{option.label}</option>)}
+                </select>
+                <button type="button" onClick={() => setSortDir((direction) => direction === "asc" ? "desc" : "asc")} className="pc-touch-target rounded-lg border border-pc-border bg-pc-bg px-3 text-pc-accent" aria-label={`Sort ${sortDir === "asc" ? "descending" : "ascending"}`}>
+                  {sortDir === "asc" ? "↑" : "↓"}
+                </button>
+              </div>
+            </label>
+          </div>
+          <label className="block">
+            <span className="pc-label">Find a player</span>
+            <input type="search" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="Filter players…" className="pc-input" />
+          </label>
+          <div className="flex items-center justify-between gap-3 border-t border-pc-border/70 pt-3 text-xs">
+            <span className="font-semibold text-pc-text">{currentTierLabel}</span>
+            <span className="text-pc-text-muted">{sorted.length} player{sorted.length === 1 ? "" : "s"}</span>
+          </div>
+        </section>
 
         {/* ── Left Sidebar ── */}
-        <aside className="w-56 shrink-0 space-y-4">
+        <aside className="hidden w-56 shrink-0 space-y-4 lg:block">
           {/* Tier selector */}
           <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-3">
             <h3 className="text-pc-text-muted text-xs uppercase tracking-wider mb-2 px-1">Tier</h3>
@@ -274,7 +327,7 @@ export default function LeaderboardPage() {
         </aside>
 
         {/* ── Main Content ── */}
-        <div className="flex-1 min-w-0">
+        <div className="min-w-0">
           {/* Loading */}
           {loading && (
             <div className="flex items-center justify-center py-20">
@@ -300,7 +353,33 @@ export default function LeaderboardPage() {
 
           {/* Table */}
           {!loading && !error && sorted.length > 0 && (
-            <div className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
+            <div className="space-y-2 md:hidden">
+              {sorted.map((player, index) => {
+                const effective = resolveEffectiveTier(player.tier, player.rank);
+                return (
+                  <Link key={player.player_id} href={`/players/${player.player_id}`} className="pc-mobile-panel flex min-w-0 items-center gap-3 p-3 transition-colors hover:border-pc-accent-mid">
+                    <RankBadge rank={effective.displayRank} />
+                    <img src={getRankIconPath(player.tier, player.rank)} alt={effective.displayName} className="h-8 w-8 shrink-0 object-contain" />
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-sm font-semibold text-pc-text">{player.name}</div>
+                      <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[11px] text-pc-text-muted">
+                        <span>{effective.displayName}</span>
+                        {player.winRate != null && <span className={player.winRate >= 50 ? "text-emerald-400" : "text-red-400"}>{player.winRate.toFixed(1)}% WR</span>}
+                      </div>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <div className="font-mono text-sm font-bold text-pc-accent">{player.points.toLocaleString()}</div>
+                      <div className="text-[10px] uppercase tracking-wide text-pc-text-muted">points</div>
+                      {player.trend != null && player.trend !== 0 && <div className={`mt-0.5 text-[10px] ${player.trend > 0 ? "text-emerald-400" : "text-red-400"}`}>{player.trend > 0 ? "▲" : "▼"}{Math.abs(player.trend)}</div>}
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+
+          {!loading && !error && sorted.length > 0 && (
+            <div className="hidden overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated md:block">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
