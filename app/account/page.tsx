@@ -7,6 +7,8 @@ import { useAuth } from "@/lib/auth-context";
 import { useTimeZone } from "@/lib/time-zone-context";
 import { formatLocalDate, formatLocalDateTime, formatLocalTime } from "@/lib/time-format";
 import { fixedUtcOffsetFromTimeZone, fixedUtcOffsetToTimeZone, getFixedUtcOffsetOptions, getSupportedTimeZones } from "@/lib/time-zone";
+import { useLobbyTier } from "@/lib/lobby-tier-context";
+import { LOBBY_TIER_OPTIONS, type LobbyTierFilter } from "@/lib/lobby-tier";
 import {
   getAccountDetails,
   unlinkPlayer,
@@ -28,6 +30,7 @@ import {
 export default function AccountPage() {
   const { user: authUser, refresh } = useAuth();
   const { timeZone, setTimeZone } = useTimeZone();
+  const { filter: lobbyTierFilter, definition: lobbyTierDefinition, setFilter: setLobbyTierFilter } = useLobbyTier();
   const router = useRouter();
   const [account, setAccount] = useState<AccountDetails | null>(null);
   const [loading, setLoading] = useState(true);
@@ -355,6 +358,25 @@ export default function AccountPage() {
             {savingTimeZone ? "Saving..." : "Save Time Zone"}
           </button>
         </div>
+      </div>
+
+      {/* ── Global ranked lobby preference ── */}
+      <div className="mb-6 rounded-lg border border-pc-border bg-pc-bg-elevated p-6">
+        <h2 className="mb-2 text-lg font-semibold text-pc-text">Ranked Lobby Scope</h2>
+        <p className="mb-4 text-sm text-pc-text-secondary">
+          Choose the ranked lobby range used by tier-aware statistics throughout PaladinsCat. This preference is stored in this browser.
+        </p>
+        <label className="block text-xs text-pc-text-muted">
+          Lobby tier
+          <select
+            value={lobbyTierFilter}
+            onChange={(event) => setLobbyTierFilter(event.target.value as LobbyTierFilter)}
+            className="mt-1.5 w-full rounded-lg border border-pc-border bg-pc-bg-secondary px-3 py-2 text-sm text-pc-text focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
+          >
+            {LOBBY_TIER_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+          </select>
+        </label>
+        <p className="mt-2 text-xs text-pc-text-muted">{lobbyTierDefinition.description}</p>
       </div>
 
       {/* ── Profile Info ── */}

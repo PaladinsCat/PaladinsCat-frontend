@@ -6,15 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { fetchChampions, fetchSkinStats, type Champion, type SkinStat } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
-
-type LobbyFilter = "all" | "bronze-gold" | "platinum-plus" | "diamond-plus";
-
-const LOBBY_FILTERS: Record<LobbyFilter, { label: string; banner: string; tierMin?: number; tierMax?: number }> = {
-  all: { label: "All ranked lobbies", banner: "All ranked lobby stats" },
-  "bronze-gold": { label: "Bronze 5 – Gold 1", banner: "Bronze 5 – Gold 1 lobby stats only", tierMin: 1, tierMax: 15 },
-  "platinum-plus": { label: "Platinum 5+", banner: "Platinum 5+ lobby stats only", tierMin: 16, tierMax: 26 },
-  "diamond-plus": { label: "Diamond 5+", banner: "Diamond+ lobby stats only", tierMin: 21, tierMax: 26 },
-};
+import { useLobbyTier } from "@/lib/lobby-tier-context";
 
 export default function SkinStatsPage() {
   const searchParams = useSearchParams();
@@ -22,27 +14,25 @@ export default function SkinStatsPage() {
   const [champions, setChampions] = useState<Champion[]>([]);
   const [rows, setRows] = useState<SkinStat[]>([]);
   const [championId, setChampionId] = useState(initialChampion);
-  const [lobbyFilter, setLobbyFilter] = useState<LobbyFilter>("all");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const { definition: lobbyTier, ready: lobbyTierReady } = useLobbyTier();
 
   useEffect(() => { fetchChampions({ limit: "200" }).then(setChampions).catch(() => setChampions([])); }, []);
   useEffect(() => {
     let cancelled = false;
-    const filter = LOBBY_FILTERS[lobbyFilter];
+    if (!lobbyTierReady) return;
     setLoading(true);
-    fetchSkinStats({ championId: championId || undefined, tierMin: filter.tierMin, tierMax: filter.tierMax, limit: 200 })
+    fetchSkinStats({ championId: championId || undefined, tierMin: lobbyTier.tierMin, tierMax: lobbyTier.tierMax, limit: 200 })
       .then((data) => { if (!cancelled) setRows(data); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [championId, lobbyFilter]);
+  }, [championId, lobbyTier.tierMin, lobbyTier.tierMax, lobbyTierReady]);
 
   const visibleRows = useMemo(() => rows.filter((row) => {
     const value = `${row.skinName} ${row.championName}`.toLowerCase();
     return value.includes(search.trim().toLowerCase());
   }), [rows, search]);
-  const activeFilter = LOBBY_FILTERS[lobbyFilter];
-
   return (
     <div className="space-y-6">
       <div>
@@ -52,11 +42,10 @@ export default function SkinStatsPage() {
       </div>
 
       <div className="rounded-xl border border-pc-accent/30 bg-pc-accent/10 px-4 py-3 text-sm text-pc-text">
-        <div className="flex flex-wrap items-center justify-between gap-3"><span>{activeFilter.banner}</span>{lobbyFilter !== "all" && <button onClick={() => setLobbyFilter("all")} className="text-xs font-semibold text-pc-accent hover:underline">Clear filter</button>}</div>
+        <div className="flex flex-wrap items-center justify-between gap-3"><span>Lobby scope: {lobbyTier.label}</span><Link href="/account" className="text-xs font-semibold text-pc-accent hover:underline">Change in Account Settings</Link></div>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-4 md:grid-cols-3">
-        <label className="text-xs text-pc-text-secondary">Lobby tier<select value={lobbyFilter} onChange={(event) => setLobbyFilter(event.target.value as LobbyFilter)} className="mt-1.5 w-full rounded-lg border border-pc-border bg-pc-bg-secondary px-3 py-2 text-sm text-pc-text"><option value="all">All ranked lobbies</option><option value="bronze-gold">Bronze 5 – Gold 1</option><option value="platinum-plus">Platinum 5+</option><option value="diamond-plus">Diamond 5+</option></select></label>
+      <div className="grid grid-cols-1 gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-4 md:grid-cols-2">
         <label className="text-xs text-pc-text-secondary">Champion<select value={championId} onChange={(event) => setChampionId(Number(event.target.value))} className="mt-1.5 w-full rounded-lg border border-pc-border bg-pc-bg-secondary px-3 py-2 text-sm text-pc-text"><option value={0}>All champions</option>{champions.map((champion) => <option key={champion.id} value={champion.id}>{champion.name}</option>)}</select></label>
         <label className="text-xs text-pc-text-secondary">Search skins<input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Skin or champion" className="mt-1.5 w-full rounded-lg border border-pc-border bg-pc-bg-secondary px-3 py-2 text-sm text-pc-text placeholder:text-pc-text-muted" /></label>
       </div>

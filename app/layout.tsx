@@ -8,6 +8,7 @@ import MapSlideshow from "@/components/MapSlideshow";
 import PageLayout from "@/components/PageLayout";
 import { AuthProvider } from "@/lib/auth-context";
 import { TimeZoneProvider } from "@/lib/time-zone-context";
+import { LobbyTierProvider } from "@/lib/lobby-tier-context";
 import { cn } from "@/lib/utils";
 import { SEO_KEYWORDS, SITE_NAME, SITE_URL } from "@/lib/seo";
 
@@ -120,18 +121,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
         <AuthProvider>
           <TimeZoneProvider>
-            <MapSlideshow />
-            <Nav />
-            <HirezOutageBanner />
-            {/* Content container: responsive width that fills common desktop sizes */}
-            <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-8 pb-24">
-              {/* Responsive max-width: 1280px up to xl, wider on larger screens */}
-              <div className="max-w-7xl xl:max-w-[1400px] 2xl:max-w-[1600px] mx-auto">
-                <PageLayout>{children}</PageLayout>
-              </div>
-            </main>
-            <div className="block lg:hidden"><BottomNav /></div>
-            <Footer />
+            <LobbyTierProvider>
+              <MapSlideshow />
+              <Nav />
+              <HirezOutageBanner />
+              {/* Content container: responsive width that fills common desktop sizes */}
+              <main className="flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-8 pb-24">
+                {/* Responsive max-width: 1280px up to xl, wider on larger screens */}
+                <div className="max-w-7xl xl:max-w-[1400px] 2xl:max-w-[1600px] mx-auto">
+                  <PageLayout>{children}</PageLayout>
+                </div>
+              </main>
+              <div className="block lg:hidden"><BottomNav /></div>
+              <Footer />
+            </LobbyTierProvider>
           </TimeZoneProvider>
         </AuthProvider>
       </body>

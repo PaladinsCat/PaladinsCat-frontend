@@ -16,6 +16,7 @@ import { championSlug } from "@/lib/utils";
 import { getRankIconPath } from "@/lib/tier-utils";
 import { getStatQuality } from "@/lib/stat-quality";
 import { PerformanceOverviewCard } from "@/components/PerformanceOverviewCard";
+import { useLobbyTier } from "@/lib/lobby-tier-context";
 
 const ROLES = ["Frontline", "Damage", "Flank", "Support"] as const;
 
@@ -81,6 +82,7 @@ function mapMapStats(maps: Array<{ name: string; totalMatches: number; distribut
 }
 
 export default function StatsPage() {
+  const { definition: lobbyTier, ready: lobbyTierReady } = useLobbyTier();
   const [itemSort, setItemSort] = useState<SortKey>("pickRate");
   const [itemSortDir, setItemSortDir] = useState<"asc" | "desc">("desc");
   const [expandedBannedId, setExpandedBannedId] = useState<number | null>(null);
@@ -126,12 +128,22 @@ export default function StatsPage() {
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([
-      fetchSkinStats({ limit: 5 }),
-      fetchMatchCompositions({ limit: 10 }),
-    ]).then(([skins, comps]) => {
+    if (!lobbyTierReady) return () => {};
+    fetchSkinStats({
+      limit: 5,
+      tierMin: lobbyTier.tierMin,
+      tierMax: lobbyTier.tierMax,
+    }).then((skins) => {
       if (cancelled) return;
       setSkinStats(skins);
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [lobbyTierReady, lobbyTier.tierMin, lobbyTier.tierMax]);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchMatchCompositions({ limit: 10 }).then((comps) => {
+      if (cancelled) return;
       setCompositions(comps);
     }).catch(() => {});
     return () => { cancelled = true; };

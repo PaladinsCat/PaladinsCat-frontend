@@ -1882,8 +1882,8 @@ export async function fetchSkinStats(params?: { championId?: number; tierMin?: n
   if (params?.tierMax != null) query.set('tierMax', String(params.tierMax));
   if (params?.limit != null) query.set('limit', String(params.limit));
   try {
-    const raw = await fetchJson<{ data?: any[] }>(`/stats/skins${query.toString() ? `?${query.toString()}` : ''}`);
-    return (raw.data ?? []).map((row) => ({
+    const raw = await fetchJson<any[]>(`/stats/skins${query.toString() ? `?${query.toString()}` : ''}`);
+    return raw.map((row) => ({
       skinId: Number(row.skin_id),
       skinName: String(row.skin_name ?? 'Unknown Skin'),
       championId: Number(row.champion_id),
