@@ -47,11 +47,11 @@ export default function MatchupCard({ player }: { player: MatchResultPlayer }) {
   return (
     <article className="relative min-w-0 overflow-hidden rounded-lg border border-pc-border bg-pc-bg-elevated p-3 shadow-sm transition-colors hover:border-pc-accent-mid">
       <div className="absolute right-0 top-12 select-none text-[96px] font-bold leading-none text-pc-text/[0.025] sm:text-[132px]">?</div>
+      <PartyBadge player={md} className="absolute right-3 top-3 z-10" />
       <div className="relative flex flex-col items-center text-center">
         <img src={getChampionIconSafe(champion)} alt={champion || "Champion"} className="h-14 w-14 rounded-full border-2 border-pc-border object-cover" onError={(event) => { event.currentTarget.src = "/images/champions/Champion_Generic_Icon.avif"; }} />
         <div className="mt-2 flex w-full items-center justify-center gap-1 text-sm font-bold">
           <Link href={`/players/${md.player_id}`} className="min-w-0 truncate text-pc-text hover:text-pc-accent">{md.player_name || "PRIVATE"}</Link>
-          <PartyBadge player={md} />
           {profile?.level != null && <span className="shrink-0 text-pc-text-muted">· Lv {num(profile.level)}</span>}
         </div>
         {champion ? <Link href={`/champions/${championSlug(champion)}`} className="truncate text-xs text-pc-text-secondary hover:text-pc-accent">{champion}</Link> : <span className="text-xs text-pc-text-muted">Champion unknown</span>}
