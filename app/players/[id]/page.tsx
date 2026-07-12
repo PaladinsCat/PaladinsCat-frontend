@@ -243,7 +243,13 @@ export default function PlayerProfilePage() {
       })
       .then((data) => {
         if (!cancelled) {
+          const expiresAt = data.profileRefresh?.expires_at
+            ? new Date(data.profileRefresh.expires_at).getTime()
+            : Number.NaN;
+          const now = Date.now();
           setResponse(data);
+          setRefreshCooldownUntil(Number.isFinite(expiresAt) && expiresAt > now ? expiresAt : null);
+          setRefreshClock(now);
           setError(null);
           setProfileLoading(false);
         }
@@ -418,6 +424,7 @@ export default function PlayerProfilePage() {
   const refreshRemainingMs = refreshCooldownUntil
     ? Math.max(0, refreshCooldownUntil - refreshClock)
     : 0;
+  const refreshDisabled = refreshing || refreshRemainingMs > 0;
   const refreshFeedbackColor = refreshFeedback?.kind === 'error'
     ? 'text-red-400 bg-red-500/10 border-red-500/20'
     : refreshFeedback?.kind === 'success'
@@ -447,12 +454,12 @@ export default function PlayerProfilePage() {
           </button>
           <button
             onClick={handleRefresh}
-            disabled={refreshing}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-pc-bg-secondary/80 hover:bg-pc-bg-secondary text-pc-text border border-pc-border/50 transition-colors ${refreshing ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={refreshDisabled}
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-pc-bg-secondary/80 hover:bg-pc-bg-secondary text-pc-text border border-pc-border/50 transition-colors ${refreshDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
             title="Refresh profile (10-minute cooldown)"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={refreshing ? 'animate-spin' : ''}><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
-            {refreshing ? 'Refreshing...' : 'Refresh'}
+            {refreshing ? 'Refreshing...' : refreshRemainingMs > 0 ? `Refresh in ${formatCooldown(refreshRemainingMs)}` : 'Refresh'}
           </button>
           <button
             onClick={() => openReportModal('suspicious')}
@@ -515,9 +522,9 @@ export default function PlayerProfilePage() {
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
                 Current match
               </button>
-              <button type="button" role="menuitem" disabled={refreshing} onClick={() => { setActionMenuOpen(false); void handleRefresh(); }} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-pc-text transition-colors hover:bg-pc-bg-elevated hover:text-pc-accent disabled:cursor-not-allowed disabled:opacity-50">
+              <button type="button" role="menuitem" disabled={refreshDisabled} onClick={() => { setActionMenuOpen(false); void handleRefresh(); }} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-pc-text transition-colors hover:bg-pc-bg-elevated hover:text-pc-accent disabled:cursor-not-allowed disabled:opacity-50">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className={refreshing ? 'animate-spin' : ''} aria-hidden="true"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
-                {refreshing ? 'Refreshing profile…' : 'Refresh profile'}
+                {refreshing ? 'Refreshing profile…' : refreshRemainingMs > 0 ? `Refresh in ${formatCooldown(refreshRemainingMs)}` : 'Refresh profile'}
               </button>
 
               <div className="my-2 border-t border-pc-border/70" />
