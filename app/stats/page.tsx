@@ -4,12 +4,14 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   fetchStatsOverview,
+  fetchBaselines,
   fetchMatchCompositions,
   fetchSkinStats,
   type Champion,
   type MatchCompositionStat,
   type SkinStat,
   type TierStat,
+  type BaselineEntry,
 } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
@@ -92,10 +94,11 @@ export default function StatsPage() {
   const [items, setItems] = useState<PageItemStat[]>([]);
   const [maps, setMaps] = useState<PageMapStat[]>([]);
   const [tiers, setTiers] = useState<TierStat[]>([]);
-  const [activeTiers, setActiveTiers] = useState<TierStat[]>([]);
+  const [egpmBaselines, setEgpmBaselines] = useState<BaselineEntry[]>([]);
   const [skinStats, setSkinStats] = useState<SkinStat[]>([]);
   const [compositions, setCompositions] = useState<MatchCompositionStat[]>([]);
   const [overviewLoading, setOverviewLoading] = useState(true);
+  const [egpmLoading, setEgpmLoading] = useState(true);
   const [skinsLoading, setSkinsLoading] = useState(true);
   const [compositionsLoading, setCompositionsLoading] = useState(true);
 
@@ -123,7 +126,6 @@ export default function StatsPage() {
         setItems(mapItemStats(overview.items));
         setMaps(mapMapStats(overview.maps));
         setTiers(overview.profileTiers);
-        setActiveTiers(overview.activeTiers);
       })
       .catch(() => {})
       .finally(() => { if (!cancelled) setOverviewLoading(false); });
@@ -131,6 +133,17 @@ export default function StatsPage() {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (!lobbyTierReady) return;
+    let cancelled = false;
+    setEgpmLoading(true);
+    fetchBaselines({ queueId: 486, tierMin: lobbyTier.tierMin, tierMax: lobbyTier.tierMax })
+      .then((rows) => { if (!cancelled) setEgpmBaselines(rows); })
+      .catch(() => { if (!cancelled) setEgpmBaselines([]); })
+      .finally(() => { if (!cancelled) setEgpmLoading(false); });
+    return () => { cancelled = true; };
+  }, [lobbyTier.label, lobbyTier.tierMax, lobbyTier.tierMin, lobbyTierReady]);
 
   useEffect(() => {
     let cancelled = false;
@@ -211,9 +224,9 @@ export default function StatsPage() {
     ];
   }
   const displayTiers = consolidateTiers(tiers);
-  const activeDisplayTiers = consolidateTiers(activeTiers);
   const maxTierCount = Math.max(1, ...displayTiers.map((tier) => tier.totalPlays));
-  const maxActiveTierCount = Math.max(1, ...activeDisplayTiers.map((tier) => tier.totalPlays));
+  const baselineOrder = ["Global", "Damage", "Flank", "Support", "Frontline"];
+  const orderedEgpmBaselines = [...egpmBaselines].sort((a, b) => baselineOrder.indexOf(a.role) - baselineOrder.indexOf(b.role));
 
   return (
     <div className="space-y-8">
@@ -225,9 +238,8 @@ export default function StatsPage() {
         </p>
       </div>
 
-      {/* ── Global Metrics (consolidated card) + Tier Distribution ── */}
+      {/* ── Performance, eGPM, and ranked-player distribution ── */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Performance Overview (1/3) */}
         <div>
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-bold text-pc-text">Performance Overview</h2>
@@ -270,82 +282,53 @@ export default function StatsPage() {
         })()}</ContentFade>}
         </div>
 
-        {/* Tier Distribution + Active Ranked (2/3, split 50/50) */}
-        <div className="lg:col-span-2">
+        <div>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-bold text-pc-text">Rank Distribution</h2>
+            <div>
+              <h2 className="text-sm font-bold text-pc-text">eGPM by Role</h2>
+              <div className="text-[9px] text-pc-text-muted">{lobbyTier.label}</div>
+            </div>
+            <Link href="/stats/egpm" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">Detail →</Link>
+          </div>
+          {egpmLoading ? <DataCardSkeleton rows={5} /> : (
+            <ContentFade>
+              <PerformanceOverviewCard metrics={orderedEgpmBaselines.map((row) => ({
+                key: `egpm-${row.role}`,
+                label: row.role === "Frontline" ? "Front" : row.role === "Support" ? "Supp" : row.role === "Damage" ? "Dmg" : row.role,
+                color: row.role === "Global" ? "#facc15" : row.role === "Damage" ? "#f87171" : row.role === "Flank" ? "#c084fc" : row.role === "Support" ? "#34d399" : "#60a5fa",
+                p10: row.p10Egpm,
+                p25: row.p25Egpm,
+                mean: row.avgEgpm,
+                p75: row.p75Egpm,
+                p90: row.p90Egpm,
+              }))} />
+            </ContentFade>
+          )}
+        </div>
+
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-bold text-pc-text">Ranked Player Distribution</h2>
             <Link href="/stats/tiers" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">Detail →</Link>
           </div>
           {overviewLoading ? <ChartCardSkeleton /> : <ContentFade className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-0">
-              {/* Left: Profile Tier Distribution */}
-              <div>
-                <div className="text-xs font-semibold text-pc-text-secondary mb-2 px-2">Ranked Player Distribution</div>
-                <div className="flex h-48 items-end justify-center gap-1.5 pb-2">
-                  {displayTiers.map((tier) => {
-                    const height = Math.max(4, Math.round((tier.totalPlays / maxTierCount) * 116));
-                    const rankIcon = getRankIconPath(tier.tierSort, tier.tierSort === 26 ? 101 : tier.tierSort === 27 ? 1 : 0);
-                    return (
-                      <div key={tier.tierSort} className="group flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1">
-                        <div className="text-[9px] text-pc-text-muted tabular-nums opacity-0 group-hover:opacity-100 transition-opacity">
-                          {tier.percentage.toFixed(1)}%
-                        </div>
-                        <div
-                          className="w-5 rounded-t-sm bg-pc-accent-mid group-hover:bg-pc-accent transition-colors"
-                          style={{ height }}
-                          title={`${tier.tier}: ${tier.totalPlays.toLocaleString()} (${tier.percentage.toFixed(1)}%)`}
-                        />
-                        <img
-                          src={rankIcon}
-                          alt={tier.tier}
-                          title={tier.tier}
-                          className="h-5 w-5 object-contain drop-shadow"
-                          loading="lazy"
-                        />
-                        <div className="text-[9px] text-pc-text-secondary tabular-nums leading-none">
-                          {tier.totalPlays.toLocaleString()}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-              {/* Right: Active Ranked Match Distribution (with left border divider) */}
-              <div className="border-t border-pc-border pt-4 sm:border-l sm:border-t-0 sm:pl-3 sm:pt-0">
-                <div className="text-xs font-semibold text-pc-text-secondary mb-2 px-2">Active Ranked Matches</div>
-                <div className="flex h-48 items-end justify-center gap-1.5 pb-2">
-                  {activeDisplayTiers.map((tier) => {
-                    const height = Math.max(4, Math.round((tier.totalPlays / maxActiveTierCount) * 116));
-                    const rankIcon = getRankIconPath(tier.tierSort, tier.tierSort === 26 ? 101 : tier.tierSort === 27 ? 1 : 0);
-                    return (
-                      <div key={tier.tierSort} className="group flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1">
-                        <div className="text-[9px] text-pc-text-muted tabular-nums opacity-0 group-hover:opacity-100 transition-opacity">
-                          {tier.percentage.toFixed(1)}%
-                        </div>
-                        <div
-                          className="w-5 rounded-t-sm bg-pc-accent-mid/60 group-hover:bg-pc-accent-mid transition-colors"
-                          style={{ height }}
-                          title={`${tier.tier}: ${tier.totalPlays.toLocaleString()} (${tier.percentage.toFixed(1)}%)`}
-                        />
-                        <img
-                          src={rankIcon}
-                          alt={tier.tier}
-                          title={tier.tier}
-                          className="h-5 w-5 object-contain drop-shadow"
-                          loading="lazy"
-                        />
-                        <div className="text-[9px] text-pc-text-secondary tabular-nums leading-none">
-                          {tier.totalPlays.toLocaleString()}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
+            <div className="flex h-48 items-end justify-center gap-1.5 pb-2">
+              {displayTiers.map((tier) => {
+                const height = Math.max(4, Math.round((tier.totalPlays / maxTierCount) * 116));
+                const rankIcon = getRankIconPath(tier.tierSort, tier.tierSort === 26 ? 101 : tier.tierSort === 27 ? 1 : 0);
+                return (
+                  <div key={tier.tierSort} className="group flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1">
+                    <div className="text-[9px] text-pc-text-muted tabular-nums opacity-0 group-hover:opacity-100 transition-opacity">{tier.percentage.toFixed(1)}%</div>
+                    <div className="w-5 rounded-t-sm bg-pc-accent-mid group-hover:bg-pc-accent transition-colors" style={{ height }} title={`${tier.tier}: ${tier.totalPlays.toLocaleString()} (${tier.percentage.toFixed(1)}%)`} />
+                    <img src={rankIcon} alt={tier.tier} title={tier.tier} className="h-5 w-5 object-contain drop-shadow" loading="lazy" />
+                    <div className="text-[9px] text-pc-text-secondary tabular-nums leading-none">{tier.totalPlays.toLocaleString()}</div>
+                  </div>
+                );
+              })}
             </div>
           </ContentFade>}
         </div>
-        </section>
+      </section>
 
       {/* ── Top Champions (win rate + ban rate, consolidated) ── */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">

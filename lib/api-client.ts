@@ -383,11 +383,15 @@ export async function fetchPerformanceMetrics(params?: {
   metric?: PerformanceMetricKey;
   role?: string;
   queueId?: number;
+  tierMin?: number;
+  tierMax?: number;
 }): Promise<PerformanceMetricsResponse> {
   const query = new URLSearchParams();
   if (params?.metric) query.set('metric', params.metric);
   if (params?.role) query.set('role', params.role);
   if (params?.queueId != null) query.set('queueId', String(params.queueId));
+  if (params?.tierMin != null) query.set('tierMin', String(params.tierMin));
+  if (params?.tierMax != null) query.set('tierMax', String(params.tierMax));
   try {
     const raw = await fetchJson<Record<string, any>>(`/stats/performance-metrics${query.toString() ? `?${query.toString()}` : ''}`);
     return Object.fromEntries(
@@ -461,28 +465,57 @@ export interface BaselineEntry {
   p90Gpm: number;
   p10Dpm: number;
   p90Dpm: number;
+  avgEgpm: number;
+  p10Egpm: number;
+  p25Egpm: number;
+  p75Egpm: number;
+  p90Egpm: number;
+  maxEgpm: number;
   sampleSize: number;
+  updatedAt: string | null;
 }
 
-export async function fetchBaselines(params?: { role?: string; queueId?: number }): Promise<BaselineEntry[]> {
+export async function fetchBaselines(params?: { role?: string; queueId?: number; tierMin?: number; tierMax?: number }): Promise<BaselineEntry[]> {
   const query = new URLSearchParams();
   if (params?.role) query.set('role', params.role);
   if (params?.queueId) query.set('queueId', String(params.queueId));
+  if (params?.tierMin != null) query.set('tierMin', String(params.tierMin));
+  if (params?.tierMax != null) query.set('tierMax', String(params.tierMax));
   try {
     const raw = await fetchJson<Array<{
       role: string; queue_id: number;
       avg_gpm: number; avg_dpm: number; avg_hpm: number;
       avg_shpm: number; avg_mpm: number; avg_kda: number;
       p10_gpm: number; p90_gpm: number; p10_dpm: number; p90_dpm: number;
-      sample_size: number;
+      avg_egpm: number; p10_egpm: number; p25_egpm: number; p75_egpm: number; p90_egpm: number; max_egpm: number;
+      sample_size: number; updated_at?: string | null;
     }>>(`/stats/baselines${query.toString() ? `?${query.toString()}` : ''}`);
-    return raw.map(r => ({
+    const mapped = raw.map(r => ({
       role: r.role, queueId: r.queue_id,
       avgGpm: Number(r.avg_gpm ?? 0), avgDpm: Number(r.avg_dpm ?? 0), avgHpm: Number(r.avg_hpm ?? 0),
       avgShpm: Number(r.avg_shpm ?? 0), avgMpm: Number(r.avg_mpm ?? 0), avgKda: Number(r.avg_kda ?? 0),
       p10Gpm: Number(r.p10_gpm ?? 0), p90Gpm: Number(r.p90_gpm ?? 0), p10Dpm: Number(r.p10_dpm ?? 0), p90Dpm: Number(r.p90_dpm ?? 0),
+      avgEgpm: Number(r.avg_egpm ?? 0), p10Egpm: Number(r.p10_egpm ?? 0), p25Egpm: Number(r.p25_egpm ?? 0),
+      p75Egpm: Number(r.p75_egpm ?? 0), p90Egpm: Number(r.p90_egpm ?? 0), maxEgpm: Number(r.max_egpm ?? 0),
       sampleSize: Number(r.sample_size ?? 0),
+      updatedAt: r.updated_at ?? null,
     }));
+    if (!mapped.some((row) => row.role === 'Global')) {
+      const global = (await fetchPerformanceMetrics({
+        metric: 'gpm', queueId: params?.queueId, tierMin: params?.tierMin, tierMax: params?.tierMax,
+      })).gpm;
+      if (global) {
+        mapped.unshift({
+          role: 'Global', queueId: params?.queueId ?? 486,
+          avgGpm: global.mean, avgDpm: 0, avgHpm: 0, avgShpm: 0, avgMpm: 0, avgKda: 0,
+          p10Gpm: global.p10, p90Gpm: global.p90, p10Dpm: 0, p90Dpm: 0,
+          avgEgpm: global.mean, p10Egpm: global.p10, p25Egpm: global.p25,
+          p75Egpm: global.p75, p90Egpm: global.p90, maxEgpm: global.max,
+          sampleSize: global.sampleSize, updatedAt: null,
+        });
+      }
+    }
+    return mapped;
   } catch {
     return [];
   }
