@@ -77,7 +77,7 @@ export default function MapSlideshow() {
             backgroundImage: `url("${currentMap}")`,
             backgroundPosition: "center",
             backgroundSize: "cover",
-            filter: "brightness(0.45)",
+            filter: "brightness(0.4)",
           }}
         />
       </AnimatePresence>
