@@ -7,6 +7,13 @@ import { useLobbyTier } from "@/lib/lobby-tier-context";
 
 type SortKey = "totalMatches" | "winRate";
 
+const CLASS_COLUMNS = [
+  { key: "frontline", label: "Frontline", icon: "/images/icons/Class_Front_Line_Icon.avif" },
+  { key: "damage", label: "Damage", icon: "/images/icons/Class_Damage_Icon.avif" },
+  { key: "flank", label: "Flank", icon: "/images/icons/Class_Flank_Icon.avif" },
+  { key: "support", label: "Support", icon: "/images/icons/Class_Support_Icon.avif" },
+] as const;
+
 export default function CompositionStatsPage() {
   const [rows, setRows] = useState<MatchCompositionStat[]>([]);
   const [sortKey, setSortKey] = useState<SortKey>("totalMatches");
@@ -38,7 +45,7 @@ export default function CompositionStatsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-6xl space-y-6">
       <div>
         <Link href="/stats" className="mb-2 inline-block text-xs text-pc-accent hover:underline">← Global Stats</Link>
         <h1 className="pc-heading pc-heading-lg text-pc-accent">Composition Stats</h1>
@@ -54,15 +61,17 @@ export default function CompositionStatsPage() {
         ].map(([label, value]) => <div key={label} className="rounded-xl border border-pc-border bg-pc-bg-elevated p-4"><div className="text-[10px] uppercase tracking-wider text-pc-text-muted">{label}</div><div className="mt-1 truncate text-lg font-bold text-pc-text">{value}</div></div>)}
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-pc-border bg-pc-bg-elevated">
-        <table className="w-full min-w-[720px] text-sm">
+      <div className="mx-auto w-full max-w-5xl overflow-x-auto rounded-xl border border-pc-border bg-pc-bg-elevated shadow-lg shadow-black/10">
+        <table className="w-full min-w-[760px] table-fixed text-sm">
           <thead className="border-b border-pc-border text-left text-xs text-pc-text-muted">
             <tr>
-              <th className="px-4 py-3">Composition</th>
-              <th className="px-3 py-3 text-right">Frontline</th>
-              <th className="px-3 py-3 text-right">Damage</th>
-              <th className="px-3 py-3 text-right">Flank</th>
-              <th className="px-3 py-3 text-right">Support</th>
+              <th className="w-[18%] px-4 py-3">Composition</th>
+              {CLASS_COLUMNS.map((column) => <th key={column.key} className="w-[10%] px-2 py-3 text-right">
+                <span className="inline-flex items-center justify-end gap-1.5">
+                  <img src={column.icon} alt="" aria-hidden="true" className="h-4 w-4 object-contain" />
+                  <span>{column.label}</span>
+                </span>
+              </th>)}
               <th className="px-3 py-3 text-right"><button onClick={() => changeSort("totalMatches")} className="hover:text-pc-accent">Matches {sortKey === "totalMatches" && (descending ? "↓" : "↑")}</button></th>
               <th className="px-3 py-3 text-right">W / L</th>
               <th className="px-4 py-3 text-right"><button onClick={() => changeSort("winRate")} className="hover:text-pc-accent">Win Rate {sortKey === "winRate" && (descending ? "↓" : "↑")}</button></th>
@@ -71,10 +80,12 @@ export default function CompositionStatsPage() {
           <tbody>
             {sorted.map((row) => <tr key={row.composition} className="border-b border-pc-border/50 transition-colors hover:bg-pc-bg-secondary/60">
               <td className="px-4 py-3 font-mono font-semibold text-pc-text">{row.composition}</td>
-              <td className="px-3 py-3 text-right text-pc-text-secondary">{row.frontline}</td>
-              <td className="px-3 py-3 text-right text-pc-text-secondary">{row.damage}</td>
-              <td className="px-3 py-3 text-right text-pc-text-secondary">{row.flank}</td>
-              <td className="px-3 py-3 text-right text-pc-text-secondary">{row.support}</td>
+              {CLASS_COLUMNS.map((column) => <td key={column.key} className="px-2 py-3 text-right text-pc-text-secondary">
+                <span className="inline-flex items-center justify-end gap-1.5 tabular-nums">
+                  <img src={column.icon} alt="" aria-hidden="true" className="h-4 w-4 object-contain opacity-90" />
+                  <span>{row[column.key]}</span>
+                </span>
+              </td>)}
               <td className="px-3 py-3 text-right text-pc-text">{row.totalMatches.toLocaleString()}</td>
               <td className="px-3 py-3 text-right text-pc-text-secondary">{row.wins.toLocaleString()} / {row.losses.toLocaleString()}</td>
               <td className={row.winRate >= 50 ? "px-4 py-3 text-right font-semibold text-emerald-400" : "px-4 py-3 text-right font-semibold text-rose-400"}>{row.winRate.toFixed(1)}%</td>
