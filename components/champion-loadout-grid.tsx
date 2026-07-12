@@ -8,33 +8,17 @@ function statNameKey(value: string | null | undefined): string {
   return String(value ?? "").normalize("NFKD").toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
-function LevelRateStrip({
-  levels,
-  totalMatches,
-}: {
-  levels: ChampionCardStat["levels"];
-  totalMatches: number;
-}) {
-  if (levels.length === 0) return null;
+function formatPlays(value: number): string {
+  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
+  if (value >= 1_000) return `${(value / 1_000).toFixed(1)}K`;
+  return String(value);
+}
 
-  return (
-    <div className="mt-1.5 flex min-w-0 gap-1 text-[8px] leading-none">
-      <span className="pt-0.5 font-bold text-pc-text-muted">L</span>
-      {levels.map((level) => {
-        const pickRate = (level.plays / Math.max(1, totalMatches)) * 100;
-        return (
-          <span
-            key={level.level}
-            className="min-w-0 truncate rounded bg-pc-bg px-1 py-0.5 text-pc-text-secondary"
-            title={`Level ${level.level}: ${level.winRate.toFixed(1)}% win rate, ${pickRate.toFixed(1)}% pick rate, ${level.plays.toLocaleString()} picks`}
-          >
-            {level.level} <span className="text-pc-text">{level.winRate.toFixed(0)}</span>
-            <span className="text-pc-text-muted">/{pickRate.toFixed(0)}</span>
-          </span>
-        );
-      })}
-    </div>
-  );
+function winRateColor(winRate: number): string {
+  if (winRate >= 55) return "text-emerald-400";
+  if (winRate >= 50) return "text-pc-text";
+  if (winRate >= 45) return "text-amber-400";
+  return "text-rose-400";
 }
 
 export default function ChampionLoadoutGrid({
@@ -66,38 +50,62 @@ export default function ChampionLoadoutGrid({
       {Object.entries(byCategory).map(([category, cards]) => (
         <section key={category} className="mb-6 last:mb-0">
           <h3 className="mb-2 text-xs font-medium uppercase tracking-wider text-pc-text-muted">{category}</h3>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {cards.map((card) => {
               const stat: ChampionCardStat | undefined = statsByName.get(statNameKey(card.name));
               const pickRate = stat ? (stat.totalPlays / Math.max(1, cardStats.totalMatches)) * 100 : 0;
               const quality = stat ? getStatQuality(stat.winRate, pickRate, maxCardPickRate) : null;
+              const maxLevelPlays = stat ? Math.max(1, ...stat.levels.map((level) => level.plays)) : 1;
+              const maxLevelPickRate = stat
+                ? Math.max(1, ...stat.levels.map((level) => (level.plays / Math.max(1, stat.totalPlays)) * 100))
+                : 1;
               const params = new URLSearchParams({ talentId: String(talentId), returnTo });
               const href = stat ? `/champions/${championSlug}/cards/${stat.cardId}?${params.toString()}` : null;
-              const className = "group block rounded-lg border bg-pc-bg-elevated p-2.5 text-left transition-colors hover:border-pc-accent-mid";
+              const className = "pc-surface-light block rounded-lg border p-3 text-left transition-colors hover:border-pc-accent-mid";
               const content = (
-                <div className="flex gap-2">
+                <div className="flex items-start gap-3">
                   {card.iconUrl ? (
-                    <SmartImage src={card.iconUrl} alt="" className="h-10 w-10 flex-shrink-0 rounded-md border border-pc-border bg-pc-bg/50 object-cover" onError={(event) => { (event.target as HTMLImageElement).style.display = "none"; }} />
+                    <SmartImage src={card.iconUrl} alt={card.name} className="h-10 w-12 flex-shrink-0 rounded border border-pc-border bg-pc-bg/50 object-cover" onError={(event) => { (event.target as HTMLImageElement).style.display = "none"; }} />
                   ) : (
                     <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded border border-pc-border bg-pc-bg-elevated">
                       <span className="text-xs text-pc-accent">?</span>
                     </div>
                   )}
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-xs font-semibold text-pc-text group-hover:text-pc-accent">{card.name}</div>
+                    <div className="mb-0.5 text-xs font-medium text-pc-accent">{card.name}</div>
+                    <p className="text-xs leading-relaxed text-pc-text-secondary">{card.description}</p>
                     {stat && stat.totalPlays > 0 && (
-                      <>
-                        <div className="mt-0.5 text-[11px]" style={quality ? { color: quality.color } : undefined}>
-                          {stat.winRate.toFixed(1)}% WR <span className="text-pc-text-muted">· {pickRate.toFixed(1)}% PR</span>
+                      <div className="mt-2 space-y-1.5">
+                        <div className="flex flex-wrap items-center gap-2 text-xs">
+                          <span className={quality?.textClass ?? winRateColor(stat.winRate)} style={quality ? { color: quality.color } : undefined}>
+                            <span className="mr-1 text-pc-text-muted">WR</span>{stat.winRate.toFixed(1)}%
+                          </span>
+                          <span className="text-pc-border">|</span>
+                          <span className="text-pc-text-muted"><span className="mr-1">PR</span><span style={quality ? { color: quality.color } : undefined}>{pickRate.toFixed(1)}%</span></span>
+                          <span className="text-pc-border">|</span>
+                          <span className="break-words text-pc-text-muted"><span className="mr-1">Picks</span><span style={quality ? { color: quality.color } : undefined}>{formatPlays(stat.totalPlays)}</span></span>
+                          <span className="text-pc-border">|</span>
+                          <span className="break-words text-pc-text-muted">{stat.wins.toLocaleString()}W/{stat.losses.toLocaleString()}L</span>
                         </div>
-                        <div className="mt-2 h-1 overflow-hidden rounded-full bg-pc-bg">
-                          <div className="h-full rounded-full" style={{ width: `${Math.max(4, (pickRate / maxCardPickRate) * 100)}%`, background: quality?.track }} />
-                        </div>
-                        <div className="mt-1 text-[9px] text-pc-text-muted">{stat.totalPlays.toLocaleString()} picks</div>
-                        <LevelRateStrip levels={stat.levels} totalMatches={cardStats.totalMatches} />
-                      </>
+                        {stat.levels.length > 0 && (
+                          <div className="flex items-center gap-1">
+                            {stat.levels.map((level) => {
+                              const levelPickRate = (level.plays / Math.max(1, stat.totalPlays)) * 100;
+                              const levelQuality = getStatQuality(level.winRate, levelPickRate, maxLevelPickRate);
+                              return (
+                                <div key={level.level} className="flex flex-1 flex-col items-center">
+                                  <div className="text-[9px] text-pc-text-muted">L{level.level}</div>
+                                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-pc-bg-elevated">
+                                    <div className="h-full rounded-full" style={{ width: `${Math.max(level.plays > 0 ? 8 : 0, Math.round((level.plays / maxLevelPlays) * 100))}%`, background: levelQuality.track }} />
+                                  </div>
+                                  <div className="text-[9px] text-pc-text-muted">{level.plays}</div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
                     )}
-                    {(!stat || stat.totalPlays === 0) && <div className="mt-1 text-[9px] text-pc-text-muted">No ranked sample</div>}
                   </div>
                 </div>
               );
