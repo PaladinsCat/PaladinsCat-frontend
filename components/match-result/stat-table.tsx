@@ -7,6 +7,7 @@ import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
 import { computeDamageStats, num, fixed } from "./format";
 import LoadoutStrip from "./loadout-strip";
+import PartyBadge, { getPartyNumber } from "./party-badge";
 
 interface StatTableRowProps {
   player: MatchPlayerDetail;
@@ -47,6 +48,7 @@ export default function StatTable({ player, fact, wins }: StatTableRowProps) {
     : [];
 
   const championSrc = getChampionIconSafe(player.champion_name) || "/images/default-champion.png";
+  const partyNumber = getPartyNumber(player);
 
   // IMPORTANT: Return a React Fragment, NOT a <div>, because these <tr> elements
   // are direct children of <tbody> — <div> inside <tbody> is invalid HTML and
@@ -306,10 +308,12 @@ export default function StatTable({ player, fact, wins }: StatTableRowProps) {
                 <div className="text-[10px] text-pc-text-muted">Source</div>
                 <div className="text-sm font-medium text-pc-text">{player.source || "—"}</div>
               </div>
-              <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">Party</div>
-                <div className="text-sm font-medium text-pc-text">{player.party_number != null ? player.party_number : "—"}</div>
-              </div>
+              {partyNumber != null && (
+                <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
+                  <div className="text-[10px] text-pc-text-muted">Party</div>
+                  <PartyBadge player={player} className="mt-0.5" />
+                </div>
+              )}
             </div>
 
             {/* ── Full loadout visual strip ── */}

@@ -3261,6 +3261,9 @@ export interface MatchPlayerDetail {
   league_tier: string | null;
   tier?: number | null;
   source?: string | null;
+  party_id?: number | null;
+  party?: number | null;
+  /** Legacy alias retained for older API payloads. */
   party_number?: number | null;
   final_match_level?: number | null;
   kda: number;

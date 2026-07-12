@@ -1,0 +1,31 @@
+import { Users } from "lucide-react";
+import type { MatchPlayerDetail } from "@/lib/api-client";
+
+type PartyPlayer = Pick<MatchPlayerDetail, "party" | "party_number">;
+
+export function getPartyNumber(player: PartyPlayer): number | null {
+  const value = Number(player.party ?? player.party_number ?? 0);
+  return Number.isFinite(value) && value > 0 ? Math.trunc(value) : null;
+}
+
+export default function PartyBadge({
+  player,
+  className = "",
+}: {
+  player: PartyPlayer;
+  className?: string;
+}) {
+  const partyNumber = getPartyNumber(player);
+  if (partyNumber == null) return null;
+
+  return (
+    <span
+      className={`inline-flex h-5 shrink-0 items-center gap-1 rounded-full border border-pc-accent/30 bg-pc-accent/10 px-1.5 text-[10px] font-bold tabular-nums text-pc-accent ${className}`}
+      title={`Party ${partyNumber} — matching badges queued together`}
+      aria-label={`Party ${partyNumber}`}
+    >
+      <Users aria-hidden="true" className="h-3 w-3" strokeWidth={2.25} />
+      {partyNumber}
+    </span>
+  );
+}

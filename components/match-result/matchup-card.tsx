@@ -6,6 +6,7 @@ import { championSlug } from "@/lib/utils";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { formatKBMTier, getChampionStats, num } from "./format";
 import { getRankIconPath, resolveEffectiveTier } from "@/lib/tier-utils";
+import PartyBadge from "./party-badge";
 
 function RecordBar({ wins, total, tone }: { wins: number; total: number; tone: "teal" | "green" }) {
   const percent = total > 0 ? Math.max(0, Math.min(100, (wins / total) * 100)) : 50;
@@ -49,7 +50,8 @@ export default function MatchupCard({ player }: { player: MatchResultPlayer }) {
       <div className="relative flex flex-col items-center text-center">
         <img src={getChampionIconSafe(champion)} alt={champion || "Champion"} className="h-14 w-14 rounded-full border-2 border-pc-border object-cover" onError={(event) => { event.currentTarget.src = "/images/champions/Champion_Generic_Icon.avif"; }} />
         <div className="mt-2 flex w-full items-center justify-center gap-1 text-sm font-bold">
-          <Link href={`/players/${md.player_id}`} className="max-w-[72%] truncate text-pc-text hover:text-pc-accent">{md.player_name || "PRIVATE"}</Link>
+          <Link href={`/players/${md.player_id}`} className="min-w-0 truncate text-pc-text hover:text-pc-accent">{md.player_name || "PRIVATE"}</Link>
+          <PartyBadge player={md} />
           {profile?.level != null && <span className="shrink-0 text-pc-text-muted">· Lv {num(profile.level)}</span>}
         </div>
         {champion ? <Link href={`/champions/${championSlug(champion)}`} className="truncate text-xs text-pc-text-secondary hover:text-pc-accent">{champion}</Link> : <span className="text-xs text-pc-text-muted">Champion unknown</span>}
@@ -64,7 +66,6 @@ export default function MatchupCard({ player }: { player: MatchResultPlayer }) {
       <div className="relative space-y-3 pt-3 text-xs">
         <RecordSummary label="Champion" wins={championWins} total={championGames} tone="teal" eloLabel="Champion Elo" elo={profile?.championElo} />
         <RecordSummary label="Global" wins={globalWins} total={globalGames} tone="green" eloLabel="Player Elo" elo={profile?.queueElo} />
-        <div className="text-[10px] text-pc-text-muted">{md.party_number && md.party_number > 1 ? `Party ${md.party_number}` : "Solo"}</div>
       </div>
     </article>
   );

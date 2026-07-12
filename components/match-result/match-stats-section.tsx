@@ -5,6 +5,7 @@ import type { MatchPlayerDetail, MatchFactPlayer } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
 import { computeDamageStats, num, fixed } from "./format";
+import PartyBadge from "./party-badge";
 
 interface MatchStatsSectionProps {
   team1Players: MatchPlayerDetail[];
@@ -90,6 +91,11 @@ function PlayerRow({
         </div>
       </td>
 
+      {/* Party — omitted for solo players */}
+      <td className="px-2 py-2 text-center whitespace-nowrap">
+        <PartyBadge player={player} className="mx-auto" />
+      </td>
+
       {/* Numeric stat columns */}
       <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
         {num(player.kills)}/{num(player.deaths)}/{num(player.assists)}
@@ -141,7 +147,7 @@ function PlayerRow({
 /* ── Main section ── */
 
 const statColumns = [
-  "Player", "K/D/A", "DPM", "KDA", "HPM", "GPM", "eGPM",
+  "Player", "Party", "K/D/A", "DPM", "KDA", "HPM", "GPM", "eGPM",
   "Dmg", "Abil", "Self", "Heal", "Mit", "Taken", "Obj", "AFK",
 ];
 
@@ -163,7 +169,7 @@ export default function MatchStatsSection({
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[1100px]">
+        <table className="w-full min-w-[1160px]">
           <thead>
             <tr className="border-b border-pc-border/60 bg-pc-bg-secondary/50">
               {statColumns.map((col) => (
