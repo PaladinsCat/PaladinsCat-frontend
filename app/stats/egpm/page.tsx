@@ -7,7 +7,6 @@ import { ContentFade, EmptyState } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { fetchBaselines, type BaselineEntry } from "@/lib/api-client";
 import { useLobbyTier } from "@/lib/lobby-tier-context";
-import { LOBBY_TIER_OPTIONS, type LobbyTierFilter } from "@/lib/lobby-tier";
 
 const ROLE_ORDER = ["Global", "Damage", "Flank", "Support", "Frontline"];
 const ROLE_COLORS: Record<string, string> = {
@@ -23,7 +22,7 @@ function format(value: number) {
 }
 
 export default function EgpmDetailPage() {
-  const { filter, definition: lobbyTier, ready, setFilter } = useLobbyTier();
+  const { definition: lobbyTier, ready } = useLobbyTier();
   const [rows, setRows] = useState<BaselineEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [sort, setSort] = useState<"role" | "average" | "samples">("role");
@@ -52,17 +51,11 @@ export default function EgpmDetailPage() {
     <div className="space-y-7">
       <header>
         <Link href="/stats" className="text-sm text-pc-text-secondary transition-colors hover:text-pc-accent">← Global Stats</Link>
-        <div className="mt-3 flex flex-wrap items-end justify-between gap-3">
+        <div className="mt-3">
           <div>
             <h1 className="pc-heading pc-heading-lg text-pc-accent">Effective Credits per Minute</h1>
             <p className="mt-1 max-w-3xl text-sm text-pc-text-secondary">eGPM measures credits earned through participation after removing the 500 starting credits.</p>
           </div>
-          <label className="rounded-lg border border-pc-accent-mid/50 bg-pc-bg-elevated px-3 py-2">
-            <span className="mr-2 text-[10px] font-semibold uppercase tracking-wider text-pc-text-muted">Lobby tier</span>
-            <select value={filter} onChange={(event) => setFilter(event.target.value as LobbyTierFilter)} className="bg-transparent text-xs font-semibold text-pc-accent outline-none">
-              {LOBBY_TIER_OPTIONS.map((option) => <option key={option.value} value={option.value} className="bg-pc-bg-elevated text-pc-text">{option.label}</option>)}
-            </select>
-          </label>
         </div>
       </header>
 
