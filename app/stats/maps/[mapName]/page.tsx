@@ -9,6 +9,7 @@ import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
 import { getStatQuality } from "@/lib/stat-quality";
 import { mapImagePath } from "@/lib/map-images";
+import { STATIC_CHAMPIONS } from "@/lib/static-champions";
 
 function itemIcon(name: string) { return `/images/items/${name.replace(/\s+/g, "_")}_Icon.png`; }
 function rateColor(rate: number) { return getStatQuality(rate, 1, 1).color; }
@@ -19,6 +20,7 @@ function duration(seconds: number) {
 
 type MapSection = "champions" | "talents" | "items";
 type ChampionSort = "winRate" | "pickRate" | "banRate";
+type TalentSort = "winRate" | "pickRate" | "totalPlays";
 
 const MAP_SECTIONS: Array<{ key: MapSection; label: string }> = [
   { key: "champions", label: "Champions" },
@@ -32,6 +34,21 @@ const CHAMPION_SORTS: Array<{ key: ChampionSort; label: string }> = [
   { key: "banRate", label: "Ban rate" },
 ];
 
+const TALENT_SORTS: Array<{ key: TalentSort; label: string }> = [
+  { key: "winRate", label: "Win rate" },
+  { key: "pickRate", label: "Pick rate" },
+  { key: "totalPlays", label: "Plays" },
+];
+
+const ROLES = [
+  { label: "Frontline", icon: "/images/icons/Class_Front_Line_Icon.avif" },
+  { label: "Damage", icon: "/images/icons/Class_Damage_Icon.avif" },
+  { label: "Flank", icon: "/images/icons/Class_Flank_Icon.avif" },
+  { label: "Support", icon: "/images/icons/Class_Support_Icon.avif" },
+] as const;
+
+const CHAMPION_ROLE_BY_SLUG = new Map(STATIC_CHAMPIONS.map((champion) => [championSlug(champion.name), champion.roles[0] ?? ""]));
+
 export default function MapDetailPage() {
   const params = useParams<{ mapName: string }>();
   const mapName = decodeURIComponent(params.mapName);
@@ -39,6 +56,8 @@ export default function MapDetailPage() {
   const [loaded, setLoaded] = useState(false);
   const [activeSection, setActiveSection] = useState<MapSection>("champions");
   const [championSort, setChampionSort] = useState<ChampionSort>("winRate");
+  const [talentRole, setTalentRole] = useState<string | null>(null);
+  const [talentSort, setTalentSort] = useState<TalentSort>("winRate");
 
   useEffect(() => {
     let cancelled = false;
@@ -58,6 +77,18 @@ export default function MapDetailPage() {
     return difference || b.totalPlays - a.totalPlays || a.championName.localeCompare(b.championName);
   }), [detail, championSort]);
 
+  const talentGroups = useMemo(() => (detail?.champions ?? [])
+    .filter((champion) => !talentRole || CHAMPION_ROLE_BY_SLUG.get(championSlug(champion.championName)) === talentRole)
+    .map((champion) => ({
+      champion,
+      talents: [...(talentsByChampion.get(champion.championId) ?? [])].sort((a, b) => {
+        const difference = b[talentSort] - a[talentSort];
+        return difference || a.talentName.localeCompare(b.talentName);
+      }),
+    }))
+    .filter((group) => group.talents.length > 0)
+    .sort((a, b) => (b.talents[0]?.[talentSort] ?? 0) - (a.talents[0]?.[talentSort] ?? 0)), [detail, talentRole, talentSort, talentsByChampion]);
+
   if (!detail) return <div className="pc-card py-12 text-center text-sm text-pc-text-secondary">{loaded ? "Map statistics are unavailable." : "Loading map statistics…"}</div>;
   const { map } = detail;
 
@@ -74,7 +105,7 @@ export default function MapDetailPage() {
         </div>
       </section>
 
-      <div className="flex gap-2 overflow-x-auto pb-1">
+      <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {MAP_SECTIONS.map((section) => (
           <button
             key={section.key}
@@ -94,7 +125,7 @@ export default function MapDetailPage() {
         <section>
           <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div><h2 className="pc-card-title">Champion performance</h2><p className="mt-1 text-xs text-pc-text-muted">Compact map-specific win, pick, and ban performance.</p></div>
-            <div className="flex gap-2 overflow-x-auto pb-1">
+            <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {CHAMPION_SORTS.map((sort) => (
                 <button key={sort.key} type="button" onClick={() => setChampionSort(sort.key)} className={`shrink-0 rounded-lg px-3 py-2 text-xs font-medium transition-colors ${championSort === sort.key ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-text-secondary hover:text-pc-text"}`}>{sort.label}</button>
               ))}
@@ -113,7 +144,19 @@ export default function MapDetailPage() {
       )}
 
       {activeSection === "talents" && (
-        <section><div className="mb-3"><h2 className="pc-card-title">Talent picks</h2><p className="mt-1 text-xs text-pc-text-muted">Grouped by champion to make variants easy to compare.</p></div><div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">{detail.champions.map((champion) => { const talents = talentsByChampion.get(champion.championId) ?? []; if (!talents.length) return null; return <div key={champion.championId} className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated"><div className="flex items-center gap-2 border-b border-pc-border px-3 py-2"><img src={getChampionIconSafe(champion.championName)} alt="" className="h-6 w-6 rounded object-contain" /><span className="text-xs font-semibold text-pc-text">{champion.championName}</span></div><div className="divide-y divide-pc-border/50">{talents.map((talent) => <div key={talent.talentId} className="grid grid-cols-[minmax(0,1fr)_auto_auto] gap-3 px-3 py-2 text-xs"><span className="truncate text-pc-text-secondary" title={talent.talentName}>{talent.talentName}</span><span style={{ color: rateColor(talent.winRate) }}>{talent.winRate.toFixed(1)}% WR</span><span className="text-pc-text-muted">{talent.pickRate.toFixed(1)}% PR</span></div>)}</div></div>; })}</div></section>
+        <section>
+          <div className="mb-3"><h2 className="pc-card-title">Talent picks</h2><p className="mt-1 text-xs text-pc-text-muted">Filter champions by role and rank their talents by map-specific performance.</p></div>
+          <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <button type="button" onClick={() => setTalentRole(null)} className={`shrink-0 rounded-lg px-3 py-2 text-sm font-medium drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] transition-colors ${talentRole === null ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-muted hover:text-pc-text"}`}>All</button>
+              {ROLES.map((role) => <button key={role.label} type="button" onClick={() => setTalentRole(role.label)} className={`flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] transition-colors ${talentRole === role.label ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-muted hover:text-pc-text"}`}><img src={role.icon} alt="" className="h-5 w-5" />{role.label}</button>)}
+            </div>
+            <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {TALENT_SORTS.map((sort) => <button key={sort.key} type="button" onClick={() => setTalentSort(sort.key)} className={`shrink-0 rounded-lg px-3 py-2 text-xs font-medium transition-colors ${talentSort === sort.key ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-text-secondary hover:text-pc-text"}`}>{sort.label}</button>)}
+            </div>
+          </div>
+          {talentGroups.length > 0 ? <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">{talentGroups.map(({ champion, talents }) => <div key={champion.championId} className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated"><div className="flex items-center gap-2 border-b border-pc-border px-3 py-2"><img src={getChampionIconSafe(champion.championName)} alt="" className="h-6 w-6 rounded object-contain" /><span className="text-xs font-semibold text-pc-text">{champion.championName}</span><span className="ml-auto text-[9px] uppercase text-pc-text-muted">{CHAMPION_ROLE_BY_SLUG.get(championSlug(champion.championName))}</span></div><div className="divide-y divide-pc-border/50">{talents.map((talent) => <div key={talent.talentId} className="grid grid-cols-[minmax(0,1fr)_auto_auto] gap-3 px-3 py-2 text-xs"><span className="truncate text-pc-text-secondary" title={talent.talentName}>{talent.talentName}</span><span style={{ color: rateColor(talent.winRate) }}>{talent.winRate.toFixed(1)}% WR</span><span className="text-pc-text-muted">{talent.pickRate.toFixed(1)}% PR</span></div>)}</div></div>)}</div> : <div className="rounded-xl border border-dashed border-pc-border bg-pc-bg-elevated p-8 text-center text-sm text-pc-text-muted">No talent observations match this role.</div>}
+        </section>
       )}
 
       {activeSection === "items" && (
