@@ -29,3 +29,12 @@ export function writeBrowserResult<T>(key: string, value: T, ttlMs: number): T {
   }
   return value;
 }
+
+export function removeBrowserResult(key: string): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.removeItem(key);
+  } catch {
+    // Storage may be unavailable; there is nothing else to clear.
+  }
+}

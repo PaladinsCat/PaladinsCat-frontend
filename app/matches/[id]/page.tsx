@@ -45,9 +45,10 @@ import RatingSnapshots from "@/components/match-result/rating-snapshots";
 import MatchExportButton from "@/components/match-result/match-export-button";
 import { ErrorState } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
-import { readBrowserResult, writeBrowserResult } from "@/lib/browser-result-cache";
+import { readBrowserResult, removeBrowserResult, writeBrowserResult } from "@/lib/browser-result-cache";
 
 const MATCH_RESULT_CACHE_TTL_MS = 5 * 60 * 1000;
+const MATCH_UI_CACHE_TTL_MS = 30 * 60 * 1000;
 
 type CachedMatchResult = {
   match: MatchDetailWithBans | null;
@@ -169,6 +170,42 @@ export default function MatchDetailPage() {
     load();
     return () => { cancelled = true; };
   }, [matchId, reloadKey]);
+
+  useEffect(() => {
+    if (loading || !match) return;
+    const cacheKey = `paladinscat:match-scroll:v1:${matchId}`;
+    const navigationLockKey = `${cacheKey}:navigating`;
+    const cached = readBrowserResult<{ scrollY: number }>(cacheKey);
+    removeBrowserResult(navigationLockKey);
+    let frame = 0;
+    let restoreTimer: ReturnType<typeof setTimeout> | null = null;
+
+    if (cached && Number.isFinite(cached.scrollY)) {
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        window.scrollTo({ top: cached.scrollY, behavior: "auto" });
+        // Expanded build rows restore in their own mount effect. Reapply once
+        // their additional height has entered layout so the offset is exact.
+        restoreTimer = setTimeout(() => window.scrollTo({ top: cached.scrollY, behavior: "auto" }), 150);
+      });
+    }
+
+    const persistScroll = () => {
+      if (readBrowserResult<boolean>(navigationLockKey)) return;
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        writeBrowserResult(cacheKey, { scrollY: window.scrollY }, MATCH_UI_CACHE_TTL_MS);
+      });
+    };
+    window.addEventListener("scroll", persistScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", persistScroll);
+      if (frame) window.cancelAnimationFrame(frame);
+      if (restoreTimer) clearTimeout(restoreTimer);
+    };
+  }, [loading, match, matchId]);
 
   /* ── Derived data ── */
 

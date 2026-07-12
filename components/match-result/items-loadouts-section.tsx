@@ -37,6 +37,7 @@ const loadoutMetricsByChampionTalentScope = new Map<string, Promise<{
 const RESULT_CACHE_PREFIX = "paladinscat:match-build:v1";
 const REFERENCE_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const METRIC_CACHE_TTL_MS = 5 * 60 * 1000;
+const UI_CACHE_TTL_MS = 30 * 60 * 1000;
 
 function normalizeName(value: string | null | undefined) {
   return String(value ?? "")
@@ -163,6 +164,7 @@ function DetailEntry({
   playsLabel = "plays",
   loadingLabel = "Loading scoped metrics…",
   href,
+  onNavigate,
 }: {
   name: string;
   description: string;
@@ -177,13 +179,14 @@ function DetailEntry({
   playsLabel?: string;
   loadingLabel?: string;
   href?: string;
+  onNavigate?: () => void;
 }) {
   const quality = metric ? getStatQuality(metric.winRate, metric.pickRate, maxPickRate) : null;
   return <article className="flex min-w-0 items-start gap-3 rounded-lg border border-pc-border/70 bg-pc-bg-secondary/45 p-3">
     <Asset sources={sources} alt={name} level={level} tone={tone} />
     <div className="min-w-0 flex-1">
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-        {href ? <Link href={href} className="text-xs font-semibold text-pc-text transition-colors hover:text-pc-accent hover:underline">{name}</Link> : <h4 className="text-xs font-semibold text-pc-text">{name}</h4>}
+        {href ? <Link href={href} onClick={onNavigate} className="text-xs font-semibold text-pc-text transition-colors hover:text-pc-accent hover:underline">{name}</Link> : <h4 className="text-xs font-semibold text-pc-text">{name}</h4>}
         <span className="text-[9px] font-semibold uppercase tracking-wider text-pc-text-muted">{label}</span>
       </div>
       <p className="mt-1 text-xs leading-5 text-pc-text-secondary">{description}</p>
@@ -227,6 +230,15 @@ function PlayerBuildRow({
   const selectedTalent = talents[0] ?? null;
   const championPath = `/champions/${championSlug(player.champion_name || "")}`;
   const returnToQuery = encodeURIComponent(returnTo);
+  const matchId = returnTo.match(/^\/matches\/(\d+)/)?.[1];
+  const preserveMatchPosition = () => {
+    if (!matchId) return;
+    const cacheKey = `paladinscat:match-scroll:v1:${matchId}`;
+    writeBrowserResult(cacheKey, { scrollY: window.scrollY }, UI_CACHE_TTL_MS);
+    // Next resets scroll during client navigation. Ignore that synthetic
+    // scroll event until the match page mounts again and clears this lock.
+    writeBrowserResult(`${cacheKey}:navigating`, true, 10_000);
+  };
   const [reference, setReference] = useState<BuildReferenceData | null>(null);
   const [itemMetrics, setItemMetrics] = useState<ItemStat[] | null>(null);
   const [loadoutMetrics, setLoadoutMetrics] = useState<{
@@ -235,6 +247,10 @@ function PlayerBuildRow({
   } | null>(null);
   const [expanded, setExpanded] = useState(false);
   const disclosureId = useId();
+  const expandedCacheKey = `${RESULT_CACHE_PREFIX}:expanded:${returnTo}:${player.player_id}`;
+  useEffect(() => {
+    setExpanded(readBrowserResult<boolean>(expandedCacheKey) ?? false);
+  }, [expandedCacheKey]);
   useEffect(() => {
     let cancelled = false;
     getBuildReference(player.champion_id, player.champion_name || "").then((data) => { if (!cancelled) setReference(data); });
@@ -341,7 +357,11 @@ function PlayerBuildRow({
         aria-controls={disclosureId}
         aria-label={`${expanded ? "Collapse" : "Expand"} items and loadout details for ${playerName}`}
         title={`${expanded ? "Collapse" : "Expand"} details`}
-        onClick={() => setExpanded((current) => !current)}
+        onClick={() => setExpanded((current) => {
+          const next = !current;
+          writeBrowserResult(expandedCacheKey, next, UI_CACHE_TTL_MS);
+          return next;
+        })}
         className="col-start-2 row-start-1 flex h-9 w-9 items-center justify-center rounded-lg border border-pc-border bg-pc-bg-secondary text-pc-text-muted transition-colors hover:border-pc-accent-mid hover:text-pc-accent lg:col-start-4"
       >
         <ChevronDown aria-hidden="true" className={`h-4 w-4 transition-transform ${expanded ? "rotate-180" : ""}`} />
@@ -362,7 +382,7 @@ function PlayerBuildRow({
           {talents.map((talent) => {
             const entry = findReference("talents", talent.talent_id, talent.talent_name);
             const name = talent.talent_name ?? entry?.name ?? `Talent #${talent.talent_id}`;
-            return <DetailEntry key={`talent-detail-${talent.talent_id}`} name={name} href={`${championPath}/talents/${talent.talent_id}?returnTo=${returnToQuery}`} label="Talent" description={formatDescription(entry?.description, 1) ?? (reference ? "Description unavailable." : "Loading description…")} sources={[entry?.iconUrl, talent.icon_url, talent.fallback_icon_url]} tone="border-amber-400/40" metric={talentMetric} showMetrics metricsLoaded={loadoutMetrics !== null} maxPickRate={100} />;
+            return <DetailEntry key={`talent-detail-${talent.talent_id}`} name={name} href={`${championPath}/talents/${talent.talent_id}?returnTo=${returnToQuery}`} onNavigate={preserveMatchPosition} label="Talent" description={formatDescription(entry?.description, 1) ?? (reference ? "Description unavailable." : "Loading description…")} sources={[entry?.iconUrl, talent.icon_url, talent.fallback_icon_url]} tone="border-amber-400/40" metric={talentMetric} showMetrics metricsLoaded={loadoutMetrics !== null} maxPickRate={100} />;
           })}
           {cards.map((card) => {
             const entry = findReference("cards", card.card_id, card.card_name);
@@ -370,7 +390,7 @@ function PlayerBuildRow({
             const name = card.card_name ?? entry?.name ?? `Card #${card.card_id}`;
             const query = new URLSearchParams({ returnTo });
             if (selectedTalent) query.set("talentId", String(selectedTalent.talent_id));
-            return <DetailEntry key={`card-detail-${card.card_id}`} name={name} href={`${championPath}/cards/${card.card_id}?${query.toString()}`} label={`Card · level ${level}`} description={formatDescription(entry?.description, level) ?? (reference ? "Description unavailable." : "Loading description…")} sources={[entry?.iconUrl, card.icon_url, card.fallback_icon_url]} level={level} tone="border-pc-accent/30" metric={cardMetricAtRecordedLevel(card.card_id, card.card_name, level)} showMetrics metricsLoaded={loadoutMetrics !== null} maxPickRate={maxLoadoutLevelPickRate} playsLabel="picks" />;
+            return <DetailEntry key={`card-detail-${card.card_id}`} name={name} href={`${championPath}/cards/${card.card_id}?${query.toString()}`} onNavigate={preserveMatchPosition} label={`Card · level ${level}`} description={formatDescription(entry?.description, level) ?? (reference ? "Description unavailable." : "Loading description…")} sources={[entry?.iconUrl, card.icon_url, card.fallback_icon_url]} level={level} tone="border-pc-accent/30" metric={cardMetricAtRecordedLevel(card.card_id, card.card_name, level)} showMetrics metricsLoaded={loadoutMetrics !== null} maxPickRate={maxLoadoutLevelPickRate} playsLabel="picks" />;
           })}
           {talents.length === 0 && cards.length === 0 && <p className="text-xs text-pc-text-muted">No talent or loadout cards were recorded.</p>}
         </section>
@@ -383,7 +403,7 @@ function PlayerBuildRow({
             const name = item.item_name ?? entry?.name ?? `Item #${item.item_id}`;
             const description = entry?.description ?? item.description;
             const itemMetric = itemMetricAtRecordedSlotAndLevel(item.item_id, item.item_name, item.slot, item.item_level ?? 0);
-            return <DetailEntry key={`item-detail-${item.slot}-${item.item_id}`} name={name} href={`/stats/items/${item.item_id}?returnTo=${returnToQuery}`} label={`Item · slot ${item.slot} · level ${level}`} description={formatDescription(description, level) ?? (reference ? "Description unavailable." : "Loading description…")} sources={[entry?.iconUrl, item.icon_url, item.fallback_icon_url]} level={level} metric={itemMetric} showMetrics metricsLoaded={itemMetrics !== null} maxPickRate={maxItemPickRate} playsLabel="uses" loadingLabel="Loading scoped item metrics…" />;
+            return <DetailEntry key={`item-detail-${item.slot}-${item.item_id}`} name={name} href={`/stats/items/${item.item_id}?returnTo=${returnToQuery}`} onNavigate={preserveMatchPosition} label={`Item · slot ${item.slot} · level ${level}`} description={formatDescription(description, level) ?? (reference ? "Description unavailable." : "Loading description…")} sources={[entry?.iconUrl, item.icon_url, item.fallback_icon_url]} level={level} metric={itemMetric} showMetrics metricsLoaded={itemMetrics !== null} maxPickRate={maxItemPickRate} playsLabel="uses" loadingLabel="Loading scoped item metrics…" />;
           })}
           {items.length === 0 && <p className="text-xs text-pc-text-muted">No purchased items were recorded.</p>}
         </section>

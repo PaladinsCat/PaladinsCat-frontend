@@ -10,10 +10,11 @@ export function safeInternalReturnTo(value: string | null | undefined): string |
 
 export default function ContextBackLink({ fallbackHref, label = "Back" }: { fallbackHref: string; label?: string }) {
   const searchParams = useSearchParams();
-  const href = safeInternalReturnTo(searchParams.get("returnTo")) ?? fallbackHref;
+  const returnTo = safeInternalReturnTo(searchParams.get("returnTo"));
+  const href = returnTo ?? fallbackHref;
 
   return (
-    <Link href={href} className="inline-flex items-center gap-1 text-sm text-pc-text-secondary transition-colors hover:text-pc-accent">
+    <Link href={href} scroll={returnTo ? false : undefined} className="inline-flex items-center gap-1 text-sm text-pc-text-secondary transition-colors hover:text-pc-accent">
       <span aria-hidden="true">←</span>
       {label}
     </Link>
