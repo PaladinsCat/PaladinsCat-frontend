@@ -360,11 +360,16 @@ export default function PlayerProfilePage() {
     setShowCurrentMatch(true);
     setCurrentMatch(null);
     try {
-      const res = await fetch(`${API_BASE}/live/players/${id}`);
+      const res = await fetch(`${API_BASE}/live/players/${id}`, { cache: 'no-store' });
       const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.error?.message || data?.error || 'Failed to fetch live match data');
+      }
       setCurrentMatch(data);
-    } catch {
-      setCurrentMatch({ error: 'Failed to fetch live match data' });
+    } catch (error) {
+      setCurrentMatch({
+        error: error instanceof Error ? error.message : 'Failed to fetch live match data',
+      });
     }
   }, [id]);
 
@@ -942,6 +947,11 @@ export default function PlayerProfilePage() {
               <div className="text-center py-8 text-pc-text-muted text-sm">Checking live matches...</div>
             ) : currentMatch.error ? (
               <div className="text-center py-8 text-pc-text-muted text-sm">{currentMatch.error}</div>
+            ) : currentMatch.pending ? (
+              <div className="text-center py-8">
+                <div className="text-pc-text-muted text-sm mb-2">Live lobby is still loading</div>
+                <div className="text-xs text-pc-text-muted/60">{currentMatch.message || 'Try again in a few seconds.'}</div>
+              </div>
             ) : !currentMatch.match ? (
               <div className="text-center py-8">
                 <div className="text-pc-text-muted text-sm mb-2">Not in a live match</div>
@@ -984,9 +994,15 @@ export default function PlayerProfilePage() {
                                   <div className="flex min-w-0 items-center gap-2">
                                     <img src={getChampionIconSafe(p.champion_name || "")} alt="" className="h-7 w-7 shrink-0 rounded object-contain" />
                                     <div className="min-w-0">
-                                      <Link href={`/players/${p.player_id}`} className="block truncate text-xs font-medium text-pc-text hover:text-pc-accent">
-                                        {p.player_name || `#${p.player_id}`}
-                                      </Link>
+                                      {Number(p.player_id) > 0 ? (
+                                        <Link href={`/players/${p.player_id}`} className="block truncate text-xs font-medium text-pc-text hover:text-pc-accent">
+                                          {p.player_name || `#${p.player_id}`}
+                                        </Link>
+                                      ) : (
+                                        <span className="block truncate text-xs font-medium text-pc-text-muted">
+                                          {p.player_name || 'Private Account'}
+                                        </span>
+                                      )}
                                       <div className="truncate text-[10px] text-pc-text-muted">{p.champion_name || "Unknown champion"} · Lvl {p.profile_level ?? p.account_level ?? "—"}</div>
                                     </div>
                                   </div>
