@@ -41,10 +41,6 @@ export default function SkinStatsPage() {
         <p className="mt-1 text-sm text-pc-text-secondary">Ranked cosmetic performance from stored match facts, including repaired or overflow skin IDs.</p>
       </div>
 
-      <div className="rounded-xl border border-pc-accent/30 bg-pc-accent/10 px-4 py-3 text-sm text-pc-text">
-        <div className="flex flex-wrap items-center justify-between gap-3"><span>Lobby scope: {lobbyTier.label}</span><Link href="/account" className="text-xs font-semibold text-pc-accent hover:underline">Change in Account Settings</Link></div>
-      </div>
-
       <div className="grid grid-cols-1 gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-4 md:grid-cols-2">
         <label className="text-xs text-pc-text-secondary">Champion<select value={championId} onChange={(event) => setChampionId(Number(event.target.value))} className="mt-1.5 w-full rounded-lg border border-pc-border bg-pc-bg-secondary px-3 py-2 text-sm text-pc-text"><option value={0}>All champions</option>{champions.map((champion) => <option key={champion.id} value={champion.id}>{champion.name}</option>)}</select></label>
         <label className="text-xs text-pc-text-secondary">Search skins<input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Skin or champion" className="mt-1.5 w-full rounded-lg border border-pc-border bg-pc-bg-secondary px-3 py-2 text-sm text-pc-text placeholder:text-pc-text-muted" /></label>
