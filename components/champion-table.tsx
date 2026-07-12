@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import ScrambleText from "@/components/ScrambleText";
 import { fetchChampions, type Champion } from "@/lib/api-client";
@@ -45,6 +45,10 @@ export default function ChampionTable() {
   const [sortBy, setSortBy] = useState<"name" | "winRate" | "banRate" | "popularity">("name");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [searchQuery, setSearchQuery] = useState("");
+  const deferredFilterRole = useDeferredValue(filterRole);
+  const deferredSortBy = useDeferredValue(sortBy);
+  const deferredSortDir = useDeferredValue(sortDir);
+  const deferredSearchQuery = useDeferredValue(searchQuery);
 
   // Try to fetch DB stats in the background and merge them in
   useEffect(() => {
@@ -97,28 +101,31 @@ export default function ChampionTable() {
     return () => { cancelled = true; };
   }, []);
 
-  const filtered = champions
+  const filtered = useMemo(() => champions
     .filter((c) => {
-      const matchesSearch = c.name.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesRole = !filterRole || (c.roles && c.roles.includes(filterRole));
+      const matchesSearch = c.name.toLowerCase().includes(deferredSearchQuery.toLowerCase());
+      const matchesRole = !deferredFilterRole || (c.roles && c.roles.includes(deferredFilterRole));
       return matchesSearch && matchesRole;
     })
     .sort((a, b) => {
-      // Nulls sink to the bottom for stat sorts
+      // Nulls sink to the bottom for stat sorts.
       const nullsLast = (av: number | null | undefined, bv: number | null | undefined) => {
         if (av == null && bv == null) return 0;
         if (av == null) return 1;
         if (bv == null) return -1;
-        return sortDir === "desc" ? bv - av : av - bv;
+        return deferredSortDir === "desc" ? bv - av : av - bv;
       };
-      switch (sortBy) {
+      switch (deferredSortBy) {
         case "winRate":    return nullsLast(a.winRate, b.winRate);
         case "banRate":    return nullsLast(a.banRate, b.banRate);
         case "popularity": return nullsLast(a.totalPlays, b.totalPlays);
-        default:           return sortDir === "asc" ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
+        default:           return deferredSortDir === "asc" ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
       }
-    });
-  const maxChampionPickRate = Math.max(1, ...champions.map((champion) => champion.pickRate ?? 0));
+    }), [champions, deferredFilterRole, deferredSearchQuery, deferredSortBy, deferredSortDir]);
+  const maxChampionPickRate = useMemo(
+    () => Math.max(1, ...champions.map((champion) => champion.pickRate ?? 0)),
+    [champions],
+  );
 
   return (
     <div className="space-y-6">

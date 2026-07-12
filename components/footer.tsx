@@ -109,12 +109,12 @@ export default function Footer() {
 
         </div>
 
-        {/* Version */}
-        {versionLabel && (
-          <div className="mt-6 pt-4 border-t border-pc-border/50 text-center">
+        {/* Keep this slot mounted so the async version label cannot resize the footer. */}
+        <div className="mt-6 min-h-8 pt-4 border-t border-pc-border/50 text-center">
+          {versionLabel && (
             <span className="text-pc-text-muted text-xs" title={versionTitle}>{versionLabel}</span>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </footer>
   );

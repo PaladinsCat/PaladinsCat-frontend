@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { memo, Suspense, useDeferredValue, useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -256,6 +256,52 @@ function remoteLookupNotice(target: UniversalSearchRemoteTarget, remote: Univers
   return null;
 }
 
+const SearchResultGroups = memo(function SearchResultGroups({
+  grouped,
+}: {
+  grouped: Array<[UniversalSearchType, UniversalSearchResult[]]>;
+}) {
+  if (grouped.length === 0) return null;
+
+  return (
+    <div className="space-y-5">
+      {grouped.map(([type, rows]) => (
+        <section key={type} className="space-y-2">
+          <div className="flex items-center gap-2 px-1">
+            <h2 className="text-sm font-semibold text-pc-text">{TYPE_LABEL[type]}</h2>
+            <span className="text-xs text-pc-text-muted">{rows.length}</span>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            {rows.map((result) => (
+              <Link
+                key={`${result.type}-${result.id}-${result.href}`}
+                href={result.href}
+                className="group flex items-center gap-3 rounded-lg border border-pc-border bg-pc-bg-elevated p-3 hover:border-pc-accent-mid transition-colors"
+              >
+                <ResultIcon result={result} />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="truncate text-sm font-semibold text-pc-text group-hover:text-pc-accent transition-colors">
+                      {result.title}
+                    </span>
+                    <span className={`shrink-0 text-[9px] px-1.5 py-0.5 rounded-full border ${TYPE_STYLE[result.type]}`}>
+                      {TYPE_LABEL[result.type]}
+                    </span>
+                  </div>
+                  <p className="truncate text-xs text-pc-text-muted mt-0.5">{result.subtitle}</p>
+                </div>
+                <span className="text-xs text-pc-text-muted group-hover:text-pc-accent transition-colors">
+                  View
+                </span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+  );
+});
+
 function SearchPageBody() {
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("q") ?? "";
@@ -266,13 +312,14 @@ function SearchPageBody() {
   const [error, setError] = useState<string | null>(null);
   const [remoteLoadingTarget, setRemoteLoadingTarget] = useState<UniversalSearchRemoteTarget | null>(null);
   const [remoteNotice, setRemoteNotice] = useState<string | null>(null);
+  const deferredQuery = useDeferredValue(query);
 
   useEffect(() => {
     setQuery(initialQuery);
   }, [initialQuery]);
 
   useEffect(() => {
-    const q = query.trim();
+    const q = deferredQuery.trim();
     setError(null);
     setRemoteNotice(null);
     if (q.length < 2 && !/^\d+$/.test(q)) {
@@ -310,7 +357,7 @@ function SearchPageBody() {
     }, 180);
 
     return () => window.clearTimeout(timer);
-  }, [query]);
+  }, [deferredQuery]);
 
   const grouped = useMemo(() => {
     const byType = new Map<UniversalSearchType, UniversalSearchResult[]>();
@@ -461,7 +508,7 @@ function SearchPageBody() {
         <div className="pc-card text-xs text-pc-text-muted">{remoteNotice}</div>
       )}
 
-      {loading && (
+      {loading && results.length === 0 && (
         <LoadingPanel label="Searching PaladinsCat…" detail="Checking players, matches, champions, items, cards, and talents." />
       )}
 
@@ -473,43 +520,7 @@ function SearchPageBody() {
         <EmptyState title="No results found" description="Try a broader name, player ID, match ID, champion, item, card, or talent." />
       )}
 
-      {!loading && grouped.length > 0 && (
-        <div className="space-y-5">
-          {grouped.map(([type, rows]) => (
-            <section key={type} className="space-y-2">
-              <div className="flex items-center gap-2 px-1">
-                <h2 className="text-sm font-semibold text-pc-text">{TYPE_LABEL[type]}</h2>
-                <span className="text-xs text-pc-text-muted">{rows.length}</span>
-              </div>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                {rows.map((result) => (
-                  <Link
-                    key={`${result.type}-${result.id}-${result.href}`}
-                    href={result.href}
-                    className="group flex items-center gap-3 rounded-lg border border-pc-border bg-pc-bg-elevated p-3 hover:border-pc-accent-mid transition-colors"
-                  >
-                    <ResultIcon result={result} />
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="truncate text-sm font-semibold text-pc-text group-hover:text-pc-accent transition-colors">
-                          {result.title}
-                        </span>
-                        <span className={`shrink-0 text-[9px] px-1.5 py-0.5 rounded-full border ${TYPE_STYLE[result.type]}`}>
-                          {TYPE_LABEL[result.type]}
-                        </span>
-                      </div>
-                      <p className="truncate text-xs text-pc-text-muted mt-0.5">{result.subtitle}</p>
-                    </div>
-                    <span className="text-xs text-pc-text-muted group-hover:text-pc-accent transition-colors">
-                      View
-                    </span>
-                  </Link>
-                ))}
-              </div>
-            </section>
-          ))}
-        </div>
-      )}
+      <SearchResultGroups grouped={grouped} />
     </div>
   );
 }
