@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { fetchCheaterPlayers } from "@/lib/api-client";
+import PlayerModerationCards from "@/components/player-moderation-cards";
 
 const CLASS_ICONS: Record<string, string> = {
   Frontline: "/images/icons/Class_Front_Line_Icon.avif",
@@ -58,7 +59,9 @@ export default function SuspiciousPage() {
       ) : data.length === 0 ? (
         <div className="text-center py-12 text-pc-text-secondary text-sm">No suspicious players found.</div>
       ) : (
-        <div className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
+        <>
+          <PlayerModerationCards players={data} showSeverity />
+        <div className="hidden overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated md:block">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -116,6 +119,7 @@ export default function SuspiciousPage() {
             </table>
           </div>
         </div>
+        </>
       )}
     </div>
   );

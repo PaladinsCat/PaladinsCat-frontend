@@ -46,7 +46,17 @@ export default function SkinStatsPage() {
         <label className="text-xs text-pc-text-secondary">Search skins<input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Skin or champion" className="mt-1.5 w-full rounded-lg border border-pc-border bg-pc-bg-secondary px-3 py-2 text-sm text-pc-text placeholder:text-pc-text-muted" /></label>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-pc-border bg-pc-bg-elevated">
+      <div className="space-y-2 sm:hidden">
+        {visibleRows.map((row) => <Link key={`${row.championId}-${row.skinId}`} href={`/champions/${championSlug(row.championName)}`} className="pc-mobile-panel flex min-w-0 items-center gap-3 p-3">
+          <img src={getChampionIconSafe(row.championName)} alt="" className="h-10 w-10 shrink-0 rounded-lg object-contain" />
+          <div className="min-w-0 flex-1"><div className="truncate text-sm font-semibold text-pc-text">{row.skinName}</div><div className="text-[10px] text-pc-text-muted">{row.championName} · ID {row.skinId}</div><div className="mt-1 text-[10px] text-pc-text-secondary">{row.totalPlays.toLocaleString()} plays · {row.wins.toLocaleString()}W/{row.losses.toLocaleString()}L</div></div>
+          <span className={row.winRate >= 50 ? "shrink-0 font-bold text-emerald-400" : "shrink-0 font-bold text-rose-400"}>{row.winRate.toFixed(1)}%</span>
+        </Link>)}
+        {!loading && visibleRows.length === 0 && <div className="pc-mobile-panel p-6 text-center text-sm text-pc-text-muted">No skin statistics match these filters.</div>}
+        {loading && <div className="pc-mobile-panel p-6 text-center text-sm text-pc-text-muted">Loading skin statistics…</div>}
+      </div>
+
+      <div className="hidden overflow-x-auto rounded-xl border border-pc-border bg-pc-bg-elevated sm:block">
         <table className="w-full min-w-[680px] text-sm"><thead className="border-b border-pc-border text-left text-xs text-pc-text-muted"><tr><th className="px-4 py-3">Skin</th><th className="px-3 py-3">Champion</th><th className="px-3 py-3 text-right">Plays</th><th className="px-3 py-3 text-right">W / L</th><th className="px-4 py-3 text-right">Win Rate</th></tr></thead><tbody>
           {visibleRows.map((row) => <tr key={`${row.championId}-${row.skinId}`} className="border-b border-pc-border/50 transition-colors hover:bg-pc-bg-secondary/60"><td className="px-4 py-3"><div className="font-medium text-pc-text">{row.skinName}</div><div className="text-[10px] text-pc-text-muted">ID {row.skinId}</div></td><td className="px-3 py-3"><Link href={`/champions/${championSlug(row.championName)}`} className="flex items-center gap-2 text-pc-text-secondary hover:text-pc-accent"><img src={getChampionIconSafe(row.championName)} alt="" className="h-6 w-6 rounded object-contain" />{row.championName}</Link></td><td className="px-3 py-3 text-right text-pc-text">{row.totalPlays.toLocaleString()}</td><td className="px-3 py-3 text-right text-pc-text-secondary">{row.wins.toLocaleString()} / {row.losses.toLocaleString()}</td><td className={row.winRate >= 50 ? "px-4 py-3 text-right font-semibold text-emerald-400" : "px-4 py-3 text-right font-semibold text-rose-400"}>{row.winRate.toFixed(1)}%</td></tr>)}
           {!loading && visibleRows.length === 0 && <tr><td colSpan={5} className="px-4 py-10 text-center text-pc-text-muted">No skin statistics match these filters.</td></tr>}

@@ -151,6 +151,37 @@ const statColumns = [
   "Dmg", "Abil", "Self", "Heal", "Mit", "Taken", "Obj", "AFK",
 ];
 
+function MobilePlayerCard({ player, wins }: { player: MatchPlayerDetail; wins: boolean }) {
+  const damage = computeDamageStats(player).totalDamage;
+  const champion = player.champion_name || `Champion #${player.champion_id}`;
+  const metrics = [
+    ["K / D / A", `${num(player.kills)} / ${num(player.deaths)} / ${num(player.assists)}`],
+    ["KDA", fixed(player.kda, 2)],
+    ["DPM", fixed(player.damage_per_minute, 0)],
+    ["HPM", fixed(player.healing_per_minute, 0)],
+    ["GPM", fixed(player.gold_per_minute, 0)],
+    ["eGPM", fixed(player.egpm, 0)],
+    ["Damage", num(damage)],
+    ["Healing", num(player.healing)],
+    ["Mitigated", num(player.damage_mitigated)],
+    ["Taken", num(player.damage_taken)],
+  ];
+
+  return <article className={`border-b border-pc-border/60 p-3 last:border-b-0 ${wins ? "bg-emerald-400/[0.035]" : ""}`}>
+    <div className="flex min-w-0 items-center gap-3">
+      <img src={getChampionIconSafe(player.champion_name)} alt="" className="h-11 w-11 shrink-0 rounded-xl border border-pc-border object-cover" />
+      <div className="min-w-0 flex-1">
+        <Link href={`/players/${player.player_id}`} className="block truncate text-sm font-semibold text-pc-text hover:text-pc-accent">{player.player_name || "PRIVATE"}</Link>
+        {player.champion_name ? <Link href={`/champions/${championSlug(player.champion_name)}`} className="block truncate text-xs text-pc-text-secondary hover:text-pc-accent">{champion}</Link> : <span className="text-xs text-pc-text-secondary">{champion}</span>}
+      </div>
+      <PartyBadge player={player} />
+    </div>
+    <dl className="mt-3 grid grid-cols-2 gap-1.5 min-[420px]:grid-cols-3">
+      {metrics.map(([label, value]) => <div key={label} className="rounded-lg border border-pc-border/60 bg-pc-bg-secondary/50 px-2.5 py-2"><dt className="text-[9px] uppercase tracking-wide text-pc-text-muted">{label}</dt><dd className="mt-0.5 truncate font-mono text-xs font-semibold text-pc-text">{value}</dd></div>)}
+    </dl>
+  </article>;
+}
+
 export default function MatchStatsSection({
   team1Players,
   team2Players,
@@ -168,7 +199,14 @@ export default function MatchStatsSection({
         </h2>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="lg:hidden">
+        <div className="border-b border-pc-border bg-pc-bg-secondary/60 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted">{team1Label}</div>
+        {team1Players.map((player) => <MobilePlayerCard key={`${player.player_id}-${player.champion_id}`} player={player} wins={team1Wins} />)}
+        <div className="border-y border-pc-border bg-pc-bg-secondary/60 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted">{team2Label}</div>
+        {team2Players.map((player) => <MobilePlayerCard key={`${player.player_id}-${player.champion_id}`} player={player} wins={team2Wins} />)}
+      </div>
+
+      <div className="hidden overflow-x-auto lg:block">
         <table className="w-full min-w-[1160px]">
           <thead>
             <tr className="border-b border-pc-border/60 bg-pc-bg-secondary/50">

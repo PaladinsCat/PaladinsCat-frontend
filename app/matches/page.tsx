@@ -219,7 +219,10 @@ export default function MatchesPage() {
                   Showing {(page - 1) * perPage + 1}–{Math.min(page * perPage, total)} of {total.toLocaleString()} ranked matches
                 </div>
               )}
-              <div className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
+              <div className="space-y-2 sm:hidden">
+                {matches.map((match) => <MatchCard key={match.match_id} match={match} />)}
+              </div>
+              <div className="hidden overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated sm:block">
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
@@ -419,6 +422,14 @@ function MatchRow({ match }: { match: MatchSearchResult }) {
       <td className="px-4 py-3 text-pc-text-secondary text-xs"><Link href={href}>{date}</Link></td>
     </tr>
   );
+}
+
+function MatchCard({ match }: { match: MatchSearchResult }) {
+  const href = `/matches/${match.match_id}`;
+  return <Link href={href} className="pc-mobile-panel block p-3 transition-colors hover:border-pc-accent-mid">
+    <div className="flex min-w-0 items-start justify-between gap-3"><div className="min-w-0"><div className="truncate text-sm font-semibold text-pc-text">{match.map || "Unknown map"}</div><div className="mt-0.5 font-mono text-[10px] text-pc-accent">#{match.match_id}</div></div><span className="shrink-0 rounded-full border border-pc-border bg-pc-bg px-2 py-1 text-[10px] uppercase text-pc-text-secondary">{match.region || "—"}</span></div>
+    <div className="mt-3 grid grid-cols-2 gap-2 text-xs"><div><div className="text-[9px] uppercase text-pc-text-muted">Duration</div><div className="font-mono text-pc-text-secondary">{formatDuration(match.duration_seconds)}</div></div><div className="text-right"><div className="text-[9px] uppercase text-pc-text-muted">Played</div><div className="text-pc-text-secondary">{formatLocalDateTime(match.entry_datetime)}</div></div></div>
+  </Link>;
 }
 
 function formatDuration(seconds: number): string {

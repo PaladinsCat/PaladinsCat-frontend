@@ -751,7 +751,15 @@ export default function PlayerProfilePage() {
               ) : matches.length === 0 ? (
                 <p className="text-pc-text-muted text-sm">No matches recorded yet.</p>
               ) : (
-                <div className="overflow-x-auto">
+                <>
+                <div className="space-y-2 sm:hidden">
+                  {matches.filter((match) => match.championName).map((match) => <Link key={match.matchId} href={`/matches/${match.matchId}`} className="pc-mobile-panel flex min-w-0 items-center gap-3 p-3">
+                    <img src={getChampionIconSafe(match.championName)} alt="" className="h-10 w-10 shrink-0 rounded-lg object-contain" />
+                    <div className="min-w-0 flex-1"><div className="flex min-w-0 items-center gap-2"><span className="truncate text-sm font-semibold text-pc-text">{match.championName}</span><span className={`shrink-0 text-[10px] font-bold ${match.isWinner ? "text-emerald-400" : "text-rose-400"}`}>{match.isWinner ? "WIN" : "LOSS"}</span></div><div className="truncate text-[10px] text-pc-text-muted">{match.queueId === 486 ? "Ranked" : "Casual"} · {displayMatchMap(match.mapGame, match.queueId)}</div><div className="mt-1 text-[10px] text-pc-text-muted">{formatLocalDateTime(match.entryDatetime)}</div></div>
+                    <div className="shrink-0 text-right"><div className="font-mono text-sm font-bold text-pc-text">{match.kills}/{match.deaths}/{match.assists}</div><div className="text-[9px] uppercase text-pc-text-muted">{formatKda(match.kills, match.deaths, match.assists)} KDA</div><div className="mt-1 font-mono text-[10px] text-pc-text-secondary">{formatMatchDuration(match.duration)}</div></div>
+                  </Link>)}
+                </div>
+                <div className="hidden overflow-x-auto sm:block">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-pc-border text-pc-text-muted text-left text-xs">
@@ -806,6 +814,7 @@ export default function PlayerProfilePage() {
                     </tbody>
                   </table>
                 </div>
+                </>
               )}
             </div>
           </div>

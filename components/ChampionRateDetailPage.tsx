@@ -202,7 +202,21 @@ export default function ChampionRateDetailPage({ config }: { config: RateMetricC
                 </div>
               </div>
 
-              <div className="overflow-x-auto">
+              <div className="divide-y divide-pc-border/50 sm:hidden">
+                {section.champions.map((champion, index) => {
+                  const rowVsClassPct = pctDiff(champion.value, section.average);
+                  const rowVsGlobalPct = pctDiff(champion.value, globalAverage);
+                  return <Link key={champion.id} href={`/champions/${championSlug(champion.name)}`} className="flex min-w-0 items-center gap-3 p-3 transition-colors hover:bg-pc-bg/50">
+                    <span className="w-7 shrink-0 text-center text-xs text-pc-text-muted">#{index + 1}</span>
+                    <img src={getChampionIconSafe(champion.name)} alt="" className="h-9 w-9 shrink-0 rounded-lg object-contain" />
+                    <div className="min-w-0 flex-1"><div className="truncate text-sm font-semibold text-pc-text">{champion.name}</div><div className="mt-0.5 flex flex-wrap gap-x-2 text-[10px]"><span className={rowVsClassPct >= 0 ? "text-emerald-400" : "text-red-400"}>{formatSignedDeltaPercent(rowVsClassPct)} class</span><span className={rowVsGlobalPct >= 0 ? "text-emerald-400" : "text-red-400"}>{formatSignedDeltaPercent(rowVsGlobalPct)} global</span><span className="text-pc-text-muted">{champion.matches.toLocaleString()} matches</span></div></div>
+                    <span className="shrink-0 font-mono text-sm font-bold" style={{ color: config.stroke }}>{formatRate(champion.value)}</span>
+                  </Link>;
+                })}
+                {section.champions.length === 0 && <div className="px-3 py-6 text-center text-sm text-pc-text-muted">No champion data</div>}
+              </div>
+
+              <div className="hidden overflow-x-auto sm:block">
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="text-left text-pc-text-muted border-b border-pc-border/60">

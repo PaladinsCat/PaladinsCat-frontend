@@ -61,7 +61,22 @@ export default function CompositionStatsPage() {
         ].map(([label, value]) => <div key={label} className="rounded-xl border border-pc-border bg-pc-bg-elevated p-4"><div className="text-[10px] uppercase tracking-wider text-pc-text-muted">{label}</div><div className="mt-1 truncate text-lg font-bold text-pc-text">{value}</div></div>)}
       </div>
 
-      <div className="mx-auto w-full max-w-5xl overflow-x-auto rounded-xl border border-pc-border bg-pc-bg-elevated shadow-lg shadow-black/10">
+      <div className="flex flex-wrap items-center gap-2 md:hidden">
+        <span className="text-xs text-pc-text-muted">Sort:</span>
+        <button onClick={() => changeSort("totalMatches")} className={`pc-touch-target rounded-lg border px-3 text-xs ${sortKey === "totalMatches" ? "border-pc-accent bg-pc-accent/15 text-pc-accent" : "border-pc-border bg-pc-bg-elevated text-pc-text-secondary"}`}>Matches {sortKey === "totalMatches" && (descending ? "↓" : "↑")}</button>
+        <button onClick={() => changeSort("winRate")} className={`pc-touch-target rounded-lg border px-3 text-xs ${sortKey === "winRate" ? "border-pc-accent bg-pc-accent/15 text-pc-accent" : "border-pc-border bg-pc-bg-elevated text-pc-text-secondary"}`}>Win rate {sortKey === "winRate" && (descending ? "↓" : "↑")}</button>
+      </div>
+
+      <div className="space-y-2 md:hidden">
+        {sorted.map((row) => <article key={row.composition} className="pc-mobile-panel p-3">
+          <div className="flex items-center justify-between gap-3"><div><div className="font-mono text-base font-bold text-pc-text">{row.composition}</div><div className="text-[10px] text-pc-text-muted">Frontline · Damage · Flank · Support</div></div><div className={row.winRate >= 50 ? "text-right font-bold text-emerald-400" : "text-right font-bold text-rose-400"}>{row.winRate.toFixed(1)}%<div className="text-[9px] font-normal uppercase tracking-wide text-pc-text-muted">win rate</div></div></div>
+          <div className="mt-3 grid grid-cols-4 gap-1.5">{CLASS_COLUMNS.map((column) => <div key={column.key} className="rounded-lg bg-pc-bg-secondary/60 p-2 text-center"><img src={column.icon} alt="" className="mx-auto h-5 w-5 object-contain" /><div className="mt-1 font-mono text-sm font-semibold text-pc-text">{row[column.key]}</div><div className="truncate text-[8px] uppercase text-pc-text-muted">{column.label}</div></div>)}</div>
+          <div className="mt-3 flex items-center justify-between text-xs"><span className="text-pc-text-secondary">{row.totalMatches.toLocaleString()} matches</span><span className="text-pc-text-muted">{row.wins.toLocaleString()}W / {row.losses.toLocaleString()}L</span></div>
+        </article>)}
+        {sorted.length === 0 && <div className="pc-mobile-panel p-6 text-center text-sm text-pc-text-muted">{loading ? "Loading composition statistics…" : "Composition statistics are not available for this lobby scope yet."}</div>}
+      </div>
+
+      <div className="mx-auto hidden w-full max-w-5xl overflow-x-auto rounded-xl border border-pc-border bg-pc-bg-elevated shadow-lg shadow-black/10 md:block">
         <table className="w-full min-w-[760px] table-fixed text-sm">
           <thead className="border-b border-pc-border text-left text-xs text-pc-text-muted">
             <tr>
