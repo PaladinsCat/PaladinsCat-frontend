@@ -2014,9 +2014,13 @@ export interface ChampionTalentStatsResponse {
 
 export async function fetchChampionTalentStats(
   championId: number,
-  mode: 'ranked' = 'ranked'
+  mode: 'ranked' = 'ranked',
+  tier?: { tierMin?: number; tierMax?: number }
 ): Promise<ChampionTalentStatsResponse> {
   try {
+    const query = new URLSearchParams({ mode });
+    if (tier?.tierMin != null) query.set('tierMin', String(tier.tierMin));
+    if (tier?.tierMax != null) query.set('tierMax', String(tier.tierMax));
     const raw = await fetchJson<{
       totalMatches: number | string;
       talentCoveredMatches?: number | string;
@@ -2033,7 +2037,7 @@ export async function fetchChampionTalentStats(
         losses: number | string;
         winRate: number | string;
       }>;
-    }>(`/stats/talents/${championId}?mode=${mode}`);
+    }>(`/stats/talents/${championId}?${query.toString()}`);
 
     return {
       totalMatches: Number(raw.totalMatches) ?? 0,
@@ -2152,9 +2156,14 @@ export async function fetchChampionCardDetail(
 export async function fetchChampionCardStats(
   championId: number,
   mode: 'ranked' = 'ranked',
-  talentId?: number | null
+  talentId?: number | null,
+  tier?: { tierMin?: number; tierMax?: number }
 ): Promise<ChampionCardStatsResponse> {
   try {
+    const query = new URLSearchParams({ mode });
+    if (talentId) query.set('talentId', String(talentId));
+    if (tier?.tierMin != null) query.set('tierMin', String(tier.tierMin));
+    if (tier?.tierMax != null) query.set('tierMax', String(tier.tierMax));
     const raw = await fetchJson<{
       totalMatches: number | string;
       cards: Array<{
@@ -2170,7 +2179,7 @@ export async function fetchChampionCardStats(
           winRate: number | string;
         }>;
       }>;
-    }>(`/stats/cards/${championId}?mode=${mode}${talentId ? `&talentId=${talentId}` : ''}`);
+    }>(`/stats/cards/${championId}?${query.toString()}`);
 
     const mappedCards = (raw.cards ?? []).map((c) => ({
       cardId: Number(c.cardId) ?? 0,

@@ -3,7 +3,16 @@
 import { useEffect, useId, useState } from "react";
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
-import { fetchItems, type ItemStat, type MatchFactPlayer, type MatchPlayerDetail } from "@/lib/api-client";
+import {
+  fetchChampionCardStats,
+  fetchChampionTalentStats,
+  fetchItems,
+  type ChampionCardStatsResponse,
+  type ChampionTalentStatsResponse,
+  type ItemStat,
+  type MatchFactPlayer,
+  type MatchPlayerDetail,
+} from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { loadBuildReferenceData, type BuildReferenceData } from "@/lib/build-reference";
 import { championSlug } from "@/lib/utils";
@@ -17,6 +26,10 @@ type Props = { team1Players: MatchPlayerDetail[]; team2Players: MatchPlayerDetai
 // Cache per champion so the 10 match rows do not issue duplicate reference requests.
 const referenceByChampion = new Map<number, Promise<BuildReferenceData>>();
 const itemMetricsByChampionScope = new Map<string, Promise<ItemStat[]>>();
+const loadoutMetricsByChampionTalentScope = new Map<string, Promise<{
+  talents: ChampionTalentStatsResponse;
+  cards: ChampionCardStatsResponse;
+}>>();
 
 function normalizeName(value: string | null | undefined) {
   return String(value ?? "")
@@ -43,6 +56,20 @@ function getScopedItemMetrics(championId: number, scope: string, tierMin?: numbe
   if (!promise) {
     promise = fetchItems({ mode: "ranked", championId, limit: 200, tierMin, tierMax }).catch(() => []);
     itemMetricsByChampionScope.set(key, promise);
+  }
+  return promise;
+}
+
+function getScopedLoadoutMetrics(championId: number, talentId: number | null, scope: string, tierMin?: number, tierMax?: number) {
+  const key = `${championId}:${talentId ?? "all"}:${scope}`;
+  let promise = loadoutMetricsByChampionTalentScope.get(key);
+  if (!promise) {
+    const tier = { tierMin, tierMax };
+    promise = Promise.all([
+      fetchChampionTalentStats(championId, "ranked", tier),
+      fetchChampionCardStats(championId, "ranked", talentId, tier),
+    ]).then(([talents, cards]) => ({ talents, cards }));
+    loadoutMetricsByChampionTalentScope.set(key, promise);
   }
   return promise;
 }
@@ -78,6 +105,12 @@ function formatDescription(description: string | null | undefined, level: number
     ));
 }
 
+type DetailMetric = {
+  winRate: number;
+  pickRate: number;
+  plays: number;
+};
+
 function DetailEntry({
   name,
   description,
@@ -85,10 +118,12 @@ function DetailEntry({
   level,
   tone,
   label,
-  itemMetric,
-  showItemMetrics = false,
-  itemMetricsLoaded = false,
-  maxItemPickRate = 1,
+  metric,
+  showMetrics = false,
+  metricsLoaded = false,
+  maxPickRate = 1,
+  playsLabel = "plays",
+  loadingLabel = "Loading scoped metrics…",
 }: {
   name: string;
   description: string;
@@ -96,12 +131,14 @@ function DetailEntry({
   level?: number | null;
   tone?: string;
   label: string;
-  itemMetric?: ItemStat;
-  showItemMetrics?: boolean;
-  itemMetricsLoaded?: boolean;
-  maxItemPickRate?: number;
+  metric?: DetailMetric;
+  showMetrics?: boolean;
+  metricsLoaded?: boolean;
+  maxPickRate?: number;
+  playsLabel?: string;
+  loadingLabel?: string;
 }) {
-  const quality = itemMetric ? getStatQuality(itemMetric.winRate, itemMetric.pickRate, maxItemPickRate) : null;
+  const quality = metric ? getStatQuality(metric.winRate, metric.pickRate, maxPickRate) : null;
   return <article className="flex min-w-0 items-start gap-3 rounded-lg border border-pc-border/70 bg-pc-bg-secondary/45 p-3">
     <Asset sources={sources} alt={name} level={level} tone={tone} />
     <div className="min-w-0 flex-1">
@@ -110,12 +147,12 @@ function DetailEntry({
         <span className="text-[9px] font-semibold uppercase tracking-wider text-pc-text-muted">{label}</span>
       </div>
       <p className="mt-1 text-xs leading-5 text-pc-text-secondary">{description}</p>
-      {showItemMetrics && <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[10px] tabular-nums">
-        {itemMetric ? <>
-          <span className="rounded-md border px-1.5 py-0.5 font-semibold" style={{ color: quality?.color, borderColor: quality?.borderColor, background: quality?.background }}>WR {itemMetric.winRate.toFixed(1)}%</span>
-          <span className="rounded-md border border-pc-border bg-pc-bg px-1.5 py-0.5 text-pc-text-secondary">PR {(itemMetric.pickRate ?? 0).toFixed(1)}%</span>
-          <span className="text-pc-text-muted">{itemMetric.totalUsage.toLocaleString()} uses</span>
-        </> : <span className="text-pc-text-muted">{itemMetricsLoaded ? "No ranked sample in this lobby scope." : "Loading scoped item metrics…"}</span>}
+      {showMetrics && <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[10px] tabular-nums">
+        {metric ? <>
+          <span className="rounded-md border px-1.5 py-0.5 font-semibold" style={{ color: quality?.color, borderColor: quality?.borderColor, background: quality?.background }}>WR {metric.winRate.toFixed(1)}%</span>
+          <span className="rounded-md border border-pc-border bg-pc-bg px-1.5 py-0.5 text-pc-text-secondary">PR {metric.pickRate.toFixed(1)}%</span>
+          <span className="text-pc-text-muted">{metric.plays.toLocaleString()} {playsLabel}</span>
+        </> : <span className="text-pc-text-muted">{metricsLoaded ? "No ranked sample in this lobby scope." : loadingLabel}</span>}
       </div>}
     </div>
   </article>;
@@ -141,8 +178,16 @@ function PlayerBuildRow({
   lobbyTierReady: boolean;
 }) {
   const champion = player.champion_name || `Champion #${player.champion_id}`;
+  const talents = fact?.talents ?? [];
+  const cards = fact?.cards ?? [];
+  const items = fact?.items ?? [];
+  const selectedTalent = talents[0] ?? null;
   const [reference, setReference] = useState<BuildReferenceData | null>(null);
   const [itemMetrics, setItemMetrics] = useState<ItemStat[] | null>(null);
+  const [loadoutMetrics, setLoadoutMetrics] = useState<{
+    talents: ChampionTalentStatsResponse;
+    cards: ChampionCardStatsResponse;
+  } | null>(null);
   const [expanded, setExpanded] = useState(false);
   const disclosureId = useId();
   useEffect(() => {
@@ -158,19 +203,47 @@ function PlayerBuildRow({
       .then((rows) => { if (!cancelled) setItemMetrics(rows); });
     return () => { cancelled = true; };
   }, [expanded, lobbyScope, lobbyTierMax, lobbyTierMin, lobbyTierReady, player.champion_id]);
+  useEffect(() => {
+    if (!expanded || !lobbyTierReady) return;
+    let cancelled = false;
+    setLoadoutMetrics(null);
+    getScopedLoadoutMetrics(player.champion_id, selectedTalent?.talent_id ?? null, lobbyScope, lobbyTierMin, lobbyTierMax)
+      .then((metrics) => { if (!cancelled) setLoadoutMetrics(metrics); });
+    return () => { cancelled = true; };
+  }, [expanded, lobbyScope, lobbyTierMax, lobbyTierMin, lobbyTierReady, player.champion_id, selectedTalent?.talent_id]);
   const findReference = (kind: "items" | "cards" | "talents", id: number, name: string | null | undefined) => (
     reference?.[kind].find((entry) => entry.id === id)
     ?? reference?.[kind].find((entry) => normalizeName(entry.name) === normalizeName(name))
   );
-  const talents = fact?.talents ?? [];
-  const cards = fact?.cards ?? [];
-  const items = fact?.items ?? [];
   const playerName = player.player_name || "PRIVATE";
   const maxItemPickRate = Math.max(1, ...(itemMetrics ?? []).map((metric) => metric.pickRate ?? 0));
   const findItemMetric = (itemId: number, itemName: string | null | undefined) => (
     itemMetrics?.find((metric) => metric.itemId === itemId)
     ?? itemMetrics?.find((metric) => normalizeName(metric.itemName) === normalizeName(itemName))
   );
+  const selectedTalentMetric = selectedTalent ? (
+    loadoutMetrics?.talents.talents.find((metric) => metric.talentId === selectedTalent.talent_id)
+    ?? loadoutMetrics?.talents.talents.find((metric) => normalizeName(metric.talentName) === normalizeName(selectedTalent.talent_name))
+  ) : undefined;
+  const talentMetric: DetailMetric | undefined = selectedTalentMetric ? {
+    winRate: selectedTalentMetric.winRate,
+    pickRate: (selectedTalentMetric.totalPlays / Math.max(1, loadoutMetrics?.talents.totalMatches ?? 0)) * 100,
+    plays: selectedTalentMetric.totalPlays,
+  } : undefined;
+  const maxLoadoutLevelPickRate = Math.max(1, ...(loadoutMetrics?.cards.cards.flatMap((card) => (
+    card.levels.map((level) => (level.plays / Math.max(1, loadoutMetrics.cards.totalMatches)) * 100)
+  )) ?? []));
+  const cardMetricAtRecordedLevel = (cardId: number, cardName: string | null | undefined, level: number): DetailMetric | undefined => {
+    const cardMetric = loadoutMetrics?.cards.cards.find((metric) => metric.cardId === cardId)
+      ?? loadoutMetrics?.cards.cards.find((metric) => normalizeName(metric.cardName) === normalizeName(cardName));
+    const levelMetric = cardMetric?.levels.find((metric) => metric.level === level);
+    if (!levelMetric) return undefined;
+    return {
+      winRate: levelMetric.winRate,
+      pickRate: (levelMetric.plays / Math.max(1, loadoutMetrics?.cards.totalMatches ?? 0)) * 100,
+      plays: levelMetric.plays,
+    };
+  };
 
   return <div className={`border-b border-pc-border/60 last:border-b-0 ${wins ? "bg-emerald-400/[0.025]" : ""}`}>
     <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-3 px-3 py-3 lg:min-w-[780px] lg:grid-cols-[240px_1fr_1fr_36px] lg:items-center lg:gap-4 lg:px-4">
@@ -200,34 +273,39 @@ function PlayerBuildRow({
     </div>
 
     {expanded && <div id={disclosureId} className="border-t border-pc-border/60 bg-pc-bg/25 px-3 py-4 lg:px-4">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-pc-border/50 pb-3">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted">Ranked performance</span>
+        <span className="text-[9px] font-semibold text-pc-accent">{lobbyTierReady ? lobbyScopeLabel : "Loading lobby scope…"}</span>
+      </div>
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <section className="space-y-2">
-          <h3 className="text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted">Talent &amp; loadout cards</h3>
+          <div>
+            <h3 className="text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted">Talent &amp; loadout cards</h3>
+            <p className="mt-1 text-[10px] text-pc-text-muted">{selectedTalent ? <>Card metrics are filtered by <span className="font-semibold text-pc-accent">{selectedTalent.talent_name ?? "the selected talent"}</span> and use each recorded card level.</> : "No selected talent was recorded; card metrics include all talents."}</p>
+          </div>
           {talents.map((talent) => {
             const entry = findReference("talents", talent.talent_id, talent.talent_name);
             const name = talent.talent_name ?? entry?.name ?? `Talent #${talent.talent_id}`;
-            return <DetailEntry key={`talent-detail-${talent.talent_id}`} name={name} label="Talent" description={formatDescription(entry?.description, 1) ?? (reference ? "Description unavailable." : "Loading description…")} sources={[entry?.iconUrl, talent.icon_url, talent.fallback_icon_url]} tone="border-amber-400/40" />;
+            return <DetailEntry key={`talent-detail-${talent.talent_id}`} name={name} label="Talent" description={formatDescription(entry?.description, 1) ?? (reference ? "Description unavailable." : "Loading description…")} sources={[entry?.iconUrl, talent.icon_url, talent.fallback_icon_url]} tone="border-amber-400/40" metric={talentMetric} showMetrics metricsLoaded={loadoutMetrics !== null} maxPickRate={100} />;
           })}
           {cards.map((card) => {
             const entry = findReference("cards", card.card_id, card.card_name);
             const level = Math.max(1, card.card_level ?? 1);
             const name = card.card_name ?? entry?.name ?? `Card #${card.card_id}`;
-            return <DetailEntry key={`card-detail-${card.card_id}`} name={name} label={`Card · level ${level}`} description={formatDescription(entry?.description, level) ?? (reference ? "Description unavailable." : "Loading description…")} sources={[entry?.iconUrl, card.icon_url, card.fallback_icon_url]} level={level} tone="border-pc-accent/30" />;
+            return <DetailEntry key={`card-detail-${card.card_id}`} name={name} label={`Card · level ${level}`} description={formatDescription(entry?.description, level) ?? (reference ? "Description unavailable." : "Loading description…")} sources={[entry?.iconUrl, card.icon_url, card.fallback_icon_url]} level={level} tone="border-pc-accent/30" metric={cardMetricAtRecordedLevel(card.card_id, card.card_name, level)} showMetrics metricsLoaded={loadoutMetrics !== null} maxPickRate={maxLoadoutLevelPickRate} playsLabel="picks" />;
           })}
           {talents.length === 0 && cards.length === 0 && <p className="text-xs text-pc-text-muted">No talent or loadout cards were recorded.</p>}
         </section>
 
         <section className="space-y-2">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <h3 className="text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted">Purchased items</h3>
-            <span className="text-[9px] font-semibold text-pc-accent">{lobbyTierReady ? lobbyScopeLabel : "Loading lobby scope…"}</span>
-          </div>
+          <h3 className="text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted">Purchased items</h3>
           {items.map((item) => {
             const entry = findReference("items", item.item_id, item.item_name);
             const level = Math.max(1, (item.item_level ?? 0) + 1);
             const name = item.item_name ?? entry?.name ?? `Item #${item.item_id}`;
             const description = entry?.description ?? item.description;
-            return <DetailEntry key={`item-detail-${item.slot}-${item.item_id}`} name={name} label={`Item · level ${level}`} description={formatDescription(description, level) ?? (reference ? "Description unavailable." : "Loading description…")} sources={[entry?.iconUrl, item.icon_url, item.fallback_icon_url]} level={level} itemMetric={findItemMetric(item.item_id, item.item_name)} showItemMetrics itemMetricsLoaded={itemMetrics !== null} maxItemPickRate={maxItemPickRate} />;
+            const itemMetric = findItemMetric(item.item_id, item.item_name);
+            return <DetailEntry key={`item-detail-${item.slot}-${item.item_id}`} name={name} label={`Item · level ${level}`} description={formatDescription(description, level) ?? (reference ? "Description unavailable." : "Loading description…")} sources={[entry?.iconUrl, item.icon_url, item.fallback_icon_url]} level={level} metric={itemMetric ? { winRate: itemMetric.winRate, pickRate: itemMetric.pickRate ?? 0, plays: itemMetric.totalUsage } : undefined} showMetrics metricsLoaded={itemMetrics !== null} maxPickRate={maxItemPickRate} playsLabel="uses" loadingLabel="Loading scoped item metrics…" />;
           })}
           {items.length === 0 && <p className="text-xs text-pc-text-muted">No purchased items were recorded.</p>}
         </section>
