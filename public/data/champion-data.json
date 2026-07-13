@@ -4114,7 +4114,7 @@
         "name": "Ice in her Veins",
         "description": "Heal for {50|50} every 1s while using FrostFire Glide.",
         "category": "Frostfire Glide",
-        "iconUrl": "/images/cards/Card_Ice_in_her_Veins.avif",
+        "iconUrl": "/images/cards/Card_Ice_In_Her_Veins.avif",
         "cooldown": null,
         "values": null
       },
@@ -4568,7 +4568,7 @@
         "name": "Sanctum of Faith",
         "description": "Regenerate {1|1}% Moonlight every 1s when not using Moonlight.",
         "category": "Moonlight",
-        "iconUrl": "/images/cards/Card_Sanctum_of_Faith.avif",
+        "iconUrl": "/images/cards/Card_Sanctum_Of_Faith.avif",
         "cooldown": null,
         "values": null
       },
@@ -8641,7 +8641,7 @@
         "name": "At The Ready",
         "description": "Generate {10|10} Ammo per missile for each enemy hit by Missile Launcher.",
         "category": "Missile Launcher",
-        "iconUrl": "/images/cards/Card_At_The_Ready.avif",
+        "iconUrl": "/images/cards/Card_At_the_Ready.avif",
         "cooldown": null,
         "values": null
       },
@@ -11241,19 +11241,19 @@
         "name": "Tribunal Upgrades",
         "description": "Burst Mode now deals additional Shock damage that Reveals targets, Mag Dump adds a Burn over time, and Automatic freezes to Slow enemies.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Vii Tribunal Upgrades.avif"
+        "iconUrl": "/images/champions/Talent VII Tribunal Upgrades.avif"
       },
       {
         "name": "Execute Article VII",
         "description": "Decree 77 now targets the closest enemy with laser lock-on. After .8s, your eye blasts them and deals 1000 damage in a 20-unit radius. Anyone hit is executed if below 25% after.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Vii Execute Article VII.avif"
+        "iconUrl": "/images/champions/Talent VII Execute Article VII.avif"
       },
       {
         "name": "Spring Loaded",
         "description": "Increase the travel distance of Explosive Dodge by 30%, and drop explosive traps at both your starting and ending locations.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Vii Spring Loaded.avif"
+        "iconUrl": "/images/champions/Talent VII Spring Loaded.avif"
       }
     ],
     "loadouts": [
