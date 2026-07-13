@@ -62,7 +62,7 @@ type CachedMatchResult = {
 function queueName(id: number): string {
   const map: Record<number, string> = {
     1: "Casual Queue", 2: "KBM", 4: "1v1", 8: "Team Queue",
-    16: "Open", 32: "Doomspire",
+    16: "Open", 32: "Doomspire", 486: "Ranked Siege",
   };
   return map[id] ?? `Queue #${id}`;
 }
@@ -305,6 +305,9 @@ export default function MatchDetailPage() {
           team2Wins={team2Wins}
           team1={team1}
           team2={team2}
+          bans={match.bans}
+          facts={fact?.players}
+          profiles={profileMap}
         />
       </div>
 
