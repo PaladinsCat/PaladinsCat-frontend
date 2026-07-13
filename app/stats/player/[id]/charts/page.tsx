@@ -5,6 +5,7 @@ import Link from "next/link";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { fetchKdaHistory, fetchDpmHistory, fetchGlickoHistory, type KdaHistoryEntry, type DpmHistoryEntry, type GlickoHistoryEntry } from "@/lib/api-client";
 import { formatLocalMonthDay } from "@/lib/time-format";
+import { LoadingPanel } from "@/components/async-state";
 
 export default function PlayerChartsPage({ params }: { params: Promise<{ id: string }> }) {
   const [kdaData, setKdaData] = useState<KdaHistoryEntry[]>([]);
@@ -43,7 +44,7 @@ export default function PlayerChartsPage({ params }: { params: Promise<{ id: str
   }, [loadData]);
 
 
-  if (loading) return <div className="text-center py-12 text-pc-text-secondary">Loading charts...</div>;
+  if (loading) return <LoadingPanel />;
   if (error) return <div className="text-center py-12 text-pc-text-muted">{error}</div>;
 
   return (

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { fetchClassLeaderboard } from "@/lib/api-client";
+import { LoadingPanel } from "@/components/async-state";
 
 const VALID_ROLES = ["Frontline", "Damage", "Flank", "Support"] as const;
 type Role = (typeof VALID_ROLES)[number];
@@ -175,11 +176,7 @@ export default function ClassEloPage() {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <div className="animate-pulse text-pc-text-muted text-sm">
-            Loading {role} champion leaderboard...
-          </div>
-        </div>
+        <LoadingPanel compact />
       ) : players.length === 0 ? (
         <div className="text-center py-20 text-pc-text-muted">
           No champion data available for {role}.

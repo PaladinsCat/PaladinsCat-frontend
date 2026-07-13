@@ -11,6 +11,7 @@ import {
 } from "@/lib/api-client";
 import { formatLocalDateTime, parseBackendDate } from "@/lib/time-format";
 import { useAuth } from "@/lib/auth-context";
+import { LoadingPanel } from "@/components/async-state";
 
 type Draft = {
   timestamp: string;
@@ -144,12 +145,7 @@ export default function AdminNotificationsPage() {
 
   // Show loading state while auth resolves
   if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">Notifications Admin</h1>
-        <div className="text-sm text-pc-text-muted">Checking admin access...</div>
-      </div>
-    );
+    return <LoadingPanel />;
   }
 
   // Not admin — deny access

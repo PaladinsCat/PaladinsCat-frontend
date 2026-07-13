@@ -7,6 +7,7 @@ import ScrambleText from "@/components/ScrambleText";
 import { formatLocalDateTime } from "@/lib/time-format";
 import { EmptyState, ErrorState } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
+import { LoadingPanel } from "@/components/async-state";
 
 export default function CommunityPage() {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -107,9 +108,7 @@ export default function CommunityPage() {
 
             <div className="divide-y divide-pc-border/70">
               {streamsLoading ? (
-                <div className="space-y-3 p-4" aria-label="Loading live streams">
-                  {[0, 1, 2].map((item) => <div key={item} className="h-16 animate-pulse rounded-lg bg-pc-bg" />)}
-                </div>
+                <LoadingPanel compact />
               ) : streams.length === 0 ? (
                 <div className="p-4 text-sm text-pc-text-secondary">No Paladins streams are live right now.</div>
               ) : (

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { fetchMatchCompositions, type MatchCompositionStat } from "@/lib/api-client";
 import { useLobbyTier } from "@/lib/lobby-tier-context";
+import { LoadingIndicator } from "@/components/async-state";
 
 type SortKey = "totalMatches" | "winRate";
 
@@ -73,7 +74,7 @@ export default function CompositionStatsPage() {
           <div className="mt-3 grid grid-cols-4 gap-1.5">{CLASS_COLUMNS.map((column) => <div key={column.key} className="rounded-lg bg-pc-bg-secondary/60 p-2 text-center"><img src={column.icon} alt="" className="mx-auto h-5 w-5 object-contain" /><div className="mt-1 font-mono text-sm font-semibold text-pc-text">{row[column.key]}</div><div className="truncate text-[8px] uppercase text-pc-text-muted">{column.label}</div></div>)}</div>
           <div className="mt-3 flex items-center justify-between text-xs"><span className="text-pc-text-secondary">{row.totalMatches.toLocaleString()} matches</span><span className="text-pc-text-muted">{row.wins.toLocaleString()}W / {row.losses.toLocaleString()}L</span></div>
         </article>)}
-        {sorted.length === 0 && <div className="pc-mobile-panel p-6 text-center text-sm text-pc-text-muted">{loading ? "Loading composition statistics…" : "Composition statistics are not available for this lobby scope yet."}</div>}
+        {sorted.length === 0 && <div className="pc-mobile-panel p-6 text-center text-sm text-pc-text-muted">{loading ? <LoadingIndicator /> : "Composition statistics are not available for this lobby scope yet."}</div>}
       </div>
 
       <div className="mx-auto hidden w-full max-w-5xl overflow-x-auto rounded-xl border border-pc-border bg-pc-bg-elevated shadow-lg shadow-black/10 lg:block">
@@ -100,7 +101,7 @@ export default function CompositionStatsPage() {
               <td className="px-3 py-3 text-right text-pc-text-secondary">{row.wins.toLocaleString()} / {row.losses.toLocaleString()}</td>
               <td className={row.winRate >= 50 ? "px-4 py-3 text-right font-semibold text-emerald-400" : "px-4 py-3 text-right font-semibold text-rose-400"}>{row.winRate.toFixed(1)}%</td>
             </tr>)}
-            {sorted.length === 0 && <tr><td colSpan={8} className="px-4 py-10 text-center text-pc-text-muted">{loading ? "Loading composition statistics…" : "Composition statistics are not available for this lobby scope yet."}</td></tr>}
+            {sorted.length === 0 && <tr><td colSpan={8} className="px-4 py-10 text-center text-pc-text-muted">{loading ? <LoadingIndicator /> : "Composition statistics are not available for this lobby scope yet."}</td></tr>}
           </tbody>
         </table>
       </div>

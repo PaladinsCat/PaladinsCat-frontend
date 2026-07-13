@@ -91,7 +91,6 @@ export default function CreatePostPage() {
         <AsyncButton
           type="submit"
           loading={loading}
-          loadingLabel="Creating post…"
           className="w-full py-2.5 bg-pc-accent hover:bg-pc-accent-secondary text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Create Post

@@ -6,6 +6,7 @@ import { getBuildDetail, toggleBuildLike, getAuthUser, getAuthToken, type Build 
 import { formatLocalDateTime } from "@/lib/time-format";
 import { championSlug } from "@/lib/utils";
 import { loadBuildReferenceData, type BuildReferenceData } from "@/lib/build-reference";
+import { LoadingPanel } from "@/components/async-state";
 
 function AssetImage({ src, alt }: { src?: string | null; alt: string }) {
   if (!src) {
@@ -81,7 +82,7 @@ export default function BuildDetailPage({ params }: { params: Promise<{ id: stri
     }
   }
 
-  if (loading) return <div className="text-center py-12 text-pc-text-secondary">Loading build...</div>;
+  if (loading) return <LoadingPanel />;
   if (error) return <div className="text-center py-12 text-pc-text-muted">{error}</div>;
   if (!build) return <div className="text-center py-12 text-pc-text-muted">Build not found</div>;
 

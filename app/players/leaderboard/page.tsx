@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { fetchRankedLeaderboard, type RankedPlayer } from "@/lib/api-client";
 import { resolveEffectiveTier, getRankIconPath } from "@/lib/tier-utils";
+import { LoadingPanel } from "@/components/async-state";
 
 const TIER_GROUPS = [
   { group: "Diamond", tiers: [
@@ -330,9 +331,7 @@ export default function LeaderboardPage() {
         <div className="min-w-0">
           {/* Loading */}
           {loading && (
-            <div className="flex items-center justify-center py-20">
-              <div className="text-pc-text-muted text-sm animate-pulse">Loading leaderboard...</div>
-            </div>
+            <LoadingPanel compact />
           )}
 
           {/* Error */}

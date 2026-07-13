@@ -37,8 +37,8 @@ export default function PlayerLoadoutDetailPage() {
   const cardsById = useMemo(() => new Map(references.map((card) => [card.id, card])), [references]);
 
   if (error) return <ErrorState title="Loadout unavailable" message={error} />;
-  if (!champions.length) return <LoadingPanel label="Loading champion roster…" />;
-  if (!loadout && !freshness) return <LoadingPanel label="Loading saved deck…" detail="Checking the player-loadout cache." />;
+  if (!champions.length) return <LoadingPanel />;
+  if (!loadout && !freshness) return <LoadingPanel />;
   if (!champion || !loadout) return <ErrorState title="Loadout unavailable" message="This saved deck is no longer in the player&apos;s cached loadouts." />;
 
   const entries = loadout.cardIds.slice(0, 5).map((cardId, index) => ({ cardId, level: Math.max(1, loadout.cardLevels[index] ?? 1), card: cardsById.get(cardId) }));

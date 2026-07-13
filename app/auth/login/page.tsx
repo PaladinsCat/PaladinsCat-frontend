@@ -8,7 +8,7 @@ import { AsyncButton, LoadingPanel } from "@/components/async-state";
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<LoadingPanel label="Preparing sign in…" className="min-h-[60vh]" />}>
+    <Suspense fallback={<LoadingPanel className="min-h-[60vh]" />}>
       <LoginForm />
     </Suspense>
   );
@@ -87,7 +87,6 @@ function LoginForm() {
           <AsyncButton
             type="submit"
             loading={loading}
-            loadingLabel="Signing in…"
             className="w-full py-2.5 bg-pc-accent hover:bg-pc-accent-secondary text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Sign In

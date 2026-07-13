@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { fetchBaselines, fetchPerformanceLeaderboard, type BaselineEntry } from "@/lib/api-client";
+import { LoadingPanel } from "@/components/async-state";
 
 const VALID_METRICS = ["gpm", "hpm", "dpm", "mpm"] as const;
 type Metric = (typeof VALID_METRICS)[number];
@@ -213,9 +214,7 @@ export default function MetricLeaderboardPage() {
 
       {/* ── Table ── */}
       {loading ? (
-        <div className="text-center py-20 text-pc-text-muted">
-          Loading {METRIC_LABELS[m]} leaderboard...
-        </div>
+        <LoadingPanel compact />
       ) : entries.length === 0 ? (
         <div className="text-center py-20 text-pc-text-muted">
           No data available for {METRIC_LABELS[m]}.

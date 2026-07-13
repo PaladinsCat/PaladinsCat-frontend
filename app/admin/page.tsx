@@ -161,7 +161,7 @@ export default function AdminDashboardPage() {
         <span>Signed in as {user.username}. This route and its data endpoint require an admin session.</span>
         <span>Snapshot {formatLocalDateTime(dashboard.generatedAt)}</span>
       </footer>
-      {loading && <LoadingPanel compact className="fixed bottom-20 right-5 z-50 rounded-xl border border-pc-border bg-pc-bg-elevated px-4 shadow-xl" label="Refreshing dashboard…" />}
+      {loading && <LoadingPanel compact className="fixed bottom-20 right-5 z-50 rounded-xl border border-pc-border bg-pc-bg-elevated px-4 shadow-xl" />}
     </ContentFade>
   );
 }

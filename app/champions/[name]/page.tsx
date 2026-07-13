@@ -312,7 +312,7 @@ export default function ChampionDetailPage() {
         {/* Right column — talent summaries (~3/4) */}
         <div className="lg:col-span-3 space-y-6">
           {loading && (
-            <LoadingPanel compact className="pc-card" label="Loading champion analytics…" detail="Combining ranked performance and talent data." />
+            <LoadingPanel compact className="pc-card" />
           )}
           {/* Compact ranked summary leads the analysis column. */}
           <section className="space-y-2">

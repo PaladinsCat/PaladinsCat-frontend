@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ErrorState, LoadingPanel } from "@/components/async-state";
+import { ErrorState, LoadingIndicator, LoadingPanel } from "@/components/async-state";
 import { fetchPlayerLoadouts, refreshPlayerLoadouts, type PlayerLoadoutsResponse } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { getPlayerLoadoutChampionRoster, type PlayerLoadoutChampion } from "@/lib/player-loadout-roster";
@@ -75,14 +75,14 @@ export default function PlayerLoadoutsPage() {
     return entries;
   }, new Map<number, number>()) ?? []), [data]);
 
-  if (loading) return <LoadingPanel label="Loading player loadouts…" detail="Loading available champions." />;
+  if (loading) return <LoadingPanel />;
   if (error && !data) return <ErrorState title="Loadouts unavailable" message={error} onRetry={load} />;
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div><Link href={`/players/${playerId}`} className="mb-2 inline-block text-xs text-pc-accent hover:underline">← Player profile</Link><h1 className="pc-heading pc-heading-lg text-pc-accent">Player Loadouts</h1><p className="mt-1 text-sm text-pc-text-secondary">Choose a champion to see this player&apos;s saved in-game decks.</p></div>
-        <button type="button" onClick={refresh} disabled={refreshing || !data || manualRefreshRemainingSeconds > 0} className="rounded-lg border border-pc-border bg-pc-bg-elevated px-3 py-2 text-xs font-semibold text-pc-text hover:border-pc-accent-mid hover:text-pc-accent disabled:cursor-not-allowed disabled:opacity-50">{refreshing ? "Refreshing all loadouts…" : manualRefreshRemainingSeconds > 0 ? `Refresh in ${formatCooldown(manualRefreshRemainingSeconds)}` : "Refresh all loadouts"}</button>
+        <button type="button" onClick={refresh} disabled={refreshing || !data || manualRefreshRemainingSeconds > 0} className="rounded-lg border border-pc-border bg-pc-bg-elevated px-3 py-2 text-xs font-semibold text-pc-text hover:border-pc-accent-mid hover:text-pc-accent disabled:cursor-not-allowed disabled:opacity-50">{refreshing ? <LoadingIndicator className="gap-2" /> : manualRefreshRemainingSeconds > 0 ? `Refresh in ${formatCooldown(manualRefreshRemainingSeconds)}` : "Refresh all loadouts"}</button>
       </div>
 
       {error && <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-200">{error}</div>}

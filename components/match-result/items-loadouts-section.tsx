@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { ChevronDown } from "lucide-react";
@@ -22,6 +22,7 @@ import { canonicalLocalImageUrl } from "@/lib/image-assets";
 import { useLobbyTier } from "@/lib/lobby-tier-context";
 import { getStatQuality } from "@/lib/stat-quality";
 import { readBrowserResult, writeBrowserResult } from "@/lib/browser-result-cache";
+import { LoadingIndicator } from "@/components/async-state";
 
 type Props = { team1Players: MatchPlayerDetail[]; team2Players: MatchPlayerDetail[]; team1Wins: boolean; team2Wins: boolean; factMap: Map<string, MatchFactPlayer> };
 
@@ -162,12 +163,12 @@ function DetailEntry({
   metricsLoaded = false,
   maxPickRate = 1,
   playsLabel = "plays",
-  loadingLabel = "Loading scoped metrics…",
+  loadingLabel: _loadingLabel,
   href,
   onNavigate,
 }: {
   name: string;
-  description: string;
+  description: ReactNode;
   sources: Array<string | null | undefined>;
   level?: number | null;
   tone?: string;
@@ -195,7 +196,7 @@ function DetailEntry({
           <span className="rounded-md border px-1.5 py-0.5 font-semibold" style={{ color: quality?.color, borderColor: quality?.borderColor, background: quality?.background }}>WR {metric.winRate.toFixed(1)}%</span>
           <span className="rounded-md border border-pc-border bg-pc-bg px-1.5 py-0.5 text-pc-text-secondary">PR {metric.pickRate.toFixed(1)}%</span>
           <span className="text-pc-text-muted">{metric.plays.toLocaleString()} {playsLabel}</span>
-        </> : <span className="text-pc-text-muted">{metricsLoaded ? "No ranked sample in this lobby scope." : loadingLabel}</span>}
+        </> : metricsLoaded ? <span className="text-pc-text-muted">No ranked sample in this lobby scope.</span> : <LoadingIndicator className="gap-1.5 text-[10px]" />}
       </div>}
     </div>
   </article>;
@@ -371,7 +372,7 @@ function PlayerBuildRow({
     {expanded && <div id={disclosureId} className="border-t border-pc-border/60 bg-pc-bg/25 px-3 py-4 lg:px-4">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-pc-border/50 pb-3">
         <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted">Ranked performance</span>
-        <span className="text-[9px] font-semibold text-pc-accent">{lobbyTierReady ? lobbyScopeLabel : "Loading lobby scope…"}</span>
+        {lobbyTierReady ? <span className="text-[9px] font-semibold text-pc-accent">{lobbyScopeLabel}</span> : <LoadingIndicator className="gap-1.5 text-[10px]" />}
       </div>
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <section className="space-y-2">
@@ -382,7 +383,7 @@ function PlayerBuildRow({
           {talents.map((talent) => {
             const entry = findReference("talents", talent.talent_id, talent.talent_name);
             const name = talent.talent_name ?? entry?.name ?? `Talent #${talent.talent_id}`;
-            return <DetailEntry key={`talent-detail-${talent.talent_id}`} name={name} href={`${championPath}/talents/${talent.talent_id}?returnTo=${returnToQuery}`} onNavigate={preserveMatchPosition} label="Talent" description={formatDescription(entry?.description, 1) ?? (reference ? "Description unavailable." : "Loading description…")} sources={[entry?.iconUrl, talent.icon_url, talent.fallback_icon_url]} tone="border-amber-400/40" metric={talentMetric} showMetrics metricsLoaded={loadoutMetrics !== null} maxPickRate={100} />;
+            return <DetailEntry key={`talent-detail-${talent.talent_id}`} name={name} href={`${championPath}/talents/${talent.talent_id}?returnTo=${returnToQuery}`} onNavigate={preserveMatchPosition} label="Talent" description={formatDescription(entry?.description, 1) ?? (reference ? "Description unavailable." : <LoadingIndicator className="gap-1.5 text-xs" />)} sources={[entry?.iconUrl, talent.icon_url, talent.fallback_icon_url]} tone="border-amber-400/40" metric={talentMetric} showMetrics metricsLoaded={loadoutMetrics !== null} maxPickRate={100} />;
           })}
           {cards.map((card) => {
             const entry = findReference("cards", card.card_id, card.card_name);
@@ -390,7 +391,7 @@ function PlayerBuildRow({
             const name = card.card_name ?? entry?.name ?? `Card #${card.card_id}`;
             const query = new URLSearchParams({ returnTo });
             if (selectedTalent) query.set("talentId", String(selectedTalent.talent_id));
-            return <DetailEntry key={`card-detail-${card.card_id}`} name={name} href={`${championPath}/cards/${card.card_id}?${query.toString()}`} onNavigate={preserveMatchPosition} label={`Card · level ${level}`} description={formatDescription(entry?.description, level) ?? (reference ? "Description unavailable." : "Loading description…")} sources={[entry?.iconUrl, card.icon_url, card.fallback_icon_url]} level={level} tone="border-pc-accent/30" metric={cardMetricAtRecordedLevel(card.card_id, card.card_name, level)} showMetrics metricsLoaded={loadoutMetrics !== null} maxPickRate={maxLoadoutLevelPickRate} playsLabel="picks" />;
+            return <DetailEntry key={`card-detail-${card.card_id}`} name={name} href={`${championPath}/cards/${card.card_id}?${query.toString()}`} onNavigate={preserveMatchPosition} label={`Card · level ${level}`} description={formatDescription(entry?.description, level) ?? (reference ? "Description unavailable." : <LoadingIndicator className="gap-1.5 text-xs" />)} sources={[entry?.iconUrl, card.icon_url, card.fallback_icon_url]} level={level} tone="border-pc-accent/30" metric={cardMetricAtRecordedLevel(card.card_id, card.card_name, level)} showMetrics metricsLoaded={loadoutMetrics !== null} maxPickRate={maxLoadoutLevelPickRate} playsLabel="picks" />;
           })}
           {talents.length === 0 && cards.length === 0 && <p className="text-xs text-pc-text-muted">No talent or loadout cards were recorded.</p>}
         </section>
@@ -403,7 +404,7 @@ function PlayerBuildRow({
             const name = item.item_name ?? entry?.name ?? `Item #${item.item_id}`;
             const description = entry?.description ?? item.description;
             const itemMetric = itemMetricAtRecordedSlotAndLevel(item.item_id, item.item_name, item.slot, item.item_level ?? 0);
-            return <DetailEntry key={`item-detail-${item.slot}-${item.item_id}`} name={name} href={`/stats/items/${item.item_id}?returnTo=${returnToQuery}`} onNavigate={preserveMatchPosition} label={`Item · slot ${item.slot} · level ${level}`} description={formatDescription(description, level) ?? (reference ? "Description unavailable." : "Loading description…")} sources={[entry?.iconUrl, item.icon_url, item.fallback_icon_url]} level={level} metric={itemMetric} showMetrics metricsLoaded={itemMetrics !== null} maxPickRate={maxItemPickRate} playsLabel="uses" loadingLabel="Loading scoped item metrics…" />;
+            return <DetailEntry key={`item-detail-${item.slot}-${item.item_id}`} name={name} href={`/stats/items/${item.item_id}?returnTo=${returnToQuery}`} onNavigate={preserveMatchPosition} label={`Item · slot ${item.slot} · level ${level}`} description={formatDescription(description, level) ?? (reference ? "Description unavailable." : <LoadingIndicator className="gap-1.5 text-xs" />)} sources={[entry?.iconUrl, item.icon_url, item.fallback_icon_url]} level={level} metric={itemMetric} showMetrics metricsLoaded={itemMetrics !== null} maxPickRate={maxItemPickRate} playsLabel="uses" />;
           })}
           {items.length === 0 && <p className="text-xs text-pc-text-muted">No purchased items were recorded.</p>}
         </section>

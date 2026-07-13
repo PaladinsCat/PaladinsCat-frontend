@@ -22,13 +22,9 @@ export function ContentFade({ children, className }: { children: ReactNode; clas
 }
 
 export function LoadingPanel({
-  label = "Loading data…",
-  detail,
   compact = false,
   className,
 }: {
-  label?: string;
-  detail?: string;
   compact?: boolean;
   className?: string;
 }) {
@@ -40,16 +36,21 @@ export function LoadingPanel({
         className,
       )}
     >
-      <LoaderCircle className="h-5 w-5 shrink-0 animate-spin text-pc-accent" aria-hidden="true" />
-      <div role="status" aria-live="polite">
-        <div className="text-sm font-medium text-pc-text">{label}</div>
-        {detail && <div className="mt-0.5 text-xs text-pc-text-muted">{detail}</div>}
-      </div>
+      <LoadingIndicator />
     </ContentFade>
   );
 }
 
-export function LoadingOverlay({ visible, label = "Updating…" }: { visible: boolean; label?: string }) {
+export function LoadingIndicator({ className }: { className?: string }) {
+  return (
+    <span role="status" aria-live="polite" className={cn("inline-flex items-center gap-3 text-sm font-medium text-pc-text", className)}>
+      <LoaderCircle className="h-5 w-5 shrink-0 animate-spin text-pc-accent" aria-hidden="true" />
+      <span>Loading</span>
+    </span>
+  );
+}
+
+export function LoadingOverlay({ visible }: { visible: boolean }) {
   const reduceMotion = useReducedMotion();
   return (
     <AnimatePresence>
@@ -64,8 +65,7 @@ export function LoadingOverlay({ visible, label = "Updating…" }: { visible: bo
           aria-busy="true"
         >
           <div className="flex items-center gap-2 rounded-xl border border-pc-border bg-pc-bg-elevated px-4 py-2 text-sm font-medium text-pc-text shadow-xl">
-            <LoaderCircle className="h-4 w-4 animate-spin text-pc-accent" aria-hidden="true" />
-            {label}
+            <LoadingIndicator className="gap-2" />
           </div>
         </motion.div>
       )}
@@ -122,11 +122,10 @@ export function ErrorState({
 
 interface AsyncButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   loading?: boolean;
-  loadingLabel?: string;
   children: ReactNode;
 }
 
-export function AsyncButton({ loading = false, loadingLabel = "Working…", children, className, disabled, ...props }: AsyncButtonProps) {
+export function AsyncButton({ loading = false, children, className, disabled, ...props }: AsyncButtonProps) {
   return (
     <button
       {...props}
@@ -134,8 +133,8 @@ export function AsyncButton({ loading = false, loadingLabel = "Working…", chil
       aria-busy={loading}
       className={cn("inline-flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-60", className)}
     >
-      {loading && <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden="true" />}
-      {loading ? loadingLabel : children}
+      {loading && <LoaderCircle className="h-4 w-4 animate-spin text-pc-accent" aria-hidden="true" />}
+      {loading ? "Loading" : children}
     </button>
   );
 }

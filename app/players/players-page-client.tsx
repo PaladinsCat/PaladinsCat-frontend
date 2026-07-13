@@ -16,8 +16,7 @@ import {
 import ScrambleText from "@/components/ScrambleText";
 import { getRankIconPath, resolveEffectiveTier } from "@/lib/tier-utils";
 import { getChampionIconSafe } from "@/lib/champion-icons";
-import { LoadingPanel } from "@/components/async-state";
-import { Skeleton } from "@/components/ui/skeleton";
+import { LoadingIndicator, LoadingPanel } from "@/components/async-state";
 
 const STAT_LABELS: Record<string, string> = {
   gpm: "Credits / Min",
@@ -41,7 +40,7 @@ function RankBadge({ rank }: { rank: number }) {
 }
 
 function InlineLoading() {
-  return <Skeleton className="h-3 w-20" />;
+  return <LoadingIndicator className="gap-1.5 text-xs" />;
 }
 
 export default function PlayersPageClient({ initialOverview }: { initialOverview: PlayersOverview | null }) {
@@ -143,7 +142,7 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
       {/* Search results */}
       {query.length >= 2 && (
         <div className="space-y-1">
-          {searching && <LoadingPanel compact label="Searching players…" />}
+          {searching && <LoadingPanel compact />}
           {searchError && <p className="text-pc-text-muted text-sm">{searchError}</p>}
           {results.map((p) => (
             <Link

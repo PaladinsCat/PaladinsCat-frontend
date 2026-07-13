@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { fetchCheaterPlayers } from "@/lib/api-client";
 import PlayerModerationCards from "@/components/player-moderation-cards";
+import { LoadingPanel } from "@/components/async-state";
 
 const CLASS_ICONS: Record<string, string> = {
   Frontline: "/images/icons/Class_Front_Line_Icon.avif",
@@ -55,7 +56,7 @@ export default function SuspiciousPage() {
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-pc-text-secondary text-sm">Loading...</div>
+        <LoadingPanel compact />
       ) : data.length === 0 ? (
         <div className="text-center py-12 text-pc-text-secondary text-sm">No suspicious players found.</div>
       ) : (

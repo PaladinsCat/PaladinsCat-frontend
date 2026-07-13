@@ -494,7 +494,6 @@ function SearchPageBody() {
               onClick={() => runRemoteLookup(action.target)}
               disabled={remoteLoadingTarget !== null}
               loading={remoteLoadingTarget === action.target}
-              loadingLabel="Looking up…"
               className="px-3 py-1.5 rounded-md border border-pc-accent/30 bg-pc-accent/10 text-xs font-semibold text-pc-accent hover:bg-pc-accent/15 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {action.label}
@@ -509,7 +508,7 @@ function SearchPageBody() {
       )}
 
       {loading && results.length === 0 && (
-        <LoadingPanel label="Searching PaladinsCat…" detail="Checking players, matches, champions, items, cards, and talents." />
+        <LoadingPanel />
       )}
 
       {error && (

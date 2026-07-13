@@ -10,6 +10,7 @@ import {
 } from "@/lib/api-client";
 import { STATIC_CHAMPIONS } from "@/lib/static-champions";
 import { getChampionIconSafe } from "@/lib/champion-icons";
+import { LoadingPanel } from "@/components/async-state";
 
 import { useSearchParams } from "next/navigation";
 type ELOMode = "champion" | "account";
@@ -43,7 +44,7 @@ function RankBadge({ rank }: { rank: number }) {
 
 export default function ChampionEloPage() {
   return (
-    <Suspense fallback={<div className="pc-card">Loading ELO leaderboard...</div>}>
+    <Suspense fallback={<LoadingPanel />}>
       <ChampionEloContent />
     </Suspense>
   );
@@ -355,9 +356,7 @@ function ChampionEloContent() {
       {/* Table */}
       {eloMode === "champion" ? (
         loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="text-pc-text-muted text-sm animate-pulse">Loading champion ELO...</div>
-          </div>
+          <LoadingPanel compact />
         ) : players.length === 0 ? (
           <div className="bg-pc-bg-elevated border border-pc-border rounded-xl text-center py-12">
             <p className="text-pc-text-muted">
@@ -440,9 +439,7 @@ function ChampionEloContent() {
       ) : (
         /* Account ELO table */
         loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="text-pc-text-muted text-sm animate-pulse">Loading account ELO...</div>
-          </div>
+          <LoadingPanel compact />
         ) : accountPlayers.length === 0 ? (
           <div className="bg-pc-bg-elevated border border-pc-border rounded-xl text-center py-12">
             <p className="text-pc-text-muted">No account ELO data available.</p>

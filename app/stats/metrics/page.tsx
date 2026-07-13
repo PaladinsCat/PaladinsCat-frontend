@@ -12,6 +12,7 @@ import {
   type PerformanceMetricKey,
   type PerformanceMetricSummary,
 } from "@/lib/api-client";
+import { LoadingPanel } from "@/components/async-state";
 
 /* ── Metric configs ── */
 
@@ -413,7 +414,7 @@ function MetricsPageClient() {
 
 export default function MetricsPage() {
   return (
-    <Suspense fallback={<div className="text-pc-text-muted">Loading...</div>}>
+    <Suspense fallback={<LoadingPanel />}>
       <MetricsPageClient />
     </Suspense>
   );

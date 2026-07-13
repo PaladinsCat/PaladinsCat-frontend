@@ -19,6 +19,7 @@ import {
 } from "@/lib/api-client";
 import { formatLocalDateTime } from "@/lib/time-format";
 import CommunityRichContent from "@/components/CommunityRichContent";
+import { LoadingIndicator, LoadingPanel } from "@/components/async-state";
 
 export default function PostDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
@@ -193,7 +194,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
     }
   }
 
-  if (loading) return <div className="text-center py-12 text-pc-text-secondary">Loading post...</div>;
+  if (loading) return <LoadingPanel />;
   if (error) return <div className="text-center py-12 text-pc-text-muted">{error}</div>;
   if (!detail) return <div className="text-center py-12 text-pc-text-muted">Post not found</div>;
 
@@ -234,7 +235,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                 disabled={savingPost || !postTitle.trim() || !postContent.trim()}
                 className="rounded-lg bg-pc-accent px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-pc-accent-secondary disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {savingPost ? "Saving..." : "Save"}
+                {savingPost ? <LoadingIndicator className="gap-2" /> : "Save"}
               </button>
               <button
                 type="button"
@@ -365,7 +366,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                           disabled={isBusy || !commentContent.trim()}
                           className="rounded-lg bg-pc-accent px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-pc-accent-secondary disabled:cursor-not-allowed disabled:opacity-50"
                         >
-                          {isBusy ? "Saving..." : "Save"}
+                          {isBusy ? <LoadingIndicator className="gap-2" /> : "Save"}
                         </button>
                         <button
                           type="button"

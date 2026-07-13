@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { fetchCheaterPlayers, type CheaterPlayer } from "@/lib/api-client";
+import { LoadingPanel } from "@/components/async-state";
 
 type VoteKind = "weirdo" | "hall_of_fame";
 
@@ -48,7 +49,7 @@ export default function CommunityVoteLeaderboard({ kind }: { kind: VoteKind }) {
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-pc-text-secondary text-sm">Loading...</div>
+        <LoadingPanel compact />
       ) : players.length === 0 ? (
         <div className="text-center py-12 text-pc-text-secondary text-sm">No community votes yet.</div>
       ) : (

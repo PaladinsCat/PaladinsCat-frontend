@@ -9,6 +9,7 @@ import { formatLocalDate, formatLocalDateTime, formatLocalTime } from "@/lib/tim
 import { fixedUtcOffsetFromTimeZone, fixedUtcOffsetToTimeZone, getFixedUtcOffsetOptions, getSupportedTimeZones } from "@/lib/time-zone";
 import { useLobbyTier } from "@/lib/lobby-tier-context";
 import { LOBBY_TIER_OPTIONS, type LobbyTierFilter } from "@/lib/lobby-tier";
+import { LoadingIndicator, LoadingPanel } from "@/components/async-state";
 import {
   getAccountDetails,
   unlinkPlayer,
@@ -256,9 +257,7 @@ export default function AccountPage() {
 
   if (loading) {
     return (
-      <div className="min-h-[50vh] flex items-center justify-center">
-        <div className="text-pc-text-secondary">Loading account...</div>
-      </div>
+      <LoadingPanel className="min-h-[50vh]" />
     );
   }
 
@@ -355,7 +354,7 @@ export default function AccountPage() {
             disabled={savingTimeZone || selectedTimeZone === timeZone}
             className="px-4 py-2 lg:self-end bg-pc-accent hover:bg-pc-accent-secondary text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
           >
-            {savingTimeZone ? "Saving..." : "Save Time Zone"}
+            {savingTimeZone ? <LoadingIndicator className="gap-2" /> : "Save Time Zone"}
           </button>
         </div>
       </div>
@@ -437,7 +436,7 @@ export default function AccountPage() {
           disabled={savingProfile}
           className="px-4 py-2 bg-pc-accent hover:bg-pc-accent-secondary text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
         >
-          {savingProfile ? "Saving..." : "Save Profile"}
+          {savingProfile ? <LoadingIndicator className="gap-2" /> : "Save Profile"}
         </button>
       </div>
 
@@ -508,7 +507,7 @@ export default function AccountPage() {
                     disabled={linking}
                     className="flex-1 px-3 py-2 rounded-lg bg-pc-accent text-pc-bg font-semibold text-sm hover:bg-pc-accent-secondary disabled:opacity-50"
                   >
-                    {linking ? "Checking..." : "Verify & Link"}
+                    {linking ? <LoadingIndicator className="gap-2" /> : "Verify & Link"}
                   </button>
                   <button
                     onClick={handleCancelVerification}
@@ -531,7 +530,7 @@ export default function AccountPage() {
               />
               {searching && (
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-pc-text-muted text-sm">
-                  Searching...
+                  <LoadingIndicator className="gap-2" />
                 </span>
               )}
             </div>

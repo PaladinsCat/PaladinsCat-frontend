@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { useLobbyTier } from "@/lib/lobby-tier-context";
 import { LOBBY_TIER_OPTIONS, type LobbyTierFilter } from "@/lib/lobby-tier";
+import { LoadingIndicator } from "@/components/async-state";
 
 export default function LobbyTierBanner() {
   const pathname = usePathname();
@@ -33,9 +34,7 @@ export default function LobbyTierBanner() {
             Ranked stats
           </span>
           <span className="hidden h-4 w-px bg-pc-border sm:block" aria-hidden="true" />
-          <span className="truncate text-xs font-semibold text-pc-accent" aria-live="polite">
-            {ready ? definition.label : "Loading lobby scope…"}
-          </span>
+          {ready ? <span className="truncate text-xs font-semibold text-pc-accent">{definition.label}</span> : <LoadingIndicator className="gap-1.5 text-xs" />}
         </div>
 
         <div className="hidden items-center gap-1 md:flex" role="group" aria-label="Ranked lobby statistics scope">

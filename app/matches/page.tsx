@@ -192,7 +192,7 @@ export default function MatchesPage() {
               </div>
             </div>
             <div className="flex gap-2 mt-3">
-              <AsyncButton onClick={handleSearch} loading={loading} loadingLabel="Searching…"
+              <AsyncButton onClick={handleSearch} loading={loading}
                 className="flex-1 px-4 py-1.5 rounded-lg bg-pc-accent text-pc-bg font-semibold text-sm hover:bg-pc-accent-secondary transition-colors">
                 Search
               </AsyncButton>
@@ -282,7 +282,7 @@ export default function MatchesPage() {
             </div>
 
             {statsLoading ? (
-              <LoadingPanel compact label="Loading activity…" detail="Combining regional and dropped-match totals." />
+              <LoadingPanel compact />
             ) : (
               <div className="space-y-px">
                 {/* Header */}

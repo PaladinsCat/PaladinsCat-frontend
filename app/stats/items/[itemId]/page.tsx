@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { fetchItemDetail, type ItemDetailStats, type ItemDimensionStat } from "@/lib/api-client";
 import { getStatQuality } from "@/lib/stat-quality";
 import ContextBackLink from "@/components/context-back-link";
+import { LoadingPanel } from "@/components/async-state";
 
 function itemIcon(name: string) { return `/images/items/${name.replace(/\s+/g, "_")}_Icon.avif`; }
 function percent(value: number) { return `${value.toFixed(1)}%`; }
@@ -35,7 +36,7 @@ export default function ItemDetailPage() {
   useEffect(() => { setLoaded(false); if (Number.isInteger(itemId)) fetchItemDetail(itemId).then(setDetail).finally(() => setLoaded(true)); }, [itemId]);
   const matrix = useMemo(() => new Map((detail?.breakdown ?? []).map((row) => [`${row.slot}-${row.level}`, row])), [detail]);
 
-  if (!detail) return <div className="pc-card py-12 text-center text-sm text-pc-text-secondary">{loaded ? "No item statistics are available for this queue." : "Loading item statistics…"}</div>;
+  if (!detail) return loaded ? <div className="pc-card py-12 text-center text-sm text-pc-text-secondary">No item statistics are available for this queue.</div> : <LoadingPanel />;
   const overallQuality = getStatQuality(detail.winRate, 1, 1);
   return <div className="space-y-6">
     <div><ContextBackLink fallbackHref="/stats/items" label="Back" /></div>

@@ -381,7 +381,7 @@ export default function CreateBuildPage() {
         )}
 
         {loadingReference && (
-          <LoadingPanel label="Loading champion build options…" detail="Preparing talents, cards, and items." />
+          <LoadingPanel />
         )}
 
         {referenceData && (
@@ -478,7 +478,6 @@ export default function CreateBuildPage() {
             type="submit"
             disabled={!canSubmit}
             loading={submitting}
-            loadingLabel="Saving build…"
             className="rounded-lg bg-pc-accent px-5 py-2 font-semibold text-black transition-colors hover:bg-pc-accent-secondary disabled:cursor-not-allowed disabled:opacity-50"
           >
             Save Build

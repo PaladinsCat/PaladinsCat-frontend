@@ -11,6 +11,7 @@ import { getStatQuality } from "@/lib/stat-quality";
 import { mapImagePath } from "@/lib/map-images";
 import { STATIC_CHAMPIONS } from "@/lib/static-champions";
 import { getCanonicalTalentIconPath } from "@/lib/champion-data";
+import { LoadingIndicator, LoadingPanel } from "@/components/async-state";
 
 function itemIcon(name: string) { return `/images/items/${name.replace(/\s+/g, "_")}_Icon.png`; }
 function rateColor(rate: number) { return getStatQuality(rate, 1, 1).color; }
@@ -23,7 +24,7 @@ function duration(seconds: number) {
 }
 
 function ItemMapComparison({ rows }: { rows: MapItemComparisonStat[] }) {
-  return <details className="mt-2 border-t border-pc-border/60 pt-2"><summary className="cursor-pointer select-none text-[10px] font-medium text-pc-accent">Compare other maps</summary>{rows.length > 0 ? <div className="mt-2 max-h-52 divide-y divide-pc-border/50 overflow-y-auto rounded-lg border border-pc-border/60 bg-pc-bg">{rows.map((row) => <Link key={row.mapName} href={`/stats/maps/${encodeURIComponent(row.mapName)}`} className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 px-2 py-1.5 transition-colors hover:bg-pc-bg-elevated"><span className="truncate text-[10px] text-pc-text-secondary" title={row.mapName}>{row.mapName.replace(/^Ranked\s+/, "")}</span><span className="text-right"><span className="block text-[10px] font-semibold" style={{ color: rateColor(row.winRate) }}>{row.winRate.toFixed(1)}% WR</span><span className="block text-[10px] text-pc-text-muted">{row.wins.toLocaleString()}W/{row.losses.toLocaleString()}L · {row.totalUses.toLocaleString()} purchases</span></span></Link>)}</div> : <p className="mt-2 rounded-lg border border-dashed border-pc-border px-2 py-2 text-[10px] text-pc-text-muted">Cross-map samples will appear after the stats service refreshes.</p>}</details>;
+  return <details className="mt-2 border-t border-pc-border/60 pt-2"><summary className="cursor-pointer select-none text-[10px] font-medium text-pc-accent">Compare other maps</summary>{rows.length > 0 ? <div className="mt-2 max-h-52 divide-y divide-pc-border/50 overflow-y-auto rounded-lg border border-pc-border/60 bg-pc-bg">{rows.map((row) => <Link key={row.mapName} href={`/stats/maps/${encodeURIComponent(row.mapName)}`} className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 px-2 py-1.5 transition-colors hover:bg-pc-bg-elevated"><span className="truncate text-[10px] text-pc-text-secondary" title={row.mapName}>{row.mapName.replace(/^Ranked\s+/, "")}</span><span className="text-right"><span className="block text-[10px] font-semibold" style={{ color: rateColor(row.winRate) }}>{row.winRate.toFixed(1)}% WR</span><span className="block text-[10px] text-pc-text-muted">{row.wins.toLocaleString()}W/{row.losses.toLocaleString()}L · {row.totalUses.toLocaleString()} purchases</span></span></Link>)}</div> : <LoadingIndicator className="mt-2 rounded-lg border border-dashed border-pc-border px-2 py-2" />}</details>;
 }
 
 type MapSection = "champions" | "talents" | "items";
@@ -141,7 +142,7 @@ export default function MapDetailPage() {
     return grouped;
   }, [detail]);
 
-  if (!detail) return <div className="pc-card py-12 text-center text-sm text-pc-text-secondary">{loaded ? "Map statistics are unavailable." : "Loading map statistics…"}</div>;
+  if (!detail) return loaded ? <div className="pc-card py-12 text-center text-sm text-pc-text-secondary">Map statistics are unavailable.</div> : <LoadingPanel />;
   const { map } = detail;
 
   return (

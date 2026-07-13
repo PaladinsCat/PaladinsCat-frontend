@@ -10,7 +10,7 @@ import { getTierColor, resolveEffectiveTier, getRankIconPath } from "@/lib/tier-
 import { useAuth } from "@/lib/auth-context";
 import ReportModal from "@/components/ReportModal";
 import { formatLocalDate, formatLocalDateTime } from "@/lib/time-format";
-import { ErrorState, LoadingOverlay, LoadingPanel } from "@/components/async-state";
+import { ErrorState, LoadingIndicator, LoadingOverlay, LoadingPanel } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import SmartImage from "@/components/SmartImage";
 import { formatKda } from "@/lib/kda";
@@ -441,7 +441,7 @@ export default function PlayerProfilePage() {
 
       {/* ── Header ── */}
       <div className={`pc-card relative ${actionMenuOpen ? 'z-40' : 'z-10'}`}>
-        <LoadingOverlay visible={refreshing} label="Refreshing Hi-Rez profile…" />
+        <LoadingOverlay visible={refreshing} />
         {/* Action buttons — top right */}
         <div ref={actionMenuRef} className="relative mb-3 flex items-center justify-end">
           <div className="hidden flex-wrap items-center justify-end gap-2 md:flex">
@@ -747,7 +747,7 @@ export default function PlayerProfilePage() {
             </div>
             <div className="pc-card">
               {matchesLoading ? (
-                <LoadingPanel compact label="Loading recent matches…" detail="Profile details remain available while match history loads." />
+                <LoadingPanel compact />
               ) : matches.length === 0 ? (
                 <p className="text-pc-text-muted text-sm">No matches recorded yet.</p>
               ) : (
@@ -953,14 +953,11 @@ export default function PlayerProfilePage() {
               </button>
             </div>
             {!currentMatch ? (
-              <div className="text-center py-8 text-pc-text-muted text-sm">Checking live matches...</div>
+              <LoadingPanel compact />
             ) : currentMatch.error ? (
               <div className="text-center py-8 text-pc-text-muted text-sm">{currentMatch.error}</div>
             ) : currentMatch.pending ? (
-              <div className="text-center py-8">
-                <div className="text-pc-text-muted text-sm mb-2">Live lobby is still loading</div>
-                <div className="text-xs text-pc-text-muted/60">{currentMatch.message || 'Try again in a few seconds.'}</div>
-              </div>
+              <div className="py-8 text-center"><LoadingIndicator /></div>
             ) : !currentMatch.match ? (
               <div className="text-center py-8">
                 <div className="text-pc-text-muted text-sm mb-2">Not in a live match</div>
