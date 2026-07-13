@@ -206,7 +206,7 @@ export default function ChampionDetailPage() {
           fetchItems({ mode: "ranked", championId: match.id, limit: 200 }).catch(() => [] as ItemStat[]),
           // Global ranked distributions plus champion-specific distributions
           // use the same metric contract as /stats/metrics. This
-          // keeps the champion page from comparing raw damage/gold totals across
+          // keeps the champion page from comparing raw damage/credit totals across
           // matches of different lengths.
           fetchPerformanceMetrics({ queueId: RANKED_QUEUE_ID }).catch(() => ({} as PerformanceMetricsResponse)),
           Promise.all(

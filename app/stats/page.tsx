@@ -238,7 +238,7 @@ export default function StatsPage() {
         </p>
       </div>
 
-      {/* ── Performance, eGPM, and ranked-player distribution ── */}
+      {/* ── Performance, eCPM, and ranked-player distribution ── */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="flex h-full flex-col">
           <div className="flex items-center justify-between mb-3">
@@ -253,7 +253,7 @@ export default function StatsPage() {
           const perfRows = [
             { key: "dpm", label: "DPM", color: "#f87171" },
             { key: "hpm", label: "HPM", color: "#34d399" },
-            { key: "gpm", label: "GPM", color: "#facc15" },
+            { key: "gpm", label: "CPM", color: "#facc15" },
             { key: "mpm", label: "MPM", color: "#60a5fa" },
             { key: "kda", label: "KDA", color: "#33b6b1" },
           ].map(({ key, label, color }) => {
@@ -284,7 +284,7 @@ export default function StatsPage() {
 
         <div className="flex h-full flex-col">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-bold text-pc-text">eGPM by Role</h2>
+            <h2 className="text-sm font-bold text-pc-text">eCPM by Role</h2>
             <Link href="/stats/egpm" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">Detail →</Link>
           </div>
           {egpmLoading ? <DataCardSkeleton rows={5} /> : (
@@ -293,11 +293,11 @@ export default function StatsPage() {
                 key: `egpm-${row.role}`,
                 label: row.role === "Frontline" ? "Front" : row.role === "Support" ? "Supp" : row.role === "Damage" ? "Dmg" : row.role,
                 color: row.role === "Global" ? "#facc15" : row.role === "Damage" ? "#f87171" : row.role === "Flank" ? "#c084fc" : row.role === "Support" ? "#34d399" : "#60a5fa",
-                p10: row.p10Egpm,
-                p25: row.p25Egpm,
-                mean: row.avgEgpm,
-                p75: row.p75Egpm,
-                p90: row.p90Egpm,
+                p10: row.p10Ecpm,
+                p25: row.p25Ecpm,
+                mean: row.avgEcpm,
+                p75: row.p75Ecpm,
+                p90: row.p90Ecpm,
               }))} />
             </ContentFade>
           )}

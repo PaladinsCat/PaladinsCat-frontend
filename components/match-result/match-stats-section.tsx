@@ -147,7 +147,7 @@ function PlayerRow({
 /* ── Main section ── */
 
 const statColumns = [
-  "Player", "Party", "K/D/A", "DPM", "KDA", "HPM", "GPM", "eGPM",
+  "Player", "Party", "K/D/A", "DPM", "KDA", "HPM", "CPM", "eCPM",
   "Dmg", "Abil", "Self", "Heal", "Mit", "Taken", "Obj", "AFK",
 ];
 
@@ -159,8 +159,8 @@ function MobilePlayerCard({ player, wins }: { player: MatchPlayerDetail; wins: b
     ["KDA", fixed(player.kda, 2)],
     ["DPM", fixed(player.damage_per_minute, 0)],
     ["HPM", fixed(player.healing_per_minute, 0)],
-    ["GPM", fixed(player.gold_per_minute, 0)],
-    ["eGPM", fixed(player.egpm, 0)],
+    ["CPM", fixed(player.gold_per_minute, 0)],
+    ["eCPM", fixed(player.egpm, 0)],
     ["Damage", num(damage)],
     ["Healing", num(player.healing)],
     ["Mitigated", num(player.damage_mitigated)],

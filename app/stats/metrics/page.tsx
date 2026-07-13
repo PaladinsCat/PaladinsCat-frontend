@@ -27,7 +27,7 @@ interface MetricConfig {
 const METRIC_CONFIGS: MetricConfig[] = [
   { key: "dpm", label: "DPM", fullLabel: "Damage / Min", color: "#f87171", fill: "rgba(248,113,113,0.15)", isDecimal: false },
   { key: "hpm", label: "HPM", fullLabel: "Healing / Min", color: "#34d399", fill: "rgba(52,211,153,0.15)", isDecimal: false },
-  { key: "gpm", label: "GPM", fullLabel: "Credits / Min", color: "#facc15", fill: "rgba(250,204,21,0.15)", isDecimal: false },
+  { key: "gpm", label: "CPM", fullLabel: "Credits / Min", color: "#facc15", fill: "rgba(250,204,21,0.15)", isDecimal: false },
   { key: "mpm", label: "MPM", fullLabel: "Mitigation / Min", color: "#60a5fa", fill: "rgba(96,165,250,0.15)", isDecimal: false },
   { key: "kda", label: "KDA", fullLabel: "KDA Ratio", color: "#33b6b1", fill: "rgba(51,182,177,0.15)", isDecimal: true },
 ];

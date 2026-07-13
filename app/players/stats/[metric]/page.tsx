@@ -30,7 +30,7 @@ const METRIC_HEX: Record<Metric, string> = {
 };
 
 const METRIC_AVG_KEY: Record<Metric, keyof BaselineEntry> = {
-  gpm: "avgGpm",
+  gpm: "avgCpm",
   hpm: "avgHpm",
   dpm: "avgDpm",
   mpm: "avgMpm",

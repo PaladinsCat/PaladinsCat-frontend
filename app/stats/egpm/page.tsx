@@ -39,7 +39,7 @@ export default function EgpmDetailPage() {
   }, [lobbyTier.label, lobbyTier.tierMax, lobbyTier.tierMin, ready]);
 
   const ordered = useMemo(() => [...rows].sort((a, b) => {
-    if (sort === "average") return b.avgEgpm - a.avgEgpm;
+    if (sort === "average") return b.avgEcpm - a.avgEcpm;
     if (sort === "samples") return b.sampleSize - a.sampleSize;
     return ROLE_ORDER.indexOf(a.role) - ROLE_ORDER.indexOf(b.role);
   }), [rows, sort]);
@@ -54,12 +54,12 @@ export default function EgpmDetailPage() {
         <div className="mt-3">
           <div>
             <h1 className="pc-heading pc-heading-lg text-pc-accent">Effective Credits per Minute</h1>
-            <p className="mt-1 max-w-3xl text-sm text-pc-text-secondary">eGPM measures credits earned through participation after removing the 500 starting credits.</p>
+            <p className="mt-1 max-w-3xl text-sm text-pc-text-secondary">eCPM measures credits earned through participation after removing the 500 starting credits.</p>
           </div>
         </div>
       </header>
 
-      {rows.length === 0 ? <EmptyState title="No eGPM baselines" description="No complete ranked observations match this lobby-tier scope." /> : <>
+      {rows.length === 0 ? <EmptyState title="No eCPM baselines" description="No complete ranked observations match this lobby-tier scope." /> : <>
         <section>
           <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
             <div><h2 className="text-sm font-bold text-pc-text">Current player-base distribution</h2><p className="mt-1 text-xs text-pc-text-muted">Whiskers show P10–P90, the box shows P25–P75, and the marker is the average.</p></div>
@@ -69,26 +69,26 @@ export default function EgpmDetailPage() {
             key: `egpm-${row.role}`,
             label: row.role === "Frontline" ? "Front" : row.role === "Support" ? "Supp" : row.role === "Damage" ? "Dmg" : row.role,
             color: ROLE_COLORS[row.role] ?? "#facc15",
-            p10: row.p10Egpm,
-            p25: row.p25Egpm,
-            mean: row.avgEgpm,
-            p75: row.p75Egpm,
-            p90: row.p90Egpm,
+            p10: row.p10Ecpm,
+            p25: row.p25Ecpm,
+            mean: row.avgEcpm,
+            p75: row.p75Ecpm,
+            p90: row.p90Ecpm,
           }))} /></ContentFade>
         </section>
 
         {global && <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           {[
-            ["Average", global.avgEgpm], ["P10", global.p10Egpm], ["P25", global.p25Egpm],
-            ["P75", global.p75Egpm], ["P90", global.p90Egpm], ["Maximum", global.maxEgpm],
+            ["Average", global.avgEcpm], ["P10", global.p10Ecpm], ["P25", global.p25Ecpm],
+            ["P75", global.p75Ecpm], ["P90", global.p90Ecpm], ["Maximum", global.maxEcpm],
           ].map(([label, value]) => <div key={String(label)} className="rounded-xl border border-pc-border bg-pc-bg-elevated p-4"><div className="text-[10px] uppercase tracking-wider text-pc-text-muted">Global {label}</div><div className="mt-1 text-xl font-bold text-yellow-400 tabular-nums">{format(Number(value))}</div></div>)}
         </section>}
 
         <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <div className="pc-card">
             <h2 className="pc-card-title">Calculation</h2>
-            <div className="mt-3 rounded-lg border border-pc-border bg-pc-bg px-4 py-3 font-mono text-sm text-pc-accent">eGPM = (Gold earned − 500) ÷ minutes played</div>
-            <p className="mt-3 text-sm leading-relaxed text-pc-text-secondary">Starting credits are removed so the metric reflects active credit generation. Longer participation, eliminations, objective play, and other credit-producing actions raise eGPM. Only complete ranked match facts with valid players and more than two minutes played enter these baselines.</p>
+            <div className="mt-3 rounded-lg border border-pc-border bg-pc-bg px-4 py-3 font-mono text-sm text-pc-accent">eCPM = (Credits earned − 500) ÷ minutes played</div>
+            <p className="mt-3 text-sm leading-relaxed text-pc-text-secondary">Starting credits are removed so the metric reflects active credit generation. Longer participation, eliminations, objective play, and other credit-producing actions raise eCPM. Only complete ranked match facts with valid players and more than two minutes played enter these baselines.</p>
           </div>
           <div className="pc-card">
             <h2 className="pc-card-title">AFK severity thresholds</h2>
@@ -96,7 +96,7 @@ export default function EgpmDetailPage() {
               {[
                 ["Engaged", "≥ 80", "text-emerald-400"], ["Disconnected", "60–79", "text-yellow-400"],
                 ["Partial AFK", "40–59", "text-orange-400"], ["Full AFK", "< 40", "text-red-400"],
-              ].map(([label, range, color]) => <div key={label} className="rounded-lg border border-pc-border bg-pc-bg p-3"><div className={`font-semibold ${color}`}>{label}</div><div className="mt-1 font-mono text-pc-text-secondary">{range} eGPM</div></div>)}
+              ].map(([label, range, color]) => <div key={label} className="rounded-lg border border-pc-border bg-pc-bg p-3"><div className={`font-semibold ${color}`}>{label}</div><div className="mt-1 font-mono text-pc-text-secondary">{range} eCPM</div></div>)}
             </div>
             <p className="mt-3 text-xs leading-relaxed text-pc-text-muted">These are fixed detection thresholds. The role and global percentiles describe the current player base; changing the global lobby-tier selection recalculates this page for that tier range.</p>
           </div>
@@ -112,7 +112,7 @@ export default function EgpmDetailPage() {
           <div className="overflow-x-auto rounded-xl border border-pc-border bg-pc-bg-elevated">
             <table className="w-full min-w-[760px] text-sm tabular-nums">
               <thead><tr className="border-b border-pc-border text-left text-[10px] uppercase tracking-wider text-pc-text-muted"><th className="px-4 py-3">Role</th><th className="px-3 py-3 text-right">Average</th><th className="px-3 py-3 text-right">P10</th><th className="px-3 py-3 text-right">P25</th><th className="px-3 py-3 text-right">P75</th><th className="px-3 py-3 text-right">P90</th><th className="px-3 py-3 text-right">Max</th><th className="px-4 py-3 text-right">Samples</th></tr></thead>
-              <tbody>{ordered.map((row) => <tr key={row.role} className="border-b border-pc-border/50 last:border-b-0"><th className="px-4 py-3 text-left font-semibold" style={{ color: ROLE_COLORS[row.role] }}>{row.role}</th><td className="px-3 py-3 text-right font-bold text-pc-text">{format(row.avgEgpm)}</td><td className="px-3 py-3 text-right text-pc-text-secondary">{format(row.p10Egpm)}</td><td className="px-3 py-3 text-right text-pc-text-secondary">{format(row.p25Egpm)}</td><td className="px-3 py-3 text-right text-pc-text-secondary">{format(row.p75Egpm)}</td><td className="px-3 py-3 text-right text-pc-text-secondary">{format(row.p90Egpm)}</td><td className="px-3 py-3 text-right text-pc-text-secondary">{format(row.maxEgpm)}</td><td className="px-4 py-3 text-right text-pc-text-muted">{row.sampleSize.toLocaleString()}</td></tr>)}</tbody>
+              <tbody>{ordered.map((row) => <tr key={row.role} className="border-b border-pc-border/50 last:border-b-0"><th className="px-4 py-3 text-left font-semibold" style={{ color: ROLE_COLORS[row.role] }}>{row.role}</th><td className="px-3 py-3 text-right font-bold text-pc-text">{format(row.avgEcpm)}</td><td className="px-3 py-3 text-right text-pc-text-secondary">{format(row.p10Ecpm)}</td><td className="px-3 py-3 text-right text-pc-text-secondary">{format(row.p25Ecpm)}</td><td className="px-3 py-3 text-right text-pc-text-secondary">{format(row.p75Ecpm)}</td><td className="px-3 py-3 text-right text-pc-text-secondary">{format(row.p90Ecpm)}</td><td className="px-3 py-3 text-right text-pc-text-secondary">{format(row.maxEcpm)}</td><td className="px-4 py-3 text-right text-pc-text-muted">{row.sampleSize.toLocaleString()}</td></tr>)}</tbody>
             </table>
           </div>
         </section>

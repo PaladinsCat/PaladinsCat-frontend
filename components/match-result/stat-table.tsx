@@ -95,10 +95,10 @@ export default function StatTable({ player, fact, wins }: StatTableRowProps) {
           {num(player.kills)}/{num(player.deaths)}/{num(player.assists)}
         </td>
 
-        {/* Credits (Gold) */}
+        {/* Credits */}
         <td className="py-2 px-2 text-sm text-pc-text-secondary text-center">{num(player.gold_earned)}</td>
 
-        {/* CPM (Gold/min) */}
+        {/* CPM (Credits/min) */}
         <td className="py-2 px-2 text-xs text-pc-text-secondary text-center">{fixed(player.gold_per_minute, 0)}</td>
 
         {/* Damage */}
@@ -163,11 +163,11 @@ export default function StatTable({ player, fact, wins }: StatTableRowProps) {
                 <div className="text-sm font-medium text-pc-text">{fixed(player.healing_self_per_minute, 0)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">GPM</div>
+                <div className="text-[10px] text-pc-text-muted">CPM</div>
                 <div className="text-sm font-medium text-pc-text">{fixed(player.gold_per_minute, 0)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">eGPM</div>
+                <div className="text-[10px] text-pc-text-muted">eCPM</div>
                 <div className="text-sm font-medium text-pc-text">{fixed(player.egpm, 0)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">

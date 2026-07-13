@@ -161,7 +161,7 @@ export interface CheaterPlayer {
   hallOfFameCount: number;
   avgDpm: number | null;
   avgHpm: number | null;
-  avgGpm: number | null;
+  avgCpm: number | null;
   avgMpm: number | null;
   totalMatches: number;
   winRate: number | null;
@@ -190,7 +190,7 @@ export async function fetchCheaterPlayers(params?: { cheater?: boolean; susOnly?
       weirdoCount: r.weirdo_count ?? 0,
       hallOfFameCount: r.hall_of_fame_count ?? 0,
       avgDpm: r.avg_dpm ?? null, avgHpm: r.avg_hpm ?? null,
-      avgGpm: r.avg_egpm ?? null, avgMpm: r.avg_mpm ?? null,
+      avgCpm: r.avg_egpm ?? null, avgMpm: r.avg_mpm ?? null,
       totalMatches: Number(r.total_matches) || 0, winRate: r.win_rate != null ? Number(r.win_rate) : null,
     }));
   } catch {
@@ -455,22 +455,22 @@ export async function fetchChampionPerformanceDistributions(params: {
 export interface BaselineEntry {
   role: string;
   queueId: number;
-  avgGpm: number;
+  avgCpm: number;
   avgDpm: number;
   avgHpm: number;
   avgShpm: number;
   avgMpm: number;
   avgKda: number;
-  p10Gpm: number;
-  p90Gpm: number;
+  p10Cpm: number;
+  p90Cpm: number;
   p10Dpm: number;
   p90Dpm: number;
-  avgEgpm: number;
-  p10Egpm: number;
-  p25Egpm: number;
-  p75Egpm: number;
-  p90Egpm: number;
-  maxEgpm: number;
+  avgEcpm: number;
+  p10Ecpm: number;
+  p25Ecpm: number;
+  p75Ecpm: number;
+  p90Ecpm: number;
+  maxEcpm: number;
   sampleSize: number;
   updatedAt: string | null;
 }
@@ -492,11 +492,11 @@ export async function fetchBaselines(params?: { role?: string; queueId?: number;
     }>>(`/stats/baselines${query.toString() ? `?${query.toString()}` : ''}`);
     const mapped = raw.map(r => ({
       role: r.role, queueId: r.queue_id,
-      avgGpm: Number(r.avg_gpm ?? 0), avgDpm: Number(r.avg_dpm ?? 0), avgHpm: Number(r.avg_hpm ?? 0),
+      avgCpm: Number(r.avg_gpm ?? 0), avgDpm: Number(r.avg_dpm ?? 0), avgHpm: Number(r.avg_hpm ?? 0),
       avgShpm: Number(r.avg_shpm ?? 0), avgMpm: Number(r.avg_mpm ?? 0), avgKda: Number(r.avg_kda ?? 0),
-      p10Gpm: Number(r.p10_gpm ?? 0), p90Gpm: Number(r.p90_gpm ?? 0), p10Dpm: Number(r.p10_dpm ?? 0), p90Dpm: Number(r.p90_dpm ?? 0),
-      avgEgpm: Number(r.avg_egpm ?? 0), p10Egpm: Number(r.p10_egpm ?? 0), p25Egpm: Number(r.p25_egpm ?? 0),
-      p75Egpm: Number(r.p75_egpm ?? 0), p90Egpm: Number(r.p90_egpm ?? 0), maxEgpm: Number(r.max_egpm ?? 0),
+      p10Cpm: Number(r.p10_gpm ?? 0), p90Cpm: Number(r.p90_gpm ?? 0), p10Dpm: Number(r.p10_dpm ?? 0), p90Dpm: Number(r.p90_dpm ?? 0),
+      avgEcpm: Number(r.avg_egpm ?? 0), p10Ecpm: Number(r.p10_egpm ?? 0), p25Ecpm: Number(r.p25_egpm ?? 0),
+      p75Ecpm: Number(r.p75_egpm ?? 0), p90Ecpm: Number(r.p90_egpm ?? 0), maxEcpm: Number(r.max_egpm ?? 0),
       sampleSize: Number(r.sample_size ?? 0),
       updatedAt: r.updated_at ?? null,
     }));
@@ -507,10 +507,10 @@ export async function fetchBaselines(params?: { role?: string; queueId?: number;
       if (global) {
         mapped.unshift({
           role: 'Global', queueId: params?.queueId ?? 486,
-          avgGpm: global.mean, avgDpm: 0, avgHpm: 0, avgShpm: 0, avgMpm: 0, avgKda: 0,
-          p10Gpm: global.p10, p90Gpm: global.p90, p10Dpm: 0, p90Dpm: 0,
-          avgEgpm: global.mean, p10Egpm: global.p10, p25Egpm: global.p25,
-          p75Egpm: global.p75, p90Egpm: global.p90, maxEgpm: global.max,
+          avgCpm: global.mean, avgDpm: 0, avgHpm: 0, avgShpm: 0, avgMpm: 0, avgKda: 0,
+          p10Cpm: global.p10, p90Cpm: global.p90, p10Dpm: 0, p90Dpm: 0,
+          avgEcpm: global.mean, p10Ecpm: global.p10, p25Ecpm: global.p25,
+          p75Ecpm: global.p75, p90Ecpm: global.p90, maxEcpm: global.max,
           sampleSize: global.sampleSize, updatedAt: null,
         });
       }
@@ -622,7 +622,7 @@ export function mapPlayersOverviewResponse(raw: any): PlayersOverview {
     kbmTier: row.kbm_tier ?? null, cheater: row.cheater ?? false, susCount: Number(row.sus_count ?? 0),
     weirdoCount: Number(row.weirdo_count ?? 0), hallOfFameCount: Number(row.hall_of_fame_count ?? 0),
     avgDpm: row.avg_dpm == null ? null : Number(row.avg_dpm), avgHpm: row.avg_hpm == null ? null : Number(row.avg_hpm),
-    avgGpm: row.avg_egpm == null ? null : Number(row.avg_egpm), avgMpm: row.avg_mpm == null ? null : Number(row.avg_mpm),
+    avgCpm: row.avg_egpm == null ? null : Number(row.avg_egpm), avgMpm: row.avg_mpm == null ? null : Number(row.avg_mpm),
     totalMatches: Number(row.total_matches ?? 0), winRate: row.win_rate == null ? null : Number(row.win_rate),
   });
   const communityCounts = {
@@ -1663,7 +1663,7 @@ export interface StatsChampion {
   pickRate?: number;
   kda?: number;
   avgDamage?: number;
-  avgGold?: number;
+  avgCredits?: number;
   avgHeal?: number;
   avgMitigation?: number;
   avgLeagueTier?: number;
@@ -1687,7 +1687,7 @@ function mapStatsChampionRows(raw: Array<{
     pickRate: toDisplayPercent(r.pick_rate) ?? undefined,
     kda: num(r.kda),
     avgDamage: num(r.avg_damage),
-    avgGold: num(r.avg_gold),
+    avgCredits: num(r.avg_gold),
     avgHeal: num(r.avg_heal),
     avgMitigation: num(r.avg_mitigation),
     avgLeagueTier: num(r.avg_league_tier),

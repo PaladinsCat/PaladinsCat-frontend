@@ -33,7 +33,7 @@ export default function Nav() {
         { href: "/stats/maps", label: "Map Stats" },
         { href: "/stats/compositions", label: "Composition Stats" },
         { href: "/stats/metrics", label: "Performance Metrics" },
-        { href: "/stats/egpm", label: "Effective Credits (eGPM)" },
+        { href: "/stats/egpm", label: "Effective Credits (eCPM)" },
         { href: "/stats/tiers", label: "Ranked Player Distribution" },
         { href: "/stats/skins", label: "Skin Stats" },
         { href: "/stats/regions", label: "Regions" },
