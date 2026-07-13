@@ -8,6 +8,18 @@ export function canonicalLocalImageUrl(src: string): string {
   return src.startsWith("/images/") ? src.replace(/,/g, "") : src;
 }
 
+/** Asset filenames use the official uppercase spelling, while API/reference
+ * data occasionally title-cases it as "Vii". Keep this mapping at the image
+ * boundary so every consumer resolves the same local file. */
+export function canonicalChampionAssetName(name: string): string {
+  return name.trim().toLowerCase() === "vii" ? "VII" : name.trim();
+}
+
 export function getTalentImageUrl(championName: string, talentName: string, extension = "png"): string {
-  return canonicalLocalImageUrl(`/images/champions/Talent ${championName} ${talentName}.${extension}`);
+  return canonicalLocalImageUrl(`/images/champions/Talent ${canonicalChampionAssetName(championName)} ${talentName}.${extension}`);
+}
+
+export function getCanonicalTalentImageUrl(source: string | null | undefined, championName: string, talentName: string): string {
+  const extension = source?.match(/\.([a-z0-9]+)(?:[?#].*)?$/i)?.[1] ?? "avif";
+  return getTalentImageUrl(championName, talentName, extension);
 }

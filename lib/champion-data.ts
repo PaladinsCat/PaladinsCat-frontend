@@ -1,5 +1,5 @@
 import { championSlug } from "@/lib/utils";
-import { getTalentImageUrl } from "@/lib/image-assets";
+import { getCanonicalTalentImageUrl, getTalentImageUrl } from "@/lib/image-assets";
 
 export interface ChampionSkill {
   name: string;
@@ -96,6 +96,5 @@ export async function getCanonicalTalentIconPath(championName: string, talentNam
   const champion = await getChampionData(championName);
   const talentKey = normalizeChampionReferenceName(talentName);
   const talent = champion?.talents.find((entry) => normalizeChampionReferenceName(entry.name) === talentKey);
-  if (talent?.iconUrl) return talent.iconUrl;
-  return getTalentIconPath(champion?.name ?? championName, talent?.name ?? talentName);
+  return getCanonicalTalentImageUrl(talent?.iconUrl, champion?.name ?? championName, talent?.name ?? talentName);
 }

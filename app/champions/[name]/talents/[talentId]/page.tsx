@@ -8,6 +8,7 @@ import ContextBackLink from "@/components/context-back-link";
 import { EmptyState, ErrorState } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { getChampionData, getTalentIconPath, type ChampionData, type ChampionTalent } from "@/lib/champion-data";
+import { getCanonicalTalentImageUrl } from "@/lib/image-assets";
 import {
   fetchChampionCardStats,
   fetchChampions,
@@ -118,7 +119,7 @@ export default function ChampionTalentDetailPage() {
 
   const pickRate = totalMatches > 0 ? (talentStat.totalPlays / totalMatches) * 100 : 0;
   const quality = getStatQuality(talentStat.winRate, pickRate, 100);
-  const talentImageUrl = talentMeta?.iconUrl || getTalentIconPath(championData.name, talentStat.talentName);
+  const talentImageUrl = getCanonicalTalentImageUrl(talentMeta?.iconUrl, championData.name, talentStat.talentName);
 
   return (
     <div className="space-y-6">
