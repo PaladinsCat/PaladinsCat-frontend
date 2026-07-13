@@ -10319,7 +10319,7 @@
         "name": "Heavy Blade",
         "key": "RMB",
         "iconUrl": "/images/skills/Ability_Heavy_Blade.png",
-        "iconUrl2": "/images/skills/Ability_Heavy_Blade.png",
+        "iconUrl2": null,
         "iconUrl3": null,
         "damage": "850 - 500",
         "healing": null,
