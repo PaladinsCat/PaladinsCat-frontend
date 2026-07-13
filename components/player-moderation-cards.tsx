@@ -27,7 +27,7 @@ export default function PlayerModerationCards({ players, showSeverity = false }:
       <dl className="grid grid-cols-3 gap-px border-y border-pc-border/60 bg-pc-border/60 min-[420px]:grid-cols-6">
         {[
           ["DPM", player.avgDpm ?? player.dpm], ["HPM", player.avgHpm ?? player.hpm],
-          ["CPM", player.avgCpm ?? player.gpm], ["MPM", player.avgMpm ?? player.mpm],
+          ["CPM", player.avgCpm ?? player.gpm], ["SPM", player.avgSpm ?? player.mpm],
           ["KDA", player.kda], ["Win rate", player.winRate == null ? "—" : `${player.winRate}%`],
         ].map(([label, metric]) => <div key={label} className="bg-pc-bg-elevated px-2 py-2 text-center"><dt className="text-[8px] uppercase tracking-wide text-pc-text-muted">{label}</dt><dd className="mt-0.5 truncate font-mono text-xs font-semibold text-pc-text-secondary">{value(metric)}</dd></div>)}
       </dl>

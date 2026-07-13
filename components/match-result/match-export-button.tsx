@@ -74,7 +74,7 @@ export default function MatchExportButton(props: MatchExportButtonProps) {
       drawText(props.team2Wins ? "WINNER" : "", 1520, 145, 15, "#86efac", "center", "700");
 
       const columns = [
-        ["Champion / Player", 72, "left"], ["K / D / A", 700, "center"], ["KDA", 830, "center"], ["Damage", 1010, "right"], ["Healing", 1190, "right"], ["Mitigation", 1390, "right"],
+        ["Champion / Player", 72, "left"], ["K / D / A", 700, "center"], ["KDA", 830, "center"], ["Damage", 1010, "right"], ["Healing", 1190, "right"], ["Shielding", 1390, "right"],
       ] as const;
       const drawTeam = (players: MatchPlayerDetail[], startY: number, name: string, wins: boolean, accent: string) => {
         roundedRect(context, 36, startY, 1528, 48, 12);

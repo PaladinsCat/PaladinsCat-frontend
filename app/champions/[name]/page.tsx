@@ -39,7 +39,7 @@ const CHAMPION_METRICS: Array<{ key: PerformanceMetricKey; label: string; colorC
   { key: "dpm", label: "Damage / Min", colorClass: "text-red-400", accent: "#f87171" },
   { key: "gpm", label: "Credits / Min", colorClass: "text-yellow-400", accent: "#facc15" },
   { key: "hpm", label: "Healing / Min", colorClass: "text-emerald-400", accent: "#34d399" },
-  { key: "mpm", label: "Mitigation / Min", colorClass: "text-blue-400", accent: "#60a5fa" },
+  { key: "mpm", label: "Shielding / Min", colorClass: "text-blue-400", accent: "#60a5fa" },
   { key: "kda", label: "KDA", colorClass: "text-violet-400", accent: "#a78bfa" },
 ];
 

@@ -4,7 +4,7 @@ const METRIC_LABELS: Record<string, string> = {
   dpm: "Damage Per Minute",
   hpm: "Healing Per Minute",
   gpm: "Credits Per Minute",
-  mpm: "Mitigation Per Minute",
+  mpm: "Shielding Per Minute",
   kda: "KDA",
   winrate: "Win Rate",
 };

@@ -23,7 +23,7 @@ const STAT_LABELS: Record<string, string> = {
   gpm: "Credits / Min",
   hpm: "Healing / Min",
   dpm: "Damage / Min",
-  mpm: "Mitigation / Min",
+  mpm: "Shielding / Min",
 };
 
 const PERFORMANCE_METRICS = [

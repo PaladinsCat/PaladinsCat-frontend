@@ -171,7 +171,7 @@ export default function StatTable({ player, fact, wins }: StatTableRowProps) {
                 <div className="text-sm font-medium text-pc-text">{fixed(player.egpm, 0)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">MPM</div>
+                <div className="text-[10px] text-pc-text-muted">SPM</div>
                 <div className="text-sm font-medium text-pc-text">{fixed(player.mitigation_per_minute, 0)}</div>
               </div>
 
@@ -221,13 +221,13 @@ export default function StatTable({ player, fact, wins }: StatTableRowProps) {
                 <div className="text-sm font-medium text-pc-text">{num(player.healing_player_self)}</div>
               </div>
 
-              {/* Damage taken & mitigated */}
+              {/* Damage taken & shielding */}
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
                 <div className="text-[10px] text-pc-text-muted">Taken</div>
                 <div className="text-sm font-medium text-pc-text">{num(player.damage_taken)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">Mitigated</div>
+                <div className="text-[10px] text-pc-text-muted">Shielding</div>
                 <div className="text-sm font-medium text-pc-text">{num(player.damage_mitigated)}</div>
               </div>
 

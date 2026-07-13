@@ -12,7 +12,7 @@ const METRIC_LABELS: Record<Metric, string> = {
   gpm: "Credits / Min",
   hpm: "Healing / Min",
   dpm: "Damage / Min",
-  mpm: "Mitigation / Min",
+  mpm: "Shielding / Min",
 };
 
 const METRIC_COLORS: Record<Metric, string> = {
@@ -33,7 +33,7 @@ const METRIC_AVG_KEY: Record<Metric, keyof BaselineEntry> = {
   gpm: "avgCpm",
   hpm: "avgHpm",
   dpm: "avgDpm",
-  mpm: "avgMpm",
+  mpm: "avgSpm",
 };
 
 const CLASS_ICONS: Record<string, string> = {

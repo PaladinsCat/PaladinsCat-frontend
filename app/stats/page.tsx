@@ -254,7 +254,7 @@ export default function StatsPage() {
             { key: "dpm", label: "DPM", color: "#f87171" },
             { key: "hpm", label: "HPM", color: "#34d399" },
             { key: "gpm", label: "CPM", color: "#facc15" },
-            { key: "mpm", label: "MPM", color: "#60a5fa" },
+            { key: "mpm", label: "SPM", color: "#60a5fa" },
             { key: "kda", label: "KDA", color: "#33b6b1" },
           ].map(({ key, label, color }) => {
             const d = metrics[key as keyof typeof metrics] as {

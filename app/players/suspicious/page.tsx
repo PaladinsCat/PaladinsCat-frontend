@@ -71,7 +71,7 @@ export default function SuspiciousPage() {
                   <th className="px-3 py-3 text-right">DPM</th>
                   <th className="px-3 py-3 text-right">HPM</th>
                   <th className="px-3 py-3 text-right">CPM</th>
-                  <th className="px-3 py-3 text-right">MPM</th>
+                  <th className="px-3 py-3 text-right">SPM</th>
                   <th className="px-3 py-3 text-right">KDA</th>
                   <th className="px-3 py-3 text-right">WR</th>
                   <th className="px-3 py-3 text-right">Matches</th>
@@ -99,7 +99,7 @@ export default function SuspiciousPage() {
                     <td className="px-3 py-2 text-right text-xs text-pc-text-secondary">{fmt(p.avgDpm ?? p.dpm)}</td>
                     <td className="px-3 py-2 text-right text-xs text-pc-text-secondary">{fmt(p.avgHpm ?? p.hpm)}</td>
                     <td className="px-3 py-2 text-right text-xs text-pc-text-secondary">{fmt(p.avgCpm ?? p.gpm)}</td>
-                    <td className="px-3 py-2 text-right text-xs text-pc-text-secondary">{fmt(p.avgMpm ?? p.mpm)}</td>
+                    <td className="px-3 py-2 text-right text-xs text-pc-text-secondary">{fmt(p.avgSpm ?? p.mpm)}</td>
                     <td className="px-3 py-2 text-right text-xs text-pc-text-secondary">{p.kda ?? "—"}</td>
                     <td className="px-3 py-2 text-right text-xs">
                       <span className={p.winRate >= 50 ? "text-emerald-400" : "text-red-400"}>

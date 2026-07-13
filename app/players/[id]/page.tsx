@@ -718,10 +718,10 @@ export default function PlayerProfilePage() {
                   <div className="space-y-1.5">
                     <StatRow label="Damage / Min" value={formatNumber(player.avg_dpm)} color="text-red-400" />
                     <StatRow label="Healing / Min" value={formatNumber(player.avg_hpm)} color="text-emerald-400" />
-                    <StatRow label="Mitigation / Min" value={formatNumber(player.avg_mpm)} color="text-sky-400" />
+                    <StatRow label="Shielding / Min" value={formatNumber(player.avg_mpm)} color="text-sky-400" />
                     <StatRow label="Credits / Min" value={formatNumber(player.avg_egpm)} color="text-yellow-400" />
                     {player.avg_shpm != null && (
-                      <StatRow label="Shield / Min" value={formatNumber(player.avg_shpm)} color="text-violet-400" />
+                      <StatRow label="Shielding / Min" value={formatNumber(player.avg_shpm)} color="text-violet-400" />
                     )}
                   </div>
                 </div>
