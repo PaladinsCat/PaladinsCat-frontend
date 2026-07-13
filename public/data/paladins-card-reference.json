@@ -7592,7 +7592,7 @@
   {
     "id": 26950,
     "name": "High Ground",
-    "description": "Increase the jump strength of Octaviaâ€™s Commanding Leap by {5|5}%.",
+    "description": "Increase the jump strength of Octavia’s Commanding Leap by {5|5}%.",
     "championId": 2540,
     "itemType": "Champion Card",
     "iconUrl": "/images/cards/Card_High Ground.avif",
@@ -7842,7 +7842,7 @@
   {
     "id": 27325,
     "name": "Arcane Maelstrom",
-    "description": "Using Envelop reduces your linked friendly targetâ€™s Cooldowns by {7|7}%.",
+    "description": "Using Envelop reduces your linked friendly target’s Cooldowns by {7|7}%.",
     "championId": 2542,
     "itemType": "Champion Card",
     "iconUrl": "/images/cards/Card_Arcane_Maelstrom.avif",
@@ -8042,7 +8042,7 @@
   {
     "id": 27528,
     "name": "Hide",
-    "description": "Increase the duration of Saatiâ€™s invisibility by {0.12|0.125}s after deployment of Dead Ringer.",
+    "description": "Increase the duration of Saati’s invisibility by {0.12|0.125}s after deployment of Dead Ringer.",
     "championId": 2543,
     "itemType": "Champion Card",
     "iconUrl": "/images/cards/Card_Hide.avif",
@@ -8052,7 +8052,7 @@
   {
     "id": 27529,
     "name": "Paper Design",
-    "description": "Decrease the time between bursts of Dead Ringerâ€™s inhand fire by {8|8}%.",
+    "description": "Decrease the time between bursts of Dead Ringer’s inhand fire by {8|8}%.",
     "championId": 2543,
     "itemType": "Champion Card",
     "iconUrl": "/images/cards/Card_Paper_Design.avif",
@@ -8082,7 +8082,7 @@
   {
     "id": 27532,
     "name": "Seek",
-    "description": "Increase the duration of Dead Ringerâ€™s reveal on destruction by {0.5|0.5}s.",
+    "description": "Increase the duration of Dead Ringer’s reveal on destruction by {0.5|0.5}s.",
     "championId": 2543,
     "itemType": "Champion Card",
     "iconUrl": "/images/cards/Card_Seek.avif",
@@ -8642,7 +8642,7 @@
   {
     "id": 30789,
     "name": "Charmed",
-    "description": "Increase your allyâ€™s Movement Speed by {4|4}% while they are marked by Blood Hex.",
+    "description": "Increase your ally’s Movement Speed by {4|4}% while they are marked by Blood Hex.",
     "championId": 2551,
     "itemType": "Champion Card",
     "iconUrl": "/images/cards/Card_Charmed.avif",
@@ -8782,7 +8782,7 @@
   {
     "id": 31041,
     "name": "A Brief Respite",
-    "description": "Reduce the Cooldown of Deadly Momentum by {1|1}s after hitting at least one enemy with Rogueâ€™s Tempo.",
+    "description": "Reduce the Cooldown of Deadly Momentum by {1|1}s after hitting at least one enemy with Rogue’s Tempo.",
     "championId": 2554,
     "itemType": "Champion Card",
     "iconUrl": "/images/cards/Card_A_Brief_Respite.avif",
@@ -8802,7 +8802,7 @@
   {
     "id": 31043,
     "name": "Casual Competency",
-    "description": "Hitting an enemy with Rogueâ€™s Tempo grants you {1|1}",
+    "description": "Hitting an enemy with Rogue’s Tempo grants you {1|1}",
     "championId": 2554,
     "itemType": "Champion Card",
     "iconUrl": "/images/cards/Card_Casual_Competency.avif",
@@ -9342,7 +9342,7 @@
   {
     "id": 32768,
     "name": "Lightless",
-    "description": "Increase the duration of Dark Strideâ€™s trail by {1|1}s.",
+    "description": "Increase the duration of Dark Stride’s trail by {1|1}s.",
     "championId": 2566,
     "itemType": "Champion Card",
     "iconUrl": "/images/cards/Card_Lightless.avif",

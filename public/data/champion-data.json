@@ -1460,7 +1460,7 @@
       },
       {
         "name": "Fallout",
-        "description": "Increase Grumpy Bomb\u00e2\u20ac\u2122s Stun duration by {0.1|0.1}s.",
+        "description": "Increase Grumpy Bomb\u2019s Stun duration by {0.1|0.1}s.",
         "category": "Grumpy Bomb",
         "iconUrl": "/images/cards/Card_Fallout.avif",
         "cooldown": null,
@@ -1822,7 +1822,7 @@
     "talents": [
       {
         "name": "Measured Cadence",
-        "description": "Automatically fire a weaker copy of Rogue\u00e2\u20ac\u2122s Tempo for every 4 Ammo consumed. This copy deals 400 damage and reduces Rogue's Tempo's Cooldown by 15% on hit.",
+        "description": "Automatically fire a weaker copy of Rogue\u2019s Tempo for every 4 Ammo consumed. This copy deals 400 damage and reduces Rogue's Tempo's Cooldown by 15% on hit.",
         "category": "",
         "iconUrl": "/images/champions/Talent Caspian Measured Cadence.avif"
       },
@@ -1842,7 +1842,7 @@
     "loadouts": [
       {
         "name": "A Brief Respite",
-        "description": "Reduce the Cooldown of Deadly Momentum by {1|1}s after hitting at least one enemy with Rogue\u00e2\u20ac\u2122s Tempo.",
+        "description": "Reduce the Cooldown of Deadly Momentum by {1|1}s after hitting at least one enemy with Rogue\u2019s Tempo.",
         "category": "Rogue&#39;s Tempo",
         "iconUrl": "/images/cards/Card_A_Brief_Respite.avif",
         "cooldown": null,
@@ -2336,7 +2336,7 @@
       },
       {
         "name": "Grand Design",
-        "description": "Grants Marked ally {2.5|2.5}% Lifesteal and Corvus shares 100% of the Healing done due to the Marked target\u00e2\u20ac\u2122s granted Lifesteal.",
+        "description": "Grants Marked ally {2.5|2.5}% Lifesteal and Corvus shares 100% of the Healing done due to the Marked target\u2019s granted Lifesteal.",
         "category": "Mark of Fate",
         "iconUrl": "/images/cards/Card_Grand_Design.avif",
         "cooldown": null,
@@ -2507,7 +2507,7 @@
       },
       {
         "name": "Blow the Man Down",
-        "description": "Enemies hit by Harpoon\u00e2\u20ac\u2122s Slow have their Movement Speed reduced by an additional {6|6}%.",
+        "description": "Enemies hit by Harpoon\u2019s Slow have their Movement Speed reduced by an additional {6|6}%.",
         "category": "Harpoon",
         "iconUrl": "/images/cards/Card_Blow_the_Man_Down.avif",
         "cooldown": null,
@@ -3439,7 +3439,7 @@
       },
       {
         "name": "Light Forge",
-        "description": "Hitting Kindle Soul increases you and your target\u00e2\u20ac\u2122s Movement Speed by {5|5}% for 2s.",
+        "description": "Hitting Kindle Soul increases you and your target\u2019s Movement Speed by {5|5}% for 2s.",
         "category": "Kindle Soul",
         "iconUrl": "/images/cards/Card_Light_Forge.avif",
         "cooldown": null,
@@ -4455,7 +4455,7 @@
         "iconUrl": "/images/champions/Talent Io Life Link.avif"
       },
       {
-        "name": "Goddess\u00e2\u20ac\u2122 Blessing",
+        "name": "Goddess's Blessing",
         "description": "Allies being Healed by Moonlight take 15% reduced damage.",
         "category": "",
         "iconUrl": "/images/champions/Talent Io Goddess's Blessing.avif"
@@ -6214,7 +6214,7 @@
       },
       {
         "name": "Murderous Intent",
-        "description": "Hitting an enemy with Heart of Crimson while they\u00e2\u20ac\u2122re affected by Blood Hex or Swarm increases your movement speed by 10% and attack speed by 11% for 4s. Stacks up to 3 times.",
+        "description": "Hitting an enemy with Heart of Crimson while they\u2019re affected by Blood Hex or Swarm increases your movement speed by 10% and attack speed by 11% for 4s. Stacks up to 3 times.",
         "category": "",
         "iconUrl": "/images/champions/Talent Lillith Murderous Intent.avif"
       }
@@ -6238,7 +6238,7 @@
       },
       {
         "name": "Charmed",
-        "description": "Increase your ally\u00e2\u20ac\u2122s Movement Speed by {4|4}% while they are marked by Blood Hex.",
+        "description": "Increase your ally\u2019s Movement Speed by {4|4}% while they are marked by Blood Hex.",
         "category": "Blood Hex",
         "iconUrl": "/images/cards/Card_Charmed.avif",
         "cooldown": null,
@@ -6951,7 +6951,7 @@
       },
       {
         "name": "Pungent Gourd",
-        "description": "Increase your Allies\u00e2\u20ac\u2122 and your Movement Speed by {8|8}% while in your Gourd.",
+        "description": "Increase your Allies\u2019 and your Movement Speed by {8|8}% while in your Gourd.",
         "category": "Gourd",
         "iconUrl": "/images/cards/Card_Pungent_Gourd.avif",
         "cooldown": null,
@@ -7592,7 +7592,7 @@
       },
       {
         "name": "High Ground",
-        "description": "Increase the jump strength of Octavia\u00e2\u20ac\u2122s Commanding Leap by {5|5}%.",
+        "description": "Increase the jump strength of Octavia\u2019s Commanding Leap by {5|5}%.",
         "category": "Commanding Leap",
         "iconUrl": "/images/cards/Card_High Ground.avif",
         "cooldown": null,
@@ -7735,7 +7735,7 @@
     "talents": [
       {
         "name": "Everyone Dies",
-        "description": "Hitting an enemy with Dark Stride now reduces Gravity Vice\u00e2\u20ac\u2122s Cooldown by 50%, and Dark Stride\u00e2\u20ac\u2122s damage is increased by 100.",
+        "description": "Hitting an enemy with Dark Stride now reduces Gravity Vice\u2019s Cooldown by 50%, and Dark Stride\u2019s damage is increased by 100.",
         "category": "",
         "iconUrl": "/images/champions/Talent Omen Everyone Dies.avif"
       },
@@ -7819,7 +7819,7 @@
       },
       {
         "name": "Lightless",
-        "description": "Increase the duration of Dark Stride\u00e2\u20ac\u2122s trail by {1|1}s.",
+        "description": "Increase the duration of Dark Stride\u2019s trail by {1|1}s.",
         "category": "Dark Stride",
         "iconUrl": "/images/cards/Card_Lightless.avif",
         "cooldown": null,
@@ -8217,7 +8217,7 @@
       },
       {
         "name": "Declaration of War",
-        "description": "Increase the potency of Juggernaut\u00e2\u20ac\u2122s Knockup and Knockback by {7|7}%.",
+        "description": "Increase the potency of Juggernaut\u2019s Knockup and Knockback by {7|7}%.",
         "category": "Juggernaut",
         "iconUrl": "/images/cards/Card_Declaration_of_War.avif",
         "cooldown": null,
@@ -8404,7 +8404,7 @@
       },
       {
         "name": "Focus",
-        "description": "Spirit Link\u00e2\u20ac\u2122s Cooldown is increased to 6s and it now only lasts for 3s, but its base effects are tripled.",
+        "description": "Spirit Link\u2019s Cooldown is increased to 6s and it now only lasts for 3s, but its base effects are tripled.",
         "category": "",
         "iconUrl": "/images/champions/Talent Rei Focus.avif"
       }
@@ -8428,7 +8428,7 @@
       },
       {
         "name": "Arcane Maelstrom",
-        "description": "Using Envelop reduces your linked friendly target\u00e2\u20ac\u2122s Cooldowns by {7|7}%.",
+        "description": "Using Envelop reduces your linked friendly target\u2019s Cooldowns by {7|7}%.",
         "category": "Envelop",
         "iconUrl": "/images/cards/Card_Arcane_Maelstrom.avif",
         "cooldown": null,
@@ -8898,7 +8898,7 @@
       },
       {
         "name": "Hide",
-        "description": "Increase the duration of Saati\u00e2\u20ac\u2122s invisibility by {0.12|0.125}s after deployment of Dead Ringer.",
+        "description": "Increase the duration of Saati\u2019s invisibility by {0.12|0.125}s after deployment of Dead Ringer.",
         "category": "Dead Ringer",
         "iconUrl": "/images/cards/Card_Hide.avif",
         "cooldown": null,
@@ -8906,7 +8906,7 @@
       },
       {
         "name": "Paper Design",
-        "description": "Decrease the time between bursts of Dead Ringer\u00e2\u20ac\u2122s inhand fire by {8|8}%.",
+        "description": "Decrease the time between bursts of Dead Ringer\u2019s inhand fire by {8|8}%.",
         "category": "Dead Ringer",
         "iconUrl": "/images/cards/Card_Paper_Design.avif",
         "cooldown": null,
@@ -8930,7 +8930,7 @@
       },
       {
         "name": "Seek",
-        "description": "Increase the duration of Dead Ringer\u00e2\u20ac\u2122s reveal on destruction by {0.5|0.5}s.",
+        "description": "Increase the duration of Dead Ringer\u2019s reveal on destruction by {0.5|0.5}s.",
         "category": "Dead Ringer",
         "iconUrl": "/images/cards/Card_Seek.avif",
         "cooldown": null,
@@ -10368,7 +10368,7 @@
         "iconUrl": "/images/champions/Talent Tiberius Borrowed Luck.avif"
       },
       {
-        "name": "Tigron\u00e2\u20ac\u2122s Fury",
+        "name": "Tigron's Fury",
         "description": "Heavy Blade now explodes on reactivation instead of recalling, but the initial throw deals reduced damage.",
         "category": "",
         "iconUrl": "/images/champions/Talent Tiberius Tigron's Fury.png"
@@ -10829,7 +10829,7 @@
       },
       {
         "name": "Favored Quarry",
-        "description": "Increase the duration of Hunter\u00e2\u20ac\u2122s Mark by {0.6|0.6}s.",
+        "description": "Increase the duration of Hunter\u2019s Mark by {0.6|0.6}s.",
         "category": "Hunter&#39;s Mark",
         "iconUrl": "/images/cards/Card_Favored_Quarry.avif",
         "cooldown": null,
@@ -11896,7 +11896,7 @@
     "talents": [
       {
         "name": "Unyielding Pressure",
-        "description": "Your Dark Siphon now deals an additional 10% of the target\u00e2\u20ac\u2122s maximum Health as damage over 1.5s.",
+        "description": "Your Dark Siphon now deals an additional 10% of the target\u2019s maximum Health as damage over 1.5s.",
         "category": "",
         "iconUrl": "/images/champions/Talent Vora Unyielding Pressure.avif"
       },

@@ -20,6 +20,11 @@ export function getTalentImageUrl(championName: string, talentName: string, exte
 }
 
 export function getCanonicalTalentImageUrl(source: string | null | undefined, championName: string, talentName: string): string {
+  // Champion data is the source of truth for talent artwork. Some talents
+  // intentionally keep art under a historic or punctuation-sensitive name,
+  // so rebuilding the path from the display name can point at a non-existent
+  // file (for example Goddess's Blessing).
+  if (source?.startsWith("/images/")) return canonicalLocalImageUrl(source);
   const extension = source?.match(/\.([a-z0-9]+)(?:[?#].*)?$/i)?.[1] ?? "avif";
   return getTalentImageUrl(championName, talentName, extension);
 }
