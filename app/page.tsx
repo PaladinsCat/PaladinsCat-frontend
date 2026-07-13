@@ -13,6 +13,7 @@ import {
 } from "@/lib/api-client";
 import { formatLocalDateTime } from "@/lib/time-format";
 import HomeSearch from "@/components/home-search";
+import { useLocalization } from "@/lib/localization-context";
 
 function notificationDot(importance: number) {
   if (importance >= 75) return "bg-amber-500";
@@ -21,6 +22,7 @@ function notificationDot(importance: number) {
 }
 
 export default function HomePage() {
+  const { t } = useLocalization();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [notificationsChecked, setNotificationsChecked] = useState(false);
   const [changelogPreview, setChangelogPreview] = useState<ChangelogEntry | null>(null);
@@ -47,7 +49,7 @@ export default function HomePage() {
       >
         <Image
           src="/images/icons/paladinscat.avif"
-          alt="PaladinsCat logo"
+          alt={t("home.logoAlt")}
           width={80}
           height={80}
           unoptimized
@@ -64,7 +66,7 @@ export default function HomePage() {
           />
         </h1>
         <p className="text-xs text-pc-text-secondary mt-1 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]">
-          Paladins: Comp Analytics Tool — advanced statistic, or just meow.
+          {t("home.tagline")}
         </p>
       </motion.div>
 
@@ -96,7 +98,7 @@ export default function HomePage() {
                       <button
                         onClick={() => setNotifications((prev) => prev.filter((n) => n.id !== notification.id))}
                         className="shrink-0 mt-0.5 p-1 rounded text-pc-text-muted hover:text-pc-text opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                        aria-label="Dismiss"
+                        aria-label={t("home.dismiss")}
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
                       </button>
@@ -106,7 +108,7 @@ export default function HomePage() {
               ) : (
                 <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 shadow-sm flex flex-col items-center justify-center min-h-[120px]">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-pc-text-muted mb-2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg>
-                  <p className="text-pc-text-muted text-xs text-center">No notifications</p>
+                  <p className="text-pc-text-muted text-xs text-center">{t("home.noNotifications")}</p>
                 </div>
               )}
             </div>
@@ -118,7 +120,7 @@ export default function HomePage() {
                   <div className="p-4 pb-3">
                     <div className="flex items-center gap-2 mb-2">
                       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-pc-accent shrink-0"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" /></svg>
-                      <h2 className="text-sm font-bold text-pc-text">Latest Changes</h2>
+                      <h2 className="text-sm font-bold text-pc-text">{t("home.latestChanges")}</h2>
                     </div>
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-xs font-bold text-pc-accent">
@@ -144,7 +146,7 @@ export default function HomePage() {
                       href="/changelog"
                       className="inline-flex items-center gap-1.5 text-xs font-semibold text-pc-accent hover:text-pc-accent-mid transition-colors"
                     >
-                      View All Changes
+                      {t("home.viewAllChanges")}
                       <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6" /></svg>
                     </Link>
                   </div>
@@ -152,7 +154,7 @@ export default function HomePage() {
               ) : (
                 <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 shadow-sm flex flex-col items-center justify-center min-h-[120px]">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-pc-text-muted mb-2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" /></svg>
-                  <p className="text-pc-text-muted text-xs text-center">No changelog entries yet</p>
+                  <p className="text-pc-text-muted text-xs text-center">{t("home.noChangelogEntries")}</p>
                 </div>
               )}
             </div>

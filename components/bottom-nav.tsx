@@ -9,16 +9,18 @@ import {
   Users,
   Menu,
 } from "lucide-react";
+import { useLocalization } from "@/lib/localization-context";
 
 const items = [
-  { href: "/", label: "Home", icon: Home },
-  { href: "/champions", label: "Champions", icon: Sword },
-  { href: "/stats", label: "Stats", icon: BarChart3 },
-  { href: "/players", label: "Players", icon: Users },
-];
+  { href: "/", labelKey: "menu.home", icon: Home },
+  { href: "/champions", labelKey: "nav.champions", icon: Sword },
+  { href: "/stats", labelKey: "nav.stats", icon: BarChart3 },
+  { href: "/players", labelKey: "nav.players", icon: Users },
+] as const;
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const { t } = useLocalization();
 
   return (
     <div className="fixed bottom-[max(0.5rem,env(safe-area-inset-bottom))] left-1/2 z-50 w-[calc(100vw-1rem)] max-w-sm -translate-x-1/2 sm:bottom-6">
@@ -38,12 +40,12 @@ export default function BottomNav() {
                   ? "text-pc-accent bg-pc-accent/10"
                   : "text-pc-text-muted hover:text-pc-text hover:bg-pc-bg-secondary"
               }`}
-              aria-label={item.label}
+              aria-label={t(item.labelKey)}
             >
               <item.icon
                 className={`w-5 h-5 ${isActive ? "stroke-[2.5]" : "stroke-[1.5]"}`}
               />
-              <span className="mt-0.5 max-w-full truncate text-[10px] font-medium leading-none min-[360px]:text-[11px]">{item.label}</span>
+              <span className="mt-0.5 max-w-full truncate text-[10px] font-medium leading-none min-[360px]:text-[11px]">{t(item.labelKey)}</span>
             </Link>
           );
         })}
@@ -51,10 +53,10 @@ export default function BottomNav() {
           type="button"
           onClick={() => window.dispatchEvent(new Event("paladinscat:open-site-menu"))}
           className="flex h-12 min-w-0 flex-col items-center justify-center rounded-xl px-0.5 text-pc-text-muted transition-all duration-200 hover:bg-pc-bg-secondary hover:text-pc-text"
-          aria-label="More navigation"
+          aria-label={t("bottomNav.moreNavigation")}
         >
           <Menu className="h-5 w-5 stroke-[1.5]" />
-          <span className="mt-0.5 text-[10px] font-medium leading-none min-[360px]:text-[11px]">More</span>
+          <span className="mt-0.5 text-[10px] font-medium leading-none min-[360px]:text-[11px]">{t("bottomNav.more")}</span>
         </button>
       </div>
     </div>

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Activity, Bell, Database, Eye, Gamepad2, Gauge, KeyRound, RefreshCw, Users } from "lucide-react";
+import { Activity, Bell, Database, Eye, Gamepad2, Gauge, KeyRound, Languages, RefreshCw, Users } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { fetchAdminDashboard, type AdminDashboard } from "@/lib/admin-dashboard-api";
 import { ContentFade, ErrorState, LoadingPanel } from "@/components/async-state";
@@ -82,6 +82,7 @@ export default function AdminDashboardPage() {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Link href="/admin/notifications" className="pc-btn-secondary inline-flex items-center gap-2 text-sm"><Bell className="h-4 w-4" /> Notifications</Link>
+          <Link href="/admin/localization" className="pc-btn-secondary inline-flex items-center gap-2 text-sm"><Languages className="h-4 w-4" /> Localization</Link>
           <button type="button" onClick={() => void load()} disabled={loading} className="pc-btn-secondary inline-flex items-center gap-2 text-sm disabled:opacity-60">
             <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} /> Refresh
           </button>

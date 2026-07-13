@@ -1,0 +1,28 @@
+export const SUPPORTED_LOCALES = [
+  { code: "en", label: "English" },
+  { code: "de", label: "Deutsch" },
+  { code: "es", label: "Español" },
+  { code: "fr", label: "Français" },
+  { code: "pl", label: "Polski" },
+  { code: "pt-BR", label: "Português (Brasil)" },
+  { code: "ru", label: "Русский" },
+  { code: "tr", label: "Türkçe" },
+  { code: "zh-CN", label: "简体中文" },
+] as const;
+
+export type Locale = (typeof SUPPORTED_LOCALES)[number]["code"];
+export const LOCALE_MODULES = localeModules;
+
+export const COMMUNITY_LOCALE_BASE_URL = (
+  process.env.NEXT_PUBLIC_LOCALE_BASE_URL
+  ?? "https://raw.githubusercontent.com/NabiCook/PaladinsCat-locales/main/locales"
+).replace(/\/+$/, "");
+
+export function isSupportedLocale(value: string | null | undefined): value is Locale {
+  return SUPPORTED_LOCALES.some(({ code }) => code === value);
+}
+
+export function communityLocaleUrl(locale: Locale, module: string) {
+  return `${COMMUNITY_LOCALE_BASE_URL}/${encodeURIComponent(locale)}/${module}.json`;
+}
+import localeModules from "./modules.json";

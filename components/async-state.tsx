@@ -4,6 +4,7 @@ import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { AlertTriangle, Inbox, LoaderCircle, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLocalization } from "@/lib/localization-context";
 
 const transition = { duration: 0.2, ease: "easeOut" as const };
 
@@ -42,10 +43,11 @@ export function LoadingPanel({
 }
 
 export function LoadingIndicator({ className }: { className?: string }) {
+  const { t } = useLocalization();
   return (
     <span role="status" aria-live="polite" className={cn("inline-flex items-center gap-3 text-sm font-medium text-pc-text", className)}>
       <LoaderCircle className="h-5 w-5 shrink-0 animate-spin text-pc-accent" aria-hidden="true" />
-      <span>Loading</span>
+      <span>{t("async.loading")}</span>
     </span>
   );
 }
@@ -95,7 +97,7 @@ export function EmptyState({
 }
 
 export function ErrorState({
-  title = "Could not load this data",
+  title,
   message,
   onRetry,
   className,
@@ -105,15 +107,16 @@ export function ErrorState({
   onRetry?: () => void;
   className?: string;
 }) {
+  const { t } = useLocalization();
   return (
     <ContentFade className={cn("pc-card flex min-h-40 flex-col items-center justify-center px-5 py-10 text-center", className)}>
       <AlertTriangle className="mb-3 h-7 w-7 text-amber-400" aria-hidden="true" />
-      <h2 className="text-sm font-semibold text-pc-text">{title}</h2>
+      <h2 className="text-sm font-semibold text-pc-text">{title ?? t("async.couldNotLoad")}</h2>
       {message && <p className="mt-1 max-w-lg text-xs leading-relaxed text-pc-text-muted">{message}</p>}
       {onRetry && (
         <button type="button" onClick={onRetry} className="pc-btn-secondary mt-4 inline-flex items-center gap-2 text-sm">
           <RefreshCw className="h-4 w-4" aria-hidden="true" />
-          Try again
+          {t("async.tryAgain")}
         </button>
       )}
     </ContentFade>
@@ -126,6 +129,7 @@ interface AsyncButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 export function AsyncButton({ loading = false, children, className, disabled, ...props }: AsyncButtonProps) {
+  const { t } = useLocalization();
   return (
     <button
       {...props}
@@ -134,7 +138,7 @@ export function AsyncButton({ loading = false, children, className, disabled, ..
       className={cn("inline-flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-60", className)}
     >
       {loading && <LoaderCircle className="h-4 w-4 animate-spin text-pc-accent" aria-hidden="true" />}
-      {loading ? "Loading" : children}
+      {loading ? t("async.loading") : children}
     </button>
   );
 }

@@ -8,6 +8,7 @@ import MapSlideshow from "@/components/MapSlideshow";
 import PageLayout from "@/components/PageLayout";
 import { AuthProvider } from "@/lib/auth-context";
 import { TimeZoneProvider } from "@/lib/time-zone-context";
+import { LocalizationProvider } from "@/lib/localization-context";
 import { LobbyTierProvider } from "@/lib/lobby-tier-context";
 import LobbyTierBanner from "@/components/LobbyTierBanner";
 import SiteAnalytics from "@/components/SiteAnalytics";
@@ -122,8 +123,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
         <AuthProvider>
-          <TimeZoneProvider>
-            <LobbyTierProvider>
+          <LocalizationProvider>
+            <TimeZoneProvider>
+              <LobbyTierProvider>
               <SiteAnalytics />
               <MapSlideshow />
               <Nav />
@@ -138,8 +140,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </main>
               <div className="block lg:hidden"><BottomNav /></div>
               <Footer />
-            </LobbyTierProvider>
-          </TimeZoneProvider>
+              </LobbyTierProvider>
+            </TimeZoneProvider>
+          </LocalizationProvider>
         </AuthProvider>
       </body>
     </html>

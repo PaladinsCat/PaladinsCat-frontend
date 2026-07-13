@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "generate-types": "npx openapi-typescript http://localhost:3005/openapi.json -o lib/types.gen.ts"
+    "generate-types": "npx openapi-typescript http://localhost:3005/openapi.json -o lib/types.gen.ts",
+    "sync-community-locales": "node scripts/sync-community-locales.mjs",
+    "audit-localization": "node scripts/audit-localization.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",

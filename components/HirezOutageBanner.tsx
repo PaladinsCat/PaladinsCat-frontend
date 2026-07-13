@@ -4,10 +4,12 @@ import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, Clock, RefreshCw } from "lucide-react";
 import { fetchHirezServiceStatus, type HirezServiceStatus } from "@/lib/api-client";
 import { formatLocalTime } from "@/lib/time-format";
+import { useLocalization } from "@/lib/localization-context";
 
 const REFRESH_MS = 60_000;
 
 export default function HirezOutageBanner() {
+  const { t } = useLocalization();
   const [status, setStatus] = useState<HirezServiceStatus | null>(null);
 
   useEffect(() => {
@@ -32,7 +34,7 @@ export default function HirezOutageBanner() {
   if (!status || status.status === "ok") return null;
 
   const isOutage = status.status === "outage";
-  const title = primary?.title ?? (isOutage ? "Hi-Rez API outage" : "Hi-Rez API degraded");
+  const title = primary?.title ?? t(isOutage ? "status.apiOutage" : "status.apiDegraded");
 
   return (
     <section
@@ -54,23 +56,23 @@ export default function HirezOutageBanner() {
         <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-red-50/85 lg:justify-end">
           {status.pendingVendorDebt > 0 && (
             <span className="rounded border border-red-300/30 bg-red-900/40 px-2.5 py-1">
-              {status.pendingVendorDebt} held matches
+              {t("status.heldMatches", { count: status.pendingVendorDebt })}
             </span>
           )}
           {status.affectedHours > 0 && (
             <span className="rounded border border-red-300/30 bg-red-900/40 px-2.5 py-1">
-              {status.affectedHours} affected hours
+              {t("status.affectedHours", { count: status.affectedHours })}
             </span>
           )}
           {nextProbe && (
             <span className="inline-flex items-center gap-1 rounded border border-red-300/30 bg-red-900/40 px-2.5 py-1">
               <Clock className="h-3.5 w-3.5" aria-hidden="true" />
-              {primary?.probeDue ? "Probe due" : `Next probe ${nextProbe}`}
+              {primary?.probeDue ? t("status.probeDue") : t("status.nextProbe", { time: nextProbe })}
             </span>
           )}
           <span className="inline-flex items-center gap-1 rounded border border-red-300/30 bg-red-900/40 px-2.5 py-1">
             <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
-            Live
+            {t("status.live")}
           </span>
         </div>
       </div>

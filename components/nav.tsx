@@ -2,8 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
+import {
+  SUPPORTED_LOCALES,
+  type Locale,
+  useLocalization,
+} from "@/lib/localization-context";
 import {
   getWallpaperEnabled,
   setWallpaperEnabled,
@@ -13,62 +18,79 @@ import {
 export default function Nav() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const { locale, setLocale, t } = useLocalization();
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
+  const [headerLanguageMenuOpen, setHeaderLanguageMenuOpen] = useState(false);
   const [wallpaperEnabled, setWallpaperEnabledState] = useState(true);
+  const headerLanguageMenuRef = useRef<HTMLDivElement>(null);
 
   const navLinks = [
-    { href: "/champions", label: "Champions" },
-    { href: "/players", label: "Players" },
-    { href: "/matches", label: "Matches" },
-    { href: "/stats", label: "Stats" },
-    { href: "/builds", label: "Builds" },
-    { href: "/community", label: "Community" },
+    { href: "/champions", label: t("nav.champions") },
+    { href: "/players", label: t("nav.players") },
+    { href: "/matches", label: t("nav.matches") },
+    { href: "/stats", label: t("nav.stats") },
+    { href: "/builds", label: t("nav.builds") },
+    { href: "/community", label: t("nav.community") },
   ];
 
   const menuSections = [
-    { title: "Browse", links: [{ href: "/", label: "Home" }, ...navLinks] },
+    { title: t("menu.browse"), links: [{ href: "/", label: t("menu.home") }, ...navLinks] },
     {
-      title: "Stats",
+      title: t("nav.stats"),
       links: [
-        { href: "/stats", label: "Global Stats" },
-        { href: "/stats/winrate", label: "Champion Win Rates" },
-        { href: "/stats/banrate", label: "Champion Ban Rates" },
-        { href: "/stats/talents", label: "Talent Performance" },
-        { href: "/stats/loadouts", label: "Loadout Meta" },
-        { href: "/stats/items", label: "Item Meta" },
-        { href: "/stats/maps", label: "Map Stats" },
-        { href: "/stats/compositions", label: "Composition Stats" },
-        { href: "/stats/metrics", label: "Performance Metrics" },
-        { href: "/stats/egpm", label: "Effective Credits (eCPM)" },
-        { href: "/stats/tiers", label: "Ranked Player Distribution" },
-        { href: "/stats/skins", label: "Skin Stats" },
-        { href: "/stats/regions", label: "Regions" },
-        { href: "/stats/platforms", label: "Platforms" },
+        { href: "/stats", label: t("menu.globalStats") },
+        { href: "/stats/winrate", label: t("menu.championWinRates") },
+        { href: "/stats/banrate", label: t("menu.championBanRates") },
+        { href: "/stats/talents", label: t("menu.talentPerformance") },
+        { href: "/stats/loadouts", label: t("menu.loadoutMeta") },
+        { href: "/stats/items", label: t("menu.itemMeta") },
+        { href: "/stats/maps", label: t("menu.mapStats") },
+        { href: "/stats/compositions", label: t("menu.compositionStats") },
+        { href: "/stats/metrics", label: t("menu.performanceMetrics") },
+        { href: "/stats/egpm", label: t("menu.effectiveCredits") },
+        { href: "/stats/tiers", label: t("menu.rankedDistribution") },
+        { href: "/stats/skins", label: t("menu.skinStats") },
+        { href: "/stats/regions", label: t("menu.regions") },
+        { href: "/stats/platforms", label: t("menu.platforms") },
       ],
     },
     {
-      title: "Players",
+      title: t("nav.players"),
       links: [
-        { href: "/players", label: "Player Hub" },
-        { href: "/players/leaderboard", label: "Ranked Leaderboard" },
-        { href: "/players/elo", label: "ELO Leaderboard" },
-        { href: "/players/cheaters", label: "Cheater Reports" },
-        { href: "/players/suspicious", label: "Suspicious Players" },
-        { href: "/players/weirdos", label: "Weirdos" },
-        { href: "/players/hall-of-fame", label: "Hall of Fame" },
+        { href: "/players", label: t("menu.playerHub") },
+        { href: "/players/leaderboard", label: t("menu.rankedLeaderboard") },
+        { href: "/players/elo", label: t("menu.eloLeaderboard") },
+        { href: "/players/cheaters", label: t("menu.cheaterReports") },
+        { href: "/players/suspicious", label: t("menu.suspiciousPlayers") },
+        { href: "/players/weirdos", label: t("menu.weirdos") },
+        { href: "/players/hall-of-fame", label: t("menu.hallOfFame") },
       ],
     },
-    { title: "Site", links: [{ href: "/about", label: "About" }, { href: "/changelog", label: "Changelog" }, { href: "/contact", label: "Contact" }, { href: "/privacy", label: "Privacy" }, { href: "/terms", label: "Terms" }] },
+    { title: t("menu.site"), links: [{ href: "/localization", label: t("nav.localization") }, { href: "/about", label: t("menu.about") }, { href: "/changelog", label: t("menu.changelog") }, { href: "/contact", label: t("menu.contact") }, { href: "/privacy", label: t("menu.privacy") }, { href: "/terms", label: t("menu.terms") }] },
   ];
 
   useEffect(() => {
-    if (!sideMenuOpen) return;
+    if (!sideMenuOpen && !headerLanguageMenuOpen) return;
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setSideMenuOpen(false);
+      if (event.key === "Escape") {
+        setSideMenuOpen(false);
+        setHeaderLanguageMenuOpen(false);
+      }
     };
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
-  }, [sideMenuOpen]);
+  }, [headerLanguageMenuOpen, sideMenuOpen]);
+
+  useEffect(() => {
+    if (!headerLanguageMenuOpen) return;
+    const closeOnOutsideClick = (event: MouseEvent) => {
+      if (!headerLanguageMenuRef.current?.contains(event.target as Node)) {
+        setHeaderLanguageMenuOpen(false);
+      }
+    };
+    window.addEventListener("mousedown", closeOnOutsideClick);
+    return () => window.removeEventListener("mousedown", closeOnOutsideClick);
+  }, [headerLanguageMenuOpen]);
 
   useEffect(() => {
     const syncWallpaperPreference = () => setWallpaperEnabledState(getWallpaperEnabled());
@@ -97,6 +119,17 @@ export default function Nav() {
     setWallpaperEnabledState(next);
     setWallpaperEnabled(next);
   }
+
+  function handleLocaleChange(event: React.ChangeEvent<HTMLSelectElement>) {
+    setLocale(event.target.value as Locale);
+  }
+
+  function selectHeaderLocale(nextLocale: Locale) {
+    setLocale(nextLocale);
+    setHeaderLanguageMenuOpen(false);
+  }
+
+  const localeCode = locale.split("-")[0].toUpperCase();
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -136,30 +169,65 @@ export default function Nav() {
             {/* Right: grouped menu and account controls */}
             {/* Player search lives on /players page; champion search on /champions page */}
             <div className="flex shrink-0 items-center justify-end gap-3">
+              <div ref={headerLanguageMenuRef} className="relative">
+                <button
+                  type="button"
+                  onClick={() => setHeaderLanguageMenuOpen((open) => !open)}
+                  className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm font-medium text-pc-text-secondary transition-colors hover:bg-pc-bg-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent"
+                  aria-label={t("nav.language")}
+                  aria-expanded={headerLanguageMenuOpen}
+                  aria-haspopup="listbox"
+                >
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="12" cy="12" r="10" /><path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20M12 2a15.3 15.3 0 0 0 0 20" /></svg>
+                  {localeCode}
+                  <svg className={`h-3.5 w-3.5 transition-transform ${headerLanguageMenuOpen ? "rotate-180" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+                </button>
+                {headerLanguageMenuOpen && (
+                  <div className="absolute right-0 top-full z-10 mt-2 w-52 rounded-lg border border-pc-border bg-pc-bg-secondary p-1 shadow-xl" role="listbox" aria-label={t("nav.language")}>
+                    {SUPPORTED_LOCALES.map(({ code, label }) => (
+                      <button
+                        key={code}
+                        type="button"
+                        onClick={() => selectHeaderLocale(code)}
+                        className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm transition-colors ${locale === code ? "bg-pc-bg-elevated text-pc-accent" : "text-pc-text-secondary hover:bg-pc-bg-elevated hover:text-pc-text"}`}
+                        role="option"
+                        aria-selected={locale === code}
+                      >
+                        {label}
+                        <span className="text-xs text-pc-text-muted">{code.split("-")[0].toUpperCase()}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
               <button
                 onClick={() => setSideMenuOpen(true)}
                 className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm text-pc-text-secondary transition-colors hover:bg-pc-bg-elevated hover:text-pc-accent"
-                aria-label="Open site menu"
+                aria-label={t("nav.openSiteMenu")}
                 aria-expanded={sideMenuOpen}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
-                Menu
+                {t("nav.menu")}
               </button>
               {user ? (
-                <div className="flex items-center gap-3">
+                <div className="group relative">
                   <Link
                     href="/account"
-                    className="max-w-32 truncate text-sm text-pc-text-secondary underline underline-offset-2 transition-colors hover:text-pc-accent"
+                    className="block max-w-36 truncate rounded-md px-1 py-1 text-sm text-pc-text-secondary underline underline-offset-2 transition-colors hover:text-pc-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent"
                   >
-                    Hi, {user.username}
+                    {t("nav.greeting", { username: user.username })}
                   </Link>
-                  <button onClick={handleLogout} className="pc-btn-ghost text-sm">
-                    Logout
-                  </button>
+                  <div className="invisible pointer-events-none absolute right-0 top-full z-10 pt-1 opacity-0 transition-all group-hover:visible group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:visible group-focus-within:pointer-events-auto group-focus-within:opacity-100">
+                    <div className="rounded-lg border border-pc-border bg-pc-bg-secondary p-1 shadow-xl">
+                      <button onClick={handleLogout} className="whitespace-nowrap rounded-md px-3 py-2 text-sm text-pc-text-secondary transition-colors hover:bg-pc-bg-elevated hover:text-pc-text">
+                        {t("nav.logout")}
+                      </button>
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <Link href="/auth/login" className="pc-btn-secondary text-sm">
-                  Login
+                  {t("nav.login")}
                 </Link>
               )}
             </div>
@@ -185,18 +253,27 @@ export default function Nav() {
       </nav>
 
       {sideMenuOpen && (
-        <div className="fixed inset-0 z-[60]" role="dialog" aria-modal="true" aria-label="Site menu">
-          <button className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setSideMenuOpen(false)} aria-label="Close site menu" />
+        <div className="fixed inset-0 z-[60]" role="dialog" aria-modal="true" aria-label={t("nav.menu")}>
+          <button className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setSideMenuOpen(false)} aria-label={t("nav.closeSiteMenu")} />
           <aside className="absolute inset-y-0 right-0 flex w-[min(24rem,calc(100vw-2rem))] flex-col border-l border-pc-border bg-pc-bg-secondary shadow-2xl">
             <div className="flex items-center justify-between border-b border-pc-border px-5 py-4">
               <Link href="/" onClick={() => setSideMenuOpen(false)} className="flex items-center gap-2 font-bold text-pc-text"><img src="/images/icons/paladinscat.avif" alt="" className="h-6 w-6" />PaladinsCat</Link>
-              <button onClick={() => setSideMenuOpen(false)} className="rounded-lg p-2 text-pc-text-secondary hover:bg-pc-bg-elevated hover:text-pc-accent" aria-label="Close site menu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
+              <button onClick={() => setSideMenuOpen(false)} className="rounded-lg p-2 text-pc-text-secondary hover:bg-pc-bg-elevated hover:text-pc-accent" aria-label={t("nav.closeSiteMenu")}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
             </div>
             <div className="flex-1 overflow-y-auto px-4 py-5">
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                 {menuSections.map((section) => <section key={section.title}><h2 className="mb-2 px-2 text-[10px] font-bold uppercase tracking-widest text-pc-text-muted">{section.title}</h2><div className="space-y-0.5">{section.links.map((link) => <Link key={link.href} href={link.href} onClick={() => setSideMenuOpen(false)} className={`block rounded-lg px-2.5 py-2 text-sm transition-colors ${isMenuActive(link.href) ? "bg-pc-bg-elevated text-pc-accent" : "text-pc-text-secondary hover:bg-pc-bg-elevated hover:text-pc-text"}`}>{link.label}</Link>)}</div></section>)}
                 <section>
-                  <h2 className="mb-2 px-2 text-[10px] font-bold uppercase tracking-widest text-pc-text-muted">Appearance</h2>
+                  <h2 className="mb-2 px-2 text-[10px] font-bold uppercase tracking-widest text-pc-text-muted">{t("nav.language")}</h2>
+                  <label className="block rounded-lg px-2.5 py-2 text-sm text-pc-text-secondary transition-colors hover:bg-pc-bg-elevated hover:text-pc-text">
+                    <span className="sr-only">{t("nav.language")}</span>
+                    <select value={locale} onChange={handleLocaleChange} className="w-full rounded-md border border-pc-border bg-pc-bg px-2.5 py-2 text-sm text-pc-text outline-none focus-visible:ring-2 focus-visible:ring-pc-accent">
+                      {SUPPORTED_LOCALES.map(({ code, label }) => <option key={code} value={code}>{label}</option>)}
+                    </select>
+                  </label>
+                </section>
+                <section>
+                  <h2 className="mb-2 px-2 text-[10px] font-bold uppercase tracking-widest text-pc-text-muted">{t("menu.appearance")}</h2>
                   <button
                     type="button"
                     onClick={handleWallpaperToggle}
@@ -204,8 +281,8 @@ export default function Nav() {
                     aria-pressed={wallpaperEnabled}
                   >
                     <span>
-                      <span className="block">Map wallpaper</span>
-                      <span className="mt-0.5 block text-xs text-pc-text-muted">{wallpaperEnabled ? "Enabled" : "Dark grey only"}</span>
+                      <span className="block">{t("menu.mapWallpaper")}</span>
+                      <span className="mt-0.5 block text-xs text-pc-text-muted">{wallpaperEnabled ? t("menu.enabled") : t("menu.darkGreyOnly")}</span>
                     </span>
                     <span className={`relative h-5 w-9 rounded-full transition-colors ${wallpaperEnabled ? "bg-pc-accent" : "bg-pc-bg"}`} aria-hidden="true">
                       <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${wallpaperEnabled ? "translate-x-4" : "translate-x-0.5"}`} />
@@ -215,7 +292,7 @@ export default function Nav() {
               </div>
             </div>
             <div className="border-t border-pc-border px-5 py-4">
-              {user ? <div className="flex items-center justify-between"><Link href="/account" onClick={() => setSideMenuOpen(false)} className="text-sm text-pc-text-secondary hover:text-pc-accent">Hi, {user.username}</Link><button onClick={handleLogout} className="pc-btn-ghost text-sm">Logout</button></div> : <Link href="/auth/login" onClick={() => setSideMenuOpen(false)} className="pc-btn-secondary block text-center text-sm">Login</Link>}
+              {user ? <div className="flex items-center justify-between"><Link href="/account" onClick={() => setSideMenuOpen(false)} className="text-sm text-pc-text-secondary hover:text-pc-accent">{t("nav.greeting", { username: user.username })}</Link><button onClick={handleLogout} className="pc-btn-ghost text-sm">{t("nav.logout")}</button></div> : <Link href="/auth/login" onClick={() => setSideMenuOpen(false)} className="pc-btn-secondary block text-center text-sm">{t("nav.login")}</Link>}
             </div>
           </aside>
         </div>

@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { useLocalization } from "@/lib/localization-context";
 
 export default function HomeSearch() {
+  const { t } = useLocalization();
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
   const [value, setValue] = useState("");
@@ -36,14 +38,14 @@ export default function HomeSearch() {
             onChange={(event) => setValue(event.target.value)}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
-            aria-label="Search players, matches, champions, items, cards, talents"
+            aria-label={t("search.homeInputLabel")}
             className="w-full rounded-lg bg-transparent px-4 py-2 pr-10 text-sm text-pc-text outline-none transition-colors placeholder:text-pc-text-muted"
           />
           {value.length > 0 && (
             <button
               type="button"
-              aria-label="Clear search"
-              title="Clear search"
+              aria-label={t("search.clear")}
+              title={t("search.clear")}
               onClick={() => setValue("")}
               className="absolute inset-y-0 right-3 flex cursor-pointer items-center text-pc-text-muted transition-colors hover:text-white"
             >
@@ -53,7 +55,7 @@ export default function HomeSearch() {
         </div>
         <button
           type="submit"
-          aria-label="Search"
+          aria-label={t("search.submit")}
           className="pc-glass flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/5 text-pc-text-muted transition-colors hover:border-pc-accent-mid hover:text-pc-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`transition-colors ${hovered || focused ? "text-pc-accent" : "text-pc-text-muted group-hover:text-pc-accent group-focus-within:text-pc-accent"}`}><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>

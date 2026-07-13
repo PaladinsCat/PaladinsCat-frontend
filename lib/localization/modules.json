@@ -1,0 +1,10 @@
+[
+  "ui/navigation",
+  "ui/footer",
+  "ui/async",
+  "pages/home",
+  "pages/localization",
+  "system/status",
+  "game/talents",
+  "game/items"
+]
