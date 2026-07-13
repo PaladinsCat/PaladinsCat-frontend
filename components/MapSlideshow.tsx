@@ -2,6 +2,10 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  getWallpaperEnabled,
+  WALLPAPER_CHANGE_EVENT,
+} from "@/lib/wallpaper-preference";
 
 // All 12 Paladins map wallpapers — AVIF format
 const MAPS = [
@@ -29,11 +33,23 @@ const INTERVAL_MS = 10_000;
  * then shuffles order client-side after mount.
  */
 export default function MapSlideshow() {
+  const [wallpaperEnabled, setWallpaperEnabled] = useState(true);
   // Deterministic on server: always start at index 0
   const [index, setIndex] = useState(0);
   // Null until client mounts and shuffles
   const [order, setOrder] = useState<string[] | null>(null);
   const mounted = useRef(false);
+
+  useEffect(() => {
+    const syncWallpaperPreference = () => setWallpaperEnabled(getWallpaperEnabled());
+    syncWallpaperPreference();
+    window.addEventListener(WALLPAPER_CHANGE_EVENT, syncWallpaperPreference);
+    window.addEventListener("storage", syncWallpaperPreference);
+    return () => {
+      window.removeEventListener(WALLPAPER_CHANGE_EVENT, syncWallpaperPreference);
+      window.removeEventListener("storage", syncWallpaperPreference);
+    };
+  }, []);
 
   useEffect(() => {
     // Shuffle once on mount
@@ -58,6 +74,10 @@ export default function MapSlideshow() {
 
   // Before client mount, render the first map in static order (matches SSR)
   const currentMap = order ? order[index] : MAPS[0];
+
+  if (!wallpaperEnabled) {
+    return <div className="fixed inset-0 -z-10 bg-pc-bg" aria-hidden="true" />;
+  }
 
   return (
     <div className="fixed inset-0 -z-10 overflow-hidden" aria-hidden="true" style={{ backgroundColor: "var(--pc-bg)" }}>

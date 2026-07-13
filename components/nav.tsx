@@ -4,11 +4,17 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
+import {
+  getWallpaperEnabled,
+  setWallpaperEnabled,
+  WALLPAPER_CHANGE_EVENT,
+} from "@/lib/wallpaper-preference";
 
 export default function Nav() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
+  const [wallpaperEnabled, setWallpaperEnabledState] = useState(true);
 
   const navLinks = [
     { href: "/champions", label: "Champions" },
@@ -65,6 +71,17 @@ export default function Nav() {
   }, [sideMenuOpen]);
 
   useEffect(() => {
+    const syncWallpaperPreference = () => setWallpaperEnabledState(getWallpaperEnabled());
+    syncWallpaperPreference();
+    window.addEventListener(WALLPAPER_CHANGE_EVENT, syncWallpaperPreference);
+    window.addEventListener("storage", syncWallpaperPreference);
+    return () => {
+      window.removeEventListener(WALLPAPER_CHANGE_EVENT, syncWallpaperPreference);
+      window.removeEventListener("storage", syncWallpaperPreference);
+    };
+  }, []);
+
+  useEffect(() => {
     const openSiteMenu = () => setSideMenuOpen(true);
     window.addEventListener("paladinscat:open-site-menu", openSiteMenu);
     return () => window.removeEventListener("paladinscat:open-site-menu", openSiteMenu);
@@ -73,6 +90,12 @@ export default function Nav() {
   async function handleLogout() {
     await logout();
     setSideMenuOpen(false);
+  }
+
+  function handleWallpaperToggle() {
+    const next = !wallpaperEnabled;
+    setWallpaperEnabledState(next);
+    setWallpaperEnabled(next);
   }
 
   const isActive = (href: string) =>
@@ -172,6 +195,23 @@ export default function Nav() {
             <div className="flex-1 overflow-y-auto px-4 py-5">
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                 {menuSections.map((section) => <section key={section.title}><h2 className="mb-2 px-2 text-[10px] font-bold uppercase tracking-widest text-pc-text-muted">{section.title}</h2><div className="space-y-0.5">{section.links.map((link) => <Link key={link.href} href={link.href} onClick={() => setSideMenuOpen(false)} className={`block rounded-lg px-2.5 py-2 text-sm transition-colors ${isMenuActive(link.href) ? "bg-pc-bg-elevated text-pc-accent" : "text-pc-text-secondary hover:bg-pc-bg-elevated hover:text-pc-text"}`}>{link.label}</Link>)}</div></section>)}
+                <section>
+                  <h2 className="mb-2 px-2 text-[10px] font-bold uppercase tracking-widest text-pc-text-muted">Appearance</h2>
+                  <button
+                    type="button"
+                    onClick={handleWallpaperToggle}
+                    className="flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-sm text-pc-text-secondary transition-colors hover:bg-pc-bg-elevated hover:text-pc-text"
+                    aria-pressed={wallpaperEnabled}
+                  >
+                    <span>
+                      <span className="block">Map wallpaper</span>
+                      <span className="mt-0.5 block text-xs text-pc-text-muted">{wallpaperEnabled ? "Enabled" : "Dark grey only"}</span>
+                    </span>
+                    <span className={`relative h-5 w-9 rounded-full transition-colors ${wallpaperEnabled ? "bg-pc-accent" : "bg-pc-bg"}`} aria-hidden="true">
+                      <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${wallpaperEnabled ? "translate-x-4" : "translate-x-0.5"}`} />
+                    </span>
+                  </button>
+                </section>
               </div>
             </div>
             <div className="border-t border-pc-border px-5 py-4">
