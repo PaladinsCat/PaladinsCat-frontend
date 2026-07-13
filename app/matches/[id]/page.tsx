@@ -295,19 +295,6 @@ export default function MatchDetailPage() {
       <div className="-mt-3 flex justify-end">
         <MatchExportButton
           matchId={match.match.match_id}
-          map={match.match.map}
-          queueLabel={queueLabel}
-          region={match.match.region}
-          duration={duration}
-          team1Score={match.match.team1_score}
-          team2Score={match.match.team2_score}
-          team1Wins={team1Wins}
-          team2Wins={team2Wins}
-          team1={team1}
-          team2={team2}
-          bans={match.bans}
-          facts={fact?.players}
-          profiles={profileMap}
         />
       </div>
 
