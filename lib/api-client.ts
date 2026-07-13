@@ -691,6 +691,15 @@ export interface MapChampionStat {
   banRate: number;
 }
 
+export interface ChampionMapStat {
+  name: string;
+  totalPlays: number;
+  wins: number;
+  losses: number;
+  winRate: number;
+  pickRate: number;
+}
+
 export interface MapTalentStat {
   talentId: number;
   talentName: string;
@@ -1929,6 +1938,29 @@ export async function fetchMapStats(params?: { queueId?: number; limit?: number 
       totalMatches: Number(r.total_matches ?? 0),
       distributionRate: Number(r.distribution_rate ?? 0),
       avgDurationSeconds: Number(r.avg_duration_seconds ?? 0),
+    }));
+  } catch {
+    return [];
+  }
+}
+
+export async function fetchChampionMapStats(championId: number): Promise<ChampionMapStat[]> {
+  try {
+    const raw = await fetchJson<Array<{
+      map: string;
+      total_plays: number | string;
+      wins: number | string;
+      losses: number | string;
+      win_rate: number | string;
+      pick_rate: number | string;
+    }>>(`/stats/champions/${championId}/maps`);
+    return raw.map((row) => ({
+      name: row.map,
+      totalPlays: Number(row.total_plays ?? 0),
+      wins: Number(row.wins ?? 0),
+      losses: Number(row.losses ?? 0),
+      winRate: Number(row.win_rate ?? 0),
+      pickRate: Number(row.pick_rate ?? 0),
     }));
   } catch {
     return [];

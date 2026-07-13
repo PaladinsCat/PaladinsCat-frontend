@@ -10,6 +10,7 @@ import { LoadingPanel } from "@/components/async-state";
 import SmartImage from "@/components/SmartImage";
 import { championSlug } from "@/lib/utils";
 import { getStatQuality } from "@/lib/stat-quality";
+import { mapImagePath } from "@/lib/map-images";
 import {
   getChampionData,
   getTalentIconPath,
@@ -22,6 +23,7 @@ import {
   fetchChampionTalentStats,
   fetchPerformanceMetrics,
   fetchChampionPerformanceDistributions,
+  fetchChampionMapStats,
   type ChampionTalentStatsResponse,
   type ChampionTalentStat,
   type ItemStat,
@@ -29,6 +31,7 @@ import {
   type PerformanceMetricKey,
   type PerformanceMetricSummary,
   type ChampionPerformanceDistribution,
+  type ChampionMapStat,
 } from "@/lib/api-client";
 import { getRankIconPath, getTierColor, resolveEffectiveTier } from "@/lib/tier-utils";
 import { withStoredLobbyTier } from "@/lib/lobby-tier";
@@ -129,6 +132,7 @@ export default function ChampionDetailPage() {
   const [stats, setStats] = useState<ChampionStats | null>(null);
   const [talentStats, setTalentStats] = useState<ChampionTalentStatsResponse | null>(null);
   const [championItems, setChampionItems] = useState<ItemStat[]>([]);
+  const [championMaps, setChampionMaps] = useState<ChampionMapStat[]>([]);
   const [globalPerformance, setGlobalPerformance] = useState<PerformanceMetricsResponse>({});
   const [championPerformance, setChampionPerformance] = useState<Partial<Record<PerformanceMetricKey, ChampionPerformanceDistribution>>>({});
   const [tierStats, setTierStats] = useState<TierStat[]>([]);
@@ -170,6 +174,7 @@ export default function ChampionDetailPage() {
     }
     setLoading(true);
     setChampionItems([]);
+    setChampionMaps([]);
 
     // Resolve the champion ID, then fetch its ranked stats in parallel.
     fetch(`${API_BASE}/champions`)
@@ -204,6 +209,9 @@ export default function ChampionDetailPage() {
           fetchChampionTalentStats(match.id).catch(() => null as ChampionTalentStatsResponse | null),
           // Champion-filtered ranked item stats are aggregated from the match facts.
           fetchItems({ mode: "ranked", championId: match.id, limit: 200 }).catch(() => [] as ItemStat[]),
+          // One database-backed distribution query returns every map for this
+          // champion. Pick rate is the map's share of the champion's plays.
+          fetchChampionMapStats(match.id).catch(() => [] as ChampionMapStat[]),
           // Global ranked distributions plus champion-specific distributions
           // use the same metric contract as /stats/metrics. This
           // keeps the champion page from comparing raw damage/credit totals across
@@ -220,10 +228,11 @@ export default function ChampionDetailPage() {
       })
       .then((result) => {
         if (!result) return;
-        const [statsData, talentData, itemData, globalMetrics, championMetricPairs] = result;
+        const [statsData, talentData, itemData, mapData, globalMetrics, championMetricPairs] = result;
         if (statsData) setStats(statsData);
         if (talentData) setTalentStats(talentData);
         setChampionItems(itemData);
+        setChampionMaps(mapData);
         setGlobalPerformance(globalMetrics ?? {});
         setChampionPerformance(
           Object.fromEntries(championMetricPairs.filter(([, row]) => row != null)) as Partial<Record<PerformanceMetricKey, ChampionPerformanceDistribution>>
@@ -244,6 +253,7 @@ export default function ChampionDetailPage() {
   }, [talentStats]);
   const maxTierPickRate = useMemo(() => Math.max(1, ...tierStats.map((tier) => tier.pickRate)), [tierStats]);
   const maxTrendPlays = useMemo(() => Math.max(1, ...patchTrends.map((trend) => trend.weeklyPlays)), [patchTrends]);
+  const maxMapPickRate = useMemo(() => Math.max(1, ...championMaps.map((map) => map.pickRate)), [championMaps]);
   if (dataLoaded && !championData && !staticChampion) return notFound();
 
   const formatNum = (n: number | null) => (n != null ? n.toLocaleString() : "—");
@@ -481,6 +491,57 @@ export default function ChampionDetailPage() {
           </div>
         </div>
       )}
+
+      {/* Champion-relative ranked map distribution. */}
+      <section className="space-y-3">
+        <div>
+          <h2 className="pc-card-title">Map Stats</h2>
+          <p className="mt-1 text-xs text-pc-text-secondary">
+            Ranked performance by map. Pick rate is each map&apos;s share of all ranked plays for this champion.
+          </p>
+        </div>
+        {loading ? (
+          <LoadingPanel />
+        ) : championMaps.length === 0 ? (
+          <div className="pc-card text-sm text-pc-text-muted">No ranked map statistics are available yet.</div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {championMaps.map((map) => {
+              const quality = getStatQuality(map.winRate, map.pickRate, maxMapPickRate);
+              return (
+                <Link
+                  key={map.name}
+                  href={`/stats/maps/${encodeURIComponent(map.name)}`}
+                  className="group overflow-hidden rounded-xl border bg-pc-bg-elevated transition-colors hover:border-pc-accent-mid"
+                  style={{ borderColor: quality.borderColor }}
+                >
+                  <div className="relative h-36 overflow-hidden bg-pc-bg">
+                    <SmartImage src={mapImagePath(map.name)} alt="" className="h-full w-full object-cover opacity-75 transition-transform duration-300 group-hover:scale-105" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-pc-bg-elevated via-pc-bg-elevated/10 to-transparent" />
+                    <h3 className="absolute bottom-3 left-4 right-4 truncate text-base font-bold text-pc-text group-hover:text-pc-accent">
+                      {map.name.replace(/^Ranked\s+/, "")}
+                    </h3>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 p-3 text-center text-xs">
+                    <div>
+                      <div className="text-[10px] uppercase text-pc-text-muted">Win Rate</div>
+                      <div className="font-bold" style={{ color: quality.color }}>{map.winRate.toFixed(1)}%</div>
+                    </div>
+                    <div>
+                      <div className="text-[10px] uppercase text-pc-text-muted">Pick Rate</div>
+                      <div className="font-medium text-pc-accent">{map.pickRate.toFixed(1)}%</div>
+                    </div>
+                    <div>
+                      <div className="text-[10px] uppercase text-pc-text-muted">Plays</div>
+                      <div className="font-medium text-pc-text">{map.totalPlays.toLocaleString()}</div>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </section>
     </div>
   );
 }
