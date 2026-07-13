@@ -402,6 +402,28 @@ export async function fetchPerformanceMetrics(params?: {
   }
 }
 
+/**
+ * Fetch the global and each class's summary in one cacheable API response.
+ * The metrics page used to make five nearly identical requests per tab.
+ */
+export async function fetchPerformanceMetricDashboard(metric: PerformanceMetricKey): Promise<{
+  summary: PerformanceMetricSummary;
+  roles: Record<string, PerformanceMetricSummary>;
+}> {
+  try {
+    const query = new URLSearchParams({ metric, includeRoles: '1' });
+    const raw = await fetchJson<Record<string, any>>(`/stats/performance-metrics?${query.toString()}`);
+    return {
+      summary: mapMetricSummary(raw[metric]),
+      roles: Object.fromEntries(
+        Object.entries(raw.roles ?? {}).map(([role, summary]) => [role, mapMetricSummary(summary)])
+      ),
+    };
+  } catch {
+    return { summary: mapMetricSummary(null), roles: {} };
+  }
+}
+
 export interface ChampionPerformanceDistribution {
   championId: number;
   championName: string;

@@ -7,7 +7,7 @@ import { championSlug } from "@/lib/utils";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import {
   fetchChampionPerformanceDistributions,
-  fetchPerformanceMetrics,
+  fetchPerformanceMetricDashboard,
   type ChampionPerformanceDistribution,
   type PerformanceMetricKey,
   type PerformanceMetricSummary,
@@ -178,19 +178,16 @@ function MetricPanel({ config }: { config: MetricConfig }) {
     let cancelled = false;
 
     async function load() {
-      const [summaries, championRows, ...classSummaryRows] = await Promise.all([
-        fetchPerformanceMetrics({ metric }),
+      const [dashboard, championRows] = await Promise.all([
+        fetchPerformanceMetricDashboard(metric),
         fetchChampionPerformanceDistributions({ metric }),
-        ...CLASS_ORDER.map((role) => fetchPerformanceMetrics({ metric, role }).catch(() => ({}))),
       ]);
 
       if (cancelled) return;
 
-      const classSummaries = Object.fromEntries(
-        CLASS_ORDER.map((role, index) => [role, (classSummaryRows[index] as Record<string, PerformanceMetricSummary>)[metric]])
-      ) as Partial<Record<(typeof CLASS_ORDER)[number], PerformanceMetricSummary>>;
+      const classSummaries = dashboard.roles as Partial<Record<(typeof CLASS_ORDER)[number], PerformanceMetricSummary>>;
 
-      setMetricSummary(normalizeSummary(summaries[metric]));
+      setMetricSummary(normalizeSummary(dashboard.summary));
       setClassData(buildClassData(championRows, classSummaries));
     }
 
