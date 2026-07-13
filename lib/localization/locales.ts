@@ -1,5 +1,13 @@
+// This is the public, selectable locale list. Do not advertise a translation
+// until its locale files exist in the community locale repository.
 export const SUPPORTED_LOCALES = [
   { code: "en", label: "English" },
+] as const;
+
+// Contributor targets are intentionally separate from public locales: they let
+// an approved translator start a locale without making an incomplete language
+// visible in the site header.
+export const CONTRIBUTOR_LOCALES = [
   { code: "de", label: "Deutsch" },
   { code: "es", label: "Español" },
   { code: "fr", label: "Français" },
@@ -11,6 +19,7 @@ export const SUPPORTED_LOCALES = [
 ] as const;
 
 export type Locale = (typeof SUPPORTED_LOCALES)[number]["code"];
+export type ContributorLocale = (typeof CONTRIBUTOR_LOCALES)[number]["code"];
 export const LOCALE_MODULES = localeModules;
 
 export const COMMUNITY_LOCALE_BASE_URL = (

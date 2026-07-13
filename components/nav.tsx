@@ -120,13 +120,14 @@ export default function Nav() {
     setWallpaperEnabled(next);
   }
 
-  function handleLocaleChange(event: React.ChangeEvent<HTMLSelectElement>) {
-    setLocale(event.target.value as Locale);
-  }
-
   function selectHeaderLocale(nextLocale: Locale) {
     setLocale(nextLocale);
     setHeaderLanguageMenuOpen(false);
+  }
+
+  function selectSideMenuLocale(nextLocale: Locale) {
+    setLocale(nextLocale);
+    setSideMenuOpen(false);
   }
 
   const localeCode = locale.split("-")[0].toUpperCase();
@@ -265,12 +266,21 @@ export default function Nav() {
                 {menuSections.map((section) => <section key={section.title}><h2 className="mb-2 px-2 text-[10px] font-bold uppercase tracking-widest text-pc-text-muted">{section.title}</h2><div className="space-y-0.5">{section.links.map((link) => <Link key={link.href} href={link.href} onClick={() => setSideMenuOpen(false)} className={`block rounded-lg px-2.5 py-2 text-sm transition-colors ${isMenuActive(link.href) ? "bg-pc-bg-elevated text-pc-accent" : "text-pc-text-secondary hover:bg-pc-bg-elevated hover:text-pc-text"}`}>{link.label}</Link>)}</div></section>)}
                 <section>
                   <h2 className="mb-2 px-2 text-[10px] font-bold uppercase tracking-widest text-pc-text-muted">{t("nav.language")}</h2>
-                  <label className="block rounded-lg px-2.5 py-2 text-sm text-pc-text-secondary transition-colors hover:bg-pc-bg-elevated hover:text-pc-text">
-                    <span className="sr-only">{t("nav.language")}</span>
-                    <select value={locale} onChange={handleLocaleChange} className="w-full rounded-md border border-pc-border bg-pc-bg px-2.5 py-2 text-sm text-pc-text outline-none focus-visible:ring-2 focus-visible:ring-pc-accent">
-                      {SUPPORTED_LOCALES.map(({ code, label }) => <option key={code} value={code}>{label}</option>)}
-                    </select>
-                  </label>
+                  <div className="overflow-hidden rounded-lg border border-pc-border bg-pc-bg p-1" role="listbox" aria-label={t("nav.language")}>
+                    {SUPPORTED_LOCALES.map(({ code, label }) => (
+                      <button
+                        key={code}
+                        type="button"
+                        onClick={() => selectSideMenuLocale(code)}
+                        className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm transition-colors ${locale === code ? "bg-pc-bg-elevated text-pc-accent" : "text-pc-text-secondary hover:bg-pc-bg-elevated hover:text-pc-text"}`}
+                        role="option"
+                        aria-selected={locale === code}
+                      >
+                        <span className="inline-flex items-center gap-2"><svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="12" cy="12" r="10" /><path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20M12 2a15.3 15.3 0 0 0 0 20" /></svg>{label}</span>
+                        <span className="text-xs text-pc-text-muted">{code.split("-")[0].toUpperCase()}</span>
+                      </button>
+                    ))}
+                  </div>
                 </section>
                 <section>
                   <h2 className="mb-2 px-2 text-[10px] font-bold uppercase tracking-widest text-pc-text-muted">{t("menu.appearance")}</h2>
