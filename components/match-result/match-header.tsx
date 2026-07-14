@@ -12,8 +12,8 @@ interface MatchHeaderProps {
   region: string;
   team1Wins: boolean;
   team2Wins: boolean;
-  team1Score: number;
-  team2Score: number;
+  team1Score: number | null;
+  team2Score: number | null;
   broken: boolean;
   recovered: boolean;
   private: boolean;
@@ -50,12 +50,12 @@ export default function MatchHeader({
         <div className="flex items-center gap-4 shrink-0">
           <div className={`text-center px-3 py-1.5 rounded-lg ${team1Wins ? "bg-green-500/10 border border-green-500/30" : "bg-pc-bg-secondary"}`}>
             <div className="text-[10px] text-pc-text-muted">Team 1</div>
-            <div className={`text-xl font-bold ${team1Wins ? "text-green-400" : "text-pc-text"}`}>{team1Score}</div>
+            <div className={`text-xl font-bold ${team1Wins ? "text-green-400" : "text-pc-text"}`}>{team1Score ?? "?"}</div>
           </div>
           <div className="text-pc-text-muted text-sm">vs</div>
           <div className={`text-center px-3 py-1.5 rounded-lg ${team2Wins ? "bg-green-500/10 border border-green-500/30" : "bg-pc-bg-secondary"}`}>
             <div className="text-[10px] text-pc-text-muted">Team 2</div>
-            <div className={`text-xl font-bold ${team2Wins ? "text-green-400" : "text-pc-text"}`}>{team2Score}</div>
+            <div className={`text-xl font-bold ${team2Wins ? "text-green-400" : "text-pc-text"}`}>{team2Score ?? "?"}</div>
           </div>
         </div>
         <div className="text-right text-sm text-pc-text-secondary shrink-0">

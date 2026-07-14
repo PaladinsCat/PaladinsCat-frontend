@@ -78,9 +78,9 @@ export interface ResolvedBan {
 /** Score block data. */
 export interface ScoreBlockData {
   team1Label: string;
-  team1Score: number;
+  team1Score: number | null;
   team2Label: string;
-  team2Score: number;
+  team2Score: number | null;
   team1Wins: boolean;
   team2Wins: boolean;
 }

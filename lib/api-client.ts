@@ -1540,7 +1540,7 @@ export async function fetchPlayerMatches(id: string, params?: { limit?: string; 
   return raw.map((m) => ({
     matchId: m.match_id,
     championName: m.champion_name,
-    isWinner: m.win_status === 'Winner',
+    isWinner: ['winner', 'win'].includes(String(m.win_status ?? '').toLowerCase()),
     kills: Number(m.kills ?? 0),
     deaths: Number(m.deaths ?? 0),
     assists: Number(m.assists ?? 0),
@@ -3409,8 +3409,8 @@ export interface MatchData {
   queue_id: number;
   duration_seconds: number;
   region: string;
-  team1_score: number;
-  team2_score: number;
+  team1_score: number | null;
+  team2_score: number | null;
   winning_task_force: number;
   is_ranked: boolean;
   recovered: boolean;
