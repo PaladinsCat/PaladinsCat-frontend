@@ -105,7 +105,7 @@ export default function MatchesPage() {
       }
     } catch {
       setMatches([]); setTotal(0); setTotalPages(1);
-      setError("Match data unavailable. Start the PaladinsCat API on port 3005.");
+      setError("We couldn't load match data right now. Please try again.");
     } finally {
       setLoading(false);
     }

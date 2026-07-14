@@ -14,7 +14,7 @@ const getCachedPlayersOverview = unstable_cache(
     ).replace(/\/+$/, "");
 
     if (apiBase.startsWith("/")) {
-      throw new Error("NEXT_SERVER_API_URL must be absolute for server rendering");
+      throw new Error("Players overview configuration is unavailable.");
     }
 
     const response = await fetch(`${apiBase}/players/overview`, {
@@ -23,7 +23,7 @@ const getCachedPlayersOverview = unstable_cache(
       signal: AbortSignal.timeout(10_000),
     });
     if (!response.ok) {
-      throw new Error(`Players overview API returned ${response.status}`);
+      throw new Error("Players overview is unavailable.");
     }
 
     return mapPlayersOverviewResponse(await response.json());

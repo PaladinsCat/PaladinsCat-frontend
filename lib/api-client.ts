@@ -946,7 +946,7 @@ async function fetchJson<T>(path: string, options?: RequestInit & { retries?: nu
       }
       const errBody = await res.json().catch(() => null);
       const message = typeof errBody?.error === "string" ? errBody.error : errBody?.error?.message;
-      throw new Error(message || `API ${res.status} on ${path}`);
+      throw new Error(message || "We couldn't load this data right now. Please try again.");
     }
     const json = await res.json();
     // Handle normalized list envelopes when callers only need the rows.

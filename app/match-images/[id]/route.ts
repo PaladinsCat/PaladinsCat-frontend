@@ -22,6 +22,6 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
       },
     });
   } catch (error) {
-    return Response.json({ error: error instanceof Error ? error.message : "The match image renderer is unavailable." }, { status: 503 });
+    return Response.json({ error: "We couldn't prepare this match image right now. Please try again." }, { status: 503 });
   }
 }

@@ -49,14 +49,14 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
     headers: { Authorization: `Bearer ${token}`, ...init.headers },
   });
   const body = await response.json().catch(() => null);
-  if (!response.ok) throw new Error(body?.error?.message || body?.error || `API ${response.status}`);
+  if (!response.ok) throw new Error(body?.error?.message || body?.error || "We couldn't complete this request right now. Please try again.");
   return body as T;
 }
 
 async function publicRequest<T>(path: string): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`);
   const body = await response.json().catch(() => null);
-  if (!response.ok) throw new Error(body?.error?.message || body?.error || `API ${response.status}`);
+  if (!response.ok) throw new Error(body?.error?.message || body?.error || "We couldn't complete this request right now. Please try again.");
   return body as T;
 }
 
