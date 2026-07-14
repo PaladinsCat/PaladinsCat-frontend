@@ -681,43 +681,6 @@ export default function PlayerProfilePage() {
             </div>
           </div>
 
-          {/* KBM Ranked */}
-          <div>
-            <h2 className="pc-card-title shadow-sm">Ranked</h2>
-            <div className="pc-card">
-              <div className="flex items-center gap-4 mb-3">
-                {/* Tier display */}
-                <div className="text-center">
-                  <img src={rankIcon} alt={effectiveTier.displayName} className="w-12 h-12 object-contain mx-auto" />
-                  <div className={`text-xs font-semibold ${tierColor} mt-1`}>{effectiveTier.displayName}</div>
-                  <div className="text-xs text-pc-text-muted mt-0.5">Season {player.kbm_season}</div>
-                </div>
-                <div className="flex-1 border-l border-pc-border/50 pl-4">
-                  <StatGrid>
-                    <StatRow label="Rank" value={`#${effectiveTier.displayRank}`} color="text-pc-accent" />
-                    <StatRow label="Prev Rank" value={`#${player.kbm_prev_rank}`} />
-                    <StatRow label="Trend" value={`${trendArrow(player.kbm_trend)} ${Math.abs(player.kbm_trend)}`} color={trendColor(player.kbm_trend)} />
-                    <StatRow label="Leaves" value={formatNumber(player.kbm_leaves)} />
-                  </StatGrid>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 gap-2 border-t border-pc-border/50 pt-3 text-center min-[360px]:grid-cols-3">
-                <div>
-                  <div className="text-xs text-pc-text-muted">Wins</div>
-                  <div className="text-sm font-mono text-emerald-400">{player.kbm_wins}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-pc-text-muted">Losses</div>
-                  <div className="text-sm font-mono text-rose-400">{player.kbm_losses}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-pc-text-muted">Win Rate</div>
-                  <div className="text-sm font-mono text-pc-text">{kbmWr}%</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
           {/* Performance + Overall Stats */}
           <div>
             <h2 className="pc-card-title shadow-sm">Performance</h2>
@@ -840,6 +803,42 @@ export default function PlayerProfilePage() {
               <div className="min-w-0 flex-1"><div className="text-sm font-semibold text-pc-text group-hover:text-pc-accent">Player Loadouts</div><div className="mt-0.5 text-xs text-pc-text-muted">View saved decks by champion</div></div>
               <span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent">→</span>
             </Link>
+          </div>
+
+          {/* KBM Ranked */}
+          <div>
+            <h2 className="pc-card-title shadow-sm">Ranked</h2>
+            <div className="pc-card p-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="w-14 shrink-0 text-center">
+                  <img src={rankIcon} alt={effectiveTier.displayName} className="mx-auto h-10 w-10 object-contain" />
+                  <div className={`mt-1 truncate text-[11px] font-semibold ${tierColor}`}>{effectiveTier.displayName}</div>
+                  <div className="mt-0.5 text-[10px] text-pc-text-muted">Season {player.kbm_season}</div>
+                </div>
+                <div className="min-w-0 flex-1 border-l border-pc-border/50 pl-3">
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
+                    <StatRow label="Rank" value={`#${effectiveTier.displayRank}`} color="text-pc-accent" />
+                    <StatRow label="Prev" value={`#${player.kbm_prev_rank}`} />
+                    <StatRow label="Trend" value={`${trendArrow(player.kbm_trend)} ${Math.abs(player.kbm_trend)}`} color={trendColor(player.kbm_trend)} />
+                    <StatRow label="Leaves" value={formatNumber(player.kbm_leaves)} />
+                  </div>
+                </div>
+              </div>
+              <div className="mt-3 grid grid-cols-3 gap-1.5 border-t border-pc-border/50 pt-2.5 text-center">
+                <div>
+                  <div className="text-[10px] text-pc-text-muted">Wins</div>
+                  <div className="font-mono text-xs text-emerald-400">{player.kbm_wins}</div>
+                </div>
+                <div>
+                  <div className="text-[10px] text-pc-text-muted">Losses</div>
+                  <div className="font-mono text-xs text-rose-400">{player.kbm_losses}</div>
+                </div>
+                <div>
+                  <div className="text-[10px] text-pc-text-muted">Win Rate</div>
+                  <div className="font-mono text-xs text-pc-text">{kbmWr}%</div>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Glicko Rating */}
