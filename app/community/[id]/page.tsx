@@ -20,6 +20,7 @@ import {
 import { formatLocalDateTime } from "@/lib/time-format";
 import CommunityRichContent from "@/components/CommunityRichContent";
 import { LoadingIndicator, LoadingPanel } from "@/components/async-state";
+import { VerifiedPlayerBadge } from "@/components/player-name";
 
 export default function PostDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
@@ -275,7 +276,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
               )}
             </div>
             <div className="flex items-center gap-4 mt-3 text-pc-text-secondary text-sm">
-              <span>by {post.username}</span>
+              <span className="inline-flex items-center gap-1">by {post.username}{post.linkedPlayerId != null && <VerifiedPlayerBadge />}</span>
               <span>{formatLocalDateTime(post.createdAt)}</span>
               <span>👁 {post.viewCount}</span>
             </div>
@@ -328,7 +329,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                 <div key={comment.id} className="bg-pc-bg-secondary rounded-lg p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-2 text-sm">
-                      <span className="text-pc-text font-medium">{comment.username}</span>
+                      <span className="inline-flex items-center gap-1 text-pc-text font-medium">{comment.username}{comment.linkedPlayerId != null && <VerifiedPlayerBadge />}</span>
                       <span className="text-pc-text-muted">{formatLocalDateTime(comment.createdAt)}</span>
                     </div>
                     {canEditComment && !isEditing && (

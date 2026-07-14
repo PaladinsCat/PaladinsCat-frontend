@@ -8,6 +8,7 @@ import { formatLocalDateTime } from "@/lib/time-format";
 import { EmptyState, ErrorState } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { LoadingPanel } from "@/components/async-state";
+import { VerifiedPlayerBadge } from "@/components/player-name";
 
 export default function CommunityPage() {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -72,7 +73,7 @@ export default function CommunityPage() {
                         {post.content}
                       </p>
                       <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-pc-text-muted sm:text-sm">
-                        <span className="min-w-0 truncate">by {post.username}</span>
+                        <span className="inline-flex min-w-0 items-center gap-1 truncate">by {post.username}{post.linkedPlayerId != null && <VerifiedPlayerBadge />}</span>
                         <span>{formatLocalDateTime(post.createdAt)}</span>
                         <span aria-label={`${post.likes} likes`}>❤ {post.likes}</span>
                         <span aria-label={`${post.viewCount} views`}>👁 {post.viewCount}</span>

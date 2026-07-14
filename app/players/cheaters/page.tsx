@@ -2,21 +2,12 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { fetchCheaterPlayers } from "@/lib/api-client";
-import PlayerModerationCards from "@/components/player-moderation-cards";
+import { fetchCheaterPlayers, type CheaterPlayer } from "@/lib/api-client";
 import { LoadingPanel } from "@/components/async-state";
-
-const CLASS_ICONS: Record<string, string> = {
-  Frontline: "/images/icons/Class_Front_Line_Icon.avif",
-  Damage: "/images/icons/Class_Damage_Icon.avif",
-  Flank: "/images/icons/Class_Flank_Icon.avif",
-  Support: "/images/icons/Class_Support_Icon.avif",
-};
-
-const fmt = (n: number | null | undefined) => n != null ? n.toLocaleString() : "—";
+import PlayerName from "@/components/player-name";
 
 export default function CheatersPage() {
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<CheaterPlayer[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -35,12 +26,12 @@ export default function CheatersPage() {
   }, []);
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto w-full max-w-4xl space-y-6">
       <div>
         <Link href="/players" className="text-pc-accent text-xs hover:underline mb-2 inline-block">← Players</Link>
         <h1 className="pc-heading pc-heading-lg text-pc-accent">Confirmed Cheaters</h1>
         <p className="text-pc-text-secondary text-sm mt-1">
-          Verified cheating accounts with full performance metrics
+          Confirmed cheating accounts and their primary report reason
         </p>
       </div>
 
@@ -54,61 +45,37 @@ export default function CheatersPage() {
       ) : data.length === 0 ? (
         <div className="text-center py-12 text-pc-text-secondary text-sm">No confirmed cheaters found.</div>
       ) : (
-        <>
-          <PlayerModerationCards players={data} />
-        <div className="hidden overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated lg:block">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-pc-border text-pc-text-muted text-left text-xs">
-                  <th className="px-3 py-3 w-8">#</th>
-                  <th className="px-3 py-3">Player</th>
-                  <th className="px-3 py-3 text-right">DPM</th>
-                  <th className="px-3 py-3 text-right">HPM</th>
-                  <th className="px-3 py-3 text-right">CPM</th>
-                  <th className="px-3 py-3 text-right">SPM</th>
-                  <th className="px-3 py-3 text-right">KDA</th>
-                  <th className="px-3 py-3 text-right">WR</th>
-                  <th className="px-3 py-3 text-right">Matches</th>
-                  <th className="px-3 py-3">Reason</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.map((p: any, i: number) => (
-                  <tr key={p.id} className="border-b border-pc-border/50 hover:bg-pc-bg/50 transition-colors">
-                    <td className="px-3 py-2 text-pc-text-muted text-xs">{i + 1}</td>
-                    <td className="px-3 py-2">
-                      <div className="flex items-center gap-2 min-w-0">
-                        {CLASS_ICONS[p.className] && (
-                          <img src={CLASS_ICONS[p.className]} alt={p.className} className="w-4 h-4 shrink-0" />
-                        )}
-                        <div className="min-w-0">
-                          <Link href={`/players/${p.id}`} className="text-pc-text font-medium text-xs hover:text-pc-accent transition-colors block truncate">
-                            {p.name}
-                          </Link>
-                          <span className="text-pc-text-muted text-xs">{p.region}</span>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-3 py-2 text-right text-xs text-pc-text-secondary">{fmt(p.avgDpm ?? p.dpm)}</td>
-                    <td className="px-3 py-2 text-right text-xs text-pc-text-secondary">{fmt(p.avgHpm ?? p.hpm)}</td>
-                    <td className="px-3 py-2 text-right text-xs text-pc-text-secondary">{fmt(p.avgCpm ?? p.gpm)}</td>
-                    <td className="px-3 py-2 text-right text-xs text-pc-text-secondary">{fmt(p.avgSpm ?? p.mpm)}</td>
-                    <td className="px-3 py-2 text-right text-xs text-pc-text-secondary">{p.kda ?? "—"}</td>
-                    <td className="px-3 py-2 text-right text-xs">
-                      <span className={p.winRate >= 50 ? "text-emerald-400" : "text-red-400"}>
-                        {p.winRate != null ? `${p.winRate}%` : "—"}
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 text-right text-xs text-pc-text-secondary">{fmt(p.totalMatches)}</td>
-                    <td className="px-3 py-2 text-xs text-pc-text-muted max-w-[200px] truncate">{p.reason || "—"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        <div className="space-y-2">
+          {data.map((player) => {
+            const topReason = player.topReasons[0];
+            return (
+              <article
+                key={player.id}
+                className="grid gap-3 rounded-xl border border-red-500/20 bg-pc-bg-elevated p-3 sm:grid-cols-[minmax(0,14rem)_minmax(0,1fr)] sm:items-start"
+              >
+                <Link
+                  href={`/players/${player.id}`}
+                  className="min-w-0 truncate text-sm font-semibold text-pc-text transition-colors hover:text-pc-accent"
+                >
+                  <PlayerName playerId={player.id} cheater={player.cheater} susCount={player.susCount}>
+                    {player.name}
+                  </PlayerName>
+                </Link>
+
+                <div className="min-w-0">
+                  <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-pc-text-muted">Top reason</div>
+                  {topReason ? (
+                    <span className="inline-block max-w-full break-words rounded-md border border-pc-border bg-pc-bg px-2 py-1 text-xs leading-relaxed text-pc-text-secondary [overflow-wrap:anywhere]">
+                      {topReason.reason}
+                    </span>
+                  ) : (
+                    <span className="text-xs text-pc-text-muted">No reason recorded</span>
+                  )}
+                </div>
+              </article>
+            );
+          })}
         </div>
-        </>
       )}
     </div>
   );

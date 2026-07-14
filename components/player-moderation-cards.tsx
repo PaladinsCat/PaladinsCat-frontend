@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PlayerName from "@/components/player-name";
 
 const CLASS_ICONS: Record<string, string> = {
   Frontline: "/images/icons/Class_Front_Line_Icon.avif",
@@ -21,7 +22,7 @@ export default function PlayerModerationCards({ players, showSeverity = false }:
       <div className="flex min-w-0 items-center gap-3 p-3">
         <span className="w-6 shrink-0 text-center text-xs text-pc-text-muted">{index + 1}</span>
         {CLASS_ICONS[player.className] && <img src={CLASS_ICONS[player.className]} alt="" className="h-7 w-7 shrink-0 object-contain" />}
-        <div className="min-w-0 flex-1"><Link href={`/players/${player.id}`} className="block truncate text-sm font-semibold text-pc-text hover:text-pc-accent">{player.name}</Link><div className="text-[10px] text-pc-text-muted">{player.region || "Unknown region"} · {value(player.totalMatches)} matches</div></div>
+        <div className="min-w-0 flex-1"><Link href={`/players/${player.id}`} className="block truncate text-sm font-semibold text-pc-text hover:text-pc-accent"><PlayerName playerId={player.id} cheater={player.cheater} susCount={player.susCount ?? player.sus_count}>{player.name}</PlayerName></Link><div className="text-[10px] text-pc-text-muted">{player.region || "Unknown region"} · {value(player.totalMatches)} matches</div></div>
         {showSeverity && <span className={`shrink-0 rounded-full border px-2 py-1 text-[10px] font-semibold capitalize ${SEVERITY_STYLES[player.severity] || "border-pc-border text-pc-text-muted"}`}>{player.severity || "Review"}</span>}
       </div>
       <dl className="grid grid-cols-3 gap-px border-y border-pc-border/60 bg-pc-border/60 min-[420px]:grid-cols-6">

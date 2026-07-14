@@ -6,6 +6,7 @@ import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
 import { computeDamageStats, num, fixed } from "./format";
 import PartyBadge from "./party-badge";
+import PlayerName from "@/components/player-name";
 
 interface MatchStatsSectionProps {
   team1Players: MatchPlayerDetail[];
@@ -73,7 +74,7 @@ function PlayerRow({
               href={`/players/${player.player_id}`}
               className="block truncate text-sm font-medium text-pc-text hover:text-pc-accent"
             >
-              {player.player_name || "PRIVATE"}
+              <PlayerName playerId={player.player_id}>{player.player_name || "PRIVATE"}</PlayerName>
             </Link>
             {championHref ? (
               <Link
@@ -171,7 +172,7 @@ function MobilePlayerCard({ player, wins }: { player: MatchPlayerDetail; wins: b
     <div className="flex min-w-0 items-center gap-3">
       <img src={getChampionIconSafe(player.champion_name)} alt="" className="h-11 w-11 shrink-0 rounded-xl border border-pc-border object-cover" />
       <div className="min-w-0 flex-1">
-        <Link href={`/players/${player.player_id}`} className="block truncate text-sm font-semibold text-pc-text hover:text-pc-accent">{player.player_name || "PRIVATE"}</Link>
+        <Link href={`/players/${player.player_id}`} className="block truncate text-sm font-semibold text-pc-text hover:text-pc-accent"><PlayerName playerId={player.player_id}>{player.player_name || "PRIVATE"}</PlayerName></Link>
         {player.champion_name ? <Link href={`/champions/${championSlug(player.champion_name)}`} className="block truncate text-xs text-pc-text-secondary hover:text-pc-accent">{champion}</Link> : <span className="text-xs text-pc-text-secondary">{champion}</span>}
       </div>
       <PartyBadge player={player} />

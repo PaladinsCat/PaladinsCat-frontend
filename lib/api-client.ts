@@ -165,6 +165,7 @@ export interface CheaterPlayer {
   avgSpm: number | null;
   totalMatches: number;
   winRate: number | null;
+  topReasons: Array<{ reason: string; count: number }>;
 }
 
 export async function fetchCheaterPlayers(params?: { cheater?: boolean; susOnly?: boolean; weirdoOnly?: boolean; hallOfFameOnly?: boolean; limit?: number }): Promise<CheaterPlayer[]> {
@@ -182,6 +183,7 @@ export async function fetchCheaterPlayers(params?: { cheater?: boolean; susOnly?
       weirdo_count?: number; hall_of_fame_count?: number;
       avg_dpm?: number | null; avg_hpm?: number | null; avg_egpm?: number | null;
       avg_mpm?: number | null; total_matches?: number; win_rate?: number | null;
+      top_reasons?: Array<{ reason?: string; count?: number }>;
     }>>(`/players/search?${query.toString()}`);
     return raw.map(r => ({
       id: r.id, name: r.name, platform: r.platform, region: r.region,
@@ -192,6 +194,7 @@ export async function fetchCheaterPlayers(params?: { cheater?: boolean; susOnly?
       avgDpm: r.avg_dpm ?? null, avgHpm: r.avg_hpm ?? null,
       avgCpm: r.avg_egpm ?? null, avgSpm: r.avg_mpm ?? null,
       totalMatches: Number(r.total_matches) || 0, winRate: r.win_rate != null ? Number(r.win_rate) : null,
+      topReasons: (r.top_reasons ?? []).map((reason) => ({ reason: reason.reason ?? "", count: Number(reason.count ?? 0) })).filter((reason) => reason.reason.length > 0),
     }));
   } catch {
     return [];
@@ -646,6 +649,7 @@ export function mapPlayersOverviewResponse(raw: any): PlayersOverview {
     avgDpm: row.avg_dpm == null ? null : Number(row.avg_dpm), avgHpm: row.avg_hpm == null ? null : Number(row.avg_hpm),
     avgCpm: row.avg_egpm == null ? null : Number(row.avg_egpm), avgSpm: row.avg_mpm == null ? null : Number(row.avg_mpm),
     totalMatches: Number(row.total_matches ?? 0), winRate: row.win_rate == null ? null : Number(row.win_rate),
+    topReasons: Array.isArray(row.top_reasons) ? row.top_reasons.map((reason: any) => ({ reason: String(reason?.reason ?? ""), count: Number(reason?.count ?? 0) })).filter((reason: { reason: string }) => reason.reason.length > 0) : [],
   });
   const communityCounts = {
     cheaters: Number(raw.community_counts?.cheaters ?? raw.cheaters?.[0]?.total_count ?? raw.cheaters?.length ?? 0),
@@ -2508,6 +2512,8 @@ export interface AuthUser {
   createdAt: string;
   lastLogin: string | null;
   timeZone: string | null;
+  linkedPlayerId: number | null;
+  linkedPlayerName: string | null;
 }
 
 export interface AuthSession {
@@ -2585,6 +2591,8 @@ export async function register(username: string, email: string, password: string
       createdAt: raw.user.created_at ?? new Date().toISOString(),
       lastLogin: raw.user.last_login ?? null,
       timeZone: raw.user.time_zone ?? null,
+      linkedPlayerId: null,
+      linkedPlayerName: null,
     },
     token: raw.token,
     expiresAt: raw.expires_at ?? new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(),
@@ -2596,7 +2604,7 @@ export async function register(username: string, email: string, password: string
 
 export async function login(username: string, password: string): Promise<AuthSession> {
   const raw = await fetchJson<{
-    user: { id: number; username: string; email?: string | null; avatar_url?: string | null; bio?: string | null; is_admin?: boolean; is_approved?: boolean; created_at?: string; last_login?: string | null; time_zone?: string | null };
+    user: { id: number; username: string; email?: string | null; avatar_url?: string | null; bio?: string | null; is_admin?: boolean; is_approved?: boolean; created_at?: string; last_login?: string | null; time_zone?: string | null; linked_player_id?: number | null; linked_player_name?: string | null };
     token: string;
     expires_at?: string;
   }>(`/auth/login`, {
@@ -2617,6 +2625,8 @@ export async function login(username: string, password: string): Promise<AuthSes
       createdAt: raw.user.created_at ?? new Date().toISOString(),
       lastLogin: raw.user.last_login ?? null,
       timeZone: raw.user.time_zone ?? null,
+      linkedPlayerId: raw.user.linked_player_id ?? null,
+      linkedPlayerName: raw.user.linked_player_name ?? null,
     },
     token: raw.token,
     expiresAt: raw.expires_at ?? new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(),
@@ -2664,6 +2674,8 @@ export async function getMe(_userId?: number): Promise<AuthUser> {
     created_at?: string;
     last_login?: string | null;
     time_zone?: string | null;
+    linked_player_id?: number | null;
+    linked_player_name?: string | null;
   }>(`/auth/me`, {
     headers: { "Authorization": `Bearer ${token}` },
   });
@@ -2679,6 +2691,8 @@ export async function getMe(_userId?: number): Promise<AuthUser> {
     createdAt: raw.created_at ?? "",
     lastLogin: raw.last_login ?? null,
     timeZone: raw.time_zone ?? null,
+    linkedPlayerId: raw.linked_player_id ?? null,
+    linkedPlayerName: raw.linked_player_name ?? null,
   };
 }
 
@@ -2706,6 +2720,8 @@ export async function getUserProfile(userId: number): Promise<AuthUser> {
     createdAt: raw.created_at,
     lastLogin: raw.last_login,
     timeZone: null,
+    linkedPlayerId: null,
+    linkedPlayerName: null,
   };
 }
 
@@ -2790,6 +2806,8 @@ export async function getAccountDetails(): Promise<AccountDetails> {
       createdAt: raw.user.created_at,
       lastLogin: raw.user.last_login,
       timeZone: raw.user.time_zone ?? null,
+      linkedPlayerId: raw.user.linked_player_id ?? null,
+      linkedPlayerName: raw.linkedPlayer?.name ?? null,
       linked_player_id: raw.user.linked_player_id,
     },
     linkedPlayer: raw.linkedPlayer,
@@ -2918,6 +2936,7 @@ export interface Post {
   id: number;
   userId: number;
   username: string;
+  linkedPlayerId: number | null;
   title: string;
   content: string;
   buildId: number | null;
@@ -2931,6 +2950,7 @@ export interface Comment {
   postId: number;
   userId: number;
   username: string;
+  linkedPlayerId: number | null;
   parentId: number | null;
   content: string;
   createdAt: string;
@@ -2961,6 +2981,7 @@ type RawPost = {
   id: number;
   user_id: number;
   username: string;
+  linked_player_id?: number | null;
   title: string;
   content: string;
   build_id: number | null;
@@ -2974,6 +2995,7 @@ type RawComment = {
   post_id: number;
   user_id: number;
   username: string;
+  linked_player_id?: number | null;
   parent_id: number | null;
   content: string;
   created_at: string;
@@ -2984,6 +3006,7 @@ function mapPost(raw: RawPost): Post {
     id: raw.id,
     userId: raw.user_id,
     username: raw.username,
+    linkedPlayerId: raw.linked_player_id ?? null,
     title: raw.title,
     content: raw.content,
     buildId: raw.build_id,
@@ -2999,6 +3022,7 @@ function mapComment(raw: RawComment): Comment {
     postId: raw.post_id,
     userId: raw.user_id,
     username: raw.username,
+    linkedPlayerId: raw.linked_player_id ?? null,
     parentId: raw.parent_id,
     content: raw.content,
     createdAt: raw.created_at,

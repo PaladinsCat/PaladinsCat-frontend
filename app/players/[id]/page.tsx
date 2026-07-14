@@ -14,6 +14,7 @@ import { ErrorState, LoadingIndicator, LoadingOverlay, LoadingPanel } from "@/co
 import { RouteSkeleton } from "@/components/route-skeleton";
 import SmartImage from "@/components/SmartImage";
 import { formatKda } from "@/lib/kda";
+import PlayerName from "@/components/player-name";
 
 interface PlayerData {
   id: string;
@@ -603,7 +604,7 @@ export default function PlayerProfilePage() {
                 <span className="text-xs font-bold text-red-400 bg-red-500/10 px-1.5 py-0.5 rounded">CHEATER</span>
               )}
               {player.sus_count > 0 && !player.cheater && (
-                <span className="text-xs font-bold text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded">SUSPICIOUS ({player.sus_count})</span>
+                <span className="text-xs font-bold text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded">SUS</span>
               )}
               {player.weirdo_count > 0 && (
                 <span className="text-xs font-bold text-violet-300 bg-violet-500/10 px-1.5 py-0.5 rounded">WEIRDO ({player.weirdo_count})</span>
@@ -1002,7 +1003,7 @@ export default function PlayerProfilePage() {
                                     <div className="min-w-0">
                                       {Number(p.player_id) > 0 ? (
                                         <Link href={`/players/${p.player_id}`} className="block truncate text-xs font-medium text-pc-text hover:text-pc-accent">
-                                          {p.player_name || `#${p.player_id}`}
+                                          <PlayerName playerId={p.player_id}>{p.player_name || `#${p.player_id}`}</PlayerName>
                                         </Link>
                                       ) : (
                                         <span className="block truncate text-xs font-medium text-pc-text-muted">

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { fetchRankedLeaderboard, type RankedPlayer } from "@/lib/api-client";
 import { resolveEffectiveTier, getRankIconPath } from "@/lib/tier-utils";
 import { LoadingPanel } from "@/components/async-state";
+import PlayerName from "@/components/player-name";
 
 const TIER_GROUPS = [
   { group: "Diamond", tiers: [
@@ -360,7 +361,7 @@ export default function LeaderboardPage() {
                     <RankBadge rank={effective.displayRank} />
                     <img src={getRankIconPath(player.tier, player.rank)} alt={effective.displayName} className="h-8 w-8 shrink-0 object-contain" />
                     <div className="min-w-0 flex-1">
-                      <div className="truncate text-sm font-semibold text-pc-text">{player.name}</div>
+                      <div className="truncate text-sm font-semibold text-pc-text"><PlayerName playerId={player.player_id}>{player.name}</PlayerName></div>
                       <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[11px] text-pc-text-muted">
                         <span>{effective.displayName}</span>
                         {player.winRate != null && <span className={player.winRate >= 50 ? "text-emerald-400" : "text-red-400"}>{player.winRate.toFixed(1)}% WR</span>}
@@ -412,7 +413,7 @@ export default function LeaderboardPage() {
                           </td>
                           <td className="py-2.5 px-4">
                             <Link href={`/players/${p.player_id}`} className="text-pc-text font-medium hover:text-pc-accent transition-colors">
-                              {p.name}
+                              <PlayerName playerId={p.player_id}>{p.name}</PlayerName>
                             </Link>
                           </td>
                           <td className="py-2.5 px-4 text-right text-pc-text font-medium">{p.points.toLocaleString()}</td>

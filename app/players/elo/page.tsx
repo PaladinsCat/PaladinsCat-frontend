@@ -11,6 +11,7 @@ import {
 import { STATIC_CHAMPIONS } from "@/lib/static-champions";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { LoadingPanel } from "@/components/async-state";
+import PlayerName from "@/components/player-name";
 
 import { useSearchParams } from "next/navigation";
 type ELOMode = "champion" | "account";
@@ -392,7 +393,7 @@ function ChampionEloContent() {
                       </td>
                       <td className="py-2.5 px-4">
                         <Link href={`/players/${p.player_id}`} className="text-pc-text font-medium hover:text-pc-accent transition-colors">
-                          {p.player_name}
+                          <PlayerName playerId={p.player_id}>{p.player_name}</PlayerName>
                         </Link>
                       </td>
                       <td className="py-2.5 px-4">
@@ -470,7 +471,7 @@ function ChampionEloContent() {
                       </td>
                       <td className="py-2.5 px-4">
                         <Link href={`/players/${p.playerId}`} className="text-pc-text font-medium hover:text-pc-accent transition-colors">
-                          {p.playerName}
+                          <PlayerName playerId={p.playerId}>{p.playerName}</PlayerName>
                         </Link>
                       </td>
                       <td className="py-2.5 px-4 text-right text-pc-accent font-bold">

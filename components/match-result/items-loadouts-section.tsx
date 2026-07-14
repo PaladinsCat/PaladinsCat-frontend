@@ -23,6 +23,7 @@ import { useLobbyTier } from "@/lib/lobby-tier-context";
 import { getStatQuality } from "@/lib/stat-quality";
 import { readBrowserResult, writeBrowserResult } from "@/lib/browser-result-cache";
 import { LoadingIndicator } from "@/components/async-state";
+import PlayerName from "@/components/player-name";
 
 type Props = { team1Players: MatchPlayerDetail[]; team2Players: MatchPlayerDetail[]; team1Wins: boolean; team2Wins: boolean; factMap: Map<string, MatchFactPlayer> };
 
@@ -342,7 +343,7 @@ function PlayerBuildRow({
     <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-3 px-3 py-3 lg:min-w-[780px] lg:grid-cols-[240px_1fr_1fr_36px] lg:items-center lg:gap-4 lg:px-4">
       <div className="flex min-w-0 items-center gap-3 pr-2 lg:pr-0">
         <img src={getChampionIconSafe(player.champion_name)} alt={champion} className="h-11 w-11 rounded-lg border border-pc-border object-cover" onError={(event) => { event.currentTarget.src = "/images/champions/Champion_Generic_Icon.avif"; }} />
-        <div className="min-w-0"><Link href={`/players/${player.player_id}`} className="block truncate text-sm font-semibold text-pc-text hover:text-pc-accent">{playerName}</Link>{player.champion_name && <Link href={`/champions/${championSlug(player.champion_name)}`} className="text-xs text-pc-text-secondary hover:text-pc-accent">{champion}</Link>}</div>
+        <div className="min-w-0"><Link href={`/players/${player.player_id}`} className="block truncate text-sm font-semibold text-pc-text hover:text-pc-accent"><PlayerName playerId={player.player_id}>{playerName}</PlayerName></Link>{player.champion_name && <Link href={`/champions/${championSlug(player.champion_name)}`} className="text-xs text-pc-text-secondary hover:text-pc-accent">{champion}</Link>}</div>
       </div>
       <div className="col-span-2 lg:col-span-1">
         <div className="mb-1.5 text-[9px] font-semibold uppercase tracking-wider text-pc-text-muted lg:hidden">Talent &amp; cards</div>

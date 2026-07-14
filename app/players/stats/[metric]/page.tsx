@@ -5,6 +5,8 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { fetchBaselines, fetchPerformanceLeaderboard, type BaselineEntry } from "@/lib/api-client";
 import { LoadingPanel } from "@/components/async-state";
+import PlayerName from "@/components/player-name";
+import { getChampionIconSafe } from "@/lib/champion-icons";
 
 const VALID_METRICS = ["gpm", "hpm", "dpm", "mpm"] as const;
 type Metric = (typeof VALID_METRICS)[number];
@@ -48,7 +50,7 @@ interface PerfEntry {
   rank: number;
   player_id: number;
   name: string;
-  champion: string;
+  champion: string | null;
   className: string;
   value: number;
   totalMatches: number;
@@ -113,7 +115,7 @@ export default function MetricLeaderboardPage() {
           rank: p.rank,
           player_id: p.playerId,
           name: p.playerName,
-          champion: p.championName ?? "—",
+          champion: p.championName,
           className: p.className ?? "Unknown",
           value: p.value,
           totalMatches: p.totalMatches,
@@ -227,7 +229,7 @@ export default function MetricLeaderboardPage() {
                 <tr className="border-b border-pc-border">
                   <th className="text-left text-pc-text-muted font-medium py-3 px-4 w-14">Rank</th>
                   <th className="text-left text-pc-text-muted font-medium py-3 px-4">Player</th>
-                  <th className="text-left text-pc-text-muted font-medium py-3 px-4 hidden sm:table-cell">Champion</th>
+                  <th className="text-center text-pc-text-muted font-medium py-3 px-4 hidden sm:table-cell">Champion</th>
                   <th className="text-left text-pc-text-muted font-medium py-3 px-4 hidden md:table-cell">Class</th>
                   <th className="text-right text-pc-text-muted font-medium py-3 px-4">{METRIC_LABELS[m]}</th>
                   <th className="text-right text-pc-text-muted font-medium py-3 px-4 hidden md:table-cell">Matches</th>
@@ -250,11 +252,16 @@ export default function MetricLeaderboardPage() {
                           href={`/players/${p.player_id}`}
                           className="text-pc-text font-medium hover:text-pc-accent transition-colors"
                         >
-                          {p.name}
+                          <PlayerName playerId={p.player_id}>{p.name}</PlayerName>
                         </Link>
                       </td>
-                      <td className="py-2.5 px-4 text-pc-text-secondary hidden sm:table-cell">
-                        {p.champion}
+                      <td className="py-2.5 px-4 hidden sm:table-cell">
+                        <img
+                          src={getChampionIconSafe(p.champion)}
+                          alt={p.champion ?? "Champion unavailable"}
+                          title={p.champion ?? "Champion unavailable"}
+                          className="mx-auto h-7 w-7 rounded object-contain"
+                        />
                       </td>
                       <td className="py-2.5 px-4 hidden md:table-cell">
                         <span className="flex items-center gap-2 text-xs">

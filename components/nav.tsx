@@ -14,6 +14,7 @@ import {
   setWallpaperEnabled,
   WALLPAPER_CHANGE_EVENT,
 } from "@/lib/wallpaper-preference";
+import PlayerName from "@/components/player-name";
 
 export default function Nav() {
   const pathname = usePathname();
@@ -138,6 +139,8 @@ export default function Nav() {
     if (href === "/" || href === "/stats" || href === "/players") return pathname === href;
     return pathname === href || pathname.startsWith(`${href}/`);
   };
+  const profileHref = user?.linkedPlayerId ? `/players/${user.linkedPlayerId}` : "/link-account";
+  const accountLabel = user ? t("nav.greeting", { username: user.linkedPlayerName ?? user.username }) : "";
 
   return (
     <>
@@ -211,18 +214,18 @@ export default function Nav() {
                 {t("nav.menu")}
               </button>
               {user ? (
-                <div className="group relative">
+                <div className="group relative flex items-center">
                   <Link
-                    href="/account"
+                    href={profileHref}
                     className="block max-w-36 truncate rounded-md px-1 py-1 text-sm text-pc-text-secondary underline underline-offset-2 transition-colors hover:text-pc-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent"
                   >
-                    {t("nav.greeting", { username: user.username })}
+                    {user.linkedPlayerId ? <PlayerName playerId={user.linkedPlayerId} verified>{accountLabel}</PlayerName> : accountLabel}
                   </Link>
-                  <div className="invisible pointer-events-none absolute right-0 top-full z-10 pt-1 opacity-0 transition-all group-hover:visible group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:visible group-focus-within:pointer-events-auto group-focus-within:opacity-100">
-                    <div className="rounded-lg border border-pc-border bg-pc-bg-secondary p-1 shadow-xl">
-                      <button onClick={handleLogout} className="whitespace-nowrap rounded-md px-3 py-2 text-sm text-pc-text-secondary transition-colors hover:bg-pc-bg-elevated hover:text-pc-text">
-                        {t("nav.logout")}
-                      </button>
+                  <div className="pointer-events-none invisible absolute right-0 top-full z-10 w-44 pt-2 opacity-0 transition-all group-hover:pointer-events-auto group-hover:visible group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:visible group-focus-within:opacity-100">
+                    <div className="rounded-lg border border-pc-border bg-pc-bg-secondary p-1 shadow-xl" role="menu">
+                    <Link href={profileHref} className="block rounded-md px-3 py-2 text-sm text-pc-text-secondary transition-colors hover:bg-pc-bg-elevated hover:text-pc-text" role="menuitem">Profile</Link>
+                    <Link href="/account" className="block rounded-md px-3 py-2 text-sm text-pc-text-secondary transition-colors hover:bg-pc-bg-elevated hover:text-pc-text" role="menuitem">Account settings</Link>
+                    <button onClick={handleLogout} className="block w-full rounded-md px-3 py-2 text-left text-sm text-pc-text-secondary transition-colors hover:bg-pc-bg-elevated hover:text-pc-text" role="menuitem">{t("nav.logout")}</button>
                     </div>
                   </div>
                 </div>
@@ -302,7 +305,7 @@ export default function Nav() {
               </div>
             </div>
             <div className="border-t border-pc-border px-5 py-4">
-              {user ? <div className="flex items-center justify-between"><Link href="/account" onClick={() => setSideMenuOpen(false)} className="text-sm text-pc-text-secondary hover:text-pc-accent">{t("nav.greeting", { username: user.username })}</Link><button onClick={handleLogout} className="pc-btn-ghost text-sm">{t("nav.logout")}</button></div> : <Link href="/auth/login" onClick={() => setSideMenuOpen(false)} className="pc-btn-secondary block text-center text-sm">{t("nav.login")}</Link>}
+              {user ? <div className="flex items-center justify-between gap-3"><Link href={profileHref} onClick={() => setSideMenuOpen(false)} className="min-w-0 truncate text-sm text-pc-text-secondary hover:text-pc-accent">{user.linkedPlayerId ? <PlayerName playerId={user.linkedPlayerId} verified>{accountLabel}</PlayerName> : accountLabel}</Link><Link href="/account" onClick={() => setSideMenuOpen(false)} className="text-xs text-pc-text-muted hover:text-pc-accent">Account</Link><button onClick={handleLogout} className="pc-btn-ghost text-sm">{t("nav.logout")}</button></div> : <Link href="/auth/login" onClick={() => setSideMenuOpen(false)} className="pc-btn-secondary block text-center text-sm">{t("nav.login")}</Link>}
             </div>
           </aside>
         </div>

@@ -17,6 +17,7 @@ import ScrambleText from "@/components/ScrambleText";
 import { getRankIconPath, resolveEffectiveTier } from "@/lib/tier-utils";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { LoadingIndicator, LoadingPanel } from "@/components/async-state";
+import PlayerName from "@/components/player-name";
 
 const STAT_LABELS: Record<string, string> = {
   gpm: "Credits / Min",
@@ -151,7 +152,7 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
               className="flex items-center justify-between p-3 rounded-lg bg-pc-bg-elevated border border-pc-border hover:border-pc-accent-mid transition-colors"
             >
               <div>
-                <span className="text-pc-text font-medium text-sm">{p.name}</span>
+                <PlayerName playerId={p.id}>{p.name}</PlayerName>
                 <span className="text-pc-text-muted text-xs ml-2">{p.region} · {p.platform}</span>
               </div>
               {p.kbmTier && (
@@ -184,7 +185,7 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
                     Detail →
                   </Link>
                 </div>
-                <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-3 hover:border-pc-accent-mid transition-colors flex-1 flex flex-col justify-center">
+                <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-3 hover:border-pc-accent-mid transition-colors flex-1 flex flex-col justify-start">
                   <div className="space-y-1.5">
                     {players.length === 0 && (
                       <div className="text-xs text-pc-text-muted">{overviewLoading ? <InlineLoading /> : "No ranked data"}</div>
@@ -193,10 +194,19 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
                       <div key={`${stat}-${p.playerId}`} className="flex items-center justify-between text-xs">
                         <div className="flex items-center gap-1.5 min-w-0">
                           <RankBadge rank={i + 1} />
-                          <Link href={`/players/${p.playerId}`} className="text-pc-text truncate hover:text-pc-accent transition-colors">{p.playerName}</Link>
+                          <Link href={`/players/${p.playerId}`} className="text-pc-text truncate hover:text-pc-accent transition-colors"><PlayerName playerId={p.playerId}>{p.playerName}</PlayerName></Link>
                         </div>
                         <div className="flex items-center gap-1 shrink-0">
-                          <span className="text-pc-text-muted">{p.championName ?? p.className ?? ""}</span>
+                          {p.championName ? (
+                            <img
+                              src={getChampionIconSafe(p.championName)}
+                              alt={p.championName}
+                              title={p.championName}
+                              className="h-4 w-4 shrink-0 rounded object-contain"
+                            />
+                          ) : p.className ? (
+                            <span className="text-pc-text-muted">{p.className}</span>
+                          ) : null}
                           <span className="text-pc-accent font-medium">{p.value.toLocaleString()}</span>
                         </div>
                       </div>
@@ -220,7 +230,7 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
                   Detail →
                 </Link>
               </div>
-              <div className="bg-pc-bg-elevated border border-red-500/20 rounded-xl p-3 flex-1 flex flex-col justify-center">
+              <div className="bg-pc-bg-elevated border border-red-500/20 rounded-xl p-3 flex-1 flex flex-col justify-start">
                 <div className="space-y-1.5">
                 {cheaterPlayers.length === 0 && (
                   <div className="text-xs text-pc-text-muted">{overviewLoading ? <InlineLoading /> : "No confirmed cheaters"}</div>
@@ -230,11 +240,8 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
                     <div className="shrink-0 mt-0.5 w-1.5 h-1.5 rounded-full bg-red-500" />
                     <div className="flex-1 min-w-0">
                       <Link href={`/players/${p.id}`} className="text-pc-text font-medium text-xs hover:text-pc-accent transition-colors truncate">
-                        {p.name}
+                        <PlayerName playerId={p.id} cheater={p.cheater} susCount={p.susCount}>{p.name}</PlayerName>
                       </Link>
-                      <p className="text-pc-text-muted text-xs mt-0.5">
-                        {p.totalMatches.toLocaleString()} matches{p.winRate != null ? ` · ${p.winRate.toFixed(1)}% WR` : ""}
-                      </p>
                     </div>
                   </div>
                 ))}
@@ -256,7 +263,7 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
                   Detail →
                 </Link>
               </div>
-              <div className="bg-pc-bg-elevated border border-amber-500/20 rounded-xl p-3 flex-1 flex flex-col justify-center">
+              <div className="bg-pc-bg-elevated border border-amber-500/20 rounded-xl p-3 flex-1 flex flex-col justify-start">
                 <div className="space-y-1.5">
                 {suspiciousPlayers.length === 0 && (
                   <div className="text-xs text-pc-text-muted">{overviewLoading ? <InlineLoading /> : "No suspicious players"}</div>
@@ -267,15 +274,12 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">
                         <Link href={`/players/${p.id}`} className="text-pc-text font-medium text-xs hover:text-pc-accent transition-colors truncate">
-                          {p.name}
+                          <PlayerName playerId={p.id} cheater={p.cheater} susCount={p.susCount}>{p.name}</PlayerName>
                         </Link>
                         <span className="shrink-0 text-xs px-1 py-0.5 rounded border bg-amber-500/15 text-amber-400 border-amber-500/30">
-                          {p.susCount} flags
+                          {p.susCount}
                         </span>
                       </div>
-                      <p className="text-pc-text-muted text-xs mt-0.5">
-                        {p.totalMatches.toLocaleString()} matches{p.winRate != null ? ` · ${p.winRate.toFixed(1)}% WR` : ""}
-                      </p>
                     </div>
                   </div>
                 ))}
@@ -297,7 +301,7 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
                   Detail →
                 </Link>
               </div>
-              <div className="bg-pc-bg-elevated border border-violet-500/20 rounded-xl p-3 flex-1 flex flex-col justify-center">
+              <div className="bg-pc-bg-elevated border border-violet-500/20 rounded-xl p-3 flex-1 flex flex-col justify-start">
                 <div className="space-y-1.5">
                   {weirdoPlayers.length === 0 && (
                     <div className="text-xs text-pc-text-muted">{overviewLoading ? <InlineLoading /> : "No Weirdo votes yet"}</div>
@@ -307,10 +311,9 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
                       <div className="shrink-0 mt-0.5 text-violet-300 text-xs">✦</div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5">
-                          <Link href={`/players/${p.id}`} className="text-pc-text font-medium text-xs hover:text-pc-accent transition-colors truncate">{p.name}</Link>
-                          <span className="shrink-0 text-xs px-1 py-0.5 rounded border bg-violet-500/15 text-violet-300 border-violet-500/30">{p.weirdoCount} votes</span>
+                          <Link href={`/players/${p.id}`} className="text-pc-text font-medium text-xs hover:text-pc-accent transition-colors truncate"><PlayerName playerId={p.id} cheater={p.cheater} susCount={p.susCount}>{p.name}</PlayerName></Link>
+                          <span className="shrink-0 text-xs px-1 py-0.5 rounded border bg-violet-500/15 text-violet-300 border-violet-500/30">{p.weirdoCount}</span>
                         </div>
-                        <p className="text-pc-text-muted text-xs mt-0.5">{p.totalMatches.toLocaleString()} matches{p.winRate != null ? ` · ${p.winRate.toFixed(1)}% WR` : ""}</p>
                       </div>
                     </div>
                   ))}
@@ -332,7 +335,7 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
                   Detail →
                 </Link>
               </div>
-              <div className="bg-pc-bg-elevated border border-emerald-500/20 rounded-xl p-3 flex-1 flex flex-col justify-center">
+              <div className="bg-pc-bg-elevated border border-emerald-500/20 rounded-xl p-3 flex-1 flex flex-col justify-start">
                 <div className="space-y-1.5">
                   {hallOfFamePlayers.length === 0 && (
                     <div className="text-xs text-pc-text-muted">{overviewLoading ? <InlineLoading /> : "No Hall of Fame votes yet"}</div>
@@ -342,10 +345,9 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
                       <div className="shrink-0 mt-0.5 text-emerald-300 text-xs">♥</div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5">
-                          <Link href={`/players/${p.id}`} className="text-pc-text font-medium text-xs hover:text-pc-accent transition-colors truncate">{p.name}</Link>
-                          <span className="shrink-0 text-xs px-1 py-0.5 rounded border bg-emerald-500/15 text-emerald-300 border-emerald-500/30">{p.hallOfFameCount} votes</span>
+                          <Link href={`/players/${p.id}`} className="text-pc-text font-medium text-xs hover:text-pc-accent transition-colors truncate"><PlayerName playerId={p.id} cheater={p.cheater} susCount={p.susCount}>{p.name}</PlayerName></Link>
+                          <span className="shrink-0 text-xs px-1 py-0.5 rounded border bg-emerald-500/15 text-emerald-300 border-emerald-500/30">{p.hallOfFameCount}</span>
                         </div>
-                        <p className="text-pc-text-muted text-xs mt-0.5">{p.totalMatches.toLocaleString()} matches{p.winRate != null ? ` · ${p.winRate.toFixed(1)}% WR` : ""}</p>
                       </div>
                     </div>
                   ))}
@@ -387,7 +389,7 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
                                 <div className="flex items-center gap-1.5 min-w-0">
                                   <RankBadge rank={i + 1} />
                                   <img src={iconPath} alt={effective.displayName} className="w-4 h-4 object-contain shrink-0" title={effective.displayName} />
-                                  <Link href={`/players/${p.player_id}`} className="text-pc-text truncate hover:text-pc-accent transition-colors">{p.name}</Link>
+                                  <Link href={`/players/${p.player_id}`} className="text-pc-text truncate hover:text-pc-accent transition-colors"><PlayerName playerId={p.player_id}>{p.name}</PlayerName></Link>
                                 </div>
                                 <div className="flex items-center gap-2 shrink-0">
                                   {p.trend != null && p.trend !== 0 ? (
@@ -414,7 +416,7 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
                                 <div className="flex items-center gap-1.5 min-w-0">
                                   <RankBadge rank={rank} />
                                   <img src={iconPath} alt={effective.displayName} className="w-4 h-4 object-contain shrink-0" title={effective.displayName} />
-                                  <Link href={`/players/${p.player_id}`} className="text-pc-text truncate hover:text-pc-accent transition-colors">{p.name}</Link>
+                                  <Link href={`/players/${p.player_id}`} className="text-pc-text truncate hover:text-pc-accent transition-colors"><PlayerName playerId={p.player_id}>{p.name}</PlayerName></Link>
                                 </div>
                                 <div className="flex items-center gap-2 shrink-0">
                                   {p.trend != null && p.trend !== 0 ? (
@@ -457,7 +459,7 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
                     <div key={`champ-elo-${p.player_id}`} className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-1.5 min-w-0">
                         <RankBadge rank={i + 1} />
-                        <Link href={`/players/${p.player_id}`} className="text-pc-text truncate hover:text-pc-accent transition-colors">{p.player_name}</Link>
+                        <Link href={`/players/${p.player_id}`} className="text-pc-text truncate hover:text-pc-accent transition-colors"><PlayerName playerId={p.player_id}>{p.player_name}</PlayerName></Link>
                       </div>
                       <div className="flex items-center gap-1 shrink-0">
                         <img src={getChampionIconSafe(p.champion_name)} alt="" className="w-4 h-4 object-contain rounded" />
@@ -486,7 +488,7 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
                     <div key={`account-elo-${p.playerId}`} className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-1.5 min-w-0">
                         <RankBadge rank={p.rank} />
-                        <Link href={`/players/${p.playerId}`} className="text-pc-text truncate hover:text-pc-accent transition-colors">{p.playerName}</Link>
+                        <Link href={`/players/${p.playerId}`} className="text-pc-text truncate hover:text-pc-accent transition-colors"><PlayerName playerId={p.playerId}>{p.playerName}</PlayerName></Link>
                       </div>
                       <span className="text-pc-accent font-medium">{p.elo.toLocaleString()}</span>
                     </div>

@@ -8,6 +8,7 @@ import { championSlug } from "@/lib/utils";
 import { computeDamageStats, num, fixed } from "./format";
 import LoadoutStrip from "./loadout-strip";
 import PartyBadge, { getPartyNumber } from "./party-badge";
+import PlayerName from "@/components/player-name";
 
 interface StatTableRowProps {
   player: MatchPlayerDetail;
@@ -71,7 +72,7 @@ export default function StatTable({ player, fact, wins }: StatTableRowProps) {
             />
             <div className="min-w-0">
               <Link href={`/players/${player.player_id}`} className="text-sm font-medium text-pc-text hover:text-pc-accent block truncate">
-                {player.player_name || "PRIVATE"}
+                <PlayerName playerId={player.player_id}>{player.player_name || "PRIVATE"}</PlayerName>
               </Link>
               {championHref ? (
                 <Link href={championHref} className="text-xs text-pc-text-secondary truncate block">

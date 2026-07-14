@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { fetchCheaterPlayers, type CheaterPlayer } from "@/lib/api-client";
 import { LoadingPanel } from "@/components/async-state";
+import PlayerName from "@/components/player-name";
 
 type VoteKind = "weirdo" | "hall_of_fame";
 
@@ -61,7 +62,7 @@ export default function CommunityVoteLeaderboard({ kind }: { kind: VoteKind }) {
               className="flex items-center gap-3 px-4 py-3 border-b border-pc-border/50 last:border-0 hover:bg-pc-bg/50 transition-colors"
             >
               <span className="w-6 text-xs text-pc-text-muted">{index + 1}</span>
-              <span className="flex-1 min-w-0 text-sm font-medium text-pc-text truncate">{player.name}</span>
+              <span className="flex-1 min-w-0 text-sm font-medium text-pc-text truncate"><PlayerName playerId={player.id} cheater={player.cheater} susCount={player.susCount}>{player.name}</PlayerName></span>
               <span className="text-xs text-pc-text-muted shrink-0">{player.totalMatches.toLocaleString()} matches</span>
               <span className={`text-xs font-semibold px-2 py-1 rounded border shrink-0 ${tone}`}>{config.count(player)} votes</span>
             </Link>

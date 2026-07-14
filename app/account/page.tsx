@@ -5,26 +5,19 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { useTimeZone } from "@/lib/time-zone-context";
-import { formatLocalDate, formatLocalDateTime, formatLocalTime } from "@/lib/time-format";
+import { formatLocalDate, formatLocalDateTime } from "@/lib/time-format";
 import { fixedUtcOffsetFromTimeZone, fixedUtcOffsetToTimeZone, getFixedUtcOffsetOptions, getSupportedTimeZones } from "@/lib/time-zone";
 import { useLobbyTier } from "@/lib/lobby-tier-context";
 import { LOBBY_TIER_OPTIONS, type LobbyTierFilter } from "@/lib/lobby-tier";
 import { LoadingIndicator, LoadingPanel } from "@/components/async-state";
+import PlayerLinkCard from "@/components/player-link-card";
 import {
   getAccountDetails,
-  unlinkPlayer,
   changePassword,
-  fetchPlayerSearch,
   updateProfile,
   type AccountDetails,
-  type PlayerSearchResult,
-  getPlayerLinkVerification,
-  startPlayerLinkVerification,
-  verifyPlayerLink,
-  cancelPlayerLinkVerification,
   getAccountNotifications,
   markAccountNotificationRead,
-  type PlayerLinkVerification,
   type AccountNotification,
 } from "@/lib/api-client";
 
@@ -38,12 +31,6 @@ export default function AccountPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  // ── Player linking state ──
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<PlayerSearchResult[]>([]);
-  const [searching, setSearching] = useState(false);
-  const [linking, setLinking] = useState(false);
-  const [verification, setVerification] = useState<PlayerLinkVerification | null>(null);
   const [notifications, setNotifications] = useState<AccountNotification[]>([]);
 
   // ── Password change state ──
@@ -69,14 +56,12 @@ export default function AccountPage() {
 
   const loadAccount = useCallback(async () => {
     try {
-      const [data, pendingVerification, inbox] = await Promise.all([
+      const [data, inbox] = await Promise.all([
         getAccountDetails(),
-        getPlayerLinkVerification(),
         getAccountNotifications().catch(() => []),
       ]);
       setAccount(data);
       setBio(data.user.bio ?? "");
-      setVerification(pendingVerification);
       setNotifications(inbox);
     } catch (err) {
       if (err instanceof Error) {
@@ -100,65 +85,6 @@ export default function AccountPage() {
     }
     loadAccount();
   }, [authUser, router, loadAccount]);
-
-  // ── Player search ──
-  const debouncedSearch = useCallback(
-    (query: string) => {
-      if (query.length < 2) {
-        setSearchResults([]);
-        return;
-      }
-      setSearching(true);
-      const timer = setTimeout(async () => {
-        try {
-          const results = await fetchPlayerSearch(query);
-          setSearchResults(results);
-        } catch {
-          setSearchResults([]);
-        } finally {
-          setSearching(false);
-        }
-      }, 350);
-      return () => clearTimeout(timer);
-    },
-    [],
-  );
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setSearchQuery(val);
-    debouncedSearch(val);
-  };
-
-  const handleStartLinkVerification = async (result: PlayerSearchResult) => {
-    if (!result.id) return;
-    setLinking(true);
-    setError(null);
-    setSuccess(null);
-    try {
-      const nextVerification = await startPlayerLinkVerification(parseInt(result.id, 10));
-      setVerification(nextVerification);
-      setSuccess(`Verification code generated for ${result.name}`);
-      setSearchResults([]);
-      setSearchQuery("");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to generate verification code");
-    } finally {
-      setLinking(false);
-    }
-  };
-
-  const handleUnlinkPlayer = async () => {
-    setError(null);
-    setSuccess(null);
-    try {
-      await unlinkPlayer();
-      setSuccess("Player link removed");
-      await loadAccount();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to unlink player");
-    }
-  };
 
   // ── Password change ──
   const handleChangePassword = async (e: React.FormEvent) => {
@@ -211,32 +137,6 @@ export default function AccountPage() {
     void markAccountNotificationRead(notification.id).catch(() => {
       setNotifications((current) => current.map((entry) => entry.id === notification.id ? { ...entry, readAt: null } : entry));
     });
-  };
-
-  const handleVerifyPlayerLink = async () => {
-    setLinking(true);
-    setError(null);
-    setSuccess(null);
-    try {
-      const result = await verifyPlayerLink();
-      setVerification(null);
-      setSuccess(`Linked to ${result.player.name}`);
-      await loadAccount();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to verify player ownership");
-    } finally {
-      setLinking(false);
-    }
-  };
-
-  const handleCancelVerification = async () => {
-    try {
-      await cancelPlayerLinkVerification();
-      setVerification(null);
-      setSuccess(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to cancel verification");
-    }
   };
 
   const handleSaveTimeZone = async () => {
@@ -441,132 +341,14 @@ export default function AccountPage() {
       </div>
 
       {/* ── Player Linking ── */}
-      <div className="bg-pc-bg-elevated rounded-lg border border-pc-border p-6 mb-6">
-        <h2 className="text-lg font-semibold text-pc-text mb-2">
-          Link Paladins Player
-        </h2>
-        <p className="text-pc-text-secondary text-sm mb-4">
-          Link your Paladins in-game player profile to your PaladinsCat account.
-          This connects your stats and ranked data.
-        </p>
-
-        {linkedPlayer ? (
-          /* ── Player is linked ── */
-          <div>
-            <div className="bg-pc-bg-secondary border border-pc-border rounded-lg p-4 mb-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-pc-text-secondary">Linked Player</span>
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-900/40 text-emerald-400">
-                  Connected
-                </span>
-              </div>
-              <Link href={`/players/${linkedPlayer.id}`} className="mb-1 block text-lg font-semibold text-pc-text hover:text-pc-accent">
-                {linkedPlayer.name}
-              </Link>
-              {linkedPlayer.platform_name && (
-                <div className="text-pc-text-secondary text-sm">{linkedPlayer.platform_name}</div>
-              )}
-              {linkedPlayer.kbm_tier && (
-                <div className="text-pc-text-secondary text-sm mt-1">
-                  Tier: {linkedPlayer.kbm_tier}
-                  {linkedPlayer.kbm_points !== null && ` · ${linkedPlayer.kbm_points} TP`}
-                </div>
-              )}
-              {linkedPlayer.wins !== null && (
-                <div className="text-pc-text-secondary text-sm mt-1">
-                  {linkedPlayer.wins}W / {linkedPlayer.losses ?? "—"}L
-                </div>
-              )}
-            </div>
-
-            <button
-              onClick={handleUnlinkPlayer}
-              className="px-3 py-1.5 border border-red-700/50 text-red-400 hover:bg-red-900/30 rounded-lg transition-colors text-sm"
-            >
-              Unlink Player
-            </button>
-            <Link href={`/players/${linkedPlayer.id}`} className="ml-3 text-sm text-pc-accent hover:underline">Open player profile →</Link>
-          </div>
-        ) : (
-          /* ── Player search ── */
-          <div>
-            {verification ? (
-              <div className="bg-pc-bg-secondary border border-pc-border rounded-lg p-4 mb-4">
-                <div className="text-pc-text font-medium">Verify {verification.player.name}</div>
-                <ol className="mt-3 space-y-1.5 text-sm text-pc-text-secondary list-decimal list-inside">
-                  <li>In Paladins, rename any saved loadout to this exact code.</li>
-                  <li>Save the loadout, then return here and verify it.</li>
-                </ol>
-                <div className="mt-3 rounded-lg border border-pc-accent/40 bg-pc-bg px-4 py-3 font-mono text-center text-lg font-bold tracking-wider text-pc-accent">
-                  {verification.code}
-                </div>
-                <div className="mt-2 text-xs text-pc-text-muted">Expires {formatLocalTime(verification.expiresAt)}</div>
-                <div className="mt-4 flex gap-2">
-                  <button
-                    onClick={handleVerifyPlayerLink}
-                    disabled={linking}
-                    className="flex-1 px-3 py-2 rounded-lg bg-pc-accent text-pc-bg font-semibold text-sm hover:bg-pc-accent-secondary disabled:opacity-50"
-                  >
-                    {linking ? <LoadingIndicator className="gap-2" /> : "Verify & Link"}
-                  </button>
-                  <button
-                    onClick={handleCancelVerification}
-                    disabled={linking}
-                    className="px-3 py-2 rounded-lg border border-pc-border text-pc-text-secondary text-sm hover:bg-pc-bg-elevated disabled:opacity-50"
-                  >
-                    Choose another
-                  </button>
-                </div>
-              </div>
-            ) : (
-            <>
-              <div className="relative mb-4">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={handleSearchChange}
-                placeholder="Search by in-game name..."
-                className="w-full px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text placeholder-pc-text-muted focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
-              />
-              {searching && (
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-pc-text-muted text-sm">
-                  <LoadingIndicator className="gap-2" />
-                </span>
-              )}
-            </div>
-
-            {searchResults.length > 0 && (
-              <div className="bg-pc-bg-secondary border border-pc-border rounded-lg overflow-hidden max-h-60 overflow-y-auto">
-                {searchResults.map((result) => (
-                  <button
-                    key={result.id}
-                    onClick={() => handleStartLinkVerification(result)}
-                    disabled={linking}
-                    className="w-full flex items-center justify-between px-4 py-3 border-b border-pc-border last:border-b-0 hover:bg-pc-bg-elevated transition-colors disabled:opacity-50"
-                  >
-                    <div className="text-left">
-                      <div className="text-pc-text font-medium">{result.name}</div>
-                      {result.platform && (
-                        <div className="text-pc-text-secondary text-sm">{result.platform}</div>
-                      )}
-                    </div>
-                    {result.kbmTier && (
-                      <span className="text-pc-accent text-sm">{result.kbmTier}</span>
-                    )}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {searchQuery.length >= 2 && !searching && searchResults.length === 0 && (
-              <div className="text-pc-text-muted text-sm text-center py-2">
-                No players found
-              </div>
-              )}
-            </>
-            )}
-          </div>
-        )}
+      <div className="mb-6">
+        <PlayerLinkCard
+          linkedPlayer={linkedPlayer}
+          onChanged={async () => {
+            await loadAccount();
+            await refresh();
+          }}
+        />
       </div>
 
       {/* ── Password Change ── */}

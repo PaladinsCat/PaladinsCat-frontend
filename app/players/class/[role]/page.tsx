@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { fetchClassLeaderboard } from "@/lib/api-client";
 import { LoadingPanel } from "@/components/async-state";
+import PlayerName from "@/components/player-name";
 
 const VALID_ROLES = ["Frontline", "Damage", "Flank", "Support"] as const;
 type Role = (typeof VALID_ROLES)[number];
@@ -229,7 +230,7 @@ export default function ClassEloPage() {
                           href={`/players/${p.player_id}`}
                           className="text-pc-text font-medium hover:text-pc-accent transition-colors"
                         >
-                          {p.name}
+                          <PlayerName playerId={p.player_id}>{p.name}</PlayerName>
                         </Link>
                       </td>
                       <td className="py-2.5 px-4 text-pc-text-secondary hidden sm:table-cell">
