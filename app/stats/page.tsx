@@ -7,9 +7,11 @@ import {
   fetchBaselines,
   fetchMatchCompositions,
   fetchSkinStats,
+  fetchBrokenSkinStats,
   type Champion,
   type MatchCompositionStat,
   type SkinStat,
+  type BrokenSkinStat,
   type TierStat,
   type BaselineEntry,
 } from "@/lib/api-client";
@@ -101,6 +103,8 @@ export default function StatsPage() {
   const [egpmLoading, setEgpmLoading] = useState(true);
   const [skinsLoading, setSkinsLoading] = useState(true);
   const [compositionsLoading, setCompositionsLoading] = useState(true);
+  const [brokenSkins, setBrokenSkins] = useState<BrokenSkinStat[]>([]);
+  const [brokenSkinsLoading, setBrokenSkinsLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
@@ -174,6 +178,21 @@ export default function StatsPage() {
       setCompositions(comps);
     }).catch(() => {})
       .finally(() => { if (!cancelled) setCompositionsLoading(false); });
+    return () => { cancelled = true; };
+  }, [lobbyTierReady, lobbyTier.tierMin, lobbyTier.tierMax]);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!lobbyTierReady) return () => {};
+    setBrokenSkinsLoading(true);
+    fetchBrokenSkinStats({
+      tierMin: lobbyTier.tierMin,
+      tierMax: lobbyTier.tierMax,
+    }).then((broken) => {
+      if (cancelled) return;
+      setBrokenSkins(broken);
+    }).catch(() => {})
+      .finally(() => { if (!cancelled) setBrokenSkinsLoading(false); });
     return () => { cancelled = true; };
   }, [lobbyTierReady, lobbyTier.tierMin, lobbyTier.tierMax]);
 
@@ -559,6 +578,36 @@ export default function StatsPage() {
                     <div className="min-w-0 flex-1 text-[10px] text-pc-text-muted">{composition.totalMatches.toLocaleString()} ranked matches</div>
                     <span className={composition.winRate >= 50 ? "text-xs font-bold text-emerald-400" : "text-xs font-bold text-rose-400"}>{composition.winRate.toFixed(1)}%</span>
                   </Link>
+                ))}
+              </div>
+            )}
+          </ContentFade>}
+        </div>
+      </section>
+
+      <section className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div>
+          <div className="mb-3 flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-bold text-pc-text">Broken Skins</h2>
+              <p className="text-[11px] text-pc-text-muted">Int16 overflow (skin_id &gt; 32,767) — usage share per champion</p>
+            </div>
+          </div>
+          {brokenSkinsLoading ? <DataCardSkeleton rows={5} /> : <ContentFade className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated">
+            {brokenSkins.length === 0 ? <div className="p-4 text-sm text-pc-text-muted">No broken skin data.</div> : (
+              <div className="divide-y divide-pc-border/50">
+                {brokenSkins.map((skin) => (
+                  <div key={`${skin.championId}-${skin.skinId}`} className="flex items-center gap-3 px-4 py-2.5">
+                    <img src={getChampionIconSafe(skin.championName)} alt="" className="h-7 w-7 rounded object-contain" />
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-xs font-medium text-pc-text">{skin.skinName}</div>
+                      <div className="text-[10px] text-pc-text-muted">{skin.championName} · {skin.totalPlays.toLocaleString()} plays</div>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-xs font-bold text-rose-400">{skin.usageShare.toFixed(1)}% share</span>
+                      <div className="text-[9px] text-pc-text-muted">WR {skin.winRate.toFixed(1)}%</div>
+                    </div>
+                  </div>
                 ))}
               </div>
             )}

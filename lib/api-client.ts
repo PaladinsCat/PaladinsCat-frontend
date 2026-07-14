@@ -2044,6 +2044,41 @@ export async function fetchSkinStats(params?: { championId?: number; tierMin?: n
   }
 }
 
+export interface BrokenSkinStat {
+  skinId: number;
+  skinName: string;
+  championId: number;
+  championName: string;
+  totalPlays: number;
+  wins: number;
+  losses: number;
+  winRate: number;
+  usageShare: number;
+}
+
+export async function fetchBrokenSkinStats(params?: { championId?: number; tierMin?: number; tierMax?: number }): Promise<BrokenSkinStat[]> {
+  const query = new URLSearchParams();
+  if (params?.championId != null) query.set('championId', String(params.championId));
+  if (params?.tierMin != null) query.set('tierMin', String(params.tierMin));
+  if (params?.tierMax != null) query.set('tierMax', String(params.tierMax));
+  try {
+    const raw = await fetchJson<any[]>(`/stats/broken-skins${query.toString() ? `?${query.toString()}` : ''}`);
+    return raw.map((row) => ({
+      skinId: Number(row.skin_id),
+      skinName: String(row.skin_name ?? 'Unknown Skin'),
+      championId: Number(row.champion_id),
+      championName: String(row.champion_name ?? 'Unknown Champion'),
+      totalPlays: Number(row.total_plays ?? 0),
+      wins: Number(row.wins ?? 0),
+      losses: Number(row.losses ?? 0),
+      winRate: Number(row.win_rate ?? 0),
+      usageShare: Number(row.usage_share ?? 0),
+    }));
+  } catch {
+    return [];
+  }
+}
+
 export interface MatchCompositionStat {
   composition: string;
   frontline: number;

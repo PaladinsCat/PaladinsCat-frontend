@@ -115,14 +115,14 @@ function getScopedLoadoutMetrics(championId: number, talentId: number | null, sc
   return promise;
 }
 
-function Asset({ sources, alt, level, tone = "border-pc-border" }: { sources: Array<string | null | undefined>; alt: string; level?: number | null; tone?: string }) {
+function Asset({ sources, alt, level, tone = "border-pc-border", transparent = false }: { sources: Array<string | null | undefined>; alt: string; level?: number | null; tone?: string; transparent?: boolean }) {
   const candidates = [...new Set(sources.filter((source): source is string => Boolean(source)).map(canonicalLocalImageUrl))];
   const [index, setIndex] = useState(0);
   useEffect(() => setIndex(0), [alt, candidates.join("|")]);
   const src = candidates[index];
-  if (!src) return <div className="h-9 w-9 rounded border border-pc-border bg-pc-bg-secondary" title={alt} />;
+  if (!src) return <div className={transparent ? "h-12 w-12" : "h-9 w-9 rounded border border-pc-border bg-pc-bg-secondary"} title={alt} />;
   return <div className="relative shrink-0" title={alt}>
-    <img src={src} alt={alt} className={`h-9 w-9 rounded border ${tone} object-cover`} loading="eager" onError={() => setIndex(current => Math.min(current + 1, candidates.length))} />
+    <img src={src} alt={alt} className={transparent ? "h-12 w-12 object-contain" : `h-9 w-9 rounded border ${tone} object-cover`} loading="eager" onError={() => setIndex(current => Math.min(current + 1, candidates.length))} />
     {level != null && <span className="absolute -right-1 -top-1 min-w-3 rounded bg-pc-bg px-1 text-center text-[9px] font-bold text-pc-text ring-1 ring-pc-border">{level}</span>}
   </div>;
 }
@@ -167,6 +167,7 @@ function DetailEntry({
   loadingLabel: _loadingLabel,
   href,
   onNavigate,
+  transparentIcon = false,
 }: {
   name: string;
   description: ReactNode;
@@ -182,10 +183,11 @@ function DetailEntry({
   loadingLabel?: string;
   href?: string;
   onNavigate?: () => void;
+  transparentIcon?: boolean;
 }) {
   const quality = metric ? getStatQuality(metric.winRate, metric.pickRate, maxPickRate) : null;
   return <article className="flex min-w-0 items-start gap-3 rounded-lg border border-pc-border/70 bg-pc-bg-secondary/45 p-3">
-    <Asset sources={sources} alt={name} level={level} tone={tone} />
+    <Asset sources={sources} alt={name} level={level} tone={tone} transparent={transparentIcon} />
     <div className="min-w-0 flex-1">
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
         {href ? <Link href={href} onClick={onNavigate} className="text-xs font-semibold text-pc-text transition-colors hover:text-pc-accent hover:underline">{name}</Link> : <h4 className="text-xs font-semibold text-pc-text">{name}</h4>}
@@ -347,7 +349,7 @@ function PlayerBuildRow({
       </div>
       <div className="col-span-2 lg:col-span-1">
         <div className="mb-1.5 text-[9px] font-semibold uppercase tracking-wider text-pc-text-muted lg:hidden">Talent &amp; cards</div>
-        <div className="flex flex-wrap items-center gap-1.5">{talents.map(t => { const entry = findReference("talents", t.talent_id, t.talent_name); return <Asset key={`talent-${t.talent_id}`} sources={[entry?.iconUrl, t.icon_url, t.fallback_icon_url]} alt={t.talent_name ?? "Talent"} tone="border-amber-400/40" />; })}{cards.map(c => { const entry = findReference("cards", c.card_id, c.card_name); return <Asset key={`card-${c.card_id}`} sources={[entry?.iconUrl, c.icon_url, c.fallback_icon_url]} alt={c.card_name ?? "Loadout card"} level={c.card_level ?? undefined} tone="border-pc-accent/30" />; })}</div>
+        <div className="flex flex-wrap items-center gap-1.5">{talents.map(t => { const entry = findReference("talents", t.talent_id, t.talent_name); return <Asset key={`talent-${t.talent_id}`} sources={[entry?.iconUrl, t.icon_url, t.fallback_icon_url]} alt={t.talent_name ?? "Talent"} transparent />; })}{cards.map(c => { const entry = findReference("cards", c.card_id, c.card_name); return <Asset key={`card-${c.card_id}`} sources={[entry?.iconUrl, c.icon_url, c.fallback_icon_url]} alt={c.card_name ?? "Loadout card"} level={c.card_level ?? undefined} tone="border-pc-accent/30" />; })}</div>
       </div>
       <div className="col-span-2 lg:col-span-1">
         <div className="mb-1.5 text-[9px] font-semibold uppercase tracking-wider text-pc-text-muted lg:hidden">Purchased items</div>
@@ -384,7 +386,7 @@ function PlayerBuildRow({
           {talents.map((talent) => {
             const entry = findReference("talents", talent.talent_id, talent.talent_name);
             const name = talent.talent_name ?? entry?.name ?? `Talent #${talent.talent_id}`;
-            return <DetailEntry key={`talent-detail-${talent.talent_id}`} name={name} href={`${championPath}/talents/${talent.talent_id}?returnTo=${returnToQuery}`} onNavigate={preserveMatchPosition} label="Talent" description={formatDescription(entry?.description, 1) ?? (reference ? "Description unavailable." : <LoadingIndicator className="gap-1.5 text-xs" />)} sources={[entry?.iconUrl, talent.icon_url, talent.fallback_icon_url]} tone="border-amber-400/40" metric={talentMetric} showMetrics metricsLoaded={loadoutMetrics !== null} maxPickRate={100} />;
+            return <DetailEntry key={`talent-detail-${talent.talent_id}`} name={name} href={`${championPath}/talents/${talent.talent_id}?returnTo=${returnToQuery}`} onNavigate={preserveMatchPosition} label="Talent" description={formatDescription(entry?.description, 1) ?? (reference ? "Description unavailable." : <LoadingIndicator className="gap-1.5 text-xs" />)} sources={[entry?.iconUrl, talent.icon_url, talent.fallback_icon_url]} transparentIcon metric={talentMetric} showMetrics metricsLoaded={loadoutMetrics !== null} maxPickRate={100} />;
           })}
           {cards.map((card) => {
             const entry = findReference("cards", card.card_id, card.card_name);

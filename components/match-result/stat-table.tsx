@@ -338,7 +338,7 @@ export default function StatTable({ player, fact, wins }: StatTableRowProps) {
                           <img
                             src={talent.icon_url ?? talent.fallback_icon_url ?? ""}
                             alt={talent.talent_name ?? "Talent"}
-                            className="w-5 h-5 rounded shrink-0 border border-pc-border bg-pc-bg-secondary"
+                            className="h-10 w-10 shrink-0 object-contain"
                             onError={(e) => { (e.target as HTMLImageElement).src = talent.fallback_icon_url ?? ""; }}
                           />
                           <span className="truncate">{talent.talent_name ?? `Talent #${talent.talent_id}`}</span>

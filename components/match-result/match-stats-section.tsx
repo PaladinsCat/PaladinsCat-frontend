@@ -99,16 +99,7 @@ function PlayerRow({
 
       {/* Numeric stat columns */}
       <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
-        {num(player.kills)}/{num(player.deaths)}/{num(player.assists)}
-      </td>
-      <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
-        {fixed(player.damage_per_minute, 0)}
-      </td>
-      <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
-        {fixed(player.kda, 2)}
-      </td>
-      <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
-        {fixed(player.healing_per_minute, 0)}
+        {num(player.gold_earned)}
       </td>
       <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
         {fixed(player.gold_per_minute, 0)}
@@ -117,25 +108,37 @@ function PlayerRow({
         {fixed(player.egpm, 0)}
       </td>
       <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
+        {fixed(player.kda, 2)}
+      </td>
+      <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
+        {num(player.objective_assists)}
+      </td>
+      <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
         {num(totalDamage)}
+      </td>
+      <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
+        {fixed(player.damage_per_minute, 0)}
       </td>
       <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
         {hasWeaponBreakdown ? num(nonWeaponDamage) : "—"}
       </td>
       <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
-        {num(player.healing_self)}
-      </td>
-      <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
-        {num(player.healing)}
+        {num(player.damage_taken)}
       </td>
       <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
         {num(player.damage_mitigated)}
       </td>
       <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
-        {num(player.damage_taken)}
+        {fixed(player.mitigation_per_minute, 0)}
       </td>
       <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
-        {num(player.objective_assists)}
+        {num(player.healing)}
+      </td>
+      <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
+        {fixed(player.healing_per_minute, 0)}
+      </td>
+      <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
+        {num(player.healing_self)}
       </td>
       <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
         {fixed(player.afk_rate, 1)}%
@@ -148,24 +151,33 @@ function PlayerRow({
 /* ── Main section ── */
 
 const statColumns = [
-  "Player", "Party", "K/D/A", "DPM", "KDA", "HPM", "CPM", "eCPM",
-  "Dmg", "Abil", "Self", "Heal", "Shielding", "Taken", "Obj", "AFK",
+  "Player", "Party", "Credits", "CPM", "eCPM", "KDA", "Obj",
+  "Dmg", "DPM", "Abil", "Taken", "Shielding", "SPM", "Heal", "HPM", "Self", "AFK",
 ];
 
 function MobilePlayerCard({ player, wins }: { player: MatchPlayerDetail; wins: boolean }) {
-  const damage = computeDamageStats(player).totalDamage;
+  const damageStats = computeDamageStats(player);
+  const damage = damageStats.totalDamage;
+  const abilityDamage = player.source !== "recovered" || damageStats.weaponDamage > 0 || damage === 0
+    ? Math.max(damage - damageStats.weaponDamage, 0)
+    : null;
   const champion = player.champion_name || `Champion #${player.champion_id}`;
   const metrics = [
-    ["K / D / A", `${num(player.kills)} / ${num(player.deaths)} / ${num(player.assists)}`],
-    ["KDA", fixed(player.kda, 2)],
-    ["DPM", fixed(player.damage_per_minute, 0)],
-    ["HPM", fixed(player.healing_per_minute, 0)],
+    ["Credits", num(player.gold_earned)],
     ["CPM", fixed(player.gold_per_minute, 0)],
     ["eCPM", fixed(player.egpm, 0)],
+    ["KDA", fixed(player.kda, 2)],
+    ["Obj", num(player.objective_assists)],
     ["Damage", num(damage)],
-    ["Healing", num(player.healing)],
-    ["Shielding", num(player.damage_mitigated)],
+    ["DPM", fixed(player.damage_per_minute, 0)],
+    ["Abil", abilityDamage == null ? "—" : num(abilityDamage)],
     ["Taken", num(player.damage_taken)],
+    ["Shielding", num(player.damage_mitigated)],
+    ["SPM", fixed(player.mitigation_per_minute, 0)],
+    ["Healing", num(player.healing)],
+    ["HPM", fixed(player.healing_per_minute, 0)],
+    ["Self", num(player.healing_self)],
+    ["AFK", `${fixed(player.afk_rate, 1)}%`],
   ];
 
   return <article className={`border-b border-pc-border/60 p-3 last:border-b-0 ${wins ? "bg-emerald-400/[0.035]" : ""}`}>
@@ -208,7 +220,7 @@ export default function MatchStatsSection({
       </div>
 
       <div className="hidden overflow-x-auto lg:block">
-        <table className="w-full min-w-[1160px]">
+        <table className="w-full min-w-[1280px]">
           <thead>
             <tr className="border-b border-pc-border/60 bg-pc-bg-secondary/50">
               {statColumns.map((col) => (

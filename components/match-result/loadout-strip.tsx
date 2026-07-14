@@ -14,7 +14,7 @@ interface MaterialIconProps {
   className?: string;
 }
 
-function MaterialIcon({ src, fallbackSrc, alt, className = "w-8 h-8" }: MaterialIconProps) {
+function MaterialIcon({ src, fallbackSrc, alt, className = "w-8 h-8 object-cover" }: MaterialIconProps) {
   const [failed, setFailed] = useState(false);
   useEffect(() => { setFailed(false); }, [src, fallbackSrc]);
   const imageSrc = failed ? fallbackSrc : src;
@@ -22,7 +22,7 @@ function MaterialIcon({ src, fallbackSrc, alt, className = "w-8 h-8" }: Material
     return <div className={`flex items-center justify-center text-xs text-pc-text-muted ${className}`}>#</div>;
   }
   return (
-    <img src={imageSrc} alt={alt} className={`object-cover ${className}`} loading="lazy" onError={() => setFailed(true)} />
+    <img src={imageSrc} alt={alt} className={className} loading="lazy" onError={() => setFailed(true)} />
   );
 }
 
@@ -41,9 +41,7 @@ export default function LoadoutStrip({ fact }: LoadoutStripProps) {
         const label = (m as any).talent_name || (m as any).item_name || (m as any).card_name || "Unknown";
         const src = (m as any).icon_url;
         const fallbackSrc = (m as any).fallback_icon_url;
-        const colorClass = m.type === "talent"
-          ? "border-amber-500/25 bg-amber-500/10"
-          : m.type === "item"
+        const colorClass = m.type === "item"
           ? "border-pc-accent/25 bg-pc-bg-secondary"
           : "border-blue-500/25 bg-blue-500/10";
 
@@ -57,14 +55,14 @@ export default function LoadoutStrip({ fact }: LoadoutStripProps) {
         return (
           <div
             key={idx}
-            className={`group relative flex flex-col items-center gap-1 rounded-md border p-2 ${colorClass}`}
+            className={m.type === "talent" ? "group relative flex flex-col items-center" : `group relative flex flex-col items-center gap-1 rounded-md border p-2 ${colorClass}`}
             title={level ? `${label} — Level ${level}` : label}
           >
             <MaterialIcon
               src={src}
               fallbackSrc={fallbackSrc}
               alt={label}
-              className="w-8 h-8"
+              className={m.type === "talent" ? "h-12 w-12 object-contain" : "w-8 h-8"}
             />
             {/* Level badge — visible on hover or for leveled items/cards */}
             {level !== null && (
