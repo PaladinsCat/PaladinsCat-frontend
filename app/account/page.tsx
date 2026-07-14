@@ -20,6 +20,15 @@ import {
   markAccountNotificationRead,
   type AccountNotification,
 } from "@/lib/api-client";
+import {
+  clearCustomWallpaper,
+  getCustomWallpaper,
+  resolveCustomWallpaper,
+  setCustomWallpaperFile,
+  setCustomWallpaperUrl,
+  setWallpaperEnabled,
+  type ResolvedCustomWallpaper,
+} from "@/lib/wallpaper-preference";
 
 export default function AccountPage() {
   const { user: authUser, refresh } = useAuth();
@@ -30,6 +39,9 @@ export default function AccountPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [customWallpaper, setCustomWallpaperState] = useState<ResolvedCustomWallpaper | null>(null);
+  const [wallpaperUrl, setWallpaperUrl] = useState("");
+  const [wallpaperError, setWallpaperError] = useState<string | null>(null);
 
   const [notifications, setNotifications] = useState<AccountNotification[]>([]);
 
@@ -85,6 +97,20 @@ export default function AccountPage() {
     }
     loadAccount();
   }, [authUser, router, loadAccount]);
+
+  const refreshCustomWallpaper = useCallback(async () => {
+    const savedWallpaper = getCustomWallpaper();
+    setWallpaperUrl(savedWallpaper?.type === "url" ? savedWallpaper.source : "");
+    setCustomWallpaperState(await resolveCustomWallpaper().catch(() => null));
+  }, []);
+
+  useEffect(() => {
+    void refreshCustomWallpaper();
+  }, [refreshCustomWallpaper]);
+
+  useEffect(() => () => {
+    if (customWallpaper?.revoke) URL.revokeObjectURL(customWallpaper.source);
+  }, [customWallpaper]);
 
   // ── Password change ──
   const handleChangePassword = async (e: React.FormEvent) => {
@@ -152,6 +178,46 @@ export default function AccountPage() {
       setError(err instanceof Error ? err.message : "Failed to update time zone");
     } finally {
       setSavingTimeZone(false);
+    }
+  };
+
+  const applyCustomWallpaperUrl = async () => {
+    try {
+      await setCustomWallpaperUrl(wallpaperUrl);
+      setWallpaperEnabled(true);
+      setWallpaperError(null);
+      setSuccess("Custom wallpaper saved for this browser.");
+      await refreshCustomWallpaper();
+    } catch (err) {
+      setWallpaperError(err instanceof Error ? err.message : "Unable to save this wallpaper.");
+    }
+  };
+
+  const handleWallpaperFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    try {
+      await setCustomWallpaperFile(file);
+      setWallpaperEnabled(true);
+      setWallpaperError(null);
+      setSuccess("Custom wallpaper saved for this browser.");
+      await refreshCustomWallpaper();
+    } catch (err) {
+      setWallpaperError(err instanceof Error ? err.message : "Unable to save this wallpaper.");
+    }
+  };
+
+  const handleClearCustomWallpaper = async () => {
+    try {
+      await clearCustomWallpaper();
+      setWallpaperUrl("");
+      setWallpaperError(null);
+      setSuccess("Custom wallpaper removed. Map wallpapers are active again.");
+      await refreshCustomWallpaper();
+    } catch (err) {
+      setWallpaperError(err instanceof Error ? err.message : "Unable to remove this wallpaper.");
     }
   };
 
@@ -276,6 +342,57 @@ export default function AccountPage() {
           </select>
         </label>
         <p className="mt-2 text-xs text-pc-text-muted">{lobbyTierDefinition.description}</p>
+      </div>
+
+      {/* ── Custom wallpaper ── */}
+      <div className="mb-6 rounded-lg border border-pc-border bg-pc-bg-elevated p-6">
+        <h2 className="mb-2 text-lg font-semibold text-pc-text">Custom Wallpaper</h2>
+        <p className="mb-4 text-sm text-pc-text-secondary">
+          Use your own image behind every page. Images and links are saved only in this browser; they are not uploaded to your account.
+        </p>
+
+        {customWallpaper && (
+          <div
+            className="mb-4 h-32 rounded-lg border border-pc-border bg-pc-bg-secondary"
+            style={{ backgroundImage: `url(${JSON.stringify(customWallpaper.source)})`, backgroundPosition: "center", backgroundSize: "cover" }}
+            role="img"
+            aria-label="Current custom wallpaper preview"
+          />
+        )}
+
+        {wallpaperError && <p className="mb-3 rounded-lg border border-red-700/50 bg-red-900/30 p-3 text-sm text-red-400">{wallpaperError}</p>}
+
+        <div className="space-y-3">
+          <label className="block text-sm font-medium text-pc-text-secondary">
+            Image link
+            <div className="mt-1.5 flex flex-col gap-2 sm:flex-row">
+              <input
+                type="url"
+                value={wallpaperUrl}
+                onChange={(event) => setWallpaperUrl(event.target.value)}
+                placeholder="https://example.com/wallpaper.jpg"
+                className="min-w-0 flex-1 rounded-lg border border-pc-border bg-pc-bg-secondary px-3 py-2 text-sm text-pc-text placeholder-pc-text-muted focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
+              />
+              <button
+                type="button"
+                onClick={() => void applyCustomWallpaperUrl()}
+                disabled={!wallpaperUrl.trim()}
+                className="rounded-lg bg-pc-accent px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-pc-accent-secondary disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Use Link
+              </button>
+            </div>
+          </label>
+
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <label className="inline-flex w-fit cursor-pointer items-center rounded-lg border border-pc-border bg-pc-bg-secondary px-4 py-2 text-sm font-semibold text-pc-text transition-colors hover:border-pc-accent hover:text-pc-accent">
+              Upload image
+              <input type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/avif" onChange={handleWallpaperFileChange} className="sr-only" />
+            </label>
+            {customWallpaper && <button type="button" onClick={() => void handleClearCustomWallpaper()} className="w-fit text-sm text-pc-text-muted transition-colors hover:text-red-400">Remove custom wallpaper</button>}
+          </div>
+          <p className="text-xs text-pc-text-muted">Uploaded images up to 25 MB are stored in this browser&apos;s local image cache, while local storage keeps only a small reference. Linked images are loaded from their original web address.</p>
+        </div>
       </div>
 
       {/* ── Profile Info ── */}

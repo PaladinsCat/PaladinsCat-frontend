@@ -4,6 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   getWallpaperEnabled,
+  resolveCustomWallpaper,
+  type ResolvedCustomWallpaper,
   WALLPAPER_CHANGE_EVENT,
 } from "@/lib/wallpaper-preference";
 
@@ -34,6 +36,7 @@ const INTERVAL_MS = 10_000;
  */
 export default function MapSlideshow() {
   const [wallpaperEnabled, setWallpaperEnabled] = useState(true);
+  const [customWallpaper, setCustomWallpaper] = useState<ResolvedCustomWallpaper | null>(null);
   // Deterministic on server: always start at index 0
   const [index, setIndex] = useState(0);
   // Null until client mounts and shuffles
@@ -41,15 +44,32 @@ export default function MapSlideshow() {
   const mounted = useRef(false);
 
   useEffect(() => {
-    const syncWallpaperPreference = () => setWallpaperEnabled(getWallpaperEnabled());
-    syncWallpaperPreference();
-    window.addEventListener(WALLPAPER_CHANGE_EVENT, syncWallpaperPreference);
-    window.addEventListener("storage", syncWallpaperPreference);
+    let active = true;
+    let refreshVersion = 0;
+    const syncWallpaperPreferences = async () => {
+      const version = ++refreshVersion;
+      setWallpaperEnabled(getWallpaperEnabled());
+      const wallpaper = await resolveCustomWallpaper().catch(() => null);
+      if (active && version === refreshVersion) {
+        setCustomWallpaper(wallpaper);
+      } else if (wallpaper?.revoke) {
+        URL.revokeObjectURL(wallpaper.source);
+      }
+    };
+    void syncWallpaperPreferences();
+    const handleWallpaperChange = () => void syncWallpaperPreferences();
+    window.addEventListener(WALLPAPER_CHANGE_EVENT, handleWallpaperChange);
+    window.addEventListener("storage", handleWallpaperChange);
     return () => {
-      window.removeEventListener(WALLPAPER_CHANGE_EVENT, syncWallpaperPreference);
-      window.removeEventListener("storage", syncWallpaperPreference);
+      active = false;
+      window.removeEventListener(WALLPAPER_CHANGE_EVENT, handleWallpaperChange);
+      window.removeEventListener("storage", handleWallpaperChange);
     };
   }, []);
+
+  useEffect(() => () => {
+    if (customWallpaper?.revoke) URL.revokeObjectURL(customWallpaper.source);
+  }, [customWallpaper]);
 
   useEffect(() => {
     // Shuffle once on mount
@@ -77,6 +97,21 @@ export default function MapSlideshow() {
 
   if (!wallpaperEnabled) {
     return <div className="fixed inset-0 -z-10 bg-pc-bg" aria-hidden="true" />;
+  }
+
+  if (customWallpaper) {
+    return (
+      <div
+        className="fixed inset-0 -z-10 bg-pc-bg"
+        aria-hidden="true"
+        style={{
+          backgroundImage: `url(${JSON.stringify(customWallpaper.source)})`,
+          backgroundPosition: "center",
+          backgroundSize: "cover",
+          filter: "brightness(0.4)",
+        }}
+      />
+    );
   }
 
   return (
