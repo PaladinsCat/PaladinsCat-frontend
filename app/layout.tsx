@@ -28,6 +28,9 @@ export const metadata: Metadata = {
   authors: [{ name: "PaladinsCat" }],
   creator: SITE_NAME,
   publisher: SITE_NAME,
+  other: {
+    "google-adsense-account": "ca-pub-5642439289050032",
+  },
   alternates: {
     canonical: "/",
   },
