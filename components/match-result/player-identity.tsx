@@ -27,11 +27,11 @@ export function MatchPlayerLink({ player, className = "" }: { player: MatchPlaye
   const href = matchPlayerHref(player);
   const content = privateId ? (
     <>
-      <span>Private</span>
+      <span>Private Account</span>
       <span className="ml-1 inline-flex rounded border border-violet-400/30 bg-violet-400/10 px-1.5 py-0.5 align-middle text-[0.68em] font-bold uppercase tracking-wide text-violet-200">#{privateId}</span>
     </>
   ) : Number(player.player_id) === 0 ? (
-    <span>Private</span>
+    <span>Private Account</span>
   ) : (
     <PlayerName playerId={player.player_id}>{player.player_name || "Unknown"}</PlayerName>
   );
@@ -42,8 +42,8 @@ export function MatchPlayerLink({ player, className = "" }: { player: MatchPlaye
 export function MatchPlayerReference({ player, className = "" }: { player: MatchPlayerDetail; className?: string }) {
   const privateId = trackedPrivateId(player);
   if (privateId) {
-    return <Link href={`/players/private-accounts/${privateId}`} className={className}>Private profile #{privateId}</Link>;
+    return <Link href={`/players/private-accounts/${privateId}`} className={className}>Private ID {privateId}</Link>;
   }
-  if (Number(player.player_id) === 0) return <span className={className}>Private profile</span>;
+  if (Number(player.player_id) === 0) return <span className={className}>Private ID unavailable</span>;
   return <span className={className}>PID {player.player_id}</span>;
 }
