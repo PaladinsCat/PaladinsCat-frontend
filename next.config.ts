@@ -35,12 +35,25 @@ const nextConfig: NextConfig = {
       // proxy prefix and forwards to the backend service. This keeps the public
       // website working even when the direct backend debug port is filtered.
       { source: "/api/:path*", destination: `${apiDestination}/:path*` },
+      // Champion page bundles are requested by the browser as a neutral data
+      // route. Some embedded browsers block navigations/fetches under /api,
+      // even though the same-origin backend response is healthy.
+      { source: "/_pc/:path*", destination: `${apiDestination}/:path*` },
     ];
   },
   async headers() {
     return [
       {
         source: "/api/:path*",
+        headers: [
+          {
+            key: "X-Robots-Tag",
+            value: "noindex, nofollow",
+          },
+        ],
+      },
+      {
+        source: "/_pc/:path*",
         headers: [
           {
             key: "X-Robots-Tag",

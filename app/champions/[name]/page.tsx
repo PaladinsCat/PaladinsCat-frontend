@@ -32,7 +32,10 @@ import {
 import { getRankIconPath, getTierColor, resolveEffectiveTier } from "@/lib/tier-utils";
 import { withStoredLobbyTier } from "@/lib/lobby-tier";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api";
+// Keep this client request on the Next proxy instead of /api. Embedded
+// browsers can block /api fetches outright, which otherwise makes a healthy
+// cached bundle look like empty champion metrics.
+const CHAMPION_DATA_BASE = "/_pc";
 const CHAMPION_METRICS: Array<{ key: PerformanceMetricKey; label: string; colorClass: string; accent: string }> = [
   { key: "dpm", label: "Damage / Min", colorClass: "text-red-400", accent: "#f87171" },
   { key: "gpm", label: "Credits / Min", colorClass: "text-yellow-400", accent: "#facc15" },
@@ -188,7 +191,7 @@ export default function ChampionDetailPage() {
     // One server-cached bundle replaces the old fan-out of ten browser calls.
     // A warm entry is served from Redis immediately while the backend refreshes
     // it in the background after its TTL.
-    fetch(`${API_BASE}${withStoredLobbyTier(`/champions/${championId}/page-data`)}`)
+    fetch(`${CHAMPION_DATA_BASE}${withStoredLobbyTier(`/champions/${championId}/page-data`)}`)
       .then((response) => {
         if (!response.ok) throw new Error('Champion page data unavailable');
         return response.json() as Promise<ChampionPagePayload>;
