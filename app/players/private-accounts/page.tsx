@@ -71,11 +71,6 @@ export default function PrivateAccountsPage() {
           <div className="min-w-0">
             <h2 className="text-sm font-semibold text-pc-text">How private-account tracking works</h2>
             <p className="mt-1 text-sm leading-6 text-pc-text-secondary">Paladins hides the player ID and name, but completed matches still expose changing account signals. PaladinsCat builds a conservative timeline from account level, champion mastery, rank, platform, party companions, and match timing.</p>
-            <div className="mt-3 grid gap-2 text-xs text-pc-text-muted sm:grid-cols-3">
-              <div className="rounded-lg border border-pc-border/70 bg-pc-bg/35 px-3 py-2"><span className="font-semibold text-pc-text-secondary">PartyId</span> is session context only—never a person ID.</div>
-              <div className="rounded-lg border border-pc-border/70 bg-pc-bg/35 px-3 py-2"><span className="font-semibold text-pc-text-secondary">TP changes</span> after results; its direction and range support a match, but never define identity.</div>
-              <div className="rounded-lg border border-pc-border/70 bg-pc-bg/35 px-3 py-2"><span className="font-semibold text-pc-text-secondary">Names</span> appear only after in-game evidence is reviewed and verified.</div>
-            </div>
           </div>
         </div>
       </section>
