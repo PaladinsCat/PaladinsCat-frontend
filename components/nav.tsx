@@ -140,7 +140,9 @@ export default function Nav() {
     return pathname === href || pathname.startsWith(`${href}/`);
   };
   const profileHref = user?.linkedPlayerId ? `/players/${user.linkedPlayerId}` : "/link-account";
-  const accountLabel = user ? t("nav.greeting", { username: user.linkedPlayerName ?? user.username }) : "";
+  const accountLabel = user
+    ? (user.linkedPlayerName ?? user.username).replace(/_/g, " ")
+    : "";
 
   return (
     <>
@@ -217,7 +219,7 @@ export default function Nav() {
                 <div className="group relative flex items-center">
                   <Link
                     href={profileHref}
-                    className="block max-w-36 truncate rounded-md px-1 py-1 text-sm text-pc-text-secondary underline underline-offset-2 transition-colors hover:text-pc-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent"
+                    className="block max-w-36 truncate rounded-md px-1 py-1 text-sm text-pc-text-secondary transition-colors hover:text-pc-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent"
                   >
                     {user.linkedPlayerId ? <PlayerName playerId={user.linkedPlayerId} verified>{accountLabel}</PlayerName> : accountLabel}
                   </Link>
