@@ -20,6 +20,11 @@ import {
 } from "@/lib/champion-data";
 import { getCanonicalTalentImageUrl } from "@/lib/image-assets";
 import {
+  fetchItems,
+  fetchChampionTalentStats,
+  fetchPerformanceMetrics,
+  fetchChampionPerformanceDistributions,
+  fetchChampionMapStats,
   type ChampionTalentStatsResponse,
   type ChampionTalentStat,
   type ItemStat,
@@ -32,10 +37,8 @@ import {
 import { getRankIconPath, getTierColor, resolveEffectiveTier } from "@/lib/tier-utils";
 import { withStoredLobbyTier } from "@/lib/lobby-tier";
 
-// Keep this client request on the Next proxy instead of /api. Embedded
-// browsers can block /api fetches outright, which otherwise makes a healthy
-// cached bundle look like empty champion metrics.
-const CHAMPION_DATA_BASE = "/_pc";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api";
+const RANKED_QUEUE_ID = 486;
 const CHAMPION_METRICS: Array<{ key: PerformanceMetricKey; label: string; colorClass: string; accent: string }> = [
   { key: "dpm", label: "Damage / Min", colorClass: "text-red-400", accent: "#f87171" },
   { key: "gpm", label: "Credits / Min", colorClass: "text-yellow-400", accent: "#facc15" },
@@ -128,7 +131,7 @@ function AvgTierCard({ stats }: { stats: ChampionStats }) {
   );
 }
 
-export default function ChampionDetailPage({ initialPageData = null }: { initialPageData?: ChampionPagePayload | null }) {
+export default function ChampionDetailPage() {
   const params = useParams();
   const rawName = params?.name;
   const name = Array.isArray(rawName) ? rawName[0] ?? "" : rawName ?? "";
@@ -187,50 +190,39 @@ export default function ChampionDetailPage({ initialPageData = null }: { initial
     setChampionItems([]);
     setChampionMaps([]);
 
-    const applyPageData = (data: ChampionPagePayload) => {
-      const s = data.stats;
-      setStats(s ? {
-        avgRating: s.avg_league_tier != null ? Number(s.avg_league_tier) : null,
-        avgWinRate: s.win_rate != null ? Number(s.win_rate) : null,
-        totalPlays: s.total_matches != null ? Number(s.total_matches) : null,
-        totalMatches: s.total_matches != null ? Number(s.total_matches) : null,
-        totalWins: s.wins != null ? Number(s.wins) : null,
-      } : null);
-      setTalentStats(data.talentStats);
-      setChampionItems(data.items);
-      setChampionMaps(data.maps);
-      setGlobalPerformance(data.performance);
-      setChampionPerformance(data.championPerformance);
-    };
-
-    // Server rendering supplies the same Redis-cached bundle for the initial
-    // request. That keeps metrics available in embedded browsers that block
-    // background fetches, while the client request below remains a fallback.
-    if (initialPageData) {
-      applyPageData(initialPageData);
-      setLoading(false);
-      return;
-    }
-
-    // One server-cached bundle replaces the old fan-out of ten browser calls.
-    // A warm entry is served from Redis immediately while the backend refreshes
-    // it in the background after its TTL.
-    fetch(`${CHAMPION_DATA_BASE}${withStoredLobbyTier(`/champions/${championId}/page-data`)}`)
-      .then((response) => {
-        if (!response.ok) throw new Error('Champion page data unavailable');
-        return response.json() as Promise<ChampionPagePayload>;
-      })
-      .then(applyPageData)
-      .catch(() => {
-        setStats(null);
-        setTalentStats(null);
-        setChampionItems([]);
-        setChampionMaps([]);
-        setGlobalPerformance({});
-        setChampionPerformance({});
+    Promise.all([
+      fetch(`${API_BASE}${withStoredLobbyTier(`/champions/${championId}`)}`)
+        .then((response) => response.ok ? response.json() : null)
+        .then((data: { stats?: Record<string, unknown> | null } | null) => {
+          const s = data?.stats;
+          return s ? {
+            avgRating: s.avg_league_tier != null ? Number(s.avg_league_tier) : null,
+            avgWinRate: s.win_rate != null ? Number(s.win_rate) : null,
+            totalPlays: s.total_matches != null ? Number(s.total_matches) : null,
+            totalMatches: s.total_matches != null ? Number(s.total_matches) : null,
+            totalWins: s.wins != null ? Number(s.wins) : null,
+          } as ChampionStats : null;
+        }).catch(() => null as ChampionStats | null),
+      fetchChampionTalentStats(championId).catch(() => null as ChampionTalentStatsResponse | null),
+      fetchItems({ mode: "ranked", championId, limit: 200 }).catch(() => [] as ItemStat[]),
+      fetchChampionMapStats(championId).catch(() => [] as ChampionMapStat[]),
+      fetchPerformanceMetrics({ queueId: RANKED_QUEUE_ID }).catch(() => ({} as PerformanceMetricsResponse)),
+      Promise.all(CHAMPION_METRICS.map(({ key }) =>
+        fetchChampionPerformanceDistributions({ metric: key, championId, queueId: RANKED_QUEUE_ID })
+          .then((rows) => [key, rows[0] ?? null] as const)
+          .catch(() => [key, null] as const)
+      )),
+    ])
+      .then(([statsData, talentData, itemData, mapData, globalMetrics, championMetricPairs]) => {
+        if (statsData) setStats(statsData);
+        if (talentData) setTalentStats(talentData);
+        setChampionItems(itemData);
+        setChampionMaps(mapData);
+        setGlobalPerformance(globalMetrics);
+        setChampionPerformance(Object.fromEntries(championMetricPairs.filter(([, row]) => row != null)) as Partial<Record<PerformanceMetricKey, ChampionPerformanceDistribution>>);
       })
       .finally(() => setLoading(false));
-  }, [championData, initialPageData, staticChampion?.id]);
+  }, [championData, staticChampion?.id]);
 
 
   const talentStatsByName = useMemo(() => {
