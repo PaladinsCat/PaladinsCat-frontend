@@ -2,6 +2,7 @@
 
 import type { MatchResultPlayer, TeamAverages } from "./types";
 import MatchupCard from "./matchup-card";
+import { matchPlayerKey } from "./player-identity";
 
 interface TeamMatchupProps {
   players: MatchResultPlayer[];
@@ -17,7 +18,7 @@ export default function TeamMatchup({ players, label, averages }: TeamMatchupPro
       {/* Player cards in a responsive grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 p-3">
         {players.map((p) => (
-          <MatchupCard key={p.matchData.player_id} player={p} />
+          <MatchupCard key={matchPlayerKey(p.matchData)} player={p} />
         ))}
       </div>
 

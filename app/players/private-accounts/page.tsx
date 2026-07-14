@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { CalendarClock, LockKeyhole, Search, ShieldCheck } from "lucide-react";
+import { CalendarClock, Info, LockKeyhole, Search, ShieldCheck } from "lucide-react";
 import { LoadingPanel } from "@/components/async-state";
 import PlayerDirectoryPagination from "@/components/player-directory-pagination";
 import { fetchPrivateAccountsDirectory, type PrivateAccountSummary } from "@/lib/api-client";
-import { TIER_NAMES, getTierColor } from "@/lib/tier-utils";
+import { TIER_NAMES, getRankIconPath, getTierColor } from "@/lib/tier-utils";
 
 const PAGE_SIZE = 24;
 
@@ -65,6 +65,21 @@ export default function PrivateAccountsPage() {
         </div>
       </header>
 
+      <section className="rounded-2xl border border-violet-400/20 bg-gradient-to-br from-violet-400/[0.08] to-pc-bg-elevated p-4 sm:p-5">
+        <div className="flex items-start gap-3">
+          <Info aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0 text-violet-300" />
+          <div className="min-w-0">
+            <h2 className="text-sm font-semibold text-pc-text">How private-account tracking works</h2>
+            <p className="mt-1 text-sm leading-6 text-pc-text-secondary">Paladins hides the player ID and name, but completed matches still expose changing account signals. PaladinsCat builds a conservative timeline from account level, champion mastery, rank, platform, party companions, and match timing.</p>
+            <div className="mt-3 grid gap-2 text-xs text-pc-text-muted sm:grid-cols-3">
+              <div className="rounded-lg border border-pc-border/70 bg-pc-bg/35 px-3 py-2"><span className="font-semibold text-pc-text-secondary">PartyId</span> is session context only—never a person ID.</div>
+              <div className="rounded-lg border border-pc-border/70 bg-pc-bg/35 px-3 py-2"><span className="font-semibold text-pc-text-secondary">TP changes</span> after results; its direction and range support a match, but never define identity.</div>
+              <div className="rounded-lg border border-pc-border/70 bg-pc-bg/35 px-3 py-2"><span className="font-semibold text-pc-text-secondary">Names</span> appear only after in-game evidence is reviewed and verified.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <label className="relative block w-full sm:max-w-sm">
           <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-pc-text-muted" />
@@ -89,9 +104,9 @@ export default function PrivateAccountsPage() {
             const tierName = TIER_NAMES[account.leagueTier] || "Unranked";
             return (
               <Link href={`/players/private-accounts/${account.id}`} key={account.id} className="group block overflow-hidden rounded-xl border border-slate-400/20 bg-pc-bg-elevated p-4 transition-colors hover:border-pc-accent-mid">
-                <div className="flex flex-col items-start gap-3 sm:flex-row sm:justify-between">
+                <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted">Private profile</div>
+                    <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted"><span>Private profile #{account.id}</span><span className="rounded border border-pc-border bg-pc-bg/50 px-1.5 py-0.5 text-pc-text-secondary">Level {account.accountLevel.toLocaleString()}</span></div>
                     <h2 className="mt-1 flex items-center gap-1.5 truncate text-base font-semibold text-pc-text group-hover:text-pc-accent">
                       <span className="truncate">{account.displayName}</span>
                       {account.verifiedName && <ShieldCheck aria-label="Verified from submitted evidence" className="h-4 w-4 shrink-0 text-emerald-300" />}
@@ -100,11 +115,10 @@ export default function PrivateAccountsPage() {
                   <span className="shrink-0 rounded-full border border-slate-400/20 bg-slate-400/10 px-2 py-1 text-xs font-semibold text-slate-300">{account.matchCount.toLocaleString()} matches</span>
                 </div>
 
-                <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 border-y border-pc-border py-3 text-xs">
-                  <div><dt className="text-pc-text-muted">Account level</dt><dd className="mt-0.5 font-semibold text-pc-text">{account.accountLevel.toLocaleString()}</dd></div>
-                  <div><dt className="text-pc-text-muted">Mastery level</dt><dd className="mt-0.5 font-semibold text-pc-text">{account.masteryLevel.toLocaleString()}</dd></div>
-                  <div><dt className="text-pc-text-muted">Rank</dt><dd className={`mt-0.5 font-semibold ${getTierColor(account.leagueTier)}`}>{tierName}</dd></div>
-                  <div><dt className="text-pc-text-muted">League points</dt><dd className="mt-0.5 font-semibold text-pc-text">{account.leaguePoints.toLocaleString()}</dd></div>
+                <dl className="mt-4 grid grid-cols-3 divide-x divide-pc-border border-y border-pc-border py-3 text-xs">
+                  <div className="pr-3"><dt className="text-pc-text-muted">Mastery</dt><dd className="mt-1 font-semibold text-pc-text">{account.masteryLevel.toLocaleString()}</dd></div>
+                  <div className="px-3"><dt className="text-pc-text-muted">Rank</dt><dd className={`mt-1 flex min-w-0 items-center gap-1.5 font-semibold ${getTierColor(account.leagueTier)}`}><img src={getRankIconPath(account.leagueTier, 0)} alt="" className="h-6 w-6 shrink-0 object-contain" /><span className="truncate">{tierName}</span></dd></div>
+                  <div className="pl-3"><dt className="text-pc-text-muted">TP</dt><dd className="mt-1 font-semibold text-pc-text">{account.leaguePoints.toLocaleString()}</dd></div>
                 </dl>
 
                 <div className="mt-3 flex items-start gap-2 text-xs text-pc-text-muted">

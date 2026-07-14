@@ -5,7 +5,7 @@ import type { MatchPlayerDetail, MatchFactPlayer } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
 import { computeDamageStats, num, fixed } from "./format";
-import PlayerName from "@/components/player-name";
+import { MatchPlayerLink, matchPlayerKey } from "./player-identity";
 
 interface MatchStatsSectionProps {
   team1Players: MatchPlayerDetail[];
@@ -69,12 +69,7 @@ function PlayerRow({
             className="h-8 w-8 rounded shrink-0 border border-pc-border object-cover"
           />
           <div className="min-w-0">
-            <Link
-              href={`/players/${player.player_id}`}
-              className="block truncate text-sm font-medium text-pc-text hover:text-pc-accent"
-            >
-              <PlayerName playerId={player.player_id}>{player.player_name || "PRIVATE"}</PlayerName>
-            </Link>
+            <MatchPlayerLink player={player} className="block truncate text-sm font-medium text-pc-text hover:text-pc-accent" />
             {championHref ? (
               <Link
                 href={championHref}
@@ -178,7 +173,7 @@ function MobilePlayerCard({ player, wins }: { player: MatchPlayerDetail; wins: b
     <div className="flex min-w-0 items-center gap-3">
       <img src={getChampionIconSafe(player.champion_name)} alt="" className="h-11 w-11 shrink-0 rounded-xl border border-pc-border object-cover" />
       <div className="min-w-0 flex-1">
-        <Link href={`/players/${player.player_id}`} className="block truncate text-sm font-semibold text-pc-text hover:text-pc-accent"><PlayerName playerId={player.player_id}>{player.player_name || "PRIVATE"}</PlayerName></Link>
+        <MatchPlayerLink player={player} className="block truncate text-sm font-semibold text-pc-text hover:text-pc-accent" />
         {player.champion_name ? <Link href={`/champions/${championSlug(player.champion_name)}`} className="block truncate text-xs text-pc-text-secondary hover:text-pc-accent">{champion}</Link> : <span className="text-xs text-pc-text-secondary">{champion}</span>}
       </div>
     </div>
@@ -207,9 +202,9 @@ export default function MatchStatsSection({
 
       <div className="lg:hidden">
         <div className="border-b border-pc-border bg-pc-bg-secondary/60 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted">{team1Label}</div>
-        {team1Players.map((player) => <MobilePlayerCard key={`${player.player_id}-${player.champion_id}`} player={player} wins={team1Wins} />)}
+        {team1Players.map((player) => <MobilePlayerCard key={matchPlayerKey(player)} player={player} wins={team1Wins} />)}
         <div className="border-y border-pc-border bg-pc-bg-secondary/60 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted">{team2Label}</div>
-        {team2Players.map((player) => <MobilePlayerCard key={`${player.player_id}-${player.champion_id}`} player={player} wins={team2Wins} />)}
+        {team2Players.map((player) => <MobilePlayerCard key={matchPlayerKey(player)} player={player} wins={team2Wins} />)}
       </div>
 
       <div className="hidden lg:block">
@@ -234,7 +229,7 @@ export default function MatchStatsSection({
             {/* Team 1 rows */}
             {team1Players.map((p) => (
               <PlayerRow
-                key={p.player_id}
+                key={matchPlayerKey(p)}
                 player={p}
                 fact={factMap.get(String(p.player_id))}
                 wins={team1Wins}
@@ -244,7 +239,7 @@ export default function MatchStatsSection({
             {/* Team 2 rows */}
             {team2Players.map((p) => (
               <PlayerRow
-                key={p.player_id}
+                key={matchPlayerKey(p)}
                 player={p}
                 fact={factMap.get(String(p.player_id))}
                 wins={team2Wins}

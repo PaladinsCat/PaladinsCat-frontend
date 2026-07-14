@@ -645,6 +645,8 @@ export interface PrivateAccountObservationSummary {
   masteryLevel: number;
   leagueTier: number;
   leaguePoints: number;
+  tpDelta: number | null;
+  winStatus: string | null;
   championId: number | null;
   championName: string | null;
   taskForce: number;
@@ -744,6 +746,8 @@ export async function fetchPrivateAccountDetail(privateId: number): Promise<Priv
       masteryLevel: Number(row.mastery_level ?? 0),
       leagueTier: Number(row.league_tier ?? 0),
       leaguePoints: Number(row.league_points ?? 0),
+      tpDelta: row.tp_delta == null ? null : Number(row.tp_delta),
+      winStatus: row.win_status == null ? null : String(row.win_status),
       championId: row.champion_id == null ? null : Number(row.champion_id),
       championName: row.champion_name == null ? null : String(row.champion_name),
       taskForce: Number(row.task_force ?? 0),
@@ -3687,6 +3691,11 @@ export async function fetchGlickoHistory(playerId: string, days: number = 30, li
 export interface MatchPlayerDetail {
   player_id: number;
   player_name: string;
+  private_slot?: number | null;
+  private_player_id?: number | null;
+  private_account_alias?: string | null;
+  private_account_verified_name?: string | null;
+  private_account_display_name?: string | null;
   champion_id: number;
   champion_name: string;
   skin_id: number;

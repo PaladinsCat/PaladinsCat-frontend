@@ -8,12 +8,12 @@ import { championSlug } from "@/lib/utils";
 import { mapImagePath } from "@/lib/map-images";
 import { getRankIconPath, resolveEffectiveTier, TIER_NAMES } from "@/lib/tier-utils";
 import { parseBackendDate } from "@/lib/time-format";
-import PlayerName from "@/components/player-name";
 import CanonicalTalentImage from "@/components/canonical-talent-image";
 import MatchExportButton from "./match-export-button";
 import { computeDamageStats } from "./format";
 import { getPartyNumber } from "./party-badge";
 import type { MatchResultPlayer } from "./types";
+import { MatchPlayerLink, MatchPlayerReference, matchPlayerKey } from "./player-identity";
 
 type BrowserScoreboardProps = {
   match: MatchData;
@@ -104,7 +104,7 @@ function TeamRows({ team }: { team: MatchResultPlayer[] }) {
     const peak = (key: keyof Metrics, onlyIfPositive = false) => stat[key] === maximum(key) && (!onlyIfPositive || stat[key] > 0);
 
     return (
-      <div className="player-row grid-row" key={player.player_id}>
+      <div className="player-row grid-row" key={matchPlayerKey(player)}>
         <div className="champion-wrap">
           {championHref ? (
             <Link href={championHref} aria-label={`${player.champion_name} champion page`} title={player.champion_name}>
@@ -115,7 +115,7 @@ function TeamRows({ team }: { team: MatchResultPlayer[] }) {
         </div>
         <div className="rank"><img src={getRankIconPath(tier.tier, tier.rank)} alt={tier.effective.displayName} title={tier.effective.displayName} /></div>
         <div className="level">{entry.profileData?.level != null ? integer(entry.profileData.level) : "—"}</div>
-        <div className="player"><Link href={`/players/${player.player_id}`} className="player-name block" title={player.player_name || "PRIVATE"}><PlayerName playerId={player.player_id}>{player.player_name || "PRIVATE"}</PlayerName></Link><div className="player-sub">PID {player.player_id}</div></div>
+        <div className="player"><MatchPlayerLink player={player} className="player-name block" /><MatchPlayerReference player={player} className="player-sub block hover:text-violet-200" /></div>
         <div className="player-elo">{entry.profileData?.queueElo != null ? integer(entry.profileData.queueElo) : "—"}</div>
         {talent && talentHref ? (
           <Link href={talentHref} className="talent-link" title={talent.talent_name ?? "Talent"} aria-label={`${talent.talent_name ?? "Talent"} talent page`}>

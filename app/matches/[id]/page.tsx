@@ -60,7 +60,11 @@ async function fetchProfilesForMatch(
   players: MatchPlayerDetail[],
   queueId: number,
 ): Promise<ProfileByPlayerId> {
-  const uniquePlayers = [...new Map(players.map((player) => [String(player.player_id), player])).values()];
+  const uniquePlayers = [...new Map(
+    players
+      .filter((player) => Number(player.player_id) > 0)
+      .map((player) => [String(player.player_id), player]),
+  ).values()];
   // Each profile fetch gets its own 10-second timeout
   const timedFetch = (player: MatchPlayerDetail) =>
     fetchPlayerProfile(String(player.player_id), queueId, player.champion_id)

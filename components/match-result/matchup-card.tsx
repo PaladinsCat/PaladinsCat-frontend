@@ -7,7 +7,7 @@ import { getChampionIconSafe } from "@/lib/champion-icons";
 import { formatKBMTier, getChampionStats, num } from "./format";
 import { getRankIconPath, resolveEffectiveTier } from "@/lib/tier-utils";
 import PartyBadge from "./party-badge";
-import PlayerName from "@/components/player-name";
+import { MatchPlayerLink } from "./player-identity";
 
 function RecordBar({ wins, total, tone }: { wins: number; total: number; tone: "teal" | "green" }) {
   const percent = total > 0 ? Math.max(0, Math.min(100, (wins / total) * 100)) : 50;
@@ -51,7 +51,7 @@ export default function MatchupCard({ player }: { player: MatchResultPlayer }) {
       <div className="relative flex flex-col items-center text-center">
         <img src={getChampionIconSafe(champion)} alt={champion || "Champion"} className="h-14 w-14 rounded-full border-2 border-pc-border object-cover" onError={(event) => { event.currentTarget.src = "/images/champions/Champion_Generic_Icon.avif"; }} />
         <div className="mt-2 flex w-full items-center justify-center gap-1 text-sm font-bold">
-          <Link href={`/players/${md.player_id}`} className="min-w-0 truncate text-pc-text hover:text-pc-accent"><PlayerName playerId={md.player_id}>{md.player_name || "PRIVATE"}</PlayerName></Link>
+          <MatchPlayerLink player={md} className="min-w-0 truncate text-pc-text hover:text-pc-accent" />
           {profile?.level != null && <span className="shrink-0 text-pc-text-muted">· Lv {num(profile.level)}</span>}
         </div>
         {champion ? <Link href={`/champions/${championSlug(champion)}`} className="truncate text-xs text-pc-text-secondary hover:text-pc-accent">{champion}</Link> : <span className="text-xs text-pc-text-muted">Champion unknown</span>}
