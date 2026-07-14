@@ -289,7 +289,7 @@ const SearchResultGroups = memo(function SearchResultGroups({
                       {TYPE_LABEL[result.type]}
                     </span>
                   </div>
-                  <p className="truncate text-xs text-pc-text-muted mt-0.5">
+                  <p className="truncate text-xs text-pc-text-muted mt-1">
                     <PlayerSearchSubtitle result={result} />
                   </p>
                 </div>

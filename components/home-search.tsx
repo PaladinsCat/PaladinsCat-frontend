@@ -148,7 +148,7 @@ export default function HomeSearch({ onSearchActiveChange }: HomeSearchProps) {
                       <span className="w-14 shrink-0 text-[10px] font-semibold uppercase tracking-wide text-pc-accent">
                         {RESULT_TYPE_LABEL[result.type]}
                       </span>
-                      <span className="min-w-0 flex-1">
+                      <span className="min-w-0 flex-1 space-y-1">
                         <span className="block truncate text-sm font-medium text-pc-text">
                           {result.type === "player" ? <PlayerName playerId={result.id}>{result.title}</PlayerName> : result.title}
                         </span>
