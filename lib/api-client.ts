@@ -2987,6 +2987,7 @@ export async function verifyPlayerLink(): Promise<{ message: string; player: { i
   return fetchJson<{ message: string; player: { id: number; name: string } }>("/auth/account/player-link/verification/check", {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify({}),
   });
 }
 
