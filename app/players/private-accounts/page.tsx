@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { CalendarClock, LockKeyhole, Search } from "lucide-react";
+import { CalendarClock, LockKeyhole, Search, ShieldCheck } from "lucide-react";
 import { LoadingPanel } from "@/components/async-state";
 import PlayerDirectoryPagination from "@/components/player-directory-pagination";
 import { fetchPrivateAccountsDirectory, type PrivateAccountSummary } from "@/lib/api-client";
@@ -88,11 +88,14 @@ export default function PrivateAccountsPage() {
           {accounts.map((account) => {
             const tierName = TIER_NAMES[account.leagueTier] || "Unranked";
             return (
-              <article key={account.id} className="overflow-hidden rounded-xl border border-slate-400/20 bg-pc-bg-elevated p-4">
+              <Link href={`/players/private-accounts/${account.id}`} key={account.id} className="group block overflow-hidden rounded-xl border border-slate-400/20 bg-pc-bg-elevated p-4 transition-colors hover:border-pc-accent-mid">
                 <div className="flex flex-col items-start gap-3 sm:flex-row sm:justify-between">
                   <div className="min-w-0">
                     <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted">Private profile</div>
-                    <h2 className="mt-1 truncate text-base font-semibold text-pc-text">{account.alias || `Private #${account.id}`}</h2>
+                    <h2 className="mt-1 flex items-center gap-1.5 truncate text-base font-semibold text-pc-text group-hover:text-pc-accent">
+                      <span className="truncate">{account.displayName}</span>
+                      {account.verifiedName && <ShieldCheck aria-label="Verified from submitted evidence" className="h-4 w-4 shrink-0 text-emerald-300" />}
+                    </h2>
                   </div>
                   <span className="shrink-0 rounded-full border border-slate-400/20 bg-slate-400/10 px-2 py-1 text-xs font-semibold text-slate-300">{account.matchCount.toLocaleString()} matches</span>
                 </div>
@@ -108,7 +111,7 @@ export default function PrivateAccountsPage() {
                   <CalendarClock aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0" />
                   <div><div>First observed <span className="text-pc-text-secondary">{observedAt(account.firstSeen)}</span></div><div className="mt-1">Last observed <span className="text-pc-text-secondary">{observedAt(account.lastSeen)}</span></div></div>
                 </div>
-              </article>
+              </Link>
             );
           })}
         </div>

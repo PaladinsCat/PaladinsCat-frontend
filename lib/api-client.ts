@@ -622,6 +622,8 @@ export interface PlayersOverview {
 export interface PrivateAccountSummary {
   id: number;
   alias: string | null;
+  verifiedName: string | null;
+  displayName: string;
   partyId: number;
   accountLevel: number;
   masteryLevel: number;
@@ -630,6 +632,35 @@ export interface PrivateAccountSummary {
   matchCount: number;
   firstSeen: string | null;
   lastSeen: string | null;
+  identityStatus: string;
+  identityConfidence: number;
+  trackingVersion: number;
+}
+
+export interface PrivateAccountObservationSummary {
+  matchId: number;
+  privateSlot: number;
+  entryDatetime: string | null;
+  accountLevel: number;
+  masteryLevel: number;
+  leagueTier: number;
+  leaguePoints: number;
+  championId: number | null;
+  championName: string | null;
+  taskForce: number;
+  platform: string | null;
+  source: string;
+  resolutionStatus: string;
+  resolutionConfidence: number;
+  map: string | null;
+  queueId: number;
+  region: string | null;
+  durationSeconds: number;
+}
+
+export interface PrivateAccountDetail {
+  account: PrivateAccountSummary;
+  observations: PrivateAccountObservationSummary[];
 }
 
 export interface PartyPairSummary {
@@ -654,6 +685,8 @@ function mapPrivateAccount(row: any): PrivateAccountSummary {
   return {
     id: Number(row.id),
     alias: row.alias == null ? null : String(row.alias),
+    verifiedName: row.verified_name == null ? null : String(row.verified_name),
+    displayName: String(row.display_name ?? row.verified_name ?? row.alias ?? `Private #${row.id}`),
     partyId: Number(row.party_id ?? 0),
     accountLevel: Number(row.account_level ?? 0),
     masteryLevel: Number(row.mastery_level ?? 0),
@@ -662,6 +695,9 @@ function mapPrivateAccount(row: any): PrivateAccountSummary {
     matchCount: Number(row.match_count ?? 0),
     firstSeen: row.first_seen ?? null,
     lastSeen: row.last_seen ?? null,
+    identityStatus: String(row.identity_status ?? 'inferred'),
+    identityConfidence: Number(row.identity_confidence ?? 0),
+    trackingVersion: Number(row.tracking_version ?? 1),
   };
 }
 
@@ -685,6 +721,33 @@ export async function fetchPrivateAccountsDirectory(params: { page?: number; pag
   const rows = await fetchJson<any[]>(`/player-ext/private?${query.toString()}`);
   const total = Number(rows[0]?.total_count ?? 0);
   return { items: rows.map(mapPrivateAccount), total, page, pageSize, totalPages: Math.max(1, Math.ceil(total / pageSize)) };
+}
+
+export async function fetchPrivateAccountDetail(privateId: number): Promise<PrivateAccountDetail> {
+  const raw = await fetchJson<any>(`/player-ext/private/${privateId}`);
+  return {
+    account: mapPrivateAccount(raw.account),
+    observations: (raw.observations ?? []).map((row: any) => ({
+      matchId: Number(row.match_id),
+      privateSlot: Number(row.private_slot ?? 0),
+      entryDatetime: row.entry_datetime ?? null,
+      accountLevel: Number(row.account_level ?? 0),
+      masteryLevel: Number(row.mastery_level ?? 0),
+      leagueTier: Number(row.league_tier ?? 0),
+      leaguePoints: Number(row.league_points ?? 0),
+      championId: row.champion_id == null ? null : Number(row.champion_id),
+      championName: row.champion_name == null ? null : String(row.champion_name),
+      taskForce: Number(row.task_force ?? 0),
+      platform: row.platform == null ? null : String(row.platform),
+      source: String(row.source ?? 'direct'),
+      resolutionStatus: String(row.resolution_status ?? 'unresolved'),
+      resolutionConfidence: Number(row.resolution_confidence ?? 0),
+      map: row.map == null ? null : String(row.map),
+      queueId: Number(row.queue_id ?? 0),
+      region: row.region == null ? null : String(row.region),
+      durationSeconds: Number(row.duration_seconds ?? 0),
+    })),
+  };
 }
 
 export async function fetchPartyPairsDirectory(params: { page?: number; pageSize?: number; query?: string } = {}): Promise<PlayerDirectoryPage<PartyPairSummary>> {
