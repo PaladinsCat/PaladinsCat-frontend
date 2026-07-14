@@ -2,6 +2,7 @@
 // until its locale files exist in the community locale repository.
 export const SUPPORTED_LOCALES = [
   { code: "en", label: "English" },
+  { code: "ko", label: "한국어" },
 ] as const;
 
 // Contributor targets are intentionally separate from public locales: they let
