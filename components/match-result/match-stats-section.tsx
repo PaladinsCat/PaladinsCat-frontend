@@ -5,7 +5,6 @@ import type { MatchPlayerDetail, MatchFactPlayer } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
 import { computeDamageStats, num, fixed } from "./format";
-import PartyBadge from "./party-badge";
 import PlayerName from "@/components/player-name";
 
 interface MatchStatsSectionProps {
@@ -62,8 +61,8 @@ function PlayerRow({
       }`}
     >
       {/* Champion icon + player info */}
-      <td className="px-3 py-2 whitespace-nowrap">
-        <div className="flex items-center gap-2">
+      <td className="px-3 py-2">
+        <div className="flex min-w-0 items-center gap-2">
           <img
             src={icon}
             alt={player.champion_name || "Champion"}
@@ -90,11 +89,6 @@ function PlayerRow({
             )}
           </div>
         </div>
-      </td>
-
-      {/* Party — omitted for solo players */}
-      <td className="px-2 py-2 text-center whitespace-nowrap">
-        <PartyBadge player={player} className="mx-auto" />
       </td>
 
       {/* Numeric stat columns */}
@@ -151,7 +145,7 @@ function PlayerRow({
 /* ── Main section ── */
 
 const statColumns = [
-  "Player", "Party", "Credits", "CPM", "eCPM", "KDA", "Obj",
+  "Player", "Credits", "CPM", "eCPM", "KDA", "Obj",
   "Dmg", "DPM", "Abil", "Taken", "Shielding", "SPM", "Heal", "HPM", "Self", "AFK",
 ];
 
@@ -187,7 +181,6 @@ function MobilePlayerCard({ player, wins }: { player: MatchPlayerDetail; wins: b
         <Link href={`/players/${player.player_id}`} className="block truncate text-sm font-semibold text-pc-text hover:text-pc-accent"><PlayerName playerId={player.player_id}>{player.player_name || "PRIVATE"}</PlayerName></Link>
         {player.champion_name ? <Link href={`/champions/${championSlug(player.champion_name)}`} className="block truncate text-xs text-pc-text-secondary hover:text-pc-accent">{champion}</Link> : <span className="text-xs text-pc-text-secondary">{champion}</span>}
       </div>
-      <PartyBadge player={player} />
     </div>
     <dl className="mt-3 grid grid-cols-2 gap-1.5 min-[420px]:grid-cols-3">
       {metrics.map(([label, value]) => <div key={label} className="rounded-lg border border-pc-border/60 bg-pc-bg-secondary/50 px-2.5 py-2"><dt className="text-[9px] uppercase tracking-wide text-pc-text-muted">{label}</dt><dd className="mt-0.5 truncate font-mono text-xs font-semibold text-pc-text">{value}</dd></div>)}
@@ -219,14 +212,18 @@ export default function MatchStatsSection({
         {team2Players.map((player) => <MobilePlayerCard key={`${player.player_id}-${player.champion_id}`} player={player} wins={team2Wins} />)}
       </div>
 
-      <div className="hidden overflow-x-auto lg:block">
-        <table className="w-full min-w-[1280px]">
+      <div className="hidden lg:block">
+        <table className="w-full table-fixed">
+          <colgroup>
+            <col className="w-[180px] xl:w-[210px]" />
+            {statColumns.slice(1).map((column) => <col key={column} />)}
+          </colgroup>
           <thead>
             <tr className="border-b border-pc-border/60 bg-pc-bg-secondary/50">
               {statColumns.map((col) => (
                 <th
                   key={col}
-                  className="px-2 py-2 text-[10px] uppercase tracking-wider text-pc-text-muted font-medium text-center"
+                  className={`px-1.5 py-2 text-[10px] uppercase tracking-wide text-pc-text-muted font-medium ${col === "Player" ? "text-left" : "text-center"}`}
                 >
                   {col}
                 </th>

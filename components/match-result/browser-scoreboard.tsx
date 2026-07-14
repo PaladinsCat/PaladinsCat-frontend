@@ -187,9 +187,15 @@ export default function BrowserScoreboard({ match, queueLabel, team1, team2, ban
   const mapName = useMemo(() => cleanMapName(match.map), [match.map]);
   const modeName = useMemo(() => cleanQueueMode(queueLabel), [queueLabel]);
   const ranked = match.is_ranked;
-  const sortedBans = useMemo(() => [...bans].sort((a, b) => value(a.ban_slot) - value(b.ban_slot)), [bans]);
-  const leftBans = sortedBans.slice(0, Math.ceil(sortedBans.length / 2)).slice(0, 4);
-  const rightBans = sortedBans.slice(Math.ceil(sortedBans.length / 2)).slice(0, 4);
+  const { leftBans, rightBans } = useMemo(() => {
+    const orderedBans = [...bans].sort((a, b) => value(a.ban_slot) - value(b.ban_slot));
+
+    // Ban slots represent alternating draft turns: Team 1 takes odd slots and Team 2 takes even slots.
+    return {
+      leftBans: orderedBans.filter((ban) => value(ban.ban_slot) % 2 === 1).slice(0, 4),
+      rightBans: orderedBans.filter((ban) => value(ban.ban_slot) > 0 && value(ban.ban_slot) % 2 === 0).slice(0, 4),
+    };
+  }, [bans]);
   const averageTier = Math.floor([...team1, ...team2].reduce((sum, player) => sum + tierFor(player).tier, 0) / Math.max(1, team1.length + team2.length));
 
   useEffect(() => {

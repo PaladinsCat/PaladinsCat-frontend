@@ -28,14 +28,12 @@ import {
   type MatchFactPlayer,
   type MatchPlayerDetail,
   type RatingSnapshot,
-  type MatchBan,
 } from "@/lib/api-client";
 import { championSlug } from "@/lib/utils";
 import {
   MatchResultPlayer,
   ProfileByPlayerId,
 } from "@/components/match-result/types";
-import BansSection from "@/components/match-result/bans-section";
 import MatchupSection from "@/components/match-result/matchup-section";
 import MatchStatsSection from "@/components/match-result/match-stats-section";
 import ItemsLoadoutsSection from "@/components/match-result/items-loadouts-section";
@@ -214,13 +212,6 @@ export default function MatchDetailPage() {
     }
   }
 
-  // Resolved bans
-  const resolvedBans = match?.bans.map((ban) => ({
-    banSlot: ban.ban_slot ?? 0,
-    championId: ban.champion_id,
-    championName: ban.champion_name || null,
-  })) ?? [];
-
   // Enriched players for matchup cards
   const team1Players: MatchResultPlayer[] = team1.map((p) => ({
     matchData: p,
@@ -261,18 +252,14 @@ export default function MatchDetailPage() {
         bans={match.bans}
       />
 
-      {/* Player Matchup — pre-match view */}
-      <MatchupSection
-        team1={team1Players}
-        team2={team2Players}
+      {/* Loadouts — talent, cards, and purchased items */}
+      <ItemsLoadoutsSection
+        team1Players={team1}
+        team2Players={team2}
         team1Wins={team1Wins}
         team2Wins={team2Wins}
-        team1Label="Team 1"
-        team2Label="Team 2"
+        factMap={factMap}
       />
-
-      {/* Draft context belongs directly after the pre-match comparison. */}
-      {resolvedBans.length > 0 && <BansSection bans={resolvedBans} />}
 
       {/* Match Stats — in-match performance */}
       <MatchStatsSection
@@ -285,13 +272,14 @@ export default function MatchDetailPage() {
         factMap={factMap}
       />
 
-      {/* Loadouts — talent, cards, and purchased items */}
-      <ItemsLoadoutsSection
-        team1Players={team1}
-        team2Players={team2}
+      {/* Player Matchup — pre-match view */}
+      <MatchupSection
+        team1={team1Players}
+        team2={team2Players}
         team1Wins={team1Wins}
         team2Wins={team2Wins}
-        factMap={factMap}
+        team1Label="Team 1"
+        team2Label="Team 2"
       />
 
       {/* Rating Snapshots */}
