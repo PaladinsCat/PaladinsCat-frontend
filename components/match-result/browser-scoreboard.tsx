@@ -195,7 +195,15 @@ export default function BrowserScoreboard({ match, queueLabel, team1, team2, ban
   useEffect(() => {
     const node = previewRef.current;
     if (!node) return;
-    const resize = () => setPreviewScale(Math.min(1, Math.max(0.2, node.clientWidth / CANVAS_WIDTH)));
+    const resize = () => {
+      const availableWidth = node.getBoundingClientRect().width;
+      if (availableWidth <= 0) return;
+
+      // Do not impose a minimum scale here. Narrow mobile containers can need
+      // less than 0.2× to contain the full 2048px canvas; flooring the scale
+      // made the healing/right-edge columns overflow the clipped preview.
+      setPreviewScale(Math.min(1, availableWidth / CANVAS_WIDTH));
+    };
     resize();
     const observer = new ResizeObserver(resize);
     observer.observe(node);
