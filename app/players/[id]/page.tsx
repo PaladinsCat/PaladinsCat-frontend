@@ -606,7 +606,9 @@ export default function PlayerProfilePage() {
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="min-w-0 break-words text-xl font-bold text-pc-text">{player.name}</h1>
+              <h1 className="min-w-0 break-words text-xl font-bold text-pc-text">
+                <PlayerName playerId={player.id}>{player.name}</PlayerName>
+              </h1>
               {player.cheater && (
                 <span className="text-xs font-bold text-red-400 bg-red-500/10 px-1.5 py-0.5 rounded">CHEATER</span>
               )}
