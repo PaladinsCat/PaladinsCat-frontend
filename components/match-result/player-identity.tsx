@@ -22,6 +22,14 @@ export function matchPlayerHref(player: MatchPlayerDetail): string | null {
   return playerId > 0 ? `/players/${playerId}` : null;
 }
 
+export function privateAccountCode(player: MatchPlayerDetail): string | null {
+  const privateId = trackedPrivateId(player);
+  if (!privateId) return null;
+  const alias = String(player.private_account_alias ?? "").trim();
+  if (alias && !/^private-\d+$/i.test(alias)) return alias;
+  return `P-${String(privateId).padStart(6, "0")}`;
+}
+
 export function MatchPlayerLink({ player, className = "" }: { player: MatchPlayerDetail; className?: string }) {
   const privateId = trackedPrivateId(player);
   const href = matchPlayerHref(player);
@@ -41,9 +49,10 @@ export function MatchPlayerLink({ player, className = "" }: { player: MatchPlaye
 
 export function MatchPlayerReference({ player, className = "" }: { player: MatchPlayerDetail; className?: string }) {
   const privateId = trackedPrivateId(player);
+  const privateCode = privateAccountCode(player);
   if (privateId) {
-    return <Link href={`/players/private-accounts/${privateId}`} className={className}>Private ID {privateId}</Link>;
+    return <Link href={`/players/private-accounts/${privateId}`} className={className}>{privateCode}</Link>;
   }
-  if (Number(player.player_id) === 0) return <span className={className}>Private ID unavailable</span>;
+  if (Number(player.player_id) === 0) return <span className={className}>P-??????</span>;
   return <span className={className}>PID {player.player_id}</span>;
 }

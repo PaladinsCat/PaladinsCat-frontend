@@ -693,11 +693,17 @@ export interface PlayerDirectoryPage<T> {
 }
 
 function mapPrivateAccount(row: any): PrivateAccountSummary {
+  const id = Number(row.id);
+  const storedAlias = row.alias == null ? "" : String(row.alias).trim();
+  const alias = !storedAlias || /^private-\d+$/i.test(storedAlias)
+    ? `P-${String(id).padStart(6, "0")}`
+    : storedAlias;
+  const verifiedName = row.verified_name == null ? null : String(row.verified_name);
   return {
-    id: Number(row.id),
-    alias: row.alias == null ? null : String(row.alias),
-    verifiedName: row.verified_name == null ? null : String(row.verified_name),
-    displayName: String(row.display_name ?? row.verified_name ?? row.alias ?? `Private #${row.id}`),
+    id,
+    alias,
+    verifiedName,
+    displayName: verifiedName ?? alias,
     partyId: Number(row.party_id ?? 0),
     accountLevel: Number(row.account_level ?? 0),
     masteryLevel: Number(row.mastery_level ?? 0),
