@@ -178,15 +178,10 @@ export default function ChampionDetailPage() {
       setLoading(false);
       return;
     }
-    const championId = staticChampion?.id;
-    if (!championId) {
+    if (!staticChampion) {
       setLoading(false);
       return;
     }
-    setLoading(true);
-    setChampionItems([]);
-    setChampionMaps([]);
-
     const applyPageData = (data: ChampionPagePayload) => {
       const s = data.stats;
       setStats(s ? {
@@ -203,10 +198,14 @@ export default function ChampionDetailPage() {
       setChampionPerformance(data.championPerformance);
     };
 
+    setLoading(true);
+    setChampionItems([]);
+    setChampionMaps([]);
+
     // One cached bundle replaces the old fan-out of champion-specific
     // requests. Redis serves a warm entry immediately and refreshes it in the
     // background after its TTL.
-    fetch(`${CHAMPION_DATA_BASE}${withStoredLobbyTier(`/champions/${championId}/page-data`)}`)
+    fetch(`${CHAMPION_DATA_BASE}${withStoredLobbyTier(`/champions/${encodeURIComponent(staticChampion.name.toLowerCase())}/page-data`)}`)
       .then((response) => {
         if (!response.ok) throw new Error("Champion page data unavailable");
         return response.json() as Promise<ChampionPagePayload>;
@@ -221,7 +220,7 @@ export default function ChampionDetailPage() {
         setChampionPerformance({});
       })
       .finally(() => setLoading(false));
-  }, [championData, staticChampion?.id]);
+  }, [championData, staticChampion]);
 
 
   const talentStatsByName = useMemo(() => {
