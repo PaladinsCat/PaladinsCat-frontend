@@ -417,9 +417,13 @@ export default function PlayerProfilePage() {
   }
 
   const { player, queueRatings, championRatings } = response;
-  const totalMatches = player.total_matches || (player.wins + player.losses) || 0;
-  const totalWins = player.total_wins || player.wins || 0;
-  const winRate = totalMatches > 0 ? (totalWins / totalMatches) * 100 : 0;
+  // `wins`/`losses` are the account-wide Hi-Rez totals. The denormalized
+  // `total_*` columns are ranked-ingest aggregates and must not drive the
+  // global profile performance summary.
+  const globalWins = Number(player.wins ?? 0);
+  const globalLosses = Number(player.losses ?? 0);
+  const globalMatches = globalWins + globalLosses;
+  const winRate = globalMatches > 0 ? (globalWins / globalMatches) * 100 : 0;
   const kbmRating = queueRatings.find((r) => r.queue_id === 486);
   const kbmMu = kbmRating ? Number(kbmRating.mu) : null;
   const effectiveTier = resolveEffectiveTier(player.kbm_tier, player.kbm_rank);
@@ -875,11 +879,10 @@ export default function PlayerProfilePage() {
                 <div className="min-w-0">
                   <div className="mb-1.5 text-[10px] uppercase tracking-wider text-pc-text-muted">Overall</div>
                   <div className="space-y-1">
-                    <StatRow label="Total Matches" value={formatNumber(player.total_matches)} />
-                    <StatRow label="Total Wins" value={formatNumber(player.total_wins)} color="text-emerald-400" />
-                    <StatRow label="Total Losses" value={formatNumber(player.total_losses)} color="text-rose-400" />
+                    <StatRow label="Total Matches" value={formatNumber(globalMatches)} />
+                    <StatRow label="Total Wins" value={formatNumber(globalWins)} color="text-emerald-400" />
+                    <StatRow label="Total Losses" value={formatNumber(globalLosses)} color="text-rose-400" />
                     <StatRow label="Win Rate" value={winRate.toFixed(1) + "%"} color={winRate >= 50 ? "text-emerald-400" : "text-rose-400"} />
-                    <StatRow label="Hi-Rez W/L" value={`${player.wins} / ${player.losses}`} />
                   </div>
                 </div>
               </div>
