@@ -6,9 +6,15 @@ import { CalendarClock, Search, UsersRound } from "lucide-react";
 import { LoadingPanel } from "@/components/async-state";
 import PlayerDirectoryPagination from "@/components/player-directory-pagination";
 import PlayerName from "@/components/player-name";
-import { fetchPartyPairsDirectory, type PartyPairSummary } from "@/lib/api-client";
+import {
+  fetchPartyPairsDirectory,
+  fetchPartyStacksDirectory,
+  type PartyPairSummary,
+  type PartyStackSummary,
+} from "@/lib/api-client";
 
 const PAGE_SIZE = 24;
+type DirectoryMode = "stacks" | "pairs";
 
 function observedAt(value: string | null) {
   if (!value) return "Unknown";
@@ -17,8 +23,15 @@ function observedAt(value: string | null) {
   return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(date);
 }
 
-export default function PartyPairsPage() {
+function MatchCount({ count }: { count: number }) {
+  return <span className="shrink-0 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-2 py-1 text-xs font-semibold text-cyan-300">{count.toLocaleString()} match{count === 1 ? "" : "es"}</span>;
+}
+
+export default function RankedPartiesPage() {
+  const [mode, setMode] = useState<DirectoryMode>("stacks");
   const [pairs, setPairs] = useState<PartyPairSummary[]>([]);
+  const [stacks, setStacks] = useState<PartyStackSummary[]>([]);
+  const [stackSize, setStackSize] = useState<number | null>(null);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -36,21 +49,31 @@ export default function PartyPairsPage() {
     let cancelled = false;
     setLoading(true);
     setError(null);
-    fetchPartyPairsDirectory({ page, pageSize: PAGE_SIZE, query: debouncedQuery })
+    const request = mode === "stacks"
+      ? fetchPartyStacksDirectory({ page, pageSize: PAGE_SIZE, query: debouncedQuery, size: stackSize })
+      : fetchPartyPairsDirectory({ page, pageSize: PAGE_SIZE, query: debouncedQuery });
+    request
       .then((result) => {
         if (cancelled) return;
-        setPairs(result.items);
+        if (mode === "stacks") setStacks(result.items as PartyStackSummary[]);
+        else setPairs(result.items as PartyPairSummary[]);
         setTotal(result.total);
         setTotalPages(result.totalPages);
       })
       .catch(() => {
-        if (!cancelled) setError("Party pairs could not be loaded.");
+        if (!cancelled) setError("Ranked parties could not be loaded.");
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
     return () => { cancelled = true; };
-  }, [debouncedQuery, page]);
+  }, [debouncedQuery, mode, page, stackSize]);
+
+  const itemsEmpty = mode === "stacks" ? stacks.length === 0 : pairs.length === 0;
+  const changeMode = (nextMode: DirectoryMode) => {
+    setMode(nextMode);
+    setPage(1);
+  };
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6">
@@ -59,52 +82,96 @@ export default function PartyPairsPage() {
         <div className="flex items-start gap-3">
           <UsersRound aria-hidden="true" className="mt-1 h-9 w-9 shrink-0 text-cyan-300" strokeWidth={1.5} />
           <div className="min-w-0">
-            <h1 className="pc-heading pc-heading-lg text-pc-accent">Party Pairs</h1>
-            <p className="mt-1 max-w-3xl text-sm text-pc-text-secondary">Ranked teammates observed sharing a party at least once. Match totals include every ranked teammate match stored for that pair.</p>
+            <h1 className="pc-heading pc-heading-lg text-pc-accent">Ranked Parties</h1>
+            <p className="mt-1 max-w-3xl text-sm text-pc-text-secondary">Search exact 2–5 player stacks or every canonical pair produced by those parties. Each match contributes once, regardless of player order.</p>
           </div>
         </div>
       </header>
 
+      <div className="inline-flex rounded-xl border border-pc-border bg-pc-bg-elevated p-1 text-xs font-semibold">
+        {(["stacks", "pairs"] as DirectoryMode[]).map(option => (
+          <button
+            key={option}
+            type="button"
+            onClick={() => changeMode(option)}
+            className={`rounded-lg px-4 py-2 capitalize transition-colors ${mode === option ? "bg-cyan-500/15 text-cyan-300" : "text-pc-text-muted hover:text-pc-text"}`}
+          >
+            {option}
+          </button>
+        ))}
+      </div>
+
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <label className="relative block w-full sm:max-w-sm">
-          <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-pc-text-muted" />
-          <input
-            value={query}
-            onChange={(event) => { setQuery(event.target.value); setPage(1); }}
-            placeholder="Search either player…"
-            className="w-full rounded-xl border border-pc-border bg-pc-bg-elevated py-2.5 pl-9 pr-3 text-sm text-pc-text outline-none transition-colors placeholder:text-pc-text-muted focus:border-pc-accent-mid"
-          />
-        </label>
-        <div className="text-xs text-pc-text-muted">{loading && pairs.length === 0 ? "Loading…" : `${total.toLocaleString()} known pair${total === 1 ? "" : "s"}`}</div>
+        <div className="flex w-full flex-col gap-2 sm:max-w-xl sm:flex-row">
+          <label className="relative block min-w-0 flex-1">
+            <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-pc-text-muted" />
+            <input
+              value={query}
+              onChange={(event) => { setQuery(event.target.value); setPage(1); }}
+              placeholder={mode === "stacks" ? "Search any stack member…" : "Search either player…"}
+              className="w-full rounded-xl border border-pc-border bg-pc-bg-elevated py-2.5 pl-9 pr-3 text-sm text-pc-text outline-none transition-colors placeholder:text-pc-text-muted focus:border-pc-accent-mid"
+            />
+          </label>
+          {mode === "stacks" && (
+            <select
+              value={stackSize ?? ""}
+              onChange={(event) => { setStackSize(event.target.value ? Number(event.target.value) : null); setPage(1); }}
+              className="rounded-xl border border-pc-border bg-pc-bg-elevated px-3 py-2.5 text-sm text-pc-text outline-none focus:border-pc-accent-mid"
+              aria-label="Stack size"
+            >
+              <option value="">All sizes</option>
+              {[2, 3, 4, 5].map(size => <option key={size} value={size}>{size}-stack</option>)}
+            </select>
+          )}
+        </div>
+        <div className="text-xs text-pc-text-muted">{loading && itemsEmpty ? "Loading…" : `${total.toLocaleString()} known ${mode === "stacks" ? "stack" : "pair"}${total === 1 ? "" : "s"}`}</div>
       </div>
 
       {error && <div className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-300">{error}</div>}
-      {loading && pairs.length === 0 ? (
+      {loading && itemsEmpty ? (
         <LoadingPanel compact />
-      ) : pairs.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-pc-border bg-pc-bg-elevated px-4 py-12 text-center text-sm text-pc-text-muted">No party pairs match this search.</div>
+      ) : itemsEmpty ? (
+        <div className="rounded-xl border border-dashed border-pc-border bg-pc-bg-elevated px-4 py-12 text-center text-sm text-pc-text-muted">No ranked {mode} match this search.</div>
+      ) : mode === "stacks" ? (
+        <div className={`grid grid-cols-1 gap-3 md:grid-cols-2 ${loading ? "opacity-60" : ""}`}>
+          {stacks.map(stack => (
+            <article key={stack.groupKey} className="overflow-hidden rounded-xl border border-cyan-500/20 bg-pc-bg-elevated p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted">Exact ranked {stack.stackSize}-stack</div>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {stack.players.map(player => (
+                      <Link key={player.id} href={`/players/${player.id}`} className="rounded-lg border border-pc-border bg-pc-bg/50 px-2.5 py-1.5 text-sm font-semibold text-pc-text transition-colors hover:border-pc-accent-mid hover:text-pc-accent">
+                        <PlayerName playerId={player.id}>{player.name}</PlayerName>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+                <MatchCount count={stack.matchCount} />
+              </div>
+              <div className="mt-4 flex items-start gap-2 border-t border-pc-border pt-3 text-xs text-pc-text-muted">
+                <CalendarClock aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0" />
+                <div><div>First observed <span className="text-pc-text-secondary">{observedAt(stack.firstSeen)}</span></div><div className="mt-1">Last observed <span className="text-pc-text-secondary">{observedAt(stack.lastSeen)}</span></div></div>
+              </div>
+            </article>
+          ))}
+        </div>
       ) : (
         <div className={`grid grid-cols-1 gap-3 md:grid-cols-2 ${loading ? "opacity-60" : ""}`}>
           {pairs.map((pair) => (
             <article key={`${pair.sourcePlayerId}-${pair.targetPlayerId}`} className="overflow-hidden rounded-xl border border-cyan-500/20 bg-pc-bg-elevated p-4">
               <div className="flex flex-col items-start gap-3 sm:flex-row sm:justify-between">
                 <div className="min-w-0">
-                  <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted">Known party pair</div>
+                  <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted">Canonical party pair</div>
                   <div className="mt-2 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-sm font-semibold">
                     <Link href={`/players/${pair.sourcePlayerId}`} className="min-w-0 break-words text-pc-text transition-colors hover:text-pc-accent [overflow-wrap:anywhere]"><PlayerName playerId={pair.sourcePlayerId}>{pair.sourcePlayerName}</PlayerName></Link>
                     <span className="shrink-0 text-cyan-300">+</span>
                     <Link href={`/players/${pair.targetPlayerId}`} className="min-w-0 break-words text-pc-text transition-colors hover:text-pc-accent [overflow-wrap:anywhere]"><PlayerName playerId={pair.targetPlayerId}>{pair.targetPlayerName}</PlayerName></Link>
                   </div>
                 </div>
-                <span className="shrink-0 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-2 py-1 text-xs font-semibold text-cyan-300">{pair.matchCount.toLocaleString()} matches</span>
+                <MatchCount count={pair.matchCount} />
               </div>
-
-              <div className="mt-4 grid grid-cols-2 gap-2 border-y border-pc-border py-3 text-xs">
-                <Link href={`/players/${pair.sourcePlayerId}`} className="min-w-0 truncate rounded-lg bg-pc-bg/50 px-3 py-2 text-pc-text-secondary transition-colors hover:text-pc-accent">View {pair.sourcePlayerName}</Link>
-                <Link href={`/players/${pair.targetPlayerId}`} className="min-w-0 truncate rounded-lg bg-pc-bg/50 px-3 py-2 text-pc-text-secondary transition-colors hover:text-pc-accent">View {pair.targetPlayerName}</Link>
-              </div>
-
-              <div className="mt-3 flex items-start gap-2 text-xs text-pc-text-muted">
+              <div className="mt-4 flex items-start gap-2 border-t border-pc-border pt-3 text-xs text-pc-text-muted">
                 <CalendarClock aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0" />
                 <div><div>First observed <span className="text-pc-text-secondary">{observedAt(pair.firstSeen)}</span></div><div className="mt-1">Last observed <span className="text-pc-text-secondary">{observedAt(pair.lastSeen)}</span></div></div>
               </div>

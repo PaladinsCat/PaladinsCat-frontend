@@ -673,6 +673,15 @@ export interface PartyPairSummary {
   lastSeen: string | null;
 }
 
+export interface PartyStackSummary {
+  groupKey: string;
+  stackSize: number;
+  players: Array<{ id: number; name: string }>;
+  matchCount: number;
+  firstSeen: string | null;
+  lastSeen: string | null;
+}
+
 export interface PlayerDirectoryPage<T> {
   items: T[];
   total: number;
@@ -753,11 +762,34 @@ export async function fetchPrivateAccountDetail(privateId: number): Promise<Priv
 export async function fetchPartyPairsDirectory(params: { page?: number; pageSize?: number; query?: string } = {}): Promise<PlayerDirectoryPage<PartyPairSummary>> {
   const page = Math.max(1, params.page ?? 1);
   const pageSize = Math.min(100, Math.max(1, params.pageSize ?? 24));
-  const query = new URLSearchParams({ page: String(page), perPage: String(pageSize) });
+  const query = new URLSearchParams({ page: String(page), perPage: String(pageSize), kind: 'pairs' });
   if (params.query?.trim()) query.set('q', params.query.trim());
   const rows = await fetchJson<any[]>(`/coplay/parties?${query.toString()}`);
   const total = Number(rows[0]?.total_count ?? 0);
   return { items: rows.map(mapPartyPair), total, page, pageSize, totalPages: Math.max(1, Math.ceil(total / pageSize)) };
+}
+
+export async function fetchPartyStacksDirectory(params: { page?: number; pageSize?: number; query?: string; size?: number | null } = {}): Promise<PlayerDirectoryPage<PartyStackSummary>> {
+  const page = Math.max(1, params.page ?? 1);
+  const pageSize = Math.min(100, Math.max(1, params.pageSize ?? 24));
+  const query = new URLSearchParams({ page: String(page), perPage: String(pageSize), kind: 'stacks' });
+  if (params.query?.trim()) query.set('q', params.query.trim());
+  if (params.size && params.size >= 2 && params.size <= 5) query.set('size', String(params.size));
+  const rows = await fetchJson<any[]>(`/coplay/parties?${query.toString()}`);
+  const total = Number(rows[0]?.total_count ?? 0);
+  const items = rows.map((row): PartyStackSummary => {
+    const ids = Array.isArray(row.player_ids) ? row.player_ids.map(Number) : [];
+    const names = Array.isArray(row.player_names) ? row.player_names.map(String) : [];
+    return {
+      groupKey: String(row.group_key),
+      stackSize: Number(row.stack_size ?? ids.length),
+      players: ids.map((id: number, index: number) => ({ id, name: names[index] ?? `Player ${id}` })),
+      matchCount: Number(row.match_count ?? 0),
+      firstSeen: row.first_seen ?? null,
+      lastSeen: row.last_seen ?? null,
+    };
+  });
+  return { items, total, page, pageSize, totalPages: Math.max(1, Math.ceil(total / pageSize)) };
 }
 
 let playersOverviewCache: { value: PlayersOverview; expiresAt: number } | null = null;

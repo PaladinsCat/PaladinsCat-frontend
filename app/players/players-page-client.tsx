@@ -367,8 +367,8 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
             <Link href="/players/parties" className="group flex min-h-20 items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-4 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary min-[480px]:col-span-2">
               <UsersRound aria-hidden="true" className="h-10 w-10 shrink-0 text-cyan-300" strokeWidth={1.5} />
               <div className="min-w-0 flex-1">
-                <h3 className="text-sm font-semibold text-pc-text group-hover:text-pc-accent">Party Pairs</h3>
-                <p className="mt-0.5 text-xs text-pc-text-muted">{overviewLoading ? "Loading known pairs…" : `${directoryCounts.parties.toLocaleString()} known ranked pairs`}</p>
+                <h3 className="text-sm font-semibold text-pc-text group-hover:text-pc-accent">Ranked Parties</h3>
+                <p className="mt-0.5 text-xs text-pc-text-muted">{overviewLoading ? "Loading party connections…" : `${directoryCounts.parties.toLocaleString()} known party pairs`}</p>
               </div>
               <span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent">→</span>
             </Link>
