@@ -682,6 +682,15 @@ export default function PlayerProfilePage() {
                   <span className="text-xs text-pc-text-secondary italic">{player.personal_status_message}</span>
                 </div>
               )}
+              <div className="mt-3 border-t border-pc-border/50 pt-3">
+                <div className="mb-1.5 text-[10px] uppercase tracking-wider text-pc-text-muted">Overall</div>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+                  <StatRow label="Total Matches" value={formatNumber(globalMatches)} />
+                  <StatRow label="Total Wins" value={formatNumber(globalWins)} color="text-emerald-400" />
+                  <StatRow label="Total Losses" value={formatNumber(globalLosses)} color="text-rose-400" />
+                  <StatRow label="Win Rate" value={winRate.toFixed(1) + "%"} color={winRate >= 50 ? "text-emerald-400" : "text-rose-400"} />
+                </div>
+              </div>
             </div>
           </div>
 
@@ -861,30 +870,17 @@ export default function PlayerProfilePage() {
 
           {/* Consolidated performance summary */}
           <div>
-            <h2 className="pc-card-title shadow-sm">Performance</h2>
+            <h2 className="pc-card-title shadow-sm">Ranked Performance</h2>
             <div className="pc-card p-3">
+              <div className="mb-1.5 text-[10px] uppercase tracking-wider text-pc-text-muted">Averages</div>
               <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
-                <div className="min-w-0">
-                  <div className="mb-1.5 text-[10px] uppercase tracking-wider text-pc-text-muted">Averages</div>
-                  <div className="space-y-1">
-                    <StatRow label="Damage / Min" value={formatNumber(player.avg_dpm)} color="text-red-400" />
-                    <StatRow label="Healing / Min" value={formatNumber(player.avg_hpm)} color="text-emerald-400" />
-                    <StatRow label="Shielding / Min" value={formatNumber(player.avg_mpm)} color="text-sky-400" />
-                    <StatRow label="Credits / Min" value={formatNumber(player.avg_egpm)} color="text-yellow-400" />
-                    {player.avg_shpm != null && (
-                      <StatRow label="Shielding / Min" value={formatNumber(player.avg_shpm)} color="text-violet-400" />
-                    )}
-                  </div>
-                </div>
-                <div className="min-w-0">
-                  <div className="mb-1.5 text-[10px] uppercase tracking-wider text-pc-text-muted">Overall</div>
-                  <div className="space-y-1">
-                    <StatRow label="Total Matches" value={formatNumber(globalMatches)} />
-                    <StatRow label="Total Wins" value={formatNumber(globalWins)} color="text-emerald-400" />
-                    <StatRow label="Total Losses" value={formatNumber(globalLosses)} color="text-rose-400" />
-                    <StatRow label="Win Rate" value={winRate.toFixed(1) + "%"} color={winRate >= 50 ? "text-emerald-400" : "text-rose-400"} />
-                  </div>
-                </div>
+                <StatRow label="Damage / Min" value={formatNumber(player.avg_dpm)} color="text-red-400" />
+                <StatRow label="Healing / Min" value={formatNumber(player.avg_hpm)} color="text-emerald-400" />
+                <StatRow label="Shielding / Min" value={formatNumber(player.avg_mpm)} color="text-sky-400" />
+                <StatRow label="Credits / Min" value={formatNumber(player.avg_egpm)} color="text-yellow-400" />
+                {player.avg_shpm != null && (
+                  <StatRow label="Shielding / Min" value={formatNumber(player.avg_shpm)} color="text-violet-400" />
+                )}
               </div>
             </div>
           </div>
