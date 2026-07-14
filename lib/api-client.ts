@@ -872,6 +872,10 @@ export interface ChangelogPage {
   totalPages: number;
 }
 
+export interface AdminChangelogInput {
+  changelog: string;
+}
+
 export interface SiteVersionComponent {
   id: number;
   component: string;
@@ -1129,6 +1133,26 @@ export async function fetchChangelog(params?: { page?: number; perPage?: number 
   } catch {
     return { data: [], total: 0, page: 1, perPage: 10, totalPages: 1 };
   }
+}
+
+export async function fetchAdminChangelog(): Promise<ChangelogEntry[]> {
+  const token = getAuthToken();
+  if (!token) throw new Error('Not authenticated');
+  const raw = await fetchJson<any[]>('/admin/changelog', {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return raw.map(mapChangelogEntry);
+}
+
+export async function updateAdminChangelog(id: number, input: AdminChangelogInput): Promise<ChangelogEntry> {
+  const token = getAuthToken();
+  if (!token) throw new Error('Not authenticated');
+  const raw = await fetchJson<any>(`/admin/changelog/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify(input),
+  });
+  return mapChangelogEntry(raw);
 }
 
 function mapChangelogEntry(raw: any): ChangelogEntry {
