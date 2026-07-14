@@ -17,7 +17,9 @@ export default function MatchExportButton(props: MatchExportButtonProps) {
     setExporting(true);
     setMessage(null);
     try {
-      const response = await fetch(`/match-images/${props.matchId}?theme=${props.theme ?? "dark"}`, { cache: "no-store" });
+      // The visible scoreboard card loads this exact URL first. Reuse that
+      // browser-cached PNG when saving instead of forcing a second render.
+      const response = await fetch(`/match-images/${props.matchId}?theme=${props.theme ?? "dark"}`, { cache: "force-cache" });
       if (!response.ok) {
         const body = await response.json().catch(() => null) as { error?: string } | null;
         throw new Error(body?.error ?? "The match image could not be rendered.");

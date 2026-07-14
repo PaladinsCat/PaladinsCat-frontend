@@ -292,11 +292,21 @@ export default function MatchDetailPage() {
         private={match.match.private}
       />
 
-      <div className="-mt-3 flex justify-end">
-        <MatchExportButton
-          matchId={match.match.match_id}
+      {/* The renderer's pre-built 16:9 card also warms the browser cache used
+          by Save image, so exporting normally avoids a second PNG download. */}
+      <section className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated shadow-sm" aria-label="Match scoreboard image">
+        <img
+          src={`/match-images/${match.match.match_id}?theme=dark`}
+          alt={`Rendered scoreboard for match ${match.match.match_id}`}
+          width={2048}
+          height={1152}
+          className="block h-auto w-full bg-pc-bg"
+          loading="eager"
         />
-      </div>
+        <div className="flex items-center justify-end border-t border-pc-border bg-pc-bg-secondary/70 px-3 py-2">
+          <MatchExportButton matchId={match.match.match_id} />
+        </div>
+      </section>
 
       {/* Player Matchup — pre-match view */}
       <MatchupSection
