@@ -2,10 +2,12 @@ import { STATIC_CHAMPIONS } from "@/lib/static-champions";
 import { championSlug } from "@/lib/utils";
 import ChampionDetailPageClient, { type ChampionPagePayload } from "./champion-detail-client";
 
-// The production runtime image is deliberately slim and does not preserve
-// build-stage environment values. Its own loopback Next server is always
-// present, and its /_pc rewrite forwards to the cached backend route.
-const SERVER_DATA_ORIGIN = "http://127.0.0.1:3000";
+// Production rendering uses the same public same-origin proxy path that is
+// verified for browser clients. The backend response is Redis-cached, so this
+// remains a fast cache-first request without exposing a direct backend port.
+const SERVER_DATA_ORIGIN = process.env.NODE_ENV === "production"
+  ? "https://paladinscat.com"
+  : "http://127.0.0.1:3000";
 
 export const dynamic = "force-dynamic";
 
