@@ -11,6 +11,7 @@ export const CONTRIBUTOR_LOCALES = [
   { code: "de", label: "Deutsch" },
   { code: "es", label: "Español" },
   { code: "fr", label: "Français" },
+  { code: "ko", label: "한국어" },
   { code: "pl", label: "Polski" },
   { code: "pt-BR", label: "Português (Brasil)" },
   { code: "ru", label: "Русский" },
