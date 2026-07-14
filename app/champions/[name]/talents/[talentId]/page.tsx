@@ -16,7 +16,18 @@ import {
   type ChampionTalentStat,
 } from "@/lib/api-client";
 import { getStatQuality } from "@/lib/stat-quality";
+import { withStoredLobbyTier } from "@/lib/lobby-tier";
 import { championSlug } from "@/lib/utils";
+
+const CHAMPION_DATA_BASE = "/_pc";
+
+type ChampionTalentPagePayload = {
+  championId: number;
+  talentId: number;
+  totalMatches: number;
+  talentStat: ChampionTalentStat;
+  cardStats: ChampionCardStatsResponse;
+};
 
 function parsePositiveInteger(value: string | string[] | null | undefined): number | null {
   const raw = Array.isArray(value) ? value[0] : value;
@@ -56,24 +67,50 @@ export default function ChampionTalentDetailPage() {
       return;
     }
 
-    Promise.all([fetchChampions(), getChampionData(name)])
-      .then(async ([champions, localData]) => {
-        const champion = champions.find((entry) => championSlug(entry.name) === name.toLowerCase());
-        if (!champion) throw new Error("Champion not found.");
-        if (!localData) throw new Error("Champion reference data is unavailable.");
+    const controller = new AbortController();
+    const talentPageUrl = withStoredLobbyTier(
+      `/champions/${championSlug(name)}/talents/${talentId}/page-data`,
+    );
+    const loadTalentPage = async (): Promise<ChampionTalentPagePayload> => {
+      const response = await fetch(`${CHAMPION_DATA_BASE}${talentPageUrl}`, { signal: controller.signal });
+      if (response.ok) return response.json() as Promise<ChampionTalentPagePayload>;
+      if (response.status !== 404) throw new Error("Talent page data is unavailable.");
 
-        const [talentStats, filteredCardStats] = await Promise.all([
-          fetchChampionTalentStats(champion.id),
-          fetchChampionCardStats(champion.id, "ranked", talentId),
-        ]);
-        const selectedTalent = talentStats.talents.find((talent) => talent.talentId === talentId);
-        if (!selectedTalent) throw new Error("Talent statistics not found.");
+      // Deployment compatibility: an updated frontend may briefly reach an
+      // older backend that does not expose the composite route yet. Preserve
+      // the previous requests only for that rolling-deploy window.
+      const champions = await fetchChampions();
+      const champion = champions.find((entry) => championSlug(entry.name) === championSlug(name));
+      if (!champion) throw new Error("Champion not found.");
+      const [talentStats, cardStats] = await Promise.all([
+        fetchChampionTalentStats(champion.id),
+        fetchChampionCardStats(champion.id, "ranked", talentId),
+      ]);
+      const talentStat = talentStats.talents.find((entry) => entry.talentId === talentId);
+      if (!talentStat) throw new Error("Talent statistics not found.");
+      return {
+        championId: champion.id,
+        talentId,
+        totalMatches: talentStats.totalMatches,
+        talentStat,
+        cardStats,
+      };
+    };
+    Promise.all([
+      getChampionData(name),
+      loadTalentPage(),
+    ])
+      .then(([localData, pageData]) => {
+        if (!localData) throw new Error("Champion reference data is unavailable.");
+        if (pageData.talentId !== talentId || !pageData.talentStat) {
+          throw new Error("Talent statistics not found.");
+        }
         if (cancelled) return;
 
         setChampionData(localData);
-        setTalentStat(selectedTalent);
-        setTotalMatches(talentStats.totalMatches);
-        setCardStats(filteredCardStats);
+        setTalentStat(pageData.talentStat);
+        setTotalMatches(pageData.totalMatches);
+        setCardStats(pageData.cardStats);
       })
       .catch((reason: unknown) => {
         if (cancelled) return;
@@ -88,6 +125,7 @@ export default function ChampionTalentDetailPage() {
 
     return () => {
       cancelled = true;
+      controller.abort();
     };
   }, [name, talentId]);
 
