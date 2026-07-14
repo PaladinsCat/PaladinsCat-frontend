@@ -37,6 +37,8 @@ const staticRoutes: Array<{
   { path: "/players/suspicious", changeFrequency: "daily", priority: 0.65 },
   { path: "/players/weirdos", changeFrequency: "daily", priority: 0.6 },
   { path: "/players/hall-of-fame", changeFrequency: "daily", priority: 0.6 },
+  { path: "/players/private-accounts", changeFrequency: "daily", priority: 0.6 },
+  { path: "/players/parties", changeFrequency: "daily", priority: 0.6 },
   { path: "/stats/winrate", changeFrequency: "hourly", priority: 0.85 },
   { path: "/stats/banrate", changeFrequency: "hourly", priority: 0.85 },
   { path: "/stats/metrics", changeFrequency: "hourly", priority: 0.85 },

@@ -623,7 +623,12 @@ export interface PrivateAccountSummary {
   id: number;
   alias: string | null;
   partyId: number;
+  accountLevel: number;
+  masteryLevel: number;
+  leagueTier: number;
+  leaguePoints: number;
   matchCount: number;
+  firstSeen: string | null;
   lastSeen: string | null;
 }
 
@@ -633,7 +638,63 @@ export interface PartyPairSummary {
   targetPlayerId: number;
   targetPlayerName: string;
   matchCount: number;
+  firstSeen: string | null;
   lastSeen: string | null;
+}
+
+export interface PlayerDirectoryPage<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+function mapPrivateAccount(row: any): PrivateAccountSummary {
+  return {
+    id: Number(row.id),
+    alias: row.alias == null ? null : String(row.alias),
+    partyId: Number(row.party_id ?? 0),
+    accountLevel: Number(row.account_level ?? 0),
+    masteryLevel: Number(row.mastery_level ?? 0),
+    leagueTier: Number(row.league_tier ?? 0),
+    leaguePoints: Number(row.league_points ?? 0),
+    matchCount: Number(row.match_count ?? 0),
+    firstSeen: row.first_seen ?? null,
+    lastSeen: row.last_seen ?? null,
+  };
+}
+
+function mapPartyPair(row: any): PartyPairSummary {
+  return {
+    sourcePlayerId: Number(row.source_player_id),
+    sourcePlayerName: String(row.source_player_name ?? 'Unknown'),
+    targetPlayerId: Number(row.target_player_id),
+    targetPlayerName: String(row.target_player_name ?? 'Unknown'),
+    matchCount: Number(row.match_count ?? 0),
+    firstSeen: row.first_seen ?? null,
+    lastSeen: row.last_seen ?? null,
+  };
+}
+
+export async function fetchPrivateAccountsDirectory(params: { page?: number; pageSize?: number; query?: string } = {}): Promise<PlayerDirectoryPage<PrivateAccountSummary>> {
+  const page = Math.max(1, params.page ?? 1);
+  const pageSize = Math.min(100, Math.max(1, params.pageSize ?? 24));
+  const query = new URLSearchParams({ page: String(page), perPage: String(pageSize) });
+  if (params.query?.trim()) query.set('q', params.query.trim());
+  const rows = await fetchJson<any[]>(`/player-ext/private?${query.toString()}`);
+  const total = Number(rows[0]?.total_count ?? 0);
+  return { items: rows.map(mapPrivateAccount), total, page, pageSize, totalPages: Math.max(1, Math.ceil(total / pageSize)) };
+}
+
+export async function fetchPartyPairsDirectory(params: { page?: number; pageSize?: number; query?: string } = {}): Promise<PlayerDirectoryPage<PartyPairSummary>> {
+  const page = Math.max(1, params.page ?? 1);
+  const pageSize = Math.min(100, Math.max(1, params.pageSize ?? 24));
+  const query = new URLSearchParams({ page: String(page), perPage: String(pageSize) });
+  if (params.query?.trim()) query.set('q', params.query.trim());
+  const rows = await fetchJson<any[]>(`/coplay/parties?${query.toString()}`);
+  const total = Number(rows[0]?.total_count ?? 0);
+  return { items: rows.map(mapPartyPair), total, page, pageSize, totalPages: Math.max(1, Math.ceil(total / pageSize)) };
 }
 
 let playersOverviewCache: { value: PlayersOverview; expiresAt: number } | null = null;
@@ -680,21 +741,8 @@ export function mapPlayersOverviewResponse(raw: any): PlayersOverview {
     weirdos: Number(raw.community_counts?.weirdos ?? raw.weirdos?.[0]?.total_count ?? raw.weirdos?.length ?? 0),
     hallOfFame: Number(raw.community_counts?.hall_of_fame ?? raw.hall_of_fame?.[0]?.total_count ?? raw.hall_of_fame?.length ?? 0),
   };
-  const privateAccounts: PrivateAccountSummary[] = (raw.private_accounts ?? []).map((row: any) => ({
-    id: Number(row.id),
-    alias: row.alias == null ? null : String(row.alias),
-    partyId: Number(row.party_id ?? 0),
-    matchCount: Number(row.match_count ?? 0),
-    lastSeen: row.last_seen ?? null,
-  }));
-  const partyPairs: PartyPairSummary[] = (raw.party_pairs ?? []).map((row: any) => ({
-    sourcePlayerId: Number(row.source_player_id),
-    sourcePlayerName: String(row.source_player_name ?? 'Unknown'),
-    targetPlayerId: Number(row.target_player_id),
-    targetPlayerName: String(row.target_player_name ?? 'Unknown'),
-    matchCount: Number(row.match_count ?? 0),
-    lastSeen: row.last_seen ?? null,
-  }));
+  const privateAccounts: PrivateAccountSummary[] = (raw.private_accounts ?? []).map(mapPrivateAccount);
+  const partyPairs: PartyPairSummary[] = (raw.party_pairs ?? []).map(mapPartyPair);
   const directoryCounts = {
     privateAccounts: Number(raw.directory_counts?.private_accounts ?? raw.private_accounts?.[0]?.total_count ?? privateAccounts.length),
     parties: Number(raw.directory_counts?.parties ?? raw.party_pairs?.[0]?.total_count ?? partyPairs.length),
