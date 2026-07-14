@@ -30,13 +30,11 @@ import {
   type RatingSnapshot,
   type MatchBan,
 } from "@/lib/api-client";
-import { formatLocalDateTime } from "@/lib/time-format";
 import { championSlug } from "@/lib/utils";
 import {
   MatchResultPlayer,
   ProfileByPlayerId,
 } from "@/components/match-result/types";
-import MatchHeader from "@/components/match-result/match-header";
 import BansSection from "@/components/match-result/bans-section";
 import MatchupSection from "@/components/match-result/matchup-section";
 import MatchStatsSection from "@/components/match-result/match-stats-section";
@@ -46,6 +44,7 @@ import BrowserScoreboard from "@/components/match-result/browser-scoreboard";
 import { ErrorState } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { readBrowserResult, removeBrowserResult, writeBrowserResult } from "@/lib/browser-result-cache";
+import { getQueueLabel } from "@/lib/queue-labels";
 
 const MATCH_RESULT_CACHE_TTL_MS = 5 * 60 * 1000;
 const MATCH_UI_CACHE_TTL_MS = 30 * 60 * 1000;
@@ -56,23 +55,6 @@ type CachedMatchResult = {
   snapshots: RatingSnapshot[];
   profiles: Array<[string, any]>;
 };
-
-/* ── Helpers ── */
-
-function queueName(id: number): string {
-  const map: Record<number, string> = {
-    1: "Casual Queue", 2: "KBM", 4: "1v1", 8: "Team Queue",
-    16: "Open", 32: "Doomspire", 486: "Ranked Siege",
-  };
-  return map[id] ?? `Queue #${id}`;
-}
-
-function formatDuration(seconds: number): string {
-  if (!Number.isFinite(seconds) || seconds < 0) return "—";
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
-  return `${m}:${s.toString().padStart(2, "0")}`;
-}
 
 /* ── Profile fetching with Promise.allSettled + dedupe + timeout ── */
 
@@ -209,10 +191,7 @@ export default function MatchDetailPage() {
 
   /* ── Derived data ── */
 
-  const queueLabel = match ? queueName(match.match.queue_id) : "";
-  const isRanked = match?.match.is_ranked ?? false;
-  const duration = match ? formatDuration(match.match.duration_seconds) : "";
-  const timestamp = match ? formatLocalDateTime(match.match.entry_datetime) : "";
+  const queueLabel = match ? getQueueLabel(match.match.queue_id) : "";
 
   // Keep task-force ordering stable throughout the header, matchup, metrics, and builds.
   // The winner flags provide the visual emphasis without swapping the score columns.
@@ -274,24 +253,6 @@ export default function MatchDetailPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-      {/* Header — match metadata, scores, flags */}
-      <MatchHeader
-        matchId={match.match.match_id}
-        queueLabel={queueLabel}
-        isRanked={isRanked}
-        map={match.match.map}
-        duration={duration}
-        timestamp={timestamp}
-        region={match.match.region}
-        team1Wins={team1Wins}
-        team2Wins={team2Wins}
-        team1Score={match.match.team1_score}
-        team2Score={match.match.team2_score}
-        broken={match.match.broken}
-        recovered={match.match.recovered}
-        private={match.match.private}
-      />
-
       <BrowserScoreboard
         match={match.match}
         queueLabel={queueLabel}

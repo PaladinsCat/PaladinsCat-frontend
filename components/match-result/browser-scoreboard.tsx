@@ -7,6 +7,7 @@ import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
 import { mapImagePath } from "@/lib/map-images";
 import { getRankIconPath, resolveEffectiveTier, TIER_NAMES } from "@/lib/tier-utils";
+import { parseBackendDate } from "@/lib/time-format";
 import PlayerName from "@/components/player-name";
 import CanonicalTalentImage from "@/components/canonical-talent-image";
 import MatchExportButton from "./match-export-button";
@@ -55,6 +56,18 @@ function duration(seconds: number) {
 
 function cleanMapName(map: string) {
   return map.replace(/^(?:(?:Ranked|Live|WIP)\s+)+/i, "").replace(/\bv\d+\b/ig, "").trim() || map;
+}
+
+function cleanQueueMode(queueLabel: string) {
+  return queueLabel.replace(/^(?:Ranked|Casual)\s+/i, "").trim() || queueLabel;
+}
+
+function utcTimestamp(value: string) {
+  const date = parseBackendDate(value);
+  if (!date) return "—";
+  const datePart = date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
+  const timePart = date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: "UTC" });
+  return `${datePart} · ${timePart} UTC`;
 }
 
 function metricsFor(player: MatchPlayerDetail): Metrics {
@@ -172,6 +185,7 @@ export default function BrowserScoreboard({ match, queueLabel, team1, team2, ban
   const scoreboardRef = useRef<HTMLElement>(null);
   const [previewScale, setPreviewScale] = useState(1);
   const mapName = useMemo(() => cleanMapName(match.map), [match.map]);
+  const modeName = useMemo(() => cleanQueueMode(queueLabel), [queueLabel]);
   const ranked = match.is_ranked;
   const sortedBans = useMemo(() => [...bans].sort((a, b) => value(a.ban_slot) - value(b.ban_slot)), [bans]);
   const leftBans = sortedBans.slice(0, Math.ceil(sortedBans.length / 2)).slice(0, 4);
@@ -201,9 +215,18 @@ export default function BrowserScoreboard({ match, queueLabel, team1, team2, ban
             <section ref={scoreboardRef} className="scoreboard" style={{ "--scoreboard-map": `url("${mapImagePath(match.map)}")` } as React.CSSProperties} aria-label="Paladins match scoreboard">
               <img className="scoreboard-map" src={mapImagePath(match.map)} alt="" aria-hidden="true" />
               <header className="hero">
-                <div>
-                  <div className="brand-line"><span className="brand-name"><img src="/images/icons/paladinscat.avif" alt="" /> PaladinsCat</span><div className="queue"><span>{match.region || "—"}</span><span>{queueLabel}</span></div></div>
+                <div className="match-identity">
+                  <div className="brand-line">
+                    <span className="brand-name"><img src="/images/icons/paladinscat.avif" alt="" /> PaladinsCat</span>
+                    <div className="status-tags">
+                      <span className={`status-tag ${ranked ? "ranked" : "casual"}`}>{ranked ? "Ranked" : "Casual"}</span>
+                      {match.broken && !match.recovered && <span className="status-tag broken">Broken</span>}
+                      {match.recovered && <span className="status-tag recovered">Recovered</span>}
+                      {match.private && <span className="status-tag private">Private</span>}
+                    </div>
+                  </div>
                   <div className="map-line"><div className={`map-name${mapName.length > 19 ? " long" : ""}`}>{mapName}</div></div>
+                  <div className="match-context"><span>{match.region || "—"}</span><span>{modeName}</span></div>
                 </div>
                 <div className={`score${ranked ? "" : " casual"}`}>
                   {ranked && <div className="score-bans left"><span className="ban-label">Bans</span><div className="ban-picks">{banIcons(leftBans)}</div></div>}
@@ -211,9 +234,10 @@ export default function BrowserScoreboard({ match, queueLabel, team1, team2, ban
                   {ranked && <div className="score-bans right"><span className="ban-label">Bans</span><div className="ban-picks">{banIcons(rightBans)}</div></div>}
                 </div>
                 <div className={`match-meta${ranked ? "" : " casual-meta"}`}>
-                  {ranked && <div className="tier-meta"><img src={getRankIconPath(averageTier, 0)} alt={TIER_NAMES[averageTier] ?? "Unranked"} /><div><div className="meta-value">{TIER_NAMES[averageTier] ?? "Unranked"}</div><div className="meta-label">Avg tier</div></div></div>}
-                  <div><div className="meta-value">{duration(match.duration_seconds)}</div><div className="meta-label">Duration</div></div>
-                  <div><div className="meta-value">{match.match_id}</div><div className="meta-label">Match ID</div></div>
+                  <div className="tier-meta" aria-hidden={!ranked}><img src={getRankIconPath(averageTier, 0)} alt={ranked ? TIER_NAMES[averageTier] ?? "Unranked" : ""} /><div><div className="meta-value">{TIER_NAMES[averageTier] ?? "Unranked"}</div><div className="meta-label">Avg tier</div></div></div>
+                  <time className="timestamp-meta" dateTime={match.entry_datetime}>{utcTimestamp(match.entry_datetime)}</time>
+                  <div className="duration-meta"><div className="meta-value">{duration(match.duration_seconds)}</div><div className="meta-label">Duration</div></div>
+                  <div className="match-id-meta"><div className="meta-value">{match.match_id}</div><div className="meta-label">Match ID</div></div>
                 </div>
               </header>
               <div className="columns grid-row"><div>Party</div><div></div><div>Level</div><div>Player</div><div>Elo</div><div>Talent</div><div>Credits</div><div>K / D / A</div><div>OB. Time</div><div>Damage</div><div>Taken</div><div>Shielding</div><div>Healing</div></div>

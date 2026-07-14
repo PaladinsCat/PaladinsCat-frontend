@@ -1,7 +1,6 @@
 export * from "./types";
 export * from "./format";
 
-export { default as MatchHeader } from "./match-header";
 export { default as BansSection } from "./bans-section";
 export { default as MatchupSection } from "./matchup-section";
 export { default as TeamMatchup } from "./team-matchup";
