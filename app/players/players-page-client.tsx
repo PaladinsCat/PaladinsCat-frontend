@@ -271,15 +271,13 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
                 {suspiciousPlayers.map((p) => (
                   <div key={p.id} className="flex items-start gap-2 p-2 rounded-lg bg-pc-bg/50">
                     <div className="shrink-0 mt-0.5 w-1.5 h-1.5 rounded-full bg-amber-500" />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5">
+                    <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
                         <Link href={`/players/${p.id}`} className="text-pc-text font-medium text-xs hover:text-pc-accent transition-colors truncate">
                           <PlayerName playerId={p.id} cheater={p.cheater} susCount={p.susCount}>{p.name}</PlayerName>
                         </Link>
                         <span className="shrink-0 text-xs px-1 py-0.5 rounded border bg-amber-500/15 text-amber-400 border-amber-500/30">
                           {p.susCount}
                         </span>
-                      </div>
                     </div>
                   </div>
                 ))}
@@ -309,11 +307,9 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
                   {weirdoPlayers.map((p) => (
                     <div key={p.id} className="flex items-start gap-2 p-2 rounded-lg bg-pc-bg/50">
                       <div className="shrink-0 mt-0.5 text-violet-300 text-xs">✦</div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <Link href={`/players/${p.id}`} className="text-pc-text font-medium text-xs hover:text-pc-accent transition-colors truncate"><PlayerName playerId={p.id} cheater={p.cheater} susCount={p.susCount}>{p.name}</PlayerName></Link>
-                          <span className="shrink-0 text-xs px-1 py-0.5 rounded border bg-violet-500/15 text-violet-300 border-violet-500/30">{p.weirdoCount}</span>
-                        </div>
+                      <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
+                        <Link href={`/players/${p.id}`} className="text-pc-text font-medium text-xs hover:text-pc-accent transition-colors truncate"><PlayerName playerId={p.id} cheater={p.cheater} susCount={p.susCount}>{p.name}</PlayerName></Link>
+                        <span className="shrink-0 text-xs px-1 py-0.5 rounded border bg-violet-500/15 text-violet-300 border-violet-500/30">{p.weirdoCount}</span>
                       </div>
                     </div>
                   ))}
@@ -343,11 +339,9 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
                   {hallOfFamePlayers.map((p) => (
                     <div key={p.id} className="flex items-start gap-2 p-2 rounded-lg bg-pc-bg/50">
                       <div className="shrink-0 mt-0.5 text-emerald-300 text-xs">♥</div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <Link href={`/players/${p.id}`} className="text-pc-text font-medium text-xs hover:text-pc-accent transition-colors truncate"><PlayerName playerId={p.id} cheater={p.cheater} susCount={p.susCount}>{p.name}</PlayerName></Link>
-                          <span className="shrink-0 text-xs px-1 py-0.5 rounded border bg-emerald-500/15 text-emerald-300 border-emerald-500/30">{p.hallOfFameCount}</span>
-                        </div>
+                      <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
+                        <Link href={`/players/${p.id}`} className="text-pc-text font-medium text-xs hover:text-pc-accent transition-colors truncate"><PlayerName playerId={p.id} cheater={p.cheater} susCount={p.susCount}>{p.name}</PlayerName></Link>
+                        <span className="shrink-0 text-xs px-1 py-0.5 rounded border bg-emerald-500/15 text-emerald-300 border-emerald-500/30">{p.hallOfFameCount}</span>
                       </div>
                     </div>
                   ))}
