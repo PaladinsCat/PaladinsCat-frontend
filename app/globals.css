@@ -776,7 +776,7 @@ main :where(a, button, input, select, textarea):focus-visible {
 #browser-scoreboard .scoreboard-map { display: none; }
 #browser-scoreboard .scoreboard[data-image-export="true"]::before { content: none; }
 #browser-scoreboard .scoreboard[data-image-export="true"] > .scoreboard-map { display: block; position: absolute; z-index: 0; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: saturate(1.15); opacity: .7; }
-#browser-scoreboard .hero { position: relative; grid-row: 4; height: 86px; padding: 10px 38px; display: grid; grid-template-columns: 285px 590px minmax(0, 1fr); align-items: center; background: rgba(5, 9, 15, .58); border-bottom: 1px solid rgba(72, 211, 190, .22); }
+#browser-scoreboard .hero { position: relative; grid-row: 4; height: 86px; padding: 7px 38px 9px; display: grid; grid-template-columns: 285px 590px minmax(0, 1fr); align-items: center; background: rgba(5, 9, 15, .58); border-bottom: 1px solid rgba(72, 211, 190, .22); }
 #browser-scoreboard .hero::before { content: ""; position: absolute; inset: 0; pointer-events: none; -webkit-backdrop-filter: blur(7px); backdrop-filter: blur(7px); -webkit-mask-image: linear-gradient(90deg, #000, transparent 20%, transparent 80%, #000); mask-image: linear-gradient(90deg, #000, transparent 20%, transparent 80%, #000); }
 #browser-scoreboard .hero > * { position: relative; z-index: 1; }
 #browser-scoreboard .hero::after { content: none; }
