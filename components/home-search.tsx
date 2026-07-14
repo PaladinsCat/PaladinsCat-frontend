@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { fetchUniversalSearch, type UniversalSearchResult, type UniversalSearchType } from "@/lib/api-client";
 import { useLocalization } from "@/lib/localization-context";
 import PlayerName from "@/components/player-name";
+import { PlayerSearchSubtitle } from "@/components/player-search-result";
 
 const RESULT_TYPE_LABEL: Record<UniversalSearchType, string> = {
   player: "Player",
@@ -151,7 +152,9 @@ export default function HomeSearch({ onSearchActiveChange }: HomeSearchProps) {
                         <span className="block truncate text-sm font-medium text-pc-text">
                           {result.type === "player" ? <PlayerName playerId={result.id}>{result.title}</PlayerName> : result.title}
                         </span>
-                        <span className="block truncate text-xs text-pc-text-muted">{result.subtitle}</span>
+                        <span className="block truncate text-xs text-pc-text-muted">
+                          <PlayerSearchSubtitle result={result} />
+                        </span>
                       </span>
                     </Link>
                   ))}

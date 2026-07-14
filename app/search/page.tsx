@@ -15,6 +15,7 @@ import {
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { AsyncButton, EmptyState, ErrorState, LoadingPanel } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
+import { PlayerSearchSubtitle } from "@/components/player-search-result";
 
 const TYPE_LABEL: Record<UniversalSearchType, string> = {
   player: "Player",
@@ -288,7 +289,9 @@ const SearchResultGroups = memo(function SearchResultGroups({
                       {TYPE_LABEL[result.type]}
                     </span>
                   </div>
-                  <p className="truncate text-xs text-pc-text-muted mt-0.5">{result.subtitle}</p>
+                  <p className="truncate text-xs text-pc-text-muted mt-0.5">
+                    <PlayerSearchSubtitle result={result} />
+                  </p>
                 </div>
                 <span className="text-xs text-pc-text-muted group-hover:text-pc-accent transition-colors">
                   View
