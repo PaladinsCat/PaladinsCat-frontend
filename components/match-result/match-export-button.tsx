@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type RefObject } from "react";
+import { toPng } from "html-to-image";
 import { LoadingIndicator } from "@/components/async-state";
-type MatchImageTheme = "dark" | "light";
 
 type MatchExportButtonProps = {
   matchId: number;
-  theme?: MatchImageTheme;
+  target: RefObject<HTMLElement | null>;
 };
 
 export default function MatchExportButton(props: MatchExportButtonProps) {
@@ -17,25 +17,47 @@ export default function MatchExportButton(props: MatchExportButtonProps) {
     setExporting(true);
     setMessage(null);
     try {
-      // The visible scoreboard card loads this exact URL first. Reuse that
-      // browser-cached PNG when saving instead of forcing a second render.
-      const response = await fetch(`/match-images/${props.matchId}?theme=${props.theme ?? "dark"}`, { cache: "force-cache" });
-      if (!response.ok) {
-        const body = await response.json().catch(() => null) as { error?: string } | null;
-        throw new Error(body?.error ?? "The match image could not be rendered.");
+      const scoreboard = props.target.current;
+      if (!scoreboard) throw new Error("The scoreboard is still loading. Please try again.");
+
+      // html-to-image serializes a CSS pseudo-element background unreliably.
+      // The scoreboard exposes the identical map as an image only while it is
+      // being captured, so the browser output retains the rendered backdrop.
+      scoreboard.dataset.imageExport = "true";
+      try {
+        await Promise.all(Array.from(scoreboard.querySelectorAll("img")).map((image) => {
+          if (image.complete) return image.decode?.().catch(() => undefined) ?? Promise.resolve();
+          return new Promise<void>((resolve) => {
+            image.addEventListener("load", () => resolve(), { once: true });
+            image.addEventListener("error", () => resolve(), { once: true });
+          });
+        }));
+
+        const dataUrl = await toPng(scoreboard, {
+          // The on-page scoreboard is deliberately scaled to the prototype's
+          // 2048×1152 canvas. Capture its native 1280×720 layout instead and
+          // let the canvas provide the higher-resolution PNG.
+          width: 1280,
+          height: 720,
+          canvasWidth: 2048,
+          canvasHeight: 1152,
+          pixelRatio: 1,
+          cacheBust: false,
+          backgroundColor: "#161618",
+          style: { transform: "none", transformOrigin: "top left" },
+        });
+        const anchor = document.createElement("a");
+        anchor.href = dataUrl;
+        anchor.download = `paladinscat-match-${props.matchId}.png`;
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        setMessage("PNG saved");
+      } finally {
+        delete scoreboard.dataset.imageExport;
       }
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const anchor = document.createElement("a");
-      anchor.href = url;
-      anchor.download = `paladinscat-match-${props.matchId}.png`;
-      document.body.appendChild(anchor);
-      anchor.click();
-      anchor.remove();
-      window.setTimeout(() => URL.revokeObjectURL(url), 1_000);
-      setMessage("PNG saved");
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Could not export this match.");
+      setMessage(error instanceof Error ? error.message : "Could not save this match image.");
     } finally {
       setExporting(false);
     }

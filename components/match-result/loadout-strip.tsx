@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import type { MatchFactPlayer } from "@/lib/api-client";
+import CanonicalTalentImage from "@/components/canonical-talent-image";
 
 interface LoadoutStripProps {
   fact: MatchFactPlayer;
@@ -58,12 +59,21 @@ export default function LoadoutStrip({ fact }: LoadoutStripProps) {
             className={m.type === "talent" ? "group relative flex flex-col items-center" : `group relative flex flex-col items-center gap-1 rounded-md border p-2 ${colorClass}`}
             title={level ? `${label} — Level ${level}` : label}
           >
-            <MaterialIcon
-              src={src}
-              fallbackSrc={fallbackSrc}
-              alt={label}
-              className={m.type === "talent" ? "h-12 w-12 object-contain" : "w-8 h-8"}
-            />
+            {m.type === "talent" ? (
+              <CanonicalTalentImage
+                championName={m.champion_name}
+                talentName={m.talent_name}
+                className="h-12 w-12 object-contain"
+                fallbackClassName="h-12 w-12"
+              />
+            ) : (
+              <MaterialIcon
+                src={src}
+                fallbackSrc={fallbackSrc}
+                alt={label}
+                className="w-8 h-8"
+              />
+            )}
             {/* Level badge — visible on hover or for leveled items/cards */}
             {level !== null && (
               <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-pc-text text-[10px] font-bold text-pc-bg">

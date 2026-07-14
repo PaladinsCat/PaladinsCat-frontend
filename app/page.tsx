@@ -14,6 +14,10 @@ import {
 import { formatLocalDateTime } from "@/lib/time-format";
 import HomeSearch from "@/components/home-search";
 import { useLocalization } from "@/lib/localization-context";
+import {
+  getHomeAlertsEnabled,
+  HOME_ALERTS_CHANGE_EVENT,
+} from "@/lib/home-alert-preference";
 
 function notificationDot(importance: number) {
   if (importance >= 75) return "bg-amber-500";
@@ -26,6 +30,8 @@ export default function HomePage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [notificationsChecked, setNotificationsChecked] = useState(false);
   const [changelogPreview, setChangelogPreview] = useState<ChangelogEntry | null>(null);
+  const [searchActive, setSearchActive] = useState(false);
+  const [homeAlertsEnabled, setHomeAlertsEnabled] = useState(true);
 
   useEffect(() => {
     const load = async () => {
@@ -38,6 +44,17 @@ export default function HomePage() {
       setNotificationsChecked(true);
     };
     load();
+  }, []);
+
+  useEffect(() => {
+    const syncHomeAlertsPreference = () => setHomeAlertsEnabled(getHomeAlertsEnabled());
+    syncHomeAlertsPreference();
+    window.addEventListener(HOME_ALERTS_CHANGE_EVENT, syncHomeAlertsPreference);
+    window.addEventListener("storage", syncHomeAlertsPreference);
+    return () => {
+      window.removeEventListener(HOME_ALERTS_CHANGE_EVENT, syncHomeAlertsPreference);
+      window.removeEventListener("storage", syncHomeAlertsPreference);
+    };
   }, []);
 
   return (
@@ -71,10 +88,10 @@ export default function HomePage() {
       </motion.div>
 
       {/* ── Search Bar ── */}
-      <HomeSearch />
+      <HomeSearch onSearchActiveChange={setSearchActive} />
 
       {/* ── 2×1 Grid: Notifications | Changelog ── */}
-      {notificationsChecked && (
+      {homeAlertsEnabled && !searchActive && notificationsChecked && (
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}

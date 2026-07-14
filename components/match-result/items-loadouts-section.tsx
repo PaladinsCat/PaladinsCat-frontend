@@ -24,6 +24,7 @@ import { getStatQuality } from "@/lib/stat-quality";
 import { readBrowserResult, writeBrowserResult } from "@/lib/browser-result-cache";
 import { LoadingIndicator } from "@/components/async-state";
 import PlayerName from "@/components/player-name";
+import CanonicalTalentImage from "@/components/canonical-talent-image";
 
 type Props = { team1Players: MatchPlayerDetail[]; team2Players: MatchPlayerDetail[]; team1Wins: boolean; team2Wins: boolean; factMap: Map<string, MatchFactPlayer> };
 
@@ -168,6 +169,7 @@ function DetailEntry({
   href,
   onNavigate,
   transparentIcon = false,
+  canonicalTalent,
 }: {
   name: string;
   description: ReactNode;
@@ -184,10 +186,19 @@ function DetailEntry({
   href?: string;
   onNavigate?: () => void;
   transparentIcon?: boolean;
+  canonicalTalent?: { championName: string | null | undefined; talentName: string | null | undefined };
 }) {
   const quality = metric ? getStatQuality(metric.winRate, metric.pickRate, maxPickRate) : null;
   return <article className="flex min-w-0 items-start gap-3 rounded-lg border border-pc-border/70 bg-pc-bg-secondary/45 p-3">
-    <Asset sources={sources} alt={name} level={level} tone={tone} transparent={transparentIcon} />
+    {canonicalTalent ? (
+      <CanonicalTalentImage
+        championName={canonicalTalent.championName}
+        talentName={canonicalTalent.talentName}
+        alt={name}
+        className={transparentIcon ? "h-12 w-12 shrink-0 object-contain" : "h-9 w-9 shrink-0 rounded border border-pc-border object-contain"}
+        fallbackClassName={transparentIcon ? "h-12 w-12 shrink-0" : "h-9 w-9 shrink-0 rounded border border-pc-border bg-pc-bg-secondary"}
+      />
+    ) : <Asset sources={sources} alt={name} level={level} tone={tone} transparent={transparentIcon} />}
     <div className="min-w-0 flex-1">
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
         {href ? <Link href={href} onClick={onNavigate} className="text-xs font-semibold text-pc-text transition-colors hover:text-pc-accent hover:underline">{name}</Link> : <h4 className="text-xs font-semibold text-pc-text">{name}</h4>}
@@ -349,7 +360,7 @@ function PlayerBuildRow({
       </div>
       <div className="col-span-2 lg:col-span-1">
         <div className="mb-1.5 text-[9px] font-semibold uppercase tracking-wider text-pc-text-muted lg:hidden">Talent &amp; cards</div>
-        <div className="flex flex-wrap items-center gap-1.5">{talents.map(t => { const entry = findReference("talents", t.talent_id, t.talent_name); return <Asset key={`talent-${t.talent_id}`} sources={[entry?.iconUrl, t.icon_url, t.fallback_icon_url]} alt={t.talent_name ?? "Talent"} transparent />; })}{cards.map(c => { const entry = findReference("cards", c.card_id, c.card_name); return <Asset key={`card-${c.card_id}`} sources={[entry?.iconUrl, c.icon_url, c.fallback_icon_url]} alt={c.card_name ?? "Loadout card"} level={c.card_level ?? undefined} tone="border-pc-accent/30" />; })}</div>
+        <div className="flex flex-wrap items-center gap-1.5">{talents.map(t => <CanonicalTalentImage key={`talent-${t.talent_id}`} championName={t.champion_name ?? player.champion_name} talentName={t.talent_name} alt={t.talent_name ?? "Talent"} className="h-12 w-12 shrink-0 object-contain" fallbackClassName="h-12 w-12 shrink-0" />)}{cards.map(c => { const entry = findReference("cards", c.card_id, c.card_name); return <Asset key={`card-${c.card_id}`} sources={[entry?.iconUrl, c.icon_url, c.fallback_icon_url]} alt={c.card_name ?? "Loadout card"} level={c.card_level ?? undefined} tone="border-pc-accent/30" />; })}</div>
       </div>
       <div className="col-span-2 lg:col-span-1">
         <div className="mb-1.5 text-[9px] font-semibold uppercase tracking-wider text-pc-text-muted lg:hidden">Purchased items</div>
@@ -386,7 +397,7 @@ function PlayerBuildRow({
           {talents.map((talent) => {
             const entry = findReference("talents", talent.talent_id, talent.talent_name);
             const name = talent.talent_name ?? entry?.name ?? `Talent #${talent.talent_id}`;
-            return <DetailEntry key={`talent-detail-${talent.talent_id}`} name={name} href={`${championPath}/talents/${talent.talent_id}?returnTo=${returnToQuery}`} onNavigate={preserveMatchPosition} label="Talent" description={formatDescription(entry?.description, 1) ?? (reference ? "Description unavailable." : <LoadingIndicator className="gap-1.5 text-xs" />)} sources={[entry?.iconUrl, talent.icon_url, talent.fallback_icon_url]} transparentIcon metric={talentMetric} showMetrics metricsLoaded={loadoutMetrics !== null} maxPickRate={100} />;
+            return <DetailEntry key={`talent-detail-${talent.talent_id}`} name={name} href={`${championPath}/talents/${talent.talent_id}?returnTo=${returnToQuery}`} onNavigate={preserveMatchPosition} label="Talent" description={formatDescription(entry?.description, 1) ?? (reference ? "Description unavailable." : <LoadingIndicator className="gap-1.5 text-xs" />)} sources={[]} canonicalTalent={{ championName: talent.champion_name ?? player.champion_name, talentName: talent.talent_name }} transparentIcon metric={talentMetric} showMetrics metricsLoaded={loadoutMetrics !== null} maxPickRate={100} />;
           })}
           {cards.map((card) => {
             const entry = findReference("cards", card.card_id, card.card_name);

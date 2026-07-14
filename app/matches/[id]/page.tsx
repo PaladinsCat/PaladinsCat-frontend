@@ -42,7 +42,7 @@ import MatchupSection from "@/components/match-result/matchup-section";
 import MatchStatsSection from "@/components/match-result/match-stats-section";
 import ItemsLoadoutsSection from "@/components/match-result/items-loadouts-section";
 import RatingSnapshots from "@/components/match-result/rating-snapshots";
-import MatchExportButton from "@/components/match-result/match-export-button";
+import BrowserScoreboard from "@/components/match-result/browser-scoreboard";
 import { ErrorState } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { readBrowserResult, removeBrowserResult, writeBrowserResult } from "@/lib/browser-result-cache";
@@ -292,21 +292,13 @@ export default function MatchDetailPage() {
         private={match.match.private}
       />
 
-      {/* The renderer's pre-built 16:9 card also warms the browser cache used
-          by Save image, so exporting normally avoids a second PNG download. */}
-      <section className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated shadow-sm" aria-label="Match scoreboard image">
-        <img
-          src={`/match-images/${match.match.match_id}?theme=dark`}
-          alt={`Rendered scoreboard for match ${match.match.match_id}`}
-          width={2048}
-          height={1152}
-          className="block h-auto w-full bg-pc-bg"
-          loading="eager"
-        />
-        <div className="flex items-center justify-end border-t border-pc-border bg-pc-bg-secondary/70 px-3 py-2">
-          <MatchExportButton matchId={match.match.match_id} />
-        </div>
-      </section>
+      <BrowserScoreboard
+        match={match.match}
+        queueLabel={queueLabel}
+        team1={team1Players}
+        team2={team2Players}
+        bans={match.bans}
+      />
 
       {/* Player Matchup — pre-match view */}
       <MatchupSection

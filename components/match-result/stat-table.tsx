@@ -9,6 +9,7 @@ import { computeDamageStats, num, fixed } from "./format";
 import LoadoutStrip from "./loadout-strip";
 import PartyBadge, { getPartyNumber } from "./party-badge";
 import PlayerName from "@/components/player-name";
+import CanonicalTalentImage from "@/components/canonical-talent-image";
 
 interface StatTableRowProps {
   player: MatchPlayerDetail;
@@ -28,21 +29,25 @@ export default function StatTable({ player, fact, wins }: StatTableRowProps) {
   const loadoutIcons = fact
     ? [
         ...fact.items.map((i) => ({
+          type: "item" as const,
           icon: i.icon_url,
           fallback: i.fallback_icon_url,
           label: i.item_name || "Item",
           level: i.item_level ?? null,
         })),
         ...fact.cards.map((c) => ({
+          type: "card" as const,
           icon: c.icon_url,
           fallback: c.fallback_icon_url,
           label: c.card_name || "Card",
           level: c.card_level ?? null,
         })),
         ...fact.talents.map((t) => ({
-          icon: t.icon_url,
-          fallback: t.fallback_icon_url,
+          type: "talent" as const,
+          icon: null,
+          fallback: null,
           label: t.talent_name || "Talent",
+          championName: t.champion_name || player.champion_name,
           level: null,
         })),
       ]
@@ -122,12 +127,22 @@ export default function StatTable({ player, fact, wins }: StatTableRowProps) {
                   className="relative"
                   title={item.level ? `${item.label} — Level ${item.level}` : item.label}
                 >
-                  <img
-                    src={safeSrc}
-                    alt={item.label}
-                    className="w-5 h-5 rounded border border-pc-border bg-pc-bg-secondary"
-                    onError={(e) => { (e.target as HTMLImageElement).src = (item.fallback || ""); }}
-                  />
+                  {item.type === "talent" ? (
+                    <CanonicalTalentImage
+                      championName={item.championName}
+                      talentName={item.label}
+                      className="w-5 h-5 rounded border border-pc-border bg-pc-bg-secondary object-contain"
+                      fallbackClassName="w-5 h-5 rounded border border-pc-border bg-pc-bg-secondary"
+                      loading="eager"
+                    />
+                  ) : (
+                    <img
+                      src={safeSrc}
+                      alt={item.label}
+                      className="w-5 h-5 rounded border border-pc-border bg-pc-bg-secondary"
+                      onError={(e) => { (e.target as HTMLImageElement).src = (item.fallback || ""); }}
+                    />
+                  )}
                   {item.level !== null && (
                     <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-pc-text text-[8px] font-bold text-pc-bg">
                       {item.level}
@@ -335,11 +350,11 @@ export default function StatTable({ player, fact, wins }: StatTableRowProps) {
                     <div className="space-y-1">
                       {fact.talents.map((talent) => (
                         <div key={talent.talent_id} className="text-xs text-pc-text-secondary flex items-center gap-2">
-                          <img
-                            src={talent.icon_url ?? talent.fallback_icon_url ?? ""}
-                            alt={talent.talent_name ?? "Talent"}
+                          <CanonicalTalentImage
+                            championName={talent.champion_name ?? player.champion_name}
+                            talentName={talent.talent_name}
                             className="h-10 w-10 shrink-0 object-contain"
-                            onError={(e) => { (e.target as HTMLImageElement).src = talent.fallback_icon_url ?? ""; }}
+                            fallbackClassName="h-10 w-10 shrink-0"
                           />
                           <span className="truncate">{talent.talent_name ?? `Talent #${talent.talent_id}`}</span>
                         </div>

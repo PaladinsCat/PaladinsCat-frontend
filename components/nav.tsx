@@ -14,6 +14,11 @@ import {
   setWallpaperEnabled,
   WALLPAPER_CHANGE_EVENT,
 } from "@/lib/wallpaper-preference";
+import {
+  getHomeAlertsEnabled,
+  setHomeAlertsEnabled,
+  HOME_ALERTS_CHANGE_EVENT,
+} from "@/lib/home-alert-preference";
 import PlayerName from "@/components/player-name";
 
 export default function Nav() {
@@ -23,6 +28,7 @@ export default function Nav() {
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
   const [headerLanguageMenuOpen, setHeaderLanguageMenuOpen] = useState(false);
   const [wallpaperEnabled, setWallpaperEnabledState] = useState(true);
+  const [homeAlertsEnabled, setHomeAlertsEnabledState] = useState(true);
   const headerLanguageMenuRef = useRef<HTMLDivElement>(null);
 
   const navLinks = [
@@ -105,6 +111,17 @@ export default function Nav() {
   }, []);
 
   useEffect(() => {
+    const syncHomeAlertsPreference = () => setHomeAlertsEnabledState(getHomeAlertsEnabled());
+    syncHomeAlertsPreference();
+    window.addEventListener(HOME_ALERTS_CHANGE_EVENT, syncHomeAlertsPreference);
+    window.addEventListener("storage", syncHomeAlertsPreference);
+    return () => {
+      window.removeEventListener(HOME_ALERTS_CHANGE_EVENT, syncHomeAlertsPreference);
+      window.removeEventListener("storage", syncHomeAlertsPreference);
+    };
+  }, []);
+
+  useEffect(() => {
     const openSiteMenu = () => setSideMenuOpen(true);
     window.addEventListener("paladinscat:open-site-menu", openSiteMenu);
     return () => window.removeEventListener("paladinscat:open-site-menu", openSiteMenu);
@@ -119,6 +136,12 @@ export default function Nav() {
     const next = !wallpaperEnabled;
     setWallpaperEnabledState(next);
     setWallpaperEnabled(next);
+  }
+
+  function handleHomeAlertsToggle() {
+    const next = !homeAlertsEnabled;
+    setHomeAlertsEnabledState(next);
+    setHomeAlertsEnabled(next);
   }
 
   function selectHeaderLocale(nextLocale: Locale) {
@@ -301,6 +324,20 @@ export default function Nav() {
                     </span>
                     <span className={`relative h-5 w-9 rounded-full transition-colors ${wallpaperEnabled ? "bg-pc-accent" : "bg-pc-bg"}`} aria-hidden="true">
                       <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${wallpaperEnabled ? "translate-x-4" : "translate-x-0.5"}`} />
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleHomeAlertsToggle}
+                    className="flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-sm text-pc-text-secondary transition-colors hover:bg-pc-bg-elevated hover:text-pc-text"
+                    aria-pressed={homeAlertsEnabled}
+                  >
+                    <span>
+                      <span className="block">{t("menu.homeAlerts")}</span>
+                      <span className="mt-0.5 block text-xs text-pc-text-muted">{homeAlertsEnabled ? t("menu.enabled") : t("menu.hidden")}</span>
+                    </span>
+                    <span className={`relative h-5 w-9 rounded-full transition-colors ${homeAlertsEnabled ? "bg-pc-accent" : "bg-pc-bg"}`} aria-hidden="true">
+                      <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${homeAlertsEnabled ? "translate-x-4" : "translate-x-0.5"}`} />
                     </span>
                   </button>
                 </section>

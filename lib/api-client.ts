@@ -1483,7 +1483,7 @@ export async function fetchPlayerSearch(query: string): Promise<PlayerSearchResu
     platform: string;
     region: string;
     kbm_tier: string | null;
-  }>>(`/players/search/${encodeURIComponent(query)}`);
+  }>>(`/players/search?q=${encodeURIComponent(query)}`);
 
   return raw.map((r) => ({
     id: r.id,

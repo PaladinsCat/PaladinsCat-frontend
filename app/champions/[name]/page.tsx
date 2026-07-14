@@ -20,11 +20,6 @@ import {
 } from "@/lib/champion-data";
 import { getCanonicalTalentImageUrl } from "@/lib/image-assets";
 import {
-  fetchItems,
-  fetchChampionTalentStats,
-  fetchPerformanceMetrics,
-  fetchChampionPerformanceDistributions,
-  fetchChampionMapStats,
   type ChampionTalentStatsResponse,
   type ChampionTalentStat,
   type ItemStat,
@@ -38,7 +33,6 @@ import { getRankIconPath, getTierColor, resolveEffectiveTier } from "@/lib/tier-
 import { withStoredLobbyTier } from "@/lib/lobby-tier";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api";
-const RANKED_QUEUE_ID = 486;
 const CHAMPION_METRICS: Array<{ key: PerformanceMetricKey; label: string; colorClass: string; accent: string }> = [
   { key: "dpm", label: "Damage / Min", colorClass: "text-red-400", accent: "#f87171" },
   { key: "gpm", label: "Credits / Min", colorClass: "text-yellow-400", accent: "#facc15" },
@@ -71,6 +65,15 @@ interface ChampionStats {
   totalMatches: number | null;
   totalWins: number | null;
 }
+
+type ChampionPagePayload = {
+  stats: Record<string, unknown> | null;
+  talentStats: ChampionTalentStatsResponse | null;
+  items: ItemStat[];
+  maps: ChampionMapStat[];
+  performance: PerformanceMetricsResponse;
+  championPerformance: Partial<Record<PerformanceMetricKey, ChampionPerformanceDistribution>>;
+};
 
 // Tier/trend types from existing API
 interface TierStat {
@@ -173,74 +176,48 @@ export default function ChampionDetailPage() {
       setLoading(false);
       return;
     }
+    const championId = staticChampion?.id;
+    if (!championId) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setChampionItems([]);
     setChampionMaps([]);
 
-    // Resolve the champion ID, then fetch its ranked stats in parallel.
-    fetch(`${API_BASE}/champions`)
-      .then((r) => r.json())
-      .then((champs: Array<{ id: number; name: string }>) => {
-        const match = champs.find((c) => c.name.toLowerCase() === championData!.name.toLowerCase());
-        if (!match) return;
-
-        return Promise.all([
-          // Champion aggregate stats from /champions/:id
-          fetch(`${API_BASE}${withStoredLobbyTier(`/champions/${match.id}`)}`)
-            .then((r) => r.json())
-            .then((data: { stats?: Record<string, unknown> | null }) => {
-              const s = data.stats;
-              if (!s) return null;
-              return {
-                // This page's "Avg Rating" is the ranked player tier average
-                // for the champion, not a player Glicko/ELO μ. The backend exposes it from
-                // champion_stats_ranked.sum_league_tier / total_matches, which
-                // is maintained during ingest and rebuilt by the projection
-                // tracker, so the detail page does not need to aggregate over
-                // match_players on every request.
-                avgRating: s.avg_league_tier != null ? Number(s.avg_league_tier) : null,
-                avgWinRate: s.win_rate != null ? Number(s.win_rate) : null,
-                totalPlays: s.total_matches != null ? Number(s.total_matches) : null,
-                totalMatches: s.total_matches != null ? Number(s.total_matches) : null,
-                totalWins: s.wins != null ? Number(s.wins) : null,
-              } as ChampionStats;
-            })
-            .catch(() => null as ChampionStats | null),
-          // Talent stats for this champion
-          fetchChampionTalentStats(match.id).catch(() => null as ChampionTalentStatsResponse | null),
-          // Champion-filtered ranked item stats are aggregated from the match facts.
-          fetchItems({ mode: "ranked", championId: match.id, limit: 200 }).catch(() => [] as ItemStat[]),
-          // One database-backed distribution query returns every map for this
-          // champion. Pick rate is the map's share of the champion's plays.
-          fetchChampionMapStats(match.id).catch(() => [] as ChampionMapStat[]),
-          // Global ranked distributions plus champion-specific distributions
-          // use the same metric contract as /stats/metrics. This
-          // keeps the champion page from comparing raw damage/credit totals across
-          // matches of different lengths.
-          fetchPerformanceMetrics({ queueId: RANKED_QUEUE_ID }).catch(() => ({} as PerformanceMetricsResponse)),
-          Promise.all(
-            CHAMPION_METRICS.map(({ key }) =>
-              fetchChampionPerformanceDistributions({ metric: key, championId: match.id, queueId: RANKED_QUEUE_ID })
-                .then((rows) => [key, rows[0] ?? null] as const)
-                .catch(() => [key, null] as const)
-            )
-          ),
-        ]);
+    // One server-cached bundle replaces the old fan-out of ten browser calls.
+    // A warm entry is served from Redis immediately while the backend refreshes
+    // it in the background after its TTL.
+    fetch(`${API_BASE}${withStoredLobbyTier(`/champions/${championId}/page-data`)}`)
+      .then((response) => {
+        if (!response.ok) throw new Error('Champion page data unavailable');
+        return response.json() as Promise<ChampionPagePayload>;
       })
-      .then((result) => {
-        if (!result) return;
-        const [statsData, talentData, itemData, mapData, globalMetrics, championMetricPairs] = result;
-        if (statsData) setStats(statsData);
-        if (talentData) setTalentStats(talentData);
-        setChampionItems(itemData);
-        setChampionMaps(mapData);
-        setGlobalPerformance(globalMetrics ?? {});
-        setChampionPerformance(
-          Object.fromEntries(championMetricPairs.filter(([, row]) => row != null)) as Partial<Record<PerformanceMetricKey, ChampionPerformanceDistribution>>
-        );
+      .then((data) => {
+        const s = data.stats;
+        setStats(s ? {
+          avgRating: s.avg_league_tier != null ? Number(s.avg_league_tier) : null,
+          avgWinRate: s.win_rate != null ? Number(s.win_rate) : null,
+          totalPlays: s.total_matches != null ? Number(s.total_matches) : null,
+          totalMatches: s.total_matches != null ? Number(s.total_matches) : null,
+          totalWins: s.wins != null ? Number(s.wins) : null,
+        } : null);
+        setTalentStats(data.talentStats);
+        setChampionItems(data.items);
+        setChampionMaps(data.maps);
+        setGlobalPerformance(data.performance);
+        setChampionPerformance(data.championPerformance);
+      })
+      .catch(() => {
+        setStats(null);
+        setTalentStats(null);
+        setChampionItems([]);
+        setChampionMaps([]);
+        setGlobalPerformance({});
+        setChampionPerformance({});
       })
       .finally(() => setLoading(false));
-  }, [championData]);
+  }, [championData, staticChampion?.id]);
 
 
   const talentStatsByName = useMemo(() => {
