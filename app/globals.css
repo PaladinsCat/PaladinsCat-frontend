@@ -776,7 +776,7 @@ main :where(a, button, input, select, textarea):focus-visible {
 #browser-scoreboard .scoreboard-map { display: none; }
 #browser-scoreboard .scoreboard[data-image-export="true"]::before { content: none; }
 #browser-scoreboard .scoreboard[data-image-export="true"] > .scoreboard-map { display: block; position: absolute; z-index: 0; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: saturate(1.15); opacity: .7; }
-#browser-scoreboard .hero { position: relative; grid-row: 4; height: 86px; padding: 7px 38px 9px; display: grid; grid-template-columns: 285px 590px minmax(0, 1fr); align-items: center; background: rgba(5, 9, 15, .58); border-bottom: 1px solid rgba(72, 211, 190, .22); }
+#browser-scoreboard .hero { position: relative; grid-row: 4; height: 86px; padding: 7px 38px 9px; display: grid; grid-template-columns: 285px 590px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); align-items: center; background: rgba(5, 9, 15, .58); border-bottom: 1px solid rgba(72, 211, 190, .22); }
 #browser-scoreboard .hero::before { content: ""; position: absolute; inset: 0; pointer-events: none; -webkit-backdrop-filter: blur(7px); backdrop-filter: blur(7px); -webkit-mask-image: linear-gradient(90deg, #000, transparent 20%, transparent 80%, #000); mask-image: linear-gradient(90deg, #000, transparent 20%, transparent 80%, #000); }
 #browser-scoreboard .hero > * { position: relative; z-index: 1; }
 #browser-scoreboard .hero::after { content: none; }
@@ -808,9 +808,10 @@ main :where(a, button, input, select, textarea):focus-visible {
 #browser-scoreboard .ban-picks { display: grid; grid-auto-flow: column; grid-auto-columns: 49px; align-items: start; justify-content: center; gap: 3px; }
 #browser-scoreboard .score-bans .ban-pick { flex-direction: column; min-width: 0; overflow: hidden; font-size: 0; line-height: 0; text-align: center; white-space: nowrap; }
 #browser-scoreboard .score-bans .ban-pick img { width: 48px; height: 48px; }
-#browser-scoreboard .match-meta { grid-column: 3; align-self: center; justify-self: stretch; display: grid; grid-template-columns: 110px minmax(0, 1fr); grid-template-areas: "tier timestamp" "duration match"; column-gap: 20px; row-gap: 7px; align-items: end; text-align: right; transform: translateY(-3px); }
+#browser-scoreboard .match-meta { grid-column: 3; align-self: center; justify-self: stretch; display: grid; height: 100%; grid-template-columns: 135px minmax(0, 1fr); grid-template-areas: "tier timestamp" "duration match"; column-gap: 20px; row-gap: 7px; align-items: end; text-align: right; transform: translateY(-3px); }
 #browser-scoreboard .match-meta.casual-meta .tier-meta { visibility: hidden; }
 #browser-scoreboard .tier-meta { grid-area: tier; display: flex; align-items: center; justify-content: flex-end; gap: 7px; text-align: right; }
+#browser-scoreboard .tier-meta .meta-value { white-space: nowrap; }
 #browser-scoreboard .timestamp-meta { grid-area: timestamp; align-self: center; color: var(--text); font-size: 11px; font-weight: 690; line-height: 1; white-space: nowrap; }
 #browser-scoreboard .duration-meta { grid-area: duration; }
 #browser-scoreboard .match-id-meta { grid-area: match; }
