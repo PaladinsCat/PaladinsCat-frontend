@@ -26,7 +26,7 @@ export const LOCALE_MODULES = localeModules;
 
 export const COMMUNITY_LOCALE_BASE_URL = (
   process.env.NEXT_PUBLIC_LOCALE_BASE_URL
-  ?? "https://raw.githubusercontent.com/NabiCook/PaladinsCat-locales/main/locales"
+  ?? "/locales"
 ).replace(/\/+$/, "");
 
 export function isSupportedLocale(value: string | null | undefined): value is Locale {

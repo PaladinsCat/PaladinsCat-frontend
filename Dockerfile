@@ -11,21 +11,25 @@ WORKDIR /app
 ARG NEXT_PUBLIC_API_URL=/api
 ARG NEXT_SERVER_API_URL=http://localhost:3304
 ARG NEXT_BUILD_CPUS=2
+ARG NEXT_PUBLIC_LOCALE_BASE_URL=/locales
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 ENV NEXT_SERVER_API_URL=${NEXT_SERVER_API_URL}
 ENV NEXT_BUILD_CPUS=${NEXT_BUILD_CPUS}
-COPY package.json package-lock.json tsconfig.json ./
+ENV NEXT_PUBLIC_LOCALE_BASE_URL=${NEXT_PUBLIC_LOCALE_BASE_URL}
+COPY src/frontend/package.json src/frontend/package-lock.json src/frontend/tsconfig.json ./
 RUN npm ci
-COPY . .
+COPY community-locales /community-locales
+COPY src/frontend/ .
 RUN npm run build
 
 # Dev stage
 FROM node:22-alpine AS dev
 WORKDIR /app
-COPY package.json ./
+COPY src/frontend/package.json ./
 RUN npm install
-COPY . ./
-CMD ["sh", "-c", "npm install && npx next dev -H 0.0.0.0"]
+COPY community-locales /community-locales
+COPY src/frontend/ ./
+CMD ["sh", "-c", "npm install && npm run dev -- -H 0.0.0.0"]
 
 # Prod runtime
 FROM node:22-alpine AS runtime
