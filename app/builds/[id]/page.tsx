@@ -7,6 +7,7 @@ import { formatLocalDateTime } from "@/lib/time-format";
 import { championSlug } from "@/lib/utils";
 import { loadBuildReferenceData, type BuildReferenceData } from "@/lib/build-reference";
 import { LoadingPanel } from "@/components/async-state";
+import CanonicalTalentImage from "@/components/canonical-talent-image";
 
 function AssetImage({ src, alt }: { src?: string | null; alt: string }) {
   if (!src) {
@@ -19,10 +20,10 @@ function AssetImage({ src, alt }: { src?: string | null; alt: string }) {
   return <img src={src} alt={alt} className="h-10 w-10 shrink-0 rounded-md border border-pc-border object-cover" loading="lazy" />;
 }
 
-function AssetRow({ iconUrl, title, subtitle }: { iconUrl?: string | null; title: string; subtitle?: string }) {
+function AssetRow({ iconUrl, title, subtitle, talentId }: { iconUrl?: string | null; title: string; subtitle?: string; talentId?: number }) {
   return (
     <div className="pc-surface-light flex items-center gap-3 rounded-lg border border-pc-border p-3 text-sm text-pc-text">
-      <AssetImage src={iconUrl} alt={title} />
+      {talentId ? <CanonicalTalentImage talentId={talentId} talentName={title} alt={title} className="h-10 w-10 shrink-0 rounded-md border border-pc-border object-cover" fallbackClassName="h-10 w-10 shrink-0 rounded-md border border-pc-border bg-pc-bg-secondary" /> : <AssetImage src={iconUrl} alt={title} />}
       <div className="min-w-0">
         <div className="truncate font-semibold">{title}</div>
         {subtitle && <div className="text-xs text-pc-text-muted">{subtitle}</div>}
@@ -146,6 +147,7 @@ export default function BuildDetailPage({ params }: { params: Promise<{ id: stri
                   return (
                     <AssetRow
                       key={talentId}
+                      talentId={talentId}
                       iconUrl={talent?.iconUrl}
                       title={talent?.name ?? `Talent ${talentId}`}
                       subtitle="Selected talent"

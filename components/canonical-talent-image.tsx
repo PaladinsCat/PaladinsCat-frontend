@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { getCanonicalTalentIconPath } from "@/lib/champion-data";
 
 type CanonicalTalentImageProps = {
-  championName: string | null | undefined;
+  talentId: number | null | undefined;
   talentName: string | null | undefined;
   alt?: string;
   className?: string;
@@ -19,7 +19,7 @@ type CanonicalTalentImageProps = {
  * the champion reference correctly resolves.
  */
 export default function CanonicalTalentImage({
-  championName,
+  talentId,
   talentName,
   alt,
   className,
@@ -33,9 +33,9 @@ export default function CanonicalTalentImage({
     let active = true;
     setSrc(null);
 
-    if (!championName || !talentName) return () => { active = false; };
+    if (!talentId) return () => { active = false; };
 
-    void getCanonicalTalentIconPath(championName, talentName)
+    void getCanonicalTalentIconPath(talentId)
       .then((resolved) => {
         if (active) setSrc(resolved);
       })
@@ -44,7 +44,7 @@ export default function CanonicalTalentImage({
       });
 
     return () => { active = false; };
-  }, [championName, talentName]);
+  }, [talentId]);
 
   if (!src) {
     return <span className={fallbackClassName ?? className} role="img" aria-label={`${displayName} unavailable`} />;

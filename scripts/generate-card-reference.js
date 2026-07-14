@@ -357,6 +357,11 @@ async function main() {
   fs.writeFileSync(TALENT_OUTPUT_PATH, `${JSON.stringify(talentOutput, null, 2)}\n`);
   console.log(`Wrote ${output.length} card references to ${path.relative(ROOT, OUTPUT_PATH)}`);
   console.log(`Wrote ${talentOutput.length} talent references to ${path.relative(ROOT, TALENT_OUTPUT_PATH)}`);
+
+  // Champion data owns the exact current talent artwork. Re-attach stable IDs
+  // and copy those URLs after every reference regeneration so consumers never
+  // fall back to display-name-derived filenames.
+  require("./sync-champion-talent-ids");
 }
 
 main().catch((err) => {

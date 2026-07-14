@@ -8,38 +8,8 @@ export function canonicalLocalImageUrl(src: string): string {
   return src.startsWith("/images/") ? src.replace(/,/g, "") : src;
 }
 
-/** Asset filenames use the official uppercase spelling, while API/reference
- * data occasionally title-cases it as "Vii". Keep this mapping at the image
- * boundary so every consumer resolves the same local file. */
-export function canonicalChampionAssetName(name: string): string {
-  return name.trim().toLowerCase() === "vii" ? "VII" : name.trim();
-}
-
-function canonicalTalentAssetName(championName: string, talentName: string): string {
-  // The game/API calls this talent "Tinkerin", while the published asset
-  // retains the punctuation from the original display name.
-  if (championName.trim().toLowerCase() === "barik" && talentName.trim().toLowerCase() === "tinkerin") {
-    return "Tinkerin'";
-  }
-  return talentName.trim();
-}
-
-export function getTalentImageUrl(championName: string, talentName: string, extension = "png"): string {
-  return canonicalLocalImageUrl(`/images/champions/Talent ${canonicalChampionAssetName(championName)} ${canonicalTalentAssetName(championName, talentName)}.${extension}`);
-}
-
-export function getCanonicalTalentImageUrl(source: string | null | undefined, championName: string, talentName: string): string {
-  // Champion data is the source of truth for talent artwork. Some talents
-  // intentionally keep art under a historic or punctuation-sensitive name,
-  // so rebuilding the path from the display name can point at a non-existent
-  // file (for example Goddess's Blessing).
-  if (source?.startsWith("/images/")) {
-    const normalized = canonicalLocalImageUrl(source);
-    return normalized.replace(
-      /Talent(?:%20|\s)Barik(?:%20|\s)Tinkerin(?=\.(?:png|avif)$)/i,
-      (name) => `${name}'`,
-    );
-  }
-  const extension = source?.match(/\.([a-z0-9]+)(?:[?#].*)?$/i)?.[1] ?? "avif";
-  return getTalentImageUrl(championName, talentName, extension);
+/** Champion data owns exact talent asset URLs. Never reconstruct a filename
+ * from API display text; punctuation, localization, and historic names differ. */
+export function getCanonicalTalentImageUrl(source: string | null | undefined): string | null {
+  return source?.startsWith("/images/") ? canonicalLocalImageUrl(source) : null;
 }

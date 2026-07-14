@@ -8,17 +8,16 @@ import { getChampionIconSafe } from "@/lib/champion-icons";
 import ScrambleText from "@/components/ScrambleText";
 import { LoadingPanel } from "@/components/async-state";
 import SmartImage from "@/components/SmartImage";
+import CanonicalTalentImage from "@/components/canonical-talent-image";
 import { championSlug } from "@/lib/utils";
 import { getStatQuality } from "@/lib/stat-quality";
 import { mapImagePath } from "@/lib/map-images";
 import {
   getChampionData,
-  getTalentIconPath,
   type ChampionData,
   type ChampionSkill,
   type ChampionTalent,
 } from "@/lib/champion-data";
-import { getCanonicalTalentImageUrl } from "@/lib/image-assets";
 import {
   type ChampionTalentStatsResponse,
   type ChampionTalentStat,
@@ -98,12 +97,6 @@ const ROLE_ICONS: Record<string, string> = {
   Support: "/images/icons/Class_Support_Icon.avif",
 };
 
-function statNameKey(value: string | null | undefined): string {
-  return String(value ?? "")
-    .normalize("NFKD")
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, "");
-}
 function AvgTierCard({ stats }: { stats: ChampionStats }) {
   if (stats.avgRating == null) {
     return (
@@ -223,8 +216,8 @@ export default function ChampionDetailPage() {
   }, [championData, staticChampion]);
 
 
-  const talentStatsByName = useMemo(() => {
-    return new Map((talentStats?.talents ?? []).map((stat) => [statNameKey(stat.talentName), stat]));
+  const talentStatsById = useMemo(() => {
+    return new Map((talentStats?.talents ?? []).map((stat) => [stat.talentId, stat]));
   }, [talentStats]);
 
   const maxTalentPickRate = useMemo(() => {
@@ -342,12 +335,11 @@ export default function ChampionDetailPage() {
               <div className="pc-card">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {championData.talents.map((talent) => {
-                  const stat: ChampionTalentStat | undefined = talentStatsByName.get(statNameKey(talent.name));
+                  const stat: ChampionTalentStat | undefined = talentStatsById.get(talent.id);
                   return (
                     <TalentCard
                       key={talent.name}
                       talent={talent}
-                      championName={championData.name}
                       stat={stat ?? undefined}
                       totalMatches={talentStats?.totalMatches ?? 0}
                       maxPickRate={maxTalentPickRate}
@@ -664,33 +656,29 @@ function SkillCard({ skill }: { skill: ChampionSkill }) {
 
 function TalentCard({
   talent,
-  championName,
   stat,
   totalMatches,
   maxPickRate,
   href,
 }: {
   talent: ChampionTalent;
-  championName: string;
   stat?: ChampionTalentStat;
   totalMatches?: number;
   maxPickRate?: number;
   href?: string;
 }) {
-  const talentImageUrl = getCanonicalTalentImageUrl(talent.iconUrl, championName, talent.name);
   const pickRate = stat && totalMatches && totalMatches > 0 ? (stat.totalPlays / totalMatches) * 100 : 0;
   const quality = stat ? getStatQuality(stat.winRate, pickRate, maxPickRate ?? 100) : null;
 
   const content = (
     <>
       <div className="flex-shrink-0 w-14 h-14 flex items-center justify-center overflow-hidden">
-        <SmartImage
-          src={talentImageUrl}
+        <CanonicalTalentImage
+          talentId={talent.id}
+          talentName={talent.name}
           alt={talent.name}
           className="w-full h-full object-contain"
-          onError={(e) => {
-            (e.target as HTMLImageElement).style.display = "none";
-          }}
+          fallbackClassName="w-full h-full"
         />
       </div>
       <div className="flex-1 min-w-0">

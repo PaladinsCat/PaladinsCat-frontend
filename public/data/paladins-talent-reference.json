@@ -1415,7 +1415,7 @@
     "championId": 2517,
     "championName": "Io",
     "itemType": "Talent",
-    "iconUrl": "https://web2.hirez.com/paladins/champion-cards/goddess-blessing.jpg",
+    "iconUrl": "/images/champions/Talent Io Goddess's Blessing.avif",
     "source": "db-observed"
   },
   {
@@ -1470,7 +1470,7 @@
     "championId": 2529,
     "championName": "Tiberius",
     "itemType": "Talent",
-    "iconUrl": "/images/champions/Talent Tiberius Tigron's Fury.avif",
+    "iconUrl": "/images/champions/Talent Tiberius Tigron's Fury.png",
     "source": "db-observed"
   },
   {
@@ -1811,6 +1811,17 @@
     "championName": "Caspian",
     "itemType": "Talent",
     "iconUrl": "/images/champions/Talent Caspian Everywhere At Once.avif",
+    "source": "db-observed",
+    "shortDescription": null
+  },
+  {
+    "id": 31059,
+    "name": "It's Got Some Heft",
+    "description": null,
+    "championId": 2554,
+    "championName": "Caspian",
+    "itemType": "Talent",
+    "iconUrl": "/images/champions/Talent Caspian It's Got Some Heft.avif",
     "source": "db-observed",
     "shortDescription": null
   },

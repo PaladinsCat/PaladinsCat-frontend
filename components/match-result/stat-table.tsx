@@ -44,10 +44,10 @@ export default function StatTable({ player, fact, wins }: StatTableRowProps) {
         })),
         ...fact.talents.map((t) => ({
           type: "talent" as const,
+          talentId: t.talent_id,
           icon: null,
           fallback: null,
           label: t.talent_name || "Talent",
-          championName: t.champion_name || player.champion_name,
           level: null,
         })),
       ]
@@ -129,7 +129,7 @@ export default function StatTable({ player, fact, wins }: StatTableRowProps) {
                 >
                   {item.type === "talent" ? (
                     <CanonicalTalentImage
-                      championName={item.championName}
+                      talentId={item.talentId}
                       talentName={item.label}
                       className="w-5 h-5 rounded border border-pc-border bg-pc-bg-secondary object-contain"
                       fallbackClassName="w-5 h-5 rounded border border-pc-border bg-pc-bg-secondary"
@@ -351,7 +351,7 @@ export default function StatTable({ player, fact, wins }: StatTableRowProps) {
                       {fact.talents.map((talent) => (
                         <div key={talent.talent_id} className="text-xs text-pc-text-secondary flex items-center gap-2">
                           <CanonicalTalentImage
-                            championName={talent.champion_name ?? player.champion_name}
+                            talentId={talent.talent_id}
                             talentName={talent.talent_name}
                             className="h-10 w-10 shrink-0 object-contain"
                             fallbackClassName="h-10 w-10 shrink-0"

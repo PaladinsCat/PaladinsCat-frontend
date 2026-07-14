@@ -72,19 +72,22 @@
         "name": "Defiant Fist",
         "description": "Successful hits with your Revolver increase the damage of your next Defiance by 20%, stacking up to 100%.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Androxus Defiant Fist.avif"
+        "iconUrl": "/images/champions/Talent Androxus Defiant Fist.avif",
+        "id": 20085
       },
       {
         "name": "Godslayer",
         "description": "Reversal always fires back and does an additional 800 damage.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Androxus Godslayer.avif"
+        "iconUrl": "/images/champions/Talent Androxus Godslayer.avif",
+        "id": 16368
       },
       {
         "name": "Dark Stalker",
         "description": "Nether Step now has 3 separate charges and is no longer linked.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Androxus Dark Stalker.avif"
+        "iconUrl": "/images/champions/Talent Androxus Dark Stalker.avif",
+        "id": 19292
       }
     ],
     "loadouts": [
@@ -291,19 +294,22 @@
         "name": "Battering Ram",
         "description": "Reduce your damage taken by 75% while using Shoulder Bash.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Ash Battering Ram.avif"
+        "iconUrl": "/images/champions/Talent Ash Battering Ram.avif",
+        "id": 18388
       },
       {
         "name": "Slug Shot",
         "description": "Your weapon shots travel 50% faster and 100% farther, dealing 450 Direct Damage with no explosion.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Ash Slug Shot.avif"
+        "iconUrl": "/images/champions/Talent Ash Slug Shot.avif",
+        "id": 33047
       },
       {
         "name": "Fortress Breaker",
         "description": "Increase Siege Shield's maximum Health by 2750 and its size by 50%, but reduce its Movement Speed by 80%.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Ash Fortress Breaker.avif"
+        "iconUrl": "/images/champions/Talent Ash Fortress Breaker.avif",
+        "id": 18556
       }
     ],
     "loadouts": [
@@ -510,19 +516,22 @@
         "name": "Unstable Fissure",
         "description": "When you use Second Chance you also Rewind enemies within 20 units 3s into the past.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Atlas Unstable Fissure.avif"
+        "iconUrl": "/images/champions/Talent Atlas Unstable Fissure.avif",
+        "id": 27390
       },
       {
         "name": "Temporal Divide",
         "description": "Greatly increase the size of Stasis Field, but its Duration is decreased to 3.5 seconds and its Cooldown is increased to 18s.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Atlas Temporal Divide.avif"
+        "iconUrl": "/images/champions/Talent Atlas Temporal Divide.avif",
+        "id": 24483
       },
       {
         "name": "Deja vu",
         "description": "Setback becomes a lobbed explosive, capable of Rewinding multiple enemies.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Atlas Deja vu.avif"
+        "iconUrl": "/images/champions/Talent Atlas Deja vu.avif",
+        "id": 24477
       }
     ],
     "loadouts": [
@@ -729,19 +738,22 @@
         "name": "Persistence",
         "description": "Reduce the damage you take by {4|4}% while at or below 40% Health.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Azaan Persistence.avif"
+        "iconUrl": "/images/champions/Talent Azaan Persistence.avif",
+        "id": 27718
       },
       {
         "name": "Tempering",
         "description": "Reckoning's damage and size, Sanctuary's health, and Conviction's range and stun duration are increased by 50%, but their Cooldown is increased by 25%.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Azaan Tempering.avif"
+        "iconUrl": "/images/champions/Talent Azaan Tempering.avif",
+        "id": 27719
       },
       {
         "name": "Eternal",
         "description": "Your Ire no longer decays due to not taking or dealing damage, but you no longer gain the passive damage increase while above Ire threshold.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Azaan Eternal.avif"
+        "iconUrl": "/images/champions/Talent Azaan Eternal.avif",
+        "id": 27720
       }
     ],
     "loadouts": [
@@ -948,19 +960,22 @@
         "name": "Fortify",
         "description": "Increase the maximum Health of Barricade by 2000 and reduce its Cooldown by 3s.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Barik Fortify.avif"
+        "iconUrl": "/images/champions/Talent Barik Fortify.avif",
+        "id": 16397
       },
       {
         "name": "Tinkerin'",
         "description": "Modify your Blunderbuss to fire a single slug that deals 600 damage.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Barik Tinkerin'.avif"
+        "iconUrl": "/images/champions/Talent Barik Tinkerin'.avif",
+        "id": 16400
       },
       {
         "name": "Forgefire",
         "description": "Dome Shield now costs 40% Ultimate charge and places a miniature Flamethrower Turret. This turret deals 400 damage every 1s and has no Shield, but you can have 2 active at once.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Barik Forgefire.avif"
+        "iconUrl": "/images/champions/Talent Barik Forgefire.avif",
+        "id": 27389
       }
     ],
     "loadouts": [
@@ -1167,19 +1182,22 @@
         "name": "Fiery Disposition",
         "description": "Hitting an enemy with Grenade Launcher Burns them for 0.175% of their maximum Health every 0.1s for 1.5s. Additional hits refresh the duration.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Betty La Bomba Fiery Disposition.avif"
+        "iconUrl": "/images/champions/Talent Betty La Bomba Fiery Disposition.avif",
+        "id": 33048
       },
       {
         "name": "Controlled Fury",
         "description": "Reduce the range of Hail of Bombs by 50%, concentrating the explosions in a smaller area, and reduce the Cooldown of Hail of Bombs by 2s.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Betty La Bomba Controlled Fury.avif"
+        "iconUrl": "/images/champions/Talent Betty La Bomba Controlled Fury.avif",
+        "id": 28009
       },
       {
         "name": "Gotta Bounce",
         "description": "Reduce the Cooldown of Explosive Personality by 5s.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Betty La Bomba Gotta Bounce.avif"
+        "iconUrl": "/images/champions/Talent Betty La Bomba Gotta Bounce.avif",
+        "id": 28010
       }
     ],
     "loadouts": [
@@ -1386,19 +1404,22 @@
         "name": "Chain Reaction",
         "description": "Hitting with more than one Sticky Bomb on a use of Detonate increases the damage of each explosion after the first by 30% of its base damage, up to 150%.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Bomb King Chain Reaction.avif"
+        "iconUrl": "/images/champions/Talent Bomb King Chain Reaction.avif",
+        "id": 16426
       },
       {
         "name": "Royal Subjects",
         "description": "Poppy bomb now has 2 charges, but reduce its Knockback strength against enemies by 40%.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Bomb King Royal Subjects.avif"
+        "iconUrl": "/images/champions/Talent Bomb King Royal Subjects.avif",
+        "id": 20216
       },
       {
         "name": "Accelerant",
         "description": "Reduces the time it takes for Grumpy Bomb to explode by 40% and increase its damage to shields by 200%.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Bomb King Accelerant.avif"
+        "iconUrl": "/images/champions/Talent Bomb King Accelerant.avif",
+        "id": 16427
       }
     ],
     "loadouts": [
@@ -1605,19 +1626,22 @@
         "name": "Ensnare",
         "description": "Increase the damage you deal to targets Slowed by Net Shot by 25% and increases the duration of Net Shot's Slows by 0.5s. The damage increase lasts a minimum of 2s.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Buck Ensnare.avif"
+        "iconUrl": "/images/champions/Talent Buck Ensnare.avif",
+        "id": 16386
       },
       {
         "name": "Bulk Up",
         "description": "Using Recovery instantly Heals you for 600 and increases your maximum Health by 300 for 5s.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Buck Bulk Up.avif"
+        "iconUrl": "/images/champions/Talent Buck Bulk Up.avif",
+        "id": 16392
       },
       {
         "name": "Bounce House",
         "description": "Heroic Leap deals 600 damage and applies a Knockup to enemies within 20 units of your landing location.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Buck Bounce House.avif"
+        "iconUrl": "/images/champions/Talent Buck Bounce House.avif",
+        "id": 12931
       }
     ],
     "loadouts": [
@@ -1824,19 +1848,22 @@
         "name": "Measured Cadence",
         "description": "Automatically fire a weaker copy of Rogue\u2019s Tempo for every 4 Ammo consumed. This copy deals 400 damage and reduces Rogue's Tempo's Cooldown by 15% on hit.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Caspian Measured Cadence.avif"
+        "iconUrl": "/images/champions/Talent Caspian Measured Cadence.avif",
+        "id": 31057
       },
       {
         "name": "Everywhere At Once",
         "description": "The Cooldown of Deadly Momentum is reduced by 3s, and it gains 1 additional charge. Heal for 200 Health when you hit an enemy with Deadly Momentum.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Caspian Everywhere At Once.avif"
+        "iconUrl": "/images/champions/Talent Caspian Everywhere At Once.avif",
+        "id": 31058
       },
       {
         "name": "It's Got Some Heft",
         "description": "War deals 50 more damage per hit and hits 20% farther, but its fire rate is decreased by 20%. War's attacks now deal an additional 20% damage to each enemy hit for each enemy hit in total with your attack.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Caspian It's Got Some Heft.avif"
+        "iconUrl": "/images/champions/Talent Caspian It's Got Some Heft.avif",
+        "id": 31059
       }
     ],
     "loadouts": [
@@ -2043,19 +2070,22 @@
         "name": "Exaction",
         "description": "For 8s after using Dodge Roll, your next weapon shot's damage is increased by 30%.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Cassie Exaction.avif"
+        "iconUrl": "/images/champions/Talent Cassie Exaction.avif",
+        "id": 16384
       },
       {
         "name": "Impulse",
         "description": "Blast Shot has its damage increased by 150 and its Cooldown decreased by 2s.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Cassie Impulse.avif"
+        "iconUrl": "/images/champions/Talent Cassie Impulse.avif",
+        "id": 16382
       },
       {
         "name": "Big Game",
         "description": "For 4s after hitting an enemy with Disengage, your weapon shots deal an additional 9% of that enemy's maximum Health as damage.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Cassie Big Game.avif"
+        "iconUrl": "/images/champions/Talent Cassie Big Game.avif",
+        "id": 16385
       }
     ],
     "loadouts": [
@@ -2262,19 +2292,22 @@
         "name": "Dark Gifts",
         "description": "Your Marked ally gains 15% Crowd Control reduction, 20% Cooldown reduction, 25% Reload Speed increase, and they are Healed for 100 every 1s.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Corvus Dark Gifts.avif"
+        "iconUrl": "/images/champions/Talent Corvus Dark Gifts.avif",
+        "id": 25371
       },
       {
         "name": "Stunning Visage",
         "description": "Enemies hit by Projection are Stunned for 1s and any enemy caught between your Projection and you when you Teleport takes 800 damage. Reduce Projection's Cooldown by 3s.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Corvus Stunning Visage.avif"
+        "iconUrl": "/images/champions/Talent Corvus Stunning Visage.avif",
+        "id": 25370
       },
       {
         "name": "Spreading Influence",
         "description": "Decrease the percentage of Healing given to Marked targets by 20%, but you can have two Marks out at a time.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Corvus Spreading Influence.avif"
+        "iconUrl": "/images/champions/Talent Corvus Spreading Influence.avif",
+        "id": 25366
       }
     ],
     "loadouts": [
@@ -2481,19 +2514,22 @@
         "name": "Scuttle",
         "description": "Cursed Howitzer's Abyssal Reload now explodes in a 20-unit-radius area on contact, but only deals 700 damage.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Dredge Scuttle.avif"
+        "iconUrl": "/images/champions/Talent Dredge Scuttle.avif",
+        "id": 23690
       },
       {
         "name": "Hurl",
         "description": "Hits with Harpoon refund its cooldown and generate 50% more Ultimate charge, but no longer Slows enemies hit.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Dredge Hurl.avif"
+        "iconUrl": "/images/champions/Talent Dredge Hurl.avif",
+        "id": 23688
       },
       {
         "name": "Abyss Spike",
         "description": "Harpoon lodges into terrain and explodes when an enemy comes within 20 units, dealing 1000 damage in a 35-unit-radius area.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Dredge Abyss Spike.avif"
+        "iconUrl": "/images/champions/Talent Dredge Abyss Spike.avif",
+        "id": 23807
       }
     ],
     "loadouts": [
@@ -2700,19 +2736,22 @@
         "name": "Combustible",
         "description": "Fire Spit applies a Knockback and deals an additional 300 Burn damage over 2s.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Drogoz Combustible.avif"
+        "iconUrl": "/images/champions/Talent Drogoz Combustible.avif",
+        "id": 16514
       },
       {
         "name": "Fusillade",
         "description": "Damage dealt when hitting an enemy directly with Rocket Launcher or Salvo is increased by 25%.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Drogoz Fusillade.avif"
+        "iconUrl": "/images/champions/Talent Drogoz Fusillade.avif",
+        "id": 16383
       },
       {
         "name": "W.Y.R.M. Jets",
         "description": "Increase Booster's Max Vertical Speed by 100% and Vertical Acceleration by 57%.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Drogoz W.Y.R.M. Jets.avif"
+        "iconUrl": "/images/champions/Talent Drogoz W.Y.R.M. Jets.avif",
+        "id": 16364
       }
     ],
     "loadouts": [
@@ -2919,19 +2958,22 @@
         "name": "Over the Moon",
         "description": "Increase the damage you deal with your weapon shots by 25% for 3s after Soar ends.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Evie Over the Moon.avif"
+        "iconUrl": "/images/champions/Talent Evie Over the Moon.avif",
+        "id": 16370
       },
       {
         "name": "Snow Globe",
         "description": "Ice Storm has its damage increased by 100% and its Ultimate charge decreased by 50%, but its duration is reduced to 3s and its Slow is reduced to 30%.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Evie Snow Globe.avif"
+        "iconUrl": "/images/champions/Talent Evie Snow Globe.avif",
+        "id": 20235
       },
       {
         "name": "Wormhole",
         "description": "Blink leaves behind a magical wormhole. Refire Blink within 4s of its use to return to the wormhole.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Evie Wormhole.avif"
+        "iconUrl": "/images/champions/Talent Evie Wormhole.avif",
+        "id": 16371
       }
     ],
     "loadouts": [
@@ -3138,19 +3180,22 @@
         "name": "Aegis",
         "description": "Increase Chivalry's Shield to 5500, and it begins regenerating 25% sooner and 25% faster. You now only need 20% Shield to activate Chivalry after it is broken.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Fernando Aegis.avif"
+        "iconUrl": "/images/champions/Talent Fernando Aegis.avif",
+        "id": 16379
       },
       {
         "name": "Scorch",
         "description": "Increase the damage of Fireball by 35%, decrease its Cooldown by 1s, and deal 20% increased damage for each subsequent target hit after the first.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Fernando Scorch.avif"
+        "iconUrl": "/images/champions/Talent Fernando Scorch.avif",
+        "id": 16380
       },
       {
         "name": "Formidable",
         "description": "You now have 2 charges of Charge, each Charge deals an additional 100 damage, and you are Immune to Crowd Control while Charging, but the Cooldown of Charge is increased to 13s.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Fernando Formidable.avif"
+        "iconUrl": "/images/champions/Talent Fernando Formidable.avif",
+        "id": 16381
       }
     ],
     "loadouts": [
@@ -3357,19 +3402,22 @@
         "name": "Cherish",
         "description": "Kindle Soul also heals allies within 50 units of your target at 50% effectiveness.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Furia Cherish.avif"
+        "iconUrl": "/images/champions/Talent Furia Cherish.avif",
+        "id": 23394
       },
       {
         "name": "Exterminate",
         "description": "Increase the Attack Speed bonus of Wrath to 15% per tier.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Furia Exterminate.avif"
+        "iconUrl": "/images/champions/Talent Furia Exterminate.avif",
+        "id": 23358
       },
       {
         "name": "Solar Blessing",
         "description": "Pyre Strike now can be stopped by refire & Heals yourself and allies within for 175 every 0.1s. Allies continue to heal for 1.5s on exit.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Furia Solar Blessing.avif"
+        "iconUrl": "/images/champions/Talent Furia Solar Blessing.avif",
+        "id": 23362
       }
     ],
     "loadouts": [
@@ -3576,19 +3624,22 @@
         "name": "Totemic Ward",
         "description": "Gain a third charge of Healing Totem and increase their radius by 20%.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Grohk Totemic Ward.avif"
+        "iconUrl": "/images/champions/Talent Grohk Totemic Ward.avif",
+        "id": 16377
       },
       {
         "name": "Spirit's Domain",
         "description": "Hitting allies with your Lightning Staff Heals them for 80 every .1s and up to 30% more if held longer on them, increases their Movement Speed by 20% for 1s, and your maximum Ammo capacity is increased by 25%.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Grohk Spirit's Domain.avif"
+        "iconUrl": "/images/champions/Talent Grohk Spirit's Domain.avif",
+        "id": 20325
       },
       {
         "name": "Maelstrom",
         "description": "Increase the damage of Lightning Staff to 75, your weapon shots reduce the Cooldown of Shock Pulse by 0.5s, and Shock Pulse chains 4 additional times.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Grohk Maelstrom.avif"
+        "iconUrl": "/images/champions/Talent Grohk Maelstrom.avif",
+        "id": 16378
       }
     ],
     "loadouts": [
@@ -3795,19 +3846,22 @@
         "name": "Wisps of Sylvanus",
         "description": "Blossom's passive aura now also provides 15% Movement Speed.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Grover Wisps of Sylvanus.avif"
+        "iconUrl": "/images/champions/Talent Grover Wisps of Sylvanus.avif",
+        "id": 33622
       },
       {
         "name": "Ferocity",
         "description": "Increase your maximum damage scaling over distance by 60%.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Grover Ferocity.avif"
+        "iconUrl": "/images/champions/Talent Grover Ferocity.avif",
+        "id": 16389
       },
       {
         "name": "Deep Roots",
         "description": "Crippling Throw travels 35% slower, but now instead Roots targets affected.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Grover Deep Roots.avif"
+        "iconUrl": "/images/champions/Talent Grover Deep Roots.avif",
+        "id": 16582
       }
     ],
     "loadouts": [
@@ -4014,19 +4068,22 @@
         "name": "Splitting Ice",
         "description": "Frost Bolt Chains to a nearby enemy within 30 units, dealing 225 damage.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Imani Splitting Ice.avif"
+        "iconUrl": "/images/champions/Talent Imani Splitting Ice.avif",
+        "id": 24145
       },
       {
         "name": "Pyromania",
         "description": "Each of your Pyre Balls explodes in a 20-unit-radius area on hit and generate more Mana. Converts Pyre ball to Area Damage.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Imani Pyromania.avif"
+        "iconUrl": "/images/champions/Talent Imani Pyromania.avif",
+        "id": 24144
       },
       {
         "name": "Mana Rift",
         "description": "Remaining still for 1s creates a 30-unit Mana Rift around you that generates Mana every 1s. Leaving the Mana Rift destroys it.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Imani Mana Rift.avif"
+        "iconUrl": "/images/champions/Talent Imani Mana Rift.avif",
+        "id": 24136
       }
     ],
     "loadouts": [
@@ -4233,19 +4290,22 @@
         "name": "Mother's Grace",
         "description": "Increase the Damage Reduction of Earthern Guard by 10% and gain Immunity to Crowd Control while Earthen Guard is active.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Inara Mother's Grace.avif"
+        "iconUrl": "/images/champions/Talent Inara Mother's Grace.avif",
+        "id": 16601
       },
       {
         "name": "Tremors",
         "description": "Impasse now has 2 charges and its Cooldown is reduced to 12s, but you are unable to destroy your walls.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Inara Tremors.avif"
+        "iconUrl": "/images/champions/Talent Inara Tremors.avif",
+        "id": 16605
       },
       {
         "name": "Treacherous Ground",
         "description": "The radius of Warder's Field is increased by 50% and it Cripples enemies within it.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Inara Treacherous Ground.avif"
+        "iconUrl": "/images/champions/Talent Inara Treacherous Ground.avif",
+        "id": 16600
       }
     ],
     "loadouts": [
@@ -4452,19 +4512,22 @@
         "name": "Life Link",
         "description": "When Io or Luna heal an ally other than each other, the other is also healed at 50% efficiency.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Io Life Link.avif"
+        "iconUrl": "/images/champions/Talent Io Life Link.avif",
+        "id": 24673
       },
       {
         "name": "Goddess's Blessing",
         "description": "Allies being Healed by Moonlight take 15% reduced damage.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Io Goddess's Blessing.avif"
+        "iconUrl": "/images/champions/Talent Io Goddess's Blessing.avif",
+        "id": 24674
       },
       {
         "name": "Sacrifice",
         "description": "If Io falls below 200 Health while Luna is active, she trades places with Luna, heals for 50% of her Health, and Luna dies in her stead.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Io Sacrifice.avif"
+        "iconUrl": "/images/champions/Talent Io Sacrifice.avif",
+        "id": 24663
       }
     ],
     "loadouts": [
@@ -4671,19 +4734,22 @@
         "name": "Luminary",
         "description": "All allies already affected by Astral Mark are Healed for an additional 285 when you use Astral Mark.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Jenos Luminary.avif"
+        "iconUrl": "/images/champions/Talent Jenos Luminary.avif",
+        "id": 19223
       },
       {
         "name": "Binary Star",
         "description": "Star Splitter now deals 380 damage every 0.4s, but reduces your maximum Ammo to 15.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Jenos Binary Star.avif"
+        "iconUrl": "/images/champions/Talent Jenos Binary Star.avif",
+        "id": 20092
       },
       {
         "name": "The Power Cosmeum",
         "description": "Enemies affected by Void Grip are Crippled and take an additional 480 damage over its duration.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Jenos The Power Cosmeum.avif"
+        "iconUrl": "/images/champions/Talent Jenos The Power Cosmeum.avif",
+        "id": 19190
       }
     ],
     "loadouts": [
@@ -4890,19 +4956,22 @@
         "name": "Empowered Curse",
         "description": "Increase your Ultimate charge rate by 3% and Movement Speed by 5% per stack of Curse currently on enemies.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Kasumi Empowered Curse.avif"
+        "iconUrl": "/images/champions/Talent Kasumi Empowered Curse.avif",
+        "id": 31303
       },
       {
         "name": "Haunted Ground",
         "description": "When a Spirit Trap is triggered, reactivate to teleport to the trap and detonate it. Increase the explosion radius by 25%, Curse stacks applied by 2, and it Fears instead of Slowing.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Kasumi Haunted Ground.avif"
+        "iconUrl": "/images/champions/Talent Kasumi Haunted Ground.avif",
+        "id": 31304
       },
       {
         "name": "Unfinished Business",
         "description": "After Body and Soul ends, Heal for 70% of the damage your body took (minimum of 15% max health) while traveling, unaffected by Anti-Healing.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Kasumi Unfinished Business.avif"
+        "iconUrl": "/images/champions/Talent Kasumi Unfinished Business.avif",
+        "id": 31305
       }
     ],
     "loadouts": [
@@ -5109,19 +5178,22 @@
         "name": "Lian's Shield",
         "description": "Your Shield now regenerates at 120% effectiveness, and regenerates even while it is active.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Khan Lian's Shield.avif"
+        "iconUrl": "/images/champions/Talent Khan Lian's Shield.avif",
+        "id": 22888
       },
       {
         "name": "Storm of Bullets",
         "description": "Increase your Attack Speed by 40%, but reduce your damage-per-shot by 25%.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Khan Storm of Bullets.avif"
+        "iconUrl": "/images/champions/Talent Khan Storm of Bullets.avif",
+        "id": 22890
       },
       {
         "name": "Vortex Grip",
         "description": "Targets are Stunned by Commander's Grab for an additional 1.4s and Weakened to weapon attacks by 15% during.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Khan Vortex Grip.avif"
+        "iconUrl": "/images/champions/Talent Khan Vortex Grip.avif",
+        "id": 22891
       }
     ],
     "loadouts": [
@@ -5328,19 +5400,22 @@
         "name": "Steady Aim",
         "description": "For 4s after hitting a fully-charged weapon shot, your next fully-charged shot will deal an additional 20% damage.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Kinessa Steady Aim.avif"
+        "iconUrl": "/images/champions/Talent Kinessa Steady Aim.avif",
+        "id": 16456
       },
       {
         "name": "High Voltage",
         "description": "Carbine Rifle now deals 20% bonus damage to Shocked targets.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Kinessa High Voltage.avif"
+        "iconUrl": "/images/champions/Talent Kinessa High Voltage.avif",
+        "id": 33708
       },
       {
         "name": "Reposition",
         "description": "Transporter instantly Teleports you to its target location, but has its range reduced to 75 units.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Kinessa Reposition.avif"
+        "iconUrl": "/images/champions/Talent Kinessa Reposition.avif",
+        "id": 20093
       }
     ],
     "loadouts": [
@@ -5547,19 +5622,22 @@
         "name": "Bullet Time",
         "description": "Supercharge your reflexes after using Shadow Step, increasing your Fire Rate and Movement Speed by 15% for 2s.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Koga Bullet Time.avif"
+        "iconUrl": "/images/champions/Talent Koga Bullet Time.avif",
+        "id": 33621
       },
       {
         "name": "Blood Reaper",
         "description": "Cyclone Strike deals 125% of its target's maximum Health as damage over its duration and your Movement Speed is increased by 25% during the attack.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Koga Blood Reaper.avif"
+        "iconUrl": "/images/champions/Talent Koga Blood Reaper.avif",
+        "id": 23481
       },
       {
         "name": "Dragon Fangs",
         "description": "Dragon Stance consumes Health instead of Energy at a rate of 200 Health per second. Dragon Stance requires at least 300 Health to activate and automatically cancels at 15 Health.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Koga Dragon Fangs.avif"
+        "iconUrl": "/images/champions/Talent Koga Dragon Fangs.avif",
+        "id": 23482
       }
     ],
     "loadouts": [
@@ -5766,19 +5844,22 @@
         "name": "Discovery",
         "description": "Increase the damage you deal to your Retribution target by 15%.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Lex Discovery.avif"
+        "iconUrl": "/images/champions/Talent Lex Discovery.avif",
+        "id": 16914
       },
       {
         "name": "Heroism",
         "description": "Gain Immunity to Crowd Control during Combat Slide.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Lex Heroism.avif"
+        "iconUrl": "/images/champions/Talent Lex Heroism.avif",
+        "id": 16807
       },
       {
         "name": "Death Hastens",
         "description": "Your weapon shots deal 680 damage every 0.7s, but your maximum Ammo count is reduced by 6.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Lex Death Hastens.avif"
+        "iconUrl": "/images/champions/Talent Lex Death Hastens.avif",
+        "id": 16909
       }
     ],
     "loadouts": [
@@ -5985,19 +6066,22 @@
         "name": "Alacrity",
         "description": "Grace now hits all enemies in front of you instead of only one, but its Cooldown is increased by 1s.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Lian Alacrity.avif"
+        "iconUrl": "/images/champions/Talent Lian Alacrity.avif",
+        "id": 18816
       },
       {
         "name": "Eminence",
         "description": "Increase the damage of Presence by up to 50% based on the range at which it hits and reduce its Cooldown by 4s.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Lian Eminence.avif"
+        "iconUrl": "/images/champions/Talent Lian Eminence.avif",
+        "id": 18815
       },
       {
         "name": "Precision",
         "description": "Hitting an enemy with Heirloom Rifle increases your Heirloom Rifle damage against that enemy by 7% for 5s, stacking up to 5 times.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Lian Precision.avif"
+        "iconUrl": "/images/champions/Talent Lian Precision.avif",
+        "id": 18814
       }
     ],
     "loadouts": [
@@ -6204,19 +6288,22 @@
         "name": "Cursed Accord",
         "description": "Blood Hexed allies ignore damage resistance up to 10%. Heal an extra 250 Blood Health when a Blood Hexed ally eliminates an enemy.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Lillith Cursed Accord.avif"
+        "iconUrl": "/images/champions/Talent Lillith Cursed Accord.avif",
+        "id": 30806
       },
       {
         "name": "Maelstrom of Carnage",
         "description": "Swarm is now cast on yourself and follows you around instead of being placed on the ground, its ability cost is decreased and its radius is increased by 40%.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Lillith Maelstrom of Carnage.avif"
+        "iconUrl": "/images/champions/Talent Lillith Maelstrom of Carnage.avif",
+        "id": 30807
       },
       {
         "name": "Murderous Intent",
         "description": "Hitting an enemy with Heart of Crimson while they\u2019re affected by Blood Hex or Swarm increases your movement speed by 10% and attack speed by 11% for 4s. Stacks up to 3 times.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Lillith Murderous Intent.avif"
+        "iconUrl": "/images/champions/Talent Lillith Murderous Intent.avif",
+        "id": 33002
       }
     ],
     "loadouts": [
@@ -6423,19 +6510,22 @@
         "name": "Cat Burglar",
         "description": "Increase the damage of each of your daggers from your first two Dagger sets within 5s of Prowl ending by 30%.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Maeve Cat Burglar.avif"
+        "iconUrl": "/images/champions/Talent Maeve Cat Burglar.avif",
+        "id": 16406
       },
       {
         "name": "Artful Dodger",
         "description": "Activating Nine Lives interrupts and gives immunity to all Crowd Control effects for .25s. You have an additional jump.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Maeve Artful Dodger.avif"
+        "iconUrl": "/images/champions/Talent Maeve Artful Dodger.avif",
+        "id": 16502
       },
       {
         "name": "Rogue's Gambit",
         "description": "Increase the damage done by Pounce by 20%, reduce its Cooldown by 2s, and reset Pounce's Cooldown after earning an Elimination.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Maeve Rogue's Gambit.avif"
+        "iconUrl": "/images/champions/Talent Maeve Rogue's Gambit.avif",
+        "id": 16449
       }
     ],
     "loadouts": [
@@ -6642,19 +6732,22 @@
         "name": "Pluck",
         "description": "For 4s after hitting an enemy with Dredge Anchor, your next weapon shot against that enemy deals 75% increased damage.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Makoa Pluck.avif"
+        "iconUrl": "/images/champions/Talent Makoa Pluck.avif",
+        "id": 16433
       },
       {
         "name": "Half Shell",
         "description": "Shell Shield is placed on the ground instead of channeled around you and lasts 2s longer.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Makoa Half Shell.avif"
+        "iconUrl": "/images/champions/Talent Makoa Half Shell.avif",
+        "id": 16525
       },
       {
         "name": "Leviathan",
         "description": "Dredge Anchor now also pulls you toward the enemy and Stuns them. Increase your Ultimate charge rate by 25% and Health by 500. Ancient Rage now also increases your Movement Speed by 45%.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Makoa Leviathan.avif"
+        "iconUrl": "/images/champions/Talent Makoa Leviathan.avif",
+        "id": 16432
       }
     ],
     "loadouts": [
@@ -6861,19 +6954,22 @@
         "name": "Spirit's Chosen",
         "description": "Mending Spirits heals an additional 350 Health instantly.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Mal'Damba Spirit's Chosen.avif"
+        "iconUrl": "/images/champions/Talent Mal'Damba Spirit's Chosen.avif",
+        "id": 16495
       },
       {
         "name": "Ripened Gourd",
         "description": "Your Gourd deals 40% less damage to enemies, but it Heals for twice as much.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Mal'Damba Ripened Gourd.avif"
+        "iconUrl": "/images/champions/Talent Mal'Damba Ripened Gourd.avif",
+        "id": 33051
       },
       {
         "name": "Wekono's Wrath",
         "description": "Your Snake Toss projectile travels 60% faster and deals an additional 500 damage.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Mal'Damba Wekono's Wrath.avif"
+        "iconUrl": "/images/champions/Talent Mal'Damba Wekono's Wrath.avif",
+        "id": 16494
       }
     ],
     "loadouts": [
@@ -7080,19 +7176,22 @@
         "name": "Spit Shine",
         "description": "Detonating 10 stacks of Magic Mark now also increases the Movement Speed of affected allies by 10% for 4s. This effect stacks up to 3 times and each stack expires individually.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Moji Spit Shine.avif"
+        "iconUrl": "/images/champions/Talent Moji Spit Shine.avif",
+        "id": 33417
       },
       {
         "name": "Jubilation",
         "description": "Magic Marks are now instead applied to enemies. Detonating at least 7 stacks of Magic Mark deals bonus damage, up to 550 damage at 10 stacks. Enemies within 15 units take 75% of the damage.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Moji Jubilation.avif"
+        "iconUrl": "/images/champions/Talent Moji Jubilation.avif",
+        "id": 33416
       },
       {
         "name": "Realm Runner",
         "description": "When entering Scamper, leave a magical dust cloud behind that applies a lingering heal for 600 over 3s. The dust cloud lasts 4s.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Moji Realm Runner.avif"
+        "iconUrl": "/images/champions/Talent Moji Realm Runner.avif",
+        "id": 33418
       }
     ],
     "loadouts": [
@@ -7299,19 +7398,22 @@
         "name": "Show of Force",
         "description": "Rift Slash Cripples enemies it hits for 1.25s, and the resulting Abyssal Rift lasts 1s longer.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Nyx Show of Force.avif"
+        "iconUrl": "/images/champions/Talent Nyx Show of Force.avif",
+        "id": 31890
       },
       {
         "name": "Abyssal Breach",
         "description": "Enemies that pass through Abyssal Fortress are Revealed and take 10% additional weapon damage from you and your allies for 3s. Reduce Abyssal Fortress' Cooldown by 2s.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Nyx Abyssal Breach.avif"
+        "iconUrl": "/images/champions/Talent Nyx Abyssal Breach.avif",
+        "id": 31891
       },
       {
         "name": "Subjugation",
         "description": "Increase the distance traveled by Juggernaut by {8|8}%.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Nyx Subjugation.avif"
+        "iconUrl": "/images/champions/Talent Nyx Subjugation.avif",
+        "id": 31892
       }
     ],
     "loadouts": [
@@ -7518,19 +7620,22 @@
         "name": "Paratrooper",
         "description": "You can now hover for 4s and gain 50% increase air control. While in Commanding Leap, gain 10% increased Weapon Damage.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Octavia Paratrooper.avif"
+        "iconUrl": "/images/champions/Talent Octavia Paratrooper.avif",
+        "id": 26957
       },
       {
         "name": "Display of Force",
         "description": "Enemies are Rooted in place when they are hit by the pre-fire beam and the Creeping Barrage deals 1450 damage.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Octavia Display of Force.avif"
+        "iconUrl": "/images/champions/Talent Octavia Display of Force.avif",
+        "id": 26959
       },
       {
         "name": "Asymmetric Warfare",
         "description": "Distortion Field now damages enemies for 200 every .5s for the duration of Distortion Field and heals allies for 125 every .5 seconds while inside of the field.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Octavia Asymmetric Warfare.avif"
+        "iconUrl": "/images/champions/Talent Octavia Asymmetric Warfare.avif",
+        "id": 26958
       }
     ],
     "loadouts": [
@@ -7737,19 +7842,22 @@
         "name": "Everyone Dies",
         "description": "Hitting an enemy with Dark Stride now reduces Gravity Vice\u2019s Cooldown by 50%, and Dark Stride\u2019s damage is increased by 100.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Omen Everyone Dies.avif"
+        "iconUrl": "/images/champions/Talent Omen Everyone Dies.avif",
+        "id": 32760
       },
       {
         "name": "Umbral Lance",
         "description": "Aphotic Reaver no longer ramps down, but its spread is reduced by 70%.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Omen Umbral Lance.avif"
+        "iconUrl": "/images/champions/Talent Omen Umbral Lance.avif",
+        "id": 33052
       },
       {
         "name": "Binary Void",
         "description": "Deadly Domain now has 2 charges, but it's cooldown is increased by 3s.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Omen Binary Void.avif"
+        "iconUrl": "/images/champions/Talent Omen Binary Void.avif",
+        "id": 32758
       }
     ],
     "loadouts": [
@@ -7956,19 +8064,22 @@
         "name": "Mega Potion",
         "description": "Healing Potion's Healing is increased by 1000 and now provides a Stacking 200 Shield.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Pip Mega Potion.avif"
+        "iconUrl": "/images/champions/Talent Pip Mega Potion.avif",
+        "id": 16376
       },
       {
         "name": "Catalyst",
         "description": "Enemies hit with Explosive Flask take 40% increased damage from your weapon shots for 4s.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Pip Catalyst.avif"
+        "iconUrl": "/images/champions/Talent Pip Catalyst.avif",
+        "id": 16391
       },
       {
         "name": "Combat Medic",
         "description": "Potion Launcher also Heals allies hit for 700 and your Potion Launcher fire rate is increased by 15%. You no longer take damage from your weapon shots.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Pip Combat Medic.avif"
+        "iconUrl": "/images/champions/Talent Pip Combat Medic.avif",
+        "id": 16516
       }
     ],
     "loadouts": [
@@ -8175,19 +8286,22 @@
         "name": "Enforcer",
         "description": "Gain 1.2s of Crowd Control Immunity and reduce your damage taken by 40% while using Juggernaut.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Raum Enforcer.avif"
+        "iconUrl": "/images/champions/Talent Raum Enforcer.avif",
+        "id": 24778
       },
       {
         "name": "Earthsplitter",
         "description": "Increase your Ultimate charge rate by 60%.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Raum Earthsplitter.avif"
+        "iconUrl": "/images/champions/Talent Raum Earthsplitter.avif",
+        "id": 24779
       },
       {
         "name": "Subservience",
         "description": "All your living allies are Healed for 1.5% of their maximum Health for each Soul Harvested.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Raum Subservience.avif"
+        "iconUrl": "/images/champions/Talent Raum Subservience.avif",
+        "id": 24780
       }
     ],
     "loadouts": [
@@ -8394,19 +8508,22 @@
         "name": "Ambidextrous",
         "description": "Chain Heal has 2 charges, but its cooldown is increased by 2 seconds.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Rei Ambidextrous.avif"
+        "iconUrl": "/images/champions/Talent Rei Ambidextrous.avif",
+        "id": 27316
       },
       {
         "name": "Restraint",
         "description": "Increase the duration of Focus and grant Reload Speed.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Rei Restraint.avif"
+        "iconUrl": "/images/champions/Talent Rei Restraint.avif",
+        "id": 27314
       },
       {
         "name": "Focus",
         "description": "Spirit Link\u2019s Cooldown is increased to 6s and it now only lasts for 3s, but its base effects are tripled.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Rei Focus.avif"
+        "iconUrl": "/images/champions/Talent Rei Focus.avif",
+        "id": 27315
       }
     ],
     "loadouts": [
@@ -8613,19 +8730,22 @@
         "name": "Flux Generator",
         "description": "Increase the Shield granted by Emitter by 1000 and reduce its cooldown by 1s. While Emitter is active, gain Immunity to Crowd Control.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Ruckus Flux Generator.avif"
+        "iconUrl": "/images/champions/Talent Ruckus Flux Generator.avif",
+        "id": 33050
       },
       {
         "name": "Rocket Barrage",
         "description": "Increase the radius of Missile Launcher's explosions by 66%.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Ruckus Rocket Barrage.avif"
+        "iconUrl": "/images/champions/Talent Ruckus Rocket Barrage.avif",
+        "id": 20097
       },
       {
         "name": "Aerial Assault",
         "description": "Advance gains a 3rd charge.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Ruckus Aerial Assault.avif"
+        "iconUrl": "/images/champions/Talent Ruckus Aerial Assault.avif",
+        "id": 16503
       }
     ],
     "loadouts": [
@@ -8832,19 +8952,22 @@
         "name": "Spare Change",
         "description": "Ricochet now costs 2 Pips and earning an Elimination grants you 2 Pips.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Saati Spare Change.avif"
+        "iconUrl": "/images/champions/Talent Saati Spare Change.avif",
+        "id": 33410
       },
       {
         "name": "Improvised",
         "description": "Your Dead Ringer Decoy is now rigged to explode when enemies are close, dealing 650 damage within a 20 unit radius.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Saati Improvised.avif"
+        "iconUrl": "/images/champions/Talent Saati Improvised.avif",
+        "id": 27508
       },
       {
         "name": "Window of Opportunity",
         "description": "Blast Back now instead applies a Knockup and enemies take 20% more DMG from Saati for 1.5s.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Saati Window of Opportunity.avif"
+        "iconUrl": "/images/champions/Talent Saati Window of Opportunity.avif",
+        "id": 27509
       }
     ],
     "loadouts": [
@@ -9051,19 +9174,22 @@
         "name": "Resuscitate",
         "description": "Increase the Health and Weapon DMG bonus of Soul Collector to 2% per charge.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Seris Soul Collector.avif"
+        "iconUrl": "/images/champions/Talent Seris Soul Collector.avif",
+        "id": 33709
       },
       {
         "name": "Forsake",
         "description": "Restore Soul now heals over .5s but its cooldown is increased to 2.5s.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Seris Forsake.avif"
+        "iconUrl": "/images/champions/Talent Seris Forsake.avif",
+        "id": 33528
       },
       {
         "name": "Internal Torment",
         "description": "Resuscitate yourself when defeated, restoring a portion of your Health.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Seris Internal Torment.avif"
+        "iconUrl": "/images/champions/Talent Seris Internal Torment.avif",
+        "id": 33441
       }
     ],
     "loadouts": [
@@ -9270,19 +9396,22 @@
         "name": "Desert Shadow",
         "description": "Eliminations enter you into Stealth for 2s. Shots from Stealth deal 200 increased damage.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Sha Lin Desert Shadow.avif"
+        "iconUrl": "/images/champions/Talent Sha Lin Desert Shadow.avif",
+        "id": 16453
       },
       {
         "name": "Recurve",
         "description": "Increase the rate at which your Longbow charges by 25%.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Sha Lin Recurve.avif"
+        "iconUrl": "/images/champions/Talent Sha Lin Recurve.avif",
+        "id": 16455
       },
       {
         "name": "Sand Trap",
         "description": "Crippling Arrow now explodes in a 20-unit-radius area on contact, dealing up to 300 additional Area Damage to enemies hit, but its Cripple is reduced by 1s.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Sha Lin Sand Trap.avif"
+        "iconUrl": "/images/champions/Talent Sha Lin Sand Trap.avif",
+        "id": 20263
       }
     ],
     "loadouts": [
@@ -9489,19 +9618,22 @@
         "name": "Debilitate",
         "description": "Increase the damage done by Poison Bolts by 15% and the rate at which they deal damage by 75%.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Skye Debilitate.avif"
+        "iconUrl": "/images/champions/Talent Skye Debilitate.avif",
+        "id": 16374
       },
       {
         "name": "Smoke and Dagger",
         "description": "Benefits from your Smoke Screen cards also benefit allies who enter Smoke Screen and allies are Healed for 100 every 1s while in your Smoke Screen.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Skye Smoke and Dagger.avif"
+        "iconUrl": "/images/champions/Talent Skye Smoke and Dagger.avif",
+        "id": 20148
       },
       {
         "name": "Preparation",
         "description": "Hidden gains a second charge and refills Wrist Crossbow's Ammo. While Hidden is active, reduce the damage you take by 50%. Permanently set the maximum duration of Hidden to 4s.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Skye Preparation.avif"
+        "iconUrl": "/images/champions/Talent Skye Preparation.avif",
+        "id": 16375
       }
     ],
     "loadouts": [
@@ -9708,19 +9840,22 @@
         "name": "Nocturnal",
         "description": "While standing still, Stealth lasts indefinitely.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Strix Nocturnal.avif"
+        "iconUrl": "/images/champions/Talent Strix Nocturnal.avif",
+        "id": 19468
       },
       {
         "name": "Unauthorized Use",
         "description": "Flare has 200% base damage and Projectile Speed, and Weakens targets by 20% to your weapons on a direct hit for 2s, but it no longer Reveals. Reduce Flare's Cooldown by 8s.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Strix Unauthorized Use.avif"
+        "iconUrl": "/images/champions/Talent Strix Unauthorized Use.avif",
+        "id": 20279
       },
       {
         "name": "Crack Shot",
         "description": "Talon Rifle and Pistol gain perfect Accuracy, but Talon Rifle's damage is reduced to 950.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Strix Crack Shot.avif"
+        "iconUrl": "/images/champions/Talent Strix Crack Shot.avif",
+        "id": 19477
       }
     ],
     "loadouts": [
@@ -9927,19 +10062,22 @@
         "name": "Inner Strength",
         "description": "Reduce the Cooldown of Overcharge and Blitz Upper by 6s when you Teleport using Rune of Travel.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Talus Inner Strength.avif"
+        "iconUrl": "/images/champions/Talent Talus Inner Strength.avif",
+        "id": 19623
       },
       {
         "name": "Faustian Bargain",
         "description": "Rune of Travel no longer automatically activates, and if the Rune is not used the Cooldown is reset.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Talus Faustian Bargain.avif"
+        "iconUrl": "/images/champions/Talent Talus Faustian Bargain.avif",
+        "id": 19626
       },
       {
         "name": "Nothing Personal",
         "description": "Increase the damage dealt by Inner Strength.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Talus Nothing Personal.avif"
+        "iconUrl": "/images/champions/Talent Talus Nothing Personal.avif",
+        "id": 19706
       }
     ],
     "loadouts": [
@@ -10146,19 +10284,22 @@
         "name": "Undying",
         "description": "Reduce the damage you take by 15% while at or below 50% Health.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Terminus Undying.avif"
+        "iconUrl": "/images/champions/Talent Terminus Undying.avif",
+        "id": 19943
       },
       {
         "name": "Crush",
         "description": "Shatterfall deals 50% more damage and has a larger area of effect, but its Cooldown is increased by 4s.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Terminus Crush.avif"
+        "iconUrl": "/images/champions/Talent Terminus Crush.avif",
+        "id": 20028
       },
       {
         "name": "Decimation",
         "description": "Each Calamity Blast deals an additional 100 damage.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Terminus Decimation.avif"
+        "iconUrl": "/images/champions/Talent Terminus Decimation.avif",
+        "id": 19944
       }
     ],
     "loadouts": [
@@ -10365,19 +10506,22 @@
         "name": "Borrowed Luck",
         "description": "Combat Trance now resets your other abilities' cooldowns when activated.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Tiberius Borrowed Luck.avif"
+        "iconUrl": "/images/champions/Talent Tiberius Borrowed Luck.avif",
+        "id": 25180
       },
       {
         "name": "Tigron's Fury",
         "description": "Heavy Blade now explodes on reactivation instead of recalling, but the initial throw deals reduced damage.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Tiberius Tigron's Fury.png"
+        "iconUrl": "/images/champions/Talent Tiberius Tigron's Fury.png",
+        "id": 25181
       },
       {
         "name": "Vicious Assault",
         "description": "Crouching Tigron now has 2 charges and deals 600 damage in a 20-unit-radius area on landing. Gain 40% Damage Resistance while airborne.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Tiberius Vicious Assault.avif"
+        "iconUrl": "/images/champions/Talent Tiberius Vicious Assault.avif",
+        "id": 25182
       }
     ],
     "loadouts": [
@@ -10584,19 +10728,22 @@
         "name": "Thanks, Grandpa",
         "description": "Increase Protection's Shield Health by 200.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Torvald Thanks Grandpa.avif"
+        "iconUrl": "/images/champions/Talent Torvald Thanks Grandpa.avif",
+        "id": 20099
       },
       {
         "name": "Direct Current",
         "description": "Double the range at which you can use Nullify.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Torvald Direct Current.avif"
+        "iconUrl": "/images/champions/Talent Torvald Direct Current.avif",
+        "id": 16450
       },
       {
         "name": "Field Study",
         "description": "Increase the damage done by allies by 10% while they are Shielded by Protection.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Torvald Field Study.avif"
+        "iconUrl": "/images/champions/Talent Torvald Field Study.avif",
+        "id": 16451
       }
     ],
     "loadouts": [
@@ -10803,19 +10950,22 @@
         "name": "Mercy Kill",
         "description": "Nade Launcher has 3 charges, but reduce the damage of each to 650.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Tyra Mercy Kill.avif"
+        "iconUrl": "/images/champions/Talent Tyra Mercy Kill.avif",
+        "id": 16458
       },
       {
         "name": "Hunting Party",
         "description": "Hunter's Mark now Weakens its target for all allies.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Tyra Hunting Party.avif"
+        "iconUrl": "/images/champions/Talent Tyra Hunting Party.avif",
+        "id": 16448
       },
       {
         "name": "Burn, Monster!",
         "description": "Fire Bomb deals 30% increased damage and applies a 60% reduced healing effect.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Tyra Burn Monster!.avif"
+        "iconUrl": "/images/champions/Talent Tyra Burn Monster!.avif",
+        "id": 20230
       }
     ],
     "loadouts": [
@@ -11022,19 +11172,22 @@
         "name": "Omnipresence",
         "description": "Your Ambush gains an additional teleport and can now be used on allies.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Vatu Omnipresence.avif"
+        "iconUrl": "/images/champions/Talent Vatu Omnipresence.avif",
+        "id": 27084
       },
       {
         "name": "Unerring",
         "description": "Increase the explosion radius of Shadow Bombs by 5 units and they now home to enemies.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Vatu Unerring.avif"
+        "iconUrl": "/images/champions/Talent Vatu Unerring.avif",
+        "id": 27085
       },
       {
         "name": "Enveloping Shadows",
         "description": "Reduce the Cooldown of your basic abilities by 3% for each Kunai that hits an enemy.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Vatu Enveloping Shadows.avif"
+        "iconUrl": "/images/champions/Talent Vatu Enveloping Shadows.avif",
+        "id": 33055
       }
     ],
     "loadouts": [
@@ -11241,19 +11394,22 @@
         "name": "Tribunal Upgrades",
         "description": "Burst Mode now deals additional Shock damage that Reveals targets, Mag Dump adds a Burn over time, and Automatic freezes to Slow enemies.",
         "category": "",
-        "iconUrl": "/images/champions/Talent VII Tribunal Upgrades.avif"
+        "iconUrl": "/images/champions/Talent VII Tribunal Upgrades.avif",
+        "id": 27929
       },
       {
         "name": "Execute Article VII",
         "description": "Decree 77 now targets the closest enemy with laser lock-on. After .8s, your eye blasts them and deals 1000 damage in a 20-unit radius. Anyone hit is executed if below 25% after.",
         "category": "",
-        "iconUrl": "/images/champions/Talent VII Execute Article VII.avif"
+        "iconUrl": "/images/champions/Talent VII Execute Article VII.avif",
+        "id": 33632
       },
       {
         "name": "Spring Loaded",
         "description": "Increase the travel distance of Explosive Dodge by 30%, and drop explosive traps at both your starting and ending locations.",
         "category": "",
-        "iconUrl": "/images/champions/Talent VII Spring Loaded.avif"
+        "iconUrl": "/images/champions/Talent VII Spring Loaded.avif",
+        "id": 27931
       }
     ],
     "loadouts": [
@@ -11460,19 +11616,22 @@
         "name": "Cardio",
         "description": "Heal for 300 per second and gain 150% increased Jump Height while using Hustle.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Viktor Cardio.avif"
+        "iconUrl": "/images/champions/Talent Viktor Cardio.avif",
+        "id": 16431
       },
       {
         "name": "Burst Mode",
         "description": "Switch your rifle to Three-Shot-Burst mode, increasing your effective range and firing three 210-damage shots every 0.5s.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Viktor Burst Mode.avif"
+        "iconUrl": "/images/champions/Talent Viktor Burst Mode.avif",
+        "id": 16429
       },
       {
         "name": "Shrapnel",
         "description": "Increase the radius of Frag Grenade's explosion by 40% and its damage by 150.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Viktor Shrapnel.avif"
+        "iconUrl": "/images/champions/Talent Viktor Shrapnel.avif",
+        "id": 20100
       }
     ],
     "loadouts": [
@@ -11679,19 +11838,22 @@
         "name": "Suspect Everyone",
         "description": "Reduce Deflector Shield's cooldown by half if it is destroyed by an enemy.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Vivian Suspect Everyone.avif"
+        "iconUrl": "/images/champions/Talent Vivian Suspect Everyone.avif",
+        "id": 20316
       },
       {
         "name": "Booby Trap",
         "description": "Your Sensor Drones explode, dealing 600 Area Damage and applying a Knockback to those hit when an enemy is within 20 units.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Vivian Booby Trap.avif"
+        "iconUrl": "/images/champions/Talent Vivian Booby Trap.avif",
+        "id": 21261
       },
       {
         "name": "Opportunity in Chaos",
         "description": "After firing continuously for 2s, gain 10% increased damage.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Vivian Opportunity in Chaos.avif"
+        "iconUrl": "/images/champions/Talent Vivian Opportunity in Chaos.avif",
+        "id": 20315
       }
     ],
     "loadouts": [
@@ -11898,19 +12060,22 @@
         "name": "Unyielding Pressure",
         "description": "Your Dark Siphon now deals an additional 10% of the target\u2019s maximum Health as damage over 1.5s.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Vora Unyielding Pressure.avif"
+        "iconUrl": "/images/champions/Talent Vora Unyielding Pressure.avif",
+        "id": 25572
       },
       {
         "name": "Parasitic Pull",
         "description": "Tendril can now target allies & on attach provides them double your Tendril card effects after attaching. Hitting enemies with Tendril deals 225 damage over 1.25s.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Vora Parasitic Pull.avif"
+        "iconUrl": "/images/champions/Talent Vora Parasitic Pull.avif",
+        "id": 33629
       },
       {
         "name": "Eclipsed Affection",
         "description": "Reduce Obliteration's Cooldown by 2s and by 50% after earning an Elimination. When used at max Darkness stacks, Obliteration deals 100 more bonus damage.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Vora Eclipsed Affection.avif"
+        "iconUrl": "/images/champions/Talent Vora Eclipsed Affection.avif",
+        "id": 33628
       }
     ],
     "loadouts": [
@@ -12117,19 +12282,22 @@
         "name": "Nightshade",
         "description": "Dead Zone damage is increased to 650. On hit, 25% of Dead Zone's cooldown is refunded.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Willo Nightshade.avif"
+        "iconUrl": "/images/champions/Talent Willo Nightshade.avif",
+        "id": 20319
       },
       {
         "name": "Blastflower",
         "description": "Hitting an enemy with your weapon shots increases the damage they take from weapon shots by 15% for 3s, stacking up to 3 times.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Willo Blastflower.avif"
+        "iconUrl": "/images/champions/Talent Willo Blastflower.avif",
+        "id": 17137
       },
       {
         "name": "Scorn",
         "description": "Increase the damage of each Seedling to 750 and reduce their detonation time by 25%. Secondary Seedlings now deal 1500 damage over 2s to any deployable shield hit.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Willo Scorn.avif"
+        "iconUrl": "/images/champions/Talent Willo Scorn.avif",
+        "id": 17111
       }
     ],
     "loadouts": [
@@ -12336,19 +12504,22 @@
         "name": "Corrosive Acid",
         "description": "Increase the damage done by Caustic Spray to 42, and your acid pools to 40. Allies within your acid pools have their Movement Speed increased by 20%.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Yagorath Corrosive Acid.avif"
+        "iconUrl": "/images/champions/Talent Yagorath Corrosive Acid.avif",
+        "id": 26699
       },
       {
         "name": "Sight Begets Strength",
         "description": "Allied players within range of your Primal Vision gain a stackable 100-Health Shield and 15% increased Movement Speed for 5s each time you pulse.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Yagorath Sight Begets Strength.avif"
+        "iconUrl": "/images/champions/Talent Yagorath Sight Begets Strength.avif",
+        "id": 26700
       },
       {
         "name": "Unnatural Persistence",
         "description": "While in Hardening, increase your Healing received from others by 50%.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Yagorath Unnatural Persistence.avif"
+        "iconUrl": "/images/champions/Talent Yagorath Unnatural Persistence.avif",
+        "id": 26701
       }
     ],
     "loadouts": [
@@ -12555,19 +12726,22 @@
         "name": "Focusing Lens",
         "description": "Deal an additional 200 damage to an enemy if you hit them with all 5 shots of Illusory Mirror.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Ying Focusing Lens.avif"
+        "iconUrl": "/images/champions/Talent Ying Focusing Lens.avif",
+        "id": 16367
       },
       {
         "name": "Life Exchange",
         "description": "Shatter instantly Heals your target for 700, but its Cooldown is increased by 1s and it no longer explodes your Illusions. Reduces the Cooldown of Shatter by 2s if you miss.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Ying Life Exchange.avif"
+        "iconUrl": "/images/champions/Talent Ying Life Exchange.avif",
+        "id": 20359
       },
       {
         "name": "Resonance",
         "description": "If an Illusion is killed or expires, it triggers a Shatter explosion, dealing 550 damage. Also increases your Shattered Illusions' Movement Speed by 65% and Explosion Radius by 5 units.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Ying Resonance.avif"
+        "iconUrl": "/images/champions/Talent Ying Resonance.avif",
+        "id": 16366
       }
     ],
     "loadouts": [
@@ -12774,19 +12948,22 @@
         "name": "Guillotine",
         "description": "Spite deals 20% of its target's maximum Health with each hit. If this kills the target, you are refunded 20% charge.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Zhin Guillotine.avif"
+        "iconUrl": "/images/champions/Talent Zhin Guillotine.avif",
+        "id": 18303
       },
       {
         "name": "Yomi",
         "description": "Whirl now Ignites enemies hit for 3s. Your Inferno Blade deals 20% Increased damage to targets Burning or Ignited.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Zhin Yomi.avif"
+        "iconUrl": "/images/champions/Talent Zhin Yomi.avif",
+        "id": 20222
       },
       {
         "name": "Smolder",
         "description": "Heal for 15% of your maximum Health per second while using Billow.",
         "category": "",
-        "iconUrl": "/images/champions/Talent Zhin Smolder.avif"
+        "iconUrl": "/images/champions/Talent Zhin Smolder.avif",
+        "id": 18302
       }
     ],
     "loadouts": [

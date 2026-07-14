@@ -21,6 +21,7 @@ import {
 } from "@/lib/build-reference";
 import { championSlug } from "@/lib/utils";
 import { AsyncButton, LoadingPanel } from "@/components/async-state";
+import CanonicalTalentImage from "@/components/canonical-talent-image";
 
 const MAX_ITEMS = 4;
 const MAX_CARDS = 5;
@@ -92,7 +93,7 @@ function TalentTile({ talent, selected, onSelect }: {
         selected ? "border-pc-accent bg-pc-accent/10" : "border-pc-border hover:border-pc-accent-mid"
       } ${talent.id <= 0 ? "cursor-not-allowed opacity-45" : ""}`}
     >
-      <AssetImage src={talent.iconUrl} alt={talent.name} />
+      <CanonicalTalentImage talentId={talent.id} talentName={talent.name} alt={talent.name} className="h-10 w-10 shrink-0 rounded-md border border-pc-border object-cover" fallbackClassName="h-10 w-10 shrink-0 rounded-md border border-pc-border bg-pc-bg-secondary" />
       <span className="min-w-0 flex-1">
         <span className="block text-sm font-semibold text-pc-text">{talent.name}</span>
         <span className="mt-1 line-clamp-3 block text-xs text-pc-text-secondary">{talent.description}</span>

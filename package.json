@@ -9,7 +9,8 @@
     "lint": "next lint",
     "generate-types": "npx openapi-typescript http://localhost:3005/openapi.json -o lib/types.gen.ts",
     "sync-community-locales": "node scripts/sync-community-locales.mjs",
-    "audit-localization": "node scripts/audit-localization.mjs"
+    "audit-localization": "node scripts/audit-localization.mjs",
+    "sync-talent-assets": "node scripts/sync-champion-talent-ids.js"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",

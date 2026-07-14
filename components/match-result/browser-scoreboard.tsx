@@ -107,7 +107,7 @@ function TeamRows({ team }: { team: MatchResultPlayer[] }) {
         {talent && talentHref ? (
           <Link href={talentHref} className="talent-link" title={talent.talent_name ?? "Talent"} aria-label={`${talent.talent_name ?? "Talent"} talent page`}>
             <CanonicalTalentImage
-              championName={talent.champion_name ?? player.champion_name}
+              talentId={talent.talent_id}
               talentName={talent.talent_name}
               className="talent-icon"
               alt={talent.talent_name ?? "Talent"}
@@ -116,7 +116,7 @@ function TeamRows({ team }: { team: MatchResultPlayer[] }) {
           </Link>
         ) : talent ? (
           <CanonicalTalentImage
-            championName={talent.champion_name ?? player.champion_name}
+            talentId={talent.talent_id}
             talentName={talent.talent_name}
             className="talent-icon"
             alt={talent.talent_name ?? "Talent"}

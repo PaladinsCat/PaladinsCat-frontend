@@ -2,13 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams, usePathname, useSearchParams } from "next/navigation";
-import SmartImage from "@/components/SmartImage";
+import CanonicalTalentImage from "@/components/canonical-talent-image";
 import ChampionLoadoutGrid from "@/components/champion-loadout-grid";
 import ContextBackLink from "@/components/context-back-link";
 import { EmptyState, ErrorState } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
-import { getChampionData, getTalentIconPath, type ChampionData, type ChampionTalent } from "@/lib/champion-data";
-import { getCanonicalTalentImageUrl } from "@/lib/image-assets";
+import { getChampionData, type ChampionData, type ChampionTalent } from "@/lib/champion-data";
 import {
   fetchChampionCardStats,
   fetchChampions,
@@ -23,10 +22,6 @@ function parsePositiveInteger(value: string | string[] | null | undefined): numb
   const raw = Array.isArray(value) ? value[0] : value;
   const parsed = Number(raw);
   return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
-}
-
-function statNameKey(value: string | null | undefined): string {
-  return String(value ?? "").normalize("NFKD").toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
 function formatPlays(value: number): string {
@@ -98,8 +93,8 @@ export default function ChampionTalentDetailPage() {
 
   const talentMeta = useMemo<ChampionTalent | null>(() => {
     if (!championData || !talentStat) return null;
-    return championData.talents.find((talent) => statNameKey(talent.name) === statNameKey(talentStat.talentName)) ?? null;
-  }, [championData, talentStat]);
+    return championData.talents.find((talent) => talent.id === talentId) ?? null;
+  }, [championData, talentId, talentStat]);
 
   const currentLocation = useMemo(() => {
     const query = searchParams.toString();
@@ -119,8 +114,6 @@ export default function ChampionTalentDetailPage() {
 
   const pickRate = totalMatches > 0 ? (talentStat.totalPlays / totalMatches) * 100 : 0;
   const quality = getStatQuality(talentStat.winRate, pickRate, 100);
-  const talentImageUrl = getCanonicalTalentImageUrl(talentMeta?.iconUrl, championData.name, talentStat.talentName);
-
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-3">
@@ -132,7 +125,7 @@ export default function ChampionTalentDetailPage() {
       <section className="pc-card">
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-[180px_1fr]">
           <div className="pc-surface-light flex aspect-square items-center justify-center overflow-hidden rounded-lg border border-pc-border p-4 sm:max-w-[220px] lg:max-w-none">
-            <SmartImage src={talentImageUrl} alt={talentStat.talentName} className="h-full w-full object-contain" />
+            <CanonicalTalentImage talentId={talentId} talentName={talentStat.talentName} alt={talentStat.talentName} className="h-full w-full object-contain" fallbackClassName="h-full w-full" />
           </div>
           <div className="min-w-0 space-y-4">
             <div>

@@ -1,5 +1,5 @@
 import { championSlug } from "@/lib/utils";
-import { getCanonicalTalentImageUrl, getTalentImageUrl } from "@/lib/image-assets";
+import { getCanonicalTalentImageUrl } from "@/lib/image-assets";
 
 export interface ChampionSkill {
   name: string;
@@ -14,6 +14,7 @@ export interface ChampionSkill {
 }
 
 export interface ChampionTalent {
+  id: number;
   name: string;
   description: string;
   category: string;
@@ -51,6 +52,7 @@ export interface ChampionData {
 type ChampionDataMap = Record<string, ChampionData>;
 
 let championDataPromise: Promise<ChampionDataMap> | null = null;
+let canonicalTalentImagesPromise: Promise<Map<number, string>> | null = null;
 
 async function loadChampionDataMap(): Promise<ChampionDataMap> {
   if (!championDataPromise) {
@@ -59,7 +61,9 @@ async function loadChampionDataMap(): Promise<ChampionDataMap> {
     // transform, type-check, and bundle every champion whenever one champion
     // page compiled. Fetching static JSON preserves the same local data while
     // keeping production memory bounded for the 2GB VPS Docker stack.
-    championDataPromise = fetch("/data/champion-data.json")
+    // Version the static URL when its schema changes so CDN/browser caches do
+    // not serve the pre-ID talent objects to the canonical image registry.
+    championDataPromise = fetch("/data/champion-data.json?v=talent-ids-1")
       .then((response) => {
         if (!response.ok) {
           throw new Error(`Failed to load champion data: ${response.status}`);
@@ -75,26 +79,26 @@ export async function getChampionData(slug: string): Promise<ChampionData | unde
   return data[championSlug(slug)];
 }
 
-// Talent image paths.
-export function getTalentIconPath(championName: string, talentName: string): string {
-  return getTalentImageUrl(championName, talentName);
+async function loadCanonicalTalentImages(): Promise<Map<number, string>> {
+  if (!canonicalTalentImagesPromise) {
+    canonicalTalentImagesPromise = loadChampionDataMap().then((champions) => {
+      const images = new Map<number, string>();
+      for (const champion of Object.values(champions)) {
+        for (const talent of champion.talents) {
+          const imageUrl = getCanonicalTalentImageUrl(talent.iconUrl);
+          if (imageUrl) images.set(talent.id, imageUrl);
+        }
+      }
+      return images;
+    });
+  }
+  return canonicalTalentImagesPromise;
 }
 
-export function normalizeChampionReferenceName(value: string | null | undefined): string {
-  return String(value ?? "")
-    // Reference snapshots contain both real smart punctuation and occasional
-    // UTF-8 mojibake (for example Goddessâ€™ Blessing). Collapse those variants
-    // before applying the strict alphanumeric identity used by DB/API names.
-    .replace(/\u00e2\u20ac[\u2122\u02dc]/g, "'")
-    .replace(/[’‘´`]/g, "'")
-    .normalize("NFKD")
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, "");
-}
-
-export async function getCanonicalTalentIconPath(championName: string, talentName: string): Promise<string> {
-  const champion = await getChampionData(championName);
-  const talentKey = normalizeChampionReferenceName(talentName);
-  const talent = champion?.talents.find((entry) => normalizeChampionReferenceName(entry.name) === talentKey);
-  return getCanonicalTalentImageUrl(talent?.iconUrl, champion?.name ?? championName, talent?.name ?? talentName);
+/** Resolve talent artwork only by the stable game ID. Display names are never
+ * used as asset keys, so API punctuation and localization cannot change URLs. */
+export async function getCanonicalTalentIconPath(talentId: number): Promise<string | null> {
+  if (!Number.isInteger(talentId) || talentId <= 0) return null;
+  const images = await loadCanonicalTalentImages();
+  return images.get(talentId) ?? null;
 }

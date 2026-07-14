@@ -232,22 +232,16 @@ async function buildTalents(championId: number, champion?: ChampionData): Promis
     fetchReferenceTalents().catch(() => [] as RawTalent[]),
     loadLocalTalents(),
   ]);
-  const byNameAndChampion = new Map<string, RawTalent>();
-  const byName = new Map<string, RawTalent>();
+  const byId = new Map<number, RawTalent>();
   for (const row of [...localTalents, ...(dbTalents as RawTalent[])]) {
-    const key = normalizeName(nameOf(row, "talent"));
-    if (!key) continue;
-    byName.set(key, row);
-    const rowChampionId = championIdOf(row as RawTalent);
-    if (rowChampionId > 0) byNameAndChampion.set(`${rowChampionId}:${key}`, row as RawTalent);
+    const id = idOf(row, "talent");
+    if (id > 0) byId.set(id, row);
   }
 
-  return champion.talents.map((talent, index) => {
-    const key = normalizeName(talent.name);
-    const row = byNameAndChampion.get(`${championId}:${key}`) ?? byName.get(key);
-    const id = row ? idOf(row, "talent") : 0;
+  return champion.talents.map((talent) => {
+    const row = byId.get(talent.id);
     return {
-      id: id > 0 ? id : -(index + 1),
+      id: talent.id,
       name: talent.name,
       category: talent.category || "Talent",
       description: row?.description ?? talent.description ?? null,

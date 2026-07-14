@@ -3,8 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import SmartImage from "@/components/SmartImage";
+import CanonicalTalentImage from "@/components/canonical-talent-image";
 import ContextBackLink, { safeInternalReturnTo } from "@/components/context-back-link";
-import { getChampionData, type ChampionData, type ChampionTalent } from "@/lib/champion-data";
+import { getChampionData, type ChampionData } from "@/lib/champion-data";
 import {
   fetchChampionCardDetail,
   fetchChampions,
@@ -106,10 +107,6 @@ export default function ChampionCardDetailPage() {
     return (championData.loadouts ?? []).find((card) => statNameKey(card.name) === statNameKey(detail.cardName)) ?? null;
   }, [championData, detail]);
 
-  const talentByName = useMemo(() => {
-    return new Map((championData?.talents ?? []).map((talent) => [statNameKey(talent.name), talent]));
-  }, [championData]);
-
   const selectedTalent = useMemo(() => {
     if (selectedTalentId == null) return null;
     return (detail?.talents ?? []).find((talent) => talent.talentId === selectedTalentId) ?? null;
@@ -203,12 +200,10 @@ export default function ChampionCardDetailPage() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {detail.talents.map((talent) => {
-            const localTalent = talentByName.get(statNameKey(talent.talentName)) ?? null;
             return (
               <TalentPairingCard
                 key={talent.talentId}
                 talent={talent}
-                localTalent={localTalent}
                 selected={talent.talentId === selectedTalentId}
                 maxTalentPlays={maxTalentPlays}
                 onSelect={() => selectTalent(talent.talentId)}
@@ -241,13 +236,11 @@ function SummaryTile({ label, value, color }: { label: string; value: string; co
 
 function TalentPairingCard({
   talent,
-  localTalent,
   selected,
   maxTalentPlays,
   onSelect,
 }: {
   talent: ChampionCardTalentStat;
-  localTalent: ChampionTalent | null;
   selected: boolean;
   maxTalentPlays: number;
   onSelect: () => void;
@@ -264,11 +257,7 @@ function TalentPairingCard({
     >
       <div className="flex items-start gap-3">
         <div className="w-12 h-12 rounded-md border border-pc-border bg-pc-bg/50 overflow-hidden flex-shrink-0">
-          {localTalent?.iconUrl ? (
-            <SmartImage src={localTalent.iconUrl} alt={talent.talentName} className="w-full h-full object-contain" />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-xs text-pc-text-muted">?</div>
-          )}
+          <CanonicalTalentImage talentId={talent.talentId} talentName={talent.talentName} alt={talent.talentName} className="w-full h-full object-contain" fallbackClassName="w-full h-full" />
         </div>
         <div className="min-w-0 flex-1">
           <div className="text-sm font-medium text-pc-accent truncate">{talent.talentName}</div>

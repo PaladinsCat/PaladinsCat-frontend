@@ -61,7 +61,7 @@ export default function LoadoutStrip({ fact }: LoadoutStripProps) {
           >
             {m.type === "talent" ? (
               <CanonicalTalentImage
-                championName={m.champion_name}
+                talentId={m.talent_id}
                 talentName={m.talent_name}
                 className="h-12 w-12 object-contain"
                 fallbackClassName="h-12 w-12"

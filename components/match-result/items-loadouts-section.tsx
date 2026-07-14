@@ -186,13 +186,13 @@ function DetailEntry({
   href?: string;
   onNavigate?: () => void;
   transparentIcon?: boolean;
-  canonicalTalent?: { championName: string | null | undefined; talentName: string | null | undefined };
+  canonicalTalent?: { talentId: number; talentName: string | null | undefined };
 }) {
   const quality = metric ? getStatQuality(metric.winRate, metric.pickRate, maxPickRate) : null;
   return <article className="flex min-w-0 items-start gap-3 rounded-lg border border-pc-border/70 bg-pc-bg-secondary/45 p-3">
     {canonicalTalent ? (
       <CanonicalTalentImage
-        championName={canonicalTalent.championName}
+        talentId={canonicalTalent.talentId}
         talentName={canonicalTalent.talentName}
         alt={name}
         className={transparentIcon ? "h-12 w-12 shrink-0 object-contain" : "h-9 w-9 shrink-0 rounded border border-pc-border object-contain"}
@@ -360,7 +360,7 @@ function PlayerBuildRow({
       </div>
       <div className="col-span-2 lg:col-span-1">
         <div className="mb-1.5 text-[9px] font-semibold uppercase tracking-wider text-pc-text-muted lg:hidden">Talent &amp; cards</div>
-        <div className="flex flex-wrap items-center gap-1.5">{talents.map(t => <CanonicalTalentImage key={`talent-${t.talent_id}`} championName={t.champion_name ?? player.champion_name} talentName={t.talent_name} alt={t.talent_name ?? "Talent"} className="h-12 w-12 shrink-0 object-contain" fallbackClassName="h-12 w-12 shrink-0" />)}{cards.map(c => { const entry = findReference("cards", c.card_id, c.card_name); return <Asset key={`card-${c.card_id}`} sources={[entry?.iconUrl, c.icon_url, c.fallback_icon_url]} alt={c.card_name ?? "Loadout card"} level={c.card_level ?? undefined} tone="border-pc-accent/30" />; })}</div>
+        <div className="flex flex-wrap items-center gap-1.5">{talents.map(t => <CanonicalTalentImage key={`talent-${t.talent_id}`} talentId={t.talent_id} talentName={t.talent_name} alt={t.talent_name ?? "Talent"} className="h-12 w-12 shrink-0 object-contain" fallbackClassName="h-12 w-12 shrink-0" />)}{cards.map(c => { const entry = findReference("cards", c.card_id, c.card_name); return <Asset key={`card-${c.card_id}`} sources={[entry?.iconUrl, c.icon_url, c.fallback_icon_url]} alt={c.card_name ?? "Loadout card"} level={c.card_level ?? undefined} tone="border-pc-accent/30" />; })}</div>
       </div>
       <div className="col-span-2 lg:col-span-1">
         <div className="mb-1.5 text-[9px] font-semibold uppercase tracking-wider text-pc-text-muted lg:hidden">Purchased items</div>
@@ -397,7 +397,7 @@ function PlayerBuildRow({
           {talents.map((talent) => {
             const entry = findReference("talents", talent.talent_id, talent.talent_name);
             const name = talent.talent_name ?? entry?.name ?? `Talent #${talent.talent_id}`;
-            return <DetailEntry key={`talent-detail-${talent.talent_id}`} name={name} href={`${championPath}/talents/${talent.talent_id}?returnTo=${returnToQuery}`} onNavigate={preserveMatchPosition} label="Talent" description={formatDescription(entry?.description, 1) ?? (reference ? "Description unavailable." : <LoadingIndicator className="gap-1.5 text-xs" />)} sources={[]} canonicalTalent={{ championName: talent.champion_name ?? player.champion_name, talentName: talent.talent_name }} transparentIcon metric={talentMetric} showMetrics metricsLoaded={loadoutMetrics !== null} maxPickRate={100} />;
+            return <DetailEntry key={`talent-detail-${talent.talent_id}`} name={name} href={`${championPath}/talents/${talent.talent_id}?returnTo=${returnToQuery}`} onNavigate={preserveMatchPosition} label="Talent" description={formatDescription(entry?.description, 1) ?? (reference ? "Description unavailable." : <LoadingIndicator className="gap-1.5 text-xs" />)} sources={[]} canonicalTalent={{ talentId: talent.talent_id, talentName: talent.talent_name }} transparentIcon metric={talentMetric} showMetrics metricsLoaded={loadoutMetrics !== null} maxPickRate={100} />;
           })}
           {cards.map((card) => {
             const entry = findReference("cards", card.card_id, card.card_name);
