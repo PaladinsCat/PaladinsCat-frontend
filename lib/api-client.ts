@@ -605,12 +605,35 @@ export interface PlayersOverview {
   suspiciousPlayers: CheaterPlayer[];
   weirdoPlayers: CheaterPlayer[];
   hallOfFamePlayers: CheaterPlayer[];
+  privateAccounts: PrivateAccountSummary[];
+  partyPairs: PartyPairSummary[];
   communityCounts: {
     cheaters: number;
     suspicious: number;
     weirdos: number;
     hallOfFame: number;
   };
+  directoryCounts: {
+    privateAccounts: number;
+    parties: number;
+  };
+}
+
+export interface PrivateAccountSummary {
+  id: number;
+  alias: string | null;
+  partyId: number;
+  matchCount: number;
+  lastSeen: string | null;
+}
+
+export interface PartyPairSummary {
+  sourcePlayerId: number;
+  sourcePlayerName: string;
+  targetPlayerId: number;
+  targetPlayerName: string;
+  matchCount: number;
+  lastSeen: string | null;
 }
 
 let playersOverviewCache: { value: PlayersOverview; expiresAt: number } | null = null;
@@ -657,6 +680,25 @@ export function mapPlayersOverviewResponse(raw: any): PlayersOverview {
     weirdos: Number(raw.community_counts?.weirdos ?? raw.weirdos?.[0]?.total_count ?? raw.weirdos?.length ?? 0),
     hallOfFame: Number(raw.community_counts?.hall_of_fame ?? raw.hall_of_fame?.[0]?.total_count ?? raw.hall_of_fame?.length ?? 0),
   };
+  const privateAccounts: PrivateAccountSummary[] = (raw.private_accounts ?? []).map((row: any) => ({
+    id: Number(row.id),
+    alias: row.alias == null ? null : String(row.alias),
+    partyId: Number(row.party_id ?? 0),
+    matchCount: Number(row.match_count ?? 0),
+    lastSeen: row.last_seen ?? null,
+  }));
+  const partyPairs: PartyPairSummary[] = (raw.party_pairs ?? []).map((row: any) => ({
+    sourcePlayerId: Number(row.source_player_id),
+    sourcePlayerName: String(row.source_player_name ?? 'Unknown'),
+    targetPlayerId: Number(row.target_player_id),
+    targetPlayerName: String(row.target_player_name ?? 'Unknown'),
+    matchCount: Number(row.match_count ?? 0),
+    lastSeen: row.last_seen ?? null,
+  }));
+  const directoryCounts = {
+    privateAccounts: Number(raw.directory_counts?.private_accounts ?? raw.private_accounts?.[0]?.total_count ?? privateAccounts.length),
+    parties: Number(raw.directory_counts?.parties ?? raw.party_pairs?.[0]?.total_count ?? partyPairs.length),
+  };
 
   return {
     championEloPlayers: (raw.champion_elo?.data ?? []).map(mapChampionElo),
@@ -669,7 +711,10 @@ export function mapPlayersOverviewResponse(raw: any): PlayersOverview {
     suspiciousPlayers: (raw.suspicious ?? []).map(mapCommunity),
     weirdoPlayers: (raw.weirdos ?? []).map(mapCommunity),
     hallOfFamePlayers: (raw.hall_of_fame ?? []).map(mapCommunity),
+    privateAccounts,
+    partyPairs,
     communityCounts,
+    directoryCounts,
   };
 }
 

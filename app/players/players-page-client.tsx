@@ -9,7 +9,9 @@ import {
   type ClassLeaderboardEntry,
   type PerformanceLeaderboardEntry,
   type PlayerSearchResult,
+  type PrivateAccountSummary,
   type RankedPlayer,
+  type PartyPairSummary,
   type ChampionEloEntry,
   type PlayersOverview,
 } from "@/lib/api-client";
@@ -63,6 +65,12 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
   const [suspiciousPlayers, setSuspiciousPlayers] = useState<CheaterPlayer[]>(initialOverview?.suspiciousPlayers ?? []);
   const [weirdoPlayers, setWeirdoPlayers] = useState<CheaterPlayer[]>(initialOverview?.weirdoPlayers ?? []);
   const [hallOfFamePlayers, setHallOfFamePlayers] = useState<CheaterPlayer[]>(initialOverview?.hallOfFamePlayers ?? []);
+  const [privateAccounts, setPrivateAccounts] = useState<PrivateAccountSummary[]>(initialOverview?.privateAccounts ?? []);
+  const [partyPairs, setPartyPairs] = useState<PartyPairSummary[]>(initialOverview?.partyPairs ?? []);
+  const [directoryCounts, setDirectoryCounts] = useState<PlayersOverview["directoryCounts"]>(initialOverview?.directoryCounts ?? {
+    privateAccounts: initialOverview?.privateAccounts.length ?? 0,
+    parties: initialOverview?.partyPairs.length ?? 0,
+  });
   const [overviewLoading, setOverviewLoading] = useState(initialOverview == null);
 
   useEffect(() => {
@@ -85,6 +93,9 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
         setSuspiciousPlayers(overview.suspiciousPlayers);
         setWeirdoPlayers(overview.weirdoPlayers);
         setHallOfFamePlayers(overview.hallOfFamePlayers);
+        setPrivateAccounts(overview.privateAccounts);
+        setPartyPairs(overview.partyPairs);
+        setDirectoryCounts(overview.directoryCounts);
       })
       .catch(() => {
         // The empty-state copy remains visible; avoid an unhandled rejection
@@ -343,6 +354,69 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
                         <Link href={`/players/${p.id}`} className="text-pc-text font-medium text-xs hover:text-pc-accent transition-colors truncate"><PlayerName playerId={p.id} cheater={p.cheater} susCount={p.susCount}>{p.name}</PlayerName></Link>
                         <span className="shrink-0 text-xs px-1 py-0.5 rounded border bg-emerald-500/15 text-emerald-300 border-emerald-500/30">{p.hallOfFameCount}</span>
                       </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Tracked private accounts */}
+            <div className="flex flex-col h-full">
+              <div className="flex items-center justify-between mb-2 px-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="w-2 h-2 shrink-0 rounded-full bg-slate-400" />
+                  <h3 className="text-pc-text font-semibold text-xs truncate">Private Accounts</h3>
+                  <span className="text-xs px-1.5 py-0.5 rounded-full bg-slate-400/10 text-slate-300 border border-slate-400/20">
+                    {directoryCounts.privateAccounts}
+                  </span>
+                </div>
+              </div>
+              <div className="bg-pc-bg-elevated border border-slate-400/20 rounded-xl p-3 flex-1 flex flex-col justify-start">
+                <div className="space-y-1.5">
+                  {privateAccounts.length === 0 && (
+                    <div className="text-xs text-pc-text-muted">{overviewLoading ? <InlineLoading /> : "No private accounts tracked"}</div>
+                  )}
+                  {privateAccounts.map((account) => (
+                    <div key={account.id} className="flex items-center justify-between gap-2 p-2 rounded-lg bg-pc-bg/50 text-xs">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="shrink-0 text-slate-300">◌</span>
+                        <span className="text-pc-text font-medium truncate">{account.alias || `Private #${account.id}`}</span>
+                      </div>
+                      <span className="shrink-0 px-1 py-0.5 rounded border bg-slate-400/10 text-slate-300 border-slate-400/20" title="Recorded matches">
+                        {account.matchCount}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Ranked party pairs */}
+            <div className="flex flex-col h-full">
+              <div className="flex items-center justify-between mb-2 px-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="w-2 h-2 shrink-0 rounded-full bg-cyan-500" />
+                  <h3 className="text-pc-text font-semibold text-xs">Parties</h3>
+                  <span className="text-xs px-1.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+                    {directoryCounts.parties}
+                  </span>
+                </div>
+              </div>
+              <div className="bg-pc-bg-elevated border border-cyan-500/20 rounded-xl p-3 flex-1 flex flex-col justify-start">
+                <div className="space-y-1.5">
+                  {partyPairs.length === 0 && (
+                    <div className="text-xs text-pc-text-muted">{overviewLoading ? <InlineLoading /> : "No ranked party pairs"}</div>
+                  )}
+                  {partyPairs.map((pair) => (
+                    <div key={`${pair.sourcePlayerId}-${pair.targetPlayerId}`} className="flex items-center justify-between gap-2 p-2 rounded-lg bg-pc-bg/50 text-xs">
+                      <div className="min-w-0 truncate text-pc-text">
+                        <Link href={`/players/${pair.sourcePlayerId}`} className="font-medium hover:text-pc-accent transition-colors">{pair.sourcePlayerName}</Link>
+                        <span className="px-1 text-cyan-300">+</span>
+                        <Link href={`/players/${pair.targetPlayerId}`} className="font-medium hover:text-pc-accent transition-colors">{pair.targetPlayerName}</Link>
+                      </div>
+                      <span className="shrink-0 px-1 py-0.5 rounded border bg-cyan-500/10 text-cyan-300 border-cyan-500/20" title="Ranked matches together">
+                        {pair.matchCount}
+                      </span>
                     </div>
                   ))}
                 </div>
