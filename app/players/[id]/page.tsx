@@ -201,10 +201,15 @@ export default function PlayerProfilePage() {
   const [showCurrentMatch, setShowCurrentMatch] = useState(false);
   const [fetchKey, setFetchKey] = useState(0);
   const [historyFetchKey, setHistoryFetchKey] = useState(0);
+  const [avatarLoadFailed, setAvatarLoadFailed] = useState(false);
 
   // Report modal state
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportType, setReportType] = useState<Exclude<ReportType, 'approve'>>('suspicious');
+
+  useEffect(() => {
+    setAvatarLoadFailed(false);
+  }, [id, response?.player.avatar_url]);
 
   // Open report modal — redirect to login if not authenticated
   const openReportModal = useCallback((type: Exclude<ReportType, 'approve'>) => {
@@ -432,6 +437,8 @@ export default function PlayerProfilePage() {
     : refreshFeedback?.kind === 'success'
       ? 'text-emerald-300 bg-emerald-500/10 border-emerald-500/20'
       : 'text-amber-300 bg-amber-500/10 border-amber-500/20';
+  const rawAvatarUrl = player.avatar_url?.trim();
+  const avatarUrl = !avatarLoadFailed && /^https?:\/\//i.test(rawAvatarUrl ?? '') ? rawAvatarUrl : null;
 
   return (
     <div className="space-y-5">
@@ -583,18 +590,18 @@ export default function PlayerProfilePage() {
         <div className="flex flex-col items-start gap-4 min-[420px]:flex-row">
           {/* Avatar */}
           <div className="w-16 h-16 rounded-xl border-2 border-pc-accent/30 overflow-hidden shrink-0 bg-pc-bg flex items-center justify-center">
-            {player.avatar_url ? (
+            {avatarUrl ? (
               <img
-                src={player.avatar_url}
+                src={avatarUrl}
                 alt={player.name}
                 className="w-full h-full object-cover"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = "none";
-                  (e.target as HTMLImageElement).parentElement!.innerHTML = `<span class="text-2xl font-bold text-pc-accent">${player.name.charAt(0).toUpperCase()}</span>`;
-                }}
+                onError={() => setAvatarLoadFailed(true)}
               />
             ) : (
-              <span className="text-2xl font-bold text-pc-accent">{player.name.charAt(0).toUpperCase()}</span>
+              <picture>
+                <source srcSet="/images/icons/Avatar_Default_Icon.avif" type="image/avif" />
+                <img src="/images/icons/Avatar_Default_Icon.png" alt={`${player.name}'s Paladins avatar`} className="w-full h-full object-cover" />
+              </picture>
             )}
           </div>
           <div className="flex-1 min-w-0">
