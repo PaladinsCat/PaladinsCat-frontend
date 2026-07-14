@@ -3,11 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
-  fetchStatsOverview,
-  fetchBaselines,
-  fetchMatchCompositions,
-  fetchSkinStats,
-  fetchBrokenSkinStats,
+  fetchStatsPageData,
   type Champion,
   type MatchCompositionStat,
   type SkinStat,
@@ -107,94 +103,52 @@ export default function StatsPage() {
   const [brokenSkinsLoading, setBrokenSkinsLoading] = useState(true);
 
   useEffect(() => {
-    let cancelled = false;
-    fetchStatsOverview()
-      .then((overview) => {
-        if (cancelled) return;
-        const liveMetrics = overview.metrics;
-        if (Object.keys(liveMetrics).length > 0) {
-        setMetrics((current) => ({
-          ...current,
-          ...Object.fromEntries(Object.entries(liveMetrics).map(([key, summary]) => [key, {
-            p10: summary?.p10 ?? 0,
-            p25: summary?.p25 ?? 0,
-            p75: summary?.p75 ?? 0,
-            p90: summary?.p90 ?? 0,
-            mean: summary?.mean ?? 0,
-            median: summary?.median ?? 0,
-            mode: summary?.mode ?? 0,
-          }])),
-        }));
-        }
-        setChampions(overview.champions);
-        setItems(mapItemStats(overview.items));
-        setMaps(mapMapStats(overview.maps));
-        setTiers(overview.profileTiers);
-      })
-      .catch(() => {})
-      .finally(() => { if (!cancelled) setOverviewLoading(false); });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  useEffect(() => {
     if (!lobbyTierReady) return;
     let cancelled = false;
+    setOverviewLoading(true);
     setEgpmLoading(true);
-    fetchBaselines({ queueId: 486, tierMin: lobbyTier.tierMin, tierMax: lobbyTier.tierMax })
-      .then((rows) => { if (!cancelled) setEgpmBaselines(rows); })
-      .catch(() => { if (!cancelled) setEgpmBaselines([]); })
-      .finally(() => { if (!cancelled) setEgpmLoading(false); });
-    return () => { cancelled = true; };
-  }, [lobbyTier.label, lobbyTier.tierMax, lobbyTier.tierMin, lobbyTierReady]);
-
-  useEffect(() => {
-    let cancelled = false;
-    if (!lobbyTierReady) return () => {};
     setSkinsLoading(true);
-    fetchSkinStats({
-      limit: 5,
-      tierMin: lobbyTier.tierMin,
-      tierMax: lobbyTier.tierMax,
-    }).then((skins) => {
-      if (cancelled) return;
-      setSkinStats(skins);
-    }).catch(() => {})
-      .finally(() => { if (!cancelled) setSkinsLoading(false); });
-    return () => { cancelled = true; };
-  }, [lobbyTierReady, lobbyTier.tierMin, lobbyTier.tierMax]);
-
-  useEffect(() => {
-    let cancelled = false;
-    if (!lobbyTierReady) return () => {};
     setCompositionsLoading(true);
-    fetchMatchCompositions({
-      limit: 10,
-      tierMin: lobbyTier.tierMin,
-      tierMax: lobbyTier.tierMax,
-    }).then((comps) => {
-      if (cancelled) return;
-      setCompositions(comps);
-    }).catch(() => {})
-      .finally(() => { if (!cancelled) setCompositionsLoading(false); });
-    return () => { cancelled = true; };
-  }, [lobbyTierReady, lobbyTier.tierMin, lobbyTier.tierMax]);
-
-  useEffect(() => {
-    let cancelled = false;
-    if (!lobbyTierReady) return () => {};
     setBrokenSkinsLoading(true);
-    fetchBrokenSkinStats({
-      tierMin: lobbyTier.tierMin,
-      tierMax: lobbyTier.tierMax,
-    }).then((broken) => {
-      if (cancelled) return;
-      setBrokenSkins(broken);
-    }).catch(() => {})
-      .finally(() => { if (!cancelled) setBrokenSkinsLoading(false); });
+    fetchStatsPageData({ tierMin: lobbyTier.tierMin, tierMax: lobbyTier.tierMax })
+      .then((data) => {
+        if (cancelled) return;
+        const liveMetrics = data.overview.metrics;
+        if (Object.keys(liveMetrics).length > 0) {
+          setMetrics((current) => ({
+            ...current,
+            ...Object.fromEntries(Object.entries(liveMetrics).map(([key, summary]) => [key, {
+              p10: summary?.p10 ?? 0, p25: summary?.p25 ?? 0, p75: summary?.p75 ?? 0, p90: summary?.p90 ?? 0,
+              mean: summary?.mean ?? 0, median: summary?.median ?? 0, mode: summary?.mode ?? 0,
+            }])),
+          }));
+        }
+        setChampions(data.overview.champions);
+        setItems(mapItemStats(data.overview.items));
+        setMaps(mapMapStats(data.overview.maps));
+        setTiers(data.overview.profileTiers);
+        setEgpmBaselines(data.baselines);
+        setSkinStats(data.skins);
+        setCompositions(data.compositions);
+        setBrokenSkins(data.brokenSkins);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setEgpmBaselines([]);
+        setSkinStats([]);
+        setCompositions([]);
+        setBrokenSkins([]);
+      })
+      .finally(() => {
+        if (cancelled) return;
+        setOverviewLoading(false);
+        setEgpmLoading(false);
+        setSkinsLoading(false);
+        setCompositionsLoading(false);
+        setBrokenSkinsLoading(false);
+      });
     return () => { cancelled = true; };
-  }, [lobbyTierReady, lobbyTier.tierMin, lobbyTier.tierMax]);
+  }, [lobbyTierReady, lobbyTier.tierMax, lobbyTier.tierMin]);
 
   const [champions, setChampions] = useState<Champion[]>([]);
 

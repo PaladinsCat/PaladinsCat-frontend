@@ -2463,6 +2463,76 @@ export interface StatsOverview {
 let statsOverviewCache: { key: string; value: StatsOverview; expiresAt: number } | null = null;
 let statsOverviewInFlight: { key: string; promise: Promise<StatsOverview> } | null = null;
 
+function mapStatsOverview(raw: any): StatsOverview {
+  const number = (value: unknown) => Number(value ?? 0);
+  const mapItems = (rows: any[]): ItemStat[] => rows.map((row) => ({
+    itemId: number(row.item_id), itemName: String(row.item_name ?? ''),
+    totalUsage: number(row.total_uses ?? row.total_usage), winRate: number(row.win_rate),
+    pickRate: row.pick_rate == null ? undefined : number(row.pick_rate),
+    slots: (row.slots ?? []).map((slot: any) => ({ slot: number(slot.slot), totalUses: number(slot.total_uses), wins: 0, losses: 0, winRate: number(slot.win_rate) })),
+    levels: (row.levels ?? []).map((level: any) => ({ level: number(level.item_level), totalUses: number(level.total_uses), wins: 0, losses: 0, winRate: number(level.win_rate) })),
+    breakdown: (row.breakdown ?? []).map((entry: any) => ({ slot: number(entry.slot), level: number(entry.item_level), totalUses: number(entry.total_uses), wins: 0, losses: 0, winRate: number(entry.win_rate), pickRate: entry.pick_rate == null ? undefined : number(entry.pick_rate) })),
+  }));
+  const mapMaps = (rows: any[]): MapStat[] => rows.map((row) => ({
+    name: String(row.map ?? ''), totalMatches: number(row.total_matches),
+    distributionRate: number(row.distribution_rate), avgDurationSeconds: number(row.avg_duration_seconds),
+  }));
+  const mapTiers = (rows: any[]): TierStat[] => rows.map((row) => ({
+    tier: String(row.tier ?? ''), tierSort: number(row.tier_sort), totalPlays: number(row.total_plays),
+    avgWinRate: toDisplayPercent(row.avg_win_rate) ?? 0, percentage: number(row.percentage),
+  }));
+  return {
+    metrics: Object.fromEntries(Object.entries(raw.metrics ?? {}).map(([metric, summary]) => [metric, mapMetricSummary(summary)])),
+    champions: mapChampionsOverview(raw.champions ?? {}),
+    items: mapItems(raw.items ?? []),
+    maps: mapMaps(raw.maps ?? []),
+    profileTiers: mapTiers(raw.profile_tiers ?? []),
+    activeTiers: mapTiers(raw.active_tiers ?? []),
+  };
+}
+
+function mapBaselineRows(rows: any[]): BaselineEntry[] {
+  return rows.map((row) => ({
+    role: String(row.role ?? ''), queueId: Number(row.queue_id ?? 486),
+    avgCpm: Number(row.avg_gpm ?? 0), avgDpm: Number(row.avg_dpm ?? 0), avgHpm: Number(row.avg_hpm ?? 0),
+    avgShpm: Number(row.avg_shpm ?? 0), avgSpm: Number(row.avg_mpm ?? 0), avgKda: Number(row.avg_kda ?? 0),
+    p10Cpm: Number(row.p10_gpm ?? 0), p90Cpm: Number(row.p90_gpm ?? 0), p10Dpm: Number(row.p10_dpm ?? 0), p90Dpm: Number(row.p90_dpm ?? 0),
+    avgEcpm: Number(row.avg_egpm ?? 0), p10Ecpm: Number(row.p10_egpm ?? 0), p25Ecpm: Number(row.p25_egpm ?? 0),
+    p75Ecpm: Number(row.p75_egpm ?? 0), p90Ecpm: Number(row.p90_egpm ?? 0), maxEcpm: Number(row.max_egpm ?? 0),
+    sampleSize: Number(row.sample_size ?? 0), updatedAt: row.updated_at ?? null,
+  }));
+}
+
+export interface StatsPageData {
+  overview: StatsOverview;
+  baselines: BaselineEntry[];
+  skins: SkinStat[];
+  compositions: MatchCompositionStat[];
+  brokenSkins: BrokenSkinStat[];
+}
+
+export async function fetchStatsPageData(params?: { tierMin?: number; tierMax?: number }): Promise<StatsPageData> {
+  const query = new URLSearchParams();
+  if (params?.tierMin != null) query.set('tierMin', String(params.tierMin));
+  if (params?.tierMax != null) query.set('tierMax', String(params.tierMax));
+  const raw = await fetchJson<any>(`/stats/page-data${query.toString() ? `?${query.toString()}` : ''}`, { unwrapData: false });
+  const skinRows = (rows: any[]): SkinStat[] => rows.map((row) => ({
+    skinId: Number(row.skin_id), skinName: String(row.skin_name ?? 'Unknown Skin'), championId: Number(row.champion_id), championName: String(row.champion_name ?? 'Unknown Champion'),
+    totalPlays: Number(row.total_plays ?? 0), wins: Number(row.wins ?? 0), losses: Number(row.losses ?? 0), winRate: Number(row.win_rate ?? 0),
+  }));
+  const compositions = (rows: any[]): MatchCompositionStat[] => rows.map((row) => ({
+    composition: String(row.comp_id), frontline: Number(row.frontline ?? 0), damage: Number(row.damage ?? 0), flank: Number(row.flank ?? 0), support: Number(row.support ?? 0),
+    totalMatches: Number(row.count ?? 0), wins: Number(row.wins ?? 0), losses: Number(row.losses ?? 0), winRate: Number(row.winrate ?? 0),
+  }));
+  return {
+    overview: mapStatsOverview(raw.overview ?? {}),
+    baselines: mapBaselineRows(raw.baselines ?? []),
+    skins: skinRows(raw.skins ?? []),
+    compositions: compositions(raw.compositions ?? []),
+    brokenSkins: (raw.broken_skins ?? []).map((row: any) => ({ ...skinRows([row])[0], usageShare: Number(row.usage_share ?? 0) })),
+  };
+}
+
 export async function fetchStatsOverview(): Promise<StatsOverview> {
   const cacheKey = getStoredLobbyTierFilter();
   if (statsOverviewCache?.key === cacheKey && statsOverviewCache.expiresAt > Date.now()) return statsOverviewCache.value;
