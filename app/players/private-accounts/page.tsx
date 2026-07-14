@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { CalendarClock, Info, LockKeyhole, Search, ShieldCheck } from "lucide-react";
+import { CalendarClock, Info, LockKeyhole, Search } from "lucide-react";
 import { LoadingPanel } from "@/components/async-state";
 import PlayerDirectoryPagination from "@/components/player-directory-pagination";
 import { fetchPrivateAccountsDirectory, type PrivateAccountSummary } from "@/lib/api-client";
@@ -98,27 +98,26 @@ export default function PrivateAccountsPage() {
           {accounts.map((account) => {
             const tierName = TIER_NAMES[account.leagueTier] || "Unranked";
             return (
-              <Link href={`/players/private-accounts/${account.id}`} key={account.id} className="group block overflow-hidden rounded-xl border border-slate-400/20 bg-pc-bg-elevated p-4 transition-colors hover:border-pc-accent-mid">
+              <Link href={`/players/private-accounts/${account.id}`} key={account.id} className="group block overflow-hidden rounded-xl border border-slate-400/20 bg-pc-bg-elevated p-3 transition-colors hover:border-pc-accent-mid">
                 <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted"><span>Private profile #{account.id}</span><span className="rounded border border-pc-border bg-pc-bg/50 px-1.5 py-0.5 text-pc-text-secondary">Level {account.accountLevel.toLocaleString()}</span></div>
-                    <h2 className="mt-1 flex items-center gap-1.5 truncate text-base font-semibold text-pc-text group-hover:text-pc-accent">
-                      <span className="truncate">{account.displayName}</span>
-                      {account.verifiedName && <ShieldCheck aria-label="Verified from submitted evidence" className="h-4 w-4 shrink-0 text-emerald-300" />}
-                    </h2>
+                  <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+                    <h2 className="mr-0.5 truncate text-base font-semibold text-pc-text group-hover:text-pc-accent">{account.alias || account.displayName}</h2>
+                    <span className="rounded border border-pc-border bg-pc-bg/50 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-pc-text-secondary">Level {account.accountLevel.toLocaleString()}</span>
+                    <span className="rounded border border-pc-border bg-pc-bg/50 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-pc-text-secondary">Mastery {account.masteryLevel.toLocaleString()}</span>
+                    <span className={`ml-1 flex min-w-0 items-center gap-1 text-xs font-semibold ${getTierColor(account.leagueTier)}`}>
+                      <img src={getRankIconPath(account.leagueTier, 0)} alt="" className="h-5 w-5 shrink-0 object-contain" />
+                      <span className="truncate">{tierName}</span>
+                      <span className="text-pc-text-muted">·</span>
+                      <span className="whitespace-nowrap text-pc-text-secondary">{account.leaguePoints.toLocaleString()} TP</span>
+                    </span>
                   </div>
                   <span className="shrink-0 rounded-full border border-slate-400/20 bg-slate-400/10 px-2 py-1 text-xs font-semibold text-slate-300">{account.matchCount.toLocaleString()} matches</span>
                 </div>
 
-                <dl className="mt-4 grid grid-cols-3 divide-x divide-pc-border border-y border-pc-border py-3 text-xs">
-                  <div className="pr-3"><dt className="text-pc-text-muted">Mastery</dt><dd className="mt-1 font-semibold text-pc-text">{account.masteryLevel.toLocaleString()}</dd></div>
-                  <div className="px-3"><dt className="text-pc-text-muted">Rank</dt><dd className={`mt-1 flex min-w-0 items-center gap-1.5 font-semibold ${getTierColor(account.leagueTier)}`}><img src={getRankIconPath(account.leagueTier, 0)} alt="" className="h-6 w-6 shrink-0 object-contain" /><span className="truncate">{tierName}</span></dd></div>
-                  <div className="pl-3"><dt className="text-pc-text-muted">TP</dt><dd className="mt-1 font-semibold text-pc-text">{account.leaguePoints.toLocaleString()}</dd></div>
-                </dl>
-
-                <div className="mt-3 flex items-start gap-2 text-xs text-pc-text-muted">
-                  <CalendarClock aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0" />
-                  <div><div>First observed <span className="text-pc-text-secondary">{observedAt(account.firstSeen)}</span></div><div className="mt-1">Last observed <span className="text-pc-text-secondary">{observedAt(account.lastSeen)}</span></div></div>
+                <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-pc-border pt-2 text-[11px] text-pc-text-muted">
+                  <CalendarClock aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
+                  <span>First observed <span className="text-pc-text-secondary">{observedAt(account.firstSeen)}</span></span>
+                  <span>Last observed <span className="text-pc-text-secondary">{observedAt(account.lastSeen)}</span></span>
                 </div>
               </Link>
             );
