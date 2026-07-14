@@ -452,63 +452,32 @@ export default function PlayerProfilePage() {
       </Link>
 
       {/* ── Header ── */}
-      <div className={`pc-card relative ${actionMenuOpen ? 'z-40' : 'z-10'}`}>
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+      <div className={`pc-card relative lg:col-span-2 ${actionMenuOpen ? 'z-40' : 'z-10'}`}>
         <LoadingOverlay visible={refreshing} />
-        {/* Action buttons — top right */}
-        <div ref={actionMenuRef} className="relative mb-3 flex items-center justify-end">
-          <div className="hidden flex-wrap items-center justify-end gap-2 md:flex">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
+        {/* Keep live/refresh controls visible; consolidate voting and moderation. */}
+        <div ref={actionMenuRef} className="relative order-2 flex shrink-0 flex-wrap items-center justify-end gap-2 self-stretch lg:self-center">
           <button
+            type="button"
             onClick={handleCurrentMatch}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-pc-bg-secondary/80 hover:bg-pc-bg-secondary text-pc-text border border-pc-border/50 transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-pc-border/70 bg-pc-bg-secondary/90 px-3 py-2 text-xs font-semibold text-pc-text transition-colors hover:border-pc-accent-mid hover:text-pc-accent"
             title="Check current match"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
             Current
           </button>
+
           <button
+            type="button"
             onClick={handleRefresh}
             disabled={refreshDisabled}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-pc-bg-secondary/80 hover:bg-pc-bg-secondary text-pc-text border border-pc-border/50 transition-colors ${refreshDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-pc-border/70 bg-pc-bg-secondary/90 px-3 py-2 text-xs font-semibold text-pc-text transition-colors hover:border-pc-accent-mid hover:text-pc-accent disabled:cursor-not-allowed disabled:opacity-50"
             title="Refresh profile (10-minute cooldown)"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={refreshing ? 'animate-spin' : ''}><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
-            {refreshing ? 'Refreshing...' : refreshRemainingMs > 0 ? `Refresh in ${formatCooldown(refreshRemainingMs)}` : 'Refresh'}
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={refreshing ? 'animate-spin' : ''} aria-hidden="true"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+            {refreshing ? 'Refreshing…' : refreshRemainingMs > 0 ? `Refresh in ${formatCooldown(refreshRemainingMs)}` : 'Refresh'}
           </button>
-          <button
-            onClick={() => openReportModal('suspicious')}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 transition-colors"
-            title={isLoggedIn ? "Report as suspicious" : "Log in to report"}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            Suspicious
-          </button>
-          <button
-            onClick={() => openReportModal('weirdo')}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-violet-500/10 hover:bg-violet-500/20 text-violet-300 border border-violet-500/20 transition-colors"
-            title={isLoggedIn ? "Vote Weirdo" : "Log in to vote"}
-          >
-            <span aria-hidden>✦</span>
-            {`Weirdo${player.weirdo_count ? ` (${player.weirdo_count})` : ''}`}
-          </button>
-          <button
-            onClick={() => openReportModal('hall_of_fame')}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/20 transition-colors"
-            title={isLoggedIn ? "Vote for Hall of Fame" : "Log in to vote"}
-          >
-            <span aria-hidden>♥</span>
-            {`Hall of Fame${player.hall_of_fame_count ? ` (${player.hall_of_fame_count})` : ''}`}
-          </button>
-          {(isAdmin || isApproved) && (
-            <button
-              onClick={() => openReportModal('cheater')}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition-colors"
-              title="Flag as cheater"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              Cheater
-            </button>
-          )}
-          </div>
 
           <button
             type="button"
@@ -516,7 +485,7 @@ export default function PlayerProfilePage() {
               setRefreshFeedback(null);
               setActionMenuOpen((open) => !open);
             }}
-            className="inline-flex items-center gap-2 rounded-lg border border-pc-border/70 bg-pc-bg-secondary/90 px-3 py-2 text-xs font-semibold text-pc-text transition-colors hover:border-pc-accent-mid hover:text-pc-accent md:hidden"
+            className="inline-flex items-center gap-2 rounded-lg border border-pc-border/70 bg-pc-bg-secondary/90 px-3 py-2 text-xs font-semibold text-pc-text transition-colors hover:border-pc-accent-mid hover:text-pc-accent"
             aria-haspopup="menu"
             aria-expanded={actionMenuOpen}
           >
@@ -526,22 +495,11 @@ export default function PlayerProfilePage() {
 
           {actionMenuOpen && (
             <div
-              className="absolute right-0 top-full z-30 mt-2 w-60 max-w-[calc(100vw-3rem)] overflow-hidden rounded-xl border border-pc-border bg-pc-bg-secondary p-2 shadow-2xl md:hidden"
+              className="absolute right-0 top-full z-30 mt-2 w-60 max-w-[calc(100vw-3rem)] overflow-hidden rounded-xl border border-pc-border bg-pc-bg-secondary p-2 shadow-2xl"
               role="menu"
               aria-label="Player actions"
             >
-              <div className="px-2 pb-1 pt-1 text-[10px] font-bold uppercase tracking-widest text-pc-text-muted">Player</div>
-              <button type="button" role="menuitem" onClick={() => { setActionMenuOpen(false); void handleCurrentMatch(); }} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-pc-text transition-colors hover:bg-pc-bg-elevated hover:text-pc-accent">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
-                Current match
-              </button>
-              <button type="button" role="menuitem" disabled={refreshDisabled} onClick={() => { setActionMenuOpen(false); void handleRefresh(); }} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-pc-text transition-colors hover:bg-pc-bg-elevated hover:text-pc-accent disabled:cursor-not-allowed disabled:opacity-50">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className={refreshing ? 'animate-spin' : ''} aria-hidden="true"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
-                {refreshing ? 'Refreshing profile…' : refreshRemainingMs > 0 ? `Refresh in ${formatCooldown(refreshRemainingMs)}` : 'Refresh profile'}
-              </button>
-
-              <div className="my-2 border-t border-pc-border/70" />
-              <div className="px-2 pb-1 text-[10px] font-bold uppercase tracking-widest text-pc-text-muted">Community</div>
+              <div className="px-2 pb-1 pt-1 text-[10px] font-bold uppercase tracking-widest text-pc-text-muted">Community</div>
               <button type="button" role="menuitem" onClick={() => { setActionMenuOpen(false); openReportModal('suspicious'); }} className="flex w-full items-center justify-between gap-3 rounded-lg px-2.5 py-2 text-left text-sm text-amber-400 transition-colors hover:bg-amber-500/10">
                 <span>Report suspicious</span>
                 {player.sus_count > 0 && <span className="text-xs tabular-nums">{player.sus_count}</span>}
@@ -591,6 +549,7 @@ export default function PlayerProfilePage() {
           )}
         </div>
 
+        <div className="order-1 min-w-0 flex-1">
         <div className="flex flex-col items-start gap-4 min-[420px]:flex-row">
           {/* Avatar */}
           <div className="w-16 h-16 rounded-xl border-2 border-pc-accent/30 overflow-hidden shrink-0 bg-pc-bg flex items-center justify-center">
@@ -610,8 +569,8 @@ export default function PlayerProfilePage() {
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="min-w-0 break-words text-xl font-bold text-pc-text">
-                <PlayerName playerId={player.id}>{player.name}</PlayerName>
+              <h1 className="min-w-0 break-words text-2xl font-bold leading-tight text-pc-text sm:text-3xl">
+                <PlayerName playerId={player.id} className="gap-1.5 [&_img]:h-5 [&_img]:w-5 sm:[&_img]:h-6 sm:[&_img]:w-6">{player.name}</PlayerName>
               </h1>
               {player.cheater && (
                 <span className="text-xs font-bold text-red-400 bg-red-500/10 px-1.5 py-0.5 rounded">CHEATER</span>
@@ -627,37 +586,29 @@ export default function PlayerProfilePage() {
               )}
             </div>
             {/* Title + loading frame */}
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-0.5">
+            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
               {player.title && (
-                <span className="text-xs text-pc-text-secondary" dangerouslySetInnerHTML={{ __html: player.title }} />
+                <span className="text-sm text-pc-text-secondary sm:text-base" dangerouslySetInnerHTML={{ __html: player.title }} />
               )}
               {player.loading_frame && (
-                <span className="text-xs text-pc-accent/80 font-medium">▸ {player.loading_frame}</span>
+                <span className="text-sm font-medium text-pc-accent/80 sm:text-base">▸ {player.loading_frame}</span>
               )}
-            </div>
-            {/* Meta badges */}
-            <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
-              <span className={`text-xs font-semibold ${tierColor} bg-pc-bg px-1.5 py-0.5 rounded flex items-center gap-1`}>
-                <img src={rankIcon} alt={effectiveTier.displayName} className="w-4 h-4 object-contain" />
-                {effectiveTier.displayName}
-              </span>
-              {player.kbm_points > 0 && (
-                <span className="text-xs text-pc-text-muted font-mono">{player.kbm_points} TP</span>
-              )}
-              <span className="text-pc-border">·</span>
-              <span className="text-xs text-pc-text-muted">{player.region}</span>
-              <span className="text-pc-border">·</span>
-              <span className="text-xs text-pc-text-muted">{player.platform}</span>
-              {player.platform_name && (
-                <span className="text-xs text-pc-text-muted">({player.platform_name})</span>
-              )}
-              <span className="text-pc-border">·</span>
-              <span className="text-xs text-pc-text-muted">Lvl {player.level}</span>
-              <span className="text-pc-border">·</span>
-              <span className="text-xs text-pc-text-muted">Mastery {player.mastery_level}</span>
             </div>
           </div>
         </div>
+        </div>
+      </div>
+      </div>
+
+      {/* Keep loadouts visible beside the compact profile header on desktop. */}
+      <div className="lg:col-span-1">
+        <h2 className="pc-card-title shadow-sm">Loadouts</h2>
+        <Link href={`/players/${id}/loadouts`} className="group flex items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-3 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary">
+          <SmartImage src="/images/icons/Player_Loadouts_Icon.png" alt="" className="h-11 w-11 shrink-0 object-contain" />
+          <div className="min-w-0 flex-1"><div className="text-sm font-semibold text-pc-text group-hover:text-pc-accent">Player Loadouts</div><div className="mt-0.5 text-xs text-pc-text-muted">View saved decks by champion</div></div>
+          <span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent">→</span>
+        </Link>
+      </div>
       </div>
 
       {/* ── Main grid ── */}
@@ -668,27 +619,51 @@ export default function PlayerProfilePage() {
           <div>
             <h2 className="pc-card-title shadow-sm">Account</h2>
             <div className="pc-card">
-              <StatGrid>
-                <StatRow label="Created" value={formatLocalDate(player.created_datetime)} />
-                <StatRow label="Last Login" value={formatLocalDateTime(player.last_login_datetime)} />
-                <StatRow label="Playtime" value={formatHours(player.hours_played)} />
-                <StatRow label="Achievements" value={formatNumber(player.total_achievements)} />
-                <StatRow label="Total XP" value={formatLargeNumber(player.total_xp)} />
-                <StatRow label="Champion XP" value={formatLargeNumber(player.total_worshippers)} />
-              </StatGrid>
-              {player.personal_status_message && (
-                <div className="mt-3 pt-3 border-t border-pc-border/50">
-                  <span className="text-xs text-pc-text-muted">Status: </span>
-                  <span className="text-xs text-pc-text-secondary italic">{player.personal_status_message}</span>
+              <div className="grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(12rem,0.65fr)]">
+                <div className="min-w-0">
+                  <div className="mb-3 flex flex-wrap items-center gap-1.5 border-b border-pc-border/50 pb-3">
+                    <span className={`flex items-center gap-1 rounded bg-pc-bg px-1.5 py-0.5 text-xs font-semibold ${tierColor}`}>
+                      <img src={rankIcon} alt={effectiveTier.displayName} className="h-4 w-4 object-contain" />
+                      {effectiveTier.displayName}
+                    </span>
+                    {player.kbm_points > 0 && (
+                      <span className="font-mono text-xs text-pc-text-muted">{player.kbm_points} TP</span>
+                    )}
+                    <span className="text-pc-border">·</span>
+                    <span className="text-xs text-pc-text-muted">{player.region}</span>
+                    <span className="text-pc-border">·</span>
+                    <span className="text-xs text-pc-text-muted">{player.platform}</span>
+                    {player.platform_name && (
+                      <span className="text-xs text-pc-text-muted">({player.platform_name})</span>
+                    )}
+                    <span className="text-pc-border">·</span>
+                    <span className="text-xs text-pc-text-muted">Lvl {player.level}</span>
+                    <span className="text-pc-border">·</span>
+                    <span className="text-xs text-pc-text-muted">Mastery {player.mastery_level}</span>
+                  </div>
+                  <StatGrid>
+                    <StatRow label="Created" value={formatLocalDate(player.created_datetime)} />
+                    <StatRow label="Last Login" value={formatLocalDateTime(player.last_login_datetime)} />
+                    <StatRow label="Playtime" value={formatHours(player.hours_played)} />
+                    <StatRow label="Total XP" value={formatLargeNumber(player.total_xp)} />
+                    <StatRow label="Achievements" value={formatNumber(player.total_achievements)} />
+                    <StatRow label="Champion XP" value={formatLargeNumber(player.total_worshippers)} />
+                  </StatGrid>
+                  {player.personal_status_message && (
+                    <div className="mt-3 border-t border-pc-border/50 pt-3">
+                      <span className="text-xs text-pc-text-muted">Status: </span>
+                      <span className="text-xs text-pc-text-secondary italic">{player.personal_status_message}</span>
+                    </div>
+                  )}
                 </div>
-              )}
-              <div className="mt-3 border-t border-pc-border/50 pt-3">
-                <div className="mb-1.5 text-[10px] uppercase tracking-wider text-pc-text-muted">Overall</div>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
-                  <StatRow label="Total Matches" value={formatNumber(globalMatches)} />
-                  <StatRow label="Total Wins" value={formatNumber(globalWins)} color="text-emerald-400" />
-                  <StatRow label="Total Losses" value={formatNumber(globalLosses)} color="text-rose-400" />
-                  <StatRow label="Win Rate" value={winRate.toFixed(1) + "%"} color={winRate >= 50 ? "text-emerald-400" : "text-rose-400"} />
+                <div className="border-t border-pc-border/50 pt-3 lg:border-l lg:border-t-0 lg:pl-4 lg:pt-0">
+                  <div className="mb-1.5 text-[10px] uppercase tracking-wider text-pc-text-muted">Overall</div>
+                  <div className="grid grid-cols-1 gap-y-1.5">
+                    <StatRow label="Total Matches" value={formatNumber(globalMatches)} />
+                    <StatRow label="Total Wins" value={formatNumber(globalWins)} color="text-emerald-400" />
+                    <StatRow label="Total Losses" value={formatNumber(globalLosses)} color="text-rose-400" />
+                    <StatRow label="Win Rate" value={winRate.toFixed(1) + "%"} color={winRate >= 50 ? "text-emerald-400" : "text-rose-400"} />
+                  </div>
                 </div>
               </div>
             </div>
@@ -777,16 +752,6 @@ export default function PlayerProfilePage() {
 
         {/* Right column: Rating + Performance + Champion Ratings (1/3) */}
         <div className="lg:col-span-1 space-y-5">
-          {/* Saved Loadouts */}
-          <div>
-            <h2 className="pc-card-title shadow-sm">Loadouts</h2>
-            <Link href={`/players/${id}/loadouts`} className="group flex items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-3 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary">
-              <SmartImage src="/images/icons/Player_Loadouts_Icon.png" alt="" className="h-11 w-11 shrink-0 object-contain" />
-              <div className="min-w-0 flex-1"><div className="text-sm font-semibold text-pc-text group-hover:text-pc-accent">Player Loadouts</div><div className="mt-0.5 text-xs text-pc-text-muted">View saved decks by champion</div></div>
-              <span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent">→</span>
-            </Link>
-          </div>
-
           {/* KBM Ranked */}
           <div>
             <h2 className="pc-card-title shadow-sm">Ranked</h2>
@@ -953,11 +918,11 @@ export default function PlayerProfilePage() {
       {/* ── Current Match Modal ── */}
       {showCurrentMatch && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowCurrentMatch(false)}>
-          <div className="pc-card max-h-[calc(100vh-2rem)] w-full max-w-5xl overflow-y-auto mx-4 p-5" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-bold text-pc-text">Current Match</h3>
+          <div className="pc-card mx-3 max-h-[calc(100vh-1.5rem)] w-full max-w-7xl overflow-y-auto p-5 sm:mx-6 sm:p-6 lg:p-7" onClick={(e) => e.stopPropagation()}>
+            <div className="mb-5 flex items-center justify-between">
+              <h3 className="text-xl font-bold text-pc-text sm:text-2xl">Current Match</h3>
               <button onClick={() => setShowCurrentMatch(false)} className="text-pc-text-muted hover:text-pc-text transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
               </button>
             </div>
             {!currentMatch ? (
@@ -972,62 +937,98 @@ export default function PlayerProfilePage() {
                 <div className="text-xs text-pc-text-muted/60">This player is not currently playing a tracked match.</div>
               </div>
             ) : (
-              <div className="space-y-3">
-                <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-pc-border/70 bg-pc-bg-secondary/60 px-3 py-2">
-                  <div className="flex min-w-0 items-center gap-2 text-xs">
+              <div className="space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-pc-border/70 bg-pc-bg-secondary/60 px-4 py-3">
+                  <div className="flex min-w-0 items-center gap-2.5 text-sm">
                     <span className="text-pc-text-muted">Match</span>
                     <Link href={`/matches/${currentMatch.match.match_id}`} className="font-mono text-pc-accent hover:text-pc-accent-secondary">
                       #{currentMatch.match.match_id}
                     </Link>
                     <span className="truncate text-pc-text-secondary">{currentMatch.match.map || "Unknown map"}</span>
                   </div>
-                  <span className={`text-xs font-medium ${currentMatch.match.status === 'active' ? 'text-emerald-400' : 'text-pc-text-muted'}`}>
+                  <span className={`text-sm font-semibold ${currentMatch.match.status === 'active' ? 'text-emerald-400' : 'text-pc-text-muted'}`}>
                     {currentMatch.match.status}
                   </span>
                 </div>
                 {currentMatch.players && currentMatch.players.length > 0 && (
-                  <div className="grid grid-cols-1 gap-3 border-t border-pc-border/50 pt-3 md:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-4 border-t border-pc-border/50 pt-4 md:grid-cols-2">
                     {[1, 2].map((taskForce) => {
                       const team = currentMatch.players.filter((p: any) => Number(p.task_force) === taskForce);
                       return (
-                        <section key={taskForce} className="overflow-hidden rounded-lg border border-pc-border/70 bg-pc-bg-secondary/40">
-                          <div className={`flex items-center justify-between border-b border-pc-border/60 px-3 py-2 text-xs font-semibold ${taskForce === 1 ? 'text-sky-300' : 'text-rose-300'}`}>
+                        <section key={taskForce} className="overflow-hidden rounded-xl border border-pc-border/70 bg-pc-bg-secondary/40">
+                          <div className={`flex items-center justify-between border-b border-pc-border/60 px-4 py-3 text-sm font-semibold ${taskForce === 1 ? 'text-sky-300' : 'text-rose-300'}`}>
                             <span>Team {taskForce}</span>
-                            <span className="text-[10px] font-normal text-pc-text-muted">{team.length} players</span>
+                            <span className="text-xs font-normal text-pc-text-muted">{team.length} players</span>
                           </div>
                           <div className="divide-y divide-pc-border/50">
                             {team.map((p: any) => {
-                              const total = Number(p.total_matches ?? 0);
-                              const wins = Number(p.total_wins ?? 0);
-                              const winRate = total > 0 ? `${((wins / total) * 100).toFixed(0)}% WR` : "No profile data";
+                              const rankedMatches = Number(p.ranked_matches ?? 0);
+                              const profileMatches = Number(p.profile_matches ?? 0);
+                              const indexedMatches = Number(p.total_matches ?? 0);
+                              const indexedWins = Number(p.total_wins ?? 0);
+                              const isRankedLobby = Number(currentMatch.match.queue_id) === 486;
+                              const useRankedMetrics = isRankedLobby && rankedMatches > 0;
+                              const metricMatches = useRankedMetrics
+                                ? rankedMatches
+                                : profileMatches > 0
+                                  ? profileMatches
+                                  : indexedMatches;
+                              const storedWinRate = useRankedMetrics
+                                ? Number(p.ranked_win_rate)
+                                : profileMatches > 0
+                                  ? Number(p.profile_win_rate)
+                                  : indexedMatches > 0
+                                    ? (indexedWins / indexedMatches) * 100
+                                    : Number.NaN;
+                              const winRate = Number.isFinite(storedWinRate) ? `${storedWinRate.toFixed(1)}% WR` : "No win-rate data";
+                              const metricScope = useRankedMetrics ? "ranked" : profileMatches > 0 ? "profile" : "indexed";
                               const tier = Number(p.kbm_tier ?? p.live_tier ?? 0);
                               const rank = Number(p.kbm_rank ?? 0);
                               const tierName = tier > 0 ? resolveEffectiveTier(tier, rank).displayName : "Unranked";
+                              const level = p.profile_level ?? p.account_level ?? "—";
+                              const mastery = Number(p.profile_mastery_level ?? p.mastery_level ?? 0);
+                              const profileDetails = [
+                                p.champion_name || "Unknown champion",
+                                `Lvl ${level}`,
+                                mastery > 0 ? `Mastery ${mastery}` : null,
+                                p.profile_platform || null,
+                              ].filter(Boolean).join(" · ");
+                              const sampleSummary = metricMatches > 0
+                                ? `${metricMatches.toLocaleString()} ${metricScope} matches`
+                                : p.has_profile
+                                  ? "Profile cached locally"
+                                  : "No local profile";
+                              const performanceSummary = p.avg_dpm != null
+                                ? `${sampleSummary} · ${Math.round(Number(p.avg_dpm)).toLocaleString()} DPM`
+                                : sampleSummary;
                               return (
-                                <div key={p.player_id} className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 px-3 py-2.5">
-                                  <div className="flex min-w-0 items-center gap-2">
-                                    <img src={getChampionIconSafe(p.champion_name || "")} alt="" className="h-7 w-7 shrink-0 rounded object-contain" />
+                                <div key={p.player_id} className="grid grid-cols-[minmax(0,1fr)_auto] gap-3 px-4 py-3.5">
+                                  <div className="flex min-w-0 items-center gap-3">
+                                    <img src={getChampionIconSafe(p.champion_name || "")} alt="" className="h-10 w-10 shrink-0 rounded-lg object-contain sm:h-11 sm:w-11" />
                                     <div className="min-w-0">
                                       {Number(p.player_id) > 0 ? (
-                                        <Link href={`/players/${p.player_id}`} className="block truncate text-xs font-medium text-pc-text hover:text-pc-accent">
+                                        <Link href={`/players/${p.player_id}`} className="block truncate text-sm font-semibold text-pc-text hover:text-pc-accent sm:text-base">
                                           <PlayerName playerId={p.player_id}>{p.player_name || `#${p.player_id}`}</PlayerName>
                                         </Link>
                                       ) : (
-                                        <span className="block truncate text-xs font-medium text-pc-text-muted">
+                                        <span className="block truncate text-sm font-semibold text-pc-text-muted sm:text-base">
                                           {p.player_name || 'Private Account'}
                                         </span>
                                       )}
-                                      <div className="truncate text-[10px] text-pc-text-muted">{p.champion_name || "Unknown champion"} · Lvl {p.profile_level ?? p.account_level ?? "—"}</div>
+                                      <div className="truncate text-xs text-pc-text-muted">{profileDetails}</div>
                                     </div>
                                   </div>
-                                  <div className="text-right text-[10px] leading-4">
-                                    <div className="font-mono text-pc-accent">{p.queue_elo != null ? Math.round(Number(p.queue_elo)) : "—"} ELO</div>
-                                    <div className="text-pc-text-secondary">{tierName} · {winRate}</div>
+                                  <div className="text-right text-xs leading-5">
+                                    <div className="font-mono text-sm text-pc-accent">
+                                      {p.queue_elo != null ? `${Math.round(Number(p.queue_elo))} ELO` : p.has_profile ? "Local profile" : "No rating"}
+                                    </div>
+                                    <div className="font-medium text-pc-text-secondary">{tierName} · {winRate}</div>
+                                    <div className="text-pc-text-muted">{performanceSummary}</div>
                                   </div>
                                 </div>
                               );
                             })}
-                            {team.length === 0 && <div className="px-3 py-4 text-center text-xs text-pc-text-muted">No players recorded yet.</div>}
+                            {team.length === 0 && <div className="px-4 py-6 text-center text-sm text-pc-text-muted">No players recorded yet.</div>}
                           </div>
                         </section>
                       );
