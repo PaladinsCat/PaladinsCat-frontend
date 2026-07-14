@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   getWallpaperEnabled,
-  resolveCustomWallpaper,
+  resolveCustomWallpapers,
   type ResolvedCustomWallpaper,
   WALLPAPER_CHANGE_EVENT,
 } from "@/lib/wallpaper-preference";
@@ -36,7 +36,7 @@ const INTERVAL_MS = 10_000;
  */
 export default function MapSlideshow() {
   const [wallpaperEnabled, setWallpaperEnabled] = useState(true);
-  const [customWallpaper, setCustomWallpaper] = useState<ResolvedCustomWallpaper | null>(null);
+  const [customWallpapers, setCustomWallpapers] = useState<ResolvedCustomWallpaper[]>([]);
   // Deterministic on server: always start at index 0
   const [index, setIndex] = useState(0);
   // Null until client mounts and shuffles
@@ -49,11 +49,13 @@ export default function MapSlideshow() {
     const syncWallpaperPreferences = async () => {
       const version = ++refreshVersion;
       setWallpaperEnabled(getWallpaperEnabled());
-      const wallpaper = await resolveCustomWallpaper().catch(() => null);
+      const wallpapers = await resolveCustomWallpapers().catch(() => []);
       if (active && version === refreshVersion) {
-        setCustomWallpaper(wallpaper);
-      } else if (wallpaper?.revoke) {
-        URL.revokeObjectURL(wallpaper.source);
+        setCustomWallpapers(wallpapers);
+      } else {
+        wallpapers.forEach((wallpaper) => {
+          if (wallpaper.revoke) URL.revokeObjectURL(wallpaper.source);
+        });
       }
     };
     void syncWallpaperPreferences();
@@ -68,8 +70,10 @@ export default function MapSlideshow() {
   }, []);
 
   useEffect(() => () => {
-    if (customWallpaper?.revoke) URL.revokeObjectURL(customWallpaper.source);
-  }, [customWallpaper]);
+    customWallpapers.forEach((wallpaper) => {
+      if (wallpaper.revoke) URL.revokeObjectURL(wallpaper.source);
+    });
+  }, [customWallpapers]);
 
   useEffect(() => {
     // Shuffle once on mount
@@ -84,28 +88,37 @@ export default function MapSlideshow() {
     }
   }, []);
 
+  const slides = useMemo(
+    () => customWallpapers.length > 0 ? customWallpapers.map((wallpaper) => wallpaper.source) : order,
+    [customWallpapers, order],
+  );
+
   useEffect(() => {
-    if (!order) return;
+    setIndex(0);
+  }, [customWallpapers]);
+
+  useEffect(() => {
+    if (!slides || slides.length <= 1) return;
     const id = setInterval(() => {
-      setIndex((i) => (i + 1) % order.length);
+      setIndex((i) => (i + 1) % slides.length);
     }, INTERVAL_MS);
     return () => clearInterval(id);
-  }, [order]);
+  }, [slides]);
 
   // Before client mount, render the first map in static order (matches SSR)
-  const currentMap = order ? order[index] : MAPS[0];
+  const currentMap = slides?.[index] ?? MAPS[0];
 
   if (!wallpaperEnabled) {
     return <div className="fixed inset-0 -z-10 bg-pc-bg" aria-hidden="true" />;
   }
 
-  if (customWallpaper) {
+  if (customWallpapers.length === 1) {
     return (
       <div
         className="fixed inset-0 -z-10 bg-pc-bg"
         aria-hidden="true"
         style={{
-          backgroundImage: `url(${JSON.stringify(customWallpaper.source)})`,
+          backgroundImage: `url(${JSON.stringify(customWallpapers[0].source)})`,
           backgroundPosition: "center",
           backgroundSize: "cover",
           filter: "brightness(0.4)",

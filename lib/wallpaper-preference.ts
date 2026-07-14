@@ -20,6 +20,7 @@ export type CustomWallpaper =
 export type ResolvedCustomWallpaper = {
   source: string;
   revoke: boolean;
+  wallpaper: CustomWallpaper;
 };
 
 function isSupportedExternalWallpaper(source: string): boolean {
@@ -78,16 +79,45 @@ async function removeUpload(id: string): Promise<void> {
   }).finally(() => database.close());
 }
 
-function saveWallpaperReference(wallpaper: CustomWallpaper | null): void {
+function saveWallpaperReferences(wallpapers: CustomWallpaper[]): void {
   try {
-    if (wallpaper) {
-      window.localStorage.setItem(CUSTOM_WALLPAPER_STORAGE_KEY, JSON.stringify(wallpaper));
+    if (wallpapers.length > 0) {
+      window.localStorage.setItem(CUSTOM_WALLPAPER_STORAGE_KEY, JSON.stringify(wallpapers));
     } else {
       window.localStorage.removeItem(CUSTOM_WALLPAPER_STORAGE_KEY);
     }
   } catch {
     throw new Error("The browser could not save this wallpaper setting.");
   }
+}
+
+function parseWallpaperReference(value: unknown): CustomWallpaper | null {
+  if (
+    typeof value === "object"
+    && value !== null
+    && "type" in value
+    && "source" in value
+    && value.type === "url"
+    && typeof value.source === "string"
+    && isSupportedExternalWallpaper(value.source)
+  ) {
+    return { type: "url", source: value.source };
+  }
+  if (
+    typeof value === "object"
+    && value !== null
+    && "type" in value
+    && "id" in value
+    && value.type === "upload"
+    && typeof value.id === "string"
+  ) {
+    return { type: "upload", id: value.id };
+  }
+  return null;
+}
+
+function wallpaperKey(wallpaper: CustomWallpaper): string {
+  return wallpaper.type === "url" ? `url:${wallpaper.source}` : `upload:${wallpaper.id}`;
 }
 
 function createWallpaperId(): string {
@@ -114,102 +144,151 @@ export function setWallpaperEnabled(enabled: boolean): void {
   notifyWallpaperChange();
 }
 
-/** Returns the small local-storage reference for the browser's custom wallpaper. */
-export function getCustomWallpaper(): CustomWallpaper | null {
-  if (typeof window === "undefined") return null;
+/** Returns the small local-storage references for this browser's custom wallpapers. */
+export function getCustomWallpapers(): CustomWallpaper[] {
+  if (typeof window === "undefined") return [];
 
   try {
     const raw = window.localStorage.getItem(CUSTOM_WALLPAPER_STORAGE_KEY);
-    if (!raw) return null;
+    if (!raw) return [];
 
     let parsed: unknown;
     try {
       parsed = JSON.parse(raw);
     } catch {
       // Preserve existing URL-only settings created before the IndexedDB upgrade.
-      return isSupportedExternalWallpaper(raw) ? { type: "url", source: raw } : null;
+      return isSupportedExternalWallpaper(raw) ? [{ type: "url", source: raw }] : [];
     }
-    if (
-      typeof parsed === "object"
-      && parsed !== null
-      && "type" in parsed
-      && "source" in parsed
-      && parsed.type === "url"
-      && typeof parsed.source === "string"
-      && isSupportedExternalWallpaper(parsed.source)
-    ) {
-      return { type: "url", source: parsed.source };
-    }
-    if (
-      typeof parsed === "object"
-      && parsed !== null
-      && "type" in parsed
-      && "id" in parsed
-      && parsed.type === "upload"
-      && typeof parsed.id === "string"
-    ) {
-      return { type: "upload", id: parsed.id };
-    }
-    return null;
+    const values = Array.isArray(parsed) ? parsed : [parsed];
+    return values.map(parseWallpaperReference).filter((wallpaper): wallpaper is CustomWallpaper => wallpaper !== null);
   } catch {
-    return null;
+    return [];
   }
 }
 
-/** Resolves the local reference into a URL that can be used by a CSS background. */
-export async function resolveCustomWallpaper(): Promise<ResolvedCustomWallpaper | null> {
-  const wallpaper = getCustomWallpaper();
-  if (!wallpaper) return null;
-  if (wallpaper.type === "url") return { source: wallpaper.source, revoke: false };
-
-  const upload = await getStoredUpload(wallpaper.id);
-  return upload ? { source: URL.createObjectURL(upload), revoke: true } : null;
+/** Returns the first wallpaper for compatibility with single-wallpaper consumers. */
+export function getCustomWallpaper(): CustomWallpaper | null {
+  return getCustomWallpapers()[0] ?? null;
 }
 
-/** Saves an external wallpaper URL in local storage. */
-export async function setCustomWallpaperUrl(source: string): Promise<void> {
-  if (typeof window === "undefined") return;
+/** Resolves local references into URLs that can be used by CSS backgrounds. */
+export async function resolveCustomWallpapers(): Promise<ResolvedCustomWallpaper[]> {
+  const wallpapers = getCustomWallpapers();
+  const resolved = await Promise.all(wallpapers.map(async (wallpaper): Promise<ResolvedCustomWallpaper | null> => {
+    if (wallpaper.type === "url") {
+      return { source: wallpaper.source, revoke: false, wallpaper };
+    }
 
+    const upload = await getStoredUpload(wallpaper.id);
+    return upload ? { source: URL.createObjectURL(upload), revoke: true, wallpaper } : null;
+  }));
+  return resolved.filter((wallpaper): wallpaper is ResolvedCustomWallpaper => wallpaper !== null);
+}
+
+/** Resolves the first custom wallpaper for compatibility with single-wallpaper consumers. */
+export async function resolveCustomWallpaper(): Promise<ResolvedCustomWallpaper | null> {
+  return (await resolveCustomWallpapers())[0] ?? null;
+}
+
+function validateWallpaperUrl(source: string): string {
   const normalizedSource = source.trim();
   if (!isSupportedExternalWallpaper(normalizedSource)) {
     throw new Error("Use a valid http(s) image URL.");
   }
+  return normalizedSource;
+}
 
-  const previous = getCustomWallpaper();
-  saveWallpaperReference({ type: "url", source: normalizedSource });
-  if (previous?.type === "upload") void removeUpload(previous.id);
+function validateWallpaperFile(file: File): void {
+  if (!SUPPORTED_IMAGE_TYPES.has(file.type)) {
+    throw new Error("Choose PNG, JPEG, WebP, GIF, or AVIF images.");
+  }
+  if (file.size > MAX_CUSTOM_WALLPAPER_BYTES) {
+    throw new Error("Choose images no larger than 25 MB each.");
+  }
+}
+
+/** Adds an external wallpaper URL to the saved collection. */
+export async function addCustomWallpaperUrl(source: string): Promise<void> {
+  if (typeof window === "undefined") return;
+
+  const normalizedSource = validateWallpaperUrl(source);
+  const wallpapers = getCustomWallpapers();
+  const nextWallpaper: CustomWallpaper = { type: "url", source: normalizedSource };
+  if (!wallpapers.some((wallpaper) => wallpaperKey(wallpaper) === wallpaperKey(nextWallpaper))) {
+    saveWallpaperReferences([...wallpapers, nextWallpaper]);
+  }
   notifyWallpaperChange();
 }
 
-/** Stores an uploaded image in IndexedDB and saves only its ID in local storage. */
+/** Adds uploaded images to IndexedDB and their references to the saved collection. */
+export async function addCustomWallpaperFiles(files: File[]): Promise<void> {
+  if (typeof window === "undefined" || files.length === 0) return;
+  files.forEach(validateWallpaperFile);
+
+  const additions = files.map((file) => ({ file, wallpaper: { type: "upload", id: createWallpaperId() } as CustomWallpaper }));
+  const savedIds: string[] = [];
+  try {
+    for (const addition of additions) {
+      if (addition.wallpaper.type !== "upload") continue;
+      await saveUpload(addition.wallpaper.id, addition.file);
+      savedIds.push(addition.wallpaper.id);
+    }
+    saveWallpaperReferences([...getCustomWallpapers(), ...additions.map(({ wallpaper }) => wallpaper)]);
+  } catch (error) {
+    await Promise.allSettled(savedIds.map(removeUpload));
+    throw error;
+  }
+  notifyWallpaperChange();
+}
+
+/** Replaces the collection with one external wallpaper URL. */
+export async function setCustomWallpaperUrl(source: string): Promise<void> {
+  if (typeof window === "undefined") return;
+
+  const normalizedSource = validateWallpaperUrl(source);
+  const previous = getCustomWallpapers();
+  saveWallpaperReferences([{ type: "url", source: normalizedSource }]);
+  await Promise.allSettled(previous.filter((wallpaper): wallpaper is Extract<CustomWallpaper, { type: "upload" }> => wallpaper.type === "upload").map((wallpaper) => removeUpload(wallpaper.id)));
+  notifyWallpaperChange();
+}
+
+/** Replaces the collection with one uploaded image. */
 export async function setCustomWallpaperFile(file: File): Promise<void> {
   if (typeof window === "undefined") return;
-  if (!SUPPORTED_IMAGE_TYPES.has(file.type)) {
-    throw new Error("Choose a PNG, JPEG, WebP, GIF, or AVIF image.");
-  }
-  if (file.size > MAX_CUSTOM_WALLPAPER_BYTES) {
-    throw new Error("Choose an image no larger than 25 MB.");
-  }
+  validateWallpaperFile(file);
 
   const id = createWallpaperId();
-  const previous = getCustomWallpaper();
+  const previous = getCustomWallpapers();
   await saveUpload(id, file);
   try {
-    saveWallpaperReference({ type: "upload", id });
+    saveWallpaperReferences([{ type: "upload", id }]);
   } catch (error) {
     void removeUpload(id);
     throw error;
   }
-  if (previous?.type === "upload") void removeUpload(previous.id);
+  await Promise.allSettled(previous.filter((wallpaper): wallpaper is Extract<CustomWallpaper, { type: "upload" }> => wallpaper.type === "upload").map((wallpaper) => removeUpload(wallpaper.id)));
   notifyWallpaperChange();
 }
 
-/** Removes the reference and its uploaded image, if any, from this browser. */
+/** Removes one wallpaper from the saved collection. */
+export async function removeCustomWallpaper(target: CustomWallpaper): Promise<void> {
+  if (typeof window === "undefined") return;
+
+  const targetKey = wallpaperKey(target);
+  const wallpapers = getCustomWallpapers();
+  const index = wallpapers.findIndex((wallpaper) => wallpaperKey(wallpaper) === targetKey);
+  if (index < 0) return;
+  saveWallpaperReferences(wallpapers.filter((_, wallpaperIndex) => wallpaperIndex !== index));
+  if (target.type === "upload") await Promise.allSettled([removeUpload(target.id)]);
+  notifyWallpaperChange();
+}
+
+/** Removes all references and uploaded images from this browser. */
 export async function clearCustomWallpaper(): Promise<void> {
   if (typeof window === "undefined") return;
 
-  const previous = getCustomWallpaper();
-  saveWallpaperReference(null);
-  if (previous?.type === "upload") void removeUpload(previous.id);
+  const previous = getCustomWallpapers();
+  saveWallpaperReferences([]);
+  await Promise.allSettled(previous.filter((wallpaper): wallpaper is Extract<CustomWallpaper, { type: "upload" }> => wallpaper.type === "upload").map((wallpaper) => removeUpload(wallpaper.id)));
   notifyWallpaperChange();
 }

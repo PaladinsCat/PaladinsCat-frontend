@@ -22,10 +22,10 @@ import {
 } from "@/lib/api-client";
 import {
   clearCustomWallpaper,
-  getCustomWallpaper,
-  resolveCustomWallpaper,
-  setCustomWallpaperFile,
-  setCustomWallpaperUrl,
+  addCustomWallpaperFiles,
+  addCustomWallpaperUrl,
+  removeCustomWallpaper,
+  resolveCustomWallpapers,
   setWallpaperEnabled,
   type ResolvedCustomWallpaper,
 } from "@/lib/wallpaper-preference";
@@ -39,7 +39,7 @@ export default function AccountPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [customWallpaper, setCustomWallpaperState] = useState<ResolvedCustomWallpaper | null>(null);
+  const [customWallpapers, setCustomWallpapersState] = useState<ResolvedCustomWallpaper[]>([]);
   const [wallpaperUrl, setWallpaperUrl] = useState("");
   const [wallpaperError, setWallpaperError] = useState<string | null>(null);
 
@@ -99,9 +99,7 @@ export default function AccountPage() {
   }, [authUser, router, loadAccount]);
 
   const refreshCustomWallpaper = useCallback(async () => {
-    const savedWallpaper = getCustomWallpaper();
-    setWallpaperUrl(savedWallpaper?.type === "url" ? savedWallpaper.source : "");
-    setCustomWallpaperState(await resolveCustomWallpaper().catch(() => null));
+    setCustomWallpapersState(await resolveCustomWallpapers().catch(() => []));
   }, []);
 
   useEffect(() => {
@@ -109,8 +107,10 @@ export default function AccountPage() {
   }, [refreshCustomWallpaper]);
 
   useEffect(() => () => {
-    if (customWallpaper?.revoke) URL.revokeObjectURL(customWallpaper.source);
-  }, [customWallpaper]);
+    customWallpapers.forEach((wallpaper) => {
+      if (wallpaper.revoke) URL.revokeObjectURL(wallpaper.source);
+    });
+  }, [customWallpapers]);
 
   // ── Password change ──
   const handleChangePassword = async (e: React.FormEvent) => {
@@ -183,8 +183,9 @@ export default function AccountPage() {
 
   const applyCustomWallpaperUrl = async () => {
     try {
-      await setCustomWallpaperUrl(wallpaperUrl);
+      await addCustomWallpaperUrl(wallpaperUrl);
       setWallpaperEnabled(true);
+      setWallpaperUrl("");
       setWallpaperError(null);
       setSuccess("Custom wallpaper saved for this browser.");
       await refreshCustomWallpaper();
@@ -194,18 +195,29 @@ export default function AccountPage() {
   };
 
   const handleWallpaperFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+    const files = Array.from(event.target.files ?? []);
     event.target.value = "";
-    if (!file) return;
+    if (files.length === 0) return;
 
     try {
-      await setCustomWallpaperFile(file);
+      await addCustomWallpaperFiles(files);
       setWallpaperEnabled(true);
       setWallpaperError(null);
       setSuccess("Custom wallpaper saved for this browser.");
       await refreshCustomWallpaper();
     } catch (err) {
       setWallpaperError(err instanceof Error ? err.message : "Unable to save this wallpaper.");
+    }
+  };
+
+  const handleRemoveCustomWallpaper = async (wallpaper: ResolvedCustomWallpaper) => {
+    try {
+      await removeCustomWallpaper(wallpaper.wallpaper);
+      setWallpaperError(null);
+      setSuccess("Custom wallpaper removed.");
+      await refreshCustomWallpaper();
+    } catch (err) {
+      setWallpaperError(err instanceof Error ? err.message : "Unable to remove this wallpaper.");
     }
   };
 
@@ -351,14 +363,31 @@ export default function AccountPage() {
           Use your own image behind every page. Images and links are saved only in this browser; they are not uploaded to your account.
         </p>
 
-        {customWallpaper && (
-          <div
-            className="mb-4 h-32 rounded-lg border border-pc-border bg-pc-bg-secondary"
-            style={{ backgroundImage: `url(${JSON.stringify(customWallpaper.source)})`, backgroundPosition: "center", backgroundSize: "cover" }}
-            role="img"
-            aria-label="Current custom wallpaper preview"
-          />
+        {customWallpapers.length > 0 && (
+          <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
+            {customWallpapers.map((wallpaper, index) => (
+              <div key={`${wallpaper.source}-${index}`} className="group relative h-24 overflow-hidden rounded-lg border border-pc-border bg-pc-bg-secondary">
+                <div
+                  className="absolute inset-0"
+                  style={{ backgroundImage: `url(${JSON.stringify(wallpaper.source)})`, backgroundPosition: "center", backgroundSize: "cover" }}
+                  role="img"
+                  aria-label={`Custom wallpaper ${index + 1} preview`}
+                />
+                <button
+                  type="button"
+                  onClick={() => void handleRemoveCustomWallpaper(wallpaper)}
+                  className="absolute right-1.5 top-1.5 rounded-md bg-black/70 px-2 py-1 text-xs font-medium text-white opacity-100 transition-opacity hover:bg-red-700 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100"
+                  aria-label={`Remove custom wallpaper ${index + 1}`}
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+          </div>
         )}
+
+        {customWallpapers.length > 1 && <p className="mb-3 text-xs text-pc-text-muted">{customWallpapers.length} images cycle every 10 seconds with the map wallpaper crossfade.</p>}
+        {customWallpapers.length === 1 && <p className="mb-3 text-xs text-pc-text-muted">One image is shown as a static wallpaper.</p>}
 
         {wallpaperError && <p className="mb-3 rounded-lg border border-red-700/50 bg-red-900/30 p-3 text-sm text-red-400">{wallpaperError}</p>}
 
@@ -379,19 +408,19 @@ export default function AccountPage() {
                 disabled={!wallpaperUrl.trim()}
                 className="rounded-lg bg-pc-accent px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-pc-accent-secondary disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Use Link
+                Add Link
               </button>
             </div>
           </label>
 
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <label className="inline-flex w-fit cursor-pointer items-center rounded-lg border border-pc-border bg-pc-bg-secondary px-4 py-2 text-sm font-semibold text-pc-text transition-colors hover:border-pc-accent hover:text-pc-accent">
-              Upload image
-              <input type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/avif" onChange={handleWallpaperFileChange} className="sr-only" />
+              Upload images
+              <input type="file" multiple accept="image/png,image/jpeg,image/webp,image/gif,image/avif" onChange={handleWallpaperFileChange} className="sr-only" />
             </label>
-            {customWallpaper && <button type="button" onClick={() => void handleClearCustomWallpaper()} className="w-fit text-sm text-pc-text-muted transition-colors hover:text-red-400">Remove custom wallpaper</button>}
+            {customWallpapers.length > 0 && <button type="button" onClick={() => void handleClearCustomWallpaper()} className="w-fit text-sm text-pc-text-muted transition-colors hover:text-red-400">Remove all custom wallpapers</button>}
           </div>
-          <p className="text-xs text-pc-text-muted">Uploaded images up to 25 MB are stored in this browser&apos;s local image cache, while local storage keeps only a small reference. Linked images are loaded from their original web address.</p>
+          <p className="text-xs text-pc-text-muted">Select one or more images. Each uploaded image can be up to 25 MB and is stored in this browser&apos;s local image cache, while local storage keeps only small references. Linked images are loaded from their original web addresses.</p>
         </div>
       </div>
 
