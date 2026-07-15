@@ -181,6 +181,33 @@ export interface BoostedPlayer extends CheaterPlayer {
   }>;
 }
 
+export interface BoostedMatchSummary {
+  matchId: number;
+  entryDatetime: string | null;
+  map: string | null;
+  queueId: number;
+  region: string | null;
+  durationSeconds: number;
+  team1Score: number;
+  team2Score: number;
+  winningTaskForce: number;
+  championId: number | null;
+  championName: string | null;
+  winStatus: string | null;
+  kills: number;
+  deaths: number;
+  assists: number;
+  leagueTier: number;
+  leaguePoints: number;
+  source: string;
+  cheaters: Array<{ id: string; name: string }>;
+}
+
+export interface BoostedPlayerDetail {
+  player: BoostedPlayer;
+  matches: BoostedMatchSummary[];
+}
+
 export async function fetchCheaterPlayers(params?: { cheater?: boolean; susOnly?: boolean; weirdoOnly?: boolean; hallOfFameOnly?: boolean; limit?: number }): Promise<CheaterPlayer[]> {
   const query = new URLSearchParams();
   if (params?.cheater) query.set('cheater', 'true');
@@ -634,18 +661,8 @@ export interface PlayersOverview {
   };
 }
 
-export async function fetchBoostedPlayers(limit = 100): Promise<BoostedPlayer[]> {
-  const raw = await fetchJson<Array<{
-    id: string; name: string; platform: string; region: string;
-    kbm_tier?: string | null; cheater?: boolean; sus_count?: number;
-    weirdo_count?: number; hall_of_fame_count?: number;
-    avg_dpm?: number | null; avg_hpm?: number | null; avg_egpm?: number | null;
-    avg_mpm?: number | null; total_matches?: number; win_rate?: number | null;
-    party_match_count?: number; first_seen?: string | null; last_seen?: string | null;
-    cheaters?: Array<{ id?: string | number; name?: string; match_count?: number; first_seen?: string | null; last_seen?: string | null }>;
-  }>>(`/players/boosted?limit=${Math.min(Math.max(limit, 1), 100)}`);
-
-  return raw.map((row) => ({
+function mapBoostedPlayer(row: any): BoostedPlayer {
+  return {
     id: String(row.id), name: row.name, platform: row.platform, region: row.region,
     kbmTier: row.kbm_tier ?? null, cheater: Boolean(row.cheater), susCount: Number(row.sus_count ?? 0),
     weirdoCount: Number(row.weirdo_count ?? 0), hallOfFameCount: Number(row.hall_of_fame_count ?? 0),
@@ -656,14 +673,50 @@ export async function fetchBoostedPlayers(limit = 100): Promise<BoostedPlayer[]>
     partyMatchCount: Number(row.party_match_count ?? 0),
     firstSeen: row.first_seen ?? null,
     lastSeen: row.last_seen ?? null,
-    cheaters: (row.cheaters ?? []).map((cheater) => ({
+    cheaters: (row.cheaters ?? []).map((cheater: any) => ({
       id: String(cheater.id ?? ""),
       name: cheater.name ?? "Unknown player",
       matchCount: Number(cheater.match_count ?? 0),
       firstSeen: cheater.first_seen ?? null,
       lastSeen: cheater.last_seen ?? null,
-    })).filter((cheater) => cheater.id.length > 0),
-  }));
+    })).filter((cheater: { id: string }) => cheater.id.length > 0),
+  };
+}
+
+export async function fetchBoostedPlayers(limit = 100): Promise<BoostedPlayer[]> {
+  const raw = await fetchJson<any[]>(`/players/boosted?limit=${Math.min(Math.max(limit, 1), 100)}`);
+  return raw.map(mapBoostedPlayer);
+}
+
+export async function fetchBoostedPlayerDetail(playerId: string): Promise<BoostedPlayerDetail> {
+  const raw = await fetchJson<any>(`/players/boosted/${encodeURIComponent(playerId)}`);
+  return {
+    player: mapBoostedPlayer(raw.player),
+    matches: (raw.matches ?? []).map((row: any) => ({
+      matchId: Number(row.match_id),
+      entryDatetime: row.entry_datetime ?? null,
+      map: row.map == null ? null : String(row.map),
+      queueId: Number(row.queue_id ?? 0),
+      region: row.region == null ? null : String(row.region),
+      durationSeconds: Number(row.duration_seconds ?? 0),
+      team1Score: Number(row.team1_score ?? 0),
+      team2Score: Number(row.team2_score ?? 0),
+      winningTaskForce: Number(row.winning_task_force ?? 0),
+      championId: row.champion_id == null ? null : Number(row.champion_id),
+      championName: row.champion_name == null ? null : String(row.champion_name),
+      winStatus: row.win_status == null ? null : String(row.win_status),
+      kills: Number(row.kills ?? 0),
+      deaths: Number(row.deaths ?? 0),
+      assists: Number(row.assists ?? 0),
+      leagueTier: Number(row.league_tier ?? 0),
+      leaguePoints: Number(row.league_points ?? 0),
+      source: String(row.source ?? 'direct'),
+      cheaters: (row.cheaters ?? []).map((cheater: any) => ({
+        id: String(cheater.id ?? ''),
+        name: String(cheater.name ?? 'Unknown player'),
+      })).filter((cheater: { id: string }) => cheater.id.length > 0),
+    })),
+  };
 }
 
 export interface PrivateAccountSummary {
@@ -1180,26 +1233,28 @@ export interface TierSummary {
 // ── Fetch helpers ──
 
 /**
- * Fetch timeout (ms). Without it, a stalled backend connection causes the
+ * Default fetch timeout (ms). Without it, a stalled backend connection causes the
  * frontend to wait indefinitely — especially bad on mobile/slow networks.
- * 10 seconds is generous for API calls; if it takes longer, the connection
- * is likely dead and we should fail fast and retry.
+ * Most reads use 10 seconds; operations that intentionally wait for durable
+ * pipeline completion can opt into a longer request-scoped timeout.
  */
 const FETCH_TIMEOUT_MS = 10000;
 
-async function fetchJson<T>(path: string, options?: RequestInit & { retries?: number; unwrapData?: boolean }): Promise<T> {
+async function fetchJson<T>(path: string, options?: RequestInit & { retries?: number; unwrapData?: boolean; timeoutMs?: number }): Promise<T> {
   const retries = options?.retries ?? 2;
   const unwrapData = options?.unwrapData ?? true;
+  const timeoutMs = options?.timeoutMs ?? FETCH_TIMEOUT_MS;
   const fetchOptions: RequestInit = { ...options };
   delete (fetchOptions as any).retries;
   delete (fetchOptions as any).unwrapData;
+  delete (fetchOptions as any).timeoutMs;
 
   for (let attempt = 0; attempt <= retries; attempt++) {
     // CRITICAL: Add timeout to prevent indefinite hang on stalled backend.
     // AbortSignal.timeout() cancels the fetch if it exceeds the limit.
     // Source: Fault #1 — "No timeout on fetch()"
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
     const scopedPath = withStoredLobbyTier(path);
     const res = await fetch(`${API_BASE}${scopedPath}`, { ...fetchOptions, signal: controller.signal });
     clearTimeout(timeoutId);
@@ -4124,7 +4179,10 @@ export async function fetchDroppedMatches(params: {
 }
 
 export async function fetchMatchDetail(matchId: number): Promise<MatchDetailWithBans | null> {
-  const raw = await fetchJson<{ matches: MatchDetailWithBans[]; count: number; notFound?: number[] }>(`/matches/${matchId}`);
+  const raw = await fetchJson<{ matches: MatchDetailWithBans[]; count: number; notFound?: number[] }>(
+    `/matches/${matchId}`,
+    { timeoutMs: 130_000, retries: 0 },
+  );
   if (raw.matches.length === 0) return null;
   return raw.matches[0];
 }

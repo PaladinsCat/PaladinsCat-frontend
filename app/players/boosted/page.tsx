@@ -39,31 +39,32 @@ export default function BoostedPlayersPage() {
       ) : (
         <div className="space-y-2">
           {players.map((player) => (
-            <article
+            <Link
               key={player.id}
-              className="grid gap-3 rounded-xl border border-orange-400/20 bg-pc-bg-elevated p-3 sm:grid-cols-[minmax(0,14rem)_minmax(0,1fr)] sm:items-start"
+              href={`/players/boosted/${player.id}`}
+              className="group grid gap-3 rounded-xl border border-orange-400/20 bg-pc-bg-elevated p-3 transition-colors hover:border-orange-400/40 hover:bg-orange-400/[0.04] sm:grid-cols-[minmax(0,14rem)_minmax(0,1fr)] sm:items-start"
             >
               <div className="min-w-0">
-                <Link href={`/players/${player.id}`} className="truncate text-sm font-semibold text-pc-text transition-colors hover:text-pc-accent">
+                <div className="truncate text-sm font-semibold text-pc-text transition-colors group-hover:text-pc-accent">
                   <PlayerName playerId={player.id} cheater={player.cheater} susCount={player.susCount}>{player.name}</PlayerName>
-                </Link>
-                <span className="mt-1 inline-block rounded border border-orange-400/30 bg-orange-400/15 px-2 py-1 text-xs font-semibold text-orange-300">
+                </div>
+                <span className="mt-1 inline-block rounded border border-orange-400/30 bg-orange-400/15 px-1.5 py-0.5 text-[10px] font-bold leading-none text-orange-300">
                   {t("moderation.boosted")}
                 </span>
               </div>
 
               <div className="min-w-0">
-                <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-pc-text-muted">{t("moderation.confirmedCheater")}</div>
+                <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-pc-text-muted">{t("moderation.cheaterDuo")}</div>
                 <ul className="flex flex-wrap gap-1.5">
                   {player.cheaters.map((cheater) => (
                     <li key={cheater.id} className="max-w-full rounded-md border border-red-500/20 bg-red-500/10 px-2 py-1 text-xs leading-relaxed text-red-200 [overflow-wrap:anywhere]">
-                      <Link href={`/players/${cheater.id}`} className="font-semibold hover:text-white hover:underline">{cheater.name}</Link>
-                      <span className="ml-1 text-red-200/70">· {cheater.matchCount.toLocaleString()} {t("moderation.rankedPartyMatches")}</span>
+                      <span className="font-semibold">{cheater.name}</span>
+                      <span className="ml-1 text-red-200/70">· {cheater.matchCount.toLocaleString()}</span>
                     </li>
                   ))}
                 </ul>
               </div>
-            </article>
+            </Link>
           ))}
         </div>
       )}

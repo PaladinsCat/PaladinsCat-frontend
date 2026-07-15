@@ -150,6 +150,10 @@ export default function MatchDetailPage() {
         // Match detail + fact + snapshots in parallel
         const detailResult = await fetchMatchDetail(numericMatchId);
         if (cancelled) return;
+        if (!detailResult) {
+          setError(t("generated.matches.matchDetailsUnavailable"));
+          return;
+        }
         setMatch(detailResult);
 
         const [factResult, snapResult] = await Promise.all([
