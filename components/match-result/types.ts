@@ -32,6 +32,8 @@ export interface PlayerProfileData {
   globalWins?: number | null;
   globalLosses?: number | null;
   globalWinRate?: number | null;
+  cheater?: boolean;
+  susCount?: number;
   totalMatches: number;
   totalWins: number;
   winRate: number | null;

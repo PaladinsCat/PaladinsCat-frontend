@@ -1645,13 +1645,14 @@ export async function fetchChampionCounters(id: number): Promise<CounterStats> {
 
 // ── Players ──
 
-export async function fetchPlayerProfile(id: string, queueId?: number, championId?: number): Promise<PlayerProfile & { level?: number | null; kbmRank?: number | null; queueElo?: number | null; championElo?: number | null; globalWins?: number | null; globalLosses?: number | null; globalWinRate?: number | null }> {
+export async function fetchPlayerProfile(id: string, queueId?: number, championId?: number): Promise<PlayerProfile & { level?: number | null; kbmRank?: number | null; queueElo?: number | null; championElo?: number | null; globalWins?: number | null; globalLosses?: number | null; globalWinRate?: number | null; cheater?: boolean; susCount?: number }> {
   type RawChampion = { champion_name: string; champion_id: number; wins: number; total_plays?: number; matches_played?: number; losses?: number; win_rate?: number | null; mu?: number | string | null };
   type RawPlayer = {
     id: string | number; name: string; level?: number | string | null; platform?: string | null; region?: string | null;
     kbm_tier?: string | number | null; kbm_points?: number | string | null; kbm_rank?: number | string | null;
     total_matches?: number | string | null; total_wins?: number | string | null;
     wins?: number | string | null; losses?: number | string | null;
+    cheater?: boolean | null; sus_count?: number | string | null;
     win_rate?: number | string | null; total_plays?: number | string | null;
     top_champions?: RawChampion[] | null;
   };
@@ -1695,6 +1696,8 @@ export async function fetchPlayerProfile(id: string, queueId?: number, championI
     globalWinRate: globalWins != null && globalLosses != null && globalWins + globalLosses > 0
       ? (globalWins / (globalWins + globalLosses)) * 100
       : null,
+    cheater: Boolean(player.cheater),
+    susCount: numberOrNull(player.sus_count) ?? 0,
     totalMatches,
     totalWins,
     winRate: reportedWinRate ?? (totalMatches > 0 ? (totalWins / totalMatches) * 100 : null),

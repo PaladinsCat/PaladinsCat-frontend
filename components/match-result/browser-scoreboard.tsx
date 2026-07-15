@@ -105,8 +105,10 @@ function TeamRows({ team }: { team: MatchResultPlayer[] }) {
     const party = getPartyNumber(player);
     const peak = (key: keyof Metrics, onlyIfPositive = false) => stat[key] === maximum(key) && (!onlyIfPositive || stat[key] > 0);
 
+    const cheater = Boolean(entry.profileData?.cheater);
+
     return (
-      <div className="player-row grid-row" key={matchPlayerKey(player)}>
+      <div className={`player-row grid-row${cheater ? " cheater-row" : ""}`} key={matchPlayerKey(player)}>
         <div className="champion-wrap">
           {championHref ? (
             <Link href={championHref} aria-label={t("generated.matches.value1ChampionPage", { value1: player.champion_name })} title={player.champion_name}>

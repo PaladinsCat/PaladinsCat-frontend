@@ -51,8 +51,8 @@ export function PlayerModerationTag({
 
   return <>
     {moderation.verified && <VerifiedPlayerBadge />}
-    {moderation.cheater && <span className="shrink-0 rounded bg-red-500/10 px-1.5 py-0.5 text-[10px] font-bold leading-none text-red-400" aria-label={t("generated.players.confirmedCheater")}>{t("generated.players.cheater")}</span>}
-    {!moderation.cheater && moderation.susCount > 0 && <span className="shrink-0 rounded bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-bold leading-none text-amber-400" aria-label={t("generated.players.suspiciousPlayerWithValue1Flags", { value1: moderation.susCount })}>{t("generated.players.sus")}</span>}
+    {moderation.cheater && <span className="player-status-tag cheater shrink-0 rounded bg-red-500/10 px-1.5 py-0.5 text-[10px] font-bold leading-none text-red-400" aria-label={t("generated.players.confirmedCheater")}>{t("generated.players.cheater")}</span>}
+    {!moderation.cheater && moderation.susCount > 0 && <span className="player-status-tag suspicious shrink-0 rounded bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-bold leading-none text-amber-400" aria-label={t("generated.players.suspiciousPlayerWithValue1Flags", { value1: moderation.susCount })}>{t("generated.players.sus")}</span>}
   </>;
 }
 

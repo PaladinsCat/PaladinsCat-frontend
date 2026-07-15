@@ -107,7 +107,7 @@ export default function MatchDetailPage() {
       setLoading(true);
       setError(null);
       setProfileMap(null);
-      const cacheKey = `paladinscat:match-result:v1:${numericMatchId}`;
+      const cacheKey = `paladinscat:match-result:v2:${numericMatchId}`;
       try {
         const cached = reloadKey === 0 ? readBrowserResult<CachedMatchResult>(cacheKey) : null;
         if (cached) {

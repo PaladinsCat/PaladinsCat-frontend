@@ -755,12 +755,17 @@ main :where(a, button, input, select, textarea):focus-visible {
   --teal: #37d6c0;
   --blue: #0c4493;
   --rose: #a52b2b;
-  --score-blue: #4f83c6;
-  --score-rose: #d66565;
-  --team-one-row-a: #0b3d84;
-  --team-one-row-b: #072958;
-  --team-two-row-a: #952727;
-  --team-two-row-b: #631a1a;
+  --score-blue: #3488f0;
+  --score-rose: #ef4444;
+  --team-one-row-a: #0d3387;
+  --team-one-row-b: #001342;
+  --team-two-row-a: #801414;
+  --team-two-row-b: #420000;
+  --police-light: #221111;
+  --cheater-pattern: url('/images/patterns/cheater-police-line.svg');
+  --moderation-tag-bg: #161618;
+  --cheater-tag-text: #ff0f0f;
+  --suspicious-tag-text: #ffc124;
   --gold: #f9c95f;
   --heal: #66e3a4;
   --shield: #87a8ff;
@@ -798,8 +803,8 @@ main :where(a, button, input, select, textarea):focus-visible {
 #browser-scoreboard .match-context span + span::before { content: "·"; margin-right: 6px; color: #667386; }
 #browser-scoreboard .score { grid-column: 2; justify-self: stretch; display: grid; width: 100%; grid-template-columns: 1fr auto auto auto 1fr; align-items: center; gap: 8px; }
 #browser-scoreboard .score-number { font-size: 41px; line-height: 1; font-weight: 820; letter-spacing: -.05em; }
-#browser-scoreboard .score-number.team-one-score { color: var(--score-blue); text-shadow: 0 0 12px rgba(79, 131, 198, .32); transform: translate(-10px, -5px); }
-#browser-scoreboard .score-number.team-two-score { color: var(--score-rose); text-shadow: 0 0 12px rgba(214, 101, 101, .32); transform: translate(10px, 5px); }
+#browser-scoreboard .score-number.team-one-score { color: var(--score-blue); text-shadow: 0 0 12px rgba(52, 136, 240, .38); transform: translate(-10px, -5px); }
+#browser-scoreboard .score-number.team-two-score { color: var(--score-rose); text-shadow: 0 0 12px rgba(239, 68, 68, .38); transform: translate(10px, 5px); }
 #browser-scoreboard .score-separator { color: #607086; font-size: 17px; font-weight: 600; }
 #browser-scoreboard .score.casual { width: auto; justify-self: center; grid-template-columns: auto auto auto; gap: 14px; }
 #browser-scoreboard .score-bans { display: flex; min-width: 0; flex-direction: column; gap: 7px; transform: translateY(-4px); }
@@ -850,6 +855,8 @@ main :where(a, button, input, select, textarea):focus-visible {
 #browser-scoreboard .team-total.shield-total { grid-column: 12; }
 #browser-scoreboard .team-total.healing-total { grid-column: 13; }
 #browser-scoreboard .player-row { position: relative; height: 55px; background: color-mix(in srgb, var(--team-one-row-a) 80%, transparent); border-bottom: 1px solid rgba(148, 163, 184, .18); font-variant-numeric: tabular-nums; }
+#browser-scoreboard .player-row > * { position: relative; z-index: 3; }
+#browser-scoreboard .player-row.cheater-row::before { content: ""; position: absolute; z-index: 1; inset: 0; overflow: hidden; background-color: var(--police-light); background-image: var(--cheater-pattern); background-position: 0 0; background-repeat: repeat-x; background-size: 90.51px 55px; pointer-events: none; }
 #browser-scoreboard .player-row::after { content: ""; position: absolute; z-index: 2; inset: 5px 20px; pointer-events: none; opacity: .55; background: linear-gradient(to bottom, transparent, rgba(148, 163, 184, .28) 28%, rgba(148, 163, 184, .28) 72%, transparent) 56px 0 / 1px 100% no-repeat, linear-gradient(to bottom, transparent, rgba(148, 163, 184, .28) 28%, rgba(148, 163, 184, .28) 72%, transparent) 108px 0 / 1px 100% no-repeat, linear-gradient(to bottom, transparent, rgba(148, 163, 184, .28) 28%, rgba(148, 163, 184, .28) 72%, transparent) 174px 0 / 1px 100% no-repeat, linear-gradient(to bottom, transparent, rgba(148, 163, 184, .28) 28%, rgba(148, 163, 184, .28) 72%, transparent) 392px 0 / 1px 100% no-repeat, linear-gradient(to bottom, transparent, rgba(148, 163, 184, .28) 28%, rgba(148, 163, 184, .28) 72%, transparent) 456px 0 / 1px 100% no-repeat, linear-gradient(to bottom, transparent, rgba(148, 163, 184, .28) 28%, rgba(148, 163, 184, .28) 72%, transparent) 514px 0 / 1px 100% no-repeat, linear-gradient(to bottom, transparent, rgba(148, 163, 184, .28) 28%, rgba(148, 163, 184, .28) 72%, transparent) 624px 0 / 1px 100% no-repeat, linear-gradient(to bottom, transparent, rgba(148, 163, 184, .28) 28%, rgba(148, 163, 184, .28) 72%, transparent) 740px 0 / 1px 100% no-repeat, linear-gradient(to bottom, transparent, rgba(148, 163, 184, .28) 28%, rgba(148, 163, 184, .28) 72%, transparent) 812px 0 / 1px 100% no-repeat, linear-gradient(to bottom, transparent, rgba(148, 163, 184, .28) 28%, rgba(148, 163, 184, .28) 72%, transparent) 920px 0 / 1px 100% no-repeat, linear-gradient(to bottom, transparent, rgba(148, 163, 184, .28) 28%, rgba(148, 163, 184, .28) 72%, transparent) 1028px 0 / 1px 100% no-repeat, linear-gradient(to bottom, transparent, rgba(148, 163, 184, .28) 28%, rgba(148, 163, 184, .28) 72%, transparent) 1136px 0 / 1px 100% no-repeat; }
 #browser-scoreboard #team-one .player-row:nth-child(even) { background: color-mix(in srgb, var(--team-one-row-b) 80%, transparent); }
 #browser-scoreboard #team-two .player-row { background: color-mix(in srgb, var(--team-two-row-a) 80%, transparent); }
@@ -857,7 +864,11 @@ main :where(a, button, input, select, textarea):focus-visible {
 #browser-scoreboard .champion-wrap { position: relative; width: 52px; height: 52px; justify-self: center; }
 #browser-scoreboard .champion-icon { width: 52px; height: 52px; object-fit: cover; border-radius: 9px; border: 1px solid rgba(255,255,255,.16); }
 #browser-scoreboard .player { min-width: 0; padding-left: 8px; }
-#browser-scoreboard .player-name { overflow: hidden; color: var(--text); font-size: 18px; font-weight: 720; line-height: 1.04; letter-spacing: -.01em; text-overflow: ellipsis; white-space: nowrap; }
+#browser-scoreboard .player-name { display: flex; min-width: 0; align-items: center; gap: 5px; overflow: hidden; color: var(--text); font-size: 18px; font-weight: 720; line-height: 1.04; letter-spacing: -.01em; white-space: nowrap; }
+#browser-scoreboard .player-name-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+#browser-scoreboard .player-status-tag { display: inline-flex; flex: 0 0 auto; align-items: center; border-radius: 3px; padding: 2px 5px; font-size: 8px; font-weight: 800; line-height: 1; letter-spacing: .02em; }
+#browser-scoreboard .player-status-tag.cheater { color: var(--cheater-tag-text); background: var(--moderation-tag-bg); }
+#browser-scoreboard .player-status-tag.suspicious { color: var(--suspicious-tag-text); background: var(--moderation-tag-bg); }
 #browser-scoreboard .player-elo { color: #dbe2eb; text-align: center; font-size: 16.5px; font-weight: 680; letter-spacing: .01em; white-space: nowrap; }
 #browser-scoreboard .player-sub { margin-top: 3px; overflow: hidden; color: var(--muted); font-size: 12.5px; font-weight: 550; letter-spacing: .035em; text-overflow: ellipsis; white-space: nowrap; }
 #browser-scoreboard .talent-icon { width: 50px; height: 50px; justify-self: center; object-fit: contain; }
