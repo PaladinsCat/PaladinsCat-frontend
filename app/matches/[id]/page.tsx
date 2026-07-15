@@ -9,7 +9,8 @@
  *   GET /api/matches/:id          → match metadata + players + bans
  *   GET /api/matches/fact/:id     → items, cards, talents per player
  *   GET /api/ratings/snapshots/:id → rating changes (pre/post mu/phi)
- *   The match response embeds the immutable post-ingest profile snapshot.
+ *   The match response embeds the stored canonical profile, with an ingest
+ *   snapshot fallback when no canonical player row exists.
  *
  * @see C:\PaladinsCat\docs\frontend\match-detail.md
  */
@@ -136,7 +137,7 @@ export default function MatchDetailPage() {
     async function load() {
       setLoading(true);
       setError(null);
-      const cacheKey = `paladinscat:match-result:v3:${numericMatchId}`;
+      const cacheKey = `paladinscat:match-result:v5:${numericMatchId}`;
       try {
         const cached = reloadKey === 0 ? readBrowserResult<CachedMatchResult>(cacheKey) : null;
         if (cached) {

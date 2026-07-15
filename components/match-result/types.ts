@@ -10,7 +10,7 @@ import type {
   RatingSnapshot,
 } from "@/lib/api-client";
 
-/** Match player enriched only with the profile snapshot stored during ingest. */
+/** Match player enriched from the canonical stored profile or an ingest snapshot fallback. */
 export interface MatchResultPlayer {
   matchData: MatchPlayerDetail;
   factData?: MatchFactPlayer;

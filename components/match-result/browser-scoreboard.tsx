@@ -109,6 +109,13 @@ function TeamRows({ team }: { team: MatchResultPlayer[] }) {
 
     return (
       <div className={`player-row grid-row${cheater ? " cheater-row" : ""}`} key={matchPlayerKey(player)}>
+        {cheater && (
+          <span
+            className="cheater-banner"
+            aria-hidden="true"
+            style={{ position: "absolute", inset: 0, zIndex: 1, pointerEvents: "none" }}
+          />
+        )}
         <div className="champion-wrap">
           {championHref ? (
             <Link href={championHref} aria-label={t("generated.matches.value1ChampionPage", { value1: player.champion_name })} title={player.champion_name}>
@@ -234,10 +241,9 @@ export default function BrowserScoreboard({ match, queueLabel, team1, team2, ban
         <main className="viewport" style={{ width: CANVAS_WIDTH, maxWidth: "none", transform: `scale(${previewScale})`, transformOrigin: "top left" }}>
           <div className="scoreboard-canvas">
             <section ref={scoreboardRef} className="scoreboard" style={{ "--scoreboard-map": `image-set(url("${mapImage.avif}") type("image/avif"), url("${mapImage.png}") type("image/png"))` } as React.CSSProperties} aria-label={t("generated.matches.paladinsMatchScoreboard")}>
-              <picture>
-                <source srcSet={mapImage.avif} type="image/avif" />
-                <img className="scoreboard-map" src={mapImage.png} alt="" aria-hidden="true" />
-              </picture>
+              {/* Keep the PNG as a direct child for html-to-image. The normal
+                  preview uses the AVIF-aware pseudo-element above instead. */}
+              <img className="scoreboard-map" src={mapImage.png} alt="" aria-hidden="true" />
               <header className="hero">
                 <div className="match-identity">
                   <div className="brand-line">
