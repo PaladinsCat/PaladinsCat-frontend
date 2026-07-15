@@ -59,6 +59,7 @@ interface PlayerData {
   avg_shpm: number | null;
   avg_mpm: number | null;
   cheater: boolean;
+  boosted: boolean;
   sus_count: number;
   weirdo_count: number;
   hall_of_fame_count: number;
@@ -570,10 +571,13 @@ export default function PlayerProfilePage() {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="min-w-0 break-words text-2xl font-bold leading-tight text-pc-text sm:text-3xl">
-                <PlayerName playerId={player.id} className="gap-1.5 [&_img]:h-5 [&_img]:w-5 sm:[&_img]:h-6 sm:[&_img]:w-6">{player.name}</PlayerName>
+                {player.name}
               </h1>
               {player.cheater && (
                 <span className="text-xs font-bold text-red-400 bg-red-500/10 px-1.5 py-0.5 rounded">{t("generated.players.cheater")}</span>
+              )}
+              {player.boosted && (
+                <Link href="/players/boosted" className="rounded bg-orange-400/10 px-1.5 py-0.5 text-xs font-bold text-orange-300 hover:bg-orange-400/20">{t("moderation.boosted")}</Link>
               )}
               {player.sus_count > 0 && !player.cheater && (
                 <span className="text-xs font-bold text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded">{t("generated.players.sus")}</span>

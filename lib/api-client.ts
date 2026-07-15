@@ -168,6 +168,19 @@ export interface CheaterPlayer {
   topReasons: Array<{ reason: string; count: number }>;
 }
 
+export interface BoostedPlayer extends CheaterPlayer {
+  partyMatchCount: number;
+  firstSeen: string | null;
+  lastSeen: string | null;
+  cheaters: Array<{
+    id: string;
+    name: string;
+    matchCount: number;
+    firstSeen: string | null;
+    lastSeen: string | null;
+  }>;
+}
+
 export async function fetchCheaterPlayers(params?: { cheater?: boolean; susOnly?: boolean; weirdoOnly?: boolean; hallOfFameOnly?: boolean; limit?: number }): Promise<CheaterPlayer[]> {
   const query = new URLSearchParams();
   if (params?.cheater) query.set('cheater', 'true');
@@ -602,6 +615,7 @@ export interface PlayersOverview {
   rankedPlayers: RankedPlayer[];
   accountEloPlayers: ClassLeaderboardEntry[];
   cheaterPlayers: CheaterPlayer[];
+  boostedPlayers: BoostedPlayer[];
   suspiciousPlayers: CheaterPlayer[];
   weirdoPlayers: CheaterPlayer[];
   hallOfFamePlayers: CheaterPlayer[];
@@ -609,6 +623,7 @@ export interface PlayersOverview {
   partyPairs: PartyPairSummary[];
   communityCounts: {
     cheaters: number;
+    boosted: number;
     suspicious: number;
     weirdos: number;
     hallOfFame: number;
@@ -617,6 +632,38 @@ export interface PlayersOverview {
     privateAccounts: number;
     parties: number;
   };
+}
+
+export async function fetchBoostedPlayers(limit = 100): Promise<BoostedPlayer[]> {
+  const raw = await fetchJson<Array<{
+    id: string; name: string; platform: string; region: string;
+    kbm_tier?: string | null; cheater?: boolean; sus_count?: number;
+    weirdo_count?: number; hall_of_fame_count?: number;
+    avg_dpm?: number | null; avg_hpm?: number | null; avg_egpm?: number | null;
+    avg_mpm?: number | null; total_matches?: number; win_rate?: number | null;
+    party_match_count?: number; first_seen?: string | null; last_seen?: string | null;
+    cheaters?: Array<{ id?: string | number; name?: string; match_count?: number; first_seen?: string | null; last_seen?: string | null }>;
+  }>>(`/players/boosted?limit=${Math.min(Math.max(limit, 1), 100)}`);
+
+  return raw.map((row) => ({
+    id: String(row.id), name: row.name, platform: row.platform, region: row.region,
+    kbmTier: row.kbm_tier ?? null, cheater: Boolean(row.cheater), susCount: Number(row.sus_count ?? 0),
+    weirdoCount: Number(row.weirdo_count ?? 0), hallOfFameCount: Number(row.hall_of_fame_count ?? 0),
+    avgDpm: row.avg_dpm ?? null, avgHpm: row.avg_hpm ?? null,
+    avgCpm: row.avg_egpm ?? null, avgSpm: row.avg_mpm ?? null,
+    totalMatches: Number(row.total_matches ?? 0), winRate: row.win_rate == null ? null : Number(row.win_rate),
+    topReasons: [],
+    partyMatchCount: Number(row.party_match_count ?? 0),
+    firstSeen: row.first_seen ?? null,
+    lastSeen: row.last_seen ?? null,
+    cheaters: (row.cheaters ?? []).map((cheater) => ({
+      id: String(cheater.id ?? ""),
+      name: cheater.name ?? "Unknown player",
+      matchCount: Number(cheater.match_count ?? 0),
+      firstSeen: cheater.first_seen ?? null,
+      lastSeen: cheater.last_seen ?? null,
+    })).filter((cheater) => cheater.id.length > 0),
+  }));
 }
 
 export interface PrivateAccountSummary {
@@ -840,8 +887,22 @@ export function mapPlayersOverviewResponse(raw: any): PlayersOverview {
     totalMatches: Number(row.total_matches ?? 0), winRate: row.win_rate == null ? null : Number(row.win_rate),
     topReasons: Array.isArray(row.top_reasons) ? row.top_reasons.map((reason: any) => ({ reason: String(reason?.reason ?? ""), count: Number(reason?.count ?? 0) })).filter((reason: { reason: string }) => reason.reason.length > 0) : [],
   });
+  const mapBoosted = (row: any): BoostedPlayer => ({
+    ...mapCommunity(row),
+    partyMatchCount: Number(row.party_match_count ?? 0),
+    firstSeen: row.first_seen ?? null,
+    lastSeen: row.last_seen ?? null,
+    cheaters: Array.isArray(row.cheaters) ? row.cheaters.map((cheater: any) => ({
+      id: String(cheater?.id ?? ""),
+      name: String(cheater?.name ?? "Unknown player"),
+      matchCount: Number(cheater?.match_count ?? 0),
+      firstSeen: cheater?.first_seen ?? null,
+      lastSeen: cheater?.last_seen ?? null,
+    })).filter((cheater: { id: string }) => cheater.id.length > 0) : [],
+  });
   const communityCounts = {
     cheaters: Number(raw.community_counts?.cheaters ?? raw.cheaters?.[0]?.total_count ?? raw.cheaters?.length ?? 0),
+    boosted: Number(raw.community_counts?.boosted ?? raw.boosted?.[0]?.total_count ?? raw.boosted?.length ?? 0),
     suspicious: Number(raw.community_counts?.suspicious ?? raw.suspicious?.[0]?.total_count ?? raw.suspicious?.length ?? 0),
     weirdos: Number(raw.community_counts?.weirdos ?? raw.weirdos?.[0]?.total_count ?? raw.weirdos?.length ?? 0),
     hallOfFame: Number(raw.community_counts?.hall_of_fame ?? raw.hall_of_fame?.[0]?.total_count ?? raw.hall_of_fame?.length ?? 0),
@@ -861,6 +922,7 @@ export function mapPlayersOverviewResponse(raw: any): PlayersOverview {
     rankedPlayers: (raw.ranked ?? []).map(mapRanked),
     accountEloPlayers: (raw.account_elo?.data ?? []).map(mapAccountElo),
     cheaterPlayers: (raw.cheaters ?? []).map(mapCommunity),
+    boostedPlayers: (raw.boosted ?? []).map(mapBoosted),
     suspiciousPlayers: (raw.suspicious ?? []).map(mapCommunity),
     weirdoPlayers: (raw.weirdos ?? []).map(mapCommunity),
     hallOfFamePlayers: (raw.hall_of_fame ?? []).map(mapCommunity),

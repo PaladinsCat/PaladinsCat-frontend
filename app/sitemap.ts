@@ -34,6 +34,7 @@ const staticRoutes: Array<{
   { path: "/players/leaderboard", changeFrequency: "hourly", priority: 0.85 },
   { path: "/players/elo", changeFrequency: "hourly", priority: 0.85 },
   { path: "/players/cheaters", changeFrequency: "daily", priority: 0.65 },
+  { path: "/players/boosted", changeFrequency: "daily", priority: 0.65 },
   { path: "/players/suspicious", changeFrequency: "daily", priority: 0.65 },
   { path: "/players/weirdos", changeFrequency: "daily", priority: 0.6 },
   { path: "/players/hall-of-fame", changeFrequency: "daily", priority: 0.6 },

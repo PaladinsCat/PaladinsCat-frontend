@@ -6,6 +6,7 @@ import { LockKeyhole, UsersRound } from "lucide-react";
 import {
   fetchPlayerSearch,
   fetchPlayersOverview,
+  type BoostedPlayer,
   type CheaterPlayer,
   type ClassLeaderboardEntry,
   type PerformanceLeaderboardEntry,
@@ -58,11 +59,13 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
   const [accountEloPlayers, setAccountEloPlayers] = useState<ClassLeaderboardEntry[]>(initialOverview?.accountEloPlayers ?? []);
   const [communityCounts, setCommunityCounts] = useState<PlayersOverview["communityCounts"]>(initialOverview?.communityCounts ?? {
     cheaters: initialOverview?.cheaterPlayers.length ?? 0,
+    boosted: initialOverview?.boostedPlayers.length ?? 0,
     suspicious: initialOverview?.suspiciousPlayers.length ?? 0,
     weirdos: initialOverview?.weirdoPlayers.length ?? 0,
     hallOfFame: initialOverview?.hallOfFamePlayers.length ?? 0,
   });
   const [cheaterPlayers, setCheaterPlayers] = useState<CheaterPlayer[]>(initialOverview?.cheaterPlayers ?? []);
+  const [boostedPlayers, setBoostedPlayers] = useState<BoostedPlayer[]>(initialOverview?.boostedPlayers ?? []);
   const [suspiciousPlayers, setSuspiciousPlayers] = useState<CheaterPlayer[]>(initialOverview?.suspiciousPlayers ?? []);
   const [weirdoPlayers, setWeirdoPlayers] = useState<CheaterPlayer[]>(initialOverview?.weirdoPlayers ?? []);
   const [hallOfFamePlayers, setHallOfFamePlayers] = useState<CheaterPlayer[]>(initialOverview?.hallOfFamePlayers ?? []);
@@ -89,6 +92,7 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
         setAccountEloPlayers(overview.accountEloPlayers);
         setCommunityCounts(overview.communityCounts);
         setCheaterPlayers(overview.cheaterPlayers);
+        setBoostedPlayers(overview.boostedPlayers);
         setSuspiciousPlayers(overview.suspiciousPlayers);
         setWeirdoPlayers(overview.weirdoPlayers);
         setHallOfFamePlayers(overview.hallOfFamePlayers);
@@ -174,6 +178,27 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
         </div>
       )}
 
+      {/* ── Directories ── */}
+      <div className="grid grid-cols-1 gap-3 min-[480px]:grid-cols-2">
+        <Link href="/players/private-accounts" className="group flex min-h-20 items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-4 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary">
+          <LockKeyhole aria-hidden="true" className="h-10 w-10 shrink-0 text-slate-300" strokeWidth={1.5} />
+          <div className="min-w-0 flex-1">
+            <h3 className="text-sm font-semibold text-pc-text group-hover:text-pc-accent">{t("generated.players.privateAccounts")}</h3>
+            <p className="mt-0.5 text-xs text-pc-text-muted">{overviewLoading ? t("generated.players.loadingTrackedAccounts") : t("generated.players.value1TrackedAccounts", { value1: directoryCounts.privateAccounts.toLocaleString() })}</p>
+          </div>
+          <span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent">→</span>
+        </Link>
+
+        <Link href="/players/parties" className="group flex min-h-20 items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-4 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary">
+          <UsersRound aria-hidden="true" className="h-10 w-10 shrink-0 text-cyan-300" strokeWidth={1.5} />
+          <div className="min-w-0 flex-1">
+            <h3 className="text-sm font-semibold text-pc-text group-hover:text-pc-accent">{t("generated.players.rankedParties")}</h3>
+            <p className="mt-0.5 text-xs text-pc-text-muted">{overviewLoading ? t("generated.players.loadingPartyConnections") : t("generated.players.value1KnownPartyPairs", { value1: directoryCounts.parties.toLocaleString() })}</p>
+          </div>
+          <span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent">→</span>
+        </Link>
+      </div>
+
       {/* ── Main Content: Performance (left) + Leaderboards (right) ── */}
       <div className="flex flex-col lg:flex-row gap-6">
 
@@ -251,6 +276,41 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
                     </div>
                   </div>
                 ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Boosted Players */}
+            <div className="flex h-full flex-col">
+              <div className="mb-2 flex items-center justify-between px-2">
+                <div className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-orange-400" />
+                  <h3 className="text-xs font-semibold text-pc-text">{t("moderation.boosted")}</h3>
+                  <span className="rounded-full border border-orange-400/20 bg-orange-400/10 px-1.5 py-0.5 text-xs text-orange-300">
+                    {communityCounts.boosted}
+                  </span>
+                </div>
+                <Link href="/players/boosted" className="text-xs text-pc-text-secondary drop-shadow-sm transition-colors hover:text-orange-300">
+                  {t("generated.players.detail")}</Link>
+              </div>
+              <div className="flex flex-1 flex-col justify-start rounded-xl border border-orange-400/20 bg-pc-bg-elevated p-3">
+                <div className="space-y-1.5">
+                  {boostedPlayers.length === 0 && (
+                    <div className="text-xs text-pc-text-muted">{overviewLoading ? <InlineLoading /> : t("moderation.noBoostedPlayers")}</div>
+                  )}
+                  {boostedPlayers.map((player) => (
+                    <div key={player.id} className="flex items-start gap-2 rounded-lg bg-pc-bg/50 p-2">
+                      <div className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-orange-400" />
+                      <div className="flex min-w-0 flex-1 items-center justify-between gap-2">
+                        <Link href={`/players/${player.id}`} className="truncate text-xs font-medium text-pc-text transition-colors hover:text-pc-accent">
+                          <PlayerName playerId={player.id} cheater={player.cheater} susCount={player.susCount}>{player.name}</PlayerName>
+                        </Link>
+                        <span className="shrink-0 rounded border border-orange-400/30 bg-orange-400/15 px-1 py-0.5 text-xs text-orange-300">
+                          {player.partyMatchCount}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -351,24 +411,6 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
                 </div>
               </div>
             </div>
-
-            <Link href="/players/private-accounts" className="group flex min-h-20 items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-4 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary min-[480px]:col-span-2">
-              <LockKeyhole aria-hidden="true" className="h-10 w-10 shrink-0 text-slate-300" strokeWidth={1.5} />
-              <div className="min-w-0 flex-1">
-                <h3 className="text-sm font-semibold text-pc-text group-hover:text-pc-accent">{t("generated.players.privateAccounts")}</h3>
-                <p className="mt-0.5 text-xs text-pc-text-muted">{overviewLoading ? t("generated.players.loadingTrackedAccounts") : t("generated.players.value1TrackedAccounts", { value1: directoryCounts.privateAccounts.toLocaleString() })}</p>
-              </div>
-              <span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent">→</span>
-            </Link>
-
-            <Link href="/players/parties" className="group flex min-h-20 items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-4 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary min-[480px]:col-span-2">
-              <UsersRound aria-hidden="true" className="h-10 w-10 shrink-0 text-cyan-300" strokeWidth={1.5} />
-              <div className="min-w-0 flex-1">
-                <h3 className="text-sm font-semibold text-pc-text group-hover:text-pc-accent">{t("generated.players.rankedParties")}</h3>
-                <p className="mt-0.5 text-xs text-pc-text-muted">{overviewLoading ? t("generated.players.loadingPartyConnections") : t("generated.players.value1KnownPartyPairs", { value1: directoryCounts.parties.toLocaleString() })}</p>
-              </div>
-              <span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent">→</span>
-            </Link>
 
           </div>
         </div>
