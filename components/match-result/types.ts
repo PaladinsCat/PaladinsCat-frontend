@@ -10,21 +10,21 @@ import type {
   RatingSnapshot,
 } from "@/lib/api-client";
 
-/** Enriched player with optional profile data for the matchup cards. */
+/** Match player enriched only with the profile snapshot stored during ingest. */
 export interface MatchResultPlayer {
   matchData: MatchPlayerDetail;
   factData?: MatchFactPlayer;
   profileData?: PlayerProfileData | null;
 }
 
-/** Slim profile shape returned by GET /api/players/:id */
+/** Slim historical profile shape embedded in GET /api/matches/:id. */
 export interface PlayerProfileData {
   id: string;
   name: string;
   level: number | null;
   platform: string;
   region: string;
-  kbmTier: string | null;
+  kbmTier: string | number | null;
   kbmPoints: number | null;
   kbmRank?: number | null;
   queueElo?: number | null;
@@ -32,6 +32,10 @@ export interface PlayerProfileData {
   globalWins?: number | null;
   globalLosses?: number | null;
   globalWinRate?: number | null;
+  rankedWins?: number | null;
+  rankedLosses?: number | null;
+  capturedAt?: string | null;
+  snapshotSource?: string | null;
   cheater?: boolean;
   susCount?: number;
   totalMatches: number;

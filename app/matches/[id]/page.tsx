@@ -3,13 +3,13 @@
  *
  * Data orchestration layer only. All rendering delegated to components in
  * `components/match-result/`. This page fetches match, fact, snapshots,
- * related matches, and player profiles, then wires them together.
+ * and stored profile/rating snapshots, then wires them together.
  *
  * Data sources:
  *   GET /api/matches/:id          → match metadata + players + bans
  *   GET /api/matches/fact/:id     → items, cards, talents per player
  *   GET /api/ratings/snapshots/:id → rating changes (pre/post mu/phi)
- *   GET /api/players/:id          → lifetime stats per player (profile)
+ *   The match response embeds the immutable post-ingest profile snapshot.
  *
  * @see C:\PaladinsCat\docs\frontend\match-detail.md
  */
@@ -22,7 +22,6 @@ import {
   fetchMatchDetail,
   fetchMatchFact,
   fetchMatchSnapshots,
-  fetchPlayerProfile,
   type MatchDetailWithBans,
   type MatchFact,
   type MatchFactPlayer,
@@ -32,7 +31,7 @@ import {
 import { championSlug } from "@/lib/utils";
 import {
   MatchResultPlayer,
-  ProfileByPlayerId,
+  type PlayerProfileData,
 } from "@/components/match-result/types";
 import MatchupSection from "@/components/match-result/matchup-section";
 import MatchStatsSection from "@/components/match-result/match-stats-section";
@@ -52,36 +51,68 @@ type CachedMatchResult = {
   match: MatchDetailWithBans | null;
   fact: MatchFact | null;
   snapshots: RatingSnapshot[];
-  profiles: Array<[string, any]>;
 };
 
-/* ── Profile fetching with Promise.allSettled + dedupe + timeout ── */
+function finiteNumber(value: unknown): number | null {
+  if (value == null || value === "") return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
 
-async function fetchProfilesForMatch(
-  players: MatchPlayerDetail[],
-  queueId: number,
-): Promise<ProfileByPlayerId> {
-  const uniquePlayers = [...new Map(
-    players
-      .filter((player) => Number(player.player_id) > 0)
-      .map((player) => [String(player.player_id), player]),
-  ).values()];
-  // Each profile fetch gets its own 10-second timeout
-  const timedFetch = (player: MatchPlayerDetail) =>
-    fetchPlayerProfile(String(player.player_id), queueId, player.champion_id)
-      .catch(() => null);
+function storedProfileForMatch(player: MatchPlayerDetail): PlayerProfileData | null {
+  if (Number(player.player_id) <= 0) return null;
+  const snapshot = player.profile_snapshot;
+  if (!snapshot) return null;
 
-  const results = await Promise.allSettled(
-    uniquePlayers.map((player) => timedFetch(player)),
-  );
-  const map = new Map<string, any>();
-  for (let i = 0; i < uniquePlayers.length; i++) {
-    const r = results[i] as PromiseSettledResult<any>;
-    if (r.status === "fulfilled" && r.value) {
-      map.set(String(uniquePlayers[i].player_id), r.value);
-    }
-  }
-  return map;
+  const globalWins = finiteNumber(snapshot.global_wins);
+  const globalLosses = finiteNumber(snapshot.global_losses);
+  const globalMatches = globalWins != null && globalLosses != null
+    ? globalWins + globalLosses
+    : 0;
+  const championWins = finiteNumber(snapshot.champion_wins);
+  const championLosses = finiteNumber(snapshot.champion_losses);
+  const championMatches = championWins != null && championLosses != null
+    ? championWins + championLosses
+    : null;
+
+  return {
+    id: String(player.player_id),
+    name: player.player_name,
+    level: finiteNumber(snapshot.level),
+    platform: snapshot.platform ?? player.platform ?? "",
+    region: snapshot.region ?? player.region ?? "",
+    kbmTier: finiteNumber(snapshot.kbm_tier),
+    kbmPoints: finiteNumber(snapshot.kbm_points),
+    kbmRank: finiteNumber(snapshot.kbm_rank),
+    queueElo: finiteNumber(snapshot.queue_elo),
+    championElo: finiteNumber(snapshot.champion_elo),
+    globalWins,
+    globalLosses,
+    globalWinRate: globalMatches > 0 && globalWins != null
+      ? (globalWins / globalMatches) * 100
+      : null,
+    rankedWins: finiteNumber(snapshot.kbm_wins),
+    rankedLosses: finiteNumber(snapshot.kbm_losses),
+    capturedAt: snapshot.captured_at,
+    snapshotSource: snapshot.source,
+    cheater: snapshot.cheater === true,
+    susCount: finiteNumber(snapshot.sus_count) ?? 0,
+    totalMatches: globalMatches,
+    totalWins: globalWins ?? 0,
+    winRate: globalMatches > 0 && globalWins != null
+      ? (globalWins / globalMatches) * 100
+      : null,
+    totalPlays: globalMatches,
+    topChampions: championMatches != null ? [{
+      championName: player.champion_name,
+      championId: player.champion_id,
+      wins: championWins ?? 0,
+      totalPlays: championMatches,
+      winRate: championMatches > 0 && championWins != null
+        ? (championWins / championMatches) * 100
+        : 0,
+    }] : [],
+  };
 }
 
 /* ── Page component ── */
@@ -96,7 +127,6 @@ export default function MatchDetailPage() {
   const [snapshots, setSnapshots] = useState<RatingSnapshot[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [profileMap, setProfileMap] = useState<ProfileByPlayerId | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
@@ -106,15 +136,13 @@ export default function MatchDetailPage() {
     async function load() {
       setLoading(true);
       setError(null);
-      setProfileMap(null);
-      const cacheKey = `paladinscat:match-result:v2:${numericMatchId}`;
+      const cacheKey = `paladinscat:match-result:v3:${numericMatchId}`;
       try {
         const cached = reloadKey === 0 ? readBrowserResult<CachedMatchResult>(cacheKey) : null;
         if (cached) {
           setMatch(cached.match);
           setFact(cached.fact);
           setSnapshots(cached.snapshots);
-          setProfileMap(new Map(cached.profiles));
           return;
         }
 
@@ -131,19 +159,10 @@ export default function MatchDetailPage() {
         setFact(factResult);
         setSnapshots(snapResult);
 
-        // Fetch player profiles in parallel (optional — page renders without them)
-        let profiles = new Map<string, any>();
-        if (detailResult?.players) {
-          profiles = await fetchProfilesForMatch(detailResult.players, detailResult.match.queue_id);
-          if (cancelled) return;
-          setProfileMap(profiles);
-        }
-
         writeBrowserResult(cacheKey, {
           match: detailResult,
           fact: factResult,
           snapshots: snapResult,
-          profiles: Array.from(profiles.entries()),
         }, MATCH_RESULT_CACHE_TTL_MS);
 
       } catch (err: any) {
@@ -222,12 +241,12 @@ export default function MatchDetailPage() {
   const team1Players: MatchResultPlayer[] = team1.map((p) => ({
     matchData: p,
     factData: factMap.get(String(p.player_id)),
-    profileData: profileMap?.get(String(p.player_id)) ?? null,
+    profileData: storedProfileForMatch(p),
   }));
   const team2Players: MatchResultPlayer[] = team2.map((p) => ({
     matchData: p,
     factData: factMap.get(String(p.player_id)),
-    profileData: profileMap?.get(String(p.player_id)) ?? null,
+    profileData: storedProfileForMatch(p),
   }));
 
   /* ── Skeleton ── */

@@ -363,14 +363,14 @@ export default function PlayerProfilePage() {
         throw new Error(data?.error?.message || 'Failed to refresh profile');
       }
 
-      const historyRefreshError = data?.historyRefresh?.error;
+      const relatedRefreshError = data?.historyRefresh?.error || data?.championStatsRefresh?.error;
       showRefreshCooldown(
         data?.profileRefresh?.expires_at,
         data?.profileRefresh?.remaining_seconds,
-        historyRefreshError ? 'warning' : 'success',
-        historyRefreshError
-          ? 'Profile refreshed, but match history could not be updated. Next refresh available in'
-          : 'Profile and match history refreshed. Next refresh available in',
+        relatedRefreshError ? 'warning' : 'success',
+        relatedRefreshError
+          ? 'Profile refreshed, but some related data could not be updated. Next refresh available in'
+          : 'Profile, match history, and champion totals refreshed. Next refresh available in',
       );
       setFetchKey(k => k + 1);
       setHistoryFetchKey((key) => key + 1);
@@ -409,7 +409,7 @@ export default function PlayerProfilePage() {
     let cancelled = false;
     setMatchesLoading(true);
 
-    fetchPlayerMatches(id, { limit: "20", refresh: true })
+    fetchPlayerMatches(id, { limit: "20" })
       .then((data) => {
         if (!cancelled) setMatches(data);
       })

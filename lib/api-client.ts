@@ -1874,7 +1874,7 @@ export async function fetchUniversalSearch(
   return fetchJson<UniversalSearchResponse>(`/search/universal?${query.toString()}`, { unwrapData: false });
 }
 
-export async function fetchPlayerMatches(id: string, params?: { limit?: string; offset?: string; refresh?: string | boolean }): Promise<MatchRecord[]> {
+export async function fetchPlayerMatches(id: string, params?: { limit?: string; offset?: string }): Promise<MatchRecord[]> {
   const query = new URLSearchParams();
   if (params) {
     for (const [key, value] of Object.entries(params)) {
@@ -1979,9 +1979,8 @@ function mapPlayerLoadout(raw: any): PlayerLoadout {
   };
 }
 
-export async function fetchPlayerLoadouts(playerId: string | number, options?: { refresh?: boolean }): Promise<PlayerLoadoutsResponse> {
-  const query = options?.refresh === false ? "?refresh=false" : "";
-  const raw = await fetchJson<any>(`/players/${playerId}/loadouts${query}`);
+export async function fetchPlayerLoadouts(playerId: string | number): Promise<PlayerLoadoutsResponse> {
+  const raw = await fetchJson<any>(`/players/${playerId}/loadouts`);
   return {
     loadouts: Array.isArray(raw.loadouts) ? raw.loadouts.map(mapPlayerLoadout) : [],
     freshness: mapPlayerLoadoutFreshness(raw.freshness),
@@ -3889,6 +3888,13 @@ export interface MatchPlayerDetail {
   win_status: string;
   task_force: number;
   league_tier: string | null;
+  league_points?: number | null;
+  league_wins?: number | null;
+  league_losses?: number | null;
+  account_level?: number | null;
+  mastery_level?: number | null;
+  platform?: string | null;
+  region?: string | null;
   tier?: number | null;
   source?: string | null;
   party_id?: number | null;
@@ -3902,6 +3908,28 @@ export interface MatchPlayerDetail {
   healing_self_per_minute: number;
   time_in_match: number;
   afk_rate: number;
+  profile_snapshot?: MatchPlayerProfileSnapshot | null;
+}
+
+export interface MatchPlayerProfileSnapshot {
+  captured_at: string | null;
+  source: 'post_match_ingest' | 'match_player' | string;
+  level: number | null;
+  platform: string | null;
+  region: string | null;
+  global_wins: number | null;
+  global_losses: number | null;
+  kbm_tier: number | null;
+  kbm_points: number | null;
+  kbm_rank: number | null;
+  kbm_wins: number | null;
+  kbm_losses: number | null;
+  champion_wins: number | null;
+  champion_losses: number | null;
+  queue_elo: number | null;
+  champion_elo: number | null;
+  cheater: boolean;
+  sus_count: number;
 }
 
 export interface MatchBan {
