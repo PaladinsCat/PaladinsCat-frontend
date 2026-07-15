@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
-import { fetchPlayerMatches, type MatchRecord, type ReportType } from "@/lib/api-client";
+import { clearPlayerTag, fetchPlayerMatches, type MatchRecord, type ReportType } from "@/lib/api-client";
 import { getTierColor, resolveEffectiveTier, getRankIconPath } from "@/lib/tier-utils";
 import { useAuth } from "@/lib/auth-context";
 import ReportModal from "@/components/ReportModal";
@@ -210,6 +210,7 @@ export default function PlayerProfilePage() {
   // Report modal state
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportType, setReportType] = useState<Exclude<ReportType, 'approve'>>('suspicious');
+  const [clearingTag, setClearingTag] = useState<'cheater' | 'suspicious' | null>(null);
 
   useEffect(() => {
     setAvatarLoadFailed(false);
@@ -234,6 +235,25 @@ export default function PlayerProfilePage() {
     setShowReportModal(false);
     setFetchKey(k => k + 1);
   }, []);
+
+  const clearModerationTag = useCallback(async (tag: 'cheater' | 'suspicious') => {
+    if (!isAdmin) return;
+    const confirmation = tag === 'cheater'
+      ? t("moderation.confirmClearCheaterTag")
+      : t("moderation.confirmClearSuspiciousTag");
+    if (!window.confirm(confirmation)) return;
+
+    setClearingTag(tag);
+    try {
+      await clearPlayerTag(id, tag);
+      setActionMenuOpen(false);
+      setFetchKey((key) => key + 1);
+    } catch (err) {
+      setRefreshFeedback({ kind: 'error', message: err instanceof Error ? err.message : 'Unable to clear tag' });
+    } finally {
+      setClearingTag(null);
+    }
+  }, [id, isAdmin, t]);
 
   // Fetch profile
   const fetchProfile = useCallback(async () => {
@@ -521,6 +541,16 @@ export default function PlayerProfilePage() {
                   <div className="px-2 pb-1 text-[10px] font-bold uppercase tracking-widest text-pc-text-muted">{t("generated.players.moderation")}</div>
                   <button type="button" role="menuitem" onClick={() => { setActionMenuOpen(false); openReportModal('cheater'); }} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-red-400 transition-colors hover:bg-red-500/10">
                     {t("generated.players.flagAsCheater")}</button>
+                  {isAdmin && player.cheater && (
+                    <button type="button" role="menuitem" disabled={clearingTag !== null} onClick={() => clearModerationTag('cheater')} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-red-300 transition-colors hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-50">
+                      {clearingTag === 'cheater' ? t("generated.components.submitting") : t("moderation.clearCheaterTag")}
+                    </button>
+                  )}
+                  {isAdmin && player.sus_count > 0 && (
+                    <button type="button" role="menuitem" disabled={clearingTag !== null} onClick={() => clearModerationTag('suspicious')} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-amber-300 transition-colors hover:bg-amber-500/10 disabled:cursor-not-allowed disabled:opacity-50">
+                      {clearingTag === 'suspicious' ? t("generated.components.submitting") : t("moderation.clearSuspiciousTag")}
+                    </button>
+                  )}
                 </>
               )}
             </div>

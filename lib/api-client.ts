@@ -3320,6 +3320,18 @@ export async function reportPlayer(playerId: string | number, opts: ReportOption
   return raw;
 }
 
+export async function clearPlayerTag(playerId: string | number, tag: 'cheater' | 'suspicious'): Promise<{ success: boolean; message: string; cleared: boolean }> {
+  const token = getAuthToken();
+  if (!token) {
+    throw new Error("Authentication required — please log in");
+  }
+  return fetchJson<{ success: boolean; message: string; cleared: boolean }>(`/players/${playerId}/clear-tag`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+    body: JSON.stringify({ tag }),
+  });
+}
+
 // ── Community Types ──
 
 export interface Post {
