@@ -1713,6 +1713,80 @@ export async function fetchPlayerProfile(id: string, queueId?: number, championI
   };
 }
 
+export interface PlayerChampionStat {
+  championId: number;
+  championName: string;
+  role: string;
+  xp: number;
+  ownershipType: string;
+  wins: number;
+  losses: number;
+  kills: number;
+  deaths: number;
+  assists: number;
+  minutesPlayed: number;
+  matchesPlayed: number;
+  winRate: number | null;
+  lastUpdated: string | null;
+}
+
+export async function fetchPlayerChampionStats(playerId: string | number): Promise<PlayerChampionStat[]> {
+  type RawStat = {
+    champion_id: number | string;
+    champion_name: string;
+    role: string;
+    xp?: number | string | null;
+    ownership_type?: string | null;
+    wins?: number | string | null;
+    losses?: number | string | null;
+    kills?: number | string | null;
+    deaths?: number | string | null;
+    assists?: number | string | null;
+    minutes_played?: number | string | null;
+    matches_played?: number | string | null;
+    win_rate?: number | string | null;
+    last_updated?: string | null;
+  };
+  const raw = await fetchJson<RawStat[]>(`/players/${playerId}/champions`);
+  const numberOrZero = (value: number | string | null | undefined) => {
+    const parsed = Number(value ?? 0);
+    return Number.isFinite(parsed) ? parsed : 0;
+  };
+  const numberOrNull = (value: number | string | null | undefined) => {
+    if (value == null || value === "") return null;
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  };
+
+  return raw.map((stat) => ({
+    championId: numberOrZero(stat.champion_id),
+    championName: stat.champion_name,
+    role: stat.role,
+    xp: numberOrZero(stat.xp),
+    ownershipType: stat.ownership_type ?? "",
+    wins: numberOrZero(stat.wins),
+    losses: numberOrZero(stat.losses),
+    kills: numberOrZero(stat.kills),
+    deaths: numberOrZero(stat.deaths),
+    assists: numberOrZero(stat.assists),
+    minutesPlayed: numberOrZero(stat.minutes_played),
+    matchesPlayed: numberOrZero(stat.matches_played),
+    winRate: numberOrNull(stat.win_rate),
+    lastUpdated: stat.last_updated ?? null,
+  }));
+}
+
+export interface PlayerChampionStatsRefreshResponse {
+  refreshed: boolean;
+  freshness: {
+    remaining_seconds: number;
+  };
+}
+
+export async function refreshPlayerChampionStats(playerId: string | number): Promise<PlayerChampionStatsRefreshResponse> {
+  return fetchJson<PlayerChampionStatsRefreshResponse>(`/players/${playerId}/champions/refresh`, { method: "POST" });
+}
+
 export interface ItemDimensionStat {
   slot?: number;
   level?: number;

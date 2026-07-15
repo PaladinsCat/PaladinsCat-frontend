@@ -476,8 +476,9 @@ export default function PlayerProfilePage() {
         {t("generated.players.backToPlayers")}</Link>
 
       {/* ── Header ── */}
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-      <div className={`pc-card relative lg:col-span-2 ${actionMenuOpen ? 'z-40' : 'z-10'}`}>
+      <div className="grid items-start grid-cols-1 gap-5 lg:grid-cols-3">
+      <div className="space-y-5 lg:col-span-2">
+      <div className={`pc-card relative self-start ${actionMenuOpen ? 'z-40' : 'z-10'}`}>
         <LoadingOverlay visible={refreshing} />
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
         {/* Keep live/refresh controls visible; consolidate voting and moderation. */}
@@ -636,22 +637,8 @@ export default function PlayerProfilePage() {
         </div>
       </div>
       </div>
-
-      {/* Keep loadouts visible beside the compact profile header on desktop. */}
-      <div className="lg:col-span-1">
-        <h2 className="pc-card-title shadow-sm">{t("generated.players.loadouts")}</h2>
-        <Link href={`/players/${id}/loadouts`} className="group flex items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-3 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary">
-          <SmartImage src="/images/icons/Player_Loadouts_Icon.png" alt="" className="h-11 w-11 shrink-0 object-contain" />
-          <div className="min-w-0 flex-1"><div className="text-sm font-semibold text-pc-text group-hover:text-pc-accent">{t("generated.players.playerLoadouts")}</div><div className="mt-0.5 text-xs text-pc-text-muted">{t("generated.players.viewSavedDecksByChampion")}</div></div>
-          <span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent">→</span>
-        </Link>
-      </div>
-      </div>
-
-      {/* ── Main grid ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* Left column: Account + Recent Matches (2/3) */}
-        <div className="lg:col-span-2 space-y-5">
+        {/* Account + Recent Matches stay in the same left stack as the title. */}
+        <div className="space-y-5">
           {/* Account Overview */}
           <div>
             <h2 className="pc-card-title shadow-sm">{t("generated.players.account")}</h2>
@@ -787,9 +774,27 @@ export default function PlayerProfilePage() {
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Right column: Rating + Performance + Champion Ratings (1/3) */}
-        <div className="lg:col-span-1 space-y-5">
+      {/* Sidebar cards and player ratings form an independent right stack. */}
+      <div className="self-start space-y-5 lg:col-span-1">
+          <div>
+            <h2 className="pc-card-title shadow-sm">{t("generated.players.loadouts")}</h2>
+            <Link href={`/players/${id}/loadouts`} className="group flex items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-3 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary">
+              <SmartImage src="/images/icons/Player_Loadouts_Icon.png" alt="" className="h-11 w-11 shrink-0 object-contain" />
+              <div className="min-w-0 flex-1"><div className="text-sm font-semibold text-pc-text group-hover:text-pc-accent">{t("generated.players.playerLoadouts")}</div><div className="mt-0.5 text-xs text-pc-text-muted">{t("generated.players.viewSavedDecksByChampion")}</div></div>
+              <span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent">→</span>
+            </Link>
+          </div>
+          <div>
+            <h2 className="pc-card-title shadow-sm">{t("common.playerChampions.title")}</h2>
+            <Link href={`/players/${id}/champions`} className="group flex items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-3 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center"><SmartImage src="/images/icons/GUI_End_of_Match_Player_Accolades_Icon.png" alt="" className="h-9 w-9 object-contain" /></span>
+              <div className="min-w-0 flex-1"><div className="text-sm font-semibold text-pc-text group-hover:text-pc-accent">{t("common.playerChampions.title")}</div><div className="mt-0.5 text-xs text-pc-text-muted">{t("common.playerChampions.cardDescription")}</div></div>
+              <span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent">→</span>
+            </Link>
+          </div>
+
           {/* KBM Ranked */}
           <div>
             <h2 className="pc-card-title shadow-sm">{t("generated.players.ranked")}</h2>
