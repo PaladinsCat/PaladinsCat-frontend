@@ -576,8 +576,11 @@ export default function PlayerProfilePage() {
               {player.cheater && (
                 <span className="text-xs font-bold text-red-400 bg-red-500/10 px-1.5 py-0.5 rounded">{t("generated.players.cheater")}</span>
               )}
-              {player.boosted && (
-                <Link href="/players/boosted" className="rounded bg-orange-400/10 px-1.5 py-0.5 text-xs font-bold text-orange-300 hover:bg-orange-400/20">{t("moderation.boosted")}</Link>
+              {!player.cheater && player.boosted && (
+                <Link href="/players/boosted" className="rounded bg-orange-400/10 px-1.5 py-0.5 text-xs font-bold text-orange-300 hover:bg-orange-400/20">
+                  <span className="sm:hidden">{t("moderation.boostedShort")}</span>
+                  <span className="hidden sm:inline">{t("moderation.boosted")}</span>
+                </Link>
               )}
               {player.sus_count > 0 && !player.cheater && (
                 <span className="text-xs font-bold text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded">{t("generated.players.sus")}</span>
