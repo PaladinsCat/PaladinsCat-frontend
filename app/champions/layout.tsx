@@ -1,13 +1,11 @@
-import type { Metadata } from "next";
+import { createLocalizedMetadata } from "@/lib/server-localization";
 
-export const metadata: Metadata = {
-  title: "Paladins Champion Stats, Win Rates, Ban Rates & Meta Data",
-  description:
-    "Compare Paladins champion stats, ranked win rates, ban rates, pick rates, roles, talents, cards, and meta trends.",
-  alternates: {
-    canonical: "/champions",
-  },
-};
+export async function generateMetadata() {
+  return createLocalizedMetadata("seo.champions.title", {
+    descriptionKey: "seo.champions.description",
+    metadata: { alternates: { canonical: "/champions" } },
+  });
+}
 
 export default function ChampionsLayout({ children }: { children: React.ReactNode }) {
   return children;

@@ -19,6 +19,7 @@ import { PerformanceOverviewCard } from "@/components/PerformanceOverviewCard";
 import { useLobbyTier } from "@/lib/lobby-tier-context";
 import { ContentFade } from "@/components/async-state";
 import { ChartCardSkeleton, DataCardSkeleton } from "@/components/route-skeleton";
+import { useLocalization } from "@/lib/localization-context";
 
 const ROLES = ["Frontline", "Damage", "Flank", "Support"] as const;
 
@@ -84,6 +85,7 @@ function mapMapStats(maps: Array<{ name: string; totalMatches: number; distribut
 }
 
 export default function StatsPage() {
+  const { t } = useLocalization();
   const { definition: lobbyTier, ready: lobbyTierReady } = useLobbyTier();
   const [itemSort, setItemSort] = useState<SortKey>("pickRate");
   const [itemSortDir, setItemSortDir] = useState<"asc" | "desc">("desc");
@@ -205,30 +207,28 @@ export default function StatsPage() {
     <div className="space-y-8">
       {/* ── Header ── */}
       <div>
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">Global Stats</h1>
+        <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.stats.globalStats.bd3846d")}</h1>
         <p className="text-pc-text-secondary text-sm mt-1">
-          Aggregate statistics across all tracked matches
-        </p>
+          {t("generated.stats.aggregateStatisticsAcrossAllTrackedMatches")}</p>
       </div>
 
       {/* ── Performance, eCPM, and ranked-player distribution ── */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="flex h-full flex-col">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-bold text-pc-text">Performance Overview</h2>
+            <h2 className="text-sm font-bold text-pc-text">{t("generated.stats.performanceOverview")}</h2>
             <Link href="/stats/metrics" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">
-              Detail →
-            </Link>
+              {t("generated.stats.detail")}</Link>
           </div>
         {overviewLoading ? (
           <DataCardSkeleton rows={5} />
         ) : <ContentFade className="flex-1">{(() => {
           const perfRows = [
-            { key: "dpm", label: "DPM", color: "#f87171" },
-            { key: "hpm", label: "HPM", color: "#34d399" },
-            { key: "gpm", label: "CPM", color: "#facc15" },
-            { key: "mpm", label: "SPM", color: "#60a5fa" },
-            { key: "kda", label: "KDA", color: "#33b6b1" },
+            { key: "dpm", label: t("generated.stats.dpm"), color: "#f87171" },
+            { key: "hpm", label: t("generated.stats.hpm"), color: "#34d399" },
+            { key: "gpm", label: t("generated.stats.cpm"), color: "#facc15" },
+            { key: "mpm", label: t("generated.stats.spm"), color: "#60a5fa" },
+            { key: "kda", label: t("generated.stats.kda"), color: "#33b6b1" },
           ].map(({ key, label, color }) => {
             const d = metrics[key as keyof typeof metrics] as {
               p10: number;
@@ -257,14 +257,14 @@ export default function StatsPage() {
 
         <div className="flex h-full flex-col">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-bold text-pc-text">eCPM by Role</h2>
-            <Link href="/stats/egpm" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">Detail →</Link>
+            <h2 className="text-sm font-bold text-pc-text">{t("generated.stats.ecpmByRole")}</h2>
+            <Link href="/stats/egpm" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">{t("generated.stats.detail")}</Link>
           </div>
           {egpmLoading ? <DataCardSkeleton rows={5} /> : (
             <ContentFade className="flex-1">
               <PerformanceOverviewCard metrics={orderedEgpmBaselines.map((row) => ({
                 key: `egpm-${row.role}`,
-                label: row.role === "Frontline" ? "Front" : row.role === "Support" ? "Supp" : row.role === "Damage" ? "Dmg" : row.role,
+                label: row.role === "Frontline" ? t("common.roles.frontlineShort") : row.role === "Support" ? t("common.roles.supportShort") : row.role === "Damage" ? t("common.roles.damageShort") : row.role === "Global" ? t("common.roles.global") : t("common.roles.flank"),
                 color: row.role === "Global" ? "#facc15" : row.role === "Damage" ? "#f87171" : row.role === "Flank" ? "#c084fc" : row.role === "Support" ? "#34d399" : "#60a5fa",
                 p10: row.p10Ecpm,
                 p25: row.p25Ecpm,
@@ -278,8 +278,8 @@ export default function StatsPage() {
 
         <div className="flex h-full flex-col">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-bold text-pc-text">Ranked Player Distribution</h2>
-            <Link href="/stats/tiers" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">Detail →</Link>
+            <h2 className="text-sm font-bold text-pc-text">{t("generated.stats.rankedPlayerDistribution")}</h2>
+            <Link href="/stats/tiers" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">{t("generated.stats.detail")}</Link>
           </div>
           {overviewLoading ? <ChartCardSkeleton /> : <ContentFade className="flex-1 bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
             <div className="flex h-full min-h-48 items-end justify-center gap-1.5 pb-2">
@@ -289,7 +289,7 @@ export default function StatsPage() {
                 return (
                   <div key={tier.tierSort} className="group flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1">
                     <div className="text-[9px] text-pc-text-muted tabular-nums opacity-0 group-hover:opacity-100 transition-opacity">{tier.percentage.toFixed(1)}%</div>
-                    <div className="w-5 rounded-t-sm bg-pc-accent-mid group-hover:bg-pc-accent transition-colors" style={{ height }} title={`${tier.tier}: ${tier.totalPlays.toLocaleString()} (${tier.percentage.toFixed(1)}%)`} />
+                    <div className="w-5 rounded-t-sm bg-pc-accent-mid group-hover:bg-pc-accent transition-colors" style={{ height }} title={t("generated.stats.value1Value2Value3", { value1: tier.tier, value2: tier.totalPlays.toLocaleString(), value3: tier.percentage.toFixed(1) })} />
                     <img src={rankIcon} alt={tier.tier} title={tier.tier} className="h-5 w-5 object-contain drop-shadow" loading="lazy" />
                     <div className="text-[9px] text-pc-text-secondary tabular-nums leading-none">{tier.totalPlays.toLocaleString()}</div>
                   </div>
@@ -304,17 +304,17 @@ export default function StatsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
       <section className="lg:col-span-3 lg:order-1">
         <div className="pc-section-heading mb-3 px-1 sm:px-2">
-          <h2 className="text-sm font-bold text-pc-text">Top Champions</h2>
+          <h2 className="text-sm font-bold text-pc-text">{t("generated.stats.topChampions")}</h2>
           <div className="flex flex-wrap gap-x-3 gap-y-1">
-            <Link href="/stats/winrate" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">Win Rate Detail →</Link>
-            <Link href="/stats/banrate" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">Ban Rate Detail →</Link>
+            <Link href="/stats/winrate" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">{t("generated.stats.winRateDetail")}</Link>
+            <Link href="/stats/banrate" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">{t("generated.stats.banRateDetail")}</Link>
           </div>
         </div>
         {overviewLoading ? <DataCardSkeleton rows={10} columns={2} /> : <ContentFade className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
           <div className="grid grid-cols-1 gap-5 min-[480px]:grid-cols-2 min-[480px]:gap-4">
             {/* Left: Top Win Rate */}
             <div>
-              <div className="text-xs font-semibold text-pc-text-secondary mb-2 px-2">Top Win Rate</div>
+              <div className="text-xs font-semibold text-pc-text-secondary mb-2 px-2">{t("generated.stats.topWinRate")}</div>
               <div className="flex flex-col gap-1">
                 {[...champions]
                   .filter((c) => c.winRate != null && Number.isFinite(c.winRate))
@@ -351,7 +351,7 @@ export default function StatsPage() {
 
             {/* Right: Most Banned */}
             <div>
-              <div className="text-xs font-semibold text-pc-text-secondary mb-2 px-2">Most Banned</div>
+              <div className="text-xs font-semibold text-pc-text-secondary mb-2 px-2">{t("generated.stats.mostBanned")}</div>
               <div className="flex flex-col gap-1">
                 {[...champions]
                   .filter((c) => c.banRate != null && Number.isFinite(c.banRate))
@@ -387,7 +387,7 @@ export default function StatsPage() {
         {/* Item Stats (3/5) */}
         <section className="lg:col-span-5 lg:order-3">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-bold text-pc-text">Item Stats</h2>
+            <h2 className="text-sm font-bold text-pc-text">{t("generated.stats.itemStats")}</h2>
             <div className="flex items-center gap-2">
               {(["pickRate", "winRate"] as const).map((key) => (
                 <button
@@ -399,18 +399,17 @@ export default function StatsPage() {
                       : "bg-pc-card text-pc-muted hover:text-pc-text"
                   }`}
                 >
-                  {key === "pickRate" ? "Pick Rate" : "Win Rate"}
+                  {key === "pickRate" ? t("generated.stats.pickRate") : t("generated.stats.winRate.49a3838")}
                   {itemSort === key && (itemSortDir === "desc" ? " ↓" : " ↑")}
                 </button>
               ))}
               <Link href="/stats/items" className="ml-1 text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">
-                Detail →
-              </Link>
+                {t("generated.stats.detail")}</Link>
             </div>
           </div>
           {overviewLoading ? <DataCardSkeleton rows={4} columns={2} /> : <ContentFade className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 space-y-4">
             {sortedItems.length === 0 && (
-              <div className="text-sm text-pc-text-muted">Item stats unavailable.</div>
+              <div className="text-sm text-pc-text-muted">{t("generated.stats.itemStatsUnavailable")}</div>
             )}
             {(["Defense", "Utility", "Healing", "Offense"] as const).map((cat) => {
               const catColor = cat === "Offense" ? "text-red-400" :
@@ -442,10 +441,10 @@ export default function StatsPage() {
                         <div className="text-pc-text font-medium text-xs leading-tight truncate w-full">{item.name}</div>
                         <div className="flex items-center gap-1 text-[9px] mt-0.5">
                           <span style={{ color: quality.color }}>
-                            WR {item.winRate}%
+                            {t("generated.stats.wr")}{" "}{item.winRate}%
                           </span>
                           <span className="text-pc-text-muted">·</span>
-                          <span style={{ color: quality.color }}>PR {item.pickRate}%</span>
+                          <span style={{ color: quality.color }}>{t("generated.stats.pr")}{" "}{item.pickRate}%</span>
                         </div>
                       </Link>
                       );
@@ -460,19 +459,19 @@ export default function StatsPage() {
         {/* Map Stats (2/5) */}
         <section className="lg:col-span-2 lg:order-2">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-bold text-pc-text">Map Stats</h2>
-            <Link href="/stats/maps" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">Detail →</Link>
+            <h2 className="text-sm font-bold text-pc-text">{t("generated.stats.mapStats")}</h2>
+            <Link href="/stats/maps" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">{t("generated.stats.detail")}</Link>
           </div>
           {overviewLoading ? <DataCardSkeleton rows={8} /> : <ContentFade className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
             {sortedMaps.length === 0 ? (
-              <div className="p-4 text-sm text-pc-text-muted">Map stats unavailable.</div>
+              <div className="p-4 text-sm text-pc-text-muted">{t("generated.stats.mapStatsUnavailable")}</div>
             ) : (
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-pc-border text-pc-text-muted text-left text-xs">
-                  <th className="px-3 py-3">Map</th>
-                  <th className="px-2 py-3 text-right">Map Share</th>
-                  <th className="px-3 py-3 text-right">Matches</th>
+                  <th className="px-3 py-3">{t("generated.stats.map")}</th>
+                  <th className="px-2 py-3 text-right">{t("generated.stats.mapShare")}</th>
+                  <th className="px-3 py-3 text-right">{t("generated.stats.matches")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -495,18 +494,18 @@ export default function StatsPage() {
         <div>
           <div className="mb-3 flex items-center justify-between">
             <div>
-              <h2 className="text-sm font-bold text-pc-text">Skin Stats</h2>
-              <p className="text-[11px] text-pc-text-muted">Ranked cosmetics, including recovered skin IDs</p>
+              <h2 className="text-sm font-bold text-pc-text">{t("generated.stats.skinStats")}</h2>
+              <p className="text-[11px] text-pc-text-muted">{t("generated.stats.rankedCosmeticsIncludingRecoveredSkinIds")}</p>
             </div>
-            <Link href="/stats/skins" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">Detail →</Link>
+            <Link href="/stats/skins" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">{t("generated.stats.detail")}</Link>
           </div>
           {skinsLoading ? <DataCardSkeleton rows={5} /> : <ContentFade className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated">
-            {skinStats.length === 0 ? <div className="p-4 text-sm text-pc-text-muted">Skin stats unavailable.</div> : (
+            {skinStats.length === 0 ? <div className="p-4 text-sm text-pc-text-muted">{t("generated.stats.skinStatsUnavailable")}</div> : (
               <div className="divide-y divide-pc-border/50">
                 {skinStats.map((skin) => (
                   <Link key={`${skin.championId}-${skin.skinId}`} href={`/stats/skins?champion=${skin.championId}`} className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-pc-bg-secondary/60">
                     <img src={getChampionIconSafe(skin.championName)} alt="" className="h-7 w-7 rounded object-contain" />
-                    <div className="min-w-0 flex-1"><div className="truncate text-xs font-medium text-pc-text">{skin.skinName}</div><div className="text-[10px] text-pc-text-muted">{skin.championName} · {skin.totalPlays.toLocaleString()} plays</div></div>
+                    <div className="min-w-0 flex-1"><div className="truncate text-xs font-medium text-pc-text">{skin.skinName}</div><div className="text-[10px] text-pc-text-muted">{skin.championName} · {skin.totalPlays.toLocaleString()} {t("generated.stats.plays.0effba4")}</div></div>
                     <span className="text-xs font-bold text-emerald-400">{skin.winRate.toFixed(1)}%</span>
                   </Link>
                 ))}
@@ -518,18 +517,18 @@ export default function StatsPage() {
         <div>
           <div className="mb-3 flex items-center justify-between">
             <div>
-              <h2 className="text-sm font-bold text-pc-text">Composition Stats</h2>
-              <p className="text-[11px] text-pc-text-muted">Team shape: Frontline · Damage · Flank · Support</p>
+              <h2 className="text-sm font-bold text-pc-text">{t("generated.stats.compositionStats")}</h2>
+              <p className="text-[11px] text-pc-text-muted">{t("generated.stats.teamShapeFrontlineDamageFlankSupport")}</p>
             </div>
-            <Link href="/stats/compositions" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">Detail →</Link>
+            <Link href="/stats/compositions" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">{t("generated.stats.detail")}</Link>
           </div>
           {compositionsLoading ? <DataCardSkeleton rows={5} /> : <ContentFade className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated">
-            {compositions.length === 0 ? <div className="p-4 text-sm text-pc-text-muted">Composition stats unavailable.</div> : (
+            {compositions.length === 0 ? <div className="p-4 text-sm text-pc-text-muted">{t("generated.stats.compositionStatsUnavailable")}</div> : (
               <div className="divide-y divide-pc-border/50">
                 {compositions.slice(0, 5).map((composition) => (
                   <Link key={composition.composition} href="/stats/compositions" className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-pc-bg-secondary/60">
                     <div className="w-20 font-mono text-xs font-semibold text-pc-text">{composition.composition}</div>
-                    <div className="min-w-0 flex-1 text-[10px] text-pc-text-muted">{composition.totalMatches.toLocaleString()} ranked matches</div>
+                    <div className="min-w-0 flex-1 text-[10px] text-pc-text-muted">{composition.totalMatches.toLocaleString()} {t("generated.stats.rankedMatches")}</div>
                     <span className={composition.winRate >= 50 ? "text-xs font-bold text-emerald-400" : "text-xs font-bold text-rose-400"}>{composition.winRate.toFixed(1)}%</span>
                   </Link>
                 ))}
@@ -543,23 +542,23 @@ export default function StatsPage() {
         <div>
           <div className="mb-3 flex items-center justify-between">
             <div>
-              <h2 className="text-sm font-bold text-pc-text">Broken Skins</h2>
-              <p className="text-[11px] text-pc-text-muted">Int16 overflow (skin_id &gt; 32,767) — usage share per champion</p>
+              <h2 className="text-sm font-bold text-pc-text">{t("generated.stats.brokenSkins")}</h2>
+              <p className="text-[11px] text-pc-text-muted">{t("generated.stats.int16OverflowSkinId32767UsageSharePerChampion")}</p>
             </div>
           </div>
           {brokenSkinsLoading ? <DataCardSkeleton rows={5} /> : <ContentFade className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated">
-            {brokenSkins.length === 0 ? <div className="p-4 text-sm text-pc-text-muted">No broken skin data.</div> : (
+            {brokenSkins.length === 0 ? <div className="p-4 text-sm text-pc-text-muted">{t("generated.stats.noBrokenSkinData")}</div> : (
               <div className="divide-y divide-pc-border/50">
                 {brokenSkins.map((skin) => (
                   <div key={`${skin.championId}-${skin.skinId}`} className="flex items-center gap-3 px-4 py-2.5">
                     <img src={getChampionIconSafe(skin.championName)} alt="" className="h-7 w-7 rounded object-contain" />
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-xs font-medium text-pc-text">{skin.skinName}</div>
-                      <div className="text-[10px] text-pc-text-muted">{skin.championName} · {skin.totalPlays.toLocaleString()} plays</div>
+                      <div className="text-[10px] text-pc-text-muted">{skin.championName} · {skin.totalPlays.toLocaleString()} {t("generated.stats.plays.0effba4")}</div>
                     </div>
                     <div className="text-right">
-                      <span className="text-xs font-bold text-rose-400">{skin.usageShare.toFixed(1)}% share</span>
-                      <div className="text-[9px] text-pc-text-muted">WR {skin.winRate.toFixed(1)}%</div>
+                      <span className="text-xs font-bold text-rose-400">{skin.usageShare.toFixed(1)}{t("generated.stats.share.b95bb2e")}</span>
+                      <div className="text-[9px] text-pc-text-muted">{t("generated.stats.wr")}{" "}{skin.winRate.toFixed(1)}%</div>
                     </div>
                   </div>
                 ))}

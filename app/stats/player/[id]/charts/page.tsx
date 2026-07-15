@@ -6,8 +6,10 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import { fetchKdaHistory, fetchDpmHistory, fetchGlickoHistory, type KdaHistoryEntry, type DpmHistoryEntry, type GlickoHistoryEntry } from "@/lib/api-client";
 import { formatLocalMonthDay } from "@/lib/time-format";
 import { LoadingPanel } from "@/components/async-state";
+import { useLocalization } from "@/lib/localization-context";
 
 export default function PlayerChartsPage({ params }: { params: Promise<{ id: string }> }) {
+  const { t } = useLocalization();
   const [kdaData, setKdaData] = useState<KdaHistoryEntry[]>([]);
   const [dpmData, setDpmData] = useState<DpmHistoryEntry[]>([]);
   const [glickoData, setGlickoData] = useState<GlickoHistoryEntry[]>([]);
@@ -33,7 +35,7 @@ export default function PlayerChartsPage({ params }: { params: Promise<{ id: str
       setDpmData(dpm);
       setGlickoData(glicko);
     } catch {
-      setError("Failed to load chart data");
+      setError(t("generated.stats.failedToLoadChartData"));
     } finally {
       setLoading(false);
     }
@@ -52,26 +54,25 @@ export default function PlayerChartsPage({ params }: { params: Promise<{ id: str
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link href={`/players/${id}`} className="text-pc-text-secondary hover:text-pc-accent transition-colors">
-            ← Back to profile
-          </Link>
-          <h1 className="text-3xl font-bold text-pc-accent">Player Charts</h1>
+            {t("generated.stats.backToProfile")}</Link>
+          <h1 className="text-3xl font-bold text-pc-accent">{t("generated.stats.playerCharts")}</h1>
         </div>
         <select
           value={days}
           onChange={(e) => setDays(parseInt(e.target.value, 10))}
           className="px-3 py-2 bg-pc-bg-elevated border border-pc-border rounded-lg text-pc-text focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
         >
-          <option value={7}>Last 7 days</option>
-          <option value={30}>Last 30 days</option>
-          <option value={90}>Last 90 days</option>
+          <option value={7}>{t("generated.stats.last7Days")}</option>
+          <option value={30}>{t("generated.stats.last30Days")}</option>
+          <option value={90}>{t("generated.stats.last90Days")}</option>
         </select>
       </div>
 
       {/* KDA Chart */}
       <div className="bg-pc-bg-elevated rounded-lg border border-pc-border p-6">
-        <h2 className="text-xl font-semibold text-pc-accent mb-4">KDA History</h2>
+        <h2 className="text-xl font-semibold text-pc-accent mb-4">{t("generated.stats.kdaHistory")}</h2>
         {kdaData.length === 0 ? (
-          <p className="text-pc-text-muted text-center py-8">No KDA data available</p>
+          <p className="text-pc-text-muted text-center py-8">{t("generated.stats.noKdaDataAvailable")}</p>
         ) : (
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={kdaData.map((d) => ({ ...d, label: formatLocalMonthDay(d.date) }))} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
@@ -93,9 +94,9 @@ export default function PlayerChartsPage({ params }: { params: Promise<{ id: str
 
       {/* DPM Chart */}
       <div className="bg-pc-bg-elevated rounded-lg border border-pc-border p-6">
-        <h2 className="text-xl font-semibold text-pc-accent mb-4">Damage Per Minute</h2>
+        <h2 className="text-xl font-semibold text-pc-accent mb-4">{t("generated.stats.damagePerMinute")}</h2>
         {dpmData.length === 0 ? (
-          <p className="text-pc-text-muted text-center py-8">No DPM data available</p>
+          <p className="text-pc-text-muted text-center py-8">{t("generated.stats.noDpmDataAvailable")}</p>
         ) : (
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={dpmData.map((d) => ({ ...d, label: formatLocalMonthDay(d.date) }))} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
@@ -116,9 +117,9 @@ export default function PlayerChartsPage({ params }: { params: Promise<{ id: str
 
       {/* Glicko-2 Chart */}
       <div className="bg-pc-bg-elevated rounded-lg border border-pc-border p-6">
-        <h2 className="text-xl font-semibold text-pc-accent mb-4">Glicko-2 Rating</h2>
+        <h2 className="text-xl font-semibold text-pc-accent mb-4">{t("generated.stats.glicko2Rating")}</h2>
         {glickoData.length === 0 ? (
-          <p className="text-pc-text-muted text-center py-8">No rating data available</p>
+          <p className="text-pc-text-muted text-center py-8">{t("generated.stats.noRatingDataAvailable")}</p>
         ) : (
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={glickoData.map((d) => ({ ...d, label: formatLocalMonthDay(d.date) }))} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>

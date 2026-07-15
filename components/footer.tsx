@@ -100,10 +100,9 @@ export default function Footer() {
           {/* Column 2: Brand + Copyright */}
           <div className="flex flex-col items-start md:items-end text-right">
             <Link href="/" className="text-xl font-bold text-pc-text hover:text-pc-text-muted transition-colors mb-3">
-              PaladinsCat
-            </Link>
+              {t("generated.common.paladinscat")}</Link>
             <p className="text-pc-text-muted text-xs">
-              PaladinsCat © {new Date().getFullYear()}<br />
+              {t("generated.common.paladinscat.edf580c")}{" "}{new Date().getFullYear()}<br />
               {t("footer.dataProvidedBy")}<br />
               {t("footer.allRightsReserved")}
             </p>

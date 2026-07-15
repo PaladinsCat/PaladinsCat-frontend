@@ -2,62 +2,64 @@
 
 import { useState, useRef, useEffect } from "react";
 import { reportPlayer, type ReportOptions, type ReportType } from "@/lib/api-client";
+import { useLocalization } from "@/lib/localization-context";
+import type { TranslationKey } from "@/lib/localization/messages";
 
 type PlayerAction = Exclude<ReportType, "approve">;
 
 const ACTIONS: Record<PlayerAction, {
-  label: string;
-  submitLabel: string;
+  labelKey: TranslationKey;
+  submitLabelKey: TranslationKey;
   accent: "amber" | "red" | "violet" | "emerald";
-  prompt: string;
-  reasons: Array<{ label: string; value: string }>;
+  promptKey: TranslationKey;
+  reasons: Array<{ labelKey: TranslationKey; value: string }>;
 }> = {
   suspicious: {
-    label: "Report Suspicious",
-    submitLabel: "Report as Suspicious",
+    labelKey: "moderation.reportSuspicious",
+    submitLabelKey: "moderation.reportAsSuspicious",
     accent: "amber",
-    prompt: "What makes this player suspicious?",
+    promptKey: "moderation.promptSuspicious",
     reasons: [
-      { label: "Suspected boosting", value: "boosting" },
-      { label: "First person aim", value: "first_person_aim" },
-      { label: "AFK / inactive", value: "afk" },
-      { label: "Teammate only", value: "teammate_only" },
-      { label: "Other", value: "other" },
+      { labelKey: "moderation.suspectedBoosting", value: "boosting" },
+      { labelKey: "moderation.firstPersonAim", value: "first_person_aim" },
+      { labelKey: "moderation.afkInactive", value: "afk" },
+      { labelKey: "moderation.teammateOnly", value: "teammate_only" },
+      { labelKey: "moderation.other", value: "other" },
     ],
   },
   weirdo: {
-    label: "Vote Weirdo",
-    submitLabel: "Add to Weirdo",
+    labelKey: "moderation.voteWeirdo",
+    submitLabelKey: "moderation.addToWeirdo",
     accent: "violet",
-    prompt: "What makes this player a Weirdo?",
+    promptKey: "moderation.promptWeirdo",
     reasons: [
-      { label: "Unexpected loadout", value: "unexpected_loadout" },
-      { label: "Wild strategy", value: "wild_strategy" },
-      { label: "Memorable personality", value: "memorable_personality" },
-      { label: "Other", value: "other" },
+      { labelKey: "moderation.unexpectedLoadout", value: "unexpected_loadout" },
+      { labelKey: "moderation.wildStrategy", value: "wild_strategy" },
+      { labelKey: "moderation.memorablePersonality", value: "memorable_personality" },
+      { labelKey: "moderation.other", value: "other" },
     ],
   },
   hall_of_fame: {
-    label: "Hall of Fame Vote",
-    submitLabel: "Add to Hall of Fame",
+    labelKey: "moderation.hallOfFameVote",
+    submitLabelKey: "moderation.addToHallOfFame",
     accent: "emerald",
-    prompt: "Why does this player belong in the Hall of Fame?",
+    promptKey: "moderation.promptHallOfFame",
     reasons: [
-      { label: "Exceptional teammate", value: "exceptional_teammate" },
-      { label: "Elite gameplay", value: "elite_gameplay" },
-      { label: "Great sportsmanship", value: "great_sportsmanship" },
-      { label: "Other", value: "other" },
+      { labelKey: "moderation.exceptionalTeammate", value: "exceptional_teammate" },
+      { labelKey: "moderation.eliteGameplay", value: "elite_gameplay" },
+      { labelKey: "moderation.greatSportsmanship", value: "great_sportsmanship" },
+      { labelKey: "moderation.other", value: "other" },
     ],
   },
   cheater: {
-    label: "Flag Cheater",
-    submitLabel: "Confirm Cheater",
+    labelKey: "moderation.flagCheater",
+    submitLabelKey: "moderation.confirmCheater",
     accent: "red",
-    prompt: "What evidence supports this action?",
+    promptKey: "moderation.promptCheater",
     reasons: [
-      { label: "Verified cheating evidence", value: "verified_evidence" },
-      { label: "Account review", value: "account_review" },
-      { label: "Other", value: "other" },
+      { labelKey: "moderation.verifiedCheatingEvidence", value: "verified_evidence" },
+      { labelKey: "moderation.accountReview", value: "account_review" },
+      { labelKey: "moderation.other", value: "other" },
     ],
   },
 };
@@ -70,6 +72,7 @@ interface ReportModalProps {
 }
 
 export default function ReportModal({ playerId, type, onClose, onSuccess }: ReportModalProps) {
+  const { t } = useLocalization();
   const [selectedReason, setSelectedReason] = useState("");
   const [customReason, setCustomReason] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -94,17 +97,17 @@ export default function ReportModal({ playerId, type, onClose, onSuccess }: Repo
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     if (!selectedReason) {
-      setError("Select a reason");
+      setError(t("moderation.selectReason"));
       return;
     }
     if (isOther && !customReason.trim()) {
-      setError(action.prompt);
+      setError(t(action.promptKey));
       return;
     }
 
     const reason = isOther
       ? customReason.trim()
-      : action.reasons.find((item) => item.value === selectedReason)?.label ?? selectedReason;
+      : selectedReason;
     setError(null);
     setSubmitting(true);
     try {
@@ -141,19 +144,19 @@ export default function ReportModal({ playerId, type, onClose, onSuccess }: Repo
     <div ref={overlayRef} onClick={handleOverlayClick} className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
       <div className="w-full max-w-md mx-4 bg-pc-bg-elevated border border-pc-border rounded-xl p-5 space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold text-pc-text">{action.label}</h2>
-          <button onClick={onClose} className="text-pc-text-muted hover:text-pc-text transition-colors" aria-label="Close">✕</button>
+          <h2 className="text-sm font-bold text-pc-text">{t(action.labelKey)}</h2>
+          <button onClick={onClose} className="text-pc-text-muted hover:text-pc-text transition-colors" aria-label={t("generated.components.close")}>✕</button>
         </div>
 
         {success ? (
           <div className="text-center py-6">
             <div className="text-emerald-400 text-2xl mb-2">✓</div>
-            <p className="text-pc-text text-sm">Your reason was recorded.</p>
+            <p className="text-pc-text text-sm">{t("generated.components.yourReasonWasRecorded")}</p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <label className="text-xs text-pc-text-muted uppercase tracking-wider">Reason</label>
+              <label className="text-xs text-pc-text-muted uppercase tracking-wider">{t("generated.components.reason")}</label>
               <div className="space-y-1.5">
                 {action.reasons.map((item) => (
                   <button
@@ -162,7 +165,7 @@ export default function ReportModal({ playerId, type, onClose, onSuccess }: Repo
                     onClick={() => setSelectedReason(item.value)}
                     className={`w-full text-left px-3 py-2 rounded-lg text-sm border transition-colors ${selectedReason === item.value ? activeColorMap[action.accent] : `${colorMap[action.accent]} opacity-70 hover:opacity-100`}`}
                   >
-                    {item.label}
+                    {t(item.labelKey)}
                   </button>
                 ))}
               </div>
@@ -170,15 +173,15 @@ export default function ReportModal({ playerId, type, onClose, onSuccess }: Repo
 
             {isOther && (
               <div className="space-y-2">
-                <label className="text-xs text-pc-text-muted uppercase tracking-wider">Describe</label>
-                <textarea value={customReason} onChange={(event) => setCustomReason(event.target.value)} placeholder={action.prompt} rows={3} className="w-full px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text placeholder-pc-text-muted text-sm focus:outline-none focus:ring-2 focus:ring-pc-accent/50 resize-none" autoFocus />
+                <label className="text-xs text-pc-text-muted uppercase tracking-wider">{t("generated.components.describe")}</label>
+                <textarea value={customReason} onChange={(event) => setCustomReason(event.target.value)} placeholder={t(action.promptKey)} rows={3} className="w-full px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text placeholder-pc-text-muted text-sm focus:outline-none focus:ring-2 focus:ring-pc-accent/50 resize-none" autoFocus />
               </div>
             )}
 
             {error && <div className="text-red-400 text-xs bg-red-900/20 border border-red-700/30 rounded-lg px-3 py-2">{error}</div>}
 
             <button type="submit" disabled={submitting} className={`w-full py-2.5 rounded-lg text-sm font-semibold text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${submitColor[action.accent]}`}>
-              {submitting ? "Submitting..." : action.submitLabel}
+              {submitting ? t("generated.components.submitting") : t(action.submitLabelKey)}
             </button>
           </form>
         )}

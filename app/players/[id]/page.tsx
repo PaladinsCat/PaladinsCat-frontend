@@ -15,6 +15,7 @@ import { RouteSkeleton } from "@/components/route-skeleton";
 import SmartImage from "@/components/SmartImage";
 import { formatKda } from "@/lib/kda";
 import PlayerName from "@/components/player-name";
+import { useLocalization } from "@/lib/localization-context";
 
 interface PlayerData {
   id: string;
@@ -22,6 +23,7 @@ interface PlayerData {
   level: number;
   wins: number;
   losses: number;
+  leaves: number;
   hours_played: number;
   minutes_played: number;
   mastery_level: number;
@@ -179,6 +181,7 @@ function StatGrid({ children }: { children: React.ReactNode }) {
 }
 
 export default function PlayerProfilePage() {
+  const { t } = useLocalization();
   const params = useParams();
   const router = useRouter();
   const id = params?.id as string;
@@ -407,11 +410,11 @@ export default function PlayerProfilePage() {
     return (
       <div className="space-y-4">
         <ErrorState
-          title={response ? "Could not refresh this profile" : "Player profile unavailable"}
+          title={response ? t("generated.players.couldNotRefreshThisProfile") : t("generated.players.playerProfileUnavailable")}
           message={error || "The player could not be found."}
           onRetry={() => setFetchKey((key) => key + 1)}
         />
-        <Link href="/players" className="text-pc-accent text-sm hover:underline">← Back to Players</Link>
+        <Link href="/players" className="text-pc-accent text-sm hover:underline">{t("generated.players.backToPlayers")}</Link>
       </div>
     );
   }
@@ -427,6 +430,7 @@ export default function PlayerProfilePage() {
   const kbmRating = queueRatings.find((r) => r.queue_id === 486);
   const kbmMu = kbmRating ? Number(kbmRating.mu) : null;
   const effectiveTier = resolveEffectiveTier(player.kbm_tier, player.kbm_rank);
+  const rankedTierLabel = effectiveTier.isGrandmaster ? "GM" : effectiveTier.displayName;
   const tierColor = getTierColor(effectiveTier.displayTier);
   const rankIcon = getRankIconPath(player.kbm_tier, player.kbm_rank);
   const kbmWr = player.kbm_wins + player.kbm_losses > 0
@@ -448,8 +452,7 @@ export default function PlayerProfilePage() {
     <div className="space-y-5">
       {/* Back link */}
       <Link href="/players" className="text-pc-text-secondary hover:text-pc-accent transition-colors text-sm">
-        ← Back to Players
-      </Link>
+        {t("generated.players.backToPlayers")}</Link>
 
       {/* ── Header ── */}
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
@@ -462,21 +465,20 @@ export default function PlayerProfilePage() {
             type="button"
             onClick={handleCurrentMatch}
             className="inline-flex items-center gap-1.5 rounded-lg border border-pc-border/70 bg-pc-bg-secondary/90 px-3 py-2 text-xs font-semibold text-pc-text transition-colors hover:border-pc-accent-mid hover:text-pc-accent"
-            title="Check current match"
+            title={t("generated.players.checkCurrentMatch")}
           >
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
-            Current
-          </button>
+            {t("generated.players.current")}</button>
 
           <button
             type="button"
             onClick={handleRefresh}
             disabled={refreshDisabled}
             className="inline-flex items-center gap-1.5 rounded-lg border border-pc-border/70 bg-pc-bg-secondary/90 px-3 py-2 text-xs font-semibold text-pc-text transition-colors hover:border-pc-accent-mid hover:text-pc-accent disabled:cursor-not-allowed disabled:opacity-50"
-            title="Refresh profile (10-minute cooldown)"
+            title={t("generated.players.refreshProfile10MinuteCooldown")}
           >
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={refreshing ? 'animate-spin' : ''} aria-hidden="true"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
-            {refreshing ? 'Refreshing…' : refreshRemainingMs > 0 ? `Refresh in ${formatCooldown(refreshRemainingMs)}` : 'Refresh'}
+            {refreshing ? t("generated.players.refreshing") : refreshRemainingMs > 0 ? t("generated.players.refreshInValue1", { value1: formatCooldown(refreshRemainingMs) }) : t("generated.players.refresh")}
           </button>
 
           <button
@@ -490,36 +492,34 @@ export default function PlayerProfilePage() {
             aria-expanded={actionMenuOpen}
           >
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
-            Actions
-          </button>
+            {t("generated.players.actions")}</button>
 
           {actionMenuOpen && (
             <div
               className="absolute right-0 top-full z-30 mt-2 w-60 max-w-[calc(100vw-3rem)] overflow-hidden rounded-xl border border-pc-border bg-pc-bg-secondary p-2 shadow-2xl"
               role="menu"
-              aria-label="Player actions"
+              aria-label={t("generated.players.playerActions")}
             >
-              <div className="px-2 pb-1 pt-1 text-[10px] font-bold uppercase tracking-widest text-pc-text-muted">Community</div>
+              <div className="px-2 pb-1 pt-1 text-[10px] font-bold uppercase tracking-widest text-pc-text-muted">{t("generated.players.community")}</div>
               <button type="button" role="menuitem" onClick={() => { setActionMenuOpen(false); openReportModal('suspicious'); }} className="flex w-full items-center justify-between gap-3 rounded-lg px-2.5 py-2 text-left text-sm text-amber-400 transition-colors hover:bg-amber-500/10">
-                <span>Report suspicious</span>
+                <span>{t("generated.players.reportSuspicious")}</span>
                 {player.sus_count > 0 && <span className="text-xs tabular-nums">{player.sus_count}</span>}
               </button>
               <button type="button" role="menuitem" onClick={() => { setActionMenuOpen(false); openReportModal('weirdo'); }} className="flex w-full items-center justify-between gap-3 rounded-lg px-2.5 py-2 text-left text-sm text-violet-300 transition-colors hover:bg-violet-500/10">
-                <span>Vote Weirdo</span>
+                <span>{t("generated.players.voteWeirdo")}</span>
                 {player.weirdo_count > 0 && <span className="text-xs tabular-nums">{player.weirdo_count}</span>}
               </button>
               <button type="button" role="menuitem" onClick={() => { setActionMenuOpen(false); openReportModal('hall_of_fame'); }} className="flex w-full items-center justify-between gap-3 rounded-lg px-2.5 py-2 text-left text-sm text-emerald-300 transition-colors hover:bg-emerald-500/10">
-                <span>Vote Hall of Fame</span>
+                <span>{t("generated.players.voteHallOfFame")}</span>
                 {player.hall_of_fame_count > 0 && <span className="text-xs tabular-nums">{player.hall_of_fame_count}</span>}
               </button>
 
               {(isAdmin || isApproved) && (
                 <>
                   <div className="my-2 border-t border-pc-border/70" />
-                  <div className="px-2 pb-1 text-[10px] font-bold uppercase tracking-widest text-pc-text-muted">Moderation</div>
+                  <div className="px-2 pb-1 text-[10px] font-bold uppercase tracking-widest text-pc-text-muted">{t("generated.players.moderation")}</div>
                   <button type="button" role="menuitem" onClick={() => { setActionMenuOpen(false); openReportModal('cheater'); }} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-red-400 transition-colors hover:bg-red-500/10">
-                    Flag as cheater
-                  </button>
+                    {t("generated.players.flagAsCheater")}</button>
                 </>
               )}
             </div>
@@ -534,15 +534,15 @@ export default function PlayerProfilePage() {
               <span className="md:hidden">
                 {refreshCooldownUntil
                   ? refreshRemainingMs > 0
-                    ? `Refresh in ${formatCooldown(refreshRemainingMs)}.`
-                    : 'Refresh available.'
+                    ? t("generated.players.refreshInValue1.5356e91", { value1: formatCooldown(refreshRemainingMs) })
+                    : t("generated.players.refreshAvailable")
                   : refreshFeedback.message}
               </span>
               <span className="hidden md:inline">
                 {refreshCooldownUntil
                   ? refreshRemainingMs > 0
-                    ? `${refreshFeedback.message} ${formatCooldown(refreshRemainingMs)}.`
-                    : 'Profile can now be refreshed.'
+                    ? t("generated.players.value1Value2", { value1: refreshFeedback.message, value2: formatCooldown(refreshRemainingMs) })
+                    : t("generated.players.profileCanNowBeRefreshed")
                   : refreshFeedback.message}
               </span>
             </div>
@@ -563,7 +563,7 @@ export default function PlayerProfilePage() {
             ) : (
               <picture>
                 <source srcSet="/images/icons/Avatar_Default_Icon.avif" type="image/avif" />
-                <img src="/images/icons/Avatar_Default_Icon.png" alt={`${player.name}'s Paladins avatar`} className="w-full h-full object-cover" />
+                <img src="/images/icons/Avatar_Default_Icon.png" alt={t("generated.players.value1SPaladinsAvatar", { value1: player.name })} className="w-full h-full object-cover" />
               </picture>
             )}
           </div>
@@ -573,16 +573,16 @@ export default function PlayerProfilePage() {
                 <PlayerName playerId={player.id} className="gap-1.5 [&_img]:h-5 [&_img]:w-5 sm:[&_img]:h-6 sm:[&_img]:w-6">{player.name}</PlayerName>
               </h1>
               {player.cheater && (
-                <span className="text-xs font-bold text-red-400 bg-red-500/10 px-1.5 py-0.5 rounded">CHEATER</span>
+                <span className="text-xs font-bold text-red-400 bg-red-500/10 px-1.5 py-0.5 rounded">{t("generated.players.cheater")}</span>
               )}
               {player.sus_count > 0 && !player.cheater && (
-                <span className="text-xs font-bold text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded">SUS</span>
+                <span className="text-xs font-bold text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded">{t("generated.players.sus")}</span>
               )}
               {player.weirdo_count > 0 && (
-                <span className="text-xs font-bold text-violet-300 bg-violet-500/10 px-1.5 py-0.5 rounded">WEIRDO ({player.weirdo_count})</span>
+                <span className="text-xs font-bold text-violet-300 bg-violet-500/10 px-1.5 py-0.5 rounded">{t("generated.players.weirdo.2a889b0")}{player.weirdo_count})</span>
               )}
               {player.hall_of_fame_count > 0 && (
-                <span className="text-xs font-bold text-emerald-300 bg-emerald-500/10 px-1.5 py-0.5 rounded">HALL OF FAME ({player.hall_of_fame_count})</span>
+                <span className="text-xs font-bold text-emerald-300 bg-emerald-500/10 px-1.5 py-0.5 rounded">{t("generated.players.hallOfFame.6170909")}{player.hall_of_fame_count})</span>
               )}
             </div>
             {/* Title + loading frame */}
@@ -602,10 +602,10 @@ export default function PlayerProfilePage() {
 
       {/* Keep loadouts visible beside the compact profile header on desktop. */}
       <div className="lg:col-span-1">
-        <h2 className="pc-card-title shadow-sm">Loadouts</h2>
+        <h2 className="pc-card-title shadow-sm">{t("generated.players.loadouts")}</h2>
         <Link href={`/players/${id}/loadouts`} className="group flex items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-3 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary">
           <SmartImage src="/images/icons/Player_Loadouts_Icon.png" alt="" className="h-11 w-11 shrink-0 object-contain" />
-          <div className="min-w-0 flex-1"><div className="text-sm font-semibold text-pc-text group-hover:text-pc-accent">Player Loadouts</div><div className="mt-0.5 text-xs text-pc-text-muted">View saved decks by champion</div></div>
+          <div className="min-w-0 flex-1"><div className="text-sm font-semibold text-pc-text group-hover:text-pc-accent">{t("generated.players.playerLoadouts")}</div><div className="mt-0.5 text-xs text-pc-text-muted">{t("generated.players.viewSavedDecksByChampion")}</div></div>
           <span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent">→</span>
         </Link>
       </div>
@@ -617,7 +617,7 @@ export default function PlayerProfilePage() {
         <div className="lg:col-span-2 space-y-5">
           {/* Account Overview */}
           <div>
-            <h2 className="pc-card-title shadow-sm">Account</h2>
+            <h2 className="pc-card-title shadow-sm">{t("generated.players.account")}</h2>
             <div className="pc-card">
               <div className="grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(12rem,0.65fr)]">
                 <div className="min-w-0">
@@ -627,7 +627,7 @@ export default function PlayerProfilePage() {
                       {effectiveTier.displayName}
                     </span>
                     {player.kbm_points > 0 && (
-                      <span className="font-mono text-xs text-pc-text-muted">{player.kbm_points} TP</span>
+                      <span className="font-mono text-xs text-pc-text-muted">{player.kbm_points} {t("generated.players.tp")}</span>
                     )}
                     <span className="text-pc-border">·</span>
                     <span className="text-xs text-pc-text-muted">{player.region}</span>
@@ -637,32 +637,33 @@ export default function PlayerProfilePage() {
                       <span className="text-xs text-pc-text-muted">({player.platform_name})</span>
                     )}
                     <span className="text-pc-border">·</span>
-                    <span className="text-xs text-pc-text-muted">Lvl {player.level}</span>
+                    <span className="text-xs text-pc-text-muted">{t("generated.players.lvl")}{" "}{player.level}</span>
                     <span className="text-pc-border">·</span>
-                    <span className="text-xs text-pc-text-muted">Mastery {player.mastery_level}</span>
+                    <span className="text-xs text-pc-text-muted">{t("generated.players.mastery")}{" "}{player.mastery_level}</span>
                   </div>
                   <StatGrid>
-                    <StatRow label="Created" value={formatLocalDate(player.created_datetime)} />
-                    <StatRow label="Last Login" value={formatLocalDateTime(player.last_login_datetime)} />
-                    <StatRow label="Playtime" value={formatHours(player.hours_played)} />
-                    <StatRow label="Total XP" value={formatLargeNumber(player.total_xp)} />
-                    <StatRow label="Achievements" value={formatNumber(player.total_achievements)} />
-                    <StatRow label="Champion XP" value={formatLargeNumber(player.total_worshippers)} />
+                    <StatRow label={t("generated.players.created")} value={formatLocalDate(player.created_datetime)} />
+                    <StatRow label={t("generated.players.lastLogin")} value={formatLocalDateTime(player.last_login_datetime)} />
+                    <StatRow label={t("generated.players.playtime")} value={formatHours(player.hours_played)} />
+                    <StatRow label={t("generated.players.totalXp")} value={formatLargeNumber(player.total_xp)} />
+                    <StatRow label={t("generated.players.achievements")} value={formatNumber(player.total_achievements)} />
+                    <StatRow label={t("generated.players.championXp")} value={formatLargeNumber(player.total_worshippers)} />
                   </StatGrid>
                   {player.personal_status_message && (
                     <div className="mt-3 border-t border-pc-border/50 pt-3">
-                      <span className="text-xs text-pc-text-muted">Status: </span>
+                      <span className="text-xs text-pc-text-muted">{t("generated.players.status")}{" "}</span>
                       <span className="text-xs text-pc-text-secondary italic">{player.personal_status_message}</span>
                     </div>
                   )}
                 </div>
                 <div className="border-t border-pc-border/50 pt-3 lg:border-l lg:border-t-0 lg:pl-4 lg:pt-0">
-                  <div className="mb-1.5 text-[10px] uppercase tracking-wider text-pc-text-muted">Overall</div>
+                  <div className="mb-1.5 text-[10px] uppercase tracking-wider text-pc-text-muted">{t("generated.players.overall")}</div>
                   <div className="grid grid-cols-1 gap-y-1.5">
-                    <StatRow label="Total Matches" value={formatNumber(globalMatches)} />
-                    <StatRow label="Total Wins" value={formatNumber(globalWins)} color="text-emerald-400" />
-                    <StatRow label="Total Losses" value={formatNumber(globalLosses)} color="text-rose-400" />
-                    <StatRow label="Win Rate" value={winRate.toFixed(1) + "%"} color={winRate >= 50 ? "text-emerald-400" : "text-rose-400"} />
+                    <StatRow label={t("generated.players.totalMatches")} value={formatNumber(globalMatches)} />
+                    <StatRow label={t("generated.players.casualDeserted")} value={formatNumber(player.leaves)} />
+                    <StatRow label={t("generated.players.totalWins")} value={formatNumber(globalWins)} color="text-emerald-400" />
+                    <StatRow label={t("generated.players.totalLosses")} value={formatNumber(globalLosses)} color="text-rose-400" />
+                    <StatRow label={t("generated.players.winRate")} value={winRate.toFixed(1) + "%"} color={winRate >= 50 ? "text-emerald-400" : "text-rose-400"} />
                   </div>
                 </div>
               </div>
@@ -672,37 +673,37 @@ export default function PlayerProfilePage() {
           {/* Recent Matches */}
           <div>
             <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-              <h2 className="pc-card-title shadow-sm">Recent Matches</h2>
-              <span className="text-[11px] text-pc-text-muted">All queues · served from the history cache</span>
+              <h2 className="pc-card-title shadow-sm">{t("generated.players.recentMatches")}</h2>
+              <span className="text-[11px] text-pc-text-muted">{t("generated.players.allQueuesServedFromTheHistoryCache")}</span>
             </div>
             <div className="pc-card">
               {matchesLoading ? (
                 <LoadingPanel compact />
               ) : matches.length === 0 ? (
-                <p className="text-pc-text-muted text-sm">No matches recorded yet.</p>
+                <p className="text-pc-text-muted text-sm">{t("generated.players.noMatchesRecordedYet")}</p>
               ) : (
                 <>
                 <div className="space-y-2 lg:hidden">
                   {matches.filter((match) => match.championName).map((match) => <Link key={match.matchId} href={`/matches/${match.matchId}`} className="pc-mobile-panel flex min-w-0 items-center gap-3 p-3">
                     <img src={getChampionIconSafe(match.championName)} alt="" className="h-10 w-10 shrink-0 rounded-lg object-contain" />
-                    <div className="min-w-0 flex-1"><div className="flex min-w-0 items-center gap-2"><span className="truncate text-sm font-semibold text-pc-text">{match.championName}</span><span className={`shrink-0 text-[10px] font-bold ${match.isWinner ? "text-emerald-400" : "text-rose-400"}`}>{match.isWinner ? "WIN" : "LOSS"}</span></div><div className="truncate text-[10px] text-pc-text-muted">{match.queueId === 486 ? "Ranked" : "Casual"} · {displayMatchMap(match.mapGame, match.queueId)}</div><div className="mt-1 text-[10px] text-pc-text-muted">{formatLocalDateTime(match.entryDatetime)}</div></div>
-                    <div className="shrink-0 text-right"><div className="font-mono text-sm font-bold text-pc-text">{match.kills}/{match.deaths}/{match.assists}</div><div className="text-[9px] uppercase text-pc-text-muted">{formatKda(match.kills, match.deaths, match.assists)} KDA</div><div className="mt-1 font-mono text-[10px] text-pc-text-secondary">{formatMatchDuration(match.duration)}</div></div>
+                    <div className="min-w-0 flex-1"><div className="flex min-w-0 items-center gap-2"><span className="truncate text-sm font-semibold text-pc-text">{match.championName}</span><span className={`shrink-0 text-[10px] font-bold ${match.isWinner ? "text-emerald-400" : "text-rose-400"}`}>{match.isWinner ? t("generated.players.win") : t("generated.players.loss")}</span></div><div className="truncate text-[10px] text-pc-text-muted">{match.queueId === 486 ? t("generated.players.ranked") : t("generated.players.casual")} · {displayMatchMap(match.mapGame, match.queueId)}</div><div className="mt-1 text-[10px] text-pc-text-muted">{formatLocalDateTime(match.entryDatetime)}</div></div>
+                    <div className="shrink-0 text-right"><div className="font-mono text-sm font-bold text-pc-text">{match.kills}/{match.deaths}/{match.assists}</div><div className="text-[9px] uppercase text-pc-text-muted">{formatKda(match.kills, match.deaths, match.assists)} {t("generated.players.kda")}</div><div className="mt-1 font-mono text-[10px] text-pc-text-secondary">{formatMatchDuration(match.duration)}</div></div>
                   </Link>)}
                 </div>
                 <div className="hidden overflow-x-auto lg:block">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-pc-border text-pc-text-muted text-left text-xs">
-                        <th className="px-3 py-1.5">Match</th>
-                        <th className="px-3 py-1.5">Champion</th>
-                        <th className="px-3 py-1.5">Queue</th>
+                        <th className="px-3 py-1.5">{t("generated.players.match.0335207")}</th>
+                        <th className="px-3 py-1.5">{t("generated.players.champion")}</th>
+                        <th className="px-3 py-1.5">{t("generated.players.queue")}</th>
                         <th className="px-3 py-1.5">K</th>
                         <th className="px-3 py-1.5">D</th>
                         <th className="px-3 py-1.5">A</th>
-                        <th className="px-3 py-1.5">KDA</th>
-                        <th className="px-3 py-1.5">Result</th>
-                        <th className="px-3 py-1.5">Time</th>
-                        <th className="px-3 py-1.5">Played</th>
+                        <th className="px-3 py-1.5">{t("generated.players.kda")}</th>
+                        <th className="px-3 py-1.5">{t("generated.players.result")}</th>
+                        <th className="px-3 py-1.5">{t("generated.players.time")}</th>
+                        <th className="px-3 py-1.5">{t("generated.players.played")}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -723,7 +724,7 @@ export default function PlayerProfilePage() {
                             </td>
                             <td className="px-3 py-1.5">
                               <div className="text-xs text-pc-text-secondary">
-                                {m.queueId === 486 ? "Ranked" : m.queueId ? "Casual" : "Unknown"}
+                                {m.queueId === 486 ? t("generated.players.ranked") : m.queueId ? t("generated.players.casual") : t("generated.players.unknown")}
                               </div>
                               <div className="max-w-28 truncate text-[10px] text-pc-text-muted" title={displayMatchMap(m.mapGame, m.queueId)}>{displayMatchMap(m.mapGame, m.queueId)}</div>
                             </td>
@@ -754,34 +755,34 @@ export default function PlayerProfilePage() {
         <div className="lg:col-span-1 space-y-5">
           {/* KBM Ranked */}
           <div>
-            <h2 className="pc-card-title shadow-sm">Ranked</h2>
+            <h2 className="pc-card-title shadow-sm">{t("generated.players.ranked")}</h2>
             <div className="pc-card p-3">
               <div className="flex min-w-0 items-center gap-3">
                 <div className="w-14 shrink-0 text-center">
                   <img src={rankIcon} alt={effectiveTier.displayName} className="mx-auto h-10 w-10 object-contain" />
-                  <div className={`mt-1 truncate text-[11px] font-semibold ${tierColor}`}>{effectiveTier.displayName}</div>
-                  <div className="mt-0.5 text-[10px] text-pc-text-muted">Season {player.kbm_season}</div>
+                  <div className={`mt-1 text-[11px] font-semibold ${tierColor}`}>{rankedTierLabel}</div>
+                  <div className="mt-0.5 text-[10px] text-pc-text-muted">{t("generated.players.season")}{" "}{player.kbm_season}</div>
                 </div>
                 <div className="min-w-0 flex-1 border-l border-pc-border/50 pl-3">
                   <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
-                    <StatRow label="Rank" value={`#${effectiveTier.displayRank}`} color="text-pc-accent" />
-                    <StatRow label="Prev" value={`#${player.kbm_prev_rank}`} />
-                    <StatRow label="Trend" value={`${trendArrow(player.kbm_trend)} ${Math.abs(player.kbm_trend)}`} color={trendColor(player.kbm_trend)} />
-                    <StatRow label="Leaves" value={formatNumber(player.kbm_leaves)} />
+                    <StatRow label={t("generated.players.rank")} value={`#${effectiveTier.displayRank}`} color="text-pc-accent" />
+                    <StatRow label={t("generated.players.prev")} value={`#${player.kbm_prev_rank}`} />
+                    <StatRow label={t("generated.players.trend")} value={`${trendArrow(player.kbm_trend)} ${Math.abs(player.kbm_trend)}`} color={trendColor(player.kbm_trend)} />
+                    <StatRow label={t("common.metrics.deserted")} value={formatNumber(player.kbm_leaves)} />
                   </div>
                 </div>
               </div>
               <div className="mt-3 grid grid-cols-3 gap-1.5 border-t border-pc-border/50 pt-2.5 text-center">
                 <div>
-                  <div className="text-[10px] text-pc-text-muted">Wins</div>
+                  <div className="text-[10px] text-pc-text-muted">{t("generated.players.wins")}</div>
                   <div className="font-mono text-xs text-emerald-400">{player.kbm_wins}</div>
                 </div>
                 <div>
-                  <div className="text-[10px] text-pc-text-muted">Losses</div>
+                  <div className="text-[10px] text-pc-text-muted">{t("generated.players.losses")}</div>
                   <div className="font-mono text-xs text-rose-400">{player.kbm_losses}</div>
                 </div>
                 <div>
-                  <div className="text-[10px] text-pc-text-muted">Win Rate</div>
+                  <div className="text-[10px] text-pc-text-muted">{t("generated.players.winRate")}</div>
                   <div className="font-mono text-xs text-pc-text">{kbmWr}%</div>
                 </div>
               </div>
@@ -790,21 +791,21 @@ export default function PlayerProfilePage() {
 
           {/* Glicko Rating */}
           <div>
-            <h2 className="pc-card-title shadow-sm">Rating</h2>
+            <h2 className="pc-card-title shadow-sm">{t("generated.players.rating")}</h2>
             <div className="pc-card">
               {kbmRating ? (
                 <div className="space-y-3">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-pc-accent font-mono">{Number(kbmRating.mu).toFixed(0)}</div>
-                    <div className="text-xs text-pc-text-muted mt-0.5">Glicko-2 Rating</div>
+                    <div className="text-xs text-pc-text-muted mt-0.5">{t("generated.players.glicko2Rating")}</div>
                   </div>
                   <div className="grid grid-cols-1 gap-2 text-center min-[400px]:grid-cols-2">
                     <div className="pc-surface-light rounded p-2 border border-pc-border/50">
-                      <div className="text-xs text-pc-text-muted">Deviation</div>
+                      <div className="text-xs text-pc-text-muted">{t("generated.players.deviation")}</div>
                       <div className="text-xs font-mono text-pc-text">{Number(kbmRating.phi).toFixed(0)}</div>
                     </div>
                     <div className="pc-surface-light rounded p-2 border border-pc-border/50">
-                      <div className="text-xs text-pc-text-muted">Volatility</div>
+                      <div className="text-xs text-pc-text-muted">{t("generated.players.volatility")}</div>
                       <div className="text-xs font-mono text-pc-text">{Number(kbmRating.volatility).toFixed(4)}</div>
                     </div>
                   </div>
@@ -818,33 +819,33 @@ export default function PlayerProfilePage() {
                       <div className="text-xs font-mono text-rose-400">{formatNumber(Number.isFinite(Number(kbmRating.losses)) ? Number(kbmRating.losses) : null)}</div>
                     </div>
                     <div>
-                      <div className="text-xs text-pc-text-muted">WR</div>
+                      <div className="text-xs text-pc-text-muted">{t("generated.players.wr.a175495")}</div>
                       <div className="text-xs font-mono text-pc-text">
                         {Number.isFinite(Number(kbmRating.wins)) && Number(kbmRating.matches_played) > 0
-                          ? `${((Number(kbmRating.wins) / Number(kbmRating.matches_played)) * 100).toFixed(0)}%`
+                          ? t("generated.players.value1", { value1: ((Number(kbmRating.wins) / Number(kbmRating.matches_played)) * 100).toFixed(0) })
                           : "—"}
                       </div>
                     </div>
                   </div>
                 </div>
               ) : (
-                <p className="text-pc-text-muted text-sm text-center py-4">No ranked rating yet</p>
+                <p className="text-pc-text-muted text-sm text-center py-4">{t("generated.players.noRankedRatingYet")}</p>
               )}
             </div>
           </div>
 
           {/* Consolidated performance summary */}
           <div>
-            <h2 className="pc-card-title shadow-sm">Ranked Performance</h2>
+            <h2 className="pc-card-title shadow-sm">{t("generated.players.rankedPerformance")}</h2>
             <div className="pc-card p-3">
-              <div className="mb-1.5 text-[10px] uppercase tracking-wider text-pc-text-muted">Averages</div>
+              <div className="mb-1.5 text-[10px] uppercase tracking-wider text-pc-text-muted">{t("generated.players.averages")}</div>
               <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
-                <StatRow label="Damage / Min" value={formatNumber(player.avg_dpm)} color="text-red-400" />
-                <StatRow label="Healing / Min" value={formatNumber(player.avg_hpm)} color="text-emerald-400" />
-                <StatRow label="Shielding / Min" value={formatNumber(player.avg_mpm)} color="text-sky-400" />
-                <StatRow label="Credits / Min" value={formatNumber(player.avg_egpm)} color="text-yellow-400" />
+                <StatRow label={t("generated.players.damageMin")} value={formatNumber(player.avg_dpm)} color="text-red-400" />
+                <StatRow label={t("generated.players.healingMin")} value={formatNumber(player.avg_hpm)} color="text-emerald-400" />
+                <StatRow label={t("generated.players.shieldingMin")} value={formatNumber(player.avg_mpm)} color="text-sky-400" />
+                <StatRow label={t("generated.players.creditsMin")} value={formatNumber(player.avg_egpm)} color="text-yellow-400" />
                 {player.avg_shpm != null && (
-                  <StatRow label="Shielding / Min" value={formatNumber(player.avg_shpm)} color="text-violet-400" />
+                  <StatRow label={t("generated.players.shieldingMin")} value={formatNumber(player.avg_shpm)} color="text-violet-400" />
                 )}
               </div>
             </div>
@@ -853,7 +854,7 @@ export default function PlayerProfilePage() {
           {/* Champion Ratings */}
           {championRatings.length > 0 && (
             <div>
-              <h2 className="pc-card-title shadow-sm">Champion Ratings</h2>
+              <h2 className="pc-card-title shadow-sm">{t("generated.players.championRatings")}</h2>
               <div className="pc-card">
                 <div className="space-y-2">
                   {championRatings.slice(0, 10).map((cr) => {
@@ -876,12 +877,12 @@ export default function PlayerProfilePage() {
                           <span className="text-xs font-mono text-pc-accent ml-2">{Number(cr.mu).toFixed(0)}</span>
                         </div>
                         <div className="flex items-center gap-2 text-xs text-pc-text-muted">
-                          <span>{cr.matches_played} games</span>
+                          <span>{cr.matches_played} {t("generated.players.games")}</span>
                           <span>·</span>
                           <span>
                             {cr.matches_played > 0
-                              ? `${((cr.wins / cr.matches_played) * 100).toFixed(0)}% WR`
-                              : "No WR"}
+                              ? t("generated.players.value1Wr", { value1: ((cr.wins / cr.matches_played) * 100).toFixed(0) })
+                              : t("generated.players.noWr")}
                           </span>
                         </div>
                       </div>
@@ -896,12 +897,12 @@ export default function PlayerProfilePage() {
           {/* Queue Ratings (if multiple queues) */}
           {queueRatings.length > 1 && (
             <div>
-              <h2 className="pc-card-title shadow-sm">Queue Ratings</h2>
+              <h2 className="pc-card-title shadow-sm">{t("generated.players.queueRatings")}</h2>
               <div className="pc-card">
                 <div className="space-y-2">
                   {queueRatings.map((qr) => (
                     <div key={qr.queue_id} className="flex items-center justify-between py-1.5 border-b border-pc-border/30 last:border-0">
-                      <span className="text-xs text-pc-text-muted">Queue {qr.queue_id}</span>
+                      <span className="text-xs text-pc-text-muted">{t("generated.players.queue")}{" "}{qr.queue_id}</span>
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-mono text-pc-accent">{Number(qr.mu).toFixed(0)}</span>
                         <span className="text-xs text-pc-text-muted">φ{Number(qr.phi).toFixed(0)}</span>
@@ -920,7 +921,7 @@ export default function PlayerProfilePage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowCurrentMatch(false)}>
           <div className="pc-card mx-3 max-h-[calc(100vh-1.5rem)] w-full max-w-7xl overflow-y-auto p-5 sm:mx-6 sm:p-6 lg:p-7" onClick={(e) => e.stopPropagation()}>
             <div className="mb-5 flex items-center justify-between">
-              <h3 className="text-xl font-bold text-pc-text sm:text-2xl">Current Match</h3>
+              <h3 className="text-xl font-bold text-pc-text sm:text-2xl">{t("generated.players.currentMatch")}</h3>
               <button onClick={() => setShowCurrentMatch(false)} className="text-pc-text-muted hover:text-pc-text transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
               </button>
@@ -933,18 +934,18 @@ export default function PlayerProfilePage() {
               <div className="py-8 text-center"><LoadingIndicator /></div>
             ) : !currentMatch.match ? (
               <div className="text-center py-8">
-                <div className="text-pc-text-muted text-sm mb-2">Not in a live match</div>
-                <div className="text-xs text-pc-text-muted/60">This player is not currently playing a tracked match.</div>
+                <div className="text-pc-text-muted text-sm mb-2">{t("generated.players.notInALiveMatch")}</div>
+                <div className="text-xs text-pc-text-muted/60">{t("generated.players.thisPlayerIsNotCurrentlyPlayingATrackedMatch")}</div>
               </div>
             ) : (
               <div className="space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-pc-border/70 bg-pc-bg-secondary/60 px-4 py-3">
                   <div className="flex min-w-0 items-center gap-2.5 text-sm">
-                    <span className="text-pc-text-muted">Match</span>
+                    <span className="text-pc-text-muted">{t("generated.players.match.0335207")}</span>
                     <Link href={`/matches/${currentMatch.match.match_id}`} className="font-mono text-pc-accent hover:text-pc-accent-secondary">
                       #{currentMatch.match.match_id}
                     </Link>
-                    <span className="truncate text-pc-text-secondary">{currentMatch.match.map || "Unknown map"}</span>
+                    <span className="truncate text-pc-text-secondary">{currentMatch.match.map || t("generated.players.unknownMap")}</span>
                   </div>
                   <span className={`text-sm font-semibold ${currentMatch.match.status === 'active' ? 'text-emerald-400' : 'text-pc-text-muted'}`}>
                     {currentMatch.match.status}
@@ -957,8 +958,8 @@ export default function PlayerProfilePage() {
                       return (
                         <section key={taskForce} className="overflow-hidden rounded-xl border border-pc-border/70 bg-pc-bg-secondary/40">
                           <div className={`flex items-center justify-between border-b border-pc-border/60 px-4 py-3 text-sm font-semibold ${taskForce === 1 ? 'text-sky-300' : 'text-rose-300'}`}>
-                            <span>Team {taskForce}</span>
-                            <span className="text-xs font-normal text-pc-text-muted">{team.length} players</span>
+                            <span>{t("generated.players.team")}{" "}{taskForce}</span>
+                            <span className="text-xs font-normal text-pc-text-muted">{team.length} {t("generated.players.players.2912fa5")}</span>
                           </div>
                           <div className="divide-y divide-pc-border/50">
                             {team.map((p: any) => {
@@ -1008,11 +1009,11 @@ export default function PlayerProfilePage() {
                                     <div className="min-w-0">
                                       {Number(p.player_id) > 0 ? (
                                         <Link href={`/players/${p.player_id}`} className="block truncate text-sm font-semibold text-pc-text hover:text-pc-accent sm:text-base">
-                                          <PlayerName playerId={p.player_id}>{p.player_name || `#${p.player_id}`}</PlayerName>
+                                          <PlayerName playerId={p.player_id}>{p.player_name || t("generated.players.value1.e7f351a", { value1: p.player_id })}</PlayerName>
                                         </Link>
                                       ) : (
                                         <span className="block truncate text-sm font-semibold text-pc-text-muted sm:text-base">
-                                          {p.player_name || 'Private Account'}
+                                          {p.player_name || t("generated.players.privateAccount")}
                                         </span>
                                       )}
                                       <div className="truncate text-xs text-pc-text-muted">{profileDetails}</div>
@@ -1020,7 +1021,7 @@ export default function PlayerProfilePage() {
                                   </div>
                                   <div className="text-right text-xs leading-5">
                                     <div className="font-mono text-sm text-pc-accent">
-                                      {p.queue_elo != null ? `${Math.round(Number(p.queue_elo))} ELO` : p.has_profile ? "Local profile" : "No rating"}
+                                      {p.queue_elo != null ? t("generated.players.value1Elo", { value1: Math.round(Number(p.queue_elo)) }) : p.has_profile ? t("generated.players.localProfile") : t("generated.players.noRating")}
                                     </div>
                                     <div className="font-medium text-pc-text-secondary">{tierName} · {winRate}</div>
                                     <div className="text-pc-text-muted">{performanceSummary}</div>
@@ -1028,7 +1029,7 @@ export default function PlayerProfilePage() {
                                 </div>
                               );
                             })}
-                            {team.length === 0 && <div className="px-4 py-6 text-center text-sm text-pc-text-muted">No players recorded yet.</div>}
+                            {team.length === 0 && <div className="px-4 py-6 text-center text-sm text-pc-text-muted">{t("generated.players.noPlayersRecordedYet")}</div>}
                           </div>
                         </section>
                       );

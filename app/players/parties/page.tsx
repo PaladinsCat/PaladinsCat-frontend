@@ -12,6 +12,7 @@ import {
   type PartyPairSummary,
   type PartyStackSummary,
 } from "@/lib/api-client";
+import { useLocalization } from "@/lib/localization-context";
 
 const PAGE_SIZE = 24;
 type DirectoryMode = "stacks" | "pairs";
@@ -24,10 +25,12 @@ function observedAt(value: string | null) {
 }
 
 function MatchCount({ count }: { count: number }) {
-  return <span className="shrink-0 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-2 py-1 text-xs font-semibold text-cyan-300">{count.toLocaleString()} match{count === 1 ? "" : "es"}</span>;
+  const { t } = useLocalization();
+  return <span className="shrink-0 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-2 py-1 text-xs font-semibold text-cyan-300">{count.toLocaleString()} {t("generated.players.match")}{count === 1 ? "" : t("generated.players.es")}</span>;
 }
 
 export default function RankedPartiesPage() {
+  const { t } = useLocalization();
   const [mode, setMode] = useState<DirectoryMode>("stacks");
   const [pairs, setPairs] = useState<PartyPairSummary[]>([]);
   const [stacks, setStacks] = useState<PartyStackSummary[]>([]);
@@ -61,7 +64,7 @@ export default function RankedPartiesPage() {
         setTotalPages(result.totalPages);
       })
       .catch(() => {
-        if (!cancelled) setError("Ranked parties could not be loaded.");
+        if (!cancelled) setError(t("generated.players.rankedPartiesCouldNotBeLoaded"));
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -78,12 +81,12 @@ export default function RankedPartiesPage() {
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6">
       <header>
-        <Link href="/players" className="mb-2 inline-block text-xs text-pc-accent hover:underline">← Players</Link>
+        <Link href="/players" className="mb-2 inline-block text-xs text-pc-accent hover:underline">{t("generated.players.players")}</Link>
         <div className="flex items-start gap-3">
           <UsersRound aria-hidden="true" className="mt-1 h-9 w-9 shrink-0 text-cyan-300" strokeWidth={1.5} />
           <div className="min-w-0">
-            <h1 className="pc-heading pc-heading-lg text-pc-accent">Ranked Parties</h1>
-            <p className="mt-1 max-w-3xl text-sm text-pc-text-secondary">Search exact 2–5 player stacks or every canonical pair produced by those parties. Each match contributes once, regardless of player order.</p>
+            <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.players.rankedParties")}</h1>
+            <p className="mt-1 max-w-3xl text-sm text-pc-text-secondary">{t("generated.players.searchExact25PlayerStacksOrEveryCanonicalPair")}</p>
           </div>
         </div>
       </header>
@@ -108,7 +111,7 @@ export default function RankedPartiesPage() {
             <input
               value={query}
               onChange={(event) => { setQuery(event.target.value); setPage(1); }}
-              placeholder={mode === "stacks" ? "Search any stack member…" : "Search either player…"}
+              placeholder={mode === "stacks" ? t("generated.players.searchAnyStackMember") : t("generated.players.searchEitherPlayer")}
               className="w-full rounded-xl border border-pc-border bg-pc-bg-elevated py-2.5 pl-9 pr-3 text-sm text-pc-text outline-none transition-colors placeholder:text-pc-text-muted focus:border-pc-accent-mid"
             />
           </label>
@@ -117,28 +120,28 @@ export default function RankedPartiesPage() {
               value={stackSize ?? ""}
               onChange={(event) => { setStackSize(event.target.value ? Number(event.target.value) : null); setPage(1); }}
               className="rounded-xl border border-pc-border bg-pc-bg-elevated px-3 py-2.5 text-sm text-pc-text outline-none focus:border-pc-accent-mid"
-              aria-label="Stack size"
+              aria-label={t("generated.players.stackSize")}
             >
-              <option value="">All sizes</option>
-              {[2, 3, 4, 5].map(size => <option key={size} value={size}>{size}-stack</option>)}
+              <option value="">{t("generated.players.allSizes")}</option>
+              {[2, 3, 4, 5].map(size => <option key={size} value={size}>{size}{t("generated.players.stack")}</option>)}
             </select>
           )}
         </div>
-        <div className="text-xs text-pc-text-muted">{loading && itemsEmpty ? "Loading…" : `${total.toLocaleString()} known ${mode === "stacks" ? "stack" : "pair"}${total === 1 ? "" : "s"}`}</div>
+        <div className="text-xs text-pc-text-muted">{loading && itemsEmpty ? t("generated.players.loading") : t(mode === "stacks" ? (total === 1 ? "common.count.knownStackOne" : "common.count.knownStackMany") : (total === 1 ? "common.count.knownPairOne" : "common.count.knownPairMany"), { count: total.toLocaleString() })}</div>
       </div>
 
       {error && <div className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-300">{error}</div>}
       {loading && itemsEmpty ? (
         <LoadingPanel compact />
       ) : itemsEmpty ? (
-        <div className="rounded-xl border border-dashed border-pc-border bg-pc-bg-elevated px-4 py-12 text-center text-sm text-pc-text-muted">No ranked {mode} match this search.</div>
+        <div className="rounded-xl border border-dashed border-pc-border bg-pc-bg-elevated px-4 py-12 text-center text-sm text-pc-text-muted">{t("generated.players.noRanked")}{" "}{mode} {t("generated.players.matchThisSearch")}</div>
       ) : mode === "stacks" ? (
         <div className={`grid grid-cols-1 gap-3 md:grid-cols-2 ${loading ? "opacity-60" : ""}`}>
           {stacks.map(stack => (
             <article key={stack.groupKey} className="overflow-hidden rounded-xl border border-cyan-500/20 bg-pc-bg-elevated p-4">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted">Exact ranked {stack.stackSize}-stack</div>
+                  <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted">{t("generated.players.exactRanked")}{" "}{stack.stackSize}{t("generated.players.stack")}</div>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {stack.players.map(player => (
                       <Link key={player.id} href={`/players/${player.id}`} className="rounded-lg border border-pc-border bg-pc-bg/50 px-2.5 py-1.5 text-sm font-semibold text-pc-text transition-colors hover:border-pc-accent-mid hover:text-pc-accent">
@@ -151,7 +154,7 @@ export default function RankedPartiesPage() {
               </div>
               <div className="mt-4 flex items-start gap-2 border-t border-pc-border pt-3 text-xs text-pc-text-muted">
                 <CalendarClock aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0" />
-                <div><div>First observed <span className="text-pc-text-secondary">{observedAt(stack.firstSeen)}</span></div><div className="mt-1">Last observed <span className="text-pc-text-secondary">{observedAt(stack.lastSeen)}</span></div></div>
+                <div><div>{t("generated.players.firstObserved")}{" "}<span className="text-pc-text-secondary">{observedAt(stack.firstSeen)}</span></div><div className="mt-1">{t("generated.players.lastObserved")}{" "}<span className="text-pc-text-secondary">{observedAt(stack.lastSeen)}</span></div></div>
               </div>
             </article>
           ))}
@@ -162,7 +165,7 @@ export default function RankedPartiesPage() {
             <article key={`${pair.sourcePlayerId}-${pair.targetPlayerId}`} className="overflow-hidden rounded-xl border border-cyan-500/20 bg-pc-bg-elevated p-4">
               <div className="flex flex-col items-start gap-3 sm:flex-row sm:justify-between">
                 <div className="min-w-0">
-                  <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted">Canonical party pair</div>
+                  <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted">{t("generated.players.canonicalPartyPair")}</div>
                   <div className="mt-2 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-sm font-semibold">
                     <Link href={`/players/${pair.sourcePlayerId}`} className="min-w-0 break-words text-pc-text transition-colors hover:text-pc-accent [overflow-wrap:anywhere]"><PlayerName playerId={pair.sourcePlayerId}>{pair.sourcePlayerName}</PlayerName></Link>
                     <span className="shrink-0 text-cyan-300">+</span>
@@ -173,7 +176,7 @@ export default function RankedPartiesPage() {
               </div>
               <div className="mt-4 flex items-start gap-2 border-t border-pc-border pt-3 text-xs text-pc-text-muted">
                 <CalendarClock aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0" />
-                <div><div>First observed <span className="text-pc-text-secondary">{observedAt(pair.firstSeen)}</span></div><div className="mt-1">Last observed <span className="text-pc-text-secondary">{observedAt(pair.lastSeen)}</span></div></div>
+                <div><div>{t("generated.players.firstObserved")}{" "}<span className="text-pc-text-secondary">{observedAt(pair.firstSeen)}</span></div><div className="mt-1">{t("generated.players.lastObserved")}{" "}<span className="text-pc-text-secondary">{observedAt(pair.lastSeen)}</span></div></div>
               </div>
             </article>
           ))}

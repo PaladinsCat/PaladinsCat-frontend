@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { MatchSearchResult } from "@/lib/api-client";
+import { useLocalization } from "@/lib/localization-context";
 
 /** Format duration seconds → "mm:ss" */
 function formatDuration(seconds: number): string {
@@ -12,12 +13,13 @@ function formatDuration(seconds: number): string {
 }
 
 export default function RelatedMatches({ related, matchId, loading }: { related: MatchSearchResult[]; matchId: number; loading: boolean }) {
+  const { t } = useLocalization();
   if (loading) return null;
   if (related.length === 0) return null;
 
   return (
     <section className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 sm:p-6">
-      <h2 className="text-lg font-bold text-pc-text uppercase tracking-wide mb-4">Related Matches</h2>
+      <h2 className="text-lg font-bold text-pc-text uppercase tracking-wide mb-4">{t("generated.matches.relatedMatches")}</h2>
       <div className="space-y-2">
         {related.map((m, i) => (
           <Link
@@ -27,7 +29,7 @@ export default function RelatedMatches({ related, matchId, loading }: { related:
           >
             <div className="flex items-center gap-3">
               <span className={`w-2 h-2 rounded-full ${m.win_status === "Winner" ? "bg-green-400" : "bg-red-400"}`} />
-              <span className="text-pc-text font-medium">Match #{m.match_id}</span>
+              <span className="text-pc-text font-medium">{t("generated.matches.match")}{m.match_id}</span>
               <span className="text-pc-text-secondary text-sm">{m.champion_name}</span>
             </div>
             <div className="text-sm text-pc-text-muted">

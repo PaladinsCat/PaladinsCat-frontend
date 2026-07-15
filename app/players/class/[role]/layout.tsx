@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getServerLocalization } from "@/lib/server-localization";
 
 type Props = {
   children: React.ReactNode;
@@ -14,10 +15,11 @@ function titleCaseRole(role: string) {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { role } = await params;
   const displayRole = titleCaseRole(role);
+  const { t } = await getServerLocalization();
 
   return {
-    title: `Paladins ${displayRole} Stats — Champion Rankings and ELO`,
-    description: `Compare Paladins ${displayRole} champion stats, win rates, performance averages, ranked data, and champion ELO leaderboards.`,
+    title: t("seo.players.class.title", { role: displayRole }),
+    description: t("seo.players.class.description", { role: displayRole }),
     alternates: {
       canonical: `/players/class/${role}`,
     },

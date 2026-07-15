@@ -17,6 +17,7 @@ import { championSlug } from "@/lib/utils";
 import { getStatQuality } from "@/lib/stat-quality";
 import { ErrorState } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
+import { useLocalization } from "@/lib/localization-context";
 
 function parseMaybeNumber(value: string | string[] | null | undefined): number | null {
   const raw = Array.isArray(value) ? value[0] : value;
@@ -44,6 +45,7 @@ function formatPct(value: number | null | undefined): string {
 }
 
 export default function ChampionCardDetailPage() {
+  const { t } = useLocalization();
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -70,7 +72,7 @@ export default function ChampionCardDetailPage() {
 
     if (!name || !cardId) {
       setLoading(false);
-      setError("Invalid card route.");
+      setError(t("generated.champions.invalidCardRoute"));
       return;
     }
 
@@ -80,9 +82,9 @@ export default function ChampionCardDetailPage() {
     Promise.all([fetchChampions(), getChampionData(name)])
       .then(async ([champions, localData]) => {
         const champion = champions.find((entry) => championSlug(entry.name) === name.toLowerCase());
-        if (!champion) throw new Error("Champion not found.");
+        if (!champion) throw new Error(t("generated.champions.championNotFound"));
         const cardDetail = await fetchChampionCardDetail(champion.id, cardId, "ranked", selectedTalentId);
-        if (!cardDetail) throw new Error("Card stats not found.");
+        if (!cardDetail) throw new Error(t("generated.champions.cardStatsNotFound"));
         if (cancelled) return;
         setChampionData(localData ?? null);
         setDetail(cardDetail);
@@ -133,7 +135,7 @@ export default function ChampionCardDetailPage() {
     return (
       <div className="space-y-4">
         <ContextBackLink fallbackHref={`/champions/${name}`} />
-        <ErrorState title="Card statistics unavailable" message={error ?? "No card data is available for this queue."} />
+        <ErrorState title={t("generated.champions.cardStatisticsUnavailable")} message={error ?? "No card data is available for this queue."} />
       </div>
     );
   }
@@ -156,30 +158,28 @@ export default function ChampionCardDetailPage() {
               <SmartImage src={cardMeta.iconUrl} alt={detail.cardName} className="w-full aspect-[4/3] rounded-md object-cover bg-pc-bg/50" />
             ) : (
               <div className="w-full aspect-[4/3] rounded-md bg-pc-bg-elevated border border-pc-border flex items-center justify-center text-pc-text-muted">
-                No image
-              </div>
+                {t("generated.champions.noImage")}</div>
             )}
           </div>
 
           <div className="space-y-4">
             <div>
-              <div className="text-xs uppercase tracking-wider text-pc-text-muted mb-1">{championDisplayName} loadout card</div>
+              <div className="text-xs uppercase tracking-wider text-pc-text-muted mb-1">{championDisplayName} {t("generated.champions.loadoutCard")}</div>
               <p className="text-sm text-pc-text-secondary leading-relaxed">
-                {cardMeta?.description ?? "No local card description is available yet."}
+                {cardMeta?.description ?? t("generated.champions.noLocalCardDescriptionIsAvailableYet")}
               </p>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <SummaryTile label={selectedTalent ? "Talent Plays" : "Total Plays"} value={formatPlays(detail.totalPlays)} />
-              <SummaryTile label="Win Rate" value={formatPct(detail.winRate)} color={headlineQuality.color} />
-              <SummaryTile label="Wins" value={detail.wins.toLocaleString()} />
-              <SummaryTile label="Losses" value={detail.losses.toLocaleString()} />
+              <SummaryTile label={selectedTalent ? t("generated.champions.talentPlays") : t("common.sort.totalPlays")} value={formatPlays(detail.totalPlays)} />
+              <SummaryTile label={t("generated.champions.winRate")} value={formatPct(detail.winRate)} color={headlineQuality.color} />
+              <SummaryTile label={t("generated.champions.wins")} value={detail.wins.toLocaleString()} />
+              <SummaryTile label={t("generated.champions.losses")} value={detail.losses.toLocaleString()} />
             </div>
 
             {selectedTalent && (
               <div className="text-xs text-pc-text-secondary">
-                Filtered by <span className="text-pc-accent font-medium">{selectedTalent.talentName}</span>. Level stats below only include this talent pairing.
-              </div>
+                {t("generated.champions.filteredBy")}{" "}<span className="text-pc-accent font-medium">{selectedTalent.talentName}</span>{t("generated.champions.levelStatsBelowOnlyIncludeThisTalentPairing")}</div>
             )}
           </div>
         </div>
@@ -187,15 +187,14 @@ export default function ChampionCardDetailPage() {
 
       <section className="pc-card space-y-4">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="pc-card-title">Talent Pairings</h2>
+          <h2 className="pc-card-title">{t("generated.champions.talentPairings")}</h2>
           {selectedTalentId != null && (
             <button
               type="button"
               onClick={() => selectTalent(null)}
               className="text-xs px-3 py-1 rounded-lg border border-pc-border text-pc-text-secondary hover:text-pc-accent hover:border-pc-accent-mid transition-colors"
             >
-              Clear
-            </button>
+              {t("generated.champions.clear")}</button>
           )}
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -214,7 +213,7 @@ export default function ChampionCardDetailPage() {
       </section>
 
       <section className="pc-card space-y-4">
-        <h2 className="pc-card-title">Level Breakdown</h2>
+        <h2 className="pc-card-title">{t("generated.champions.levelBreakdown")}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
           {detail.levels.map((level) => (
             <LevelCard key={level.level} level={level} maxLevelPlays={maxLevelPlays} />
@@ -245,6 +244,7 @@ function TalentPairingCard({
   maxTalentPlays: number;
   onSelect: () => void;
 }) {
+  const { t } = useLocalization();
   const quality = getStatQuality(talent.winRate, talent.totalPlays, maxTalentPlays);
   const width = Math.max(talent.totalPlays > 0 ? 8 : 0, Math.round((talent.totalPlays / Math.max(1, maxTalentPlays)) * 100));
 
@@ -262,11 +262,11 @@ function TalentPairingCard({
         <div className="min-w-0 flex-1">
           <div className="text-sm font-medium text-pc-accent truncate">{talent.talentName}</div>
           <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
-            <span style={{ color: quality.color }}><span className="text-pc-text-muted mr-1">WR</span>{formatPct(talent.winRate)}</span>
+            <span style={{ color: quality.color }}><span className="text-pc-text-muted mr-1">{t("generated.champions.wr")}</span>{formatPct(talent.winRate)}</span>
             <span className="text-pc-border">|</span>
-            <span className="text-pc-text-muted"><span className="mr-1">Picks</span><span style={{ color: quality.color }}>{formatPlays(talent.totalPlays)}</span></span>
+            <span className="text-pc-text-muted"><span className="mr-1">{t("generated.champions.picks")}</span><span style={{ color: quality.color }}>{formatPlays(talent.totalPlays)}</span></span>
             <span className="text-pc-border">|</span>
-            <span className="text-pc-text-muted whitespace-nowrap">{talent.wins.toLocaleString()}W/{talent.losses.toLocaleString()}L</span>
+            <span className="text-pc-text-muted whitespace-nowrap">{talent.wins.toLocaleString()}{t("generated.champions.w")}{talent.losses.toLocaleString()}L</span>
           </div>
           <div className="mt-2 h-1.5 rounded-full bg-pc-bg-elevated overflow-hidden">
             <div className="h-full rounded-full" style={{ width: `${width}%`, background: quality.track }} />
@@ -278,6 +278,7 @@ function TalentPairingCard({
 }
 
 function LevelCard({ level, maxLevelPlays }: { level: ChampionCardLevelStat; maxLevelPlays: number }) {
+  const { t } = useLocalization();
   const quality = getStatQuality(level.winRate, level.plays, maxLevelPlays);
   const width = Math.max(level.plays > 0 ? 8 : 0, Math.round((level.plays / Math.max(1, maxLevelPlays)) * 100));
 
@@ -290,7 +291,7 @@ function LevelCard({ level, maxLevelPlays }: { level: ChampionCardLevelStat; max
       <div className="h-2 rounded-full bg-pc-bg-elevated overflow-hidden mb-2">
         <div className="h-full rounded-full" style={{ width: `${width}%`, background: quality.track }} />
       </div>
-      <div className="text-xs text-pc-text-muted">{formatPlays(level.plays)} picks</div>
+      <div className="text-xs text-pc-text-muted">{formatPlays(level.plays)} {t("generated.champions.picks.b324c80")}</div>
     </div>
   );
 }

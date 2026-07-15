@@ -6,60 +6,66 @@ import { fetchRankedLeaderboard, type RankedPlayer } from "@/lib/api-client";
 import { resolveEffectiveTier, getRankIconPath } from "@/lib/tier-utils";
 import { LoadingPanel } from "@/components/async-state";
 import PlayerName from "@/components/player-name";
+import { useLocalization } from "@/lib/localization-context";
+import type { TranslationKey } from "@/lib/localization/messages";
 
-const TIER_GROUPS = [
-  { group: "Diamond", tiers: [
-    { tier: 25, label: "Diamond I" },
-    { tier: 24, label: "Diamond II" },
-    { tier: 23, label: "Diamond III" },
-    { tier: 22, label: "Diamond IV" },
-    { tier: 21, label: "Diamond V" },
+const TIER_GROUPS: ReadonlyArray<{
+  group: string;
+  groupKey: TranslationKey;
+  tiers: ReadonlyArray<{ tier: number; labelKey: TranslationKey }>;
+}> = [
+  { group: "Diamond", groupKey: "common.tiers.diamond", tiers: [
+    { tier: 25, labelKey: "common.tiers.diamond1" },
+    { tier: 24, labelKey: "common.tiers.diamond2" },
+    { tier: 23, labelKey: "common.tiers.diamond3" },
+    { tier: 22, labelKey: "common.tiers.diamond4" },
+    { tier: 21, labelKey: "common.tiers.diamond5" },
   ]},
-  { group: "Platinum", tiers: [
-    { tier: 20, label: "Platinum I" },
-    { tier: 19, label: "Platinum II" },
-    { tier: 18, label: "Platinum III" },
-    { tier: 17, label: "Platinum IV" },
-    { tier: 16, label: "Platinum V" },
+  { group: "Platinum", groupKey: "common.tiers.platinum", tiers: [
+    { tier: 20, labelKey: "common.tiers.platinum1" },
+    { tier: 19, labelKey: "common.tiers.platinum2" },
+    { tier: 18, labelKey: "common.tiers.platinum3" },
+    { tier: 17, labelKey: "common.tiers.platinum4" },
+    { tier: 16, labelKey: "common.tiers.platinum5" },
   ]},
-  { group: "Gold", tiers: [
-    { tier: 15, label: "Gold I" },
-    { tier: 14, label: "Gold II" },
-    { tier: 13, label: "Gold III" },
-    { tier: 12, label: "Gold IV" },
-    { tier: 11, label: "Gold V" },
+  { group: "Gold", groupKey: "common.tiers.gold", tiers: [
+    { tier: 15, labelKey: "common.tiers.gold1" },
+    { tier: 14, labelKey: "common.tiers.gold2" },
+    { tier: 13, labelKey: "common.tiers.gold3" },
+    { tier: 12, labelKey: "common.tiers.gold4" },
+    { tier: 11, labelKey: "common.tiers.gold5" },
   ]},
-  { group: "Silver", tiers: [
-    { tier: 10, label: "Silver I" },
-    { tier: 9, label: "Silver II" },
-    { tier: 8, label: "Silver III" },
-    { tier: 7, label: "Silver IV" },
-    { tier: 6, label: "Silver V" },
+  { group: "Silver", groupKey: "common.tiers.silver", tiers: [
+    { tier: 10, labelKey: "common.tiers.silver1" },
+    { tier: 9, labelKey: "common.tiers.silver2" },
+    { tier: 8, labelKey: "common.tiers.silver3" },
+    { tier: 7, labelKey: "common.tiers.silver4" },
+    { tier: 6, labelKey: "common.tiers.silver5" },
   ]},
-  { group: "Bronze", tiers: [
-    { tier: 5, label: "Bronze I" },
-    { tier: 4, label: "Bronze II" },
-    { tier: 3, label: "Bronze III" },
-    { tier: 2, label: "Bronze IV" },
-    { tier: 1, label: "Bronze V" },
+  { group: "Bronze", groupKey: "common.tiers.bronze", tiers: [
+    { tier: 5, labelKey: "common.tiers.bronze1" },
+    { tier: 4, labelKey: "common.tiers.bronze2" },
+    { tier: 3, labelKey: "common.tiers.bronze3" },
+    { tier: 2, labelKey: "common.tiers.bronze4" },
+    { tier: 1, labelKey: "common.tiers.bronze5" },
   ]},
 ];
 
 type SortKey = "points" | "winRate" | "totalWins" | "trend";
 
-const SORT_OPTIONS: { key: SortKey; label: string }[] = [
-  { key: "points", label: "Points" },
-  { key: "winRate", label: "Win Rate" },
-  { key: "totalWins", label: "Total Wins" },
-  { key: "trend", label: "Trend" },
+const SORT_OPTIONS: Array<{ key: SortKey; labelKey: TranslationKey }> = [
+  { key: "points", labelKey: "common.sort.points" },
+  { key: "winRate", labelKey: "common.sort.winRate" },
+  { key: "totalWins", labelKey: "common.sort.totalWins" },
+  { key: "trend", labelKey: "common.sort.trend" },
 ];
 
-const MOBILE_TIER_OPTIONS = [
-  { value: "26-gm", label: "Grandmaster" },
-  { value: "26-master", label: "Master" },
+const MOBILE_TIER_OPTIONS: Array<{ value: string; labelKey: TranslationKey }> = [
+  { value: "26-gm", labelKey: "common.tiers.grandmaster" },
+  { value: "26-master", labelKey: "common.tiers.master" },
   ...TIER_GROUPS.flatMap((group) => group.tiers.map((item) => ({
     value: String(item.tier),
-    label: item.label,
+    labelKey: item.labelKey,
   }))),
 ];
 
@@ -74,6 +80,7 @@ function RankBadge({ rank }: { rank: number }) {
 }
 
 export default function LeaderboardPage() {
+  const { t } = useLocalization();
   const [tier, setTier] = useState(26);
   const [masterSubTab, setMasterSubTab] = useState<"gm" | "master">("gm");
   const [players, setPlayers] = useState<RankedPlayer[]>([]);
@@ -105,7 +112,7 @@ export default function LeaderboardPage() {
         if (cancelled) return;
         setPlayers(data);
       } catch {
-        if (!cancelled) setError("Failed to load leaderboard data.");
+        if (!cancelled) setError(t("generated.players.failedToLoadLeaderboardData"));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -137,8 +144,8 @@ export default function LeaderboardPage() {
   });
 
   const currentTierLabel = tier === 26
-    ? (masterSubTab === "gm" ? "Grandmaster" : "Master")
-    : (TIER_GROUPS.flatMap((g) => g.tiers).find((t) => t.tier === tier)?.label || `Tier ${tier}`);
+    ? t(masterSubTab === "gm" ? "common.tiers.grandmaster" : "common.tiers.master")
+    : t(TIER_GROUPS.flatMap((group) => group.tiers).find((item) => item.tier === tier)?.labelKey ?? "common.tiers.tierNumber", { number: tier });
 
   const mobileTierValue = tier === 26 ? `26-${masterSubTab}` : String(tier);
   const selectMobileTier = (value: string) => {
@@ -154,44 +161,44 @@ export default function LeaderboardPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="min-w-0">
-        <Link href="/players" className="text-pc-accent text-xs hover:underline mb-2 inline-block">← Players</Link>
-        <h1 className="pc-heading pc-heading-lg break-words text-pc-accent">Ranked Leaderboard</h1>
+        <Link href="/players" className="text-pc-accent text-xs hover:underline mb-2 inline-block">{t("generated.players.players")}</Link>
+        <h1 className="pc-heading pc-heading-lg break-words text-pc-accent">{t("generated.players.rankedLeaderboard")}</h1>
       </div>
 
       {/* Main layout: sidebar + content */}
       <div className="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-[14rem_minmax(0,1fr)] lg:gap-6">
 
-        <section className="pc-mobile-panel space-y-3 p-3 lg:hidden" aria-label="Leaderboard filters">
+        <section className="pc-mobile-panel space-y-3 p-3 lg:hidden" aria-label={t("generated.players.leaderboardFilters")}>
           <div className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2">
             <label className="block min-w-0">
-              <span className="pc-label">Tier</span>
+              <span className="pc-label">{t("generated.players.tier")}</span>
               <select
                 value={mobileTierValue}
                 onChange={(event) => selectMobileTier(event.target.value)}
                 className="pc-select w-full"
               >
-                {MOBILE_TIER_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+                {MOBILE_TIER_OPTIONS.map((option) => <option key={option.value} value={option.value}>{t(option.labelKey)}</option>)}
               </select>
             </label>
             <label className="block min-w-0">
-              <span className="pc-label">Sort</span>
+              <span className="pc-label">{t("generated.players.sort")}</span>
               <div className="flex gap-2">
                 <select value={sortKey} onChange={(event) => setSortKey(event.target.value as SortKey)} className="pc-select min-w-0 flex-1">
-                  {SORT_OPTIONS.map((option) => <option key={option.key} value={option.key}>{option.label}</option>)}
+                  {SORT_OPTIONS.map((option) => <option key={option.key} value={option.key}>{t(option.labelKey)}</option>)}
                 </select>
-                <button type="button" onClick={() => setSortDir((direction) => direction === "asc" ? "desc" : "asc")} className="pc-touch-target rounded-lg border border-pc-border bg-pc-bg px-3 text-pc-accent" aria-label={`Sort ${sortDir === "asc" ? "descending" : "ascending"}`}>
+                <button type="button" onClick={() => setSortDir((direction) => direction === "asc" ? "desc" : "asc")} className="pc-touch-target rounded-lg border border-pc-border bg-pc-bg px-3 text-pc-accent" aria-label={t("generated.players.sortValue1", { value1: sortDir === "asc" ? t("generated.players.descending") : t("generated.players.ascending") })}>
                   {sortDir === "asc" ? "↑" : "↓"}
                 </button>
               </div>
             </label>
           </div>
           <label className="block">
-            <span className="pc-label">Find a player</span>
-            <input type="search" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="Filter players…" className="pc-input" />
+            <span className="pc-label">{t("generated.players.findAPlayer")}</span>
+            <input type="search" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder={t("generated.players.filterPlayers")} className="pc-input" />
           </label>
           <div className="flex items-center justify-between gap-3 border-t border-pc-border/70 pt-3 text-xs">
             <span className="font-semibold text-pc-text">{currentTierLabel}</span>
-            <span className="text-pc-text-muted">{sorted.length} player{sorted.length === 1 ? "" : "s"}</span>
+            <span className="text-pc-text-muted">{t(sorted.length === 1 ? "common.count.playerOne" : "common.count.playerMany", { count: sorted.length })}</span>
           </div>
         </section>
 
@@ -199,7 +206,7 @@ export default function LeaderboardPage() {
         <aside className="hidden w-56 shrink-0 space-y-4 lg:block">
           {/* Tier selector */}
           <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-3">
-            <h3 className="text-pc-text-muted text-xs uppercase tracking-wider mb-2 px-1">Tier</h3>
+            <h3 className="text-pc-text-muted text-xs uppercase tracking-wider mb-2 px-1">{t("generated.players.tier")}</h3>
             <div className="space-y-0.5">
               {/* Grandmaster */}
               <button
@@ -210,8 +217,7 @@ export default function LeaderboardPage() {
                     : "text-pc-text-secondary hover:text-pc-text hover:bg-pc-bg/50"
                 }`}
               >
-                Grandmaster
-              </button>
+                {t("generated.players.grandmaster")}</button>
 
               {/* Master */}
               <button
@@ -222,8 +228,7 @@ export default function LeaderboardPage() {
                     : "text-pc-text-secondary hover:text-pc-text hover:bg-pc-bg/50"
                 }`}
               >
-                Master
-              </button>
+                {t("generated.players.master")}</button>
 
               {/* Multi-tier groups */}
               {TIER_GROUPS.map((group) => {
@@ -240,22 +245,22 @@ export default function LeaderboardPage() {
                           : "text-pc-text-secondary hover:text-pc-text hover:bg-pc-bg/50"
                       }`}
                     >
-                      <span>{group.group}</span>
+                      <span>{t(group.groupKey)}</span>
                       <span className="text-xs text-pc-text-muted">{isExpanded ? "▾" : "▸"}</span>
                     </button>
                     {isExpanded && (
                       <div className="ml-2 mt-0.5 space-y-0.5 border-l border-pc-border/50 pl-2">
-                        {group.tiers.map((t) => (
+                        {group.tiers.map((item) => (
                           <button
-                            key={t.tier}
-                            onClick={() => setTier(t.tier)}
+                            key={item.tier}
+                            onClick={() => setTier(item.tier)}
                             className={`w-full text-left px-2.5 py-1 rounded-lg text-xs transition-colors ${
-                              tier === t.tier
+                              tier === item.tier
                                 ? "bg-pc-accent/20 text-pc-accent font-medium border border-pc-accent/30"
                                 : "text-pc-text-muted hover:text-pc-text hover:bg-pc-bg/50"
                             }`}
                           >
-                            {t.label.replace(group.group + " ", "")}
+                            {t(item.labelKey)}
                           </button>
                         ))}
                       </div>
@@ -268,7 +273,7 @@ export default function LeaderboardPage() {
 
           {/* Sort controls */}
           <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-3">
-            <h3 className="text-pc-text-muted text-xs uppercase tracking-wider mb-2 px-1">Sort By</h3>
+            <h3 className="text-pc-text-muted text-xs uppercase tracking-wider mb-2 px-1">{t("generated.players.sortBy")}</h3>
             <div className="space-y-1">
               {SORT_OPTIONS.map((opt) => (
                 <button
@@ -287,7 +292,7 @@ export default function LeaderboardPage() {
                       : "text-pc-text-secondary hover:text-pc-text hover:bg-pc-bg/50"
                   }`}
                 >
-                  <span>{opt.label}</span>
+                  <span>{t(opt.labelKey)}</span>
                   {sortKey === opt.key && (
                     <span className="text-xs">{sortDir === "asc" ? "↑" : "↓"}</span>
                   )}
@@ -298,13 +303,13 @@ export default function LeaderboardPage() {
 
           {/* Player search */}
           <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-3">
-            <h3 className="text-pc-text-muted text-xs uppercase tracking-wider mb-2 px-1">Search</h3>
+            <h3 className="text-pc-text-muted text-xs uppercase tracking-wider mb-2 px-1">{t("generated.players.search")}</h3>
             <div className="relative">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Filter players..."
+                placeholder={t("generated.players.filterPlayers.2950f2e")}
                 className="w-full px-3 py-1.5 rounded-lg bg-pc-bg border border-pc-border text-pc-text text-xs focus:outline-none focus:border-pc-accent"
               />
               {searchQuery && (
@@ -320,10 +325,10 @@ export default function LeaderboardPage() {
 
           {/* Current selection summary */}
           <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-3">
-            <div className="text-pc-text-muted text-xs uppercase tracking-wider mb-1">Viewing</div>
+            <div className="text-pc-text-muted text-xs uppercase tracking-wider mb-1">{t("generated.players.viewing")}</div>
             <div className="text-pc-text font-semibold text-sm">{currentTierLabel}</div>
             <div className="text-pc-text-secondary text-xs mt-0.5">
-              {sorted.length} player{sorted.length !== 1 ? "s" : ""}
+              {t(sorted.length === 1 ? "common.count.playerOne" : "common.count.playerMany", { count: sorted.length })}
             </div>
           </div>
         </aside>
@@ -346,7 +351,7 @@ export default function LeaderboardPage() {
           {!loading && !error && sorted.length === 0 && (
             <div className="bg-pc-bg-elevated border border-pc-border rounded-xl text-center py-12">
               <p className="text-pc-text-muted">
-                {searchQuery ? `No players matching "${searchQuery}".` : "No ranked players found for this tier."}
+                {searchQuery ? t("generated.players.noPlayersMatchingValue1", { value1: searchQuery }) : t("generated.players.noRankedPlayersFoundForThisTier")}
               </p>
             </div>
           )}
@@ -364,12 +369,12 @@ export default function LeaderboardPage() {
                       <div className="truncate text-sm font-semibold text-pc-text"><PlayerName playerId={player.player_id}>{player.name}</PlayerName></div>
                       <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[11px] text-pc-text-muted">
                         <span>{effective.displayName}</span>
-                        {player.winRate != null && <span className={player.winRate >= 50 ? "text-emerald-400" : "text-red-400"}>{player.winRate.toFixed(1)}% WR</span>}
+                        {player.winRate != null && <span className={player.winRate >= 50 ? "text-emerald-400" : "text-red-400"}>{player.winRate.toFixed(1)}{t("generated.players.wr")}</span>}
                       </div>
                     </div>
                     <div className="shrink-0 text-right">
                       <div className="font-mono text-sm font-bold text-pc-accent">{player.points.toLocaleString()}</div>
-                      <div className="text-[10px] uppercase tracking-wide text-pc-text-muted">points</div>
+                      <div className="text-[10px] uppercase tracking-wide text-pc-text-muted">{t("generated.players.points")}</div>
                       {player.trend != null && player.trend !== 0 && <div className={`mt-0.5 text-[10px] ${player.trend > 0 ? "text-emerald-400" : "text-red-400"}`}>{player.trend > 0 ? "▲" : "▼"}{Math.abs(player.trend)}</div>}
                     </div>
                   </Link>
@@ -384,14 +389,14 @@ export default function LeaderboardPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-pc-border">
-                      <th className="text-left text-pc-text-muted font-medium py-3 px-4 w-28">Rank</th>
-                      <th className="text-left text-pc-text-muted font-medium py-3 px-4">Player</th>
-                      <th className="text-right text-pc-text-muted font-medium py-3 px-4">Points</th>
-                      <th className="text-right text-pc-text-muted font-medium py-3 px-4 w-16">Trend</th>
-                      <th className="text-right text-pc-text-muted font-medium py-3 px-4 hidden lg:table-cell">Wins</th>
-                      <th className="text-right text-pc-text-muted font-medium py-3 px-4 hidden md:table-cell">Win Rate</th>
-                      <th className="text-right text-pc-text-muted font-medium py-3 px-4 hidden lg:table-cell">Leaves</th>
-                      <th className="text-right text-pc-text-muted font-medium py-3 px-4 hidden lg:table-cell">Leave Rate</th>
+                      <th className="text-left text-pc-text-muted font-medium py-3 px-4 w-28">{t("generated.players.rank")}</th>
+                      <th className="text-left text-pc-text-muted font-medium py-3 px-4">{t("generated.players.player")}</th>
+                      <th className="text-right text-pc-text-muted font-medium py-3 px-4">{t("generated.players.points.4b2a6a3")}</th>
+                      <th className="text-right text-pc-text-muted font-medium py-3 px-4 w-16">{t("generated.players.trend")}</th>
+                      <th className="text-right text-pc-text-muted font-medium py-3 px-4 hidden lg:table-cell">{t("generated.players.wins")}</th>
+                      <th className="text-right text-pc-text-muted font-medium py-3 px-4 hidden md:table-cell">{t("generated.players.winRate")}</th>
+                      <th className="text-right text-pc-text-muted font-medium py-3 px-4 hidden lg:table-cell">{t("generated.players.leaves")}</th>
+                      <th className="text-right text-pc-text-muted font-medium py-3 px-4 hidden lg:table-cell">{t("generated.players.leaveRate")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -468,7 +473,7 @@ export default function LeaderboardPage() {
           {/* Footer */}
           {!loading && sorted.length > 0 && (
             <p className="text-pc-text-muted text-xs text-center mt-4">
-              Showing {sorted.length} of {filtered.length} players in {currentTierLabel}
+              {t("generated.players.showing")}{" "}{sorted.length} {t("generated.players.of")}{" "}{filtered.length} {t("generated.players.playersIn")}{" "}{currentTierLabel}
             </p>
           )}
         </div>

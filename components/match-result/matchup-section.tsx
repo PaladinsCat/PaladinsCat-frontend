@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { MatchResultPlayer } from "./types";
 import { computeTeamAverages } from "./format";
 import TeamMatchup from "./team-matchup";
+import { useLocalization } from "@/lib/localization-context";
 
 interface MatchupSectionProps {
   team1: MatchResultPlayer[];
@@ -17,6 +18,7 @@ interface MatchupSectionProps {
 export default function MatchupSection({
   team1, team2, team1Wins, team2Wins, team1Label, team2Label,
 }: MatchupSectionProps) {
+  const { t } = useLocalization();
   const [sortBy, setSortBy] = useState("Player Name");
   const averages1 = computeTeamAverages(team1);
   const averages2 = computeTeamAverages(team2);
@@ -33,7 +35,7 @@ export default function MatchupSection({
     <section className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 sm:p-6">
       {/* Section header */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-bold text-pc-text uppercase tracking-wide">Player Matchup</h2>
+        <h2 className="text-lg font-bold text-pc-text uppercase tracking-wide">{t("generated.matches.playerMatchup")}</h2>
         <div className="relative">
           <select
             value={sortBy}
@@ -53,7 +55,7 @@ export default function MatchupSection({
       {/* VS divider */}
       <div className="flex items-center justify-center py-3">
         <div className="flex-1 h-px bg-pc-border" />
-        <span className="px-4 text-pc-text-muted font-bold text-lg">VS</span>
+        <span className="px-4 text-pc-text-muted font-bold text-lg">{t("generated.matches.vs")}</span>
         <div className="flex-1 h-px bg-pc-border" />
       </div>
 

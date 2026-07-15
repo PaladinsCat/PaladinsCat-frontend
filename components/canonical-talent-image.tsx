@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getCanonicalTalentIconPath } from "@/lib/champion-data";
+import { useLocalization } from "@/lib/localization-context";
 
 type CanonicalTalentImageProps = {
   talentId: number | null | undefined;
@@ -26,6 +27,7 @@ export default function CanonicalTalentImage({
   loading = "lazy",
   fallbackClassName,
 }: CanonicalTalentImageProps) {
+  const { t } = useLocalization();
   const [src, setSrc] = useState<string | null>(null);
   const displayName = talentName || "Talent";
 
@@ -47,7 +49,7 @@ export default function CanonicalTalentImage({
   }, [talentId]);
 
   if (!src) {
-    return <span className={fallbackClassName ?? className} role="img" aria-label={`${displayName} unavailable`} />;
+    return <span className={fallbackClassName ?? className} role="img" aria-label={t("generated.champions.value1Unavailable", { value1: displayName })} />;
   }
 
   return (

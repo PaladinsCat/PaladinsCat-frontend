@@ -1,33 +1,34 @@
 "use client";
 
 import ScrambleText from "@/components/ScrambleText";
+import { useLocalization } from "@/lib/localization-context";
 
 export default function ContactPage() {
+  const { t } = useLocalization();
   return (
     <div className="space-y-12 max-w-3xl mx-auto text-center">
 
       {/* ── Header ── */}
       <section className="space-y-2">
         <h1 className="text-3xl font-bold text-pc-accent">
-          <ScrambleText text="Contact" speed={30} iterations={15} delayFromCenter={false} />
+          <ScrambleText text={t("generated.contact.contact")} speed={30} iterations={15} delayFromCenter={false} />
         </h1>
         <p className="text-pc-text-secondary drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
-          Have questions, feedback, or found a bug? We&apos;d love to hear from you.
-        </p>
+          {t("generated.contact.haveQuestionsFeedbackOrFoundABugWeDLove")}</p>
       </section>
 
       {/* ── Contact Methods ── */}
       <div className="space-y-6">
         {[
           {
-            title: "Discord",
+            title: t("generated.contact.discord"),
             desc: "The fastest way to reach us. Join the community, ask questions, report bugs, or just hang out.",
             cta: "Join Discord",
             href: "https://discord.gg/VqYMXAR",
             primary: true,
           },
           {
-            title: "Email",
+            title: t("generated.contact.email"),
             desc: "For business inquiries, partnerships, or anything else — drop us a line directly.",
             cta: "nabicook@proton.me",
             href: "mailto:nabicook@proton.me",
@@ -56,9 +57,7 @@ export default function ContactPage() {
       {/* ── Note ── */}
       <section className="border-t border-pc-border pt-8">
         <p className="text-pc-text-muted text-sm leading-relaxed drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]">
-          PaladinsCat is a community project run by volunteers. We do our best to respond quickly,
-          but please be patient — we&apos;re all Paladins players too.
-        </p>
+          {t("generated.contact.paladinscatIsACommunityProjectRunByVolunteersWeDo")}</p>
       </section>
 
     </div>

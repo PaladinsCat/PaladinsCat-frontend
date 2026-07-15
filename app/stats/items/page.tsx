@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { fetchItems, type ItemStat } from "@/lib/api-client";
 import { loadBuildReferenceData, type BuildItemReference } from "@/lib/build-reference";
 import { getStatQuality } from "@/lib/stat-quality";
+import { useLocalization } from "@/lib/localization-context";
 
 const CATEGORY_BY_ITEM: Record<string, string> = {
   "Blast Shields": "Defense", Guardian: "Defense", Haven: "Defense", Illuminate: "Defense", Resilience: "Defense", Sentinel: "Defense",
@@ -42,13 +43,14 @@ function formatItemDescription(description: string | null | undefined, level = 1
 }
 
 function DimensionBars({ label, rows, total }: { label: "S" | "L"; rows: ItemStat["slots"]; total: number }) {
+  const { t } = useLocalization();
   if (rows.length === 0) return null;
   const maxUses = Math.max(1, ...rows.map((row) => row.totalUses));
   const maxRate = Math.max(1, ...rows.map((row) => (row.totalUses / Math.max(1, total)) * 100));
 
   return (
     <div className="mt-1.5">
-      <div className="mb-0.5 text-[9px] font-medium text-pc-text-muted">{label === "S" ? "Purchase slot" : "Upgrade level"}</div>
+      <div className="mb-0.5 text-[9px] font-medium text-pc-text-muted">{label === "S" ? t("generated.stats.purchaseSlot") : t("generated.stats.upgradeLevel")}</div>
       <div className="flex items-center gap-1">
         {rows.map((row) => {
           const dimension = label === "S" ? row.slot : row.level;
@@ -59,7 +61,7 @@ function DimensionBars({ label, rows, total }: { label: "S" | "L"; rows: ItemSta
             <div
               key={dimension}
               className="flex min-w-0 flex-1 flex-col items-center"
-              title={`${label === "S" ? "Slot" : "Level"} ${displayDimension}: ${row.winRate.toFixed(1)}% win rate, ${rate.toFixed(1)}% purchase share, ${row.totalUses.toLocaleString()} purchases`}
+              title={t("generated.stats.value1Value2Value3WinRateValue4PurchaseShareValue5Purchases", { value1: label === "S" ? t("generated.stats.slot") : t("generated.stats.level"), value2: displayDimension ?? "", value3: row.winRate.toFixed(1), value4: rate.toFixed(1), value5: row.totalUses.toLocaleString() })}
             >
               <div className="text-[9px] text-pc-text-muted">{label}{displayDimension}</div>
               <div className="h-1.5 w-full overflow-hidden rounded-full bg-pc-bg-elevated">
@@ -75,6 +77,7 @@ function DimensionBars({ label, rows, total }: { label: "S" | "L"; rows: ItemSta
 }
 
 export default function ItemsPage() {
+  const { t } = useLocalization();
   const [items, setItems] = useState<ItemStat[]>([]);
   const [references, setReferences] = useState<BuildItemReference[]>([]);
   const [query, setQuery] = useState("");
@@ -106,20 +109,20 @@ export default function ItemsPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="pc-heading pc-heading-lg text-pc-accent">Item Meta</h1>
-          <p className="mt-1 text-sm text-pc-text-secondary">Browse every tracked item, then open an item to see its purchase order and upgrade performance.</p>
+          <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.stats.itemMeta")}</h1>
+          <p className="mt-1 text-sm text-pc-text-secondary">{t("generated.stats.browseEveryTrackedItemThenOpenAnItemToSee")}</p>
         </div>
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row">
-        <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search items" className="w-full rounded-lg border border-pc-border bg-pc-bg-elevated px-3 py-2 text-sm text-pc-text outline-none placeholder:text-pc-text-muted focus:border-pc-accent sm:max-w-sm" />
+        <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t("generated.stats.searchItems")} className="w-full rounded-lg border border-pc-border bg-pc-bg-elevated px-3 py-2 text-sm text-pc-text outline-none placeholder:text-pc-text-muted focus:border-pc-accent sm:max-w-sm" />
         <div className="flex gap-2 text-xs">
-          <button onClick={() => setSort("uses")} className={`rounded-lg px-3 py-2 ${sort === "uses" ? "bg-pc-accent text-pc-bg" : "bg-pc-card text-pc-text-secondary hover:text-pc-text"}`}>Most picked</button>
-          <button onClick={() => setSort("winRate")} className={`rounded-lg px-3 py-2 ${sort === "winRate" ? "bg-pc-accent text-pc-bg" : "bg-pc-card text-pc-text-secondary hover:text-pc-text"}`}>Win rate</button>
+          <button onClick={() => setSort("uses")} className={`rounded-lg px-3 py-2 ${sort === "uses" ? "bg-pc-accent text-pc-bg" : "bg-pc-card text-pc-text-secondary hover:text-pc-text"}`}>{t("generated.stats.mostPicked")}</button>
+          <button onClick={() => setSort("winRate")} className={`rounded-lg px-3 py-2 ${sort === "winRate" ? "bg-pc-accent text-pc-bg" : "bg-pc-card text-pc-text-secondary hover:text-pc-text"}`}>{t("generated.stats.winRate")}</button>
         </div>
       </div>
 
-      {items.length === 0 ? <div className="pc-card text-sm text-pc-text-muted">Item stats are unavailable for this queue.</div> : (
+      {items.length === 0 ? <div className="pc-card text-sm text-pc-text-muted">{t("generated.stats.itemStatsAreUnavailableForThisQueue")}</div> : (
         <div className="pc-card">
           {categories.map((category) => {
             const categoryItems = filtered.filter((item) => (CATEGORY_BY_ITEM[item.itemName] ?? "Utility") === category);
@@ -139,11 +142,11 @@ export default function ItemsPage() {
                   <h2 className="mb-0.5 text-xs font-medium text-pc-accent">{item.itemName}</h2>
                   <p className="text-xs leading-relaxed text-pc-text-secondary">{description}</p>
                   <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
-                    <span style={{ color: quality.color }}><span className="mr-1 text-pc-text-muted">WR</span>{item.winRate.toFixed(1)}%</span>
+                    <span style={{ color: quality.color }}><span className="mr-1 text-pc-text-muted">{t("generated.stats.wr")}</span>{item.winRate.toFixed(1)}%</span>
                     <span className="text-pc-border">|</span>
-                    <span className="text-pc-text-muted"><span className="mr-1">PR</span><span style={{ color: quality.color }}>{pickRate.toFixed(1)}%</span></span>
+                    <span className="text-pc-text-muted"><span className="mr-1">{t("generated.stats.pr")}</span><span style={{ color: quality.color }}>{pickRate.toFixed(1)}%</span></span>
                     <span className="text-pc-border">|</span>
-                    <span className="text-pc-text-muted"><span className="mr-1">Purchases</span><span style={{ color: quality.color }}>{formatCount(item.totalUsage)}</span></span>
+                    <span className="text-pc-text-muted"><span className="mr-1">{t("generated.stats.purchases")}</span><span style={{ color: quality.color }}>{formatCount(item.totalUsage)}</span></span>
                   </div>
                   <DimensionBars label="S" rows={item.slots} total={item.totalUsage} />
                   <DimensionBars label="L" rows={item.levels} total={item.totalUsage} />

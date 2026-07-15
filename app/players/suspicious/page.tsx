@@ -5,8 +5,10 @@ import Link from "next/link";
 import { fetchCheaterPlayers, type CheaterPlayer } from "@/lib/api-client";
 import { LoadingPanel } from "@/components/async-state";
 import PlayerName from "@/components/player-name";
+import { useLocalization } from "@/lib/localization-context";
 
 export default function SuspiciousPage() {
+  const { t } = useLocalization();
   const [data, setData] = useState<CheaterPlayer[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -28,22 +30,21 @@ export default function SuspiciousPage() {
   return (
     <div className="mx-auto w-full max-w-4xl space-y-6">
       <div>
-        <Link href="/players" className="text-pc-accent text-xs hover:underline mb-2 inline-block">← Players</Link>
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">Suspicious Players</h1>
+        <Link href="/players" className="text-pc-accent text-xs hover:underline mb-2 inline-block">{t("generated.players.players")}</Link>
+        <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.players.suspiciousPlayers")}</h1>
         <p className="text-pc-text-secondary text-sm mt-1">
-          Players flagged for unusual behavior — under investigation
-        </p>
+          {t("generated.players.playersFlaggedForUnusualBehaviorUnderInvestigation")}</p>
       </div>
 
       <div className="flex items-center gap-2">
         <div className="w-2 h-2 rounded-full bg-amber-500" />
-        <span className="text-pc-text-muted text-xs">{data.length} flagged</span>
+        <span className="text-pc-text-muted text-xs">{data.length} {t("generated.players.flagged")}</span>
       </div>
 
       {loading ? (
         <LoadingPanel compact />
       ) : data.length === 0 ? (
-        <div className="text-center py-12 text-pc-text-secondary text-sm">No suspicious players found.</div>
+        <div className="text-center py-12 text-pc-text-secondary text-sm">{t("generated.players.noSuspiciousPlayersFound")}</div>
       ) : (
         <div className="space-y-2">
           {data.map((player) => (
@@ -59,11 +60,11 @@ export default function SuspiciousPage() {
               </Link>
 
               <span className="w-fit shrink-0 rounded-full border border-amber-500/30 bg-amber-500/15 px-2 py-1 text-xs font-semibold text-amber-300">
-                {player.susCount.toLocaleString()} {player.susCount === 1 ? "flag" : "flags"}
+                {player.susCount.toLocaleString()} {player.susCount === 1 ? t("generated.players.flag") : t("generated.players.flags")}
               </span>
 
               <div className="min-w-0">
-                <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-pc-text-muted">Top reasons</div>
+                <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-pc-text-muted">{t("generated.players.topReasons")}</div>
                 {player.topReasons.length > 0 ? (
                   <ul className="flex min-w-0 flex-wrap gap-1.5">
                     {player.topReasons.map((reason) => (
@@ -77,7 +78,7 @@ export default function SuspiciousPage() {
                     ))}
                   </ul>
                 ) : (
-                  <span className="text-xs text-pc-text-muted">No reason recorded</span>
+                  <span className="text-xs text-pc-text-muted">{t("generated.players.noReasonRecorded")}</span>
                 )}
               </div>
             </article>

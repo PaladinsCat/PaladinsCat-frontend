@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
+import { createLocalizedMetadata } from "@/lib/server-localization";
 
-export const metadata: Metadata = {
-  title: "Paladins eCPM Distribution — Global and Role Baselines",
-  description: "Explore effective credits per minute averages and percentile distributions globally and by Paladins role.",
-  alternates: { canonical: "/stats/egpm" },
-};
+export async function generateMetadata() {
+  return createLocalizedMetadata("seo.stats.egpm.title", {
+    descriptionKey: "seo.stats.egpm.description",
+    metadata: { alternates: { canonical: "/stats/egpm" } },
+  });
+}
 
 export default function EgpmLayout({ children }: { children: React.ReactNode }) {
   return children;

@@ -10,6 +10,7 @@ import LoadoutStrip from "./loadout-strip";
 import PartyBadge, { getPartyNumber } from "./party-badge";
 import { MatchPlayerLink } from "./player-identity";
 import CanonicalTalentImage from "@/components/canonical-talent-image";
+import { useLocalization } from "@/lib/localization-context";
 
 interface StatTableRowProps {
   player: MatchPlayerDetail;
@@ -18,6 +19,7 @@ interface StatTableRowProps {
 }
 
 export default function StatTable({ player, fact, wins }: StatTableRowProps) {
+  const { t } = useLocalization();
   const [expanded, setExpanded] = useState(false);
   const damageStats = computeDamageStats(player);
   const championHref = player.champion_name ? `/champions/${championSlug(player.champion_name)}` : undefined;
@@ -71,7 +73,7 @@ export default function StatTable({ player, fact, wins }: StatTableRowProps) {
           <div className="flex items-center gap-2">
             <img
               src={championSrc}
-              alt={player.champion_name || "Champion"}
+              alt={player.champion_name || t("generated.matches.champion")}
               className="w-7 h-7 rounded-full border border-pc-border bg-pc-bg-secondary"
               onError={(e) => { (e.target as HTMLImageElement).src = "/images/default-champion.png"; }}
             />
@@ -123,7 +125,7 @@ export default function StatTable({ player, fact, wins }: StatTableRowProps) {
                 <div
                   key={idx}
                   className="relative"
-                  title={item.level ? `${item.label} — Level ${item.level}` : item.label}
+                  title={item.level ? t("generated.matches.value1LevelValue2", { value1: item.label, value2: item.level }) : item.label}
                 >
                   {item.type === "talent" ? (
                     <CanonicalTalentImage
@@ -161,170 +163,170 @@ export default function StatTable({ player, fact, wins }: StatTableRowProps) {
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2">
               {/* Core per-minute stats */}
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">DPM</div>
+                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.dpm")}</div>
                 <div className="text-sm font-medium text-pc-text">{fixed(player.damage_per_minute, 0)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">KDA</div>
+                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.kda")}</div>
                 <div className="text-sm font-medium text-pc-text">{fixed(player.kda, 2)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">HPM</div>
+                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.hpm")}</div>
                 <div className="text-sm font-medium text-pc-text">{fixed(player.healing_per_minute, 0)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">SHPM</div>
+                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.shpm")}</div>
                 <div className="text-sm font-medium text-pc-text">{fixed(player.healing_self_per_minute, 0)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">CPM</div>
+                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.cpm")}</div>
                 <div className="text-sm font-medium text-pc-text">{fixed(player.gold_per_minute, 0)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">eCPM</div>
+                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.ecpm")}</div>
                 <div className="text-sm font-medium text-pc-text">{fixed(player.egpm, 0)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">SPM</div>
+                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.spm")}</div>
                 <div className="text-sm font-medium text-pc-text">{fixed(player.mitigation_per_minute, 0)}</div>
               </div>
 
               {/* Damage breakdown */}
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">Total Damage</div>
+                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.totalDamage.d5e892e")}</div>
                 <div className="text-sm font-medium text-pc-text">{num(damageStats.totalDamage)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">Weapon</div>
+                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.weapon")}</div>
                 <div className="text-sm font-medium text-pc-text">{num(damageStats.weaponDamage)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">Ability</div>
+                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.ability")}</div>
                 <div className="text-sm font-medium text-pc-text">{damageStats.nonWeaponDamage != null ? num(damageStats.nonWeaponDamage) : "—"}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">Split</div>
+                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.split")}</div>
                 <div className="text-sm font-medium text-pc-text">{damageStats.weaponShare}</div>
               </div>
 
               {/* Damage breakdown: raw physical + magical */}
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">Physical Dmg</div>
+                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.physicalDmg")}</div>
                 <div className="text-sm font-medium text-pc-text">{num(player.damage_done_physical)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">Magical Dmg</div>
+                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.magicalDmg")}</div>
                 <div className="text-sm font-medium text-pc-text">{num(player.damage_done_magical)}</div>
               </div>
 
               {/* Healing breakdown */}
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">Healing</div>
+                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.healing")}</div>
                 <div className="text-sm font-medium text-pc-text">{num(player.healing)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">Self Heal</div>
+                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.selfHeal")}</div>
                 <div className="text-sm font-medium text-pc-text">{num(player.healing_self)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">Bot Heal</div>
+                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.botHeal")}</div>
                 <div className="text-sm font-medium text-pc-text">{num(player.healing_bot)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">Player Self</div>
+                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.playerSelf")}</div>
                 <div className="text-sm font-medium text-pc-text">{num(player.healing_player_self)}</div>
               </div>
 
               {/* Damage taken & shielding */}
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">Taken</div>
+                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.taken")}</div>
                 <div className="text-sm font-medium text-pc-text">{num(player.damage_taken)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">Shielding</div>
+                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.shielding")}</div>
                 <div className="text-sm font-medium text-pc-text">{num(player.damage_mitigated)}</div>
               </div>
 
               {/* Multi-kill streaks */}
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">First Blood</div>
+                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.firstBlood")}</div>
                 <div className="text-sm font-medium text-pc-text">{num(player.kills_first_blood)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">Double Kills</div>
+                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.doubleKills")}</div>
                 <div className="text-sm font-medium text-pc-text">{num(player.kills_double)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">Triple Kills</div>
+                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.tripleKills")}</div>
                 <div className="text-sm font-medium text-pc-text">{num(player.kills_triple)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">Quadra Kill</div>
+                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.quadraKill")}</div>
                 <div className="text-sm font-medium text-pc-text">{num(player.kills_quadra)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">Penta Kill</div>
+                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.pentaKill")}</div>
                 <div className="text-sm font-medium text-pc-text">{num(player.kills_penta)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">Max Multi</div>
+                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.maxMulti")}</div>
                 <div className="text-sm font-medium text-pc-text">{num(player.multi_kill_max)}</div>
               </div>
 
               {/* Objective & game activity */}
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">Objective</div>
+                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.objective")}</div>
                 <div className="text-sm font-medium text-pc-text">{num(player.objective_assists)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">Spree</div>
+                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.spree")}</div>
                 <div className="text-sm font-medium text-pc-text">{num(player.killing_spree)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">Camps</div>
+                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.camps")}</div>
                 <div className="text-sm font-medium text-pc-text">{num(player.camps_cleared)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">Struct Dmg</div>
+                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.structDmg")}</div>
                 <div className="text-sm font-medium text-pc-text">{num(player.structure_damage)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">Wards</div>
+                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.wards")}</div>
                 <div className="text-sm font-medium text-pc-text">{num(player.wards_placed)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">Towers</div>
+                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.towers")}</div>
                 <div className="text-sm font-medium text-pc-text">{num(player.towers_destroyed)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">Distance</div>
+                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.distance")}</div>
                 <div className="text-sm font-medium text-pc-text">{player.distance_traveled != null ? num(Math.round(player.distance_traveled)) : "—"}</div>
               </div>
 
               {/* Time & identity */}
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">Time in Match</div>
+                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.timeInMatch")}</div>
                 <div className="text-sm font-medium text-pc-text">{fixed(player.time_in_match, 0)}s</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">AFK Rate</div>
+                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.afkRate")}</div>
                 <div className="text-sm font-medium text-pc-text">{fixed(player.afk_rate, 1)}%</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">Win Status</div>
+                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.winStatus")}</div>
                 <div className="text-sm font-medium text-pc-text">{player.win_status || "—"}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">Team</div>
-                <div className="text-sm font-medium text-pc-text">Team {player.task_force}</div>
+                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.team")}</div>
+                <div className="text-sm font-medium text-pc-text">{t("generated.matches.team")}{" "}{player.task_force}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">Source</div>
+                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.source")}</div>
                 <div className="text-sm font-medium text-pc-text">{player.source || "—"}</div>
               </div>
               {partyNumber != null && (
                 <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                  <div className="text-[10px] text-pc-text-muted">Party</div>
+                  <div className="text-[10px] text-pc-text-muted">{t("generated.matches.party")}</div>
                   <PartyBadge player={player} className="mt-0.5" />
                 </div>
               )}
@@ -333,7 +335,7 @@ export default function StatTable({ player, fact, wins }: StatTableRowProps) {
             {/* ── Full loadout visual strip ── */}
             {fact && (
               <div className="mt-3">
-                <div className="text-xs uppercase text-pc-text-muted mb-2 font-semibold">Full Loadout</div>
+                <div className="text-xs uppercase text-pc-text-muted mb-2 font-semibold">{t("generated.matches.fullLoadout")}</div>
                 <LoadoutStrip fact={fact} />
               </div>
             )}
@@ -344,7 +346,7 @@ export default function StatTable({ player, fact, wins }: StatTableRowProps) {
                 {/* Talents */}
                 {fact.talents.length > 0 && (
                   <div>
-                    <div className="text-xs uppercase text-pc-text-muted mb-1 font-semibold">Talents</div>
+                    <div className="text-xs uppercase text-pc-text-muted mb-1 font-semibold">{t("generated.matches.talents")}</div>
                     <div className="space-y-1">
                       {fact.talents.map((talent) => (
                         <div key={talent.talent_id} className="text-xs text-pc-text-secondary flex items-center gap-2">
@@ -354,7 +356,7 @@ export default function StatTable({ player, fact, wins }: StatTableRowProps) {
                             className="h-10 w-10 shrink-0 object-contain"
                             fallbackClassName="h-10 w-10 shrink-0"
                           />
-                          <span className="truncate">{talent.talent_name ?? `Talent #${talent.talent_id}`}</span>
+                          <span className="truncate">{talent.talent_name ?? t("generated.matches.talentValue1", { value1: talent.talent_id })}</span>
                         </div>
                       ))}
                     </div>
@@ -363,19 +365,19 @@ export default function StatTable({ player, fact, wins }: StatTableRowProps) {
                 {/* Items */}
                 {fact.items.length > 0 && (
                   <div>
-                    <div className="text-xs uppercase text-pc-text-muted mb-1 font-semibold">Items</div>
+                    <div className="text-xs uppercase text-pc-text-muted mb-1 font-semibold">{t("generated.matches.items")}</div>
                     <div className="space-y-1">
                       {fact.items.map((item) => (
                         <div key={item.item_id} className="text-xs text-pc-text-secondary flex items-center gap-2">
                           <img
                             src={item.icon_url ?? item.fallback_icon_url ?? ""}
-                            alt={item.item_name ?? "Item"}
+                            alt={item.item_name ?? t("generated.matches.item")}
                             className="w-5 h-5 rounded shrink-0 border border-pc-border bg-pc-bg-secondary"
                             onError={(e) => { (e.target as HTMLImageElement).src = item.fallback_icon_url ?? ""; }}
                           />
-                          <span className="truncate">{item.item_name ?? `Item #${item.item_id}`}</span>
+                          <span className="truncate">{item.item_name ?? t("generated.matches.itemValue1", { value1: item.item_id })}</span>
                           {item.item_level !== null && item.item_level !== undefined && (
-                            <span className="text-pc-text-muted ml-auto">Lvl {item.item_level}</span>
+                            <span className="text-pc-text-muted ml-auto">{t("generated.matches.lvl")}{" "}{item.item_level}</span>
                           )}
                           {item.item_type && (
                             <span className="text-[10px] text-pc-text-muted">({item.item_type})</span>
@@ -388,19 +390,19 @@ export default function StatTable({ player, fact, wins }: StatTableRowProps) {
                 {/* Cards */}
                 {fact.cards.length > 0 && (
                   <div>
-                    <div className="text-xs uppercase text-pc-text-muted mb-1 font-semibold">Cards</div>
+                    <div className="text-xs uppercase text-pc-text-muted mb-1 font-semibold">{t("generated.matches.cards")}</div>
                     <div className="space-y-1">
                       {fact.cards.map((card) => (
                         <div key={card.card_id} className="text-xs text-pc-text-secondary flex items-center gap-2">
                           <img
                             src={card.icon_url ?? card.fallback_icon_url ?? ""}
-                            alt={card.card_name ?? "Card"}
+                            alt={card.card_name ?? t("generated.matches.card")}
                             className="w-5 h-5 rounded shrink-0 border border-pc-border bg-pc-bg-secondary"
                             onError={(e) => { (e.target as HTMLImageElement).src = card.fallback_icon_url ?? ""; }}
                           />
-                          <span className="truncate">{card.card_name ?? `Card #${card.card_id}`}</span>
+                          <span className="truncate">{card.card_name ?? t("generated.matches.cardValue1", { value1: card.card_id })}</span>
                           {card.card_level !== null && card.card_level !== undefined && (
-                            <span className="text-pc-text-muted ml-auto">Lvl {card.card_level}</span>
+                            <span className="text-pc-text-muted ml-auto">{t("generated.matches.lvl")}{" "}{card.card_level}</span>
                           )}
                         </div>
                       ))}

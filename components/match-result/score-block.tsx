@@ -1,4 +1,5 @@
 import type { ScoreBlockData } from "./types";
+import { LocalizedText } from "@/lib/localization-context";
 
 export default function ScoreBlock({ data }: { data: ScoreBlockData }) {
   return (
@@ -9,7 +10,7 @@ export default function ScoreBlock({ data }: { data: ScoreBlockData }) {
           {data.team1Score ?? "?"}
         </div>
       </div>
-      <div className="text-pc-text-muted text-lg font-medium">VS</div>
+      <div className="text-pc-text-muted text-lg font-medium"><LocalizedText id="generated.matches.vs" /></div>
       <div className={`text-center px-6 py-3 rounded-xl ${data.team2Wins ? "bg-green-500/10 border-2 border-green-500/40" : "bg-pc-bg-secondary/50 border-2 border-pc-border"}`}>
         <div className="text-xs uppercase tracking-wider text-pc-text-muted">{data.team2Label}</div>
         <div className={`text-3xl font-bold ${data.team2Wins ? "text-green-400" : "text-pc-text-secondary"}`}>

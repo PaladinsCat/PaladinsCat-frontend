@@ -19,6 +19,7 @@ import { getRankIconPath, resolveEffectiveTier } from "@/lib/tier-utils";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { LoadingIndicator, LoadingPanel } from "@/components/async-state";
 import PlayerName from "@/components/player-name";
+import { useLocalization } from "@/lib/localization-context";
 
 const STAT_LABELS: Record<string, string> = {
   gpm: "Credits / Min",
@@ -46,6 +47,7 @@ function InlineLoading() {
 }
 
 export default function PlayersPageClient({ initialOverview }: { initialOverview: PlayersOverview | null }) {
+  const { t } = useLocalization();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<PlayerSearchResult[]>([]);
   const [searching, setSearching] = useState(false);
@@ -124,21 +126,21 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
       {/* ── Header + Search ── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h1 className="pc-heading pc-heading-lg text-pc-accent">
-          <ScrambleText text="Players" speed={30} iterations={15} delayFromCenter={false} />
+          <ScrambleText text={t("generated.players.players.392feef")} speed={30} iterations={15} delayFromCenter={false} />
         </h1>
         <div className="relative w-full sm:w-72">
           <input
             type="text"
             value={query}
             onChange={(e) => { setQuery(e.target.value); search(e.target.value); }}
-            placeholder="Search player..."
+            placeholder={t("generated.players.searchPlayer")}
             className="pc-input pr-8 w-full text-sm"
           />
           {query && (
             <button
               onClick={() => { setQuery(""); setResults([]); }}
               className="absolute right-2 top-1/2 -translate-y-1/2 text-pc-text-muted hover:text-pc-text transition-colors"
-              aria-label="Clear search"
+              aria-label={t("generated.players.clearSearch")}
             >
               ✕
             </button>
@@ -167,7 +169,7 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
             </Link>
           ))}
           {!searching && results.length === 0 && (
-            <p className="text-pc-text-muted text-sm">No players found</p>
+            <p className="text-pc-text-muted text-sm">{t("generated.players.noPlayersFound")}</p>
           )}
         </div>
       )}
@@ -178,7 +180,7 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
         {/* Left: Performance Stats 2×2 + Cheaters & Suspicious in one grid */}
         <div className="lg:w-3/5 space-y-4">
           <div className="flex items-center justify-between mb-2 px-2">
-            <h2 className="text-sm font-bold text-pc-text">Performance Stats</h2>
+            <h2 className="text-sm font-bold text-pc-text">{t("generated.players.performanceStats")}</h2>
           </div>
           <div className="grid grid-cols-1 gap-3 min-[480px]:grid-cols-2 xl:grid-cols-4">
             {PERFORMANCE_METRICS.map(({ key: stat }) => {
@@ -188,13 +190,12 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
                 <div className="flex items-center justify-between mb-2 px-2">
                   <h3 className="text-pc-text font-semibold text-xs">{STAT_LABELS[stat] || stat}</h3>
                   <Link href={`/players/stats/${stat}`} className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors drop-shadow-sm">
-                    Detail →
-                  </Link>
+                    {t("generated.players.detail")}</Link>
                 </div>
                 <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-3 hover:border-pc-accent-mid transition-colors flex-1 flex flex-col justify-start">
                   <div className="space-y-1.5">
                     {players.length === 0 && (
-                      <div className="text-xs text-pc-text-muted">{overviewLoading ? <InlineLoading /> : "No ranked data"}</div>
+                      <div className="text-xs text-pc-text-muted">{overviewLoading ? <InlineLoading /> : t("generated.players.noRankedData")}</div>
                     )}
                     {players.map((p, i) => (
                       <div key={`${stat}-${p.playerId}`} className="flex items-center justify-between text-xs">
@@ -227,19 +228,18 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
               <div className="flex items-center justify-between mb-2 px-2">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-red-500" />
-                  <h3 className="text-pc-text font-semibold text-xs">Cheaters</h3>
+                  <h3 className="text-pc-text font-semibold text-xs">{t("generated.players.cheaters")}</h3>
                   <span className="text-xs px-1.5 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/20">
                     {communityCounts.cheaters}
                   </span>
                 </div>
                 <Link href="/players/cheaters" className="text-xs text-pc-text-secondary hover:text-red-400 transition-colors drop-shadow-sm">
-                  Detail →
-                </Link>
+                  {t("generated.players.detail")}</Link>
               </div>
               <div className="bg-pc-bg-elevated border border-red-500/20 rounded-xl p-3 flex-1 flex flex-col justify-start">
                 <div className="space-y-1.5">
                 {cheaterPlayers.length === 0 && (
-                  <div className="text-xs text-pc-text-muted">{overviewLoading ? <InlineLoading /> : "No confirmed cheaters"}</div>
+                  <div className="text-xs text-pc-text-muted">{overviewLoading ? <InlineLoading /> : t("generated.players.noConfirmedCheaters")}</div>
                 )}
                 {cheaterPlayers.map((p) => (
                   <div key={p.id} className="flex items-start gap-2 p-2 rounded-lg bg-pc-bg/50">
@@ -260,19 +260,18 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
               <div className="flex items-center justify-between mb-2 px-2">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-amber-500" />
-                  <h3 className="text-pc-text font-semibold text-xs">Suspicious</h3>
+                  <h3 className="text-pc-text font-semibold text-xs">{t("generated.players.suspicious")}</h3>
                   <span className="text-xs px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
                     {communityCounts.suspicious}
                   </span>
                 </div>
                 <Link href="/players/suspicious" className="text-xs text-pc-text-secondary hover:text-amber-400 transition-colors drop-shadow-sm">
-                  Detail →
-                </Link>
+                  {t("generated.players.detail")}</Link>
               </div>
               <div className="bg-pc-bg-elevated border border-amber-500/20 rounded-xl p-3 flex-1 flex flex-col justify-start">
                 <div className="space-y-1.5">
                 {suspiciousPlayers.length === 0 && (
-                  <div className="text-xs text-pc-text-muted">{overviewLoading ? <InlineLoading /> : "No suspicious players"}</div>
+                  <div className="text-xs text-pc-text-muted">{overviewLoading ? <InlineLoading /> : t("generated.players.noSuspiciousPlayers")}</div>
                 )}
                 {suspiciousPlayers.map((p) => (
                   <div key={p.id} className="flex items-start gap-2 p-2 rounded-lg bg-pc-bg/50">
@@ -296,19 +295,18 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
               <div className="flex items-center justify-between mb-2 px-2">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-violet-500" />
-                  <h3 className="text-pc-text font-semibold text-xs">Weirdo</h3>
+                  <h3 className="text-pc-text font-semibold text-xs">{t("generated.players.weirdo")}</h3>
                   <span className="text-xs px-1.5 py-0.5 rounded-full bg-violet-500/10 text-violet-300 border border-violet-500/20">
                     {communityCounts.weirdos}
                   </span>
                 </div>
                 <Link href="/players/weirdos" className="text-xs text-pc-text-secondary hover:text-violet-300 transition-colors drop-shadow-sm">
-                  Detail →
-                </Link>
+                  {t("generated.players.detail")}</Link>
               </div>
               <div className="bg-pc-bg-elevated border border-violet-500/20 rounded-xl p-3 flex-1 flex flex-col justify-start">
                 <div className="space-y-1.5">
                   {weirdoPlayers.length === 0 && (
-                    <div className="text-xs text-pc-text-muted">{overviewLoading ? <InlineLoading /> : "No Weirdo votes yet"}</div>
+                    <div className="text-xs text-pc-text-muted">{overviewLoading ? <InlineLoading /> : t("generated.players.noWeirdoVotesYet")}</div>
                   )}
                   {weirdoPlayers.map((p) => (
                     <div key={p.id} className="flex items-start gap-2 p-2 rounded-lg bg-pc-bg/50">
@@ -328,19 +326,18 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
               <div className="flex items-center justify-between mb-2 px-2">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                  <h3 className="text-pc-text font-semibold text-xs">Hall of Fame</h3>
+                  <h3 className="text-pc-text font-semibold text-xs">{t("generated.players.hallOfFame")}</h3>
                   <span className="text-xs px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
                     {communityCounts.hallOfFame}
                   </span>
                 </div>
                 <Link href="/players/hall-of-fame" className="text-xs text-pc-text-secondary hover:text-emerald-300 transition-colors drop-shadow-sm">
-                  Detail →
-                </Link>
+                  {t("generated.players.detail")}</Link>
               </div>
               <div className="bg-pc-bg-elevated border border-emerald-500/20 rounded-xl p-3 flex-1 flex flex-col justify-start">
                 <div className="space-y-1.5">
                   {hallOfFamePlayers.length === 0 && (
-                    <div className="text-xs text-pc-text-muted">{overviewLoading ? <InlineLoading /> : "No Hall of Fame votes yet"}</div>
+                    <div className="text-xs text-pc-text-muted">{overviewLoading ? <InlineLoading /> : t("generated.players.noHallOfFameVotesYet")}</div>
                   )}
                   {hallOfFamePlayers.map((p) => (
                     <div key={p.id} className="flex items-start gap-2 p-2 rounded-lg bg-pc-bg/50">
@@ -358,8 +355,8 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
             <Link href="/players/private-accounts" className="group flex min-h-20 items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-4 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary min-[480px]:col-span-2">
               <LockKeyhole aria-hidden="true" className="h-10 w-10 shrink-0 text-slate-300" strokeWidth={1.5} />
               <div className="min-w-0 flex-1">
-                <h3 className="text-sm font-semibold text-pc-text group-hover:text-pc-accent">Private Accounts</h3>
-                <p className="mt-0.5 text-xs text-pc-text-muted">{overviewLoading ? "Loading tracked accounts…" : `${directoryCounts.privateAccounts.toLocaleString()} tracked accounts`}</p>
+                <h3 className="text-sm font-semibold text-pc-text group-hover:text-pc-accent">{t("generated.players.privateAccounts")}</h3>
+                <p className="mt-0.5 text-xs text-pc-text-muted">{overviewLoading ? t("generated.players.loadingTrackedAccounts") : t("generated.players.value1TrackedAccounts", { value1: directoryCounts.privateAccounts.toLocaleString() })}</p>
               </div>
               <span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent">→</span>
             </Link>
@@ -367,8 +364,8 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
             <Link href="/players/parties" className="group flex min-h-20 items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-4 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary min-[480px]:col-span-2">
               <UsersRound aria-hidden="true" className="h-10 w-10 shrink-0 text-cyan-300" strokeWidth={1.5} />
               <div className="min-w-0 flex-1">
-                <h3 className="text-sm font-semibold text-pc-text group-hover:text-pc-accent">Ranked Parties</h3>
-                <p className="mt-0.5 text-xs text-pc-text-muted">{overviewLoading ? "Loading party connections…" : `${directoryCounts.parties.toLocaleString()} known party pairs`}</p>
+                <h3 className="text-sm font-semibold text-pc-text group-hover:text-pc-accent">{t("generated.players.rankedParties")}</h3>
+                <p className="mt-0.5 text-xs text-pc-text-muted">{overviewLoading ? t("generated.players.loadingPartyConnections") : t("generated.players.value1KnownPartyPairs", { value1: directoryCounts.parties.toLocaleString() })}</p>
               </div>
               <span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent">→</span>
             </Link>
@@ -381,14 +378,13 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
           {/* Ranked Leaderboard — expanded, full width */}
           <section>
             <div className="flex items-center justify-between mb-2 px-2">
-              <h2 className="text-sm font-bold text-pc-text">Ranked Leaderboard</h2>
+              <h2 className="text-sm font-bold text-pc-text">{t("generated.players.rankedLeaderboard")}</h2>
               <Link href="/players/leaderboard" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors drop-shadow-sm">
-                Detail →
-              </Link>
+                {t("generated.players.detail")}</Link>
             </div>
             <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4">
               {rankedPlayers.length === 0 ? (
-                <div className="text-xs text-pc-text-muted">{overviewLoading ? <InlineLoading /> : "No ranked leaderboard data"}</div>
+                <div className="text-xs text-pc-text-muted">{overviewLoading ? <InlineLoading /> : t("generated.players.noRankedLeaderboardData")}</div>
               ) : (
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
                   {(() => {
@@ -463,15 +459,14 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
             {/* Top Players by Champion */}
             <section>
               <div className="flex items-center justify-between mb-2 px-2">
-                <h2 className="text-sm font-bold text-pc-text">Top Players by Champion</h2>
+                <h2 className="text-sm font-bold text-pc-text">{t("generated.players.topPlayersByChampion")}</h2>
                 <Link href="/players/elo" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors drop-shadow-sm">
-                  Detail →
-                </Link>
+                  {t("generated.players.detail")}</Link>
               </div>
               <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-3">
                 <div className="space-y-1.5">
                   {championEloPlayers.length === 0 && (
-                    <div className="text-xs text-pc-text-muted">{overviewLoading ? <InlineLoading /> : "No data"}</div>
+                    <div className="text-xs text-pc-text-muted">{overviewLoading ? <InlineLoading /> : t("generated.players.noData")}</div>
                   )}
                   {championEloPlayers.map((p, i) => (
                     <div key={`champ-elo-${p.player_id}`} className="flex items-center justify-between text-xs">
@@ -492,15 +487,14 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
             {/* Account ELO */}
             <section>
               <div className="flex items-center justify-between mb-2 px-2">
-                <h2 className="text-sm font-bold text-pc-text">Account ELO</h2>
+                <h2 className="text-sm font-bold text-pc-text">{t("generated.players.accountElo")}</h2>
                 <Link href="/players/elo?mode=account" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors drop-shadow-sm">
-                  Detail →
-                </Link>
+                  {t("generated.players.detail")}</Link>
               </div>
               <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-3">
                 <div className="space-y-1.5">
                   {accountEloPlayers.length === 0 && (
-                    <div className="text-xs text-pc-text-muted">{overviewLoading ? <InlineLoading /> : "No data"}</div>
+                    <div className="text-xs text-pc-text-muted">{overviewLoading ? <InlineLoading /> : t("generated.players.noData")}</div>
                   )}
                   {accountEloPlayers.map((p) => (
                     <div key={`account-elo-${p.playerId}`} className="flex items-center justify-between text-xs">

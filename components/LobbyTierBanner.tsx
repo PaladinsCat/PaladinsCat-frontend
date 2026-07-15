@@ -6,8 +6,10 @@ import { useAuth } from "@/lib/auth-context";
 import { useLobbyTier } from "@/lib/lobby-tier-context";
 import { LOBBY_TIER_OPTIONS, type LobbyTierFilter } from "@/lib/lobby-tier";
 import { LoadingIndicator } from "@/components/async-state";
+import { useLocalization } from "@/lib/localization-context";
 
 export default function LobbyTierBanner() {
+  const { t } = useLocalization();
   const pathname = usePathname();
   const { isLoggedIn, isLoading: authLoading } = useAuth();
   const { filter, definition, ready, setFilter } = useLobbyTier();
@@ -31,13 +33,12 @@ export default function LobbyTierBanner() {
       <div className="mx-auto flex min-h-11 max-w-7xl items-center gap-3 px-4 py-2 sm:px-6 lg:px-8">
         <div className="flex min-w-0 flex-1 items-center gap-2">
           <span className="shrink-0 text-[10px] font-bold uppercase tracking-[0.14em] text-pc-text-muted">
-            Ranked stats
-          </span>
+            {t("generated.players.rankedStats")}</span>
           <span className="hidden h-4 w-px bg-pc-border sm:block" aria-hidden="true" />
           {ready ? <span className="truncate text-xs font-semibold text-pc-accent">{definition.label}</span> : <LoadingIndicator className="gap-1.5 text-xs" />}
         </div>
 
-        <div className="hidden items-center gap-1 md:flex" role="group" aria-label="Ranked lobby statistics scope">
+        <div className="hidden items-center gap-1 md:flex" role="group" aria-label={t("generated.players.rankedLobbyStatisticsScope")}>
           {LOBBY_TIER_OPTIONS.map((option) => {
             const selected = ready && option.value === filter;
             return (
@@ -60,7 +61,7 @@ export default function LobbyTierBanner() {
         </div>
 
         <label className="md:hidden">
-          <span className="sr-only">Ranked lobby statistics scope</span>
+          <span className="sr-only">{t("generated.players.rankedLobbyStatisticsScope")}</span>
           <select
             value={filter}
             onChange={(event) => changeScope(event.target.value as LobbyTierFilter)}
@@ -74,8 +75,7 @@ export default function LobbyTierBanner() {
         </label>
 
         <Link href="/account" className="hidden shrink-0 text-[11px] text-pc-text-muted transition-colors hover:text-pc-accent sm:inline">
-          Settings
-        </Link>
+          {t("generated.players.settings")}</Link>
       </div>
     </div>
   );

@@ -7,6 +7,7 @@ import { LoadingPanel } from "@/components/async-state";
 import PlayerDirectoryPagination from "@/components/player-directory-pagination";
 import { fetchPrivateAccountsDirectory, type PrivateAccountSummary } from "@/lib/api-client";
 import { TIER_NAMES, getRankIconPath, getTierColor } from "@/lib/tier-utils";
+import { useLocalization } from "@/lib/localization-context";
 
 const PAGE_SIZE = 24;
 
@@ -18,6 +19,7 @@ function observedAt(value: string | null) {
 }
 
 export default function PrivateAccountsPage() {
+  const { t } = useLocalization();
   const [accounts, setAccounts] = useState<PrivateAccountSummary[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -44,7 +46,7 @@ export default function PrivateAccountsPage() {
         setTotalPages(result.totalPages);
       })
       .catch(() => {
-        if (!cancelled) setError("Private accounts could not be loaded.");
+        if (!cancelled) setError(t("generated.players.privateAccountsCouldNotBeLoaded"));
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -55,12 +57,12 @@ export default function PrivateAccountsPage() {
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6">
       <header>
-        <Link href="/players" className="mb-2 inline-block text-xs text-pc-accent hover:underline">← Players</Link>
+        <Link href="/players" className="mb-2 inline-block text-xs text-pc-accent hover:underline">{t("generated.players.players")}</Link>
         <div className="flex items-start gap-3">
           <LockKeyhole aria-hidden="true" className="mt-1 h-9 w-9 shrink-0 text-slate-300" strokeWidth={1.5} />
           <div className="min-w-0">
-            <h1 className="pc-heading pc-heading-lg text-pc-accent">Private Accounts</h1>
-            <p className="mt-1 max-w-2xl text-sm text-pc-text-secondary">Pseudonymous accounts observed in match data while their Paladins profiles were private.</p>
+            <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.players.privateAccounts")}</h1>
+            <p className="mt-1 max-w-2xl text-sm text-pc-text-secondary">{t("generated.players.pseudonymousAccountsObservedInMatchDataWhileTheirPaladinsProfiles")}</p>
           </div>
         </div>
       </header>
@@ -69,8 +71,8 @@ export default function PrivateAccountsPage() {
         <div className="flex items-start gap-3">
           <Info aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0 text-violet-300" />
           <div className="min-w-0">
-            <h2 className="text-sm font-semibold text-pc-text">How private-account tracking works</h2>
-            <p className="mt-1 text-sm leading-6 text-pc-text-secondary">Paladins hides the player ID and name, but completed matches still expose changing account signals. PaladinsCat builds a conservative timeline from account level, champion mastery, rank, platform, party companions, and match timing.</p>
+            <h2 className="text-sm font-semibold text-pc-text">{t("generated.players.howPrivateAccountTrackingWorks")}</h2>
+            <p className="mt-1 text-sm leading-6 text-pc-text-secondary">{t("generated.players.paladinsHidesThePlayerIdAndNameButCompletedMatches")}</p>
           </div>
         </div>
       </section>
@@ -81,18 +83,18 @@ export default function PrivateAccountsPage() {
           <input
             value={query}
             onChange={(event) => { setQuery(event.target.value); setPage(1); }}
-            placeholder="Search private alias…"
+            placeholder={t("generated.players.searchPrivateAlias")}
             className="w-full rounded-xl border border-pc-border bg-pc-bg-elevated py-2.5 pl-9 pr-3 text-sm text-pc-text outline-none transition-colors placeholder:text-pc-text-muted focus:border-pc-accent-mid"
           />
         </label>
-        <div className="text-xs text-pc-text-muted">{loading && accounts.length === 0 ? "Loading…" : `${total.toLocaleString()} tracked account${total === 1 ? "" : "s"}`}</div>
+        <div className="text-xs text-pc-text-muted">{loading && accounts.length === 0 ? t("generated.players.loading") : t(total === 1 ? "common.count.trackedAccountOne" : "common.count.trackedAccountMany", { count: total.toLocaleString() })}</div>
       </div>
 
       {error && <div className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-300">{error}</div>}
       {loading && accounts.length === 0 ? (
         <LoadingPanel compact />
       ) : accounts.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-pc-border bg-pc-bg-elevated px-4 py-12 text-center text-sm text-pc-text-muted">No private accounts match this search.</div>
+        <div className="rounded-xl border border-dashed border-pc-border bg-pc-bg-elevated px-4 py-12 text-center text-sm text-pc-text-muted">{t("generated.players.noPrivateAccountsMatchThisSearch")}</div>
       ) : (
         <div className={`grid grid-cols-1 gap-3 md:grid-cols-2 ${loading ? "opacity-60" : ""}`}>
           {accounts.map((account) => {
@@ -102,22 +104,22 @@ export default function PrivateAccountsPage() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex min-w-0 flex-wrap items-center gap-1.5">
                     <h2 className="mr-0.5 truncate text-base font-semibold text-pc-text group-hover:text-pc-accent">{account.alias || account.displayName}</h2>
-                    <span className="rounded border border-pc-border bg-pc-bg/50 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-pc-text-secondary">Level {account.accountLevel.toLocaleString()}</span>
-                    <span className="rounded border border-pc-border bg-pc-bg/50 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-pc-text-secondary">Mastery {account.masteryLevel.toLocaleString()}</span>
+                    <span className="rounded border border-pc-border bg-pc-bg/50 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-pc-text-secondary">{t("generated.players.level")}{" "}{account.accountLevel.toLocaleString()}</span>
+                    <span className="rounded border border-pc-border bg-pc-bg/50 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-pc-text-secondary">{t("generated.players.mastery")}{" "}{account.masteryLevel.toLocaleString()}</span>
                     <span className={`ml-1 flex min-w-0 items-center gap-1 text-xs font-semibold ${getTierColor(account.leagueTier)}`}>
                       <img src={getRankIconPath(account.leagueTier, 0)} alt="" className="h-5 w-5 shrink-0 object-contain" />
                       <span className="truncate">{tierName}</span>
                       <span className="text-pc-text-muted">·</span>
-                      <span className="whitespace-nowrap text-pc-text-secondary">{account.leaguePoints.toLocaleString()} TP</span>
+                      <span className="whitespace-nowrap text-pc-text-secondary">{account.leaguePoints.toLocaleString()} {t("generated.players.tp")}</span>
                     </span>
                   </div>
-                  <span className="shrink-0 rounded-full border border-slate-400/20 bg-slate-400/10 px-2 py-1 text-xs font-semibold text-slate-300">{account.matchCount.toLocaleString()} matches</span>
+                  <span className="shrink-0 rounded-full border border-slate-400/20 bg-slate-400/10 px-2 py-1 text-xs font-semibold text-slate-300">{account.matchCount.toLocaleString()} {t("generated.players.matches.9f3e924")}</span>
                 </div>
 
                 <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-pc-border pt-2 text-[11px] text-pc-text-muted">
                   <CalendarClock aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
-                  <span>First observed <span className="text-pc-text-secondary">{observedAt(account.firstSeen)}</span></span>
-                  <span>Last observed <span className="text-pc-text-secondary">{observedAt(account.lastSeen)}</span></span>
+                  <span>{t("generated.players.firstObserved")}{" "}<span className="text-pc-text-secondary">{observedAt(account.firstSeen)}</span></span>
+                  <span>{t("generated.players.lastObserved")}{" "}<span className="text-pc-text-secondary">{observedAt(account.lastSeen)}</span></span>
                 </div>
               </Link>
             );

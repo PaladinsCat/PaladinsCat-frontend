@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
+import { createLocalizedMetadata } from "@/lib/server-localization";
 
-export const metadata: Metadata = {
-  title: "Ranked Paladins Parties",
-  description: "Browse exact ranked Paladins stacks of two to five players and every canonical pair produced by those parties.",
-  alternates: { canonical: "/players/parties" },
-};
+export async function generateMetadata() {
+  return createLocalizedMetadata("seo.players.parties.title", {
+    descriptionKey: "seo.players.parties.description",
+    metadata: { alternates: { canonical: "/players/parties" } },
+  });
+}
 
 export default function RankedPartiesLayout({ children }: { children: React.ReactNode }) {
   return children;

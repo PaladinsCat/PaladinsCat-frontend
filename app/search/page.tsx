@@ -16,6 +16,7 @@ import { getChampionIconSafe } from "@/lib/champion-icons";
 import { AsyncButton, EmptyState, ErrorState, LoadingPanel } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { PlayerSearchSubtitle } from "@/components/player-search-result";
+import { useLocalization } from "@/lib/localization-context";
 
 const TYPE_LABEL: Record<UniversalSearchType, string> = {
   player: "Player",
@@ -262,6 +263,7 @@ const SearchResultGroups = memo(function SearchResultGroups({
 }: {
   grouped: Array<[UniversalSearchType, UniversalSearchResult[]]>;
 }) {
+  const { t } = useLocalization();
   if (grouped.length === 0) return null;
 
   return (
@@ -294,8 +296,7 @@ const SearchResultGroups = memo(function SearchResultGroups({
                   </p>
                 </div>
                 <span className="text-xs text-pc-text-muted group-hover:text-pc-accent transition-colors">
-                  View
-                </span>
+                  {t("generated.search.view")}</span>
               </Link>
             ))}
           </div>
@@ -306,6 +307,7 @@ const SearchResultGroups = memo(function SearchResultGroups({
 });
 
 function SearchPageBody() {
+  const { t } = useLocalization();
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("q") ?? "";
   const [query, setQuery] = useState(initialQuery);
@@ -353,7 +355,7 @@ function SearchPageBody() {
           window.history.replaceState(null, "", `/search?${params.toString()}`);
         })
         .catch(() => {
-          setError("Search unavailable");
+          setError(t("generated.search.searchUnavailable"));
           setResults([]);
         })
         .finally(() => setLoading(false));
@@ -395,7 +397,7 @@ function SearchPageBody() {
       setResults((current) => mergeResults([...current, ...response.data]).slice(0, 48));
       setRemoteNotice(remoteLookupNotice(target, response.remote));
     } catch {
-      setError("Remote lookup unavailable");
+      setError(t("generated.search.remoteLookupUnavailable"));
     } finally {
       setRemoteLoadingTarget(null);
     }
@@ -411,16 +413,16 @@ function SearchPageBody() {
   // only the short miss cache and still cannot spend a call for an existing DB
   // row because the backend preflight wins first.
   const remoteActions: Array<{ target: UniversalSearchRemoteTarget; label: string; show: boolean }> = [
-    { target: "player-id", label: "Look up player ID", show: isNumericQuery(q) && !isLikelyMatchId(q) },
-    { target: "match-id", label: "Look up match ID", show: isLikelyMatchId(q) },
-    { target: "player-name", label: "Search Hi-Rez exact player name", show: canRemotePlayerNameLookup(q) },
+    { target: "player-id", label: t("generated.search.lookUpPlayerId"), show: isNumericQuery(q) && !isLikelyMatchId(q) },
+    { target: "match-id", label: t("generated.search.lookUpMatchId"), show: isLikelyMatchId(q) },
+    { target: "player-name", label: t("generated.search.searchHiRezExactPlayerName"), show: canRemotePlayerNameLookup(q) },
   ];
   const visibleRemoteActions = remoteActions.filter((action) => action.show);
 
   return (
     <div className="space-y-6">
       <div className="space-y-3">
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">Search</h1>
+        <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.search.search")}</h1>
         <form onSubmit={submit} className="flex max-w-3xl gap-2">
           <div className="relative flex-1">
             <input
@@ -428,15 +430,15 @@ function SearchPageBody() {
               name="q"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              aria-label="Search players, matches, champions, items, cards, talents"
+              aria-label={t("generated.search.searchPlayersMatchesChampionsItemsCardsTalents")}
               autoFocus
               className="pc-input w-full text-sm pr-10"
             />
             {query && (
               <button
                 type="button"
-                aria-label="Clear search"
-                title="Clear search"
+                aria-label={t("generated.search.clearSearch")}
+                title={t("generated.search.clearSearch")}
                 onClick={() => {
                   setQuery("");
                   setResults([]);
@@ -459,8 +461,8 @@ function SearchPageBody() {
           </div>
           <button
             type="submit"
-            aria-label="Search"
-            title="Search"
+            aria-label={t("generated.search.search")}
+            title={t("generated.search.search")}
             className="pc-glass flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-pc-border text-pc-text-muted hover:border-pc-accent-mid hover:text-pc-accent transition-colors"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4">
@@ -502,7 +504,7 @@ function SearchPageBody() {
               {action.label}
             </AsyncButton>
           ))}
-          <span className="text-xs text-pc-text-muted">Exact lookup. Local DB is checked first.</span>
+          <span className="text-xs text-pc-text-muted">{t("generated.search.exactLookupLocalDbIsCheckedFirst")}</span>
         </div>
       )}
 
@@ -515,11 +517,11 @@ function SearchPageBody() {
       )}
 
       {error && (
-        <ErrorState title="Search unavailable" message={error} />
+        <ErrorState title={t("generated.search.searchUnavailable")} message={error} />
       )}
 
       {!loading && searched && results.length === 0 && !error && (
-        <EmptyState title="No results found" description="Try a broader name, player ID, match ID, champion, item, card, or talent." />
+        <EmptyState title={t("generated.search.noResultsFound")} description={t("generated.search.tryABroaderNamePlayerIdMatchIdChampionItem")} />
       )}
 
       <SearchResultGroups grouped={grouped} />

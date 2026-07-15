@@ -5,8 +5,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { register } from "@/lib/api-client";
 import { AsyncButton } from "@/components/async-state";
+import { useLocalization } from "@/lib/localization-context";
 
 export default function RegisterPage() {
+  const { t } = useLocalization();
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -22,7 +24,7 @@ export default function RegisterPage() {
     // out permanently (no password reset flow exists).
     // Source: Fault #7 — "No password confirmation field"
     if (password !== passwordConfirm) {
-      setError("Passwords do not match");
+      setError(t("generated.auth.passwordsDoNotMatch"));
       return;
     }
     setLoading(true);
@@ -41,8 +43,8 @@ export default function RegisterPage() {
     <div className="min-h-[60vh] flex items-center justify-center">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-pc-accent">Create Account</h1>
-          <p className="text-pc-text-secondary mt-2">Join the PaladinsCat community</p>
+          <h1 className="text-3xl font-bold text-pc-accent">{t("generated.auth.createAccount")}</h1>
+          <p className="text-pc-text-secondary mt-2">{t("generated.auth.joinThePaladinscatCommunity")}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-pc-bg-elevated rounded-lg border border-pc-border p-6 space-y-4">
@@ -54,8 +56,7 @@ export default function RegisterPage() {
 
           <div>
             <label htmlFor="username" className="block text-sm font-medium text-pc-text-secondary mb-1">
-              Username
-            </label>
+              {t("generated.auth.username")}</label>
             <input
               id="username"
               type="text"
@@ -64,14 +65,13 @@ export default function RegisterPage() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="w-full px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text placeholder-pc-text-muted focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
-              placeholder="Choose a username (3+ chars)"
+              placeholder={t("generated.auth.chooseAUsername3Chars")}
             />
           </div>
 
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-pc-text-secondary mb-1">
-              Email
-            </label>
+              {t("generated.auth.email")}</label>
             <input
               id="email"
               type="email"
@@ -79,14 +79,13 @@ export default function RegisterPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text placeholder-pc-text-muted focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
-              placeholder="your@email.com"
+              placeholder={t("generated.auth.yourEmailCom")}
             />
           </div>
 
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-pc-text-secondary mb-1">
-              Password
-            </label>
+              {t("generated.auth.password")}</label>
             <input
               id="password"
               type="password"
@@ -95,14 +94,13 @@ export default function RegisterPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text placeholder-pc-text-muted focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
-              placeholder="6+ characters"
+              placeholder={t("generated.auth.text6Characters")}
             />
           </div>
 
           <div>
             <label htmlFor="passwordConfirm" className="block text-sm font-medium text-pc-text-secondary mb-1">
-              Confirm Password
-            </label>
+              {t("generated.auth.confirmPassword")}</label>
             <input
               id="passwordConfirm"
               type="password"
@@ -111,7 +109,7 @@ export default function RegisterPage() {
               value={passwordConfirm}
               onChange={(e) => setPasswordConfirm(e.target.value)}
               className="w-full px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text placeholder-pc-text-muted focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
-              placeholder="Re-enter password"
+              placeholder={t("generated.auth.reEnterPassword")}
             />
           </div>
 
@@ -120,14 +118,12 @@ export default function RegisterPage() {
             loading={loading}
             className="w-full py-2.5 bg-pc-accent hover:bg-pc-accent-secondary text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Create Account
-          </AsyncButton>
+            {t("generated.auth.createAccount")}</AsyncButton>
 
           <p className="text-center text-pc-text-secondary text-sm">
-            Already have an account?{" "}
+            {t("generated.auth.alreadyHaveAnAccount")}{" "}
             <Link href="/auth/login" className="text-pc-accent hover:text-pc-accent-light transition-colors">
-              Sign in
-            </Link>
+              {t("generated.auth.signIn.ada2e9e")}</Link>
           </p>
         </form>
       </div>

@@ -7,8 +7,10 @@ import { DataTableSkeleton } from "@/components/route-skeleton";
 import Link from "next/link";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
+import { useLocalization } from "@/lib/localization-context";
 
 export default function TalentsPage() {
+  const { t } = useLocalization();
   const [talents, setTalents] = useState<Array<{ talentId: number; talentName: string; championId: number; championName: string; totalPlays: number; winRate: number }>>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,8 +30,8 @@ export default function TalentsPage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-bold text-pc-accent sm:text-3xl">Talent Performance</h1>
-      <label className="block sm:hidden"><span className="pc-label">Champion</span><select value={selectedChampion ?? ""} onChange={(event) => setSelectedChampion(event.target.value || null)} className="pc-select w-full"><option value="">All champions</option>{champions.map((champion) => <option key={champion} value={champion}>{champion}</option>)}</select></label>
+      <h1 className="text-2xl font-bold text-pc-accent sm:text-3xl">{t("generated.stats.talentPerformance")}</h1>
+      <label className="block sm:hidden"><span className="pc-label">{t("generated.stats.champion")}</span><select value={selectedChampion ?? ""} onChange={(event) => setSelectedChampion(event.target.value || null)} className="pc-select w-full"><option value="">{t("generated.stats.allChampions")}</option>{champions.map((champion) => <option key={champion} value={champion}>{champion}</option>)}</select></label>
       <div className="hidden flex-wrap gap-2 sm:flex">
         <button
           onClick={() => setSelectedChampion(null)}
@@ -37,8 +39,7 @@ export default function TalentsPage() {
             !selectedChampion ? "bg-pc-accent text-pc-bg" : "bg-pc-bg-elevated hover:bg-pc-bg-secondary"
           }`}
         >
-          All
-        </button>
+          {t("generated.stats.all")}</button>
         {champions.map((champion) => (
           <button
             key={champion}
@@ -56,12 +57,12 @@ export default function TalentsPage() {
       ) : error ? (
         <ErrorState message={String(error)} />
       ) : filtered.length === 0 ? (
-        <EmptyState title="No talent statistics" description="Talent performance will appear after ranked matches are processed." />
+        <EmptyState title={t("generated.stats.noTalentStatistics")} description={t("generated.stats.talentPerformanceWillAppearAfterRankedMatchesAreProcessed")} />
       ) : (
         <div className="space-y-2 sm:hidden">
           {filtered.slice(0, 20).map((talent) => <Link key={`${talent.championId}-${talent.talentId}`} href={`/champions/${championSlug(talent.championName)}/talents/${talent.talentId}`} className="pc-mobile-panel flex min-w-0 items-center gap-3 p-3">
             <img src={getChampionIconSafe(talent.championName)} alt="" className="h-10 w-10 shrink-0 rounded-lg object-contain" />
-            <div className="min-w-0 flex-1"><div className="truncate text-sm font-semibold text-pc-text">{talent.talentName}</div><div className="text-xs text-pc-text-muted">{talent.championName} · {talent.totalPlays.toLocaleString()} plays</div></div>
+            <div className="min-w-0 flex-1"><div className="truncate text-sm font-semibold text-pc-text">{talent.talentName}</div><div className="text-xs text-pc-text-muted">{talent.championName} · {talent.totalPlays.toLocaleString()} {t("generated.stats.plays.0effba4")}</div></div>
             <span className={talent.winRate >= 50 ? "shrink-0 font-bold text-emerald-400" : "shrink-0 font-bold text-rose-400"}>{talent.winRate?.toFixed(1)}%</span>
           </Link>)}
         </div>
@@ -71,10 +72,10 @@ export default function TalentsPage() {
           <table className="w-full text-left">
             <thead className="bg-pc-bg-elevated">
               <tr>
-                <th className="px-4 py-2 text-pc-accent font-semibold">Champion</th>
-                <th className="px-4 py-2 text-pc-accent font-semibold">Talent</th>
-                <th className="px-4 py-2 text-pc-accent font-semibold">Plays</th>
-                <th className="px-4 py-2 text-pc-accent font-semibold">Win Rate</th>
+                <th className="px-4 py-2 text-pc-accent font-semibold">{t("generated.stats.champion")}</th>
+                <th className="px-4 py-2 text-pc-accent font-semibold">{t("generated.stats.talent")}</th>
+                <th className="px-4 py-2 text-pc-accent font-semibold">{t("generated.stats.plays")}</th>
+                <th className="px-4 py-2 text-pc-accent font-semibold">{t("generated.stats.winRate.49a3838")}</th>
               </tr>
             </thead>
             <tbody>

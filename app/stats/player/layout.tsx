@@ -1,12 +1,10 @@
-import type { Metadata } from "next";
+import { createLocalizedMetadata } from "@/lib/server-localization";
 
-export const metadata: Metadata = {
-  title: "Player Charts",
-  robots: {
-    index: false,
-    follow: true,
-  },
-};
+export async function generateMetadata() {
+  return createLocalizedMetadata("seo.stats.player.title", {
+    metadata: { robots: { index: false, follow: true } },
+  });
+}
 
 export default function PlayerStatsLayout({ children }: { children: React.ReactNode }) {
   return children;

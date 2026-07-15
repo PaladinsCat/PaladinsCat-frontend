@@ -5,6 +5,7 @@ import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { useLocalization } from "@/lib/localization-context";
 
 interface MaterialIconProps {
   src: string | null | undefined;
@@ -32,12 +33,13 @@ interface BansSectionProps {
 }
 
 export default function BansSection({ bans }: BansSectionProps) {
+  const { t } = useLocalization();
   if (bans.length === 0) return null;
   return (
     <section className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
       <div className="flex items-center gap-3 px-4 py-3 border-b border-pc-border">
         <span className="h-px flex-1 bg-pc-border" />
-        <h2 className="text-xs font-bold text-pc-text uppercase tracking-[0.18em]">Match Bans</h2>
+        <h2 className="text-xs font-bold text-pc-text uppercase tracking-[0.18em]">{t("generated.matches.matchBans")}</h2>
         <span className="h-px flex-1 bg-pc-border" />
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-px bg-pc-border">
@@ -53,7 +55,7 @@ export default function BansSection({ bans }: BansSectionProps) {
               />
               <div className="min-w-0">
                 <div className="text-[10px] uppercase tracking-wide text-red-300/70">
-                  Ban {ban.banSlot ?? i + 1}
+                  {t("generated.matches.ban")}{" "}{ban.banSlot ?? i + 1}
                 </div>
                 <div className="truncate text-xs font-medium">{label}</div>
               </div>

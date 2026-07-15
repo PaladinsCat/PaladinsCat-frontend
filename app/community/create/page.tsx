@@ -5,8 +5,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createPost, getAuthUser, getAuthToken } from "@/lib/api-client";
 import { AsyncButton } from "@/components/async-state";
+import { useLocalization } from "@/lib/localization-context";
 
 export default function CreatePostPage() {
+  const { t } = useLocalization();
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -25,7 +27,7 @@ export default function CreatePostPage() {
     }
 
     if (!title.trim() || !content.trim()) {
-      setError("Title and content are required");
+      setError(t("generated.community.titleAndContentAreRequired"));
       return;
     }
 
@@ -45,9 +47,8 @@ export default function CreatePostPage() {
     <div className="max-w-2xl mx-auto space-y-6">
       <div className="flex items-center gap-4">
         <Link href="/community" className="text-pc-text-secondary hover:text-pc-accent transition-colors">
-          ← Back to community
-        </Link>
-        <h1 className="text-3xl font-bold text-pc-accent">Create Post</h1>
+          {t("generated.community.backToCommunity")}</Link>
+        <h1 className="text-3xl font-bold text-pc-accent">{t("generated.community.createPost")}</h1>
       </div>
 
       <form onSubmit={handleSubmit} className="bg-pc-bg-elevated rounded-lg border border-pc-border p-6 space-y-4">
@@ -59,8 +60,7 @@ export default function CreatePostPage() {
 
         <div>
           <label htmlFor="title" className="block text-sm font-medium text-pc-text-secondary mb-1">
-            Title *
-          </label>
+            {t("generated.community.title")}</label>
           <input
             id="title"
             type="text"
@@ -68,15 +68,14 @@ export default function CreatePostPage() {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className="w-full px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text placeholder-pc-text-muted focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
-            placeholder="Post title"
+            placeholder={t("generated.community.postTitle")}
           />
         </div>
 
         <div>
           <label htmlFor="content" className="block text-sm font-medium text-pc-text-secondary mb-1">
-            Content *
-          </label>
-          <p className="mb-1 text-xs text-pc-text-muted">Paste a YouTube or Vimeo link on its own line to embed it; other HTTPS links stay clickable.</p>
+            {t("generated.community.content")}</label>
+          <p className="mb-1 text-xs text-pc-text-muted">{t("generated.community.pasteAYoutubeOrVimeoLinkOnItsOwnLine")}</p>
           <textarea
             id="content"
             required
@@ -84,7 +83,7 @@ export default function CreatePostPage() {
             onChange={(e) => setContent(e.target.value)}
             rows={12}
             className="w-full px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text placeholder-pc-text-muted focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
-            placeholder="Write your post content..."
+            placeholder={t("generated.community.writeYourPostContent")}
           />
         </div>
 
@@ -93,8 +92,7 @@ export default function CreatePostPage() {
           loading={loading}
           className="w-full py-2.5 bg-pc-accent hover:bg-pc-accent-secondary text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Create Post
-        </AsyncButton>
+          {t("generated.community.createPost")}</AsyncButton>
       </form>
     </div>
   );

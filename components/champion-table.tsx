@@ -9,12 +9,13 @@ import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
 import { getRankIconPath, getTierColor } from "@/lib/tier-utils";
 import { getStatQuality } from "@/lib/stat-quality";
+import { useLocalization } from "@/lib/localization-context";
 
 const ROLES = [
-  { label: "Frontline", icon: "/images/icons/Class_Front_Line_Icon.avif" },
-  { label: "Damage",    icon: "/images/icons/Class_Damage_Icon.avif" },
-  { label: "Flank",     icon: "/images/icons/Class_Flank_Icon.avif" },
-  { label: "Support",   icon: "/images/icons/Class_Support_Icon.avif" },
+  { value: "Frontline", labelKey: "common.roles.frontline", icon: "/images/icons/Class_Front_Line_Icon.avif" },
+  { value: "Damage", labelKey: "common.roles.damage", icon: "/images/icons/Class_Damage_Icon.avif" },
+  { value: "Flank", labelKey: "common.roles.flank", icon: "/images/icons/Class_Flank_Icon.avif" },
+  { value: "Support", labelKey: "common.roles.support", icon: "/images/icons/Class_Support_Icon.avif" },
 ] as const;
 const TIERS = ["Iron", "Bronze", "Silver", "Gold", "Platinum", "Diamond", "Master", "Grandmaster"] as const;
 
@@ -38,6 +39,7 @@ function buildStaticBase(): Champion[] {
 }
 
 export default function ChampionTable() {
+  const { t } = useLocalization();
   const [champions, setChampions] = useState<Champion[]>(buildStaticBase);
   const [loading, setLoading] = useState(false);
   const [dbAvailable, setDbAvailable] = useState<boolean | null>(null); // null = checking
@@ -130,7 +132,7 @@ export default function ChampionTable() {
   return (
     <div className="space-y-6">
       <h1 className="pc-heading pc-heading-lg text-pc-accent drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)]">
-        <ScrambleText text="Champions" speed={30} iterations={15} delayFromCenter={false} />
+        <ScrambleText text={t("generated.champions.champions")} speed={30} iterations={15} delayFromCenter={false} />
       </h1>
 
       {/* Filters */}
@@ -140,14 +142,14 @@ export default function ChampionTable() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search champions..."
+            placeholder={t("generated.champions.searchChampions")}
             className="pc-input pr-8 w-full"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
               className="absolute right-2 top-1/2 -translate-y-1/2 text-pc-text-muted hover:text-pc-text transition-colors"
-              aria-label="Clear search"
+              aria-label={t("generated.champions.clearSearch")}
             >
               ✕
             </button>
@@ -158,15 +160,15 @@ export default function ChampionTable() {
           onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
           className="pc-select"
         >
-          <option value="name">Name</option>
-          <option value="winRate">Win Rate</option>
-          <option value="banRate">Ban Rate</option>
-          <option value="popularity">Popularity</option>
+          <option value="name">{t("generated.champions.name")}</option>
+          <option value="winRate">{t("generated.champions.winRate")}</option>
+          <option value="banRate">{t("generated.champions.banRate")}</option>
+          <option value="popularity">{t("generated.champions.popularity")}</option>
         </select>
         <button
           onClick={() => setSortDir(sortDir === "asc" ? "desc" : "asc")}
           className="pc-select flex items-center gap-1 cursor-pointer"
-          title={sortDir === "asc" ? "Ascending" : "Descending"}
+          title={sortDir === "asc" ? t("generated.champions.ascending") : t("generated.champions.descending")}
         >
           {sortDir === "asc" ? "↑" : "↓"}
         </button>
@@ -182,20 +184,19 @@ export default function ChampionTable() {
               : "pc-surface text-pc-muted hover:text-pc-text"
           }`}
         >
-          All
-        </button>
+          {t("generated.champions.all")}</button>
         {ROLES.map((r) => (
           <button
-            key={r.label}
-            onClick={() => setFilterRole(filterRole === r.label ? null : r.label)}
+            key={r.value}
+            onClick={() => setFilterRole(filterRole === r.value ? null : r.value)}
             className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] ${
-              filterRole === r.label
+              filterRole === r.value
                 ? "bg-pc-accent text-pc-bg"
                 : "pc-surface text-pc-muted hover:text-pc-text"
             }`}
           >
-            <img src={r.icon} alt={r.label} className="w-5 h-5" />
-            {r.label}
+            <img src={r.icon} alt={t(r.labelKey)} className="w-5 h-5" />
+            {t(r.labelKey)}
           </button>
         ))}
       </div>
@@ -203,20 +204,19 @@ export default function ChampionTable() {
       {/* DB status indicator */}
       {dbAvailable === false && (
         <div className="text-pc-muted text-sm italic">
-          Stats unavailable — showing champion list only. Win/pick/ban rates will appear when the database is online.
-        </div>
+          {t("generated.champions.statsUnavailableShowingChampionListOnlyWinPickBanRates")}</div>
       )}
 
       {/* Champion Grid */}
       {filtered.length === 0 ? (
         <div className="pc-card text-center">
-          <p className="pc-body">No champions matched your search.</p>
+          <p className="pc-body">{t("generated.champions.noChampionsMatchedYourSearch")}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
           {filtered.map((c) => {
             const roleIcon = c.roles && c.roles.length > 0
-              ? ROLES.find(r => r.label === c.roles![0])?.icon
+              ? ROLES.find(r => r.value === c.roles![0])?.icon
               : undefined;
             const formatPlays = (n: number | null | undefined) => {
               if (n == null) return "—";
@@ -236,7 +236,7 @@ export default function ChampionTable() {
                     <div className="absolute top-2 right-2">
                       <img
                         src={getRankIconPath(Math.round(c.rating), 0)}
-                        alt={`Tier ${Math.round(c.rating)}`}
+                        alt={t("generated.champions.tierValue1", { value1: Math.round(c.rating) })}
                         className="w-4 h-4 object-contain"
                       />
                     </div>
@@ -271,17 +271,17 @@ export default function ChampionTable() {
                     {/* Row 2: stats — wraps on narrow cards */}
                     <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs">
                       <span className={quality?.textClass ?? "text-pc-text-muted"} style={quality ? { color: quality.color } : undefined}>
-                        <span className="text-pc-text-muted mr-1">WR</span>
-                        {c.winRate != null ? `${c.winRate}%` : "—"}
+                        <span className="text-pc-text-muted mr-1">{t("generated.champions.wr")}</span>
+                        {c.winRate != null ? t("generated.champions.value1", { value1: c.winRate }) : "—"}
                       </span>
                       <span className="text-pc-border">|</span>
                       <span className={c.banRate != null ? "text-rose-400" : "text-pc-text-muted"}>
-                        <span className="text-pc-text-muted mr-1">BR</span>
-                        {c.banRate != null ? `${c.banRate}%` : "—"}
+                        <span className="text-pc-text-muted mr-1">{t("generated.champions.br")}</span>
+                        {c.banRate != null ? t("generated.champions.value1", { value1: c.banRate }) : "—"}
                       </span>
                       <span className="text-pc-border">|</span>
                       <span className="text-pc-text-muted whitespace-nowrap">
-                        <span className="mr-1">Plays</span>
+                        <span className="mr-1">{t("generated.champions.plays")}</span>
                         <span className="text-pc-text-secondary">{formatPlays(c.totalPlays)}</span>
                       </span>
                     </div>

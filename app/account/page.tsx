@@ -29,8 +29,10 @@ import {
   setWallpaperEnabled,
   type ResolvedCustomWallpaper,
 } from "@/lib/wallpaper-preference";
+import { useLocalization } from "@/lib/localization-context";
 
 export default function AccountPage() {
+  const { t } = useLocalization();
   const { user: authUser, refresh } = useAuth();
   const { timeZone, setTimeZone } = useTimeZone();
   const { filter: lobbyTierFilter, definition: lobbyTierDefinition, setFilter: setLobbyTierFilter } = useLobbyTier();
@@ -83,7 +85,7 @@ export default function AccountPage() {
         }
         setError(err.message);
       } else {
-        setError("Failed to load account details");
+        setError(t("generated.account.failedToLoadAccountDetails"));
       }
     } finally {
       setLoading(false);
@@ -130,7 +132,7 @@ export default function AccountPage() {
     setChangingPw(true);
     try {
       await changePassword(currentPw, newPw);
-      setSuccess("Password changed successfully");
+      setSuccess(t("generated.account.passwordChangedSuccessfully"));
       setCurrentPw("");
       setNewPw("");
       setConfirmPw("");
@@ -149,7 +151,7 @@ export default function AccountPage() {
     setSuccess(null);
     try {
       await updateProfile({ bio });
-      setSuccess("Profile updated");
+      setSuccess(t("generated.account.profileUpdated"));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update profile");
     } finally {
@@ -173,7 +175,7 @@ export default function AccountPage() {
       await updateProfile({ time_zone: selectedTimeZone });
       setTimeZone(selectedTimeZone);
       await refresh();
-      setSuccess("Time zone updated");
+      setSuccess(t("generated.account.timeZoneUpdated"));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update time zone");
     } finally {
@@ -187,7 +189,7 @@ export default function AccountPage() {
       setWallpaperEnabled(true);
       setWallpaperUrl("");
       setWallpaperError(null);
-      setSuccess("Custom wallpaper saved for this browser.");
+      setSuccess(t("generated.account.customWallpaperSavedForThisBrowser"));
       await refreshCustomWallpaper();
     } catch (err) {
       setWallpaperError(err instanceof Error ? err.message : "Unable to save this wallpaper.");
@@ -203,7 +205,7 @@ export default function AccountPage() {
       await addCustomWallpaperFiles(files);
       setWallpaperEnabled(true);
       setWallpaperError(null);
-      setSuccess("Custom wallpaper saved for this browser.");
+      setSuccess(t("generated.account.customWallpaperSavedForThisBrowser"));
       await refreshCustomWallpaper();
     } catch (err) {
       setWallpaperError(err instanceof Error ? err.message : "Unable to save this wallpaper.");
@@ -214,7 +216,7 @@ export default function AccountPage() {
     try {
       await removeCustomWallpaper(wallpaper.wallpaper);
       setWallpaperError(null);
-      setSuccess("Custom wallpaper removed.");
+      setSuccess(t("generated.account.customWallpaperRemoved"));
       await refreshCustomWallpaper();
     } catch (err) {
       setWallpaperError(err instanceof Error ? err.message : "Unable to remove this wallpaper.");
@@ -226,7 +228,7 @@ export default function AccountPage() {
       await clearCustomWallpaper();
       setWallpaperUrl("");
       setWallpaperError(null);
-      setSuccess("Custom wallpaper removed. Map wallpapers are active again.");
+      setSuccess(t("generated.account.customWallpaperRemovedMapWallpapersAreActiveAgain"));
       await refreshCustomWallpaper();
     } catch (err) {
       setWallpaperError(err instanceof Error ? err.message : "Unable to remove this wallpaper.");
@@ -242,7 +244,7 @@ export default function AccountPage() {
   if (!account) {
     return (
       <div className="min-h-[50vh] flex items-center justify-center">
-        <div className="text-pc-text-secondary">Account not found</div>
+        <div className="text-pc-text-secondary">{t("generated.account.accountNotFound")}</div>
       </div>
     );
   }
@@ -253,10 +255,9 @@ export default function AccountPage() {
     <div className="max-w-2xl mx-auto">
       {/* ── Header ── */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-pc-accent">Account Settings</h1>
+        <h1 className="text-3xl font-bold text-pc-accent">{t("generated.account.accountSettings")}</h1>
         <p className="text-pc-text-secondary mt-1">
-          Manage your profile, link your Paladins player, and change your password.
-        </p>
+          {t("generated.account.manageYourProfileLinkYourPaladinsPlayerAndChangeYour")}</p>
       </div>
 
       {/* ── Alerts ── */}
@@ -275,17 +276,17 @@ export default function AccountPage() {
       <div className="mb-6 rounded-lg border border-pc-border bg-pc-bg-elevated p-6">
         <div className="mb-3 flex items-center justify-between gap-3">
           <div>
-            <h2 className="text-lg font-semibold text-pc-text">Notifications</h2>
-            <p className="text-sm text-pc-text-secondary">Replies to your community posts appear here.</p>
+            <h2 className="text-lg font-semibold text-pc-text">{t("generated.account.notifications")}</h2>
+            <p className="text-sm text-pc-text-secondary">{t("generated.account.repliesToYourCommunityPostsAppearHere")}</p>
           </div>
-          {notifications.some((notification) => !notification.readAt) && <span className="rounded-full bg-pc-accent/15 px-2 py-1 text-xs font-semibold text-pc-accent">{notifications.filter((notification) => !notification.readAt).length} new</span>}
+          {notifications.some((notification) => !notification.readAt) && <span className="rounded-full bg-pc-accent/15 px-2 py-1 text-xs font-semibold text-pc-accent">{notifications.filter((notification) => !notification.readAt).length} {t("generated.account.new")}</span>}
         </div>
-        {notifications.length === 0 ? <p className="rounded-lg bg-pc-bg-secondary px-3 py-4 text-sm text-pc-text-muted">No community notifications yet.</p> : (
+        {notifications.length === 0 ? <p className="rounded-lg bg-pc-bg-secondary px-3 py-4 text-sm text-pc-text-muted">{t("generated.account.noCommunityNotificationsYet")}</p> : (
           <div className="divide-y divide-pc-border overflow-hidden rounded-lg border border-pc-border/70">
             {notifications.map((notification) => {
               const href = notification.postId ? `/community/${notification.postId}` : "/community";
               return <Link key={notification.id} href={href} onClick={() => handleNotificationOpen(notification)} className={`block px-4 py-3 transition-colors hover:bg-pc-bg-secondary ${notification.readAt ? "text-pc-text-secondary" : "bg-pc-accent/5 text-pc-text"}`}>
-                <div className="flex items-start justify-between gap-3"><div className="min-w-0"><div className="text-sm"><span className="font-semibold">{notification.actorUsername}</span> replied to <span className="font-medium">{notification.postTitle ?? "your post"}</span></div>{notification.commentContent && <div className="mt-1 line-clamp-1 text-xs text-pc-text-muted">{notification.commentContent}</div>}</div><time className="shrink-0 text-[10px] text-pc-text-muted">{formatLocalDateTime(notification.createdAt)}</time></div>
+                <div className="flex items-start justify-between gap-3"><div className="min-w-0"><div className="text-sm"><span className="font-semibold">{notification.actorUsername}</span> {t("generated.account.repliedTo")}{" "}<span className="font-medium">{notification.postTitle ?? t("generated.account.yourPost")}</span></div>{notification.commentContent && <div className="mt-1 line-clamp-1 text-xs text-pc-text-muted">{notification.commentContent}</div>}</div><time className="shrink-0 text-[10px] text-pc-text-muted">{formatLocalDateTime(notification.createdAt)}</time></div>
               </Link>;
             })}
           </div>
@@ -294,13 +295,12 @@ export default function AccountPage() {
 
       {/* ── Time Zone ── */}
       <div className="bg-pc-bg-elevated rounded-lg border border-pc-border p-6 mb-6">
-        <h2 className="text-lg font-semibold text-pc-text mb-2">Time Zone</h2>
+        <h2 className="text-lg font-semibold text-pc-text mb-2">{t("generated.account.timeZone")}</h2>
         <p className="text-pc-text-secondary text-sm mb-4">
-          All timestamps and match-search hour windows use this time zone. Choose an IANA zone for daylight saving time, or a fixed UTC offset.
-        </p>
+          {t("generated.account.allTimestampsAndMatchSearchHourWindowsUseThisTime")}</p>
         <div className="flex flex-col lg:flex-row gap-3">
           <div className="flex-1">
-            <label className="block text-xs text-pc-text-muted mb-1">IANA time zone</label>
+            <label className="block text-xs text-pc-text-muted mb-1">{t("generated.account.ianaTimeZone")}</label>
             <select
               value={selectedUtcOffset ? "" : selectedTimeZone}
               onChange={(event) => {
@@ -309,12 +309,12 @@ export default function AccountPage() {
               }}
               className="w-full px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
             >
-              <option value="" disabled>Select a time zone</option>
+              <option value="" disabled>{t("generated.account.selectATimeZone")}</option>
               {timeZones.map((zone) => <option key={zone} value={zone}>{zone}</option>)}
             </select>
           </div>
           <div className="flex-1">
-            <label className="block text-xs text-pc-text-muted mb-1">Fixed UTC offset</label>
+            <label className="block text-xs text-pc-text-muted mb-1">{t("generated.account.fixedUtcOffset")}</label>
             <select
               value={selectedUtcOffset}
               onChange={(event) => {
@@ -323,7 +323,7 @@ export default function AccountPage() {
               }}
               className="w-full px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
             >
-              <option value="">Use IANA time zone</option>
+              <option value="">{t("generated.account.useIanaTimeZone")}</option>
               {utcOffsetOptions.map((offset) => <option key={offset.value} value={offset.value}>{offset.label}</option>)}
             </select>
           </div>
@@ -332,20 +332,18 @@ export default function AccountPage() {
             disabled={savingTimeZone || selectedTimeZone === timeZone}
             className="px-4 py-2 lg:self-end bg-pc-accent hover:bg-pc-accent-secondary text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
           >
-            {savingTimeZone ? <LoadingIndicator className="gap-2" /> : "Save Time Zone"}
+            {savingTimeZone ? <LoadingIndicator className="gap-2" /> : t("generated.account.saveTimeZone")}
           </button>
         </div>
       </div>
 
       {/* ── Global ranked lobby preference ── */}
       <div className="mb-6 rounded-lg border border-pc-border bg-pc-bg-elevated p-6">
-        <h2 className="mb-2 text-lg font-semibold text-pc-text">Ranked Lobby Scope</h2>
+        <h2 className="mb-2 text-lg font-semibold text-pc-text">{t("generated.account.rankedLobbyScope")}</h2>
         <p className="mb-4 text-sm text-pc-text-secondary">
-          Choose the ranked lobby range used by tier-aware statistics throughout PaladinsCat. This preference is stored in this browser.
-        </p>
+          {t("generated.account.chooseTheRankedLobbyRangeUsedByTierAwareStatistics")}</p>
         <label className="block text-xs text-pc-text-muted">
-          Lobby tier
-          <select
+          {t("generated.account.lobbyTier")}<select
             value={lobbyTierFilter}
             onChange={(event) => setLobbyTierFilter(event.target.value as LobbyTierFilter)}
             className="mt-1.5 w-full rounded-lg border border-pc-border bg-pc-bg-secondary px-3 py-2 text-sm text-pc-text focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
@@ -358,10 +356,9 @@ export default function AccountPage() {
 
       {/* ── Custom wallpaper ── */}
       <div className="mb-6 rounded-lg border border-pc-border bg-pc-bg-elevated p-6">
-        <h2 className="mb-2 text-lg font-semibold text-pc-text">Custom Wallpaper</h2>
+        <h2 className="mb-2 text-lg font-semibold text-pc-text">{t("generated.account.customWallpaper")}</h2>
         <p className="mb-4 text-sm text-pc-text-secondary">
-          Use your own image behind every page. Images and links are saved only in this browser; they are not uploaded to your account.
-        </p>
+          {t("generated.account.useYourOwnImageBehindEveryPageImagesAndLinks")}</p>
 
         {customWallpapers.length > 0 && (
           <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -371,35 +368,33 @@ export default function AccountPage() {
                   className="absolute inset-0"
                   style={{ backgroundImage: `url(${JSON.stringify(wallpaper.source)})`, backgroundPosition: "center", backgroundSize: "cover" }}
                   role="img"
-                  aria-label={`Custom wallpaper ${index + 1} preview`}
+                  aria-label={t("generated.account.customWallpaperValue1Preview", { value1: index + 1 })}
                 />
                 <button
                   type="button"
                   onClick={() => void handleRemoveCustomWallpaper(wallpaper)}
                   className="absolute right-1.5 top-1.5 rounded-md bg-black/70 px-2 py-1 text-xs font-medium text-white opacity-100 transition-opacity hover:bg-red-700 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100"
-                  aria-label={`Remove custom wallpaper ${index + 1}`}
+                  aria-label={t("generated.account.removeCustomWallpaperValue1", { value1: index + 1 })}
                 >
-                  Remove
-                </button>
+                  {t("generated.account.remove")}</button>
               </div>
             ))}
           </div>
         )}
 
-        {customWallpapers.length > 1 && <p className="mb-3 text-xs text-pc-text-muted">{customWallpapers.length} images cycle every 10 seconds with the map wallpaper crossfade.</p>}
-        {customWallpapers.length === 1 && <p className="mb-3 text-xs text-pc-text-muted">One image is shown as a static wallpaper.</p>}
+        {customWallpapers.length > 1 && <p className="mb-3 text-xs text-pc-text-muted">{customWallpapers.length} {t("generated.account.imagesCycleEvery10SecondsWithTheMapWallpaperCrossfade")}</p>}
+        {customWallpapers.length === 1 && <p className="mb-3 text-xs text-pc-text-muted">{t("generated.account.oneImageIsShownAsAStaticWallpaper")}</p>}
 
         {wallpaperError && <p className="mb-3 rounded-lg border border-red-700/50 bg-red-900/30 p-3 text-sm text-red-400">{wallpaperError}</p>}
 
         <div className="space-y-3">
           <label className="block text-sm font-medium text-pc-text-secondary">
-            Image link
-            <div className="mt-1.5 flex flex-col gap-2 sm:flex-row">
+            {t("generated.account.imageLink")}<div className="mt-1.5 flex flex-col gap-2 sm:flex-row">
               <input
                 type="url"
                 value={wallpaperUrl}
                 onChange={(event) => setWallpaperUrl(event.target.value)}
-                placeholder="https://example.com/wallpaper.jpg"
+                placeholder={t("generated.account.httpsExampleComWallpaperJpg")}
                 className="min-w-0 flex-1 rounded-lg border border-pc-border bg-pc-bg-secondary px-3 py-2 text-sm text-pc-text placeholder-pc-text-muted focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
               />
               <button
@@ -408,55 +403,49 @@ export default function AccountPage() {
                 disabled={!wallpaperUrl.trim()}
                 className="rounded-lg bg-pc-accent px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-pc-accent-secondary disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Add Link
-              </button>
+                {t("generated.account.addLink")}</button>
             </div>
           </label>
 
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <label className="inline-flex w-fit cursor-pointer items-center rounded-lg border border-pc-border bg-pc-bg-secondary px-4 py-2 text-sm font-semibold text-pc-text transition-colors hover:border-pc-accent hover:text-pc-accent">
-              Upload images
-              <input type="file" multiple accept="image/png,image/jpeg,image/webp,image/gif,image/avif" onChange={handleWallpaperFileChange} className="sr-only" />
+              {t("generated.account.uploadImages")}<input type="file" multiple accept="image/png,image/jpeg,image/webp,image/gif,image/avif" onChange={handleWallpaperFileChange} className="sr-only" />
             </label>
-            {customWallpapers.length > 0 && <button type="button" onClick={() => void handleClearCustomWallpaper()} className="w-fit text-sm text-pc-text-muted transition-colors hover:text-red-400">Remove all custom wallpapers</button>}
+            {customWallpapers.length > 0 && <button type="button" onClick={() => void handleClearCustomWallpaper()} className="w-fit text-sm text-pc-text-muted transition-colors hover:text-red-400">{t("generated.account.removeAllCustomWallpapers")}</button>}
           </div>
-          <p className="text-xs text-pc-text-muted">Select one or more images. Each uploaded image can be up to 25 MB and is stored in this browser&apos;s local image cache, while local storage keeps only small references. Linked images are loaded from their original web addresses.</p>
+          <p className="text-xs text-pc-text-muted">{t("generated.account.selectOneOrMoreImagesEachUploadedImageCanBe")}</p>
         </div>
       </div>
 
       {/* ── Profile Info ── */}
       <div className="bg-pc-bg-elevated rounded-lg border border-pc-border p-6 mb-6">
-        <h2 className="text-lg font-semibold text-pc-text mb-4">Profile</h2>
+        <h2 className="text-lg font-semibold text-pc-text mb-4">{t("generated.account.profile")}</h2>
 
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
             <label className="block text-sm font-medium text-pc-text-secondary mb-1">
-              Username
-            </label>
+              {t("generated.account.username")}</label>
             <div className="px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text">
               {user.username}
             </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-pc-text-secondary mb-1">
-              Email
-            </label>
+              {t("generated.account.email")}</label>
             <div className="px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text">
               {user.email}
             </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-pc-text-secondary mb-1">
-              Member Since
-            </label>
+              {t("generated.account.memberSince")}</label>
             <div className="px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text">
               {formatLocalDate(user.createdAt)}
             </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-pc-text-secondary mb-1">
-              Last Login
-            </label>
+              {t("generated.account.lastLogin")}</label>
             <div className="px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text">
               {formatLocalDate(user.lastLogin)}
             </div>
@@ -465,14 +454,13 @@ export default function AccountPage() {
 
         <div className="mb-4">
           <label htmlFor="bio" className="block text-sm font-medium text-pc-text-secondary mb-1">
-            Bio
-          </label>
+            {t("generated.account.bio")}</label>
           <textarea
             id="bio"
             value={bio}
             onChange={(e) => setBio(e.target.value)}
             className="w-full px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text placeholder-pc-text-muted focus:outline-none focus:ring-2 focus:ring-pc-accent/50 resize-y min-h-[80px]"
-            placeholder="Tell us about yourself..."
+            placeholder={t("generated.account.tellUsAboutYourself")}
             rows={3}
           />
         </div>
@@ -482,7 +470,7 @@ export default function AccountPage() {
           disabled={savingProfile}
           className="px-4 py-2 bg-pc-accent hover:bg-pc-accent-secondary text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
         >
-          {savingProfile ? <LoadingIndicator className="gap-2" /> : "Save Profile"}
+          {savingProfile ? <LoadingIndicator className="gap-2" /> : t("generated.account.saveProfile")}
         </button>
       </div>
 
@@ -500,8 +488,7 @@ export default function AccountPage() {
       {/* ── Password Change ── */}
       <div className="bg-pc-bg-elevated rounded-lg border border-pc-border p-6 mb-6">
         <h2 className="text-lg font-semibold text-pc-text mb-4">
-          Change Password
-        </h2>
+          {t("generated.account.changePassword")}</h2>
 
         {pwError && (
           <div className="mb-3 bg-red-900/30 border border-red-700/50 rounded-lg p-3 text-red-400 text-sm">
@@ -512,8 +499,7 @@ export default function AccountPage() {
         <form onSubmit={handleChangePassword} className="space-y-3">
           <div>
             <label htmlFor="currentPw" className="block text-sm font-medium text-pc-text-secondary mb-1">
-              Current Password
-            </label>
+              {t("generated.account.currentPassword")}</label>
             <input
               id="currentPw"
               type="password"
@@ -524,14 +510,13 @@ export default function AccountPage() {
               }}
               required
               className="w-full px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text placeholder-pc-text-muted focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
-              placeholder="Enter current password"
+              placeholder={t("generated.account.enterCurrentPassword")}
             />
           </div>
 
           <div>
             <label htmlFor="newPw" className="block text-sm font-medium text-pc-text-secondary mb-1">
-              New Password
-            </label>
+              {t("generated.account.newPassword")}</label>
             <input
               id="newPw"
               type="password"
@@ -543,14 +528,13 @@ export default function AccountPage() {
               required
               minLength={6}
               className="w-full px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text placeholder-pc-text-muted focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
-              placeholder="6+ characters"
+              placeholder={t("generated.account.text6Characters")}
             />
           </div>
 
           <div>
             <label htmlFor="confirmPw" className="block text-sm font-medium text-pc-text-secondary mb-1">
-              Confirm New Password
-            </label>
+              {t("generated.account.confirmNewPassword")}</label>
             <input
               id="confirmPw"
               type="password"
@@ -562,7 +546,7 @@ export default function AccountPage() {
               required
               minLength={6}
               className="w-full px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text placeholder-pc-text-muted focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
-              placeholder="Re-enter new password"
+              placeholder={t("generated.account.reEnterNewPassword")}
             />
           </div>
 
@@ -571,7 +555,7 @@ export default function AccountPage() {
             disabled={changingPw}
             className="w-full py-2.5 bg-pc-accent hover:bg-pc-accent-secondary text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {changingPw ? "Changing..." : "Change Password"}
+            {changingPw ? t("generated.account.changing") : t("generated.account.changePassword")}
           </button>
         </form>
       </div>

@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { fetchChangelog, type ChangelogPage } from "@/lib/api-client";
 import { formatLocalDateTime, formatRelativeTime } from "@/lib/time-format";
 import { LoadingPanel } from "@/components/async-state";
+import { useLocalization } from "@/lib/localization-context";
+import type { TranslationKey } from "@/lib/localization/messages";
 
 const PER_PAGE = 10;
 
@@ -13,7 +15,7 @@ type ChangelogSection = {
   color: string;
 };
 
-function parseChangelog(text: string): ChangelogSection[] {
+function parseChangelog(text: string, changesLabel: string): ChangelogSection[] {
   if (!text || !text.trim()) return [];
 
   const sections: ChangelogSection[] = [];
@@ -61,21 +63,21 @@ function parseChangelog(text: string): ChangelogSection[] {
   if (currentSection && currentSection.items.length > 0) sections.push(currentSection);
 
   if (orphanItems.length > 0) {
-    sections.unshift({ title: "Changes", items: orphanItems, color: "text-pc-text" });
+    sections.unshift({ title: changesLabel, items: orphanItems, color: "text-pc-text" });
   }
 
   return sections;
 }
 
-function sourceLabel(source: string | null) {
+function sourceLabel(source: string | null, t: (key: TranslationKey) => string) {
   if (!source) return null;
-  const labels: Record<string, string> = {
-    "deploy-script": "Automated deploy",
-    "manual-migration": "Manual migration",
-    "runtime_env_fallback": "Runtime fallback",
-    "site_versions_legacy": "Legacy version",
+  const labels: Record<string, TranslationKey> = {
+    "deploy-script": "common.changelog.automatedDeploy",
+    "manual-migration": "common.changelog.manualMigration",
+    "runtime_env_fallback": "common.changelog.runtimeFallback",
+    "site_versions_legacy": "common.changelog.legacyVersion",
   };
-  return labels[source] || source;
+  return labels[source] ? t(labels[source]) : source;
 }
 
 function getVersionColor(type: "major" | "minor" | "patch") {
@@ -86,8 +88,13 @@ function getVersionColor(type: "major" | "minor" | "patch") {
   }
 }
 
-function releaseLabel(type: "major" | "minor" | "patch") {
-  return type.charAt(0).toUpperCase() + type.slice(1);
+function releaseLabel(type: "major" | "minor" | "patch", t: (key: TranslationKey) => string) {
+  const labels = {
+    major: "common.changelog.major",
+    minor: "common.changelog.minor",
+    patch: "common.changelog.patch",
+  } as const;
+  return t(labels[type]);
 }
 
 function getVersionTextColor(type: "major" | "minor" | "patch") {
@@ -100,14 +107,14 @@ function getVersionTextColor(type: "major" | "minor" | "patch") {
 
 // Version History Graph - compact timeline visualization
 function VersionHistoryGraph({ entries }: { entries: ChangelogPage["data"] }) {
+  const { t } = useLocalization();
   if (entries.length === 0) return null;
 
   return (
     <div className="pc-card sticky top-20">
       <h2 className="text-sm font-bold text-pc-text mb-4 flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-pc-accent"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>
-        Version History
-      </h2>
+        {t("generated.changelog.versionHistory")}</h2>
 
       <div className="space-y-0">
         {entries.map((entry, i) => {
@@ -137,7 +144,7 @@ function VersionHistoryGraph({ entries }: { entries: ChangelogPage["data"] }) {
                   </span>
                 </div>
                 <span className={`text-[10px] font-semibold uppercase tracking-wide ${textColor}`}>
-                  {releaseLabel(changeType)} · {entry.changeCount} change{entry.changeCount !== 1 ? "s" : ""}
+                  {releaseLabel(changeType, t)} · {t(entry.changeCount === 1 ? "common.count.changeOne" : "common.count.changeMany", { count: entry.changeCount })}
                 </span>
                 {entry.deployedAt && (
                   <time dateTime={entry.deployedAt} className="text-xs text-pc-text-muted block mt-0.5">
@@ -146,8 +153,7 @@ function VersionHistoryGraph({ entries }: { entries: ChangelogPage["data"] }) {
                 )}
                 {!hasChangelog && (
                   <span className="text-xs text-pc-text-muted italic block mt-0.5">
-                    deployment
-                  </span>
+                    {t("generated.changelog.deployment")}</span>
                 )}
               </div>
             </div>
@@ -159,14 +165,11 @@ function VersionHistoryGraph({ entries }: { entries: ChangelogPage["data"] }) {
       <div className="mt-4 pt-3 border-t border-pc-border">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-pc-text-muted">
           <span className="flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-rose-500" /> Major · 10+
-          </span>
+            <span className="w-1.5 h-1.5 rounded-full bg-rose-500" /> {t("generated.changelog.major10")}</span>
           <span className="flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" /> Minor · 5–9
-          </span>
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" /> {t("generated.changelog.minor59")}</span>
           <span className="flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-pc-accent" /> Patch · 0–4
-          </span>
+            <span className="w-1.5 h-1.5 rounded-full bg-pc-accent" /> {t("generated.changelog.patch04")}</span>
         </div>
       </div>
     </div>
@@ -174,7 +177,8 @@ function VersionHistoryGraph({ entries }: { entries: ChangelogPage["data"] }) {
 }
 
 function ChangelogEntry({ entry, index }: { entry: ChangelogPage["data"][number]; index: number }) {
-  const sections = useMemo(() => parseChangelog(entry.changelog), [entry.changelog]);
+  const { t } = useLocalization();
+  const sections = useMemo(() => parseChangelog(entry.changelog, t("common.changelog.changes")), [entry.changelog, t]);
   const hasChangelog = sections.length > 0;
 
   return (
@@ -189,7 +193,7 @@ function ChangelogEntry({ entry, index }: { entry: ChangelogPage["data"][number]
               ? "border-amber-500/40 bg-amber-500/10 text-amber-400"
               : "border-pc-accent/40 bg-pc-accent/10 text-pc-accent"
         }`}>
-          {releaseLabel(entry.releaseType)} · {entry.changeCount} change{entry.changeCount !== 1 ? "s" : ""}
+          {releaseLabel(entry.releaseType, t)} · {t(entry.changeCount === 1 ? "common.count.changeOne" : "common.count.changeMany", { count: entry.changeCount })}
         </span>
         <span className="font-mono text-xs text-pc-text-muted bg-pc-bg-secondary px-1.5 py-0.5 rounded">
           {entry.gitCommitShort}
@@ -208,10 +212,10 @@ function ChangelogEntry({ entry, index }: { entry: ChangelogPage["data"][number]
             {formatRelativeTime(entry.deployedAt)}
           </time>
         )}
-        {sourceLabel(entry.source) && (
+        {sourceLabel(entry.source, t) && (
           <>
             <span>·</span>
-            <span>{sourceLabel(entry.source)}</span>
+            <span>{sourceLabel(entry.source, t)}</span>
           </>
         )}
       </div>
@@ -236,14 +240,14 @@ function ChangelogEntry({ entry, index }: { entry: ChangelogPage["data"][number]
         </div>
       ) : (
         <p className="text-xs text-pc-text-muted italic">
-          Deployment recorded — no changelog provided.
-        </p>
+          {t("generated.changelog.deploymentRecordedNoChangelogProvided")}</p>
       )}
     </article>
   );
 }
 
 function Pagination({ page, totalPages, onChange }: { page: number; totalPages: number; onChange: (p: number) => void }) {
+  const { t } = useLocalization();
   if (totalPages <= 1) return null;
 
   const pages: (number | "...")[] = [];
@@ -260,14 +264,13 @@ function Pagination({ page, totalPages, onChange }: { page: number; totalPages: 
   }
 
   return (
-    <nav className="flex items-center justify-center gap-1 pt-4" aria-label="Pagination">
+    <nav className="flex items-center justify-center gap-1 pt-4" aria-label={t("generated.changelog.pagination")}>
       <button
         onClick={() => onChange(Math.max(1, page - 1))}
         disabled={page <= 1}
         className="px-3 py-1.5 rounded-lg text-xs text-pc-text-muted hover:text-pc-accent disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
       >
-        ← Prev
-      </button>
+        {t("generated.changelog.prev")}</button>
       <div className="flex items-center gap-1 mx-2">
         {pages.map((pn, i) =>
           pn === "..." ? (
@@ -292,13 +295,13 @@ function Pagination({ page, totalPages, onChange }: { page: number; totalPages: 
         disabled={page >= totalPages}
         className="px-3 py-1.5 rounded-lg text-xs text-pc-text-muted hover:text-pc-accent disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
       >
-        Next →
-      </button>
+        {t("generated.changelog.next")}</button>
     </nav>
   );
 }
 
 export default function ChangelogPage() {
+  const { t } = useLocalization();
   const [page, setPage] = useState(1);
   const [data, setData] = useState<ChangelogPage | null>(null);
   const [loading, setLoading] = useState(true);
@@ -321,10 +324,9 @@ export default function ChangelogPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="space-y-1">
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">Changelog</h1>
+        <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.changelog.changelog")}</h1>
         <p className="text-sm text-pc-text-muted">
-          {totalEntries} deployment{totalEntries !== 1 ? "s" : ""} recorded
-        </p>
+          {t(totalEntries === 1 ? "common.count.deploymentRecordedOne" : "common.count.deploymentRecordedMany", { count: totalEntries })}</p>
       </div>
 
       {/* Content: Graph + Entries */}
@@ -332,7 +334,7 @@ export default function ChangelogPage() {
         <LoadingPanel />
       ) : totalEntries === 0 ? (
         <div className="pc-card text-center py-12">
-          <p className="text-pc-text-muted text-sm">No deployment history yet.</p>
+          <p className="text-pc-text-muted text-sm">{t("generated.changelog.noDeploymentHistoryYet")}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

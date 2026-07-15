@@ -16,9 +16,11 @@ import { AsyncButton, EmptyState, ErrorState, LoadingPanel } from "@/components/
 import { DataTableSkeleton } from "@/components/route-skeleton";
 import { useAuth } from "@/lib/auth-context";
 import { useLobbyTier } from "@/lib/lobby-tier-context";
+import { useLocalization } from "@/lib/localization-context";
 
 const RANKED_QUEUE_ID = "486";
 export default function MatchesPage() {
+  const { t } = useLocalization();
   const { timeZone } = useTimeZone();
   const { isLoggedIn, isLoading: authLoading } = useAuth();
   const { definition: lobbyTier, ready: lobbyTierReady } = useLobbyTier();
@@ -105,7 +107,7 @@ export default function MatchesPage() {
       }
     } catch {
       setMatches([]); setTotal(0); setTotalPages(1);
-      setError("We couldn't load match data right now. Please try again.");
+      setError(t("generated.matches.weCouldnTLoadMatchDataRightNowPleaseTry"));
     } finally {
       setLoading(false);
     }
@@ -143,8 +145,8 @@ export default function MatchesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">Matches</h1>
-        <p className="text-pc-text-secondary text-sm mt-1">Search ranked match history and view live activity</p>
+        <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.matches.matches")}</h1>
+        <p className="text-pc-text-secondary text-sm mt-1">{t("generated.matches.searchRankedMatchHistoryAndViewLiveActivity")}</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -154,35 +156,35 @@ export default function MatchesPage() {
           <div className="pc-card">
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
               <div>
-                <label className="block text-xs text-pc-text-muted mb-1">Champion</label>
+                <label className="block text-xs text-pc-text-muted mb-1">{t("generated.matches.champion")}</label>
                 <select value={championId} onChange={(e) => setChampionId(e.target.value)}
                   className="w-full px-3 py-1.5 rounded-lg bg-pc-bg border border-pc-border text-pc-text text-sm focus:outline-none focus:border-pc-accent"
                   disabled={championsLoading}>
-                  <option value="">All</option>
+                  <option value="">{t("generated.matches.all")}</option>
                   {champions?.sort((a, b) => a.name.localeCompare(b.name)).map((c) => (
                     <option key={c.id} value={String(c.id)}>{c.name}</option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-xs text-pc-text-muted mb-1">Region</label>
+                <label className="block text-xs text-pc-text-muted mb-1">{t("generated.matches.region")}</label>
                 <select value={region} onChange={(e) => setRegion(e.target.value)}
                   className="w-full px-3 py-1.5 rounded-lg bg-pc-bg border border-pc-border text-pc-text text-sm focus:outline-none focus:border-pc-accent">
-                  <option value="">All</option>
-                  <option value="NA">NA</option>
-                  <option value="EU">EU</option>
+                  <option value="">{t("generated.matches.all")}</option>
+                  <option value="NA">{t("generated.matches.na")}</option>
+                  <option value="EU">{t("generated.matches.eu")}</option>
                 </select>
               </div>
               <div>
-                <label className="block text-xs text-pc-text-muted mb-1">Date ({timeZone})</label>
+                <label className="block text-xs text-pc-text-muted mb-1">{t("generated.matches.date")}{timeZone})</label>
                 <input type="date" value={date} onChange={(e) => setDate(e.target.value)}
                   className="w-full px-3 py-1.5 rounded-lg bg-pc-bg border border-pc-border text-pc-text text-sm focus:outline-none focus:border-pc-accent" />
               </div>
               <div>
-                <label className="block text-xs text-pc-text-muted mb-1">Hour ({timeZone})</label>
+                <label className="block text-xs text-pc-text-muted mb-1">{t("generated.matches.hour")}{timeZone})</label>
                 <select value={hour} onChange={(e) => setHour(e.target.value)} disabled={!date}
                   className="w-full px-3 py-1.5 rounded-lg bg-pc-bg border border-pc-border text-pc-text text-sm focus:outline-none focus:border-pc-accent disabled:opacity-50">
-                  <option value="">All hours</option>
+                  <option value="">{t("generated.matches.allHours")}</option>
                   {Array.from({ length: 24 }, (_, value) => (
                     <option key={value} value={String(value)}>
                       {String(value).padStart(2, "0")}:00 – {String(value).padStart(2, "0")}:59
@@ -194,12 +196,10 @@ export default function MatchesPage() {
             <div className="flex gap-2 mt-3">
               <AsyncButton onClick={handleSearch} loading={loading}
                 className="flex-1 px-4 py-1.5 rounded-lg bg-pc-accent text-pc-bg font-semibold text-sm hover:bg-pc-accent-secondary transition-colors">
-                Search
-              </AsyncButton>
+                {t("generated.matches.search")}</AsyncButton>
               <button onClick={handleReset}
                 className="px-4 py-1.5 rounded-lg bg-pc-bg border border-pc-border text-pc-text-secondary text-sm hover:bg-pc-bg-elevated transition-colors">
-                Reset
-              </button>
+                {t("generated.matches.reset")}</button>
             </div>
           </div>
 
@@ -208,16 +208,15 @@ export default function MatchesPage() {
           {error && !loading && <ErrorState message={error} onRetry={() => void loadMatches()} />}
           {!loading && !error && matches.length === 0 && (
             <EmptyState
-              title={hasFilters ? "No matching games" : "No ranked matches available"}
-              description={hasFilters ? "Try widening the champion, region, date, or hour filters." : "New ranked matches will appear here after ingestion."}
+              title={hasFilters ? t("generated.matches.noMatchingGames") : t("generated.matches.noRankedMatchesAvailable")}
+              description={hasFilters ? t("common.empty.matchesFiltered") : t("common.empty.matchesNew")}
             />
           )}
           {!loading && !error && matches.length > 0 && (
             <>
               {hasFilters && (
                 <div className="text-xs text-pc-text-muted">
-                  Showing {(page - 1) * perPage + 1}–{Math.min(page * perPage, total)} of {total.toLocaleString()} ranked matches
-                </div>
+                  {t("generated.matches.showing")}{" "}{(page - 1) * perPage + 1}–{Math.min(page * perPage, total)} {t("generated.matches.of")}{" "}{total.toLocaleString()} {t("generated.matches.rankedMatches")}</div>
               )}
               <div className="space-y-2 sm:hidden">
                 {matches.map((match) => <MatchCard key={match.match_id} match={match} />)}
@@ -227,11 +226,11 @@ export default function MatchesPage() {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-pc-border bg-pc-bg-secondary text-pc-text-muted text-left text-xs">
-                        <th className="px-4 py-3">Match ID</th>
-                        <th className="px-4 py-3">Map</th>
-                        <th className="px-4 py-3">Region</th>
-                        <th className="px-4 py-3">Duration</th>
-                        <th className="px-4 py-3">Date</th>
+                        <th className="px-4 py-3">{t("generated.matches.matchId")}</th>
+                        <th className="px-4 py-3">{t("generated.matches.map")}</th>
+                        <th className="px-4 py-3">{t("generated.matches.region")}</th>
+                        <th className="px-4 py-3">{t("generated.matches.duration")}</th>
+                        <th className="px-4 py-3">{t("generated.matches.date.eb9a4bc")}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -244,13 +243,11 @@ export default function MatchesPage() {
                 <div className="flex items-center justify-center gap-2">
                   <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}
                     className="px-3 py-2 rounded-lg bg-pc-bg-elevated border border-pc-border text-pc-text text-xs disabled:opacity-50 hover:bg-pc-bg-secondary transition-colors">
-                    ← Prev
-                  </button>
-                  <span className="text-xs text-pc-text-secondary px-4">Page {page} of {totalPages}</span>
+                    {t("generated.matches.prev")}</button>
+                  <span className="text-xs text-pc-text-secondary px-4">{t("generated.matches.page")}{" "}{page} {t("generated.matches.of")}{" "}{totalPages}</span>
                   <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}
                     className="px-3 py-2 rounded-lg bg-pc-bg-elevated border border-pc-border text-pc-text text-xs disabled:opacity-50 hover:bg-pc-bg-secondary transition-colors">
-                    Next →
-                  </button>
+                    {t("generated.matches.next")}</button>
                 </div>
               )}
             </>
@@ -261,8 +258,8 @@ export default function MatchesPage() {
         <div className="lg:col-span-1 space-y-6">
           {/* Title outside card */}
           <div className="flex items-center justify-between">
-            <h2 className="pc-card-title mb-0 shadow-sm">24h Ranked Activity</h2>
-            <span className="text-xs uppercase tracking-wider text-pc-text-muted">Local time</span>
+            <h2 className="pc-card-title mb-0 shadow-sm">{t("generated.matches.text24hRankedActivity")}</h2>
+            <span className="text-xs uppercase tracking-wider text-pc-text-muted">{t("generated.matches.localTime")}</span>
           </div>
 
           <div className="pc-card p-3">
@@ -270,14 +267,14 @@ export default function MatchesPage() {
             <div className="flex items-center gap-4 mb-3 pb-2 border-b border-pc-border/50">
               <div className="flex items-center gap-1.5">
                 <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                <span className="text-xs text-pc-text-muted">NA</span>
+                <span className="text-xs text-pc-text-muted">{t("generated.matches.na")}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <div className="w-2 h-2 rounded-full bg-sky-500" />
-                <span className="text-xs text-pc-text-muted">EU</span>
+                <span className="text-xs text-pc-text-muted">{t("generated.matches.eu")}</span>
               </div>
               {!statsLoading && hourlyStats && (
-                <span className="ml-auto text-xs text-pc-accent font-mono">{hourlyStats.totalToday ?? 0} total</span>
+                <span className="ml-auto text-xs text-pc-accent font-mono">{hourlyStats.totalToday ?? 0} {t("generated.matches.total")}</span>
               )}
             </div>
 
@@ -288,11 +285,11 @@ export default function MatchesPage() {
                 {/* Header */}
                 <div className="flex items-center gap-2 px-1 pb-1 border-b border-pc-border/30">
                   <span className="w-10 text-xs text-pc-text-muted font-medium" />
-                  <span className="flex-1 text-xs text-pc-text-muted font-medium text-center">NA</span>
+                  <span className="flex-1 text-xs text-pc-text-muted font-medium text-center">{t("generated.matches.na")}</span>
                   <span className="w-px h-3 bg-pc-border/30" />
-                  <span className="flex-1 text-xs text-pc-text-muted font-medium text-center">EU</span>
+                  <span className="flex-1 text-xs text-pc-text-muted font-medium text-center">{t("generated.matches.eu")}</span>
                   <span className="w-px h-3 bg-pc-border/30" />
-                  <span className="w-8 text-xs text-pc-text-muted font-medium text-right">Drop</span>
+                  <span className="w-8 text-xs text-pc-text-muted font-medium text-right">{t("generated.matches.drop")}</span>
                   <span className="w-px h-3 bg-pc-border/30" />
                   <span className="w-8 text-xs text-pc-text-muted font-medium text-right">Σ</span>
                 </div>
@@ -359,7 +356,7 @@ export default function MatchesPage() {
                   <div key={r.region} className="pc-surface-light rounded-lg p-2 text-center border border-pc-border/50">
                     <div className="text-xs text-pc-text-muted uppercase tracking-wider">{r.region}</div>
                     <div className="text-lg font-mono font-bold text-pc-accent">{r.totalToday.toLocaleString()}</div>
-                    <div className="text-xs text-pc-text-muted">{r.matchesPerHour}/hr</div>
+                    <div className="text-xs text-pc-text-muted">{r.matchesPerHour}{t("generated.matches.hr")}</div>
                   </div>
                 ))}
               </div>
@@ -368,10 +365,9 @@ export default function MatchesPage() {
             {!statsLoading && droppedRows.length > 0 && (
               <div className="mt-3 pt-3 border-t border-pc-border/50">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs uppercase tracking-wider text-amber-300/90">True dropped</span>
+                  <span className="text-xs uppercase tracking-wider text-amber-300/90">{t("generated.matches.trueDropped")}</span>
                   <span className="text-xs text-pc-text-muted">
-                    {droppedRows.reduce((sum: number, row: any) => sum + row.droppedIds.length, 0)} IDs
-                  </span>
+                    {droppedRows.reduce((sum: number, row: any) => sum + row.droppedIds.length, 0)} {t("generated.matches.ids")}</span>
                 </div>
                 <div className="space-y-1">
                   {droppedRows.map((row: any) => (
@@ -398,8 +394,7 @@ export default function MatchesPage() {
           {/* Discovery logic note */}
           <div className="pc-card p-3">
             <div className="text-xs text-pc-text-secondary leading-relaxed">
-              <span className="text-pc-text font-medium">Discovery runs hourly at HH:30</span> for the previous hour. The 30-minute offset allows matches to finish for the hour period — e.g. waiting for matches started at HH:59. Expect global tracking to be up to 1h 30m behind real time. However, you can search your match as soon as it ends — it will be immediately included in statistics.
-            </div>
+              <span className="text-pc-text font-medium">{t("generated.matches.discoveryRunsHourlyAtHh30")}</span> {t("generated.matches.forThePreviousHourThe30MinuteOffsetAllowsMatches")}</div>
           </div>
         </div>
       </div>
@@ -425,10 +420,11 @@ function MatchRow({ match }: { match: MatchSearchResult }) {
 }
 
 function MatchCard({ match }: { match: MatchSearchResult }) {
+  const { t } = useLocalization();
   const href = `/matches/${match.match_id}`;
   return <Link href={href} className="pc-mobile-panel block p-3 transition-colors hover:border-pc-accent-mid">
-    <div className="flex min-w-0 items-start justify-between gap-3"><div className="min-w-0"><div className="truncate text-sm font-semibold text-pc-text">{match.map || "Unknown map"}</div><div className="mt-0.5 font-mono text-[10px] text-pc-accent">#{match.match_id}</div></div><span className="shrink-0 rounded-full border border-pc-border bg-pc-bg px-2 py-1 text-[10px] uppercase text-pc-text-secondary">{match.region || "—"}</span></div>
-    <div className="mt-3 grid grid-cols-2 gap-2 text-xs"><div><div className="text-[9px] uppercase text-pc-text-muted">Duration</div><div className="font-mono text-pc-text-secondary">{formatDuration(match.duration_seconds)}</div></div><div className="text-right"><div className="text-[9px] uppercase text-pc-text-muted">Played</div><div className="text-pc-text-secondary">{formatLocalDateTime(match.entry_datetime)}</div></div></div>
+    <div className="flex min-w-0 items-start justify-between gap-3"><div className="min-w-0"><div className="truncate text-sm font-semibold text-pc-text">{match.map || t("generated.matches.unknownMap")}</div><div className="mt-0.5 font-mono text-[10px] text-pc-accent">#{match.match_id}</div></div><span className="shrink-0 rounded-full border border-pc-border bg-pc-bg px-2 py-1 text-[10px] uppercase text-pc-text-secondary">{match.region || "—"}</span></div>
+    <div className="mt-3 grid grid-cols-2 gap-2 text-xs"><div><div className="text-[9px] uppercase text-pc-text-muted">{t("generated.matches.duration")}</div><div className="font-mono text-pc-text-secondary">{formatDuration(match.duration_seconds)}</div></div><div className="text-right"><div className="text-[9px] uppercase text-pc-text-muted">{t("generated.matches.played")}</div><div className="text-pc-text-secondary">{formatLocalDateTime(match.entry_datetime)}</div></div></div>
   </Link>;
 }
 

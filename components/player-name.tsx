@@ -2,12 +2,14 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { fetchPlayerModeration, type PlayerModeration } from "@/lib/player-moderation";
+import { useLocalization } from "@/lib/localization-context";
 
 const EMPTY_MODERATION: PlayerModeration = { cheater: false, susCount: 0, verified: false };
 
 export function VerifiedPlayerBadge({ className = "" }: { className?: string }) {
+  const { t } = useLocalization();
   return (
-    <span className={`inline-flex shrink-0 ${className}`} role="img" aria-label="Verified PaladinsCat player" title="Verified PaladinsCat player">
+    <span className={`inline-flex shrink-0 ${className}`} role="img" aria-label={t("generated.players.verifiedPaladinscatPlayer")} title={t("generated.players.verifiedPaladinscatPlayer")}>
       <picture>
         <source srcSet="/images/icons/Verified_Player_Support_Icon.avif" type="image/avif" />
         <img src="/images/icons/Verified_Player_Support_Icon.png" alt="" className="h-3.5 w-3.5 object-contain" />
@@ -27,6 +29,7 @@ export function PlayerModerationTag({
   susCount?: number;
   verified?: boolean;
 }) {
+  const { t } = useLocalization();
   const hasInitialState = cheater !== undefined && susCount !== undefined && verified !== undefined;
   const [moderation, setModeration] = useState<PlayerModeration>(() => (
     hasInitialState
@@ -48,8 +51,8 @@ export function PlayerModerationTag({
 
   return <>
     {moderation.verified && <VerifiedPlayerBadge />}
-    {moderation.cheater && <span className="shrink-0 rounded bg-red-500/10 px-1.5 py-0.5 text-[10px] font-bold leading-none text-red-400" aria-label="Confirmed cheater">CHEATER</span>}
-    {!moderation.cheater && moderation.susCount > 0 && <span className="shrink-0 rounded bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-bold leading-none text-amber-400" aria-label={`Suspicious player with ${moderation.susCount} flags`}>SUS</span>}
+    {moderation.cheater && <span className="shrink-0 rounded bg-red-500/10 px-1.5 py-0.5 text-[10px] font-bold leading-none text-red-400" aria-label={t("generated.players.confirmedCheater")}>{t("generated.players.cheater")}</span>}
+    {!moderation.cheater && moderation.susCount > 0 && <span className="shrink-0 rounded bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-bold leading-none text-amber-400" aria-label={t("generated.players.suspiciousPlayerWithValue1Flags", { value1: moderation.susCount })}>{t("generated.players.sus")}</span>}
   </>;
 }
 

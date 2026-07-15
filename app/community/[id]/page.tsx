@@ -21,8 +21,10 @@ import { formatLocalDateTime } from "@/lib/time-format";
 import CommunityRichContent from "@/components/CommunityRichContent";
 import { LoadingIndicator, LoadingPanel } from "@/components/async-state";
 import { VerifiedPlayerBadge } from "@/components/player-name";
+import { useLocalization } from "@/lib/localization-context";
 
 export default function PostDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { t } = useLocalization();
   const router = useRouter();
   const [detail, setDetail] = useState<PostDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -52,7 +54,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
       setPostTitle(data.post.title);
       setPostContent(data.post.content);
     } catch {
-      setError("Failed to load post");
+      setError(t("generated.community.failedToLoadPost"));
     } finally {
       setLoading(false);
     }
@@ -109,7 +111,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
   }
 
   async function handleDeletePost() {
-    if (!detail || !window.confirm("Delete this post?")) return;
+    if (!detail || !window.confirm(t("generated.community.deleteThisPost"))) return;
     setActionError(null);
     const auth = requireAuth();
     if (!auth) return;
@@ -176,7 +178,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
   }
 
   async function handleDeleteComment(commentId: number) {
-    if (!window.confirm("Delete this comment?")) return;
+    if (!window.confirm(t("generated.community.deleteThisComment"))) return;
     setActionError(null);
     const auth = requireAuth();
     if (!auth) return;
@@ -197,7 +199,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
 
   if (loading) return <LoadingPanel />;
   if (error) return <div className="text-center py-12 text-pc-text-muted">{error}</div>;
-  if (!detail) return <div className="text-center py-12 text-pc-text-muted">Post not found</div>;
+  if (!detail) return <div className="text-center py-12 text-pc-text-muted">{t("generated.community.postNotFound")}</div>;
 
   const { post, comments } = detail;
   const currentUser = getAuthUser();
@@ -206,8 +208,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
   return (
     <div className="space-y-6">
       <Link href="/community" className="text-pc-text-secondary hover:text-pc-accent transition-colors">
-        ← Back to community
-      </Link>
+        {t("generated.community.backToCommunity")}</Link>
 
       {actionError && (
         <div className="rounded-lg border border-red-700/50 bg-red-900/30 p-3 text-sm text-red-400">
@@ -236,7 +237,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                 disabled={savingPost || !postTitle.trim() || !postContent.trim()}
                 className="rounded-lg bg-pc-accent px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-pc-accent-secondary disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {savingPost ? <LoadingIndicator className="gap-2" /> : "Save"}
+                {savingPost ? <LoadingIndicator className="gap-2" /> : t("generated.community.save")}
               </button>
               <button
                 type="button"
@@ -247,8 +248,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                 }}
                 className="rounded-lg border border-pc-border px-4 py-2 text-sm text-pc-text-secondary transition-colors hover:text-pc-text"
               >
-                Cancel
-              </button>
+                {t("generated.community.cancel")}</button>
             </div>
           </form>
         ) : (
@@ -262,21 +262,20 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                     onClick={() => setEditingPost(true)}
                     className="rounded-lg border border-pc-border px-3 py-1.5 text-xs text-pc-text-secondary transition-colors hover:text-pc-text"
                   >
-                    Edit
-                  </button>
+                    {t("generated.community.edit")}</button>
                   <button
                     type="button"
                     onClick={handleDeletePost}
                     disabled={deletingPost}
                     className="rounded-lg border border-red-700/50 px-3 py-1.5 text-xs text-red-400 transition-colors hover:bg-red-900/20 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {deletingPost ? "Deleting..." : "Delete"}
+                    {deletingPost ? t("generated.community.deleting") : t("generated.community.delete")}
                   </button>
                 </div>
               )}
             </div>
             <div className="flex items-center gap-4 mt-3 text-pc-text-secondary text-sm">
-              <span className="inline-flex items-center gap-1">by {post.username}{post.linkedPlayerId != null && <VerifiedPlayerBadge />}</span>
+              <span className="inline-flex items-center gap-1">{t("generated.community.by")}{" "}{post.username}{post.linkedPlayerId != null && <VerifiedPlayerBadge />}</span>
               <span>{formatLocalDateTime(post.createdAt)}</span>
               <span>👁 {post.viewCount}</span>
             </div>
@@ -296,7 +295,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
 
       <div className="bg-pc-bg-elevated rounded-lg border border-pc-border p-6">
         <h2 className="text-xl font-semibold text-pc-accent mb-4">
-          Comments ({comments.length})
+          {t("generated.community.comments")}{comments.length})
         </h2>
 
         <form onSubmit={handleComment} className="mb-6 flex gap-3">
@@ -304,7 +303,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
             type="text"
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
-            placeholder="Add a comment..."
+            placeholder={t("generated.community.addAComment")}
             className="flex-1 px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text placeholder-pc-text-muted focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
           />
           <button
@@ -312,12 +311,12 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
             disabled={commenting || !newComment.trim()}
             className="px-4 py-2 bg-pc-accent hover:bg-pc-accent-secondary text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {commenting ? "Posting..." : "Post"}
+            {commenting ? t("generated.community.posting") : t("generated.community.post")}
           </button>
         </form>
 
         {comments.length === 0 ? (
-          <p className="text-pc-text-muted text-center py-4">No comments yet</p>
+          <p className="text-pc-text-muted text-center py-4">{t("generated.community.noCommentsYet")}</p>
         ) : (
           <div className="space-y-3">
             {comments.map((comment) => {
@@ -339,15 +338,14 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                           onClick={() => startCommentEdit(comment)}
                           className="text-xs text-pc-text-muted transition-colors hover:text-pc-text"
                         >
-                          Edit
-                        </button>
+                          {t("generated.community.edit")}</button>
                         <button
                           type="button"
                           onClick={() => handleDeleteComment(comment.id)}
                           disabled={isBusy}
                           className="text-xs text-red-400 transition-colors hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-50"
                         >
-                          {isBusy ? "Deleting..." : "Delete"}
+                          {isBusy ? t("generated.community.deleting") : t("generated.community.delete")}
                         </button>
                       </div>
                     )}
@@ -367,7 +365,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                           disabled={isBusy || !commentContent.trim()}
                           className="rounded-lg bg-pc-accent px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-pc-accent-secondary disabled:cursor-not-allowed disabled:opacity-50"
                         >
-                          {isBusy ? <LoadingIndicator className="gap-2" /> : "Save"}
+                          {isBusy ? <LoadingIndicator className="gap-2" /> : t("generated.community.save")}
                         </button>
                         <button
                           type="button"
@@ -377,8 +375,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                           }}
                           className="rounded-lg border border-pc-border px-3 py-1.5 text-xs text-pc-text-secondary transition-colors hover:text-pc-text"
                         >
-                          Cancel
-                        </button>
+                          {t("generated.community.cancel")}</button>
                       </div>
                     </div>
                   ) : (

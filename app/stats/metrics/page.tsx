@@ -13,24 +13,26 @@ import {
   type PerformanceMetricSummary,
 } from "@/lib/api-client";
 import { LoadingPanel } from "@/components/async-state";
+import { useLocalization } from "@/lib/localization-context";
+import type { TranslationKey } from "@/lib/localization/messages";
 
 /* ── Metric configs ── */
 
 interface MetricConfig {
   key: string;
-  label: string;
-  fullLabel: string;
+  labelKey: TranslationKey;
+  fullLabelKey: TranslationKey;
   color: string;
   fill: string;
   isDecimal: boolean;
 }
 
 const METRIC_CONFIGS: MetricConfig[] = [
-  { key: "dpm", label: "DPM", fullLabel: "Damage / Min", color: "#f87171", fill: "rgba(248,113,113,0.15)", isDecimal: false },
-  { key: "hpm", label: "HPM", fullLabel: "Healing / Min", color: "#34d399", fill: "rgba(52,211,153,0.15)", isDecimal: false },
-  { key: "gpm", label: "CPM", fullLabel: "Credits / Min", color: "#facc15", fill: "rgba(250,204,21,0.15)", isDecimal: false },
-  { key: "mpm", label: "SPM", fullLabel: "Shielding / Min", color: "#60a5fa", fill: "rgba(96,165,250,0.15)", isDecimal: false },
-  { key: "kda", label: "KDA", fullLabel: "KDA Ratio", color: "#33b6b1", fill: "rgba(51,182,177,0.15)", isDecimal: true },
+  { key: "dpm", labelKey: "common.metrics.dpm", fullLabelKey: "common.metrics.damagePerMinute", color: "#f87171", fill: "rgba(248,113,113,0.15)", isDecimal: false },
+  { key: "hpm", labelKey: "common.metrics.hpm", fullLabelKey: "common.metrics.healingPerMinute", color: "#34d399", fill: "rgba(52,211,153,0.15)", isDecimal: false },
+  { key: "gpm", labelKey: "common.metrics.cpm", fullLabelKey: "common.metrics.creditsPerMinute", color: "#facc15", fill: "rgba(250,204,21,0.15)", isDecimal: false },
+  { key: "mpm", labelKey: "common.metrics.spm", fullLabelKey: "common.metrics.shieldingPerMinute", color: "#60a5fa", fill: "rgba(96,165,250,0.15)", isDecimal: false },
+  { key: "kda", labelKey: "common.metrics.kda", fullLabelKey: "common.metrics.kdaRatio", color: "#33b6b1", fill: "rgba(51,182,177,0.15)", isDecimal: true },
 ];
 
 const CLASS_ICONS: Record<string, string> = {
@@ -141,6 +143,7 @@ function TabBar({
   activeKey: string;
   onChange: (key: string) => void;
 }) {
+  const { t } = useLocalization();
   return (
     <div className="grid grid-cols-5 gap-1 overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated p-1">
       {configs.map((cfg) => (
@@ -154,7 +157,7 @@ function TabBar({
           }`}
           style={activeKey === cfg.key ? { background: cfg.color } : {}}
         >
-          {cfg.label}
+          {t(cfg.labelKey)}
         </button>
       ))}
     </div>
@@ -164,6 +167,7 @@ function TabBar({
 /* ── Metric panel (same as MetricDetailPage content) ── */
 
 function MetricPanel({ config }: { config: MetricConfig }) {
+  const { t } = useLocalization();
   const [metricSummary, setMetricSummary] = useState<PerformanceMetricSummary>(() => emptySummary());
   const [classData, setClassData] = useState<ClassMetricData[]>(() => buildClassData([], {}));
 
@@ -226,11 +230,11 @@ function MetricPanel({ config }: { config: MetricConfig }) {
       <section className="bg-pc-bg-elevated border border-pc-border rounded-xl p-5">
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-5">
           {[
-            { label: "Global Avg", value: formatVal(metricSummary.mean), accent: true },
-            { label: "P10", value: formatVal(metricSummary.p10) },
-            { label: "P90", value: formatVal(metricSummary.p90) },
-            { label: "Max", value: formatVal(metricSummary.max) },
-            { label: "Samples", value: metricSummary.sampleSize.toLocaleString() },
+            { label: t("generated.stats.globalAvg"), value: formatVal(metricSummary.mean), accent: true },
+            { label: t("generated.stats.p10"), value: formatVal(metricSummary.p10) },
+            { label: t("generated.stats.p90"), value: formatVal(metricSummary.p90) },
+            { label: t("generated.stats.max"), value: formatVal(metricSummary.max) },
+            { label: t("generated.stats.samples"), value: metricSummary.sampleSize.toLocaleString() },
           ].map((item) => (
             <div key={item.label} className="min-w-0">
               <div className="text-pc-text-muted text-xs uppercase tracking-wider mb-1">{item.label}</div>
@@ -262,27 +266,27 @@ function MetricPanel({ config }: { config: MetricConfig }) {
                     <h2 className="text-pc-text font-semibold truncate">{section.className}</h2>
                   </div>
                   <div className="text-right shrink-0">
-                    <div className="text-xs text-pc-text-muted uppercase tracking-wider">Class Avg</div>
+                    <div className="text-xs text-pc-text-muted uppercase tracking-wider">{t("generated.stats.classAvg")}</div>
                     <div className="text-lg font-bold" style={{ color: config.color }}>{formatVal(classMean)}</div>
                   </div>
                 </div>
                 <div className="mt-4 grid grid-cols-2 gap-3 text-xs sm:grid-cols-4">
                   <div>
-                    <div className="text-pc-text-muted text-xs uppercase tracking-wider">vs Global</div>
+                    <div className="text-pc-text-muted text-xs uppercase tracking-wider">{t("generated.stats.vsGlobal")}</div>
                     <div className={classVsGlobal >= 0 ? "text-emerald-400" : "text-red-400"}>
                       {formatSigned(classVsGlobal)} ({classVsGlobalPct >= 0 ? "+" : ""}{classVsGlobalPct.toFixed(1)}%)
                     </div>
                   </div>
                   <div>
-                    <div className="text-pc-text-muted text-xs uppercase tracking-wider">P10</div>
+                    <div className="text-pc-text-muted text-xs uppercase tracking-wider">{t("generated.stats.p10")}</div>
                     <div className="text-pc-text-secondary">{formatVal(section.summary.p10)}</div>
                   </div>
                   <div>
-                    <div className="text-pc-text-muted text-xs uppercase tracking-wider">P90</div>
+                    <div className="text-pc-text-muted text-xs uppercase tracking-wider">{t("generated.stats.p90")}</div>
                     <div className="text-pc-text-secondary">{formatVal(section.summary.p90)}</div>
                   </div>
                   <div>
-                    <div className="text-pc-text-muted text-xs uppercase tracking-wider">Samples</div>
+                    <div className="text-pc-text-muted text-xs uppercase tracking-wider">{t("generated.stats.samples")}</div>
                     <div className="text-pc-text-secondary">{section.summary.sampleSize.toLocaleString()}</div>
                   </div>
                 </div>
@@ -299,29 +303,29 @@ function MetricPanel({ config }: { config: MetricConfig }) {
                       <div className="min-w-0 flex-1">
                         <div className="truncate text-sm font-semibold text-pc-text">{champion.name}</div>
                         <div className="mt-0.5 flex flex-wrap gap-x-2 text-[10px]">
-                          <span className={vsClassPct >= 0 ? "text-emerald-400" : "text-red-400"}>{vsClassPct >= 0 ? "+" : ""}{vsClassPct.toFixed(1)}% class</span>
-                          <span className={vsGlobalPct >= 0 ? "text-emerald-400" : "text-red-400"}>{vsGlobalPct >= 0 ? "+" : ""}{vsGlobalPct.toFixed(1)}% global</span>
-                          <span className="text-pc-text-muted">{champion.matches.toLocaleString()} matches</span>
+                          <span className={vsClassPct >= 0 ? "text-emerald-400" : "text-red-400"}>{vsClassPct >= 0 ? "+" : ""}{vsClassPct.toFixed(1)}{t("generated.stats.class")}</span>
+                          <span className={vsGlobalPct >= 0 ? "text-emerald-400" : "text-red-400"}>{vsGlobalPct >= 0 ? "+" : ""}{vsGlobalPct.toFixed(1)}{t("generated.stats.global.ac9baca")}</span>
+                          <span className="text-pc-text-muted">{champion.matches.toLocaleString()} {t("generated.stats.matches.9f3e924")}</span>
                         </div>
                       </div>
                       <span className="shrink-0 font-mono text-sm font-bold" style={{ color: config.color }}>{formatVal(champion.value)}</span>
                     </Link>
                   );
                 })}
-                {section.champions.length === 0 && <div className="px-3 py-6 text-center text-sm text-pc-text-muted">No champion data</div>}
+                {section.champions.length === 0 && <div className="px-3 py-6 text-center text-sm text-pc-text-muted">{t("generated.stats.noChampionData")}</div>}
               </div>
 
               <div className="hidden overflow-x-auto sm:block">
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="text-left text-pc-text-muted border-b border-pc-border/60">
-                      <th className="px-3 py-2 w-12">Class</th>
-                      <th className="px-3 py-2 w-12">Global</th>
-                      <th className="px-3 py-2">Name</th>
-                      <th className="px-3 py-2 text-right">{config.fullLabel}</th>
-                      <th className="px-3 py-2 text-right">vs Class</th>
-                      <th className="px-3 py-2 text-right">vs Global</th>
-                      <th className="px-3 py-2 text-right">Matches</th>
+                      <th className="px-3 py-2 w-12">{t("generated.stats.class.41ff354")}</th>
+                      <th className="px-3 py-2 w-12">{t("generated.stats.global")}</th>
+                      <th className="px-3 py-2">{t("generated.stats.name")}</th>
+                      <th className="px-3 py-2 text-right">{t(config.fullLabelKey)}</th>
+                      <th className="px-3 py-2 text-right">{t("generated.stats.vsClass")}</th>
+                      <th className="px-3 py-2 text-right">{t("generated.stats.vsGlobal")}</th>
+                      <th className="px-3 py-2 text-right">{t("generated.stats.matches")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -359,8 +363,7 @@ function MetricPanel({ config }: { config: MetricConfig }) {
                     {section.champions.length === 0 && (
                       <tr>
                         <td colSpan={7} className="px-3 py-6 text-center text-pc-text-muted">
-                          No champion data
-                        </td>
+                          {t("generated.stats.noChampionData")}</td>
                       </tr>
                     )}
                   </tbody>
@@ -377,6 +380,7 @@ function MetricPanel({ config }: { config: MetricConfig }) {
 /* ── Client page wrapper (reads search params) ── */
 
 function MetricsPageClient() {
+  const { t } = useLocalization();
   const searchParams = useSearchParams();
   const router = useRouter();
   const tab = searchParams.get("tab") || "dpm";
@@ -396,10 +400,9 @@ function MetricsPageClient() {
     <div className="space-y-6">
       <div>
         <Link href="/stats" className="text-pc-accent text-xs hover:underline mb-2 inline-block">
-          Back to Global Stats
-        </Link>
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">Performance Metrics</h1>
-        <p className="text-pc-text-muted text-sm mt-1">Compare champion performance across all metrics</p>
+          {t("generated.stats.backToGlobalStats")}</Link>
+        <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.stats.performanceMetrics")}</h1>
+        <p className="text-pc-text-muted text-sm mt-1">{t("generated.stats.compareChampionPerformanceAcrossAllMetrics")}</p>
       </div>
 
       <TabBar configs={METRIC_CONFIGS} activeKey={activeConfig.key} onChange={handleTabChange} />

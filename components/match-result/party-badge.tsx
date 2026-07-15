@@ -1,5 +1,8 @@
+"use client";
+
 import { Users } from "lucide-react";
 import type { MatchPlayerDetail } from "@/lib/api-client";
+import { useLocalization } from "@/lib/localization-context";
 
 type PartyPlayer = Pick<MatchPlayerDetail, "party" | "party_number">;
 
@@ -15,14 +18,15 @@ export default function PartyBadge({
   player: PartyPlayer;
   className?: string;
 }) {
+  const { t } = useLocalization();
   const partyNumber = getPartyNumber(player);
   if (partyNumber == null) return null;
 
   return (
     <span
       className={`inline-flex h-5 shrink-0 items-center gap-1 rounded-full border border-pc-accent/30 bg-pc-accent/10 px-1.5 text-[10px] font-bold tabular-nums text-pc-accent ${className}`}
-      title={`Party ${partyNumber} — matching badges queued together`}
-      aria-label={`Party ${partyNumber}`}
+      title={t("common.party.queuedTogether", { number: partyNumber })}
+      aria-label={t("common.party.label", { number: partyNumber })}
     >
       <Users aria-hidden="true" className="h-3 w-3" strokeWidth={2.25} />
       {partyNumber}

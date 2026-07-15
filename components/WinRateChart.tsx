@@ -2,6 +2,7 @@
 
 import { LineChartComponent } from "./Chart";
 import type { PatchTrend } from "@/lib/api-client";
+import { useLocalization } from "@/lib/localization-context";
 
 export interface WinRateChartProps {
   data: PatchTrend[];
@@ -9,6 +10,7 @@ export interface WinRateChartProps {
 }
 
 export default function WinRateChart({ data, championName }: WinRateChartProps) {
+  const { t } = useLocalization();
   const chartData = data.map((d) => ({
     week: d.trendWeek,
     winRate: d.weeklyWinRate,
@@ -20,7 +22,7 @@ export default function WinRateChart({ data, championName }: WinRateChartProps) 
       xKey="week"
       yKeys={["winRate"]}
       yLabel="Win Rate (%)"
-      title={`${championName} — Win Rate Over Time`}
+      title={t("generated.components.value1WinRateOverTime", { value1: championName })}
       height={250}
       colors={["#4ade80"]}
       showLegend={false}

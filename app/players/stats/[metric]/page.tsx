@@ -7,6 +7,7 @@ import { fetchBaselines, fetchPerformanceLeaderboard, type BaselineEntry } from 
 import { LoadingPanel } from "@/components/async-state";
 import PlayerName from "@/components/player-name";
 import { getChampionIconSafe } from "@/lib/champion-icons";
+import { useLocalization } from "@/lib/localization-context";
 
 const VALID_METRICS = ["gpm", "hpm", "dpm", "mpm"] as const;
 type Metric = (typeof VALID_METRICS)[number];
@@ -84,6 +85,7 @@ function RankBadge({ rank }: { rank: number }) {
 }
 
 export default function MetricLeaderboardPage() {
+  const { t } = useLocalization();
   const params = useParams();
   const router = useRouter();
   const rawMetric = (params.metric as string)?.toLowerCase();
@@ -156,8 +158,7 @@ export default function MetricLeaderboardPage() {
           href="/players"
           className="text-pc-text-muted hover:text-pc-accent transition-colors text-sm flex items-center gap-1"
         >
-          ← Players
-        </Link>
+          {t("generated.players.players")}</Link>
       </div>
 
       <div className="flex items-center gap-3">
@@ -169,7 +170,7 @@ export default function MetricLeaderboardPage() {
         )}
         <h1 className="pc-heading pc-heading-lg">
           <span className={colorClass}>{METRIC_LABELS[m]}</span>{" "}
-          <span className="text-pc-text">Leaderboard</span>
+          <span className="text-pc-text">{t("generated.players.leaderboard")}</span>
         </h1>
       </div>
 
@@ -194,8 +195,7 @@ export default function MetricLeaderboardPage() {
       {Object.keys(avgByRole).length > 0 && (
         <div className="bg-pc-bg-elevated rounded-xl border border-pc-border p-4">
           <h2 className="text-sm font-semibold text-pc-text-muted mb-3 uppercase tracking-wider">
-            Role Averages (Baselines)
-          </h2>
+            {t("generated.players.roleAveragesBaselines")}</h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {Object.entries(avgByRole).map(([role, val]) => (
               <div key={role} className="bg-pc-bg/50 rounded-lg p-3 border border-pc-border">
@@ -219,7 +219,7 @@ export default function MetricLeaderboardPage() {
         <LoadingPanel compact />
       ) : entries.length === 0 ? (
         <div className="text-center py-20 text-pc-text-muted">
-          No data available for {METRIC_LABELS[m]}.
+          {t("generated.players.noDataAvailableFor")}{" "}{METRIC_LABELS[m]}.
         </div>
       ) : (
         <div className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
@@ -227,13 +227,13 @@ export default function MetricLeaderboardPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-pc-border">
-                  <th className="text-left text-pc-text-muted font-medium py-3 px-4 w-14">Rank</th>
-                  <th className="text-left text-pc-text-muted font-medium py-3 px-4">Player</th>
-                  <th className="text-center text-pc-text-muted font-medium py-3 px-4 hidden sm:table-cell">Champion</th>
-                  <th className="text-left text-pc-text-muted font-medium py-3 px-4 hidden md:table-cell">Class</th>
+                  <th className="text-left text-pc-text-muted font-medium py-3 px-4 w-14">{t("generated.players.rank")}</th>
+                  <th className="text-left text-pc-text-muted font-medium py-3 px-4">{t("generated.players.player")}</th>
+                  <th className="text-center text-pc-text-muted font-medium py-3 px-4 hidden sm:table-cell">{t("generated.players.champion")}</th>
+                  <th className="text-left text-pc-text-muted font-medium py-3 px-4 hidden md:table-cell">{t("generated.players.class")}</th>
                   <th className="text-right text-pc-text-muted font-medium py-3 px-4">{METRIC_LABELS[m]}</th>
-                  <th className="text-right text-pc-text-muted font-medium py-3 px-4 hidden md:table-cell">Matches</th>
-                  <th className="text-center text-pc-text-muted font-medium py-3 px-4 hidden lg:table-cell">Region</th>
+                  <th className="text-right text-pc-text-muted font-medium py-3 px-4 hidden md:table-cell">{t("generated.players.matches")}</th>
+                  <th className="text-center text-pc-text-muted font-medium py-3 px-4 hidden lg:table-cell">{t("generated.players.region")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -258,8 +258,8 @@ export default function MetricLeaderboardPage() {
                       <td className="py-2.5 px-4 hidden sm:table-cell">
                         <img
                           src={getChampionIconSafe(p.champion)}
-                          alt={p.champion ?? "Champion unavailable"}
-                          title={p.champion ?? "Champion unavailable"}
+                          alt={p.champion ?? t("generated.players.championUnavailable")}
+                          title={p.champion ?? t("generated.players.championUnavailable")}
                           className="mx-auto h-7 w-7 rounded object-contain"
                         />
                       </td>
@@ -295,8 +295,7 @@ export default function MetricLeaderboardPage() {
 
       {/* ── Footer note ── */}
       <p className="text-pc-text-muted text-xs text-center">
-        Showing {entries.length} players — {METRIC_LABELS[m]} is a rolling average across ranked matches.
-      </p>
+        {t("generated.players.showing")}{" "}{entries.length} {t("generated.players.players.7abad31")}{" "}{METRIC_LABELS[m]} {t("generated.players.isARollingAverageAcrossRankedMatches")}</p>
     </div>
   );
 }

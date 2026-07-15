@@ -43,6 +43,7 @@ import { ErrorState } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { readBrowserResult, removeBrowserResult, writeBrowserResult } from "@/lib/browser-result-cache";
 import { getQueueLabel } from "@/lib/queue-labels";
+import { LocalizedText, useLocalization } from "@/lib/localization-context";
 
 const MATCH_RESULT_CACHE_TTL_MS = 5 * 60 * 1000;
 const MATCH_UI_CACHE_TTL_MS = 30 * 60 * 1000;
@@ -86,6 +87,7 @@ async function fetchProfilesForMatch(
 /* ── Page component ── */
 
 export default function MatchDetailPage() {
+  const { t } = useLocalization();
   const params = useParams();
   const matchId = String(params.id || "");
 
@@ -236,10 +238,9 @@ export default function MatchDetailPage() {
   if (error) {
     return (
       <div className="space-y-4">
-        <ErrorState title="Match details unavailable" message={error} onRetry={() => setReloadKey((key) => key + 1)} />
+        <ErrorState title={t("generated.matches.matchDetailsUnavailable")} message={error} onRetry={() => setReloadKey((key) => key + 1)} />
         <Link href="/matches" className="text-pc-accent hover:underline mt-4 inline-block">
-          ← Back to matches
-        </Link>
+          <LocalizedText id="generated.matches.backToMatches" /></Link>
       </div>
     );
   }

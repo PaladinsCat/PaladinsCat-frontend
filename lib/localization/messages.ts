@@ -1,14 +1,20 @@
 import asyncMessages from "./catalog/ui/async.json";
 import footerMessages from "./catalog/ui/footer.json";
 import navigationMessages from "./catalog/ui/navigation.json";
+import commonMessages from "./catalog/ui/common.json";
+import moderationMessages from "./catalog/ui/moderation.json";
 import itemMessages from "./catalog/game/items.json";
 import talentMessages from "./catalog/game/talents.json";
 import homeMessages from "./catalog/pages/home.json";
 import localizationMessages from "./catalog/pages/localization.json";
 import statusMessages from "./catalog/system/status.json";
+import generatedUiMessages from "./catalog/generated/ui.json";
+import seoMessages from "./catalog/seo/metadata.json";
 
 export const EN_MESSAGES = {
   ...navigationMessages,
+  ...commonMessages,
+  ...moderationMessages,
   ...footerMessages,
   ...asyncMessages,
   ...homeMessages,
@@ -16,6 +22,8 @@ export const EN_MESSAGES = {
   ...statusMessages,
   ...talentMessages,
   ...itemMessages,
+  ...generatedUiMessages,
+  ...seoMessages,
 };
 export type TranslationKey = keyof typeof EN_MESSAGES;
 export type TranslationValues = Record<string, string | number>;

@@ -1,13 +1,11 @@
-import type { Metadata } from "next";
+import { createLocalizedMetadata } from "@/lib/server-localization";
 
-export const metadata: Metadata = {
-  title: "Paladins ELO Leaderboard — Account Ratings and Ranked Data",
-  description:
-    "Track Paladins account ELO ratings, Glicko-2 leaderboards, ranked match counts, wins, losses, and player performance.",
-  alternates: {
-    canonical: "/players/elo",
-  },
-};
+export async function generateMetadata() {
+  return createLocalizedMetadata("seo.players.elo.title", {
+    descriptionKey: "seo.players.elo.description",
+    metadata: { alternates: { canonical: "/players/elo" } },
+  });
+}
 
 export default function PlayerEloLayout({ children }: { children: React.ReactNode }) {
   return children;

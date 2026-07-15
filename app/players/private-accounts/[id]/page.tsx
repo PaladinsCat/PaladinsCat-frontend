@@ -10,6 +10,7 @@ import {
   type PrivateAccountDetail,
 } from "@/lib/api-client";
 import { TIER_NAMES, getRankIconPath, getTierColor } from "@/lib/tier-utils";
+import { useLocalization } from "@/lib/localization-context";
 
 function observedAt(value: string | null) {
   if (!value) return "Unknown";
@@ -29,6 +30,7 @@ function tpDelta(value: number | null) {
 }
 
 export default function PrivateAccountDetailPage() {
+  const { t } = useLocalization();
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const privateId = Number(params.id);
@@ -44,7 +46,7 @@ export default function PrivateAccountDetailPage() {
         setDetail(result);
         if (result.account.id !== privateId) router.replace(`/players/private-accounts/${result.account.id}`);
       })
-      .catch(() => { if (!cancelled) setError("Private account details could not be loaded."); });
+      .catch(() => { if (!cancelled) setError(t("generated.players.privateAccountDetailsCouldNotBeLoaded")); });
     return () => { cancelled = true; };
   }, [privateId, router]);
 
@@ -58,42 +60,42 @@ export default function PrivateAccountDetailPage() {
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6">
       <header>
-        <Link href="/players/private-accounts" className="mb-2 inline-block text-xs text-pc-accent hover:underline">← Private accounts</Link>
+        <Link href="/players/private-accounts" className="mb-2 inline-block text-xs text-pc-accent hover:underline">{t("generated.players.privateAccounts.a28b00d")}</Link>
         <div className="flex items-start gap-3">
           <LockKeyhole aria-hidden="true" className="mt-1 h-9 w-9 shrink-0 text-slate-300" strokeWidth={1.5} />
           <div className="min-w-0">
-            <div className="mb-1 flex flex-wrap items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted"><span>Private profile #{account.id}</span><span className="rounded border border-pc-border bg-pc-bg-elevated px-1.5 py-0.5 text-pc-text-secondary">Level {account.accountLevel.toLocaleString()}</span></div>
+            <div className="mb-1 flex flex-wrap items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted"><span>{t("generated.players.privateProfile")}{account.id}</span><span className="rounded border border-pc-border bg-pc-bg-elevated px-1.5 py-0.5 text-pc-text-secondary">{t("generated.players.level")}{" "}{account.accountLevel.toLocaleString()}</span></div>
             <div className="flex min-w-0 items-center gap-2">
               <h1 className="pc-heading pc-heading-lg truncate text-pc-accent">{account.displayName}</h1>
-              {account.verifiedName && <ShieldCheck aria-label="Verified from submitted evidence" className="h-5 w-5 shrink-0 text-emerald-300" />}
+              {account.verifiedName && <ShieldCheck aria-label={t("generated.players.verifiedFromSubmittedEvidence")} className="h-5 w-5 shrink-0 text-emerald-300" />}
             </div>
             <p className="mt-1 text-sm text-pc-text-secondary">
               {account.verifiedName
-                ? "Known name verified from submitted in-game evidence; the Hi-Rez profile remains private."
-                : "Pseudonymous identity inferred conservatively from independent match observations."}
+                ? t("generated.players.knownNameVerifiedFromSubmittedInGameEvidenceTheHi")
+                : t("generated.players.pseudonymousIdentityInferredConservativelyFromIndependentMatchObservations")}
             </p>
           </div>
         </div>
       </header>
 
       <section className="grid grid-cols-2 overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated sm:grid-cols-4 sm:divide-x sm:divide-pc-border">
-        <div className="border-b border-pc-border p-4 sm:border-b-0"><div className="text-xs text-pc-text-muted">Latest mastery</div><div className="mt-1 text-xl font-semibold text-pc-text">{account.masteryLevel.toLocaleString()}</div></div>
-        <div className="border-b border-l border-pc-border p-4 sm:border-b-0 sm:border-l-0"><div className="text-xs text-pc-text-muted">Latest rank</div><div className={`mt-1 flex items-center gap-2 font-semibold ${getTierColor(account.leagueTier)}`}><img src={getRankIconPath(account.leagueTier, 0)} alt="" className="h-8 w-8 shrink-0 object-contain" /><span className="truncate">{tierName}</span></div></div>
-        <div className="p-4"><div className="text-xs text-pc-text-muted">Latest TP</div><div className="mt-1 text-xl font-semibold text-pc-text">{account.leaguePoints.toLocaleString()}</div></div>
-        <div className="border-l border-pc-border p-4 sm:border-l-0"><div className="text-xs text-pc-text-muted">Tracked matches</div><div className="mt-1 text-xl font-semibold text-pc-text">{account.matchCount.toLocaleString()}</div></div>
+        <div className="border-b border-pc-border p-4 sm:border-b-0"><div className="text-xs text-pc-text-muted">{t("generated.players.latestMastery")}</div><div className="mt-1 text-xl font-semibold text-pc-text">{account.masteryLevel.toLocaleString()}</div></div>
+        <div className="border-b border-l border-pc-border p-4 sm:border-b-0 sm:border-l-0"><div className="text-xs text-pc-text-muted">{t("generated.players.latestRank")}</div><div className={`mt-1 flex items-center gap-2 font-semibold ${getTierColor(account.leagueTier)}`}><img src={getRankIconPath(account.leagueTier, 0)} alt="" className="h-8 w-8 shrink-0 object-contain" /><span className="truncate">{tierName}</span></div></div>
+        <div className="p-4"><div className="text-xs text-pc-text-muted">{t("generated.players.latestTp")}</div><div className="mt-1 text-xl font-semibold text-pc-text">{account.leaguePoints.toLocaleString()}</div></div>
+        <div className="border-l border-pc-border p-4 sm:border-l-0"><div className="text-xs text-pc-text-muted">{t("generated.players.trackedMatches")}</div><div className="mt-1 text-xl font-semibold text-pc-text">{account.matchCount.toLocaleString()}</div></div>
       </section>
 
       <section className="rounded-xl border border-pc-border bg-pc-bg-elevated p-4">
         <div className="flex flex-col gap-2 text-xs text-pc-text-muted sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-2"><CalendarClock className="h-4 w-4" />Observed {observedAt(account.firstSeen)} – {observedAt(account.lastSeen)}</div>
-          <div>Identity confidence {account.identityConfidence}% · {account.identityStatus}</div>
+          <div className="flex items-center gap-2"><CalendarClock className="h-4 w-4" />{t("generated.players.observed")}{" "}{observedAt(account.firstSeen)} – {observedAt(account.lastSeen)}</div>
+          <div>{t("generated.players.identityConfidence")}{" "}{account.identityConfidence}% · {account.identityStatus}</div>
         </div>
       </section>
 
       <section>
-        <h2 className="mb-3 text-sm font-semibold text-pc-text">Observed matches</h2>
+        <h2 className="mb-3 text-sm font-semibold text-pc-text">{t("generated.players.observedMatches")}</h2>
         {observations.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-pc-border p-8 text-center text-sm text-pc-text-muted">No linked observations.</div>
+          <div className="rounded-xl border border-dashed border-pc-border p-8 text-center text-sm text-pc-text-muted">{t("generated.players.noLinkedObservations")}</div>
         ) : (
           <div className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated">
             {observations.map(observation => (
@@ -103,11 +105,11 @@ export default function PrivateAccountDetailPage() {
                 className="grid gap-2 border-b border-pc-border px-4 py-3 text-sm transition-colors last:border-b-0 hover:bg-pc-bg/50 sm:grid-cols-[minmax(0,1fr)_auto_auto_auto] sm:items-center"
               >
                 <div className="min-w-0">
-                  <div className="truncate font-semibold text-pc-text">{observation.map || `Match #${observation.matchId}`}</div>
-                  <div className="mt-0.5 truncate text-xs text-pc-text-muted">{observation.championName || "Unknown champion"} · {observation.region || "Unknown region"} · {observedAt(observation.entryDatetime)}</div>
+                  <div className="truncate font-semibold text-pc-text">{observation.map || t("generated.players.matchValue1", { value1: observation.matchId })}</div>
+                  <div className="mt-0.5 truncate text-xs text-pc-text-muted">{observation.championName || t("generated.players.unknownChampion")} · {observation.region || t("generated.players.unknownRegion")} · {observedAt(observation.entryDatetime)}</div>
                 </div>
-                <div className="flex items-center gap-1.5 text-xs text-pc-text-secondary"><img src={getRankIconPath(observation.leagueTier, 0)} alt="" className="h-6 w-6 object-contain" /><span>{TIER_NAMES[observation.leagueTier] || "Unranked"}</span></div>
-                <div className="text-xs text-pc-text-secondary"><span className="font-semibold text-pc-text">{observation.leaguePoints} TP</span>{observation.tpDelta != null && <span className={`ml-1 ${observation.tpDelta > 0 ? "text-emerald-300" : observation.tpDelta < 0 ? "text-red-300" : "text-pc-text-muted"}`}>({tpDelta(observation.tpDelta)})</span>}<div className="mt-0.5 text-[10px] uppercase tracking-wide text-pc-text-muted">{observation.winStatus || "Result unknown"} · Level {observation.accountLevel} · Mastery {observation.masteryLevel}</div></div>
+                <div className="flex items-center gap-1.5 text-xs text-pc-text-secondary"><img src={getRankIconPath(observation.leagueTier, 0)} alt="" className="h-6 w-6 object-contain" /><span>{TIER_NAMES[observation.leagueTier] || t("generated.players.unranked")}</span></div>
+                <div className="text-xs text-pc-text-secondary"><span className="font-semibold text-pc-text">{observation.leaguePoints} {t("generated.players.tp")}</span>{observation.tpDelta != null && <span className={`ml-1 ${observation.tpDelta > 0 ? "text-emerald-300" : observation.tpDelta < 0 ? "text-red-300" : "text-pc-text-muted"}`}>({tpDelta(observation.tpDelta)})</span>}<div className="mt-0.5 text-[10px] uppercase tracking-wide text-pc-text-muted">{observation.winStatus || t("generated.players.resultUnknown")} {t("generated.players.level.1019695")}{" "}{observation.accountLevel} {t("generated.players.mastery.5f14f16")}{" "}{observation.masteryLevel}</div></div>
                 <div className="text-right text-xs text-pc-text-muted">{duration(observation.durationSeconds)}</div>
               </Link>
             ))}

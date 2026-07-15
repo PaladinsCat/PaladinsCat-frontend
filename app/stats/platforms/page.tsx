@@ -5,8 +5,10 @@ import { fetchPlatforms, type LoadoutStat } from "@/lib/api-client";
 import { BarChartComponent } from "@/components/Chart";
 import { EmptyState, ErrorState } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
+import { useLocalization } from "@/lib/localization-context";
 
 export default function PlatformsPage() {
+  const { t } = useLocalization();
   const [platforms, setPlatforms] = useState<Array<{ platform: string; championId: number; championName: string; totalMatches: number; winRate: number; avgDpm: number; avgHpm: number }>>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +35,7 @@ export default function PlatformsPage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-3xl font-bold text-pc-accent">Platform Meta</h1>
+      <h1 className="text-3xl font-bold text-pc-accent">{t("generated.stats.platformMeta")}</h1>
       <div className="flex gap-2">
         <button
           onClick={() => setSelectedPlatform(null)}
@@ -41,8 +43,7 @@ export default function PlatformsPage() {
             !selectedPlatform ? "bg-pc-accent text-pc-bg" : "bg-pc-bg-elevated hover:bg-pc-bg-secondary"
           }`}
         >
-          All
-        </button>
+          {t("generated.stats.all")}</button>
         {[...new Set(platforms.map((p) => p.platform))].map((platform) => (
           <button
             key={platform}
@@ -60,14 +61,14 @@ export default function PlatformsPage() {
       ) : error ? (
         <ErrorState message={String(error)} />
       ) : chartData.length === 0 ? (
-        <EmptyState title="No platform statistics" description="Platform comparisons will appear when ranked data is available." />
+        <EmptyState title={t("generated.stats.noPlatformStatistics")} description={t("generated.stats.platformComparisonsWillAppearWhenRankedDataIsAvailable")} />
       ) : (
         <BarChartComponent
           data={chartData}
           xKey="champion"
           yKeys={["winRate"]}
           yLabel="Win Rate (%)"
-          title={selectedPlatform ? `${selectedPlatform} — Top Champions` : "Top Champions (All Platforms)"}
+          title={selectedPlatform ? t("generated.stats.value1TopChampions", { value1: selectedPlatform }) : t("generated.stats.topChampionsAllPlatforms")}
           height={400}
           colors={["#4ade80"]}
           showLegend={false}

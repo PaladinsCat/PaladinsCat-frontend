@@ -9,6 +9,7 @@ import { fetchAdminDashboard, type AdminDashboard } from "@/lib/admin-dashboard-
 import { ContentFade, ErrorState, LoadingPanel } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { formatLocalDateTime } from "@/lib/time-format";
+import { useLocalization } from "@/lib/localization-context";
 
 function formatBytes(value: number): string {
   if (value < 1024) return `${value} B`;
@@ -25,6 +26,7 @@ function shortDay(value: string): string {
 }
 
 export default function AdminDashboardPage() {
+  const { t } = useLocalization();
   const router = useRouter();
   const { user, isLoading: authLoading } = useAuth();
   const [dashboard, setDashboard] = useState<AdminDashboard | null>(null);
@@ -64,7 +66,7 @@ export default function AdminDashboardPage() {
 
   if (authLoading || !user || !isAdmin) return <RouteSkeleton variant="dashboard" />;
   if (!dashboard && loading) return <RouteSkeleton variant="dashboard" />;
-  if (!dashboard && error) return <ErrorState title="Admin dashboard unavailable" message={error} onRetry={() => void load()} />;
+  if (!dashboard && error) return <ErrorState title={t("generated.admin.adminDashboardUnavailable")} message={error} onRetry={() => void load()} />;
   if (!dashboard) return null;
 
   const { summary } = dashboard.traffic;
@@ -76,35 +78,34 @@ export default function AdminDashboardPage() {
     <ContentFade className="space-y-7">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-pc-text-muted">Private operations</div>
-          <h1 className="pc-heading pc-heading-lg text-pc-accent">Admin Dashboard</h1>
-          <p className="mt-1 text-sm text-pc-text-secondary">Traffic, platform health, ingestion, and Hi-Rez quota telemetry.</p>
+          <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-pc-text-muted">{t("generated.admin.privateOperations")}</div>
+          <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.admin.adminDashboard")}</h1>
+          <p className="mt-1 text-sm text-pc-text-secondary">{t("generated.admin.trafficPlatformHealthIngestionAndHiRezQuotaTelemetry")}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Link href="/admin/notifications" className="pc-btn-secondary inline-flex items-center gap-2 text-sm"><Bell className="h-4 w-4" /> Notifications</Link>
-          <Link href="/admin/changelog" className="pc-btn-secondary inline-flex items-center gap-2 text-sm"><ScrollText className="h-4 w-4" /> Changelog</Link>
+          <Link href="/admin/notifications" className="pc-btn-secondary inline-flex items-center gap-2 text-sm"><Bell className="h-4 w-4" /> {t("generated.admin.notifications")}</Link>
+          <Link href="/admin/changelog" className="pc-btn-secondary inline-flex items-center gap-2 text-sm"><ScrollText className="h-4 w-4" /> {t("generated.admin.changelog")}</Link>
           <button type="button" onClick={() => void load()} disabled={loading} className="pc-btn-secondary inline-flex items-center gap-2 text-sm disabled:opacity-60">
-            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} /> Refresh
-          </button>
+            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} /> {t("generated.admin.refresh")}</button>
         </div>
       </header>
 
-      {error && <div className="rounded-xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-xs text-amber-200">Showing the previous snapshot. Refresh failed: {error}</div>}
+      {error && <div className="rounded-xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-xs text-amber-200">{t("generated.admin.showingThePreviousSnapshotRefreshFailed")}{" "}{error}</div>}
 
       <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <MetricCard icon={Users} label="Visitors today" value={summary.visitorsToday.toLocaleString()} detail={`${summary.visitorsYesterday.toLocaleString()} yesterday`} />
-        <MetricCard icon={Eye} label="Page views today" value={summary.viewsToday.toLocaleString()} detail={`${summary.views7d.toLocaleString()} over 7 days`} />
-        <MetricCard icon={Gamepad2} label="Tracked matches" value={totals.matches.toLocaleString()} detail={`${totals.rankedMatches.toLocaleString()} ranked`} />
-        <MetricCard icon={Gauge} label="Hi-Rez budget" value={apiBudget.remaining.toLocaleString()} detail={`${apiBudget.used.toLocaleString()} / ${apiBudget.limit.toLocaleString()} used`} />
+        <MetricCard icon={Users} label={t("generated.admin.visitorsToday")} value={summary.visitorsToday.toLocaleString()} detail={`${summary.visitorsYesterday.toLocaleString()} yesterday`} />
+        <MetricCard icon={Eye} label={t("generated.admin.pageViewsToday")} value={summary.viewsToday.toLocaleString()} detail={`${summary.views7d.toLocaleString()} over 7 days`} />
+        <MetricCard icon={Gamepad2} label={t("generated.admin.trackedMatches")} value={totals.matches.toLocaleString()} detail={`${totals.rankedMatches.toLocaleString()} ranked`} />
+        <MetricCard icon={Gauge} label={t("generated.admin.hiRezBudget")} value={apiBudget.remaining.toLocaleString()} detail={`${apiBudget.used.toLocaleString()} / ${apiBudget.limit.toLocaleString()} used`} />
       </section>
 
       <section className="grid grid-cols-1 gap-5 xl:grid-cols-3">
         <div className="pc-card xl:col-span-2">
-          <SectionTitle icon={Activity} title="Traffic — 14 days" subtitle="Anonymous browser visitors and page views" />
+          <SectionTitle icon={Activity} title={t("generated.admin.traffic14Days")} subtitle="Anonymous browser visitors and page views" />
           <TrafficChart dashboard={dashboard} />
         </div>
         <div className="pc-card">
-          <SectionTitle icon={Eye} title="Top pages — 7 days" subtitle="Normalized public routes" />
+          <SectionTitle icon={Eye} title={t("generated.admin.topPages7Days")} subtitle="Normalized public routes" />
           <div className="mt-4 space-y-2">
             {dashboard.traffic.topPages.map((page, index) => (
               <div key={page.path} className="flex items-center gap-3 rounded-lg border border-pc-border/50 bg-pc-bg/35 px-3 py-2">
@@ -113,54 +114,54 @@ export default function AdminDashboardPage() {
                 <span className="text-xs font-semibold tabular-nums text-pc-accent">{page.pageViews.toLocaleString()}</span>
               </div>
             ))}
-            {dashboard.traffic.topPages.length === 0 && <div className="py-10 text-center text-xs text-pc-text-muted">Traffic collection begins after this update is deployed.</div>}
+            {dashboard.traffic.topPages.length === 0 && <div className="py-10 text-center text-xs text-pc-text-muted">{t("generated.admin.trafficCollectionBeginsAfterThisUpdateIsDeployed")}</div>}
           </div>
         </div>
       </section>
 
       <section className="grid grid-cols-1 gap-5 xl:grid-cols-3">
         <div className="pc-card xl:col-span-2">
-          <SectionTitle icon={KeyRound} title="Hi-Rez API keys" subtitle="Stored relay state; viewing this page does not spend quota" />
+          <SectionTitle icon={KeyRound} title={t("generated.admin.hiRezApiKeys")} subtitle="Stored relay state; viewing this page does not spend quota" />
           <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
             {dashboard.hirez.keys.map((key) => <ApiKeyCard key={key.devId} apiKey={key} />)}
           </div>
           <div className="mt-5">
-            <div className="mb-1.5 flex justify-between text-[11px] text-pc-text-muted"><span>Combined daily budget</span><span>{budgetPercent.toFixed(1)}% used</span></div>
+            <div className="mb-1.5 flex justify-between text-[11px] text-pc-text-muted"><span>{t("generated.admin.combinedDailyBudget")}</span><span>{budgetPercent.toFixed(1)}{t("generated.admin.used")}</span></div>
             <div className="h-2 overflow-hidden rounded-full bg-pc-bg"><div className="h-full rounded-full bg-pc-accent transition-all duration-500" style={{ width: `${budgetPercent}%` }} /></div>
           </div>
         </div>
         <div className="pc-card">
-          <SectionTitle icon={Activity} title="API calls — 24 hours" subtitle="All keys combined" />
+          <SectionTitle icon={Activity} title={t("generated.admin.apiCalls24Hours")} subtitle="All keys combined" />
           <HourlyBars rows={dashboard.hirez.hourly} />
         </div>
       </section>
 
       <section className="grid grid-cols-1 gap-5 xl:grid-cols-2">
         <div className="pc-card">
-          <SectionTitle icon={Database} title="Website & database" subtitle="Current stored platform totals" />
+          <SectionTitle icon={Database} title={t("generated.admin.websiteDatabase")} subtitle="Current stored platform totals" />
           <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-            <SmallStat label="Players" value={totals.players.toLocaleString()} />
-            <SmallStat label="Users" value={totals.registeredUsers.toLocaleString()} />
-            <SmallStat label="Builds" value={totals.communityBuilds.toLocaleString()} />
-            <SmallStat label="Database" value={formatBytes(totals.databaseBytes)} />
-            <SmallStat label="Buffer pending" value={pipeline.bufferPending.toLocaleString()} tone={pipeline.bufferPending > 0 ? "warn" : "normal"} />
-            <SmallStat label="Buffer failed" value={pipeline.bufferFailed.toLocaleString()} tone={pipeline.bufferFailed > 0 ? "bad" : "normal"} />
+            <SmallStat label={t("generated.admin.players")} value={totals.players.toLocaleString()} />
+            <SmallStat label={t("generated.admin.users")} value={totals.registeredUsers.toLocaleString()} />
+            <SmallStat label={t("generated.admin.builds")} value={totals.communityBuilds.toLocaleString()} />
+            <SmallStat label={t("generated.admin.database")} value={formatBytes(totals.databaseBytes)} />
+            <SmallStat label={t("generated.admin.bufferPending")} value={pipeline.bufferPending.toLocaleString()} tone={pipeline.bufferPending > 0 ? "warn" : "normal"} />
+            <SmallStat label={t("generated.admin.bufferFailed")} value={pipeline.bufferFailed.toLocaleString()} tone={pipeline.bufferFailed > 0 ? "bad" : "normal"} />
           </div>
         </div>
         <div className="pc-card">
-          <SectionTitle icon={Gauge} title="Hi-Rez endpoints — 24 hours" subtitle="Calls and mean relay response time" />
+          <SectionTitle icon={Gauge} title={t("generated.admin.hiRezEndpoints24Hours")} subtitle="Calls and mean relay response time" />
           <div className="mt-4 overflow-x-auto">
-            <table className="w-full text-xs"><thead><tr className="border-b border-pc-border text-left text-pc-text-muted"><th className="py-2 pr-3">Endpoint</th><th className="px-3 py-2 text-right">Calls</th><th className="py-2 pl-3 text-right">Avg ms</th></tr></thead>
+            <table className="w-full text-xs"><thead><tr className="border-b border-pc-border text-left text-pc-text-muted"><th className="py-2 pr-3">{t("generated.admin.endpoint")}</th><th className="px-3 py-2 text-right">{t("generated.admin.calls")}</th><th className="py-2 pl-3 text-right">{t("generated.admin.avgMs")}</th></tr></thead>
               <tbody>{dashboard.hirez.endpoints.map((endpoint) => <tr key={endpoint.endpoint} className="border-b border-pc-border/40"><td className="max-w-64 truncate py-2 pr-3 font-mono text-pc-text">{endpoint.endpoint}</td><td className="px-3 py-2 text-right tabular-nums text-pc-accent">{endpoint.calls.toLocaleString()}</td><td className="py-2 pl-3 text-right tabular-nums text-pc-text-secondary">{endpoint.avgResponseMs.toLocaleString()}</td></tr>)}</tbody>
             </table>
-            {dashboard.hirez.endpoints.length === 0 && <div className="py-8 text-center text-xs text-pc-text-muted">No API calls recorded in the last 24 hours.</div>}
+            {dashboard.hirez.endpoints.length === 0 && <div className="py-8 text-center text-xs text-pc-text-muted">{t("generated.admin.noApiCallsRecordedInTheLast24Hours")}</div>}
           </div>
         </div>
       </section>
 
       <footer className="flex flex-wrap items-center justify-between gap-2 text-[10px] text-pc-text-muted">
-        <span>Signed in as {user.username}. This route and its data endpoint require an admin session.</span>
-        <span>Snapshot {formatLocalDateTime(dashboard.generatedAt)}</span>
+        <span>{t("generated.admin.signedInAs")}{" "}{user.username}{t("generated.admin.thisRouteAndItsDataEndpointRequireAnAdminSession")}</span>
+        <span>{t("generated.admin.snapshot")}{" "}{formatLocalDateTime(dashboard.generatedAt)}</span>
       </footer>
       {loading && <LoadingPanel compact className="fixed bottom-20 right-5 z-50 rounded-xl border border-pc-border bg-pc-bg-elevated px-4 shadow-xl" />}
     </ContentFade>
@@ -181,14 +182,16 @@ function TrafficChart({ dashboard }: { dashboard: AdminDashboard }) {
 }
 
 function ApiKeyCard({ apiKey }: { apiKey: AdminDashboard["hirez"]["keys"][number] }) {
+  const { t } = useLocalization();
   const percent = apiKey.dailyLimit > 0 ? Math.min(100, (apiKey.used / apiKey.dailyLimit) * 100) : 0;
   const color = percent >= 90 ? "bg-rose-400" : percent >= 75 ? "bg-amber-400" : "bg-pc-accent";
-  return <div className="rounded-xl border border-pc-border bg-pc-bg/35 p-3"><div className="flex items-center justify-between"><span className="font-mono text-xs font-bold text-pc-text">Key {apiKey.devId}</span><span className={`rounded-full px-2 py-0.5 text-[9px] font-semibold ${apiKey.status === "healthy" ? "bg-emerald-400/15 text-emerald-300" : "bg-amber-400/15 text-amber-300"}`}>{apiKey.status}</span></div><div className="mt-3 flex items-end justify-between"><div><div className="text-lg font-bold tabular-nums text-pc-text">{apiKey.remaining.toLocaleString()}</div><div className="text-[9px] text-pc-text-muted">remaining</div></div><div className="text-right text-[10px] text-pc-text-secondary">{apiKey.used.toLocaleString()} / {apiKey.dailyLimit.toLocaleString()}</div></div><div className="mt-2 h-1.5 overflow-hidden rounded-full bg-pc-bg"><div className={`h-full rounded-full ${color}`} style={{ width: `${percent}%` }} /></div><div className="mt-2 truncate text-[9px] text-pc-text-muted">Synced {apiKey.lastSyncAt ? formatLocalDateTime(apiKey.lastSyncAt) : "never"}</div></div>;
+  return <div className="rounded-xl border border-pc-border bg-pc-bg/35 p-3"><div className="flex items-center justify-between"><span className="font-mono text-xs font-bold text-pc-text">{t("generated.admin.key")}{" "}{apiKey.devId}</span><span className={`rounded-full px-2 py-0.5 text-[9px] font-semibold ${apiKey.status === "healthy" ? "bg-emerald-400/15 text-emerald-300" : "bg-amber-400/15 text-amber-300"}`}>{apiKey.status}</span></div><div className="mt-3 flex items-end justify-between"><div><div className="text-lg font-bold tabular-nums text-pc-text">{apiKey.remaining.toLocaleString()}</div><div className="text-[9px] text-pc-text-muted">{t("generated.admin.remaining")}</div></div><div className="text-right text-[10px] text-pc-text-secondary">{apiKey.used.toLocaleString()} / {apiKey.dailyLimit.toLocaleString()}</div></div><div className="mt-2 h-1.5 overflow-hidden rounded-full bg-pc-bg"><div className={`h-full rounded-full ${color}`} style={{ width: `${percent}%` }} /></div><div className="mt-2 truncate text-[9px] text-pc-text-muted">{t("generated.admin.synced")}{" "}{apiKey.lastSyncAt ? formatLocalDateTime(apiKey.lastSyncAt) : t("generated.admin.never")}</div></div>;
 }
 
 function HourlyBars({ rows }: { rows: Array<{ hour: string; calls: number }> }) {
+  const { t } = useLocalization();
   const max = Math.max(1, ...rows.map((row) => row.calls));
-  return <div className="mt-5 flex h-40 items-end gap-1">{rows.map((row, index) => <div key={row.hour} className="group flex h-full min-w-0 flex-1 items-end"><div className="relative w-full rounded-t bg-pc-accent-mid/70 transition-colors group-hover:bg-pc-accent" style={{ height: `${Math.max(2, (row.calls / max) * 100)}%` }} title={`${formatLocalDateTime(row.hour)}: ${row.calls} calls`}><span className="absolute -top-4 left-1/2 -translate-x-1/2 text-[8px] text-pc-text-muted opacity-0 group-hover:opacity-100">{row.calls}</span></div>{index % 6 === 0 && <span className="absolute text-[8px] text-pc-text-muted" />}</div>)}</div>;
+  return <div className="mt-5 flex h-40 items-end gap-1">{rows.map((row, index) => <div key={row.hour} className="group flex h-full min-w-0 flex-1 items-end"><div className="relative w-full rounded-t bg-pc-accent-mid/70 transition-colors group-hover:bg-pc-accent" style={{ height: `${Math.max(2, (row.calls / max) * 100)}%` }} title={t("generated.admin.value1Value2Calls", { value1: formatLocalDateTime(row.hour), value2: row.calls })}><span className="absolute -top-4 left-1/2 -translate-x-1/2 text-[8px] text-pc-text-muted opacity-0 group-hover:opacity-100">{row.calls}</span></div>{index % 6 === 0 && <span className="absolute text-[8px] text-pc-text-muted" />}</div>)}</div>;
 }
 
 function SmallStat({ label, value, tone = "normal" }: { label: string; value: string; tone?: "normal" | "warn" | "bad" }) {

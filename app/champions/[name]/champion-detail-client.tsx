@@ -30,18 +30,19 @@ import {
 } from "@/lib/api-client";
 import { getRankIconPath, getTierColor, resolveEffectiveTier } from "@/lib/tier-utils";
 import { withStoredLobbyTier } from "@/lib/lobby-tier";
+import { useLocalization } from "@/lib/localization-context";
 
 // Keep this client request on the neutral same-origin proxy. Some embedded
 // browsers block background requests below /api, while /_pc is forwarded to
 // the same backend and serves the Redis-backed page bundle.
 const CHAMPION_DATA_BASE = "/_pc";
-const CHAMPION_METRICS: Array<{ key: PerformanceMetricKey; label: string; colorClass: string; accent: string }> = [
-  { key: "dpm", label: "Damage / Min", colorClass: "text-red-400", accent: "#f87171" },
-  { key: "gpm", label: "Credits / Min", colorClass: "text-yellow-400", accent: "#facc15" },
-  { key: "hpm", label: "Healing / Min", colorClass: "text-emerald-400", accent: "#34d399" },
-  { key: "mpm", label: "Shielding / Min", colorClass: "text-blue-400", accent: "#60a5fa" },
-  { key: "kda", label: "KDA", colorClass: "text-violet-400", accent: "#a78bfa" },
-];
+const CHAMPION_METRICS = [
+  { key: "dpm", labelKey: "common.metrics.damagePerMinute", colorClass: "text-red-400", accent: "#f87171" },
+  { key: "gpm", labelKey: "common.metrics.creditsPerMinute", colorClass: "text-yellow-400", accent: "#facc15" },
+  { key: "hpm", labelKey: "common.metrics.healingPerMinute", colorClass: "text-emerald-400", accent: "#34d399" },
+  { key: "mpm", labelKey: "common.metrics.shieldingPerMinute", colorClass: "text-blue-400", accent: "#60a5fa" },
+  { key: "kda", labelKey: "common.metrics.kda", colorClass: "text-violet-400", accent: "#a78bfa" },
+] as const satisfies ReadonlyArray<{ key: PerformanceMetricKey; labelKey: string; colorClass: string; accent: string }>;
 
 const ITEM_CATEGORY_BY_NAME: Record<string, string> = {
   "Blast Shields": "Defense", Guardian: "Defense", Haven: "Defense", Illuminate: "Defense", Resilience: "Defense", Sentinel: "Defense",
@@ -98,10 +99,11 @@ const ROLE_ICONS: Record<string, string> = {
 };
 
 function AvgTierCard({ stats }: { stats: ChampionStats }) {
+  const { t } = useLocalization();
   if (stats.avgRating == null) {
     return (
       <div className="pc-surface-light rounded-lg border border-pc-border p-3 text-center">
-        <div className="text-xs text-pc-text-muted mb-1">Avg Tier</div>
+        <div className="text-xs text-pc-text-muted mb-1">{t("generated.champions.avgTier")}</div>
         <div className="font-mono text-base text-pc-text">—</div>
       </div>
     );
@@ -113,7 +115,7 @@ function AvgTierCard({ stats }: { stats: ChampionStats }) {
 
   return (
     <div className="pc-surface-light rounded-lg border border-pc-border p-3 text-center">
-      <div className="mb-1 text-xs text-pc-text-muted">Avg Tier</div>
+      <div className="mb-1 text-xs text-pc-text-muted">{t("generated.champions.avgTier")}</div>
       <img src={iconPath} alt={effective.displayName} className="mx-auto h-9 w-9 object-contain" />
       <div className={`mt-0.5 text-[11px] font-semibold ${color}`}>{effective.displayName}</div>
       <div className="text-xs font-mono text-pc-text-muted mt-0.5">{stats.avgRating.toFixed(1)}</div>
@@ -122,6 +124,7 @@ function AvgTierCard({ stats }: { stats: ChampionStats }) {
 }
 
 export default function ChampionDetailPage() {
+  const { t } = useLocalization();
   const params = useParams();
   const rawName = params?.name;
   const name = Array.isArray(rawName) ? rawName[0] ?? "" : rawName ?? "";
@@ -200,7 +203,7 @@ export default function ChampionDetailPage() {
     // background after its TTL.
     fetch(`${CHAMPION_DATA_BASE}${withStoredLobbyTier(`/champions/${championSlug(staticChampion.name)}/page-data`)}`)
       .then((response) => {
-        if (!response.ok) throw new Error("Champion page data unavailable");
+        if (!response.ok) throw new Error(t("generated.champions.championPageDataUnavailable"));
         return response.json() as Promise<ChampionPagePayload>;
       })
       .then(applyPageData)
@@ -238,8 +241,7 @@ export default function ChampionDetailPage() {
       {/* Header */}
       <div className="flex items-center gap-4">
         <Link href="/champions" className="text-pc-text-secondary hover:text-pc-accent transition-colors">
-          ← Back to champions
-        </Link>
+          {t("generated.champions.backToChampions")}</Link>
         <h1 className="pc-heading pc-heading-lg text-pc-accent">
           <ScrambleText text={championData?.name ?? staticChampion?.name ?? name} speed={30} iterations={15} delayFromCenter={false} />
         </h1>
@@ -269,10 +271,10 @@ export default function ChampionDetailPage() {
               </div>
               {championData?.stats && (
                 <div className="grid grid-cols-2 gap-x-6 gap-y-3 w-full">
-                  <StatBadge label="Health" value={championData.stats.health} />
-                  <StatBadge label="Speed" value={`${championData.stats.speed}`} />
-                  <StatBadge label="Range" value={championData.stats.range} />
-                  <StatBadge label="Speed Units" value={championData.stats.speedUnits} />
+                  <StatBadge label={t("common.metrics.health")} value={championData.stats.health} />
+                  <StatBadge label={t("common.metrics.speed")} value={`${championData.stats.speed}`} />
+                  <StatBadge label={t("common.metrics.range")} value={championData.stats.range} />
+                  <StatBadge label={t("common.metrics.speedUnits")} value={championData.stats.speedUnits} />
                 </div>
               )}
             </div>
@@ -281,7 +283,7 @@ export default function ChampionDetailPage() {
           {/* Skills */}
           {championData?.skills && championData.skills.length > 0 && (
             <>
-              <h2 className="pc-card-title mb-2 shadow-sm">Skills</h2>
+              <h2 className="pc-card-title mb-2 shadow-sm">{t("generated.champions.skills")}</h2>
               <div className="pc-card">
               <div className="space-y-3">
                 {championData.skills.map((skill) => (
@@ -300,14 +302,14 @@ export default function ChampionDetailPage() {
           )}
           {/* Compact ranked summary leads the analysis column. */}
           <section className="space-y-2">
-            <h2 className="pc-card-title shadow-sm">Ranked Performance</h2>
+            <h2 className="pc-card-title shadow-sm">{t("generated.champions.rankedPerformance")}</h2>
             <div className="pc-card space-y-3 p-4">
               {stats && (
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                   <AvgTierCard stats={stats} />
-                  <StatCard label="Win Rate" value={formatPct(stats.avgWinRate)} accent />
-                  <StatCard label="Plays" value={formatNum(stats.totalPlays)} />
-                  <StatCard label="Wins" value={formatNum(stats.totalWins)} />
+                  <StatCard label={t("common.sort.winRate")} value={formatPct(stats.avgWinRate)} accent />
+                  <StatCard label={t("common.sort.plays")} value={formatNum(stats.totalPlays)} />
+                  <StatCard label={t("generated.players.wins")} value={formatNum(stats.totalWins)} />
                 </div>
               )}
               <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-5">
@@ -327,10 +329,9 @@ export default function ChampionDetailPage() {
           {championData?.talents && championData.talents.length > 0 && (
             <>
               <div className="mb-2 flex flex-wrap items-baseline gap-2">
-                <h2 className="pc-card-title shadow-sm">Talents</h2>
+                <h2 className="pc-card-title shadow-sm">{t("generated.champions.talents")}</h2>
                 <span className="text-xs font-medium text-pc-accent-light drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]">
-                  Open a talent to view its loadout cards
-                </span>
+                  {t("generated.champions.openATalentToViewItsLoadoutCards")}</span>
               </div>
               <div className="pc-card">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -354,10 +355,10 @@ export default function ChampionDetailPage() {
 
           {/* Champion-specific ranked item purchases. */}
           <section className="space-y-2">
-            <h2 className="pc-card-title shadow-sm">Item Stats</h2>
+            <h2 className="pc-card-title shadow-sm">{t("generated.champions.itemStats")}</h2>
             <div className="pc-card space-y-4 p-4">
               {championItems.length === 0 ? (
-                <div className="text-sm text-pc-text-muted">No ranked item statistics are available yet.</div>
+                <div className="text-sm text-pc-text-muted">{t("generated.champions.noRankedItemStatisticsAreAvailableYet")}</div>
               ) : (
                 ITEM_CATEGORIES.map((category) => {
                   const items = championItems.filter((item) => (ITEM_CATEGORY_BY_NAME[item.itemName] ?? "Utility") === category);
@@ -378,9 +379,9 @@ export default function ChampionDetailPage() {
                               <img src={itemIcon(item.itemName)} alt="" className="mb-1 h-12 w-12 rounded-md object-contain" />
                               <div className="w-full truncate text-xs font-medium leading-tight text-pc-text group-hover:text-pc-accent">{item.itemName}</div>
                               <div className="mt-0.5 flex items-center gap-1 text-[9px]">
-                                <span style={{ color: quality.color }}>WR {item.winRate.toFixed(1)}%</span>
+                                <span style={{ color: quality.color }}>{t("generated.champions.wr")}{" "}{item.winRate.toFixed(1)}%</span>
                                 <span className="text-pc-text-muted">·</span>
-                                <span style={{ color: quality.color }}>PR {(item.pickRate ?? 0).toFixed(1)}%</span>
+                                <span style={{ color: quality.color }}>{t("generated.champions.pr")}{" "}{(item.pickRate ?? 0).toFixed(1)}%</span>
                               </div>
                             </Link>
                           );
@@ -399,31 +400,31 @@ export default function ChampionDetailPage() {
       {/* Tier Performance */}
       {tierStats.length > 0 && (
         <div className="pc-card">
-          <h2 className="pc-card-title mb-4">Performance by Tier</h2>
+          <h2 className="pc-card-title mb-4">{t("generated.champions.performanceByTier")}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {tierStats.map((t) => {
-              const quality = getStatQuality(t.winRate, t.pickRate, maxTierPickRate);
+            {tierStats.map((tierStat) => {
+              const quality = getStatQuality(tierStat.winRate, tierStat.pickRate, maxTierPickRate);
               return (
                 <div
-                  key={t.tier}
+                  key={tierStat.tier}
                   className="pc-surface-light rounded-lg p-4 border transition-colors"
                   style={{ borderColor: quality.borderColor }}
                 >
-                  <div className="text-sm font-medium text-pc-accent mb-2">{t.tier}</div>
+                  <div className="text-sm font-medium text-pc-accent mb-2">{tierStat.tier}</div>
                   <div className="grid grid-cols-3 gap-2 text-center">
                     <div>
-                      <div className="text-xs text-pc-text-muted">WR</div>
+                      <div className="text-xs text-pc-text-muted">{t("generated.champions.wr")}</div>
                       <div className={`text-sm font-mono ${quality.textClass}`} style={{ color: quality.color }}>
-                        {t.winRate.toFixed(1)}%
+                        {tierStat.winRate.toFixed(1)}%
                       </div>
                     </div>
                     <div>
-                      <div className="text-xs text-pc-text-muted">PR</div>
-                      <div className="text-sm font-mono" style={{ color: quality.color }}>{t.pickRate.toFixed(1)}%</div>
+                      <div className="text-xs text-pc-text-muted">{t("generated.champions.pr")}</div>
+                      <div className="text-sm font-mono" style={{ color: quality.color }}>{tierStat.pickRate.toFixed(1)}%</div>
                     </div>
                     <div>
-                      <div className="text-xs text-pc-text-muted">Plays</div>
-                      <div className="text-sm font-mono text-pc-text">{t.totalPlays.toLocaleString()}</div>
+                      <div className="text-xs text-pc-text-muted">{t("generated.champions.plays")}</div>
+                      <div className="text-sm font-mono text-pc-text">{tierStat.totalPlays.toLocaleString()}</div>
                     </div>
                   </div>
                 </div>
@@ -436,14 +437,14 @@ export default function ChampionDetailPage() {
       {/* Win Rate Trends */}
       {patchTrends.length > 0 && (
         <div className="pc-card">
-          <h2 className="pc-card-title mb-4">Win Rate Trends</h2>
+          <h2 className="pc-card-title mb-4">{t("generated.champions.winRateTrends")}</h2>
           <div className="overflow-x-auto">
             <table className="pc-table w-full">
               <thead>
                 <tr>
-                  <th>Week</th>
-                  <th>Win Rate</th>
-                  <th>Plays</th>
+                  <th>{t("generated.champions.week")}</th>
+                  <th>{t("generated.champions.winRate")}</th>
+                  <th>{t("generated.champions.plays")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -468,15 +469,14 @@ export default function ChampionDetailPage() {
       {/* Champion-relative ranked map distribution. */}
       <section className="space-y-3">
         <div>
-          <h2 className="pc-card-title">Map Stats</h2>
+          <h2 className="pc-card-title">{t("generated.champions.mapStats")}</h2>
           <p className="mt-1 text-xs text-pc-text-secondary">
-            Ranked performance by map. Pick rate is each map&apos;s share of all ranked plays for this champion.
-          </p>
+            {t("generated.champions.rankedPerformanceByMapPickRateIsEachMapS")}</p>
         </div>
         {loading ? (
           <LoadingPanel />
         ) : championMaps.length === 0 ? (
-          <div className="pc-card text-sm text-pc-text-muted">No ranked map statistics are available yet.</div>
+          <div className="pc-card text-sm text-pc-text-muted">{t("generated.champions.noRankedMapStatisticsAreAvailableYet")}</div>
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {championMaps.map((map) => {
@@ -497,15 +497,15 @@ export default function ChampionDetailPage() {
                   </div>
                   <div className="grid grid-cols-3 gap-2 p-3 text-center text-xs">
                     <div>
-                      <div className="text-[10px] uppercase text-pc-text-muted">Win Rate</div>
+                      <div className="text-[10px] uppercase text-pc-text-muted">{t("generated.champions.winRate")}</div>
                       <div className="font-bold" style={{ color: quality.color }}>{map.winRate.toFixed(1)}%</div>
                     </div>
                     <div>
-                      <div className="text-[10px] uppercase text-pc-text-muted">Pick Rate</div>
+                      <div className="text-[10px] uppercase text-pc-text-muted">{t("generated.champions.pickRate")}</div>
                       <div className="font-medium text-pc-accent">{map.pickRate.toFixed(1)}%</div>
                     </div>
                     <div>
-                      <div className="text-[10px] uppercase text-pc-text-muted">Plays</div>
+                      <div className="text-[10px] uppercase text-pc-text-muted">{t("generated.champions.plays")}</div>
                       <div className="font-medium text-pc-text">{map.totalPlays.toLocaleString()}</div>
                     </div>
                   </div>
@@ -537,6 +537,7 @@ function ChampionMetricCard({
   champion?: ChampionPerformanceDistribution;
   global?: PerformanceMetricSummary;
 }) {
+  const { t } = useLocalization();
   const isDecimal = metric.key === "kda";
   const formatMetric = (value: number | null | undefined) => {
     const numeric = Number(value ?? 0);
@@ -557,26 +558,26 @@ function ChampionMetricCard({
     <div className="pc-surface-light min-w-0 rounded-lg border border-pc-border p-2.5">
       <div className="mb-2 flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <div className="text-xs text-pc-text-muted uppercase tracking-wider">{metric.label}</div>
+          <div className="text-xs text-pc-text-muted uppercase tracking-wider">{t(metric.labelKey)}</div>
           <div className={`text-lg font-bold ${metric.colorClass}`}>{formatMetric(championMean)}</div>
         </div>
         <div className="text-right text-[10px] text-pc-text-muted shrink min-w-0 overflow-hidden">
-          <div className="truncate">Matches</div>
+          <div className="truncate">{t("generated.champions.matches")}</div>
           <div className="text-pc-text-secondary font-mono overflow-wrap break-all">{(champion?.totalMatches ?? 0).toLocaleString()}</div>
         </div>
       </div>
 
       <div className="mb-2 grid grid-cols-3 gap-1.5 text-[10px]">
         <div>
-          <div className="text-pc-text-muted uppercase tracking-wider">P10</div>
+          <div className="text-pc-text-muted uppercase tracking-wider">{t("generated.champions.p10")}</div>
           <div className="text-pc-text-secondary font-mono">{formatMetric(p10)}</div>
         </div>
         <div>
-          <div className="text-pc-text-muted uppercase tracking-wider">Mode</div>
+          <div className="text-pc-text-muted uppercase tracking-wider">{t("generated.champions.mode")}</div>
           <div className="text-pc-text-secondary font-mono">{formatMetric(champion?.mode ?? 0)}</div>
         </div>
         <div>
-          <div className="text-pc-text-muted uppercase tracking-wider">P90</div>
+          <div className="text-pc-text-muted uppercase tracking-wider">{t("generated.champions.p90")}</div>
           <div className="text-pc-text-secondary font-mono">{formatMetric(p90)}</div>
         </div>
       </div>
@@ -586,7 +587,7 @@ function ChampionMetricCard({
         <div className="absolute top-1/2 h-4 w-0.5 -translate-y-1/2 bg-pc-text-muted" style={{ left: `${globalPct}%` }} />
       </div>
       <div className="flex items-center justify-between gap-2 text-[10px]">
-        <span className="text-pc-text-muted">Global {formatMetric(globalMean)}</span>
+        <span className="text-pc-text-muted">{t("generated.champions.global")}{" "}{formatMetric(globalMean)}</span>
         <span className={deltaClass}>{formatSignedMetric(delta, isDecimal)} ({deltaPct >= 0 ? "+" : ""}{deltaPct.toFixed(1)}%)</span>
       </div>
     </div>
@@ -608,6 +609,7 @@ function StatBadge({ label, value }: { label: string; value: string }) {
 }
 
 function SkillCard({ skill }: { skill: ChampionSkill }) {
+  const { t } = useLocalization();
   const icons = [skill.iconUrl, skill.iconUrl2, skill.iconUrl3].filter(Boolean) as string[];
   const [activeIdx, setActiveIdx] = useState(0);
 
@@ -640,10 +642,10 @@ function SkillCard({ skill }: { skill: ChampionSkill }) {
         <div className="flex items-center gap-2 mb-1">
           <span className="text-sm font-medium text-pc-text">{skill.name}</span>
           {skill.damage && (
-            <span className="text-xs font-mono text-pc-text-muted">DMG: {skill.damage}</span>
+            <span className="text-xs font-mono text-pc-text-muted">{t("generated.champions.dmg")}{" "}{skill.damage}</span>
           )}
           {skill.cooldown && (
-            <span className="text-xs font-mono text-pc-text-muted">CD: {skill.cooldown}</span>
+            <span className="text-xs font-mono text-pc-text-muted">{t("generated.champions.cd")}{" "}{skill.cooldown}</span>
           )}
         </div>
         {skill.description && (
@@ -667,6 +669,7 @@ function TalentCard({
   maxPickRate?: number;
   href?: string;
 }) {
+  const { t } = useLocalization();
   const pickRate = stat && totalMatches && totalMatches > 0 ? (stat.totalPlays / totalMatches) * 100 : 0;
   const quality = stat ? getStatQuality(stat.winRate, pickRate, maxPickRate ?? 100) : null;
 
@@ -687,22 +690,22 @@ function TalentCard({
           <p className="text-xs text-pc-text-secondary leading-relaxed">{talent.description}</p>
         )}
         {talent.category && (
-          <div className="text-xs text-pc-text-muted mt-1">Linked: {talent.category}</div>
+          <div className="text-xs text-pc-text-muted mt-1">{t("generated.champions.linked")}{" "}{talent.category}</div>
         )}
         {stat && stat.totalPlays > 0 && (
           <div className="flex items-center gap-2 mt-2 text-xs flex-wrap">
             <span className={quality?.textClass ?? winRateColor(stat.winRate)} style={quality ? { color: quality.color } : undefined}>
-              <span className="text-pc-text-muted mr-1">WR</span>
+              <span className="text-pc-text-muted mr-1">{t("generated.champions.wr")}</span>
               {stat.winRate.toFixed(1)}%
             </span>
             <span className="text-pc-border">|</span>
             <span className="text-pc-text-muted">
-              <span className="mr-1">PR</span>
+              <span className="mr-1">{t("generated.champions.pr")}</span>
               <span style={quality ? { color: quality.color } : undefined}>{pickRate.toFixed(1)}%</span>
             </span>
             <span className="text-pc-border">|</span>
             <span className="text-pc-text-muted overflow-wrap break-word">
-              <span className="mr-1">Matches</span>
+              <span className="mr-1">{t("generated.champions.matches")}</span>
               <span style={quality ? { color: quality.color } : undefined}>{formatPlays(stat.totalPlays)}</span>
             </span>
           </div>

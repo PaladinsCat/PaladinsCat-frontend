@@ -9,8 +9,10 @@ import { EmptyState, ErrorState } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { LoadingPanel } from "@/components/async-state";
 import { VerifiedPlayerBadge } from "@/components/player-name";
+import { useLocalization } from "@/lib/localization-context";
 
 export default function CommunityPage() {
+  const { t } = useLocalization();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -36,26 +38,25 @@ export default function CommunityPage() {
   }, []);
 
   if (loading) return <RouteSkeleton variant="list" />;
-  if (error) return <ErrorState title="Community unavailable" message={error} />;
+  if (error) return <ErrorState title={t("generated.community.communityUnavailable")} message={error} />;
 
   return (
     <div className="space-y-6">
       <div className="pc-section-heading">
         <h1 className="text-2xl font-bold text-pc-accent sm:text-3xl">
-          <ScrambleText text="Community" speed={30} iterations={15} delayFromCenter={false} />
+          <ScrambleText text={t("generated.community.community")} speed={30} iterations={15} delayFromCenter={false} />
         </h1>
         <Link
           href="/community/create"
           className="pc-touch-target inline-flex items-center px-4 py-2 bg-pc-accent hover:bg-pc-accent-secondary text-white font-semibold rounded-lg transition-colors text-sm"
         >
-          New Post
-        </Link>
+          {t("generated.community.newPost")}</Link>
       </div>
 
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(17rem,1fr)]">
         <section className="min-w-0">
           {posts.length === 0 ? (
-            <EmptyState title="No posts yet" description="Be the first to share something with the community." />
+            <EmptyState title={t("generated.community.noPostsYet")} description={t("generated.community.beTheFirstToShareSomethingWithTheCommunity")} />
           ) : (
             <div className="space-y-4">
               {posts.map((post) => (
@@ -73,10 +74,10 @@ export default function CommunityPage() {
                         {post.content}
                       </p>
                       <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-pc-text-muted sm:text-sm">
-                        <span className="inline-flex min-w-0 items-center gap-1 truncate">by {post.username}{post.linkedPlayerId != null && <VerifiedPlayerBadge />}</span>
+                        <span className="inline-flex min-w-0 items-center gap-1 truncate">{t("generated.community.by")}{" "}{post.username}{post.linkedPlayerId != null && <VerifiedPlayerBadge />}</span>
                         <span>{formatLocalDateTime(post.createdAt)}</span>
-                        <span aria-label={`${post.likes} likes`}>❤ {post.likes}</span>
-                        <span aria-label={`${post.viewCount} views`}>👁 {post.viewCount}</span>
+                        <span aria-label={t("generated.community.value1Likes", { value1: post.likes })}>❤ {post.likes}</span>
+                        <span aria-label={t("generated.community.value1Views", { value1: post.viewCount })}>👁 {post.viewCount}</span>
                       </div>
                     </div>
                     <span className="shrink-0 text-pc-text-muted">→</span>
@@ -95,7 +96,7 @@ export default function CommunityPage() {
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400 opacity-75" />
                   <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-rose-500" />
                 </span>
-                <h2 className="text-sm font-bold text-pc-text">Live on Twitch</h2>
+                <h2 className="text-sm font-bold text-pc-text">{t("generated.community.liveOnTwitch")}</h2>
               </div>
               <a
                 href="https://www.twitch.tv/directory/category/paladins"
@@ -103,15 +104,14 @@ export default function CommunityPage() {
                 rel="noreferrer"
                 className="text-xs text-pc-text-secondary transition-colors hover:text-pc-accent"
               >
-                Browse →
-              </a>
+                {t("generated.community.browse")}</a>
             </div>
 
             <div className="divide-y divide-pc-border/70">
               {streamsLoading ? (
                 <LoadingPanel compact />
               ) : streams.length === 0 ? (
-                <div className="p-4 text-sm text-pc-text-secondary">No Paladins streams are live right now.</div>
+                <div className="p-4 text-sm text-pc-text-secondary">{t("generated.community.noPaladinsStreamsAreLiveRightNow")}</div>
               ) : (
                 streams.map((stream) => (
                   <a
@@ -131,7 +131,7 @@ export default function CommunityPage() {
                         <span className="truncate font-semibold text-pc-text group-hover:text-pc-accent">{stream.userName}</span>
                         <span className="shrink-0 text-rose-400">● {stream.viewerCount.toLocaleString()}</span>
                       </div>
-                      <p className="mt-1 line-clamp-2 text-xs leading-snug text-pc-text-secondary">{stream.title || "Playing Paladins"}</p>
+                      <p className="mt-1 line-clamp-2 text-xs leading-snug text-pc-text-secondary">{stream.title || t("generated.community.playingPaladins")}</p>
                       {stream.language && <span className="mt-1 block text-[10px] uppercase tracking-wide text-pc-text-muted">{stream.language}</span>}
                     </div>
                   </a>

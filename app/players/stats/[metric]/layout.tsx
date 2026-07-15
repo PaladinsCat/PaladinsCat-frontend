@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
+import { getServerLocalization } from "@/lib/server-localization";
 
-const METRIC_LABELS: Record<string, string> = {
-  dpm: "Damage Per Minute",
-  hpm: "Healing Per Minute",
-  gpm: "Credits Per Minute",
-  mpm: "Shielding Per Minute",
-  kda: "KDA",
-  winrate: "Win Rate",
-};
+const METRIC_LABEL_KEYS = {
+  dpm: "seo.metrics.dpm",
+  hpm: "seo.metrics.hpm",
+  gpm: "seo.metrics.cpm",
+  mpm: "seo.metrics.spm",
+  kda: "seo.metrics.kda",
+  winrate: "seo.metrics.winRate",
+} as const;
 
 type Props = {
   children: React.ReactNode;
@@ -16,11 +17,13 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { metric } = await params;
-  const label = METRIC_LABELS[metric.toLowerCase()] ?? metric.toUpperCase();
+  const { t } = await getServerLocalization();
+  const metricKey = metric.toLowerCase() as keyof typeof METRIC_LABEL_KEYS;
+  const label = metricKey in METRIC_LABEL_KEYS ? t(METRIC_LABEL_KEYS[metricKey]) : metric.toUpperCase();
 
   return {
-    title: `Paladins Player ${label} Leaderboard`,
-    description: `Rank Paladins players by ${label} with account stats, champion performance, match counts, and ranked data.`,
+    title: t("seo.players.stats.title", { metric: label }),
+    description: t("seo.players.stats.description", { metric: label }),
     alternates: {
       canonical: `/players/stats/${metric}`,
     },

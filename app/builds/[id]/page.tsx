@@ -8,6 +8,7 @@ import { championSlug } from "@/lib/utils";
 import { loadBuildReferenceData, type BuildReferenceData } from "@/lib/build-reference";
 import { LoadingPanel } from "@/components/async-state";
 import CanonicalTalentImage from "@/components/canonical-talent-image";
+import { useLocalization } from "@/lib/localization-context";
 
 function AssetImage({ src, alt }: { src?: string | null; alt: string }) {
   if (!src) {
@@ -33,6 +34,7 @@ function AssetRow({ iconUrl, title, subtitle, talentId }: { iconUrl?: string | n
 }
 
 export default function BuildDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { t } = useLocalization();
   const [build, setBuild] = useState<Build | null>(null);
   const [referenceData, setReferenceData] = useState<BuildReferenceData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -52,7 +54,7 @@ export default function BuildDetailPage({ params }: { params: Promise<{ id: stri
         .then(setReferenceData)
         .catch(() => setReferenceData(null));
     } catch {
-      setError("Failed to load build");
+      setError(t("generated.builds.failedToLoadBuild"));
     } finally {
       setLoading(false);
     }
@@ -85,13 +87,12 @@ export default function BuildDetailPage({ params }: { params: Promise<{ id: stri
 
   if (loading) return <LoadingPanel />;
   if (error) return <div className="text-center py-12 text-pc-text-muted">{error}</div>;
-  if (!build) return <div className="text-center py-12 text-pc-text-muted">Build not found</div>;
+  if (!build) return <div className="text-center py-12 text-pc-text-muted">{t("generated.builds.buildNotFound")}</div>;
 
   return (
     <div className="space-y-6">
       <Link href="/builds" className="text-pc-text-secondary hover:text-pc-accent transition-colors">
-        Back to builds
-      </Link>
+        {t("generated.builds.backToBuilds")}</Link>
 
       <div className="pc-card">
         <div className="flex items-start justify-between gap-4">
@@ -99,7 +100,7 @@ export default function BuildDetailPage({ params }: { params: Promise<{ id: stri
             <h1 className="text-2xl font-bold text-pc-text">{build.name}</h1>
             <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-pc-text-secondary">
               <span>{build.championName}</span>
-              <span>by {build.username}</span>
+              <span>{t("generated.builds.by.4081586")}{" "}{build.username}</span>
               <span>{formatLocalDateTime(build.createdAt)}</span>
               <span className={build.visibility === "public" ? "text-green-400" : "text-yellow-400"}>
                 {build.visibility}
@@ -110,16 +111,16 @@ export default function BuildDetailPage({ params }: { params: Promise<{ id: stri
             onClick={handleLike}
             className="flex items-center gap-2 rounded-lg border border-pc-border px-3 py-2 text-pc-text-secondary transition-colors hover:border-pc-accent-mid hover:text-pc-accent"
           >
-            Like {build.likes}
+            {t("generated.builds.like")}{" "}{build.likes}
           </button>
         </div>
 
         <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-3">
           <div>
-            <h3 className="mb-2 text-sm font-semibold text-pc-text-secondary">Items ({build.items.length}/4)</h3>
+            <h3 className="mb-2 text-sm font-semibold text-pc-text-secondary">{t("generated.builds.items.409dd57")}{build.items.length}/4)</h3>
             <div className="space-y-2">
               {build.items.length === 0 ? (
-                <p className="text-sm text-pc-text-muted">No items</p>
+                <p className="text-sm text-pc-text-muted">{t("generated.builds.noItems")}</p>
               ) : (
                 build.items.map((itemId) => {
                   const item = itemById.get(itemId);
@@ -127,7 +128,7 @@ export default function BuildDetailPage({ params }: { params: Promise<{ id: stri
                     <AssetRow
                       key={itemId}
                       iconUrl={item?.iconUrl}
-                      title={item?.name ?? `Item ${itemId}`}
+                      title={item?.name ?? t("generated.builds.itemValue1", { value1: itemId })}
                       subtitle={item?.category}
                     />
                   );
@@ -137,10 +138,10 @@ export default function BuildDetailPage({ params }: { params: Promise<{ id: stri
           </div>
 
           <div>
-            <h3 className="mb-2 text-sm font-semibold text-pc-text-secondary">Talent ({build.talents.length}/1)</h3>
+            <h3 className="mb-2 text-sm font-semibold text-pc-text-secondary">{t("generated.builds.talent")}{build.talents.length}/1)</h3>
             <div className="space-y-2">
               {build.talents.length === 0 ? (
-                <p className="text-sm text-pc-text-muted">No talent</p>
+                <p className="text-sm text-pc-text-muted">{t("generated.builds.noTalent")}</p>
               ) : (
                 build.talents.map((talentId) => {
                   const talent = talentById.get(talentId);
@@ -149,7 +150,7 @@ export default function BuildDetailPage({ params }: { params: Promise<{ id: stri
                       key={talentId}
                       talentId={talentId}
                       iconUrl={talent?.iconUrl}
-                      title={talent?.name ?? `Talent ${talentId}`}
+                      title={talent?.name ?? t("generated.builds.talentValue1", { value1: talentId })}
                       subtitle="Selected talent"
                     />
                   );
@@ -159,10 +160,10 @@ export default function BuildDetailPage({ params }: { params: Promise<{ id: stri
           </div>
 
           <div>
-            <h3 className="mb-2 text-sm font-semibold text-pc-text-secondary">Loadout ({build.cards.length}/5, {cardPointTotal}/15 pts)</h3>
+            <h3 className="mb-2 text-sm font-semibold text-pc-text-secondary">{t("generated.builds.loadout")}{build.cards.length}/5, {cardPointTotal}{t("generated.builds.text15Pts")}</h3>
             <div className="space-y-2">
               {build.cards.length === 0 ? (
-                <p className="text-sm text-pc-text-muted">No cards</p>
+                <p className="text-sm text-pc-text-muted">{t("generated.builds.noCards")}</p>
               ) : (
                 build.cards.map((selection) => {
                   const card = cardById.get(selection.cardId);
@@ -170,7 +171,7 @@ export default function BuildDetailPage({ params }: { params: Promise<{ id: stri
                     <AssetRow
                       key={selection.cardId}
                       iconUrl={card?.iconUrl}
-                      title={card?.name ?? `Card ${selection.cardId}`}
+                      title={card?.name ?? t("generated.builds.cardValue1", { value1: selection.cardId })}
                       subtitle={`Level ${selection.level}`}
                     />
                   );
@@ -182,14 +183,14 @@ export default function BuildDetailPage({ params }: { params: Promise<{ id: stri
 
         {build.notes && (
           <div className="mt-6">
-            <h3 className="mb-2 text-sm font-semibold text-pc-text-secondary">Notes</h3>
+            <h3 className="mb-2 text-sm font-semibold text-pc-text-secondary">{t("generated.builds.notes")}</h3>
             <p className="rounded-lg bg-pc-bg-secondary p-4 text-pc-text whitespace-pre-wrap">{build.notes}</p>
           </div>
         )}
 
         <div className="mt-6 flex gap-6 text-sm text-pc-text-secondary">
-          <span>Views: {build.viewCount}</span>
-          <span>Likes: {build.likes}</span>
+          <span>{t("generated.builds.views.4776159")}{" "}{build.viewCount}</span>
+          <span>{t("generated.builds.likes.ea70b16")}{" "}{build.likes}</span>
         </div>
       </div>
     </div>

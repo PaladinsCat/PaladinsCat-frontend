@@ -5,8 +5,10 @@ import Card from "@/components/Card";
 import { fetchRegions, type RegionStat } from "@/lib/api-client";
 import { EmptyState, ErrorState } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
+import { useLocalization } from "@/lib/localization-context";
 
 export default function RegionsPage() {
+  const { t } = useLocalization();
   const [regions, setRegions] = useState<RegionStat[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -20,14 +22,14 @@ export default function RegionsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="pc-heading pc-heading-lg text-pc-accent">Regional Meta</h1>
+      <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.stats.regionalMeta")}</h1>
 
       {loading ? (
         <RouteSkeleton variant="dashboard" />
       ) : error ? (
         <ErrorState message={String(error)} />
       ) : regions.length === 0 ? (
-        <EmptyState title="No regional statistics" description="Regional champion trends will appear when ranked data is available." />
+        <EmptyState title={t("generated.stats.noRegionalStatistics")} description={t("generated.stats.regionalChampionTrendsWillAppearWhenRankedDataIsAvailable")} />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {regions.map((r) => (

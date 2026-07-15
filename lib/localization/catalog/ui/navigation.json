@@ -12,7 +12,6 @@
   "nav.localization": "Localization",
   "nav.login": "Login",
   "nav.logout": "Logout",
-  "nav.greeting": "Hi, {username}",
   "menu.browse": "Browse",
   "menu.home": "Home",
   "menu.globalStats": "Global Stats",

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { AsyncButton, LoadingPanel } from "@/components/async-state";
+import { useLocalization } from "@/lib/localization-context";
 
 export default function LoginPage() {
   return (
@@ -15,6 +16,7 @@ export default function LoginPage() {
 }
 
 function LoginForm() {
+  const { t } = useLocalization();
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectPath = searchParams.get("redirect") || "/";
@@ -43,8 +45,8 @@ function LoginForm() {
     <div className="min-h-[60vh] flex items-center justify-center">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-pc-accent">Welcome Back</h1>
-          <p className="text-pc-text-secondary mt-2">Sign in to your account</p>
+          <h1 className="text-3xl font-bold text-pc-accent">{t("generated.auth.welcomeBack")}</h1>
+          <p className="text-pc-text-secondary mt-2">{t("generated.auth.signInToYourAccount")}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-pc-bg-elevated rounded-lg border border-pc-border p-6 space-y-4">
@@ -56,8 +58,7 @@ function LoginForm() {
 
           <div>
             <label htmlFor="username" className="block text-sm font-medium text-pc-text-secondary mb-1">
-              Username or Email
-            </label>
+              {t("generated.auth.usernameOrEmail")}</label>
             <input
               id="username"
               type="text"
@@ -65,14 +66,13 @@ function LoginForm() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="w-full px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text placeholder-pc-text-muted focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
-              placeholder="Enter username or email"
+              placeholder={t("generated.auth.enterUsernameOrEmail")}
             />
           </div>
 
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-pc-text-secondary mb-1">
-              Password
-            </label>
+              {t("generated.auth.password")}</label>
             <input
               id="password"
               type="password"
@@ -80,7 +80,7 @@ function LoginForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text placeholder-pc-text-muted focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
-              placeholder="Enter password"
+              placeholder={t("generated.auth.enterPassword")}
             />
           </div>
 
@@ -89,14 +89,12 @@ function LoginForm() {
             loading={loading}
             className="w-full py-2.5 bg-pc-accent hover:bg-pc-accent-secondary text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Sign In
-          </AsyncButton>
+            {t("generated.auth.signIn")}</AsyncButton>
 
           <p className="text-center text-pc-text-secondary text-sm">
-            Don&apos;t have an account?{" "}
+            {t("generated.auth.donTHaveAnAccount")}{" "}
             <Link href="/auth/register" className="text-pc-accent hover:text-pc-accent-light transition-colors">
-              Create one
-            </Link>
+              {t("generated.auth.createOne")}</Link>
           </p>
         </form>
       </div>

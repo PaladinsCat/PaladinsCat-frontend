@@ -3,6 +3,8 @@ import { preload } from "react-dom";
 import { STATIC_CHAMPIONS } from "@/lib/static-champions";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
+import { getServerLocalization } from "@/lib/server-localization";
+import type { TranslationKey } from "@/lib/localization/messages";
 
 type Props = {
   children: React.ReactNode;
@@ -13,22 +15,30 @@ function championFromSlug(slug: string) {
   return STATIC_CHAMPIONS.find((champion) => championSlug(champion.name) === slug.toLowerCase());
 }
 
+const ROLE_KEYS: Record<string, TranslationKey> = {
+  Frontline: "common.roles.frontline",
+  Damage: "common.roles.damage",
+  Flank: "common.roles.flank",
+  Support: "common.roles.support",
+};
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { name } = await params;
   const champion = championFromSlug(name);
   const displayName = champion?.name ?? name;
-  const roleText = champion?.roles?.length ? `${champion.roles.join(", ")} champion` : "champion";
+  const { t } = await getServerLocalization();
+  const roles = champion?.roles?.map((role) => ROLE_KEYS[role] ? t(ROLE_KEYS[role]) : role).join(", ");
+  const roleText = roles ? t("seo.champions.role", { role: roles }) : t("seo.champions.roleGeneric");
+  const canonical = `/champions/${champion ? championSlug(champion.name) : name}`;
 
   return {
-    title: `${displayName} Paladins Stats, Cards, Talents & ELO`,
-    description: `View ${displayName} Paladins stats, ${roleText} win rate, ban rate, cards, talents, abilities, loadouts, and champion ELO leaderboard.`,
-    alternates: {
-      canonical: `/champions/${champion ? championSlug(champion.name) : name}`,
-    },
+    title: t("seo.champions.detail.title", { name: displayName }),
+    description: t("seo.champions.detail.description", { name: displayName, role: roleText }),
+    alternates: { canonical },
     openGraph: {
-      title: `${displayName} Paladins Stats`,
-      description: `Ranked ${displayName} stats, abilities, talents, loadout cards, win rate, ban rate, and player leaderboard.`,
-      url: `/champions/${champion ? championSlug(champion.name) : name}`,
+      title: t("seo.champions.detail.openGraphTitle", { name: displayName }),
+      description: t("seo.champions.detail.openGraphDescription", { name: displayName }),
+      url: canonical,
     },
   };
 }

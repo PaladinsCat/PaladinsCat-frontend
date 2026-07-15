@@ -1,13 +1,11 @@
-import type { Metadata } from "next";
+import { createLocalizedMetadata } from "@/lib/server-localization";
 
-export const metadata: Metadata = {
-  title: "Paladins Ranked Tier Distribution and Playerbase Stats",
-  description:
-    "See Paladins ranked tier distribution, player profile counts, active match tier distribution, average match tier, and Grandmaster/Master population data.",
-  alternates: {
-    canonical: "/stats/tiers",
-  },
-};
+export async function generateMetadata() {
+  return createLocalizedMetadata("seo.stats.tiers.title", {
+    descriptionKey: "seo.stats.tiers.description",
+    metadata: { alternates: { canonical: "/stats/tiers" } },
+  });
+}
 
 export default function TiersLayout({ children }: { children: React.ReactNode }) {
   return children;

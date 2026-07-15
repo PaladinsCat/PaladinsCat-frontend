@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getServerLocalization } from "@/lib/server-localization";
 
 type Props = {
   children: React.ReactNode;
@@ -9,10 +10,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { mapName } = await params;
   const name = decodeURIComponent(mapName).replace(/^Ranked\s+/i, "");
   const canonicalName = encodeURIComponent(decodeURIComponent(mapName));
+  const { t } = await getServerLocalization();
 
   return {
-    title: `${name} Paladins Map Stats, Distribution and Meta`,
-    description: `Explore Paladins ranked stats for ${name}: map distribution, champion picks and bans, talent performance, and item choices.`,
+    title: t("seo.stats.maps.detail.title", { name }),
+    description: t("seo.stats.maps.detail.description", { name }),
     alternates: { canonical: `/stats/maps/${canonicalName}` },
   };
 }

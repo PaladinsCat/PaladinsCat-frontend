@@ -69,35 +69,7 @@ export default function HomeSearch({ onSearchActiveChange }: HomeSearchProps) {
       transition={{ delay: 0.3 }}
       className="mx-auto mb-16 max-w-md"
     >
-      <style>{`
-        .home-search-results {
-          scrollbar-color: var(--pc-accent-secondary) var(--pc-bg-elevated);
-          scrollbar-width: thin;
-        }
-
-        .home-search-results::-webkit-scrollbar {
-          width: 0.5rem;
-        }
-
-        .home-search-results::-webkit-scrollbar-track {
-          background: var(--pc-bg-elevated);
-          box-shadow: inset 1px 0 var(--pc-border);
-        }
-
-        .home-search-results::-webkit-scrollbar-thumb {
-          background: var(--pc-accent-secondary);
-          border-radius: 999px;
-        }
-
-        .home-search-results::-webkit-scrollbar-thumb:hover {
-          background: var(--pc-accent);
-        }
-
-        .home-search-results::-webkit-scrollbar-button {
-          display: none;
-          height: 0;
-        }
-      `}</style>
+      <style>{t("generated.search.homeSearchResultsScrollbarColorVarPcAccentSecondaryVar")}</style>
       <form
         action="/search"
         method="GET"
@@ -136,7 +108,7 @@ export default function HomeSearch({ onSearchActiveChange }: HomeSearchProps) {
           {showRelatedResults && (
             <div className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-50 overflow-hidden rounded-lg border border-pc-border bg-pc-bg-elevated shadow-xl">
               {loading ? (
-                <div className="px-3 py-3 text-sm text-pc-text-muted">Searching…</div>
+                <div className="px-3 py-3 text-sm text-pc-text-muted">{t("generated.search.searching")}</div>
               ) : results.length > 0 ? (
                 <div className="home-search-results max-h-80 overflow-y-auto py-1">
                   {results.map((result) => (
@@ -160,14 +132,13 @@ export default function HomeSearch({ onSearchActiveChange }: HomeSearchProps) {
                   ))}
                 </div>
               ) : (
-                <div className="px-3 py-3 text-sm text-pc-text-muted">No related results</div>
+                <div className="px-3 py-3 text-sm text-pc-text-muted">{t("generated.search.noRelatedResults")}</div>
               )}
               <Link
                 href={`/search?q=${encodeURIComponent(value.trim())}`}
                 className="block border-t border-pc-border px-3 py-2 text-sm font-medium text-pc-accent transition-colors hover:bg-pc-bg"
               >
-                View all results
-              </Link>
+                {t("generated.search.viewAllResults")}</Link>
             </div>
           )}
         </div>

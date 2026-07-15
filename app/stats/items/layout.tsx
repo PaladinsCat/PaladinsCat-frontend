@@ -1,13 +1,11 @@
-import type { Metadata } from "next";
+import { createLocalizedMetadata } from "@/lib/server-localization";
 
-export const metadata: Metadata = {
-  title: "Paladins Item Stats — Pick Rates, Win Rates and Ranked Data",
-  description:
-    "Explore Paladins item stats with ranked pick rates, win rates, item categories, and match data for competitive builds.",
-  alternates: {
-    canonical: "/stats/items",
-  },
-};
+export async function generateMetadata() {
+  return createLocalizedMetadata("seo.stats.items.title", {
+    descriptionKey: "seo.stats.items.description",
+    metadata: { alternates: { canonical: "/stats/items" } },
+  });
+}
 
 export default function ItemsLayout({ children }: { children: React.ReactNode }) {
   return children;

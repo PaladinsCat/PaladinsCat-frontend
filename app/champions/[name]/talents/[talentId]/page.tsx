@@ -18,6 +18,7 @@ import {
 import { getStatQuality } from "@/lib/stat-quality";
 import { withStoredLobbyTier } from "@/lib/lobby-tier";
 import { championSlug } from "@/lib/utils";
+import { useLocalization } from "@/lib/localization-context";
 
 const CHAMPION_DATA_BASE = "/_pc";
 
@@ -42,6 +43,7 @@ function formatPlays(value: number): string {
 }
 
 export default function ChampionTalentDetailPage() {
+  const { t } = useLocalization();
   const params = useParams();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -63,7 +65,7 @@ export default function ChampionTalentDetailPage() {
 
     if (!name || !talentId) {
       setLoading(false);
-      setError("Invalid talent route.");
+      setError(t("generated.champions.invalidTalentRoute"));
       return;
     }
 
@@ -74,20 +76,20 @@ export default function ChampionTalentDetailPage() {
     const loadTalentPage = async (): Promise<ChampionTalentPagePayload> => {
       const response = await fetch(`${CHAMPION_DATA_BASE}${talentPageUrl}`, { signal: controller.signal });
       if (response.ok) return response.json() as Promise<ChampionTalentPagePayload>;
-      if (response.status !== 404) throw new Error("Talent page data is unavailable.");
+      if (response.status !== 404) throw new Error(t("generated.champions.talentPageDataIsUnavailable"));
 
       // Deployment compatibility: an updated frontend may briefly reach an
       // older backend that does not expose the composite route yet. Preserve
       // the previous requests only for that rolling-deploy window.
       const champions = await fetchChampions();
       const champion = champions.find((entry) => championSlug(entry.name) === championSlug(name));
-      if (!champion) throw new Error("Champion not found.");
+      if (!champion) throw new Error(t("generated.champions.championNotFound"));
       const [talentStats, cardStats] = await Promise.all([
         fetchChampionTalentStats(champion.id),
         fetchChampionCardStats(champion.id, "ranked", talentId),
       ]);
       const talentStat = talentStats.talents.find((entry) => entry.talentId === talentId);
-      if (!talentStat) throw new Error("Talent statistics not found.");
+      if (!talentStat) throw new Error(t("generated.champions.talentStatisticsNotFound"));
       return {
         championId: champion.id,
         talentId,
@@ -101,9 +103,9 @@ export default function ChampionTalentDetailPage() {
       loadTalentPage(),
     ])
       .then(([localData, pageData]) => {
-        if (!localData) throw new Error("Champion reference data is unavailable.");
+        if (!localData) throw new Error(t("generated.champions.championReferenceDataIsUnavailable"));
         if (pageData.talentId !== talentId || !pageData.talentStat) {
-          throw new Error("Talent statistics not found.");
+          throw new Error(t("generated.champions.talentStatisticsNotFound"));
         }
         if (cancelled) return;
 
@@ -145,7 +147,7 @@ export default function ChampionTalentDetailPage() {
     return (
       <div className="space-y-4">
         <ContextBackLink fallbackHref={`/champions/${name}`} />
-        <ErrorState title="Talent statistics unavailable" message={error ?? "No talent data is available for this queue."} />
+        <ErrorState title={t("generated.champions.talentStatisticsUnavailable")} message={error ?? "No talent data is available for this queue."} />
       </div>
     );
   }
@@ -167,17 +169,17 @@ export default function ChampionTalentDetailPage() {
           </div>
           <div className="min-w-0 space-y-4">
             <div>
-              <div className="mb-1 text-xs uppercase tracking-wider text-pc-text-muted">{championData.name} talent</div>
+              <div className="mb-1 text-xs uppercase tracking-wider text-pc-text-muted">{championData.name} {t("generated.champions.talent")}</div>
               <p className="text-sm leading-relaxed text-pc-text-secondary">
-                {talentMeta?.description ?? "No local talent description is available yet."}
+                {talentMeta?.description ?? t("generated.champions.noLocalTalentDescriptionIsAvailableYet")}
               </p>
-              {talentMeta?.category && <div className="mt-2 text-xs text-pc-text-muted">Linked: {talentMeta.category}</div>}
+              {talentMeta?.category && <div className="mt-2 text-xs text-pc-text-muted">{t("generated.champions.linked")}{" "}{talentMeta.category}</div>}
             </div>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              <SummaryTile label="Talent Plays" value={formatPlays(talentStat.totalPlays)} />
-              <SummaryTile label="Pick Rate" value={`${pickRate.toFixed(1)}%`} color={quality.color} />
-              <SummaryTile label="Win Rate" value={`${talentStat.winRate.toFixed(1)}%`} color={quality.color} />
-              <SummaryTile label="Record" value={`${talentStat.wins.toLocaleString()}W/${talentStat.losses.toLocaleString()}L`} />
+              <SummaryTile label={t("generated.champions.talentPlays")} value={formatPlays(talentStat.totalPlays)} />
+              <SummaryTile label={t("generated.champions.pickRate")} value={`${pickRate.toFixed(1)}%`} color={quality.color} />
+              <SummaryTile label={t("generated.champions.winRate")} value={`${talentStat.winRate.toFixed(1)}%`} color={quality.color} />
+              <SummaryTile label={t("generated.champions.record")} value={`${talentStat.wins.toLocaleString()}W/${talentStat.losses.toLocaleString()}L`} />
             </div>
           </div>
         </div>
@@ -185,10 +187,9 @@ export default function ChampionTalentDetailPage() {
 
       <section className="space-y-2">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="pc-card-title">Loadout Cards</h2>
+          <h2 className="pc-card-title">{t("generated.champions.loadoutCards")}</h2>
           <div className="text-xs text-pc-text-secondary">
-            Ranked performance with <span className="font-medium text-pc-accent">{talentStat.talentName}</span> · {cardStats.totalMatches.toLocaleString()} plays
-          </div>
+            {t("generated.champions.rankedPerformanceWith")}{" "}<span className="font-medium text-pc-accent">{talentStat.talentName}</span> · {cardStats.totalMatches.toLocaleString()} {t("generated.champions.plays.0effba4")}</div>
         </div>
         {championData.loadouts?.length ? (
           <ChampionLoadoutGrid
@@ -199,7 +200,7 @@ export default function ChampionTalentDetailPage() {
             returnTo={currentLocation}
           />
         ) : (
-          <EmptyState title="No loadout cards" description="This champion does not have local loadout-card metadata yet." />
+          <EmptyState title={t("generated.champions.noLoadoutCards")} description={t("generated.champions.thisChampionDoesNotHaveLocalLoadoutCardMetadataYet")} />
         )}
       </section>
     </div>

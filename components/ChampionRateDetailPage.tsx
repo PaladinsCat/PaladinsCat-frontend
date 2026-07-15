@@ -5,12 +5,14 @@ import Link from "next/link";
 import { fetchChampions, type Champion } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
+import { useLocalization } from "@/lib/localization-context";
+import type { TranslationKey } from "@/lib/localization/messages";
 
 type RateMetricKey = "winRate" | "banRate";
 
 interface RateMetricConfig {
   key: RateMetricKey;
-  label: string;
+  labelKey: TranslationKey;
   stroke: string;
   fill: string;
 }
@@ -113,6 +115,7 @@ function formatSignedDeltaPercent(value: number): string {
 }
 
 export default function ChampionRateDetailPage({ config }: { config: RateMetricConfig }) {
+  const { t } = useLocalization();
   const [champions, setChampions] = useState<Champion[]>([]);
 
   useEffect(() => {
@@ -140,17 +143,17 @@ export default function ChampionRateDetailPage({ config }: { config: RateMetricC
   return (
     <div className="space-y-8">
       <div>
-        <Link href="/stats" className="text-pc-accent text-xs hover:underline mb-2 inline-block">Back to Global Stats</Link>
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">{config.label}</h1>
+        <Link href="/stats" className="text-pc-accent text-xs hover:underline mb-2 inline-block">{t("generated.champions.backToGlobalStats")}</Link>
+        <h1 className="pc-heading pc-heading-lg text-pc-accent">{t(config.labelKey)}</h1>
       </div>
 
       <section className="bg-pc-bg-elevated border border-pc-border rounded-xl p-5">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: "Global Avg", value: formatRate(globalAverage), accent: true },
-            { label: "Champions", value: allRows.length.toLocaleString() },
-            { label: "Tracked Matches", value: totalMatches.toLocaleString() },
-            { label: "Top Value", value: allRows[0] ? formatRate(allRows[0].value) : "--" },
+            { label: t("generated.champions.globalAvg"), value: formatRate(globalAverage), accent: true },
+            { label: t("generated.champions.champions"), value: allRows.length.toLocaleString() },
+            { label: t("generated.champions.trackedMatches"), value: totalMatches.toLocaleString() },
+            { label: t("generated.champions.topValue"), value: allRows[0] ? formatRate(allRows[0].value) : "--" },
           ].map((item) => (
             <div key={item.label} className="min-w-0">
               <div className="text-pc-text-muted text-xs uppercase tracking-wider mb-1">{item.label}</div>
@@ -180,23 +183,23 @@ export default function ChampionRateDetailPage({ config }: { config: RateMetricC
                     <h2 className="text-pc-text font-semibold truncate">{section.className}</h2>
                   </div>
                   <div className="text-right shrink-0">
-                    <div className="text-xs text-pc-text-muted uppercase tracking-wider">Class Avg</div>
+                    <div className="text-xs text-pc-text-muted uppercase tracking-wider">{t("generated.champions.classAvg")}</div>
                     <div className="text-lg font-bold" style={{ color: config.stroke }}>{formatRate(section.average)}</div>
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-3 mt-4 text-xs">
                   <div>
-                    <div className="text-pc-text-muted text-xs uppercase tracking-wider">vs Global</div>
+                    <div className="text-pc-text-muted text-xs uppercase tracking-wider">{t("generated.champions.vsGlobal")}</div>
                     <div className={vsGlobal >= 0 ? "text-emerald-400" : "text-red-400"}>
                       {formatSigned(vsGlobal)} ({formatSignedDeltaPercent(vsGlobalPct)})
                     </div>
                   </div>
                   <div>
-                    <div className="text-pc-text-muted text-xs uppercase tracking-wider">Champions</div>
+                    <div className="text-pc-text-muted text-xs uppercase tracking-wider">{t("generated.champions.champions")}</div>
                     <div className="text-pc-text-secondary">{section.champions.length.toLocaleString()}</div>
                   </div>
                   <div>
-                    <div className="text-pc-text-muted text-xs uppercase tracking-wider">Matches</div>
+                    <div className="text-pc-text-muted text-xs uppercase tracking-wider">{t("generated.champions.matches")}</div>
                     <div className="text-pc-text-secondary">{section.matches.toLocaleString()}</div>
                   </div>
                 </div>
@@ -209,24 +212,24 @@ export default function ChampionRateDetailPage({ config }: { config: RateMetricC
                   return <Link key={champion.id} href={`/champions/${championSlug(champion.name)}`} className="flex min-w-0 items-center gap-3 p-3 transition-colors hover:bg-pc-bg/50">
                     <span className="w-7 shrink-0 text-center text-xs text-pc-text-muted">#{index + 1}</span>
                     <img src={getChampionIconSafe(champion.name)} alt="" className="h-9 w-9 shrink-0 rounded-lg object-contain" />
-                    <div className="min-w-0 flex-1"><div className="truncate text-sm font-semibold text-pc-text">{champion.name}</div><div className="mt-0.5 flex flex-wrap gap-x-2 text-[10px]"><span className={rowVsClassPct >= 0 ? "text-emerald-400" : "text-red-400"}>{formatSignedDeltaPercent(rowVsClassPct)} class</span><span className={rowVsGlobalPct >= 0 ? "text-emerald-400" : "text-red-400"}>{formatSignedDeltaPercent(rowVsGlobalPct)} global</span><span className="text-pc-text-muted">{champion.matches.toLocaleString()} matches</span></div></div>
+                    <div className="min-w-0 flex-1"><div className="truncate text-sm font-semibold text-pc-text">{champion.name}</div><div className="mt-0.5 flex flex-wrap gap-x-2 text-[10px]"><span className={rowVsClassPct >= 0 ? "text-emerald-400" : "text-red-400"}>{formatSignedDeltaPercent(rowVsClassPct)} {t("generated.champions.class")}</span><span className={rowVsGlobalPct >= 0 ? "text-emerald-400" : "text-red-400"}>{formatSignedDeltaPercent(rowVsGlobalPct)} {t("generated.champions.global.9027cc5")}</span><span className="text-pc-text-muted">{champion.matches.toLocaleString()} {t("generated.champions.matches.9f3e924")}</span></div></div>
                     <span className="shrink-0 font-mono text-sm font-bold" style={{ color: config.stroke }}>{formatRate(champion.value)}</span>
                   </Link>;
                 })}
-                {section.champions.length === 0 && <div className="px-3 py-6 text-center text-sm text-pc-text-muted">No champion data</div>}
+                {section.champions.length === 0 && <div className="px-3 py-6 text-center text-sm text-pc-text-muted">{t("generated.champions.noChampionData")}</div>}
               </div>
 
               <div className="hidden overflow-x-auto md:block">
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="text-left text-pc-text-muted border-b border-pc-border/60">
-                      <th className="px-3 py-2 w-12">Class</th>
-                      <th className="px-3 py-2 w-12">Global</th>
-                      <th className="px-3 py-2">Name</th>
-                      <th className="px-3 py-2 text-right">{config.label}</th>
-                      <th className="px-3 py-2 text-right">vs Class</th>
-                      <th className="px-3 py-2 text-right">vs Global</th>
-                      <th className="px-3 py-2 text-right">Matches</th>
+                      <th className="px-3 py-2 w-12">{t("generated.champions.class.41ff354")}</th>
+                      <th className="px-3 py-2 w-12">{t("generated.champions.global")}</th>
+                      <th className="px-3 py-2">{t("generated.champions.name")}</th>
+                      <th className="px-3 py-2 text-right">{t(config.labelKey)}</th>
+                      <th className="px-3 py-2 text-right">{t("generated.champions.vsClass")}</th>
+                      <th className="px-3 py-2 text-right">{t("generated.champions.vsGlobal")}</th>
+                      <th className="px-3 py-2 text-right">{t("generated.champions.matches")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -263,7 +266,7 @@ export default function ChampionRateDetailPage({ config }: { config: RateMetricC
                     })}
                     {section.champions.length === 0 && (
                       <tr>
-                        <td colSpan={7} className="px-3 py-6 text-center text-pc-text-muted">No champion data</td>
+                        <td colSpan={7} className="px-3 py-6 text-center text-pc-text-muted">{t("generated.champions.noChampionData")}</td>
                       </tr>
                     )}
                   </tbody>

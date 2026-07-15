@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getServerLocalization } from "@/lib/server-localization";
 
 type Props = {
   children: React.ReactNode;
@@ -7,10 +8,11 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
+  const { t } = await getServerLocalization();
 
   return {
-    title: `Paladins Player ${id} Stats, Match History and ELO`,
-    description: `View Paladins player ${id} profile stats, ranked match history, champion performance, account ELO, and recent matches on PaladinsCat.`,
+    title: t("seo.players.detail.title", { id }),
+    description: t("seo.players.detail.description", { id }),
     alternates: {
       canonical: `/players/${id}`,
     },

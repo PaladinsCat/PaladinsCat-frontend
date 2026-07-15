@@ -12,6 +12,7 @@ import {
 import { formatLocalDateTime, parseBackendDate } from "@/lib/time-format";
 import { useAuth } from "@/lib/auth-context";
 import { LoadingPanel } from "@/components/async-state";
+import { useLocalization } from "@/lib/localization-context";
 
 type Draft = {
   timestamp: string;
@@ -56,6 +57,7 @@ function toInput(draft: Draft): NotificationInput {
 }
 
 export default function AdminNotificationsPage() {
+  const { t } = useLocalization();
   const { user, isLoading } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [drafts, setDrafts] = useState<Record<number, Draft>>({});
@@ -95,7 +97,7 @@ export default function AdminNotificationsPage() {
     setError(null);
     setStatus(null);
     try {
-      if (!newDraft.message.trim()) throw new Error("Message is required.");
+      if (!newDraft.message.trim()) throw new Error(t("generated.admin.messageIsRequired"));
       await createAdminNotification(toInput(newDraft));
       setNewDraft(emptyDraft);
       await load();
@@ -152,12 +154,11 @@ export default function AdminNotificationsPage() {
   if (!isAdmin) {
     return (
       <div className="space-y-6">
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">Notifications Admin</h1>
+        <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.admin.notificationsAdmin")}</h1>
         <div className="bg-pc-bg-elevated border border-red-500/30 rounded-lg p-6 text-center space-y-2">
-          <div className="text-lg font-bold text-red-400">Access Denied</div>
+          <div className="text-lg font-bold text-red-400">{t("generated.admin.accessDenied")}</div>
           <div className="text-sm text-pc-text-muted">
-            This page is restricted to admin accounts only.
-          </div>
+            {t("generated.admin.thisPageIsRestrictedToAdminAccountsOnly")}</div>
         </div>
       </div>
     );
@@ -166,9 +167,9 @@ export default function AdminNotificationsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">Notifications Admin</h1>
+        <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.admin.notificationsAdmin")}</h1>
         <div className="text-xs text-pc-text-muted">
-          Logged in as <span className="text-pc-text">{user?.username}</span>
+          {t("generated.admin.loggedInAs")}{" "}<span className="text-pc-text">{user?.username}</span>
         </div>
       </div>
 
@@ -176,15 +177,14 @@ export default function AdminNotificationsPage() {
       {status && <div className="text-sm text-emerald-400">{status}</div>}
 
       <section className="bg-pc-bg-elevated border border-pc-border rounded-lg p-4 space-y-4">
-        <h2 className="text-lg font-bold text-pc-text">Create Notification</h2>
+        <h2 className="text-lg font-bold text-pc-text">{t("generated.admin.createNotification")}</h2>
         <NotificationEditor draft={newDraft} onChange={updateNewDraft} />
         <button
           type="button"
           onClick={createNotification}
           className="px-4 py-2 rounded-lg bg-pc-accent text-pc-bg font-semibold text-sm"
         >
-          Create
-        </button>
+          {t("generated.admin.create")}</button>
       </section>
 
       <section className="space-y-3">
@@ -206,16 +206,14 @@ export default function AdminNotificationsPage() {
                     disabled={savingId === notification.id}
                     className="px-3 py-2 rounded-lg bg-pc-accent text-pc-bg font-semibold text-sm disabled:opacity-50"
                   >
-                    Save
-                  </button>
+                    {t("generated.admin.save")}</button>
                   <button
                     type="button"
                     onClick={() => removeNotification(notification.id)}
                     disabled={savingId === notification.id}
                     className="px-3 py-2 rounded-lg border border-red-500/40 text-red-400 text-sm disabled:opacity-50"
                   >
-                    Delete
-                  </button>
+                    {t("generated.admin.delete")}</button>
                 </div>
               </div>
               <NotificationEditor draft={draft} onChange={(patch) => updateDraft(notification.id, patch)} />
@@ -224,8 +222,7 @@ export default function AdminNotificationsPage() {
         })}
         {!loading && notifications.length === 0 && (
           <div className="bg-pc-bg-elevated border border-pc-border rounded-lg p-4 text-sm text-pc-text-muted">
-            No notifications found.
-          </div>
+            {t("generated.admin.noNotificationsFound")}</div>
         )}
       </section>
     </div>
@@ -233,10 +230,11 @@ export default function AdminNotificationsPage() {
 }
 
 function NotificationEditor({ draft, onChange }: { draft: Draft; onChange: (patch: Partial<Draft>) => void }) {
+  const { t } = useLocalization();
   return (
     <div className="grid grid-cols-1 lg:grid-cols-6 gap-3">
       <div className="lg:col-span-4">
-        <label className="block text-xs text-pc-text-muted mb-1">Message</label>
+        <label className="block text-xs text-pc-text-muted mb-1">{t("generated.admin.message")}</label>
         <textarea
           value={draft.message}
           onChange={(event) => onChange({ message: event.target.value })}
@@ -246,7 +244,7 @@ function NotificationEditor({ draft, onChange }: { draft: Draft; onChange: (patc
         />
       </div>
       <div>
-        <label className="block text-xs text-pc-text-muted mb-1">Importance</label>
+        <label className="block text-xs text-pc-text-muted mb-1">{t("generated.admin.importance")}</label>
         <input
           type="number"
           value={draft.importance}
@@ -255,7 +253,7 @@ function NotificationEditor({ draft, onChange }: { draft: Draft; onChange: (patc
         />
       </div>
       <div>
-        <label className="block text-xs text-pc-text-muted mb-1">Timestamp</label>
+        <label className="block text-xs text-pc-text-muted mb-1">{t("generated.admin.timestamp")}</label>
         <input
           type="datetime-local"
           value={draft.timestamp}

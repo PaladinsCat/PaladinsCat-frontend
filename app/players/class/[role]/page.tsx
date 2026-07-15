@@ -6,6 +6,7 @@ import Link from "next/link";
 import { fetchClassLeaderboard } from "@/lib/api-client";
 import { LoadingPanel } from "@/components/async-state";
 import PlayerName from "@/components/player-name";
+import { useLocalization } from "@/lib/localization-context";
 
 const VALID_ROLES = ["Frontline", "Damage", "Flank", "Support"] as const;
 type Role = (typeof VALID_ROLES)[number];
@@ -63,6 +64,7 @@ function RankBadge({ rank }: { rank: number }) {
 }
 
 export default function ClassEloPage() {
+  const { t } = useLocalization();
   const params = useParams();
   const router = useRouter();
   const rawRole = params?.role as string;
@@ -145,8 +147,7 @@ export default function ClassEloPage() {
           href="/players"
           className="text-pc-text-muted hover:text-pc-accent transition-colors text-sm flex items-center gap-1"
         >
-          ← Players
-        </Link>
+          {t("generated.players.players")}</Link>
       </div>
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -154,7 +155,7 @@ export default function ClassEloPage() {
           <img src={CLASS_ICONS[role]} alt={role} className="w-8 h-8" />
           <h1 className="pc-heading pc-heading-lg">
             <span className={ROLE_COLORS[role]}>{role}</span>{" "}
-            <span className="text-pc-text">Champion ELO</span>
+            <span className="text-pc-text">{t("generated.players.championElo")}</span>
           </h1>
         </div>
       </div>
@@ -180,7 +181,7 @@ export default function ClassEloPage() {
         <LoadingPanel compact />
       ) : players.length === 0 ? (
         <div className="text-center py-20 text-pc-text-muted">
-          No champion data available for {role}.
+          {t("generated.players.noChampionDataAvailableFor")}{" "}{role}.
         </div>
       ) : (
         <div className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
@@ -189,29 +190,21 @@ export default function ClassEloPage() {
               <thead>
                 <tr className="border-b border-pc-border">
                   <th className="text-left text-pc-text-muted font-medium py-3 px-4 w-14">
-                    Rank
-                  </th>
+                    {t("generated.players.rank")}</th>
                   <th className="text-left text-pc-text-muted font-medium py-3 px-4">
-                    Player
-                  </th>
+                    {t("generated.players.player")}</th>
                   <th className="text-left text-pc-text-muted font-medium py-3 px-4 hidden sm:table-cell">
-                    Champion
-                  </th>
+                    {t("generated.players.champion")}</th>
                   <th className="text-right text-pc-text-muted font-medium py-3 px-4">
-                    ELO
-                  </th>
+                    {t("generated.players.elo")}</th>
                   <th className="text-right text-pc-text-muted font-medium py-3 px-4">
-                    Win Rate
-                  </th>
+                    {t("generated.players.winRate")}</th>
                   <th className="text-right text-pc-text-muted font-medium py-3 px-4 hidden md:table-cell">
-                    Matches
-                  </th>
+                    {t("generated.players.matches")}</th>
                   <th className="text-right text-pc-text-muted font-medium py-3 px-4 hidden md:table-cell">
-                    Wins
-                  </th>
+                    {t("generated.players.wins")}</th>
                   <th className="text-center text-pc-text-muted font-medium py-3 px-4 hidden lg:table-cell">
-                    Region
-                  </th>
+                    {t("generated.players.region")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -275,8 +268,7 @@ export default function ClassEloPage() {
       )}
 
       <p className="text-pc-text-muted text-xs text-center">
-        Showing {players.length} player/champion ratings
-      </p>
+        {t("generated.players.showing")}{" "}{players.length} {t("generated.players.playerChampionRatings")}</p>
     </div>
   );
 }

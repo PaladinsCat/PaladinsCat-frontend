@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import type { MatchFactPlayer } from "@/lib/api-client";
 import CanonicalTalentImage from "@/components/canonical-talent-image";
+import { useLocalization } from "@/lib/localization-context";
 
 interface LoadoutStripProps {
   fact: MatchFactPlayer;
@@ -28,6 +29,7 @@ function MaterialIcon({ src, fallbackSrc, alt, className = "w-8 h-8 object-cover
 }
 
 export default function LoadoutStrip({ fact }: LoadoutStripProps) {
+  const { t } = useLocalization();
   const allMaterials = [
     ...fact.talents.map((t) => ({ type: "talent" as const, ...t })),
     ...fact.items.map((i) => ({ type: "item" as const, ...i })),
@@ -57,7 +59,7 @@ export default function LoadoutStrip({ fact }: LoadoutStripProps) {
           <div
             key={idx}
             className={m.type === "talent" ? "group relative flex flex-col items-center" : `group relative flex flex-col items-center gap-1 rounded-md border p-2 ${colorClass}`}
-            title={level ? `${label} — Level ${level}` : label}
+            title={level ? t("generated.matches.value1LevelValue2", { value1: label, value2: level }) : label}
           >
             {m.type === "talent" ? (
               <CanonicalTalentImage
@@ -81,9 +83,9 @@ export default function LoadoutStrip({ fact }: LoadoutStripProps) {
               </span>
             )}
             {/* Tooltip label — always visible for screen readers, shown on hover */}
-            <span className="sr-only">{level ? `${label} Level ${level}` : label}</span>
+            <span className="sr-only">{level ? t("generated.matches.value1LevelValue2.a8f4500", { value1: label, value2: level }) : label}</span>
             <span className="hidden group-hover:inline-block text-[10px] text-pc-text-muted truncate max-w-[4rem] text-center pointer-events-none absolute left-full top-1/2 z-10 -translate-y-1/2 whitespace-nowrap bg-pc-bg-elevated border border-pc-border rounded px-1 py-0.5">
-              {level ? `${label} Lvl ${level}` : label}
+              {level ? t("generated.matches.value1LvlValue2", { value1: label, value2: level }) : label}
             </span>
           </div>
         );

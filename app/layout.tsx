@@ -14,74 +14,57 @@ import LobbyTierBanner from "@/components/LobbyTierBanner";
 import SiteAnalytics from "@/components/SiteAnalytics";
 import { cn } from "@/lib/utils";
 import { SEO_KEYWORDS, SITE_NAME, SITE_URL } from "@/lib/seo";
+import { getServerLocalization } from "@/lib/server-localization";
 
-export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
-  applicationName: SITE_NAME,
-  title: {
-    default: "Paladins Stats, Ranked Data & Champion Meta",
-    template: `%s | ${SITE_NAME}`,
-  },
-  description:
-    "PaladinsCat tracks Paladins stats, ranked match data, champion win rates, ELO leaderboards, player profiles, and live meta trends.",
-  keywords: SEO_KEYWORDS,
-  authors: [{ name: "PaladinsCat" }],
-  creator: SITE_NAME,
-  publisher: SITE_NAME,
-  other: {
-    "google-adsense-account": "ca-pub-5642439289050032",
-  },
-  alternates: {
-    canonical: "/",
-  },
-  icons: {
-    icon: [
-      {
-        url: "/images/icons/paladinscat.png",
-        type: "image/png",
-        sizes: "512x512",
-      },
-    ],
-    shortcut: "/images/icons/paladinscat.png",
-    apple: "/images/icons/paladinscat.png",
-  },
-  openGraph: {
-    type: "website",
-    url: SITE_URL,
-    siteName: SITE_NAME,
-    title: "Paladins Stats, Ranked Data & Champion Meta",
-    description:
-      "Search Paladins player profiles, ranked leaderboards, champion stats, match history, win rates, and meta data.",
-    images: [
-      {
-        url: "/images/icons/paladinscat.avif",
-        width: 512,
-        height: 512,
-        alt: "PaladinsCat",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary",
-    title: "Paladins Stats, Ranked Data & Champion Meta",
-    description:
-      "Paladins stats, champion data, ranked leaderboards, match history, and meta analytics.",
-    images: ["/images/icons/paladinscat.avif"],
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getServerLocalization();
+  const title = t("seo.root.title");
+  return {
+    metadataBase: new URL(SITE_URL),
+    applicationName: SITE_NAME,
+    title: { default: title, template: `%s | ${SITE_NAME}` },
+    description: t("seo.root.description"),
+    keywords: SEO_KEYWORDS,
+    authors: [{ name: SITE_NAME }],
+    creator: SITE_NAME,
+    publisher: SITE_NAME,
+    other: { "google-adsense-account": "ca-pub-5642439289050032" },
+    alternates: { canonical: "/" },
+    icons: {
+      icon: [{ url: "/images/icons/paladinscat.png", type: "image/png", sizes: "512x512" }],
+      shortcut: "/images/icons/paladinscat.png",
+      apple: "/images/icons/paladinscat.png",
+    },
+    openGraph: {
+      type: "website",
+      url: SITE_URL,
+      siteName: SITE_NAME,
+      title,
+      description: t("seo.root.openGraphDescription"),
+      images: [{ url: "/images/icons/paladinscat.avif", width: 512, height: 512, alt: SITE_NAME }],
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description: t("seo.root.twitterDescription"),
+      images: ["/images/icons/paladinscat.avif"],
+    },
+    robots: {
       index: true,
       follow: true,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-      "max-video-preview": -1,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+        "max-video-preview": -1,
+      },
     },
-  },
-};
+  };
+}
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const { locale, messages, t } = await getServerLocalization();
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [
@@ -90,9 +73,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         "@id": `${SITE_URL}/#website`,
         name: SITE_NAME,
         url: SITE_URL,
-        description:
-          "Paladins stats, ranked data, champion analytics, match history, and player leaderboards.",
-        inLanguage: "en-US",
+        description: t("seo.root.structuredDescription"),
+        inLanguage: locale,
       },
       {
         "@type": "Organization",
@@ -104,10 +86,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       {
         "@type": "Dataset",
         "@id": `${SITE_URL}/#dataset`,
-        name: "Paladins Ranked Match Stats and Champion Data",
+        name: t("seo.root.datasetName"),
         url: SITE_URL,
-        description:
-          "Ranked Paladins match data, champion performance metrics, player ratings, win rates, ban rates, item stats, and tier distributions.",
+        description: t("seo.root.datasetDescription"),
         keywords: SEO_KEYWORDS.join(", "),
         creator: {
           "@id": `${SITE_URL}/#organization`,
@@ -118,7 +99,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   };
 
   return (
-    <html lang="en" className={cn("dark", "font-sans")}>
+    <html lang={locale} className={cn("dark", "font-sans")}>
       <head></head>
       <body className="min-h-screen bg-pc-bg text-pc-text flex flex-col">
         <script
@@ -126,7 +107,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
         <AuthProvider>
-          <LocalizationProvider>
+          <LocalizationProvider initialLocale={locale} initialMessages={messages}>
             <TimeZoneProvider>
               <LobbyTierProvider>
               <SiteAnalytics />

@@ -76,7 +76,7 @@ export default function HomePage() {
         />
         <h1 className="text-4xl font-semibold tracking-wide drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)]">
           <ScrambleText
-            text="PaladinsCat"
+            text={t("generated.page.tsx.paladinscat")}
             speed={30}
             iterations={15}
             delayFromCenter={false}

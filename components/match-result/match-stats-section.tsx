@@ -6,6 +6,7 @@ import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
 import { computeDamageStats, num, fixed } from "./format";
 import { MatchPlayerLink, matchPlayerKey } from "./player-identity";
+import { useLocalization } from "@/lib/localization-context";
 
 interface MatchStatsSectionProps {
   team1Players: MatchPlayerDetail[];
@@ -40,6 +41,7 @@ function PlayerRow({
   wins: boolean;
   teamLabel: string;
 }) {
+  const { t } = useLocalization();
   const championHref = player.champion_name
     ? `/champions/${championSlug(player.champion_name)}`
     : undefined;
@@ -65,7 +67,7 @@ function PlayerRow({
         <div className="flex min-w-0 items-center gap-2">
           <img
             src={icon}
-            alt={player.champion_name || "Champion"}
+            alt={player.champion_name || t("generated.matches.champion")}
             className="h-8 w-8 rounded shrink-0 border border-pc-border object-cover"
           />
           <div className="min-w-0">
@@ -192,12 +194,12 @@ export default function MatchStatsSection({
   team2Label,
   factMap,
 }: MatchStatsSectionProps) {
+  const { t } = useLocalization();
   return (
     <section className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
       <div className="px-4 py-3 border-b border-pc-border">
         <h2 className="text-lg font-bold text-pc-text uppercase tracking-wide">
-          Player Metrics
-        </h2>
+          {t("generated.matches.playerMetrics")}</h2>
       </div>
 
       <div className="lg:hidden">

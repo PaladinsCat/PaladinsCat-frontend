@@ -5,6 +5,7 @@ import { fetchTierSummary, fetchTiers, type TierStat, type TierSummary } from "@
 import { getRankIconPath } from "@/lib/tier-utils";
 import { EmptyState, ErrorState } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
+import { useLocalization } from "@/lib/localization-context";
 
 const EMPTY_SUMMARY: TierSummary = {
   profilePlayers: 0,
@@ -52,6 +53,7 @@ function TierValue({
   tier: number;
   className?: string;
 }) {
+  const { t } = useLocalization();
   const tierSort = roundedTier(tier);
   if (tierSort === 0) {
     return <span className={`tabular-nums ${className}`}>0</span>;
@@ -61,7 +63,7 @@ function TierValue({
     <span className={`inline-flex items-center gap-2 tabular-nums ${className}`}>
       <img
         src={rankIconForTier(tierSort)}
-        alt={`Tier ${tierSort}`}
+        alt={t("generated.stats.tierValue1", { value1: tierSort })}
         className="h-6 w-6 object-contain"
         loading="lazy"
       />
@@ -79,6 +81,7 @@ function DistributionChart({
   rows: TierStat[];
   label: string;
 }) {
+  const { t } = useLocalization();
   const total = rows.reduce((sum, row) => sum + row.totalPlays, 0);
   const max = Math.max(1, ...rows.map((row) => row.totalPlays));
 
@@ -106,7 +109,7 @@ function DistributionChart({
                 <div
                   className="w-3 rounded-t-sm bg-pc-accent-mid group-hover:bg-pc-accent transition-colors"
                   style={{ height }}
-                  title={`${row.tier}: ${row.totalPlays.toLocaleString()} (${share.toFixed(1)}%)`}
+                  title={t("generated.stats.value1Value2Value3", { value1: row.tier, value2: row.totalPlays.toLocaleString(), value3: share.toFixed(1) })}
                 />
                 <img
                   src={rankIconForTier(row.tierSort)}
@@ -128,6 +131,7 @@ function DistributionChart({
 }
 
 export default function TiersPage() {
+  const { t } = useLocalization();
   const [profileTiers, setProfileTiers] = useState<TierStat[]>([]);
   const [matchTiers, setMatchTiers] = useState<TierStat[]>([]);
   const [summary, setSummary] = useState<TierSummary>(EMPTY_SUMMARY);
@@ -157,20 +161,20 @@ export default function TiersPage() {
     | { label: string; kind: "count"; value: number; suffix: string }
     | { label: string; kind: "tier"; value: number }
   > = [
-    { label: "Player profiles", kind: "count", value: summary.profilePlayers, suffix: "players" },
-    { label: "Profile avg tier", kind: "tier", value: profileAvg },
-    { label: "Active avg tier", kind: "tier", value: activeAvg },
-    { label: "Avg match tier", kind: "tier", value: summary.avgMatchTier },
-    { label: "Median match tier", kind: "tier", value: summary.medianMatchTier },
-    { label: "Ranked matches", kind: "count", value: summary.rankedMatches, suffix: "matches" },
-    { label: "Match-player rows", kind: "count", value: summary.matchPlayerRows, suffix: "rows" },
-    { label: "Active players", kind: "count", value: summary.activePlayers, suffix: "players" },
+    { label: t("generated.stats.playerProfiles"), kind: "count", value: summary.profilePlayers, suffix: "players" },
+    { label: t("generated.stats.profileAvgTier"), kind: "tier", value: profileAvg },
+    { label: t("generated.stats.activeAvgTier"), kind: "tier", value: activeAvg },
+    { label: t("generated.stats.avgMatchTier"), kind: "tier", value: summary.avgMatchTier },
+    { label: t("generated.stats.medianMatchTier"), kind: "tier", value: summary.medianMatchTier },
+    { label: t("generated.stats.rankedMatches.0b47f50"), kind: "count", value: summary.rankedMatches, suffix: "matches" },
+    { label: t("generated.stats.matchPlayerRows"), kind: "count", value: summary.matchPlayerRows, suffix: "rows" },
+    { label: t("generated.stats.activePlayers"), kind: "count", value: summary.activePlayers, suffix: "players" },
   ];
 
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">Tier Distribution</h1>
+        <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.stats.tierDistribution")}</h1>
       </div>
 
       {loading ? (
@@ -178,7 +182,7 @@ export default function TiersPage() {
       ) : error ? (
         <ErrorState message={error} />
       ) : profileTiers.length === 0 && matchTiers.length === 0 ? (
-        <EmptyState title="No tier statistics" description="Tier distributions will appear after ranked profiles and matches are processed." />
+        <EmptyState title={t("generated.stats.noTierStatistics")} description={t("generated.stats.tierDistributionsWillAppearAfterRankedProfilesAndMatchesAre")} />
       ) : (
         <>
           <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -198,15 +202,15 @@ export default function TiersPage() {
           </section>
 
           <DistributionChart
-            title="Player Profile Distribution"
+            title={t("generated.stats.playerProfileDistribution")}
             rows={normalizedProfiles}
-            label="players"
+            label={t("generated.stats.players")}
           />
 
           <DistributionChart
-            title="Active Ranked Match Distribution"
+            title={t("generated.stats.activeRankedMatchDistribution")}
             rows={normalizedMatches}
-            label="player rows"
+            label={t("generated.stats.playerRows")}
           />
         </>
       )}

@@ -14,6 +14,7 @@ import { LoadingPanel } from "@/components/async-state";
 import PlayerName from "@/components/player-name";
 
 import { useSearchParams } from "next/navigation";
+import { useLocalization } from "@/lib/localization-context";
 type ELOMode = "champion" | "account";
 
 const CLASS_ICONS: Record<string, string> = {
@@ -24,11 +25,11 @@ const CLASS_ICONS: Record<string, string> = {
 };
 
 const TABS = [
-  { key: "global", label: "Global", role: undefined },
-  { key: "Frontline", label: "Frontline", role: "Frontline" },
-  { key: "Damage", label: "Damage", role: "Damage" },
-  { key: "Flank", label: "Flank", role: "Flank" },
-  { key: "Support", label: "Support", role: "Support" },
+  { key: "global", labelKey: "common.roles.global", role: undefined },
+  { key: "Frontline", labelKey: "common.roles.frontline", role: "Frontline" },
+  { key: "Damage", labelKey: "common.roles.damage", role: "Damage" },
+  { key: "Flank", labelKey: "common.roles.flank", role: "Flank" },
+  { key: "Support", labelKey: "common.roles.support", role: "Support" },
 ] as const;
 
 type TabKey = (typeof TABS)[number]["key"];
@@ -52,6 +53,7 @@ export default function ChampionEloPage() {
 }
 
 function ChampionEloContent() {
+  const { t } = useLocalization();
   const searchParams = useSearchParams();
   const initialMode = (searchParams.get("mode") === "account" || searchParams.get("mode") === "champion") 
     ? searchParams.get("mode") as ELOMode 
@@ -196,19 +198,19 @@ function ChampionEloContent() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <Link href="/players" className="text-pc-accent text-xs hover:underline mb-2 inline-block">← Players</Link>
+        <Link href="/players" className="text-pc-accent text-xs hover:underline mb-2 inline-block">{t("generated.players.players")}</Link>
         <h1 className="pc-heading pc-heading-lg text-pc-accent">
-          {eloMode === "champion" ? "Champion ELO" : "Account ELO"}
+          {eloMode === "champion" ? t("generated.players.championElo") : t("generated.players.accountElo")}
         </h1>
         <p className="text-pc-text-muted text-sm mt-2">
           {eloMode === "account"
-            ? "Top players by their overall account Glicko-2 rating (all champions combined)"
+            ? t("generated.players.topPlayersByTheirOverallAccountGlicko2RatingAll")
             : selectedChampion
-              ? `Top players for ${selectedChampion.name}`
+              ? t("generated.players.topPlayersForValue1", { value1: selectedChampion.name })
               : activeTab === "global"
-                ? "Top 100 players by their best champion's Glicko-2 rating"
-                : `Top ${activeTab} players by their best champion's Glicko-2 rating`}
-          {total > 0 && <span className="text-pc-text-secondary ml-1">({total.toLocaleString()} rated)</span>}
+                ? t("generated.players.top100PlayersByTheirBestChampionSGlicko2")
+                : t("generated.players.topValue1PlayersByTheirBestChampionSGlicko2", { value1: activeTab })}
+          {total > 0 && <span className="text-pc-text-secondary ml-1">({total.toLocaleString()} {t("generated.players.rated")}</span>}
         </p>
       </div>
 
@@ -222,8 +224,7 @@ function ChampionEloContent() {
               : "bg-pc-bg-elevated text-pc-text-muted border border-pc-border hover:text-pc-text"
           }`}
         >
-          Champion ELO
-        </button>
+          {t("generated.players.championElo")}</button>
         <button
           onClick={() => setEloMode("account")}
           className={`text-xs px-4 py-2 rounded-lg font-medium transition-colors ${
@@ -232,8 +233,7 @@ function ChampionEloContent() {
               : "bg-pc-bg-elevated text-pc-text-muted border border-pc-border hover:text-pc-text"
           }`}
         >
-          Account ELO
-        </button>
+          {t("generated.players.accountElo")}</button>
       </div>
 
       {/* Tabs + Champion Dropdown + Search */}
@@ -255,7 +255,7 @@ function ChampionEloContent() {
                 {tab.role && (
                   <img src={CLASS_ICONS[tab.role]} alt={tab.role} className="w-4 h-4" />
                 )}
-                {tab.label}
+                {t(tab.labelKey)}
               </button>
             ))}
           </div>
@@ -274,7 +274,7 @@ function ChampionEloContent() {
                       {selectedChampion.name}
                     </>
                   ) : (
-                    "All Champions"
+                    t("generated.players.allChampions.0654ced")
                   )}
                   <span className="text-xs ml-1">▾</span>
                 </button>
@@ -289,8 +289,7 @@ function ChampionEloContent() {
                           !selectedChampionId ? "text-pc-accent bg-pc-accent/10" : "text-pc-text"
                         }`}
                       >
-                        All {activeRole} Champions
-                      </button>
+                        {t("generated.players.all")}{" "}{activeRole} {t("generated.players.champions")}</button>
                       {filteredChampions.map((c) => (
                         <button
                           key={c.id}
@@ -304,7 +303,7 @@ function ChampionEloContent() {
                         </button>
                       ))}
                       {filteredChampions.length === 0 && (
-                        <div className="text-xs text-pc-text-muted px-3 py-2">No champions found</div>
+                        <div className="text-xs text-pc-text-muted px-3 py-2">{t("generated.players.noChampionsFound")}</div>
                       )}
                     </div>
                   </div>
@@ -336,14 +335,14 @@ function ChampionEloContent() {
                     event.preventDefault();
                     handleSelectChampion(nearestChampion.id);
                   }}
-                  placeholder="Search champion..."
+                  placeholder={t("generated.players.searchChampion")}
                   className="pc-input pr-8 w-full text-xs"
                 />
                 {championSearch && (
                   <button
                     onClick={handleClearChampion}
                     className="absolute right-2 top-1/2 -translate-y-1/2 text-pc-text-muted hover:text-pc-text text-xs"
-                    aria-label="Clear search"
+                    aria-label={t("generated.players.clearSearch")}
                   >
                     ✕
                   </button>
@@ -362,8 +361,8 @@ function ChampionEloContent() {
           <div className="bg-pc-bg-elevated border border-pc-border rounded-xl text-center py-12">
             <p className="text-pc-text-muted">
               {selectedChampion
-                ? `No ELO data for ${selectedChampion.name} yet.`
-                : `No champion ELO data available.`}
+                ? t("generated.players.noEloDataForValue1Yet", { value1: selectedChampion.name })
+                : t("generated.players.noChampionEloDataAvailable")}
             </p>
           </div>
         ) : (
@@ -372,14 +371,14 @@ function ChampionEloContent() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-pc-border">
-                    <th className="text-left text-pc-text-muted font-medium py-3 px-4 w-14">Rank</th>
-                    <th className="text-left text-pc-text-muted font-medium py-3 px-4">Player</th>
-                    <th className="text-left text-pc-text-muted font-medium py-3 px-4">Champion</th>
-                    <th className="text-left text-pc-text-muted font-medium py-3 px-4 hidden md:table-cell">Class</th>
-                    <th className="text-right text-pc-text-muted font-medium py-3 px-4">ELO</th>
-                    <th className="text-right text-pc-text-muted font-medium py-3 px-4">Win Rate</th>
-                    <th className="text-right text-pc-text-muted font-medium py-3 px-4 hidden md:table-cell">Matches</th>
-                    <th className="text-center text-pc-text-muted font-medium py-3 px-4 hidden lg:table-cell">Region</th>
+                    <th className="text-left text-pc-text-muted font-medium py-3 px-4 w-14">{t("generated.players.rank")}</th>
+                    <th className="text-left text-pc-text-muted font-medium py-3 px-4">{t("generated.players.player")}</th>
+                    <th className="text-left text-pc-text-muted font-medium py-3 px-4">{t("generated.players.champion")}</th>
+                    <th className="text-left text-pc-text-muted font-medium py-3 px-4 hidden md:table-cell">{t("generated.players.class")}</th>
+                    <th className="text-right text-pc-text-muted font-medium py-3 px-4">{t("generated.players.elo")}</th>
+                    <th className="text-right text-pc-text-muted font-medium py-3 px-4">{t("generated.players.winRate")}</th>
+                    <th className="text-right text-pc-text-muted font-medium py-3 px-4 hidden md:table-cell">{t("generated.players.matches")}</th>
+                    <th className="text-center text-pc-text-muted font-medium py-3 px-4 hidden lg:table-cell">{t("generated.players.region")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -443,7 +442,7 @@ function ChampionEloContent() {
           <LoadingPanel compact />
         ) : accountPlayers.length === 0 ? (
           <div className="bg-pc-bg-elevated border border-pc-border rounded-xl text-center py-12">
-            <p className="text-pc-text-muted">No account ELO data available.</p>
+            <p className="text-pc-text-muted">{t("generated.players.noAccountEloDataAvailable")}</p>
           </div>
         ) : (
           <div className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
@@ -451,13 +450,13 @@ function ChampionEloContent() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-pc-border">
-                    <th className="text-left text-pc-text-muted font-medium py-3 px-4 w-14">Rank</th>
-                    <th className="text-left text-pc-text-muted font-medium py-3 px-4">Player</th>
-                    <th className="text-right text-pc-text-muted font-medium py-3 px-4">ELO</th>
-                    <th className="text-right text-pc-text-muted font-medium py-3 px-4">Win Rate</th>
-                    <th className="text-right text-pc-text-muted font-medium py-3 px-4 hidden md:table-cell">Matches</th>
-                    <th className="text-right text-pc-text-muted font-medium py-3 px-4 hidden md:table-cell">Wins</th>
-                    <th className="text-center text-pc-text-muted font-medium py-3 px-4 hidden lg:table-cell">Region</th>
+                    <th className="text-left text-pc-text-muted font-medium py-3 px-4 w-14">{t("generated.players.rank")}</th>
+                    <th className="text-left text-pc-text-muted font-medium py-3 px-4">{t("generated.players.player")}</th>
+                    <th className="text-right text-pc-text-muted font-medium py-3 px-4">{t("generated.players.elo")}</th>
+                    <th className="text-right text-pc-text-muted font-medium py-3 px-4">{t("generated.players.winRate")}</th>
+                    <th className="text-right text-pc-text-muted font-medium py-3 px-4 hidden md:table-cell">{t("generated.players.matches")}</th>
+                    <th className="text-right text-pc-text-muted font-medium py-3 px-4 hidden md:table-cell">{t("generated.players.wins")}</th>
+                    <th className="text-center text-pc-text-muted font-medium py-3 px-4 hidden lg:table-cell">{t("generated.players.region")}</th>
                   </tr>
                 </thead>
                 <tbody>

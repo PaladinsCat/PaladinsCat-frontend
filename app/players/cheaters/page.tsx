@@ -5,8 +5,10 @@ import Link from "next/link";
 import { fetchCheaterPlayers, type CheaterPlayer } from "@/lib/api-client";
 import { LoadingPanel } from "@/components/async-state";
 import PlayerName from "@/components/player-name";
+import { useLocalization } from "@/lib/localization-context";
 
 export default function CheatersPage() {
+  const { t } = useLocalization();
   const [data, setData] = useState<CheaterPlayer[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -28,22 +30,21 @@ export default function CheatersPage() {
   return (
     <div className="mx-auto w-full max-w-4xl space-y-6">
       <div>
-        <Link href="/players" className="text-pc-accent text-xs hover:underline mb-2 inline-block">← Players</Link>
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">Confirmed Cheaters</h1>
+        <Link href="/players" className="text-pc-accent text-xs hover:underline mb-2 inline-block">{t("generated.players.players")}</Link>
+        <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.players.confirmedCheaters")}</h1>
         <p className="text-pc-text-secondary text-sm mt-1">
-          Confirmed cheating accounts and their primary report reason
-        </p>
+          {t("generated.players.confirmedCheatingAccountsAndTheirPrimaryReportReason")}</p>
       </div>
 
       <div className="flex items-center gap-2">
         <div className="w-2 h-2 rounded-full bg-red-500" />
-        <span className="text-pc-text-muted text-xs">{data.length} confirmed</span>
+        <span className="text-pc-text-muted text-xs">{data.length} {t("generated.players.confirmed")}</span>
       </div>
 
       {loading ? (
         <LoadingPanel compact />
       ) : data.length === 0 ? (
-        <div className="text-center py-12 text-pc-text-secondary text-sm">No confirmed cheaters found.</div>
+        <div className="text-center py-12 text-pc-text-secondary text-sm">{t("generated.players.noConfirmedCheatersFound")}</div>
       ) : (
         <div className="space-y-2">
           {data.map((player) => {
@@ -63,13 +64,13 @@ export default function CheatersPage() {
                 </Link>
 
                 <div className="min-w-0">
-                  <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-pc-text-muted">Top reason</div>
+                  <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-pc-text-muted">{t("generated.players.topReason")}</div>
                   {topReason ? (
                     <span className="inline-block max-w-full break-words rounded-md border border-pc-border bg-pc-bg px-2 py-1 text-xs leading-relaxed text-pc-text-secondary [overflow-wrap:anywhere]">
                       {topReason.reason}
                     </span>
                   ) : (
-                    <span className="text-xs text-pc-text-muted">No reason recorded</span>
+                    <span className="text-xs text-pc-text-muted">{t("generated.players.noReasonRecorded")}</span>
                   )}
                 </div>
               </article>

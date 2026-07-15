@@ -10,8 +10,10 @@ import {
 import { useAuth } from '@/lib/auth-context';
 import { LoadingPanel } from '@/components/async-state';
 import { formatLocalDateTime } from '@/lib/time-format';
+import { useLocalization } from "@/lib/localization-context";
 
 export default function AdminChangelogPage() {
+  const { t } = useLocalization();
   const { user, isLoading } = useAuth();
   const isAdmin = user?.isAdmin ?? false;
   const [entries, setEntries] = useState<ChangelogEntry[]>([]);
@@ -57,17 +59,17 @@ export default function AdminChangelogPage() {
 
   if (isLoading) return <LoadingPanel />;
   if (!isAdmin) {
-    return <div className="space-y-6"><h1 className="pc-heading pc-heading-lg text-pc-accent">Changelog Admin</h1><div className="rounded-lg border border-red-500/30 bg-pc-bg-elevated p-6 text-center"><div className="text-lg font-bold text-red-400">Access Denied</div><div className="mt-2 text-sm text-pc-text-muted">This page is restricted to admin accounts only.</div></div></div>;
+    return <div className="space-y-6"><h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.admin.changelogAdmin")}</h1><div className="rounded-lg border border-red-500/30 bg-pc-bg-elevated p-6 text-center"><div className="text-lg font-bold text-red-400">{t("generated.admin.accessDenied")}</div><div className="mt-2 text-sm text-pc-text-muted">{t("generated.admin.thisPageIsRestrictedToAdminAccountsOnly")}</div></div></div>;
   }
 
   return (
     <div className="space-y-6">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="pc-heading pc-heading-lg text-pc-accent">Changelog Admin</h1>
-          <p className="mt-1 text-sm text-pc-text-secondary">Edit the public release notes for existing deployments. Empty text hides the note while keeping the deployment record.</p>
+          <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.admin.changelogAdmin")}</h1>
+          <p className="mt-1 text-sm text-pc-text-secondary">{t("generated.admin.editThePublicReleaseNotesForExistingDeploymentsEmptyText")}</p>
         </div>
-        <button type="button" onClick={() => void load()} disabled={loading} className="pc-btn-secondary inline-flex items-center justify-center gap-2 text-sm disabled:opacity-60"><RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> Refresh</button>
+        <button type="button" onClick={() => void load()} disabled={loading} className="pc-btn-secondary inline-flex items-center justify-center gap-2 text-sm disabled:opacity-60"><RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> {t("generated.admin.refresh")}</button>
       </header>
 
       {error && <div className="text-sm text-red-400">{error}</div>}
@@ -80,16 +82,16 @@ export default function AdminChangelogPage() {
           return <article key={entry.id} className="rounded-lg border border-pc-border bg-pc-bg-elevated p-4">
             <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <div className="text-sm font-bold text-pc-text">{entry.version || `Deployment #${entry.id}`}</div>
-                <div className="mt-1 text-xs text-pc-text-muted">#{entry.id}{entry.gitCommitShort ? ` · ${entry.gitCommitShort}` : ''}{entry.deployedAt ? ` · ${formatLocalDateTime(entry.deployedAt)}` : ''}</div>
+                <div className="text-sm font-bold text-pc-text">{entry.version || t("generated.admin.deploymentValue1", { value1: entry.id })}</div>
+                <div className="mt-1 text-xs text-pc-text-muted">#{entry.id}{entry.gitCommitShort ? t("generated.admin.value1", { value1: entry.gitCommitShort }) : ''}{entry.deployedAt ? t("generated.admin.value1", { value1: formatLocalDateTime(entry.deployedAt) }) : ''}</div>
               </div>
-              <button type="button" onClick={() => void save(entry)} disabled={!changed || savingId === entry.id} className="pc-btn-primary inline-flex items-center justify-center gap-2 text-sm disabled:opacity-50"><Save className="h-4 w-4" /> {savingId === entry.id ? 'Saving…' : 'Save'}</button>
+              <button type="button" onClick={() => void save(entry)} disabled={!changed || savingId === entry.id} className="pc-btn-primary inline-flex items-center justify-center gap-2 text-sm disabled:opacity-50"><Save className="h-4 w-4" /> {savingId === entry.id ? t("generated.admin.saving") : t("generated.admin.save")}</button>
             </div>
-            <label className="mb-1 block text-xs text-pc-text-muted" htmlFor={`changelog-${entry.id}`}>Public changelog</label>
-            <textarea id={`changelog-${entry.id}`} value={draft} onChange={(event) => setDrafts((current) => ({ ...current, [entry.id]: event.target.value }))} maxLength={12000} rows={Math.max(4, Math.min(12, draft.split('\n').length + 1))} className="pc-input w-full resize-y font-mono text-xs" placeholder="No public changelog text" />
+            <label className="mb-1 block text-xs text-pc-text-muted" htmlFor={`changelog-${entry.id}`}>{t("generated.admin.publicChangelog")}</label>
+            <textarea id={`changelog-${entry.id}`} value={draft} onChange={(event) => setDrafts((current) => ({ ...current, [entry.id]: event.target.value }))} maxLength={12000} rows={Math.max(4, Math.min(12, draft.split('\n').length + 1))} className="pc-input w-full resize-y font-mono text-xs" placeholder={t("generated.admin.noPublicChangelogText")} />
           </article>;
         })}
-        {!loading && entries.length === 0 && <div className="rounded-lg border border-pc-border bg-pc-bg-elevated p-4 text-sm text-pc-text-muted">No deployment records found.</div>}
+        {!loading && entries.length === 0 && <div className="rounded-lg border border-pc-border bg-pc-bg-elevated p-4 text-sm text-pc-text-muted">{t("generated.admin.noDeploymentRecordsFound")}</div>}
       </section>
     </div>
   );

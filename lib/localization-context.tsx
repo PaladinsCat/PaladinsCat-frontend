@@ -144,3 +144,14 @@ export function useLocalization() {
   if (!context) throw new Error("useLocalization must be used within a LocalizationProvider");
   return context;
 }
+
+export function LocalizedText({
+  id,
+  values,
+}: {
+  id: TranslationKey;
+  values?: TranslationValues;
+}) {
+  const { t } = useLocalization();
+  return <>{t(id, values)}</>;
+}

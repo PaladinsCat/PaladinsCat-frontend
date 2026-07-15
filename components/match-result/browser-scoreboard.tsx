@@ -14,6 +14,7 @@ import { computeDamageStats } from "./format";
 import { getPartyNumber } from "./party-badge";
 import type { MatchResultPlayer } from "./types";
 import { MatchPlayerLink, MatchPlayerReference, matchPlayerKey } from "./player-identity";
+import { useLocalization } from "@/lib/localization-context";
 
 type BrowserScoreboardProps = {
   match: MatchData;
@@ -89,6 +90,7 @@ function tierFor(player: MatchResultPlayer) {
 }
 
 function TeamRows({ team }: { team: MatchResultPlayer[] }) {
+  const { t } = useLocalization();
   const players = team.slice(0, 5);
   const metrics = players.map((entry) => metricsFor(entry.matchData));
   const maximum = (key: keyof Metrics) => Math.max(0, ...metrics.map((entry) => entry[key]));
@@ -107,23 +109,23 @@ function TeamRows({ team }: { team: MatchResultPlayer[] }) {
       <div className="player-row grid-row" key={matchPlayerKey(player)}>
         <div className="champion-wrap">
           {championHref ? (
-            <Link href={championHref} aria-label={`${player.champion_name} champion page`} title={player.champion_name}>
+            <Link href={championHref} aria-label={t("generated.matches.value1ChampionPage", { value1: player.champion_name })} title={player.champion_name}>
               <img className="champion-icon" src={getChampionIconSafe(player.champion_name)} alt={player.champion_name} />
             </Link>
           ) : <img className="champion-icon" src={getChampionIconSafe(player.champion_name)} alt={player.champion_name} />}
-          {party != null && <span className="party-badge" title={`Party ${party}`}>{party}</span>}
+          {party != null && <span className="party-badge" title={t("generated.matches.partyValue1", { value1: party })}>{party}</span>}
         </div>
         <div className="rank"><img src={getRankIconPath(tier.tier, tier.rank)} alt={tier.effective.displayName} title={tier.effective.displayName} /></div>
         <div className="level">{entry.profileData?.level != null ? integer(entry.profileData.level) : "—"}</div>
         <div className="player"><MatchPlayerLink player={player} className="player-name block" /><MatchPlayerReference player={player} className="player-sub block hover:text-violet-200" /></div>
         <div className="player-elo">{entry.profileData?.queueElo != null ? integer(entry.profileData.queueElo) : "—"}</div>
         {talent && talentHref ? (
-          <Link href={talentHref} className="talent-link" title={talent.talent_name ?? "Talent"} aria-label={`${talent.talent_name ?? "Talent"} talent page`}>
+          <Link href={talentHref} className="talent-link" title={talent.talent_name ?? t("generated.matches.talent")} aria-label={t("generated.matches.value1TalentPage", { value1: talent.talent_name ?? t("generated.matches.talent") })}>
             <CanonicalTalentImage
               talentId={talent.talent_id}
               talentName={talent.talent_name}
               className="talent-icon"
-              alt={talent.talent_name ?? "Talent"}
+              alt={talent.talent_name ?? t("generated.matches.talent")}
               loading="eager"
             />
           </Link>
@@ -132,10 +134,10 @@ function TeamRows({ team }: { team: MatchResultPlayer[] }) {
             talentId={talent.talent_id}
             talentName={talent.talent_name}
             className="talent-icon"
-            alt={talent.talent_name ?? "Talent"}
+            alt={talent.talent_name ?? t("generated.matches.talent")}
             loading="eager"
           />
-        ) : <div className="talent-icon" aria-label="Talent unavailable">—</div>}
+        ) : <div className="talent-icon" aria-label={t("generated.matches.talentUnavailable")}>—</div>}
         <Metric className="credits" value={stat.credits} peak={peak("credits")} icon="/images/icons/Currency_Credits.avif" />
         <div className="metric kda">{player.kills} / {player.deaths} / {player.assists}</div>
         <Metric className="obj" value={stat.objective} peak={peak("objective")} />
@@ -153,6 +155,7 @@ function Metric({ className, value: amount, peak, icon }: { className: string; v
 }
 
 function TeamSummary({ label, won, team, teamNumber }: { label: string; won: boolean; team: MatchResultPlayer[]; teamNumber: 1 | 2 }) {
+  const { t } = useLocalization();
   const players = team.slice(0, 5);
   const rows = players.map((entry) => metricsFor(entry.matchData));
   const total = (key: keyof Metrics) => rows.reduce((sum, entry) => sum + entry[key], 0);
@@ -166,21 +169,22 @@ function TeamSummary({ label, won, team, teamNumber }: { label: string; won: boo
 
   return (
     <div className={`team-bar team-${teamNumber === 1 ? "one" : "two"} grid-row`} id={`team-${teamNumber === 1 ? "one" : "two"}-summary`}>
-      <div className="team-heading"><div className="team-name">{label} <span className="result">{won ? "Win" : "Defeat"}</span></div></div>
-      <div className="team-total level-total average-total" title="Average level"><span className="team-average-label">AVG</span>{averageLevel == null ? "—" : integer(averageLevel)}</div>
-      <div className="team-total elo-total average-total" title="Average Elo"><span className="team-average-label">AVG</span>{averageElo == null ? "—" : integer(averageElo)}</div>
-      <div className="team-total credits-total" title="Total credits"><img src="/images/icons/Currency_Credits.avif" alt="" />{compact(total("credits"))}</div>
-      <div className="team-total kda-total" title="Team K / D / A">{kda.join(" / ")}</div>
-      <div className="team-total objective-total" title="Total objective time">{integer(total("objective"))}</div>
-      <div className="team-total damage-total" title="Total damage">{compact(total("damage"))}</div>
-      <div className="team-total taken-total" title="Total damage taken">{compact(total("taken"))}</div>
-      <div className="team-total shield-total" title="Total shielding">{compact(total("shielding"))}</div>
-      <div className="team-total healing-total" title="Total healing">{compact(total("healing"))}</div>
+      <div className="team-heading"><div className="team-name">{label} <span className="result">{won ? t("generated.matches.win") : t("generated.matches.defeat")}</span></div></div>
+      <div className="team-total level-total average-total" title={t("generated.matches.averageLevel")}><span className="team-average-label">{t("generated.matches.avg")}</span>{averageLevel == null ? "—" : integer(averageLevel)}</div>
+      <div className="team-total elo-total average-total" title={t("generated.matches.averageElo")}><span className="team-average-label">{t("generated.matches.avg")}</span>{averageElo == null ? "—" : integer(averageElo)}</div>
+      <div className="team-total credits-total" title={t("generated.matches.totalCredits")}><img src="/images/icons/Currency_Credits.avif" alt="" />{compact(total("credits"))}</div>
+      <div className="team-total kda-total" title={t("generated.matches.teamKDA")}>{kda.join(" / ")}</div>
+      <div className="team-total objective-total" title={t("generated.matches.totalObjectiveTime")}>{integer(total("objective"))}</div>
+      <div className="team-total damage-total" title={t("generated.matches.totalDamage")}>{compact(total("damage"))}</div>
+      <div className="team-total taken-total" title={t("generated.matches.totalDamageTaken")}>{compact(total("taken"))}</div>
+      <div className="team-total shield-total" title={t("generated.matches.totalShielding")}>{compact(total("shielding"))}</div>
+      <div className="team-total healing-total" title={t("generated.matches.totalHealing")}>{compact(total("healing"))}</div>
     </div>
   );
 }
 
 export default function BrowserScoreboard({ match, queueLabel, team1, team2, bans }: BrowserScoreboardProps) {
+  const { t } = useLocalization();
   const previewRef = useRef<HTMLDivElement>(null);
   const scoreboardRef = useRef<HTMLElement>(null);
   const [previewScale, setPreviewScale] = useState(1);
@@ -217,48 +221,48 @@ export default function BrowserScoreboard({ match, queueLabel, team1, team2, ban
   }, []);
 
   const banIcons = (entries: MatchBan[]) => entries.map((ban, index) => (
-    <span className="ban-pick" key={`${ban.champion_id}-${index}`}><img src={getChampionIconSafe(ban.champion_name)} alt={ban.champion_name ?? "Banned champion"} /></span>
+    <span className="ban-pick" key={`${ban.champion_id}-${index}`}><img src={getChampionIconSafe(ban.champion_name)} alt={ban.champion_name ?? t("generated.matches.bannedChampion")} /></span>
   ));
 
   return (
-    <section id="browser-scoreboard" data-theme="dark" aria-label="Match scoreboard image">
+    <section id="browser-scoreboard" data-theme="dark" aria-label={t("generated.matches.matchScoreboardImage")}>
       <div className="mb-2 flex justify-end"><MatchExportButton matchId={match.match_id} target={scoreboardRef} /></div>
       <div ref={previewRef} className="relative w-full overflow-hidden" style={{ height: `${CANVAS_HEIGHT * previewScale}px` }}>
         <main className="viewport" style={{ width: CANVAS_WIDTH, maxWidth: "none", transform: `scale(${previewScale})`, transformOrigin: "top left" }}>
           <div className="scoreboard-canvas">
-            <section ref={scoreboardRef} className="scoreboard" style={{ "--scoreboard-map": `url("${mapImagePath(match.map)}")` } as React.CSSProperties} aria-label="Paladins match scoreboard">
+            <section ref={scoreboardRef} className="scoreboard" style={{ "--scoreboard-map": `url("${mapImagePath(match.map)}")` } as React.CSSProperties} aria-label={t("generated.matches.paladinsMatchScoreboard")}>
               <img className="scoreboard-map" src={mapImagePath(match.map)} alt="" aria-hidden="true" />
               <header className="hero">
                 <div className="match-identity">
                   <div className="brand-line">
-                    <span className="brand-name"><img src="/images/icons/paladinscat.avif" alt="" /> PaladinsCat</span>
+                    <span className="brand-name"><img src="/images/icons/paladinscat.avif" alt="" /> {t("generated.matches.paladinscat")}</span>
                     <div className="status-tags">
-                      <span className={`status-tag ${ranked ? "ranked" : "casual"}`}>{ranked ? "Ranked" : "Casual"}</span>
-                      {match.broken && !match.recovered && <span className="status-tag broken">Broken</span>}
-                      {match.recovered && <span className="status-tag recovered">Recovered</span>}
-                      {match.private && <span className="status-tag private">Private</span>}
+                      <span className={`status-tag ${ranked ? "ranked" : "casual"}`}>{ranked ? t("generated.matches.ranked") : t("generated.matches.casual")}</span>
+                      {match.broken && !match.recovered && <span className="status-tag broken">{t("generated.matches.broken")}</span>}
+                      {match.recovered && <span className="status-tag recovered">{t("generated.matches.recovered")}</span>}
+                      {match.private && <span className="status-tag private">{t("generated.matches.private")}</span>}
                     </div>
                   </div>
                   <div className="map-line"><div className={`map-name${mapName.length > 19 ? " long" : ""}`}>{mapName}</div></div>
                   <div className="match-context"><span>{match.region || "—"}</span><span>{modeName}</span></div>
                 </div>
                 <div className={`score${ranked ? "" : " casual"}`}>
-                  {ranked && <div className="score-bans left"><span className="ban-label">Bans</span><div className="ban-picks">{banIcons(leftBans)}</div></div>}
+                  {ranked && <div className="score-bans left"><span className="ban-label">{t("generated.matches.bans")}</span><div className="ban-picks">{banIcons(leftBans)}</div></div>}
                   <span className="score-number team-one-score">{match.team1_score ?? "?"}</span><span className="score-separator">/</span><span className="score-number team-two-score">{match.team2_score ?? "?"}</span>
-                  {ranked && <div className="score-bans right"><span className="ban-label">Bans</span><div className="ban-picks">{banIcons(rightBans)}</div></div>}
+                  {ranked && <div className="score-bans right"><span className="ban-label">{t("generated.matches.bans")}</span><div className="ban-picks">{banIcons(rightBans)}</div></div>}
                 </div>
                 <div className={`match-meta${ranked ? "" : " casual-meta"}`}>
-                  <div className="tier-meta" aria-hidden={!ranked}><img src={getRankIconPath(averageTier, 0)} alt={ranked ? TIER_NAMES[averageTier] ?? "Unranked" : ""} /><div><div className="meta-value">{TIER_NAMES[averageTier] ?? "Unranked"}</div><div className="meta-label">Avg tier</div></div></div>
+                  <div className="tier-meta" aria-hidden={!ranked}><img src={getRankIconPath(averageTier, 0)} alt={ranked ? TIER_NAMES[averageTier] ?? t("generated.matches.unranked") : ""} /><div><div className="meta-value">{TIER_NAMES[averageTier] ?? t("generated.matches.unranked")}</div><div className="meta-label">{t("generated.matches.avgTier")}</div></div></div>
                   <time className="timestamp-meta" dateTime={match.entry_datetime}>{utcTimestamp(match.entry_datetime)}</time>
-                  <div className="duration-meta"><div className="meta-value">{duration(match.duration_seconds)}</div><div className="meta-label">Duration</div></div>
-                  <div className="match-id-meta"><div className="meta-value">{match.match_id}</div><div className="meta-label">Match ID</div></div>
+                  <div className="duration-meta"><div className="meta-value">{duration(match.duration_seconds)}</div><div className="meta-label">{t("generated.matches.duration")}</div></div>
+                  <div className="match-id-meta"><div className="meta-value">{match.match_id}</div><div className="meta-label">{t("generated.matches.matchId")}</div></div>
                 </div>
               </header>
-              <div className="columns grid-row"><div>Party</div><div></div><div>Level</div><div>Player</div><div>Elo</div><div>Talent</div><div>Credits</div><div>K / D / A</div><div>OB. Time</div><div>Damage</div><div>Taken</div><div>Shielding</div><div>Healing</div></div>
+              <div className="columns grid-row"><div>{t("generated.matches.party")}</div><div></div><div>{t("generated.matches.level")}</div><div>{t("generated.matches.player")}</div><div>{t("generated.matches.elo")}</div><div>{t("generated.matches.talent")}</div><div>{t("generated.matches.credits")}</div><div>{t("generated.matches.kDA")}</div><div>{t("generated.matches.obTime")}</div><div>{t("generated.matches.damage")}</div><div>{t("generated.matches.taken")}</div><div>{t("generated.matches.shielding")}</div><div>{t("generated.matches.healing")}</div></div>
               <div className="players" id="team-one"><TeamRows team={team1} /></div>
-              <TeamSummary label="Team 1" won={match.winning_task_force === 1} team={team1} teamNumber={1} />
+              <TeamSummary label={t("generated.matches.team1")} won={match.winning_task_force === 1} team={team1} teamNumber={1} />
               <div className="players" id="team-two"><TeamRows team={team2} /></div>
-              <TeamSummary label="Team 2" won={match.winning_task_force === 2} team={team2} teamNumber={2} />
+              <TeamSummary label={t("generated.matches.team2")} won={match.winning_task_force === 2} team={team2} teamNumber={2} />
             </section>
           </div>
         </main>

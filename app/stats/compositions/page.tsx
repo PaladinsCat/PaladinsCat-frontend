@@ -5,17 +5,19 @@ import Link from "next/link";
 import { fetchMatchCompositions, type MatchCompositionStat } from "@/lib/api-client";
 import { useLobbyTier } from "@/lib/lobby-tier-context";
 import { LoadingIndicator } from "@/components/async-state";
+import { useLocalization } from "@/lib/localization-context";
 
 type SortKey = "totalMatches" | "winRate";
 
 const CLASS_COLUMNS = [
-  { key: "frontline", label: "Frontline", icon: "/images/icons/Class_Front_Line_Icon.avif" },
-  { key: "damage", label: "Damage", icon: "/images/icons/Class_Damage_Icon.avif" },
-  { key: "flank", label: "Flank", icon: "/images/icons/Class_Flank_Icon.avif" },
-  { key: "support", label: "Support", icon: "/images/icons/Class_Support_Icon.avif" },
+  { key: "frontline", labelKey: "common.roles.frontline", icon: "/images/icons/Class_Front_Line_Icon.avif" },
+  { key: "damage", labelKey: "common.roles.damage", icon: "/images/icons/Class_Damage_Icon.avif" },
+  { key: "flank", labelKey: "common.roles.flank", icon: "/images/icons/Class_Flank_Icon.avif" },
+  { key: "support", labelKey: "common.roles.support", icon: "/images/icons/Class_Support_Icon.avif" },
 ] as const;
 
 export default function CompositionStatsPage() {
+  const { t } = useLocalization();
   const [rows, setRows] = useState<MatchCompositionStat[]>([]);
   const [sortKey, setSortKey] = useState<SortKey>("totalMatches");
   const [descending, setDescending] = useState(true);
@@ -48,9 +50,9 @@ export default function CompositionStatsPage() {
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       <div>
-        <Link href="/stats" className="mb-2 inline-block text-xs text-pc-accent hover:underline">← Global Stats</Link>
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">Composition Stats</h1>
-        <p className="mt-1 text-sm text-pc-text-secondary">Ranked five-player team compositions. The order is Frontline · Damage · Flank · Support.</p>
+        <Link href="/stats" className="mb-2 inline-block text-xs text-pc-accent hover:underline">{t("generated.stats.globalStats")}</Link>
+        <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.stats.compositionStats")}</h1>
+        <p className="mt-1 text-sm text-pc-text-secondary">{t("generated.stats.rankedFivePlayerTeamCompositionsTheOrderIsFrontlineDamage")}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -63,29 +65,29 @@ export default function CompositionStatsPage() {
       </div>
 
       <div className="flex flex-wrap items-center gap-2 lg:hidden">
-        <span className="text-xs text-pc-text-muted">Sort:</span>
-        <button onClick={() => changeSort("totalMatches")} className={`pc-touch-target rounded-lg border px-3 text-xs ${sortKey === "totalMatches" ? "border-pc-accent bg-pc-accent/15 text-pc-accent" : "border-pc-border bg-pc-bg-elevated text-pc-text-secondary"}`}>Matches {sortKey === "totalMatches" && (descending ? "↓" : "↑")}</button>
-        <button onClick={() => changeSort("winRate")} className={`pc-touch-target rounded-lg border px-3 text-xs ${sortKey === "winRate" ? "border-pc-accent bg-pc-accent/15 text-pc-accent" : "border-pc-border bg-pc-bg-elevated text-pc-text-secondary"}`}>Win rate {sortKey === "winRate" && (descending ? "↓" : "↑")}</button>
+        <span className="text-xs text-pc-text-muted">{t("generated.stats.sort")}</span>
+        <button onClick={() => changeSort("totalMatches")} className={`pc-touch-target rounded-lg border px-3 text-xs ${sortKey === "totalMatches" ? "border-pc-accent bg-pc-accent/15 text-pc-accent" : "border-pc-border bg-pc-bg-elevated text-pc-text-secondary"}`}>{t("generated.stats.matches")}{" "}{sortKey === "totalMatches" && (descending ? "↓" : "↑")}</button>
+        <button onClick={() => changeSort("winRate")} className={`pc-touch-target rounded-lg border px-3 text-xs ${sortKey === "winRate" ? "border-pc-accent bg-pc-accent/15 text-pc-accent" : "border-pc-border bg-pc-bg-elevated text-pc-text-secondary"}`}>{t("generated.stats.winRate")}{" "}{sortKey === "winRate" && (descending ? "↓" : "↑")}</button>
       </div>
 
       <div className="space-y-2 lg:hidden">
         {sorted.map((row) => <article key={row.composition} className="pc-mobile-panel p-3">
-          <div className="flex items-center justify-between gap-3"><div><div className="font-mono text-base font-bold text-pc-text">{row.composition}</div><div className="text-[10px] text-pc-text-muted">Frontline · Damage · Flank · Support</div></div><div className={row.winRate >= 50 ? "text-right font-bold text-emerald-400" : "text-right font-bold text-rose-400"}>{row.winRate.toFixed(1)}%<div className="text-[9px] font-normal uppercase tracking-wide text-pc-text-muted">win rate</div></div></div>
-          <div className="mt-3 grid grid-cols-4 gap-1.5">{CLASS_COLUMNS.map((column) => <div key={column.key} className="rounded-lg bg-pc-bg-secondary/60 p-2 text-center"><img src={column.icon} alt="" className="mx-auto h-5 w-5 object-contain" /><div className="mt-1 font-mono text-sm font-semibold text-pc-text">{row[column.key]}</div><div className="truncate text-[8px] uppercase text-pc-text-muted">{column.label}</div></div>)}</div>
-          <div className="mt-3 flex items-center justify-between text-xs"><span className="text-pc-text-secondary">{row.totalMatches.toLocaleString()} matches</span><span className="text-pc-text-muted">{row.wins.toLocaleString()}W / {row.losses.toLocaleString()}L</span></div>
+          <div className="flex items-center justify-between gap-3"><div><div className="font-mono text-base font-bold text-pc-text">{row.composition}</div><div className="text-[10px] text-pc-text-muted">{t("generated.stats.frontlineDamageFlankSupport")}</div></div><div className={row.winRate >= 50 ? "text-right font-bold text-emerald-400" : "text-right font-bold text-rose-400"}>{row.winRate.toFixed(1)}%<div className="text-[9px] font-normal uppercase tracking-wide text-pc-text-muted">{t("generated.stats.winRate.0a2b795")}</div></div></div>
+          <div className="mt-3 grid grid-cols-4 gap-1.5">{CLASS_COLUMNS.map((column) => <div key={column.key} className="rounded-lg bg-pc-bg-secondary/60 p-2 text-center"><img src={column.icon} alt="" className="mx-auto h-5 w-5 object-contain" /><div className="mt-1 font-mono text-sm font-semibold text-pc-text">{row[column.key]}</div><div className="truncate text-[8px] uppercase text-pc-text-muted">{t(column.labelKey)}</div></div>)}</div>
+          <div className="mt-3 flex items-center justify-between text-xs"><span className="text-pc-text-secondary">{row.totalMatches.toLocaleString()} {t("generated.stats.matches.9f3e924")}</span><span className="text-pc-text-muted">{row.wins.toLocaleString()}{t("generated.stats.w")}{" "}{row.losses.toLocaleString()}L</span></div>
         </article>)}
-        {sorted.length === 0 && <div className="pc-mobile-panel p-6 text-center text-sm text-pc-text-muted">{loading ? <LoadingIndicator /> : "Composition statistics are not available for this lobby scope yet."}</div>}
+        {sorted.length === 0 && <div className="pc-mobile-panel p-6 text-center text-sm text-pc-text-muted">{loading ? <LoadingIndicator /> : t("generated.stats.compositionStatisticsAreNotAvailableForThisLobbyScopeYet")}</div>}
       </div>
 
       <div className="mx-auto hidden w-full max-w-5xl overflow-x-auto rounded-xl border border-pc-border bg-pc-bg-elevated shadow-lg shadow-black/10 lg:block">
         <table className="w-full min-w-[760px] table-fixed text-sm">
           <thead className="border-b border-pc-border text-left text-xs text-pc-text-muted">
             <tr>
-              <th className="w-[18%] px-4 py-3">Composition</th>
-              {CLASS_COLUMNS.map((column) => <th key={column.key} className="w-[10%] px-2 py-3 text-right">{column.label}</th>)}
-              <th className="px-3 py-3 text-right"><button onClick={() => changeSort("totalMatches")} className="hover:text-pc-accent">Matches {sortKey === "totalMatches" && (descending ? "↓" : "↑")}</button></th>
-              <th className="px-3 py-3 text-right">W / L</th>
-              <th className="px-4 py-3 text-right"><button onClick={() => changeSort("winRate")} className="hover:text-pc-accent">Win Rate {sortKey === "winRate" && (descending ? "↓" : "↑")}</button></th>
+              <th className="w-[18%] px-4 py-3">{t("generated.stats.composition")}</th>
+              {CLASS_COLUMNS.map((column) => <th key={column.key} className="w-[10%] px-2 py-3 text-right">{t(column.labelKey)}</th>)}
+              <th className="px-3 py-3 text-right"><button onClick={() => changeSort("totalMatches")} className="hover:text-pc-accent">{t("generated.stats.matches")}{" "}{sortKey === "totalMatches" && (descending ? "↓" : "↑")}</button></th>
+              <th className="px-3 py-3 text-right">{t("generated.stats.wL")}</th>
+              <th className="px-4 py-3 text-right"><button onClick={() => changeSort("winRate")} className="hover:text-pc-accent">{t("generated.stats.winRate.49a3838")}{" "}{sortKey === "winRate" && (descending ? "↓" : "↑")}</button></th>
             </tr>
           </thead>
           <tbody>
@@ -101,7 +103,7 @@ export default function CompositionStatsPage() {
               <td className="px-3 py-3 text-right text-pc-text-secondary">{row.wins.toLocaleString()} / {row.losses.toLocaleString()}</td>
               <td className={row.winRate >= 50 ? "px-4 py-3 text-right font-semibold text-emerald-400" : "px-4 py-3 text-right font-semibold text-rose-400"}>{row.winRate.toFixed(1)}%</td>
             </tr>)}
-            {sorted.length === 0 && <tr><td colSpan={8} className="px-4 py-10 text-center text-pc-text-muted">{loading ? <LoadingIndicator /> : "Composition statistics are not available for this lobby scope yet."}</td></tr>}
+            {sorted.length === 0 && <tr><td colSpan={8} className="px-4 py-10 text-center text-pc-text-muted">{loading ? <LoadingIndicator /> : t("generated.stats.compositionStatisticsAreNotAvailableForThisLobbyScopeYet")}</td></tr>}
           </tbody>
         </table>
       </div>

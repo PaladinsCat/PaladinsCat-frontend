@@ -3,6 +3,7 @@ import SmartImage from "@/components/SmartImage";
 import type { ChampionLoadout } from "@/lib/champion-data";
 import type { ChampionCardStat, ChampionCardStatsResponse } from "@/lib/api-client";
 import { getStatQuality } from "@/lib/stat-quality";
+import { LocalizedText } from "@/lib/localization-context";
 
 function statNameKey(value: string | null | undefined): string {
   return String(value ?? "").normalize("NFKD").toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -78,14 +79,14 @@ export default function ChampionLoadoutGrid({
                       <div className="mt-2 space-y-1.5">
                         <div className="flex flex-wrap items-center gap-2 text-xs">
                           <span className={quality?.textClass ?? winRateColor(stat.winRate)} style={quality ? { color: quality.color } : undefined}>
-                            <span className="mr-1 text-pc-text-muted">WR</span>{stat.winRate.toFixed(1)}%
+                            <span className="mr-1 text-pc-text-muted"><LocalizedText id="generated.champions.wr" /></span>{stat.winRate.toFixed(1)}%
                           </span>
                           <span className="text-pc-border">|</span>
-                          <span className="text-pc-text-muted"><span className="mr-1">PR</span><span style={quality ? { color: quality.color } : undefined}>{pickRate.toFixed(1)}%</span></span>
+                          <span className="text-pc-text-muted"><span className="mr-1"><LocalizedText id="generated.champions.pr" /></span><span style={quality ? { color: quality.color } : undefined}>{pickRate.toFixed(1)}%</span></span>
                           <span className="text-pc-border">|</span>
-                          <span className="break-words text-pc-text-muted"><span className="mr-1">Picks</span><span style={quality ? { color: quality.color } : undefined}>{formatPlays(stat.totalPlays)}</span></span>
+                          <span className="break-words text-pc-text-muted"><span className="mr-1"><LocalizedText id="generated.champions.picks" /></span><span style={quality ? { color: quality.color } : undefined}>{formatPlays(stat.totalPlays)}</span></span>
                           <span className="text-pc-border">|</span>
-                          <span className="break-words text-pc-text-muted">{stat.wins.toLocaleString()}W/{stat.losses.toLocaleString()}L</span>
+                          <span className="break-words text-pc-text-muted">{stat.wins.toLocaleString()}<LocalizedText id="generated.champions.w" />{stat.losses.toLocaleString()}L</span>
                         </div>
                         {stat.levels.length > 0 && (
                           <div className="flex items-center gap-1">
