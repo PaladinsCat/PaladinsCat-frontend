@@ -15,6 +15,7 @@ import { RouteSkeleton } from "@/components/route-skeleton";
 import SmartImage from "@/components/SmartImage";
 import { formatKda } from "@/lib/kda";
 import PlayerName, { VerifiedPlayerBadge } from "@/components/player-name";
+import { fetchPlayerModeration } from "@/lib/player-moderation";
 import { useLocalization } from "@/lib/localization-context";
 
 interface PlayerData {
@@ -60,7 +61,7 @@ interface PlayerData {
   avg_mpm: number | null;
   cheater: boolean;
   boosted: boolean;
-  verified: boolean;
+  verified?: boolean | null;
   sus_count: number;
   weirdo_count: number;
   hall_of_fame_count: number;
@@ -207,6 +208,7 @@ export default function PlayerProfilePage() {
   const [fetchKey, setFetchKey] = useState(0);
   const [historyFetchKey, setHistoryFetchKey] = useState(0);
   const [avatarLoadFailed, setAvatarLoadFailed] = useState(false);
+  const [verifiedFallback, setVerifiedFallback] = useState<boolean | null>(null);
 
   // Report modal state
   const [showReportModal, setShowReportModal] = useState(false);
@@ -216,6 +218,24 @@ export default function PlayerProfilePage() {
   useEffect(() => {
     setAvatarLoadFailed(false);
   }, [id, response?.player.avatar_url]);
+
+  // Older API deployments may omit `player.verified` from the profile
+  // response even though the bulk moderation endpoint exposes it. Keep the
+  // profile badge working across both response shapes.
+  useEffect(() => {
+    const directValue = response?.player.verified;
+    if (typeof directValue === "boolean") {
+      setVerifiedFallback(directValue);
+      return;
+    }
+
+    let active = true;
+    setVerifiedFallback(null);
+    fetchPlayerModeration(id).then(({ verified }) => {
+      if (active) setVerifiedFallback(verified);
+    });
+    return () => { active = false; };
+  }, [id, response?.player.verified]);
 
   // Open report modal — redirect to login if not authenticated
   const openReportModal = useCallback((type: Exclude<ReportType, 'approve'>) => {
@@ -605,7 +625,7 @@ export default function PlayerProfilePage() {
               <h1 className="min-w-0 break-words text-2xl font-bold leading-tight text-pc-text sm:text-3xl">
                 {player.name}
               </h1>
-              {player.verified && <VerifiedPlayerBadge />}
+              {(player.verified ?? verifiedFallback) && <VerifiedPlayerBadge iconClassName="h-5 w-5" />}
               {player.cheater && (
                 <span className="text-xs font-bold text-red-400 bg-[#161618] px-1.5 py-0.5 rounded">{t("generated.players.cheater")}</span>
               )}

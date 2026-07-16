@@ -6,13 +6,13 @@ import { useLocalization } from "@/lib/localization-context";
 
 const EMPTY_MODERATION: PlayerModeration = { cheater: false, susCount: 0, verified: false };
 
-export function VerifiedPlayerBadge({ className = "" }: { className?: string }) {
+export function VerifiedPlayerBadge({ className = "", iconClassName = "h-3.5 w-3.5" }: { className?: string; iconClassName?: string }) {
   const { t } = useLocalization();
   return (
     <span className={`inline-flex shrink-0 ${className}`} role="img" aria-label={t("generated.players.verifiedPaladinscatPlayer")} title={t("generated.players.verifiedPaladinscatPlayer")}>
       <picture>
         <source srcSet="/images/icons/Verified_Player_Support_Icon.avif" type="image/avif" />
-        <img src="/images/icons/Verified_Player_Support_Icon.png" alt="" className={`h-3.5 w-3.5 object-contain`} />
+        <img src="/images/icons/Verified_Player_Support_Icon.png" alt="" className={`${iconClassName} object-contain`} />
       </picture>
     </span>
   );
