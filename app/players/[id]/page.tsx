@@ -14,7 +14,7 @@ import { ErrorState, LoadingIndicator, LoadingOverlay, LoadingPanel } from "@/co
 import { RouteSkeleton } from "@/components/route-skeleton";
 import SmartImage from "@/components/SmartImage";
 import { formatKda } from "@/lib/kda";
-import PlayerName from "@/components/player-name";
+import PlayerName, { VerifiedPlayerBadge } from "@/components/player-name";
 import { useLocalization } from "@/lib/localization-context";
 
 interface PlayerData {
@@ -60,6 +60,7 @@ interface PlayerData {
   avg_mpm: number | null;
   cheater: boolean;
   boosted: boolean;
+  verified: boolean;
   sus_count: number;
   weirdo_count: number;
   hall_of_fame_count: number;
@@ -604,6 +605,7 @@ export default function PlayerProfilePage() {
               <h1 className="min-w-0 break-words text-2xl font-bold leading-tight text-pc-text sm:text-3xl">
                 {player.name}
               </h1>
+              {player.verified && <VerifiedPlayerBadge />}
               {player.cheater && (
                 <span className="text-xs font-bold text-red-400 bg-[#161618] px-1.5 py-0.5 rounded">{t("generated.players.cheater")}</span>
               )}
