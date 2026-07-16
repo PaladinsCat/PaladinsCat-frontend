@@ -178,32 +178,32 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
         </div>
       )}
 
-      {/* ── Directories ── */}
-      <div className="grid grid-cols-1 gap-3 min-[480px]:grid-cols-2">
-        <Link href="/players/private-accounts" className="group flex min-h-20 items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-4 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary">
-          <LockKeyhole aria-hidden="true" className="h-10 w-10 shrink-0 text-slate-300" strokeWidth={1.5} />
-          <div className="min-w-0 flex-1">
-            <h3 className="text-sm font-semibold text-pc-text group-hover:text-pc-accent">{t("generated.players.privateAccounts")}</h3>
-            <p className="mt-0.5 text-xs text-pc-text-muted">{overviewLoading ? t("generated.players.loadingTrackedAccounts") : t("generated.players.value1TrackedAccounts", { value1: directoryCounts.privateAccounts.toLocaleString() })}</p>
-          </div>
-          <span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent">→</span>
-        </Link>
-
-        <Link href="/players/parties" className="group flex min-h-20 items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-4 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary">
-          <UsersRound aria-hidden="true" className="h-10 w-10 shrink-0 text-cyan-300" strokeWidth={1.5} />
-          <div className="min-w-0 flex-1">
-            <h3 className="text-sm font-semibold text-pc-text group-hover:text-pc-accent">{t("generated.players.rankedParties")}</h3>
-            <p className="mt-0.5 text-xs text-pc-text-muted">{overviewLoading ? t("generated.players.loadingPartyConnections") : t("generated.players.value1KnownPartyPairs", { value1: directoryCounts.parties.toLocaleString() })}</p>
-          </div>
-          <span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent">→</span>
-        </Link>
-      </div>
-
       {/* ── Main Content: Performance (left) + Leaderboards (right) ── */}
       <div className="flex flex-col lg:flex-row gap-6">
 
-        {/* Left: Performance Stats 2×2 + Cheaters & Suspicious in one grid */}
+        {/* Left: directory cards, performance stats, and community leaderboards */}
         <div className="lg:w-3/5 space-y-4">
+          {/* Directories stay in the left column so their combined width matches the performance cards below. */}
+          <div className="grid grid-cols-1 gap-3 min-[480px]:grid-cols-2">
+            <Link href="/players/private-accounts" className="group flex min-h-20 items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-4 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary">
+              <LockKeyhole aria-hidden="true" className="h-10 w-10 shrink-0 text-slate-300" strokeWidth={1.5} />
+              <div className="min-w-0 flex-1">
+                <h3 className="text-sm font-semibold text-pc-text group-hover:text-pc-accent">{t("generated.players.privateAccounts")}</h3>
+                <p className="mt-0.5 text-xs text-pc-text-muted">{overviewLoading ? t("generated.players.loadingTrackedAccounts") : t("generated.players.value1TrackedAccounts", { value1: directoryCounts.privateAccounts.toLocaleString() })}</p>
+              </div>
+              <span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent">→</span>
+            </Link>
+
+            <Link href="/players/parties" className="group flex min-h-20 items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-4 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary">
+              <UsersRound aria-hidden="true" className="h-10 w-10 shrink-0 text-cyan-300" strokeWidth={1.5} />
+              <div className="min-w-0 flex-1">
+                <h3 className="text-sm font-semibold text-pc-text group-hover:text-pc-accent">{t("generated.players.rankedParties")}</h3>
+                <p className="mt-0.5 text-xs text-pc-text-muted">{overviewLoading ? t("generated.players.loadingPartyConnections") : t("generated.players.value1KnownPartyPairs", { value1: directoryCounts.parties.toLocaleString() })}</p>
+              </div>
+              <span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent">→</span>
+            </Link>
+          </div>
+
           <div className="flex items-center justify-between mb-2 px-2">
             <h2 className="text-sm font-bold text-pc-text">{t("generated.players.performanceStats")}</h2>
           </div>
