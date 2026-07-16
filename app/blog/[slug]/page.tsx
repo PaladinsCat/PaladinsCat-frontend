@@ -62,7 +62,7 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
         </h1>
 
         <div className="flex items-center gap-4 text-sm text-pc-text-muted mb-8">
-          <span>By {post.author}</span>
+          <span>{t(BLOG_COPY_KEYS.authorBy, { author: post.author })}</span>
           <span>·</span>
           <span>{post.date}</span>
         </div>
