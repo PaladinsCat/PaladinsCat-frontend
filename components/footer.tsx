@@ -11,21 +11,52 @@ import Link from "next/link";
 import { fetchSiteVersion, type SiteVersion } from "@/lib/api-client";
 import { useLocalization } from "@/lib/localization-context";
 
+const VERSION_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
+const VERSION_REFRESH_MIN_GAP_MS = 15 * 1000;
+
 export default function Footer() {
   const { t } = useLocalization();
   const [siteVersion, setSiteVersion] = useState<SiteVersion | null>(null);
 
   useEffect(() => {
     let cancelled = false;
+    let loading = false;
+    let lastRefreshAt = 0;
 
-    fetchSiteVersion().then((version) => {
-      if (!cancelled && version?.version) {
-        setSiteVersion(version);
+    const refreshVersion = async (force = false) => {
+      const now = Date.now();
+      if (loading || (!force && now - lastRefreshAt < VERSION_REFRESH_MIN_GAP_MS)) {
+        return;
       }
-    });
+
+      loading = true;
+      lastRefreshAt = now;
+      try {
+        const version = await fetchSiteVersion();
+        if (!cancelled && version?.version) {
+          setSiteVersion(version);
+        }
+      } finally {
+        loading = false;
+      }
+    };
+
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === "visible") {
+        void refreshVersion();
+      }
+    };
+
+    void refreshVersion(true);
+    const intervalId = window.setInterval(() => void refreshVersion(), VERSION_REFRESH_INTERVAL_MS);
+    window.addEventListener("focus", refreshWhenVisible);
+    document.addEventListener("visibilitychange", refreshWhenVisible);
 
     return () => {
       cancelled = true;
+      window.clearInterval(intervalId);
+      window.removeEventListener("focus", refreshWhenVisible);
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
     };
   }, []);
 

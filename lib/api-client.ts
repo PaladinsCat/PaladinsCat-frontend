@@ -1516,7 +1516,7 @@ function mapSiteVersionComponent(raw: any): SiteVersionComponent {
 
 export async function fetchSiteVersion(): Promise<SiteVersion | null> {
   try {
-    const raw = await fetchJson<any>(`/meta/version`, { retries: 0 });
+    const raw = await fetchJson<any>(`/meta/version`, { retries: 0, cache: "no-store" });
     const mapped = mapSiteVersionComponent(raw);
     return {
       ...mapped,
