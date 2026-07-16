@@ -605,22 +605,22 @@ export default function PlayerProfilePage() {
                 {player.name}
               </h1>
               {player.cheater && (
-                <span className="text-xs font-bold text-red-400 bg-red-500/10 px-1.5 py-0.5 rounded">{t("generated.players.cheater")}</span>
+                <span className="text-xs font-bold text-red-400 bg-[#161618] px-1.5 py-0.5 rounded">{t("generated.players.cheater")}</span>
               )}
               {!player.cheater && player.boosted && (
-                <Link href="/players/boosted" className="rounded bg-orange-400/10 px-1.5 py-0.5 text-xs font-bold text-orange-300 hover:bg-orange-400/20">
+                <Link href="/players/boosted" className="rounded bg-[#161618] px-1.5 py-0.5 text-xs font-bold text-orange-300 hover:bg-[#161618]">
                   <span className="sm:hidden">{t("moderation.boostedShort")}</span>
                   <span className="hidden sm:inline">{t("moderation.boosted")}</span>
                 </Link>
               )}
               {player.sus_count > 0 && !player.cheater && (
-                <span className="text-xs font-bold text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded">{t("generated.players.sus")}</span>
+                <span className="text-xs font-bold text-amber-400 bg-[#161618] px-1.5 py-0.5 rounded">{t("generated.players.sus")}</span>
               )}
               {player.weirdo_count > 0 && (
-                <span className="text-xs font-bold text-violet-300 bg-violet-500/10 px-1.5 py-0.5 rounded">{t("generated.players.weirdo.2a889b0")}{player.weirdo_count})</span>
+                <span className="text-xs font-bold text-violet-300 bg-[#161618] px-1.5 py-0.5 rounded">{t("generated.players.weirdo.2a889b0")}{player.weirdo_count})</span>
               )}
               {player.hall_of_fame_count > 0 && (
-                <span className="text-xs font-bold text-emerald-300 bg-emerald-500/10 px-1.5 py-0.5 rounded">{t("generated.players.hallOfFame.6170909")}{player.hall_of_fame_count})</span>
+                <span className="text-xs font-bold text-emerald-300 bg-[#161618] px-1.5 py-0.5 rounded">{t("generated.players.hallOfFame.6170909")}{player.hall_of_fame_count})</span>
               )}
             </div>
             {/* Title + loading frame */}

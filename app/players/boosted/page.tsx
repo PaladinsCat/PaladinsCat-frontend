@@ -57,7 +57,7 @@ export default function BoostedPlayersPage() {
                 <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-pc-text-muted">{t("moderation.cheaterDuo")}</div>
                 <ul className="flex flex-wrap gap-1.5">
                   {player.cheaters.map((cheater) => (
-                    <li key={cheater.id} className="max-w-full rounded-md border border-red-500/20 bg-red-500/10 px-2 py-1 text-xs leading-relaxed text-red-200 [overflow-wrap:anywhere]">
+                    <li key={cheater.id} className="max-w-full rounded-md border border-red-500/20 bg-[#161618] px-2 py-1 text-xs leading-relaxed text-red-200 [overflow-wrap:anywhere]">
                       <span className="font-semibold">{cheater.name}</span>
                       <span className="ml-1 text-red-200/70">· {cheater.matchCount.toLocaleString()}</span>
                     </li>

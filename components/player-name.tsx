@@ -12,7 +12,7 @@ export function VerifiedPlayerBadge({ className = "" }: { className?: string }) 
     <span className={`inline-flex shrink-0 ${className}`} role="img" aria-label={t("generated.players.verifiedPaladinscatPlayer")} title={t("generated.players.verifiedPaladinscatPlayer")}>
       <picture>
         <source srcSet="/images/icons/Verified_Player_Support_Icon.avif" type="image/avif" />
-        <img src="/images/icons/Verified_Player_Support_Icon.png" alt="" className="h-3.5 w-3.5 object-contain" />
+        <img src="/images/icons/Verified_Player_Support_Icon.png" alt="" className={`h-3.5 w-3.5 object-contain`} />
       </picture>
     </span>
   );
@@ -51,8 +51,8 @@ export function PlayerModerationTag({
 
   return <>
     {moderation.verified && <VerifiedPlayerBadge />}
-    {moderation.cheater && <span className="player-status-tag cheater shrink-0 rounded bg-red-500/10 px-1.5 py-0.5 text-[10px] font-bold leading-none text-red-400" aria-label={t("generated.players.confirmedCheater")}>{t("generated.players.cheater")}</span>}
-    {!moderation.cheater && moderation.susCount > 0 && <span className="player-status-tag suspicious shrink-0 rounded bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-bold leading-none text-amber-400" aria-label={t("generated.players.suspiciousPlayerWithValue1Flags", { value1: moderation.susCount })}>{t("generated.players.sus")}</span>}
+    {moderation.cheater && <span className="player-status-tag cheater shrink-0 rounded bg-[#161618] px-1.5 py-0.5 text-[10px] font-bold leading-none text-red-400" aria-label={t("generated.players.confirmedCheater")}>{t("generated.players.cheater")}</span>}
+    {!moderation.cheater && moderation.susCount > 0 && <span className="player-status-tag suspicious shrink-0 rounded bg-[#161618] px-1.5 py-0.5 text-[10px] font-bold leading-none text-amber-400" aria-label={t("generated.players.suspiciousPlayerWithValue1Flags", { value1: moderation.susCount })}>{t("generated.players.sus")}</span>}
   </>;
 }
 
