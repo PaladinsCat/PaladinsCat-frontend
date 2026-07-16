@@ -12,6 +12,7 @@ import { LocalizationProvider } from "@/lib/localization-context";
 import { LobbyTierProvider } from "@/lib/lobby-tier-context";
 import LobbyTierBanner from "@/components/LobbyTierBanner";
 import SiteAnalytics from "@/components/SiteAnalytics";
+import DeploymentUpdateBanner from "@/components/DeploymentUpdateBanner";
 import { cn } from "@/lib/utils";
 import { SEO_KEYWORDS, SITE_NAME, SITE_URL } from "@/lib/seo";
 import { getServerLocalization } from "@/lib/server-localization";
@@ -113,6 +114,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <SiteAnalytics />
               <MapSlideshow />
               <Nav />
+              <DeploymentUpdateBanner />
               <LobbyTierBanner />
               <HirezOutageBanner />
               {/* Content container: responsive width that fills common desktop sizes */}

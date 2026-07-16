@@ -34,11 +34,11 @@ CMD ["sh", "-c", "npm install && npm run dev -- -H 0.0.0.0"]
 # Prod runtime
 FROM node:22-alpine AS runtime
 WORKDIR /app
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/package-lock.json ./package-lock.json
 RUN npm ci --omit=dev
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
 RUN chown -R node:node /app
 USER node
 EXPOSE 3000
