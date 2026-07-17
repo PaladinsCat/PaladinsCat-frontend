@@ -83,7 +83,7 @@ export default function HomePage() {
           {siteVersion?.version && (
             <Link
               href="/changelog"
-              aria-label={`${t("menu.changelog")} ${siteVersion.version}`}
+              aria-label={t("menu.changelog")}
               title={t("menu.changelog")}
               className="absolute left-full top-0 ml-1.5 whitespace-nowrap rounded-sm font-mono text-xs font-medium leading-none tracking-normal text-pc-text-muted transition-colors hover:text-pc-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent"
             >
