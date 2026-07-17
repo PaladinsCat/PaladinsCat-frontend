@@ -1,19 +1,27 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
-import { fetchPlayerModeration, type PlayerModeration } from "@/lib/player-moderation";
+import { fetchPlayerModeration, mergePlayerModeration, type PlayerModeration } from "@/lib/player-moderation";
 import { useLocalization } from "@/lib/localization-context";
 
-const EMPTY_MODERATION: PlayerModeration = { cheater: false, susCount: 0, verified: false };
+const EMPTY_MODERATION: PlayerModeration = {
+  cheater: false,
+  susCount: 0,
+  dropper: false,
+  afkWintrade: false,
+  boosted: false,
+  altAccount: false,
+  verified: false,
+};
 
 export function VerifiedPlayerBadge({ className = "", iconClassName = "h-3.5 w-3.5" }: { className?: string; iconClassName?: string }) {
   const { t } = useLocalization();
   return (
     <span className={`inline-flex shrink-0 ${className}`} role="img" aria-label={t("generated.players.verifiedPaladinscatPlayer")} title={t("generated.players.verifiedPaladinscatPlayer")}>
-      <picture>
-        <source srcSet="/images/icons/Verified_Player_Support_Icon.avif" type="image/avif" />
-        <img src="/images/icons/Verified_Player_Support_Icon.png" alt="" className={`${iconClassName} object-contain`} />
-      </picture>
+      {/* html-to-image embeds <img src>, but leaves a <picture><source srcset>
+          external inside its cloned SVG. Keep the small transparent PNG as a
+          direct image so on-page and exported scoreboards render identically. */}
+      <img src="/images/icons/Verified_Player_Support_Icon.png" alt="" className={`verified-player-icon ${iconClassName} object-contain`} />
     </span>
   );
 }
@@ -22,38 +30,65 @@ export function PlayerModerationTag({
   playerId,
   cheater,
   susCount,
+  dropper,
+  afkWintrade,
+  boosted,
+  altAccount,
   verified,
 }: {
   playerId: string | number;
   cheater?: boolean;
   susCount?: number;
+  dropper?: boolean;
+  afkWintrade?: boolean;
+  boosted?: boolean;
+  altAccount?: boolean;
   verified?: boolean;
 }) {
   const { t } = useLocalization();
-  const hasInitialState = cheater !== undefined && susCount !== undefined && verified !== undefined;
+  const hasCompleteState = cheater !== undefined
+    && susCount !== undefined
+    && dropper !== undefined
+    && afkWintrade !== undefined
+    && boosted !== undefined
+    && altAccount !== undefined
+    && verified !== undefined;
+  const suppliedModeration = { cheater, susCount, dropper, afkWintrade, boosted, altAccount, verified };
   const [moderation, setModeration] = useState<PlayerModeration>(() => (
-    hasInitialState
-      ? { cheater: Boolean(cheater), susCount: Number(susCount) || 0, verified: Boolean(verified) }
-      : EMPTY_MODERATION
+    mergePlayerModeration(EMPTY_MODERATION, suppliedModeration)
   ));
 
   useEffect(() => {
-    if (hasInitialState) {
-      setModeration({ cheater: Boolean(cheater), susCount: Number(susCount) || 0, verified: Boolean(verified) });
+    if (hasCompleteState) {
+      setModeration(mergePlayerModeration(EMPTY_MODERATION, suppliedModeration));
       return;
     }
+    // Preserve every moderation field supplied by the owning data surface.
+    // Some callers know the canonical cheater/suspicious values but still need
+    // the stored-account verification bit. The older all-or-nothing merge let
+    // the secondary bulk request overwrite those supplied values, which made a
+    // match row banner and its CHEATER tag disagree while their caches expired.
+    setModeration(mergePlayerModeration(EMPTY_MODERATION, suppliedModeration));
     let active = true;
     fetchPlayerModeration(playerId).then((state) => {
-      if (active) setModeration(state);
+      if (active) {
+        setModeration(mergePlayerModeration(state, suppliedModeration));
+      }
     });
     return () => { active = false; };
-  }, [cheater, hasInitialState, playerId, susCount, verified]);
+  }, [afkWintrade, altAccount, boosted, cheater, dropper, hasCompleteState, playerId, susCount, verified]);
 
-  return <>
+  return <span className="inline-flex max-h-10 min-w-0 flex-wrap items-center gap-1 overflow-hidden">
     {moderation.verified && <VerifiedPlayerBadge />}
     {moderation.cheater && <span className="player-status-tag cheater shrink-0 rounded bg-[#161618] px-1.5 py-0.5 text-[10px] font-bold leading-none text-red-400" aria-label={t("generated.players.confirmedCheater")}>{t("generated.players.cheater")}</span>}
-    {!moderation.cheater && moderation.susCount > 0 && <span className="player-status-tag suspicious shrink-0 rounded bg-[#161618] px-1.5 py-0.5 text-[10px] font-bold leading-none text-amber-400" aria-label={t("generated.players.suspiciousPlayerWithValue1Flags", { value1: moderation.susCount })}>{t("generated.players.sus")}</span>}
-  </>;
+    {!moderation.cheater && <>
+      {moderation.dropper && <span className="player-status-tag dropper shrink-0 rounded bg-[#161618] px-1.5 py-0.5 text-[10px] font-bold leading-none text-rose-300">{t("moderation.dropShort")}</span>}
+      {moderation.susCount > 0 && <span className="player-status-tag suspicious shrink-0 rounded bg-[#161618] px-1.5 py-0.5 text-[10px] font-bold leading-none text-amber-400" aria-label={t("generated.players.suspiciousPlayerWithValue1Flags", { value1: moderation.susCount })}>{t("generated.players.sus")}</span>}
+      {moderation.afkWintrade && <span className="player-status-tag afk shrink-0 rounded bg-[#161618] px-1.5 py-0.5 text-[10px] font-bold leading-none text-sky-300">{t("moderation.afkShort")}</span>}
+      {moderation.boosted && <span className="player-status-tag boosted shrink-0 rounded bg-[#161618] px-1.5 py-0.5 text-[10px] font-bold leading-none text-orange-300">{t("moderation.boostedShort")}</span>}
+      {moderation.altAccount && <span className="player-status-tag alt shrink-0 rounded bg-[#161618] px-1.5 py-0.5 text-[10px] font-bold leading-none text-violet-300">{t("moderation.altShort")}</span>}
+    </>}
+  </span>;
 }
 
 /** A player name with its confirmed-cheater or suspicious-player label. */
@@ -62,6 +97,10 @@ export default function PlayerName({
   children,
   cheater,
   susCount,
+  dropper,
+  afkWintrade,
+  boosted,
+  altAccount,
   verified,
   className = "",
 }: {
@@ -69,13 +108,17 @@ export default function PlayerName({
   children: ReactNode;
   cheater?: boolean;
   susCount?: number;
+  dropper?: boolean;
+  afkWintrade?: boolean;
+  boosted?: boolean;
+  altAccount?: boolean;
   verified?: boolean;
   className?: string;
 }) {
   return (
-    <span className={`inline-flex max-w-full items-center gap-1 align-middle ${className}`}>
-      <span className="truncate">{children}</span>
-      <PlayerModerationTag playerId={playerId} cheater={cheater} susCount={susCount} verified={verified} />
+    <span className={`inline-flex max-h-10 max-w-full min-w-0 flex-wrap items-center gap-1 overflow-hidden align-middle ${className}`}>
+      <span className="min-w-0 truncate">{children}</span>
+      <PlayerModerationTag playerId={playerId} cheater={cheater} susCount={susCount} dropper={dropper} afkWintrade={afkWintrade} boosted={boosted} altAccount={altAccount} verified={verified} />
     </span>
   );
 }

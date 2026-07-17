@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import PlayerName from "@/components/player-name";
+import PlayerName, { PlayerModerationTag } from "@/components/player-name";
 import type { MatchPlayerDetail } from "@/lib/api-client";
 import { useLocalization } from "@/lib/localization-context";
 
@@ -36,14 +36,27 @@ export function MatchPlayerLink({ player, className = "" }: { player: MatchPlaye
   const privateId = trackedPrivateId(player);
   const href = matchPlayerHref(player);
   const content = privateId ? (
-    <>
+    <span className="inline-flex max-w-full items-center gap-1 align-middle">
       <span>{t("generated.matches.privateAccount")}</span>
       <span className="ml-1 inline-flex rounded border border-violet-400/30 bg-violet-400/10 px-1.5 py-0.5 align-middle text-[0.68em] font-bold uppercase tracking-wide text-violet-200">#{privateId}</span>
-    </>
+      <PlayerModerationTag
+        playerId={0}
+        cheater={player.profile_snapshot?.cheater === true}
+        susCount={0}
+        verified={false}
+      />
+    </span>
   ) : Number(player.player_id) === 0 ? (
     <span>{t("generated.matches.privateAccount")}</span>
   ) : (
-    <PlayerName playerId={player.player_id}>{player.player_name || t("generated.matches.unknown")}</PlayerName>
+    <PlayerName
+      playerId={player.player_id}
+      cheater={player.profile_snapshot?.cheater}
+      susCount={player.profile_snapshot?.sus_count}
+      verified={player.profile_snapshot?.verified}
+    >
+      {player.player_name || t("generated.matches.unknown")}
+    </PlayerName>
   );
 
   return href ? <Link href={href} className={className} title={privateId ? t("generated.matches.privateAccountValue1", { value1: privateId }) : player.player_name}>{content}</Link> : <span className={className}>{content}</span>;

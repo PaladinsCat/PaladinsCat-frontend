@@ -44,6 +44,10 @@ import { RouteSkeleton } from "@/components/route-skeleton";
 import { readBrowserResult, removeBrowserResult, writeBrowserResult } from "@/lib/browser-result-cache";
 import { getQueueLabel } from "@/lib/queue-labels";
 import { LocalizedText, useLocalization } from "@/lib/localization-context";
+import {
+  fetchPlayerModerationBatch,
+  fetchPrivateAccountModerationBatch,
+} from "@/lib/player-moderation";
 
 const MATCH_RESULT_CACHE_TTL_MS = 5 * 60 * 1000;
 const MATCH_UI_CACHE_TTL_MS = 30 * 60 * 1000;
@@ -54,6 +58,33 @@ type CachedMatchResult = {
   snapshots: RatingSnapshot[];
 };
 
+async function withCurrentStoredModeration(detail: MatchDetailWithBans): Promise<MatchDetailWithBans> {
+  const [publicModeration, privateModeration] = await Promise.all([
+    fetchPlayerModerationBatch(detail.players.map((player) => player.player_id)),
+    fetchPrivateAccountModerationBatch(detail.players
+      .filter((player) => Number(player.player_id) === 0)
+      .map((player) => player.private_player_id ?? 0)),
+  ]);
+  return {
+    ...detail,
+    players: detail.players.map((player) => {
+      const playerId = Number(player.player_id);
+      const current = playerId > 0
+        ? publicModeration.get(playerId)
+        : privateModeration.get(Number(player.private_player_id));
+      if (!current || !player.profile_snapshot) return player;
+      return {
+        ...player,
+        profile_snapshot: {
+          ...player.profile_snapshot,
+          cheater: current.cheater,
+          sus_count: current.susCount,
+        },
+      };
+    }),
+  };
+}
+
 function finiteNumber(value: unknown): number | null {
   if (value == null || value === "") return null;
   const parsed = Number(value);
@@ -61,7 +92,9 @@ function finiteNumber(value: unknown): number | null {
 }
 
 function storedProfileForMatch(player: MatchPlayerDetail): PlayerProfileData | null {
-  if (Number(player.player_id) <= 0) return null;
+  const playerId = Number(player.player_id);
+  const privateId = Number(player.private_player_id ?? 0);
+  if (playerId <= 0 && privateId <= 0) return null;
   const snapshot = player.profile_snapshot;
   if (!snapshot) return null;
 
@@ -77,8 +110,10 @@ function storedProfileForMatch(player: MatchPlayerDetail): PlayerProfileData | n
     : null;
 
   return {
-    id: String(player.player_id),
-    name: player.player_name,
+    id: playerId > 0 ? String(playerId) : `private:${privateId}`,
+    name: playerId > 0
+      ? player.player_name
+      : player.private_account_display_name || player.private_account_alias || `P-${String(privateId).padStart(6, "0")}`,
     level: finiteNumber(snapshot.level),
     platform: snapshot.platform ?? player.platform ?? "",
     region: snapshot.region ?? player.region ?? "",
@@ -98,6 +133,7 @@ function storedProfileForMatch(player: MatchPlayerDetail): PlayerProfileData | n
     snapshotSource: snapshot.source,
     cheater: snapshot.cheater === true,
     susCount: finiteNumber(snapshot.sus_count) ?? 0,
+    verified: snapshot.verified === true,
     totalMatches: globalMatches,
     totalWins: globalWins ?? 0,
     winRate: globalMatches > 0 && globalWins != null
@@ -137,11 +173,20 @@ export default function MatchDetailPage() {
     async function load() {
       setLoading(true);
       setError(null);
-      const cacheKey = `paladinscat:match-result:v5:${numericMatchId}`;
+      // v7 adds private-account moderation to the stored scoreboard snapshot.
+      // Bump the key so an older session snapshot cannot hide the new tag.
+      const cacheKey = `paladinscat:match-result:v7:${numericMatchId}`;
       try {
         const cached = reloadKey === 0 ? readBrowserResult<CachedMatchResult>(cacheKey) : null;
         if (cached) {
-          setMatch(cached.match);
+          // Match facts are safe to retain in session storage, but moderation
+          // can change at any time. Refresh only the ten stored database flags;
+          // /players/bulk never starts a Hi-Rez profile refresh.
+          const currentMatch = cached.match
+            ? await withCurrentStoredModeration(cached.match).catch(() => cached.match)
+            : null;
+          if (cancelled) return;
+          setMatch(currentMatch);
           setFact(cached.fact);
           setSnapshots(cached.snapshots);
           return;
@@ -171,7 +216,7 @@ export default function MatchDetailPage() {
         }, MATCH_RESULT_CACHE_TTL_MS);
 
       } catch (err: any) {
-        if (!cancelled) setError(err.message || "Failed to load match");
+        if (!cancelled) setError(err.message || t("generated.app\\matches\\[id]\\page.failedtoloadmatch"));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -296,8 +341,8 @@ export default function MatchDetailPage() {
         team2Players={team2}
         team1Wins={team1Wins}
         team2Wins={team2Wins}
-        team1Label="Team 1"
-        team2Label="Team 2"
+        team1Label={t("generated.app\\matches\\[id]\\page.team1")}
+        team2Label={t("generated.app\\matches\\[id]\\page.team2")}
         factMap={factMap}
       />
 

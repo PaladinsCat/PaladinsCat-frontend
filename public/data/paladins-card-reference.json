@@ -4956,7 +4956,7 @@
     "shortDescription": "[Stealth]  Eliminations grant Stealth Resource.",
     "championId": 2438,
     "itemType": "Card Vendor Rank 1 Epic",
-    "iconUrl": "https://web2.hirez.com/paladins/champion-cards/guerrilla-tactics.jpg",
+    "iconUrl": "/images/cards/Card_Guerilla_Tactics.avif",
     "source": "items-reference"
   },
   {
@@ -6976,7 +6976,7 @@
     "shortDescription": null,
     "championId": 2529,
     "itemType": "Inventory Vendor - Champion Cards",
-    "iconUrl": "https://web2.hirez.com/paladins/champion-cards/honed-senses.jpg",
+    "iconUrl": "/images/cards/Card_Honed_Sense.avif",
     "source": "items-reference"
   },
   {

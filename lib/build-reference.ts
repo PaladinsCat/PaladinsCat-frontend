@@ -1,5 +1,6 @@
 import { fetchReferenceCards, fetchReferenceItems, fetchReferenceTalents } from "@/lib/api-client";
 import { getChampionData, type ChampionData } from "@/lib/champion-data";
+import { canonicalCardNameKey } from "@/lib/card-name";
 
 export type BuildItemCategory = "Offense" | "Defense" | "Healing" | "Utility";
 
@@ -204,17 +205,28 @@ async function buildCards(championId: number, champion?: ChampionData): Promise<
   ]);
   const byNameAndChampion = new Map<string, RawCard>();
   const byName = new Map<string, RawCard>();
+  const byCanonicalNameAndChampion = new Map<string, RawCard>();
+  const byCanonicalName = new Map<string, RawCard>();
   for (const row of [...localCards, ...(dbCards as RawCard[])]) {
     const key = normalizeName(nameOf(row, "card"));
     if (!key) continue;
     byName.set(key, row);
     const rowChampionId = championIdOf(row as RawCard);
     if (rowChampionId > 0) byNameAndChampion.set(`${rowChampionId}:${key}`, row as RawCard);
+    const canonicalKey = canonicalCardNameKey(nameOf(row, "card"));
+    if (canonicalKey) {
+      byCanonicalName.set(canonicalKey, row);
+      if (rowChampionId > 0) byCanonicalNameAndChampion.set(`${rowChampionId}:${canonicalKey}`, row as RawCard);
+    }
   }
 
   return champion.loadouts.map((card, index) => {
     const key = normalizeName(card.name);
-    const row = byNameAndChampion.get(`${championId}:${key}`) ?? byName.get(key);
+    const canonicalKey = canonicalCardNameKey(card.name);
+    const row = byNameAndChampion.get(`${championId}:${key}`)
+      ?? byCanonicalNameAndChampion.get(`${championId}:${canonicalKey}`)
+      ?? byName.get(key)
+      ?? byCanonicalName.get(canonicalKey);
     const id = row ? idOf(row, "card") : 0;
     return {
       id: id > 0 ? id : -(index + 1),

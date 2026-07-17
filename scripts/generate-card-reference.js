@@ -76,6 +76,16 @@ function looseAssetKey(value) {
     .replace(/[^a-z0-9]/g, "");
 }
 
+function canonicalCardAssetKey(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/[’']/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\bguerrilla\b/g, "guerilla")
+    .replace(/\b([a-z0-9]{3,})s\b/g, "$1")
+    .replace(/\s+/g, "");
+}
+
 function buildAssetIndex(dir, prefix) {
   const index = new Map();
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -95,6 +105,15 @@ function buildAssetIndex(dir, prefix) {
 
 const CARD_ASSET_INDEX = buildAssetIndex(CARD_IMAGE_DIR, "Card_");
 const TALENT_ASSET_INDEX = buildAssetIndex(CHAMPION_IMAGE_DIR, "Talent ");
+const CARD_CANONICAL_ASSET_INDEX = new Map();
+for (const filename of fs.readdirSync(CARD_IMAGE_DIR)) {
+  if (!/^Card_.*\.(?:avif|png)$/i.test(filename)) continue;
+  const ext = path.extname(filename);
+  const stem = filename.slice("Card_".length, -ext.length);
+  const key = canonicalCardAssetKey(stem);
+  const current = CARD_CANONICAL_ASSET_INDEX.get(key);
+  if (!current || ext.toLowerCase() === ".avif") CARD_CANONICAL_ASSET_INDEX.set(key, filename);
+}
 
 function indexedAssetUrl(index, publicDir, prefix, name) {
   const segment = assetSegment(name);
@@ -106,7 +125,10 @@ function indexedAssetUrl(index, publicDir, prefix, name) {
 
 function localCardIcon(name) {
   const alias = CARD_ASSET_ALIASES.get(normalizeName(name));
-  return indexedAssetUrl(CARD_ASSET_INDEX, "/images/cards", "Card_", alias || name);
+  const exact = indexedAssetUrl(CARD_ASSET_INDEX, "/images/cards", "Card_", alias || name);
+  if (exact) return exact;
+  const canonical = CARD_CANONICAL_ASSET_INDEX.get(canonicalCardAssetKey(alias || name));
+  return canonical ? `/images/cards/${canonical}` : null;
 }
 
 function localTalentIcon(championName, talentName) {

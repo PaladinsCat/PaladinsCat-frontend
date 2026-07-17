@@ -19,6 +19,7 @@ import { getChampionIconSafe } from "@/lib/champion-icons";
 import { loadBuildReferenceData, type BuildReferenceData } from "@/lib/build-reference";
 import { championSlug } from "@/lib/utils";
 import { canonicalLocalImageUrl } from "@/lib/image-assets";
+import { canonicalCardNameKey } from "@/lib/card-name";
 import { useLobbyTier } from "@/lib/lobby-tier-context";
 import { getStatQuality } from "@/lib/stat-quality";
 import { readBrowserResult, writeBrowserResult } from "@/lib/browser-result-cache";
@@ -311,7 +312,11 @@ function PlayerBuildRow({
   }, [expanded, lobbyScope, lobbyTierMax, lobbyTierMin, lobbyTierReady, player.champion_id, selectedTalent?.talent_id]);
   const findReference = (kind: "items" | "cards" | "talents", id: number, name: string | null | undefined) => (
     reference?.[kind].find((entry) => entry.id === id)
-    ?? reference?.[kind].find((entry) => normalizeName(entry.name) === normalizeName(name))
+    ?? reference?.[kind].find((entry) => (
+      kind === "cards"
+        ? canonicalCardNameKey(entry.name) === canonicalCardNameKey(name)
+        : normalizeName(entry.name) === normalizeName(name)
+    ))
   );
   const playerName = player.player_name || "PRIVATE";
   const findItemMetric = (itemId: number, itemName: string | null | undefined) => (
@@ -332,7 +337,7 @@ function PlayerBuildRow({
   )) ?? []));
   const cardMetricAtRecordedLevel = (cardId: number, cardName: string | null | undefined, level: number): DetailMetric | undefined => {
     const cardMetric = loadoutMetrics?.cards.cards.find((metric) => metric.cardId === cardId)
-      ?? loadoutMetrics?.cards.cards.find((metric) => normalizeName(metric.cardName) === normalizeName(cardName));
+      ?? loadoutMetrics?.cards.cards.find((metric) => canonicalCardNameKey(metric.cardName) === canonicalCardNameKey(cardName));
     const levelMetric = cardMetric?.levels.find((metric) => metric.level === level);
     if (!levelMetric) return undefined;
     return {

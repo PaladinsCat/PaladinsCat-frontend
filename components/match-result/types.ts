@@ -38,6 +38,7 @@ export interface PlayerProfileData {
   snapshotSource?: string | null;
   cheater?: boolean;
   susCount?: number;
+  verified?: boolean;
   totalMatches: number;
   totalWins: number;
   winRate: number | null;

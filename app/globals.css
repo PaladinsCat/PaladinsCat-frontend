@@ -866,6 +866,7 @@ main :where(a, button, input, select, textarea):focus-visible {
 #browser-scoreboard .player { min-width: 0; padding-left: 8px; }
 #browser-scoreboard .player-name { display: flex; min-width: 0; align-items: center; gap: 5px; overflow: hidden; color: var(--text); font-size: 18px; font-weight: 720; line-height: 1.04; letter-spacing: -.01em; white-space: nowrap; }
 #browser-scoreboard .player-name-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+#browser-scoreboard .verified-player-icon { width: 14px; height: 14px; flex: 0 0 auto; object-fit: contain; }
 #browser-scoreboard .player-status-tag { display: inline-flex; flex: 0 0 auto; align-items: center; border-radius: 3px; padding: 2px 5px; font-size: 8px; font-weight: 800; line-height: 1; letter-spacing: .02em; }
 #browser-scoreboard .player-status-tag.cheater { color: var(--cheater-tag-text); background: var(--moderation-tag-bg); }
 #browser-scoreboard .player-status-tag.suspicious { color: var(--suspicious-tag-text); background: var(--moderation-tag-bg); }
