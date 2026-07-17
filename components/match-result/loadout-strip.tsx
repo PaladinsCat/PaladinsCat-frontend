@@ -41,7 +41,7 @@ export default function LoadoutStrip({ fact }: LoadoutStripProps) {
   return (
     <div className="flex flex-wrap gap-2">
       {allMaterials.map((m, idx) => {
-        const label = (m as any).talent_name || (m as any).item_name || (m as any).card_name || t("generated.components\\match-result\\loadout-strip.unknown");
+        const label = (m as any).talent_name || (m as any).item_name || (m as any).card_name || t("generated.components.matchResult.loadoutStrip.unknown");
         const src = (m as any).icon_url;
         const fallbackSrc = (m as any).fallback_icon_url;
         const colorClass = m.type === "item"

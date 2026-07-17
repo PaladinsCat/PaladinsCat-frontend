@@ -54,7 +54,7 @@ export default function ChampionEloPage() {
 }
 
 function ChampionEloContent() {
-  const { t } = useLocalization();
+  const { t , formatNumber, formatPercent} = useLocalization();
   const searchParams = useSearchParams();
   const initialMode = (searchParams.get("mode") === "account" || searchParams.get("mode") === "champion") 
     ? searchParams.get("mode") as ELOMode 
@@ -226,7 +226,7 @@ function ChampionEloContent() {
               : activeTab === "global"
                 ? t("generated.players.top100PlayersByTheirBestChampionSGlicko2")
                 : t("generated.players.topValue1PlayersByTheirBestChampionSGlicko2", { value1: activeTab })}
-          {total > 0 && <span className="text-pc-text-secondary ml-1">({total.toLocaleString()} {t("generated.players.rated")}</span>}
+          {total > 0 && <span className="text-pc-text-secondary ml-1">({formatNumber(total)} {t("generated.players.rated")}</span>}
         </p>
       </div>
 
@@ -431,14 +431,14 @@ function ChampionEloContent() {
                       <td className="py-2.5 px-4 text-right">
                         {p.win_rate != null ? (
                           <span className={p.win_rate >= 50 ? "text-emerald-400 font-medium" : "text-red-400"}>
-                            {p.win_rate.toFixed(1)}%
+                            {formatPercent(p.win_rate)}
                           </span>
                         ) : (
                           <span className="text-pc-text-muted">—</span>
                         )}
                       </td>
                       <td className="py-2.5 px-4 text-right text-pc-text-secondary hidden md:table-cell">
-                        {p.total_matches.toLocaleString()}
+                        {formatNumber(p.total_matches)}
                       </td>
                       <td className="py-2.5 px-4 text-center hidden lg:table-cell">
                         <span className="text-xs px-2 py-0.5 rounded bg-pc-bg text-pc-text-muted">
@@ -497,22 +497,22 @@ function ChampionEloContent() {
                         </Link>
                       </td>
                       <td className="py-2.5 px-4 text-right text-pc-accent font-bold">
-                        {p.elo.toLocaleString()}
+                        {formatNumber(p.elo)}
                       </td>
                       <td className="py-2.5 px-4 text-right">
                         {p.winRate != null ? (
                           <span className={p.winRate >= 50 ? "text-emerald-400 font-medium" : "text-red-400"}>
-                            {p.winRate.toFixed(1)}%
+                            {formatPercent(p.winRate)}
                           </span>
                         ) : (
                           <span className="text-pc-text-muted">—</span>
                         )}
                       </td>
                       <td className="py-2.5 px-4 text-right text-pc-text-secondary hidden md:table-cell">
-                        {p.totalMatches.toLocaleString()}
+                        {formatNumber(p.totalMatches)}
                       </td>
                       <td className="py-2.5 px-4 text-right text-pc-text-secondary hidden md:table-cell">
-                        {p.totalWins.toLocaleString()}
+                        {formatNumber(p.totalWins)}
                       </td>
                       <td className="py-2.5 px-4 text-center hidden lg:table-cell">
                         <span className="text-xs px-2 py-0.5 rounded bg-pc-bg text-pc-text-muted">

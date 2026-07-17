@@ -57,7 +57,7 @@ function toInput(draft: Draft): NotificationInput {
 }
 
 export default function AdminNotificationsPage() {
-  const { t } = useLocalization();
+  const { t , formatDateTime} = useLocalization();
   const { user, isLoading } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [drafts, setDrafts] = useState<Record<number, Draft>>({});
@@ -79,9 +79,9 @@ export default function AdminNotificationsPage() {
       const rows = await fetchAdminNotifications();
       setNotifications(rows);
       setDrafts(Object.fromEntries(rows.map((notification) => [notification.id, fromNotification(notification)])));
-      setStatus(t("generated.app\\admin\\notifications\\page.loadednotifications"));
+      setStatus(t("generated.admin.notifications.page.loadednotifications"));
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("generated.app\\admin\\notifications\\page.failedtoloadnotifications"));
+      setError(err instanceof Error ? err.message : t("generated.admin.notifications.page.failedtoloadnotifications"));
     } finally {
       setLoading(false);
     }
@@ -101,9 +101,9 @@ export default function AdminNotificationsPage() {
       await createAdminNotification(toInput(newDraft));
       setNewDraft(emptyDraft);
       await load();
-      setStatus(t("generated.app\\admin\\notifications\\page.notificationcreated"));
+      setStatus(t("generated.admin.notifications.page.notificationcreated"));
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("generated.app\\admin\\notifications\\page.failedtocreatenotification"));
+      setError(err instanceof Error ? err.message : t("generated.admin.notifications.page.failedtocreatenotification"));
     }
   }
 
@@ -114,9 +114,9 @@ export default function AdminNotificationsPage() {
     try {
       await updateAdminNotification(id, toInput(drafts[id]));
       await load();
-      setStatus(t("generated.app\\admin\\notifications\\page.notificationsaved"));
+      setStatus(t("generated.admin.notifications.page.notificationsaved"));
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("generated.app\\admin\\notifications\\page.failedtosavenotification"));
+      setError(err instanceof Error ? err.message : t("generated.admin.notifications.page.failedtosavenotification"));
     } finally {
       setSavingId(null);
     }
@@ -129,9 +129,9 @@ export default function AdminNotificationsPage() {
     try {
       await deleteAdminNotification(id);
       await load();
-      setStatus(t("generated.app\\admin\\notifications\\page.notificationdeleted"));
+      setStatus(t("generated.admin.notifications.page.notificationdeleted"));
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("generated.app\\admin\\notifications\\page.failedtodeletenotification"));
+      setError(err instanceof Error ? err.message : t("generated.admin.notifications.page.failedtodeletenotification"));
     } finally {
       setSavingId(null);
     }
@@ -196,7 +196,7 @@ export default function AdminNotificationsPage() {
                 <div>
                   <div className="text-xs text-pc-text-muted">#{notification.id}</div>
                   <div className="text-sm text-pc-text-secondary">
-                    {formatLocalDateTime(notification.timestamp)}
+                    {formatDateTime(notification.timestamp)}
                   </div>
                 </div>
                 <div className="flex gap-2">

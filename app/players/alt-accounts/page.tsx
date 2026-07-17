@@ -15,7 +15,7 @@ import { useLocalization } from "@/lib/localization-context";
 const PAGE_SIZE = 24;
 
 export default function AltAccountsPage() {
-  const { t } = useLocalization();
+  const { t , formatNumber} = useLocalization();
   const [groups, setGroups] = useState<AltAccountDirectoryGroup[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -71,7 +71,7 @@ export default function AltAccountsPage() {
             className="w-full rounded-xl border border-pc-border bg-pc-bg-elevated py-2.5 pl-9 pr-3 text-sm text-pc-text outline-none placeholder:text-pc-text-muted focus:border-fuchsia-400/55"
           />
         </label>
-        <span className="text-xs text-pc-text-muted">{t("moderation.mainAccountGroups", { value1: total.toLocaleString() })}</span>
+        <span className="text-xs text-pc-text-muted">{t("moderation.mainAccountGroups", { value1: formatNumber(total) })}</span>
       </div>
 
       {error && <div className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-300">{error}</div>}
@@ -91,13 +91,13 @@ export default function AltAccountsPage() {
                   </Link>
                   <p className="mt-1 text-xs text-pc-text-muted">{group.main.region} · {group.main.platform}</p>
                 </div>
-                <span className="shrink-0 rounded-full border border-fuchsia-400/20 bg-fuchsia-400/10 px-2 py-1 text-xs font-semibold text-fuchsia-200">{t("moderation.relationshipVotes", { value1: group.totalVotes.toLocaleString() })}</span>
+                <span className="shrink-0 rounded-full border border-fuchsia-400/20 bg-fuchsia-400/10 px-2 py-1 text-xs font-semibold text-fuchsia-200">{t("moderation.relationshipVotes", { value1: formatNumber(group.totalVotes) })}</span>
               </div>
 
               <div className="p-3">
                 <div className="mb-2 flex items-center gap-2 px-1 text-[10px] font-bold uppercase tracking-[0.14em] text-pc-text-muted">
                   <UserRound aria-hidden="true" className="h-3.5 w-3.5" />
-                  {t("moderation.altAccountList", { value1: group.altAccounts.length.toLocaleString() })}
+                  {t("moderation.altAccountList", { value1: formatNumber(group.altAccounts.length) })}
                 </div>
                 <div className="space-y-2">
                   {group.altAccounts.map((alt) => (
@@ -108,7 +108,7 @@ export default function AltAccountsPage() {
                         </div>
                         <div className="mt-0.5 text-[11px] text-pc-text-muted">{alt.region} · {alt.platform}</div>
                       </div>
-                      <span className="shrink-0 text-xs font-semibold tabular-nums text-fuchsia-200">{t("moderation.relationshipVotes", { value1: alt.voteCount.toLocaleString() })}</span>
+                      <span className="shrink-0 text-xs font-semibold tabular-nums text-fuchsia-200">{t("moderation.relationshipVotes", { value1: formatNumber(alt.voteCount) })}</span>
                     </Link>
                   ))}
                 </div>

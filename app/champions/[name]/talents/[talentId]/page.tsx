@@ -36,14 +36,9 @@ function parsePositiveInteger(value: string | string[] | null | undefined): numb
   return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
 }
 
-function formatPlays(value: number): string {
-  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
-  if (value >= 1_000) return `${(value / 1_000).toFixed(1)}K`;
-  return value.toLocaleString();
-}
-
 export default function ChampionTalentDetailPage() {
-  const { t } = useLocalization();
+  const { t, formatNumber, formatPercent, formatRecord } = useLocalization();
+  const formatPlays = (value: number) => formatNumber(value, { notation: "compact", maximumFractionDigits: 1 });
   const params = useParams();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -119,7 +114,7 @@ export default function ChampionTalentDetailPage() {
         setChampionData(null);
         setTalentStat(null);
         setCardStats(null);
-        setError(reason instanceof Error ? reason.message : t("generated.app\\champions\\[name]\\talents\\[talentId]\\page.unabletoloadtalentstatisti"));
+        setError(reason instanceof Error ? reason.message : t("generated.champions.[name].talents.[talentId].page.unabletoloadtalentstatisti"));
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -177,9 +172,9 @@ export default function ChampionTalentDetailPage() {
             </div>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <SummaryTile label={t("generated.champions.talentPlays")} value={formatPlays(talentStat.totalPlays)} />
-              <SummaryTile label={t("generated.champions.pickRate")} value={`${pickRate.toFixed(1)}%`} color={quality.color} />
-              <SummaryTile label={t("generated.champions.winRate")} value={`${talentStat.winRate.toFixed(1)}%`} color={quality.color} />
-              <SummaryTile label={t("generated.champions.record")} value={`${talentStat.wins.toLocaleString()}W/${talentStat.losses.toLocaleString()}L`} />
+              <SummaryTile label={t("generated.champions.pickRate")} value={formatPercent(pickRate)} color={quality.color} />
+              <SummaryTile label={t("generated.champions.winRate")} value={formatPercent(talentStat.winRate)} color={quality.color} />
+              <SummaryTile label={t("generated.champions.record")} value={formatRecord(talentStat.wins, talentStat.losses)} />
             </div>
           </div>
         </div>
@@ -189,7 +184,7 @@ export default function ChampionTalentDetailPage() {
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="pc-card-title">{t("generated.champions.loadoutCards")}</h2>
           <div className="text-xs text-pc-text-secondary">
-            {t("generated.champions.rankedPerformanceWith")}{" "}<span className="font-medium text-pc-accent">{talentStat.talentName}</span> · {cardStats.totalMatches.toLocaleString()} {t("generated.champions.plays.0effba4")}</div>
+            {t("generated.champions.rankedPerformanceWith")}{" "}<span className="font-medium text-pc-accent">{talentStat.talentName}</span> · {formatNumber(cardStats.totalMatches)} {t("generated.champions.plays.0effba4")}</div>
         </div>
         {championData.loadouts?.length ? (
           <ChampionLoadoutGrid

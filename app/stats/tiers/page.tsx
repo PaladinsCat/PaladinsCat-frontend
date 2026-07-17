@@ -53,7 +53,7 @@ function TierValue({
   tier: number;
   className?: string;
 }) {
-  const { t } = useLocalization();
+  const { t , formatNumber} = useLocalization();
   const tierSort = roundedTier(tier);
   if (tierSort === 0) {
     return <span className={`tabular-nums ${className}`}>0</span>;
@@ -67,7 +67,7 @@ function TierValue({
         className="h-6 w-6 object-contain"
         loading="lazy"
       />
-      <span>{tier.toFixed(2)}</span>
+      <span>{formatNumber(tier, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
     </span>
   );
 }
@@ -81,7 +81,7 @@ function DistributionChart({
   rows: TierStat[];
   label: string;
 }) {
-  const { t } = useLocalization();
+  const { t , formatNumber, formatPercent} = useLocalization();
   const total = rows.reduce((sum, row) => sum + row.totalPlays, 0);
   const max = Math.max(1, ...rows.map((row) => row.totalPlays));
 
@@ -90,7 +90,7 @@ function DistributionChart({
       <div className="mb-3 flex items-center justify-between gap-3 px-1">
         <h2 className="text-lg font-bold text-pc-text">{title}</h2>
         <span className="text-xs text-pc-text-secondary tabular-nums">
-          {total.toLocaleString()} {label}
+          {formatNumber(total)} {label}
         </span>
       </div>
       <div className="rounded-xl border border-pc-border bg-pc-bg-elevated p-3 sm:p-4">
@@ -104,12 +104,12 @@ function DistributionChart({
                 className="flex flex-col items-center justify-end gap-1 min-w-6 h-full group"
               >
                 <div className="text-[9px] text-pc-text-muted tabular-nums opacity-0 group-hover:opacity-100 transition-opacity">
-                  {share.toFixed(1)}%
+                  {formatPercent(share)}
                 </div>
                 <div
                   className="w-3 rounded-t-sm bg-pc-accent-mid group-hover:bg-pc-accent transition-colors"
                   style={{ height }}
-                  title={t("generated.stats.value1Value2Value3", { value1: row.tier, value2: row.totalPlays.toLocaleString(), value3: share.toFixed(1) })}
+                  title={t("generated.stats.value1Value2Value3", { value1: row.tier, value2: formatNumber(row.totalPlays), value3: formatNumber(share, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) })}
                 />
                 <img
                   src={rankIconForTier(row.tierSort)}
@@ -119,7 +119,7 @@ function DistributionChart({
                   loading="lazy"
                 />
                 <div className="text-[8px] text-pc-text-secondary tabular-nums leading-none">
-                  {row.totalPlays > 0 ? row.totalPlays.toLocaleString() : ""}
+                  {row.totalPlays > 0 ? formatNumber(row.totalPlays) : ""}
                 </div>
               </div>
             );
@@ -131,7 +131,7 @@ function DistributionChart({
 }
 
 export default function TiersPage() {
-  const { t } = useLocalization();
+  const { t , formatNumber} = useLocalization();
   const [profileTiers, setProfileTiers] = useState<TierStat[]>([]);
   const [matchTiers, setMatchTiers] = useState<TierStat[]>([]);
   const [summary, setSummary] = useState<TierSummary>(EMPTY_SUMMARY);
@@ -193,7 +193,7 @@ export default function TiersPage() {
                   {item.kind === "tier" ? (
                     <TierValue tier={item.value} />
                   ) : (
-                    <span className="tabular-nums">{item.value.toLocaleString()}</span>
+                    <span className="tabular-nums">{formatNumber(item.value)}</span>
                   )}
                 </div>
                 {item.kind === "count" ? <div className="text-xs text-pc-text-secondary">{item.suffix}</div> : null}

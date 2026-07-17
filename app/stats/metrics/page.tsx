@@ -167,7 +167,7 @@ function TabBar({
 /* ── Metric panel (same as MetricDetailPage content) ── */
 
 function MetricPanel({ config }: { config: MetricConfig }) {
-  const { t } = useLocalization();
+  const { t , formatNumber, formatPercent} = useLocalization();
   const [metricSummary, setMetricSummary] = useState<PerformanceMetricSummary>(() => emptySummary());
   const [classData, setClassData] = useState<ClassMetricData[]>(() => buildClassData([], {}));
 
@@ -207,10 +207,10 @@ function MetricPanel({ config }: { config: MetricConfig }) {
     };
   }, [config.key]);
 
-  const formatVal = (value: number) => config.isDecimal ? value.toFixed(1) : Math.round(value).toLocaleString();
+  const formatVal = (value: number) => config.isDecimal ? formatNumber(value, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : formatNumber(Math.round(value));
   const formatSigned = (value: number) => {
     const sign = value >= 0 ? "+" : "";
-    return `${sign}${config.isDecimal ? value.toFixed(1) : Math.round(value).toLocaleString()}`;
+    return `${sign}${config.isDecimal ? formatNumber(value, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : formatNumber(Math.round(value))}`;
   };
 
   const globalRank = useMemo(() => {
@@ -234,7 +234,7 @@ function MetricPanel({ config }: { config: MetricConfig }) {
             { label: t("generated.stats.p10"), value: formatVal(metricSummary.p10) },
             { label: t("generated.stats.p90"), value: formatVal(metricSummary.p90) },
             { label: t("generated.stats.max"), value: formatVal(metricSummary.max) },
-            { label: t("generated.stats.samples"), value: metricSummary.sampleSize.toLocaleString() },
+            { label: t("generated.stats.samples"), value: formatNumber(metricSummary.sampleSize) },
           ].map((item) => (
             <div key={item.label} className="min-w-0">
               <div className="text-pc-text-muted text-xs uppercase tracking-wider mb-1">{item.label}</div>
@@ -274,7 +274,7 @@ function MetricPanel({ config }: { config: MetricConfig }) {
                   <div>
                     <div className="text-pc-text-muted text-xs uppercase tracking-wider">{t("generated.stats.vsGlobal")}</div>
                     <div className={classVsGlobal >= 0 ? "text-emerald-400" : "text-red-400"}>
-                      {formatSigned(classVsGlobal)} ({classVsGlobalPct >= 0 ? "+" : ""}{classVsGlobalPct.toFixed(1)}%)
+                      {formatSigned(classVsGlobal)} ({classVsGlobalPct >= 0 ? "+" : ""}{formatPercent(classVsGlobalPct)})
                     </div>
                   </div>
                   <div>
@@ -287,7 +287,7 @@ function MetricPanel({ config }: { config: MetricConfig }) {
                   </div>
                   <div>
                     <div className="text-pc-text-muted text-xs uppercase tracking-wider">{t("generated.stats.samples")}</div>
-                    <div className="text-pc-text-secondary">{section.summary.sampleSize.toLocaleString()}</div>
+                    <div className="text-pc-text-secondary">{formatNumber(section.summary.sampleSize)}</div>
                   </div>
                 </div>
               </div>
@@ -303,9 +303,9 @@ function MetricPanel({ config }: { config: MetricConfig }) {
                       <div className="min-w-0 flex-1">
                         <div className="truncate text-sm font-semibold text-pc-text">{champion.name}</div>
                         <div className="mt-0.5 flex flex-wrap gap-x-2 text-[10px]">
-                          <span className={vsClassPct >= 0 ? "text-emerald-400" : "text-red-400"}>{vsClassPct >= 0 ? "+" : ""}{vsClassPct.toFixed(1)}{t("generated.stats.class")}</span>
-                          <span className={vsGlobalPct >= 0 ? "text-emerald-400" : "text-red-400"}>{vsGlobalPct >= 0 ? "+" : ""}{vsGlobalPct.toFixed(1)}{t("generated.stats.global.ac9baca")}</span>
-                          <span className="text-pc-text-muted">{champion.matches.toLocaleString()} {t("generated.stats.matches.9f3e924")}</span>
+                          <span className={vsClassPct >= 0 ? "text-emerald-400" : "text-red-400"}>{vsClassPct >= 0 ? "+" : ""}{formatNumber(vsClassPct, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}{t("generated.stats.class")}</span>
+                          <span className={vsGlobalPct >= 0 ? "text-emerald-400" : "text-red-400"}>{vsGlobalPct >= 0 ? "+" : ""}{formatNumber(vsGlobalPct, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}{t("generated.stats.global.ac9baca")}</span>
+                          <span className="text-pc-text-muted">{formatNumber(champion.matches)} {t("generated.stats.matches.9f3e924")}</span>
                         </div>
                       </div>
                       <span className="shrink-0 font-mono text-sm font-bold" style={{ color: config.color }}>{formatVal(champion.value)}</span>
@@ -348,15 +348,15 @@ function MetricPanel({ config }: { config: MetricConfig }) {
                           <td className="px-3 py-2 text-right font-semibold" style={{ color: config.color }}>{formatVal(champion.value)}</td>
                           <td className="px-3 py-2 text-right">
                             <span className={vsClass >= 0 ? "text-emerald-400" : "text-red-400"}>
-                              {formatSigned(vsClass)} ({vsClassPct >= 0 ? "+" : ""}{vsClassPct.toFixed(1)}%)
+                              {formatSigned(vsClass)} ({vsClassPct >= 0 ? "+" : ""}{formatPercent(vsClassPct)})
                             </span>
                           </td>
                           <td className="px-3 py-2 text-right">
                             <span className={vsGlobal >= 0 ? "text-emerald-400" : "text-red-400"}>
-                              {formatSigned(vsGlobal)} ({vsGlobalPct >= 0 ? "+" : ""}{vsGlobalPct.toFixed(1)}%)
+                              {formatSigned(vsGlobal)} ({vsGlobalPct >= 0 ? "+" : ""}{formatPercent(vsGlobalPct)})
                             </span>
                           </td>
-                          <td className="px-3 py-2 text-right text-pc-text-secondary">{champion.matches.toLocaleString()}</td>
+                          <td className="px-3 py-2 text-right text-pc-text-secondary">{formatNumber(champion.matches)}</td>
                         </tr>
                       );
                     })}

@@ -34,7 +34,7 @@ function AssetRow({ iconUrl, title, subtitle, talentId }: { iconUrl?: string | n
 }
 
 export default function BuildDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { t } = useLocalization();
+  const { t , formatDateTime} = useLocalization();
   const [build, setBuild] = useState<Build | null>(null);
   const [referenceData, setReferenceData] = useState<BuildReferenceData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -101,7 +101,7 @@ export default function BuildDetailPage({ params }: { params: Promise<{ id: stri
             <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-pc-text-secondary">
               <span>{build.championName}</span>
               <span>{t("generated.builds.by.4081586")}{" "}{build.username}</span>
-              <span>{formatLocalDateTime(build.createdAt)}</span>
+              <span>{formatDateTime(build.createdAt)}</span>
               <span className={build.visibility === "public" ? "text-green-400" : "text-yellow-400"}>
                 {build.visibility}
               </span>
@@ -172,7 +172,7 @@ export default function BuildDetailPage({ params }: { params: Promise<{ id: stri
                       key={selection.cardId}
                       iconUrl={card?.iconUrl}
                       title={card?.name ?? t("generated.builds.cardValue1", { value1: selection.cardId })}
-                      subtitle={`Level ${selection.level}`}
+                      subtitle={t("common.playerChampions.level", { level: selection.level })}
                     />
                   );
                 })

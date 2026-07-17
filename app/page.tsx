@@ -26,7 +26,7 @@ function notificationDot(importance: number) {
 }
 
 export default function HomePage() {
-  const { t } = useLocalization();
+  const { t , formatDateTime} = useLocalization();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [notificationsChecked, setNotificationsChecked] = useState(false);
   const [changelogPreview, setChangelogPreview] = useState<ChangelogEntry | null>(null);
@@ -109,7 +109,7 @@ export default function HomePage() {
                       <div className="flex-1 min-w-0">
                         <p className="text-pc-text-secondary text-sm leading-relaxed">{notification.message}</p>
                         <span className="text-pc-text-muted text-xs mt-1 block">
-                          {formatLocalDateTime(notification.timestamp)}
+                          {formatDateTime(notification.timestamp)}
                         </span>
                       </div>
                       <button
@@ -154,7 +154,7 @@ export default function HomePage() {
                     </p>
                     {changelogPreview.deployedAt && (
                       <span className="text-pc-text-muted text-xs mt-2 block">
-                        {formatLocalDateTime(changelogPreview.deployedAt)}
+                        {formatDateTime(changelogPreview.deployedAt)}
                       </span>
                     )}
                   </div>

@@ -70,7 +70,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     "@context": "https://schema.org",
     "@graph": [
       {
-        "@type": t("generated.app\\layout.website"),
+        "@type": t("generated.layout.website"),
         "@id": `${SITE_URL}/#website`,
         name: SITE_NAME,
         url: SITE_URL,
@@ -78,14 +78,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         inLanguage: locale,
       },
       {
-        "@type": t("generated.app\\layout.organization"),
+        "@type": t("generated.layout.organization"),
         "@id": `${SITE_URL}/#organization`,
         name: SITE_NAME,
         url: SITE_URL,
         logo: `${SITE_URL}/images/icons/paladinscat.avif`,
       },
       {
-        "@type": t("generated.app\\layout.dataset"),
+        "@type": t("generated.layout.dataset"),
         "@id": `${SITE_URL}/#dataset`,
         name: t("seo.root.datasetName"),
         url: SITE_URL,

@@ -10,7 +10,7 @@ import { championSlug } from "@/lib/utils";
 import { useLocalization } from "@/lib/localization-context";
 
 export default function TalentsPage() {
-  const { t } = useLocalization();
+  const { t , formatNumber, formatPercent} = useLocalization();
   const [talents, setTalents] = useState<Array<{ talentId: number; talentName: string; championId: number; championName: string; totalPlays: number; winRate: number }>>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -62,8 +62,8 @@ export default function TalentsPage() {
         <div className="space-y-2 sm:hidden">
           {filtered.slice(0, 20).map((talent) => <Link key={`${talent.championId}-${talent.talentId}`} href={`/champions/${championSlug(talent.championName)}/talents/${talent.talentId}`} className="pc-mobile-panel flex min-w-0 items-center gap-3 p-3">
             <img src={getChampionIconSafe(talent.championName)} alt="" className="h-10 w-10 shrink-0 rounded-lg object-contain" />
-            <div className="min-w-0 flex-1"><div className="truncate text-sm font-semibold text-pc-text">{talent.talentName}</div><div className="text-xs text-pc-text-muted">{talent.championName} · {talent.totalPlays.toLocaleString()} {t("generated.stats.plays.0effba4")}</div></div>
-            <span className={talent.winRate >= 50 ? "shrink-0 font-bold text-emerald-400" : "shrink-0 font-bold text-rose-400"}>{talent.winRate?.toFixed(1)}%</span>
+            <div className="min-w-0 flex-1"><div className="truncate text-sm font-semibold text-pc-text">{talent.talentName}</div><div className="text-xs text-pc-text-muted">{talent.championName} · {formatNumber(talent.totalPlays)} {t("generated.stats.plays.0effba4")}</div></div>
+            <span className={talent.winRate >= 50 ? "shrink-0 font-bold text-emerald-400" : "shrink-0 font-bold text-rose-400"}>{formatPercent(talent.winRate)}</span>
           </Link>)}
         </div>
       )}
@@ -84,7 +84,7 @@ export default function TalentsPage() {
                   <td className="px-4 py-2 text-pc-text">{t.championName}</td>
                   <td className="px-4 py-2 text-pc-text">{t.talentName}</td>
                   <td className="px-4 py-2 text-pc-text">{t.totalPlays}</td>
-                  <td className="px-4 py-2 text-pc-text">{t.winRate?.toFixed(1)}%</td>
+                  <td className="px-4 py-2 text-pc-text">{formatPercent(t.winRate)}</td>
                 </tr>
               ))}
             </tbody>

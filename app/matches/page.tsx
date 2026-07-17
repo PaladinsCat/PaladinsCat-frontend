@@ -15,7 +15,7 @@ import { useLocalization } from "@/lib/localization-context";
 const RANKED_QUEUE_ID = "486";
 
 export default function MatchesPage() {
-  const { t } = useLocalization();
+  const { t , formatNumber} = useLocalization();
   const { timeZone } = useTimeZone();
   const { isLoggedIn, isLoading: authLoading } = useAuth();
   const { definition: lobbyTier, ready: lobbyTierReady } = useLobbyTier();
@@ -100,7 +100,7 @@ export default function MatchesPage() {
     {error && !loading && <ErrorState message={error} onRetry={() => void loadMatches()} />}
     {!loading && !error && matches.length === 0 && <EmptyState title={hasFilters ? t("generated.matches.noMatchingGames") : t("generated.matches.noRankedMatchesAvailable")} description={hasFilters ? t("common.empty.matchesFiltered") : t("common.empty.matchesNew")} />}
     {!loading && !error && matches.length > 0 && <>
-      {hasFilters && <div className="text-xs text-pc-text-muted">{t("generated.matches.showing")} {(page - 1) * perPage + 1}–{Math.min(page * perPage, total)} {t("generated.matches.of")} {total.toLocaleString()} {t("generated.matches.rankedMatches")}</div>}
+      {hasFilters && <div className="text-xs text-pc-text-muted">{t("generated.matches.showing")} {(page - 1) * perPage + 1}–{Math.min(page * perPage, total)} {t("generated.matches.of")} {formatNumber(total)} {t("generated.matches.rankedMatches")}</div>}
       <div className="space-y-2 sm:hidden">{matches.map((match) => <MatchCard key={match.match_id} match={match} />)}</div>
       <div className="hidden overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated sm:block"><div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="border-b border-pc-border bg-pc-bg-secondary text-left text-xs text-pc-text-muted"><th className="px-4 py-3">{t("generated.matches.matchId")}</th><th className="px-4 py-3">{t("generated.matches.map")}</th><th className="px-4 py-3">{t("generated.matches.region")}</th><th className="px-4 py-3">{t("generated.matches.duration")}</th><th className="px-4 py-3">{t("generated.matches.date.eb9a4bc")}</th></tr></thead><tbody>{matches.map((match) => <MatchRow key={match.match_id} match={match} />)}</tbody></table></div></div>
       {hasFilters && totalPages > 1 && <div className="flex items-center justify-center gap-2"><button onClick={() => setPage((value) => Math.max(1, value - 1))} disabled={page === 1} className="rounded-lg border border-pc-border bg-pc-bg-elevated px-3 py-2 text-xs text-pc-text disabled:opacity-50">{t("generated.matches.prev")}</button><span className="px-4 text-xs text-pc-text-secondary">{t("generated.matches.page")} {page} {t("generated.matches.of")} {totalPages}</span><button onClick={() => setPage((value) => Math.min(totalPages, value + 1))} disabled={page === totalPages} className="rounded-lg border border-pc-border bg-pc-bg-elevated px-3 py-2 text-xs text-pc-text disabled:opacity-50">{t("generated.matches.next")}</button></div>}
@@ -114,9 +114,9 @@ function MatchRow({ match }: { match: MatchSearchResult }) {
 }
 
 function MatchCard({ match }: { match: MatchSearchResult }) {
-  const { t } = useLocalization();
+  const { t , formatDateTime} = useLocalization();
   const href = `/matches/${match.match_id}`;
-  return <Link href={href} className="pc-mobile-panel block p-3"><div className="flex items-start justify-between gap-3"><div className="min-w-0"><div className="truncate text-sm font-semibold text-pc-text">{match.map || t("generated.matches.unknownMap")}</div><div className="mt-0.5 font-mono text-[10px] text-pc-accent">#{match.match_id}</div></div><span className="rounded-full border border-pc-border bg-pc-bg px-2 py-1 text-[10px] uppercase text-pc-text-secondary">{match.region || "—"}</span></div><div className="mt-3 grid grid-cols-2 gap-2 text-xs"><div><div className="text-[9px] uppercase text-pc-text-muted">{t("generated.matches.duration")}</div><div className="font-mono text-pc-text-secondary">{formatDuration(match.duration_seconds)}</div></div><div className="text-right"><div className="text-[9px] uppercase text-pc-text-muted">{t("generated.matches.played")}</div><div className="text-pc-text-secondary">{formatLocalDateTime(match.entry_datetime)}</div></div></div></Link>;
+  return <Link href={href} className="pc-mobile-panel block p-3"><div className="flex items-start justify-between gap-3"><div className="min-w-0"><div className="truncate text-sm font-semibold text-pc-text">{match.map || t("generated.matches.unknownMap")}</div><div className="mt-0.5 font-mono text-[10px] text-pc-accent">#{match.match_id}</div></div><span className="rounded-full border border-pc-border bg-pc-bg px-2 py-1 text-[10px] uppercase text-pc-text-secondary">{match.region || "—"}</span></div><div className="mt-3 grid grid-cols-2 gap-2 text-xs"><div><div className="text-[9px] uppercase text-pc-text-muted">{t("generated.matches.duration")}</div><div className="font-mono text-pc-text-secondary">{formatDuration(match.duration_seconds)}</div></div><div className="text-right"><div className="text-[9px] uppercase text-pc-text-muted">{t("generated.matches.played")}</div><div className="text-pc-text-secondary">{formatDateTime(match.entry_datetime)}</div></div></div></Link>;
 }
 
 function formatDuration(seconds: number): string {

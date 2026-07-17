@@ -40,7 +40,7 @@ function buildStaticBase(): Champion[] {
 }
 
 export default function ChampionTable() {
-  const { t } = useLocalization();
+  const { t , formatNumber} = useLocalization();
   const [champions, setChampions] = useState<Champion[]>(buildStaticBase);
   const [loading, setLoading] = useState(false);
   const [dbAvailable, setDbAvailable] = useState<boolean | null>(null); // null = checking
@@ -233,8 +233,8 @@ export default function ChampionTable() {
               : undefined;
             const formatPlays = (n: number | null | undefined) => {
               if (n == null) return "—";
-              if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-              if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
+              if (n >= 1_000_000) return `${formatNumber((n / 1_000_000), { minimumFractionDigits: 1, maximumFractionDigits: 1 })}M`;
+              if (n >= 1_000) return `${formatNumber((n / 1_000), { minimumFractionDigits: 1, maximumFractionDigits: 1 })}K`;
               return String(n);
             };
             const quality = c.winRate != null ? getStatQuality(c.winRate, c.pickRate, maxChampionPickRate) : null;

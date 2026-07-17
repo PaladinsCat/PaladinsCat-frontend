@@ -35,7 +35,7 @@ export default function LobbyTierBanner() {
           <span className="shrink-0 text-[10px] font-bold uppercase tracking-[0.14em] text-pc-text-muted">
             {t("generated.players.rankedStats")}</span>
           <span className="hidden h-4 w-px bg-pc-border sm:block" aria-hidden="true" />
-          {ready ? <span className="truncate text-xs font-semibold text-pc-accent">{definition.label}</span> : <LoadingIndicator className="gap-1.5 text-xs" />}
+          {ready ? <span className="truncate text-xs font-semibold text-pc-accent">{t(definition.labelKey)}</span> : <LoadingIndicator className="gap-1.5 text-xs" />}
         </div>
 
         <div className="hidden items-center gap-1 md:flex" role="group" aria-label={t("generated.players.rankedLobbyStatisticsScope")}>
@@ -54,7 +54,7 @@ export default function LobbyTierBanner() {
                     : "text-pc-text-secondary hover:bg-pc-bg-elevated hover:text-pc-accent"
                 }`}
               >
-                {option.label}
+                {t(option.labelKey)}
               </button>
             );
           })}
@@ -69,7 +69,7 @@ export default function LobbyTierBanner() {
             className="max-w-36 rounded-md border border-pc-border bg-pc-bg-elevated px-2 py-1 text-xs font-semibold text-pc-text focus:outline-none focus:ring-2 focus:ring-pc-accent/50 disabled:opacity-50"
           >
             {LOBBY_TIER_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>{option.label}</option>
+              <option key={option.value} value={option.value}>{t(option.labelKey)}</option>
             ))}
           </select>
         </label>

@@ -35,7 +35,7 @@ function LoginForm() {
       await login(username.trim(), password);
       router.push(redirectPath);
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("generated.app\\auth\\login\\page.loginfailed"));
+      setError(err instanceof Error ? err.message : t("generated.auth.login.page.loginfailed"));
     } finally {
       setLoading(false);
     }

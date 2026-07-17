@@ -16,7 +16,7 @@ import {
   type MatchPlayerDetail,
 } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
-import { loadBuildReferenceData, type BuildReferenceData } from "@/lib/build-reference";
+import { loadBuildReferenceData, type BuildItemReference, type BuildReferenceData } from "@/lib/build-reference";
 import { championSlug } from "@/lib/utils";
 import { canonicalLocalImageUrl } from "@/lib/image-assets";
 import { canonicalCardNameKey } from "@/lib/card-name";
@@ -130,11 +130,11 @@ function Asset({ sources, alt, level, tone = "border-pc-border", transparent = f
   </div>;
 }
 
-function cleanNumber(value: number) {
-  return Number.isInteger(value) ? String(value) : value.toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
+function cleanNumber(value: number, formatNumber: (value: number, options?: Intl.NumberFormatOptions) => string) {
+  return formatNumber(value, { maximumFractionDigits: 2 });
 }
 
-function formatDescription(description: string | null | undefined, level: number) {
+function formatDescription(description: string | null | undefined, level: number, formatNumber: (value: number, options?: Intl.NumberFormatOptions) => string) {
   if (!description) return null;
   return description
     // Hi-Rez reference descriptions carry legacy category/ability markers
@@ -142,10 +142,10 @@ function formatDescription(description: string | null | undefined, level: number
     // stale, and should not be presented as part of the effect sentence.
     .replace(/^\s*(?:\[[^\]]+\]\s*)+/, "")
     .replace(/\{\s*(?:scale\s*=\s*)?(-?(?:\d+(?:\.\d*)?|\.\d+))\s*\|\s*(-?(?:\d+(?:\.\d*)?|\.\d+))\s*\}/gi, (_match, base: string, increase: string) => (
-      cleanNumber(Number(base) + Number(increase) * Math.max(0, level - 1))
+      cleanNumber(Number(base) + Number(increase) * Math.max(0, level - 1), formatNumber)
     ))
     .replace(/\{\s*(-?(?:\d+(?:\.\d*)?|\.\d+))\s*\}/g, (_match, value: string) => (
-      cleanNumber(Number(value))
+      cleanNumber(Number(value), formatNumber)
     ));
 }
 
@@ -166,7 +166,7 @@ function DetailEntry({
   showMetrics = false,
   metricsLoaded = false,
   maxPickRate = 1,
-  playsLabel = "plays",
+  playsLabel,
   loadingLabel: _loadingLabel,
   href,
   onNavigate,
@@ -190,7 +190,7 @@ function DetailEntry({
   transparentIcon?: boolean;
   canonicalTalent?: { talentId: number; talentName: string | null | undefined };
 }) {
-  const { t } = useLocalization();
+  const { t , formatPercent, formatNumber} = useLocalization();
   const quality = metric ? getStatQuality(metric.winRate, metric.pickRate, maxPickRate) : null;
   return <article className="flex min-w-0 items-start gap-3 rounded-lg border border-pc-border/70 bg-pc-bg-secondary/45 p-3">
     {canonicalTalent ? (
@@ -210,9 +210,9 @@ function DetailEntry({
       <p className="mt-1 text-xs leading-5 text-pc-text-secondary">{description}</p>
       {showMetrics && <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[10px] tabular-nums">
         {metric ? <>
-          <span className="rounded-md border px-1.5 py-0.5 font-semibold" style={{ color: quality?.color, borderColor: quality?.borderColor, background: quality?.background }}>{t("generated.matches.wr")}{" "}{metric.winRate.toFixed(1)}%</span>
-          <span className="rounded-md border border-pc-border bg-pc-bg px-1.5 py-0.5 text-pc-text-secondary">{t("generated.matches.pr")}{" "}{metric.pickRate.toFixed(1)}%</span>
-          <span className="text-pc-text-muted">{metric.plays.toLocaleString()} {playsLabel}</span>
+          <span className="rounded-md border px-1.5 py-0.5 font-semibold" style={{ color: quality?.color, borderColor: quality?.borderColor, background: quality?.background }}>{t("generated.matches.wr")}{" "}{formatPercent(metric.winRate)}</span>
+          <span className="rounded-md border border-pc-border bg-pc-bg px-1.5 py-0.5 text-pc-text-secondary">{t("generated.matches.pr")}{" "}{formatPercent(metric.pickRate)}</span>
+          <span className="text-pc-text-muted">{formatNumber(metric.plays)} {playsLabel ?? t("generated.stats.plays.0effba4")}</span>
         </> : metricsLoaded ? <span className="text-pc-text-muted">{t("generated.matches.noRankedSampleInThisLobbyScope")}</span> : <LoadingIndicator className="gap-1.5 text-[10px]" />}
       </div>}
     </div>
@@ -240,8 +240,8 @@ function PlayerBuildRow({
   lobbyTierReady: boolean;
   returnTo: string;
 }) {
-  const { t } = useLocalization();
-  const champion = player.champion_name || `Champion #${player.champion_id}`;
+  const { formatNumber, t } = useLocalization();
+  const champion = player.champion_name || t("common.entity.championNumber", { number: player.champion_id });
   const talents = fact?.talents ?? [];
   const cards = fact?.cards ?? [];
   const items = fact?.items ?? [];
@@ -405,7 +405,7 @@ function PlayerBuildRow({
           {talents.map((talent) => {
             const entry = findReference("talents", talent.talent_id, talent.talent_name);
             const name = talent.talent_name ?? entry?.name ?? t("common.entity.talentNumber", { number: talent.talent_id });
-            return <DetailEntry key={`talent-detail-${talent.talent_id}`} name={name} href={`${championPath}/talents/${talent.talent_id}?returnTo=${returnToQuery}`} onNavigate={preserveMatchPosition} label={t("generated.matches.talent")} description={formatDescription(entry?.description, 1) ?? (reference ? t("common.fallback.descriptionUnavailable") : <LoadingIndicator className="gap-1.5 text-xs" />)} sources={[]} canonicalTalent={{ talentId: talent.talent_id, talentName: talent.talent_name }} transparentIcon metric={talentMetric} showMetrics metricsLoaded={loadoutMetrics !== null} maxPickRate={100} />;
+            return <DetailEntry key={`talent-detail-${talent.talent_id}`} name={name} href={`${championPath}/talents/${talent.talent_id}?returnTo=${returnToQuery}`} onNavigate={preserveMatchPosition} label={t("generated.matches.talent")} description={formatDescription(entry?.description, 1, formatNumber) ?? (reference ? t("common.fallback.descriptionUnavailable") : <LoadingIndicator className="gap-1.5 text-xs" />)} sources={[]} canonicalTalent={{ talentId: talent.talent_id, talentName: talent.talent_name }} transparentIcon metric={talentMetric} showMetrics metricsLoaded={loadoutMetrics !== null} maxPickRate={100} />;
           })}
           {cards.map((card) => {
             const entry = findReference("cards", card.card_id, card.card_name);
@@ -413,7 +413,7 @@ function PlayerBuildRow({
             const name = card.card_name ?? entry?.name ?? t("common.entity.cardNumber", { number: card.card_id });
             const query = new URLSearchParams({ returnTo });
             if (selectedTalent) query.set("talentId", String(selectedTalent.talent_id));
-            return <DetailEntry key={`card-detail-${card.card_id}`} name={name} href={`${championPath}/cards/${card.card_id}?${query.toString()}`} onNavigate={preserveMatchPosition} label={t("common.match.cardLevel", { level })} description={formatDescription(entry?.description, level) ?? (reference ? t("common.fallback.descriptionUnavailable") : <LoadingIndicator className="gap-1.5 text-xs" />)} sources={[entry?.iconUrl, card.icon_url, card.fallback_icon_url]} level={level} tone="border-pc-accent/30" metric={cardMetricAtRecordedLevel(card.card_id, card.card_name, level)} showMetrics metricsLoaded={loadoutMetrics !== null} maxPickRate={maxLoadoutLevelPickRate} playsLabel={t("common.count.picks")} />;
+            return <DetailEntry key={`card-detail-${card.card_id}`} name={name} href={`${championPath}/cards/${card.card_id}?${query.toString()}`} onNavigate={preserveMatchPosition} label={t("common.match.cardLevel", { level })} description={formatDescription(entry?.description, level, formatNumber) ?? (reference ? t("common.fallback.descriptionUnavailable") : <LoadingIndicator className="gap-1.5 text-xs" />)} sources={[entry?.iconUrl, card.icon_url, card.fallback_icon_url]} level={level} tone="border-pc-accent/30" metric={cardMetricAtRecordedLevel(card.card_id, card.card_name, level)} showMetrics metricsLoaded={loadoutMetrics !== null} maxPickRate={maxLoadoutLevelPickRate} playsLabel={t("common.count.picks")} />;
           })}
           {talents.length === 0 && cards.length === 0 && <p className="text-xs text-pc-text-muted">{t("generated.matches.noTalentOrLoadoutCardsWereRecorded")}</p>}
         </section>
@@ -421,12 +421,12 @@ function PlayerBuildRow({
         <section className="space-y-2">
           <h3 className="text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted">{t("generated.matches.purchasedItems")}</h3>
           {items.map((item) => {
-            const entry = findReference("items", item.item_id, item.item_name);
+            const entry = findReference("items", item.item_id, item.item_name) as BuildItemReference | undefined;
             const level = Math.max(1, (item.item_level ?? 0) + 1);
             const name = item.item_name ?? entry?.name ?? t("common.entity.itemNumber", { number: item.item_id });
-            const description = entry?.description ?? item.description;
+            const description = entry?.description ?? (entry?.descriptionKey ? t(entry.descriptionKey) : null) ?? item.description;
             const itemMetric = itemMetricAtRecordedSlotAndLevel(item.item_id, item.item_name, item.slot, item.item_level ?? 0);
-            return <DetailEntry key={`item-detail-${item.slot}-${item.item_id}`} name={name} href={`/stats/items/${item.item_id}?returnTo=${returnToQuery}`} onNavigate={preserveMatchPosition} label={t("common.match.itemSlotLevel", { slot: item.slot, level })} description={formatDescription(description, level) ?? (reference ? t("common.fallback.descriptionUnavailable") : <LoadingIndicator className="gap-1.5 text-xs" />)} sources={[entry?.iconUrl, item.icon_url, item.fallback_icon_url]} level={level} metric={itemMetric} showMetrics metricsLoaded={itemMetrics !== null} maxPickRate={maxItemPickRate} playsLabel={t("common.count.uses")} />;
+            return <DetailEntry key={`item-detail-${item.slot}-${item.item_id}`} name={name} href={`/stats/items/${item.item_id}?returnTo=${returnToQuery}`} onNavigate={preserveMatchPosition} label={t("common.match.itemSlotLevel", { slot: item.slot, level })} description={formatDescription(description, level, formatNumber) ?? (reference ? t("common.fallback.descriptionUnavailable") : <LoadingIndicator className="gap-1.5 text-xs" />)} sources={[entry?.iconUrl, item.icon_url, item.fallback_icon_url]} level={level} metric={itemMetric} showMetrics metricsLoaded={itemMetrics !== null} maxPickRate={maxItemPickRate} playsLabel={t("common.count.uses")} />;
           })}
           {items.length === 0 && <p className="text-xs text-pc-text-muted">{t("generated.matches.noPurchasedItemsWereRecorded")}</p>}
         </section>
@@ -441,6 +441,6 @@ export default function ItemsLoadoutsSection({ team1Players, team2Players, team1
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const returnTo = searchParams.size > 0 ? `${pathname}?${searchParams.toString()}` : pathname;
-  const rows = (players: MatchPlayerDetail[], wins: boolean) => players.map(p => <PlayerBuildRow key={matchPlayerKey(p)} player={p} fact={factMap.get(String(p.player_id))} wins={wins} lobbyScope={lobbyScope} lobbyScopeLabel={lobbyTier.label} lobbyTierMin={lobbyTier.tierMin} lobbyTierMax={lobbyTier.tierMax} lobbyTierReady={lobbyTierReady} returnTo={returnTo} />);
+  const rows = (players: MatchPlayerDetail[], wins: boolean) => players.map(p => <PlayerBuildRow key={matchPlayerKey(p)} player={p} fact={factMap.get(String(p.player_id))} wins={wins} lobbyScope={lobbyScope} lobbyScopeLabel={t(lobbyTier.labelKey)} lobbyTierMin={lobbyTier.tierMin} lobbyTierMax={lobbyTier.tierMax} lobbyTierReady={lobbyTierReady} returnTo={returnTo} />);
   return <section className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated"><div className="flex flex-wrap items-end justify-between gap-3 border-b border-pc-border px-4 py-3"><div><h2 className="text-lg font-bold uppercase tracking-wide text-pc-text">{t("generated.matches.itemsLoadouts")}</h2><p className="mt-0.5 text-xs text-pc-text-muted">{t("generated.matches.talentAndCardsPurchasedItemsExpandARowForDescriptions")}</p></div></div><div className="overflow-x-hidden lg:overflow-x-auto"><div className="hidden min-w-[780px] grid-cols-[240px_1fr_1fr_36px] gap-4 border-b border-pc-border bg-pc-bg-secondary/60 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted lg:grid"><span>{t("generated.matches.championPlayer")}</span><span>{t("generated.matches.loadout")}</span><span>{t("generated.matches.items")}</span><span className="sr-only">{t("generated.matches.details")}</span></div>{rows(team1Players, team1Wins)}<div className="flex items-center gap-3 bg-pc-bg-secondary/60 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-pc-text-muted"><span className={`h-1.5 w-1.5 rounded-full ${team2Wins ? "bg-emerald-400" : "bg-red-400"}`} />{t("generated.matches.opposingTeam")}</div>{rows(team2Players, team2Wins)}</div></section>;
 }

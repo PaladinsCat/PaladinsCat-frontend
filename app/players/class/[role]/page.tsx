@@ -64,7 +64,7 @@ function RankBadge({ rank }: { rank: number }) {
 }
 
 export default function ClassEloPage() {
-  const { t } = useLocalization();
+  const { t , formatNumber, formatPercent} = useLocalization();
   const params = useParams();
   const router = useRouter();
   const rawRole = params?.role as string;
@@ -231,7 +231,7 @@ export default function ClassEloPage() {
                       </td>
                       <td className="py-2.5 px-4 text-right">
                         <span className={`font-bold ${ROLE_COLORS[role]}`}>
-                          {p.elo.toLocaleString()}
+                          {formatNumber(p.elo)}
                         </span>
                       </td>
                       <td className="py-2.5 px-4 text-right">
@@ -244,14 +244,14 @@ export default function ClassEloPage() {
                               : "text-red-400"
                           }
                         >
-                          {p.winRate.toFixed(1)}%
+                          {formatPercent(p.winRate)}
                         </span>
                       </td>
                       <td className="py-2.5 px-4 text-right text-pc-text-secondary hidden md:table-cell">
-                        {p.totalMatches.toLocaleString()}
+                        {formatNumber(p.totalMatches)}
                       </td>
                       <td className="py-2.5 px-4 text-right text-pc-text-secondary hidden md:table-cell">
-                        {p.totalWins.toLocaleString()}
+                        {formatNumber(p.totalWins)}
                       </td>
                       <td className="py-2.5 px-4 text-center hidden lg:table-cell">
                         <span className="text-xs px-2 py-0.5 rounded bg-pc-bg text-pc-text-muted">

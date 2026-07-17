@@ -85,7 +85,7 @@ export default function CreateTierListPage() {
       router.push(`/tierlists/${result.postId}`);
       router.refresh();
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : t("generated.app\\tierlists\\create\\page.failedtopublishtierlist"));
+      setError(reason instanceof Error ? reason.message : t("generated.tierlists.create.page.failedtopublishtierlist"));
       setSaving(false);
     }
   }

@@ -3,16 +3,10 @@ import SmartImage from "@/components/SmartImage";
 import type { ChampionLoadout } from "@/lib/champion-data";
 import type { ChampionCardStat, ChampionCardStatsResponse } from "@/lib/api-client";
 import { getStatQuality } from "@/lib/stat-quality";
-import { LocalizedText } from "@/lib/localization-context";
+import { useLocalization } from "@/lib/localization-context";
 
 function statNameKey(value: string | null | undefined): string {
   return String(value ?? "").normalize("NFKD").toLowerCase().replace(/[^a-z0-9]/g, "");
-}
-
-function formatPlays(value: number): string {
-  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
-  if (value >= 1_000) return `${(value / 1_000).toFixed(1)}K`;
-  return String(value);
 }
 
 function winRateColor(winRate: number): string {
@@ -35,6 +29,11 @@ export default function ChampionLoadoutGrid({
   talentId: number;
   returnTo: string;
 }) {
+  const { formatNumber, formatPercent, formatRecord, t } = useLocalization();
+  const formatPlays = (value: number) => formatNumber(value, {
+    notation: "compact",
+    maximumFractionDigits: 1,
+  });
   const statsByName = new Map(cardStats.cards.map((stat) => [statNameKey(stat.cardName), stat]));
   const maxCardPickRate = Math.max(
     1,
@@ -42,7 +41,7 @@ export default function ChampionLoadoutGrid({
   );
   const byCategory: Record<string, ChampionLoadout[]> = {};
   for (const loadout of loadouts) {
-    const category = loadout.category || "General";
+    const category = loadout.category || t("common.fallback.general");
     (byCategory[category] ??= []).push(loadout);
   }
 
@@ -79,14 +78,14 @@ export default function ChampionLoadoutGrid({
                       <div className="mt-2 space-y-1.5">
                         <div className="flex flex-wrap items-center gap-2 text-xs">
                           <span className={quality?.textClass ?? winRateColor(stat.winRate)} style={quality ? { color: quality.color } : undefined}>
-                            <span className="mr-1 text-pc-text-muted"><LocalizedText id="generated.champions.wr" /></span>{stat.winRate.toFixed(1)}%
+                            <span className="mr-1 text-pc-text-muted">{t("generated.champions.wr")}</span>{formatPercent(stat.winRate)}
                           </span>
                           <span className="text-pc-border">|</span>
-                          <span className="text-pc-text-muted"><span className="mr-1"><LocalizedText id="generated.champions.pr" /></span><span style={quality ? { color: quality.color } : undefined}>{pickRate.toFixed(1)}%</span></span>
+                          <span className="text-pc-text-muted"><span className="mr-1">{t("generated.champions.pr")}</span><span style={quality ? { color: quality.color } : undefined}>{formatPercent(pickRate)}</span></span>
                           <span className="text-pc-border">|</span>
-                          <span className="break-words text-pc-text-muted"><span className="mr-1"><LocalizedText id="generated.champions.picks" /></span><span style={quality ? { color: quality.color } : undefined}>{formatPlays(stat.totalPlays)}</span></span>
+                          <span className="break-words text-pc-text-muted"><span className="mr-1">{t("generated.champions.picks")}</span><span style={quality ? { color: quality.color } : undefined}>{formatPlays(stat.totalPlays)}</span></span>
                           <span className="text-pc-border">|</span>
-                          <span className="break-words text-pc-text-muted">{stat.wins.toLocaleString()}<LocalizedText id="generated.champions.w" />{stat.losses.toLocaleString()}L</span>
+                          <span className="break-words text-pc-text-muted">{formatRecord(stat.wins, stat.losses)}</span>
                         </div>
                         {stat.levels.length > 0 && (
                           <div className="flex items-center gap-1">
@@ -95,11 +94,11 @@ export default function ChampionLoadoutGrid({
                               const levelQuality = getStatQuality(level.winRate, levelPickRate, maxLevelPickRate);
                               return (
                                 <div key={level.level} className="flex flex-1 flex-col items-center">
-                                  <div className="text-[9px] text-pc-text-muted">L{level.level}</div>
+                                  <div className="text-[9px] text-pc-text-muted">{t("common.format.levelShort", { level: level.level })}</div>
                                   <div className="h-1.5 w-full overflow-hidden rounded-full bg-pc-bg-elevated">
                                     <div className="h-full rounded-full" style={{ width: `${Math.max(level.plays > 0 ? 8 : 0, Math.round((level.plays / maxLevelPlays) * 100))}%`, background: levelQuality.track }} />
                                   </div>
-                                  <div className="text-[9px] text-pc-text-muted">{level.plays}</div>
+                                  <div className="text-[9px] text-pc-text-muted">{formatNumber(level.plays)}</div>
                                 </div>
                               );
                             })}

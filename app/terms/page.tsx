@@ -4,7 +4,7 @@ import ScrambleText from "@/components/ScrambleText";
 import { useLocalization } from "@/lib/localization-context";
 
 export default function TermsPage() {
-  const { t } = useLocalization();
+  const { locale, t } = useLocalization();
   return (
     <div className="space-y-12 max-w-3xl mx-auto text-center">
 
@@ -14,7 +14,7 @@ export default function TermsPage() {
           <ScrambleText text={t("generated.terms.termsOfUse")} speed={30} iterations={15} delayFromCenter={false} />
         </h1>
         <p className="text-pc-text-muted text-sm drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]">
-          {t("generated.terms.lastUpdated")}{" "}{new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
+          {t("generated.terms.lastUpdated")}{" "}{new Date().toLocaleDateString(locale, { year: "numeric", month: "long", day: "numeric" })}
         </p>
       </section>
 

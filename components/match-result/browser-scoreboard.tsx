@@ -41,20 +41,6 @@ function value(input: unknown) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-function integer(input: unknown) {
-  return Math.round(value(input)).toLocaleString("en-US");
-}
-
-function compact(input: unknown) {
-  const parsed = value(input);
-  return parsed >= 1000 ? `${(parsed / 1000).toFixed(1)}k` : integer(parsed);
-}
-
-function duration(seconds: number) {
-  const total = Math.max(0, Math.floor(value(seconds)));
-  return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, "0")}`;
-}
-
 function cleanMapName(map: string) {
   return map.replace(/^(?:(?:Ranked|Live|WIP)\s+)+/i, "").replace(/\bv\d+\b/ig, "").trim() || map;
 }
@@ -63,12 +49,18 @@ function cleanQueueMode(queueLabel: string) {
   return queueLabel.replace(/^(?:Ranked|Casual)\s+/i, "").trim() || queueLabel;
 }
 
-function utcTimestamp(value: string) {
+function utcTimestamp(value: string, locale: string) {
   const date = parseBackendDate(value);
   if (!date) return "—";
-  const datePart = date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
-  const timePart = date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: "UTC" });
-  return `${datePart} · ${timePart} UTC`;
+  return new Intl.DateTimeFormat(locale, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: "UTC",
+    timeZoneName: "short",
+  }).format(date);
 }
 
 function metricsFor(player: MatchPlayerDetail): Metrics {
@@ -90,7 +82,7 @@ function tierFor(player: MatchResultPlayer) {
 }
 
 function TeamRows({ team }: { team: MatchResultPlayer[] }) {
-  const { t } = useLocalization();
+  const { formatNumber, t } = useLocalization();
   const players = team.slice(0, 5);
   const metrics = players.map((entry) => metricsFor(entry.matchData));
   const maximum = (key: keyof Metrics) => Math.max(0, ...metrics.map((entry) => entry[key]));
@@ -125,9 +117,9 @@ function TeamRows({ team }: { team: MatchResultPlayer[] }) {
           {party != null && <span className="party-badge" title={t("generated.matches.partyValue1", { value1: party })}>{party}</span>}
         </div>
         <div className="rank"><img src={getRankIconPath(tier.tier, tier.rank)} alt={tier.effective.displayName} title={tier.effective.displayName} /></div>
-        <div className="level">{entry.profileData?.level != null ? integer(entry.profileData.level) : "—"}</div>
+        <div className="level">{formatNumber(entry.profileData?.level)}</div>
         <div className="player"><MatchPlayerLink player={player} className="player-name block" /><MatchPlayerReference player={player} className="player-sub block hover:text-violet-200" /></div>
-        <div className="player-elo">{entry.profileData?.queueElo != null ? integer(entry.profileData.queueElo) : "—"}</div>
+        <div className="player-elo">{formatNumber(entry.profileData?.queueElo)}</div>
         {talent && talentHref ? (
           <Link href={talentHref} className="talent-link" title={talent.talent_name ?? t("generated.matches.talent")} aria-label={t("generated.matches.value1TalentPage", { value1: talent.talent_name ?? t("generated.matches.talent") })}>
             <CanonicalTalentImage
@@ -160,11 +152,13 @@ function TeamRows({ team }: { team: MatchResultPlayer[] }) {
 }
 
 function Metric({ className, value: amount, peak, icon }: { className: string; value: number; peak: boolean; icon?: string }) {
-  return <div className={`metric ${className}${peak ? " peak" : ""}`}>{icon && <img src={icon} alt="" />}{integer(amount)}</div>;
+  const { formatNumber } = useLocalization();
+  return <div className={`metric ${className}${peak ? " peak" : ""}`}>{icon && <img src={icon} alt="" />}{formatNumber(amount)}</div>;
 }
 
 function TeamSummary({ label, won, team, teamNumber }: { label: string; won: boolean; team: MatchResultPlayer[]; teamNumber: 1 | 2 }) {
-  const { t } = useLocalization();
+  const { formatNumber, t } = useLocalization();
+  const compact = (amount: number) => formatNumber(amount, { notation: "compact", maximumFractionDigits: 1 });
   const players = team.slice(0, 5);
   const rows = players.map((entry) => metricsFor(entry.matchData));
   const total = (key: keyof Metrics) => rows.reduce((sum, entry) => sum + entry[key], 0);
@@ -179,11 +173,11 @@ function TeamSummary({ label, won, team, teamNumber }: { label: string; won: boo
   return (
     <div className={`team-bar team-${teamNumber === 1 ? "one" : "two"} grid-row`} id={`team-${teamNumber === 1 ? "one" : "two"}-summary`}>
       <div className="team-heading"><div className="team-name">{label} <span className="result">{won ? t("generated.matches.win") : t("generated.matches.defeat")}</span></div></div>
-      <div className="team-total level-total average-total" title={t("generated.matches.averageLevel")}><span className="team-average-label">{t("generated.matches.avg")}</span>{averageLevel == null ? "—" : integer(averageLevel)}</div>
-      <div className="team-total elo-total average-total" title={t("generated.matches.averageElo")}><span className="team-average-label">{t("generated.matches.avg")}</span>{averageElo == null ? "—" : integer(averageElo)}</div>
+      <div className="team-total level-total average-total" title={t("generated.matches.averageLevel")}><span className="team-average-label">{t("generated.matches.avg")}</span>{formatNumber(averageLevel)}</div>
+      <div className="team-total elo-total average-total" title={t("generated.matches.averageElo")}><span className="team-average-label">{t("generated.matches.avg")}</span>{formatNumber(averageElo)}</div>
       <div className="team-total credits-total" title={t("generated.matches.totalCredits")}><img src="/images/icons/Currency_Credits.avif" alt="" />{compact(total("credits"))}</div>
       <div className="team-total kda-total" title={t("generated.matches.teamKDA")}>{kda.join(" / ")}</div>
-      <div className="team-total objective-total" title={t("generated.matches.totalObjectiveTime")}>{integer(total("objective"))}</div>
+      <div className="team-total objective-total" title={t("generated.matches.totalObjectiveTime")}>{formatNumber(total("objective"))}</div>
       <div className="team-total damage-total" title={t("generated.matches.totalDamage")}>{compact(total("damage"))}</div>
       <div className="team-total taken-total" title={t("generated.matches.totalDamageTaken")}>{compact(total("taken"))}</div>
       <div className="team-total shield-total" title={t("generated.matches.totalShielding")}>{compact(total("shielding"))}</div>
@@ -193,7 +187,14 @@ function TeamSummary({ label, won, team, teamNumber }: { label: string; won: boo
 }
 
 export default function BrowserScoreboard({ match, queueLabel, team1, team2, bans }: BrowserScoreboardProps) {
-  const { t } = useLocalization();
+  const { formatNumber, locale, t } = useLocalization();
+  const formatMatchDuration = (seconds: number) => {
+    const total = Math.max(0, Math.floor(value(seconds)));
+    return t("common.format.clock", {
+      minutes: formatNumber(Math.floor(total / 60), { minimumIntegerDigits: 2, useGrouping: false }),
+      seconds: formatNumber(total % 60, { minimumIntegerDigits: 2, useGrouping: false }),
+    });
+  };
   const previewRef = useRef<HTMLDivElement>(null);
   const scoreboardRef = useRef<HTMLElement>(null);
   const [previewScale, setPreviewScale] = useState(1);
@@ -265,8 +266,8 @@ export default function BrowserScoreboard({ match, queueLabel, team1, team2, ban
                 </div>
                 <div className={`match-meta${ranked ? "" : " casual-meta"}`}>
                   <div className="tier-meta" aria-hidden={!ranked}><img src={getRankIconPath(averageTier, 0)} alt={ranked ? TIER_NAMES[averageTier] ?? t("generated.matches.unranked") : ""} /><div><div className="meta-value">{TIER_NAMES[averageTier] ?? t("generated.matches.unranked")}</div><div className="meta-label">{t("generated.matches.avgTier")}</div></div></div>
-                  <time className="timestamp-meta" dateTime={match.entry_datetime}>{utcTimestamp(match.entry_datetime)}</time>
-                  <div className="duration-meta"><div className="meta-value">{duration(match.duration_seconds)}</div><div className="meta-label">{t("generated.matches.duration")}</div></div>
+                  <time className="timestamp-meta" dateTime={match.entry_datetime}>{utcTimestamp(match.entry_datetime, locale)}</time>
+                  <div className="duration-meta"><div className="meta-value">{formatMatchDuration(match.duration_seconds)}</div><div className="meta-label">{t("generated.matches.duration")}</div></div>
                   <div className="match-id-meta"><div className="meta-value">{match.match_id}</div><div className="meta-label">{t("generated.matches.matchId")}</div></div>
                 </div>
               </header>

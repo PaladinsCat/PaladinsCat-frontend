@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { MatchResultPlayer } from "./types";
 import { championSlug } from "@/lib/utils";
 import { getChampionIconSafe } from "@/lib/champion-icons";
-import { formatKBMTier, getChampionStats, num } from "./format";
+import { getChampionStats } from "./format";
 import { getRankIconPath, resolveEffectiveTier } from "@/lib/tier-utils";
 import PartyBadge from "./party-badge";
 import { MatchPlayerLink } from "./player-identity";
@@ -15,25 +15,21 @@ function RecordBar({ wins, total, tone }: { wins: number; total: number; tone: "
   return <div className="h-1.5 overflow-hidden rounded-full bg-pc-bg-secondary"><div className={`h-full rounded-full ${tone === "green" ? "bg-emerald-400" : "bg-pc-accent"}`} style={{ width: `${percent}%` }} /></div>;
 }
 
-function winRateText(wins: number, total: number) {
-  return total > 0 ? `${((wins / total) * 100).toFixed(1)}% WR` : "—";
-}
-
 function RecordSummary({ label, wins, total, tone, eloLabel, elo }: { label: string; wins: number; total: number; tone: "teal" | "green"; eloLabel: string; elo: number | null | undefined }) {
-  const { t } = useLocalization();
+  const { formatNumber, formatPercent, formatRecord, t } = useLocalization();
   const losses = Math.max(0, total - wins);
   return <div>
     <div className="mb-1 flex items-center justify-between gap-2 text-[10px] font-semibold uppercase tracking-wide text-pc-text-muted">
       <span>{label}</span>
-      <span className="shrink-0 tabular-nums">{total ? t("generated.matches.value1WValue2L", { value1: wins, value2: losses }) : "—"}</span>
+      <span className="shrink-0 tabular-nums">{total ? formatRecord(wins, losses) : "—"}</span>
     </div>
-    <div className="flex items-center gap-2"><div className="min-w-0 flex-1"><RecordBar wins={wins} total={total} tone={tone} /></div><span className="shrink-0 text-[10px] tabular-nums text-pc-text-secondary">{winRateText(wins, total)}</span></div>
-    <div className="mt-1 text-right text-[10px] text-pc-text-secondary"><span className="text-pc-text-muted">{eloLabel} </span>{elo != null ? num(elo) : "—"}</div>
+    <div className="flex items-center gap-2"><div className="min-w-0 flex-1"><RecordBar wins={wins} total={total} tone={tone} /></div><span className="shrink-0 text-[10px] tabular-nums text-pc-text-secondary">{total > 0 ? t("common.summary.valueMetric", { value: formatPercent((wins / total) * 100), metric: t("generated.matches.wr") }) : "—"}</span></div>
+    <div className="mt-1 text-right text-[10px] text-pc-text-secondary"><span className="text-pc-text-muted">{eloLabel} </span>{elo != null ? formatNumber(elo) : "—"}</div>
   </div>;
 }
 
 export default function MatchupCard({ player }: { player: MatchResultPlayer }) {
-  const { t } = useLocalization();
+  const { t , formatNumber} = useLocalization();
   const { matchData: md, profileData: profile } = player;
   const champion = md.champion_name;
   const championStats = getChampionStats(profile, champion);
@@ -55,20 +51,20 @@ export default function MatchupCard({ player }: { player: MatchResultPlayer }) {
         <img src={getChampionIconSafe(champion)} alt={champion || t("generated.matches.champion")} className="h-14 w-14 rounded-full border-2 border-pc-border object-cover" onError={(event) => { event.currentTarget.src = "/images/champions/Champion_Generic_Icon.avif"; }} />
         <div className="mt-2 flex w-full items-center justify-center gap-1 text-sm font-bold">
           <MatchPlayerLink player={md} className="min-w-0 truncate text-pc-text hover:text-pc-accent" />
-          {profile?.level != null && <span className="shrink-0 text-pc-text-muted">{t("generated.matches.lv")}{" "}{num(profile.level)}</span>}
+          {profile?.level != null && <span className="shrink-0 text-pc-text-muted">{t("generated.matches.lv")}{" "}{formatNumber(profile.level)}</span>}
         </div>
         {champion ? <Link href={`/champions/${championSlug(champion)}`} className="truncate text-xs text-pc-text-secondary hover:text-pc-accent">{champion}</Link> : <span className="text-xs text-pc-text-muted">{t("generated.matches.championUnknown")}</span>}
       </div>
 
       <div className="relative mt-3 flex min-h-9 items-center justify-center gap-2 border-y border-dashed border-pc-border/70 py-2 text-center text-[11px] text-pc-text-secondary">
         {tier != null && <img src={getRankIconPath(tier, tierRank)} alt={effectiveTier?.displayName ?? t("generated.matches.unranked")} className="h-7 w-7 object-contain" loading="lazy" />}
-        <span>{effectiveTier ? t("generated.matches.value1Value2", { value1: effectiveTier.displayName, value2: effectiveTier.displayRank > 0 ? ` #${effectiveTier.displayRank}` : "" }) : formatKBMTier(md.league_tier)}</span>
-        {profile?.kbmPoints != null && <span className="font-mono text-pc-text-muted">· {num(profile.kbmPoints)} {t("generated.matches.tp")}</span>}
+        <span>{effectiveTier ? t("generated.matches.value1Value2", { value1: effectiveTier.displayName, value2: effectiveTier.displayRank > 0 ? ` #${effectiveTier.displayRank}` : "" }) : md.league_tier || t("generated.matches.unranked")}</span>
+        {profile?.kbmPoints != null && <span className="font-mono text-pc-text-muted">· {formatNumber(profile.kbmPoints)} {t("generated.matches.tp")}</span>}
       </div>
 
       <div className="relative space-y-3 pt-3 text-xs">
-        <RecordSummary label={t("generated.matches.champion")} wins={championWins} total={championGames} tone="teal" eloLabel="Champion Elo" elo={profile?.championElo} />
-        <RecordSummary label={t("generated.matches.global")} wins={globalWins} total={globalGames} tone="green" eloLabel="Player Elo" elo={profile?.queueElo} />
+        <RecordSummary label={t("generated.matches.champion")} wins={championWins} total={championGames} tone="teal" eloLabel={t("common.metrics.championElo")} elo={profile?.championElo} />
+        <RecordSummary label={t("generated.matches.global")} wins={globalWins} total={globalGames} tone="green" eloLabel={t("common.metrics.playerElo")} elo={profile?.queueElo} />
       </div>
     </article>
   );

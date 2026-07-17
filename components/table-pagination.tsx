@@ -20,7 +20,7 @@ export default function TablePagination({
   onPageChange,
   onPageSizeChange,
 }: TablePaginationProps) {
-  const { t } = useLocalization();
+  const { t , formatNumber} = useLocalization();
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
   const start = totalItems === 0 ? 0 : (page - 1) * pageSize + 1;
   const end = Math.min(page * pageSize, totalItems);
@@ -31,7 +31,7 @@ export default function TablePagination({
       aria-label={t("generated.changelog.pagination")}
     >
       <span className="text-xs text-pc-text-muted">
-        {t("skins.showingStatus", { start, end, total: totalItems.toLocaleString() })}
+        {t("skins.showingStatus", { start, end, total: formatNumber(totalItems) })}
       </span>
       <div className="flex flex-wrap items-center justify-end gap-2">
         <label className="flex items-center gap-2 text-xs text-pc-text-secondary">

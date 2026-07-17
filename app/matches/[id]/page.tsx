@@ -216,7 +216,7 @@ export default function MatchDetailPage() {
         }, MATCH_RESULT_CACHE_TTL_MS);
 
       } catch (err: any) {
-        if (!cancelled) setError(err.message || t("generated.app\\matches\\[id]\\page.failedtoloadmatch"));
+        if (!cancelled) setError(err.message || t("generated.matches.[id].page.failedtoloadmatch"));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -341,8 +341,8 @@ export default function MatchDetailPage() {
         team2Players={team2}
         team1Wins={team1Wins}
         team2Wins={team2Wins}
-        team1Label={t("generated.app\\matches\\[id]\\page.team1")}
-        team2Label={t("generated.app\\matches\\[id]\\page.team2")}
+        team1Label={t("generated.matches.[id].page.team1")}
+        team2Label={t("generated.matches.[id].page.team2")}
         factMap={factMap}
       />
 
@@ -352,8 +352,8 @@ export default function MatchDetailPage() {
         team2={team2Players}
         team1Wins={team1Wins}
         team2Wins={team2Wins}
-        team1Label="Team 1"
-        team2Label="Team 2"
+        team1Label={t("generated.matches.team1")}
+        team2Label={t("generated.matches.team2")}
       />
 
       {/* Rating Snapshots */}

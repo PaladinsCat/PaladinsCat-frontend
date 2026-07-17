@@ -85,7 +85,7 @@ function mapMapStats(maps: Array<{ name: string; totalMatches: number; distribut
 }
 
 export default function StatsPage() {
-  const { t } = useLocalization();
+  const { t , formatPercent, formatNumber} = useLocalization();
   const { definition: lobbyTier, ready: lobbyTierReady } = useLobbyTier();
   const [itemSort, setItemSort] = useState<SortKey>("pickRate");
   const [itemSortDir, setItemSortDir] = useState<"asc" | "desc">("desc");
@@ -176,7 +176,7 @@ export default function StatsPage() {
     const normalized = Array.from({ length: 27 }, (_, index) => {
       const tierSort = index + 1;
       return tierData.find((tier) => tier.tierSort === tierSort) ?? {
-        tier: tierSort === 27 ? t("generated.app\\stats\\page.grandmaster") : `Tier ${tierSort}`,
+        tier: tierSort === 27 ? t("generated.stats.page.grandmaster") : `Tier ${tierSort}`,
         tierSort,
         totalPlays: 0,
         avgWinRate: 0,
@@ -190,17 +190,17 @@ export default function StatsPage() {
       return { total, pct };
     }
     return [
-      { tier: t("generated.app\\stats\\page.bronze"), tierSort: 5, totalPlays: sumSlice(0, 5).total, avgWinRate: 0, percentage: sumSlice(0, 5).pct },
-      { tier: t("generated.app\\stats\\page.silver"), tierSort: 10, totalPlays: sumSlice(5, 10).total, avgWinRate: 0, percentage: sumSlice(5, 10).pct },
-      { tier: t("generated.app\\stats\\page.gold"), tierSort: 15, totalPlays: sumSlice(10, 15).total, avgWinRate: 0, percentage: sumSlice(10, 15).pct },
-      { tier: t("generated.app\\stats\\page.platinum"), tierSort: 20, totalPlays: sumSlice(15, 20).total, avgWinRate: 0, percentage: sumSlice(15, 20).pct },
-      { tier: t("generated.app\\stats\\page.diamond"), tierSort: 25, totalPlays: sumSlice(20, 25).total, avgWinRate: 0, percentage: sumSlice(20, 25).pct },
-      { tier: t("generated.app\\stats\\page.master"), tierSort: 26, totalPlays: sumSlice(25, 27).total, avgWinRate: 0, percentage: sumSlice(25, 27).pct },
+      { tier: t("generated.stats.page.bronze"), tierSort: 5, totalPlays: sumSlice(0, 5).total, avgWinRate: 0, percentage: sumSlice(0, 5).pct },
+      { tier: t("generated.stats.page.silver"), tierSort: 10, totalPlays: sumSlice(5, 10).total, avgWinRate: 0, percentage: sumSlice(5, 10).pct },
+      { tier: t("generated.stats.page.gold"), tierSort: 15, totalPlays: sumSlice(10, 15).total, avgWinRate: 0, percentage: sumSlice(10, 15).pct },
+      { tier: t("generated.stats.page.platinum"), tierSort: 20, totalPlays: sumSlice(15, 20).total, avgWinRate: 0, percentage: sumSlice(15, 20).pct },
+      { tier: t("generated.stats.page.diamond"), tierSort: 25, totalPlays: sumSlice(20, 25).total, avgWinRate: 0, percentage: sumSlice(20, 25).pct },
+      { tier: t("generated.stats.page.master"), tierSort: 26, totalPlays: sumSlice(25, 27).total, avgWinRate: 0, percentage: sumSlice(25, 27).pct },
     ];
   }
   const displayTiers = consolidateTiers(tiers);
   const maxTierCount = Math.max(1, ...displayTiers.map((tier) => tier.totalPlays));
-  const baselineOrder = [t("generated.app\\stats\\page.global"), "Damage", "Flank", "Support", "Frontline"];
+  const baselineOrder = [t("generated.stats.page.global"), "Damage", "Flank", "Support", "Frontline"];
   const orderedEgpmBaselines = [...egpmBaselines].sort((a, b) => baselineOrder.indexOf(a.role) - baselineOrder.indexOf(b.role));
 
   return (
@@ -288,10 +288,10 @@ export default function StatsPage() {
                 const rankIcon = getRankIconPath(tier.tierSort, tier.tierSort === 26 ? 101 : tier.tierSort === 27 ? 1 : 0);
                 return (
                   <div key={tier.tierSort} className="group flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1">
-                    <div className="text-[9px] text-pc-text-muted tabular-nums opacity-0 group-hover:opacity-100 transition-opacity">{tier.percentage.toFixed(1)}%</div>
-                    <div className="w-5 rounded-t-sm bg-pc-accent-mid group-hover:bg-pc-accent transition-colors" style={{ height }} title={t("generated.stats.value1Value2Value3", { value1: tier.tier, value2: tier.totalPlays.toLocaleString(), value3: tier.percentage.toFixed(1) })} />
+                    <div className="text-[9px] text-pc-text-muted tabular-nums opacity-0 group-hover:opacity-100 transition-opacity">{formatPercent(tier.percentage)}</div>
+                    <div className="w-5 rounded-t-sm bg-pc-accent-mid group-hover:bg-pc-accent transition-colors" style={{ height }} title={t("generated.stats.value1Value2Value3", { value1: tier.tier, value2: formatNumber(tier.totalPlays), value3: formatNumber(tier.percentage, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) })} />
                     <img src={rankIcon} alt={tier.tier} title={tier.tier} className="h-5 w-5 object-contain drop-shadow" loading="lazy" />
-                    <div className="text-[9px] text-pc-text-secondary tabular-nums leading-none">{tier.totalPlays.toLocaleString()}</div>
+                    <div className="text-[9px] text-pc-text-secondary tabular-nums leading-none">{formatNumber(tier.totalPlays)}</div>
                   </div>
                 );
               })}
@@ -341,7 +341,7 @@ export default function StatsPage() {
                           {c.name}
                         </span>
                         <span className="ml-auto text-sm font-bold tabular-nums" style={{ color: quality.color }}>
-                          {c.winRate!.toFixed(1)}%
+                          {formatPercent(c.winRate!)}
                         </span>
                       </Link>
                     );
@@ -372,7 +372,7 @@ export default function StatsPage() {
                         {c.name}
                       </span>
                       <span className="ml-auto text-sm font-bold text-rose-400 tabular-nums">
-                        {c.banRate!.toFixed(1)}%
+                        {formatPercent(c.banRate!)}
                       </span>
                     </Link>
                   ))}
@@ -478,8 +478,8 @@ export default function StatsPage() {
                 {sortedMaps.map((map) => (
                   <tr key={map.name} className="border-b border-pc-border/50 hover:bg-pc-bg/50 transition-colors">
                     <td className="px-3 py-2 text-pc-text font-medium text-xs">{map.name}</td>
-                    <td className="px-2 py-2 text-xs text-right font-semibold text-pc-accent">{map.distributionRate.toFixed(1)}%</td>
-                    <td className="px-3 py-2 text-pc-text text-xs text-right">{map.matches.toLocaleString()}</td>
+                    <td className="px-2 py-2 text-xs text-right font-semibold text-pc-accent">{formatPercent(map.distributionRate)}</td>
+                    <td className="px-3 py-2 text-pc-text text-xs text-right">{formatNumber(map.matches)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -505,8 +505,8 @@ export default function StatsPage() {
                 {skinStats.map((skin) => (
                   <Link key={`${skin.championId}-${skin.skinId}`} href={`/stats/skins?champion=${skin.championId}`} className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-pc-bg-secondary/60">
                     <img src={getChampionIconSafe(skin.championName)} alt="" className="h-7 w-7 rounded object-contain" />
-                    <div className="min-w-0 flex-1"><div className="truncate text-xs font-medium text-pc-text">{skin.skinName}</div><div className="text-[10px] text-pc-text-muted">{skin.championName} · {skin.totalPlays.toLocaleString()} {t("generated.stats.plays.0effba4")}</div></div>
-                    <span className="text-xs font-bold text-emerald-400">{skin.winRate.toFixed(1)}%</span>
+                    <div className="min-w-0 flex-1"><div className="truncate text-xs font-medium text-pc-text">{skin.skinName}</div><div className="text-[10px] text-pc-text-muted">{skin.championName} · {formatNumber(skin.totalPlays)} {t("generated.stats.plays.0effba4")}</div></div>
+                    <span className="text-xs font-bold text-emerald-400">{formatPercent(skin.winRate)}</span>
                   </Link>
                 ))}
               </div>
@@ -528,8 +528,8 @@ export default function StatsPage() {
                 {compositions.slice(0, 5).map((composition) => (
                   <Link key={composition.composition} href="/stats/compositions" className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-pc-bg-secondary/60">
                     <div className="w-20 font-mono text-xs font-semibold text-pc-text">{composition.composition}</div>
-                    <div className="min-w-0 flex-1 text-[10px] text-pc-text-muted">{composition.totalMatches.toLocaleString()} {t("generated.stats.rankedMatches")}</div>
-                    <span className={composition.winRate >= 50 ? "text-xs font-bold text-emerald-400" : "text-xs font-bold text-rose-400"}>{composition.winRate.toFixed(1)}%</span>
+                    <div className="min-w-0 flex-1 text-[10px] text-pc-text-muted">{formatNumber(composition.totalMatches)} {t("generated.stats.rankedMatches")}</div>
+                    <span className={composition.winRate >= 50 ? "text-xs font-bold text-emerald-400" : "text-xs font-bold text-rose-400"}>{formatPercent(composition.winRate)}</span>
                   </Link>
                 ))}
               </div>
@@ -554,11 +554,11 @@ export default function StatsPage() {
                     <img src={getChampionIconSafe(skin.championName)} alt="" className="h-7 w-7 rounded object-contain" />
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-xs font-medium text-pc-text">{skin.skinName}</div>
-                      <div className="text-[10px] text-pc-text-muted">{skin.championName} · {skin.totalPlays.toLocaleString()} {t("generated.stats.plays.0effba4")}</div>
+                      <div className="text-[10px] text-pc-text-muted">{skin.championName} · {formatNumber(skin.totalPlays)} {t("generated.stats.plays.0effba4")}</div>
                     </div>
                     <div className="text-right">
-                      <span className="text-xs font-bold text-rose-400">{skin.usageShare.toFixed(1)}{t("generated.stats.share.b95bb2e")}</span>
-                      <div className="text-[9px] text-pc-text-muted">{t("generated.stats.wr")}{" "}{skin.winRate.toFixed(1)}%</div>
+                      <span className="text-xs font-bold text-rose-400">{formatNumber(skin.usageShare, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}{t("generated.stats.share.b95bb2e")}</span>
+                      <div className="text-[9px] text-pc-text-muted">{t("generated.stats.wr")}{" "}{formatPercent(skin.winRate)}</div>
                     </div>
                   </div>
                 ))}

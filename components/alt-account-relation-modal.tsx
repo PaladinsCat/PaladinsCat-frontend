@@ -79,7 +79,7 @@ export default function AltAccountRelationModal({
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === t("generated.components\\alt-account-relation-modal.escape")) onClose();
+      if (event.key === t("generated.components.altAccountRelationModal.escape")) onClose();
     };
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);

@@ -16,41 +16,41 @@ export function parseBackendDate(value: string | null | undefined): Date | null 
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
-export function formatLocalDateTime(value: string | null | undefined): string {
+export function formatLocalDateTime(value: string | null | undefined, locale?: string): string {
   const date = parseBackendDate(value);
   if (!date) return "-";
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString(locale, {
     dateStyle: "medium",
     timeStyle: "short",
     timeZone: getPreferredTimeZone(),
   });
 }
 
-export function formatLocalDate(value: string | null | undefined): string {
+export function formatLocalDate(value: string | null | undefined, locale?: string): string {
   const date = parseBackendDate(value);
   if (!date) return "-";
-  return date.toLocaleDateString(undefined, {
+  return date.toLocaleDateString(locale, {
     dateStyle: "medium",
     timeZone: getPreferredTimeZone(),
   });
 }
 
-export function formatLocalMonthDay(value: string | null | undefined): string {
+export function formatLocalMonthDay(value: string | null | undefined, locale?: string): string {
   const date = parseBackendDate(value);
   if (!date) return "-";
-  return date.toLocaleDateString(undefined, {
+  return date.toLocaleDateString(locale, {
     month: "short",
     day: "numeric",
     timeZone: getPreferredTimeZone(),
   });
 }
 
-export function formatLocalHourFromUtcBucket(date: string | null | undefined, hour: number | null | undefined): string {
+export function formatLocalHourFromUtcBucket(date: string | null | undefined, hour: number | null | undefined, locale?: string): string {
   if (!date || hour == null || !Number.isFinite(hour)) return "-";
   const [year, month, day] = date.split("-").map((part) => Number.parseInt(part, 10));
   if (!year || !month || !day) return "-";
   const localDate = new Date(Date.UTC(year, month - 1, day, Math.floor(hour), 0, 0));
-  return localDate.toLocaleTimeString(undefined, {
+  return localDate.toLocaleTimeString(locale, {
     hour: "2-digit",
     minute: "2-digit",
     timeZone: getPreferredTimeZone(),
@@ -61,18 +61,20 @@ const MINUTE = 60 * 1000;
 const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 
-export function formatRelativeTime(value: string | null | undefined): string {
+export function formatRelativeTime(value: string | null | undefined, locale?: string): string {
   const date = parseBackendDate(value);
   if (!date) return "-";
   const diff = Date.now() - date.getTime();
   const abs = Math.abs(diff);
 
-  if (abs < MINUTE) return "just now";
-  if (abs < HOUR) return `${Math.floor(abs / MINUTE)}m ago`;
-  if (abs < DAY) return `${Math.floor(abs / HOUR)}h ago`;
-  if (abs < 7 * DAY) return `${Math.floor(abs / DAY)}d ago`;
+  const relative = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
+  const direction = diff >= 0 ? -1 : 1;
+  if (abs < MINUTE) return relative.format(0, "second");
+  if (abs < HOUR) return relative.format(direction * Math.floor(abs / MINUTE), "minute");
+  if (abs < DAY) return relative.format(direction * Math.floor(abs / HOUR), "hour");
+  if (abs < 7 * DAY) return relative.format(direction * Math.floor(abs / DAY), "day");
 
-  return date.toLocaleDateString(undefined, {
+  return date.toLocaleDateString(locale, {
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -80,10 +82,10 @@ export function formatRelativeTime(value: string | null | undefined): string {
   });
 }
 
-export function formatLocalTime(value: string | null | undefined): string {
+export function formatLocalTime(value: string | null | undefined, locale?: string): string {
   const date = parseBackendDate(value);
   if (!date) return "-";
-  return date.toLocaleTimeString(undefined, {
+  return date.toLocaleTimeString(locale, {
     hour: "2-digit",
     minute: "2-digit",
     timeZone: getPreferredTimeZone(),

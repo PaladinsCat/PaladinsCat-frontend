@@ -9,7 +9,7 @@ import { LoadingPanel } from "@/components/async-state";
 import { useLocalization } from "@/lib/localization-context";
 
 export default function PlayerChartsPage({ params }: { params: Promise<{ id: string }> }) {
-  const { t } = useLocalization();
+  const { t , formatMonthDay} = useLocalization();
   const [kdaData, setKdaData] = useState<KdaHistoryEntry[]>([]);
   const [dpmData, setDpmData] = useState<DpmHistoryEntry[]>([]);
   const [glickoData, setGlickoData] = useState<GlickoHistoryEntry[]>([]);
@@ -75,7 +75,7 @@ export default function PlayerChartsPage({ params }: { params: Promise<{ id: str
           <p className="text-pc-text-muted text-center py-8">{t("generated.stats.noKdaDataAvailable")}</p>
         ) : (
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={kdaData.map((d) => ({ ...d, label: formatLocalMonthDay(d.date) }))} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
+            <LineChart data={kdaData.map((d) => ({ ...d, label: formatMonthDay(d.date) }))} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
               <XAxis dataKey="label" stroke="#9CA3AF" fontSize={12} />
               <YAxis stroke="#9CA3AF" fontSize={12} />
@@ -99,7 +99,7 @@ export default function PlayerChartsPage({ params }: { params: Promise<{ id: str
           <p className="text-pc-text-muted text-center py-8">{t("generated.stats.noDpmDataAvailable")}</p>
         ) : (
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={dpmData.map((d) => ({ ...d, label: formatLocalMonthDay(d.date) }))} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
+            <LineChart data={dpmData.map((d) => ({ ...d, label: formatMonthDay(d.date) }))} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
               <XAxis dataKey="label" stroke="#9CA3AF" fontSize={12} />
               <YAxis stroke="#9CA3AF" fontSize={12} />
@@ -108,8 +108,8 @@ export default function PlayerChartsPage({ params }: { params: Promise<{ id: str
                 labelStyle={{ color: "#9CA3AF" }}
               />
               <Legend />
-              <Line type="monotone" dataKey="playerDpm" stroke="#4ade80" strokeWidth={2} dot={{ r: 3 }} name={t("generated.app\\stats\\player\\[id]\\charts\\page.playerdpm")} />
-              <Line type="monotone" dataKey="avgDpm" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} name={t("generated.app\\stats\\player\\[id]\\charts\\page.serveraverage")} />
+              <Line type="monotone" dataKey="playerDpm" stroke="#4ade80" strokeWidth={2} dot={{ r: 3 }} name={t("generated.stats.player.[id].charts.page.playerdpm")} />
+              <Line type="monotone" dataKey="avgDpm" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} name={t("generated.stats.player.[id].charts.page.serveraverage")} />
             </LineChart>
           </ResponsiveContainer>
         )}
@@ -122,7 +122,7 @@ export default function PlayerChartsPage({ params }: { params: Promise<{ id: str
           <p className="text-pc-text-muted text-center py-8">{t("generated.stats.noRatingDataAvailable")}</p>
         ) : (
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={glickoData.map((d) => ({ ...d, label: formatLocalMonthDay(d.date) }))} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
+            <LineChart data={glickoData.map((d) => ({ ...d, label: formatMonthDay(d.date) }))} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
               <XAxis dataKey="label" stroke="#9CA3AF" fontSize={12} />
               <YAxis stroke="#9CA3AF" fontSize={12} />
@@ -131,7 +131,7 @@ export default function PlayerChartsPage({ params }: { params: Promise<{ id: str
                 labelStyle={{ color: "#9CA3AF" }}
               />
               <Legend />
-              <Line type="monotone" dataKey="rating" stroke="#8b5cf6" strokeWidth={2} dot={{ r: 3 }} name={t("generated.app\\stats\\player\\[id]\\charts\\page.rating")} />
+              <Line type="monotone" dataKey="rating" stroke="#8b5cf6" strokeWidth={2} dot={{ r: 3 }} name={t("generated.stats.player.[id].charts.page.rating")} />
             </LineChart>
           </ResponsiveContainer>
         )}

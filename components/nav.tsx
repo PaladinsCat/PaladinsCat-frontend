@@ -121,7 +121,7 @@ export default function Nav() {
   useEffect(() => {
     if (!sideMenuOpen) return;
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === t("generated.components\\nav.escape")) {
+      if (event.key === t("generated.components.nav.escape")) {
         setSideMenuOpen(false);
       }
     };
@@ -253,7 +253,7 @@ export default function Nav() {
                 </span>
                   <div className="pointer-events-none invisible absolute right-0 top-full z-10 w-52 pt-2 opacity-0 transition-all group-hover:pointer-events-auto group-hover:visible group-hover:opacity-100" role="listbox" aria-label={t("nav.language")}>
                     <div className="rounded-lg border border-pc-border bg-pc-bg-secondary p-1 shadow-xl">
-                    {SUPPORTED_LOCALES.map(({ code, label }) => (
+                    {SUPPORTED_LOCALES.map(({ code, nativeName }) => (
                       <button
                         key={code}
                         type="button"
@@ -262,7 +262,7 @@ export default function Nav() {
                         role="option"
                         aria-selected={locale === code}
                       >
-                        {label}
+                        {nativeName}
                         <span className="text-xs text-pc-text-muted">{code.split("-")[0].toUpperCase()}</span>
                       </button>
                     ))}
@@ -334,7 +334,7 @@ export default function Nav() {
                 <section>
                   <h2 className="mb-2 px-2 text-[10px] font-bold uppercase tracking-widest text-pc-text-muted">{t("nav.language")}</h2>
                   <div className="overflow-hidden rounded-lg border border-pc-border bg-pc-bg p-1" role="listbox" aria-label={t("nav.language")}>
-                    {SUPPORTED_LOCALES.map(({ code, label }) => (
+                    {SUPPORTED_LOCALES.map(({ code, nativeName }) => (
                       <button
                         key={code}
                         type="button"
@@ -343,7 +343,7 @@ export default function Nav() {
                         role="option"
                         aria-selected={locale === code}
                       >
-                        <span className="inline-flex items-center gap-2"><svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="12" cy="12" r="10" /><path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20M12 2a15.3 15.3 0 0 0 0 20" /></svg>{label}</span>
+                        <span className="inline-flex items-center gap-2"><svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="12" cy="12" r="10" /><path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20M12 2a15.3 15.3 0 0 0 0 20" /></svg>{nativeName}</span>
                         <span className="text-xs text-pc-text-muted">{code.split("-")[0].toUpperCase()}</span>
                       </button>
                     ))}

@@ -8,7 +8,7 @@ import { RouteSkeleton } from "@/components/route-skeleton";
 import { useLocalization } from "@/lib/localization-context";
 
 export default function RegionsPage() {
-  const { t } = useLocalization();
+  const { t , formatPercent} = useLocalization();
   const [regions, setRegions] = useState<RegionStat[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -39,7 +39,7 @@ export default function RegionsPage() {
                 {r.topChampions.slice(0, 5).map((c) => (
                   <div key={c.championId} className="flex items-center justify-between text-sm">
                     <span className="text-pc-text">{c.championName}</span>
-                    <span className="pc-badge">{c.winRate?.toFixed(1)}%</span>
+                    <span className="pc-badge">{formatPercent(c.winRate)}</span>
                   </div>
                 ))}
               </div>

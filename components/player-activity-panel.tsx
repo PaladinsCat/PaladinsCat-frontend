@@ -10,7 +10,7 @@ import { LoadingPanel } from "@/components/async-state";
 import { useLocalization } from "@/lib/localization-context";
 
 export default function PlayerActivityPanel() {
-  const { t } = useLocalization();
+  const { t , formatNumber, formatHourFromUtcBucket} = useLocalization();
   const { isLoggedIn, isLoading: authLoading } = useAuth();
   const { definition: lobbyTier, ready: lobbyTierReady } = useLobbyTier();
   const [hourlyStats, setHourlyStats] = useState<MatchHourlyStats | null>(null);
@@ -46,7 +46,7 @@ export default function PlayerActivityPanel() {
   const droppedRows = useMemo(() => hourly
     .map((entry: any) => ({ ...entry, droppedIds: droppedIdsByHour[`${entry.date}|${entry.hour}`] ?? [] }))
     .filter((entry: any) => entry.droppedIds.length > 0), [droppedIdsByHour, hourly]);
-  const formatHour = (date: string | undefined, utcHour: number) => formatLocalHourFromUtcBucket(date, utcHour);
+  const formatHour = (date: string | undefined, utcHour: number) => formatHourFromUtcBucket(date, utcHour);
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-5">
@@ -89,7 +89,7 @@ export default function PlayerActivityPanel() {
           <section className="pc-card p-3 sm:p-4">
             <h2 className="text-sm font-bold text-pc-text">{t("generated.matches.localTime")}</h2>
             {!loading && hourlyStats && <div className="mt-3 grid grid-cols-2 gap-3">
-              {hourlyStats.regions.filter((region) => region.region === "NA" || region.region === "EU").map((region) => <div key={region.region} className="pc-surface-light rounded-lg border border-pc-border/50 p-3 text-center"><div className="text-xs uppercase text-pc-text-muted">{region.region}</div><div className="font-mono text-xl font-bold text-pc-accent">{region.totalToday.toLocaleString()}</div><div className="text-xs text-pc-text-muted">{region.matchesPerHour}{t("generated.matches.hr")}</div></div>)}
+              {hourlyStats.regions.filter((region) => region.region === "NA" || region.region === "EU").map((region) => <div key={region.region} className="pc-surface-light rounded-lg border border-pc-border/50 p-3 text-center"><div className="text-xs uppercase text-pc-text-muted">{region.region}</div><div className="font-mono text-xl font-bold text-pc-accent">{formatNumber(region.totalToday)}</div><div className="text-xs text-pc-text-muted">{region.matchesPerHour}{t("generated.matches.hr")}</div></div>)}
             </div>}
           </section>
 

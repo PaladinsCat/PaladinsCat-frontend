@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { MatchPlayerDetail, MatchFactPlayer } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
-import { computeDamageStats, num, fixed } from "./format";
+import { computeDamageStats } from "./format";
 import { MatchPlayerLink, matchPlayerKey } from "./player-identity";
 import { useLocalization } from "@/lib/localization-context";
 
@@ -41,7 +41,7 @@ function PlayerRow({
   wins: boolean;
   teamLabel: string;
 }) {
-  const { t } = useLocalization();
+  const { t, formatNumber, formatPercent } = useLocalization();
   const championHref = player.champion_name
     ? `/champions/${championSlug(player.champion_name)}`
     : undefined;
@@ -90,49 +90,49 @@ function PlayerRow({
 
       {/* Numeric stat columns */}
       <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
-        {num(player.gold_earned)}
+        {formatNumber(player.gold_earned)}
       </td>
       <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
-        {fixed(player.gold_per_minute, 0)}
+        {formatNumber(player.gold_per_minute, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
       </td>
       <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
-        {fixed(player.egpm, 0)}
+        {formatNumber(player.egpm, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
       </td>
       <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
-        {fixed(player.kda, 2)}
+        {formatNumber(player.kda, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
       </td>
       <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
-        {num(player.objective_assists)}
+        {formatNumber(player.objective_assists)}
       </td>
       <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
-        {num(totalDamage)}
+        {formatNumber(totalDamage)}
       </td>
       <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
-        {fixed(player.damage_per_minute, 0)}
+        {formatNumber(player.damage_per_minute, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
       </td>
       <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
-        {hasWeaponBreakdown ? num(nonWeaponDamage) : "—"}
+        {hasWeaponBreakdown ? formatNumber(nonWeaponDamage) : "—"}
       </td>
       <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
-        {num(player.damage_taken)}
+        {formatNumber(player.damage_taken)}
       </td>
       <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
-        {num(player.damage_mitigated)}
+        {formatNumber(player.damage_mitigated)}
       </td>
       <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
-        {fixed(player.mitigation_per_minute, 0)}
+        {formatNumber(player.mitigation_per_minute, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
       </td>
       <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
-        {num(player.healing)}
+        {formatNumber(player.healing)}
       </td>
       <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
-        {fixed(player.healing_per_minute, 0)}
+        {formatNumber(player.healing_per_minute, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
       </td>
       <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
-        {num(player.healing_self)}
+        {formatNumber(player.healing_self)}
       </td>
       <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
-        {fixed(player.afk_rate, 1)}%
+        {formatPercent(player.afk_rate)}
       </td>
 
     </tr>
@@ -142,7 +142,7 @@ function PlayerRow({
 /* ── Main section ── */
 
 function MobilePlayerCard({ player, wins }: { player: MatchPlayerDetail; wins: boolean }) {
-  const { t } = useLocalization();
+  const { t, formatNumber, formatPercent } = useLocalization();
   const damageStats = computeDamageStats(player);
   const damage = damageStats.totalDamage;
   const abilityDamage = player.source !== "recovered" || damageStats.weaponDamage > 0 || damage === 0
@@ -150,21 +150,21 @@ function MobilePlayerCard({ player, wins }: { player: MatchPlayerDetail; wins: b
     : null;
   const champion = player.champion_name || `Champion #${player.champion_id}`;
   const metrics = [
-    [t("generated.match.stats.credits"), num(player.gold_earned)],
-    ["CPM", fixed(player.gold_per_minute, 0)],
-    ["eCPM", fixed(player.egpm, 0)],
-    ["KDA", fixed(player.kda, 2)],
-    [t("generated.match.stats.obj"), num(player.objective_assists)],
-    [t("generated.match.stats.damage"), num(damage)],
-    ["DPM", fixed(player.damage_per_minute, 0)],
-    [t("generated.match.stats.abil"), abilityDamage == null ? "—" : num(abilityDamage)],
-    [t("generated.match.stats.taken"), num(player.damage_taken)],
-    [t("generated.match.stats.shielding"), num(player.damage_mitigated)],
-    ["SPM", fixed(player.mitigation_per_minute, 0)],
-    [t("generated.match.stats.healing"), num(player.healing)],
-    ["HPM", fixed(player.healing_per_minute, 0)],
-    [t("generated.match.stats.self"), num(player.healing_self)],
-    ["AFK", `${fixed(player.afk_rate, 1)}%`],
+    [t("generated.match.stats.credits"), formatNumber(player.gold_earned)],
+    [t("common.metrics.cpm"), formatNumber(player.gold_per_minute, { minimumFractionDigits: 0, maximumFractionDigits: 0 })],
+    [t("common.metrics.ecpm"), formatNumber(player.egpm, { minimumFractionDigits: 0, maximumFractionDigits: 0 })],
+    [t("common.metrics.kda"), formatNumber(player.kda, { minimumFractionDigits: 2, maximumFractionDigits: 2 })],
+    [t("generated.match.stats.obj"), formatNumber(player.objective_assists)],
+    [t("generated.match.stats.damage"), formatNumber(damage)],
+    [t("common.metrics.dpm"), formatNumber(player.damage_per_minute, { minimumFractionDigits: 0, maximumFractionDigits: 0 })],
+    [t("generated.match.stats.abil"), abilityDamage == null ? "—" : formatNumber(abilityDamage)],
+    [t("generated.match.stats.taken"), formatNumber(player.damage_taken)],
+    [t("generated.match.stats.shielding"), formatNumber(player.damage_mitigated)],
+    [t("common.metrics.spm"), formatNumber(player.mitigation_per_minute, { minimumFractionDigits: 0, maximumFractionDigits: 0 })],
+    [t("generated.match.stats.healing"), formatNumber(player.healing)],
+    [t("common.metrics.hpm"), formatNumber(player.healing_per_minute, { minimumFractionDigits: 0, maximumFractionDigits: 0 })],
+    [t("generated.match.stats.self"), formatNumber(player.healing_self)],
+    [t("common.metrics.afk"), formatPercent(player.afk_rate)],
   ];
 
   return <article className={`border-b border-pc-border/60 p-3 last:border-b-0 ${wins ? "bg-emerald-400/[0.035]" : ""}`}>
@@ -192,8 +192,8 @@ export default function MatchStatsSection({
 }: MatchStatsSectionProps) {
   const { t } = useLocalization();
   const statColumns = [
-    t("generated.match.stats.player"), t("generated.match.stats.credits"), "CPM", "eCPM", "KDA", t("generated.match.stats.obj"),
-    "Dmg", "DPM", t("generated.match.stats.abil"), t("generated.match.stats.taken"), t("generated.match.stats.shielding"), "SPM", "Heal", "HPM", t("generated.match.stats.self"), "AFK",
+    t("generated.match.stats.player"), t("generated.match.stats.credits"), t("common.metrics.cpm"), t("common.metrics.ecpm"), t("common.metrics.kda"), t("generated.match.stats.obj"),
+    t("common.roles.damageShort"), t("common.metrics.dpm"), t("generated.match.stats.abil"), t("generated.match.stats.taken"), t("generated.match.stats.shielding"), t("common.metrics.spm"), t("generated.match.stats.healing"), t("common.metrics.hpm"), t("generated.match.stats.self"), t("common.metrics.afk"),
   ];
   return (
     <section className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">

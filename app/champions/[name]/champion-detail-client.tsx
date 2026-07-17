@@ -99,7 +99,7 @@ const ROLE_ICONS: Record<string, string> = {
 };
 
 function AvgTierCard({ stats }: { stats: ChampionStats }) {
-  const { t } = useLocalization();
+  const { t , formatNumber} = useLocalization();
   if (stats.avgRating == null) {
     return (
       <div className="pc-surface-light rounded-lg border border-pc-border p-3 text-center">
@@ -118,13 +118,13 @@ function AvgTierCard({ stats }: { stats: ChampionStats }) {
       <div className="mb-1 text-xs text-pc-text-muted">{t("generated.champions.avgTier")}</div>
       <img src={iconPath} alt={effective.displayName} className="mx-auto h-9 w-9 object-contain" />
       <div className={`mt-0.5 text-[11px] font-semibold ${color}`}>{effective.displayName}</div>
-      <div className="text-xs font-mono text-pc-text-muted mt-0.5">{stats.avgRating.toFixed(1)}</div>
+      <div className="text-xs font-mono text-pc-text-muted mt-0.5">{formatNumber(stats.avgRating, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</div>
     </div>
   );
 }
 
 export default function ChampionDetailPage() {
-  const { t } = useLocalization();
+  const { t , formatNumber, formatPercent} = useLocalization();
   const params = useParams();
   const rawName = params?.name;
   const name = Array.isArray(rawName) ? rawName[0] ?? "" : rawName ?? "";
@@ -233,8 +233,8 @@ export default function ChampionDetailPage() {
   const maxMapPickRate = useMemo(() => Math.max(1, ...championMaps.map((map) => map.pickRate)), [championMaps]);
   if (dataLoaded && !championData && !staticChampion) return notFound();
 
-  const formatNum = (n: number | null) => (n != null ? n.toLocaleString() : "—");
-  const formatPct = (n: number | null) => (n != null ? `${n.toFixed(1)}%` : "—");
+  const formatNum = (n: number | null) => (n != null ? formatNumber(n) : "—");
+  const formatPct = (n: number | null) => formatPercent(n);
 
   return (
     <div className="space-y-6">
@@ -379,9 +379,9 @@ export default function ChampionDetailPage() {
                               <img src={itemIcon(item.itemName)} alt="" className="mb-1 h-12 w-12 rounded-md object-contain" />
                               <div className="w-full truncate text-xs font-medium leading-tight text-pc-text group-hover:text-pc-accent">{item.itemName}</div>
                               <div className="mt-0.5 flex items-center gap-1 text-[9px]">
-                                <span style={{ color: quality.color }}>{t("generated.champions.wr")}{" "}{item.winRate.toFixed(1)}%</span>
+                                <span style={{ color: quality.color }}>{t("generated.champions.wr")}{" "}{formatPercent(item.winRate)}</span>
                                 <span className="text-pc-text-muted">·</span>
-                                <span style={{ color: quality.color }}>{t("generated.champions.pr")}{" "}{(item.pickRate ?? 0).toFixed(1)}%</span>
+                                <span style={{ color: quality.color }}>{t("generated.champions.pr")}{" "}{formatPercent((item.pickRate ?? 0))}</span>
                               </div>
                             </Link>
                           );
@@ -415,16 +415,16 @@ export default function ChampionDetailPage() {
                     <div>
                       <div className="text-xs text-pc-text-muted">{t("generated.champions.wr")}</div>
                       <div className={`text-sm font-mono ${quality.textClass}`} style={{ color: quality.color }}>
-                        {tierStat.winRate.toFixed(1)}%
+                        {formatPercent(tierStat.winRate)}
                       </div>
                     </div>
                     <div>
                       <div className="text-xs text-pc-text-muted">{t("generated.champions.pr")}</div>
-                      <div className="text-sm font-mono" style={{ color: quality.color }}>{tierStat.pickRate.toFixed(1)}%</div>
+                      <div className="text-sm font-mono" style={{ color: quality.color }}>{formatPercent(tierStat.pickRate)}</div>
                     </div>
                     <div>
                       <div className="text-xs text-pc-text-muted">{t("generated.champions.plays")}</div>
-                      <div className="text-sm font-mono text-pc-text">{tierStat.totalPlays.toLocaleString()}</div>
+                      <div className="text-sm font-mono text-pc-text">{formatNumber(tierStat.totalPlays)}</div>
                     </div>
                   </div>
                 </div>
@@ -454,9 +454,9 @@ export default function ChampionDetailPage() {
                     <tr key={t.trendWeek}>
                       <td className="text-pc-text text-sm">{t.trendWeek}</td>
                       <td className={`font-mono text-sm ${quality.textClass}`} style={{ color: quality.color }}>
-                        {t.weeklyWinRate.toFixed(1)}%
+                        {formatPercent(t.weeklyWinRate)}
                       </td>
-                      <td className="text-pc-text-muted text-sm">{t.weeklyPlays.toLocaleString()}</td>
+                      <td className="text-pc-text-muted text-sm">{formatNumber(t.weeklyPlays)}</td>
                     </tr>
                   );
                 })}
@@ -498,15 +498,15 @@ export default function ChampionDetailPage() {
                   <div className="grid grid-cols-3 gap-2 p-3 text-center text-xs">
                     <div>
                       <div className="text-[10px] uppercase text-pc-text-muted">{t("generated.champions.winRate")}</div>
-                      <div className="font-bold" style={{ color: quality.color }}>{map.winRate.toFixed(1)}%</div>
+                      <div className="font-bold" style={{ color: quality.color }}>{formatPercent(map.winRate)}</div>
                     </div>
                     <div>
                       <div className="text-[10px] uppercase text-pc-text-muted">{t("generated.champions.pickRate")}</div>
-                      <div className="font-medium text-pc-accent">{map.pickRate.toFixed(1)}%</div>
+                      <div className="font-medium text-pc-accent">{formatPercent(map.pickRate)}</div>
                     </div>
                     <div>
                       <div className="text-[10px] uppercase text-pc-text-muted">{t("generated.champions.plays")}</div>
-                      <div className="font-medium text-pc-text">{map.totalPlays.toLocaleString()}</div>
+                      <div className="font-medium text-pc-text">{formatNumber(map.totalPlays)}</div>
                     </div>
                   </div>
                 </Link>
@@ -537,11 +537,16 @@ function ChampionMetricCard({
   champion?: ChampionPerformanceDistribution;
   global?: PerformanceMetricSummary;
 }) {
-  const { t } = useLocalization();
+  const { t , formatNumber, formatPercent} = useLocalization();
+  const formatSignedMetric = (value: number, decimal: boolean) => formatNumber(value, {
+    signDisplay: "always",
+    minimumFractionDigits: decimal ? 1 : 0,
+    maximumFractionDigits: decimal ? 1 : 0,
+  });
   const isDecimal = metric.key === "kda";
   const formatMetric = (value: number | null | undefined) => {
     const numeric = Number(value ?? 0);
-    return isDecimal ? numeric.toFixed(1) : Math.round(numeric).toLocaleString();
+    return isDecimal ? formatNumber(numeric, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : formatNumber(Math.round(numeric));
   };
   const championMean = champion?.avgValue ?? champion?.mean ?? 0;
   const globalMean = global?.mean ?? 0;
@@ -563,7 +568,7 @@ function ChampionMetricCard({
         </div>
         <div className="text-right text-[10px] text-pc-text-muted shrink min-w-0 overflow-hidden">
           <div className="truncate">{t("generated.champions.matches")}</div>
-          <div className="text-pc-text-secondary font-mono overflow-wrap break-all">{(champion?.totalMatches ?? 0).toLocaleString()}</div>
+          <div className="text-pc-text-secondary font-mono overflow-wrap break-all">{formatNumber((champion?.totalMatches ?? 0))}</div>
         </div>
       </div>
 
@@ -588,17 +593,12 @@ function ChampionMetricCard({
       </div>
       <div className="flex items-center justify-between gap-2 text-[10px]">
         <span className="text-pc-text-muted">{t("generated.champions.global")}{" "}{formatMetric(globalMean)}</span>
-        <span className={deltaClass}>{formatSignedMetric(delta, isDecimal)} ({deltaPct >= 0 ? "+" : ""}{deltaPct.toFixed(1)}%)</span>
+        <span className={deltaClass}>{formatSignedMetric(delta, isDecimal)} ({formatPercent(deltaPct, { signDisplay: "always", minimumFractionDigits: 1, maximumFractionDigits: 1 })})</span>
       </div>
     </div>
   );
 }
 
-function formatSignedMetric(value: number, decimal: boolean): string {
-  const sign = value >= 0 ? "+" : "";
-  const formatted = decimal ? value.toFixed(1) : Math.round(value).toLocaleString();
-  return `${sign}${formatted}`;
-}
 function StatBadge({ label, value }: { label: string; value: string }) {
   return (
     <div className="text-center">
@@ -669,7 +669,8 @@ function TalentCard({
   maxPickRate?: number;
   href?: string;
 }) {
-  const { t } = useLocalization();
+  const { t, formatNumber, formatPercent } = useLocalization();
+  const formatPlays = (value: number) => formatNumber(value, { notation: "compact", maximumFractionDigits: 1 });
   const pickRate = stat && totalMatches && totalMatches > 0 ? (stat.totalPlays / totalMatches) * 100 : 0;
   const quality = stat ? getStatQuality(stat.winRate, pickRate, maxPickRate ?? 100) : null;
 
@@ -696,12 +697,12 @@ function TalentCard({
           <div className="flex items-center gap-2 mt-2 text-xs flex-wrap">
             <span className={quality?.textClass ?? winRateColor(stat.winRate)} style={quality ? { color: quality.color } : undefined}>
               <span className="text-pc-text-muted mr-1">{t("generated.champions.wr")}</span>
-              {stat.winRate.toFixed(1)}%
+              {formatPercent(stat.winRate)}
             </span>
             <span className="text-pc-border">|</span>
             <span className="text-pc-text-muted">
               <span className="mr-1">{t("generated.champions.pr")}</span>
-              <span style={quality ? { color: quality.color } : undefined}>{pickRate.toFixed(1)}%</span>
+              <span style={quality ? { color: quality.color } : undefined}>{formatPercent(pickRate)}</span>
             </span>
             <span className="text-pc-border">|</span>
             <span className="text-pc-text-muted overflow-wrap break-word">
@@ -726,12 +727,6 @@ function TalentCard({
       {content}
     </div>
   );
-}
-
-function formatPlays(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
-  return String(n);
 }
 
 function winRateColor(wr: number): string {

@@ -109,17 +109,8 @@ function pctDiff(value: number, base: number): number {
   return base !== 0 ? ((value - base) / base) * 100 : 0;
 }
 
-function formatRate(value: number): string {
-  return `${value.toFixed(1)}%`;
-}
-
-function formatSignedPercent(value: number): string {
-  const normalized = Math.abs(value) < 0.05 ? 0 : value;
-  return `${normalized >= 0 ? "+" : ""}${normalized.toFixed(1)}%`;
-}
-
 export default function ChampionRateDetailPage({ config }: { config: RateMetricConfig }) {
-  const { t } = useLocalization();
+  const { t, formatNumber, formatPercent: formatRate, formatSignedPercent } = useLocalization();
   const [champions, setChampions] = useState<Champion[]>([]);
 
   useEffect(() => {
@@ -168,12 +159,12 @@ export default function ChampionRateDetailPage({ config }: { config: RateMetricC
             {config.key === "banRate" && (
               <div>
                 <div className="mb-1 text-xs uppercase tracking-wider text-pc-text-muted">{t("generated.matches.bans")}</div>
-                <div className="text-xl font-bold text-pc-text">{totalBans.toLocaleString()}</div>
+                <div className="text-xl font-bold text-pc-text">{formatNumber(totalBans)}</div>
               </div>
             )}
             <div>
               <div className="mb-1 text-xs uppercase tracking-wider text-pc-text-muted">{t("generated.champions.trackedMatches")}</div>
-              <div className="text-xl font-bold text-pc-text">{totalMatches.toLocaleString()}</div>
+              <div className="text-xl font-bold text-pc-text">{formatNumber(totalMatches)}</div>
             </div>
           </div>
         </div>
@@ -203,12 +194,12 @@ export default function ChampionRateDetailPage({ config }: { config: RateMetricC
                   {config.key === "banRate" && (
                     <div className="shrink-0 text-right text-xs">
                       <div className="text-pc-text-muted uppercase tracking-wider">{t("generated.matches.bans")}</div>
-                      <div className="text-pc-text-secondary">{section.bans.toLocaleString()}</div>
+                      <div className="text-pc-text-secondary">{formatNumber(section.bans)}</div>
                     </div>
                   )}
                   <div className="shrink-0 text-right text-xs">
                     <div className="text-pc-text-muted uppercase tracking-wider">{t("generated.champions.matches")}</div>
-                    <div className="text-pc-text-secondary">{section.matches.toLocaleString()}</div>
+                    <div className="text-pc-text-secondary">{formatNumber(section.matches)}</div>
                   </div>
               </div>
 
@@ -218,8 +209,8 @@ export default function ChampionRateDetailPage({ config }: { config: RateMetricC
                   const rowVsGlobalPct = pctDiff(champion.value, globalAverage);
                   return <Link key={champion.id} href={`/champions/${championSlug(champion.name)}`} className="flex min-w-0 items-center gap-3 p-3 transition-colors hover:bg-pc-bg/50">
                     <img src={getChampionIconSafe(champion.name)} alt="" className="h-9 w-9 shrink-0 rounded-lg object-contain" />
-                    <div className="min-w-0 flex-1"><div className="truncate text-sm font-semibold text-pc-text">{champion.name}</div><div className="mt-0.5 flex flex-wrap gap-x-2 text-[10px]"><span className={rowVsClassPct >= 0 ? "text-emerald-400" : "text-red-400"}>{formatSignedPercent(rowVsClassPct)} {t("generated.champions.class")}</span><span className={rowVsGlobalPct >= 0 ? "text-emerald-400" : "text-red-400"}>{formatSignedPercent(rowVsGlobalPct)} {t("generated.champions.global.9027cc5")}</span><span className="text-pc-text-muted">{champion.matches.toLocaleString()} {t("generated.champions.matches.9f3e924")}</span></div></div>
-                    <span className="shrink-0 text-right font-mono text-sm font-bold" style={{ color: config.stroke }}>{formatRate(champion.value)}{config.key === "banRate" && <span className="block text-[10px] font-normal text-pc-text-muted">{champion.bans.toLocaleString()} {t("generated.stats.bans")}</span>}</span>
+                    <div className="min-w-0 flex-1"><div className="truncate text-sm font-semibold text-pc-text">{champion.name}</div><div className="mt-0.5 flex flex-wrap gap-x-2 text-[10px]"><span className={rowVsClassPct >= 0 ? "text-emerald-400" : "text-red-400"}>{formatSignedPercent(rowVsClassPct)} {t("generated.champions.class")}</span><span className={rowVsGlobalPct >= 0 ? "text-emerald-400" : "text-red-400"}>{formatSignedPercent(rowVsGlobalPct)} {t("generated.champions.global.9027cc5")}</span><span className="text-pc-text-muted">{formatNumber(champion.matches)} {t("generated.champions.matches.9f3e924")}</span></div></div>
+                    <span className="shrink-0 text-right font-mono text-sm font-bold" style={{ color: config.stroke }}>{formatRate(champion.value)}{config.key === "banRate" && <span className="block text-[10px] font-normal text-pc-text-muted">{formatNumber(champion.bans)} {t("generated.stats.bans")}</span>}</span>
                   </Link>;
                 })}
                 {section.champions.length === 0 && <div className="px-3 py-6 text-center text-sm text-pc-text-muted">{t("generated.champions.noChampionData")}</div>}
@@ -253,7 +244,7 @@ export default function ChampionRateDetailPage({ config }: { config: RateMetricC
                           </td>
                           <td className="px-2.5 py-1.5 text-pc-text-muted">#{index + 1}</td>
                           <td className="px-2.5 py-1.5 text-pc-text-muted">#{globalRank.get(champion.name) ?? "-"}</td>
-                          <td className="px-2.5 py-1.5 text-right font-semibold" style={{ color: config.stroke }}>{formatRate(champion.value)}{config.key === "banRate" && <div className="text-[10px] font-normal text-pc-text-muted">{champion.bans.toLocaleString()} {t("generated.stats.bans")}</div>}</td>
+                          <td className="px-2.5 py-1.5 text-right font-semibold" style={{ color: config.stroke }}>{formatRate(champion.value)}{config.key === "banRate" && <div className="text-[10px] font-normal text-pc-text-muted">{formatNumber(champion.bans)} {t("generated.stats.bans")}</div>}</td>
                           <td className="px-2.5 py-1.5 text-right">
                             <span className={rowVsClassPct >= 0 ? "text-emerald-400" : "text-red-400"}>
                               {formatSignedPercent(rowVsClassPct)}
@@ -264,7 +255,7 @@ export default function ChampionRateDetailPage({ config }: { config: RateMetricC
                               {formatSignedPercent(rowVsGlobalPct)}
                             </span>
                           </td>
-                          <td className="px-2.5 py-1.5 text-right text-pc-text-secondary">{champion.matches.toLocaleString()}</td>
+                          <td className="px-2.5 py-1.5 text-right text-pc-text-secondary">{formatNumber(champion.matches)}</td>
                         </tr>
                       );
                     })}

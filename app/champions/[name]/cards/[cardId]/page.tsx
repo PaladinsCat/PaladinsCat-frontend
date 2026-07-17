@@ -33,19 +33,9 @@ function statNameKey(value: string | null | undefined): string {
     .replace(/[^a-z0-9]/g, "");
 }
 
-function formatPlays(n: number): string {
-  if (!Number.isFinite(n) || n <= 0) return "0";
-  if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
-  return Math.round(n).toLocaleString();
-}
-
-function formatPct(value: number | null | undefined): string {
-  if (value == null || !Number.isFinite(value)) return "-";
-  return `${value.toFixed(1)}%`;
-}
-
 export default function ChampionCardDetailPage() {
-  const { t } = useLocalization();
+  const { t, formatNumber, formatPercent: formatPct } = useLocalization();
+  const formatPlays = (value: number) => formatNumber(value, { notation: "compact", maximumFractionDigits: 1 });
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -93,7 +83,7 @@ export default function ChampionCardDetailPage() {
         if (cancelled) return;
         setChampionData(null);
         setDetail(null);
-        setError(err instanceof Error ? err.message : t("generated.app\\champions\\[name]\\cards\\[cardId]\\page.unabletoloadcardstats"));
+        setError(err instanceof Error ? err.message : t("generated.champions.[name].cards.[cardId].page.unabletoloadcardstats"));
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -173,8 +163,8 @@ export default function ChampionCardDetailPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <SummaryTile label={selectedTalent ? t("generated.champions.talentPlays") : t("common.sort.totalPlays")} value={formatPlays(detail.totalPlays)} />
               <SummaryTile label={t("generated.champions.winRate")} value={formatPct(detail.winRate)} color={headlineQuality.color} />
-              <SummaryTile label={t("generated.champions.wins")} value={detail.wins.toLocaleString()} />
-              <SummaryTile label={t("generated.champions.losses")} value={detail.losses.toLocaleString()} />
+              <SummaryTile label={t("generated.champions.wins")} value={formatNumber(detail.wins)} />
+              <SummaryTile label={t("generated.champions.losses")} value={formatNumber(detail.losses)} />
             </div>
 
             {selectedTalent && (
@@ -244,7 +234,8 @@ function TalentPairingCard({
   maxTalentPlays: number;
   onSelect: () => void;
 }) {
-  const { t } = useLocalization();
+  const { t, formatNumber, formatPercent: formatPct, formatRecord } = useLocalization();
+  const formatPlays = (value: number) => formatNumber(value, { notation: "compact", maximumFractionDigits: 1 });
   const quality = getStatQuality(talent.winRate, talent.totalPlays, maxTalentPlays);
   const width = Math.max(talent.totalPlays > 0 ? 8 : 0, Math.round((talent.totalPlays / Math.max(1, maxTalentPlays)) * 100));
 
@@ -266,7 +257,7 @@ function TalentPairingCard({
             <span className="text-pc-border">|</span>
             <span className="text-pc-text-muted"><span className="mr-1">{t("generated.champions.picks")}</span><span style={{ color: quality.color }}>{formatPlays(talent.totalPlays)}</span></span>
             <span className="text-pc-border">|</span>
-            <span className="text-pc-text-muted whitespace-nowrap">{talent.wins.toLocaleString()}{t("generated.champions.w")}{talent.losses.toLocaleString()}L</span>
+            <span className="text-pc-text-muted whitespace-nowrap">{formatRecord(talent.wins, talent.losses)}</span>
           </div>
           <div className="mt-2 h-1.5 rounded-full bg-pc-bg-elevated overflow-hidden">
             <div className="h-full rounded-full" style={{ width: `${width}%`, background: quality.track }} />
@@ -278,14 +269,15 @@ function TalentPairingCard({
 }
 
 function LevelCard({ level, maxLevelPlays }: { level: ChampionCardLevelStat; maxLevelPlays: number }) {
-  const { t } = useLocalization();
+  const { t, formatNumber, formatPercent: formatPct } = useLocalization();
+  const formatPlays = (value: number) => formatNumber(value, { notation: "compact", maximumFractionDigits: 1 });
   const quality = getStatQuality(level.winRate, level.plays, maxLevelPlays);
   const width = Math.max(level.plays > 0 ? 8 : 0, Math.round((level.plays / Math.max(1, maxLevelPlays)) * 100));
 
   return (
     <div className="pc-surface-light rounded-lg p-4 border transition-colors" style={{ borderColor: quality.borderColor }}>
       <div className="flex items-center justify-between gap-3 mb-3">
-        <div className="text-sm font-semibold text-pc-text">L{level.level}</div>
+        <div className="text-sm font-semibold text-pc-text">{t("common.format.levelShort", { level: level.level })}</div>
         <div className="text-xs font-mono" style={{ color: quality.color }}>{formatPct(level.winRate)}</div>
       </div>
       <div className="h-2 rounded-full bg-pc-bg-elevated overflow-hidden mb-2">

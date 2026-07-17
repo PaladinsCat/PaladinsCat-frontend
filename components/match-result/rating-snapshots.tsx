@@ -5,13 +5,13 @@ import PlayerName from "@/components/player-name";
 import { useLocalization } from "@/lib/localization-context";
 
 export default function RatingSnapshots({ snapshots }: { snapshots: RatingSnapshot[] }) {
-  const { t } = useLocalization();
+  const { t , formatNumber} = useLocalization();
   if (snapshots.length === 0) return null;
 
-  const formatRating = (value: number | null) => value == null ? "—" : value.toFixed(2);
+  const formatRating = (value: number | null) => value == null ? "—" : formatNumber(value, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const formatChange = (value: number | null) => {
     if (value == null) return "—";
-    return `${value >= 0 ? "+" : ""}${value.toFixed(2)}`;
+    return `${value >= 0 ? "+" : ""}${formatNumber(value, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
   return (

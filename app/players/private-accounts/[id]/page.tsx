@@ -13,13 +13,6 @@ import { TIER_NAMES, getRankIconPath, getTierColor } from "@/lib/tier-utils";
 import { useLocalization } from "@/lib/localization-context";
 import { PlayerModerationTag } from "@/components/player-name";
 
-function observedAt(value: string | null) {
-  if (!value) return "Unknown";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Unknown";
-  return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(date);
-}
-
 function duration(seconds: number) {
   if (!seconds) return "—";
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
@@ -31,7 +24,8 @@ function tpDelta(value: number | null) {
 }
 
 export default function PrivateAccountDetailPage() {
-  const { t } = useLocalization();
+  const { t, formatDateTime, formatNumber } = useLocalization();
+  const observedAt = formatDateTime;
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const privateId = Number(params.id);
@@ -65,7 +59,7 @@ export default function PrivateAccountDetailPage() {
         <div className="flex items-start gap-3">
           <LockKeyhole aria-hidden="true" className="mt-1 h-9 w-9 shrink-0 text-slate-300" strokeWidth={1.5} />
           <div className="min-w-0">
-            <div className="mb-1 flex flex-wrap items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted"><span>{t("generated.players.privateProfile")}{account.id}</span><span className="rounded border border-pc-border bg-pc-bg-elevated px-1.5 py-0.5 text-pc-text-secondary">{t("generated.players.level")}{" "}{account.accountLevel.toLocaleString()}</span></div>
+            <div className="mb-1 flex flex-wrap items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted"><span>{t("generated.players.privateProfile")}{account.id}</span><span className="rounded border border-pc-border bg-pc-bg-elevated px-1.5 py-0.5 text-pc-text-secondary">{t("generated.players.level")}{" "}{formatNumber(account.accountLevel)}</span></div>
             <div className="flex min-w-0 items-center gap-2">
               <h1 className="pc-heading pc-heading-lg truncate text-pc-accent">{account.displayName}</h1>
               <PlayerModerationTag playerId={0} cheater={account.cheater} susCount={0} verified={false} />
@@ -81,10 +75,10 @@ export default function PrivateAccountDetailPage() {
       </header>
 
       <section className="grid grid-cols-2 overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated sm:grid-cols-4 sm:divide-x sm:divide-pc-border">
-        <div className="border-b border-pc-border p-4 sm:border-b-0"><div className="text-xs text-pc-text-muted">{t("generated.players.latestMastery")}</div><div className="mt-1 text-xl font-semibold text-pc-text">{account.masteryLevel.toLocaleString()}</div></div>
+        <div className="border-b border-pc-border p-4 sm:border-b-0"><div className="text-xs text-pc-text-muted">{t("generated.players.latestMastery")}</div><div className="mt-1 text-xl font-semibold text-pc-text">{formatNumber(account.masteryLevel)}</div></div>
         <div className="border-b border-l border-pc-border p-4 sm:border-b-0 sm:border-l-0"><div className="text-xs text-pc-text-muted">{t("generated.players.latestRank")}</div><div className={`mt-1 flex items-center gap-2 font-semibold ${getTierColor(account.leagueTier)}`}><img src={getRankIconPath(account.leagueTier, 0)} alt="" className="h-8 w-8 shrink-0 object-contain" /><span className="truncate">{tierName}</span></div></div>
-        <div className="p-4"><div className="text-xs text-pc-text-muted">{t("generated.players.latestTp")}</div><div className="mt-1 text-xl font-semibold text-pc-text">{account.leaguePoints.toLocaleString()}</div></div>
-        <div className="border-l border-pc-border p-4 sm:border-l-0"><div className="text-xs text-pc-text-muted">{t("generated.players.trackedMatches")}</div><div className="mt-1 text-xl font-semibold text-pc-text">{account.matchCount.toLocaleString()}</div></div>
+        <div className="p-4"><div className="text-xs text-pc-text-muted">{t("generated.players.latestTp")}</div><div className="mt-1 text-xl font-semibold text-pc-text">{formatNumber(account.leaguePoints)}</div></div>
+        <div className="border-l border-pc-border p-4 sm:border-l-0"><div className="text-xs text-pc-text-muted">{t("generated.players.trackedMatches")}</div><div className="mt-1 text-xl font-semibold text-pc-text">{formatNumber(account.matchCount)}</div></div>
       </section>
 
       <section className="rounded-xl border border-pc-border bg-pc-bg-elevated p-4">

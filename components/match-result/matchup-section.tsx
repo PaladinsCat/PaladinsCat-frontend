@@ -18,16 +18,21 @@ interface MatchupSectionProps {
 export default function MatchupSection({
   team1, team2, team1Wins, team2Wins, team1Label, team2Label,
 }: MatchupSectionProps) {
-  const { t } = useLocalization();
-  const [sortBy, setSortBy] = useState(t("generated.match.matchup.playerName"));
-  const averages1 = computeTeamAverages(team1);
-  const averages2 = computeTeamAverages(team2);
+  const { formatNumber, formatPercent, t } = useLocalization();
+  const [sortBy, setSortBy] = useState<"player" | "tier" | "tp" | "record">("player");
+  const averages1 = computeTeamAverages(team1, formatNumber, formatPercent);
+  const averages2 = computeTeamAverages(team2, formatNumber, formatPercent);
 
-  const sortOptions = [t("generated.match.matchup.playerName"), t("generated.match.matchup.tier"), "TP", "W/L"];
+  const sortOptions = [
+    { value: "player", label: t("generated.match.matchup.playerName") },
+    { value: "tier", label: t("generated.match.matchup.tier") },
+    { value: "tp", label: t("common.metrics.tp") },
+    { value: "record", label: t("common.playerChampions.winsLosses") },
+  ] as const;
   const ordered = (players: MatchResultPlayer[]) => [...players].sort((a, b) => {
-    if (sortBy === t("generated.match.matchup.tier")) return String(b.matchData.league_tier ?? "").localeCompare(String(a.matchData.league_tier ?? ""), undefined, { numeric: true });
-    if (sortBy === "TP") return (b.profileData?.kbmPoints ?? -1) - (a.profileData?.kbmPoints ?? -1);
-    if (sortBy === "W/L") return (b.profileData?.winRate ?? -1) - (a.profileData?.winRate ?? -1);
+    if (sortBy === "tier") return String(b.matchData.league_tier ?? "").localeCompare(String(a.matchData.league_tier ?? ""), undefined, { numeric: true });
+    if (sortBy === "tp") return (b.profileData?.kbmPoints ?? -1) - (a.profileData?.kbmPoints ?? -1);
+    if (sortBy === "record") return (b.profileData?.winRate ?? -1) - (a.profileData?.winRate ?? -1);
     return (a.matchData.player_name ?? "").localeCompare(b.matchData.player_name ?? "");
   });
 
@@ -39,10 +44,10 @@ export default function MatchupSection({
         <div className="relative">
           <select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
+            onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
             className="text-xs bg-pc-bg-secondary border border-pc-border rounded-md px-2 py-1 text-pc-text-secondary cursor-pointer hover:border-pc-accent transition-colors"
           >
-            {sortOptions.map((opt) => <option key={opt} value={opt}>{opt}</option>)}
+            {sortOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
           </select>
         </div>
       </div>

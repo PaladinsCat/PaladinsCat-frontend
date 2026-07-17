@@ -1,10 +1,11 @@
+import type { TranslationKey } from "@/lib/localization/messages";
+
 export type LobbyTierFilter = "all" | "bronze-gold" | "platinum-plus" | "diamond-plus";
 
 export type LobbyTierDefinition = {
   value: LobbyTierFilter;
-  label: string;
-  description: string;
-  descriptionKey?: string;
+  labelKey: TranslationKey;
+  descriptionKey: TranslationKey;
   tierMin?: number;
   tierMax?: number;
 };
@@ -12,31 +13,27 @@ export type LobbyTierDefinition = {
 export const LOBBY_TIER_FILTERS: Record<LobbyTierFilter, LobbyTierDefinition> = {
   all: {
     value: "all",
-    label: "All ranked lobbies",
-    description: "Include every ranked lobby tier.",
-    descriptionKey: "generated.account.lobbyTier.all.description",
+    labelKey: "account.lobbyTier.all.label",
+    descriptionKey: "account.lobbyTier.all.description",
   },
   "bronze-gold": {
     value: "bronze-gold",
-    label: "Bronze 5 – Gold 1",
-    description: "Use Bronze through Gold ranked lobbies.",
-    descriptionKey: "generated.account.lobbyTier.bronzeGold.description",
+    labelKey: "account.lobbyTier.bronzeGold.label",
+    descriptionKey: "account.lobbyTier.bronzeGold.description",
     tierMin: 1,
     tierMax: 15,
   },
   "platinum-plus": {
     value: "platinum-plus",
-    label: "Platinum 5+",
-    description: "Use Platinum, Diamond, Master, and Grandmaster lobbies.",
-    descriptionKey: "generated.account.lobbyTier.platinumPlus.description",
+    labelKey: "account.lobbyTier.platinumPlus.label",
+    descriptionKey: "account.lobbyTier.platinumPlus.description",
     tierMin: 16,
     tierMax: 26,
   },
   "diamond-plus": {
     value: "diamond-plus",
-    label: "Diamond 5+",
-    description: "Use Diamond, Master, and Grandmaster lobbies.",
-    descriptionKey: "generated.account.lobbyTier.diamondPlus.description",
+    labelKey: "account.lobbyTier.diamondPlus.label",
+    descriptionKey: "account.lobbyTier.diamondPlus.description",
     tierMin: 21,
     tierMax: 26,
   },

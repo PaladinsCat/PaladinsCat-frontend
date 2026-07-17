@@ -24,7 +24,7 @@ import { formatLocalDateTime } from "@/lib/time-format";
 import { useLocalization } from "@/lib/localization-context";
 
 export default function TierListDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { t } = useLocalization();
+  const { t , formatDateTime} = useLocalization();
   const router = useRouter();
   const [id, setId] = useState<number | null>(null);
   const [list, setList] = useState<TierListSummary | null>(null);
@@ -46,7 +46,7 @@ export default function TierListDetailPage({ params }: { params: Promise<{ id: s
       setList(tierList);
       setDiscussion(post);
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : t("generated.app\\tierlists\\[id]\\page.failedtoloadtierlist"));
+      setError(reason instanceof Error ? reason.message : t("generated.tierlists.[id].page.failedtoloadtierlist"));
     } finally {
       setLoading(false);
     }
@@ -67,7 +67,7 @@ export default function TierListDetailPage({ params }: { params: Promise<{ id: s
     try {
       const likes = await togglePostLike(discussion.post.id, auth.user.id, auth.token);
       setDiscussion((current) => current ? { ...current, post: { ...current.post, likes } } : null);
-    } catch (reason) { setError(reason instanceof Error ? reason.message : t("generated.app\\tierlists\\[id]\\page.failedtoupdatelike")); }
+    } catch (reason) { setError(reason instanceof Error ? reason.message : t("generated.tierlists.[id].page.failedtoupdatelike")); }
   }
 
   async function submitComment(event: FormEvent) {
@@ -80,7 +80,7 @@ export default function TierListDetailPage({ params }: { params: Promise<{ id: s
       const created = await addComment(discussion.post.id, auth.user.id, comment.trim(), null, auth.token);
       setDiscussion((current) => current ? { ...current, comments: [...current.comments, created] } : null);
       setComment("");
-    } catch (reason) { setError(reason instanceof Error ? reason.message : t("generated.app\\tierlists\\[id]\\page.failedtoaddcomment")); }
+    } catch (reason) { setError(reason instanceof Error ? reason.message : t("generated.tierlists.[id].page.failedtoaddcomment")); }
     finally { setCommenting(false); }
   }
 
@@ -100,7 +100,7 @@ export default function TierListDetailPage({ params }: { params: Promise<{ id: s
       setDiscussion((current) => current ? { ...current, comments: current.comments.map((item) => item.id === commentId ? updated : item) } : null);
       setEditingCommentId(null);
       setEditingComment("");
-    } catch (reason) { setError(reason instanceof Error ? reason.message : t("generated.app\\tierlists\\[id]\\page.failedtoupdatecomment")); }
+    } catch (reason) { setError(reason instanceof Error ? reason.message : t("generated.tierlists.[id].page.failedtoupdatecomment")); }
     finally { setBusyCommentId(null); }
   }
 
@@ -112,7 +112,7 @@ export default function TierListDetailPage({ params }: { params: Promise<{ id: s
     try {
       await deleteComment(commentId, auth.token);
       setDiscussion((current) => current ? { ...current, comments: current.comments.filter((item) => item.id !== commentId) } : null);
-    } catch (reason) { setError(reason instanceof Error ? reason.message : t("generated.app\\tierlists\\[id]\\page.failedtodeletecomment")); }
+    } catch (reason) { setError(reason instanceof Error ? reason.message : t("generated.tierlists.[id].page.failedtodeletecomment")); }
     finally { setBusyCommentId(null); }
   }
 
@@ -126,13 +126,13 @@ export default function TierListDetailPage({ params }: { params: Promise<{ id: s
       router.push("/tierlists");
       router.refresh();
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : t("generated.app\\tierlists\\[id]\\page.failedtodeletetierlist"));
+      setError(reason instanceof Error ? reason.message : t("generated.tierlists.[id].page.failedtodeletetierlist"));
       setDeletingList(false);
     }
   }
 
   if (loading) return <LoadingPanel />;
-  if (!list || !discussion) return <div className="py-12 text-center text-pc-text-muted">{error ?? t("generated.app\\tierlists\\[id]\\page.tierlistnotfound")}</div>;
+  if (!list || !discussion) return <div className="py-12 text-center text-pc-text-muted">{error ?? t("generated.tierlists.[id].page.tierlistnotfound")}</div>;
 
   const currentUser = getAuthUser();
   const canManageList = currentUser ? currentUser.id === discussion.post.userId || currentUser.isAdmin : false;
@@ -141,7 +141,7 @@ export default function TierListDetailPage({ params }: { params: Promise<{ id: s
     <Link href="/tierlists" className="text-sm text-pc-text-secondary hover:text-pc-accent">{t("tierLists.back")}</Link>
     {error && <div className="rounded-lg border border-rose-700/50 bg-rose-950/40 p-3 text-sm text-rose-300">{error}</div>}
     <article className="space-y-5 rounded-xl border border-pc-border bg-pc-bg-elevated p-4 sm:p-6">
-      <div className="flex items-start justify-between gap-4"><div><h1 className="text-2xl font-bold text-pc-text sm:text-3xl">{discussion.post.title}</h1><div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-pc-text-muted"><span className="inline-flex items-center gap-1">{t("tierLists.createdBy", { name: discussion.post.username })}{discussion.post.linkedPlayerId != null && <VerifiedPlayerBadge />}</span><span>{formatLocalDateTime(discussion.post.createdAt)}</span><span>👁 {discussion.post.viewCount}</span></div></div>{canManageList && <button type="button" onClick={removeList} disabled={deletingList} className="shrink-0 rounded-lg border border-rose-700/50 px-3 py-1.5 text-xs text-rose-400 hover:bg-rose-950/30 disabled:opacity-50">{deletingList ? t("generated.community.deleting") : t("generated.community.delete")}</button>}</div>
+      <div className="flex items-start justify-between gap-4"><div><h1 className="text-2xl font-bold text-pc-text sm:text-3xl">{discussion.post.title}</h1><div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-pc-text-muted"><span className="inline-flex items-center gap-1">{t("tierLists.createdBy", { name: discussion.post.username })}{discussion.post.linkedPlayerId != null && <VerifiedPlayerBadge />}</span><span>{formatDateTime(discussion.post.createdAt)}</span><span>👁 {discussion.post.viewCount}</span></div></div>{canManageList && <button type="button" onClick={removeList} disabled={deletingList} className="shrink-0 rounded-lg border border-rose-700/50 px-3 py-1.5 text-xs text-rose-400 hover:bg-rose-950/30 disabled:opacity-50">{deletingList ? t("generated.community.deleting") : t("generated.community.delete")}</button>}</div>
       {discussion.post.content && <div className="text-sm text-pc-text-secondary"><CommunityRichContent content={discussion.post.content} /></div>}
       <TierListBoard entries={list.entries} />
       <div className="border-t border-pc-border pt-4"><button type="button" onClick={like} className="text-pc-text-secondary transition-colors hover:text-pc-accent">❤ {discussion.post.likes}</button></div>
@@ -153,7 +153,7 @@ export default function TierListDetailPage({ params }: { params: Promise<{ id: s
         const canManageComment = currentUser ? currentUser.id === item.userId || currentUser.isAdmin : false;
         const isEditing = editingCommentId === item.id;
         const isBusy = busyCommentId === item.id;
-        return <div key={item.id} className="rounded-lg bg-pc-bg-secondary p-4"><div className="flex items-start justify-between gap-3"><div className="flex flex-wrap items-center gap-2 text-xs text-pc-text-muted"><span className="inline-flex items-center gap-1 font-semibold text-pc-text">{item.username}{item.linkedPlayerId != null && <VerifiedPlayerBadge />}</span><span>{formatLocalDateTime(item.createdAt)}</span></div>{canManageComment && !isEditing && <div className="flex gap-2"><button type="button" onClick={() => startCommentEdit(item)} className="text-xs text-pc-text-muted hover:text-pc-text">{t("generated.community.edit")}</button><button type="button" onClick={() => removeComment(item.id)} disabled={isBusy} className="text-xs text-rose-400 hover:text-rose-300 disabled:opacity-50">{isBusy ? t("generated.community.deleting") : t("generated.community.delete")}</button></div>}</div>{isEditing ? <div className="mt-3 space-y-2"><textarea value={editingComment} onChange={(event) => setEditingComment(event.target.value)} rows={3} className="w-full rounded-lg border border-pc-border bg-pc-bg px-3 py-2 text-sm text-pc-text" /><div className="flex gap-2"><button type="button" onClick={() => saveComment(item.id)} disabled={isBusy || !editingComment.trim()} className="rounded-lg bg-pc-accent px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50">{isBusy ? <LoadingIndicator className="gap-2" /> : t("generated.community.save")}</button><button type="button" onClick={() => { setEditingCommentId(null); setEditingComment(""); }} className="rounded-lg border border-pc-border px-3 py-1.5 text-xs text-pc-text-secondary">{t("generated.community.cancel")}</button></div></div> : <div className="mt-2 text-sm"><CommunityRichContent content={item.content} /></div>}</div>;
+        return <div key={item.id} className="rounded-lg bg-pc-bg-secondary p-4"><div className="flex items-start justify-between gap-3"><div className="flex flex-wrap items-center gap-2 text-xs text-pc-text-muted"><span className="inline-flex items-center gap-1 font-semibold text-pc-text">{item.username}{item.linkedPlayerId != null && <VerifiedPlayerBadge />}</span><span>{formatDateTime(item.createdAt)}</span></div>{canManageComment && !isEditing && <div className="flex gap-2"><button type="button" onClick={() => startCommentEdit(item)} className="text-xs text-pc-text-muted hover:text-pc-text">{t("generated.community.edit")}</button><button type="button" onClick={() => removeComment(item.id)} disabled={isBusy} className="text-xs text-rose-400 hover:text-rose-300 disabled:opacity-50">{isBusy ? t("generated.community.deleting") : t("generated.community.delete")}</button></div>}</div>{isEditing ? <div className="mt-3 space-y-2"><textarea value={editingComment} onChange={(event) => setEditingComment(event.target.value)} rows={3} className="w-full rounded-lg border border-pc-border bg-pc-bg px-3 py-2 text-sm text-pc-text" /><div className="flex gap-2"><button type="button" onClick={() => saveComment(item.id)} disabled={isBusy || !editingComment.trim()} className="rounded-lg bg-pc-accent px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50">{isBusy ? <LoadingIndicator className="gap-2" /> : t("generated.community.save")}</button><button type="button" onClick={() => { setEditingCommentId(null); setEditingComment(""); }} className="rounded-lg border border-pc-border px-3 py-1.5 text-xs text-pc-text-secondary">{t("generated.community.cancel")}</button></div></div> : <div className="mt-2 text-sm"><CommunityRichContent content={item.content} /></div>}</div>;
       })}</div>}
     </section>
   </div>;

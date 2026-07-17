@@ -3,9 +3,10 @@ import { resolve } from "node:path";
 import ts from "typescript";
 
 const root = resolve(process.cwd());
-const sourceDirectories = ["app", "components"];
-const translatableAttributes = new Set(["alt", "aria-label", "description", "label", "message", "placeholder", "text", "title"]);
-const translatableProperties = /^(?:ariaLabel|caption|description|empty(?:Label|Message|Text)?|heading|label|message|placeholder|subtitle|title|tooltip)$/i;
+const sourceDirectories = ["app", "components", "lib"];
+const translatableAttributes = new Set(["alt", "aria-label", "description", "detail", "eloLabel", "label", "loadingLabel", "message", "placeholder", "playsLabel", "subtitle", "text", "title"]);
+const translatableProperties = /^(?:ariaLabel|caption|description|detail|empty(?:Label|Message|Text)?|heading|label|message|placeholder|subtitle|title|tooltip)$/i;
+const translatablePropertySuffix = /(?:Caption|Description|Detail|Label|Message|Subtitle|Text|Title|Tooltip)$/;
 const findings = [];
 const findingPositions = new Set();
 
@@ -21,7 +22,7 @@ async function filesIn(directory) {
 
 function addFinding(source, node, text, kind) {
   const normalized = text.replace(/\s+/g, " ").trim();
-  if (!/[A-Za-z]/.test(normalized) || normalized.length < 2) return;
+  if (!/[A-Za-z]/.test(normalized)) return;
   const identity = `${source.fileName}:${node.getStart(source)}:${kind}`;
   if (findingPositions.has(identity)) return;
   findingPositions.add(identity);
@@ -75,6 +76,18 @@ function isInternalControlAttribute(node) {
   return node.name.text === "label" && componentNameForAttribute(node) === "DimensionBars";
 }
 
+function isTranslatableAttribute(node) {
+  return translatableAttributes.has(node.name.text) || translatableProperties.test(node.name.text) || translatablePropertySuffix.test(node.name.text);
+}
+
+function isTranslatablePropertyName(name) {
+  return translatableProperties.test(name) || translatablePropertySuffix.test(name);
+}
+
+function isCssValue(text) {
+  return /^(?:oklch|rgb|hsl|var)\(/i.test(text.trim());
+}
+
 function isProgramControlLiteral(node, expression) {
   return Boolean(ancestorBefore(node, expression, (ancestor) => (
     ts.isBinaryExpression(ancestor)
@@ -82,7 +95,7 @@ function isProgramControlLiteral(node, expression) {
   )));
 }
 
-function uiMessageArgument(node, isClient) {
+function uiMessageArgument(node, isClient, auditClientErrors) {
   if (ts.isCallExpression(node)) {
     if (ts.isIdentifier(node.expression)
       && ["alert", "confirm", "setError", "setMessage", "setNotice", "setSuccess"].includes(node.expression.text)) {
@@ -95,7 +108,7 @@ function uiMessageArgument(node, isClient) {
       return node.arguments[0];
     }
   }
-  if (isClient && ts.isNewExpression(node) && ts.isIdentifier(node.expression) && node.expression.text === "Error") {
+  if (isClient && auditClientErrors && ts.isNewExpression(node) && ts.isIdentifier(node.expression) && node.expression.text === "Error") {
     return node.arguments?.[0];
   }
   return null;
@@ -112,18 +125,43 @@ for (const directory of sourceDirectories) {
     const input = await readFile(file, "utf8");
     const source = ts.createSourceFile(file, input, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
     const isClient = /^\s*["']use client["'];/.test(input);
+    const sourcePath = source.fileName.replaceAll("\\", "/");
+    const auditClientErrors = !sourcePath.includes("/lib/");
+    const auditUiFormatting = !sourcePath.includes("/lib/");
     const visit = (node) => {
       if (ts.isJsxText(node)) addFinding(source, node, node.getText(source), "text");
 
-      if (ts.isJsxAttribute(node) && translatableAttributes.has(node.name.text) && !isInternalControlAttribute(node)) {
+      if (ts.isJsxAttribute(node) && isTranslatableAttribute(node) && !isInternalControlAttribute(node)) {
         const value = node.initializer;
         if (value && ts.isStringLiteral(value)) addFinding(source, value, value.text, `attribute:${node.name.text}`);
       }
 
-      const messageArgument = uiMessageArgument(node, isClient);
+      const messageArgument = uiMessageArgument(node, isClient, auditClientErrors);
       if (messageArgument && (ts.isStringLiteralLike(messageArgument) || ts.isTemplateExpression(messageArgument))) {
         const text = literalText(messageArgument, source);
         if (text) addFinding(source, messageArgument, text, "message");
+      }
+
+      if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression)) {
+        const method = node.expression.name.text;
+        if (auditUiFormatting && ["toFixed", "toLocaleString"].includes(method) && containingJsxExpression(node)) {
+          addFinding(source, node, method, "locale-formatting");
+        }
+        if (auditUiFormatting && ["toLocaleDateString", "toLocaleTimeString", "toLocaleString"].includes(method)) {
+          const localeArgument = node.arguments[0];
+          if (!localeArgument || localeArgument.kind === ts.SyntaxKind.UndefinedKeyword || ts.isStringLiteralLike(localeArgument)) {
+            addFinding(source, node, method, "locale-formatting");
+          }
+        }
+      }
+
+      if (auditUiFormatting && ts.isNewExpression(node) && ts.isPropertyAccessExpression(node.expression)
+        && ts.isIdentifier(node.expression.expression) && node.expression.expression.text === "Intl"
+        && ["DateTimeFormat", "NumberFormat", "RelativeTimeFormat"].includes(node.expression.name.text)) {
+        const localeArgument = node.arguments?.[0];
+        if (!localeArgument || localeArgument.kind === ts.SyntaxKind.UndefinedKeyword || ts.isStringLiteralLike(localeArgument)) {
+          addFinding(source, node, node.expression.name.text, "locale-formatting");
+        }
       }
 
       if ((ts.isStringLiteralLike(node) || ts.isTemplateExpression(node)) && !isTranslationKeyArgument(node)) {
@@ -138,16 +176,16 @@ for (const directory of sourceDirectories) {
         if (text && property) {
           const propertyName = property.name;
           const name = ts.isIdentifier(propertyName) || ts.isStringLiteralLike(propertyName) ? propertyName.text : "";
-          if (translatableProperties.test(name)) addFinding(source, node, text, `property:${name}`);
+          if (isTranslatablePropertyName(name) && !isCssValue(text)) addFinding(source, node, text, `property:${name}`);
         } else if (text && expression && !call) {
           const attribute = ts.isJsxAttribute(expression.parent) ? expression.parent : null;
-          if (!attribute || translatableAttributes.has(attribute.name.text)) {
+          if (!attribute || isTranslatableAttribute(attribute)) {
             addFinding(source, node, text, attribute ? `attribute:${attribute.name.text}` : "expression");
           }
         } else if (text && ts.isPropertyAssignment(node.parent)) {
           const property = node.parent.name;
           const name = ts.isIdentifier(property) || ts.isStringLiteralLike(property) ? property.text : "";
-          if (translatableProperties.test(name)) addFinding(source, node, text, `property:${name}`);
+          if (isTranslatablePropertyName(name) && !isCssValue(text)) addFinding(source, node, text, `property:${name}`);
         }
       }
 

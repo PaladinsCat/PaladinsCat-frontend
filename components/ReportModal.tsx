@@ -103,7 +103,7 @@ export default function ReportModal({ playerId, type, onClose, onSuccess }: Repo
 
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
-      if (event.key === t("generated.components\\ReportModal.escape")) onClose();
+      if (event.key === t("generated.components.reportModal.escape")) onClose();
     };
     document.addEventListener("keydown", handleEsc);
     return () => document.removeEventListener("keydown", handleEsc);

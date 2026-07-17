@@ -15,28 +15,19 @@ function categoryColor(category: BuildItemCategory) {
   return category === "Offense" ? "text-red-400" : category === "Defense" ? "text-blue-400" : category === "Healing" ? "text-emerald-400" : "text-amber-400";
 }
 
-function formatCount(value: number): string {
-  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
-  if (value >= 1_000) return `${(value / 1_000).toFixed(1)}K`;
-  return String(value);
-}
-
-function cleanNumber(value: number): string {
-  return Number.isInteger(value) ? String(value) : String(Number(value.toFixed(2)));
-}
-
-function formatItemDescription(description: string | null | undefined, level = 1): string | null {
+function formatItemDescription(description: string | null | undefined, formatNumber: (value: number, options?: Intl.NumberFormatOptions) => string, level = 1): string | null {
   if (!description) return null;
   return description
     .replace(/^\s*(?:\[[^\]]+\]\s*)+/, "")
     .replace(/\{\s*(?:scale\s*=\s*)?(-?(?:\d+(?:\.\d*)?|\.\d+))\s*\|\s*(-?(?:\d+(?:\.\d*)?|\.\d+))\s*\}/gi, (_match, base: string, increase: string) => (
-      cleanNumber(Number(base) + Number(increase) * Math.max(0, level - 1))
+      formatNumber(Number(base) + Number(increase) * Math.max(0, level - 1), { maximumFractionDigits: 2 })
     ))
-    .replace(/\{\s*(-?(?:\d+(?:\.\d*)?|\.\d+))\s*\}/g, (_match, value: string) => cleanNumber(Number(value)));
+    .replace(/\{\s*(-?(?:\d+(?:\.\d*)?|\.\d+))\s*\}/g, (_match, value: string) => formatNumber(Number(value), { maximumFractionDigits: 2 }));
 }
 
 export default function ItemsPage() {
-  const { t } = useLocalization();
+  const { t, formatNumber, formatPercent } = useLocalization();
+  const formatCount = (value: number) => formatNumber(value, { notation: "compact", maximumFractionDigits: 1 });
   const [items, setItems] = useState<ItemStat[]>([]);
   const [references, setReferences] = useState<BuildItemReference[]>([]);
   const [query, setQuery] = useState("");
@@ -95,7 +86,8 @@ export default function ItemsPage() {
             const pickRate = itemPickRate(item);
             const quality = getStatQuality(item.winRate, pickRate, maxPickRate);
             const reference = referenceById.get(item.itemId);
-            const description = formatItemDescription(reference?.description, 1) ?? t("items.overviewFallbackDescription");
+            const referenceDescription = reference?.description ?? (reference?.descriptionKey ? t(reference.descriptionKey) : null);
+            const description = formatItemDescription(referenceDescription, formatNumber, 1) ?? t("items.overviewFallbackDescription");
             return <Link key={item.itemId} href={`/game/items/${item.itemId}`} className="pc-surface-light group block rounded-lg border p-3 text-left transition-colors hover:border-pc-accent-mid" style={{ borderColor: quality.borderColor }}>
               <div className="flex items-start gap-3">
                 <img src={reference?.iconUrl ?? itemIcon(item.itemName)} alt={item.itemName} className="h-10 w-12 shrink-0 rounded border border-pc-border bg-pc-bg/50 object-contain" />
@@ -103,9 +95,9 @@ export default function ItemsPage() {
                   <h2 className="mb-0.5 text-xs font-medium text-pc-accent">{item.itemName}</h2>
                   <p className="text-xs leading-relaxed text-pc-text-secondary">{description}</p>
                   <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
-                    <span style={{ color: quality.color }}><span className="mr-1 text-pc-text-muted">{t("generated.stats.wr")}</span>{item.winRate.toFixed(1)}%</span>
+                    <span style={{ color: quality.color }}><span className="mr-1 text-pc-text-muted">{t("generated.stats.wr")}</span>{formatPercent(item.winRate)}</span>
                     <span className="text-pc-border">|</span>
-                    <span className="text-pc-text-muted"><span className="mr-1">{t("generated.stats.pr")}</span><span style={{ color: quality.color }}>{pickRate.toFixed(1)}%</span></span>
+                    <span className="text-pc-text-muted"><span className="mr-1">{t("generated.stats.pr")}</span><span style={{ color: quality.color }}>{formatPercent(pickRate)}</span></span>
                     <span className="text-pc-border">|</span>
                     <span className="text-pc-text-muted"><span className="mr-1">{t("generated.stats.purchases")}</span><span style={{ color: quality.color }}>{formatCount(item.totalUsage)}</span></span>
                   </div>

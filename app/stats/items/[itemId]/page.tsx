@@ -10,22 +10,12 @@ import { LoadingPanel } from "@/components/async-state";
 import { useLocalization } from "@/lib/localization-context";
 
 function itemIcon(name: string) { return `/images/items/${name.replace(/\s+/g, "_")}_Icon.avif`; }
-function percent(value: number) { return `${value.toFixed(1)}%`; }
-function formatCount(value: number) {
-  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
-  if (value >= 1_000) return `${(value / 1_000).toFixed(1)}K`;
-  return value.toLocaleString();
-}
 function weightedWinRate(items: ItemStat[]) {
   const total = items.reduce((sum, item) => sum + item.totalUsage, 0);
   return total > 0 ? items.reduce((sum, item) => sum + item.winRate * item.totalUsage, 0) / total : null;
 }
 function relativeDifference(value: number, baseline: number | null) {
   return baseline && baseline > 0 ? ((value - baseline) / baseline) * 100 : null;
-}
-function signedPercent(value: number | null) {
-  if (value == null) return "—";
-  return `${value >= 0 ? "+" : ""}${value.toFixed(1)}%`;
 }
 
 type ChampionRole = "Frontline" | "Damage" | "Flank" | "Support";
@@ -38,7 +28,8 @@ const CHAMPION_ROLES = [
 ] as const;
 
 export default function ItemDetailPage() {
-  const { t } = useLocalization();
+  const { t, formatNumber, formatPercent: percent, formatRecord, formatSignedPercent: signedPercent } = useLocalization();
+  const formatCount = (value: number) => formatNumber(value, { notation: "compact", maximumFractionDigits: 1 });
   const params = useParams<{ itemId: string }>();
   const [detail, setDetail] = useState<ItemDetailStats | null>(null);
   const [items, setItems] = useState<ItemStat[]>([]);
@@ -94,7 +85,7 @@ export default function ItemDetailPage() {
   return <div className="space-y-6">
     <div><ContextBackLink fallbackHref="/game/items" label={t("generated.stats.back")} /></div>
     <section className="rounded-xl border border-pc-border bg-pc-bg-elevated p-5" style={{ borderColor: overallQuality.borderColor }}>
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center"><img src={itemIcon(detail.itemName)} alt="" className="h-16 w-16 rounded-lg object-contain" /><div className="min-w-0 flex-1"><h1 className="pc-heading pc-heading-lg text-pc-accent">{detail.itemName}</h1><p className="mt-1 text-sm text-pc-text-secondary">{t("generated.stats.rankedItemPerformanceByPurchaseSlotAndFinalUpgradeLevel")}</p></div><div className="grid w-full grid-cols-2 gap-3 text-left sm:w-auto sm:grid-cols-3 sm:gap-5 sm:text-right"><div><div className="text-xs uppercase text-pc-text-muted">{t("generated.stats.winRate")}</div><div className="text-xl font-bold" style={{ color: overallQuality.color }}>{percent(detail.winRate)}</div><div className="mt-1 flex flex-wrap gap-x-2 text-xs sm:justify-end"><span className={vsClass != null && vsClass >= 0 ? "text-emerald-400" : "text-red-400"}>{signedPercent(vsClass)} {t("generated.stats.vsClass")} <span className="text-pc-text-muted">({currentCategory})</span></span><span className={vsGlobal != null && vsGlobal >= 0 ? "text-emerald-400" : "text-red-400"}>{signedPercent(vsGlobal)} {t("generated.stats.vsGlobal")}</span></div></div><div><div className="text-xs uppercase text-pc-text-muted">{t("generated.stats.purchases")}</div><div className="text-xl font-bold text-pc-text">{detail.totalUses.toLocaleString()}</div></div><div className="col-span-2 sm:col-span-1"><div className="text-xs uppercase text-pc-text-muted">{t("generated.stats.record")}</div><div className="text-sm font-semibold text-pc-text">{detail.wins.toLocaleString()} {t("generated.stats.w")} {detail.losses.toLocaleString()} L</div></div></div></div>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center"><img src={itemIcon(detail.itemName)} alt="" className="h-16 w-16 rounded-lg object-contain" /><div className="min-w-0 flex-1"><h1 className="pc-heading pc-heading-lg text-pc-accent">{detail.itemName}</h1><p className="mt-1 text-sm text-pc-text-secondary">{t("generated.stats.rankedItemPerformanceByPurchaseSlotAndFinalUpgradeLevel")}</p></div><div className="grid w-full grid-cols-2 gap-3 text-left sm:w-auto sm:grid-cols-3 sm:gap-5 sm:text-right"><div><div className="text-xs uppercase text-pc-text-muted">{t("generated.stats.winRate")}</div><div className="text-xl font-bold" style={{ color: overallQuality.color }}>{percent(detail.winRate)}</div><div className="mt-1 flex flex-wrap gap-x-2 text-xs sm:justify-end"><span className={vsClass != null && vsClass >= 0 ? "text-emerald-400" : "text-red-400"}>{signedPercent(vsClass)} {t("generated.stats.vsClass")} <span className="text-pc-text-muted">({currentCategory})</span></span><span className={vsGlobal != null && vsGlobal >= 0 ? "text-emerald-400" : "text-red-400"}>{signedPercent(vsGlobal)} {t("generated.stats.vsGlobal")}</span></div></div><div><div className="text-xs uppercase text-pc-text-muted">{t("generated.stats.purchases")}</div><div className="text-xl font-bold text-pc-text">{formatNumber(detail.totalUses)}</div></div><div className="col-span-2 sm:col-span-1"><div className="text-xs uppercase text-pc-text-muted">{t("generated.stats.record")}</div><div className="text-sm font-semibold text-pc-text">{formatRecord(detail.wins, detail.losses)}</div></div></div></div>
     </section>
     <section className="pc-card">
       <div className="mb-4 border-b border-pc-border/60 pb-4">
@@ -131,7 +122,7 @@ export default function ItemDetailPage() {
                       <div className="mx-auto mt-2 h-1.5 w-full max-w-32 overflow-hidden rounded-full bg-pc-bg-elevated">
                         <div className="h-full rounded-full" style={{ width: `${Math.max(8, cell.totalUses / maxCellUses * 100)}%`, background: quality.track }} />
                       </div>
-                      <div className="mt-1.5 break-words text-xs text-pc-text-muted">{cell.totalUses.toLocaleString()} {t("generated.stats.purchases.d29d2db")}</div>
+                      <div className="mt-1.5 break-words text-xs text-pc-text-muted">{formatNumber(cell.totalUses)} {t("generated.stats.purchases.d29d2db")}</div>
                     </div>
                   );
                 })}

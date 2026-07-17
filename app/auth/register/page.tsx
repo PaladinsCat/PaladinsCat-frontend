@@ -33,7 +33,7 @@ export default function RegisterPage() {
       await register(username.trim(), email.trim(), password);
       router.push("/");
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("generated.app\\auth\\register\\page.registrationfailed"));
+      setError(err instanceof Error ? err.message : t("generated.auth.register.page.registrationfailed"));
     } finally {
       setLoading(false);
     }

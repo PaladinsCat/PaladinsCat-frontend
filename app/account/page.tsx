@@ -32,7 +32,7 @@ import {
 import { useLocalization } from "@/lib/localization-context";
 
 export default function AccountPage() {
-  const { t } = useLocalization();
+  const { t , formatDateTime, formatDate} = useLocalization();
   const { user: authUser, refresh } = useAuth();
   const { timeZone, setTimeZone } = useTimeZone();
   const { filter: lobbyTierFilter, definition: lobbyTierDefinition, setFilter: setLobbyTierFilter } = useLobbyTier();
@@ -286,7 +286,7 @@ export default function AccountPage() {
             {notifications.map((notification) => {
               const href = notification.postId ? `/community/${notification.postId}` : "/community";
               return <Link key={notification.id} href={href} onClick={() => handleNotificationOpen(notification)} className={`block px-4 py-3 transition-colors hover:bg-pc-bg-secondary ${notification.readAt ? "text-pc-text-secondary" : "bg-pc-accent/5 text-pc-text"}`}>
-                <div className="flex items-start justify-between gap-3"><div className="min-w-0"><div className="text-sm"><span className="font-semibold">{notification.actorUsername}</span> {t("generated.account.repliedTo")}{" "}<span className="font-medium">{notification.postTitle ?? t("generated.account.yourPost")}</span></div>{notification.commentContent && <div className="mt-1 line-clamp-1 text-xs text-pc-text-muted">{notification.commentContent}</div>}</div><time className="shrink-0 text-[10px] text-pc-text-muted">{formatLocalDateTime(notification.createdAt)}</time></div>
+                <div className="flex items-start justify-between gap-3"><div className="min-w-0"><div className="text-sm"><span className="font-semibold">{notification.actorUsername}</span> {t("generated.account.repliedTo")}{" "}<span className="font-medium">{notification.postTitle ?? t("generated.account.yourPost")}</span></div>{notification.commentContent && <div className="mt-1 line-clamp-1 text-xs text-pc-text-muted">{notification.commentContent}</div>}</div><time className="shrink-0 text-[10px] text-pc-text-muted">{formatDateTime(notification.createdAt)}</time></div>
               </Link>;
             })}
           </div>
@@ -348,10 +348,10 @@ export default function AccountPage() {
             onChange={(event) => setLobbyTierFilter(event.target.value as LobbyTierFilter)}
             className="mt-1.5 w-full rounded-lg border border-pc-border bg-pc-bg-secondary px-3 py-2 text-sm text-pc-text focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
           >
-            {LOBBY_TIER_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+            {LOBBY_TIER_OPTIONS.map((option) => <option key={option.value} value={option.value}>{t(option.labelKey)}</option>)}
           </select>
         </label>
-        <p className="mt-2 text-xs text-pc-text-muted">{lobbyTierDefinition.description}</p>
+        <p className="mt-2 text-xs text-pc-text-muted">{t(lobbyTierDefinition.descriptionKey)}</p>
       </div>
 
       {/* ── Custom wallpaper ── */}
@@ -440,14 +440,14 @@ export default function AccountPage() {
             <label className="block text-sm font-medium text-pc-text-secondary mb-1">
               {t("generated.account.memberSince")}</label>
             <div className="px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text">
-              {formatLocalDate(user.createdAt)}
+              {formatDate(user.createdAt)}
             </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-pc-text-secondary mb-1">
               {t("generated.account.lastLogin")}</label>
             <div className="px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text">
-              {formatLocalDate(user.lastLogin)}
+              {formatDate(user.lastLogin)}
             </div>
           </div>
         </div>

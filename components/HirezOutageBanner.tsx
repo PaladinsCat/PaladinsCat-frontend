@@ -9,7 +9,7 @@ import { useLocalization } from "@/lib/localization-context";
 const REFRESH_MS = 60_000;
 
 export default function HirezOutageBanner() {
-  const { t } = useLocalization();
+  const { t , formatTime} = useLocalization();
   const [status, setStatus] = useState<HirezServiceStatus | null>(null);
 
   useEffect(() => {
@@ -29,7 +29,7 @@ export default function HirezOutageBanner() {
   }, []);
 
   const primary = status?.activeOutages[0] ?? null;
-  const nextProbe = useMemo(() => formatLocalTime(primary?.nextProbeAt), [primary?.nextProbeAt]);
+  const nextProbe = useMemo(() => formatTime(primary?.nextProbeAt), [primary?.nextProbeAt]);
 
   if (!status || status.status === "ok") return null;
 

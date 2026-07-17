@@ -17,20 +17,14 @@ import { useLocalization } from "@/lib/localization-context";
 const PAGE_SIZE = 24;
 type DirectoryMode = "stacks" | "pairs";
 
-function observedAt(value: string | null) {
-  if (!value) return "Unknown";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Unknown";
-  return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(date);
-}
-
 function MatchCount({ count }: { count: number }) {
-  const { t } = useLocalization();
-  return <span className="shrink-0 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-2 py-1 text-xs font-semibold text-cyan-300">{count.toLocaleString()} {t("generated.players.match")}{count === 1 ? "" : t("generated.players.es")}</span>;
+  const { t, formatNumber } = useLocalization();
+  return <span className="shrink-0 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-2 py-1 text-xs font-semibold text-cyan-300">{formatNumber(count)} {t("generated.players.match")}{count === 1 ? "" : t("generated.players.es")}</span>;
 }
 
 export default function RankedPartiesPage() {
-  const { t } = useLocalization();
+  const { t, formatDateTime, formatNumber } = useLocalization();
+  const observedAt = formatDateTime;
   const [mode, setMode] = useState<DirectoryMode>("stacks");
   const [pairs, setPairs] = useState<PartyPairSummary[]>([]);
   const [stacks, setStacks] = useState<PartyStackSummary[]>([]);
@@ -127,7 +121,7 @@ export default function RankedPartiesPage() {
             </select>
           )}
         </div>
-        <div className="text-xs text-pc-text-muted">{loading && itemsEmpty ? t("generated.players.loading") : t(mode === "stacks" ? (total === 1 ? "common.count.knownStackOne" : "common.count.knownStackMany") : (total === 1 ? "common.count.knownPairOne" : "common.count.knownPairMany"), { count: total.toLocaleString() })}</div>
+        <div className="text-xs text-pc-text-muted">{loading && itemsEmpty ? t("generated.players.loading") : t(mode === "stacks" ? (total === 1 ? "common.count.knownStackOne" : "common.count.knownStackMany") : (total === 1 ? "common.count.knownPairOne" : "common.count.knownPairMany"), { count: formatNumber(total) })}</div>
       </div>
 
       {error && <div className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-300">{error}</div>}

@@ -13,7 +13,7 @@ import { formatLocalDateTime } from '@/lib/time-format';
 import { useLocalization } from "@/lib/localization-context";
 
 export default function AdminChangelogPage() {
-  const { t } = useLocalization();
+  const { t , formatDateTime} = useLocalization();
   const { user, isLoading } = useAuth();
   const isAdmin = user?.isAdmin ?? false;
   const [entries, setEntries] = useState<ChangelogEntry[]>([]);
@@ -83,7 +83,7 @@ export default function AdminChangelogPage() {
             <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <div className="text-sm font-bold text-pc-text">{entry.version || t("generated.admin.deploymentValue1", { value1: entry.id })}</div>
-                <div className="mt-1 text-xs text-pc-text-muted">#{entry.id}{entry.gitCommitShort ? t("generated.admin.value1", { value1: entry.gitCommitShort }) : ''}{entry.deployedAt ? t("generated.admin.value1", { value1: formatLocalDateTime(entry.deployedAt) }) : ''}</div>
+                <div className="mt-1 text-xs text-pc-text-muted">#{entry.id}{entry.gitCommitShort ? t("generated.admin.value1", { value1: entry.gitCommitShort }) : ''}{entry.deployedAt ? t("generated.admin.value1", { value1: formatDateTime(entry.deployedAt) }) : ''}</div>
               </div>
               <button type="button" onClick={() => void save(entry)} disabled={!changed || savingId === entry.id} className="pc-btn-primary inline-flex items-center justify-center gap-2 text-sm disabled:opacity-50"><Save className="h-4 w-4" /> {savingId === entry.id ? t("generated.admin.saving") : t("generated.admin.save")}</button>
             </div>

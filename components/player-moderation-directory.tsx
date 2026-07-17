@@ -26,7 +26,7 @@ export default function PlayerModerationDirectory({
   accentClass: string;
   borderClass: string;
 }) {
-  const { t } = useLocalization();
+  const { t , formatNumber} = useLocalization();
   const [players, setPlayers] = useState<CheaterPlayer[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -49,7 +49,7 @@ export default function PlayerModerationDirectory({
 
       <div className="flex items-center gap-2">
         <span className={`h-2 w-2 rounded-full ${accentClass}`} />
-        <span className="text-xs text-pc-text-muted">{t("moderation.value1CommunityMarked", { value1: players.length.toLocaleString() })}</span>
+        <span className="text-xs text-pc-text-muted">{t("moderation.value1CommunityMarked", { value1: formatNumber(players.length) })}</span>
       </div>
 
       {loading ? (

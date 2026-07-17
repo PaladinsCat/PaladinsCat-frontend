@@ -6,32 +6,6 @@
 import type { MatchPlayerDetail, MatchFactPlayer } from "@/lib/api-client";
 import type { MatchResultPlayer, PlayerProfileData, TeamAverages } from "./types";
 
-/* ── Number formatting ── */
-
-export function num(n: number | null | undefined): string {
-  if (n == null || !Number.isFinite(n)) return "—";
-  return n.toLocaleString();
-}
-
-export function fixed(n: number | null | undefined, digits: number): string {
-  if (n == null || !Number.isFinite(n)) return "—";
-  return n.toFixed(digits);
-}
-
-/** Format duration seconds → "mm:ss" */
-export function formatDuration(seconds: number): string {
-  if (!Number.isFinite(seconds) || seconds < 0) return "—";
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
-  return `${m}:${s.toString().padStart(2, "0")}`;
-}
-
-/** Format percentage for win/loss bars (0–100 range). */
-export function winPct(wins: number, total: number): string {
-  if (total <= 0) return "—";
-  return `${Math.round((wins / total) * 100)}%`;
-}
-
 /* ── Damage math (preserves recovered-match guard) ── */
 
 export function computeDamageStats(p: MatchPlayerDetail) {
@@ -50,8 +24,8 @@ export function computeDamageStats(p: MatchPlayerDetail) {
     : null;
   const weaponShare =
     hasWeaponBreakdown && totalDamage > 0
-      ? `${Math.round((weaponDamage / totalDamage) * 100)}%`
-      : "—";
+      ? (weaponDamage / totalDamage) * 100
+      : null;
 
   return { totalDamage, weaponDamage, nonWeaponDamage, weaponShare };
 }
@@ -81,15 +55,12 @@ export function getChampionStats(
 /**
  * Format KBM tier label for display.
  */
-export function formatKBMTier(tier: string | null | undefined): string {
-  if (!tier) return "Unranked";
-  return tier;
-}
-
 /* ── Team averages ── */
 
 export function computeTeamAverages(
   players: MatchResultPlayer[],
+  formatNumber: (value: number, options?: Intl.NumberFormatOptions) => string,
+  formatPercent: (value: number) => string,
 ): TeamAverages {
   if (players.length === 0) {
     return {
@@ -132,20 +103,13 @@ export function computeTeamAverages(
   }
 
   return {
-    avgLevel: levelCount > 0 ? fixed(levelSum / levelCount, 0) : "—",
+    avgLevel: levelCount > 0 ? formatNumber(levelSum / levelCount, { maximumFractionDigits: 0 }) : "—",
     avgEloPlus: (() => {
       const values = players.map((player) => player.profileData?.queueElo).filter((value): value is number => value != null && Number.isFinite(value));
-      return values.length > 0 ? fixed(values.reduce((sum, value) => sum + value, 0) / values.length, 0) : "—";
+      return values.length > 0 ? formatNumber(values.reduce((sum, value) => sum + value, 0) / values.length, { maximumFractionDigits: 0 }) : "—";
     })(),
     // globalWinRate is already expressed in percentage points (0–100).
-    avgWinRate: winRateCount > 0 ? `${fixed(winRateSum / winRateCount, 1)}%` : "—",
-    avgKDA: kdaCount > 0 ? fixed(kdaSum / kdaCount, 2) : "—",
+    avgWinRate: winRateCount > 0 ? formatPercent(winRateSum / winRateCount) : "—",
+    avgKDA: kdaCount > 0 ? formatNumber(kdaSum / kdaCount, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "—",
   };
-}
-
-/* ── Stat helpers for tables ── */
-
-export function formatStat(n: number | null | undefined, decimals = 0): string {
-  if (n == null || !Number.isFinite(n)) return "—";
-  return decimals > 0 ? n.toFixed(decimals) : n.toLocaleString();
 }

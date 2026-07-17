@@ -12,15 +12,9 @@ import { PlayerModerationTag } from "@/components/player-name";
 
 const PAGE_SIZE = 24;
 
-function observedAt(value: string | null) {
-  if (!value) return "Unknown";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Unknown";
-  return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(date);
-}
-
 export default function PrivateAccountsPage() {
-  const { t } = useLocalization();
+  const { t, formatDateTime, formatNumber } = useLocalization();
+  const observedAt = formatDateTime;
   const [accounts, setAccounts] = useState<PrivateAccountSummary[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -88,7 +82,7 @@ export default function PrivateAccountsPage() {
             className="w-full rounded-xl border border-pc-border bg-pc-bg-elevated py-2.5 pl-9 pr-3 text-sm text-pc-text outline-none transition-colors placeholder:text-pc-text-muted focus:border-pc-accent-mid"
           />
         </label>
-        <div className="text-xs text-pc-text-muted">{loading && accounts.length === 0 ? t("generated.players.loading") : t(total === 1 ? "common.count.trackedAccountOne" : "common.count.trackedAccountMany", { count: total.toLocaleString() })}</div>
+        <div className="text-xs text-pc-text-muted">{loading && accounts.length === 0 ? t("generated.players.loading") : t(total === 1 ? "common.count.trackedAccountOne" : "common.count.trackedAccountMany", { count: formatNumber(total) })}</div>
       </div>
 
       {error && <div className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-300">{error}</div>}
@@ -106,16 +100,16 @@ export default function PrivateAccountsPage() {
                   <div className="flex min-w-0 flex-wrap items-center gap-1.5">
                     <h2 className="mr-0.5 truncate text-base font-semibold text-pc-text group-hover:text-pc-accent">{account.alias || account.displayName}</h2>
                     <PlayerModerationTag playerId={0} cheater={account.cheater} susCount={0} verified={false} />
-                    <span className="rounded border border-pc-border bg-pc-bg/50 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-pc-text-secondary">{t("generated.players.level")}{" "}{account.accountLevel.toLocaleString()}</span>
-                    <span className="rounded border border-pc-border bg-pc-bg/50 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-pc-text-secondary">{t("generated.players.mastery")}{" "}{account.masteryLevel.toLocaleString()}</span>
+                    <span className="rounded border border-pc-border bg-pc-bg/50 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-pc-text-secondary">{t("generated.players.level")}{" "}{formatNumber(account.accountLevel)}</span>
+                    <span className="rounded border border-pc-border bg-pc-bg/50 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-pc-text-secondary">{t("generated.players.mastery")}{" "}{formatNumber(account.masteryLevel)}</span>
                     <span className={`ml-1 flex min-w-0 items-center gap-1 text-xs font-semibold ${getTierColor(account.leagueTier)}`}>
                       <img src={getRankIconPath(account.leagueTier, 0)} alt="" className="h-5 w-5 shrink-0 object-contain" />
                       <span className="truncate">{tierName}</span>
                       <span className="text-pc-text-muted">·</span>
-                      <span className="whitespace-nowrap text-pc-text-secondary">{account.leaguePoints.toLocaleString()} {t("generated.players.tp")}</span>
+                      <span className="whitespace-nowrap text-pc-text-secondary">{formatNumber(account.leaguePoints)} {t("generated.players.tp")}</span>
                     </span>
                   </div>
-                  <span className="shrink-0 rounded-full border border-slate-400/20 bg-slate-400/10 px-2 py-1 text-xs font-semibold text-slate-300">{account.matchCount.toLocaleString()} {t("generated.players.matches.9f3e924")}</span>
+                  <span className="shrink-0 rounded-full border border-slate-400/20 bg-slate-400/10 px-2 py-1 text-xs font-semibold text-slate-300">{formatNumber(account.matchCount)} {t("generated.players.matches.9f3e924")}</span>
                 </div>
 
                 <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-pc-border pt-2 text-[11px] text-pc-text-muted">

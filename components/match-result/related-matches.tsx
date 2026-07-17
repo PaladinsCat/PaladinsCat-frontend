@@ -28,7 +28,7 @@ export default function RelatedMatches({ related, matchId, loading }: { related:
             className="flex items-center justify-between p-3 rounded-lg bg-pc-bg-secondary hover:bg-pc-bg-elevated border border-transparent hover:border-pc-border transition-colors"
           >
             <div className="flex items-center gap-3">
-              <span className={`w-2 h-2 rounded-full ${m.win_status === t("generated.components\\match-result\\related-matches.winner") ? "bg-green-400" : "bg-red-400"}`} />
+              <span className={`w-2 h-2 rounded-full ${m.win_status === t("generated.components.matchResult.relatedMatches.winner") ? "bg-green-400" : "bg-red-400"}`} />
               <span className="text-pc-text font-medium">{t("generated.matches.match")}{m.match_id}</span>
               <span className="text-pc-text-secondary text-sm">{m.champion_name}</span>
             </div>

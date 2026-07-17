@@ -17,21 +17,3 @@ export const BLOG_COPY_KEYS = {
   notFoundTitle: 'generated.blog.notFoundTitle' as const,
   notFoundHint: 'generated.blog.notFoundHint' as const,
 } as const;
-
-/** @deprecated Use t(BLOG_COPY_KEYS.key) instead */
-export const BLOG_COPY = {
-  title: 'Blog',
-  subtitle: 'News, updates, and stories from the PaladinsCat team.',
-  empty: 'No posts yet.',
-  emptyHint: 'Check back soon for updates from the team.',
-  readMore: 'Read more',
-  categoryAll: 'Show All',
-  categoryPublicRelease: 'Public Release',
-  categoryQuestionAndAnswer: 'Q&A',
-  categoryGuide: 'Guide',
-  authorBy: 'By {author}',
-  backToBlog: 'Back to blog',
-  viewAllPosts: '← View all posts',
-  notFoundTitle: 'Post Not Found',
-  notFoundHint: "This blog post doesn't exist or has been removed.",
-} as const;

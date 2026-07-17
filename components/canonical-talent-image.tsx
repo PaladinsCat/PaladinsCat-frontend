@@ -29,7 +29,7 @@ export default function CanonicalTalentImage({
 }: CanonicalTalentImageProps) {
   const { t } = useLocalization();
   const [src, setSrc] = useState<string | null>(null);
-  const displayName = talentName || t("generated.components\\canonical-talent-image.talent");
+  const displayName = talentName || t("generated.components.canonicalTalentImage.talent");
 
   useEffect(() => {
     let active = true;

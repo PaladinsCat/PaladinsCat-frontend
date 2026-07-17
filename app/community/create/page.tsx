@@ -37,7 +37,7 @@ export default function CreatePostPage() {
       router.push(`/community/${post.id}`);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("generated.app\\community\\create\\page.failedtocreatepost"));
+      setError(err instanceof Error ? err.message : t("generated.community.create.page.failedtocreatepost"));
     } finally {
       setLoading(false);
     }

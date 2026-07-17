@@ -10,7 +10,7 @@ interface Props {
 }
 
 export default function PlayerDirectoryPagination({ page, totalPages, onPageChange }: Props) {
-  const { t } = useLocalization();
+  const { t , formatNumber} = useLocalization();
   if (totalPages <= 1) return null;
 
   return (
@@ -23,7 +23,7 @@ export default function PlayerDirectoryPagination({ page, totalPages, onPageChan
       >
         <ChevronLeft aria-hidden="true" className="h-4 w-4" />
         {t("generated.players.previous")}</button>
-      <span className="text-xs text-pc-text-muted">{t("generated.players.page")}{" "}<strong className="text-pc-text">{page.toLocaleString()}</strong> {t("generated.players.of")}{" "}{totalPages.toLocaleString()}</span>
+      <span className="text-xs text-pc-text-muted">{t("generated.players.page")}{" "}<strong className="text-pc-text">{formatNumber(page)}</strong> {t("generated.players.of")}{" "}{formatNumber(totalPages)}</span>
       <button
         type="button"
         onClick={() => onPageChange(page + 1)}

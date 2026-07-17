@@ -18,12 +18,9 @@ const ROLE_COLORS: Record<string, string> = {
   Frontline: "#60a5fa",
 };
 
-function format(value: number) {
-  return value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
-
 export default function EgpmDetailPage() {
-  const { t } = useLocalization();
+  const { t, formatNumber } = useLocalization();
+  const format = (value: number) => formatNumber(value, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const { definition: lobbyTier, ready } = useLobbyTier();
   const [rows, setRows] = useState<BaselineEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,7 +35,7 @@ export default function EgpmDetailPage() {
       .catch(() => { if (!cancelled) setRows([]); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [lobbyTier.label, lobbyTier.tierMax, lobbyTier.tierMin, ready]);
+  }, [lobbyTier.tierMax, lobbyTier.tierMin, ready]);
 
   const ordered = useMemo(() => [...rows].sort((a, b) => {
     if (sort === "average") return b.avgEcpm - a.avgEcpm;
@@ -65,7 +62,7 @@ export default function EgpmDetailPage() {
         <section>
           <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
             <div><h2 className="text-sm font-bold text-pc-text">{t("generated.stats.currentPlayerBaseDistribution")}</h2><p className="mt-1 text-xs text-pc-text-muted">{t("generated.stats.whiskersShowP10P90TheBoxShowsP25P75And")}</p></div>
-            <span className="text-xs text-pc-text-secondary">{global?.sampleSize.toLocaleString() ?? "—"} {t("generated.stats.globalPlayerMatchObservations")}</span>
+            <span className="text-xs text-pc-text-secondary">{global ? formatNumber(global.sampleSize) : "—"} {t("generated.stats.globalPlayerMatchObservations")}</span>
           </div>
           <ContentFade><PerformanceOverviewCard metrics={ROLE_ORDER.map((role) => rows.find((row) => row.role === role)).filter((row): row is BaselineEntry => Boolean(row)).map((row) => ({
             key: `egpm-${row.role}`,
@@ -114,7 +111,7 @@ export default function EgpmDetailPage() {
           <div className="overflow-x-auto rounded-xl border border-pc-border bg-pc-bg-elevated">
             <table className="w-full min-w-[760px] text-sm tabular-nums">
               <thead><tr className="border-b border-pc-border text-left text-[10px] uppercase tracking-wider text-pc-text-muted"><th className="px-4 py-3">{t("generated.stats.role")}</th><th className="px-3 py-3 text-right">{t("generated.stats.average")}</th><th className="px-3 py-3 text-right">{t("generated.stats.p10")}</th><th className="px-3 py-3 text-right">{t("generated.stats.p25")}</th><th className="px-3 py-3 text-right">{t("generated.stats.p75")}</th><th className="px-3 py-3 text-right">{t("generated.stats.p90")}</th><th className="px-3 py-3 text-right">{t("generated.stats.max")}</th><th className="px-4 py-3 text-right">{t("generated.stats.samples")}</th></tr></thead>
-              <tbody>{ordered.map((row) => <tr key={row.role} className="border-b border-pc-border/50 last:border-b-0"><th className="px-4 py-3 text-left font-semibold" style={{ color: ROLE_COLORS[row.role] }}>{row.role === "Frontline" ? t("common.roles.frontline") : row.role === "Support" ? t("common.roles.support") : row.role === "Damage" ? t("common.roles.damage") : row.role === "Global" ? t("common.roles.global") : t("common.roles.flank")}</th><td className="px-3 py-3 text-right font-bold text-pc-text">{format(row.avgEcpm)}</td><td className="px-3 py-3 text-right text-pc-text-secondary">{format(row.p10Ecpm)}</td><td className="px-3 py-3 text-right text-pc-text-secondary">{format(row.p25Ecpm)}</td><td className="px-3 py-3 text-right text-pc-text-secondary">{format(row.p75Ecpm)}</td><td className="px-3 py-3 text-right text-pc-text-secondary">{format(row.p90Ecpm)}</td><td className="px-3 py-3 text-right text-pc-text-secondary">{format(row.maxEcpm)}</td><td className="px-4 py-3 text-right text-pc-text-muted">{row.sampleSize.toLocaleString()}</td></tr>)}</tbody>
+              <tbody>{ordered.map((row) => <tr key={row.role} className="border-b border-pc-border/50 last:border-b-0"><th className="px-4 py-3 text-left font-semibold" style={{ color: ROLE_COLORS[row.role] }}>{row.role === "Frontline" ? t("common.roles.frontline") : row.role === "Support" ? t("common.roles.support") : row.role === "Damage" ? t("common.roles.damage") : row.role === "Global" ? t("common.roles.global") : t("common.roles.flank")}</th><td className="px-3 py-3 text-right font-bold text-pc-text">{format(row.avgEcpm)}</td><td className="px-3 py-3 text-right text-pc-text-secondary">{format(row.p10Ecpm)}</td><td className="px-3 py-3 text-right text-pc-text-secondary">{format(row.p25Ecpm)}</td><td className="px-3 py-3 text-right text-pc-text-secondary">{format(row.p75Ecpm)}</td><td className="px-3 py-3 text-right text-pc-text-secondary">{format(row.p90Ecpm)}</td><td className="px-3 py-3 text-right text-pc-text-secondary">{format(row.maxEcpm)}</td><td className="px-4 py-3 text-right text-pc-text-muted">{formatNumber(row.sampleSize)}</td></tr>)}</tbody>
             </table>
           </div>
         </section>

@@ -20,18 +20,8 @@ const ROLES = [
 
 type SortKey = "level" | "matches" | "winRate" | "xp" | "name";
 
-function formatNumber(value: number) {
-  return value.toLocaleString();
-}
-
-function formatCooldown(seconds: number) {
-  const minutes = Math.floor(Math.max(0, seconds) / 60);
-  const remainder = Math.max(0, seconds) % 60;
-  return minutes > 0 ? `${minutes}m ${remainder}s` : `${remainder}s`;
-}
-
 export default function PlayerChampionStatsPage() {
-  const { t } = useLocalization();
+  const { formatDuration, t } = useLocalization();
   const params = useParams<{ id: string }>();
   const playerId = String(params.id ?? "");
   const [stats, setStats] = useState<PlayerChampionStat[] | null>(null);
@@ -111,7 +101,7 @@ export default function PlayerChampionStatsPage() {
           <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("common.playerChampions.title")}</h1>
           <p className="mt-1 text-sm text-pc-text-secondary">{t("common.playerChampions.allChampions", { count: stats?.length ?? 0 })}</p>
         </div>
-        <button type="button" onClick={refresh} disabled={refreshing || refreshRemainingSeconds > 0} className="rounded-lg border border-pc-border bg-pc-bg-elevated px-3 py-2 text-xs font-semibold text-pc-text hover:border-pc-accent-mid hover:text-pc-accent disabled:cursor-not-allowed disabled:opacity-50">{refreshing ? <LoadingIndicator className="gap-2" /> : refreshRemainingSeconds > 0 ? t("generated.players.refreshInValue1", { value1: formatCooldown(refreshRemainingSeconds) }) : t("common.playerChampions.refresh")}</button>
+        <button type="button" onClick={refresh} disabled={refreshing || refreshRemainingSeconds > 0} className="rounded-lg border border-pc-border bg-pc-bg-elevated px-3 py-2 text-xs font-semibold text-pc-text hover:border-pc-accent-mid hover:text-pc-accent disabled:cursor-not-allowed disabled:opacity-50">{refreshing ? <LoadingIndicator className="gap-2" /> : refreshRemainingSeconds > 0 ? t("generated.players.refreshInValue1", { value1: formatDuration(refreshRemainingSeconds) }) : t("common.playerChampions.refresh")}</button>
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
@@ -140,7 +130,7 @@ export default function PlayerChampionStatsPage() {
 }
 
 function ChampionCard({ champion }: { champion: PlayerChampionStat }) {
-  const { t } = useLocalization();
+  const { formatNumber, t , formatDateTime} = useLocalization();
   const role = ROLES.find((entry) => entry.value === champion.role);
   const masteryLevel = championMasteryLevelFromXp(champion.xp);
   return (
@@ -156,11 +146,11 @@ function ChampionCard({ champion }: { champion: PlayerChampionStat }) {
         <Metric label={t("common.playerChampions.winsLosses")} value={`${formatNumber(champion.wins)} / ${formatNumber(champion.losses)}`} />
         <Metric label={t("common.playerChampions.kdaShort")} value={t("common.playerChampions.kdaLine", { kills: formatNumber(champion.kills), deaths: formatNumber(champion.deaths), assists: formatNumber(champion.assists) })} />
         <Metric label={t("common.metrics.kda")} value={formatKda(champion.kills, champion.deaths, champion.assists)} />
-        <Metric label={t("generated.players.time")} value={`${formatNumber(champion.minutesPlayed)}m`} />
+        <Metric label={t("generated.players.time")} value={t("common.format.minutesShort", { minutes: formatNumber(champion.minutesPlayed) })} />
       </div>
       <div className="mt-3 flex min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-1 border-t border-pc-border/50 pt-2 text-[10px] text-pc-text-muted">
         <span className="truncate">{t("common.playerChampions.ownership")}: <span className="text-pc-text-secondary">{champion.ownershipType || "—"}</span></span>
-        <span className="whitespace-nowrap">{t("common.playerChampions.updated")}: <span className="text-pc-text-secondary">{formatLocalDateTime(champion.lastUpdated)}</span></span>
+        <span className="whitespace-nowrap">{t("common.playerChampions.updated")}: <span className="text-pc-text-secondary">{formatDateTime(champion.lastUpdated)}</span></span>
       </div>
     </article>
   );

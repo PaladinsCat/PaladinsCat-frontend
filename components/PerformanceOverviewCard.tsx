@@ -1,5 +1,7 @@
 "use client";
 
+import { useLocalization } from "@/lib/localization-context";
+
 interface MetricRow {
   key: string;
   label: string;
@@ -11,19 +13,18 @@ interface MetricRow {
   p90: number;
 }
 
-function formatMetric(key: string, value: number): string {
-  if (key === "kda") return value.toFixed(1);
-  return Math.round(value).toLocaleString();
-}
-
 export function PerformanceOverviewCard({
   metrics,
 }: {
   metrics: MetricRow[];
 }) {
+  const { formatNumber } = useLocalization();
+  const formatMetric = (key: string, value: number) => formatNumber(value, key === "kda"
+    ? { minimumFractionDigits: 1, maximumFractionDigits: 1 }
+    : { maximumFractionDigits: 0 });
   const formatCompact = (value: number) => {
-    if (Math.abs(value) >= 1000) return Math.round(value).toLocaleString();
-    return value.toFixed(1);
+    if (Math.abs(value) >= 1000) return formatNumber(value, { maximumFractionDigits: 0 });
+    return formatNumber(value, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
   };
   return (
     <div className="h-full bg-pc-bg-elevated border border-pc-border rounded-xl p-4">

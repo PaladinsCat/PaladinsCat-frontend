@@ -52,7 +52,7 @@ function RankBadge({ rank }: { rank: number }) {
 }
 
 export default function LeaderboardPage() {
-  const { t } = useLocalization();
+  const { t , formatNumber, formatPercent} = useLocalization();
   const [tier, setTier] = useState(26);
   const [masterSubTab, setMasterSubTab] = useState<"gm" | "master">("gm");
   const [players, setPlayers] = useState<RankedPlayer[]>([]);
@@ -341,11 +341,11 @@ export default function LeaderboardPage() {
                       <div className="truncate text-sm font-semibold text-pc-text"><PlayerName playerId={player.player_id}>{player.name}</PlayerName></div>
                       <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[11px] text-pc-text-muted">
                         <span>{effective.displayName}</span>
-                        {player.winRate != null && <span className={player.winRate >= 50 ? "text-emerald-400" : "text-red-400"}>{player.winRate.toFixed(1)}{t("generated.players.wr")}</span>}
+                        {player.winRate != null && <span className={player.winRate >= 50 ? "text-emerald-400" : "text-red-400"}>{formatNumber(player.winRate, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}{t("generated.players.wr")}</span>}
                       </div>
                     </div>
                     <div className="shrink-0 text-right">
-                      <div className="font-mono text-sm font-bold text-pc-accent">{player.points.toLocaleString()}</div>
+                      <div className="font-mono text-sm font-bold text-pc-accent">{formatNumber(player.points)}</div>
                       <div className="text-[10px] uppercase tracking-wide text-pc-text-muted">{t("generated.players.points")}</div>
                       {player.trend != null && player.trend !== 0 && <div className={`mt-0.5 text-[10px] ${player.trend > 0 ? "text-emerald-400" : "text-red-400"}`}>{player.trend > 0 ? "▲" : "▼"}{Math.abs(player.trend)}</div>}
                     </div>
@@ -393,7 +393,7 @@ export default function LeaderboardPage() {
                               <PlayerName playerId={p.player_id}>{p.name}</PlayerName>
                             </Link>
                           </td>
-                          <td className="py-2.5 px-4 text-right text-pc-text font-medium">{p.points.toLocaleString()}</td>
+                          <td className="py-2.5 px-4 text-right text-pc-text font-medium">{formatNumber(p.points)}</td>
                           <td className="py-2.5 px-4 text-right">
                             {p.trend != null && p.trend !== 0 ? (
                               <span className={`text-xs ${p.trend > 0 ? "text-emerald-400" : "text-red-400"}`}>
@@ -404,12 +404,12 @@ export default function LeaderboardPage() {
                             )}
                             </td>
                             <td className="py-2.5 px-4 text-right text-pc-text-secondary text-xs hidden lg:table-cell">
-                            {wins != null ? wins.toLocaleString() : "—"}
+                            {wins != null ? formatNumber(wins) : "—"}
                             </td>
                             <td className="py-2.5 px-4 text-right text-xs hidden md:table-cell">
                             {winRate != null ? (
                               <span className={winRate >= 50 ? "text-emerald-400 font-medium" : "text-red-400"}>
-                                {winRate.toFixed(1)}%
+                                {formatPercent(winRate)}
                               </span>
                             ) : (
                               <span className="text-pc-text-muted">—</span>
@@ -427,7 +427,7 @@ export default function LeaderboardPage() {
                           <td className="py-2.5 px-4 text-right text-xs hidden lg:table-cell">
                             {leaveRate != null ? (
                               <span className={leaveRate > 5 ? "text-red-400" : leaveRate > 2 ? "text-yellow-400" : "text-pc-text-secondary"}>
-                                {leaveRate.toFixed(1)}%
+                                {formatPercent(leaveRate)}
                               </span>
                             ) : (
                               <span className="text-pc-text-muted">—</span>

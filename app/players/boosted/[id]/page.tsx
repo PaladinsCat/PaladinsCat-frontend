@@ -12,13 +12,6 @@ import {
 import { TIER_NAMES, getRankIconPath, getTierColor } from "@/lib/tier-utils";
 import { useLocalization } from "@/lib/localization-context";
 
-function observedAt(value: string | null) {
-  if (!value) return "Unknown";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Unknown";
-  return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(date);
-}
-
 function duration(seconds: number) {
   if (!seconds) return "—";
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
@@ -32,7 +25,8 @@ function resultColor(result: string | null) {
 }
 
 export default function BoostedPlayerDetailPage() {
-  const { t } = useLocalization();
+  const { t, formatDateTime, formatNumber } = useLocalization();
+  const observedAt = formatDateTime;
   const params = useParams<{ id: string }>();
   const playerId = params.id;
   const [detail, setDetail] = useState<BoostedPlayerDetail | null>(null);
@@ -73,8 +67,8 @@ export default function BoostedPlayerDetailPage() {
       </header>
 
       <section className="grid grid-cols-2 overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated sm:grid-cols-4 sm:divide-x sm:divide-pc-border">
-        <div className="border-b border-pc-border p-4 sm:border-b-0"><div className="text-xs text-pc-text-muted">{t("generated.players.trackedMatches")}</div><div className="mt-1 text-xl font-semibold text-pc-text">{matches.length.toLocaleString()}</div></div>
-        <div className="border-b border-l border-pc-border p-4 sm:border-b-0 sm:border-l-0"><div className="text-xs text-pc-text-muted">{t("moderation.cheaterDuo")}</div><div className="mt-1 text-xl font-semibold text-pc-text">{player.cheaters.length.toLocaleString()}</div></div>
+        <div className="border-b border-pc-border p-4 sm:border-b-0"><div className="text-xs text-pc-text-muted">{t("generated.players.trackedMatches")}</div><div className="mt-1 text-xl font-semibold text-pc-text">{formatNumber(matches.length)}</div></div>
+        <div className="border-b border-l border-pc-border p-4 sm:border-b-0 sm:border-l-0"><div className="text-xs text-pc-text-muted">{t("moderation.cheaterDuo")}</div><div className="mt-1 text-xl font-semibold text-pc-text">{formatNumber(player.cheaters.length)}</div></div>
         <div className="p-4"><div className="text-xs text-pc-text-muted">{t("generated.players.firstObserved")}</div><div className="mt-1 text-sm font-semibold text-pc-text">{observedAt(player.firstSeen)}</div></div>
         <div className="border-l border-pc-border p-4 sm:border-l-0"><div className="text-xs text-pc-text-muted">{t("generated.players.lastObserved")}</div><div className="mt-1 text-sm font-semibold text-pc-text">{observedAt(player.lastSeen)}</div></div>
       </section>
@@ -85,7 +79,7 @@ export default function BoostedPlayerDetailPage() {
           {player.cheaters.map((cheater) => (
             <Link key={cheater.id} href={`/players/${cheater.id}`} className="rounded-md border border-red-500/20 bg-[#161618] px-2.5 py-2 text-xs text-red-200 transition-colors hover:border-red-400/40 hover:text-white">
               <span className="font-semibold">{cheater.name}</span>
-              <span className="ml-1 text-red-200/70">· {cheater.matchCount.toLocaleString()}</span>
+              <span className="ml-1 text-red-200/70">· {formatNumber(cheater.matchCount)}</span>
             </Link>
           ))}
         </div>

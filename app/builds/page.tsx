@@ -10,7 +10,7 @@ import { RouteSkeleton } from "@/components/route-skeleton";
 import { useLocalization } from "@/lib/localization-context";
 
 export default function BuildsPage() {
-  const { t } = useLocalization();
+  const { t , formatDateTime} = useLocalization();
   const [builds, setBuilds] = useState<Build[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +26,7 @@ export default function BuildsPage() {
         });
         setBuilds(data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : t("generated.app\\builds\\page.failedtoloadbuilds"));
+        setError(err instanceof Error ? err.message : t("generated.builds.page.failedtoloadbuilds"));
       } finally {
         setLoading(false);
       }
@@ -94,7 +94,7 @@ export default function BuildsPage() {
                     {build.championName} {t("generated.builds.by")}{" "}{build.username}
                   </p>
                   <div className="flex flex-wrap items-center gap-3 mt-3 text-pc-text-muted text-sm">
-                    <span>{formatLocalDateTime(build.createdAt)}</span>
+                    <span>{formatDateTime(build.createdAt)}</span>
                     <span>{build.items.length}{t("generated.builds.text4Items")}</span>
                     <span>{build.cards.length}{t("generated.builds.text5Cards")}</span>
                     <span>{build.talents.length}{t("generated.builds.text1Talent")}</span>

@@ -12,7 +12,7 @@ import { VerifiedPlayerBadge } from "@/components/player-name";
 import { useLocalization } from "@/lib/localization-context";
 
 export default function CommunityPage() {
-  const { t } = useLocalization();
+  const { t , formatNumber, formatDateTime} = useLocalization();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -25,7 +25,7 @@ export default function CommunityPage() {
         const data = await fetchPosts({ limit: "50" });
         setPosts(data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : t("generated.app\\community\\page.failedtoloadposts"));
+        setError(err instanceof Error ? err.message : t("generated.community.page.failedtoloadposts"));
       } finally {
         setLoading(false);
       }
@@ -75,7 +75,7 @@ export default function CommunityPage() {
                       </p>
                       <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-pc-text-muted sm:text-sm">
                         <span className="inline-flex min-w-0 items-center gap-1 truncate">{t("generated.community.by")}{" "}{post.username}{post.linkedPlayerId != null && <VerifiedPlayerBadge />}</span>
-                        <span>{formatLocalDateTime(post.createdAt)}</span>
+                        <span>{formatDateTime(post.createdAt)}</span>
                         <span aria-label={t("generated.community.value1Likes", { value1: post.likes })}>❤ {post.likes}</span>
                         <span aria-label={t("generated.community.value1Views", { value1: post.viewCount })}>👁 {post.viewCount}</span>
                       </div>
@@ -129,7 +129,7 @@ export default function CommunityPage() {
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5 text-xs">
                         <span className="truncate font-semibold text-pc-text group-hover:text-pc-accent">{stream.userName}</span>
-                        <span className="shrink-0 text-rose-400">● {stream.viewerCount.toLocaleString()}</span>
+                        <span className="shrink-0 text-rose-400">● {formatNumber(stream.viewerCount)}</span>
                       </div>
                       <p className="mt-1 line-clamp-2 text-xs leading-snug text-pc-text-secondary">{stream.title || t("generated.community.playingPaladins")}</p>
                       {stream.language && <span className="mt-1 block text-[10px] uppercase tracking-wide text-pc-text-muted">{stream.language}</span>}

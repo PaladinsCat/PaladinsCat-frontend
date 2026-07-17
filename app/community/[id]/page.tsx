@@ -24,7 +24,7 @@ import { VerifiedPlayerBadge } from "@/components/player-name";
 import { useLocalization } from "@/lib/localization-context";
 
 export default function PostDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { t } = useLocalization();
+  const { t , formatDateTime} = useLocalization();
   const router = useRouter();
   const [detail, setDetail] = useState<PostDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -87,7 +87,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
         post: { ...prev.post, likes: newLikes },
       } : null);
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : t("generated.app\\community\\[id]\\page.failedtoupdatelike"));
+      setActionError(err instanceof Error ? err.message : t("generated.community.[id].page.failedtoupdatelike"));
     }
   }
 
@@ -104,7 +104,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
       setDetail((prev) => prev ? { ...prev, post } : null);
       setEditingPost(false);
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : t("generated.app\\community\\[id]\\page.failedtosavepost"));
+      setActionError(err instanceof Error ? err.message : t("generated.community.[id].page.failedtosavepost"));
     } finally {
       setSavingPost(false);
     }
@@ -122,7 +122,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
       router.push("/community");
       router.refresh();
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : t("generated.app\\community\\[id]\\page.failedtodeletepost"));
+      setActionError(err instanceof Error ? err.message : t("generated.community.[id].page.failedtodeletepost"));
       setDeletingPost(false);
     }
   }
@@ -143,7 +143,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
       } : null);
       setNewComment("");
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : t("generated.app\\community\\[id]\\page.failedtoaddcomment"));
+      setActionError(err instanceof Error ? err.message : t("generated.community.[id].page.failedtoaddcomment"));
     } finally {
       setCommenting(false);
     }
@@ -171,7 +171,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
       setEditingCommentId(null);
       setCommentContent("");
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : t("generated.app\\community\\[id]\\page.failedtosavecomment"));
+      setActionError(err instanceof Error ? err.message : t("generated.community.[id].page.failedtosavecomment"));
     } finally {
       setBusyCommentId(null);
     }
@@ -191,7 +191,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
         comments: prev.comments.filter((comment) => comment.id !== commentId),
       } : null);
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : t("generated.app\\community\\[id]\\page.failedtodeletecomment"));
+      setActionError(err instanceof Error ? err.message : t("generated.community.[id].page.failedtodeletecomment"));
     } finally {
       setBusyCommentId(null);
     }
@@ -276,7 +276,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
             </div>
             <div className="flex items-center gap-4 mt-3 text-pc-text-secondary text-sm">
               <span className="inline-flex items-center gap-1">{t("generated.community.by")}{" "}{post.username}{post.linkedPlayerId != null && <VerifiedPlayerBadge />}</span>
-              <span>{formatLocalDateTime(post.createdAt)}</span>
+              <span>{formatDateTime(post.createdAt)}</span>
               <span>👁 {post.viewCount}</span>
             </div>
             <div className="mt-4"><CommunityRichContent content={post.content} /></div>
@@ -329,7 +329,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-2 text-sm">
                       <span className="inline-flex items-center gap-1 text-pc-text font-medium">{comment.username}{comment.linkedPlayerId != null && <VerifiedPlayerBadge />}</span>
-                      <span className="text-pc-text-muted">{formatLocalDateTime(comment.createdAt)}</span>
+                      <span className="text-pc-text-muted">{formatDateTime(comment.createdAt)}</span>
                     </div>
                     {canEditComment && !isEditing && (
                       <div className="flex shrink-0 gap-2">

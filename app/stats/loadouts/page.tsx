@@ -14,7 +14,7 @@ type SortKey = "championName" | "totalUses" | "winRate" | "avgDpm" | "avgHpm";
 type SortDir = "asc" | "desc";
 
 export default function LoadoutsPage() {
-  const { t } = useLocalization();
+  const { t , formatPercent, formatNumber} = useLocalization();
   const [loadouts, setLoadouts] = useState<LoadoutStat[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -65,8 +65,8 @@ export default function LoadoutsPage() {
         <>
           <div className="space-y-2 md:hidden">
             {sorted.slice(0, 20).map((loadout) => <Link key={loadout.deckHash} href={`/champions/${championSlug(loadout.championName)}`} className="pc-mobile-panel block p-3">
-              <div className="flex min-w-0 items-center gap-3"><img src={getChampionIconSafe(loadout.championName)} alt="" className="h-10 w-10 shrink-0 rounded-lg object-contain" /><div className="min-w-0 flex-1"><div className="truncate text-sm font-semibold text-pc-text">{loadout.championName}</div><div className="truncate font-mono text-[10px] text-pc-text-muted">{loadout.deckHash}</div></div><div className={loadout.winRate >= 50 ? "shrink-0 text-right font-bold text-emerald-400" : "shrink-0 text-right font-bold text-rose-400"}>{loadout.winRate?.toFixed(1)}%<div className="text-[9px] font-normal uppercase tracking-wide text-pc-text-muted">{t("generated.stats.winRate.0a2b795")}</div></div></div>
-              <div className="mt-3 grid grid-cols-3 gap-1.5">{[[t("generated.app\\stats\\loadouts\\page.plays"), loadout.totalUses.toLocaleString()], [t("generated.app\\stats\\loadouts\\page.avgdpm"), loadout.avgDpm?.toFixed(0)], [t("generated.app\\stats\\loadouts\\page.avghpm"), loadout.avgHpm?.toFixed(0)]].map(([label, metric]) => <div key={label} className="rounded-lg bg-pc-bg-secondary/60 p-2 text-center"><div className="text-[8px] uppercase text-pc-text-muted">{label}</div><div className="mt-0.5 font-mono text-xs font-semibold text-pc-text">{metric ?? "—"}</div></div>)}</div>
+              <div className="flex min-w-0 items-center gap-3"><img src={getChampionIconSafe(loadout.championName)} alt="" className="h-10 w-10 shrink-0 rounded-lg object-contain" /><div className="min-w-0 flex-1"><div className="truncate text-sm font-semibold text-pc-text">{loadout.championName}</div><div className="truncate font-mono text-[10px] text-pc-text-muted">{loadout.deckHash}</div></div><div className={loadout.winRate >= 50 ? "shrink-0 text-right font-bold text-emerald-400" : "shrink-0 text-right font-bold text-rose-400"}>{formatPercent(loadout.winRate)}<div className="text-[9px] font-normal uppercase tracking-wide text-pc-text-muted">{t("generated.stats.winRate.0a2b795")}</div></div></div>
+              <div className="mt-3 grid grid-cols-3 gap-1.5">{[[t("generated.stats.loadouts.page.plays"), formatNumber(loadout.totalUses)], [t("generated.stats.loadouts.page.avgdpm"), formatNumber(loadout.avgDpm, { minimumFractionDigits: 0, maximumFractionDigits: 0 })], [t("generated.stats.loadouts.page.avghpm"), formatNumber(loadout.avgHpm, { minimumFractionDigits: 0, maximumFractionDigits: 0 })]].map(([label, metric]) => <div key={label} className="rounded-lg bg-pc-bg-secondary/60 p-2 text-center"><div className="text-[8px] uppercase text-pc-text-muted">{label}</div><div className="mt-0.5 font-mono text-xs font-semibold text-pc-text">{metric ?? "—"}</div></div>)}</div>
             </Link>)}
           </div>
         <Card className="hidden md:block">
@@ -98,9 +98,9 @@ export default function LoadoutsPage() {
                     <td>{l.championName}</td>
                     <td className="text-pc-text-secondary">{l.deckHash}</td>
                     <td>{l.totalUses}</td>
-                    <td>{l.winRate?.toFixed(1)}%</td>
-                    <td>{l.avgDpm?.toFixed(0)}</td>
-                    <td>{l.avgHpm?.toFixed(0)}</td>
+                    <td>{formatPercent(l.winRate)}</td>
+                    <td>{formatNumber(l.avgDpm, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</td>
+                    <td>{formatNumber(l.avgHpm, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</td>
                   </tr>
                 ))}
               </tbody>

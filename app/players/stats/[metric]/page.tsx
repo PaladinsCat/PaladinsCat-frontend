@@ -85,7 +85,7 @@ function RankBadge({ rank }: { rank: number }) {
 }
 
 export default function MetricLeaderboardPage() {
-  const { t } = useLocalization();
+  const { t , formatNumber} = useLocalization();
   const params = useParams();
   const router = useRouter();
   const rawMetric = (params.metric as string)?.toLowerCase();
@@ -118,7 +118,7 @@ export default function MetricLeaderboardPage() {
           player_id: p.playerId,
           name: p.playerName,
           champion: p.championName,
-          className: p.className ?? t("generated.app\\players\\stats\\[metric]\\page.unknown"),
+          className: p.className ?? t("generated.players.stats.[metric].page.unknown"),
           value: p.value,
           totalMatches: p.totalMatches,
           region: p.region ?? "—",
@@ -206,7 +206,7 @@ export default function MetricLeaderboardPage() {
                   <span className="text-xs text-pc-text-muted">{role}</span>
                 </div>
                 <span className={`text-lg font-bold ${colorClass}`}>
-                  {val.toFixed(1)}
+                  {formatNumber(val, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
                 </span>
               </div>
             ))}
@@ -273,11 +273,11 @@ export default function MetricLeaderboardPage() {
                       </td>
                       <td className="py-2.5 px-4 text-right">
                         <span className={`font-bold ${colorClass}`}>
-                          {p.value.toLocaleString()}
+                          {formatNumber(p.value)}
                         </span>
                       </td>
                       <td className="py-2.5 px-4 text-right text-pc-text-secondary hidden md:table-cell">
-                        {p.totalMatches.toLocaleString()}
+                        {formatNumber(p.totalMatches)}
                       </td>
                       <td className="py-2.5 px-4 text-center hidden lg:table-cell">
                         <span className="text-xs px-2 py-0.5 rounded bg-pc-bg text-pc-text-muted">

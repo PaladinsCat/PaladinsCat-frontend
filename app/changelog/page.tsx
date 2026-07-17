@@ -107,7 +107,7 @@ function getVersionTextColor(type: "major" | "minor" | "patch") {
 
 // Version History Graph - compact timeline visualization
 function VersionHistoryGraph({ entries }: { entries: ChangelogPage["data"] }) {
-  const { t } = useLocalization();
+  const { t , formatRelative} = useLocalization();
   if (entries.length === 0) return null;
 
   return (
@@ -148,7 +148,7 @@ function VersionHistoryGraph({ entries }: { entries: ChangelogPage["data"] }) {
                 </span>
                 {entry.deployedAt && (
                   <time dateTime={entry.deployedAt} className="text-xs text-pc-text-muted block mt-0.5">
-                    {formatRelativeTime(entry.deployedAt)}
+                    {formatRelative(entry.deployedAt)}
                   </time>
                 )}
                 {!hasChangelog && (
@@ -177,7 +177,7 @@ function VersionHistoryGraph({ entries }: { entries: ChangelogPage["data"] }) {
 }
 
 function ChangelogEntry({ entry, index }: { entry: ChangelogPage["data"][number]; index: number }) {
-  const { t } = useLocalization();
+  const { t , formatDateTime, formatRelative} = useLocalization();
   const sections = useMemo(() => parseChangelog(entry.changelog, t("common.changelog.changes")), [entry.changelog, t]);
   const hasChangelog = sections.length > 0;
 
@@ -208,8 +208,8 @@ function ChangelogEntry({ entry, index }: { entry: ChangelogPage["data"][number]
       {/* Meta row */}
       <div className="flex items-center gap-3 text-xs text-pc-text-muted mb-2">
         {entry.deployedAt && (
-          <time dateTime={entry.deployedAt} title={formatLocalDateTime(entry.deployedAt)}>
-            {formatRelativeTime(entry.deployedAt)}
+          <time dateTime={entry.deployedAt} title={formatDateTime(entry.deployedAt)}>
+            {formatRelative(entry.deployedAt)}
           </time>
         )}
         {sourceLabel(entry.source, t) && (

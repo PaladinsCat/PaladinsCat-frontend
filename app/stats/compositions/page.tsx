@@ -18,7 +18,7 @@ const CLASS_COLUMNS = [
 ] as const;
 
 export default function CompositionStatsPage() {
-  const { t } = useLocalization();
+  const { t, formatNumber, formatPercent, formatRecord } = useLocalization();
   const [rows, setRows] = useState<MatchCompositionStat[]>([]);
   const [sortKey, setSortKey] = useState<SortKey>("totalMatches");
   const [descending, setDescending] = useState(true);
@@ -73,10 +73,10 @@ export default function CompositionStatsPage() {
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {[
-          [t("generated.app\\stats\\compositions\\page.compositions"), rows.length.toLocaleString()],
-          [t("generated.app\\stats\\compositions\\page.mostcommon"), rows[0]?.composition ?? "—"],
-          [t("generated.app\\stats\\compositions\\page.trackedmatches"), rows.reduce((sum, row) => sum + row.totalMatches, 0).toLocaleString()],
-          [t("generated.app\\stats\\compositions\\page.bestsampledwr"), rows.length ? `${Math.max(...rows.filter((row) => row.totalMatches >= 20).map((row) => row.winRate), 0).toFixed(1)}%` : "—"],
+          [t("generated.stats.compositions.page.compositions"), formatNumber(rows.length)],
+          [t("generated.stats.compositions.page.mostcommon"), rows[0]?.composition ?? "—"],
+          [t("generated.stats.compositions.page.trackedmatches"), formatNumber(rows.reduce((sum, row) => sum + row.totalMatches, 0))],
+          [t("generated.stats.compositions.page.bestsampledwr"), rows.length ? formatPercent(Math.max(...rows.filter((row) => row.totalMatches >= 20).map((row) => row.winRate), 0)) : "—"],
         ].map(([label, value]) => <div key={label} className="rounded-xl border border-pc-border bg-pc-bg-elevated p-4"><div className="text-[10px] uppercase tracking-wider text-pc-text-muted">{label}</div><div className="mt-1 truncate text-lg font-bold text-pc-text">{value}</div></div>)}
       </div>
 
@@ -88,9 +88,9 @@ export default function CompositionStatsPage() {
 
       <div className="space-y-2 lg:hidden">
         {pagedRows.map((row) => <article key={row.composition} className="pc-mobile-panel p-3">
-          <div className="flex items-center justify-between gap-3"><div><div className="font-mono text-base font-bold text-pc-text">{row.composition}</div><div className="text-[10px] text-pc-text-muted">{t("generated.stats.frontlineDamageFlankSupport")}</div></div><div className={row.winRate >= 50 ? "text-right font-bold text-emerald-400" : "text-right font-bold text-rose-400"}>{row.winRate.toFixed(1)}%<div className="text-[9px] font-normal uppercase tracking-wide text-pc-text-muted">{t("generated.stats.winRate.0a2b795")}</div></div></div>
+          <div className="flex items-center justify-between gap-3"><div><div className="font-mono text-base font-bold text-pc-text">{row.composition}</div><div className="text-[10px] text-pc-text-muted">{t("generated.stats.frontlineDamageFlankSupport")}</div></div><div className={row.winRate >= 50 ? "text-right font-bold text-emerald-400" : "text-right font-bold text-rose-400"}>{formatPercent(row.winRate)}<div className="text-[9px] font-normal uppercase tracking-wide text-pc-text-muted">{t("generated.stats.winRate.0a2b795")}</div></div></div>
           <div className="mt-3 grid grid-cols-4 gap-1.5">{CLASS_COLUMNS.map((column) => <div key={column.key} className="rounded-lg bg-pc-bg-secondary/60 p-2 text-center"><img src={column.icon} alt="" className="mx-auto h-5 w-5 object-contain" /><div className="mt-1 font-mono text-sm font-semibold text-pc-text">{row[column.key]}</div><div className="truncate text-[8px] uppercase text-pc-text-muted">{t(column.labelKey)}</div></div>)}</div>
-          <div className="mt-3 flex items-center justify-between text-xs"><span className="text-pc-text-secondary">{row.totalMatches.toLocaleString()} {t("generated.stats.matches.9f3e924")}</span><span className="text-pc-text-muted">{row.wins.toLocaleString()}{t("generated.stats.w")}{" "}{row.losses.toLocaleString()}L</span></div>
+          <div className="mt-3 flex items-center justify-between text-xs"><span className="text-pc-text-secondary">{formatNumber(row.totalMatches)} {t("generated.stats.matches.9f3e924")}</span><span className="text-pc-text-muted">{formatRecord(row.wins, row.losses)}</span></div>
         </article>)}
         {pagedRows.length === 0 && <div className="pc-mobile-panel p-6 text-center text-sm text-pc-text-muted">{loading ? <LoadingIndicator /> : t("generated.stats.compositionStatisticsAreNotAvailableForThisLobbyScopeYet")}</div>}
       </div>
@@ -115,9 +115,9 @@ export default function CompositionStatsPage() {
                   <span>{row[column.key]}</span>
                 </span>
               </td>)}
-              <td className="px-3 py-3 text-right text-pc-text">{row.totalMatches.toLocaleString()}</td>
-              <td className="px-3 py-3 text-right text-pc-text-secondary">{row.wins.toLocaleString()} / {row.losses.toLocaleString()}</td>
-              <td className={row.winRate >= 50 ? "px-4 py-3 text-right font-semibold text-emerald-400" : "px-4 py-3 text-right font-semibold text-rose-400"}>{row.winRate.toFixed(1)}%</td>
+              <td className="px-3 py-3 text-right text-pc-text">{formatNumber(row.totalMatches)}</td>
+              <td className="px-3 py-3 text-right text-pc-text-secondary">{formatNumber(row.wins)} / {formatNumber(row.losses)}</td>
+              <td className={row.winRate >= 50 ? "px-4 py-3 text-right font-semibold text-emerald-400" : "px-4 py-3 text-right font-semibold text-rose-400"}>{formatPercent(row.winRate)}</td>
             </tr>)}
             {pagedRows.length === 0 && <tr><td colSpan={8} className="px-4 py-10 text-center text-pc-text-muted">{loading ? <LoadingIndicator /> : t("generated.stats.compositionStatisticsAreNotAvailableForThisLobbyScopeYet")}</td></tr>}
           </tbody>
@@ -127,7 +127,7 @@ export default function CompositionStatsPage() {
       {!loading && sorted.length > 0 && (
         <nav className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated px-3 py-2" aria-label={t("generated.changelog.pagination")}>
           <div className="text-xs text-pc-text-muted">
-            {t("skins.showingStatus", { start: pageStart, end: pageEnd, total: sorted.length.toLocaleString() })}
+            {t("skins.showingStatus", { start: pageStart, end: pageEnd, total: formatNumber(sorted.length) })}
           </div>
           <div className="flex flex-wrap items-center justify-end gap-2">
             <label className="flex items-center gap-2 text-xs text-pc-text-secondary">

@@ -120,46 +120,6 @@ interface RefreshFeedback {
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api";
 
-function formatNumber(n: number | null | undefined): string {
-  if (n == null || !Number.isFinite(n)) return "—";
-  return n.toLocaleString();
-}
-
-function formatLargeNumber(n: string | number | null | undefined): string {
-  if (n == null) return "—";
-  const num = typeof n === "string" ? parseInt(n, 10) : n;
-  if (!Number.isFinite(num)) return "—";
-  return num.toLocaleString();
-}
-
-function formatMatchDuration(seconds: number): string {
-  const total = Math.max(0, Math.round(seconds || 0));
-  const minutes = Math.floor(total / 60);
-  const remaining = total % 60;
-  return `${minutes}:${String(remaining).padStart(2, "0")}`;
-}
-
-function displayMatchMap(mapName: string, queueId: number | null): string {
-  const name = mapName || "Unknown map";
-  return queueId === 486 ? name.replace(/^Ranked\s+/i, "") : name;
-}
-
-
-function formatHours(hours: number): string {
-  if (!hours) return "—";
-  const d = Math.floor(hours / 24);
-  const h = hours % 24;
-  if (d > 0) return `${d}d ${h}h`;
-  return `${h}h`;
-}
-
-function formatCooldown(remainingMs: number): string {
-  const totalSeconds = Math.max(0, Math.ceil(remainingMs / 1000));
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-  return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
-}
-
 function trendArrow(trend: number): string {
   if (trend > 0) return "↑";
   if (trend < 0) return "↓";
@@ -196,7 +156,28 @@ export const PLAYER_PROFILE_ERROR_KEYS = {
 } as const;
 
 export default function PlayerProfilePage() {
-  const { t } = useLocalization();
+  const { t, formatDuration, formatNumber, formatPercent , formatDate, formatDateTime} = useLocalization();
+  const formatLargeNumber = (value: string | number | null | undefined) => formatNumber(value == null ? null : Number(value));
+  const formatMatchDuration = (seconds: number) => {
+    const total = Math.max(0, Math.round(seconds || 0));
+    return t("common.format.clock", {
+      minutes: formatNumber(Math.floor(total / 60), { minimumIntegerDigits: 2, useGrouping: false }),
+      seconds: formatNumber(total % 60, { minimumIntegerDigits: 2, useGrouping: false }),
+    });
+  };
+  const displayMatchMap = (mapName: string, queueId: number | null) => {
+    const resolved = mapName || t("generated.app.players.[id].page.unknownmap");
+    return queueId === 486 ? resolved.replace(/^Ranked\s+/i, "") : resolved;
+  };
+  const formatHours = (hours: number) => {
+    if (!hours) return "—";
+    const days = Math.floor(hours / 24);
+    const remainingHours = hours % 24;
+    return days > 0
+      ? t("common.format.daysHoursShort", { days: formatNumber(days), hours: formatNumber(remainingHours) })
+      : t("common.format.hoursShort", { hours: formatNumber(remainingHours) });
+  };
+  const formatCooldown = (remainingMs: number) => formatDuration(Math.ceil(remainingMs / 1000));
   const params = useParams();
   const router = useRouter();
   const id = params?.id as string;
@@ -499,7 +480,7 @@ export default function PlayerProfilePage() {
   const tierColor = getTierColor(effectiveTier.displayTier);
   const rankIcon = getRankIconPath(player.kbm_tier, player.kbm_rank);
   const kbmWr = player.kbm_wins + player.kbm_losses > 0
-    ? ((player.kbm_wins / (player.kbm_wins + player.kbm_losses)) * 100).toFixed(1)
+    ? formatNumber(((player.kbm_wins / (player.kbm_wins + player.kbm_losses)) * 100), { minimumFractionDigits: 1, maximumFractionDigits: 1 })
     : "—";
   const refreshRemainingMs = refreshCooldownUntil
     ? Math.max(0, refreshCooldownUntil - refreshClock)
@@ -723,8 +704,8 @@ export default function PlayerProfilePage() {
                     <span className="text-xs text-pc-text-muted">{t("generated.players.mastery")}{" "}{player.mastery_level}</span>
                   </div>
                   <StatGrid>
-                    <StatRow label={t("generated.players.created")} value={formatLocalDate(player.created_datetime)} />
-                    <StatRow label={t("generated.players.lastLogin")} value={formatLocalDateTime(player.last_login_datetime)} />
+                    <StatRow label={t("generated.players.created")} value={formatDate(player.created_datetime)} />
+                    <StatRow label={t("generated.players.lastLogin")} value={formatDateTime(player.last_login_datetime)} />
                     <StatRow label={t("generated.players.playtime")} value={formatHours(player.hours_played)} />
                     <StatRow label={t("generated.players.totalXp")} value={formatLargeNumber(player.total_xp)} />
                     <StatRow label={t("generated.players.achievements")} value={formatNumber(player.total_achievements)} />
@@ -744,7 +725,7 @@ export default function PlayerProfilePage() {
                     <StatRow label={t("generated.players.casualDeserted")} value={formatNumber(player.leaves)} />
                     <StatRow label={t("generated.players.totalWins")} value={formatNumber(globalWins)} color="text-emerald-400" />
                     <StatRow label={t("generated.players.totalLosses")} value={formatNumber(globalLosses)} color="text-rose-400" />
-                    <StatRow label={t("generated.players.winRate")} value={winRate.toFixed(1) + "%"} color={winRate >= 50 ? "text-emerald-400" : "text-rose-400"} />
+                    <StatRow label={t("generated.players.winRate")} value={formatPercent(winRate)} color={winRate >= 50 ? "text-emerald-400" : "text-rose-400"} />
                   </div>
                 </div>
               </div>
@@ -767,7 +748,7 @@ export default function PlayerProfilePage() {
                 <div className="space-y-2 lg:hidden">
                   {matches.filter((match) => match.championName).map((match) => <Link key={match.matchId} href={`/matches/${match.matchId}`} className="pc-mobile-panel flex min-w-0 items-center gap-3 p-3">
                     <img src={getChampionIconSafe(match.championName)} alt="" className="h-10 w-10 shrink-0 rounded-lg object-contain" />
-                    <div className="min-w-0 flex-1"><div className="flex min-w-0 items-center gap-2"><span className="truncate text-sm font-semibold text-pc-text">{match.championName}</span><span className={`shrink-0 text-[10px] font-bold ${match.isWinner ? "text-emerald-400" : "text-rose-400"}`}>{match.isWinner ? t("generated.players.win") : t("generated.players.loss")}</span></div><div className="truncate text-[10px] text-pc-text-muted">{match.queueId === 486 ? t("generated.players.ranked") : t("generated.players.casual")} · {displayMatchMap(match.mapGame, match.queueId)}</div><div className="mt-1 text-[10px] text-pc-text-muted">{formatLocalDateTime(match.entryDatetime)}</div></div>
+                    <div className="min-w-0 flex-1"><div className="flex min-w-0 items-center gap-2"><span className="truncate text-sm font-semibold text-pc-text">{match.championName}</span><span className={`shrink-0 text-[10px] font-bold ${match.isWinner ? "text-emerald-400" : "text-rose-400"}`}>{match.isWinner ? t("generated.players.win") : t("generated.players.loss")}</span></div><div className="truncate text-[10px] text-pc-text-muted">{match.queueId === 486 ? t("generated.players.ranked") : t("generated.players.casual")} · {displayMatchMap(match.mapGame, match.queueId)}</div><div className="mt-1 text-[10px] text-pc-text-muted">{formatDateTime(match.entryDatetime)}</div></div>
                     <div className="shrink-0 text-right"><div className="font-mono text-sm font-bold text-pc-text">{match.kills}/{match.deaths}/{match.assists}</div><div className="text-[9px] uppercase text-pc-text-muted">{formatKda(match.kills, match.deaths, match.assists)} {t("generated.players.kda")}</div><div className="mt-1 font-mono text-[10px] text-pc-text-secondary">{formatMatchDuration(match.duration)}</div></div>
                   </Link>)}
                 </div>
@@ -778,9 +759,9 @@ export default function PlayerProfilePage() {
                         <th className="px-3 py-1.5">{t("generated.players.match.0335207")}</th>
                         <th className="px-3 py-1.5">{t("generated.players.champion")}</th>
                         <th className="px-3 py-1.5">{t("generated.players.queue")}</th>
-                        <th className="px-3 py-1.5">K</th>
-                        <th className="px-3 py-1.5">D</th>
-                        <th className="px-3 py-1.5">A</th>
+                        <th className="px-3 py-1.5">{t("common.playerChampions.killsShort")}</th>
+                        <th className="px-3 py-1.5">{t("common.playerChampions.deathsShort")}</th>
+                        <th className="px-3 py-1.5">{t("common.playerChampions.assistsShort")}</th>
                         <th className="px-3 py-1.5">{t("generated.players.kda")}</th>
                         <th className="px-3 py-1.5">{t("generated.players.result")}</th>
                         <th className="px-3 py-1.5">{t("generated.players.time")}</th>
@@ -815,11 +796,11 @@ export default function PlayerProfilePage() {
                             <td className="px-3 py-1.5 text-xs font-mono text-pc-text">{kda}</td>
                             <td className="px-3 py-1.5">
                               <span className={`text-xs font-medium ${m.isWinner ? "text-emerald-400" : "text-rose-400"}`}>
-                                {m.isWinner ? "W" : "L"}
+                                {m.isWinner ? t("common.result.winShort") : t("common.result.lossShort")}
                               </span>
                             </td>
                             <td className="px-3 py-1.5 text-xs font-mono text-pc-text-secondary">{formatMatchDuration(m.duration)}</td>
-                            <td className="whitespace-nowrap px-3 py-1.5 text-xs text-pc-text-muted">{formatLocalDateTime(m.entryDatetime)}</td>
+                            <td className="whitespace-nowrap px-3 py-1.5 text-xs text-pc-text-muted">{formatDateTime(m.entryDatetime)}</td>
                           </tr>
                         );
                       })}
@@ -895,33 +876,33 @@ export default function PlayerProfilePage() {
               {kbmRating ? (
                 <div className="space-y-3">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-pc-accent font-mono">{Number(kbmRating.mu).toFixed(0)}</div>
+                    <div className="text-2xl font-bold text-pc-accent font-mono">{formatNumber(Number(kbmRating.mu), { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
                     <div className="text-xs text-pc-text-muted mt-0.5">{t("generated.players.glicko2Rating")}</div>
                   </div>
                   <div className="grid grid-cols-1 gap-2 text-center min-[400px]:grid-cols-2">
                     <div className="pc-surface-light rounded p-2 border border-pc-border/50">
                       <div className="text-xs text-pc-text-muted">{t("generated.players.deviation")}</div>
-                      <div className="text-xs font-mono text-pc-text">{Number(kbmRating.phi).toFixed(0)}</div>
+                      <div className="text-xs font-mono text-pc-text">{formatNumber(Number(kbmRating.phi), { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
                     </div>
                     <div className="pc-surface-light rounded p-2 border border-pc-border/50">
                       <div className="text-xs text-pc-text-muted">{t("generated.players.volatility")}</div>
-                      <div className="text-xs font-mono text-pc-text">{Number(kbmRating.volatility).toFixed(4)}</div>
+                      <div className="text-xs font-mono text-pc-text">{formatNumber(Number(kbmRating.volatility), { minimumFractionDigits: 4, maximumFractionDigits: 4 })}</div>
                     </div>
                   </div>
                   <div className="grid grid-cols-1 gap-2 border-t border-pc-border/50 pt-2 text-center min-[360px]:grid-cols-3">
                     <div>
-                      <div className="text-xs text-pc-text-muted">W</div>
-                      <div className="text-xs font-mono text-emerald-400">{formatNumber(Number.isFinite(Number(kbmRating.wins)) ? Number(kbmRating.wins) : null)}</div>
+                      <div className="text-xs text-pc-text-muted">{t("common.result.winShort")}</div>
+                      <div className="text-xs font-mono text-emerald-400">{Number.isFinite(Number(kbmRating.wins)) ? formatNumber(Number(kbmRating.wins)) : "—"}</div>
                     </div>
                     <div>
-                      <div className="text-xs text-pc-text-muted">L</div>
-                      <div className="text-xs font-mono text-rose-400">{formatNumber(Number.isFinite(Number(kbmRating.losses)) ? Number(kbmRating.losses) : null)}</div>
+                      <div className="text-xs text-pc-text-muted">{t("common.result.lossShort")}</div>
+                      <div className="text-xs font-mono text-rose-400">{Number.isFinite(Number(kbmRating.losses)) ? formatNumber(Number(kbmRating.losses)) : "—"}</div>
                     </div>
                     <div>
                       <div className="text-xs text-pc-text-muted">{t("generated.players.wr.a175495")}</div>
                       <div className="text-xs font-mono text-pc-text">
                         {Number.isFinite(Number(kbmRating.wins)) && Number(kbmRating.matches_played) > 0
-                          ? t("generated.players.value1", { value1: ((Number(kbmRating.wins) / Number(kbmRating.matches_played)) * 100).toFixed(0) })
+                          ? t("generated.players.value1", { value1: formatNumber(((Number(kbmRating.wins) / Number(kbmRating.matches_played)) * 100), { minimumFractionDigits: 0, maximumFractionDigits: 0 }) })
                           : "—"}
                       </div>
                     </div>
@@ -939,10 +920,10 @@ export default function PlayerProfilePage() {
             <div className="pc-card p-3">
               <div className="mb-1.5 text-[10px] uppercase tracking-wider text-pc-text-muted">{t("generated.players.averages")}</div>
               <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
-                <StatRow label={t("generated.players.damageMin")} value={formatNumber(player.avg_dpm)} color="text-red-400" />
-                <StatRow label={t("generated.players.healingMin")} value={formatNumber(player.avg_hpm)} color="text-emerald-400" />
-                <StatRow label={t("generated.players.shieldingMin")} value={formatNumber(player.avg_mpm)} color="text-sky-400" />
-                <StatRow label={t("generated.players.creditsMin")} value={formatNumber(player.avg_egpm)} color="text-yellow-400" />
+                <StatRow label={t("generated.players.damageMin")} value={player.avg_dpm != null ? formatNumber(player.avg_dpm) : "—"} color="text-red-400" />
+                <StatRow label={t("generated.players.healingMin")} value={player.avg_hpm != null ? formatNumber(player.avg_hpm) : "—"} color="text-emerald-400" />
+                <StatRow label={t("generated.players.shieldingMin")} value={player.avg_mpm != null ? formatNumber(player.avg_mpm) : "—"} color="text-sky-400" />
+                <StatRow label={t("generated.players.creditsMin")} value={player.avg_egpm != null ? formatNumber(player.avg_egpm) : "—"} color="text-yellow-400" />
                 {player.avg_shpm != null && (
                   <StatRow label={t("generated.players.shieldingMin")} value={formatNumber(player.avg_shpm)} color="text-violet-400" />
                 )}
@@ -973,14 +954,14 @@ export default function PlayerProfilePage() {
                           >
                             {cr.champion_name}
                           </Link>
-                          <span className="text-xs font-mono text-pc-accent ml-2">{Number(cr.mu).toFixed(0)}</span>
+                          <span className="text-xs font-mono text-pc-accent ml-2">{formatNumber(Number(cr.mu), { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
                         </div>
                         <div className="flex items-center gap-2 text-xs text-pc-text-muted">
                           <span>{cr.matches_played} {t("generated.players.games")}</span>
                           <span>·</span>
                           <span>
                             {cr.matches_played > 0
-                              ? t("generated.players.value1Wr", { value1: ((cr.wins / cr.matches_played) * 100).toFixed(0) })
+                              ? t("generated.players.value1Wr", { value1: formatNumber(((cr.wins / cr.matches_played) * 100), { minimumFractionDigits: 0, maximumFractionDigits: 0 }) })
                               : t("generated.players.noWr")}
                           </span>
                         </div>
@@ -1003,8 +984,8 @@ export default function PlayerProfilePage() {
                     <div key={qr.queue_id} className="flex items-center justify-between py-1.5 border-b border-pc-border/30 last:border-0">
                       <span className="text-xs text-pc-text-muted">{t("generated.players.queue")}{" "}{qr.queue_id}</span>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-mono text-pc-accent">{Number(qr.mu).toFixed(0)}</span>
-                        <span className="text-xs text-pc-text-muted">φ{Number(qr.phi).toFixed(0)}</span>
+                        <span className="text-xs font-mono text-pc-accent">{formatNumber(Number(qr.mu), { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
+                        <span className="text-xs text-pc-text-muted">φ{formatNumber(Number(qr.phi), { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
                       </div>
                     </div>
                   ))}
@@ -1080,26 +1061,26 @@ export default function PlayerProfilePage() {
                                   : indexedMatches > 0
                                     ? (indexedWins / indexedMatches) * 100
                                     : Number.NaN;
-                              const winRate = Number.isFinite(storedWinRate) ? `${storedWinRate.toFixed(1)}% WR` : "No win-rate data";
-                              const metricScope = useRankedMetrics ? "ranked" : profileMatches > 0 ? "profile" : "indexed";
+                              const winRate = Number.isFinite(storedWinRate) ? `${formatPercent(storedWinRate)} ${t("generated.players.wr.a175495")}` : t("generated.app.players.[id].page.nowinratedata");
+                              const metricScope = useRankedMetrics ? t("common.scope.ranked") : profileMatches > 0 ? t("common.scope.profile") : t("common.scope.indexed");
                               const tier = Number(p.kbm_tier ?? p.live_tier ?? 0);
                               const rank = Number(p.kbm_rank ?? 0);
-                              const tierName = tier > 0 ? resolveEffectiveTier(tier, rank).displayName : "Unranked";
+                              const tierName = tier > 0 ? resolveEffectiveTier(tier, rank).displayName : t("generated.app.players.[id].page.unranked");
                               const level = p.profile_level ?? p.account_level ?? "—";
                               const mastery = Number(p.profile_mastery_level ?? p.mastery_level ?? 0);
                               const profileDetails = [
-                                p.champion_name || "Unknown champion",
-                                `Lvl ${level}`,
-                                mastery > 0 ? `Mastery ${mastery}` : null,
+                                p.champion_name || t("generated.app.players.[id].page.unknownchampion"),
+                                t("common.format.levelValue", { level }),
+                                mastery > 0 ? t("common.format.masteryValue", { mastery: formatNumber(mastery) }) : null,
                                 p.profile_platform || null,
                               ].filter(Boolean).join(" · ");
                               const sampleSummary = metricMatches > 0
-                                ? `${metricMatches.toLocaleString()} ${metricScope} matches`
+                                ? t("common.summary.sampleMatches", { count: formatNumber(metricMatches), scope: metricScope })
                                 : p.has_profile
-                                  ? "Profile cached locally"
-                                  : "No local profile";
+                                  ? t("generated.app.players.[id].page.profilecachedlocally")
+                                  : t("generated.app.players.[id].page.nolocalprofile");
                               const performanceSummary = p.avg_dpm != null
-                                ? `${sampleSummary} · ${Math.round(Number(p.avg_dpm)).toLocaleString()} DPM`
+                                ? t("common.summary.metricValue", { summary: sampleSummary, value: formatNumber(Math.round(Number(p.avg_dpm))), metric: t("common.metrics.dpm") })
                                 : sampleSummary;
                               return (
                                 <div key={p.player_id} className="grid grid-cols-[minmax(0,1fr)_auto] gap-3 px-4 py-3.5">

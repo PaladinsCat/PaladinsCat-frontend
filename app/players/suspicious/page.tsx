@@ -9,7 +9,7 @@ import PlayerDirectoryGrid from "@/components/player-directory-grid";
 import { useLocalization } from "@/lib/localization-context";
 
 export default function SuspiciousPage() {
-  const { t } = useLocalization();
+  const { t , formatNumber} = useLocalization();
   const [data, setData] = useState<CheaterPlayer[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -58,7 +58,7 @@ export default function SuspiciousPage() {
               </div>
 
               <span className="w-fit shrink-0 rounded-full border border-amber-500/30 bg-amber-500/15 px-2 py-1 text-xs font-semibold text-amber-300">
-                {player.susCount.toLocaleString()} {player.susCount === 1 ? t("generated.players.flag") : t("generated.players.flags")}
+                {formatNumber(player.susCount)} {player.susCount === 1 ? t("generated.players.flag") : t("generated.players.flags")}
               </span>
 
               <div className="min-w-0 sm:col-span-2">

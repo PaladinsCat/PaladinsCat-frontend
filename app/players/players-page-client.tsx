@@ -41,7 +41,7 @@ const EMPTY_COUNTS: PlayersOverview["communityCounts"] = {
 };
 
 export default function PlayersPageClient({ initialOverview }: { initialOverview: PlayersOverview | null }) {
-  const { t } = useLocalization();
+  const { t , formatNumber} = useLocalization();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<PlayerSearchResult[]>([]);
   const [searching, setSearching] = useState(false);
@@ -149,7 +149,7 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
               <div className="min-w-0 flex-1">
                 <h2 className="truncate text-sm font-semibold text-pc-text group-hover:text-pc-accent">{t(card.titleKey)}</h2>
                 <p className="mt-0.5 truncate text-xs text-pc-text-muted">
-                  {overviewLoading ? t("moderation.loadingDirectory") : t(card.descriptionKey, { value1: card.count.toLocaleString() })}
+                  {overviewLoading ? t("moderation.loadingDirectory") : t(card.descriptionKey, { value1: formatNumber(card.count) })}
                 </p>
               </div>
               <span className="shrink-0 text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent">→</span>
