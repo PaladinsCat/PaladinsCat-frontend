@@ -5,6 +5,13 @@ import {
 } from "@/lib/api-client";
 import PlayersPageClient from "./players-page-client";
 
+
+// User-facing error keys — resolved at the UI layer via t()
+export const PLAYERS_ERROR_KEYS = {
+  overviewConfigUnavailable: "generated.players.overviewConfigUnavailable",
+  overviewUnavailable: "generated.players.overviewUnavailable",
+} as const;
+
 const getCachedPlayersOverview = unstable_cache(
   async (): Promise<PlayersOverview> => {
     const apiBase = (
@@ -14,7 +21,7 @@ const getCachedPlayersOverview = unstable_cache(
     ).replace(/\/+$/, "");
 
     if (apiBase.startsWith("/")) {
-      throw new Error("Players overview configuration is unavailable.");
+      throw new Error(PLAYERS_ERROR_KEYS.overviewConfigUnavailable);
     }
 
     const response = await fetch(`${apiBase}/players/overview`, {
@@ -23,12 +30,12 @@ const getCachedPlayersOverview = unstable_cache(
       signal: AbortSignal.timeout(10_000),
     });
     if (!response.ok) {
-      throw new Error("Players overview is unavailable.");
+      throw new Error(PLAYERS_ERROR_KEYS.overviewUnavailable);
     }
 
     return mapPlayersOverviewResponse(await response.json());
   },
-  ["players-overview-v1"],
+  ["players-overview-v2"],
   {
     revalidate: 300,
     tags: ["players-overview"],

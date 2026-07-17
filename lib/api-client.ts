@@ -157,6 +157,10 @@ export interface CheaterPlayer {
   kbmTier: string | null;
   cheater: boolean;
   susCount: number;
+  dropper: boolean;
+  afkWintrade: boolean;
+  boosted: boolean;
+  altAccount: boolean;
   weirdoCount: number;
   hallOfFameCount: number;
   avgDpm: number | null;
@@ -208,18 +212,22 @@ export interface BoostedPlayerDetail {
   matches: BoostedMatchSummary[];
 }
 
-export async function fetchCheaterPlayers(params?: { cheater?: boolean; susOnly?: boolean; weirdoOnly?: boolean; hallOfFameOnly?: boolean; limit?: number }): Promise<CheaterPlayer[]> {
+export async function fetchCheaterPlayers(params?: { cheater?: boolean; susOnly?: boolean; weirdoOnly?: boolean; hallOfFameOnly?: boolean; dropperOnly?: boolean; afkWintradeOnly?: boolean; altAccountOnly?: boolean; limit?: number }): Promise<CheaterPlayer[]> {
   const query = new URLSearchParams();
   if (params?.cheater) query.set('cheater', 'true');
   if (params?.susOnly) query.set('susOnly', 'true');
   if (params?.weirdoOnly) query.set('weirdoOnly', 'true');
   if (params?.hallOfFameOnly) query.set('hallOfFameOnly', 'true');
+  if (params?.dropperOnly) query.set('dropperOnly', 'true');
+  if (params?.afkWintradeOnly) query.set('afkWintradeOnly', 'true');
+  if (params?.altAccountOnly) query.set('altAccountOnly', 'true');
   if (params?.limit) query.set('limit', String(params.limit));
   query.set('perPage', String(params?.limit || 100));
   try {
     const raw = await fetchJson<Array<{
       id: string; name: string; platform: string; region: string;
       kbm_tier?: string | null; cheater?: boolean; sus_count?: number;
+      dropper?: boolean; afk_wintrade?: boolean; boosted?: boolean; alt_account?: boolean;
       weirdo_count?: number; hall_of_fame_count?: number;
       avg_dpm?: number | null; avg_hpm?: number | null; avg_egpm?: number | null;
       avg_mpm?: number | null; total_matches?: number; win_rate?: number | null;
@@ -229,6 +237,8 @@ export async function fetchCheaterPlayers(params?: { cheater?: boolean; susOnly?
       id: r.id, name: r.name, platform: r.platform, region: r.region,
       kbmTier: r.kbm_tier ?? null, cheater: r.cheater ?? false,
       susCount: r.sus_count ?? 0,
+      dropper: Boolean(r.dropper), afkWintrade: Boolean(r.afk_wintrade),
+      boosted: Boolean(r.boosted), altAccount: Boolean(r.alt_account),
       weirdoCount: r.weirdo_count ?? 0,
       hallOfFameCount: r.hall_of_fame_count ?? 0,
       avgDpm: r.avg_dpm ?? null, avgHpm: r.avg_hpm ?? null,
@@ -654,6 +664,9 @@ export interface PlayersOverview {
     suspicious: number;
     weirdos: number;
     hallOfFame: number;
+    droppers: number;
+    afkWintrade: number;
+    altAccounts: number;
   };
   directoryCounts: {
     privateAccounts: number;
@@ -665,6 +678,8 @@ function mapBoostedPlayer(row: any): BoostedPlayer {
   return {
     id: String(row.id), name: row.name, platform: row.platform, region: row.region,
     kbmTier: row.kbm_tier ?? null, cheater: Boolean(row.cheater), susCount: Number(row.sus_count ?? 0),
+    dropper: Boolean(row.dropper), afkWintrade: Boolean(row.afk_wintrade),
+    boosted: Boolean(row.boosted ?? true), altAccount: Boolean(row.alt_account),
     weirdoCount: Number(row.weirdo_count ?? 0), hallOfFameCount: Number(row.hall_of_fame_count ?? 0),
     avgDpm: row.avg_dpm ?? null, avgHpm: row.avg_hpm ?? null,
     avgCpm: row.avg_egpm ?? null, avgSpm: row.avg_mpm ?? null,
@@ -735,6 +750,9 @@ export interface PrivateAccountSummary {
   identityStatus: string;
   identityConfidence: number;
   trackingVersion: number;
+  cheater: boolean;
+  cheaterReason: string | null;
+  cheaterMarkedAt: string | null;
 }
 
 export interface PrivateAccountObservationSummary {
@@ -815,6 +833,9 @@ function mapPrivateAccount(row: any): PrivateAccountSummary {
     identityStatus: String(row.identity_status ?? 'inferred'),
     identityConfidence: Number(row.identity_confidence ?? 0),
     trackingVersion: Number(row.tracking_version ?? 1),
+    cheater: Boolean(row.cheater),
+    cheaterReason: row.cheater_reason == null ? null : String(row.cheater_reason),
+    cheaterMarkedAt: row.cheater_marked_at ?? null,
   };
 }
 
@@ -830,11 +851,12 @@ function mapPartyPair(row: any): PartyPairSummary {
   };
 }
 
-export async function fetchPrivateAccountsDirectory(params: { page?: number; pageSize?: number; query?: string } = {}): Promise<PlayerDirectoryPage<PrivateAccountSummary>> {
+export async function fetchPrivateAccountsDirectory(params: { page?: number; pageSize?: number; query?: string; cheater?: boolean } = {}): Promise<PlayerDirectoryPage<PrivateAccountSummary>> {
   const page = Math.max(1, params.page ?? 1);
   const pageSize = Math.min(100, Math.max(1, params.pageSize ?? 24));
   const query = new URLSearchParams({ page: String(page), perPage: String(pageSize) });
   if (params.query?.trim()) query.set('q', params.query.trim());
+  if (params.cheater !== undefined) query.set('cheater', String(params.cheater));
   const rows = await fetchJson<any[]>(`/player-ext/private?${query.toString()}`);
   const total = Number(rows[0]?.total_count ?? 0);
   return { items: rows.map(mapPrivateAccount), total, page, pageSize, totalPages: Math.max(1, Math.ceil(total / pageSize)) };
@@ -934,6 +956,8 @@ export function mapPlayersOverviewResponse(raw: any): PlayersOverview {
   const mapCommunity = (row: any): CheaterPlayer => ({
     id: String(row.id), name: row.name, platform: row.platform, region: row.region,
     kbmTier: row.kbm_tier ?? null, cheater: row.cheater ?? false, susCount: Number(row.sus_count ?? 0),
+    dropper: Boolean(row.dropper), afkWintrade: Boolean(row.afk_wintrade),
+    boosted: Boolean(row.boosted), altAccount: Boolean(row.alt_account),
     weirdoCount: Number(row.weirdo_count ?? 0), hallOfFameCount: Number(row.hall_of_fame_count ?? 0),
     avgDpm: row.avg_dpm == null ? null : Number(row.avg_dpm), avgHpm: row.avg_hpm == null ? null : Number(row.avg_hpm),
     avgCpm: row.avg_egpm == null ? null : Number(row.avg_egpm), avgSpm: row.avg_mpm == null ? null : Number(row.avg_mpm),
@@ -959,6 +983,9 @@ export function mapPlayersOverviewResponse(raw: any): PlayersOverview {
     suspicious: Number(raw.community_counts?.suspicious ?? raw.suspicious?.[0]?.total_count ?? raw.suspicious?.length ?? 0),
     weirdos: Number(raw.community_counts?.weirdos ?? raw.weirdos?.[0]?.total_count ?? raw.weirdos?.length ?? 0),
     hallOfFame: Number(raw.community_counts?.hall_of_fame ?? raw.hall_of_fame?.[0]?.total_count ?? raw.hall_of_fame?.length ?? 0),
+    droppers: Number(raw.community_counts?.droppers ?? raw.droppers?.[0]?.total_count ?? raw.droppers?.length ?? 0),
+    afkWintrade: Number(raw.community_counts?.afk_wintrade ?? raw.afk_wintrade?.[0]?.total_count ?? raw.afk_wintrade?.length ?? 0),
+    altAccounts: Number(raw.community_counts?.alt_accounts ?? raw.alt_accounts?.[0]?.total_count ?? raw.alt_accounts?.length ?? 0),
   };
   const privateAccounts: PrivateAccountSummary[] = (raw.private_accounts ?? []).map(mapPrivateAccount);
   const partyPairs: PartyPairSummary[] = (raw.party_pairs ?? []).map(mapPartyPair);
@@ -1061,21 +1088,12 @@ export interface MapItemStat {
   pickRate: number;
 }
 
-export interface MapItemComparisonStat {
-  itemId: number;
-  mapName: string;
-  totalUses: number;
-  wins: number;
-  losses: number;
-  winRate: number;
-}
-
 export interface MapDetailStats {
   map: MapStat;
   champions: MapChampionStat[];
   talents: MapTalentStat[];
   items: MapItemStat[];
-  itemMaps: MapItemComparisonStat[];
+  compositions: MatchCompositionStat[];
 }
 
 export interface HourlyMatchCount {
@@ -1240,6 +1258,15 @@ export interface TierSummary {
  */
 const FETCH_TIMEOUT_MS = 10000;
 
+
+// User-facing error keys — resolved at the UI layer via t()
+export const API_ERROR_KEYS = {
+  genericFailure: "generated.api.genericFailure",
+  unexpectedFetchFailure: "generated.api.unexpectedFetchFailure",
+  notAuthenticated: "generated.api.notAuthenticated",
+  authenticationRequired: "generated.api.authenticationRequired",
+} as const;
+
 async function fetchJson<T>(path: string, options?: RequestInit & { retries?: number; unwrapData?: boolean; timeoutMs?: number }): Promise<T> {
   const retries = options?.retries ?? 2;
   const unwrapData = options?.unwrapData ?? true;
@@ -1265,7 +1292,7 @@ async function fetchJson<T>(path: string, options?: RequestInit & { retries?: nu
       }
       const errBody = await res.json().catch(() => null);
       const message = typeof errBody?.error === "string" ? errBody.error : errBody?.error?.message;
-      throw new Error(message || "We couldn't load this data right now. Please try again.");
+      throw new Error(API_ERROR_KEYS.genericFailure);
     }
     const json = await res.json();
     // Handle normalized list envelopes when callers only need the rows.
@@ -1274,7 +1301,7 @@ async function fetchJson<T>(path: string, options?: RequestInit & { retries?: nu
     }
     return json as T;
   }
-  throw new Error("Unexpected fetch failure");
+  throw new Error(API_ERROR_KEYS.unexpectedFetchFailure);
 }
 
 function numberOrNull(value: number | string | null | undefined): number | null {
@@ -1382,7 +1409,7 @@ export async function fetchNotifications(params?: { limit?: number }): Promise<N
 
 export async function fetchAdminNotifications(): Promise<Notification[]> {
   const token = getAuthToken();
-  if (!token) throw new Error('Not authenticated');
+  if (!token) throw new Error(API_ERROR_KEYS.notAuthenticated);
   const raw = await fetchJson<any[]>(
     `/admin/notifications`,
     { headers: { Authorization: `Bearer ${token}` } }
@@ -1392,7 +1419,7 @@ export async function fetchAdminNotifications(): Promise<Notification[]> {
 
 export async function createAdminNotification(input: NotificationInput): Promise<Notification> {
   const token = getAuthToken();
-  if (!token) throw new Error('Not authenticated');
+  if (!token) throw new Error(API_ERROR_KEYS.notAuthenticated);
   const raw = await fetchJson<any>(`/admin/notifications`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
@@ -1403,7 +1430,7 @@ export async function createAdminNotification(input: NotificationInput): Promise
 
 export async function updateAdminNotification(id: number, input: Partial<NotificationInput>): Promise<Notification> {
   const token = getAuthToken();
-  if (!token) throw new Error('Not authenticated');
+  if (!token) throw new Error(API_ERROR_KEYS.notAuthenticated);
   const raw = await fetchJson<any>(`/admin/notifications/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
@@ -1414,7 +1441,7 @@ export async function updateAdminNotification(id: number, input: Partial<Notific
 
 export async function deleteAdminNotification(id: number): Promise<void> {
   const token = getAuthToken();
-  if (!token) throw new Error('Not authenticated');
+  if (!token) throw new Error(API_ERROR_KEYS.notAuthenticated);
   await fetchJson<{ deleted: boolean; id: number }>(`/admin/notifications/${id}`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` },
@@ -1452,7 +1479,7 @@ export async function fetchChangelog(params?: { page?: number; perPage?: number 
 
 export async function fetchAdminChangelog(): Promise<ChangelogEntry[]> {
   const token = getAuthToken();
-  if (!token) throw new Error('Not authenticated');
+  if (!token) throw new Error(API_ERROR_KEYS.notAuthenticated);
   const raw = await fetchJson<any[]>('/admin/changelog', {
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -1461,7 +1488,7 @@ export async function fetchAdminChangelog(): Promise<ChangelogEntry[]> {
 
 export async function updateAdminChangelog(id: number, input: AdminChangelogInput): Promise<ChangelogEntry> {
   const token = getAuthToken();
-  if (!token) throw new Error('Not authenticated');
+  if (!token) throw new Error(API_ERROR_KEYS.notAuthenticated);
   const raw = await fetchJson<any>(`/admin/changelog/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -1561,6 +1588,7 @@ function mapChampionsOverview(raw: ChampionOverviewRaw): Champion[] {
       winRate: stat?.winRate ?? null,
       pickRate: stat?.pickRate ?? null,
       banRate: stat?.banRate ?? null,
+      totalBans: stat?.totalBans ?? null,
       rating: stat?.avgLeagueTier ?? null,
       ratingDeviation: null,
       volatility: null,
@@ -2121,6 +2149,7 @@ export interface StatsChampion {
   winRate: number;
   totalPlays: number;
   banRate?: number;
+  totalBans?: number;
   pickRate?: number;
   kda?: number;
   avgDamage?: number;
@@ -2133,7 +2162,7 @@ export interface StatsChampion {
 function mapStatsChampionRows(raw: Array<{
   champion_id: number; champion_name: string;
   win_rate: number | string; total_matches?: number | string; total_plays?: number | string;
-  ban_rate?: number | string; pick_rate?: number | string; kda?: number | string;
+  ban_rate?: number | string; ban_total?: number | string; pick_rate?: number | string; kda?: number | string;
   avg_damage?: number | string; avg_gold?: number | string;
   avg_heal?: number | string; avg_mitigation?: number | string;
   avg_league_tier?: number | string;
@@ -2145,6 +2174,7 @@ function mapStatsChampionRows(raw: Array<{
     winRate: toDisplayPercent(r.win_rate) ?? 0,
     totalPlays: num(r.total_matches) ?? num(r.total_plays) ?? 0,
     banRate: toDisplayPercent(r.ban_rate) ?? undefined,
+    totalBans: num(r.ban_total) ?? 0,
     pickRate: toDisplayPercent(r.pick_rate) ?? undefined,
     kda: num(r.kda),
     avgDamage: num(r.avg_damage),
@@ -2163,7 +2193,7 @@ export async function fetchStatsChampions(params?: { sort?: string; limit?: numb
     const raw = await fetchJson<Array<{
       champion_id: number; champion_name: string;
       win_rate: number | string; total_matches?: number | string; total_plays?: number | string;
-      ban_rate?: number | string; pick_rate?: number | string; kda?: number | string;
+      ban_rate?: number | string; ban_total?: number | string; pick_rate?: number | string; kda?: number | string;
       avg_damage?: number | string; avg_gold?: number | string;
       avg_heal?: number | string; avg_mitigation?: number | string;
       avg_league_tier?: number | string;
@@ -2290,11 +2320,12 @@ export async function fetchLoadouts(params?: {
   }));
 }
 
-export async function fetchItems(params?: { mode?: string; limit?: number; championId?: number; tierMin?: number; tierMax?: number }): Promise<ItemStat[]> {
+export async function fetchItems(params?: { mode?: string; limit?: number; championId?: number; role?: 'Frontline' | 'Damage' | 'Flank' | 'Support'; tierMin?: number; tierMax?: number }): Promise<ItemStat[]> {
   const query = new URLSearchParams();
   if (params?.mode) query.set('mode', params.mode);
   if (params?.limit != null) query.set('limit', String(params.limit));
   if (params?.championId != null) query.set('championId', String(params.championId));
+  if (params?.role) query.set('role', params.role);
   if (params?.tierMin != null) query.set('tierMin', String(params.tierMin));
   if (params?.tierMax != null) query.set('tierMax', String(params.tierMax));
   try {
@@ -2330,10 +2361,11 @@ export async function fetchItems(params?: { mode?: string; limit?: number; champ
   }
 }
 
-export async function fetchItemDetail(itemId: number, mode: 'ranked' = 'ranked', params?: { championId?: number; tierMin?: number; tierMax?: number }): Promise<ItemDetailStats | null> {
+export async function fetchItemDetail(itemId: number, mode: 'ranked' = 'ranked', params?: { championId?: number; role?: 'Frontline' | 'Damage' | 'Flank' | 'Support'; tierMin?: number; tierMax?: number }): Promise<ItemDetailStats | null> {
   try {
     const query = new URLSearchParams({ mode });
     if (params?.championId != null) query.set('championId', String(params.championId));
+    if (params?.role) query.set('role', params.role);
     if (params?.tierMin != null) query.set('tierMin', String(params.tierMin));
     if (params?.tierMax != null) query.set('tierMax', String(params.tierMax));
     const raw = await fetchJson<any>(`/stats/items/${itemId}?${query.toString()}`);
@@ -2418,7 +2450,7 @@ export async function fetchMapDetail(mapName: string): Promise<MapDetailStats | 
       champions: (raw.champions ?? []).map((row: any) => ({ championId: number(row.champion_id), championName: row.champion_name, totalPlays: number(row.total_plays), wins: number(row.wins), losses: number(row.losses), totalBans: row.total_bans == null ? Math.round(number(row.ban_rate) * number(map.total_matches) / 100) : number(row.total_bans), winRate: number(row.win_rate), pickRate: number(row.pick_rate), banRate: number(row.ban_rate) })),
       talents: (raw.talents ?? []).map((row: any) => ({ talentId: number(row.talent_id), talentName: row.talent_name, championId: number(row.champion_id), championName: row.champion_name, totalPlays: number(row.total_plays), wins: number(row.wins), losses: number(row.losses), winRate: number(row.win_rate), pickRate: number(row.pick_rate) })),
       items: (raw.items ?? []).map((row: any) => ({ itemId: number(row.item_id), itemName: row.item_name, totalUses: number(row.total_uses), wins: number(row.wins), losses: number(row.losses), winRate: number(row.win_rate), pickRate: number(row.pick_rate) })),
-      itemMaps: (raw.itemMaps ?? []).map((row: any) => ({ itemId: number(row.item_id), mapName: row.map_name, totalUses: number(row.total_uses), wins: number(row.wins), losses: number(row.losses), winRate: number(row.win_rate) })),
+      compositions: (raw.compositions ?? []).map((row: any) => ({ composition: String(row.comp_id), frontline: number(row.frontline), damage: number(row.damage), flank: number(row.flank), support: number(row.support), totalMatches: number(row.count), wins: number(row.wins), losses: number(row.losses), winRate: number(row.winrate) })),
     };
   } catch {
     return null;
@@ -3180,7 +3212,7 @@ export async function logout(): Promise<void> {
 export async function getMe(_userId?: number): Promise<AuthUser> {
   const token = getAuthToken();
   if (!token) {
-    throw new Error("Not authenticated");
+    throw new Error(API_ERROR_KEYS.notAuthenticated);
   }
   const raw = await fetchJson<{
     user_id?: number;
@@ -3275,7 +3307,7 @@ export interface AccountNotification {
 
 export async function getAccountNotifications(limit = 25): Promise<AccountNotification[]> {
   const token = getAuthToken();
-  if (!token) throw new Error("Not authenticated");
+  if (!token) throw new Error(API_ERROR_KEYS.notAuthenticated);
   const raw = await fetchJson<{ data?: Array<{
     id: number; type: "community_comment"; post_id: number | null; comment_id: number | null;
     actor_username: string; post_title: string | null; comment_content: string | null;
@@ -3296,7 +3328,7 @@ export async function getAccountNotifications(limit = 25): Promise<AccountNotifi
 
 export async function markAccountNotificationRead(notificationId: number): Promise<void> {
   const token = getAuthToken();
-  if (!token) throw new Error("Not authenticated");
+  if (!token) throw new Error(API_ERROR_KEYS.notAuthenticated);
   await fetchJson(`/auth/account/notifications/${notificationId}/read`, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
@@ -3306,7 +3338,7 @@ export async function markAccountNotificationRead(notificationId: number): Promi
 export async function getAccountDetails(): Promise<AccountDetails> {
   const token = getAuthToken();
   if (!token) {
-    throw new Error("Not authenticated");
+    throw new Error(API_ERROR_KEYS.notAuthenticated);
   }
   const raw = await fetchJson<{
     user: { id: number; username: string; email: string; avatar_url: string | null; bio: string | null; is_admin?: boolean; is_approved?: boolean; linked_player_id: number | null; created_at: string; last_login: string | null; time_zone?: string | null };
@@ -3337,7 +3369,7 @@ export async function getAccountDetails(): Promise<AccountDetails> {
 export async function linkPlayerId(playerId: number): Promise<{ message: string; player: { id: number; name: string } }> {
   const token = getAuthToken();
   if (!token) {
-    throw new Error("Not authenticated");
+    throw new Error(API_ERROR_KEYS.notAuthenticated);
   }
   return fetchJson<{ message: string; player: { id: number; name: string } }>("/auth/account/player-link", {
     method: "POST",
@@ -3354,7 +3386,7 @@ export interface PlayerLinkVerification {
 
 export async function getPlayerLinkVerification(): Promise<PlayerLinkVerification | null> {
   const token = getAuthToken();
-  if (!token) throw new Error("Not authenticated");
+  if (!token) throw new Error(API_ERROR_KEYS.notAuthenticated);
   const raw = await fetchJson<{ verification: PlayerLinkVerification | null }>("/auth/account/player-link/verification", {
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -3363,7 +3395,7 @@ export async function getPlayerLinkVerification(): Promise<PlayerLinkVerificatio
 
 export async function startPlayerLinkVerification(playerId: number): Promise<PlayerLinkVerification> {
   const token = getAuthToken();
-  if (!token) throw new Error("Not authenticated");
+  if (!token) throw new Error(API_ERROR_KEYS.notAuthenticated);
   const raw = await fetchJson<{ verification: PlayerLinkVerification }>("/auth/account/player-link/verification", {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
@@ -3374,7 +3406,7 @@ export async function startPlayerLinkVerification(playerId: number): Promise<Pla
 
 export async function verifyPlayerLink(): Promise<{ message: string; player: { id: number; name: string } }> {
   const token = getAuthToken();
-  if (!token) throw new Error("Not authenticated");
+  if (!token) throw new Error(API_ERROR_KEYS.notAuthenticated);
   return fetchJson<{ message: string; player: { id: number; name: string } }>("/auth/account/player-link/verification/check", {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
@@ -3384,7 +3416,7 @@ export async function verifyPlayerLink(): Promise<{ message: string; player: { i
 
 export async function cancelPlayerLinkVerification(): Promise<void> {
   const token = getAuthToken();
-  if (!token) throw new Error("Not authenticated");
+  if (!token) throw new Error(API_ERROR_KEYS.notAuthenticated);
   await fetchJson<{ message: string }>("/auth/account/player-link/verification", {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` },
@@ -3394,7 +3426,7 @@ export async function cancelPlayerLinkVerification(): Promise<void> {
 export async function unlinkPlayer(): Promise<{ message: string }> {
   const token = getAuthToken();
   if (!token) {
-    throw new Error("Not authenticated");
+    throw new Error(API_ERROR_KEYS.notAuthenticated);
   }
   return fetchJson<{ message: string }>("/auth/account/player-link", {
     method: "POST",
@@ -3406,7 +3438,7 @@ export async function unlinkPlayer(): Promise<{ message: string }> {
 export async function changePassword(currentPassword: string, newPassword: string): Promise<{ message: string }> {
   const token = getAuthToken();
   if (!token) {
-    throw new Error("Not authenticated");
+    throw new Error(API_ERROR_KEYS.notAuthenticated);
   }
   return fetchJson<{ message: string }>("/auth/account/password", {
     method: "POST",
@@ -3418,7 +3450,7 @@ export async function changePassword(currentPassword: string, newPassword: strin
 export async function updateProfile(data: { avatar_url?: string | null; bio?: string | null; time_zone?: string }): Promise<{ message: string }> {
   const token = getAuthToken();
   if (!token) {
-    throw new Error("Not authenticated");
+    throw new Error(API_ERROR_KEYS.notAuthenticated);
   }
   return fetchJson<{ message: string }>("/auth/profile", {
     method: "PUT",
@@ -3429,7 +3461,7 @@ export async function updateProfile(data: { avatar_url?: string | null; bio?: st
 
 // ── Player Report ──
 
-export type ReportType = 'suspicious' | 'cheater' | 'approve' | 'weirdo' | 'hall_of_fame';
+export type ReportType = 'suspicious' | 'cheater' | 'approve' | 'weirdo' | 'hall_of_fame' | 'dropper' | 'afk_wintrade' | 'alt_account';
 
 export interface ReportOptions {
   type: ReportType;
@@ -3439,7 +3471,7 @@ export interface ReportOptions {
 export async function reportPlayer(playerId: string | number, opts: ReportOptions): Promise<{ success: boolean; message: string }> {
   const token = getAuthToken();
   if (!token) {
-    throw new Error("Authentication required — please log in");
+    throw new Error(API_ERROR_KEYS.authenticationRequired);
   }
   const body: Record<string, string> = { type: opts.type };
   if (opts.reason?.trim()) body.reason = opts.reason.trim();
@@ -3451,10 +3483,12 @@ export async function reportPlayer(playerId: string | number, opts: ReportOption
   return raw;
 }
 
-export async function clearPlayerTag(playerId: string | number, tag: 'cheater' | 'suspicious'): Promise<{ success: boolean; message: string; cleared: boolean }> {
+export type ClearablePlayerTag = 'cheater' | 'suspicious' | 'dropper' | 'afk_wintrade' | 'alt_account';
+
+export async function clearPlayerTag(playerId: string | number, tag: ClearablePlayerTag): Promise<{ success: boolean; message: string; cleared: boolean }> {
   const token = getAuthToken();
   if (!token) {
-    throw new Error("Authentication required — please log in");
+    throw new Error(API_ERROR_KEYS.authenticationRequired);
   }
   return fetchJson<{ success: boolean; message: string; cleared: boolean }>(`/players/${playerId}/clear-tag`, {
     method: "POST",
@@ -3473,6 +3507,7 @@ export interface Post {
   title: string;
   content: string;
   buildId: number | null;
+  tierListId: number | null;
   likes: number;
   viewCount: number;
   createdAt: string;
@@ -3518,6 +3553,7 @@ type RawPost = {
   title: string;
   content: string;
   build_id: number | null;
+  tier_list_id?: number | null;
   likes: number;
   view_count: number;
   created_at: string;
@@ -3543,6 +3579,7 @@ function mapPost(raw: RawPost): Post {
     title: raw.title,
     content: raw.content,
     buildId: raw.build_id,
+    tierListId: raw.tier_list_id ?? null,
     likes: raw.likes,
     viewCount: raw.view_count,
     createdAt: raw.created_at,

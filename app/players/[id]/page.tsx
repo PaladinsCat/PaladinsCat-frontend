@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
-import { clearPlayerTag, fetchPlayerMatches, type MatchRecord, type ReportType } from "@/lib/api-client";
+import { clearPlayerTag, fetchPlayerMatches, type ClearablePlayerTag, type MatchRecord, type ReportType } from "@/lib/api-client";
 import { getTierColor, resolveEffectiveTier, getRankIconPath } from "@/lib/tier-utils";
 import { useAuth } from "@/lib/auth-context";
 import ReportModal from "@/components/ReportModal";
@@ -14,7 +14,7 @@ import { ErrorState, LoadingIndicator, LoadingOverlay, LoadingPanel } from "@/co
 import { RouteSkeleton } from "@/components/route-skeleton";
 import SmartImage from "@/components/SmartImage";
 import { formatKda } from "@/lib/kda";
-import PlayerName, { VerifiedPlayerBadge } from "@/components/player-name";
+import PlayerName, { PlayerModerationTag } from "@/components/player-name";
 import { fetchPlayerModeration } from "@/lib/player-moderation";
 import { useLocalization } from "@/lib/localization-context";
 
@@ -60,6 +60,9 @@ interface PlayerData {
   avg_shpm: number | null;
   avg_mpm: number | null;
   cheater: boolean;
+  dropper: boolean;
+  afk_wintrade: boolean;
+  alt_account: boolean;
   boosted: boolean;
   verified?: boolean | null;
   sus_count: number;
@@ -183,6 +186,14 @@ function StatGrid({ children }: { children: React.ReactNode }) {
   return <div className="grid grid-cols-1 gap-x-4 gap-y-2 min-[400px]:grid-cols-2">{children}</div>;
 }
 
+
+// User-facing error keys — resolved at the UI layer via t()
+export const PLAYER_PROFILE_ERROR_KEYS = {
+  failedToLoadProfile: "generated.players.failedToLoadProfile",
+  failedToRefreshProfile: "generated.players.failedToRefreshProfile",
+  failedToFetchLiveMatchData: "generated.players.failedToFetchLiveMatchData",
+} as const;
+
 export default function PlayerProfilePage() {
   const { t } = useLocalization();
   const params = useParams();
@@ -213,7 +224,7 @@ export default function PlayerProfilePage() {
   // Report modal state
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportType, setReportType] = useState<Exclude<ReportType, 'approve'>>('suspicious');
-  const [clearingTag, setClearingTag] = useState<'cheater' | 'suspicious' | null>(null);
+  const [clearingTag, setClearingTag] = useState<ClearablePlayerTag | null>(null);
 
   useEffect(() => {
     setAvatarLoadFailed(false);
@@ -257,11 +268,13 @@ export default function PlayerProfilePage() {
     setFetchKey(k => k + 1);
   }, []);
 
-  const clearModerationTag = useCallback(async (tag: 'cheater' | 'suspicious') => {
+  const clearModerationTag = useCallback(async (tag: ClearablePlayerTag) => {
     if (!isAdmin) return;
     const confirmation = tag === 'cheater'
       ? t("moderation.confirmClearCheaterTag")
-      : t("moderation.confirmClearSuspiciousTag");
+      : tag === 'suspicious'
+        ? t("moderation.confirmClearSuspiciousTag")
+        : t("moderation.confirmClearModerationTag");
     if (!window.confirm(confirmation)) return;
 
     setClearingTag(tag);
@@ -285,7 +298,7 @@ export default function PlayerProfilePage() {
     fetch(`${API_BASE}/players/${id}`)
       .then(async (res) => {
         const data = await res.json();
-        if (!res.ok) throw new Error(data?.error?.message || 'Failed to load player profile');
+        if (!res.ok) throw new Error(data?.error?.message || PLAYER_PROFILE_ERROR_KEYS.failedToLoadProfile);
         return data as PlayerResponse;
       })
       .then((data) => {
@@ -381,7 +394,7 @@ export default function PlayerProfilePage() {
         return;
       }
       if (!res.ok) {
-        throw new Error(data?.error?.message || 'Failed to refresh profile');
+        throw new Error(data?.error?.message || PLAYER_PROFILE_ERROR_KEYS.failedToRefreshProfile);
       }
 
       const relatedRefreshError = data?.historyRefresh?.error || data?.championStatsRefresh?.error;
@@ -399,7 +412,7 @@ export default function PlayerProfilePage() {
       setRefreshCooldownUntil(null);
       setRefreshFeedback({
         kind: 'error',
-        message: err instanceof Error ? err.message : 'Failed to refresh profile',
+        message: err instanceof Error ? err.message : PLAYER_PROFILE_ERROR_KEYS.failedToRefreshProfile,
       });
     } finally {
       setRefreshing(false);
@@ -414,12 +427,12 @@ export default function PlayerProfilePage() {
       const res = await fetch(`${API_BASE}/live/players/${id}`, { cache: 'no-store' });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data?.error?.message || data?.error || 'Failed to fetch live match data');
+        throw new Error(data?.error?.message || data?.error || PLAYER_PROFILE_ERROR_KEYS.failedToFetchLiveMatchData);
       }
       setCurrentMatch(data);
     } catch (error) {
       setCurrentMatch({
-        error: error instanceof Error ? error.message : 'Failed to fetch live match data',
+        error: error instanceof Error ? error.message : PLAYER_PROFILE_ERROR_KEYS.failedToFetchLiveMatchData,
       });
     }
   }, [id]);
@@ -563,6 +576,12 @@ export default function PlayerProfilePage() {
                   <div className="px-2 pb-1 text-[10px] font-bold uppercase tracking-widest text-pc-text-muted">{t("generated.players.moderation")}</div>
                   <button type="button" role="menuitem" onClick={() => { setActionMenuOpen(false); openReportModal('cheater'); }} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-red-400 transition-colors hover:bg-red-500/10">
                     {t("generated.players.flagAsCheater")}</button>
+                  <button type="button" role="menuitem" onClick={() => { setActionMenuOpen(false); openReportModal('dropper'); }} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-rose-300 transition-colors hover:bg-rose-500/10">
+                    {t("moderation.flagDropper")}</button>
+                  <button type="button" role="menuitem" onClick={() => { setActionMenuOpen(false); openReportModal('afk_wintrade'); }} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-sky-300 transition-colors hover:bg-sky-500/10">
+                    {t("moderation.flagAfkWintrade")}</button>
+                  <button type="button" role="menuitem" onClick={() => { setActionMenuOpen(false); openReportModal('alt_account'); }} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-fuchsia-300 transition-colors hover:bg-fuchsia-500/10">
+                    {t("moderation.flagAltAccount")}</button>
                   {isAdmin && player.cheater && (
                     <button type="button" role="menuitem" disabled={clearingTag !== null} onClick={() => clearModerationTag('cheater')} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-red-300 transition-colors hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-50">
                       {clearingTag === 'cheater' ? t("generated.components.submitting") : t("moderation.clearCheaterTag")}
@@ -571,6 +590,21 @@ export default function PlayerProfilePage() {
                   {isAdmin && player.sus_count > 0 && (
                     <button type="button" role="menuitem" disabled={clearingTag !== null} onClick={() => clearModerationTag('suspicious')} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-amber-300 transition-colors hover:bg-amber-500/10 disabled:cursor-not-allowed disabled:opacity-50">
                       {clearingTag === 'suspicious' ? t("generated.components.submitting") : t("moderation.clearSuspiciousTag")}
+                    </button>
+                  )}
+                  {isAdmin && player.dropper && (
+                    <button type="button" role="menuitem" disabled={clearingTag !== null} onClick={() => clearModerationTag('dropper')} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-rose-200 transition-colors hover:bg-rose-500/10 disabled:cursor-not-allowed disabled:opacity-50">
+                      {clearingTag === 'dropper' ? t("generated.components.submitting") : t("moderation.clearDropperTag")}
+                    </button>
+                  )}
+                  {isAdmin && player.afk_wintrade && (
+                    <button type="button" role="menuitem" disabled={clearingTag !== null} onClick={() => clearModerationTag('afk_wintrade')} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-sky-200 transition-colors hover:bg-sky-500/10 disabled:cursor-not-allowed disabled:opacity-50">
+                      {clearingTag === 'afk_wintrade' ? t("generated.components.submitting") : t("moderation.clearAfkWintradeTag")}
+                    </button>
+                  )}
+                  {isAdmin && player.alt_account && (
+                    <button type="button" role="menuitem" disabled={clearingTag !== null} onClick={() => clearModerationTag('alt_account')} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-fuchsia-200 transition-colors hover:bg-fuchsia-500/10 disabled:cursor-not-allowed disabled:opacity-50">
+                      {clearingTag === 'alt_account' ? t("generated.components.submitting") : t("moderation.clearAltAccountTag")}
                     </button>
                   )}
                 </>
@@ -625,25 +659,16 @@ export default function PlayerProfilePage() {
               <h1 className="min-w-0 break-words text-2xl font-bold leading-tight text-pc-text sm:text-3xl">
                 {player.name}
               </h1>
-              {(player.verified ?? verifiedFallback) && <VerifiedPlayerBadge iconClassName="h-5 w-5" />}
-              {player.cheater && (
-                <span className="text-xs font-bold text-red-400 bg-[#161618] px-1.5 py-0.5 rounded">{t("generated.players.cheater")}</span>
-              )}
-              {!player.cheater && player.boosted && (
-                <Link href="/players/boosted" className="rounded bg-[#161618] px-1.5 py-0.5 text-xs font-bold text-orange-300 hover:bg-[#161618]">
-                  <span className="sm:hidden">{t("moderation.boostedShort")}</span>
-                  <span className="hidden sm:inline">{t("moderation.boosted")}</span>
-                </Link>
-              )}
-              {player.sus_count > 0 && !player.cheater && (
-                <span className="text-xs font-bold text-amber-400 bg-[#161618] px-1.5 py-0.5 rounded">{t("generated.players.sus")}</span>
-              )}
-              {player.weirdo_count > 0 && (
-                <span className="text-xs font-bold text-violet-300 bg-[#161618] px-1.5 py-0.5 rounded">{t("generated.players.weirdo.2a889b0")}{player.weirdo_count})</span>
-              )}
-              {player.hall_of_fame_count > 0 && (
-                <span className="text-xs font-bold text-emerald-300 bg-[#161618] px-1.5 py-0.5 rounded">{t("generated.players.hallOfFame.6170909")}{player.hall_of_fame_count})</span>
-              )}
+              <PlayerModerationTag
+                playerId={player.id}
+                cheater={player.cheater}
+                susCount={player.sus_count}
+                dropper={player.dropper}
+                afkWintrade={player.afk_wintrade}
+                boosted={player.boosted}
+                altAccount={player.alt_account}
+                verified={Boolean(player.verified ?? verifiedFallback)}
+              />
             </div>
             {/* Title + loading frame */}
             <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">

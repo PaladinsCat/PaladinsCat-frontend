@@ -34,9 +34,16 @@ export type AdminDashboard = {
 
 const numberValue = (value: unknown) => Number(value ?? 0) || 0;
 
+
+// User-facing error keys — resolved at the UI layer via t()
+export const ADMIN_ERROR_KEYS = {
+  sessionRequired: "generated.admin.sessionRequired",
+  dashboardRequestFailed: "generated.admin.dashboardRequestFailed",
+} as const;
+
 export async function fetchAdminDashboard(): Promise<AdminDashboard> {
   const token = getAuthToken();
-  if (!token) throw new Error("Admin session required.");
+  if (!token) throw new Error(ADMIN_ERROR_KEYS.sessionRequired);
   const response = await fetch("/api/admin/dashboard", {
     headers: { Authorization: `Bearer ${token}` },
     credentials: "same-origin",

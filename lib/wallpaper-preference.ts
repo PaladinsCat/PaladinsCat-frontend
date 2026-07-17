@@ -36,6 +36,15 @@ function notifyWallpaperChange(): void {
   window.dispatchEvent(new Event(WALLPAPER_CHANGE_EVENT));
 }
 
+// User-facing error keys — resolved at the UI layer via t()
+export const WALLPAPER_ERROR_KEYS = {
+  saveSetting: "generated.wallpaper.saveSettingError",
+  invalidUrl: "generated.wallpaper.invalidUrlError",
+  unsupportedType: "generated.wallpaper.unsupportedTypeError",
+  fileTooLarge: "generated.wallpaper.fileTooLargeError",
+  operationFailed: "generated.wallpaper.operationFailed",
+} as const;
+
 function openWallpaperDatabase(): Promise<IDBDatabase> {
   return new Promise<IDBDatabase>((resolve, reject) => {
     const request = window.indexedDB.open(WALLPAPER_DATABASE_NAME, 1);
@@ -87,7 +96,7 @@ function saveWallpaperReferences(wallpapers: CustomWallpaper[]): void {
       window.localStorage.removeItem(CUSTOM_WALLPAPER_STORAGE_KEY);
     }
   } catch {
-    throw new Error("The browser could not save this wallpaper setting.");
+    throw new Error(WALLPAPER_ERROR_KEYS.saveSetting);
   }
 }
 
@@ -193,17 +202,17 @@ export async function resolveCustomWallpaper(): Promise<ResolvedCustomWallpaper 
 function validateWallpaperUrl(source: string): string {
   const normalizedSource = source.trim();
   if (!isSupportedExternalWallpaper(normalizedSource)) {
-    throw new Error("Use a valid http(s) image URL.");
+    throw new Error(WALLPAPER_ERROR_KEYS.invalidUrl);
   }
   return normalizedSource;
 }
 
 function validateWallpaperFile(file: File): void {
   if (!SUPPORTED_IMAGE_TYPES.has(file.type)) {
-    throw new Error("Choose PNG, JPEG, WebP, GIF, or AVIF images.");
+    throw new Error(WALLPAPER_ERROR_KEYS.unsupportedType);
   }
   if (file.size > MAX_CUSTOM_WALLPAPER_BYTES) {
-    throw new Error("Choose images no larger than 25 MB each.");
+    throw new Error(WALLPAPER_ERROR_KEYS.fileTooLarge);
   }
 }
 
