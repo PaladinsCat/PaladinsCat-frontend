@@ -119,7 +119,7 @@ function TeamRows({ team }: { team: MatchResultPlayer[] }) {
         <div className="rank"><img src={getRankIconPath(tier.tier, tier.rank)} alt={tier.effective.displayName} title={tier.effective.displayName} /></div>
         <div className="level">{formatNumber(entry.profileData?.level)}</div>
         <div className="player"><MatchPlayerLink player={player} className="player-name block" /><MatchPlayerReference player={player} className="player-sub block hover:text-violet-200" /></div>
-        <div className="player-elo">{formatNumber(entry.profileData?.queueElo)}</div>
+        <div className="player-elo">{formatNumber(entry.profileData?.queueElo, { maximumFractionDigits: 0 })}</div>
         {talent && talentHref ? (
           <Link href={talentHref} className="talent-link" title={talent.talent_name ?? t("generated.matches.talent")} aria-label={t("generated.matches.value1TalentPage", { value1: talent.talent_name ?? t("generated.matches.talent") })}>
             <CanonicalTalentImage
