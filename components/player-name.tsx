@@ -80,13 +80,13 @@ export function PlayerModerationTag({
 
   return <span className="inline-flex max-h-10 min-w-0 flex-wrap items-center gap-1 overflow-hidden">
     {moderation.verified && <VerifiedPlayerBadge />}
-    {moderation.cheater && <span className="player-status-tag cheater shrink-0 rounded bg-[#161618] px-1.5 py-0.5 text-xs font-bold leading-none text-red-400" aria-label={t("generated.players.confirmedCheater")}>{t("generated.players.cheater")}</span>}
+    {moderation.cheater && <span className="player-status-tag cheater shrink-0 rounded bg-[#161618] px-1.5 py-0.5 text-[10px] font-bold leading-none text-red-400" aria-label={t("generated.players.confirmedCheater")}>{t("generated.players.cheater")}</span>}
     {!moderation.cheater && <>
-      {moderation.dropper && <span className="player-status-tag dropper shrink-0 rounded bg-[#161618] px-1.5 py-0.5 text-xs font-bold leading-none text-rose-300">{t("moderation.dropShort")}</span>}
-      {moderation.susCount > 0 && <span className="player-status-tag suspicious shrink-0 rounded bg-[#161618] px-1.5 py-0.5 text-xs font-bold leading-none text-amber-400" aria-label={t("generated.players.suspiciousPlayerWithValue1Flags", { value1: moderation.susCount })}>{t("generated.players.sus")}</span>}
-      {moderation.afkWintrade && <span className="player-status-tag afk shrink-0 rounded bg-[#161618] px-1.5 py-0.5 text-xs font-bold leading-none text-sky-300">{t("moderation.afkShort")}</span>}
-      {moderation.boosted && <span className="player-status-tag boosted shrink-0 rounded bg-[#161618] px-1.5 py-0.5 text-xs font-bold leading-none text-orange-300">{t("moderation.boostedShort")}</span>}
-      {moderation.altAccount && <span className="player-status-tag alt shrink-0 rounded bg-[#161618] px-1.5 py-0.5 text-xs font-bold leading-none text-violet-300">{t("moderation.altShort")}</span>}
+      {moderation.dropper && <span className="player-status-tag dropper shrink-0 rounded bg-[#161618] px-1.5 py-0.5 text-[10px] font-bold leading-none text-rose-300">{t("moderation.dropShort")}</span>}
+      {moderation.susCount > 0 && <span className="player-status-tag suspicious shrink-0 rounded bg-[#161618] px-1.5 py-0.5 text-[10px] font-bold leading-none text-amber-400" aria-label={t("generated.players.suspiciousPlayerWithValue1Flags", { value1: moderation.susCount })}>{t("generated.players.sus")}</span>}
+      {moderation.afkWintrade && <span className="player-status-tag afk shrink-0 rounded bg-[#161618] px-1.5 py-0.5 text-[10px] font-bold leading-none text-sky-300">{t("moderation.afkShort")}</span>}
+      {moderation.boosted && <span className="player-status-tag boosted shrink-0 rounded bg-[#161618] px-1.5 py-0.5 text-[10px] font-bold leading-none text-orange-300">{t("moderation.boostedShort")}</span>}
+      {moderation.altAccount && <span className="player-status-tag alt shrink-0 rounded bg-[#161618] px-1.5 py-0.5 text-[10px] font-bold leading-none text-violet-300">{t("moderation.altShort")}</span>}
     </>}
   </span>;
 }

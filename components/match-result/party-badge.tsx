@@ -24,7 +24,7 @@ export default function PartyBadge({
 
   return (
     <span
-      className={`inline-flex h-5 shrink-0 items-center gap-1 rounded-full border border-pc-accent/30 bg-pc-accent/10 px-1.5 text-xs font-bold tabular-nums text-pc-accent ${className}`}
+      className={`inline-flex h-5 shrink-0 items-center gap-1 rounded-full border border-pc-accent/30 bg-pc-accent/10 px-1.5 text-[10px] font-bold tabular-nums text-pc-accent ${className}`}
       title={t("common.party.queuedTogether", { number: partyNumber })}
       aria-label={t("common.party.label", { number: partyNumber })}
     >
