@@ -1,11 +1,45 @@
-import { getAllPosts } from "@/lib/blog";
+import { BLOG_CATEGORIES, getAllPosts, getPostLink, isBlogCategory, type BlogCategory } from "@/lib/blog";
 import { BLOG_COPY_KEYS } from "@/lib/blog-copy";
 import { getServerLocalization } from "@/lib/server-localization";
 import Link from "next/link";
 
-export default async function BlogPage() {
+// Blog content is owned by GitHub. Always render against its current contents
+// while keeping this public route at /blog.
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+const CATEGORY_LABEL_KEYS = {
+  "public-release": BLOG_COPY_KEYS.categoryPublicRelease,
+  "q-and-a": BLOG_COPY_KEYS.categoryQuestionAndAnswer,
+  "guide": BLOG_COPY_KEYS.categoryGuide,
+} as const satisfies Record<BlogCategory, string>;
+
+type BlogPageProps = {
+  searchParams: Promise<{ category?: string }>;
+};
+
+type BlogCategoryFilter = BlogCategory | "all";
+
+export async function generateMetadata() {
   const { t } = await getServerLocalization();
+  const title = t(BLOG_COPY_KEYS.title);
+  const description = t(BLOG_COPY_KEYS.subtitle);
+  return {
+    title,
+    description,
+    alternates: { canonical: "/blog" },
+    openGraph: { title, description, type: "website" as const, url: "/blog" },
+  };
+}
+
+export default async function BlogPage({ searchParams }: BlogPageProps) {
+  const { t } = await getServerLocalization();
+  const { category } = await searchParams;
+  const selectedCategory: BlogCategoryFilter = isBlogCategory(category) ? category : "all";
   const posts = await getAllPosts();
+  const visiblePosts = selectedCategory === "all"
+    ? posts
+    : posts.filter(post => post.category === selectedCategory);
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
@@ -16,7 +50,35 @@ export default async function BlogPage() {
         </p>
       </div>
 
-      {posts.length === 0 ? (
+      <nav className="mb-8 flex flex-wrap items-center gap-2" aria-label={t(BLOG_COPY_KEYS.title)}>
+        <Link
+          href="/blog"
+          aria-current={selectedCategory === "all" ? "page" : undefined}
+          className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] ${
+            selectedCategory === "all"
+              ? "bg-pc-accent text-pc-bg"
+              : "pc-surface text-pc-muted hover:text-pc-text"
+          }`}
+        >
+          {t(BLOG_COPY_KEYS.categoryAll)}
+        </Link>
+        {BLOG_CATEGORIES.map(categoryId => (
+          <Link
+            key={categoryId}
+            href={`/blog?category=${encodeURIComponent(categoryId)}`}
+            aria-current={selectedCategory === categoryId ? "page" : undefined}
+            className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] ${
+              selectedCategory === categoryId
+                ? "bg-pc-accent text-pc-bg"
+                : "pc-surface text-pc-muted hover:text-pc-text"
+            }`}
+          >
+            {t(CATEGORY_LABEL_KEYS[categoryId])}
+          </Link>
+        ))}
+      </nav>
+
+      {visiblePosts.length === 0 ? (
         <div className="text-center py-16">
           <p className="text-pc-text-muted text-lg">{t(BLOG_COPY_KEYS.empty)}</p>
           <p className="text-pc-text-muted text-sm mt-2">
@@ -25,10 +87,10 @@ export default async function BlogPage() {
         </div>
       ) : (
         <div className="space-y-8">
-          {posts.map((post) => (
+          {visiblePosts.map((post) => (
             <Link
               key={post.slug}
-              href={`/blog/${post.slug}`}
+              href={getPostLink(post.slug)}
               className="block group"
             >
               <article className="border border-pc-border rounded-xl bg-pc-bg-elevated p-6 transition-all hover:border-pc-accent/50 hover:bg-pc-bg-secondary">

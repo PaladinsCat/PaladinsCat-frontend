@@ -20,6 +20,7 @@ import {
   HOME_ALERTS_CHANGE_EVENT,
 } from "@/lib/home-alert-preference";
 import PlayerName from "@/components/player-name";
+import { BLOG_COPY_KEYS } from "@/lib/blog-copy";
 
 export default function Nav() {
   const pathname = usePathname();
@@ -38,6 +39,7 @@ export default function Nav() {
     { href: "/stats", label: t("nav.stats") },
     { href: "/builds", label: t("nav.builds") },
     { href: "/community", label: t("nav.community") },
+    { href: "/blog", label: t(BLOG_COPY_KEYS.title) },
   ];
 
   const menuSections = [
