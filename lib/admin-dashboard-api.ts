@@ -17,7 +17,7 @@ export type AdminApiKey = {
 export type AdminDashboard = {
   generatedAt: string;
   traffic: {
-    summary: { visitorsToday: number; viewsToday: number; visitorsYesterday: number; visitorDays7d: number; views7d: number };
+    summary: { activeUsers: number; activeWindowSeconds: number; heartbeatSeconds: number; visitorsToday: number; viewsToday: number; visitorsYesterday: number; visitorDays7d: number; views7d: number };
     daily: AdminDailyTraffic[];
     topPages: Array<{ path: string; pageViews: number }>;
   };
@@ -60,6 +60,9 @@ export async function fetchAdminDashboard(): Promise<AdminDashboard> {
     generatedAt: String(raw.generated_at ?? new Date().toISOString()),
     traffic: {
       summary: {
+        activeUsers: numberValue(summary.active_users),
+        activeWindowSeconds: numberValue(summary.active_window_seconds) || 300,
+        heartbeatSeconds: numberValue(summary.heartbeat_seconds) || 60,
         visitorsToday: numberValue(summary.visitors_today),
         viewsToday: numberValue(summary.views_today),
         visitorsYesterday: numberValue(summary.visitors_yesterday),

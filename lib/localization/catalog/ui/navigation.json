@@ -61,6 +61,8 @@
   "operations.deployed": "Deployed {date}",
   "operations.updated": "Updated {date}",
   "operations.traffic": "Public traffic",
+  "operations.activeUsers": "Active users",
+  "operations.activeWindow": "Unique browser sessions seen within the last {minutes} minutes",
   "operations.visitorsToday": "Visitors today",
   "operations.viewsToday": "Views today",
   "operations.visitorDays7d": "Unique visitor-days (7d)",

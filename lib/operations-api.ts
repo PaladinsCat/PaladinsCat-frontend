@@ -11,6 +11,9 @@ export interface PublicOperationsStats {
   generatedAt: string;
   release: { version: string; gitCommitShort: string; deployedAt: string | null };
   traffic: {
+    activeUsers: number;
+    activeWindowSeconds: number;
+    heartbeatSeconds: number;
     visitorsToday: number;
     viewsToday: number;
     visitorDays7d: number;
@@ -46,6 +49,9 @@ export async function fetchPublicOperationsStats(): Promise<PublicOperationsStat
       deployedAt: raw.release?.deployed_at == null ? null : String(raw.release.deployed_at),
     },
     traffic: {
+      activeUsers: Number(summary.active_users ?? 0),
+      activeWindowSeconds: Number(summary.active_window_seconds ?? 300),
+      heartbeatSeconds: Number(summary.heartbeat_seconds ?? 60),
       visitorsToday: Number(summary.visitors_today ?? 0),
       viewsToday: Number(summary.views_today ?? 0),
       visitorDays7d: Number(summary.visitor_days_7d ?? 0),

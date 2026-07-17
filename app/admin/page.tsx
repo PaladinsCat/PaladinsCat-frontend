@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Activity, Bell, Database, Eye, Gamepad2, Gauge, KeyRound, RefreshCw, ScrollText, Users } from "lucide-react";
+import { Activity, Bell, Database, Eye, Gamepad2, Gauge, HeartPulse, KeyRound, RefreshCw, ScrollText, Users } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { fetchAdminDashboard, type AdminDashboard } from "@/lib/admin-dashboard-api";
 import { ContentFade, ErrorState, LoadingPanel } from "@/components/async-state";
@@ -60,6 +60,7 @@ export default function AdminDashboardPage() {
   const totals = dashboard.site.totals;
   const pipeline = dashboard.site.pipeline;
   const budgetPercent = apiBudget.limit > 0 ? Math.min(100, (apiBudget.used / apiBudget.limit) * 100) : 0;
+  const activeWindowMinutes = Math.ceil(summary.activeWindowSeconds / 60);
 
   return (
     <ContentFade className="space-y-7">
@@ -79,7 +80,8 @@ export default function AdminDashboardPage() {
 
       {error && <div className="rounded-xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-xs text-amber-200">{t("generated.admin.showingThePreviousSnapshotRefreshFailed")}{" "}{error}</div>}
 
-      <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <section className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
+        <MetricCard icon={HeartPulse} label={t("operations.activeUsers")} value={formatNumber(summary.activeUsers)} detail={t("operations.activeWindow", { minutes: activeWindowMinutes })} />
         <MetricCard icon={Users} label={t("generated.admin.visitorsToday")} value={formatNumber(summary.visitorsToday)} detail={t("generated.admin.valueYesterday", { value: formatNumber(summary.visitorsYesterday) })} />
         <MetricCard icon={Eye} label={t("generated.admin.pageViewsToday")} value={formatNumber(summary.viewsToday)} detail={t("generated.admin.valueOverSevenDays", { value: formatNumber(summary.views7d) })} />
         <MetricCard icon={Gamepad2} label={t("generated.admin.trackedMatches")} value={formatNumber(totals.matches)} detail={t("generated.admin.valueRanked", { value: formatNumber(totals.rankedMatches) })} />
