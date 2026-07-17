@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import ScrambleText from "@/components/ScrambleText";
 import {
@@ -80,9 +81,14 @@ export default function HomePage() {
             delayFromCenter={false}
           />
           {siteVersion?.version && (
-            <span className="absolute left-full top-0 ml-1.5 whitespace-nowrap font-mono text-xs font-medium leading-none tracking-normal text-pc-text-muted">
+            <Link
+              href="/changelog"
+              aria-label={`${t("menu.changelog")} ${siteVersion.version}`}
+              title={t("menu.changelog")}
+              className="absolute left-full top-0 ml-1.5 whitespace-nowrap rounded-sm font-mono text-xs font-medium leading-none tracking-normal text-pc-text-muted transition-colors hover:text-pc-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent"
+            >
               {siteVersion.version}
-            </span>
+            </Link>
           )}
         </h1>
         <p className="text-xs text-pc-text-secondary mt-1 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]">
