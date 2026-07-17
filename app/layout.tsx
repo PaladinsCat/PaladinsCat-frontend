@@ -13,6 +13,7 @@ import { LobbyTierProvider } from "@/lib/lobby-tier-context";
 import LobbyTierBanner from "@/components/LobbyTierBanner";
 import SiteAnalytics from "@/components/SiteAnalytics";
 import DeploymentUpdateBanner from "@/components/DeploymentUpdateBanner";
+import ImageAssetFallback from "@/components/ImageAssetFallback";
 import { cn } from "@/lib/utils";
 import { SEO_KEYWORDS, SITE_NAME, SITE_URL } from "@/lib/seo";
 import { getServerLocalization } from "@/lib/server-localization";
@@ -32,7 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
     other: { "google-adsense-account": "ca-pub-5642439289050032" },
     alternates: { canonical: "/" },
     icons: {
-      icon: [{ url: "/images/icons/paladinscat.png", type: "image/png", sizes: "512x512" }],
+      icon: [{ url: "/images/icons/paladinscat.png", type: "image/png", sizes: "120x120" }],
       shortcut: "/images/icons/paladinscat.png",
       apple: "/images/icons/paladinscat.png",
     },
@@ -42,7 +43,7 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName: SITE_NAME,
       title,
       description: t("seo.root.openGraphDescription"),
-      images: [{ url: "/images/icons/paladinscat.avif", width: 512, height: 512, alt: SITE_NAME }],
+      images: [{ url: "/images/icons/paladinscat.avif", width: 120, height: 120, alt: SITE_NAME }],
     },
     twitter: {
       card: "summary",
@@ -103,6 +104,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang={locale} className={cn("dark", "font-sans")}>
       <head></head>
       <body className="min-h-screen bg-pc-bg text-pc-text flex flex-col">
+        <ImageAssetFallback />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}

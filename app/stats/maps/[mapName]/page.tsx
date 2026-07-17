@@ -20,7 +20,7 @@ import { STATIC_CHAMPIONS } from "@/lib/static-champions";
 import { LoadingIndicator, LoadingPanel } from "@/components/async-state";
 import { useLocalization } from "@/lib/localization-context";
 
-function itemIcon(name: string) { return `/images/items/${name.replace(/\s+/g, "_")}_Icon.png`; }
+function itemIcon(name: string) { return `/images/items/${name.replace(/\s+/g, "_")}_Icon.avif`; }
 function rateColor(rate: number) { return getStatQuality(rate, 1, 1).color; }
 function itemClassColor(itemClass: string) {
   return itemClass === "Offense" ? "text-red-400" : itemClass === "Defense" ? "text-blue-400" : itemClass === "Healing" ? "text-emerald-400" : "text-amber-400";

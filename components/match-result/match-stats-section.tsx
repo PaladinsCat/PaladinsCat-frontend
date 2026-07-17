@@ -54,7 +54,7 @@ function PlayerRow({
     ? Math.max(totalDamage - weaponDamage, 0)
     : null;
 
-  const icon = getChampionIconSafe(player.champion_name) || "/images/default-champion.png";
+  const icon = getChampionIconSafe(player.champion_name) || "/images/champions/Champion_Generic_Icon.avif";
 
   return (
     <tr

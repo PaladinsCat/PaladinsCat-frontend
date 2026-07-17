@@ -55,7 +55,7 @@ export default function StatTable({ player, fact, wins }: StatTableRowProps) {
       ]
     : [];
 
-  const championSrc = getChampionIconSafe(player.champion_name) || "/images/default-champion.png";
+  const championSrc = getChampionIconSafe(player.champion_name) || "/images/champions/Champion_Generic_Icon.avif";
   const partyNumber = getPartyNumber(player);
 
   // IMPORTANT: Return a React Fragment, NOT a <div>, because these <tr> elements
@@ -75,7 +75,7 @@ export default function StatTable({ player, fact, wins }: StatTableRowProps) {
               src={championSrc}
               alt={player.champion_name || t("generated.matches.champion")}
               className="w-7 h-7 rounded-full border border-pc-border bg-pc-bg-secondary"
-              onError={(e) => { (e.target as HTMLImageElement).src = "/images/default-champion.png"; }}
+              onError={(e) => { (e.target as HTMLImageElement).src = "/images/champions/Champion_Generic_Icon.avif"; }}
             />
             <div className="min-w-0">
               <MatchPlayerLink player={player} className="text-sm font-medium text-pc-text hover:text-pc-accent block truncate" />

@@ -165,7 +165,7 @@ export default function MetricLeaderboardPage() {
         {m === "gpm" && (
           <picture>
             <source srcSet="/images/icons/Currency_Credits.avif" type="image/avif" />
-            <img src="/images/icons/Currency_Credits.png" alt="" className="w-8 h-8" />
+            <img src="/images/icons/Currency_Credits.avif" alt="" className="w-8 h-8" />
           </picture>
         )}
         <h1 className="pc-heading pc-heading-lg">

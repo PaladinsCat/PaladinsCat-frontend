@@ -1,29 +1,25 @@
 "use client";
 
 import { useState, useEffect, ImgHTMLAttributes } from "react";
-import { canonicalLocalImageUrl } from "@/lib/image-assets";
+import { localImageSources } from "@/lib/image-assets";
 
 interface SmartImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, "src"> {
   src: string;
 }
 
-/** Tries .avif first and lets the rendered image fall back to the source asset. */
+/** Uses AVIF for local artwork and retries the matching PNG on failure. */
 export default function SmartImage({ src, onError, ...props }: SmartImageProps) {
-  const canonicalSrc = canonicalLocalImageUrl(src);
-  const preferredSrc = !canonicalSrc || canonicalSrc.startsWith("http")
-    ? canonicalSrc
-    : canonicalSrc.replace(/\.[^.]+$/, ".avif");
-  const [currentSrc, setCurrentSrc] = useState(() => {
-    return preferredSrc;
-  });
+  const sources = localImageSources(src);
+  const [currentSrc, setCurrentSrc] = useState(sources.preferred);
 
   useEffect(() => {
-    setCurrentSrc(preferredSrc);
-  }, [preferredSrc]);
+    setCurrentSrc(sources.preferred);
+  }, [sources.preferred]);
 
   const handleError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    if (currentSrc !== canonicalSrc) {
-      setCurrentSrc(canonicalSrc);
+    if (currentSrc !== sources.fallback) {
+      setCurrentSrc(sources.fallback);
+      return;
     }
     onError?.(e);
   };

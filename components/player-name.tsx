@@ -21,7 +21,7 @@ export function VerifiedPlayerBadge({ className = "", iconClassName = "h-3.5 w-3
       {/* html-to-image embeds <img src>, but leaves a <picture><source srcset>
           external inside its cloned SVG. Keep the small transparent PNG as a
           direct image so on-page and exported scoreboards render identically. */}
-      <img src="/images/icons/Verified_Player_Support_Icon.png" alt="" className={`verified-player-icon ${iconClassName} object-contain`} />
+      <img src="/images/icons/Verified_Player_Support_Icon.avif" alt="" className={`verified-player-icon ${iconClassName} object-contain`} />
     </span>
   );
 }

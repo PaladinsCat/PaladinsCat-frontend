@@ -244,7 +244,7 @@ export default function BrowserScoreboard({ match, queueLabel, team1, team2, ban
             <section ref={scoreboardRef} className="scoreboard" style={{ "--scoreboard-map": `image-set(url("${mapImage.avif}") type("image/avif"), url("${mapImage.png}") type("image/png"))` } as React.CSSProperties} aria-label={t("generated.matches.paladinsMatchScoreboard")}>
               {/* Keep the PNG as a direct child for html-to-image. The normal
                   preview uses the AVIF-aware pseudo-element above instead. */}
-              <img className="scoreboard-map" src={mapImage.png} alt="" aria-hidden="true" />
+              <img className="scoreboard-map" src={mapImage.avif} alt="" aria-hidden="true" />
               <header className="hero">
                 <div className="match-identity">
                   <div className="brand-line">

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { getCanonicalTalentIconPath } from "@/lib/champion-data";
 import { useLocalization } from "@/lib/localization-context";
+import SmartImage from "@/components/SmartImage";
 
 type CanonicalTalentImageProps = {
   talentId: number | null | undefined;
@@ -53,7 +54,7 @@ export default function CanonicalTalentImage({
   }
 
   return (
-    <img
+    <SmartImage
       src={src}
       alt={alt ?? displayName}
       className={className}

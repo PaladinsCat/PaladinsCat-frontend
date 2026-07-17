@@ -641,7 +641,7 @@ export default function PlayerProfilePage() {
             ) : (
               <picture>
                 <source srcSet="/images/icons/Avatar_Default_Icon.avif" type="image/avif" />
-                <img src="/images/icons/Avatar_Default_Icon.png" alt={t("generated.players.value1SPaladinsAvatar", { value1: player.name })} className="w-full h-full object-cover" />
+                <img src="/images/icons/Avatar_Default_Icon.avif" alt={t("generated.players.value1SPaladinsAvatar", { value1: player.name })} className="w-full h-full object-cover" />
               </picture>
             )}
           </div>
