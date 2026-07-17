@@ -286,7 +286,7 @@ export default function AccountPage() {
             {notifications.map((notification) => {
               const href = notification.postId ? `/community/${notification.postId}` : "/community";
               return <Link key={notification.id} href={href} onClick={() => handleNotificationOpen(notification)} className={`block px-4 py-3 transition-colors hover:bg-pc-bg-secondary ${notification.readAt ? "text-pc-text-secondary" : "bg-pc-accent/5 text-pc-text"}`}>
-                <div className="flex items-start justify-between gap-3"><div className="min-w-0"><div className="text-sm"><span className="font-semibold">{notification.actorUsername}</span> {t("generated.account.repliedTo")}{" "}<span className="font-medium">{notification.postTitle ?? t("generated.account.yourPost")}</span></div>{notification.commentContent && <div className="mt-1 line-clamp-1 text-xs text-pc-text-muted">{notification.commentContent}</div>}</div><time className="shrink-0 text-[10px] text-pc-text-muted">{formatDateTime(notification.createdAt)}</time></div>
+                <div className="flex items-start justify-between gap-3"><div className="min-w-0"><div className="text-sm"><span className="font-semibold">{notification.actorUsername}</span> {t("generated.account.repliedTo")}{" "}<span className="font-medium">{notification.postTitle ?? t("generated.account.yourPost")}</span></div>{notification.commentContent && <div className="mt-1 line-clamp-1 text-xs text-pc-text-muted">{notification.commentContent}</div>}</div><time className="shrink-0 text-xs text-pc-text-muted">{formatDateTime(notification.createdAt)}</time></div>
               </Link>;
             })}
           </div>

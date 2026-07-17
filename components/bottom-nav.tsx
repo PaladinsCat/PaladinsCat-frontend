@@ -45,7 +45,7 @@ export default function BottomNav() {
               <item.icon
                 className={`w-5 h-5 ${isActive ? "stroke-[2.5]" : "stroke-[1.5]"}`}
               />
-              <span className="mt-0.5 max-w-full truncate text-[10px] font-medium leading-none min-[360px]:text-[11px]">{t(item.labelKey)}</span>
+              <span className="mt-0.5 max-w-full truncate text-xs font-medium leading-none">{t(item.labelKey)}</span>
             </Link>
           );
         })}
@@ -56,7 +56,7 @@ export default function BottomNav() {
           aria-label={t("bottomNav.moreNavigation")}
         >
           <Menu className="h-5 w-5 stroke-[1.5]" />
-          <span className="mt-0.5 text-[10px] font-medium leading-none min-[360px]:text-[11px]">{t("bottomNav.more")}</span>
+          <span className="mt-0.5 text-xs font-medium leading-none">{t("bottomNav.more")}</span>
         </button>
       </div>
     </div>

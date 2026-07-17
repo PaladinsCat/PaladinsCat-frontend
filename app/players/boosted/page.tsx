@@ -48,13 +48,13 @@ export default function BoostedPlayersPage() {
                 <div className="truncate text-sm font-semibold text-pc-text transition-colors group-hover:text-pc-accent">
                   <PlayerName playerId={player.id} cheater={player.cheater} susCount={player.susCount}>{player.name}</PlayerName>
                 </div>
-                <span className="mt-1 inline-block rounded border border-orange-400/30 bg-orange-400/15 px-1.5 py-0.5 text-[10px] font-bold leading-none text-orange-300">
+                <span className="mt-1 inline-block rounded border border-orange-400/30 bg-orange-400/15 px-1.5 py-0.5 text-xs font-bold leading-none text-orange-300">
                   {t("moderation.boosted")}
                 </span>
               </div>
 
               <div className="min-w-0">
-                <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-pc-text-muted">{t("moderation.cheaterDuo")}</div>
+                <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-pc-text-muted">{t("moderation.cheaterDuo")}</div>
                 <ul className="flex flex-wrap gap-1.5">
                   {player.cheaters.map((cheater) => (
                     <li key={cheater.id} className="max-w-full rounded-md border border-red-500/20 bg-[#161618] px-2 py-1 text-xs leading-relaxed text-red-200 [overflow-wrap:anywhere]">

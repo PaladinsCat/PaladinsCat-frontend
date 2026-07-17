@@ -80,7 +80,7 @@ export default function HomePage() {
             delayFromCenter={false}
           />
           {siteVersion?.version && (
-            <span className="absolute left-full top-0 ml-1.5 whitespace-nowrap font-mono text-[10px] font-medium leading-none tracking-normal text-pc-text-muted">
+            <span className="absolute left-full top-0 ml-1.5 whitespace-nowrap font-mono text-xs font-medium leading-none tracking-normal text-pc-text-muted">
               {siteVersion.version}
             </span>
           )}

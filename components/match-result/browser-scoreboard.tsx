@@ -186,6 +186,50 @@ function TeamSummary({ label, won, team, teamNumber }: { label: string; won: boo
   );
 }
 
+function MobileTeamRows({ label, won, team }: { label: string; won: boolean; team: MatchResultPlayer[] }) {
+  const { formatNumber, t } = useLocalization();
+  const compact = (amount: number) => formatNumber(amount, { notation: "compact", maximumFractionDigits: 1 });
+
+  return (
+    <section>
+      <div className="flex items-center justify-between border-y border-pc-border bg-pc-bg-secondary/70 px-3 py-2 text-xs font-bold uppercase tracking-wide">
+        <span className={won ? "text-emerald-300" : "text-rose-300"}>{label}</span>
+        <span className="text-pc-text-secondary">{won ? t("generated.matches.win") : t("generated.matches.defeat")}</span>
+      </div>
+      <div className="divide-y divide-pc-border/60">
+        {team.slice(0, 5).map((entry) => {
+          const player = entry.matchData;
+          const stats = metricsFor(player);
+          const party = getPartyNumber(player);
+          const championHref = player.champion_name ? `/champions/${championSlug(player.champion_name)}` : null;
+          const championImage = <img src={getChampionIconSafe(player.champion_name)} alt="" className="h-10 w-10 rounded-lg object-cover" />;
+
+          return (
+            <div key={`mobile-${matchPlayerKey(player)}`} className="flex min-w-0 items-center gap-3 px-3 py-2.5">
+              <div className="relative shrink-0">
+                {championHref ? <Link href={championHref} aria-label={t("generated.matches.value1ChampionPage", { value1: player.champion_name })}>{championImage}</Link> : championImage}
+                {party != null && <span className="absolute -right-1.5 -top-1.5 flex min-h-5 min-w-5 items-center justify-center rounded-full border border-pc-accent/50 bg-pc-bg px-1 text-xs font-bold leading-none text-pc-accent">{party}</span>}
+              </div>
+              <div className="min-w-0 flex-1">
+                <MatchPlayerLink player={player} className="block truncate text-sm font-semibold text-pc-text hover:text-pc-accent" />
+                <div className="mt-0.5 truncate text-xs text-pc-text-muted">
+                  {player.champion_name || "—"} · {t("generated.matches.level")} {formatNumber(entry.profileData?.level)} · {t("generated.matches.elo")} {formatNumber(entry.profileData?.queueElo)}
+                </div>
+              </div>
+              <div className="shrink-0 text-right">
+                <div className="font-mono text-sm font-bold text-pc-text">{player.kills} / {player.deaths} / {player.assists}</div>
+                <div className="mt-0.5 text-xs text-pc-text-muted">
+                  {compact(stats.damage)} {t("generated.matches.damage")} · {compact(stats.healing)} {t("generated.matches.healing")}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 export default function BrowserScoreboard({ match, queueLabel, team1, team2, bans }: BrowserScoreboardProps) {
   const { formatNumber, locale, t } = useLocalization();
   const formatMatchDuration = (seconds: number) => {
@@ -238,7 +282,18 @@ export default function BrowserScoreboard({ match, queueLabel, team1, team2, ban
   return (
     <section id="browser-scoreboard" data-theme="dark" aria-label={t("generated.matches.matchScoreboardImage")}>
       <div className="mb-2 flex justify-end"><MatchExportButton matchId={match.match_id} target={scoreboardRef} /></div>
-      <div ref={previewRef} className="relative w-full overflow-hidden" style={{ height: `${CANVAS_HEIGHT * previewScale}px` }}>
+      <div className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated lg:hidden">
+        <header className="flex items-center justify-between gap-4 px-3 py-3">
+          <div className="min-w-0">
+            <div className="truncate text-base font-bold text-pc-text">{mapName}</div>
+            <div className="mt-0.5 truncate text-xs uppercase tracking-wide text-pc-text-muted">{match.region || "—"} · {modeName}</div>
+          </div>
+          <div className="shrink-0 font-mono text-2xl font-bold tabular-nums"><span className="text-blue-300">{match.team1_score ?? "?"}</span><span className="mx-2 text-pc-text-muted">/</span><span className="text-rose-300">{match.team2_score ?? "?"}</span></div>
+        </header>
+        <MobileTeamRows label={t("generated.matches.team1")} won={match.winning_task_force === 1} team={team1} />
+        <MobileTeamRows label={t("generated.matches.team2")} won={match.winning_task_force === 2} team={team2} />
+      </div>
+      <div ref={previewRef} className="relative hidden w-full overflow-hidden lg:block" style={{ height: `${CANVAS_HEIGHT * previewScale}px` }}>
         <main className="viewport" style={{ width: CANVAS_WIDTH, maxWidth: "none", transform: `scale(${previewScale})`, transformOrigin: "top left" }}>
           <div className="scoreboard-canvas">
             <section ref={scoreboardRef} className="scoreboard" style={{ "--scoreboard-map": `image-set(url("${mapImage.avif}") type("image/avif"), url("${mapImage.png}") type("image/png"))` } as React.CSSProperties} aria-label={t("generated.matches.paladinsMatchScoreboard")}>

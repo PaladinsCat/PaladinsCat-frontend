@@ -55,7 +55,7 @@ export default function BoostedPlayerDetailPage() {
         <div className="flex items-start gap-3">
           <Users aria-hidden="true" className="mt-1 h-9 w-9 shrink-0 text-orange-300" strokeWidth={1.5} />
           <div className="min-w-0">
-            <div className="mb-1 flex flex-wrap items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted">
+            <div className="mb-1 flex flex-wrap items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-pc-text-muted">
               <span className="rounded border border-orange-400/30 bg-orange-400/15 px-1.5 py-0.5 text-orange-300">{t("moderation.boosted")}</span>
               <span>{player.platform}</span>
               <span>{player.region}</span>
@@ -101,7 +101,7 @@ export default function BoostedPlayerDetailPage() {
                   <div className="truncate font-semibold text-pc-text">{match.map || t("generated.players.matchValue1", { value1: match.matchId })}</div>
                   <div className="mt-0.5 truncate text-xs text-pc-text-muted">{match.championName || t("generated.players.unknownChampion")} · {match.region || t("generated.players.unknownRegion")} · {observedAt(match.entryDatetime)}</div>
                   <div className="mt-1 flex min-w-0 flex-wrap gap-1">
-                    {match.cheaters.map((cheater) => <span key={cheater.id} className="truncate rounded border border-red-500/20 bg-[#161618] px-1.5 py-0.5 text-[10px] font-semibold text-red-200">{cheater.name}</span>)}
+                    {match.cheaters.map((cheater) => <span key={cheater.id} className="truncate rounded border border-red-500/20 bg-[#161618] px-1.5 py-0.5 text-xs font-semibold text-red-200">{cheater.name}</span>)}
                   </div>
                 </div>
                 <div className={`flex items-center gap-1.5 text-xs font-semibold ${getTierColor(match.leagueTier)}`}><img src={getRankIconPath(match.leagueTier, 0)} alt="" className="h-6 w-6 object-contain" /><span>{TIER_NAMES[match.leagueTier] || t("generated.players.unranked")}</span></div>

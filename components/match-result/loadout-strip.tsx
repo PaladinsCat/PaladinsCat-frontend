@@ -78,13 +78,13 @@ export default function LoadoutStrip({ fact }: LoadoutStripProps) {
             )}
             {/* Level badge — visible on hover or for leveled items/cards */}
             {level !== null && (
-              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-pc-text text-[10px] font-bold text-pc-bg">
+              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-pc-text text-xs font-bold text-pc-bg">
                 {level}
               </span>
             )}
             {/* Tooltip label — always visible for screen readers, shown on hover */}
             <span className="sr-only">{level ? t("generated.matches.value1LevelValue2.a8f4500", { value1: label, value2: level }) : label}</span>
-            <span className="hidden group-hover:inline-block text-[10px] text-pc-text-muted truncate max-w-[4rem] text-center pointer-events-none absolute left-full top-1/2 z-10 -translate-y-1/2 whitespace-nowrap bg-pc-bg-elevated border border-pc-border rounded px-1 py-0.5">
+            <span className="hidden group-hover:inline-block text-xs text-pc-text-muted truncate max-w-[4rem] text-center pointer-events-none absolute left-full top-1/2 z-10 -translate-y-1/2 whitespace-nowrap bg-pc-bg-elevated border border-pc-border rounded px-1 py-0.5">
               {level ? t("generated.matches.value1LvlValue2", { value1: label, value2: level }) : label}
             </span>
           </div>

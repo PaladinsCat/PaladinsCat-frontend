@@ -143,7 +143,7 @@ function VersionHistoryGraph({ entries }: { entries: ChangelogPage["data"] }) {
                     {entry.gitCommitShort}
                   </span>
                 </div>
-                <span className={`text-[10px] font-semibold uppercase tracking-wide ${textColor}`}>
+                <span className={`text-xs font-semibold uppercase tracking-wide ${textColor}`}>
                   {releaseLabel(changeType, t)} · {t(entry.changeCount === 1 ? "common.count.changeOne" : "common.count.changeMany", { count: entry.changeCount })}
                 </span>
                 {entry.deployedAt && (
@@ -186,7 +186,7 @@ function ChangelogEntry({ entry, index }: { entry: ChangelogPage["data"][number]
       {/* Header row */}
       <div className="flex items-center gap-2 flex-wrap mb-1">
         <span className="text-sm font-bold text-pc-text">{entry.version}</span>
-        <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
+        <span className={`rounded-full border px-2 py-0.5 text-xs font-bold uppercase tracking-wide ${
           entry.releaseType === "major"
             ? "border-rose-500/40 bg-rose-500/10 text-rose-400"
             : entry.releaseType === "minor"

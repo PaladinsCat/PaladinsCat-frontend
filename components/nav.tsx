@@ -330,9 +330,9 @@ export default function Nav() {
             </div>
             <div className="flex-1 overflow-y-auto px-4 py-5">
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                {menuSections.map((section) => <section key={section.title}><h2 className="mb-2 px-2 text-[10px] font-bold uppercase tracking-widest text-pc-text-muted">{section.title}</h2><div className="space-y-0.5">{section.links.map((link) => <Link key={link.href} href={link.href} onClick={() => setSideMenuOpen(false)} className={`block rounded-lg px-2.5 py-2 text-sm transition-colors ${isMenuActive(link.href) ? "bg-pc-bg-elevated text-pc-accent" : "text-pc-text-secondary hover:bg-pc-bg-elevated hover:text-pc-text"}`}>{link.label}</Link>)}</div></section>)}
+                {menuSections.map((section) => <section key={section.title}><h2 className="mb-2 px-2 text-xs font-bold uppercase tracking-widest text-pc-text-muted">{section.title}</h2><div className="space-y-0.5">{section.links.map((link) => <Link key={link.href} href={link.href} onClick={() => setSideMenuOpen(false)} className={`block rounded-lg px-2.5 py-2 text-sm transition-colors ${isMenuActive(link.href) ? "bg-pc-bg-elevated text-pc-accent" : "text-pc-text-secondary hover:bg-pc-bg-elevated hover:text-pc-text"}`}>{link.label}</Link>)}</div></section>)}
                 <section>
-                  <h2 className="mb-2 px-2 text-[10px] font-bold uppercase tracking-widest text-pc-text-muted">{t("nav.language")}</h2>
+                  <h2 className="mb-2 px-2 text-xs font-bold uppercase tracking-widest text-pc-text-muted">{t("nav.language")}</h2>
                   <div className="overflow-hidden rounded-lg border border-pc-border bg-pc-bg p-1" role="listbox" aria-label={t("nav.language")}>
                     {SUPPORTED_LOCALES.map(({ code, nativeName }) => (
                       <button
@@ -350,7 +350,7 @@ export default function Nav() {
                   </div>
                 </section>
                 <section>
-                  <h2 className="mb-2 px-2 text-[10px] font-bold uppercase tracking-widest text-pc-text-muted">{t("menu.appearance")}</h2>
+                  <h2 className="mb-2 px-2 text-xs font-bold uppercase tracking-widest text-pc-text-muted">{t("menu.appearance")}</h2>
                   <button
                     type="button"
                     onClick={handleWallpaperToggle}

@@ -288,10 +288,10 @@ export default function StatsPage() {
                 const rankIcon = getRankIconPath(tier.tierSort, tier.tierSort === 26 ? 101 : tier.tierSort === 27 ? 1 : 0);
                 return (
                   <div key={tier.tierSort} className="group flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1">
-                    <div className="text-[9px] text-pc-text-muted tabular-nums opacity-0 group-hover:opacity-100 transition-opacity">{formatPercent(tier.percentage)}</div>
+                    <div className="text-xs text-pc-text-muted tabular-nums opacity-0 group-hover:opacity-100 transition-opacity">{formatPercent(tier.percentage)}</div>
                     <div className="w-5 rounded-t-sm bg-pc-accent-mid group-hover:bg-pc-accent transition-colors" style={{ height }} title={t("generated.stats.value1Value2Value3", { value1: tier.tier, value2: formatNumber(tier.totalPlays), value3: formatNumber(tier.percentage, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) })} />
                     <img src={rankIcon} alt={tier.tier} title={tier.tier} className="h-5 w-5 object-contain drop-shadow" loading="lazy" />
-                    <div className="text-[9px] text-pc-text-secondary tabular-nums leading-none">{formatNumber(tier.totalPlays)}</div>
+                    <div className="text-xs text-pc-text-secondary tabular-nums leading-none">{formatNumber(tier.totalPlays)}</div>
                   </div>
                 );
               })}
@@ -439,7 +439,7 @@ export default function StatsPage() {
                           </div>
                         )}
                         <div className="text-pc-text font-medium text-xs leading-tight truncate w-full">{item.name}</div>
-                        <div className="flex items-center gap-1 text-[9px] mt-0.5">
+                        <div className="flex items-center gap-1 text-xs mt-0.5">
                           <span style={{ color: quality.color }}>
                             {t("generated.stats.wr")}{" "}{item.winRate}%
                           </span>
@@ -495,7 +495,7 @@ export default function StatsPage() {
           <div className="mb-3 flex items-center justify-between">
             <div>
               <h2 className="text-sm font-bold text-pc-text">{t("generated.stats.skinStats")}</h2>
-              <p className="text-[11px] text-pc-text-muted">{t("generated.stats.rankedCosmeticsIncludingRecoveredSkinIds")}</p>
+              <p className="text-xs text-pc-text-muted">{t("generated.stats.rankedCosmeticsIncludingRecoveredSkinIds")}</p>
             </div>
             <Link href="/stats/skins" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">{t("generated.stats.detail")}</Link>
           </div>
@@ -505,7 +505,7 @@ export default function StatsPage() {
                 {skinStats.map((skin) => (
                   <Link key={`${skin.championId}-${skin.skinId}`} href={`/stats/skins?champion=${skin.championId}`} className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-pc-bg-secondary/60">
                     <img src={getChampionIconSafe(skin.championName)} alt="" className="h-7 w-7 rounded object-contain" />
-                    <div className="min-w-0 flex-1"><div className="truncate text-xs font-medium text-pc-text">{skin.skinName}</div><div className="text-[10px] text-pc-text-muted">{skin.championName} · {formatNumber(skin.totalPlays)} {t("generated.stats.plays.0effba4")}</div></div>
+                    <div className="min-w-0 flex-1"><div className="truncate text-xs font-medium text-pc-text">{skin.skinName}</div><div className="text-xs text-pc-text-muted">{skin.championName} · {formatNumber(skin.totalPlays)} {t("generated.stats.plays.0effba4")}</div></div>
                     <span className="text-xs font-bold text-emerald-400">{formatPercent(skin.winRate)}</span>
                   </Link>
                 ))}
@@ -518,7 +518,7 @@ export default function StatsPage() {
           <div className="mb-3 flex items-center justify-between">
             <div>
               <h2 className="text-sm font-bold text-pc-text">{t("generated.stats.compositionStats")}</h2>
-              <p className="text-[11px] text-pc-text-muted">{t("generated.stats.teamShapeFrontlineDamageFlankSupport")}</p>
+              <p className="text-xs text-pc-text-muted">{t("generated.stats.teamShapeFrontlineDamageFlankSupport")}</p>
             </div>
             <Link href="/stats/compositions" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">{t("generated.stats.detail")}</Link>
           </div>
@@ -528,7 +528,7 @@ export default function StatsPage() {
                 {compositions.slice(0, 5).map((composition) => (
                   <Link key={composition.composition} href="/stats/compositions" className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-pc-bg-secondary/60">
                     <div className="w-20 font-mono text-xs font-semibold text-pc-text">{composition.composition}</div>
-                    <div className="min-w-0 flex-1 text-[10px] text-pc-text-muted">{formatNumber(composition.totalMatches)} {t("generated.stats.rankedMatches")}</div>
+                    <div className="min-w-0 flex-1 text-xs text-pc-text-muted">{formatNumber(composition.totalMatches)} {t("generated.stats.rankedMatches")}</div>
                     <span className={composition.winRate >= 50 ? "text-xs font-bold text-emerald-400" : "text-xs font-bold text-rose-400"}>{formatPercent(composition.winRate)}</span>
                   </Link>
                 ))}
@@ -543,7 +543,7 @@ export default function StatsPage() {
           <div className="mb-3 flex items-center justify-between">
             <div>
               <h2 className="text-sm font-bold text-pc-text">{t("generated.stats.brokenSkins")}</h2>
-              <p className="text-[11px] text-pc-text-muted">{t("generated.stats.int16OverflowSkinId32767UsageSharePerChampion")}</p>
+              <p className="text-xs text-pc-text-muted">{t("generated.stats.int16OverflowSkinId32767UsageSharePerChampion")}</p>
             </div>
           </div>
           {brokenSkinsLoading ? <DataCardSkeleton rows={5} /> : <ContentFade className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated">
@@ -554,11 +554,11 @@ export default function StatsPage() {
                     <img src={getChampionIconSafe(skin.championName)} alt="" className="h-7 w-7 rounded object-contain" />
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-xs font-medium text-pc-text">{skin.skinName}</div>
-                      <div className="text-[10px] text-pc-text-muted">{skin.championName} · {formatNumber(skin.totalPlays)} {t("generated.stats.plays.0effba4")}</div>
+                      <div className="text-xs text-pc-text-muted">{skin.championName} · {formatNumber(skin.totalPlays)} {t("generated.stats.plays.0effba4")}</div>
                     </div>
                     <div className="text-right">
                       <span className="text-xs font-bold text-rose-400">{formatNumber(skin.usageShare, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}{t("generated.stats.share.b95bb2e")}</span>
-                      <div className="text-[9px] text-pc-text-muted">{t("generated.stats.wr")}{" "}{formatPercent(skin.winRate)}</div>
+                      <div className="text-xs text-pc-text-muted">{t("generated.stats.wr")}{" "}{formatPercent(skin.winRate)}</div>
                     </div>
                   </div>
                 ))}

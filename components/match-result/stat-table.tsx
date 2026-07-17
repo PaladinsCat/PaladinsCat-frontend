@@ -87,7 +87,7 @@ export default function StatTable({ player, fact, wins }: StatTableRowProps) {
                 <span className="text-xs text-pc-text-secondary">#{player.champion_id}</span>
               )}
               {player.skin_name && (
-                <span className="text-[10px] text-pc-text-muted truncate block">{player.skin_name}</span>
+                <span className="text-xs text-pc-text-muted truncate block">{player.skin_name}</span>
               )}
             </div>
           </div>
@@ -144,7 +144,7 @@ export default function StatTable({ player, fact, wins }: StatTableRowProps) {
                     />
                   )}
                   {item.level !== null && (
-                    <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-pc-text text-[8px] font-bold text-pc-bg">
+                    <span className="absolute -right-1 -top-1 flex min-h-4 min-w-4 items-center justify-center rounded-full bg-pc-text px-0.5 text-xs font-bold leading-none text-pc-bg">
                       {item.level}
                     </span>
                   )}
@@ -163,170 +163,170 @@ export default function StatTable({ player, fact, wins }: StatTableRowProps) {
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2">
               {/* Core per-minute stats */}
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.dpm")}</div>
+                <div className="text-xs text-pc-text-muted">{t("generated.matches.dpm")}</div>
                 <div className="text-sm font-medium text-pc-text">{formatNumber(player.damage_per_minute, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.kda")}</div>
+                <div className="text-xs text-pc-text-muted">{t("generated.matches.kda")}</div>
                 <div className="text-sm font-medium text-pc-text">{formatNumber(player.kda, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.hpm")}</div>
+                <div className="text-xs text-pc-text-muted">{t("generated.matches.hpm")}</div>
                 <div className="text-sm font-medium text-pc-text">{formatNumber(player.healing_per_minute, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.shpm")}</div>
+                <div className="text-xs text-pc-text-muted">{t("generated.matches.shpm")}</div>
                 <div className="text-sm font-medium text-pc-text">{formatNumber(player.healing_self_per_minute, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.cpm")}</div>
+                <div className="text-xs text-pc-text-muted">{t("generated.matches.cpm")}</div>
                 <div className="text-sm font-medium text-pc-text">{formatNumber(player.gold_per_minute, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.ecpm")}</div>
+                <div className="text-xs text-pc-text-muted">{t("generated.matches.ecpm")}</div>
                 <div className="text-sm font-medium text-pc-text">{formatNumber(player.egpm, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.spm")}</div>
+                <div className="text-xs text-pc-text-muted">{t("generated.matches.spm")}</div>
                 <div className="text-sm font-medium text-pc-text">{formatNumber(player.mitigation_per_minute, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
               </div>
 
               {/* Damage breakdown */}
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.totalDamage.d5e892e")}</div>
+                <div className="text-xs text-pc-text-muted">{t("generated.matches.totalDamage.d5e892e")}</div>
                 <div className="text-sm font-medium text-pc-text">{formatNumber(damageStats.totalDamage)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.weapon")}</div>
+                <div className="text-xs text-pc-text-muted">{t("generated.matches.weapon")}</div>
                 <div className="text-sm font-medium text-pc-text">{formatNumber(damageStats.weaponDamage)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.ability")}</div>
+                <div className="text-xs text-pc-text-muted">{t("generated.matches.ability")}</div>
                 <div className="text-sm font-medium text-pc-text">{damageStats.nonWeaponDamage != null ? formatNumber(damageStats.nonWeaponDamage) : "—"}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.split")}</div>
+                <div className="text-xs text-pc-text-muted">{t("generated.matches.split")}</div>
                 <div className="text-sm font-medium text-pc-text">{formatPercent(damageStats.weaponShare)}</div>
               </div>
 
               {/* Damage breakdown: raw physical + magical */}
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.physicalDmg")}</div>
+                <div className="text-xs text-pc-text-muted">{t("generated.matches.physicalDmg")}</div>
                 <div className="text-sm font-medium text-pc-text">{formatNumber(player.damage_done_physical)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.magicalDmg")}</div>
+                <div className="text-xs text-pc-text-muted">{t("generated.matches.magicalDmg")}</div>
                 <div className="text-sm font-medium text-pc-text">{formatNumber(player.damage_done_magical)}</div>
               </div>
 
               {/* Healing breakdown */}
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.healing")}</div>
+                <div className="text-xs text-pc-text-muted">{t("generated.matches.healing")}</div>
                 <div className="text-sm font-medium text-pc-text">{formatNumber(player.healing)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.selfHeal")}</div>
+                <div className="text-xs text-pc-text-muted">{t("generated.matches.selfHeal")}</div>
                 <div className="text-sm font-medium text-pc-text">{formatNumber(player.healing_self)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.botHeal")}</div>
+                <div className="text-xs text-pc-text-muted">{t("generated.matches.botHeal")}</div>
                 <div className="text-sm font-medium text-pc-text">{formatNumber(player.healing_bot)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.playerSelf")}</div>
+                <div className="text-xs text-pc-text-muted">{t("generated.matches.playerSelf")}</div>
                 <div className="text-sm font-medium text-pc-text">{formatNumber(player.healing_player_self)}</div>
               </div>
 
               {/* Damage taken & shielding */}
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.taken")}</div>
+                <div className="text-xs text-pc-text-muted">{t("generated.matches.taken")}</div>
                 <div className="text-sm font-medium text-pc-text">{formatNumber(player.damage_taken)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.shielding")}</div>
+                <div className="text-xs text-pc-text-muted">{t("generated.matches.shielding")}</div>
                 <div className="text-sm font-medium text-pc-text">{formatNumber(player.damage_mitigated)}</div>
               </div>
 
               {/* Multi-kill streaks */}
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.firstBlood")}</div>
+                <div className="text-xs text-pc-text-muted">{t("generated.matches.firstBlood")}</div>
                 <div className="text-sm font-medium text-pc-text">{formatNumber(player.kills_first_blood)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.doubleKills")}</div>
+                <div className="text-xs text-pc-text-muted">{t("generated.matches.doubleKills")}</div>
                 <div className="text-sm font-medium text-pc-text">{formatNumber(player.kills_double)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.tripleKills")}</div>
+                <div className="text-xs text-pc-text-muted">{t("generated.matches.tripleKills")}</div>
                 <div className="text-sm font-medium text-pc-text">{formatNumber(player.kills_triple)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.quadraKill")}</div>
+                <div className="text-xs text-pc-text-muted">{t("generated.matches.quadraKill")}</div>
                 <div className="text-sm font-medium text-pc-text">{formatNumber(player.kills_quadra)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.pentaKill")}</div>
+                <div className="text-xs text-pc-text-muted">{t("generated.matches.pentaKill")}</div>
                 <div className="text-sm font-medium text-pc-text">{formatNumber(player.kills_penta)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.maxMulti")}</div>
+                <div className="text-xs text-pc-text-muted">{t("generated.matches.maxMulti")}</div>
                 <div className="text-sm font-medium text-pc-text">{formatNumber(player.multi_kill_max)}</div>
               </div>
 
               {/* Objective & game activity */}
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.objective")}</div>
+                <div className="text-xs text-pc-text-muted">{t("generated.matches.objective")}</div>
                 <div className="text-sm font-medium text-pc-text">{formatNumber(player.objective_assists)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.spree")}</div>
+                <div className="text-xs text-pc-text-muted">{t("generated.matches.spree")}</div>
                 <div className="text-sm font-medium text-pc-text">{formatNumber(player.killing_spree)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.camps")}</div>
+                <div className="text-xs text-pc-text-muted">{t("generated.matches.camps")}</div>
                 <div className="text-sm font-medium text-pc-text">{formatNumber(player.camps_cleared)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.structDmg")}</div>
+                <div className="text-xs text-pc-text-muted">{t("generated.matches.structDmg")}</div>
                 <div className="text-sm font-medium text-pc-text">{formatNumber(player.structure_damage)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.wards")}</div>
+                <div className="text-xs text-pc-text-muted">{t("generated.matches.wards")}</div>
                 <div className="text-sm font-medium text-pc-text">{formatNumber(player.wards_placed)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.towers")}</div>
+                <div className="text-xs text-pc-text-muted">{t("generated.matches.towers")}</div>
                 <div className="text-sm font-medium text-pc-text">{formatNumber(player.towers_destroyed)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.distance")}</div>
+                <div className="text-xs text-pc-text-muted">{t("generated.matches.distance")}</div>
                 <div className="text-sm font-medium text-pc-text">{player.distance_traveled != null ? formatNumber(Math.round(player.distance_traveled)) : "—"}</div>
               </div>
 
               {/* Time & identity */}
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.timeInMatch")}</div>
+                <div className="text-xs text-pc-text-muted">{t("generated.matches.timeInMatch")}</div>
                 <div className="text-sm font-medium text-pc-text">{t("common.format.secondsShort", { seconds: formatNumber(player.time_in_match, { maximumFractionDigits: 0 }) })}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.afkRate")}</div>
+                <div className="text-xs text-pc-text-muted">{t("generated.matches.afkRate")}</div>
                 <div className="text-sm font-medium text-pc-text">{formatPercent(player.afk_rate)}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.winStatus")}</div>
+                <div className="text-xs text-pc-text-muted">{t("generated.matches.winStatus")}</div>
                 <div className="text-sm font-medium text-pc-text">{player.win_status || "—"}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.team")}</div>
+                <div className="text-xs text-pc-text-muted">{t("generated.matches.team")}</div>
                 <div className="text-sm font-medium text-pc-text">{t("generated.matches.team")}{" "}{player.task_force}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-[10px] text-pc-text-muted">{t("generated.matches.source")}</div>
+                <div className="text-xs text-pc-text-muted">{t("generated.matches.source")}</div>
                 <div className="text-sm font-medium text-pc-text">{player.source || "—"}</div>
               </div>
               {partyNumber != null && (
                 <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                  <div className="text-[10px] text-pc-text-muted">{t("generated.matches.party")}</div>
+                  <div className="text-xs text-pc-text-muted">{t("generated.matches.party")}</div>
                   <PartyBadge player={player} className="mt-0.5" />
                 </div>
               )}
@@ -380,7 +380,7 @@ export default function StatTable({ player, fact, wins }: StatTableRowProps) {
                             <span className="text-pc-text-muted ml-auto">{t("generated.matches.lvl")}{" "}{item.item_level}</span>
                           )}
                           {item.item_type && (
-                            <span className="text-[10px] text-pc-text-muted">({item.item_type})</span>
+                            <span className="text-xs text-pc-text-muted">({item.item_type})</span>
                           )}
                         </div>
                       ))}

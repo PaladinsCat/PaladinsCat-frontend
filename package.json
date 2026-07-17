@@ -5,7 +5,7 @@
   "scripts": {
     "predev": "node scripts/copy-pinned-locales.mjs",
     "dev": "next dev",
-    "prebuild": "node scripts/copy-pinned-locales.mjs && node scripts/audit-localization.mjs --strict",
+    "prebuild": "node scripts/copy-pinned-locales.mjs && node scripts/audit-text-size.mjs && node scripts/audit-localization.mjs --strict",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -13,6 +13,7 @@
     "sync-community-locales": "node scripts/sync-community-locales.mjs",
     "sync-pinned-locales": "node scripts/copy-pinned-locales.mjs",
     "audit-localization": "node scripts/audit-localization.mjs",
+    "audit-text-size": "node scripts/audit-text-size.mjs",
     "migrate-localization": "node scripts/migrate-hardcoded-localization.mjs",
     "sync-talent-assets": "node scripts/sync-champion-talent-ids.js"
   },

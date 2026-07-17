@@ -50,7 +50,7 @@ function AssetImage({ src, alt }: { src?: string | null; alt: string }) {
 function SelectionBadge({ selected }: { selected: boolean }) {
   const { t } = useLocalization();
   return (
-    <span className={`text-[11px] font-semibold ${selected ? "text-pc-accent" : "text-pc-text-muted"}`}>
+    <span className={`text-xs font-semibold ${selected ? "text-pc-accent" : "text-pc-text-muted"}`}>
       {selected ? t("generated.builds.selected") : t("generated.builds.select")}
     </span>
   );

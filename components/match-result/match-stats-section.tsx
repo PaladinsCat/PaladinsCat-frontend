@@ -176,7 +176,7 @@ function MobilePlayerCard({ player, wins }: { player: MatchPlayerDetail; wins: b
       </div>
     </div>
     <dl className="mt-3 grid grid-cols-2 gap-1.5 min-[420px]:grid-cols-3">
-      {metrics.map(([label, value]) => <div key={label} className="rounded-lg border border-pc-border/60 bg-pc-bg-secondary/50 px-2.5 py-2"><dt className="text-[9px] uppercase tracking-wide text-pc-text-muted">{label}</dt><dd className="mt-0.5 truncate font-mono text-xs font-semibold text-pc-text">{value}</dd></div>)}
+      {metrics.map(([label, value]) => <div key={label} className="rounded-lg border border-pc-border/60 bg-pc-bg-secondary/50 px-2.5 py-2"><dt className="text-xs uppercase tracking-wide text-pc-text-muted">{label}</dt><dd className="mt-0.5 truncate font-mono text-xs font-semibold text-pc-text">{value}</dd></div>)}
     </dl>
   </article>;
 }
@@ -203,9 +203,9 @@ export default function MatchStatsSection({
       </div>
 
       <div className="lg:hidden">
-        <div className="border-b border-pc-border bg-pc-bg-secondary/60 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted">{team1Label}</div>
+        <div className="border-b border-pc-border bg-pc-bg-secondary/60 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-pc-text-muted">{team1Label}</div>
         {team1Players.map((player) => <MobilePlayerCard key={matchPlayerKey(player)} player={player} wins={team1Wins} />)}
-        <div className="border-y border-pc-border bg-pc-bg-secondary/60 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted">{team2Label}</div>
+        <div className="border-y border-pc-border bg-pc-bg-secondary/60 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-pc-text-muted">{team2Label}</div>
         {team2Players.map((player) => <MobilePlayerCard key={matchPlayerKey(player)} player={player} wins={team2Wins} />)}
       </div>
 
@@ -220,7 +220,7 @@ export default function MatchStatsSection({
               {statColumns.map((col) => (
                 <th
                   key={col}
-                  className={`px-1.5 py-2 text-[10px] uppercase tracking-wide text-pc-text-muted font-medium ${col === t("generated.match.stats.player") ? "text-left" : "text-center"}`}
+                  className={`px-1.5 py-2 text-xs uppercase tracking-wide text-pc-text-muted font-medium ${col === t("generated.match.stats.player") ? "text-left" : "text-center"}`}
                 >
                   {col}
                 </th>

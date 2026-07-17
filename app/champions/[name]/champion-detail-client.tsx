@@ -117,7 +117,7 @@ function AvgTierCard({ stats }: { stats: ChampionStats }) {
     <div className="pc-surface-light rounded-lg border border-pc-border p-3 text-center">
       <div className="mb-1 text-xs text-pc-text-muted">{t("generated.champions.avgTier")}</div>
       <img src={iconPath} alt={effective.displayName} className="mx-auto h-9 w-9 object-contain" />
-      <div className={`mt-0.5 text-[11px] font-semibold ${color}`}>{effective.displayName}</div>
+      <div className={`mt-0.5 text-xs font-semibold ${color}`}>{effective.displayName}</div>
       <div className="text-xs font-mono text-pc-text-muted mt-0.5">{formatNumber(stats.avgRating, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</div>
     </div>
   );
@@ -378,7 +378,7 @@ export default function ChampionDetailPage() {
                             >
                               <img src={itemIcon(item.itemName)} alt="" className="mb-1 h-12 w-12 rounded-md object-contain" />
                               <div className="w-full truncate text-xs font-medium leading-tight text-pc-text group-hover:text-pc-accent">{item.itemName}</div>
-                              <div className="mt-0.5 flex items-center gap-1 text-[9px]">
+                              <div className="mt-0.5 flex items-center gap-1 text-xs">
                                 <span style={{ color: quality.color }}>{t("generated.champions.wr")}{" "}{formatPercent(item.winRate)}</span>
                                 <span className="text-pc-text-muted">·</span>
                                 <span style={{ color: quality.color }}>{t("generated.champions.pr")}{" "}{formatPercent((item.pickRate ?? 0))}</span>
@@ -497,15 +497,15 @@ export default function ChampionDetailPage() {
                   </div>
                   <div className="grid grid-cols-3 gap-2 p-3 text-center text-xs">
                     <div>
-                      <div className="text-[10px] uppercase text-pc-text-muted">{t("generated.champions.winRate")}</div>
+                      <div className="text-xs uppercase text-pc-text-muted">{t("generated.champions.winRate")}</div>
                       <div className="font-bold" style={{ color: quality.color }}>{formatPercent(map.winRate)}</div>
                     </div>
                     <div>
-                      <div className="text-[10px] uppercase text-pc-text-muted">{t("generated.champions.pickRate")}</div>
+                      <div className="text-xs uppercase text-pc-text-muted">{t("generated.champions.pickRate")}</div>
                       <div className="font-medium text-pc-accent">{formatPercent(map.pickRate)}</div>
                     </div>
                     <div>
-                      <div className="text-[10px] uppercase text-pc-text-muted">{t("generated.champions.plays")}</div>
+                      <div className="text-xs uppercase text-pc-text-muted">{t("generated.champions.plays")}</div>
                       <div className="font-medium text-pc-text">{formatNumber(map.totalPlays)}</div>
                     </div>
                   </div>
@@ -566,13 +566,13 @@ function ChampionMetricCard({
           <div className="text-xs text-pc-text-muted uppercase tracking-wider">{t(metric.labelKey)}</div>
           <div className={`text-lg font-bold ${metric.colorClass}`}>{formatMetric(championMean)}</div>
         </div>
-        <div className="text-right text-[10px] text-pc-text-muted shrink min-w-0 overflow-hidden">
+        <div className="text-right text-xs text-pc-text-muted shrink min-w-0 overflow-hidden">
           <div className="truncate">{t("generated.champions.matches")}</div>
           <div className="text-pc-text-secondary font-mono overflow-wrap break-all">{formatNumber((champion?.totalMatches ?? 0))}</div>
         </div>
       </div>
 
-      <div className="mb-2 grid grid-cols-3 gap-1.5 text-[10px]">
+      <div className="mb-2 grid grid-cols-3 gap-1.5 text-xs">
         <div>
           <div className="text-pc-text-muted uppercase tracking-wider">{t("generated.champions.p10")}</div>
           <div className="text-pc-text-secondary font-mono">{formatMetric(p10)}</div>
@@ -591,7 +591,7 @@ function ChampionMetricCard({
         <div className="absolute inset-y-0 left-0 rounded-full opacity-60" style={{ width: `${meanPct}%`, backgroundColor: metric.accent }} />
         <div className="absolute top-1/2 h-4 w-0.5 -translate-y-1/2 bg-pc-text-muted" style={{ left: `${globalPct}%` }} />
       </div>
-      <div className="flex items-center justify-between gap-2 text-[10px]">
+      <div className="flex items-center justify-between gap-2 text-xs">
         <span className="text-pc-text-muted">{t("generated.champions.global")}{" "}{formatMetric(globalMean)}</span>
         <span className={deltaClass}>{formatSignedMetric(delta, isDecimal)} ({formatPercent(deltaPct, { signDisplay: "always", minimumFractionDigits: 1, maximumFractionDigits: 1 })})</span>
       </div>

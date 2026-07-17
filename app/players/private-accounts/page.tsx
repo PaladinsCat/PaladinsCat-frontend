@@ -100,8 +100,8 @@ export default function PrivateAccountsPage() {
                   <div className="flex min-w-0 flex-wrap items-center gap-1.5">
                     <h2 className="mr-0.5 truncate text-base font-semibold text-pc-text group-hover:text-pc-accent">{account.alias || account.displayName}</h2>
                     <PlayerModerationTag playerId={0} cheater={account.cheater} susCount={0} verified={false} />
-                    <span className="rounded border border-pc-border bg-pc-bg/50 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-pc-text-secondary">{t("generated.players.level")}{" "}{formatNumber(account.accountLevel)}</span>
-                    <span className="rounded border border-pc-border bg-pc-bg/50 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-pc-text-secondary">{t("generated.players.mastery")}{" "}{formatNumber(account.masteryLevel)}</span>
+                    <span className="rounded border border-pc-border bg-pc-bg/50 px-1.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-pc-text-secondary">{t("generated.players.level")}{" "}{formatNumber(account.accountLevel)}</span>
+                    <span className="rounded border border-pc-border bg-pc-bg/50 px-1.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-pc-text-secondary">{t("generated.players.mastery")}{" "}{formatNumber(account.masteryLevel)}</span>
                     <span className={`ml-1 flex min-w-0 items-center gap-1 text-xs font-semibold ${getTierColor(account.leagueTier)}`}>
                       <img src={getRankIconPath(account.leagueTier, 0)} alt="" className="h-5 w-5 shrink-0 object-contain" />
                       <span className="truncate">{tierName}</span>
@@ -112,7 +112,7 @@ export default function PrivateAccountsPage() {
                   <span className="shrink-0 rounded-full border border-slate-400/20 bg-slate-400/10 px-2 py-1 text-xs font-semibold text-slate-300">{formatNumber(account.matchCount)} {t("generated.players.matches.9f3e924")}</span>
                 </div>
 
-                <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-pc-border pt-2 text-[11px] text-pc-text-muted">
+                <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-pc-border pt-2 text-xs text-pc-text-muted">
                   <CalendarClock aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
                   <span>{t("generated.players.firstObserved")}{" "}<span className="text-pc-text-secondary">{observedAt(account.firstSeen)}</span></span>
                   <span>{t("generated.players.lastObserved")}{" "}<span className="text-pc-text-secondary">{observedAt(account.lastSeen)}</span></span>

@@ -65,7 +65,7 @@ export default function PlayerActivityPanel() {
           </div>
 
           {loading ? <LoadingPanel compact /> : <div className="space-y-1">
-            <div className="grid grid-cols-[3.5rem_1fr_1fr_3rem_3rem] gap-2 border-b border-pc-border/30 px-1 pb-1 text-center text-[10px] uppercase text-pc-text-muted">
+            <div className="grid grid-cols-[3.5rem_1fr_1fr_3rem_3rem] gap-2 border-b border-pc-border/30 px-1 pb-1 text-center text-xs uppercase text-pc-text-muted">
               <span>{t("generated.matches.localTime")}</span><span>{t("generated.matches.na")}</span><span>{t("generated.matches.eu")}</span><span>{t("generated.matches.drop")}</span><span>Σ</span>
             </div>
             {hourly.map((entry: any, index: number) => {

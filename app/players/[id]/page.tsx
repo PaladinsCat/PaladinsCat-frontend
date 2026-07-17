@@ -547,7 +547,7 @@ export default function PlayerProfilePage() {
               role="menu"
               aria-label={t("generated.players.playerActions")}
             >
-              <div className="px-2 pb-1 pt-1 text-[10px] font-bold uppercase tracking-widest text-pc-text-muted">{t("generated.players.community")}</div>
+              <div className="px-2 pb-1 pt-1 text-xs font-bold uppercase tracking-widest text-pc-text-muted">{t("generated.players.community")}</div>
               <button type="button" role="menuitem" onClick={() => { setActionMenuOpen(false); openReportModal('suspicious'); }} className="flex w-full items-center justify-between gap-3 rounded-lg px-2.5 py-2 text-left text-sm text-amber-400 transition-colors hover:bg-amber-500/10">
                 <span>{t("generated.players.reportSuspicious")}</span>
                 {player.sus_count > 0 && <span className="text-xs tabular-nums">{player.sus_count}</span>}
@@ -570,7 +570,7 @@ export default function PlayerProfilePage() {
               {(isAdmin || isApproved) && (
                 <>
                   <div className="my-2 border-t border-pc-border/70" />
-                  <div className="px-2 pb-1 text-[10px] font-bold uppercase tracking-widest text-pc-text-muted">{t("generated.players.moderation")}</div>
+                  <div className="px-2 pb-1 text-xs font-bold uppercase tracking-widest text-pc-text-muted">{t("generated.players.moderation")}</div>
                   <button type="button" role="menuitem" onClick={() => { setActionMenuOpen(false); openReportModal('cheater'); }} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-red-400 transition-colors hover:bg-red-500/10">
                     {t("generated.players.flagAsCheater")}</button>
                   {isAdmin && player.cheater && (
@@ -719,7 +719,7 @@ export default function PlayerProfilePage() {
                   )}
                 </div>
                 <div className="border-t border-pc-border/50 pt-3 lg:border-l lg:border-t-0 lg:pl-4 lg:pt-0">
-                  <div className="mb-1.5 text-[10px] uppercase tracking-wider text-pc-text-muted">{t("generated.players.overall")}</div>
+                  <div className="mb-1.5 text-xs uppercase tracking-wider text-pc-text-muted">{t("generated.players.overall")}</div>
                   <div className="grid grid-cols-1 gap-y-1.5">
                     <StatRow label={t("generated.players.totalMatches")} value={formatNumber(globalMatches)} />
                     <StatRow label={t("generated.players.casualDeserted")} value={formatNumber(player.leaves)} />
@@ -736,7 +736,7 @@ export default function PlayerProfilePage() {
           <div>
             <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
               <h2 className="pc-card-title shadow-sm">{t("generated.players.recentMatches")}</h2>
-              <span className="text-[11px] text-pc-text-muted">{t("generated.players.allQueuesServedFromTheHistoryCache")}</span>
+              <span className="text-xs text-pc-text-muted">{t("generated.players.allQueuesServedFromTheHistoryCache")}</span>
             </div>
             <div className="pc-card">
               {matchesLoading ? (
@@ -748,8 +748,8 @@ export default function PlayerProfilePage() {
                 <div className="space-y-2 lg:hidden">
                   {matches.filter((match) => match.championName).map((match) => <Link key={match.matchId} href={`/matches/${match.matchId}`} className="pc-mobile-panel flex min-w-0 items-center gap-3 p-3">
                     <img src={getChampionIconSafe(match.championName)} alt="" className="h-10 w-10 shrink-0 rounded-lg object-contain" />
-                    <div className="min-w-0 flex-1"><div className="flex min-w-0 items-center gap-2"><span className="truncate text-sm font-semibold text-pc-text">{match.championName}</span><span className={`shrink-0 text-[10px] font-bold ${match.isWinner ? "text-emerald-400" : "text-rose-400"}`}>{match.isWinner ? t("generated.players.win") : t("generated.players.loss")}</span></div><div className="truncate text-[10px] text-pc-text-muted">{match.queueId === 486 ? t("generated.players.ranked") : t("generated.players.casual")} · {displayMatchMap(match.mapGame, match.queueId)}</div><div className="mt-1 text-[10px] text-pc-text-muted">{formatDateTime(match.entryDatetime)}</div></div>
-                    <div className="shrink-0 text-right"><div className="font-mono text-sm font-bold text-pc-text">{match.kills}/{match.deaths}/{match.assists}</div><div className="text-[9px] uppercase text-pc-text-muted">{formatKda(match.kills, match.deaths, match.assists)} {t("generated.players.kda")}</div><div className="mt-1 font-mono text-[10px] text-pc-text-secondary">{formatMatchDuration(match.duration)}</div></div>
+                    <div className="min-w-0 flex-1"><div className="flex min-w-0 items-center gap-2"><span className="truncate text-sm font-semibold text-pc-text">{match.championName}</span><span className={`shrink-0 text-xs font-bold ${match.isWinner ? "text-emerald-400" : "text-rose-400"}`}>{match.isWinner ? t("generated.players.win") : t("generated.players.loss")}</span></div><div className="truncate text-xs text-pc-text-muted">{match.queueId === 486 ? t("generated.players.ranked") : t("generated.players.casual")} · {displayMatchMap(match.mapGame, match.queueId)}</div><div className="mt-1 text-xs text-pc-text-muted">{formatDateTime(match.entryDatetime)}</div></div>
+                    <div className="shrink-0 text-right"><div className="font-mono text-sm font-bold text-pc-text">{match.kills}/{match.deaths}/{match.assists}</div><div className="text-xs uppercase text-pc-text-muted">{formatKda(match.kills, match.deaths, match.assists)} {t("generated.players.kda")}</div><div className="mt-1 font-mono text-xs text-pc-text-secondary">{formatMatchDuration(match.duration)}</div></div>
                   </Link>)}
                 </div>
                 <div className="hidden overflow-x-auto lg:block">
@@ -788,7 +788,7 @@ export default function PlayerProfilePage() {
                               <div className="text-xs text-pc-text-secondary">
                                 {m.queueId === 486 ? t("generated.players.ranked") : m.queueId ? t("generated.players.casual") : t("generated.players.unknown")}
                               </div>
-                              <div className="max-w-28 truncate text-[10px] text-pc-text-muted" title={displayMatchMap(m.mapGame, m.queueId)}>{displayMatchMap(m.mapGame, m.queueId)}</div>
+                              <div className="max-w-28 truncate text-xs text-pc-text-muted" title={displayMatchMap(m.mapGame, m.queueId)}>{displayMatchMap(m.mapGame, m.queueId)}</div>
                             </td>
                             <td className="px-3 py-1.5 text-xs font-mono text-pc-text">{m.kills}</td>
                             <td className="px-3 py-1.5 text-xs font-mono text-pc-text">{m.deaths}</td>
@@ -840,8 +840,8 @@ export default function PlayerProfilePage() {
               <div className="flex min-w-0 items-center gap-3">
                 <div className="w-14 shrink-0 text-center">
                   <img src={rankIcon} alt={effectiveTier.displayName} className="mx-auto h-10 w-10 object-contain" />
-                  <div className={`mt-1 text-[11px] font-semibold ${tierColor}`}>{rankedTierLabel}</div>
-                  <div className="mt-0.5 text-[10px] text-pc-text-muted">{t("generated.players.season")}{" "}{player.kbm_season}</div>
+                  <div className={`mt-1 text-xs font-semibold ${tierColor}`}>{rankedTierLabel}</div>
+                  <div className="mt-0.5 text-xs text-pc-text-muted">{t("generated.players.season")}{" "}{player.kbm_season}</div>
                 </div>
                 <div className="min-w-0 flex-1 border-l border-pc-border/50 pl-3">
                   <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
@@ -854,15 +854,15 @@ export default function PlayerProfilePage() {
               </div>
               <div className="mt-3 grid grid-cols-3 gap-1.5 border-t border-pc-border/50 pt-2.5 text-center">
                 <div>
-                  <div className="text-[10px] text-pc-text-muted">{t("generated.players.wins")}</div>
+                  <div className="text-xs text-pc-text-muted">{t("generated.players.wins")}</div>
                   <div className="font-mono text-xs text-emerald-400">{player.kbm_wins}</div>
                 </div>
                 <div>
-                  <div className="text-[10px] text-pc-text-muted">{t("generated.players.losses")}</div>
+                  <div className="text-xs text-pc-text-muted">{t("generated.players.losses")}</div>
                   <div className="font-mono text-xs text-rose-400">{player.kbm_losses}</div>
                 </div>
                 <div>
-                  <div className="text-[10px] text-pc-text-muted">{t("generated.players.winRate")}</div>
+                  <div className="text-xs text-pc-text-muted">{t("generated.players.winRate")}</div>
                   <div className="font-mono text-xs text-pc-text">{kbmWr}%</div>
                 </div>
               </div>
@@ -918,7 +918,7 @@ export default function PlayerProfilePage() {
           <div>
             <h2 className="pc-card-title shadow-sm">{t("generated.players.rankedPerformance")}</h2>
             <div className="pc-card p-3">
-              <div className="mb-1.5 text-[10px] uppercase tracking-wider text-pc-text-muted">{t("generated.players.averages")}</div>
+              <div className="mb-1.5 text-xs uppercase tracking-wider text-pc-text-muted">{t("generated.players.averages")}</div>
               <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
                 <StatRow label={t("generated.players.damageMin")} value={player.avg_dpm != null ? formatNumber(player.avg_dpm) : "—"} color="text-red-400" />
                 <StatRow label={t("generated.players.healingMin")} value={player.avg_hpm != null ? formatNumber(player.avg_hpm) : "—"} color="text-emerald-400" />

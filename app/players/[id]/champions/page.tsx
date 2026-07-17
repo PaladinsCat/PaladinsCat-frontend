@@ -148,7 +148,7 @@ function ChampionCard({ champion }: { champion: PlayerChampionStat }) {
         <Metric label={t("common.metrics.kda")} value={formatKda(champion.kills, champion.deaths, champion.assists)} />
         <Metric label={t("generated.players.time")} value={t("common.format.minutesShort", { minutes: formatNumber(champion.minutesPlayed) })} />
       </div>
-      <div className="mt-3 flex min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-1 border-t border-pc-border/50 pt-2 text-[10px] text-pc-text-muted">
+      <div className="mt-3 flex min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-1 border-t border-pc-border/50 pt-2 text-xs text-pc-text-muted">
         <span className="truncate">{t("common.playerChampions.ownership")}: <span className="text-pc-text-secondary">{champion.ownershipType || "—"}</span></span>
         <span className="whitespace-nowrap">{t("common.playerChampions.updated")}: <span className="text-pc-text-secondary">{formatDateTime(champion.lastUpdated)}</span></span>
       </div>
@@ -157,5 +157,5 @@ function ChampionCard({ champion }: { champion: PlayerChampionStat }) {
 }
 
 function Metric({ label, value }: { label: string; value: string }) {
-  return <div><div className="text-[10px] uppercase text-pc-text-muted">{label}</div><div className="mt-0.5 truncate font-mono text-xs text-pc-text-secondary">{value}</div></div>;
+  return <div><div className="text-xs uppercase text-pc-text-muted">{label}</div><div className="mt-0.5 truncate font-mono text-xs text-pc-text-secondary">{value}</div></div>;
 }

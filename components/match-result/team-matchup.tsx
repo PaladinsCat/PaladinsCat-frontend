@@ -26,22 +26,22 @@ export default function TeamMatchup({ players, label, averages }: TeamMatchupPro
 
       {/* Team averages */}
       <div className={`mx-3 mb-3 rounded-lg border border-pc-border bg-pc-bg-secondary p-3`}>
-        <div className="text-[10px] uppercase tracking-wider text-pc-text-muted mb-2 font-semibold">{t("generated.matches.teamAverages")}</div>
+        <div className="text-xs uppercase tracking-wider text-pc-text-muted mb-2 font-semibold">{t("generated.matches.teamAverages")}</div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-center">
           <div>
-            <div className="text-[10px] text-pc-text-muted">{t("generated.matches.avgLevel")}</div>
+            <div className="text-xs text-pc-text-muted">{t("generated.matches.avgLevel")}</div>
             <div className="text-sm font-semibold text-pc-text">{averages.avgLevel}</div>
           </div>
           <div>
-            <div className="text-[10px] text-pc-text-muted">{t("generated.matches.avgWr")}</div>
+            <div className="text-xs text-pc-text-muted">{t("generated.matches.avgWr")}</div>
             <div className="text-sm font-semibold text-pc-text">{averages.avgWinRate}</div>
           </div>
           <div>
-            <div className="text-[10px] text-pc-text-muted">{t("generated.matches.avgPlayerElo")}</div>
+            <div className="text-xs text-pc-text-muted">{t("generated.matches.avgPlayerElo")}</div>
             <div className="text-sm font-semibold text-pc-text">{averages.avgEloPlus}</div>
           </div>
           <div>
-            <div className="text-[10px] text-pc-text-muted">{t("generated.matches.avgKda")}</div>
+            <div className="text-xs text-pc-text-muted">{t("generated.matches.avgKda")}</div>
             <div className="text-sm font-semibold text-pc-text">{averages.avgKDA}</div>
           </div>
         </div>

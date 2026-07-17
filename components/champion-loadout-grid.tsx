@@ -94,11 +94,11 @@ export default function ChampionLoadoutGrid({
                               const levelQuality = getStatQuality(level.winRate, levelPickRate, maxLevelPickRate);
                               return (
                                 <div key={level.level} className="flex flex-1 flex-col items-center">
-                                  <div className="text-[9px] text-pc-text-muted">{t("common.format.levelShort", { level: level.level })}</div>
+                                  <div className="text-xs text-pc-text-muted">{t("common.format.levelShort", { level: level.level })}</div>
                                   <div className="h-1.5 w-full overflow-hidden rounded-full bg-pc-bg-elevated">
                                     <div className="h-full rounded-full" style={{ width: `${Math.max(level.plays > 0 ? 8 : 0, Math.round((level.plays / maxLevelPlays) * 100))}%`, background: levelQuality.track }} />
                                   </div>
-                                  <div className="text-[9px] text-pc-text-muted">{formatNumber(level.plays)}</div>
+                                  <div className="text-xs text-pc-text-muted">{formatNumber(level.plays)}</div>
                                 </div>
                               );
                             })}

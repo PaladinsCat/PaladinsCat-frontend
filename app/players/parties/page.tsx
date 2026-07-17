@@ -135,7 +135,7 @@ export default function RankedPartiesPage() {
             <article key={stack.groupKey} className="overflow-hidden rounded-xl border border-cyan-500/20 bg-pc-bg-elevated p-4">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted">{t("generated.players.exactRanked")}{" "}{stack.stackSize}{t("generated.players.stack")}</div>
+                  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-pc-text-muted">{t("generated.players.exactRanked")}{" "}{stack.stackSize}{t("generated.players.stack")}</div>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {stack.players.map(player => (
                       <Link key={player.id} href={`/players/${player.id}`} className="rounded-lg border border-pc-border bg-pc-bg/50 px-2.5 py-1.5 text-sm font-semibold text-pc-text transition-colors hover:border-pc-accent-mid hover:text-pc-accent">
@@ -159,7 +159,7 @@ export default function RankedPartiesPage() {
             <article key={`${pair.sourcePlayerId}-${pair.targetPlayerId}`} className="overflow-hidden rounded-xl border border-cyan-500/20 bg-pc-bg-elevated p-4">
               <div className="flex flex-col items-start gap-3 sm:flex-row sm:justify-between">
                 <div className="min-w-0">
-                  <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted">{t("generated.players.canonicalPartyPair")}</div>
+                  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-pc-text-muted">{t("generated.players.canonicalPartyPair")}</div>
                   <div className="mt-2 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-sm font-semibold">
                     <Link href={`/players/${pair.sourcePlayerId}`} className="min-w-0 break-words text-pc-text transition-colors hover:text-pc-accent [overflow-wrap:anywhere]"><PlayerName playerId={pair.sourcePlayerId}>{pair.sourcePlayerName}</PlayerName></Link>
                     <span className="shrink-0 text-cyan-300">+</span>

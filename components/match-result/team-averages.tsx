@@ -9,11 +9,11 @@ export default function TeamAverages({ averages }: { averages: TeamAverages }) {
   return (
     <div className="flex flex-wrap gap-4 justify-center text-center">
       <div>
-        <div className="text-[10px] uppercase text-pc-text-muted"><LocalizedText id="generated.matches.avgLevel" /></div>
+        <div className="text-xs uppercase text-pc-text-muted"><LocalizedText id="generated.matches.avgLevel" /></div>
         <div className="text-sm font-semibold text-pc-text">{averages.avgLevel}</div>
       </div>
       <div>
-        <div className="text-[10px] uppercase text-pc-text-muted"><LocalizedText id="generated.matches.avgPlayerElo" /></div>
+        <div className="text-xs uppercase text-pc-text-muted"><LocalizedText id="generated.matches.avgPlayerElo" /></div>
         <div className="text-sm font-semibold text-pc-text">{averages.avgEloPlus}</div>
       </div>
     </div>

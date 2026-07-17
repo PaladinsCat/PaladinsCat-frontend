@@ -287,7 +287,7 @@ const SearchResultGroups = memo(function SearchResultGroups({
                     <span className="truncate text-sm font-semibold text-pc-text group-hover:text-pc-accent transition-colors">
                       {result.title}
                     </span>
-                    <span className={`shrink-0 text-[9px] px-1.5 py-0.5 rounded-full border ${TYPE_STYLE[result.type]}`}>
+                    <span className={`shrink-0 text-xs px-1.5 py-0.5 rounded-full border ${TYPE_STYLE[result.type]}`}>
                       {TYPE_LABEL[result.type]}
                     </span>
                   </div>

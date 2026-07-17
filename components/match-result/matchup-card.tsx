@@ -19,12 +19,12 @@ function RecordSummary({ label, wins, total, tone, eloLabel, elo }: { label: str
   const { formatNumber, formatPercent, formatRecord, t } = useLocalization();
   const losses = Math.max(0, total - wins);
   return <div>
-    <div className="mb-1 flex items-center justify-between gap-2 text-[10px] font-semibold uppercase tracking-wide text-pc-text-muted">
+    <div className="mb-1 flex items-center justify-between gap-2 text-xs font-semibold uppercase tracking-wide text-pc-text-muted">
       <span>{label}</span>
       <span className="shrink-0 tabular-nums">{total ? formatRecord(wins, losses) : "—"}</span>
     </div>
-    <div className="flex items-center gap-2"><div className="min-w-0 flex-1"><RecordBar wins={wins} total={total} tone={tone} /></div><span className="shrink-0 text-[10px] tabular-nums text-pc-text-secondary">{total > 0 ? t("common.summary.valueMetric", { value: formatPercent((wins / total) * 100), metric: t("generated.matches.wr") }) : "—"}</span></div>
-    <div className="mt-1 text-right text-[10px] text-pc-text-secondary"><span className="text-pc-text-muted">{eloLabel} </span>{elo != null ? formatNumber(elo) : "—"}</div>
+    <div className="flex items-center gap-2"><div className="min-w-0 flex-1"><RecordBar wins={wins} total={total} tone={tone} /></div><span className="shrink-0 text-xs tabular-nums text-pc-text-secondary">{total > 0 ? t("common.summary.valueMetric", { value: formatPercent((wins / total) * 100), metric: t("generated.matches.wr") }) : "—"}</span></div>
+    <div className="mt-1 text-right text-xs text-pc-text-secondary"><span className="text-pc-text-muted">{eloLabel} </span>{elo != null ? formatNumber(elo) : "—"}</div>
   </div>;
 }
 
@@ -56,7 +56,7 @@ export default function MatchupCard({ player }: { player: MatchResultPlayer }) {
         {champion ? <Link href={`/champions/${championSlug(champion)}`} className="truncate text-xs text-pc-text-secondary hover:text-pc-accent">{champion}</Link> : <span className="text-xs text-pc-text-muted">{t("generated.matches.championUnknown")}</span>}
       </div>
 
-      <div className="relative mt-3 flex min-h-9 items-center justify-center gap-2 border-y border-dashed border-pc-border/70 py-2 text-center text-[11px] text-pc-text-secondary">
+      <div className="relative mt-3 flex min-h-9 items-center justify-center gap-2 border-y border-dashed border-pc-border/70 py-2 text-center text-xs text-pc-text-secondary">
         {tier != null && <img src={getRankIconPath(tier, tierRank)} alt={effectiveTier?.displayName ?? t("generated.matches.unranked")} className="h-7 w-7 object-contain" loading="lazy" />}
         <span>{effectiveTier ? t("generated.matches.value1Value2", { value1: effectiveTier.displayName, value2: effectiveTier.displayRank > 0 ? ` #${effectiveTier.displayRank}` : "" }) : md.league_tier || t("generated.matches.unranked")}</span>
         {profile?.kbmPoints != null && <span className="font-mono text-pc-text-muted">· {formatNumber(profile.kbmPoints)} {t("generated.matches.tp")}</span>}

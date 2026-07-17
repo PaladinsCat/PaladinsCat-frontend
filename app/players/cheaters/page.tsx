@@ -80,7 +80,7 @@ export default function CheatersPage() {
                   )}
                 </div>
                 <div className="min-w-0">
-                  <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-pc-text-muted">{t("generated.players.topReason")}</div>
+                  <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-pc-text-muted">{t("generated.players.topReason")}</div>
                   {reason ? (
                     <span className="inline-block max-w-full break-words rounded-md border border-pc-border bg-pc-bg px-2 py-1 text-xs leading-relaxed text-pc-text-secondary [overflow-wrap:anywhere]">{reason}</span>
                   ) : (

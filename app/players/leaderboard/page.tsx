@@ -339,15 +339,15 @@ export default function LeaderboardPage() {
                     <img src={getRankIconPath(player.tier, player.rank)} alt={effective.displayName} className="h-8 w-8 shrink-0 object-contain" />
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-sm font-semibold text-pc-text"><PlayerName playerId={player.player_id}>{player.name}</PlayerName></div>
-                      <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[11px] text-pc-text-muted">
+                      <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-pc-text-muted">
                         <span>{effective.displayName}</span>
                         {player.winRate != null && <span className={player.winRate >= 50 ? "text-emerald-400" : "text-red-400"}>{formatNumber(player.winRate, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}{t("generated.players.wr")}</span>}
                       </div>
                     </div>
                     <div className="shrink-0 text-right">
                       <div className="font-mono text-sm font-bold text-pc-accent">{formatNumber(player.points)}</div>
-                      <div className="text-[10px] uppercase tracking-wide text-pc-text-muted">{t("generated.players.points")}</div>
-                      {player.trend != null && player.trend !== 0 && <div className={`mt-0.5 text-[10px] ${player.trend > 0 ? "text-emerald-400" : "text-red-400"}`}>{player.trend > 0 ? "▲" : "▼"}{Math.abs(player.trend)}</div>}
+                      <div className="text-xs uppercase tracking-wide text-pc-text-muted">{t("generated.players.points")}</div>
+                      {player.trend != null && player.trend !== 0 && <div className={`mt-0.5 text-xs ${player.trend > 0 ? "text-emerald-400" : "text-red-400"}`}>{player.trend > 0 ? "▲" : "▼"}{Math.abs(player.trend)}</div>}
                     </div>
                   </Link>
                 );

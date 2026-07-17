@@ -85,7 +85,7 @@ export default function AltAccountsPage() {
             <article key={group.main.id} className="min-w-0 overflow-hidden rounded-xl border border-fuchsia-400/20 bg-pc-bg-elevated">
               <div className="flex items-start justify-between gap-3 border-b border-pc-border p-4">
                 <div className="min-w-0">
-                  <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.16em] text-fuchsia-300">{t("moderation.mainAccount")}</div>
+                  <div className="mb-1 text-xs font-bold uppercase tracking-[0.16em] text-fuchsia-300">{t("moderation.mainAccount")}</div>
                   <Link href={`/players/${group.main.id}`} className="block truncate text-base font-bold text-pc-text hover:text-pc-accent">
                     <PlayerName playerId={group.main.id} cheater={group.main.cheater} susCount={group.main.susCount} dropper={group.main.dropper} afkWintrade={group.main.afkWintrade} altAccount={group.main.altAccount}>{group.main.name}</PlayerName>
                   </Link>
@@ -95,7 +95,7 @@ export default function AltAccountsPage() {
               </div>
 
               <div className="p-3">
-                <div className="mb-2 flex items-center gap-2 px-1 text-[10px] font-bold uppercase tracking-[0.14em] text-pc-text-muted">
+                <div className="mb-2 flex items-center gap-2 px-1 text-xs font-bold uppercase tracking-[0.14em] text-pc-text-muted">
                   <UserRound aria-hidden="true" className="h-3.5 w-3.5" />
                   {t("moderation.altAccountList", { value1: formatNumber(group.altAccounts.length) })}
                 </div>
@@ -106,7 +106,7 @@ export default function AltAccountsPage() {
                         <div className="truncate text-sm font-semibold text-pc-text">
                           <PlayerName playerId={alt.id} cheater={alt.cheater} susCount={alt.susCount} dropper={alt.dropper} afkWintrade={alt.afkWintrade} altAccount={true}>{alt.name}</PlayerName>
                         </div>
-                        <div className="mt-0.5 text-[11px] text-pc-text-muted">{alt.region} · {alt.platform}</div>
+                        <div className="mt-0.5 text-xs text-pc-text-muted">{alt.region} · {alt.platform}</div>
                       </div>
                       <span className="shrink-0 text-xs font-semibold tabular-nums text-fuchsia-200">{t("moderation.relationshipVotes", { value1: formatNumber(alt.voteCount) })}</span>
                     </Link>

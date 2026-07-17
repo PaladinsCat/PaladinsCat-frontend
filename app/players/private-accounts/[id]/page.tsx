@@ -59,7 +59,7 @@ export default function PrivateAccountDetailPage() {
         <div className="flex items-start gap-3">
           <LockKeyhole aria-hidden="true" className="mt-1 h-9 w-9 shrink-0 text-slate-300" strokeWidth={1.5} />
           <div className="min-w-0">
-            <div className="mb-1 flex flex-wrap items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted"><span>{t("generated.players.privateProfile")}{account.id}</span><span className="rounded border border-pc-border bg-pc-bg-elevated px-1.5 py-0.5 text-pc-text-secondary">{t("generated.players.level")}{" "}{formatNumber(account.accountLevel)}</span></div>
+            <div className="mb-1 flex flex-wrap items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-pc-text-muted"><span>{t("generated.players.privateProfile")}{account.id}</span><span className="rounded border border-pc-border bg-pc-bg-elevated px-1.5 py-0.5 text-pc-text-secondary">{t("generated.players.level")}{" "}{formatNumber(account.accountLevel)}</span></div>
             <div className="flex min-w-0 items-center gap-2">
               <h1 className="pc-heading pc-heading-lg truncate text-pc-accent">{account.displayName}</h1>
               <PlayerModerationTag playerId={0} cheater={account.cheater} susCount={0} verified={false} />
@@ -105,7 +105,7 @@ export default function PrivateAccountDetailPage() {
                   <div className="mt-0.5 truncate text-xs text-pc-text-muted">{observation.championName || t("generated.players.unknownChampion")} · {observation.region || t("generated.players.unknownRegion")} · {observedAt(observation.entryDatetime)}</div>
                 </div>
                 <div className="flex items-center gap-1.5 text-xs text-pc-text-secondary"><img src={getRankIconPath(observation.leagueTier, 0)} alt="" className="h-6 w-6 object-contain" /><span>{TIER_NAMES[observation.leagueTier] || t("generated.players.unranked")}</span></div>
-                <div className="text-xs text-pc-text-secondary"><span className="font-semibold text-pc-text">{observation.leaguePoints} {t("generated.players.tp")}</span>{observation.tpDelta != null && <span className={`ml-1 ${observation.tpDelta > 0 ? "text-emerald-300" : observation.tpDelta < 0 ? "text-red-300" : "text-pc-text-muted"}`}>({tpDelta(observation.tpDelta)})</span>}<div className="mt-0.5 text-[10px] uppercase tracking-wide text-pc-text-muted">{observation.winStatus || t("generated.players.resultUnknown")} {t("generated.players.level.1019695")}{" "}{observation.accountLevel} {t("generated.players.mastery.5f14f16")}{" "}{observation.masteryLevel}</div></div>
+                <div className="text-xs text-pc-text-secondary"><span className="font-semibold text-pc-text">{observation.leaguePoints} {t("generated.players.tp")}</span>{observation.tpDelta != null && <span className={`ml-1 ${observation.tpDelta > 0 ? "text-emerald-300" : observation.tpDelta < 0 ? "text-red-300" : "text-pc-text-muted"}`}>({tpDelta(observation.tpDelta)})</span>}<div className="mt-0.5 text-xs uppercase tracking-wide text-pc-text-muted">{observation.winStatus || t("generated.players.resultUnknown")} {t("generated.players.level.1019695")}{" "}{observation.accountLevel} {t("generated.players.mastery.5f14f16")}{" "}{observation.masteryLevel}</div></div>
                 <div className="text-right text-xs text-pc-text-muted">{duration(observation.durationSeconds)}</div>
               </Link>
             ))}

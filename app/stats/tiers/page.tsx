@@ -103,7 +103,7 @@ function DistributionChart({
                 key={row.tierSort}
                 className="flex flex-col items-center justify-end gap-1 min-w-6 h-full group"
               >
-                <div className="text-[9px] text-pc-text-muted tabular-nums opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="text-xs text-pc-text-muted tabular-nums opacity-0 group-hover:opacity-100 transition-opacity">
                   {formatPercent(share)}
                 </div>
                 <div
@@ -118,7 +118,7 @@ function DistributionChart({
                   className="h-5 w-5 object-contain drop-shadow"
                   loading="lazy"
                 />
-                <div className="text-[8px] text-pc-text-secondary tabular-nums leading-none">
+                <div className="text-xs text-pc-text-secondary tabular-nums leading-none">
                   {row.totalPlays > 0 ? formatNumber(row.totalPlays) : ""}
                 </div>
               </div>

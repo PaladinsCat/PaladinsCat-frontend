@@ -126,7 +126,7 @@ function Asset({ sources, alt, level, tone = "border-pc-border", transparent = f
   if (!src) return <div className={transparent ? "h-12 w-12" : "h-9 w-9 rounded border border-pc-border bg-pc-bg-secondary"} title={alt} />;
   return <div className="relative shrink-0" title={alt}>
     <img src={src} alt={alt} className={transparent ? "h-12 w-12 object-contain" : `h-9 w-9 rounded border ${tone} object-cover`} loading="eager" onError={() => setIndex(current => Math.min(current + 1, candidates.length))} />
-    {level != null && <span className="absolute -right-1 -top-1 min-w-3 rounded bg-pc-bg px-1 text-center text-[9px] font-bold text-pc-text ring-1 ring-pc-border">{level}</span>}
+    {level != null && <span className="absolute -right-1 -top-1 min-w-3 rounded bg-pc-bg px-1 text-center text-xs font-bold text-pc-text ring-1 ring-pc-border">{level}</span>}
   </div>;
 }
 
@@ -205,15 +205,15 @@ function DetailEntry({
     <div className="min-w-0 flex-1">
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
         {href ? <Link href={href} onClick={onNavigate} className="text-xs font-semibold text-pc-text transition-colors hover:text-pc-accent hover:underline">{name}</Link> : <h4 className="text-xs font-semibold text-pc-text">{name}</h4>}
-        <span className="text-[9px] font-semibold uppercase tracking-wider text-pc-text-muted">{label}</span>
+        <span className="text-xs font-semibold uppercase tracking-wider text-pc-text-muted">{label}</span>
       </div>
       <p className="mt-1 text-xs leading-5 text-pc-text-secondary">{description}</p>
-      {showMetrics && <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[10px] tabular-nums">
+      {showMetrics && <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs tabular-nums">
         {metric ? <>
           <span className="rounded-md border px-1.5 py-0.5 font-semibold" style={{ color: quality?.color, borderColor: quality?.borderColor, background: quality?.background }}>{t("generated.matches.wr")}{" "}{formatPercent(metric.winRate)}</span>
           <span className="rounded-md border border-pc-border bg-pc-bg px-1.5 py-0.5 text-pc-text-secondary">{t("generated.matches.pr")}{" "}{formatPercent(metric.pickRate)}</span>
           <span className="text-pc-text-muted">{formatNumber(metric.plays)} {playsLabel ?? t("generated.stats.plays.0effba4")}</span>
-        </> : metricsLoaded ? <span className="text-pc-text-muted">{t("generated.matches.noRankedSampleInThisLobbyScope")}</span> : <LoadingIndicator className="gap-1.5 text-[10px]" />}
+        </> : metricsLoaded ? <span className="text-pc-text-muted">{t("generated.matches.noRankedSampleInThisLobbyScope")}</span> : <LoadingIndicator className="gap-1.5 text-xs" />}
       </div>}
     </div>
   </article>;
@@ -367,11 +367,11 @@ function PlayerBuildRow({
         <div className="min-w-0"><MatchPlayerLink player={player} className="block truncate text-sm font-semibold text-pc-text hover:text-pc-accent" />{player.champion_name && <Link href={`/champions/${championSlug(player.champion_name)}`} className="text-xs text-pc-text-secondary hover:text-pc-accent">{champion}</Link>}</div>
       </div>
       <div className="col-span-2 lg:col-span-1">
-        <div className="mb-1.5 text-[9px] font-semibold uppercase tracking-wider text-pc-text-muted lg:hidden">{t("generated.matches.talentCards")}</div>
+        <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-pc-text-muted lg:hidden">{t("generated.matches.talentCards")}</div>
         <div className="flex flex-wrap items-center gap-1.5">{talents.map(talent => <CanonicalTalentImage key={`talent-${talent.talent_id}`} talentId={talent.talent_id} talentName={talent.talent_name} alt={talent.talent_name ?? t("generated.matches.talent")} className="h-12 w-12 shrink-0 object-contain" fallbackClassName="h-12 w-12 shrink-0" />)}{cards.map(c => { const entry = findReference("cards", c.card_id, c.card_name); return <Asset key={`card-${c.card_id}`} sources={[entry?.iconUrl, c.icon_url, c.fallback_icon_url]} alt={c.card_name ?? t("generated.matches.loadoutCard")} level={c.card_level ?? undefined} tone="border-pc-accent/30" />; })}</div>
       </div>
       <div className="col-span-2 lg:col-span-1">
-        <div className="mb-1.5 text-[9px] font-semibold uppercase tracking-wider text-pc-text-muted lg:hidden">{t("generated.matches.purchasedItems")}</div>
+        <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-pc-text-muted lg:hidden">{t("generated.matches.purchasedItems")}</div>
         <div className="flex flex-wrap items-center gap-1.5">{items.map(i => { const entry = findReference("items", i.item_id, i.item_name); return <Asset key={`item-${i.slot}-${i.item_id}`} sources={[entry?.iconUrl, i.icon_url, i.fallback_icon_url]} alt={i.item_name ?? t("generated.matches.item")} level={i.item_level == null ? undefined : i.item_level + 1} />; })}</div>
       </div>
       <button
@@ -393,14 +393,14 @@ function PlayerBuildRow({
 
     {expanded && <div id={disclosureId} className="border-t border-pc-border/60 bg-pc-bg/25 px-3 py-4 lg:px-4">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-pc-border/50 pb-3">
-        <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted">{t("generated.matches.rankedPerformance")}</span>
-        {lobbyTierReady ? <span className="text-[9px] font-semibold text-pc-accent">{lobbyScopeLabel}</span> : <LoadingIndicator className="gap-1.5 text-[10px]" />}
+        <span className="text-xs font-semibold uppercase tracking-[0.14em] text-pc-text-muted">{t("generated.matches.rankedPerformance")}</span>
+        {lobbyTierReady ? <span className="text-xs font-semibold text-pc-accent">{lobbyScopeLabel}</span> : <LoadingIndicator className="gap-1.5 text-xs" />}
       </div>
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <section className="space-y-2">
           <div>
-            <h3 className="text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted">{t("generated.matches.talentLoadoutCards")}</h3>
-            <p className="mt-1 text-[10px] text-pc-text-muted">{selectedTalent ? <>{t("generated.matches.cardMetricsAreFilteredBy")}{" "}<span className="font-semibold text-pc-accent">{selectedTalent.talent_name ?? t("generated.matches.theSelectedTalent")}</span> {t("generated.matches.andUseEachRecordedCardLevel")}</> : t("generated.matches.noSelectedTalentWasRecordedCardMetricsIncludeAllTalents")}</p>
+            <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-pc-text-muted">{t("generated.matches.talentLoadoutCards")}</h3>
+            <p className="mt-1 text-xs text-pc-text-muted">{selectedTalent ? <>{t("generated.matches.cardMetricsAreFilteredBy")}{" "}<span className="font-semibold text-pc-accent">{selectedTalent.talent_name ?? t("generated.matches.theSelectedTalent")}</span> {t("generated.matches.andUseEachRecordedCardLevel")}</> : t("generated.matches.noSelectedTalentWasRecordedCardMetricsIncludeAllTalents")}</p>
           </div>
           {talents.map((talent) => {
             const entry = findReference("talents", talent.talent_id, talent.talent_name);
@@ -419,7 +419,7 @@ function PlayerBuildRow({
         </section>
 
         <section className="space-y-2">
-          <h3 className="text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted">{t("generated.matches.purchasedItems")}</h3>
+          <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-pc-text-muted">{t("generated.matches.purchasedItems")}</h3>
           {items.map((item) => {
             const entry = findReference("items", item.item_id, item.item_name) as BuildItemReference | undefined;
             const level = Math.max(1, (item.item_level ?? 0) + 1);
@@ -442,5 +442,5 @@ export default function ItemsLoadoutsSection({ team1Players, team2Players, team1
   const searchParams = useSearchParams();
   const returnTo = searchParams.size > 0 ? `${pathname}?${searchParams.toString()}` : pathname;
   const rows = (players: MatchPlayerDetail[], wins: boolean) => players.map(p => <PlayerBuildRow key={matchPlayerKey(p)} player={p} fact={factMap.get(String(p.player_id))} wins={wins} lobbyScope={lobbyScope} lobbyScopeLabel={t(lobbyTier.labelKey)} lobbyTierMin={lobbyTier.tierMin} lobbyTierMax={lobbyTier.tierMax} lobbyTierReady={lobbyTierReady} returnTo={returnTo} />);
-  return <section className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated"><div className="flex flex-wrap items-end justify-between gap-3 border-b border-pc-border px-4 py-3"><div><h2 className="text-lg font-bold uppercase tracking-wide text-pc-text">{t("generated.matches.itemsLoadouts")}</h2><p className="mt-0.5 text-xs text-pc-text-muted">{t("generated.matches.talentAndCardsPurchasedItemsExpandARowForDescriptions")}</p></div></div><div className="overflow-x-hidden lg:overflow-x-auto"><div className="hidden min-w-[780px] grid-cols-[240px_1fr_1fr_36px] gap-4 border-b border-pc-border bg-pc-bg-secondary/60 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted lg:grid"><span>{t("generated.matches.championPlayer")}</span><span>{t("generated.matches.loadout")}</span><span>{t("generated.matches.items")}</span><span className="sr-only">{t("generated.matches.details")}</span></div>{rows(team1Players, team1Wins)}<div className="flex items-center gap-3 bg-pc-bg-secondary/60 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-pc-text-muted"><span className={`h-1.5 w-1.5 rounded-full ${team2Wins ? "bg-emerald-400" : "bg-red-400"}`} />{t("generated.matches.opposingTeam")}</div>{rows(team2Players, team2Wins)}</div></section>;
+  return <section className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated"><div className="flex flex-wrap items-end justify-between gap-3 border-b border-pc-border px-4 py-3"><div><h2 className="text-lg font-bold uppercase tracking-wide text-pc-text">{t("generated.matches.itemsLoadouts")}</h2><p className="mt-0.5 text-xs text-pc-text-muted">{t("generated.matches.talentAndCardsPurchasedItemsExpandARowForDescriptions")}</p></div></div><div className="overflow-x-hidden lg:overflow-x-auto"><div className="hidden min-w-[780px] grid-cols-[240px_1fr_1fr_36px] gap-4 border-b border-pc-border bg-pc-bg-secondary/60 px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-pc-text-muted lg:grid"><span>{t("generated.matches.championPlayer")}</span><span>{t("generated.matches.loadout")}</span><span>{t("generated.matches.items")}</span><span className="sr-only">{t("generated.matches.details")}</span></div>{rows(team1Players, team1Wins)}<div className="flex items-center gap-3 bg-pc-bg-secondary/60 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-pc-text-muted"><span className={`h-1.5 w-1.5 rounded-full ${team2Wins ? "bg-emerald-400" : "bg-red-400"}`} />{t("generated.matches.opposingTeam")}</div>{rows(team2Players, team2Wins)}</div></section>;
 }

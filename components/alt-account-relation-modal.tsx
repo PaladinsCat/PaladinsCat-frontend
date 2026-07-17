@@ -192,7 +192,7 @@ export default function AltAccountRelationModal({
             <div className="flex items-center gap-2 text-sm font-semibold text-fuchsia-200">
               <UserRoundCheck aria-hidden="true" className="h-5 w-5" />
               {selected.name}
-              {selectedRelation && <span className="rounded-full border border-fuchsia-400/25 bg-fuchsia-400/10 px-2 py-0.5 text-[10px] uppercase tracking-wider">{t("moderation.existingVote")}</span>}
+              {selectedRelation && <span className="rounded-full border border-fuchsia-400/25 bg-fuchsia-400/10 px-2 py-0.5 text-xs uppercase tracking-wider">{t("moderation.existingVote")}</span>}
             </div>
             <p className="text-xs font-semibold uppercase tracking-wider text-pc-text-muted">{t("moderation.chooseRelationshipDirection")}</p>
             <div className="grid gap-2 sm:grid-cols-2">

@@ -32,7 +32,7 @@ export function PerformanceOverviewCard({
         {metrics.map(({ key, label, color, p10, p25, mean, p75, p90 }) => (
           <div key={key} className="flex items-center gap-3">
             <div className="w-14 shrink-0 text-right">
-              <span className="text-[10px] font-bold text-pc-text">{label}</span>
+              <span className="text-xs font-bold text-pc-text">{label}</span>
               <div className="text-xs font-bold tabular-nums" style={{ color }}>
                 {formatMetric(key, mean)}
               </div>
@@ -40,7 +40,7 @@ export function PerformanceOverviewCard({
             <div className="flex-1">
               <RangeBar color={color} mean={mean} p10={p10} p25={p25} p75={p75} p90={p90} />
             </div>
-            <div className="w-12 shrink-0 text-[9px] text-pc-text-muted tabular-nums leading-tight">
+            <div className="w-12 shrink-0 text-xs text-pc-text-muted tabular-nums leading-tight">
               <div>{formatCompact(p10)}</div>
               <div className="text-pc-text-secondary">{formatCompact(p90)}</div>
             </div>

@@ -68,7 +68,7 @@ export default function CommunityPage() {
                   <div className="flex min-w-0 items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
                       <h2 className="break-words text-base font-semibold text-pc-text transition-colors hover:text-pc-accent sm:text-lg">
-                        {post.title}{post.tierListId != null && <span className="ml-2 rounded-full border border-pc-accent/40 bg-pc-accent/10 px-2 py-0.5 align-middle text-[10px] font-semibold uppercase tracking-wide text-pc-accent">{t("tierLists.badge")}</span>}
+                        {post.title}{post.tierListId != null && <span className="ml-2 rounded-full border border-pc-accent/40 bg-pc-accent/10 px-2 py-0.5 align-middle text-xs font-semibold uppercase tracking-wide text-pc-accent">{t("tierLists.badge")}</span>}
                       </h2>
                       <p className="mt-1 line-clamp-2 break-words text-sm text-pc-text-secondary [overflow-wrap:anywhere]">
                         {post.content}
@@ -132,7 +132,7 @@ export default function CommunityPage() {
                         <span className="shrink-0 text-rose-400">● {formatNumber(stream.viewerCount)}</span>
                       </div>
                       <p className="mt-1 line-clamp-2 text-xs leading-snug text-pc-text-secondary">{stream.title || t("generated.community.playingPaladins")}</p>
-                      {stream.language && <span className="mt-1 block text-[10px] uppercase tracking-wide text-pc-text-muted">{stream.language}</span>}
+                      {stream.language && <span className="mt-1 block text-xs uppercase tracking-wide text-pc-text-muted">{stream.language}</span>}
                     </div>
                   </a>
                 ))

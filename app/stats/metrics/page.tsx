@@ -302,7 +302,7 @@ function MetricPanel({ config }: { config: MetricConfig }) {
                       <img src={getChampionIconSafe(champion.name)} alt="" className="h-9 w-9 shrink-0 rounded-lg object-contain" />
                       <div className="min-w-0 flex-1">
                         <div className="truncate text-sm font-semibold text-pc-text">{champion.name}</div>
-                        <div className="mt-0.5 flex flex-wrap gap-x-2 text-[10px]">
+                        <div className="mt-0.5 flex flex-wrap gap-x-2 text-xs">
                           <span className={vsClassPct >= 0 ? "text-emerald-400" : "text-red-400"}>{vsClassPct >= 0 ? "+" : ""}{formatNumber(vsClassPct, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}{t("generated.stats.class")}</span>
                           <span className={vsGlobalPct >= 0 ? "text-emerald-400" : "text-red-400"}>{vsGlobalPct >= 0 ? "+" : ""}{formatNumber(vsGlobalPct, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}{t("generated.stats.global.ac9baca")}</span>
                           <span className="text-pc-text-muted">{formatNumber(champion.matches)} {t("generated.stats.matches.9f3e924")}</span>

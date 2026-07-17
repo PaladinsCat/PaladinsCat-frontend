@@ -66,7 +66,7 @@ export default function AdminDashboardPage() {
     <ContentFade className="space-y-7">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-pc-text-muted">{t("generated.admin.privateOperations")}</div>
+          <div className="text-xs font-bold uppercase tracking-[0.18em] text-pc-text-muted">{t("generated.admin.privateOperations")}</div>
           <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.admin.adminDashboard")}</h1>
           <p className="mt-1 text-sm text-pc-text-secondary">{t("generated.admin.trafficPlatformHealthIngestionAndHiRezQuotaTelemetry")}</p>
         </div>
@@ -115,7 +115,7 @@ export default function AdminDashboardPage() {
             {dashboard.hirez.keys.map((key) => <ApiKeyCard key={key.devId} apiKey={key} />)}
           </div>
           <div className="mt-5">
-            <div className="mb-1.5 flex justify-between text-[11px] text-pc-text-muted"><span>{t("generated.admin.combinedDailyBudget")}</span><span>{formatNumber(budgetPercent, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}{t("generated.admin.used")}</span></div>
+            <div className="mb-1.5 flex justify-between text-xs text-pc-text-muted"><span>{t("generated.admin.combinedDailyBudget")}</span><span>{formatNumber(budgetPercent, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}{t("generated.admin.used")}</span></div>
             <div className="h-2 overflow-hidden rounded-full bg-pc-bg"><div className="h-full rounded-full bg-pc-accent transition-all duration-500" style={{ width: `${budgetPercent}%` }} /></div>
           </div>
         </div>
@@ -148,7 +148,7 @@ export default function AdminDashboardPage() {
         </div>
       </section>
 
-      <footer className="flex flex-wrap items-center justify-between gap-2 text-[10px] text-pc-text-muted">
+      <footer className="flex flex-wrap items-center justify-between gap-2 text-xs text-pc-text-muted">
         <span>{t("generated.admin.signedInAs")}{" "}{user.username}{t("generated.admin.thisRouteAndItsDataEndpointRequireAnAdminSession")}</span>
         <span>{t("generated.admin.snapshot")}{" "}{formatDateTime(dashboard.generatedAt)}</span>
       </footer>
@@ -158,17 +158,17 @@ export default function AdminDashboardPage() {
 }
 
 function MetricCard({ icon: Icon, label, value, detail }: { icon: typeof Users; label: string; value: string; detail: string }) {
-  return <div className="pc-card p-4"><div className="flex items-center gap-2 text-xs text-pc-text-muted"><Icon className="h-4 w-4 text-pc-accent" />{label}</div><div className="mt-2 text-2xl font-bold tabular-nums text-pc-text">{value}</div><div className="mt-1 text-[10px] text-pc-text-muted">{detail}</div></div>;
+  return <div className="pc-card p-4"><div className="flex items-center gap-2 text-xs text-pc-text-muted"><Icon className="h-4 w-4 text-pc-accent" />{label}</div><div className="mt-2 text-2xl font-bold tabular-nums text-pc-text">{value}</div><div className="mt-1 text-xs text-pc-text-muted">{detail}</div></div>;
 }
 
 function SectionTitle({ icon: Icon, title, subtitle }: { icon: typeof Activity; title: string; subtitle: string }) {
-  return <div className="flex items-start gap-2"><Icon className="mt-0.5 h-4 w-4 text-pc-accent" /><div><h2 className="text-sm font-bold text-pc-text">{title}</h2><p className="text-[10px] text-pc-text-muted">{subtitle}</p></div></div>;
+  return <div className="flex items-start gap-2"><Icon className="mt-0.5 h-4 w-4 text-pc-accent" /><div><h2 className="text-sm font-bold text-pc-text">{title}</h2><p className="text-xs text-pc-text-muted">{subtitle}</p></div></div>;
 }
 
 function TrafficChart({ dashboard }: { dashboard: AdminDashboard }) {
   const { formatNumber, locale } = useLocalization();
   const max = Math.max(1, ...dashboard.traffic.daily.map((row) => Math.max(row.pageViews, row.visitors)));
-  return <div className="mt-5 flex h-52 items-end gap-1.5 overflow-x-auto border-b border-pc-border pb-2">{dashboard.traffic.daily.map((row) => <div key={row.date} className="group flex min-w-9 flex-1 flex-col items-center justify-end gap-1"><div className="text-[9px] text-pc-text-muted opacity-0 transition-opacity group-hover:opacity-100">{formatNumber(row.visitors)}/{formatNumber(row.pageViews)}</div><div className="relative flex h-36 w-full max-w-9 items-end justify-center"><div className="w-5 rounded-t bg-pc-accent-deep/70" style={{ height: `${Math.max(2, (row.pageViews / max) * 100)}%` }} /><div className="absolute bottom-0 w-2 rounded-t bg-pc-accent" style={{ height: `${Math.max(2, (row.visitors / max) * 100)}%` }} /></div><span className="text-[9px] text-pc-text-muted">{new Intl.DateTimeFormat(locale, { weekday: "short", timeZone: "UTC" }).format(new Date(`${row.date}T00:00:00Z`))}</span><span className="text-[8px] tabular-nums text-pc-text-secondary">{formatNumber(row.matches)}</span></div>)}</div>;
+  return <div className="mt-5 flex h-52 items-end gap-1.5 overflow-x-auto border-b border-pc-border pb-2">{dashboard.traffic.daily.map((row) => <div key={row.date} className="group flex min-w-9 flex-1 flex-col items-center justify-end gap-1"><div className="text-xs text-pc-text-muted opacity-0 transition-opacity group-hover:opacity-100">{formatNumber(row.visitors)}/{formatNumber(row.pageViews)}</div><div className="relative flex h-36 w-full max-w-9 items-end justify-center"><div className="w-5 rounded-t bg-pc-accent-deep/70" style={{ height: `${Math.max(2, (row.pageViews / max) * 100)}%` }} /><div className="absolute bottom-0 w-2 rounded-t bg-pc-accent" style={{ height: `${Math.max(2, (row.visitors / max) * 100)}%` }} /></div><span className="text-xs text-pc-text-muted">{new Intl.DateTimeFormat(locale, { weekday: "short", timeZone: "UTC" }).format(new Date(`${row.date}T00:00:00Z`))}</span><span className="text-xs tabular-nums text-pc-text-secondary">{formatNumber(row.matches)}</span></div>)}</div>;
 }
 
 function ApiKeyCard({ apiKey }: { apiKey: AdminDashboard["hirez"]["keys"][number] }) {
@@ -187,16 +187,16 @@ function ApiKeyCard({ apiKey }: { apiKey: AdminDashboard["hirez"]["keys"][number
     : apiKey.status === "unhealthy"
       ? "bg-rose-400/15 text-rose-300"
       : "bg-amber-400/15 text-amber-300";
-  return <div className="rounded-xl border border-pc-border bg-pc-bg/35 p-3"><div className="flex items-center justify-between"><span className="font-mono text-xs font-bold text-pc-text">{t("generated.admin.key")}{" "}{apiKey.devId}</span><span className={`rounded-full px-2 py-0.5 text-[9px] font-semibold ${statusColor}`}>{statusLabel}</span></div><div className="mt-3 flex items-end justify-between"><div><div className="text-lg font-bold tabular-nums text-pc-text">{formatNumber(apiKey.remaining)}</div><div className="text-[9px] text-pc-text-muted">{t("generated.admin.remaining")}</div></div><div className="text-right text-[10px] text-pc-text-secondary">{formatNumber(apiKey.used)} / {formatNumber(apiKey.dailyLimit)}</div></div><div className="mt-2 h-1.5 overflow-hidden rounded-full bg-pc-bg"><div className={`h-full rounded-full ${color}`} style={{ width: `${percent}%` }} /></div><div className="mt-2 truncate text-[9px] text-pc-text-muted">{t("generated.admin.synced")}{" "}{apiKey.lastSyncAt ? formatDateTime(apiKey.lastSyncAt) : t("generated.admin.never")}</div></div>;
+  return <div className="rounded-xl border border-pc-border bg-pc-bg/35 p-3"><div className="flex items-center justify-between"><span className="font-mono text-xs font-bold text-pc-text">{t("generated.admin.key")}{" "}{apiKey.devId}</span><span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${statusColor}`}>{statusLabel}</span></div><div className="mt-3 flex items-end justify-between"><div><div className="text-lg font-bold tabular-nums text-pc-text">{formatNumber(apiKey.remaining)}</div><div className="text-xs text-pc-text-muted">{t("generated.admin.remaining")}</div></div><div className="text-right text-xs text-pc-text-secondary">{formatNumber(apiKey.used)} / {formatNumber(apiKey.dailyLimit)}</div></div><div className="mt-2 h-1.5 overflow-hidden rounded-full bg-pc-bg"><div className={`h-full rounded-full ${color}`} style={{ width: `${percent}%` }} /></div><div className="mt-2 truncate text-xs text-pc-text-muted">{t("generated.admin.synced")}{" "}{apiKey.lastSyncAt ? formatDateTime(apiKey.lastSyncAt) : t("generated.admin.never")}</div></div>;
 }
 
 function HourlyBars({ rows }: { rows: Array<{ hour: string; calls: number }> }) {
   const { t , formatDateTime} = useLocalization();
   const max = Math.max(1, ...rows.map((row) => row.calls));
-  return <div className="mt-5 flex h-40 items-end gap-1">{rows.map((row, index) => <div key={row.hour} className="group flex h-full min-w-0 flex-1 items-end"><div className="relative w-full rounded-t bg-pc-accent-mid/70 transition-colors group-hover:bg-pc-accent" style={{ height: `${Math.max(2, (row.calls / max) * 100)}%` }} title={t("generated.admin.value1Value2Calls", { value1: formatDateTime(row.hour), value2: row.calls })}><span className="absolute -top-4 left-1/2 -translate-x-1/2 text-[8px] text-pc-text-muted opacity-0 group-hover:opacity-100">{row.calls}</span></div>{index % 6 === 0 && <span className="absolute text-[8px] text-pc-text-muted" />}</div>)}</div>;
+  return <div className="mt-5 flex h-40 items-end gap-1">{rows.map((row, index) => <div key={row.hour} className="group flex h-full min-w-0 flex-1 items-end"><div className="relative w-full rounded-t bg-pc-accent-mid/70 transition-colors group-hover:bg-pc-accent" style={{ height: `${Math.max(2, (row.calls / max) * 100)}%` }} title={t("generated.admin.value1Value2Calls", { value1: formatDateTime(row.hour), value2: row.calls })}><span className="absolute -top-4 left-1/2 -translate-x-1/2 text-xs text-pc-text-muted opacity-0 group-hover:opacity-100">{row.calls}</span></div>{index % 6 === 0 && <span className="absolute text-xs text-pc-text-muted" />}</div>)}</div>;
 }
 
 function SmallStat({ label, value, tone = "normal" }: { label: string; value: string; tone?: "normal" | "warn" | "bad" }) {
   const color = tone === "bad" ? "text-rose-400" : tone === "warn" ? "text-amber-300" : "text-pc-text";
-  return <div className="rounded-lg border border-pc-border/60 bg-pc-bg/35 p-3"><div className="text-[10px] text-pc-text-muted">{label}</div><div className={`mt-1 text-lg font-bold tabular-nums ${color}`}>{value}</div></div>;
+  return <div className="rounded-lg border border-pc-border/60 bg-pc-bg/35 p-3"><div className="text-xs text-pc-text-muted">{label}</div><div className={`mt-1 text-lg font-bold tabular-nums ${color}`}>{value}</div></div>;
 }

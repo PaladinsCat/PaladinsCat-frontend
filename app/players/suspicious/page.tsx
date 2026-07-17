@@ -62,7 +62,7 @@ export default function SuspiciousPage() {
               </span>
 
               <div className="min-w-0 sm:col-span-2">
-                <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-pc-text-muted">{t("generated.players.topReasons")}</div>
+                <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-pc-text-muted">{t("generated.players.topReasons")}</div>
                 {player.topReasons.length > 0 ? (
                   <ul className="flex min-w-0 flex-wrap gap-1.5">
                     {player.topReasons.map((reason) => (

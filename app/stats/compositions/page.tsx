@@ -77,7 +77,7 @@ export default function CompositionStatsPage() {
           [t("generated.stats.compositions.page.mostcommon"), rows[0]?.composition ?? "—"],
           [t("generated.stats.compositions.page.trackedmatches"), formatNumber(rows.reduce((sum, row) => sum + row.totalMatches, 0))],
           [t("generated.stats.compositions.page.bestsampledwr"), rows.length ? formatPercent(Math.max(...rows.filter((row) => row.totalMatches >= 20).map((row) => row.winRate), 0)) : "—"],
-        ].map(([label, value]) => <div key={label} className="rounded-xl border border-pc-border bg-pc-bg-elevated p-4"><div className="text-[10px] uppercase tracking-wider text-pc-text-muted">{label}</div><div className="mt-1 truncate text-lg font-bold text-pc-text">{value}</div></div>)}
+        ].map(([label, value]) => <div key={label} className="rounded-xl border border-pc-border bg-pc-bg-elevated p-4"><div className="text-xs uppercase tracking-wider text-pc-text-muted">{label}</div><div className="mt-1 truncate text-lg font-bold text-pc-text">{value}</div></div>)}
       </div>
 
       <div className="flex flex-wrap items-center gap-2 lg:hidden">
@@ -88,8 +88,8 @@ export default function CompositionStatsPage() {
 
       <div className="space-y-2 lg:hidden">
         {pagedRows.map((row) => <article key={row.composition} className="pc-mobile-panel p-3">
-          <div className="flex items-center justify-between gap-3"><div><div className="font-mono text-base font-bold text-pc-text">{row.composition}</div><div className="text-[10px] text-pc-text-muted">{t("generated.stats.frontlineDamageFlankSupport")}</div></div><div className={row.winRate >= 50 ? "text-right font-bold text-emerald-400" : "text-right font-bold text-rose-400"}>{formatPercent(row.winRate)}<div className="text-[9px] font-normal uppercase tracking-wide text-pc-text-muted">{t("generated.stats.winRate.0a2b795")}</div></div></div>
-          <div className="mt-3 grid grid-cols-4 gap-1.5">{CLASS_COLUMNS.map((column) => <div key={column.key} className="rounded-lg bg-pc-bg-secondary/60 p-2 text-center"><img src={column.icon} alt="" className="mx-auto h-5 w-5 object-contain" /><div className="mt-1 font-mono text-sm font-semibold text-pc-text">{row[column.key]}</div><div className="truncate text-[8px] uppercase text-pc-text-muted">{t(column.labelKey)}</div></div>)}</div>
+          <div className="flex items-center justify-between gap-3"><div><div className="font-mono text-base font-bold text-pc-text">{row.composition}</div><div className="text-xs text-pc-text-muted">{t("generated.stats.frontlineDamageFlankSupport")}</div></div><div className={row.winRate >= 50 ? "text-right font-bold text-emerald-400" : "text-right font-bold text-rose-400"}>{formatPercent(row.winRate)}<div className="text-xs font-normal uppercase tracking-wide text-pc-text-muted">{t("generated.stats.winRate.0a2b795")}</div></div></div>
+          <div className="mt-3 grid grid-cols-4 gap-1.5">{CLASS_COLUMNS.map((column) => <div key={column.key} className="rounded-lg bg-pc-bg-secondary/60 p-2 text-center"><img src={column.icon} alt="" className="mx-auto h-5 w-5 object-contain" /><div className="mt-1 font-mono text-sm font-semibold text-pc-text">{row[column.key]}</div><div className="truncate text-xs uppercase text-pc-text-muted">{t(column.labelKey)}</div></div>)}</div>
           <div className="mt-3 flex items-center justify-between text-xs"><span className="text-pc-text-secondary">{formatNumber(row.totalMatches)} {t("generated.stats.matches.9f3e924")}</span><span className="text-pc-text-muted">{formatRecord(row.wins, row.losses)}</span></div>
         </article>)}
         {pagedRows.length === 0 && <div className="pc-mobile-panel p-6 text-center text-sm text-pc-text-muted">{loading ? <LoadingIndicator /> : t("generated.stats.compositionStatisticsAreNotAvailableForThisLobbyScopeYet")}</div>}

@@ -54,7 +54,7 @@ export default function BansSection({ bans }: BansSectionProps) {
                 className="w-9 h-9 rounded border border-red-500/20 bg-pc-bg-secondary"
               />
               <div className="min-w-0">
-                <div className="text-[10px] uppercase tracking-wide text-red-300/70">
+                <div className="text-xs uppercase tracking-wide text-red-300/70">
                   {t("generated.matches.ban")}{" "}{ban.banSlot ?? i + 1}
                 </div>
                 <div className="truncate text-xs font-medium">{label}</div>
