@@ -38,6 +38,7 @@ function addFinding(file, input, match, renderedPixels, kind) {
 }
 
 function auditFile(file, input) {
+  const sourcePath = relative(root, file).replaceAll("\\", "/");
   const arbitraryTextSize = /text-\[(?<value>[0-9]*\.?[0-9]+)(?<unit>px|rem|em)\]/g;
   for (const match of input.matchAll(arbitraryTextSize)) {
     const value = Number(match.groups.value);
@@ -51,6 +52,13 @@ function auditFile(file, input) {
 
   const cssFontSize = /font-size:\s*(?<value>[0-9]*\.?[0-9]+)(?<unit>px|rem)/g;
   for (const match of input.matchAll(cssFontSize)) {
+    const lineStart = input.lastIndexOf("\n", match.index) + 1;
+    const lineEnd = input.indexOf("\n", match.index);
+    const sourceLine = input.slice(lineStart, lineEnd < 0 ? input.length : lineEnd);
+    // The 1280×720 scoreboard is an image-export canvas that is scaled 1.6×
+    // into its native 2048×1152 PNG. Its compact labels are canvas geometry,
+    // not normal site typography, and changing them corrupts column layout.
+    if (sourcePath === "app/globals.css" && sourceLine.includes("#browser-scoreboard")) continue;
     const renderedPixels = pixels(Number(match.groups.value), match.groups.unit);
     if (renderedPixels > 0 && renderedPixels < minimumPixels) {
       addFinding(file, input, match, renderedPixels, "css");
