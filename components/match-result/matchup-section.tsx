@@ -19,13 +19,13 @@ export default function MatchupSection({
   team1, team2, team1Wins, team2Wins, team1Label, team2Label,
 }: MatchupSectionProps) {
   const { t } = useLocalization();
-  const [sortBy, setSortBy] = useState("Player Name");
+  const [sortBy, setSortBy] = useState(t("generated.match.matchup.playerName"));
   const averages1 = computeTeamAverages(team1);
   const averages2 = computeTeamAverages(team2);
 
-  const sortOptions = ["Player Name", "Tier", "TP", "W/L"];
+  const sortOptions = [t("generated.match.matchup.playerName"), t("generated.match.matchup.tier"), "TP", "W/L"];
   const ordered = (players: MatchResultPlayer[]) => [...players].sort((a, b) => {
-    if (sortBy === "Tier") return String(b.matchData.league_tier ?? "").localeCompare(String(a.matchData.league_tier ?? ""), undefined, { numeric: true });
+    if (sortBy === t("generated.match.matchup.tier")) return String(b.matchData.league_tier ?? "").localeCompare(String(a.matchData.league_tier ?? ""), undefined, { numeric: true });
     if (sortBy === "TP") return (b.profileData?.kbmPoints ?? -1) - (a.profileData?.kbmPoints ?? -1);
     if (sortBy === "W/L") return (b.profileData?.winRate ?? -1) - (a.profileData?.winRate ?? -1);
     return (a.matchData.player_name ?? "").localeCompare(b.matchData.player_name ?? "");

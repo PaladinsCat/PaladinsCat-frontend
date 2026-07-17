@@ -25,7 +25,7 @@ export default function CommunityPage() {
         const data = await fetchPosts({ limit: "50" });
         setPosts(data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load posts");
+        setError(err instanceof Error ? err.message : t("generated.app\\community\\page.failedtoloadposts"));
       } finally {
         setLoading(false);
       }
@@ -62,13 +62,13 @@ export default function CommunityPage() {
               {posts.map((post) => (
                 <Link
                   key={post.id}
-                  href={`/community/${post.id}`}
+                  href={post.tierListId != null ? `/tierlists/${post.id}` : `/community/${post.id}`}
                   className="block min-w-0 overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated p-4 transition-colors hover:border-pc-accent/50 sm:p-5"
                 >
                   <div className="flex min-w-0 items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
                       <h2 className="break-words text-base font-semibold text-pc-text transition-colors hover:text-pc-accent sm:text-lg">
-                        {post.title}
+                        {post.title}{post.tierListId != null && <span className="ml-2 rounded-full border border-pc-accent/40 bg-pc-accent/10 px-2 py-0.5 align-middle text-[10px] font-semibold uppercase tracking-wide text-pc-accent">{t("tierLists.badge")}</span>}
                       </h2>
                       <p className="mt-1 line-clamp-2 break-words text-sm text-pc-text-secondary [overflow-wrap:anywhere]">
                         {post.content}

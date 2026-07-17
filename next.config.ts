@@ -17,6 +17,16 @@ const nextConfig: NextConfig = {
   images: {
     formats: ['image/avif', 'image/webp'],
   },
+  async redirects() {
+    return [
+      { source: "/stats", destination: "/stats/performance", permanent: true },
+      { source: "/stats/metrics", destination: "/stats/performance", permanent: true },
+      { source: "/stats/egpm", destination: "/stats/ecpm", permanent: true },
+      { source: "/stats/items/:path*", destination: "/game/items/:path*", permanent: true },
+      { source: "/stats/maps/:path*", destination: "/game/maps/:path*", permanent: true },
+      { source: "/stats/compositions", destination: "/game/compositions", permanent: true },
+    ];
+  },
   async rewrites() {
     // Frontend page routes — must come BEFORE the catch-all
     const pages = [

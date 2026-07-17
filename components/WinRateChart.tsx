@@ -21,7 +21,7 @@ export default function WinRateChart({ data, championName }: WinRateChartProps) 
       data={chartData}
       xKey="week"
       yKeys={["winRate"]}
-      yLabel="Win Rate (%)"
+      yLabel={t("generated.leaderboard.winRate")}
       title={t("generated.components.value1WinRateOverTime", { value1: championName })}
       height={250}
       colors={["#4ade80"]}

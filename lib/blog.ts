@@ -35,7 +35,7 @@ function deriveMetadata(content: string): { title: string; date: string; excerpt
   const dateMatch = visibleContent.match(/\*\*Published:\*\*\s*(.+?)\s*(?:\s*&nbsp;|\s*\||\s*$)/m);
   const date = dateMatch ? dateMatch[1].trim() : "N/A";
 
-  const lines = visibleContent.split("\n").filter(l => l.trim());
+  const lines = visibleContent.split("\\n").filter(l => l.trim());
   let excerpt = "";
   for (const line of lines) {
     if (line.startsWith(">")) {

@@ -7,6 +7,7 @@ export type Champion = {
   winRate?: number | null;
   pickRate?: number | null;
   banRate?: number | null;
+  totalBans?: number | null;
   rating?: number | null;
   ratingDeviation?: number | null;
   volatility?: number | null;
@@ -28,6 +29,7 @@ export type ChampionStats = {
   winRate?: number | null;
   pickRate?: number | null;
   banRate?: number | null;
+  totalBans?: number | null;
   totalMatches?: number | null;
 };
 

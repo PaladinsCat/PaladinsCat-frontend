@@ -118,7 +118,7 @@ function CardTile({ card, selection, disabled, onToggle, onLevelChange }: {
 
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     if (blocked) return;
-    if (event.key === "Enter" || event.key === " ") {
+    if (event.key === t("generated.app\\builds\\create\\page.enter") || event.key === " ") {
       event.preventDefault();
       onToggle();
     }
@@ -304,7 +304,7 @@ export default function CreateBuildPage() {
       );
       router.push(`/builds/${build.id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create build");
+      setError(err instanceof Error ? err.message : t("generated.app\\builds\\create\\page.failedtocreatebuild"));
     } finally {
       setSubmitting(false);
     }

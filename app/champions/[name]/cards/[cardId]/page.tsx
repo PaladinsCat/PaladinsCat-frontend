@@ -93,7 +93,7 @@ export default function ChampionCardDetailPage() {
         if (cancelled) return;
         setChampionData(null);
         setDetail(null);
-        setError(err instanceof Error ? err.message : "Unable to load card stats.");
+        setError(err instanceof Error ? err.message : t("generated.app\\champions\\[name]\\cards\\[cardId]\\page.unabletoloadcardstats"));
       })
       .finally(() => {
         if (!cancelled) setLoading(false);

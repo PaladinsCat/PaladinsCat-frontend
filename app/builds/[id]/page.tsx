@@ -151,7 +151,7 @@ export default function BuildDetailPage({ params }: { params: Promise<{ id: stri
                       talentId={talentId}
                       iconUrl={talent?.iconUrl}
                       title={talent?.name ?? t("generated.builds.talentValue1", { value1: talentId })}
-                      subtitle="Selected talent"
+                      subtitle={t("generated.builds.selectedTalent")}
                     />
                   );
                 })

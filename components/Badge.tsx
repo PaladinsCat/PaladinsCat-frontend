@@ -7,7 +7,7 @@
  *   - ranked: teal accent, trophy icon, for ranked matches/content
  *   - mode: neutral, for match mode labels (Ranked/Unranked)
  *   - default: inherits from parent, no icon
- * Usage: <Badge variant="verified">Verified</Badge>
+ * Usage: <Badge variant="verified">{t("generated.badge.verified")}</Badge>
  */
 
 export type BadgeVariant = "verified" | "supporter" | "ranked" | "mode" | "default";

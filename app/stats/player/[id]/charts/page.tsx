@@ -108,8 +108,8 @@ export default function PlayerChartsPage({ params }: { params: Promise<{ id: str
                 labelStyle={{ color: "#9CA3AF" }}
               />
               <Legend />
-              <Line type="monotone" dataKey="playerDpm" stroke="#4ade80" strokeWidth={2} dot={{ r: 3 }} name="Player DPM" />
-              <Line type="monotone" dataKey="avgDpm" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} name="Server Average" />
+              <Line type="monotone" dataKey="playerDpm" stroke="#4ade80" strokeWidth={2} dot={{ r: 3 }} name={t("generated.app\\stats\\player\\[id]\\charts\\page.playerdpm")} />
+              <Line type="monotone" dataKey="avgDpm" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} name={t("generated.app\\stats\\player\\[id]\\charts\\page.serveraverage")} />
             </LineChart>
           </ResponsiveContainer>
         )}
@@ -131,7 +131,7 @@ export default function PlayerChartsPage({ params }: { params: Promise<{ id: str
                 labelStyle={{ color: "#9CA3AF" }}
               />
               <Legend />
-              <Line type="monotone" dataKey="rating" stroke="#8b5cf6" strokeWidth={2} dot={{ r: 3 }} name="Rating" />
+              <Line type="monotone" dataKey="rating" stroke="#8b5cf6" strokeWidth={2} dot={{ r: 3 }} name={t("generated.app\\stats\\player\\[id]\\charts\\page.rating")} />
             </LineChart>
           </ResponsiveContainer>
         )}

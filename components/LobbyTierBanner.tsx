@@ -14,7 +14,7 @@ export default function LobbyTierBanner() {
   const { isLoggedIn, isLoading: authLoading } = useAuth();
   const { filter, definition, ready, setFilter } = useLobbyTier();
 
-  const statisticsRoute = ["/champions", "/matches", "/stats"].some(
+  const statisticsRoute = ["/champions", "/matches", "/stats", "/game"].some(
     (root) => pathname === root || pathname.startsWith(`${root}/`),
   );
 

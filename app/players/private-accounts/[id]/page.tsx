@@ -11,6 +11,7 @@ import {
 } from "@/lib/api-client";
 import { TIER_NAMES, getRankIconPath, getTierColor } from "@/lib/tier-utils";
 import { useLocalization } from "@/lib/localization-context";
+import { PlayerModerationTag } from "@/components/player-name";
 
 function observedAt(value: string | null) {
   if (!value) return "Unknown";
@@ -67,6 +68,7 @@ export default function PrivateAccountDetailPage() {
             <div className="mb-1 flex flex-wrap items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-pc-text-muted"><span>{t("generated.players.privateProfile")}{account.id}</span><span className="rounded border border-pc-border bg-pc-bg-elevated px-1.5 py-0.5 text-pc-text-secondary">{t("generated.players.level")}{" "}{account.accountLevel.toLocaleString()}</span></div>
             <div className="flex min-w-0 items-center gap-2">
               <h1 className="pc-heading pc-heading-lg truncate text-pc-accent">{account.displayName}</h1>
+              <PlayerModerationTag playerId={0} cheater={account.cheater} susCount={0} verified={false} />
               {account.verifiedName && <ShieldCheck aria-label={t("generated.players.verifiedFromSubmittedEvidence")} className="h-5 w-5 shrink-0 text-emerald-300" />}
             </div>
             <p className="mt-1 text-sm text-pc-text-secondary">

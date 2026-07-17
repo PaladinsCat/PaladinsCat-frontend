@@ -32,12 +32,14 @@ type RateChampionRow = {
   className: string;
   value: number;
   matches: number;
+  bans: number;
 };
 
 type RateClassSection = {
   className: string;
   average: number;
   matches: number;
+  bans: number;
   champions: RateChampionRow[];
 };
 
@@ -48,6 +50,11 @@ function metricValue(champion: Champion, key: RateMetricKey): number | null {
 
 function championMatches(champion: Champion): number {
   const value = champion.totalMatches ?? champion.totalPlays ?? 0;
+  return typeof value === "number" && Number.isFinite(value) ? value : 0;
+}
+
+function championBans(champion: Champion): number {
+  const value = champion.totalBans ?? 0;
   return typeof value === "number" && Number.isFinite(value) ? value : 0;
 }
 
@@ -82,6 +89,7 @@ function buildSections(champions: Champion[], key: RateMetricKey): RateClassSect
           className,
           value,
           matches: championMatches(champion),
+          bans: championBans(champion),
         };
       })
       .filter((row): row is RateChampionRow => row != null)
@@ -91,6 +99,7 @@ function buildSections(champions: Champion[], key: RateMetricKey): RateClassSect
       className,
       average: weightedAverage(rows, key),
       matches: rows.reduce((sum, row) => sum + row.matches, 0),
+      bans: rows.reduce((sum, row) => sum + row.bans, 0),
       champions: rows,
     };
   });
@@ -104,12 +113,7 @@ function formatRate(value: number): string {
   return `${value.toFixed(1)}%`;
 }
 
-function formatSigned(value: number): string {
-  const normalized = Math.abs(value) < 0.05 ? 0 : value;
-  return `${normalized >= 0 ? "+" : ""}${normalized.toFixed(1)}%`;
-}
-
-function formatSignedDeltaPercent(value: number): string {
+function formatSignedPercent(value: number): string {
   const normalized = Math.abs(value) < 0.05 ? 0 : value;
   return `${normalized >= 0 ? "+" : ""}${normalized.toFixed(1)}%`;
 }
@@ -139,81 +143,83 @@ export default function ChampionRateDetailPage({ config }: { config: RateMetricC
   const globalRank = useMemo(() => new Map(allRows.map((row, index) => [row.name, index + 1])), [allRows]);
   const globalAverage = weightedAverage(allRows, config.key);
   const totalMatches = allRows.reduce((sum, row) => sum + row.matches, 0);
+  const totalBans = allRows.reduce((sum, row) => sum + row.bans, 0);
 
   return (
-    <div className="space-y-8">
+    <div className="mx-auto w-full max-w-6xl space-y-6">
       <div>
-        <Link href="/stats" className="text-pc-accent text-xs hover:underline mb-2 inline-block">{t("generated.champions.backToGlobalStats")}</Link>
+        <Link href="/champions" className="text-pc-accent text-xs hover:underline mb-2 inline-block">{t("nav.champions")}</Link>
         <h1 className="pc-heading pc-heading-lg text-pc-accent">{t(config.labelKey)}</h1>
       </div>
 
-      <section className="bg-pc-bg-elevated border border-pc-border rounded-xl p-5">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            { label: t("generated.champions.globalAvg"), value: formatRate(globalAverage), accent: true },
-            { label: t("generated.champions.champions"), value: allRows.length.toLocaleString() },
-            { label: t("generated.champions.trackedMatches"), value: totalMatches.toLocaleString() },
-            { label: t("generated.champions.topValue"), value: allRows[0] ? formatRate(allRows[0].value) : "--" },
-          ].map((item) => (
-            <div key={item.label} className="min-w-0">
-              <div className="text-pc-text-muted text-xs uppercase tracking-wider mb-1">{item.label}</div>
-              <div className="text-xl font-bold truncate" style={{ color: item.accent ? config.stroke : undefined }}>
-                {item.value}
-              </div>
+      <section className="rounded-xl border border-pc-border bg-pc-bg-elevated p-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+          <div className="flex min-w-0 flex-1 items-center gap-4">
+            <div className="shrink-0">
+              <div className="mb-1 text-xs uppercase tracking-wider text-pc-text-muted">{t("generated.champions.globalAvg")}</div>
+              <div className="text-xl font-bold" style={{ color: config.stroke }}>{formatRate(globalAverage)}</div>
             </div>
-          ))}
-        </div>
-        <div className="mt-5 relative h-2 rounded-full bg-pc-bg overflow-hidden">
-          <div className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${Math.min(100, Math.max(0, globalAverage))}%`, background: config.fill }} />
-          <div className="absolute top-1/2 h-4 w-1 -translate-y-1/2 rounded-full" style={{ left: `${Math.min(100, Math.max(0, globalAverage))}%`, background: config.stroke }} />
+            <div className="relative h-2 min-w-0 flex-1 overflow-hidden rounded-full bg-pc-bg">
+              <div className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${Math.min(100, Math.max(0, globalAverage))}%`, background: config.fill }} />
+              <div className="absolute top-1/2 h-4 w-1 -translate-y-1/2 rounded-full" style={{ left: `${Math.min(100, Math.max(0, globalAverage))}%`, background: config.stroke }} />
+            </div>
+          </div>
+          <div className="flex self-end shrink-0 items-center gap-6 text-right sm:self-auto">
+            {config.key === "banRate" && (
+              <div>
+                <div className="mb-1 text-xs uppercase tracking-wider text-pc-text-muted">{t("generated.matches.bans")}</div>
+                <div className="text-xl font-bold text-pc-text">{totalBans.toLocaleString()}</div>
+              </div>
+            )}
+            <div>
+              <div className="mb-1 text-xs uppercase tracking-wider text-pc-text-muted">{t("generated.champions.trackedMatches")}</div>
+              <div className="text-xl font-bold text-pc-text">{totalMatches.toLocaleString()}</div>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+      <section className="grid grid-cols-1 gap-3 xl:grid-cols-2">
         {sections.map((section) => {
-          const vsGlobal = section.average - globalAverage;
           const vsGlobalPct = pctDiff(section.average, globalAverage);
 
           return (
-            <div key={section.className} className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
-              <div className="p-4 border-b border-pc-border">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2 min-w-0">
+            <div key={section.className} className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated">
+              <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-b border-pc-border p-3">
+                  <div className="mr-auto flex min-w-0 items-center gap-2">
                     <img src={CLASS_ICONS[section.className]} alt={section.className} className="w-6 h-6 shrink-0" />
                     <h2 className="text-pc-text font-semibold truncate">{section.className}</h2>
                   </div>
-                  <div className="text-right shrink-0">
+                  <div className="shrink-0 text-right">
                     <div className="text-xs text-pc-text-muted uppercase tracking-wider">{t("generated.champions.classAvg")}</div>
-                    <div className="text-lg font-bold" style={{ color: config.stroke }}>{formatRate(section.average)}</div>
+                    <div className="font-bold" style={{ color: config.stroke }}>{formatRate(section.average)}</div>
                   </div>
-                </div>
-                <div className="grid grid-cols-3 gap-3 mt-4 text-xs">
-                  <div>
-                    <div className="text-pc-text-muted text-xs uppercase tracking-wider">{t("generated.champions.vsGlobal")}</div>
-                    <div className={vsGlobal >= 0 ? "text-emerald-400" : "text-red-400"}>
-                      {formatSigned(vsGlobal)} ({formatSignedDeltaPercent(vsGlobalPct)})
+                  <div className="shrink-0 text-right text-xs">
+                    <div className="text-pc-text-muted uppercase tracking-wider">{t("generated.champions.vsGlobal")}</div>
+                    <div className={vsGlobalPct >= 0 ? "text-emerald-400" : "text-red-400"}>
+                      {formatSignedPercent(vsGlobalPct)}
                     </div>
                   </div>
-                  <div>
-                    <div className="text-pc-text-muted text-xs uppercase tracking-wider">{t("generated.champions.champions")}</div>
-                    <div className="text-pc-text-secondary">{section.champions.length.toLocaleString()}</div>
-                  </div>
-                  <div>
-                    <div className="text-pc-text-muted text-xs uppercase tracking-wider">{t("generated.champions.matches")}</div>
+                  {config.key === "banRate" && (
+                    <div className="shrink-0 text-right text-xs">
+                      <div className="text-pc-text-muted uppercase tracking-wider">{t("generated.matches.bans")}</div>
+                      <div className="text-pc-text-secondary">{section.bans.toLocaleString()}</div>
+                    </div>
+                  )}
+                  <div className="shrink-0 text-right text-xs">
+                    <div className="text-pc-text-muted uppercase tracking-wider">{t("generated.champions.matches")}</div>
                     <div className="text-pc-text-secondary">{section.matches.toLocaleString()}</div>
                   </div>
-                </div>
               </div>
 
               <div className="divide-y divide-pc-border/50 md:hidden">
-                {section.champions.map((champion, index) => {
+                {section.champions.map((champion) => {
                   const rowVsClassPct = pctDiff(champion.value, section.average);
                   const rowVsGlobalPct = pctDiff(champion.value, globalAverage);
                   return <Link key={champion.id} href={`/champions/${championSlug(champion.name)}`} className="flex min-w-0 items-center gap-3 p-3 transition-colors hover:bg-pc-bg/50">
-                    <span className="w-7 shrink-0 text-center text-xs text-pc-text-muted">#{index + 1}</span>
                     <img src={getChampionIconSafe(champion.name)} alt="" className="h-9 w-9 shrink-0 rounded-lg object-contain" />
-                    <div className="min-w-0 flex-1"><div className="truncate text-sm font-semibold text-pc-text">{champion.name}</div><div className="mt-0.5 flex flex-wrap gap-x-2 text-[10px]"><span className={rowVsClassPct >= 0 ? "text-emerald-400" : "text-red-400"}>{formatSignedDeltaPercent(rowVsClassPct)} {t("generated.champions.class")}</span><span className={rowVsGlobalPct >= 0 ? "text-emerald-400" : "text-red-400"}>{formatSignedDeltaPercent(rowVsGlobalPct)} {t("generated.champions.global.9027cc5")}</span><span className="text-pc-text-muted">{champion.matches.toLocaleString()} {t("generated.champions.matches.9f3e924")}</span></div></div>
-                    <span className="shrink-0 font-mono text-sm font-bold" style={{ color: config.stroke }}>{formatRate(champion.value)}</span>
+                    <div className="min-w-0 flex-1"><div className="truncate text-sm font-semibold text-pc-text">{champion.name}</div><div className="mt-0.5 flex flex-wrap gap-x-2 text-[10px]"><span className={rowVsClassPct >= 0 ? "text-emerald-400" : "text-red-400"}>{formatSignedPercent(rowVsClassPct)} {t("generated.champions.class")}</span><span className={rowVsGlobalPct >= 0 ? "text-emerald-400" : "text-red-400"}>{formatSignedPercent(rowVsGlobalPct)} {t("generated.champions.global.9027cc5")}</span><span className="text-pc-text-muted">{champion.matches.toLocaleString()} {t("generated.champions.matches.9f3e924")}</span></div></div>
+                    <span className="shrink-0 text-right font-mono text-sm font-bold" style={{ color: config.stroke }}>{formatRate(champion.value)}{config.key === "banRate" && <span className="block text-[10px] font-normal text-pc-text-muted">{champion.bans.toLocaleString()} {t("generated.stats.bans")}</span>}</span>
                   </Link>;
                 })}
                 {section.champions.length === 0 && <div className="px-3 py-6 text-center text-sm text-pc-text-muted">{t("generated.champions.noChampionData")}</div>}
@@ -223,44 +229,42 @@ export default function ChampionRateDetailPage({ config }: { config: RateMetricC
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="text-left text-pc-text-muted border-b border-pc-border/60">
-                      <th className="px-3 py-2 w-12">{t("generated.champions.class.41ff354")}</th>
-                      <th className="px-3 py-2 w-12">{t("generated.champions.global")}</th>
-                      <th className="px-3 py-2">{t("generated.champions.name")}</th>
-                      <th className="px-3 py-2 text-right">{t(config.labelKey)}</th>
-                      <th className="px-3 py-2 text-right">{t("generated.champions.vsClass")}</th>
-                      <th className="px-3 py-2 text-right">{t("generated.champions.vsGlobal")}</th>
-                      <th className="px-3 py-2 text-right">{t("generated.champions.matches")}</th>
+                      <th className="px-2.5 py-1.5">{t("generated.champions.name")}</th>
+                      <th className="w-12 px-2.5 py-1.5">{t("generated.champions.class.41ff354")}</th>
+                      <th className="w-12 px-2.5 py-1.5">{t("generated.champions.global")}</th>
+                      <th className="px-2.5 py-1.5 text-right">{t(config.labelKey)}</th>
+                      <th className="px-2.5 py-1.5 text-right">{t("generated.champions.vsClass")}</th>
+                      <th className="px-2.5 py-1.5 text-right">{t("generated.champions.vsGlobal")}</th>
+                      <th className="px-2.5 py-1.5 text-right">{t("generated.champions.matches")}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {section.champions.map((champion, index) => {
-                      const rowVsClass = champion.value - section.average;
-                      const rowVsGlobal = champion.value - globalAverage;
                       const rowVsClassPct = pctDiff(champion.value, section.average);
                       const rowVsGlobalPct = pctDiff(champion.value, globalAverage);
 
                       return (
                         <tr key={champion.id} className="border-b border-pc-border/40 hover:bg-pc-bg/50 transition-colors">
-                          <td className="px-3 py-2 text-pc-text-muted">#{index + 1}</td>
-                          <td className="px-3 py-2 text-pc-text-muted">#{globalRank.get(champion.name) ?? "-"}</td>
-                          <td className="px-3 py-2">
+                          <td className="px-2.5 py-1.5">
                             <Link href={`/champions/${championSlug(champion.name)}`} className="flex items-center gap-2 min-w-0 group">
-                              <img src={getChampionIconSafe(champion.name)} alt={champion.name} className="w-7 h-7 rounded object-contain shrink-0" />
+                              <img src={getChampionIconSafe(champion.name)} alt={champion.name} className="h-6 w-6 shrink-0 rounded object-contain" />
                               <span className="text-pc-text font-medium truncate group-hover:text-pc-accent transition-colors">{champion.name}</span>
                             </Link>
                           </td>
-                          <td className="px-3 py-2 text-right font-semibold" style={{ color: config.stroke }}>{formatRate(champion.value)}</td>
-                          <td className="px-3 py-2 text-right">
-                            <span className={rowVsClass >= 0 ? "text-emerald-400" : "text-red-400"}>
-                              {formatSigned(rowVsClass)} ({formatSignedDeltaPercent(rowVsClassPct)})
+                          <td className="px-2.5 py-1.5 text-pc-text-muted">#{index + 1}</td>
+                          <td className="px-2.5 py-1.5 text-pc-text-muted">#{globalRank.get(champion.name) ?? "-"}</td>
+                          <td className="px-2.5 py-1.5 text-right font-semibold" style={{ color: config.stroke }}>{formatRate(champion.value)}{config.key === "banRate" && <div className="text-[10px] font-normal text-pc-text-muted">{champion.bans.toLocaleString()} {t("generated.stats.bans")}</div>}</td>
+                          <td className="px-2.5 py-1.5 text-right">
+                            <span className={rowVsClassPct >= 0 ? "text-emerald-400" : "text-red-400"}>
+                              {formatSignedPercent(rowVsClassPct)}
                             </span>
                           </td>
-                          <td className="px-3 py-2 text-right">
-                            <span className={rowVsGlobal >= 0 ? "text-emerald-400" : "text-red-400"}>
-                              {formatSigned(rowVsGlobal)} ({formatSignedDeltaPercent(rowVsGlobalPct)})
+                          <td className="px-2.5 py-1.5 text-right">
+                            <span className={rowVsGlobalPct >= 0 ? "text-emerald-400" : "text-red-400"}>
+                              {formatSignedPercent(rowVsGlobalPct)}
                             </span>
                           </td>
-                          <td className="px-3 py-2 text-right text-pc-text-secondary">{champion.matches.toLocaleString()}</td>
+                          <td className="px-2.5 py-1.5 text-right text-pc-text-secondary">{champion.matches.toLocaleString()}</td>
                         </tr>
                       );
                     })}

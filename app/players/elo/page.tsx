@@ -12,6 +12,7 @@ import { STATIC_CHAMPIONS } from "@/lib/static-champions";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { LoadingPanel } from "@/components/async-state";
 import PlayerName from "@/components/player-name";
+import TablePagination, { type TablePageSize } from "@/components/table-pagination";
 
 import { useSearchParams } from "next/navigation";
 import { useLocalization } from "@/lib/localization-context";
@@ -64,6 +65,8 @@ function ChampionEloContent() {
   const [accountPlayers, setAccountPlayers] = useState<ClassLeaderboardEntry[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState<TablePageSize>(25);
 
   // Champion dropdown state (only shown within a class tab)
   const [selectedChampionId, setSelectedChampionId] = useState<number | null>(null);
@@ -97,6 +100,19 @@ function ChampionEloContent() {
     if (!q) return classChampions;
     return classChampions.filter((c) => c.name.toLowerCase().includes(q));
   }, [classChampions, championSearch]);
+
+  const visiblePlayers = useMemo(
+    () => players.slice((page - 1) * pageSize, page * pageSize),
+    [page, pageSize, players],
+  );
+  const visibleAccountPlayers = useMemo(
+    () => accountPlayers.slice((page - 1) * pageSize, page * pageSize),
+    [accountPlayers, page, pageSize],
+  );
+
+  useEffect(() => {
+    setPage(1);
+  }, [activeTab, eloMode, selectedChampionId]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -195,7 +211,7 @@ function ChampionEloContent() {
     : null;
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto w-full max-w-6xl space-y-5">
       {/* Header */}
       <div>
         <Link href="/players" className="text-pc-accent text-xs hover:underline mb-2 inline-block">{t("generated.players.players")}</Link>
@@ -382,10 +398,10 @@ function ChampionEloContent() {
                   </tr>
                 </thead>
                 <tbody>
-                  {players.map((p, i) => (
+                  {visiblePlayers.map((p) => (
                     <tr
                       key={`${p.player_id}-${p.champion_id}`}
-                      className={`border-b border-pc-border/50 hover:bg-pc-bg/60 transition-colors ${i < 3 ? "bg-pc-bg/30" : ""}`}
+                      className={`border-b border-pc-border/50 hover:bg-pc-bg/60 transition-colors ${p.rank <= 3 ? "bg-pc-bg/30" : ""}`}
                     >
                       <td className="py-2.5 px-4">
                         <RankBadge rank={p.rank} />
@@ -434,6 +450,13 @@ function ChampionEloContent() {
                 </tbody>
               </table>
             </div>
+            <TablePagination
+              page={page}
+              pageSize={pageSize}
+              totalItems={players.length}
+              onPageChange={setPage}
+              onPageSizeChange={(size) => { setPageSize(size); setPage(1); }}
+            />
           </div>
         )
       ) : (
@@ -460,10 +483,10 @@ function ChampionEloContent() {
                   </tr>
                 </thead>
                 <tbody>
-                  {accountPlayers.map((p, i) => (
+                  {visibleAccountPlayers.map((p) => (
                     <tr
                       key={`account-${p.playerId}`}
-                      className={`border-b border-pc-border/50 hover:bg-pc-bg/60 transition-colors ${i < 3 ? "bg-pc-bg/30" : ""}`}
+                      className={`border-b border-pc-border/50 hover:bg-pc-bg/60 transition-colors ${p.rank <= 3 ? "bg-pc-bg/30" : ""}`}
                     >
                       <td className="py-2.5 px-4">
                         <RankBadge rank={p.rank} />
@@ -501,6 +524,13 @@ function ChampionEloContent() {
                 </tbody>
               </table>
             </div>
+            <TablePagination
+              page={page}
+              pageSize={pageSize}
+              totalItems={accountPlayers.length}
+              onPageChange={setPage}
+              onPageSizeChange={(size) => { setPageSize(size); setPage(1); }}
+            />
           </div>
         )
       )}

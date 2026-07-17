@@ -21,34 +21,6 @@ const TIER_GROUPS: ReadonlyArray<{
     { tier: 22, labelKey: "common.tiers.diamond4" },
     { tier: 21, labelKey: "common.tiers.diamond5" },
   ]},
-  { group: "Platinum", groupKey: "common.tiers.platinum", tiers: [
-    { tier: 20, labelKey: "common.tiers.platinum1" },
-    { tier: 19, labelKey: "common.tiers.platinum2" },
-    { tier: 18, labelKey: "common.tiers.platinum3" },
-    { tier: 17, labelKey: "common.tiers.platinum4" },
-    { tier: 16, labelKey: "common.tiers.platinum5" },
-  ]},
-  { group: "Gold", groupKey: "common.tiers.gold", tiers: [
-    { tier: 15, labelKey: "common.tiers.gold1" },
-    { tier: 14, labelKey: "common.tiers.gold2" },
-    { tier: 13, labelKey: "common.tiers.gold3" },
-    { tier: 12, labelKey: "common.tiers.gold4" },
-    { tier: 11, labelKey: "common.tiers.gold5" },
-  ]},
-  { group: "Silver", groupKey: "common.tiers.silver", tiers: [
-    { tier: 10, labelKey: "common.tiers.silver1" },
-    { tier: 9, labelKey: "common.tiers.silver2" },
-    { tier: 8, labelKey: "common.tiers.silver3" },
-    { tier: 7, labelKey: "common.tiers.silver4" },
-    { tier: 6, labelKey: "common.tiers.silver5" },
-  ]},
-  { group: "Bronze", groupKey: "common.tiers.bronze", tiers: [
-    { tier: 5, labelKey: "common.tiers.bronze1" },
-    { tier: 4, labelKey: "common.tiers.bronze2" },
-    { tier: 3, labelKey: "common.tiers.bronze3" },
-    { tier: 2, labelKey: "common.tiers.bronze4" },
-    { tier: 1, labelKey: "common.tiers.bronze5" },
-  ]},
 ];
 
 type SortKey = "points" | "winRate" | "totalWins" | "trend";

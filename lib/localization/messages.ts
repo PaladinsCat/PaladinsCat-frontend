@@ -4,6 +4,7 @@ import navigationMessages from "./catalog/ui/navigation.json";
 import commonMessages from "./catalog/ui/common.json";
 import moderationMessages from "./catalog/ui/moderation.json";
 import itemMessages from "./catalog/game/items.json";
+import mapMessages from "./catalog/game/maps.json";
 import talentMessages from "./catalog/game/talents.json";
 import homeMessages from "./catalog/pages/home.json";
 import localizationMessages from "./catalog/pages/localization.json";
@@ -22,6 +23,7 @@ export const EN_MESSAGES = {
   ...statusMessages,
   ...talentMessages,
   ...itemMessages,
+  ...mapMessages,
   ...generatedUiMessages,
   ...seoMessages,
 };

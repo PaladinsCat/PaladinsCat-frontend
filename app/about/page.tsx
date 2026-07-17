@@ -19,7 +19,7 @@ export default function AboutPage() {
         <p className="text-xl text-pc-text-secondary leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
           {t("generated.about.theCompetitiveStatsPlatformForPaladinsPlayersWhoWantTo")}</p>
         <div className="flex flex-wrap justify-center gap-2 pt-2">
-          {["Champion Stats", "Ranked Tracking", "Counter Picks", "Meta Analysis", "Player Profiles"].map((tag) => (
+          {[t("generated.about.championStats"), t("generated.about.rankedTracking"), t("generated.about.counterPicks"), t("generated.about.metaAnalysis"), t("generated.about.playerProfiles")].map((tag) => (
             <span key={tag} className="text-xs px-3 py-1 rounded-full bg-pc-accent/10 text-pc-accent border border-pc-accent/20 drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]">
               {tag}
             </span>
@@ -45,19 +45,19 @@ export default function AboutPage() {
           {[
             {
               title: t("generated.about.theDataIsScattered"),
-              body: "Win rates live in one place, tier lists in another, and your match history is buried in the game client. PaladinsCat brings it all together.",
+              body: t("generated.about.theDataIsScattered"),
             },
             {
               title: t("generated.about.gutFeelingIsnTEnough"),
-              body: "Everyone has an opinion on who's S-tier. PaladinsCat replaces guesswork with actual numbers — pick rates, ban rates, counter matchups, and more.",
+              body: t("generated.about.gutFeelingBody"),
             },
             {
               title: t("generated.about.rankedIsAGrind"),
-              body: "Climbing is hard enough without knowing which champions perform best at your skill level. We break down stats by tier so you see what actually works in Gold, Diamond, or Master.",
+              body: t("generated.about.rankedGrindBody"),
             },
             {
               title: t("generated.about.theOldPlatformsAreGone"),
-              body: "TheBettermeta and Paladins.guru — two fan-favourite stat platforms — have been discontinued. PaladinsCat picks up where they left off, combining the best of both into one modern, unified experience built to last.",
+              body: t("generated.about.oldPlatformsBody"),
             },
           ].map((card) => (
             <div key={card.title} className="bg-pc-bg-elevated border border-pc-border rounded-xl p-5 hover:border-pc-accent-mid transition-colors">
@@ -76,37 +76,37 @@ export default function AboutPage() {
             {
               icon: "🎯",
               title: t("generated.about.championAnalytics"),
-              desc: "Win rates, pick rates, ban rates, and Glicko-2 ratings for all 59 champions. Filter by tier or region to find what's working where you play.",
+              desc: t("generated.about.championAnalyticsDesc"),
             },
             {
               icon: "🏆",
               title: t("generated.about.rankedLeaderboards"),
-              desc: "See who's on top. Track ranked points, tier progression, and trend movement for the best players in every region.",
+              desc: t("generated.about.leaderboardsDesc"),
             },
             {
               icon: "🔄",
               title: t("generated.about.counterPickData"),
-              desc: "Not sure who to pick into Drogoz? The counter-pick engine shows which champions statistically win and lose against any matchup.",
+              desc: t("generated.about.counterPickDesc"),
             },
             {
               icon: "📈",
               title: t("generated.about.metaTrends"),
-              desc: "Watch the meta shift over time. Weekly win rate trends show which champions are rising, falling, or holding steady across the playerbase.",
+              desc: t("generated.about.metaTrendsDesc"),
             },
             {
               icon: "👤",
               title: t("generated.about.playerProfiles"),
-              desc: "Look up any player. See their top champions, match history, win rates, and performance breakdowns across platforms and regions.",
+              desc: t("generated.about.playerProfilesDesc"),
             },
             {
               icon: "🛡",
               title: t("generated.about.antiCheatTracking"),
-              desc: "Flagged and confirmed cheaters are tracked publicly. Abnormal accuracy, wall hacks, and stat manipulation are identified and surfaced.",
+              desc: t("generated.about.cheaterTrackedBody"),
             },
             {
               icon: "📊",
               title: t("generated.about.performanceBenchmarks"),
-              desc: "Compare your damage per minute, healing per minute, and credits per minute against the best players for your champion and class.",
+              desc: t("generated.about.statsCompareBody"),
             },
           ].map((feature) => (
             <div key={feature.title} className="flex gap-4 p-4 bg-pc-bg-elevated border border-pc-border rounded-xl hover:border-pc-accent-mid transition-colors">

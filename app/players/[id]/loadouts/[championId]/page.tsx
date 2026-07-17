@@ -24,7 +24,7 @@ export default function ChampionLoadoutsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const load = useCallback(async () => { if (!playerId) return; setLoading(true); setError(null); try { const response = await fetchPlayerLoadouts(playerId); setData(response); setError(response.refreshError); } catch (cause) { setError(cause instanceof Error ? cause.message : "Could not load player loadouts."); } finally { setLoading(false); } }, [playerId]);
+  const load = useCallback(async () => { if (!playerId) return; setLoading(true); setError(null); try { const response = await fetchPlayerLoadouts(playerId); setData(response); setError(response.refreshError); } catch (cause) { setError(cause instanceof Error ? cause.message : t("generated.app\\players\\[id]\\loadouts\\[championId]\\page.couldnotloadplayerloadouts")); } finally { setLoading(false); } }, [playerId]);
   useEffect(() => { void load(); }, [load]);
   useEffect(() => { getPlayerLoadoutChampionRoster().then(setChampions); }, []);
   useEffect(() => { if (!champion) return; loadBuildReferenceData(champion.id, championSlug(champion.name)).then((reference) => setReferences(reference.cards)).catch(() => setReferences([])); }, [champion]);

@@ -26,7 +26,7 @@ export default function BuildsPage() {
         });
         setBuilds(data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load builds");
+        setError(err instanceof Error ? err.message : t("generated.app\\builds\\page.failedtoloadbuilds"));
       } finally {
         setLoading(false);
       }

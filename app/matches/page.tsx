@@ -1,79 +1,41 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import {
-  fetchMatchSearch,
-  fetchMatchesOverview,
-  type MatchSearchResult,
-  type MatchData,
-  type MatchHourlyStats,
-} from "@/lib/api-client";
+import { fetchMatchSearch, fetchMatchesOverview, type MatchData, type MatchSearchResult } from "@/lib/api-client";
 import { useChampions } from "@/lib/champion-names";
 import { useTimeZone } from "@/lib/time-zone-context";
-import { formatLocalDateTime, formatLocalHourFromUtcBucket } from "@/lib/time-format";
-import { AsyncButton, EmptyState, ErrorState, LoadingPanel } from "@/components/async-state";
+import { formatLocalDateTime } from "@/lib/time-format";
+import { AsyncButton, EmptyState, ErrorState } from "@/components/async-state";
 import { DataTableSkeleton } from "@/components/route-skeleton";
 import { useAuth } from "@/lib/auth-context";
 import { useLobbyTier } from "@/lib/lobby-tier-context";
 import { useLocalization } from "@/lib/localization-context";
 
 const RANKED_QUEUE_ID = "486";
+
 export default function MatchesPage() {
   const { t } = useLocalization();
   const { timeZone } = useTimeZone();
   const { isLoggedIn, isLoading: authLoading } = useAuth();
   const { definition: lobbyTier, ready: lobbyTierReady } = useLobbyTier();
-  const tierParams = isLoggedIn
-    ? { tierMin: lobbyTier.tierMin, tierMax: lobbyTier.tierMax }
-    : undefined;
+  const tierParams = isLoggedIn ? { tierMin: lobbyTier.tierMin, tierMax: lobbyTier.tierMax } : undefined;
   const [matches, setMatches] = useState<MatchSearchResult[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [perPage] = useState(20);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   const [championId, setChampionId] = useState("");
   const [region, setRegion] = useState("");
   const [date, setDate] = useState("");
   const [hour, setHour] = useState("");
-  const [appliedFilters, setAppliedFilters] = useState<{
-    championId: string;
-    region: string;
-    date: string;
-    hour: string;
-  } | null>(null);
+  const [appliedFilters, setAppliedFilters] = useState<{ championId: string; region: string; date: string; hour: string } | null>(null);
   const { champions, loading: championsLoading } = useChampions();
-
-  const [hourlyStats, setHourlyStats] = useState<MatchHourlyStats | null>(null);
-  const [droppedByHour, setDroppedByHour] = useState<Record<string, number>>({});
-  const [droppedIdsByHour, setDroppedIdsByHour] = useState<Record<string, string[]>>({});
-  const [statsLoading, setStatsLoading] = useState(true);
-
-  useEffect(() => {
-    let active = true;
-    if (authLoading || !lobbyTierReady) return;
-    const load = async () => {
-      setStatsLoading(true);
-      try {
-        const overview = await fetchMatchesOverview(tierParams);
-        if (active) {
-          setHourlyStats(overview.hourly);
-          setDroppedByHour(overview.droppedByHour);
-          setDroppedIdsByHour(overview.droppedIdsByHour);
-        }
-      } catch {} finally {
-        if (active) setStatsLoading(false);
-      }
-    };
-    load();
-    const interval = setInterval(load, 60_000);
-    return () => { active = false; clearInterval(interval); };
-  }, [authLoading, isLoggedIn, lobbyTierReady, lobbyTier.tierMin, lobbyTier.tierMax]);
+  const perPage = 20;
 
   const loadMatches = useCallback(async () => {
+    if (authLoading || !lobbyTierReady) return;
     setLoading(true);
     setError(null);
     try {
@@ -93,344 +55,71 @@ export default function MatchesPage() {
         setTotalPages(result.page.totalPages);
       } else {
         const recent = (await fetchMatchesOverview(tierParams)).recent.slice(0, perPage);
-        if (recent.length > 0) {
-          setMatches(recent.map((m: MatchData) => ({
-            match_id: m.match_id, entry_datetime: m.entry_datetime, map: m.map,
-            queue_id: m.queue_id, duration_seconds: m.duration_seconds, region: m.region,
-            champion_id: 0, champion_name: "", win_status: "", kills: 0, deaths: 0, assists: 0, player_count: 10,
-          })));
-          setTotal(recent.length);
-          setTotalPages(1);
-        } else {
-          setMatches([]); setTotal(0); setTotalPages(1);
-        }
+        setMatches(recent.map((match: MatchData) => ({
+          match_id: match.match_id, entry_datetime: match.entry_datetime, map: match.map,
+          queue_id: match.queue_id, duration_seconds: match.duration_seconds, region: match.region,
+          champion_id: 0, champion_name: "", win_status: "", kills: 0, deaths: 0, assists: 0, player_count: 10,
+        })));
+        setTotal(recent.length);
+        setTotalPages(1);
       }
     } catch {
-      setMatches([]); setTotal(0); setTotalPages(1);
+      setMatches([]);
+      setTotal(0);
+      setTotalPages(1);
       setError(t("generated.matches.weCouldnTLoadMatchDataRightNowPleaseTry"));
     } finally {
       setLoading(false);
     }
-  }, [appliedFilters, timeZone, page, perPage, isLoggedIn, lobbyTier.tierMin, lobbyTier.tierMax]);
+  }, [appliedFilters, authLoading, isLoggedIn, lobbyTier.tierMax, lobbyTier.tierMin, lobbyTierReady, page, timeZone]);
 
-  useEffect(() => { loadMatches(); }, [loadMatches]);
+  useEffect(() => { void loadMatches(); }, [loadMatches]);
 
   const hasFilters = appliedFilters !== null;
-  const handleSearch = () => {
-    setAppliedFilters({ championId, region, date, hour });
-    setPage(1);
-  };
-  const handleReset = () => {
-    setChampionId("");
-    setRegion("");
-    setDate("");
-    setHour("");
-    setAppliedFilters(null);
-    setPage(1);
+  const reset = () => {
+    setChampionId(""); setRegion(""); setDate(""); setHour(""); setAppliedFilters(null); setPage(1);
   };
 
-  const hourly = hourlyStats?.hourly ?? [];
-  const maxHourly = Math.max(...hourly.map((h: any) => h.NA + h.EU), 1);
-  const droppedRows = hourly
-    .map((entry: any) => {
-      const ids = droppedIdsByHour[`${entry.date}|${entry.hour}`] ?? [];
-      return { ...entry, droppedIds: ids };
-    })
-    .filter((entry: any) => entry.droppedIds.length > 0);
+  return <div className="space-y-6">
+    <header>
+      <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.matches.matches")}</h1>
+      <p className="mt-1 text-sm text-pc-text-secondary">{t("matches.description")}</p>
+    </header>
 
-  const formatHour = (date: string | undefined, utcHour: number) => formatLocalHourFromUtcBucket(date, utcHour);
-
-  const isCurrentHour = (entry: any, idx: number) => idx === hourly.length - 1;
-
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.matches.matches")}</h1>
-        <p className="text-pc-text-secondary text-sm mt-1">{t("generated.matches.searchRankedMatchHistoryAndViewLiveActivity")}</p>
+    <section className="pc-card">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
+        <label className="text-xs text-pc-text-muted">{t("generated.matches.champion")}<select value={championId} onChange={(event) => setChampionId(event.target.value)} className="mt-1 w-full rounded-lg border border-pc-border bg-pc-bg px-3 py-1.5 text-sm text-pc-text" disabled={championsLoading}><option value="">{t("generated.matches.all")}</option>{champions?.sort((a, b) => a.name.localeCompare(b.name)).map((champion) => <option key={champion.id} value={String(champion.id)}>{champion.name}</option>)}</select></label>
+        <label className="text-xs text-pc-text-muted">{t("generated.matches.region")}<select value={region} onChange={(event) => setRegion(event.target.value)} className="mt-1 w-full rounded-lg border border-pc-border bg-pc-bg px-3 py-1.5 text-sm text-pc-text"><option value="">{t("generated.matches.all")}</option><option value="NA">{t("generated.matches.na")}</option><option value="EU">{t("generated.matches.eu")}</option></select></label>
+        <label className="text-xs text-pc-text-muted">{t("generated.matches.date")}{timeZone})<input type="date" value={date} onChange={(event) => setDate(event.target.value)} className="mt-1 w-full rounded-lg border border-pc-border bg-pc-bg px-3 py-1.5 text-sm text-pc-text" /></label>
+        <label className="text-xs text-pc-text-muted">{t("generated.matches.hour")}{timeZone})<select value={hour} onChange={(event) => setHour(event.target.value)} disabled={!date} className="mt-1 w-full rounded-lg border border-pc-border bg-pc-bg px-3 py-1.5 text-sm text-pc-text disabled:opacity-50"><option value="">{t("generated.matches.allHours")}</option>{Array.from({ length: 24 }, (_, value) => <option key={value} value={String(value)}>{String(value).padStart(2, "0")}:00 – {String(value).padStart(2, "0")}:59</option>)}</select></label>
       </div>
+      <div className="mt-3 flex gap-2"><AsyncButton onClick={() => { setAppliedFilters({ championId, region, date, hour }); setPage(1); }} loading={loading} className="flex-1 rounded-lg bg-pc-accent px-4 py-1.5 text-sm font-semibold text-pc-bg">{t("generated.matches.search")}</AsyncButton><button onClick={reset} className="rounded-lg border border-pc-border bg-pc-bg px-4 py-1.5 text-sm text-pc-text-secondary hover:bg-pc-bg-elevated">{t("generated.matches.reset")}</button></div>
+    </section>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left: Search + Results (2/3) */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Search Filters */}
-          <div className="pc-card">
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-              <div>
-                <label className="block text-xs text-pc-text-muted mb-1">{t("generated.matches.champion")}</label>
-                <select value={championId} onChange={(e) => setChampionId(e.target.value)}
-                  className="w-full px-3 py-1.5 rounded-lg bg-pc-bg border border-pc-border text-pc-text text-sm focus:outline-none focus:border-pc-accent"
-                  disabled={championsLoading}>
-                  <option value="">{t("generated.matches.all")}</option>
-                  {champions?.sort((a, b) => a.name.localeCompare(b.name)).map((c) => (
-                    <option key={c.id} value={String(c.id)}>{c.name}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs text-pc-text-muted mb-1">{t("generated.matches.region")}</label>
-                <select value={region} onChange={(e) => setRegion(e.target.value)}
-                  className="w-full px-3 py-1.5 rounded-lg bg-pc-bg border border-pc-border text-pc-text text-sm focus:outline-none focus:border-pc-accent">
-                  <option value="">{t("generated.matches.all")}</option>
-                  <option value="NA">{t("generated.matches.na")}</option>
-                  <option value="EU">{t("generated.matches.eu")}</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs text-pc-text-muted mb-1">{t("generated.matches.date")}{timeZone})</label>
-                <input type="date" value={date} onChange={(e) => setDate(e.target.value)}
-                  className="w-full px-3 py-1.5 rounded-lg bg-pc-bg border border-pc-border text-pc-text text-sm focus:outline-none focus:border-pc-accent" />
-              </div>
-              <div>
-                <label className="block text-xs text-pc-text-muted mb-1">{t("generated.matches.hour")}{timeZone})</label>
-                <select value={hour} onChange={(e) => setHour(e.target.value)} disabled={!date}
-                  className="w-full px-3 py-1.5 rounded-lg bg-pc-bg border border-pc-border text-pc-text text-sm focus:outline-none focus:border-pc-accent disabled:opacity-50">
-                  <option value="">{t("generated.matches.allHours")}</option>
-                  {Array.from({ length: 24 }, (_, value) => (
-                    <option key={value} value={String(value)}>
-                      {String(value).padStart(2, "0")}:00 – {String(value).padStart(2, "0")}:59
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <div className="flex gap-2 mt-3">
-              <AsyncButton onClick={handleSearch} loading={loading}
-                className="flex-1 px-4 py-1.5 rounded-lg bg-pc-accent text-pc-bg font-semibold text-sm hover:bg-pc-accent-secondary transition-colors">
-                {t("generated.matches.search")}</AsyncButton>
-              <button onClick={handleReset}
-                className="px-4 py-1.5 rounded-lg bg-pc-bg border border-pc-border text-pc-text-secondary text-sm hover:bg-pc-bg-elevated transition-colors">
-                {t("generated.matches.reset")}</button>
-            </div>
-          </div>
-
-          {/* Results */}
-          {loading && <DataTableSkeleton rows={8} />}
-          {error && !loading && <ErrorState message={error} onRetry={() => void loadMatches()} />}
-          {!loading && !error && matches.length === 0 && (
-            <EmptyState
-              title={hasFilters ? t("generated.matches.noMatchingGames") : t("generated.matches.noRankedMatchesAvailable")}
-              description={hasFilters ? t("common.empty.matchesFiltered") : t("common.empty.matchesNew")}
-            />
-          )}
-          {!loading && !error && matches.length > 0 && (
-            <>
-              {hasFilters && (
-                <div className="text-xs text-pc-text-muted">
-                  {t("generated.matches.showing")}{" "}{(page - 1) * perPage + 1}–{Math.min(page * perPage, total)} {t("generated.matches.of")}{" "}{total.toLocaleString()} {t("generated.matches.rankedMatches")}</div>
-              )}
-              <div className="space-y-2 sm:hidden">
-                {matches.map((match) => <MatchCard key={match.match_id} match={match} />)}
-              </div>
-              <div className="hidden overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated sm:block">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-pc-border bg-pc-bg-secondary text-pc-text-muted text-left text-xs">
-                        <th className="px-4 py-3">{t("generated.matches.matchId")}</th>
-                        <th className="px-4 py-3">{t("generated.matches.map")}</th>
-                        <th className="px-4 py-3">{t("generated.matches.region")}</th>
-                        <th className="px-4 py-3">{t("generated.matches.duration")}</th>
-                        <th className="px-4 py-3">{t("generated.matches.date.eb9a4bc")}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {matches.map((m) => <MatchRow key={m.match_id} match={m} />)}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-              {hasFilters && totalPages > 1 && (
-                <div className="flex items-center justify-center gap-2">
-                  <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}
-                    className="px-3 py-2 rounded-lg bg-pc-bg-elevated border border-pc-border text-pc-text text-xs disabled:opacity-50 hover:bg-pc-bg-secondary transition-colors">
-                    {t("generated.matches.prev")}</button>
-                  <span className="text-xs text-pc-text-secondary px-4">{t("generated.matches.page")}{" "}{page} {t("generated.matches.of")}{" "}{totalPages}</span>
-                  <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}
-                    className="px-3 py-2 rounded-lg bg-pc-bg-elevated border border-pc-border text-pc-text text-xs disabled:opacity-50 hover:bg-pc-bg-secondary transition-colors">
-                    {t("generated.matches.next")}</button>
-                </div>
-              )}
-            </>
-          )}
-        </div>
-
-        {/* Right: Hourly Activity (1/3) */}
-        <div className="lg:col-span-1 space-y-6">
-          {/* Title outside card */}
-          <div className="flex items-center justify-between">
-            <h2 className="pc-card-title mb-0 shadow-sm">{t("generated.matches.text24hRankedActivity")}</h2>
-            <span className="text-xs uppercase tracking-wider text-pc-text-muted">{t("generated.matches.localTime")}</span>
-          </div>
-
-          <div className="pc-card p-3">
-            {/* Region legend + total */}
-            <div className="flex items-center gap-4 mb-3 pb-2 border-b border-pc-border/50">
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                <span className="text-xs text-pc-text-muted">{t("generated.matches.na")}</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-sky-500" />
-                <span className="text-xs text-pc-text-muted">{t("generated.matches.eu")}</span>
-              </div>
-              {!statsLoading && hourlyStats && (
-                <span className="ml-auto text-xs text-pc-accent font-mono">{hourlyStats.totalToday ?? 0} {t("generated.matches.total")}</span>
-              )}
-            </div>
-
-            {statsLoading ? (
-              <LoadingPanel compact />
-            ) : (
-              <div className="space-y-px">
-                {/* Header */}
-                <div className="flex items-center gap-2 px-1 pb-1 border-b border-pc-border/30">
-                  <span className="w-10 text-xs text-pc-text-muted font-medium" />
-                  <span className="flex-1 text-xs text-pc-text-muted font-medium text-center">{t("generated.matches.na")}</span>
-                  <span className="w-px h-3 bg-pc-border/30" />
-                  <span className="flex-1 text-xs text-pc-text-muted font-medium text-center">{t("generated.matches.eu")}</span>
-                  <span className="w-px h-3 bg-pc-border/30" />
-                  <span className="w-8 text-xs text-pc-text-muted font-medium text-right">{t("generated.matches.drop")}</span>
-                  <span className="w-px h-3 bg-pc-border/30" />
-                  <span className="w-8 text-xs text-pc-text-muted font-medium text-right">Σ</span>
-                </div>
-                {hourly.map((entry: any, idx: number) => {
-                  const na = entry.NA ?? 0;
-                  const eu = entry.EU ?? 0;
-                  const dropped = droppedByHour[`${entry.date}|${entry.hour}`] ?? 0;
-                  const sum = na + eu;
-                  const naW = maxHourly > 0 ? (na / maxHourly) * 100 : 0;
-                  const euW = maxHourly > 0 ? (eu / maxHourly) * 100 : 0;
-                  const now = isCurrentHour(entry, idx);
-                  const active = sum > 0;
-                  const time = formatHour(entry.date, entry.hour);
-                  return (
-                    <div
-                      key={idx}
-                      className={`flex items-center gap-2 rounded px-1 py-0.5 transition-colors ${
-                        now ? "bg-pc-accent/8 ring-1 ring-pc-accent/20" : active ? "hover:bg-pc-bg-secondary/50" : ""
-                      }`}
-                    >
-                      <span className={`w-10 text-right text-xs font-mono shrink-0 ${now ? "text-pc-accent font-semibold" : "text-pc-text-muted"}`}>
-                        {time}
-                      </span>
-                      {/* NA */}
-                      <div className="flex-1 flex items-center gap-1">
-                        <div className="flex-1 h-3 bg-pc-bg rounded-full overflow-hidden">
-                          {na > 0 && <div className="h-full rounded-full bg-emerald-500/80 transition-all duration-500" style={{ width: `${naW}%` }} />}
-                        </div>
-                        <span className={`w-5 text-right text-xs font-mono shrink-0 ${na > 0 ? "text-pc-text" : "text-pc-text-muted/30"}`}>
-                          {na > 0 ? na : "0"}
-                        </span>
-                      </div>
-                      <span className="w-px h-3 bg-pc-border/20 shrink-0" />
-                      {/* EU */}
-                      <div className="flex-1 flex items-center gap-1">
-                        <div className="flex-1 h-3 bg-pc-bg rounded-full overflow-hidden">
-                          {eu > 0 && <div className="h-full rounded-full bg-sky-500/80 transition-all duration-500" style={{ width: `${euW}%` }} />}
-                        </div>
-                        <span className={`w-5 text-right text-xs font-mono shrink-0 ${eu > 0 ? "text-pc-text" : "text-pc-text-muted/30"}`}>
-                          {eu > 0 ? eu : "0"}
-                        </span>
-                      </div>
-                      <span className="w-px h-3 bg-pc-border/20 shrink-0" />
-                      {/* Dropped/corrupt match debt is operator-visible only: this number is sourced from
-                         dropped_matches via the canonical debt ledger and must not drive any frontend fetch loop. */}
-                      <span className={`w-8 text-right text-xs font-mono shrink-0 ${dropped > 0 ? "text-amber-300" : "text-pc-text-muted/30"}`}>
-                        {dropped > 0 ? dropped : "-"}
-                      </span>
-                      <span className="w-px h-3 bg-pc-border/20 shrink-0" />
-                      {/* Total */}
-                      <span className={`w-8 text-right text-xs font-mono font-semibold shrink-0 ${now ? "text-pc-accent" : sum > 0 ? "text-pc-text" : "text-pc-text-muted/30"}`}>
-                        {sum > 0 ? sum : "-"}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* Region totals */}
-            {!statsLoading && hourlyStats && (
-              <div className="mt-3 pt-3 border-t border-pc-border/50 grid grid-cols-2 gap-3">
-                {hourlyStats.regions.filter((r) => r.region === "NA" || r.region === "EU").map((r) => (
-                  <div key={r.region} className="pc-surface-light rounded-lg p-2 text-center border border-pc-border/50">
-                    <div className="text-xs text-pc-text-muted uppercase tracking-wider">{r.region}</div>
-                    <div className="text-lg font-mono font-bold text-pc-accent">{r.totalToday.toLocaleString()}</div>
-                    <div className="text-xs text-pc-text-muted">{r.matchesPerHour}{t("generated.matches.hr")}</div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {!statsLoading && droppedRows.length > 0 && (
-              <div className="mt-3 pt-3 border-t border-pc-border/50">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs uppercase tracking-wider text-amber-300/90">{t("generated.matches.trueDropped")}</span>
-                  <span className="text-xs text-pc-text-muted">
-                    {droppedRows.reduce((sum: number, row: any) => sum + row.droppedIds.length, 0)} {t("generated.matches.ids")}</span>
-                </div>
-                <div className="space-y-1">
-                  {droppedRows.map((row: any) => (
-                    <div key={`${row.date}|${row.hour}`} className="flex items-start gap-2 text-xs">
-                      <span className="w-10 shrink-0 text-right font-mono text-pc-text-muted">{formatHour(row.date, row.hour)}</span>
-                      <div className="flex flex-wrap gap-1">
-                        {row.droppedIds.map((id: string) => (
-                          <Link
-                            key={id}
-                            href={`/matches/${id}`}
-                            className="font-mono text-amber-200 hover:text-pc-accent transition-colors"
-                          >
-                            #{id}
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Discovery logic note */}
-          <div className="pc-card p-3">
-            <div className="text-xs text-pc-text-secondary leading-relaxed">
-              <span className="text-pc-text font-medium">{t("generated.matches.discoveryRunsHourlyAtHh30")}</span> {t("generated.matches.forThePreviousHourThe30MinuteOffsetAllowsMatches")}</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+    {loading && <DataTableSkeleton rows={8} />}
+    {error && !loading && <ErrorState message={error} onRetry={() => void loadMatches()} />}
+    {!loading && !error && matches.length === 0 && <EmptyState title={hasFilters ? t("generated.matches.noMatchingGames") : t("generated.matches.noRankedMatchesAvailable")} description={hasFilters ? t("common.empty.matchesFiltered") : t("common.empty.matchesNew")} />}
+    {!loading && !error && matches.length > 0 && <>
+      {hasFilters && <div className="text-xs text-pc-text-muted">{t("generated.matches.showing")} {(page - 1) * perPage + 1}–{Math.min(page * perPage, total)} {t("generated.matches.of")} {total.toLocaleString()} {t("generated.matches.rankedMatches")}</div>}
+      <div className="space-y-2 sm:hidden">{matches.map((match) => <MatchCard key={match.match_id} match={match} />)}</div>
+      <div className="hidden overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated sm:block"><div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr className="border-b border-pc-border bg-pc-bg-secondary text-left text-xs text-pc-text-muted"><th className="px-4 py-3">{t("generated.matches.matchId")}</th><th className="px-4 py-3">{t("generated.matches.map")}</th><th className="px-4 py-3">{t("generated.matches.region")}</th><th className="px-4 py-3">{t("generated.matches.duration")}</th><th className="px-4 py-3">{t("generated.matches.date.eb9a4bc")}</th></tr></thead><tbody>{matches.map((match) => <MatchRow key={match.match_id} match={match} />)}</tbody></table></div></div>
+      {hasFilters && totalPages > 1 && <div className="flex items-center justify-center gap-2"><button onClick={() => setPage((value) => Math.max(1, value - 1))} disabled={page === 1} className="rounded-lg border border-pc-border bg-pc-bg-elevated px-3 py-2 text-xs text-pc-text disabled:opacity-50">{t("generated.matches.prev")}</button><span className="px-4 text-xs text-pc-text-secondary">{t("generated.matches.page")} {page} {t("generated.matches.of")} {totalPages}</span><button onClick={() => setPage((value) => Math.min(totalPages, value + 1))} disabled={page === totalPages} className="rounded-lg border border-pc-border bg-pc-bg-elevated px-3 py-2 text-xs text-pc-text disabled:opacity-50">{t("generated.matches.next")}</button></div>}
+    </>}
+  </div>;
 }
 
 function MatchRow({ match }: { match: MatchSearchResult }) {
-  const duration = formatDuration(match.duration_seconds);
-  const date = formatLocalDateTime(match.entry_datetime);
   const href = `/matches/${match.match_id}`;
-  return (
-    <tr className="group border-b border-pc-border/50 hover:bg-pc-bg-secondary transition-colors">
-      <td className="px-4 py-3">
-        <Link href={href} className="font-medium text-pc-accent group-hover:text-pc-accent-secondary transition-colors text-xs">#{match.match_id}</Link>
-      </td>
-      <td className="px-4 py-3 text-pc-text-secondary text-xs"><Link href={href}>{match.map}</Link></td>
-      <td className="px-4 py-3 text-pc-text-secondary text-xs"><Link href={href}>{match.region}</Link></td>
-      <td className="px-4 py-3 text-pc-text-secondary text-xs"><Link href={href}>{duration}</Link></td>
-      <td className="px-4 py-3 text-pc-text-secondary text-xs"><Link href={href}>{date}</Link></td>
-    </tr>
-  );
+  return <tr className="group border-b border-pc-border/50 hover:bg-pc-bg-secondary"><td className="px-4 py-3"><Link href={href} className="text-xs font-medium text-pc-accent">#{match.match_id}</Link></td><td className="px-4 py-3 text-xs text-pc-text-secondary"><Link href={href}>{match.map}</Link></td><td className="px-4 py-3 text-xs text-pc-text-secondary"><Link href={href}>{match.region}</Link></td><td className="px-4 py-3 text-xs text-pc-text-secondary"><Link href={href}>{formatDuration(match.duration_seconds)}</Link></td><td className="px-4 py-3 text-xs text-pc-text-secondary"><Link href={href}>{formatLocalDateTime(match.entry_datetime)}</Link></td></tr>;
 }
 
 function MatchCard({ match }: { match: MatchSearchResult }) {
   const { t } = useLocalization();
   const href = `/matches/${match.match_id}`;
-  return <Link href={href} className="pc-mobile-panel block p-3 transition-colors hover:border-pc-accent-mid">
-    <div className="flex min-w-0 items-start justify-between gap-3"><div className="min-w-0"><div className="truncate text-sm font-semibold text-pc-text">{match.map || t("generated.matches.unknownMap")}</div><div className="mt-0.5 font-mono text-[10px] text-pc-accent">#{match.match_id}</div></div><span className="shrink-0 rounded-full border border-pc-border bg-pc-bg px-2 py-1 text-[10px] uppercase text-pc-text-secondary">{match.region || "—"}</span></div>
-    <div className="mt-3 grid grid-cols-2 gap-2 text-xs"><div><div className="text-[9px] uppercase text-pc-text-muted">{t("generated.matches.duration")}</div><div className="font-mono text-pc-text-secondary">{formatDuration(match.duration_seconds)}</div></div><div className="text-right"><div className="text-[9px] uppercase text-pc-text-muted">{t("generated.matches.played")}</div><div className="text-pc-text-secondary">{formatLocalDateTime(match.entry_datetime)}</div></div></div>
-  </Link>;
+  return <Link href={href} className="pc-mobile-panel block p-3"><div className="flex items-start justify-between gap-3"><div className="min-w-0"><div className="truncate text-sm font-semibold text-pc-text">{match.map || t("generated.matches.unknownMap")}</div><div className="mt-0.5 font-mono text-[10px] text-pc-accent">#{match.match_id}</div></div><span className="rounded-full border border-pc-border bg-pc-bg px-2 py-1 text-[10px] uppercase text-pc-text-secondary">{match.region || "—"}</span></div><div className="mt-3 grid grid-cols-2 gap-2 text-xs"><div><div className="text-[9px] uppercase text-pc-text-muted">{t("generated.matches.duration")}</div><div className="font-mono text-pc-text-secondary">{formatDuration(match.duration_seconds)}</div></div><div className="text-right"><div className="text-[9px] uppercase text-pc-text-muted">{t("generated.matches.played")}</div><div className="text-pc-text-secondary">{formatLocalDateTime(match.entry_datetime)}</div></div></div></Link>;
 }
 
 function formatDuration(seconds: number): string {
   if (!seconds || seconds <= 0) return "—";
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return `${m}:${s.toString().padStart(2, "0")}`;
+  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
 }

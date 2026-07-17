@@ -5,6 +5,7 @@ import Link from "next/link";
 import { fetchBoostedPlayers, type BoostedPlayer } from "@/lib/api-client";
 import { LoadingPanel } from "@/components/async-state";
 import PlayerName from "@/components/player-name";
+import PlayerDirectoryGrid from "@/components/player-directory-grid";
 import { useLocalization } from "@/lib/localization-context";
 
 export default function BoostedPlayersPage() {
@@ -20,7 +21,7 @@ export default function BoostedPlayersPage() {
   }, []);
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-6">
+    <div className="mx-auto w-full max-w-5xl space-y-6">
       <div>
         <Link href="/players" className="mb-2 inline-block text-xs text-pc-accent hover:underline">{t("generated.players.players")}</Link>
         <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("moderation.boostedPlayers")}</h1>
@@ -37,12 +38,11 @@ export default function BoostedPlayersPage() {
       ) : players.length === 0 ? (
         <div className="py-12 text-center text-sm text-pc-text-secondary">{t("moderation.noBoostedPlayers")}</div>
       ) : (
-        <div className="space-y-2">
-          {players.map((player) => (
+        <PlayerDirectoryGrid items={players} getKey={(player) => player.id}>
+          {(player) => (
             <Link
-              key={player.id}
               href={`/players/boosted/${player.id}`}
-              className="group grid gap-3 rounded-xl border border-orange-400/20 bg-pc-bg-elevated p-3 transition-colors hover:border-orange-400/40 hover:bg-orange-400/[0.04] sm:grid-cols-[minmax(0,14rem)_minmax(0,1fr)] sm:items-start"
+              className="group grid h-full min-h-24 gap-3 rounded-xl border border-orange-400/20 bg-pc-bg-elevated p-4 transition-colors hover:border-orange-400/40 hover:bg-orange-400/[0.04] sm:grid-cols-[minmax(0,10rem)_minmax(0,1fr)] sm:items-start"
             >
               <div className="min-w-0">
                 <div className="truncate text-sm font-semibold text-pc-text transition-colors group-hover:text-pc-accent">
@@ -65,8 +65,8 @@ export default function BoostedPlayersPage() {
                 </ul>
               </div>
             </Link>
-          ))}
-        </div>
+          )}
+        </PlayerDirectoryGrid>
       )}
     </div>
   );

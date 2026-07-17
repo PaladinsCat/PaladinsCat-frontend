@@ -14,7 +14,7 @@ import { useLocalization } from "@/lib/localization-context";
 const items = [
   { href: "/", labelKey: "menu.home", icon: Home },
   { href: "/champions", labelKey: "nav.champions", icon: Sword },
-  { href: "/stats", labelKey: "nav.stats", icon: BarChart3 },
+  { href: "/stats/performance", labelKey: "nav.stats", icon: BarChart3 },
   { href: "/players", labelKey: "nav.players", icon: Users },
 ] as const;
 

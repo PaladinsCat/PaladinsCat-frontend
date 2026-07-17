@@ -87,7 +87,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
         post: { ...prev.post, likes: newLikes },
       } : null);
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : "Failed to update like");
+      setActionError(err instanceof Error ? err.message : t("generated.app\\community\\[id]\\page.failedtoupdatelike"));
     }
   }
 
@@ -104,7 +104,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
       setDetail((prev) => prev ? { ...prev, post } : null);
       setEditingPost(false);
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : "Failed to save post");
+      setActionError(err instanceof Error ? err.message : t("generated.app\\community\\[id]\\page.failedtosavepost"));
     } finally {
       setSavingPost(false);
     }
@@ -122,7 +122,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
       router.push("/community");
       router.refresh();
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : "Failed to delete post");
+      setActionError(err instanceof Error ? err.message : t("generated.app\\community\\[id]\\page.failedtodeletepost"));
       setDeletingPost(false);
     }
   }
@@ -143,7 +143,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
       } : null);
       setNewComment("");
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : "Failed to add comment");
+      setActionError(err instanceof Error ? err.message : t("generated.app\\community\\[id]\\page.failedtoaddcomment"));
     } finally {
       setCommenting(false);
     }
@@ -171,7 +171,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
       setEditingCommentId(null);
       setCommentContent("");
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : "Failed to save comment");
+      setActionError(err instanceof Error ? err.message : t("generated.app\\community\\[id]\\page.failedtosavecomment"));
     } finally {
       setBusyCommentId(null);
     }
@@ -191,7 +191,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
         comments: prev.comments.filter((comment) => comment.id !== commentId),
       } : null);
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : "Failed to delete comment");
+      setActionError(err instanceof Error ? err.message : t("generated.app\\community\\[id]\\page.failedtodeletecomment"));
     } finally {
       setBusyCommentId(null);
     }

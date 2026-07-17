@@ -1096,6 +1096,130 @@ export interface MapDetailStats {
   compositions: MatchCompositionStat[];
 }
 
+export interface AltAccountRelationPlayer {
+  id: string;
+  name: string;
+  region: string;
+  platform: string;
+  cheater: boolean;
+  susCount: number;
+  dropper: boolean;
+  afkWintrade: boolean;
+  altAccount: boolean;
+}
+
+export interface AltAccountDirectoryGroup {
+  main: AltAccountRelationPlayer;
+  altAccounts: Array<AltAccountRelationPlayer & { voteCount: number; lastVotedAt: string | null }>;
+  totalVotes: number;
+  lastVotedAt: string | null;
+}
+
+export interface MyAltAccountRelation {
+  id: number;
+  mainPlayerId: string;
+  mainPlayerName: string;
+  altPlayerId: string;
+  altPlayerName: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+function mapAltRelationPlayer(row: any, prefix = ''): AltAccountRelationPlayer {
+  return {
+    id: String(row[`${prefix}id`] ?? ''),
+    name: String(row[`${prefix}name`] ?? 'Unknown player'),
+    region: String(row[`${prefix}region`] ?? '—'),
+    platform: String(row[`${prefix}platform`] ?? '—'),
+    cheater: Boolean(row[`${prefix}cheater`]),
+    susCount: Number(row[`${prefix}sus_count`] ?? 0),
+    dropper: Boolean(row[`${prefix}dropper`]),
+    afkWintrade: Boolean(row[`${prefix}afk_wintrade`]),
+    altAccount: Boolean(row[`${prefix}alt_account`]),
+  };
+}
+
+export async function fetchAltAccountRelationsDirectory(params: { page?: number; pageSize?: number; query?: string } = {}): Promise<PlayerDirectoryPage<AltAccountDirectoryGroup>> {
+  const page = Math.max(1, params.page ?? 1);
+  const pageSize = Math.min(100, Math.max(1, params.pageSize ?? 24));
+  const query = new URLSearchParams({ page: String(page), perPage: String(pageSize) });
+  if (params.query?.trim()) query.set('q', params.query.trim());
+  const rows = await fetchJson<any[]>(`/players/alt-account-relations?${query.toString()}`);
+  const total = Number(rows[0]?.total_count ?? 0);
+  const items = rows.map((row): AltAccountDirectoryGroup => ({
+    main: mapAltRelationPlayer({
+      main_player_id: row.main_player_id,
+      main_player_name: row.main_player_name,
+      main_player_region: row.main_player_region,
+      main_player_platform: row.main_player_platform,
+      main_player_cheater: row.main_player_cheater,
+      main_player_sus_count: row.main_player_sus_count,
+      main_player_dropper: row.main_player_dropper,
+      main_player_afk_wintrade: row.main_player_afk_wintrade,
+      main_player_alt_account: row.main_player_alt_account,
+    }, 'main_player_'),
+    altAccounts: (Array.isArray(row.alt_accounts) ? row.alt_accounts : []).map((alt: any) => ({
+      ...mapAltRelationPlayer(alt),
+      voteCount: Number(alt.vote_count ?? 0),
+      lastVotedAt: alt.last_voted_at ?? null,
+    })),
+    totalVotes: Number(row.total_votes ?? 0),
+    lastVotedAt: row.last_voted_at ?? null,
+  }));
+  return { items, total, page, pageSize, totalPages: Math.max(1, Math.ceil(total / pageSize)) };
+}
+
+export async function fetchMyAltAccountRelations(playerId: string | number): Promise<MyAltAccountRelation[]> {
+  const token = getAuthToken();
+  if (!token) throw new Error(API_ERROR_KEYS.authenticationRequired);
+  const rows = await fetchJson<any[]>(`/players/${playerId}/alt-account-relations/mine`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: 'no-store',
+  });
+  return rows.map((row) => ({
+    id: Number(row.id),
+    mainPlayerId: String(row.main_player_id),
+    mainPlayerName: String(row.main_player_name ?? 'Unknown player'),
+    altPlayerId: String(row.alt_player_id),
+    altPlayerName: String(row.alt_player_name ?? 'Unknown player'),
+    createdAt: String(row.created_at),
+    updatedAt: String(row.updated_at),
+  }));
+}
+
+export async function voteAltAccountRelation(playerId: string | number, otherPlayerId: string | number, otherRole: 'main' | 'alt'): Promise<{ success: boolean; replaced: boolean }> {
+  const token = getAuthToken();
+  if (!token) throw new Error(API_ERROR_KEYS.authenticationRequired);
+  return fetchJson(`/players/${playerId}/alt-account-relations`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ otherPlayerId, otherRole }),
+  });
+}
+
+export async function clearMyAltAccountRelation(playerId: string | number, otherPlayerId: string | number): Promise<{ success: boolean; removed: boolean }> {
+  const token = getAuthToken();
+  if (!token) throw new Error(API_ERROR_KEYS.authenticationRequired);
+  return fetchJson(`/players/${playerId}/alt-account-relations/${otherPlayerId}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export type MapComparisonSection = 'champions' | 'talents' | 'items' | 'compositions';
+
+export interface MapCategoryComparisonStat {
+  entityKey: string;
+  mapName: string;
+  totalCount: number;
+  wins: number;
+  losses: number;
+  totalBans: number;
+  winRate: number;
+  pickRate: number;
+  banRate: number;
+}
+
 export interface HourlyMatchCount {
   date: string;
   hour: number;
@@ -2457,6 +2581,24 @@ export async function fetchMapDetail(mapName: string): Promise<MapDetailStats | 
   }
 }
 
+export async function fetchMapCategoryComparison(
+  mapName: string,
+  section: MapComparisonSection,
+): Promise<MapCategoryComparisonStat[]> {
+  const raw = await fetchJson<any>(`/stats/maps/${encodeURIComponent(mapName)}/comparison?section=${encodeURIComponent(section)}`);
+  return (raw.rows ?? []).map((row: any) => ({
+    entityKey: String(row.entity_key),
+    mapName: String(row.map_name),
+    totalCount: Number(row.total_count ?? 0),
+    wins: Number(row.wins ?? 0),
+    losses: Number(row.losses ?? 0),
+    totalBans: Number(row.total_bans ?? 0),
+    winRate: Number(row.win_rate ?? 0),
+    pickRate: Number(row.pick_rate ?? 0),
+    banRate: Number(row.ban_rate ?? 0),
+  }));
+}
+
 export interface SkinStat {
   skinId: number;
   skinName: string;
@@ -3461,7 +3603,7 @@ export async function updateProfile(data: { avatar_url?: string | null; bio?: st
 
 // ── Player Report ──
 
-export type ReportType = 'suspicious' | 'cheater' | 'approve' | 'weirdo' | 'hall_of_fame' | 'dropper' | 'afk_wintrade' | 'alt_account';
+export type ReportType = 'suspicious' | 'cheater' | 'approve' | 'weirdo' | 'hall_of_fame' | 'dropper' | 'afk_wintrade';
 
 export interface ReportOptions {
   type: ReportType;
@@ -4022,6 +4164,7 @@ export interface MatchPlayerProfileSnapshot {
   champion_elo: number | null;
   cheater: boolean;
   sus_count: number;
+  verified: boolean;
 }
 
 export interface MatchBan {

@@ -59,7 +59,7 @@ export default function MatchExportButton(props: MatchExportButtonProps) {
         delete scoreboard.dataset.imageExport;
       }
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Could not save this match image.");
+      setMessage(error instanceof Error ? error.message : t("generated.components\\match-result\\match-export-button.couldnotsavethismatchimag"));
     } finally {
       setExporting(false);
     }

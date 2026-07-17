@@ -3,22 +3,15 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { fetchItems, type ItemStat } from "@/lib/api-client";
-import { loadBuildReferenceData, type BuildItemReference } from "@/lib/build-reference";
+import { loadBuildReferenceData, type BuildItemCategory, type BuildItemReference } from "@/lib/build-reference";
 import { getStatQuality } from "@/lib/stat-quality";
 import { useLocalization } from "@/lib/localization-context";
-
-const CATEGORY_BY_ITEM: Record<string, string> = {
-  "Blast Shields": "Defense", Guardian: "Defense", Haven: "Defense", Illuminate: "Defense", Resilience: "Defense", Sentinel: "Defense",
-  Chronos: "Utility", Hoard: "Utility", "Master Riding": "Utility", "Morale Boost": "Utility", Nimble: "Utility",
-  Bloodbath: "Healing", "Kill to Heal": "Healing", "Life Rip": "Healing", Meditation: "Healing", Rejuvenate: "Healing", Veteran: "Healing",
-  Bulldozer: "Offense", "Deft Hands": "Offense", Lethality: "Offense", "Trigger Scent": "Offense", Wrecker: "Offense",
-};
 
 function itemIcon(name: string) {
   return `/images/items/${name.replace(/\s+/g, "_")}_Icon.avif`;
 }
 
-function categoryColor(category: string) {
+function categoryColor(category: BuildItemCategory) {
   return category === "Offense" ? "text-red-400" : category === "Defense" ? "text-blue-400" : category === "Healing" ? "text-emerald-400" : "text-amber-400";
 }
 
@@ -40,40 +33,6 @@ function formatItemDescription(description: string | null | undefined, level = 1
       cleanNumber(Number(base) + Number(increase) * Math.max(0, level - 1))
     ))
     .replace(/\{\s*(-?(?:\d+(?:\.\d*)?|\.\d+))\s*\}/g, (_match, value: string) => cleanNumber(Number(value)));
-}
-
-function DimensionBars({ label, rows, total }: { label: "S" | "L"; rows: ItemStat["slots"]; total: number }) {
-  const { t } = useLocalization();
-  if (rows.length === 0) return null;
-  const maxUses = Math.max(1, ...rows.map((row) => row.totalUses));
-  const maxRate = Math.max(1, ...rows.map((row) => (row.totalUses / Math.max(1, total)) * 100));
-
-  return (
-    <div className="mt-1.5">
-      <div className="mb-0.5 text-[9px] font-medium text-pc-text-muted">{label === "S" ? t("generated.stats.purchaseSlot") : t("generated.stats.upgradeLevel")}</div>
-      <div className="flex items-center gap-1">
-        {rows.map((row) => {
-          const dimension = label === "S" ? row.slot : row.level;
-          const displayDimension = label === "L" ? Number(dimension) + 1 : dimension;
-          const rate = (row.totalUses / Math.max(1, total)) * 100;
-          const quality = getStatQuality(row.winRate, rate, maxRate);
-          return (
-            <div
-              key={dimension}
-              className="flex min-w-0 flex-1 flex-col items-center"
-              title={t("generated.stats.value1Value2Value3WinRateValue4PurchaseShareValue5Purchases", { value1: label === "S" ? t("generated.stats.slot") : t("generated.stats.level"), value2: displayDimension ?? "", value3: row.winRate.toFixed(1), value4: rate.toFixed(1), value5: row.totalUses.toLocaleString() })}
-            >
-              <div className="text-[9px] text-pc-text-muted">{label}{displayDimension}</div>
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-pc-bg-elevated">
-                <div className="h-full rounded-full" style={{ width: `${Math.max(row.totalUses > 0 ? 8 : 0, Math.round((row.totalUses / maxUses) * 100))}%`, background: quality.track }} />
-              </div>
-              <div className="text-[9px] text-pc-text-muted">{formatCount(row.totalUses)}</div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
 }
 
 export default function ItemsPage() {
@@ -98,12 +57,14 @@ export default function ItemsPage() {
 
   const totalUses = items.reduce((sum, item) => sum + item.totalUsage, 0);
   const referenceById = useMemo(() => new Map(references.map((item) => [item.id, item])), [references]);
+  const referenceByName = useMemo(() => new Map(references.map((item) => [item.name.toLowerCase(), item])), [references]);
+  const categoryFor = (item: ItemStat): BuildItemCategory => referenceById.get(item.itemId)?.category ?? referenceByName.get(item.itemName.toLowerCase())?.category ?? "Utility";
   const itemPickRate = (item: ItemStat) => item.pickRate ?? (totalUses ? item.totalUsage / totalUses * 100 : 0);
   const maxPickRate = Math.max(1, ...items.map(itemPickRate));
   const filtered = useMemo(() => items
     .filter((item) => item.itemName.toLowerCase().includes(query.trim().toLowerCase()))
     .sort((a, b) => sort === "uses" ? b.totalUsage - a.totalUsage : b.winRate - a.winRate), [items, query, sort]);
-  const categories = ["Defense", "Utility", "Healing", "Offense"];
+  const categories: BuildItemCategory[] = ["Defense", "Utility", "Healing", "Offense"];
 
   return (
     <div className="space-y-6">
@@ -125,17 +86,17 @@ export default function ItemsPage() {
       {items.length === 0 ? <div className="pc-card text-sm text-pc-text-muted">{t("generated.stats.itemStatsAreUnavailableForThisQueue")}</div> : (
         <div className="pc-card">
           {categories.map((category) => {
-            const categoryItems = filtered.filter((item) => (CATEGORY_BY_ITEM[item.itemName] ?? "Utility") === category);
+            const categoryItems = filtered.filter((item) => categoryFor(item) === category);
             if (categoryItems.length === 0) return null;
-            return <section key={category} className="mb-6 last:mb-0">
+            return <section key={category} className="mb-4 last:mb-0">
               <h2 className={`mb-2 text-xs font-bold uppercase tracking-wider ${categoryColor(category)}`}>{category}</h2>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
               {categoryItems.map((item) => {
             const pickRate = itemPickRate(item);
             const quality = getStatQuality(item.winRate, pickRate, maxPickRate);
             const reference = referenceById.get(item.itemId);
-            const description = formatItemDescription(reference?.description, 1) ?? "Ranked purchase performance by slot and upgrade level.";
-            return <Link key={item.itemId} href={`/stats/items/${item.itemId}`} className="pc-surface-light group block rounded-lg border p-3 text-left transition-colors hover:border-pc-accent-mid" style={{ borderColor: quality.borderColor }}>
+            const description = formatItemDescription(reference?.description, 1) ?? t("items.overviewFallbackDescription");
+            return <Link key={item.itemId} href={`/game/items/${item.itemId}`} className="pc-surface-light group block rounded-lg border p-3 text-left transition-colors hover:border-pc-accent-mid" style={{ borderColor: quality.borderColor }}>
               <div className="flex items-start gap-3">
                 <img src={reference?.iconUrl ?? itemIcon(item.itemName)} alt={item.itemName} className="h-10 w-12 shrink-0 rounded border border-pc-border bg-pc-bg/50 object-contain" />
                 <div className="min-w-0 flex-1">
@@ -148,8 +109,6 @@ export default function ItemsPage() {
                     <span className="text-pc-border">|</span>
                     <span className="text-pc-text-muted"><span className="mr-1">{t("generated.stats.purchases")}</span><span style={{ color: quality.color }}>{formatCount(item.totalUsage)}</span></span>
                   </div>
-                  <DimensionBars label="S" rows={item.slots} total={item.totalUsage} />
-                  <DimensionBars label="L" rows={item.levels} total={item.totalUsage} />
                 </div>
               </div>
             </Link>;

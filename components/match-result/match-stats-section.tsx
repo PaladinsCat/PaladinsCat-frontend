@@ -141,12 +141,8 @@ function PlayerRow({
 
 /* ── Main section ── */
 
-const statColumns = [
-  "Player", "Credits", "CPM", "eCPM", "KDA", "Obj",
-  "Dmg", "DPM", "Abil", "Taken", "Shielding", "SPM", "Heal", "HPM", "Self", "AFK",
-];
-
 function MobilePlayerCard({ player, wins }: { player: MatchPlayerDetail; wins: boolean }) {
+  const { t } = useLocalization();
   const damageStats = computeDamageStats(player);
   const damage = damageStats.totalDamage;
   const abilityDamage = player.source !== "recovered" || damageStats.weaponDamage > 0 || damage === 0
@@ -154,20 +150,20 @@ function MobilePlayerCard({ player, wins }: { player: MatchPlayerDetail; wins: b
     : null;
   const champion = player.champion_name || `Champion #${player.champion_id}`;
   const metrics = [
-    ["Credits", num(player.gold_earned)],
+    [t("generated.match.stats.credits"), num(player.gold_earned)],
     ["CPM", fixed(player.gold_per_minute, 0)],
     ["eCPM", fixed(player.egpm, 0)],
     ["KDA", fixed(player.kda, 2)],
-    ["Obj", num(player.objective_assists)],
-    ["Damage", num(damage)],
+    [t("generated.match.stats.obj"), num(player.objective_assists)],
+    [t("generated.match.stats.damage"), num(damage)],
     ["DPM", fixed(player.damage_per_minute, 0)],
-    ["Abil", abilityDamage == null ? "—" : num(abilityDamage)],
-    ["Taken", num(player.damage_taken)],
-    ["Shielding", num(player.damage_mitigated)],
+    [t("generated.match.stats.abil"), abilityDamage == null ? "—" : num(abilityDamage)],
+    [t("generated.match.stats.taken"), num(player.damage_taken)],
+    [t("generated.match.stats.shielding"), num(player.damage_mitigated)],
     ["SPM", fixed(player.mitigation_per_minute, 0)],
-    ["Healing", num(player.healing)],
+    [t("generated.match.stats.healing"), num(player.healing)],
     ["HPM", fixed(player.healing_per_minute, 0)],
-    ["Self", num(player.healing_self)],
+    [t("generated.match.stats.self"), num(player.healing_self)],
     ["AFK", `${fixed(player.afk_rate, 1)}%`],
   ];
 
@@ -195,6 +191,10 @@ export default function MatchStatsSection({
   factMap,
 }: MatchStatsSectionProps) {
   const { t } = useLocalization();
+  const statColumns = [
+    t("generated.match.stats.player"), t("generated.match.stats.credits"), "CPM", "eCPM", "KDA", t("generated.match.stats.obj"),
+    "Dmg", "DPM", t("generated.match.stats.abil"), t("generated.match.stats.taken"), t("generated.match.stats.shielding"), "SPM", "Heal", "HPM", t("generated.match.stats.self"), "AFK",
+  ];
   return (
     <section className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
       <div className="px-4 py-3 border-b border-pc-border">
@@ -220,7 +220,7 @@ export default function MatchStatsSection({
               {statColumns.map((col) => (
                 <th
                   key={col}
-                  className={`px-1.5 py-2 text-[10px] uppercase tracking-wide text-pc-text-muted font-medium ${col === "Player" ? "text-left" : "text-center"}`}
+                  className={`px-1.5 py-2 text-[10px] uppercase tracking-wide text-pc-text-muted font-medium ${col === t("generated.match.stats.player") ? "text-left" : "text-center"}`}
                 >
                   {col}
                 </th>

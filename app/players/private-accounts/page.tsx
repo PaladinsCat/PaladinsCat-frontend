@@ -8,6 +8,7 @@ import PlayerDirectoryPagination from "@/components/player-directory-pagination"
 import { fetchPrivateAccountsDirectory, type PrivateAccountSummary } from "@/lib/api-client";
 import { TIER_NAMES, getRankIconPath, getTierColor } from "@/lib/tier-utils";
 import { useLocalization } from "@/lib/localization-context";
+import { PlayerModerationTag } from "@/components/player-name";
 
 const PAGE_SIZE = 24;
 
@@ -104,6 +105,7 @@ export default function PrivateAccountsPage() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex min-w-0 flex-wrap items-center gap-1.5">
                     <h2 className="mr-0.5 truncate text-base font-semibold text-pc-text group-hover:text-pc-accent">{account.alias || account.displayName}</h2>
+                    <PlayerModerationTag playerId={0} cheater={account.cheater} susCount={0} verified={false} />
                     <span className="rounded border border-pc-border bg-pc-bg/50 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-pc-text-secondary">{t("generated.players.level")}{" "}{account.accountLevel.toLocaleString()}</span>
                     <span className="rounded border border-pc-border bg-pc-bg/50 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-pc-text-secondary">{t("generated.players.mastery")}{" "}{account.masteryLevel.toLocaleString()}</span>
                     <span className={`ml-1 flex min-w-0 items-center gap-1 text-xs font-semibold ${getTierColor(account.leagueTier)}`}>

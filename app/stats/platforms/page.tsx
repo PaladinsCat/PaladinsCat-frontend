@@ -67,7 +67,7 @@ export default function PlatformsPage() {
           data={chartData}
           xKey="champion"
           yKeys={["winRate"]}
-          yLabel="Win Rate (%)"
+          yLabel={t("generated.app\\stats\\platforms\\page.winrate")}
           title={selectedPlatform ? t("generated.stats.value1TopChampions", { value1: selectedPlatform }) : t("generated.stats.topChampionsAllPlatforms")}
           height={400}
           colors={["#4ade80"]}

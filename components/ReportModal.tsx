@@ -10,9 +10,10 @@ type PlayerAction = Exclude<ReportType, "approve">;
 const ACTIONS: Record<PlayerAction, {
   labelKey: TranslationKey;
   submitLabelKey: TranslationKey;
-  accent: "amber" | "red" | "violet" | "emerald";
+  accent: "amber" | "red" | "violet" | "emerald" | "rose" | "sky" | "fuchsia";
   promptKey: TranslationKey;
   reasons: Array<{ labelKey: TranslationKey; value: string }>;
+  reasonRequired?: boolean;
 }> = {
   suspicious: {
     labelKey: "moderation.reportSuspicious",
@@ -63,6 +64,22 @@ const ACTIONS: Record<PlayerAction, {
       { labelKey: "moderation.other", value: "other" },
     ],
   },
+  dropper: {
+    labelKey: "moderation.voteDropper",
+    submitLabelKey: "moderation.voteDropper",
+    accent: "rose",
+    promptKey: "moderation.promptDropper",
+    reasons: [],
+    reasonRequired: false,
+  },
+  afk_wintrade: {
+    labelKey: "moderation.voteAfkWintrade",
+    submitLabelKey: "moderation.voteAfkWintrade",
+    accent: "sky",
+    promptKey: "moderation.promptAfkWintrade",
+    reasons: [],
+    reasonRequired: false,
+  },
 };
 
 interface ReportModalProps {
@@ -81,11 +98,12 @@ export default function ReportModal({ playerId, type, onClose, onSuccess }: Repo
   const [success, setSuccess] = useState(false);
   const overlayRef = useRef<HTMLDivElement>(null);
   const action = ACTIONS[type];
+  const reasonRequired = action.reasonRequired !== false;
   const isOther = selectedReason === "other";
 
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+      if (event.key === t("generated.components\\ReportModal.escape")) onClose();
     };
     document.addEventListener("keydown", handleEsc);
     return () => document.removeEventListener("keydown", handleEsc);
@@ -97,18 +115,20 @@ export default function ReportModal({ playerId, type, onClose, onSuccess }: Repo
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
-    if (!selectedReason) {
+    if (reasonRequired && !selectedReason) {
       setError(t("moderation.selectReason"));
       return;
     }
-    if (isOther && !customReason.trim()) {
+    if (reasonRequired && isOther && !customReason.trim()) {
       setError(t(action.promptKey));
       return;
     }
 
-    const reason = isOther
-      ? customReason.trim()
-      : selectedReason;
+    const reason = reasonRequired
+      ? isOther
+        ? customReason.trim()
+        : selectedReason
+      : undefined;
     setError(null);
     setSubmitting(true);
     try {
@@ -116,7 +136,7 @@ export default function ReportModal({ playerId, type, onClose, onSuccess }: Repo
       setSuccess(true);
       setTimeout(onSuccess, 500);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Action failed");
+      setError(err instanceof Error ? err.message : t("generated.report.actionFailed"));
     } finally {
       setSubmitting(false);
     }
@@ -127,18 +147,27 @@ export default function ReportModal({ playerId, type, onClose, onSuccess }: Repo
     amber: "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20",
     violet: "bg-violet-500/10 border-violet-500/30 text-violet-300 hover:bg-violet-500/20",
     emerald: "bg-emerald-500/10 border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/20",
+    rose: "bg-rose-500/10 border-rose-500/30 text-rose-300 hover:bg-rose-500/20",
+    sky: "bg-sky-500/10 border-sky-500/30 text-sky-300 hover:bg-sky-500/20",
+    fuchsia: "bg-fuchsia-500/10 border-fuchsia-500/30 text-fuchsia-300 hover:bg-fuchsia-500/20",
   };
   const activeColorMap = {
     red: "bg-red-500/25 border-red-500/50 text-red-300",
     amber: "bg-amber-500/25 border-amber-500/50 text-amber-300",
     violet: "bg-violet-500/25 border-violet-500/50 text-violet-200",
     emerald: "bg-emerald-500/25 border-emerald-500/50 text-emerald-200",
+    rose: "bg-rose-500/25 border-rose-500/50 text-rose-200",
+    sky: "bg-sky-500/25 border-sky-500/50 text-sky-200",
+    fuchsia: "bg-fuchsia-500/25 border-fuchsia-500/50 text-fuchsia-200",
   };
   const submitColor = {
     red: "bg-red-500 hover:bg-red-600",
     amber: "bg-amber-500 hover:bg-amber-600",
     violet: "bg-violet-500 hover:bg-violet-600",
     emerald: "bg-emerald-500 hover:bg-emerald-600",
+    rose: "bg-rose-500 hover:bg-rose-600",
+    sky: "bg-sky-500 hover:bg-sky-600",
+    fuchsia: "bg-fuchsia-500 hover:bg-fuchsia-600",
   };
 
   return (
@@ -152,11 +181,11 @@ export default function ReportModal({ playerId, type, onClose, onSuccess }: Repo
         {success ? (
           <div className="text-center py-6">
             <div className="text-emerald-400 text-2xl mb-2">✓</div>
-            <p className="text-pc-text text-sm">{t("generated.components.yourReasonWasRecorded")}</p>
+            <p className="text-pc-text text-sm">{t(reasonRequired ? "generated.components.yourReasonWasRecorded" : "moderation.voteRecorded")}</p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
+            {reasonRequired ? <div className="space-y-2">
               <label className="text-xs text-pc-text-muted uppercase tracking-wider">{t("generated.components.reason")}</label>
               <div className="space-y-1.5">
                 {action.reasons.map((item) => (
@@ -170,7 +199,7 @@ export default function ReportModal({ playerId, type, onClose, onSuccess }: Repo
                   </button>
                 ))}
               </div>
-            </div>
+            </div> : <p className="rounded-lg border border-pc-border bg-pc-bg-secondary px-3 py-3 text-sm leading-6 text-pc-text-secondary">{t("moderation.communityVoteNoReason")}</p>}
 
             {isOther && (
               <div className="space-y-2">

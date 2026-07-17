@@ -33,7 +33,7 @@ export default function PlayerLoadoutDetailPage() {
   const [references, setReferences] = useState<BuildCardReference[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => { let cancelled = false; fetchPlayerLoadouts(playerId).then((data) => { if (cancelled) return; setFreshness(data.freshness); setLoadout(data.loadouts.find((entry) => entry.id === loadoutId && entry.championId === championId) ?? null); }).catch((cause) => { if (!cancelled) setError(cause instanceof Error ? cause.message : "Could not load this saved deck."); }); return () => { cancelled = true; }; }, [playerId, championId, loadoutId]);
+  useEffect(() => { let cancelled = false; fetchPlayerLoadouts(playerId).then((data) => { if (cancelled) return; setFreshness(data.freshness); setLoadout(data.loadouts.find((entry) => entry.id === loadoutId && entry.championId === championId) ?? null); }).catch((cause) => { if (!cancelled) setError(cause instanceof Error ? cause.message : t("generated.app\\players\\[id]\\loadouts\\[championId]\\[loadoutId]\\page.couldnotloadthissaveddeck")); }); return () => { cancelled = true; }; }, [playerId, championId, loadoutId]);
   useEffect(() => { getPlayerLoadoutChampionRoster().then(setChampions); }, []);
   useEffect(() => { if (!champion) return; loadBuildReferenceData(champion.id, championSlug(champion.name)).then((reference) => setReferences(reference.cards)).catch(() => setReferences([])); }, [champion]);
   const cardsById = useMemo(() => new Map(references.map((card) => [card.id, card])), [references]);

@@ -109,7 +109,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                 <div className="flex items-center gap-1 text-sm text-pc-accent group-hover:opacity-80 transition-opacity">
                   {t(BLOG_COPY_KEYS.readMore)}
                   <svg className="h-4 w-4 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M5 12h14M12 5l7 7-7 7" />
+                    <path d="M512 14m125l7777" />
                   </svg>
                 </div>
               </article>

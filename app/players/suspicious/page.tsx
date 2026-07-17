@@ -5,6 +5,7 @@ import Link from "next/link";
 import { fetchCheaterPlayers, type CheaterPlayer } from "@/lib/api-client";
 import { LoadingPanel } from "@/components/async-state";
 import PlayerName from "@/components/player-name";
+import PlayerDirectoryGrid from "@/components/player-directory-grid";
 import { useLocalization } from "@/lib/localization-context";
 
 export default function SuspiciousPage() {
@@ -28,7 +29,7 @@ export default function SuspiciousPage() {
   }, []);
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-6">
+    <div className="mx-auto w-full max-w-5xl space-y-6">
       <div>
         <Link href="/players" className="text-pc-accent text-xs hover:underline mb-2 inline-block">{t("generated.players.players")}</Link>
         <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.players.suspiciousPlayers")}</h1>
@@ -46,24 +47,21 @@ export default function SuspiciousPage() {
       ) : data.length === 0 ? (
         <div className="text-center py-12 text-pc-text-secondary text-sm">{t("generated.players.noSuspiciousPlayersFound")}</div>
       ) : (
-        <div className="space-y-2">
-          {data.map((player) => (
-            <article
-              key={player.id}
-              className="grid gap-3 rounded-xl border border-amber-500/20 bg-pc-bg-elevated p-3 sm:grid-cols-[minmax(0,12rem)_auto_minmax(0,1fr)] sm:items-start"
+        <PlayerDirectoryGrid items={data} getKey={(player) => player.id}>
+          {(player) => (
+            <Link
+              href={`/players/${player.id}`}
+              className="grid h-full min-h-28 gap-3 rounded-xl border border-amber-500/20 bg-pc-bg-elevated p-4 transition-colors hover:border-amber-400/40 hover:bg-amber-500/[0.04] sm:grid-cols-[minmax(0,10rem)_auto] sm:items-start"
             >
-              <Link
-                href={`/players/${player.id}`}
-                className="min-w-0 truncate text-sm font-semibold text-pc-text transition-colors hover:text-pc-accent"
-              >
+              <div className="min-w-0 truncate text-sm font-semibold text-pc-text">
                 <PlayerName playerId={player.id} cheater={player.cheater} susCount={player.susCount}>{player.name}</PlayerName>
-              </Link>
+              </div>
 
               <span className="w-fit shrink-0 rounded-full border border-amber-500/30 bg-amber-500/15 px-2 py-1 text-xs font-semibold text-amber-300">
                 {player.susCount.toLocaleString()} {player.susCount === 1 ? t("generated.players.flag") : t("generated.players.flags")}
               </span>
 
-              <div className="min-w-0">
+              <div className="min-w-0 sm:col-span-2">
                 <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-pc-text-muted">{t("generated.players.topReasons")}</div>
                 {player.topReasons.length > 0 ? (
                   <ul className="flex min-w-0 flex-wrap gap-1.5">
@@ -81,9 +79,9 @@ export default function SuspiciousPage() {
                   <span className="text-xs text-pc-text-muted">{t("generated.players.noReasonRecorded")}</span>
                 )}
               </div>
-            </article>
-          ))}
-        </div>
+            </Link>
+          )}
+        </PlayerDirectoryGrid>
       )}
     </div>
   );

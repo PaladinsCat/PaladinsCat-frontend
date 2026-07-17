@@ -87,13 +87,13 @@ function DistributionChart({
 
   return (
     <section>
-      <div className="flex items-center justify-between gap-3 mb-4 px-2">
+      <div className="mb-3 flex items-center justify-between gap-3 px-1">
         <h2 className="text-lg font-bold text-pc-text">{title}</h2>
         <span className="text-xs text-pc-text-secondary tabular-nums">
           {total.toLocaleString()} {label}
         </span>
       </div>
-      <div className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4">
+      <div className="rounded-xl border border-pc-border bg-pc-bg-elevated p-3 sm:p-4">
         <div className="flex items-end justify-center gap-1.5 h-80 overflow-x-auto pb-2">
           {rows.map((row) => {
             const height = Math.max(2, Math.round((row.totalPlays / max) * 308));
@@ -172,7 +172,7 @@ export default function TiersPage() {
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="mx-auto w-full max-w-5xl space-y-6">
       <div>
         <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.stats.tierDistribution")}</h1>
       </div>
@@ -185,9 +185,9 @@ export default function TiersPage() {
         <EmptyState title={t("generated.stats.noTierStatistics")} description={t("generated.stats.tierDistributionsWillAppearAfterRankedProfilesAndMatchesAre")} />
       ) : (
         <>
-          <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {cards.map((item) => (
-              <div key={item.label} className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4">
+              <div key={item.label} className="rounded-xl border border-pc-border bg-pc-bg-elevated p-3">
                 <div className="text-xs text-pc-text-muted">{item.label}</div>
                 <div className="mt-1 text-xl font-semibold text-pc-text">
                   {item.kind === "tier" ? (

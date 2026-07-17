@@ -40,7 +40,7 @@ export default function AdminDashboardPage() {
     try {
       setDashboard(await fetchAdminDashboard());
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "Admin dashboard unavailable.");
+      setError(reason instanceof Error ? reason.message : t("generated.app\\admin\\page.admindashboardunavailable"));
     } finally {
       setLoading(false);
     }

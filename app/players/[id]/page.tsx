@@ -9,6 +9,7 @@ import { clearPlayerTag, fetchPlayerMatches, type ClearablePlayerTag, type Match
 import { getTierColor, resolveEffectiveTier, getRankIconPath } from "@/lib/tier-utils";
 import { useAuth } from "@/lib/auth-context";
 import ReportModal from "@/components/ReportModal";
+import AltAccountRelationModal from "@/components/alt-account-relation-modal";
 import { formatLocalDate, formatLocalDateTime } from "@/lib/time-format";
 import { ErrorState, LoadingIndicator, LoadingOverlay, LoadingPanel } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
@@ -223,6 +224,7 @@ export default function PlayerProfilePage() {
 
   // Report modal state
   const [showReportModal, setShowReportModal] = useState(false);
+  const [showAltRelationModal, setShowAltRelationModal] = useState(false);
   const [reportType, setReportType] = useState<Exclude<ReportType, 'approve'>>('suspicious');
   const [clearingTag, setClearingTag] = useState<ClearablePlayerTag | null>(null);
 
@@ -262,6 +264,14 @@ export default function PlayerProfilePage() {
     setShowReportModal(false);
     setReportType('suspicious');
   }, []);
+
+  const openAltRelationModal = useCallback(() => {
+    if (!isLoggedIn) {
+      router.push(`/auth/login?redirect=/players/${id}`);
+      return;
+    }
+    setShowAltRelationModal(true);
+  }, [id, isLoggedIn, router]);
 
   const handleReportSuccess = useCallback(() => {
     setShowReportModal(false);
@@ -569,6 +579,12 @@ export default function PlayerProfilePage() {
                 <span>{t("generated.players.voteHallOfFame")}</span>
                 {player.hall_of_fame_count > 0 && <span className="text-xs tabular-nums">{player.hall_of_fame_count}</span>}
               </button>
+              <button type="button" role="menuitem" onClick={() => { setActionMenuOpen(false); openReportModal('dropper'); }} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-rose-300 transition-colors hover:bg-rose-500/10">
+                {t("moderation.voteDropper")}</button>
+              <button type="button" role="menuitem" onClick={() => { setActionMenuOpen(false); openReportModal('afk_wintrade'); }} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-sky-300 transition-colors hover:bg-sky-500/10">
+                {t("moderation.voteAfkWintrade")}</button>
+              <button type="button" role="menuitem" onClick={() => { setActionMenuOpen(false); openAltRelationModal(); }} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-fuchsia-300 transition-colors hover:bg-fuchsia-500/10">
+                {t("moderation.voteAltAccount")}</button>
 
               {(isAdmin || isApproved) && (
                 <>
@@ -576,12 +592,6 @@ export default function PlayerProfilePage() {
                   <div className="px-2 pb-1 text-[10px] font-bold uppercase tracking-widest text-pc-text-muted">{t("generated.players.moderation")}</div>
                   <button type="button" role="menuitem" onClick={() => { setActionMenuOpen(false); openReportModal('cheater'); }} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-red-400 transition-colors hover:bg-red-500/10">
                     {t("generated.players.flagAsCheater")}</button>
-                  <button type="button" role="menuitem" onClick={() => { setActionMenuOpen(false); openReportModal('dropper'); }} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-rose-300 transition-colors hover:bg-rose-500/10">
-                    {t("moderation.flagDropper")}</button>
-                  <button type="button" role="menuitem" onClick={() => { setActionMenuOpen(false); openReportModal('afk_wintrade'); }} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-sky-300 transition-colors hover:bg-sky-500/10">
-                    {t("moderation.flagAfkWintrade")}</button>
-                  <button type="button" role="menuitem" onClick={() => { setActionMenuOpen(false); openReportModal('alt_account'); }} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-fuchsia-300 transition-colors hover:bg-fuchsia-500/10">
-                    {t("moderation.flagAltAccount")}</button>
                   {isAdmin && player.cheater && (
                     <button type="button" role="menuitem" disabled={clearingTag !== null} onClick={() => clearModerationTag('cheater')} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-red-300 transition-colors hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-50">
                       {clearingTag === 'cheater' ? t("generated.components.submitting") : t("moderation.clearCheaterTag")}
@@ -1137,6 +1147,14 @@ export default function PlayerProfilePage() {
           type={reportType}
           onClose={closeReportModal}
           onSuccess={handleReportSuccess}
+        />
+      )}
+      {showAltRelationModal && (
+        <AltAccountRelationModal
+          playerId={id}
+          playerName={player.name}
+          onClose={() => setShowAltRelationModal(false)}
+          onSuccess={() => setFetchKey((key) => key + 1)}
         />
       )}
     </div>

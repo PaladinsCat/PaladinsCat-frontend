@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import {
   SUPPORTED_LOCALES,
@@ -27,40 +27,18 @@ export default function Nav() {
   const { user, logout } = useAuth();
   const { locale, setLocale, t } = useLocalization();
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
-  const [headerLanguageMenuOpen, setHeaderLanguageMenuOpen] = useState(false);
   const [wallpaperEnabled, setWallpaperEnabledState] = useState(true);
   const [homeAlertsEnabled, setHomeAlertsEnabledState] = useState(true);
-  const headerLanguageMenuRef = useRef<HTMLDivElement>(null);
 
-  const navLinks = [
-    { href: "/champions", label: t("nav.champions") },
-    { href: "/players", label: t("nav.players") },
-    { href: "/matches", label: t("nav.matches") },
-    { href: "/stats", label: t("nav.stats") },
-    { href: "/builds", label: t("nav.builds") },
-    { href: "/community", label: t("nav.community") },
-    { href: "/blog", label: t(BLOG_COPY_KEYS.title) },
-  ];
-
-  const menuSections = [
-    { title: t("menu.browse"), links: [{ href: "/", label: t("menu.home") }, ...navLinks] },
+  const headerGroups = [
     {
-      title: t("nav.stats"),
+      title: t("nav.game"),
       links: [
-        { href: "/stats", label: t("menu.globalStats") },
-        { href: "/stats/winrate", label: t("menu.championWinRates") },
-        { href: "/stats/banrate", label: t("menu.championBanRates") },
-        { href: "/stats/talents", label: t("menu.talentPerformance") },
-        { href: "/stats/loadouts", label: t("menu.loadoutMeta") },
-        { href: "/stats/items", label: t("menu.itemMeta") },
-        { href: "/stats/maps", label: t("menu.mapStats") },
-        { href: "/stats/compositions", label: t("menu.compositionStats") },
-        { href: "/stats/metrics", label: t("menu.performanceMetrics") },
-        { href: "/stats/egpm", label: t("menu.effectiveCredits") },
-        { href: "/stats/tiers", label: t("menu.rankedDistribution") },
-        { href: "/stats/skins", label: t("menu.skinStats") },
-        { href: "/stats/regions", label: t("menu.regions") },
-        { href: "/stats/platforms", label: t("menu.platforms") },
+        { href: "/champions", label: t("nav.champions") },
+        { href: "/matches", label: t("nav.matches") },
+        { href: "/game/items", label: t("menu.items") },
+        { href: "/game/maps", label: t("menu.maps") },
+        { href: "/game/compositions", label: t("menu.teamCompositions") },
       ],
     },
     {
@@ -69,37 +47,87 @@ export default function Nav() {
         { href: "/players", label: t("menu.playerHub") },
         { href: "/players/leaderboard", label: t("menu.rankedLeaderboard") },
         { href: "/players/elo", label: t("menu.eloLeaderboard") },
-        { href: "/players/cheaters", label: t("menu.cheaterReports") },
-        { href: "/players/suspicious", label: t("menu.suspiciousPlayers") },
-        { href: "/players/weirdos", label: t("menu.weirdos") },
-        { href: "/players/hall-of-fame", label: t("menu.hallOfFame") },
+        { href: "/players/performance", label: t("menu.performanceLeaderboard") },
       ],
     },
-    { title: t("menu.site"), links: [{ href: "/localization", label: t("nav.localization") }, { href: "/about", label: t("menu.about") }, { href: "/changelog", label: t("menu.changelog") }, { href: "/contact", label: t("menu.contact") }, { href: "/privacy", label: t("menu.privacy") }, { href: "/terms", label: t("menu.terms") }] },
+    {
+      title: t("nav.stats"),
+      links: [
+        { href: "/stats/performance", label: t("menu.performanceOverview") },
+        { href: "/stats/ecpm", label: t("menu.effectiveCredits") },
+        { href: "/stats/activity", label: t("menu.playerActivity") },
+        { href: "/stats/tiers", label: t("menu.rankedDistribution") },
+      ],
+    },
+    {
+      title: t("nav.community"),
+      links: [
+        { href: "/community", label: t("nav.community") },
+        { href: "/builds", label: t("nav.builds") },
+        { href: "/tierlists", label: t("menu.tierLists") },
+      ],
+    },
+    {
+      title: t("nav.operations"),
+      links: [
+        { href: "/blog", label: t(BLOG_COPY_KEYS.title) },
+        { href: "/changelog", label: t("menu.changelog") },
+        { href: "/operations/stats", label: t("menu.paladinsCatStats") },
+      ],
+    },
+  ];
+
+  // The full side menu mirrors the directory architecture rather than the
+  // compact desktop hover menu. This keeps every player directory reachable
+  // on mobile while separating leaderboards from moderation and community
+  // labels.
+  const menuSections = [
+    { title: t("menu.browse"), links: [{ href: "/", label: t("menu.home") }] },
+    headerGroups[0],
+    {
+      title: t("nav.players"),
+      links: [
+        { href: "/players", label: t("menu.playerHub") },
+        { href: "/players/private-accounts", label: t("generated.players.privateAccounts") },
+        { href: "/players/parties", label: t("generated.players.rankedParties") },
+      ],
+    },
+    {
+      title: t("menu.leaderboards"),
+      links: headerGroups[1].links.slice(1),
+    },
+    {
+      title: t("generated.players.moderation"),
+      links: [
+        { href: "/players/cheaters", label: t("generated.players.cheaters") },
+        { href: "/players/boosted", label: t("moderation.boostedPlayers") },
+        { href: "/players/suspicious", label: t("generated.players.suspiciousPlayers") },
+        { href: "/players/droppers", label: t("moderation.droppersTitle") },
+        { href: "/players/afk-wintrade", label: t("moderation.afkWintradeTitle") },
+        { href: "/players/alt-accounts", label: t("moderation.altAccountsTitle") },
+      ],
+    },
+    {
+      title: t("menu.playerLabels"),
+      links: [
+        { href: "/players/weirdos", label: t("moderation.weirdoTitle") },
+        { href: "/players/hall-of-fame", label: t("moderation.hallOfFameTitle") },
+      ],
+    },
+    ...headerGroups.slice(2),
+    { title: t("menu.site"), links: [{ href: "/localization", label: t("nav.localization") }, { href: "/about", label: t("menu.about") }, { href: "/contact", label: t("menu.contact") }, { href: "/privacy", label: t("menu.privacy") }, { href: "/terms", label: t("menu.terms") }] },
   ];
 
   useEffect(() => {
-    if (!sideMenuOpen && !headerLanguageMenuOpen) return;
+    if (!sideMenuOpen) return;
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+      if (event.key === t("generated.components\\nav.escape")) {
         setSideMenuOpen(false);
-        setHeaderLanguageMenuOpen(false);
       }
     };
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
-  }, [headerLanguageMenuOpen, sideMenuOpen]);
-
-  useEffect(() => {
-    if (!headerLanguageMenuOpen) return;
-    const closeOnOutsideClick = (event: MouseEvent) => {
-      if (!headerLanguageMenuRef.current?.contains(event.target as Node)) {
-        setHeaderLanguageMenuOpen(false);
-      }
-    };
-    window.addEventListener("mousedown", closeOnOutsideClick);
-    return () => window.removeEventListener("mousedown", closeOnOutsideClick);
-  }, [headerLanguageMenuOpen]);
+  }, [sideMenuOpen]);
 
   useEffect(() => {
     const syncWallpaperPreference = () => setWallpaperEnabledState(getWallpaperEnabled());
@@ -148,7 +176,6 @@ export default function Nav() {
 
   function selectHeaderLocale(nextLocale: Locale) {
     setLocale(nextLocale);
-    setHeaderLanguageMenuOpen(false);
   }
 
   function selectSideMenuLocale(nextLocale: Locale) {
@@ -173,9 +200,9 @@ export default function Nav() {
     <>
       {/* Nav: sticky top, secondary bg, subtle bottom border, shadow for depth */}
       <nav className="sticky top-0 z-50 bg-pc-bg-secondary border-b border-pc-border shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-[1536px] px-4 sm:px-6 lg:px-8">
           {/* ── Desktop Layout: fixed edges with a flexible link group ── */}
-          <div className="hidden items-center lg:flex" style={{ height: 64 }}>
+          <div className="hidden items-center min-[1180px]:flex" style={{ height: 64 }}>
             {/* Left: fixed-width logo */}
             <div className="shrink-0">
               <Link href="/" className="text-xl font-bold text-pc-text hover:text-pc-text-muted transition-colors flex items-center gap-2">
@@ -183,37 +210,49 @@ export default function Nav() {
                 {t("generated.common.paladinscat")}</Link>
             </div>
 
-            {/* Center: links absorb the remaining space */}
-            <div className="flex min-w-0 flex-1 items-center justify-center gap-4 px-6 xl:gap-6">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`pc-nav-link ${isActive(link.href) ? "pc-nav-link-active" : ""}`}
-                >
-                  {link.label}
-                </Link>
-              ))}
+            {/* Center: grouped destinations use the same hover/focus behavior as Account. */}
+            <div className="flex min-w-0 flex-1 items-center justify-center gap-3 px-5 xl:gap-5 xl:px-8 2xl:gap-7">
+              {headerGroups.map((group) => {
+                const groupActive = group.links.some((link) => isActive(link.href));
+                return (
+                  <div key={group.title} className="group relative flex items-center">
+                    <span className={`pc-nav-link inline-flex items-center gap-1 ${groupActive ? "pc-nav-link-active" : ""}`}>
+                      {group.title}
+                      <svg className="h-3.5 w-3.5 transition-transform group-hover:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+                    </span>
+                    <div className="pointer-events-none invisible absolute left-1/2 top-full z-20 w-64 -translate-x-1/2 pt-2 opacity-0 transition-all group-hover:pointer-events-auto group-hover:visible group-hover:opacity-100">
+                      <div className="rounded-lg border border-pc-border bg-pc-bg-secondary p-2 shadow-xl" role="menu" aria-label={group.title}>
+                        {group.links.map((link) => (
+                          <Link
+                            key={link.href}
+                            href={link.href}
+                            role="menuitem"
+                            className={`block rounded-md px-3 py-2.5 text-sm transition-colors ${isMenuActive(link.href) ? "bg-pc-bg-elevated text-pc-accent" : "text-pc-text-secondary hover:bg-pc-bg-elevated hover:text-pc-text"}`}
+                          >
+                            {link.label}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
 
             {/* Right: grouped menu and account controls */}
             {/* Player search lives on /players page; champion search on /champions page */}
-            <div className="flex shrink-0 items-center justify-end gap-3">
-              <div ref={headerLanguageMenuRef} className="relative">
-                <button
-                  type="button"
-                  onClick={() => setHeaderLanguageMenuOpen((open) => !open)}
-                  className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm font-medium text-pc-text-secondary transition-colors hover:bg-pc-bg-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent"
+            <div className="flex shrink-0 items-center justify-end gap-4">
+              <div className="group relative">
+                <span
+                  className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm font-medium text-pc-text-secondary transition-colors group-hover:bg-pc-bg-elevated"
                   aria-label={t("nav.language")}
-                  aria-expanded={headerLanguageMenuOpen}
-                  aria-haspopup="listbox"
                 >
                   <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="12" cy="12" r="10" /><path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20M12 2a15.3 15.3 0 0 0 0 20" /></svg>
                   {localeCode}
-                  <svg className={`h-3.5 w-3.5 transition-transform ${headerLanguageMenuOpen ? "rotate-180" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
-                </button>
-                {headerLanguageMenuOpen && (
-                  <div className="absolute right-0 top-full z-10 mt-2 w-52 rounded-lg border border-pc-border bg-pc-bg-secondary p-1 shadow-xl" role="listbox" aria-label={t("nav.language")}>
+                  <svg className="h-3.5 w-3.5 transition-transform group-hover:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+                </span>
+                  <div className="pointer-events-none invisible absolute right-0 top-full z-10 w-52 pt-2 opacity-0 transition-all group-hover:pointer-events-auto group-hover:visible group-hover:opacity-100" role="listbox" aria-label={t("nav.language")}>
+                    <div className="rounded-lg border border-pc-border bg-pc-bg-secondary p-1 shadow-xl">
                     {SUPPORTED_LOCALES.map(({ code, label }) => (
                       <button
                         key={code}
@@ -227,8 +266,8 @@ export default function Nav() {
                         <span className="text-xs text-pc-text-muted">{code.split("-")[0].toUpperCase()}</span>
                       </button>
                     ))}
+                    </div>
                   </div>
-                )}
               </div>
               <button
                 onClick={() => setSideMenuOpen(true)}
@@ -247,7 +286,7 @@ export default function Nav() {
                   >
                     {user.linkedPlayerId ? <PlayerName playerId={user.linkedPlayerId} verified>{accountLabel}</PlayerName> : accountLabel}
                   </Link>
-                  <div className="pointer-events-none invisible absolute right-0 top-full z-10 w-44 pt-2 opacity-0 transition-all group-hover:pointer-events-auto group-hover:visible group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:visible group-focus-within:opacity-100">
+                  <div className="pointer-events-none invisible absolute right-0 top-full z-10 w-44 pt-2 opacity-0 transition-all group-hover:pointer-events-auto group-hover:visible group-hover:opacity-100">
                     <div className="rounded-lg border border-pc-border bg-pc-bg-secondary p-1 shadow-xl" role="menu">
                     <Link href={profileHref} className="block rounded-md px-3 py-2 text-sm text-pc-text-secondary transition-colors hover:bg-pc-bg-elevated hover:text-pc-text" role="menuitem">{t("generated.common.profile")}</Link>
                     <Link href="/account" className="block rounded-md px-3 py-2 text-sm text-pc-text-secondary transition-colors hover:bg-pc-bg-elevated hover:text-pc-text" role="menuitem">{t("generated.common.accountSettings")}</Link>
@@ -264,7 +303,7 @@ export default function Nav() {
           </div>
 
           {/* ── Mobile Layout ── */}
-          <div className="flex items-center justify-between lg:hidden" style={{ height: 64 }}>
+          <div className="flex items-center justify-between min-[1180px]:hidden" style={{ height: 64 }}>
             <Link href="/" className="text-xl font-bold text-pc-text hover:text-pc-text-muted transition-colors flex items-center gap-2">
               <img src="/images/icons/paladinscat.avif" alt="" className="w-7 h-7" />
               {t("generated.common.paladinscat")}</Link>

@@ -66,7 +66,7 @@ export default function PlayerLinkCard({ linkedPlayer, onChanged }: Props) {
       const next = await startPlayerLinkVerification(Number(result.id));
       setVerification(next); setSearchResults([]); setSearchQuery("");
       setSuccess(t("generated.players.verificationPinGeneratedForValue1", { value1: result.name }));
-    } catch (err) { setError(err instanceof Error ? err.message : "Failed to generate verification PIN"); }
+    } catch (err) { setError(err instanceof Error ? err.message : t("generated.account.linkPinFailed")); }
     finally { setLinking(false); }
   }, []);
 
@@ -76,20 +76,20 @@ export default function PlayerLinkCard({ linkedPlayer, onChanged }: Props) {
       const result = await verifyPlayerLink();
       setVerification(null); setSuccess(t("generated.players.linkedToValue1", { value1: result.player.name }));
       await onChanged();
-    } catch (err) { setError(err instanceof Error ? err.message : "Unable to verify player ownership"); }
+    } catch (err) { setError(err instanceof Error ? err.message : t("generated.account.linkVerifyFailed")); }
     finally { setLinking(false); }
   }, [onChanged]);
 
   const unlink = useCallback(async () => {
     setLinking(true); setError(null); setSuccess(null);
     try { await unlinkPlayer(); setSuccess(t("generated.players.playerLinkRemoved")); await onChanged(); }
-    catch (err) { setError(err instanceof Error ? err.message : "Failed to unlink player"); }
+    catch (err) { setError(err instanceof Error ? err.message : t("generated.account.unlinkFailed")); }
     finally { setLinking(false); }
   }, [onChanged]);
 
   const cancel = useCallback(async () => {
     try { await cancelPlayerLinkVerification(); setVerification(null); }
-    catch (err) { setError(err instanceof Error ? err.message : "Failed to cancel verification"); }
+    catch (err) { setError(err instanceof Error ? err.message : t("generated.account.cancelVerifyFailed")); }
   }, []);
 
   return <section className="bg-pc-bg-elevated rounded-lg border border-pc-border p-6">

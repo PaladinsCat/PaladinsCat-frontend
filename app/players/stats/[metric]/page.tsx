@@ -118,7 +118,7 @@ export default function MetricLeaderboardPage() {
           player_id: p.playerId,
           name: p.playerName,
           champion: p.championName,
-          className: p.className ?? "Unknown",
+          className: p.className ?? t("generated.app\\players\\stats\\[metric]\\page.unknown"),
           value: p.value,
           totalMatches: p.totalMatches,
           region: p.region ?? "—",

@@ -79,9 +79,9 @@ export default function AdminNotificationsPage() {
       const rows = await fetchAdminNotifications();
       setNotifications(rows);
       setDrafts(Object.fromEntries(rows.map((notification) => [notification.id, fromNotification(notification)])));
-      setStatus("Loaded notifications.");
+      setStatus(t("generated.app\\admin\\notifications\\page.loadednotifications"));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load notifications.");
+      setError(err instanceof Error ? err.message : t("generated.app\\admin\\notifications\\page.failedtoloadnotifications"));
     } finally {
       setLoading(false);
     }
@@ -101,9 +101,9 @@ export default function AdminNotificationsPage() {
       await createAdminNotification(toInput(newDraft));
       setNewDraft(emptyDraft);
       await load();
-      setStatus("Notification created.");
+      setStatus(t("generated.app\\admin\\notifications\\page.notificationcreated"));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create notification.");
+      setError(err instanceof Error ? err.message : t("generated.app\\admin\\notifications\\page.failedtocreatenotification"));
     }
   }
 
@@ -114,9 +114,9 @@ export default function AdminNotificationsPage() {
     try {
       await updateAdminNotification(id, toInput(drafts[id]));
       await load();
-      setStatus("Notification saved.");
+      setStatus(t("generated.app\\admin\\notifications\\page.notificationsaved"));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save notification.");
+      setError(err instanceof Error ? err.message : t("generated.app\\admin\\notifications\\page.failedtosavenotification"));
     } finally {
       setSavingId(null);
     }
@@ -129,9 +129,9 @@ export default function AdminNotificationsPage() {
     try {
       await deleteAdminNotification(id);
       await load();
-      setStatus("Notification deleted.");
+      setStatus(t("generated.app\\admin\\notifications\\page.notificationdeleted"));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete notification.");
+      setError(err instanceof Error ? err.message : t("generated.app\\admin\\notifications\\page.failedtodeletenotification"));
     } finally {
       setSavingId(null);
     }

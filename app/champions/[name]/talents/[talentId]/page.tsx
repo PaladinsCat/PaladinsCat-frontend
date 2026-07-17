@@ -119,7 +119,7 @@ export default function ChampionTalentDetailPage() {
         setChampionData(null);
         setTalentStat(null);
         setCardStats(null);
-        setError(reason instanceof Error ? reason.message : "Unable to load talent statistics.");
+        setError(reason instanceof Error ? reason.message : t("generated.app\\champions\\[name]\\talents\\[talentId]\\page.unabletoloadtalentstatisti"));
       })
       .finally(() => {
         if (!cancelled) setLoading(false);

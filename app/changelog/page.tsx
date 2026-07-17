@@ -19,7 +19,7 @@ function parseChangelog(text: string, changesLabel: string): ChangelogSection[] 
   if (!text || !text.trim()) return [];
 
   const sections: ChangelogSection[] = [];
-  const lines = text.split("\n").filter((l) => l.trim());
+  const lines = text.split("\\n").filter((l) => l.trim());
   let currentSection: ChangelogSection | null = null;
   const orphanItems: string[] = [];
 

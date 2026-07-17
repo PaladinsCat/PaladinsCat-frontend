@@ -176,7 +176,7 @@ export default function StatsPage() {
     const normalized = Array.from({ length: 27 }, (_, index) => {
       const tierSort = index + 1;
       return tierData.find((tier) => tier.tierSort === tierSort) ?? {
-        tier: tierSort === 27 ? "Grandmaster" : `Tier ${tierSort}`,
+        tier: tierSort === 27 ? t("generated.app\\stats\\page.grandmaster") : `Tier ${tierSort}`,
         tierSort,
         totalPlays: 0,
         avgWinRate: 0,
@@ -190,17 +190,17 @@ export default function StatsPage() {
       return { total, pct };
     }
     return [
-      { tier: "Bronze", tierSort: 5, totalPlays: sumSlice(0, 5).total, avgWinRate: 0, percentage: sumSlice(0, 5).pct },
-      { tier: "Silver", tierSort: 10, totalPlays: sumSlice(5, 10).total, avgWinRate: 0, percentage: sumSlice(5, 10).pct },
-      { tier: "Gold", tierSort: 15, totalPlays: sumSlice(10, 15).total, avgWinRate: 0, percentage: sumSlice(10, 15).pct },
-      { tier: "Platinum", tierSort: 20, totalPlays: sumSlice(15, 20).total, avgWinRate: 0, percentage: sumSlice(15, 20).pct },
-      { tier: "Diamond", tierSort: 25, totalPlays: sumSlice(20, 25).total, avgWinRate: 0, percentage: sumSlice(20, 25).pct },
-      { tier: "Master", tierSort: 26, totalPlays: sumSlice(25, 27).total, avgWinRate: 0, percentage: sumSlice(25, 27).pct },
+      { tier: t("generated.app\\stats\\page.bronze"), tierSort: 5, totalPlays: sumSlice(0, 5).total, avgWinRate: 0, percentage: sumSlice(0, 5).pct },
+      { tier: t("generated.app\\stats\\page.silver"), tierSort: 10, totalPlays: sumSlice(5, 10).total, avgWinRate: 0, percentage: sumSlice(5, 10).pct },
+      { tier: t("generated.app\\stats\\page.gold"), tierSort: 15, totalPlays: sumSlice(10, 15).total, avgWinRate: 0, percentage: sumSlice(10, 15).pct },
+      { tier: t("generated.app\\stats\\page.platinum"), tierSort: 20, totalPlays: sumSlice(15, 20).total, avgWinRate: 0, percentage: sumSlice(15, 20).pct },
+      { tier: t("generated.app\\stats\\page.diamond"), tierSort: 25, totalPlays: sumSlice(20, 25).total, avgWinRate: 0, percentage: sumSlice(20, 25).pct },
+      { tier: t("generated.app\\stats\\page.master"), tierSort: 26, totalPlays: sumSlice(25, 27).total, avgWinRate: 0, percentage: sumSlice(25, 27).pct },
     ];
   }
   const displayTiers = consolidateTiers(tiers);
   const maxTierCount = Math.max(1, ...displayTiers.map((tier) => tier.totalPlays));
-  const baselineOrder = ["Global", "Damage", "Flank", "Support", "Frontline"];
+  const baselineOrder = [t("generated.app\\stats\\page.global"), "Damage", "Flank", "Support", "Frontline"];
   const orderedEgpmBaselines = [...egpmBaselines].sort((a, b) => baselineOrder.indexOf(a.role) - baselineOrder.indexOf(b.role));
 
   return (

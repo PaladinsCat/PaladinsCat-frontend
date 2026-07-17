@@ -10,6 +10,7 @@ import { championSlug } from "@/lib/utils";
 import { getRankIconPath, getTierColor } from "@/lib/tier-utils";
 import { getStatQuality } from "@/lib/stat-quality";
 import { useLocalization } from "@/lib/localization-context";
+import { Palette, ShieldAlert, Trophy } from "lucide-react";
 
 const ROLES = [
   { value: "Frontline", labelKey: "common.roles.frontline", icon: "/images/icons/Class_Front_Line_Icon.avif" },
@@ -135,70 +136,82 @@ export default function ChampionTable() {
         <ScrambleText text={t("generated.champions.champions")} speed={30} iterations={15} delayFromCenter={false} />
       </h1>
 
-      {/* Filters */}
-      <div className="flex gap-3 flex-wrap items-center">
-        <div className="relative max-w-xs w-full">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={t("generated.champions.searchChampions")}
-            className="pc-input pr-8 w-full"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery("")}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-pc-text-muted hover:text-pc-text transition-colors"
-              aria-label={t("generated.champions.clearSearch")}
-            >
-              ✕
-            </button>
-          )}
+      <div className="grid grid-cols-1 gap-4 2xl:grid-cols-[minmax(32rem,0.95fr)_minmax(0,2fr)] 2xl:items-stretch">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 2xl:col-start-2 2xl:row-start-1">
+          {[
+            { href: "/stats/winrate", title: t("menu.championWinRates"), description: t("menu.winRateDescription"), icon: Trophy, tone: "text-emerald-300" },
+            { href: "/stats/banrate", title: t("menu.championBanRates"), description: t("menu.banRateDescription"), icon: ShieldAlert, tone: "text-rose-300" },
+            { href: "/stats/skins", title: t("menu.skinStats"), description: t("menu.skinStatsDescription"), icon: Palette, tone: "text-violet-300" },
+          ].map(({ href, title, description, icon: Icon, tone }) => <Link key={href} href={href} className="group flex min-h-20 items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-4 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary"><Icon aria-hidden="true" className={`h-10 w-10 shrink-0 ${tone}`} strokeWidth={1.5} /><div className="min-w-0 flex-1"><h2 className="text-sm font-semibold text-pc-text group-hover:text-pc-accent">{title}</h2><p className="mt-0.5 text-xs text-pc-text-muted">{description}</p></div><span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent">→</span></Link>)}
         </div>
-        <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-          className="pc-select"
-        >
-          <option value="name">{t("generated.champions.name")}</option>
-          <option value="winRate">{t("generated.champions.winRate")}</option>
-          <option value="banRate">{t("generated.champions.banRate")}</option>
-          <option value="popularity">{t("generated.champions.popularity")}</option>
-        </select>
-        <button
-          onClick={() => setSortDir(sortDir === "asc" ? "desc" : "asc")}
-          className="pc-select flex items-center gap-1 cursor-pointer"
-          title={sortDir === "asc" ? t("generated.champions.ascending") : t("generated.champions.descending")}
-        >
-          {sortDir === "asc" ? "↑" : "↓"}
-        </button>
-      </div>
 
-      {/* Class filter tabs */}
-      <div className="flex gap-2 flex-wrap items-center">
-        <button
-          onClick={() => setFilterRole(null)}
-          className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] ${
-            filterRole === null
-              ? "bg-pc-accent text-pc-bg"
-              : "pc-surface text-pc-muted hover:text-pc-text"
-          }`}
-        >
-          {t("generated.champions.all")}</button>
-        {ROLES.map((r) => (
-          <button
-            key={r.value}
-            onClick={() => setFilterRole(filterRole === r.value ? null : r.value)}
-            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] ${
-              filterRole === r.value
-                ? "bg-pc-accent text-pc-bg"
-                : "pc-surface text-pc-muted hover:text-pc-text"
-            }`}
-          >
-            <img src={r.icon} alt={t(r.labelKey)} className="w-5 h-5" />
-            {t(r.labelKey)}
-          </button>
-        ))}
+        <div className="space-y-3 2xl:col-start-1 2xl:row-start-1">
+          {/* Filters */}
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="relative w-full max-w-xs">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={t("generated.champions.searchChampions")}
+                className="pc-input w-full pr-8"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-pc-text-muted transition-colors hover:text-pc-text"
+                  aria-label={t("generated.champions.clearSearch")}
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+              className="pc-select"
+            >
+              <option value="name">{t("generated.champions.name")}</option>
+              <option value="winRate">{t("generated.champions.winRate")}</option>
+              <option value="banRate">{t("generated.champions.banRate")}</option>
+              <option value="popularity">{t("generated.champions.popularity")}</option>
+            </select>
+            <button
+              onClick={() => setSortDir(sortDir === "asc" ? "desc" : "asc")}
+              className="pc-select flex cursor-pointer items-center gap-1"
+              title={sortDir === "asc" ? t("generated.champions.ascending") : t("generated.champions.descending")}
+            >
+              {sortDir === "asc" ? "↑" : "↓"}
+            </button>
+          </div>
+
+          {/* Class filter tabs */}
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => setFilterRole(null)}
+              className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] ${
+                filterRole === null
+                  ? "bg-pc-accent text-pc-bg"
+                  : "pc-surface text-pc-muted hover:text-pc-text"
+              }`}
+            >
+              {t("generated.champions.all")}</button>
+            {ROLES.map((r) => (
+              <button
+                key={r.value}
+                onClick={() => setFilterRole(filterRole === r.value ? null : r.value)}
+                className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] ${
+                  filterRole === r.value
+                    ? "bg-pc-accent text-pc-bg"
+                    : "pc-surface text-pc-muted hover:text-pc-text"
+                }`}
+              >
+                <img src={r.icon} alt={t(r.labelKey)} className="h-5 w-5" />
+                {t(r.labelKey)}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* DB status indicator */}
