@@ -6,7 +6,9 @@ import { motion } from "framer-motion";
 import ScrambleText from "@/components/ScrambleText";
 import {
   fetchNotifications,
+  fetchSiteVersion,
   type Notification,
+  type SiteVersion,
 } from "@/lib/api-client";
 import HomeSearch from "@/components/home-search";
 import { useLocalization } from "@/lib/localization-context";
@@ -25,13 +27,18 @@ export default function HomePage() {
   const { t , formatDateTime} = useLocalization();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [notificationsChecked, setNotificationsChecked] = useState(false);
+  const [siteVersion, setSiteVersion] = useState<SiteVersion | null>(null);
   const [searchActive, setSearchActive] = useState(false);
   const [homeAlertsEnabled, setHomeAlertsEnabled] = useState(true);
 
   useEffect(() => {
     const load = async () => {
-      const liveNotifications = await fetchNotifications({ limit: 5 });
+      const [liveNotifications, version] = await Promise.all([
+        fetchNotifications({ limit: 5 }),
+        fetchSiteVersion(),
+      ]);
       setNotifications(liveNotifications);
+      setSiteVersion(version);
       setNotificationsChecked(true);
     };
     load();
@@ -65,13 +72,18 @@ export default function HomePage() {
           fetchPriority="high"
           className="mx-auto mb-2 opacity-90 drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]"
         />
-        <h1 className="text-4xl font-semibold tracking-wide drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)]">
+        <h1 className="relative inline-block text-4xl font-semibold tracking-wide drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)]">
           <ScrambleText
             text={t("generated.page.tsx.paladinscat")}
             speed={30}
             iterations={15}
             delayFromCenter={false}
           />
+          {siteVersion?.version && (
+            <span className="absolute left-full top-0 ml-1.5 whitespace-nowrap font-mono text-[10px] font-medium leading-none tracking-normal text-pc-text-muted">
+              {siteVersion.version}
+            </span>
+          )}
         </h1>
         <p className="text-xs text-pc-text-secondary mt-1 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]">
           {t("home.tagline")}
