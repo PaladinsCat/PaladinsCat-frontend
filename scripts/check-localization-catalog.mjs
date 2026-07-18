@@ -26,8 +26,13 @@ for (const path of canonicalFiles) {
 
 const generated = JSON.parse(await readFile(join(catalogDirectory, "generated/ui.json"), "utf8"));
 const duplicateKeys = Object.keys(generated).filter((key) => canonicalKeys.has(key));
+const invalidGeneratedKeys = Object.keys(generated).filter((key) => !key.startsWith("generated."));
 
-if (duplicateKeys.length > 0) {
+if (duplicateKeys.length > 0 || invalidGeneratedKeys.length > 0) {
+  if (invalidGeneratedKeys.length > 0) {
+    console.error(`generated/ui.json contains ${invalidGeneratedKeys.length} non-message key(s):`);
+    for (const key of invalidGeneratedKeys) console.error(`- ${key}`);
+  }
   console.error(`generated/ui.json duplicates ${duplicateKeys.length} canonical translation key(s):`);
   for (const key of duplicateKeys) console.error(`- ${key}`);
   process.exitCode = 1;

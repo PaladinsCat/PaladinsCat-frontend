@@ -5,7 +5,7 @@ import ts from "typescript";
 const root = resolve(process.cwd());
 const sourceDirectories = ["app", "components", "lib"];
 const translatableAttributes = new Set(["alt", "aria-label", "description", "detail", "eloLabel", "label", "loadingLabel", "message", "placeholder", "playsLabel", "subtitle", "text", "title"]);
-const translatableProperties = /^(?:ariaLabel|caption|description|detail|empty(?:Label|Message|Text)?|heading|label|message|placeholder|subtitle|title|tooltip)$/i;
+const translatableProperties = /^(?:ariaLabel|body|caption|cta|desc|description|detail|empty(?:Label|Message|Text)?|heading|label|message|placeholder|subtitle|title|tooltip)$/i;
 const translatablePropertySuffix = /(?:Caption|Description|Detail|Label|Message|Subtitle|Text|Title|Tooltip)$/;
 const findings = [];
 const findingPositions = new Set();
@@ -22,7 +22,7 @@ async function filesIn(directory) {
 
 function addFinding(source, node, text, kind) {
   const normalized = text.replace(/\s+/g, " ").trim();
-  if (!/[A-Za-z]/.test(normalized)) return;
+  if (!/[A-Za-z]/.test(normalized) || /^(?:https?:|mailto:|[^\s@]+@[^\s@]+\.[^\s@]+$)/i.test(normalized)) return;
   const identity = `${source.fileName}:${node.getStart(source)}:${kind}`;
   if (findingPositions.has(identity)) return;
   findingPositions.add(identity);

@@ -22,14 +22,14 @@ export default function ContactPage() {
         {[
           {
             title: t("generated.contact.discord"),
-            desc: "The fastest way to reach us. Join the community, ask questions, report bugs, or just hang out.",
-            cta: "Join Discord",
+            desc: t("generated.contact.discordDesc"),
+            cta: t("footer.joinDiscord"),
             href: "https://discord.gg/VqYMXAR",
             primary: true,
           },
           {
             title: t("generated.contact.email"),
-            desc: "For business inquiries, partnerships, or anything else — drop us a line directly.",
+            desc: t("generated.contact.emailDesc"),
             cta: "nabicook@proton.me",
             href: "mailto:nabicook@proton.me",
             primary: false,

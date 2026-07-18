@@ -142,7 +142,7 @@ export default function ChampionTalentDetailPage() {
     return (
       <div className="space-y-4">
         <ContextBackLink fallbackHref={`/champions/${name}`} />
-        <ErrorState title={t("generated.champions.talentStatisticsUnavailable")} message={error ?? "No talent data is available for this queue."} />
+        <ErrorState title={t("generated.champions.talentStatisticsUnavailable")} message={error ?? t("generated.champions.noTalentDataForQueue")} />
       </div>
     );
   }

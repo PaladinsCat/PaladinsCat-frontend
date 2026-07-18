@@ -125,7 +125,7 @@ export default function ChampionCardDetailPage() {
     return (
       <div className="space-y-4">
         <ContextBackLink fallbackHref={`/champions/${name}`} />
-        <ErrorState title={t("generated.champions.cardStatisticsUnavailable")} message={error ?? "No card data is available for this queue."} />
+        <ErrorState title={t("generated.champions.cardStatisticsUnavailable")} message={error ?? t("generated.champions.noCardDataForQueue")} />
       </div>
     );
   }

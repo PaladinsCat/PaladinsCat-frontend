@@ -1,9 +1,14 @@
-import { cp, mkdir, rm } from "node:fs/promises";
+import { access, cp, mkdir, rm } from "node:fs/promises";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const targetRepository = process.argv[2] || process.env.PALADINSCAT_LOCALES_REPO;
-if (!targetRepository) {
+const frontendRoot = resolve(import.meta.dirname, "..");
+const targetRepository = process.argv[2]
+  || process.env.PALADINSCAT_LOCALES_REPO
+  || resolve(frontendRoot, "..", "..", "..", "PaladinsCat-locales");
+try {
+  await access(targetRepository);
+} catch {
   throw new Error(
     "Provide the public locale repository path as an argument or set PALADINSCAT_LOCALES_REPO.",
   );

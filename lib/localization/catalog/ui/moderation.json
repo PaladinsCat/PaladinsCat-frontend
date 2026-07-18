@@ -1,4 +1,8 @@
 {
+  "moderation.afkInactive": "AFK / inactive",
+  "moderation.firstPersonAim": "First person aim",
+  "moderation.suspectedBoosting": "Suspected boosting",
+  "moderation.teammateOnly": "Teammate only",
   "moderation.accountReview": "Account review",
   "moderation.afkShort": "AFK",
   "moderation.afkWintradeTitle": "AFK / Wintrade",

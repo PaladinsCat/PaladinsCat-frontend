@@ -457,7 +457,7 @@ export default function PlayerProfilePage() {
       <div className="space-y-4">
         <ErrorState
           title={response ? t("generated.players.couldNotRefreshThisProfile") : t("generated.players.playerProfileUnavailable")}
-          message={error || "The player could not be found."}
+          message={error || t("generated.app.players.[id].page.theplayercouldnotbefound")}
           onRetry={() => setFetchKey((key) => key + 1)}
         />
         <Link href="/players" className="text-pc-accent text-sm hover:underline">{t("generated.players.backToPlayers")}</Link>

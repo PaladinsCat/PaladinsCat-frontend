@@ -18,6 +18,12 @@ const ROLE_COLORS: Record<string, string> = {
   Frontline: "#60a5fa",
 };
 
+const SORT_OPTIONS = [
+  { value: "role", labelKey: "generated.stats.role" },
+  { value: "average", labelKey: "generated.stats.average" },
+  { value: "samples", labelKey: "generated.stats.samples" },
+] as const;
+
 export default function EgpmDetailPage() {
   const { t, formatNumber } = useLocalization();
   const format = (value: number) => formatNumber(value, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -77,10 +83,10 @@ export default function EgpmDetailPage() {
         </section>
 
         {global && <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {[
-            ["Average", global.avgEcpm], ["P10", global.p10Ecpm], ["P25", global.p25Ecpm],
-            ["P75", global.p75Ecpm], ["P90", global.p90Ecpm], ["Maximum", global.maxEcpm],
-          ].map(([label, value]) => <div key={String(label)} className="rounded-xl border border-pc-border bg-pc-bg-elevated p-4"><div className="text-xs uppercase tracking-wider text-pc-text-muted">{t("generated.stats.global")}{" "}{label}</div><div className="mt-1 text-xl font-bold text-yellow-400 tabular-nums">{format(Number(value))}</div></div>)}
+          {([
+            ["generated.stats.average", global.avgEcpm], ["generated.stats.p10", global.p10Ecpm], ["generated.stats.p25", global.p25Ecpm],
+            ["generated.stats.p75", global.p75Ecpm], ["generated.stats.p90", global.p90Ecpm], ["generated.app.stats.egpm.page.maximum", global.maxEcpm],
+          ] as const).map(([labelKey, value]) => <div key={String(labelKey)} className="rounded-xl border border-pc-border bg-pc-bg-elevated p-4"><div className="text-xs uppercase tracking-wider text-pc-text-muted">{t("generated.stats.global")}{" "}{t(labelKey)}</div><div className="mt-1 text-xl font-bold text-yellow-400 tabular-nums">{format(Number(value))}</div></div>)}
         </section>}
 
         <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -92,10 +98,10 @@ export default function EgpmDetailPage() {
           <div className="pc-card">
             <h2 className="pc-card-title">{t("generated.stats.afkSeverityThresholds")}</h2>
             <div className="mt-3 grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
-              {[
-                ["Engaged", "≥ 80", "text-emerald-400"], ["Disconnected", "60–79", "text-yellow-400"],
-                ["Partial AFK", "40–59", "text-orange-400"], ["Full AFK", "< 40", "text-red-400"],
-              ].map(([label, range, color]) => <div key={label} className="rounded-lg border border-pc-border bg-pc-bg p-3"><div className={`font-semibold ${color}`}>{label}</div><div className="mt-1 font-mono text-pc-text-secondary">{range} {t("generated.stats.ecpm")}</div></div>)}
+              {([
+                ["generated.stats.egpm.engaged", "≥ 80", "text-emerald-400"], ["generated.stats.egpm.disconnected", "60–79", "text-yellow-400"],
+                ["generated.stats.egpm.partialAfk", "40–59", "text-orange-400"], ["generated.stats.egpm.fullAfk", "< 40", "text-red-400"],
+              ] as const).map(([labelKey, range, color]) => <div key={labelKey} className="rounded-lg border border-pc-border bg-pc-bg p-3"><div className={`font-semibold ${color}`}>{t(labelKey)}</div><div className="mt-1 font-mono text-pc-text-secondary">{range} {t("generated.stats.ecpm")}</div></div>)}
             </div>
             <p className="mt-3 text-xs leading-relaxed text-pc-text-muted">{t("generated.stats.theseAreFixedDetectionThresholdsTheRoleAndGlobalPercentiles")}</p>
           </div>
@@ -105,7 +111,7 @@ export default function EgpmDetailPage() {
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-sm font-bold text-pc-text">{t("generated.stats.rolePercentileValues")}</h2>
             <div className="flex gap-1 rounded-lg border border-pc-border bg-pc-bg-elevated p-1 text-xs">
-              {(["role", "average", "samples"] as const).map((key) => <button key={key} type="button" onClick={() => setSort(key)} className={`rounded-md px-2.5 py-1.5 capitalize transition-colors ${sort === key ? "bg-pc-accent text-pc-bg" : "text-pc-text-secondary hover:text-pc-text"}`}>{key}</button>)}
+              {SORT_OPTIONS.map(({ value, labelKey }) => <button key={value} type="button" onClick={() => setSort(value)} className={`rounded-md px-2.5 py-1.5 transition-colors ${sort === value ? "bg-pc-accent text-pc-bg" : "text-pc-text-secondary hover:text-pc-text"}`}>{t(labelKey)}</button>)}
             </div>
           </div>
           <div className="overflow-x-auto rounded-xl border border-pc-border bg-pc-bg-elevated">

@@ -43,7 +43,7 @@ export default function TermsPage() {
           },
           {
             title: t("generated.terms.text6LimitationOfLiability"),
-            body: 'PaladinsCat is provided "as is" without warranties of any kind, express or implied. We shall not be liable for any damages arising from the use of this service, including but not limited to loss of data, inaccurate stats, or service interruptions.',
+            body: t("generated.terms.bodyLimitationOfLiability"),
           },
           {
             title: t("generated.terms.text7ThirdPartyServices"),
