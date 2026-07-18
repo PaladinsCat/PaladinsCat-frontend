@@ -25,6 +25,7 @@ const nextConfig: NextConfig = {
       { source: "/stats/items/:path*", destination: "/game/items/:path*", permanent: true },
       { source: "/stats/maps/:path*", destination: "/game/maps/:path*", permanent: true },
       { source: "/stats/compositions", destination: "/game/compositions", permanent: true },
+      { source: "/players/stats/:metric", destination: "/players/performance", permanent: true },
     ];
   },
   async rewrites() {
@@ -36,7 +37,6 @@ const nextConfig: NextConfig = {
       "/players/suspicious",
       "/players/weirdos",
       "/players/hall-of-fame",
-      "/players/stats/:metric",
       "/players/class/:role",
     ];
     return [

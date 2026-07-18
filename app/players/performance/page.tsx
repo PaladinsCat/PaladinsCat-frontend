@@ -55,9 +55,9 @@ export default function PerformanceLeaderboardPage() {
   }, [metric]);
 
   return <div className="mx-auto w-full max-w-5xl space-y-5">
-    <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-      <div><h1 className="pc-heading pc-heading-lg text-pc-accent">{t("menu.performanceLeaderboard")}</h1><p className="mt-1 text-sm text-pc-text-secondary">{t("generated.players.rankedPerformance")}</p></div>
-      <Link href={`/players/stats/${metric}`} className="text-sm text-pc-accent hover:underline">{t("generated.players.detail")}</Link>
+    <header>
+      <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("menu.performanceLeaderboard")}</h1>
+      <p className="mt-1 text-sm text-pc-text-secondary">{t("generated.players.rankedPerformance")}</p>
     </header>
 
     {summary && summary.sampleSize > 0 && <PerformanceRangeBellCurve

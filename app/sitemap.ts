@@ -4,7 +4,6 @@ import { STATIC_CHAMPIONS } from "@/lib/static-champions";
 import { championSlug } from "@/lib/utils";
 
 const PLAYER_ROLES = ["frontline", "damage", "flank", "support"] as const;
-const PLAYER_METRICS = ["dpm", "hpm", "gpm", "mpm"] as const;
 // These URLs remain useful after a map leaves rotation because their historic
 // ranked data remains available. Keep this curated list small and canonical.
 const RANKED_MAPS = [
@@ -89,17 +88,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.72,
   }));
 
-  const metricEntries = PLAYER_METRICS.map((metric) => ({
-    url: `${SITE_URL}/players/stats/${metric}`,
-    changeFrequency: "daily" as const,
-    priority: 0.72,
-  }));
-
   const mapEntries = RANKED_MAPS.map((mapName) => ({
     url: `${SITE_URL}/stats/maps/${encodeURIComponent(mapName)}`,
     changeFrequency: "weekly" as const,
     priority: 0.68,
   }));
 
-  return [...staticEntries, ...championEntries, ...roleEntries, ...metricEntries, ...mapEntries];
+  return [...staticEntries, ...championEntries, ...roleEntries, ...mapEntries];
 }
