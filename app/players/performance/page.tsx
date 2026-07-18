@@ -61,7 +61,7 @@ export default function PerformanceLeaderboardPage() {
     </header>
 
     {summary && summary.sampleSize > 0 && <PerformanceRangeBellCurve
-      metricLabel={config.role ? `${t(config.role === "Support" ? "common.roles.support" : config.role === "Damage" ? "common.roles.damage" : "common.roles.frontline")} ${t(config.labelKey)}` : t(config.labelKey)}
+      metricLabel={config.role ? t("performance.roleMetric", { role: t(config.role === "Support" ? "common.roles.support" : config.role === "Damage" ? "common.roles.damage" : "common.roles.frontline"), metric: t(config.labelKey) }) : t(config.labelKey)}
       summary={summary}
       formatValue={(value) => formatNumber(Math.round(value))}
       labels={{
@@ -72,6 +72,7 @@ export default function PerformanceLeaderboardPage() {
         mean: t("performance.mean"),
         p10: t("generated.champions.p10"),
         p90: t("generated.champions.p90"),
+        percentileRange: t("performance.p10p90"),
       }}
     />}
 

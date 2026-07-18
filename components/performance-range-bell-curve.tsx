@@ -8,6 +8,7 @@ type Labels = {
   mean: string;
   p10: string;
   p90: string;
+  percentileRange: string;
 };
 
 type Props = {
@@ -59,7 +60,7 @@ export default function PerformanceRangeBellCurve({ metricLabel, summary, format
     <section className="rounded-xl border border-pc-border bg-pc-bg-elevated px-4 py-3" aria-labelledby="performance-range-title">
       <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
         <h2 id="performance-range-title" className="text-sm font-semibold text-pc-text">{labels.global} {metricLabel} {labels.range}</h2>
-        <span className="text-xs text-pc-text-muted">P10–P90</span>
+        <span className="text-xs text-pc-text-muted">{labels.percentileRange}</span>
       </div>
       <svg viewBox={`0 0 ${VIEWBOX_WIDTH} ${VIEWBOX_HEIGHT}`} className="h-32 w-full" role="img" aria-label={summaryLabel}>
         <title>{summaryLabel}</title>
