@@ -85,7 +85,7 @@ export default function HomePage() {
               href="/changelog"
               aria-label={t("menu.changelog")}
               title={t("menu.changelog")}
-              className="absolute left-full top-0 ml-1.5 whitespace-nowrap rounded-sm font-mono text-xs font-medium leading-none tracking-normal text-pc-text-muted transition-colors hover:text-pc-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent"
+              className="absolute left-full top-0 ml-1.5 whitespace-nowrap rounded-sm font-mono text-xs font-medium leading-none tracking-normal text-pc-text-muted drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] transition-colors hover:text-pc-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent"
             >
               {siteVersion.version}
             </Link>
