@@ -13,6 +13,9 @@ import generatedUiMessages from "./catalog/generated/ui.json";
 import seoMessages from "./catalog/seo/metadata.json";
 
 export const EN_MESSAGES = {
+  // Generated strings are a fallback-only catalog. Keep them first so curated
+  // modules remain authoritative when a key exists in both catalogs.
+  ...generatedUiMessages,
   ...navigationMessages,
   ...commonMessages,
   ...moderationMessages,
@@ -24,7 +27,6 @@ export const EN_MESSAGES = {
   ...talentMessages,
   ...itemMessages,
   ...mapMessages,
-  ...generatedUiMessages,
   ...seoMessages,
 };
 export type TranslationKey = keyof typeof EN_MESSAGES;
