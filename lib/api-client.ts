@@ -753,6 +753,8 @@ export interface PrivateAccountSummary {
   cheater: boolean;
   cheaterReason: string | null;
   cheaterMarkedAt: string | null;
+  susCount: number;
+  topReasons: Array<{ reason: string; count: number }>;
 }
 
 export interface PrivateAccountObservationSummary {
@@ -836,6 +838,11 @@ function mapPrivateAccount(row: any): PrivateAccountSummary {
     cheater: Boolean(row.cheater),
     cheaterReason: row.cheater_reason == null ? null : String(row.cheater_reason),
     cheaterMarkedAt: row.cheater_marked_at ?? null,
+    susCount: Number(row.sus_count ?? 0),
+    topReasons: (Array.isArray(row.top_reasons) ? row.top_reasons : []).map((reason: any) => ({
+      reason: String(reason.reason ?? ''),
+      count: Number(reason.count ?? 0),
+    })).filter((reason: { reason: string }) => reason.reason.length > 0),
   };
 }
 
@@ -851,12 +858,13 @@ function mapPartyPair(row: any): PartyPairSummary {
   };
 }
 
-export async function fetchPrivateAccountsDirectory(params: { page?: number; pageSize?: number; query?: string; cheater?: boolean } = {}): Promise<PlayerDirectoryPage<PrivateAccountSummary>> {
+export async function fetchPrivateAccountsDirectory(params: { page?: number; pageSize?: number; query?: string; cheater?: boolean; suspicious?: boolean } = {}): Promise<PlayerDirectoryPage<PrivateAccountSummary>> {
   const page = Math.max(1, params.page ?? 1);
   const pageSize = Math.min(100, Math.max(1, params.pageSize ?? 24));
   const query = new URLSearchParams({ page: String(page), perPage: String(pageSize) });
   if (params.query?.trim()) query.set('q', params.query.trim());
   if (params.cheater !== undefined) query.set('cheater', String(params.cheater));
+  if (params.suspicious !== undefined) query.set('suspicious', String(params.suspicious));
   const rows = await fetchJson<any[]>(`/player-ext/private?${query.toString()}`);
   const total = Number(rows[0]?.total_count ?? 0);
   return { items: rows.map(mapPrivateAccount), total, page, pageSize, totalPages: Math.max(1, Math.ceil(total / pageSize)) };
@@ -3623,6 +3631,23 @@ export async function reportPlayer(playerId: string | number, opts: ReportOption
     body: JSON.stringify(body),
   });
   return raw;
+}
+
+export async function reportPrivateAccount(privateId: string | number, opts: ReportOptions): Promise<{ success: boolean; message: string }> {
+  if (opts.type !== 'suspicious' && opts.type !== 'cheater') {
+    throw new Error(API_ERROR_KEYS.genericFailure);
+  }
+  const token = getAuthToken();
+  if (!token) {
+    throw new Error(API_ERROR_KEYS.authenticationRequired);
+  }
+  const body: Record<string, string> = { type: opts.type };
+  if (opts.reason?.trim()) body.reason = opts.reason.trim();
+  return fetchJson<{ success: boolean; message: string }>(`/player-ext/private/${privateId}/report`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify(body),
+  });
 }
 
 export type ClearablePlayerTag = 'cheater' | 'suspicious' | 'dropper' | 'afk_wintrade' | 'alt_account';

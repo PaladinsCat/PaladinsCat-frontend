@@ -45,7 +45,7 @@ export default function CheatersPage() {
   ], [data, privateData]);
 
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-6">
+    <div className="mx-auto w-full max-w-4xl space-y-6">
       <div>
         <Link href="/players" className="text-pc-accent text-xs hover:underline mb-2 inline-block">{t("generated.players.players")}</Link>
         <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.players.confirmedCheaters")}</h1>
@@ -70,11 +70,11 @@ export default function CheatersPage() {
             return (
               <Link
                 href={isPrivate ? `/players/private-accounts/${entry.account.id}` : `/players/${entry.player.id}`}
-                className="grid h-full min-h-24 gap-3 rounded-xl border border-red-500/20 bg-pc-bg-elevated p-4 transition-colors hover:border-red-400/40 hover:bg-red-500/[0.04] sm:grid-cols-[minmax(0,11rem)_minmax(0,1fr)] sm:items-start"
+                className="flex h-full min-h-24 flex-col gap-3 rounded-xl border border-red-500/20 bg-pc-bg-elevated p-4 transition-colors hover:border-red-400/40 hover:bg-red-500/[0.04]"
               >
                 <div className="min-w-0 truncate text-sm font-semibold text-pc-text">
                   {isPrivate ? (
-                    <PlayerName playerId={0} cheater={true} susCount={0} verified={false}>{entry.account.displayName}</PlayerName>
+                    <PlayerName playerId={0} cheater={true} susCount={entry.account.susCount} verified={false}>{entry.account.displayName}</PlayerName>
                   ) : (
                     <PlayerName playerId={entry.player.id} cheater={entry.player.cheater} susCount={entry.player.susCount}>{entry.player.name}</PlayerName>
                   )}

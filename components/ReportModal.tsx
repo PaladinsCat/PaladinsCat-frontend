@@ -87,9 +87,10 @@ interface ReportModalProps {
   type: PlayerAction;
   onClose: () => void;
   onSuccess: () => void;
+  submitReport?: (targetId: string | number, options: ReportOptions) => Promise<{ success: boolean; message: string }>;
 }
 
-export default function ReportModal({ playerId, type, onClose, onSuccess }: ReportModalProps) {
+export default function ReportModal({ playerId, type, onClose, onSuccess, submitReport = reportPlayer }: ReportModalProps) {
   const { t } = useLocalization();
   const [selectedReason, setSelectedReason] = useState("");
   const [customReason, setCustomReason] = useState("");
@@ -132,7 +133,7 @@ export default function ReportModal({ playerId, type, onClose, onSuccess }: Repo
     setError(null);
     setSubmitting(true);
     try {
-      await reportPlayer(playerId, { type, reason } as ReportOptions);
+      await submitReport(playerId, { type, reason } as ReportOptions);
       setSuccess(true);
       setTimeout(onSuccess, 500);
     } catch (err) {

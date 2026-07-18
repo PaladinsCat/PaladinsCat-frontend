@@ -42,7 +42,7 @@ export function MatchPlayerLink({ player, className = "" }: { player: MatchPlaye
       <PlayerModerationTag
         playerId={0}
         cheater={player.profile_snapshot?.cheater === true}
-        susCount={0}
+        susCount={player.profile_snapshot?.sus_count ?? 0}
         verified={false}
       />
     </span>

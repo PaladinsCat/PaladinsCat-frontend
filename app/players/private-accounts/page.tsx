@@ -99,7 +99,7 @@ export default function PrivateAccountsPage() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex min-w-0 flex-wrap items-center gap-1.5">
                     <h2 className="mr-0.5 truncate text-base font-semibold text-pc-text group-hover:text-pc-accent">{account.alias || account.displayName}</h2>
-                    <PlayerModerationTag playerId={0} cheater={account.cheater} susCount={0} verified={false} />
+                    <PlayerModerationTag playerId={0} cheater={account.cheater} susCount={account.susCount} verified={false} />
                     <span className="rounded border border-pc-border bg-pc-bg/50 px-1.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-pc-text-secondary">{t("generated.players.level")}{" "}{formatNumber(account.accountLevel)}</span>
                     <span className="rounded border border-pc-border bg-pc-bg/50 px-1.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-pc-text-secondary">{t("generated.players.mastery")}{" "}{formatNumber(account.masteryLevel)}</span>
                     <span className={`ml-1 flex min-w-0 items-center gap-1 text-xs font-semibold ${getTierColor(account.leagueTier)}`}>

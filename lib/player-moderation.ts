@@ -116,11 +116,11 @@ export async function fetchPrivateAccountModerationBatch(
   );
   if (!response.ok) throw new Error(MODERATION_ERROR_KEYS.unableToLoadPrivateBadges);
   const json = await response.json() as {
-    accounts?: Array<{ id: string | number; cheater?: boolean }>;
+    accounts?: Array<{ id: string | number; cheater?: boolean; sus_count?: number }>;
   };
   return new Map((json.accounts ?? []).map((account) => [Number(account.id), {
     cheater: Boolean(account.cheater),
-    susCount: 0,
+    susCount: Number(account.sus_count ?? 0),
     dropper: false,
     afkWintrade: false,
     boosted: false,
