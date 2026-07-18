@@ -2,39 +2,49 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { fetchPerformanceLeaderboard, type PerformanceLeaderboardEntry } from "@/lib/api-client";
+import { fetchPerformanceLeaderboard, fetchPerformanceMetrics, type PerformanceLeaderboardEntry, type PerformanceMetricSummary } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import PlayerName from "@/components/player-name";
 import { LoadingPanel } from "@/components/async-state";
 import TablePagination, { type TablePageSize } from "@/components/table-pagination";
+import PerformanceRangeBellCurve from "@/components/performance-range-bell-curve";
 import { useLocalization } from "@/lib/localization-context";
 import type { TranslationKey } from "@/lib/localization/messages";
 
 const METRICS = [
-  { key: "gpm", labelKey: "common.metrics.creditsPerMinute", color: "text-yellow-400" },
-  { key: "hpm", labelKey: "common.metrics.healingPerMinute", color: "text-emerald-400" },
-  { key: "dpm", labelKey: "common.metrics.damagePerMinute", color: "text-red-400" },
-  { key: "mpm", labelKey: "common.metrics.shieldingPerMinute", color: "text-blue-400" },
-] as const satisfies ReadonlyArray<{ key: "gpm" | "hpm" | "dpm" | "mpm"; labelKey: TranslationKey; color: string }>;
+  { key: "gpm", labelKey: "common.metrics.creditsPerMinute", color: "text-yellow-400", role: undefined },
+  { key: "hpm", labelKey: "common.metrics.healingPerMinute", color: "text-emerald-400", role: "Support" },
+  { key: "dpm", labelKey: "common.metrics.damagePerMinute", color: "text-red-400", role: "Damage" },
+  { key: "mpm", labelKey: "common.metrics.shieldingPerMinute", color: "text-blue-400", role: "Frontline" },
+] as const satisfies ReadonlyArray<{ key: "gpm" | "hpm" | "dpm" | "mpm"; labelKey: TranslationKey; color: string; role?: "Support" | "Damage" | "Frontline" }>;
 
 export default function PerformanceLeaderboardPage() {
   const { t , formatNumber} = useLocalization();
   const [metric, setMetric] = useState<(typeof METRICS)[number]["key"]>("gpm");
   const [rows, setRows] = useState<PerformanceLeaderboardEntry[]>([]);
+  const [summary, setSummary] = useState<PerformanceMetricSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState<TablePageSize>(25);
+  const config = METRICS.find((entry) => entry.key === metric)!;
 
   useEffect(() => {
     let active = true;
     setLoading(true);
-    fetchPerformanceLeaderboard({ metric, limit: 100, queueId: 486 })
-      .then((data) => { if (active) setRows(data); })
+    setSummary(null);
+    Promise.all([
+      fetchPerformanceLeaderboard({ metric, limit: 100, queueId: 486, role: config.role }),
+      fetchPerformanceMetrics({ metric, queueId: 486, role: config.role }),
+    ])
+      .then(([data, metrics]) => {
+        if (!active) return;
+        setRows(data);
+        setSummary(metrics[metric] ?? null);
+      })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
-  }, [metric]);
+  }, [config.role, metric]);
 
-  const config = METRICS.find((entry) => entry.key === metric)!;
   const visibleRows = useMemo(
     () => rows.slice((page - 1) * pageSize, page * pageSize),
     [page, pageSize, rows],
@@ -49,6 +59,21 @@ export default function PerformanceLeaderboardPage() {
       <div><h1 className="pc-heading pc-heading-lg text-pc-accent">{t("menu.performanceLeaderboard")}</h1><p className="mt-1 text-sm text-pc-text-secondary">{t("generated.players.rankedPerformance")}</p></div>
       <Link href={`/players/stats/${metric}`} className="text-sm text-pc-accent hover:underline">{t("generated.players.detail")}</Link>
     </header>
+
+    {summary && summary.sampleSize > 0 && <PerformanceRangeBellCurve
+      metricLabel={config.role ? `${t(config.role === "Support" ? "common.roles.support" : config.role === "Damage" ? "common.roles.damage" : "common.roles.frontline")} ${t(config.labelKey)}` : t(config.labelKey)}
+      summary={summary}
+      formatValue={(value) => formatNumber(Math.round(value))}
+      labels={{
+        global: t("common.roles.global"),
+        range: t("common.metrics.range"),
+        mode: t("generated.champions.mode"),
+        median: t("performance.median"),
+        mean: t("performance.mean"),
+        p10: t("generated.champions.p10"),
+        p90: t("generated.champions.p90"),
+      }}
+    />}
 
     <div className="grid grid-cols-2 gap-2 rounded-xl border border-pc-border bg-pc-bg-elevated p-1 sm:grid-cols-4">
       {METRICS.map((entry) => <button key={entry.key} type="button" onClick={() => setMetric(entry.key)} className={`rounded-lg px-3 py-2 text-xs font-bold transition-colors sm:text-sm ${metric === entry.key ? "bg-pc-accent text-pc-bg" : "text-pc-text-secondary hover:bg-pc-bg-secondary hover:text-pc-text"}`}>{t(entry.labelKey)}</button>)}

@@ -1,4 +1,6 @@
 {
+  "performance.median": "Median",
+  "performance.mean": "Mean",
   "common.format.durationShort": "{minutes}m {seconds}s",
   "common.format.clock": "{minutes}:{seconds}",
   "common.format.daysHoursShort": "{days}d {hours}h",
