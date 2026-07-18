@@ -9,12 +9,13 @@ import {
   fetchBoostedPlayerDetail,
   type BoostedPlayerDetail,
 } from "@/lib/api-client";
-import { TIER_NAMES, getRankIconPath, getTierColor } from "@/lib/tier-utils";
 import { useLocalization } from "@/lib/localization-context";
+import { getChampionIconSafe } from "@/lib/champion-icons";
+import { formatKda } from "@/lib/kda";
 
 function duration(seconds: number) {
   if (!seconds) return "—";
-  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+  return `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
 }
 
 function resultColor(result: string | null) {
@@ -22,6 +23,11 @@ function resultColor(result: string | null) {
   if (normalized === "winner" || normalized === "win") return "text-emerald-300";
   if (normalized === "loser" || normalized === "loss") return "text-red-300";
   return "text-pc-text-muted";
+}
+
+function displayMatchMap(mapName: string | null, queueId: number) {
+  if (!mapName) return null;
+  return queueId === 486 ? mapName.replace(/^Ranked\s+/i, "") : mapName;
 }
 
 export default function BoostedPlayerDetailPage() {
@@ -60,7 +66,9 @@ export default function BoostedPlayerDetailPage() {
               <span>{player.platform}</span>
               <span>{player.region}</span>
             </div>
-            <h1 className="pc-heading pc-heading-lg truncate text-pc-accent">{player.name}</h1>
+            <h1 className="pc-heading pc-heading-lg truncate">
+              <Link href={`/players/${player.id}`} className="text-pc-accent transition-colors hover:text-pc-accent-light hover:underline">{player.name}</Link>
+            </h1>
             <p className="mt-1 max-w-2xl text-sm text-pc-text-secondary">{t("moderation.boostedDescription")}</p>
           </div>
         </div>
@@ -86,29 +94,78 @@ export default function BoostedPlayerDetailPage() {
       </section>
 
       <section>
-        <h2 className="mb-3 text-sm font-semibold text-pc-text">{t("generated.players.observedMatches")}</h2>
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="pc-card-title shadow-sm">{t("generated.players.observedMatches")}</h2>
+          <span className="text-xs text-pc-text-muted">{formatNumber(matches.length)} {t("generated.players.matches.9f3e924")}</span>
+        </div>
         {matches.length === 0 ? (
           <div className="rounded-xl border border-dashed border-pc-border p-8 text-center text-sm text-pc-text-muted">{t("generated.players.noLinkedObservations")}</div>
         ) : (
-          <div className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated">
-            {matches.map((match) => (
-              <Link
-                key={match.matchId}
-                href={`/matches/${match.matchId}`}
-                className="grid gap-2 border-b border-pc-border px-4 py-3 text-sm transition-colors last:border-b-0 hover:bg-pc-bg/50 sm:grid-cols-[minmax(0,1fr)_auto_auto_auto] sm:items-center"
-              >
-                <div className="min-w-0">
-                  <div className="truncate font-semibold text-pc-text">{match.map || t("generated.players.matchValue1", { value1: match.matchId })}</div>
-                  <div className="mt-0.5 truncate text-xs text-pc-text-muted">{match.championName || t("generated.players.unknownChampion")} · {match.region || t("generated.players.unknownRegion")} · {observedAt(match.entryDatetime)}</div>
-                  <div className="mt-1 flex min-w-0 flex-wrap gap-1">
-                    {match.cheaters.map((cheater) => <span key={cheater.id} className="truncate rounded border border-red-500/20 bg-[#161618] px-1.5 py-0.5 text-xs font-semibold text-red-200">{cheater.name}</span>)}
+          <div className="pc-card">
+            <div className="space-y-2 lg:hidden">
+              {matches.map((match) => (
+                <div key={match.matchId} className="pc-mobile-panel flex min-w-0 items-center gap-3 p-3">
+                  <div className="flex w-24 shrink-0 flex-col gap-1">
+                    {match.cheaters.map((cheater) => (
+                      <Link key={cheater.id} href={`/players/${cheater.id}`} className="truncate rounded border border-red-500/25 bg-red-500/10 px-1.5 py-1 text-xs font-semibold text-red-200 transition-colors hover:border-red-400/50 hover:text-white" title={cheater.name}>
+                        <span className="mr-1 font-bold text-red-400">{t("moderation.duoShort")}</span>{cheater.name}
+                      </Link>
+                    ))}
                   </div>
+                  <img src={getChampionIconSafe(match.championName || "")} alt="" className="h-10 w-10 shrink-0 rounded-lg object-contain" />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex min-w-0 items-center gap-2"><span className="truncate text-sm font-semibold text-pc-text">{match.championName || t("generated.players.unknownChampion")}</span><span className={`shrink-0 text-xs font-bold ${resultColor(match.winStatus)}`}>{match.winStatus?.toLowerCase().startsWith("win") ? t("generated.players.win") : t("generated.players.loss")}</span></div>
+                    <div className="truncate text-xs text-pc-text-muted">{match.queueId === 486 ? t("generated.players.ranked") : t("generated.players.casual")} · {displayMatchMap(match.map, match.queueId) || t("generated.players.unknownMap")}</div>
+                    <div className="mt-1 flex min-w-0 items-center gap-2 text-xs text-pc-text-muted"><Link href={`/matches/${match.matchId}`} className="shrink-0 font-mono text-pc-accent hover:text-pc-accent-secondary">#{match.matchId}</Link><span className="truncate">{observedAt(match.entryDatetime)}</span></div>
+                  </div>
+                  <div className="shrink-0 text-right"><div className="font-mono text-sm font-bold text-pc-text">{match.kills}/{match.deaths}/{match.assists}</div><div className="text-xs uppercase text-pc-text-muted">{formatKda(match.kills, match.deaths, match.assists)} {t("generated.players.kda")}</div><div className="mt-1 font-mono text-xs text-pc-text-secondary">{duration(match.durationSeconds)}</div></div>
                 </div>
-                <div className={`flex items-center gap-1.5 text-xs font-semibold ${getTierColor(match.leagueTier)}`}><img src={getRankIconPath(match.leagueTier, 0)} alt="" className="h-6 w-6 object-contain" /><span>{TIER_NAMES[match.leagueTier] || t("generated.players.unranked")}</span></div>
-                <div className="text-xs text-pc-text-secondary"><span className={`font-semibold ${resultColor(match.winStatus)}`}>{match.winStatus || t("generated.players.resultUnknown")}</span><div className="mt-0.5 tabular-nums text-pc-text-muted">{match.kills} / {match.deaths} / {match.assists}</div></div>
-                <div className="text-right text-xs text-pc-text-muted">{duration(match.durationSeconds)}</div>
-              </Link>
-            ))}
+              ))}
+            </div>
+            <div className="hidden overflow-x-auto lg:block">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-pc-border text-left text-xs text-pc-text-muted">
+                    <th className="px-3 py-1.5">{t("moderation.duoShort")}</th>
+                    <th className="px-3 py-1.5">{t("generated.players.match.0335207")}</th>
+                    <th className="px-3 py-1.5">{t("generated.players.champion")}</th>
+                    <th className="px-3 py-1.5">{t("generated.players.queue")}</th>
+                    <th className="px-3 py-1.5">{t("common.playerChampions.killsShort")}</th>
+                    <th className="px-3 py-1.5">{t("common.playerChampions.deathsShort")}</th>
+                    <th className="px-3 py-1.5">{t("common.playerChampions.assistsShort")}</th>
+                    <th className="px-3 py-1.5">{t("generated.players.kda")}</th>
+                    <th className="px-3 py-1.5">{t("generated.players.result")}</th>
+                    <th className="px-3 py-1.5">{t("generated.players.time")}</th>
+                    <th className="px-3 py-1.5">{t("generated.players.played")}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {matches.map((match) => (
+                    <tr key={match.matchId} className="border-b border-pc-border/30 transition-colors hover:bg-pc-bg-secondary/50">
+                      <td className="px-3 py-1.5">
+                        <div className="flex min-w-28 flex-col items-start gap-1">
+                          {match.cheaters.map((cheater) => (
+                            <Link key={cheater.id} href={`/players/${cheater.id}`} className="max-w-32 truncate rounded border border-red-500/25 bg-red-500/10 px-1.5 py-0.5 text-xs font-semibold text-red-200 transition-colors hover:border-red-400/50 hover:text-white" title={cheater.name}>
+                              <span className="mr-1 font-bold text-red-400">{t("moderation.duoShort")}</span>{cheater.name}
+                            </Link>
+                          ))}
+                        </div>
+                      </td>
+                      <td className="px-3 py-1.5"><Link href={`/matches/${match.matchId}`} className="font-mono text-xs text-pc-accent hover:text-pc-accent-secondary">#{match.matchId}</Link></td>
+                      <td className="px-3 py-1.5"><div className="flex items-center gap-1.5"><img src={getChampionIconSafe(match.championName || "")} alt="" className="h-5 w-5 rounded object-contain" /><span className="text-xs text-pc-text">{match.championName || t("generated.players.unknownChampion")}</span></div></td>
+                      <td className="px-3 py-1.5"><div className="text-xs text-pc-text-secondary">{match.queueId === 486 ? t("generated.players.ranked") : match.queueId ? t("generated.players.casual") : t("generated.players.unknown")}</div><div className="max-w-28 truncate text-xs text-pc-text-muted" title={displayMatchMap(match.map, match.queueId) || undefined}>{displayMatchMap(match.map, match.queueId) || t("generated.players.unknownMap")}</div></td>
+                      <td className="px-3 py-1.5 font-mono text-xs text-pc-text">{match.kills}</td>
+                      <td className="px-3 py-1.5 font-mono text-xs text-pc-text">{match.deaths}</td>
+                      <td className="px-3 py-1.5 font-mono text-xs text-pc-text">{match.assists}</td>
+                      <td className="px-3 py-1.5 font-mono text-xs text-pc-text">{formatKda(match.kills, match.deaths, match.assists)}</td>
+                      <td className="px-3 py-1.5"><span className={`text-xs font-medium ${resultColor(match.winStatus)}`}>{match.winStatus?.toLowerCase().startsWith("win") ? t("common.result.winShort") : t("common.result.lossShort")}</span></td>
+                      <td className="px-3 py-1.5 font-mono text-xs text-pc-text-secondary">{duration(match.durationSeconds)}</td>
+                      <td className="whitespace-nowrap px-3 py-1.5 text-xs text-pc-text-muted">{observedAt(match.entryDatetime)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </section>
