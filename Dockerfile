@@ -19,6 +19,7 @@ ENV NEXT_PUBLIC_LOCALE_BASE_URL=${NEXT_PUBLIC_LOCALE_BASE_URL}
 COPY src/frontend/package.json src/frontend/package-lock.json src/frontend/tsconfig.json ./
 RUN npm ci
 COPY community-locales /community-locales
+ENV PALADINSCAT_LOCALES_REPO=/community-locales
 COPY src/frontend/ .
 RUN npm run build
 
@@ -28,6 +29,7 @@ WORKDIR /app
 COPY src/frontend/package.json ./
 RUN npm install
 COPY community-locales /community-locales
+ENV PALADINSCAT_LOCALES_REPO=/community-locales
 COPY src/frontend/ ./
 CMD ["sh", "-c", "npm install && npm run dev -- -H 0.0.0.0"]
 
