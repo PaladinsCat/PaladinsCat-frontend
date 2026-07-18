@@ -45,7 +45,7 @@ export default function CommunityVoteLeaderboard({ kind }: { kind: VoteKind }) {
     : "border-emerald-500/20 text-emerald-300 bg-emerald-500/10";
 
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-6">
+    <div className="mx-auto w-full max-w-4xl space-y-6">
       <div>
         <Link href="/players" className="text-pc-accent text-xs hover:underline mb-2 inline-block">{t("generated.components.players")}</Link>
         <h1 className="pc-heading pc-heading-lg text-pc-accent">{t(config.titleKey)}</h1>

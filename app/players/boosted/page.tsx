@@ -21,7 +21,7 @@ export default function BoostedPlayersPage() {
   }, []);
 
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-6">
+    <div className="mx-auto w-full max-w-4xl space-y-6">
       <div>
         <Link href="/players" className="mb-2 inline-block text-xs text-pc-accent hover:underline">{t("generated.players.players")}</Link>
         <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("moderation.boostedPlayers")}</h1>
@@ -42,7 +42,7 @@ export default function BoostedPlayersPage() {
           {(player) => (
             <Link
               href={`/players/boosted/${player.id}`}
-              className="group grid h-full min-h-24 gap-3 rounded-xl border border-orange-400/20 bg-pc-bg-elevated p-4 transition-colors hover:border-orange-400/40 hover:bg-orange-400/[0.04] sm:grid-cols-[minmax(0,10rem)_minmax(0,1fr)] sm:items-start"
+              className="group flex h-full min-h-24 flex-col gap-3 rounded-xl border border-orange-400/20 bg-pc-bg-elevated p-4 transition-colors hover:border-orange-400/40 hover:bg-orange-400/[0.04]"
             >
               <div className="min-w-0">
                 <div className="truncate text-sm font-semibold text-pc-text transition-colors group-hover:text-pc-accent">

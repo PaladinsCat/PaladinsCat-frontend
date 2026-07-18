@@ -29,7 +29,7 @@ export default function PlayerDirectoryGrid<T>({
 
   return (
     <div className="space-y-4">
-      <div className={`grid grid-cols-1 gap-3 md:grid-cols-2 ${loading ? "opacity-60" : ""}`}>
+      <div className={`grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 ${loading ? "opacity-60" : ""}`}>
         {visibleItems.map((item, index) => (
           <div key={getKey(item)} className="min-w-0">
             {children(item, (page - 1) * PLAYER_DIRECTORY_PAGE_SIZE + index)}
