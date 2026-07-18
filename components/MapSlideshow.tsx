@@ -8,22 +8,9 @@ import {
   type ResolvedCustomWallpaper,
   WALLPAPER_CHANGE_EVENT,
 } from "@/lib/wallpaper-preference";
+import { DEFAULT_WALLPAPERS, type BuiltInWallpaper } from "@/lib/wallpaper-images";
 
-// All 12 Paladins map wallpapers — AVIF format
-const MAPS = [
-  "/images/maps/Ascension_Peak_Overhead_Layout.avif",
-  "/images/maps/Brightmarsh_Overhead_Layout.avif",
-  "/images/maps/Dragon_Arena_Overhead_Layout.avif",
-  "/images/maps/Fish Market Overhead.avif",
-  "/images/maps/Foremans_Rise_Overhead_Layout.avif",
-  "/images/maps/Frog_Isle_Overhead_Layout.avif",
-  "/images/maps/Jaguar_Falls_Overhead_Layout.avif",
-  "/images/maps/Serpent_Beach_Overhead_Layout.avif",
-  "/images/maps/Snowfall_Junction_Overhead_Layout.avif",
-  "/images/maps/Splotstone_Quarry_Overhead_Layout.avif",
-  "/images/maps/Stone_Keep_Overhead_Layout.avif",
-  "/images/maps/Warders_Gate_Overhead_Layout.avif",
-];
+type WallpaperSlide = BuiltInWallpaper | string;
 
 const INTERVAL_MS = 10_000;
 
@@ -40,7 +27,7 @@ export default function MapSlideshow() {
   // Deterministic on server: always start at index 0
   const [index, setIndex] = useState(0);
   // Null until client mounts and shuffles
-  const [order, setOrder] = useState<string[] | null>(null);
+  const [order, setOrder] = useState<BuiltInWallpaper[] | null>(null);
   const mounted = useRef(false);
 
   useEffect(() => {
@@ -79,7 +66,7 @@ export default function MapSlideshow() {
     // Shuffle once on mount
     if (!mounted.current) {
       mounted.current = true;
-      const arr = [...MAPS];
+      const arr = [...DEFAULT_WALLPAPERS];
       for (let i = arr.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [arr[i], arr[j]] = [arr[j], arr[i]];
@@ -88,7 +75,7 @@ export default function MapSlideshow() {
     }
   }, []);
 
-  const slides = useMemo(
+  const slides = useMemo<WallpaperSlide[] | null>(
     () => customWallpapers.length > 0 ? customWallpapers.map((wallpaper) => wallpaper.source) : order,
     [customWallpapers, order],
   );
@@ -106,7 +93,11 @@ export default function MapSlideshow() {
   }, [slides]);
 
   // Before client mount, render the first map in static order (matches SSR)
-  const currentMap = slides?.[index] ?? MAPS[0];
+  const currentWallpaper = slides?.[index] ?? DEFAULT_WALLPAPERS[0];
+  const currentWallpaperKey = typeof currentWallpaper === "string" ? currentWallpaper : currentWallpaper.avif;
+  const currentWallpaperImage = typeof currentWallpaper === "string"
+    ? `url(${JSON.stringify(currentWallpaper)})`
+    : `image-set(url(${JSON.stringify(currentWallpaper.avif)}) type("image/avif"), url(${JSON.stringify(currentWallpaper.png)}) type("image/png"))`;
 
   if (!wallpaperEnabled) {
     return <div className="fixed inset-0 -z-10 bg-pc-bg" aria-hidden="true" />;
@@ -131,7 +122,7 @@ export default function MapSlideshow() {
     <div className="fixed inset-0 -z-10 overflow-hidden" aria-hidden="true" style={{ backgroundColor: "var(--pc-bg)" }}>
       <AnimatePresence>
         <motion.div
-          key={currentMap}
+          key={currentWallpaperKey}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -142,7 +133,7 @@ export default function MapSlideshow() {
             left: 0,
             width: "100%",
             height: "100%",
-            backgroundImage: `url("${currentMap}")`,
+            backgroundImage: currentWallpaperImage,
             backgroundPosition: "center",
             backgroundSize: "cover",
             filter: "brightness(0.4)",
