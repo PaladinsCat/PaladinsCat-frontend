@@ -75,8 +75,8 @@ export default function PerformanceRangeBellCurve({ metricLabel, summary, format
         <circle cx={modeX} cy={yFor(mode)} r="3" className="fill-pc-text" />
         <line x1={medianX} y1={PLOT_TOP + 18} x2={medianX} y2={PLOT_BOTTOM} className="stroke-pc-text" strokeWidth="1.5" />
         <circle cx={medianX} cy={yFor(median)} r="3" className="fill-pc-text" />
-        <text x={PLOT_LEFT} y="124" className="fill-pc-text-muted text-[11px]">{formatValue(domainStart)}</text>
-        <text x={PLOT_RIGHT} y="124" textAnchor="end" className="fill-pc-text-muted text-[11px]">{formatValue(domainEnd)}</text>
+        <text x={PLOT_LEFT} y="124" className="fill-pc-text-muted text-xs">{formatValue(domainStart)}</text>
+        <text x={PLOT_RIGHT} y="124" textAnchor="end" className="fill-pc-text-muted text-xs">{formatValue(domainEnd)}</text>
       </svg>
       <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs sm:grid-cols-5">
         {[
