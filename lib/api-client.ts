@@ -353,13 +353,13 @@ export async function fetchChampionElo(params: {
 
 export interface PerformanceLeaderboardEntry {
   rank: number;
+  matchId: string;
   playerId: number;
   playerName: string;
   championName: string | null;
   championId: number | null;
   className: string | null;
   value: number;
-  totalMatches: number;
   region: string | null;
   platform: string | null;
 }
@@ -379,19 +379,19 @@ export async function fetchPerformanceLeaderboard(params: {
   if (params.queueId != null) query.set('queueId', String(params.queueId));
   try {
     const raw = await fetchJson<Array<{
-      rank: number; player_id: number; player_name: string;
+      rank: number; match_id: number | string; player_id: number; player_name: string;
       champion_name: string | null; champion_id: number | null; class_name: string | null;
-      value: number | string; total_matches: number; region: string | null; platform: string | null;
+      value: number | string; region: string | null; platform: string | null;
     }>>(`/players/leaderboard/performance?${query.toString()}`);
     return raw.map((r) => ({
       rank: Number(r.rank),
+      matchId: String(r.match_id),
       playerId: Number(r.player_id),
       playerName: r.player_name,
       championName: r.champion_name ?? null,
       championId: r.champion_id ?? null,
       className: r.class_name ?? null,
       value: typeof r.value === 'string' ? Number(r.value) : r.value,
-      totalMatches: Number(r.total_matches ?? 0),
       region: r.region ?? null,
       platform: r.platform ?? null,
     }));
@@ -936,9 +936,9 @@ export function mapPlayersOverviewResponse(raw: any): PlayersOverview {
     total_wins: Number(row.total_wins), win_rate: row.win_rate == null ? null : Number(row.win_rate), region: row.region ?? null,
   });
   const mapPerformance = (row: any): PerformanceLeaderboardEntry => ({
-    rank: Number(row.rank), playerId: Number(row.player_id), playerName: row.player_name,
+    rank: Number(row.rank), matchId: String(row.match_id), playerId: Number(row.player_id), playerName: row.player_name,
     championName: row.champion_name ?? null, championId: row.champion_id == null ? null : Number(row.champion_id),
-    className: row.class_name ?? null, value: Number(row.value), totalMatches: Number(row.total_matches ?? 0),
+    className: row.class_name ?? null, value: Number(row.value),
     region: row.region ?? null, platform: row.platform ?? null,
   });
   const mapRanked = (row: any): RankedPlayer => ({

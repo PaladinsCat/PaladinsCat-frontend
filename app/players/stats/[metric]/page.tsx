@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { fetchBaselines, fetchPerformanceLeaderboard, type BaselineEntry } from "@/lib/api-client";
+import { fetchPerformanceLeaderboard } from "@/lib/api-client";
 import { LoadingPanel } from "@/components/async-state";
 import PlayerName from "@/components/player-name";
 import { getChampionIconSafe } from "@/lib/champion-icons";
@@ -33,13 +33,6 @@ const METRIC_HEX: Record<Metric, string> = {
   mpm: "#60a5fa",
 };
 
-const METRIC_AVG_KEY: Record<Metric, keyof BaselineEntry> = {
-  gpm: "avgCpm",
-  hpm: "avgHpm",
-  dpm: "avgDpm",
-  mpm: "avgSpm",
-};
-
 const CLASS_ICONS: Record<string, string> = {
   Frontline: "/images/icons/Class_Front_Line_Icon.avif",
   Damage: "/images/icons/Class_Damage_Icon.avif",
@@ -49,12 +42,12 @@ const CLASS_ICONS: Record<string, string> = {
 
 interface PerfEntry {
   rank: number;
+  matchId: string;
   player_id: number;
   name: string;
   champion: string | null;
   className: string;
   value: number;
-  totalMatches: number;
   region: string;
 }
 
@@ -92,7 +85,6 @@ export default function MetricLeaderboardPage() {
 
   const normalizedMetric = VALID_METRICS.find((m) => m === rawMetric) || null;
 
-  const [baselines, setBaselines] = useState<BaselineEntry[]>([]);
   const [entries, setEntries] = useState<PerfEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -107,25 +99,20 @@ export default function MetricLeaderboardPage() {
     async function load() {
       setLoading(true);
       try {
-        const [baselineRows, leaderboardRows] = await Promise.all([
-          fetchBaselines(),
-          fetchPerformanceLeaderboard({ metric, limit: 100 }),
-        ]);
+        const leaderboardRows = await fetchPerformanceLeaderboard({ metric, limit: 100 });
         if (cancelled) return;
-        setBaselines(baselineRows);
         setEntries(leaderboardRows.map((p) => ({
           rank: p.rank,
+          matchId: p.matchId,
           player_id: p.playerId,
           name: p.playerName,
           champion: p.championName,
           className: p.className ?? t("generated.players.stats.[metric].page.unknown"),
           value: p.value,
-          totalMatches: p.totalMatches,
           region: p.region ?? "—",
         })));
       } catch {
         if (!cancelled) {
-          setBaselines([]);
           setEntries([]);
         }
       } finally {
@@ -143,12 +130,6 @@ export default function MetricLeaderboardPage() {
 
   const m = normalizedMetric;
   const colorClass = METRIC_COLORS[m];
-
-  const avgByRole = baselines.reduce<Record<string, number>>((acc, b) => {
-    const val = b[METRIC_AVG_KEY[m]] as number;
-    if (val) acc[b.role] = val;
-    return acc;
-  }, {});
 
   return (
     <div className="space-y-6">
@@ -191,29 +172,6 @@ export default function MetricLeaderboardPage() {
         ))}
       </div>
 
-      {/* ── Baselines summary ── */}
-      {Object.keys(avgByRole).length > 0 && (
-        <div className="bg-pc-bg-elevated rounded-xl border border-pc-border p-4">
-          <h2 className="text-sm font-semibold text-pc-text-muted mb-3 uppercase tracking-wider">
-            {t("generated.players.roleAveragesBaselines")}</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {Object.entries(avgByRole).map(([role, val]) => (
-              <div key={role} className="bg-pc-bg/50 rounded-lg p-3 border border-pc-border">
-                <div className="flex items-center gap-2 mb-1">
-                  {CLASS_ICONS[role] && (
-                    <img src={CLASS_ICONS[role]} alt={role} className="w-5 h-5" />
-                  )}
-                  <span className="text-xs text-pc-text-muted">{role}</span>
-                </div>
-                <span className={`text-lg font-bold ${colorClass}`}>
-                  {formatNumber(val, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* ── Table ── */}
       {loading ? (
         <LoadingPanel compact />
@@ -232,7 +190,7 @@ export default function MetricLeaderboardPage() {
                   <th className="text-center text-pc-text-muted font-medium py-3 px-4 hidden sm:table-cell">{t("generated.players.champion")}</th>
                   <th className="text-left text-pc-text-muted font-medium py-3 px-4 hidden md:table-cell">{t("generated.players.class")}</th>
                   <th className="text-right text-pc-text-muted font-medium py-3 px-4">{METRIC_LABELS[m]}</th>
-                  <th className="text-right text-pc-text-muted font-medium py-3 px-4 hidden md:table-cell">{t("generated.players.matches")}</th>
+                  <th className="text-left text-pc-text-muted font-medium py-3 px-4 hidden md:table-cell">{t("generated.matches.matchId")}</th>
                   <th className="text-center text-pc-text-muted font-medium py-3 px-4 hidden lg:table-cell">{t("generated.players.region")}</th>
                 </tr>
               </thead>
@@ -241,7 +199,7 @@ export default function MetricLeaderboardPage() {
                   const rowBg = i < 3 ? "bg-pc-bg/30" : "";
                   return (
                     <tr
-                      key={p.player_id}
+                      key={`${p.matchId}-${p.player_id}-${p.rank}`}
                       className={`border-b border-pc-border/50 hover:bg-pc-bg/60 transition-colors ${rowBg}`}
                     >
                       <td className="py-2.5 px-4">
@@ -276,8 +234,10 @@ export default function MetricLeaderboardPage() {
                           {formatNumber(p.value)}
                         </span>
                       </td>
-                      <td className="py-2.5 px-4 text-right text-pc-text-secondary hidden md:table-cell">
-                        {formatNumber(p.totalMatches)}
+                      <td className="py-2.5 px-4 font-mono text-pc-text-secondary hidden md:table-cell">
+                        <Link href={`/matches/${p.matchId}`} className="hover:text-pc-accent hover:underline">
+                          {p.matchId}
+                        </Link>
                       </td>
                       <td className="py-2.5 px-4 text-center hidden lg:table-cell">
                         <span className="text-xs px-2 py-0.5 rounded bg-pc-bg text-pc-text-muted">
@@ -293,9 +253,6 @@ export default function MetricLeaderboardPage() {
         </div>
       )}
 
-      {/* ── Footer note ── */}
-      <p className="text-pc-text-muted text-xs text-center">
-        {t("generated.players.showing")}{" "}{entries.length} {t("generated.players.players.7abad31")}{" "}{METRIC_LABELS[m]} {t("generated.players.isARollingAverageAcrossRankedMatches")}</p>
     </div>
   );
 }
