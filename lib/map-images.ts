@@ -1,18 +1,5 @@
 const DEFAULT_MAP_ARTWORK = "Test_Maps_Loading";
-
-const RANKED_MAP_ARTWORK: Record<string, string> = {
-  "ascension peak": "Ranked_Ascension_Peak",
-  bazaar: "Ranked_Bazaar",
-  brightmarsh: "Ranked_Brightmarsh",
-  "frog isle": "Ranked_Frog_Isle",
-  "ice mines": "Ranked_Ice_Mines",
-  "jaguar falls": "Ranked_Jaguar_Falls",
-  "serpent beach": "Ranked_Serpent_Beach",
-  "splitstone quarry": "Ranked_Splitstone_Quarry",
-  "stone keep classic": "Ranked_Stone_Keep_Classic",
-  "stone keep v2 night": "Ranked_Stone_Keep_V2_Night",
-  "warders gate": "Ranked_Warders_Gate",
-};
+const DEFAULT_MATCH_MAP_ARTWORK = "Match_Test_Maps";
 
 const MAP_ARTWORK: Record<string, string> = {
   abyss: "Abyss_Loading",
@@ -37,6 +24,8 @@ const MAP_ARTWORK: Record<string, string> = {
   "snowfall junction": "Snowfall_Junction_Overhead_Layout",
   "splitstone quarry": "Splotstone_Quarry_Overhead_Layout",
   "stone keep": "Stone_Keep_Overhead_Layout",
+  "stone keep classic": "Stone_Keep_Overhead_Layout",
+  "stone keep v2 night": "Stone_Keep_Overhead_Layout",
   "test maps": "Test_Maps_Loading",
   throne: "Throne_Loading",
   "timber mill": "Timber_Mill_Loading",
@@ -46,6 +35,41 @@ const MAP_ARTWORK: Record<string, string> = {
   // These maps currently have loading-card artwork but no overhead asset.
   bazaar: "Ranked_Bazaar",
   "ice mines": "Ranked_Ice_Mines",
+};
+
+const MATCH_MAP_ARTWORK: Record<string, string> = {
+  abyss: "Match_Abyss",
+  "ascension peak": "Match_Ascension_Peak",
+  bazaar: "Match_Bazaar",
+  brightmarsh: "Match_Brightmarsh",
+  dawnforge: "Match_Dawnforge",
+  "dragon arena": "Match_Dragon_Arena",
+  "fish market": "Match_Fish_Market",
+  "foremans rise": "Match_Foremans_Rise",
+  "frostbite cavern": "Match_Frostbite_Cavern",
+  "frozen guard": "Match_Frozen_Guard",
+  "frog isle": "Match_Frog_Isle",
+  "greenwood outpost": "Match_Greenwood_Outpost",
+  "hidden temple": "Match_Hidden_Temple",
+  "ice mines": "Match_Ice_Mines",
+  "jaguar falls": "Match_Jaguar_Falls",
+  "magistrates archives": "Match_Magistrates_Archives",
+  "marauders port": "Match_Marauders_Port",
+  "primal court": "Match_Primal_Court",
+  "serpent beach": "Match_Serpent_Beach",
+  "shattered desert": "Match_Shattered_Desert",
+  "shooting range": "Match_Shooting_Range",
+  "snowfall junction": "Match_Snowfall_Junction",
+  "splitstone quarry": "Match_Splitstone_Quarry",
+  "stone keep": "Match_Stone_Keep",
+  "stone keep classic": "Match_Stone_Keep_Classic",
+  "stone keep v2 night": "Match_Stone_Keep_V2_Night",
+  "test maps": "Match_Test_Maps",
+  throne: "Match_Throne",
+  "timber mill": "Match_Timber_Mill",
+  "trade district": "Match_Trade_District",
+  tutorial: "Match_Tutorial",
+  "warders gate": "Match_Warders_Gate",
 };
 
 function mapLookupKey(value: string): string {
@@ -59,18 +83,21 @@ function mapLookupKey(value: string): string {
 }
 
 export function mapImagePath(mapName: string): string {
-  const trimmed = mapName.trim();
-  const lookupKey = mapLookupKey(trimmed.replace(/^ranked\s+/i, ""));
-  const artwork = /^ranked\s+/i.test(trimmed)
-    ? RANKED_MAP_ARTWORK[lookupKey] ?? MAP_ARTWORK[lookupKey]
-    : MAP_ARTWORK[lookupKey];
+  const lookupKey = mapLookupKey(mapName.trim().replace(/^ranked\s+/i, ""));
+  const artwork = MAP_ARTWORK[lookupKey];
 
   // A neutral map card is preferable to a missing wallpaper for historic,
   // experimental, or newly introduced maps without published loading art.
   return `/images/maps/${artwork ?? DEFAULT_MAP_ARTWORK}.png`;
 }
 
-export function mapImageSources(mapName: string): { avif: string; png: string } {
-  const png = mapImagePath(mapName);
+export function matchMapImagePath(mapName: string): string {
+  const lookupKey = mapLookupKey(mapName.trim().replace(/^ranked\s+/i, ""));
+  const artwork = MATCH_MAP_ARTWORK[lookupKey] ?? DEFAULT_MATCH_MAP_ARTWORK;
+  return `/images/maps/${artwork}.png`;
+}
+
+export function matchMapImageSources(mapName: string): { avif: string; png: string } {
+  const png = matchMapImagePath(mapName);
   return { avif: png.replace(/\.png$/, ".avif"), png };
 }

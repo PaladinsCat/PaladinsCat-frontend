@@ -5,7 +5,7 @@ import Link from "next/link";
 import type { MatchBan, MatchData, MatchPlayerDetail } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
-import { mapImageSources } from "@/lib/map-images";
+import { matchMapImageSources } from "@/lib/map-images";
 import { getRankIconPath, resolveEffectiveTier, TIER_NAMES } from "@/lib/tier-utils";
 import { parseBackendDate } from "@/lib/time-format";
 import CanonicalTalentImage from "@/components/canonical-talent-image";
@@ -233,7 +233,7 @@ export default function BrowserScoreboard({ match, queueLabel, team1, team2, ban
   const banIcons = (entries: MatchBan[]) => entries.map((ban, index) => (
     <span className="ban-pick" key={`${ban.champion_id}-${index}`}><img src={getChampionIconSafe(ban.champion_name)} alt={ban.champion_name ?? t("generated.matches.bannedChampion")} /></span>
   ));
-  const mapImage = mapImageSources(match.map);
+  const mapImage = matchMapImageSources(match.map);
 
   return (
     <section id="browser-scoreboard" data-theme="dark" aria-label={t("generated.matches.matchScoreboardImage")}>
@@ -244,7 +244,7 @@ export default function BrowserScoreboard({ match, queueLabel, team1, team2, ban
             <section ref={scoreboardRef} className="scoreboard" style={{ "--scoreboard-map": `image-set(url("${mapImage.avif}") type("image/avif"), url("${mapImage.png}") type("image/png"))` } as React.CSSProperties} aria-label={t("generated.matches.paladinsMatchScoreboard")}>
               {/* Keep the PNG as a direct child for html-to-image. The normal
                   preview uses the AVIF-aware pseudo-element above instead. */}
-              <img className="scoreboard-map" src={mapImage.avif} alt="" aria-hidden="true" />
+              <img className="scoreboard-map" src={mapImage.png} alt="" aria-hidden="true" />
               <header className="hero">
                 <div className="match-identity">
                   <div className="brand-line">
