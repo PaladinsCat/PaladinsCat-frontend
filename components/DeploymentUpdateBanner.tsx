@@ -126,7 +126,7 @@ export default function DeploymentUpdateBanner() {
   return (
     <section
       aria-live="assertive"
-      className={`sticky top-16 z-50 border-b backdrop-blur-[30px] ${
+      className={`sticky top-16 z-40 border-b backdrop-blur-[30px] ${
         state.phase === "failed"
           ? "border-red-400/40 bg-red-950/90 text-red-50"
           : "border-amber-300/40 bg-amber-950/90 text-amber-50"
