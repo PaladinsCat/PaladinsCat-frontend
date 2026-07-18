@@ -34,13 +34,13 @@ CMD ["sh", "-c", "npm install && npm run dev -- -H 0.0.0.0"]
 # Prod runtime
 FROM node:22-alpine AS runtime
 WORKDIR /app
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/package-lock.json ./package-lock.json
-RUN npm ci --omit=dev
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
-RUN chown -R node:node /app
+RUN chown node:node /app
 USER node
+COPY --chown=node:node --from=builder /app/package.json ./package.json
+COPY --chown=node:node --from=builder /app/package-lock.json ./package-lock.json
+RUN npm ci --omit=dev
+COPY --chown=node:node --from=builder /app/.next ./.next
+COPY --chown=node:node --from=builder /app/public ./public
 EXPOSE 3000
 CMD ["npx", "next", "start", "-p", "3000"]
 
