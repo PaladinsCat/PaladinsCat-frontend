@@ -70,16 +70,16 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
   }, [initialOverview]);
 
   const cards = useMemo<DirectoryCard[]>(() => [
-    { href: "/players/private-accounts", titleKey: "generated.players.privateAccounts", descriptionKey: "moderation.trackedAccounts", count: directoryCounts.privateAccounts, icon: LockKeyhole, iconClass: "text-slate-300" },
-    { href: "/players/parties", titleKey: "generated.players.rankedParties", descriptionKey: "moderation.knownPartyPairs", count: directoryCounts.parties, icon: UsersRound, iconClass: "text-cyan-300" },
-    { href: "/players/cheaters", titleKey: "generated.players.cheaters", descriptionKey: "moderation.confirmedAccounts", count: communityCounts.cheaters, icon: ShieldAlert, iconClass: "text-red-400" },
-    { href: "/players/boosted", titleKey: "moderation.boostedPlayers", descriptionKey: "moderation.taggedAccounts", count: communityCounts.boosted, icon: Award, iconClass: "text-orange-300" },
-    { href: "/players/suspicious", titleKey: "generated.players.suspiciousPlayers", descriptionKey: "moderation.flaggedAccounts", count: communityCounts.suspicious, icon: BadgeAlert, iconClass: "text-amber-300" },
-    { href: "/players/weirdos", titleKey: "moderation.weirdoTitle", descriptionKey: "moderation.communityVotes", count: communityCounts.weirdos, icon: Sparkles, iconClass: "text-violet-300" },
-    { href: "/players/hall-of-fame", titleKey: "moderation.hallOfFameTitle", descriptionKey: "moderation.communityVotes", count: communityCounts.hallOfFame, icon: Award, iconClass: "text-emerald-300" },
-    { href: "/players/droppers", titleKey: "moderation.droppersTitle", descriptionKey: "moderation.communityMarkedAccounts", count: communityCounts.droppers, icon: CircleSlash2, iconClass: "text-rose-300" },
-    { href: "/players/afk-wintrade", titleKey: "moderation.afkWintradeTitle", descriptionKey: "moderation.communityMarkedAccounts", count: communityCounts.afkWintrade, icon: Clock3, iconClass: "text-sky-300" },
-    { href: "/players/alt-accounts", titleKey: "moderation.altAccountsTitle", descriptionKey: "moderation.communityMarkedAccounts", count: communityCounts.altAccounts, icon: Copy, iconClass: "text-fuchsia-300" },
+    { href: "/players/private-accounts", titleKey: "generated.players.privateAccounts", descriptionKey: "moderation.accounts", count: directoryCounts.privateAccounts, icon: LockKeyhole, iconClass: "text-slate-300" },
+    { href: "/players/parties", titleKey: "generated.players.rankedParties", descriptionKey: "moderation.pairs", count: directoryCounts.parties, icon: UsersRound, iconClass: "text-cyan-300" },
+    { href: "/players/cheaters", titleKey: "generated.players.cheaters", descriptionKey: "moderation.accounts", count: communityCounts.cheaters, icon: ShieldAlert, iconClass: "text-red-400" },
+    { href: "/players/boosted", titleKey: "moderation.boostedPlayers", descriptionKey: "moderation.accounts", count: communityCounts.boosted, icon: Award, iconClass: "text-orange-300" },
+    { href: "/players/suspicious", titleKey: "generated.players.suspiciousPlayers", descriptionKey: "moderation.accounts", count: communityCounts.suspicious, icon: BadgeAlert, iconClass: "text-amber-300" },
+    { href: "/players/weirdos", titleKey: "moderation.weirdoTitle", descriptionKey: "moderation.votes", count: communityCounts.weirdos, icon: Sparkles, iconClass: "text-violet-300" },
+    { href: "/players/hall-of-fame", titleKey: "moderation.hallOfFameTitle", descriptionKey: "moderation.votes", count: communityCounts.hallOfFame, icon: Award, iconClass: "text-emerald-300" },
+    { href: "/players/droppers", titleKey: "moderation.droppersTitle", descriptionKey: "moderation.accounts", count: communityCounts.droppers, icon: CircleSlash2, iconClass: "text-rose-300" },
+    { href: "/players/afk-wintrade", titleKey: "moderation.afkWintradeTitle", descriptionKey: "moderation.accounts", count: communityCounts.afkWintrade, icon: Clock3, iconClass: "text-sky-300" },
+    { href: "/players/alt-accounts", titleKey: "moderation.altAccountsTitle", descriptionKey: "moderation.accounts", count: communityCounts.altAccounts, icon: Copy, iconClass: "text-fuchsia-300" },
   ], [communityCounts, directoryCounts]);
 
   async function search(value: string) {
