@@ -46,11 +46,8 @@ export default function BoostedPlayersPage() {
             >
               <div className="min-w-0">
                 <div className="truncate text-sm font-semibold text-pc-text transition-colors group-hover:text-pc-accent">
-                  <PlayerName playerId={player.id} cheater={player.cheater} susCount={player.susCount}>{player.name}</PlayerName>
+                  <PlayerName playerId={player.id} cheater={player.cheater} susCount={player.susCount} boosted={player.boosted}>{player.name}</PlayerName>
                 </div>
-                <span className="mt-1 inline-block rounded border border-orange-400/30 bg-orange-400/15 px-1.5 py-0.5 text-xs font-bold leading-none text-orange-300">
-                  {t("moderation.boosted")}
-                </span>
               </div>
 
               <div className="min-w-0">
