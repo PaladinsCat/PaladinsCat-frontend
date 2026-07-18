@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { fetchMatchSearch, fetchMatchesOverview, type MatchData, type MatchSearchResult } from "@/lib/api-client";
 import { useChampions } from "@/lib/champion-names";
 import { useTimeZone } from "@/lib/time-zone-context";
@@ -16,6 +17,7 @@ const RANKED_QUEUE_ID = "486";
 
 export default function MatchesPage() {
   const { t , formatNumber} = useLocalization();
+  const router = useRouter();
   const { timeZone } = useTimeZone();
   const { isLoggedIn, isLoading: authLoading } = useAuth();
   const { definition: lobbyTier, ready: lobbyTierReady } = useLobbyTier();
@@ -27,6 +29,7 @@ export default function MatchesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [championId, setChampionId] = useState("");
+  const [matchId, setMatchId] = useState("");
   const [region, setRegion] = useState("");
   const [date, setDate] = useState("");
   const [hour, setHour] = useState("");
@@ -77,7 +80,21 @@ export default function MatchesPage() {
 
   const hasFilters = appliedFilters !== null;
   const reset = () => {
-    setChampionId(""); setRegion(""); setDate(""); setHour(""); setAppliedFilters(null); setPage(1);
+    setMatchId(""); setChampionId(""); setRegion(""); setDate(""); setHour(""); setAppliedFilters(null); setPage(1);
+  };
+
+  const search = () => {
+    const requestedMatchId = matchId.trim();
+    if (requestedMatchId) {
+      if (!/^\d+$/.test(requestedMatchId) || /^0+$/.test(requestedMatchId)) {
+        setError(t("matches.invalidMatchId"));
+        return;
+      }
+      router.push(`/matches/${requestedMatchId}`);
+      return;
+    }
+    setAppliedFilters({ championId, region, date, hour });
+    setPage(1);
   };
 
   return <div className="space-y-6">
@@ -87,13 +104,14 @@ export default function MatchesPage() {
     </header>
 
     <section className="pc-card">
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        <label className="text-xs text-pc-text-muted">{t("generated.matches.matchId")}<input value={matchId} onChange={(event) => setMatchId(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); search(); } }} inputMode="numeric" pattern="[0-9]*" placeholder={t("matches.matchIdPlaceholder")} className="mt-1 w-full rounded-lg border border-pc-border bg-pc-bg px-3 py-1.5 text-sm text-pc-text" /></label>
         <label className="text-xs text-pc-text-muted">{t("generated.matches.champion")}<select value={championId} onChange={(event) => setChampionId(event.target.value)} className="mt-1 w-full rounded-lg border border-pc-border bg-pc-bg px-3 py-1.5 text-sm text-pc-text" disabled={championsLoading}><option value="">{t("generated.matches.all")}</option>{champions?.sort((a, b) => a.name.localeCompare(b.name)).map((champion) => <option key={champion.id} value={String(champion.id)}>{champion.name}</option>)}</select></label>
         <label className="text-xs text-pc-text-muted">{t("generated.matches.region")}<select value={region} onChange={(event) => setRegion(event.target.value)} className="mt-1 w-full rounded-lg border border-pc-border bg-pc-bg px-3 py-1.5 text-sm text-pc-text"><option value="">{t("generated.matches.all")}</option><option value="NA">{t("generated.matches.na")}</option><option value="EU">{t("generated.matches.eu")}</option></select></label>
         <label className="text-xs text-pc-text-muted">{t("generated.matches.date")}{timeZone})<input type="date" value={date} onChange={(event) => setDate(event.target.value)} className="mt-1 w-full rounded-lg border border-pc-border bg-pc-bg px-3 py-1.5 text-sm text-pc-text" /></label>
         <label className="text-xs text-pc-text-muted">{t("generated.matches.hour")}{timeZone})<select value={hour} onChange={(event) => setHour(event.target.value)} disabled={!date} className="mt-1 w-full rounded-lg border border-pc-border bg-pc-bg px-3 py-1.5 text-sm text-pc-text disabled:opacity-50"><option value="">{t("generated.matches.allHours")}</option>{Array.from({ length: 24 }, (_, value) => <option key={value} value={String(value)}>{String(value).padStart(2, "0")}:00 – {String(value).padStart(2, "0")}:59</option>)}</select></label>
       </div>
-      <div className="mt-3 flex gap-2"><AsyncButton onClick={() => { setAppliedFilters({ championId, region, date, hour }); setPage(1); }} loading={loading} className="flex-1 rounded-lg bg-pc-accent px-4 py-1.5 text-sm font-semibold text-pc-bg">{t("generated.matches.search")}</AsyncButton><button onClick={reset} className="rounded-lg border border-pc-border bg-pc-bg px-4 py-1.5 text-sm text-pc-text-secondary hover:bg-pc-bg-elevated">{t("generated.matches.reset")}</button></div>
+      <div className="mt-3 flex gap-2"><AsyncButton onClick={search} loading={loading} className="flex-1 rounded-lg bg-pc-accent px-4 py-1.5 text-sm font-semibold text-pc-bg">{t("generated.matches.search")}</AsyncButton><button onClick={reset} className="rounded-lg border border-pc-border bg-pc-bg px-4 py-1.5 text-sm text-pc-text-secondary hover:bg-pc-bg-elevated">{t("generated.matches.reset")}</button></div>
     </section>
 
     {loading && <DataTableSkeleton rows={8} />}

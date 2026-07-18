@@ -2452,12 +2452,13 @@ export async function fetchLoadouts(params?: {
   }));
 }
 
-export async function fetchItems(params?: { mode?: string; limit?: number; championId?: number; role?: 'Frontline' | 'Damage' | 'Flank' | 'Support'; tierMin?: number; tierMax?: number }): Promise<ItemStat[]> {
+export async function fetchItems(params?: { mode?: string; limit?: number; championId?: number; role?: 'Frontline' | 'Damage' | 'Flank' | 'Support'; summary?: boolean; tierMin?: number; tierMax?: number }): Promise<ItemStat[]> {
   const query = new URLSearchParams();
   if (params?.mode) query.set('mode', params.mode);
   if (params?.limit != null) query.set('limit', String(params.limit));
   if (params?.championId != null) query.set('championId', String(params.championId));
   if (params?.role) query.set('role', params.role);
+  if (params?.summary) query.set('summary', 'true');
   if (params?.tierMin != null) query.set('tierMin', String(params.tierMin));
   if (params?.tierMax != null) query.set('tierMax', String(params.tierMax));
   try {

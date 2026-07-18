@@ -9,5 +9,11 @@
   "maps.detailDescription": "Champion, talent, item, and team-composition performance for this ranked map.",
   "maps.itemDescription": "Map-specific item purchase performance grouped by item class.",
   "maps.compositionDescription": "Five-player team compositions recorded on this map, ordered by match count.",
-  "maps.noCompositions": "No complete team compositions are available for this map."
+  "maps.noCompositions": "No complete team compositions are available for this map.",
+  "compositions.title": "Team Composition Stats",
+  "compositions.description": "Ranked five-player team compositions, ordered Frontline · Damage · Flank · Support.",
+  "compositions.summary.total": "Compositions",
+  "compositions.summary.mostCommon": "Most common",
+  "compositions.summary.trackedMatches": "Tracked matches",
+  "compositions.summary.bestSampledWinRate": "Best sampled win rate"
 }

@@ -57,7 +57,7 @@ export default function ItemDetailPage() {
     }
     Promise.all([
       fetchItemDetail(itemId, "ranked", selectedRole ? { role: selectedRole } : undefined),
-      fetchItems({ mode: "ranked", limit: 200, role: selectedRole ?? undefined }),
+      fetchItems({ mode: "ranked", limit: 200, role: selectedRole ?? undefined, summary: selectedRole != null }),
     ]).then(([nextDetail, nextItems]) => {
       if (!active) return;
       setDetail(nextDetail);

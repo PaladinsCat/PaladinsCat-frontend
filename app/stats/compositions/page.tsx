@@ -67,16 +67,16 @@ export default function CompositionStatsPage() {
     <div className="mx-auto max-w-6xl space-y-6">
       <div>
         <Link href="/matches" className="mb-2 inline-block text-xs text-pc-accent hover:underline">{t("nav.matches")}</Link>
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.stats.compositionStats")}</h1>
-        <p className="mt-1 text-sm text-pc-text-secondary">{t("generated.stats.rankedFivePlayerTeamCompositionsTheOrderIsFrontlineDamage")}</p>
+        <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("compositions.title")}</h1>
+        <p className="mt-1 text-sm text-pc-text-secondary">{t("compositions.description")}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {[
-          [t("generated.stats.compositions.page.compositions"), formatNumber(rows.length)],
-          [t("generated.stats.compositions.page.mostcommon"), rows[0]?.composition ?? "—"],
-          [t("generated.stats.compositions.page.trackedmatches"), formatNumber(rows.reduce((sum, row) => sum + row.totalMatches, 0))],
-          [t("generated.stats.compositions.page.bestsampledwr"), rows.length ? formatPercent(Math.max(...rows.filter((row) => row.totalMatches >= 20).map((row) => row.winRate), 0)) : "—"],
+          [t("compositions.summary.total"), formatNumber(rows.length)],
+          [t("compositions.summary.mostCommon"), rows[0]?.composition ?? "—"],
+          [t("compositions.summary.trackedMatches"), formatNumber(rows.reduce((sum, row) => sum + row.totalMatches, 0))],
+          [t("compositions.summary.bestSampledWinRate"), rows.length ? formatPercent(Math.max(...rows.filter((row) => row.totalMatches >= 20).map((row) => row.winRate), 0)) : "—"],
         ].map(([label, value]) => <div key={label} className="rounded-xl border border-pc-border bg-pc-bg-elevated p-4"><div className="text-xs uppercase tracking-wider text-pc-text-muted">{label}</div><div className="mt-1 truncate text-lg font-bold text-pc-text">{value}</div></div>)}
       </div>
 

@@ -1,12 +1,5 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api";
 
-export interface OperationsDailyPoint {
-  date: string;
-  visitors: number;
-  pageViews: number;
-  matches: number;
-}
-
 export interface PublicOperationsStats {
   generatedAt: string;
   release: { version: string; gitCommitShort: string; deployedAt: string | null };
@@ -18,7 +11,6 @@ export interface PublicOperationsStats {
     viewsToday: number;
     visitorDays7d: number;
     views7d: number;
-    daily: OperationsDailyPoint[];
   };
   catalog: {
     matches: number;
@@ -26,12 +18,18 @@ export interface PublicOperationsStats {
     casualMatches: number;
     players: number;
     registeredUsers: number;
+    verifiedUsers: number;
     communityBuilds: number;
     tierLists: number;
     communityPosts: number;
     recoveredMatches: number;
     incompleteMatches: number;
     latestMatchAt: string | null;
+  };
+  ingestCoverage: {
+    totalMatches: number;
+    directMatches: number;
+    recoveredMatches: number;
   };
 }
 
@@ -56,12 +54,6 @@ export async function fetchPublicOperationsStats(): Promise<PublicOperationsStat
       viewsToday: Number(summary.views_today ?? 0),
       visitorDays7d: Number(summary.visitor_days_7d ?? 0),
       views7d: Number(summary.views_7d ?? 0),
-      daily: Array.isArray(raw.traffic?.daily) ? raw.traffic.daily.map((point: any) => ({
-        date: String(point.date),
-        visitors: Number(point.visitors ?? 0),
-        pageViews: Number(point.page_views ?? 0),
-        matches: Number(point.matches ?? 0),
-      })) : [],
     },
     catalog: {
       matches: Number(catalog.matches ?? 0),
@@ -69,12 +61,18 @@ export async function fetchPublicOperationsStats(): Promise<PublicOperationsStat
       casualMatches: Number(catalog.casual_matches ?? 0),
       players: Number(catalog.players ?? 0),
       registeredUsers: Number(catalog.registered_users ?? 0),
+      verifiedUsers: Number(catalog.verified_users ?? 0),
       communityBuilds: Number(catalog.community_builds ?? 0),
       tierLists: Number(catalog.tier_lists ?? 0),
       communityPosts: Number(catalog.community_posts ?? 0),
       recoveredMatches: Number(catalog.recovered_matches ?? 0),
       incompleteMatches: Number(catalog.incomplete_matches ?? 0),
       latestMatchAt: catalog.latest_match_at == null ? null : String(catalog.latest_match_at),
+    },
+    ingestCoverage: {
+      totalMatches: Number(raw.ingest_coverage?.total_matches ?? 0),
+      directMatches: Number(raw.ingest_coverage?.direct_matches ?? 0),
+      recoveredMatches: Number(raw.ingest_coverage?.recovered_matches ?? 0),
     },
   };
 }
