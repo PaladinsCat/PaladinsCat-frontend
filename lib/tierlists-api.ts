@@ -74,7 +74,7 @@ export async function fetchTierLists(limit = 30): Promise<TierListSummary[]> {
 }
 
 export async function fetchTierList(postId: number): Promise<TierListSummary> {
-  return mapTierList(await requestJson<RawTierList>(`/tierlists/${postId}`));
+  return mapTierList(await requestJson<RawTierList>(`/tierlists/${postId}`, { cache: "no-store" }));
 }
 
 export async function createTierList(input: {
@@ -85,6 +85,19 @@ export async function createTierList(input: {
 }): Promise<{ postId: number }> {
   return requestJson<{ postId: number }>("/tierlists", {
     method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${input.token}` },
+    body: JSON.stringify({ title: input.title, description: input.description, entries: input.entries }),
+  });
+}
+
+export async function updateTierList(postId: number, input: {
+  title: string;
+  description: string;
+  entries: Array<{ championId: number; tier: TierName; position: number }>;
+  token: string;
+}): Promise<{ postId: number }> {
+  return requestJson<{ postId: number }>(`/tierlists/${postId}`, {
+    method: "PUT",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${input.token}` },
     body: JSON.stringify({ title: input.title, description: input.description, entries: input.entries }),
   });
