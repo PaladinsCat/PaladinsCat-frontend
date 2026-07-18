@@ -101,7 +101,6 @@
   "operations.visitors": "Visitors",
   "operations.pageViews": "Page views",
   "operations.newMatches": "New matches",
-  "operations.publicContract": "This page exposes aggregate public metrics only. API keys, quotas, worker queues, and other operational controls remain private.",
   "operations.chartTooltip": "{date}: {visitors} visitors, {matches} matches",
   "account.lobbyTier.all.description": "Include every ranked lobby tier.",
   "account.lobbyTier.all.label": "All ranked lobbies",

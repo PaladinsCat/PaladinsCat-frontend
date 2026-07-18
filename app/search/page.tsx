@@ -234,26 +234,22 @@ function ResultIcon({ result }: { result: UniversalSearchResult }) {
 function remoteLookupNotice(target: UniversalSearchRemoteTarget, remote: UniversalSearchResponse["remote"]) {
   if (!remote) return null;
   if (remote.skipped) {
-    return target === "match-id" && remote.reason === "match already exists locally"
-      ? null
-      : remote.reason || "Lookup skipped.";
+    return null;
   }
   if (remote.status === "hit") {
     if (target === "match-id") {
-      return remote.cacheHit ? "Served from recent match lookup cache." : "Match fetched and stored.";
+      return "Match found.";
     }
-    return remote.cacheHit ? "Served from recent lookup cache." : "Hi-Rez lookup found a result.";
+    return "Result found.";
   }
   if (remote.status === "miss") {
     if (target === "match-id") {
-      return remote.cacheHit
-        ? "Recent match lookup returned no match data. You can try lookup again."
-        : "Hi-Rez returned no match data for this ID.";
+      return "No match found for this ID.";
     }
-    return remote.cacheHit ? "Recent Hi-Rez lookup already found no result." : "Hi-Rez returned no result.";
+    return "No result found.";
   }
   if (remote.status === "error") {
-    return remote.error || "Hi-Rez lookup failed.";
+    return "Search is temporarily unavailable.";
   }
   return null;
 }
