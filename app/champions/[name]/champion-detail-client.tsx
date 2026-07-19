@@ -19,6 +19,7 @@ import {
   type ChampionTalent,
 } from "@/lib/champion-data";
 import {
+  normalizeChampionTalentStatsResponse,
   type ChampionTalentStatsResponse,
   type ChampionTalentStat,
   type ItemStat,
@@ -37,14 +38,14 @@ import { useLocalization } from "@/lib/localization-context";
 // the same backend and serves the Redis-backed page bundle.
 const CHAMPION_DATA_BASE = "/_pc";
 const CHAMPION_METRICS = [
-  { key: "dpm", labelKey: "common.metrics.damagePerMinute", colorClass: "text-red-400", accent: "#f87171" },
-  { key: "wpm", labelKey: "common.metrics.weaponPerMinute", colorClass: "text-orange-400", accent: "#fb923c" },
-  { key: "apm", labelKey: "common.metrics.abilityPerMinute", colorClass: "text-fuchsia-400", accent: "#e879f9" },
-  { key: "gpm", labelKey: "common.metrics.creditsPerMinute", colorClass: "text-yellow-400", accent: "#facc15" },
-  { key: "hpm", labelKey: "common.metrics.healingPerMinute", colorClass: "text-emerald-400", accent: "#34d399" },
-  { key: "mpm", labelKey: "common.metrics.shieldingPerMinute", colorClass: "text-blue-400", accent: "#60a5fa" },
-  { key: "kda", labelKey: "common.metrics.kda", colorClass: "text-violet-400", accent: "#a78bfa" },
-] as const satisfies ReadonlyArray<{ key: PerformanceMetricKey; labelKey: string; colorClass: string; accent: string }>;
+  { key: "dpm", labelKey: "common.metrics.damagePerMinute", shortLabelKey: "common.metrics.dpm", colorClass: "text-red-400" },
+  { key: "wpm", labelKey: "common.metrics.weaponPerMinute", shortLabelKey: "common.metrics.wpm", colorClass: "text-orange-400" },
+  { key: "apm", labelKey: "common.metrics.abilityPerMinute", shortLabelKey: "common.metrics.apm", colorClass: "text-fuchsia-400" },
+  { key: "gpm", labelKey: "common.metrics.creditsPerMinute", shortLabelKey: "common.metrics.cpm", colorClass: "text-yellow-400" },
+  { key: "hpm", labelKey: "common.metrics.healingPerMinute", shortLabelKey: "common.metrics.hpm", colorClass: "text-emerald-400" },
+  { key: "mpm", labelKey: "common.metrics.shieldingPerMinute", shortLabelKey: "common.metrics.spm", colorClass: "text-blue-400" },
+  { key: "kda", labelKey: "common.metrics.kda", shortLabelKey: "common.metrics.kda", colorClass: "text-violet-400" },
+] as const satisfies ReadonlyArray<{ key: PerformanceMetricKey; labelKey: string; shortLabelKey: string; colorClass: string }>;
 
 const ITEM_CATEGORY_BY_NAME: Record<string, string> = {
   "Blast Shields": "Defense", Guardian: "Defense", Haven: "Defense", Illuminate: "Defense", Resilience: "Defense", Sentinel: "Defense",
@@ -100,17 +101,28 @@ const ROLE_ICONS: Record<string, string> = {
   Support: "/images/icons/Class_Support_Icon.avif",
 };
 
-function RankedSummaryCard({ stats }: { stats: ChampionStats }) {
+function RankedPerformanceCard({
+  stats,
+  championPerformance,
+  globalPerformance,
+}: {
+  stats: ChampionStats;
+  championPerformance: Partial<Record<PerformanceMetricKey, ChampionPerformanceDistribution>>;
+  globalPerformance: PerformanceMetricsResponse;
+}) {
   const { t, formatNumber, formatPercent } = useLocalization();
   const tier = stats.avgRating == null ? null : Math.round(stats.avgRating);
   const effective = tier == null ? null : resolveEffectiveTier(tier, 0);
   const iconPath = tier == null ? null : getRankIconPath(tier, 0);
   const color = effective == null ? "text-pc-text" : getTierColor(effective.displayTier);
+  const totalLosses = stats.totalPlays == null || stats.totalWins == null
+    ? null
+    : Math.max(stats.totalPlays - stats.totalWins, 0);
 
   return (
-    <div className="pc-surface-light rounded-lg border border-pc-border p-3">
-      <div className="grid grid-cols-2 gap-x-3 gap-y-4 sm:grid-cols-4 sm:divide-x sm:divide-pc-border">
-        <div className="min-w-0 text-center sm:px-3 sm:first:pl-0">
+    <div>
+      <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,3fr)]">
+        <div className="min-w-0 text-center sm:border-r sm:border-pc-border sm:pr-4">
           <div className="mb-1 text-xs text-pc-text-muted">{t("generated.champions.avgTier")}</div>
           {effective && iconPath ? (
             <div className="flex items-center justify-center gap-2">
@@ -122,19 +134,35 @@ function RankedSummaryCard({ stats }: { stats: ChampionStats }) {
             </div>
           ) : <div className="font-mono text-lg text-pc-text">—</div>}
         </div>
-        <SummaryMetric label={t("common.sort.winRate")} value={stats.avgWinRate == null ? "—" : formatPercent(stats.avgWinRate)} accent />
-        <SummaryMetric label={t("common.sort.plays")} value={stats.totalPlays == null ? "—" : formatNumber(stats.totalPlays)} />
-        <SummaryMetric label={t("generated.players.wins")} value={stats.totalWins == null ? "—" : formatNumber(stats.totalWins)} />
+        <div className="flex min-h-14 flex-wrap items-center justify-center gap-x-4 gap-y-2 px-2 py-2 sm:flex-nowrap sm:gap-x-5">
+          <div className="flex items-baseline gap-2">
+            <span className="font-mono text-lg text-pc-accent">{stats.avgWinRate == null ? "—" : formatPercent(stats.avgWinRate)}</span>
+            <span className="text-xs text-pc-text-muted">{t("common.sort.winRate")}</span>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className="font-mono text-lg text-pc-text">{stats.totalWins == null ? "—" : formatNumber(stats.totalWins)}</span>
+            <span className="text-xs text-pc-text-muted">{t("generated.players.wins")}</span>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className="font-mono text-lg text-pc-text">{totalLosses == null ? "—" : formatNumber(totalLosses)}</span>
+            <span className="text-xs text-pc-text-muted">{t("generated.players.losses")}</span>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className="font-mono text-lg text-pc-text">{stats.totalPlays == null ? "—" : formatNumber(stats.totalPlays)}</span>
+            <span className="text-xs text-pc-text-muted">{t("common.sort.totalPlays")}</span>
+          </div>
+        </div>
       </div>
-    </div>
-  );
-}
-
-function SummaryMetric({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
-  return (
-    <div className="flex min-h-12 min-w-0 flex-col justify-center text-center sm:px-3">
-      <div className="mb-1 text-xs text-pc-text-muted">{label}</div>
-      <div className={`font-mono text-lg ${accent ? "text-pc-accent" : "text-pc-text"}`}>{value}</div>
+      <div className="mt-4 grid grid-cols-2 border-t border-pc-border pt-4 sm:grid-cols-4 lg:grid-cols-7 lg:divide-x lg:divide-pc-border">
+        {CHAMPION_METRICS.map((metric) => (
+          <ChampionMetricCell
+            key={metric.key}
+            metric={metric}
+            champion={championPerformance[metric.key]}
+            global={globalPerformance[metric.key]}
+          />
+        ))}
+      </div>
     </div>
   );
 }
@@ -203,7 +231,7 @@ export default function ChampionDetailPage() {
         totalMatches: s.total_matches != null ? Number(s.total_matches) : null,
         totalWins: s.wins != null ? Number(s.wins) : null,
       } : null);
-      setTalentStats(data.talentStats);
+      setTalentStats(data.talentStats ? normalizeChampionTalentStatsResponse(data.talentStats) : null);
       setChampionItems(data.items);
       setChampionMaps(data.maps);
       setGlobalPerformance(data.performance);
@@ -316,28 +344,14 @@ export default function ChampionDetailPage() {
           {/* Compact ranked summary leads the analysis column. */}
           <section className="space-y-2">
             <h2 className="pc-card-title shadow-sm">{t("generated.champions.rankedPerformance")}</h2>
-            <div className="pc-card space-y-5 p-4">
-              {stats && <RankedSummaryCard stats={stats} />}
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                {CHAMPION_METRICS.slice(0, 3).map((metric) => (
-                  <ChampionMetricCard
-                    key={metric.key}
-                    metric={metric}
-                    champion={championPerformance[metric.key]}
-                    global={globalPerformance[metric.key]}
-                  />
-                ))}
-              </div>
-              <div className="grid grid-cols-1 gap-3 border-t border-pc-border pt-5 sm:grid-cols-2">
-                {CHAMPION_METRICS.slice(3).map((metric) => (
-                  <ChampionMetricCard
-                    key={metric.key}
-                    metric={metric}
-                    champion={championPerformance[metric.key]}
-                    global={globalPerformance[metric.key]}
-                  />
-                ))}
-              </div>
+            <div className="pc-card p-4">
+              {stats && (
+                <RankedPerformanceCard
+                  stats={stats}
+                  championPerformance={championPerformance}
+                  globalPerformance={globalPerformance}
+                />
+              )}
             </div>
           </section>
 
@@ -535,7 +549,7 @@ export default function ChampionDetailPage() {
   );
 }
 
-function ChampionMetricCard({
+function ChampionMetricCell({
   metric,
   champion,
   global,
@@ -545,11 +559,6 @@ function ChampionMetricCard({
   global?: PerformanceMetricSummary;
 }) {
   const { t , formatNumber, formatPercent} = useLocalization();
-  const formatSignedMetric = (value: number, decimal: boolean) => formatNumber(value, {
-    signDisplay: "always",
-    minimumFractionDigits: decimal ? 1 : 0,
-    maximumFractionDigits: decimal ? 1 : 0,
-  });
   const isDecimal = metric.key === "kda";
   const formatMetric = (value: number | null | undefined) => {
     const numeric = Number(value ?? 0);
@@ -557,46 +566,20 @@ function ChampionMetricCard({
   };
   const championMean = champion?.avgValue ?? champion?.mean ?? 0;
   const globalMean = global?.mean ?? 0;
-  const delta = championMean - globalMean;
-  const deltaPct = globalMean !== 0 ? (delta / globalMean) * 100 : 0;
+  const deltaPct = globalMean !== 0 ? ((championMean - globalMean) / globalMean) * 100 : 0;
   const p10 = champion?.p10 && champion.p10 > 0 ? champion.p10 : champion?.min ?? 0;
   const p90 = champion?.p90 && champion.p90 > 0 ? champion.p90 : champion?.max ?? 0;
-  const rangeMax = Math.max(p90, championMean, globalMean, 1);
-  const meanPct = Math.max(0, Math.min(100, (championMean / rangeMax) * 100));
-  const globalPct = Math.max(0, Math.min(100, (globalMean / rangeMax) * 100));
-  const deltaClass = delta >= 0 ? "text-emerald-400" : "text-rose-400";
+  const deltaClass = deltaPct >= 0 ? "text-emerald-400" : "text-rose-400";
 
   return (
-    <div className="pc-surface-light min-w-0 rounded-lg border border-pc-border p-2.5">
-      <div className="mb-2 flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <div className="text-xs text-pc-text-muted uppercase tracking-wider">{t(metric.labelKey)}</div>
-          <div className={`text-lg font-bold ${metric.colorClass}`}>{formatMetric(championMean)}</div>
-        </div>
-        <div className="text-right text-xs text-pc-text-muted shrink min-w-0 overflow-hidden">
-          <div className="truncate">{t("generated.champions.matches")}</div>
-          <div className="text-pc-text-secondary font-mono overflow-wrap break-all">{formatNumber((champion?.totalMatches ?? 0))}</div>
-        </div>
-      </div>
-
-      <div className="mb-2 grid grid-cols-2 gap-3 text-xs">
-        <div>
-          <div className="text-pc-text-muted uppercase tracking-wider">{t("generated.champions.p10")}</div>
-          <div className="text-pc-text-secondary font-mono">{formatMetric(p10)}</div>
-        </div>
-        <div>
-          <div className="text-pc-text-muted uppercase tracking-wider">{t("generated.champions.p90")}</div>
-          <div className="text-pc-text-secondary font-mono">{formatMetric(p90)}</div>
-        </div>
-      </div>
-
-      <div className="relative h-2 rounded-full bg-pc-bg overflow-hidden mb-2">
-        <div className="absolute inset-y-0 left-0 rounded-full opacity-60" style={{ width: `${meanPct}%`, backgroundColor: metric.accent }} />
-        <div className="absolute top-1/2 h-4 w-0.5 -translate-y-1/2 bg-pc-text-muted" style={{ left: `${globalPct}%` }} />
-      </div>
-      <div className="flex items-center justify-between gap-2 text-xs">
-        <span className="text-pc-text-muted">{t("generated.champions.global")}{" "}{formatMetric(globalMean)}</span>
-        <span className={deltaClass}>{formatSignedMetric(delta, isDecimal)} ({formatPercent(deltaPct, { signDisplay: "always", minimumFractionDigits: 1, maximumFractionDigits: 1 })})</span>
+    <div className="min-w-0 px-2 py-1 text-center" title={t(metric.labelKey)}>
+      <div className="text-xs uppercase tracking-wider text-pc-text-muted">{t(metric.shortLabelKey)}</div>
+      <div className={`text-lg font-bold ${metric.colorClass}`}>{formatMetric(championMean)}</div>
+      <div className="mt-1 text-xs text-pc-text-muted">{t("performance.p10p90")}</div>
+      <div className="whitespace-nowrap font-mono text-xs text-pc-text-secondary">{formatMetric(p10)}–{formatMetric(p90)}</div>
+      <div className="mt-1 flex flex-wrap items-center justify-center gap-x-1 text-xs">
+        <span className="text-pc-text-muted">{t("generated.champions.global")} {formatMetric(globalMean)}</span>
+        <span className={deltaClass}>{formatPercent(deltaPct, { signDisplay: "always", minimumFractionDigits: 1, maximumFractionDigits: 1 })}</span>
       </div>
     </div>
   );

@@ -12,6 +12,8 @@ import {
   fetchChampionCardStats,
   fetchChampions,
   fetchChampionTalentStats,
+  normalizeChampionCardStatsResponse,
+  normalizeChampionTalentStatsResponse,
   type ChampionCardStatsResponse,
   type ChampionTalentStat,
 } from "@/lib/api-client";
@@ -70,7 +72,20 @@ export default function ChampionTalentDetailPage() {
     );
     const loadTalentPage = async (): Promise<ChampionTalentPagePayload> => {
       const response = await fetch(`${CHAMPION_DATA_BASE}${talentPageUrl}`, { signal: controller.signal });
-      if (response.ok) return response.json() as Promise<ChampionTalentPagePayload>;
+      if (response.ok) {
+        const raw = await response.json() as any;
+        const talentStats = normalizeChampionTalentStatsResponse({
+          totalMatches: raw.totalMatches,
+          talents: [raw.talentStat],
+        });
+        return {
+          championId: Number(raw.championId),
+          talentId: Number(raw.talentId),
+          totalMatches: talentStats.totalMatches,
+          talentStat: talentStats.talents[0],
+          cardStats: normalizeChampionCardStatsResponse(raw.cardStats),
+        };
+      }
       if (response.status !== 404) throw new Error(t("generated.champions.talentPageDataIsUnavailable"));
 
       // Deployment compatibility: an updated frontend may briefly reach an

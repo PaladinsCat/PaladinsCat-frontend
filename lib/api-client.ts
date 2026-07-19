@@ -2759,6 +2759,26 @@ export interface ChampionTalentStatsResponse {
   talents: ChampionTalentStat[];
 }
 
+export function normalizeChampionTalentStatsResponse(raw: any): ChampionTalentStatsResponse {
+  return {
+    totalMatches: numberOrNull(raw?.totalMatches) ?? 0,
+    talentCoveredMatches: numberOrNull(raw?.talentCoveredMatches) ?? 0,
+    disconnectedPlayers: numberOrNull(raw?.disconnectedPlayers) ?? 0,
+    disconnectedWins: numberOrNull(raw?.disconnectedWins) ?? 0,
+    disconnectedLosses: numberOrNull(raw?.disconnectedLosses) ?? 0,
+    disconnectedWinRate: toDisplayPercent(raw?.disconnectedWinRate),
+    talentCoverageRate: toDisplayPercent(raw?.talentCoverageRate),
+    talents: (Array.isArray(raw?.talents) ? raw.talents : []).map((talent: any) => ({
+      talentId: numberOrNull(talent?.talentId) ?? 0,
+      talentName: String(talent?.talentName ?? 'Unknown'),
+      totalPlays: numberOrNull(talent?.totalPlays) ?? 0,
+      wins: numberOrNull(talent?.wins) ?? 0,
+      losses: numberOrNull(talent?.losses) ?? 0,
+      winRate: toDisplayPercent(talent?.winRate) ?? 0,
+    })),
+  };
+}
+
 export async function fetchChampionTalentStats(
   championId: number,
   mode: 'ranked' = 'ranked',
@@ -2786,23 +2806,7 @@ export async function fetchChampionTalentStats(
       }>;
     }>(`/stats/talents/${championId}?${query.toString()}`);
 
-    return {
-      totalMatches: Number(raw.totalMatches) ?? 0,
-      talentCoveredMatches: Number(raw.talentCoveredMatches ?? 0),
-      disconnectedPlayers: Number(raw.disconnectedPlayers ?? 0),
-      disconnectedWins: Number(raw.disconnectedWins ?? 0),
-      disconnectedLosses: Number(raw.disconnectedLosses ?? 0),
-      disconnectedWinRate: raw.disconnectedWinRate == null ? null : Number(raw.disconnectedWinRate),
-      talentCoverageRate: raw.talentCoverageRate == null ? null : Number(raw.talentCoverageRate),
-      talents: (raw.talents ?? []).map((t) => ({
-        talentId: Number(t.talentId) ?? 0,
-        talentName: t.talentName ?? 'Unknown',
-        totalPlays: Number(t.totalPlays) ?? 0,
-        wins: Number(t.wins) ?? 0,
-        losses: Number(t.losses) ?? 0,
-        winRate: toDisplayPercent(t.winRate) ?? 0,
-      })),
-    };
+    return normalizeChampionTalentStatsResponse(raw);
   } catch {
     return { totalMatches: 0, talentCoveredMatches: 0, disconnectedPlayers: 0, disconnectedWins: 0, disconnectedLosses: 0, disconnectedWinRate: null, talentCoverageRate: null, talents: [] };
   }
@@ -2836,6 +2840,36 @@ function statNameKeyForCards(value: string | null | undefined): string {
     .normalize('NFKD')
     .toLowerCase()
     .replace(/[^a-z0-9]/g, '');
+}
+
+export function normalizeChampionCardStatsResponse(raw: any): ChampionCardStatsResponse {
+  const mappedCards = (Array.isArray(raw?.cards) ? raw.cards : []).map((card: any) => ({
+    cardId: numberOrNull(card?.cardId) ?? 0,
+    cardName: String(card?.cardName ?? 'Unknown'),
+    totalPlays: numberOrNull(card?.totalPlays) ?? 0,
+    wins: numberOrNull(card?.wins) ?? 0,
+    losses: numberOrNull(card?.losses) ?? 0,
+    winRate: toDisplayPercent(card?.winRate) ?? 0,
+    levels: (Array.isArray(card?.levels) ? card.levels : []).map((level: any) => ({
+      level: numberOrNull(level?.level) ?? 0,
+      plays: numberOrNull(level?.plays) ?? 0,
+      winRate: toDisplayPercent(level?.winRate) ?? 0,
+    })),
+  }));
+  const dedupedByName = new Map<string, ChampionCardStat>();
+  for (const card of mappedCards) {
+    const key = statNameKeyForCards(card.cardName);
+    const existing = dedupedByName.get(key);
+    if (!existing || card.totalPlays > existing.totalPlays) dedupedByName.set(key, card);
+  }
+
+  return {
+    totalMatches: numberOrNull(raw?.totalMatches) ?? 0,
+    cards: Array.from(dedupedByName.values()).sort((a, b) => {
+      const playsDelta = b.totalPlays - a.totalPlays;
+      return playsDelta !== 0 ? playsDelta : a.cardName.localeCompare(b.cardName);
+    }),
+  };
 }
 export interface ChampionCardTalentStat {
   talentId: number;
@@ -2928,36 +2962,7 @@ export async function fetchChampionCardStats(
       }>;
     }>(`/stats/cards/${championId}?${query.toString()}`);
 
-    const mappedCards = (raw.cards ?? []).map((c) => ({
-      cardId: Number(c.cardId) ?? 0,
-      cardName: c.cardName ?? 'Unknown',
-      totalPlays: Number(c.totalPlays) ?? 0,
-      wins: Number(c.wins) ?? 0,
-      losses: Number(c.losses) ?? 0,
-      winRate: toDisplayPercent(c.winRate) ?? 0,
-      levels: (c.levels ?? []).map((l) => ({
-        level: Number(l.level) ?? 0,
-        plays: Number(l.plays) ?? 0,
-        winRate: toDisplayPercent(l.winRate) ?? 0,
-      })),
-    }));
-    const dedupedByName = new Map<string, ChampionCardStat>();
-    for (const card of mappedCards) {
-      const key = statNameKeyForCards(card.cardName);
-      const existing = dedupedByName.get(key);
-      if (!existing || card.totalPlays > existing.totalPlays) {
-        dedupedByName.set(key, card);
-      }
-    }
-
-    return {
-      totalMatches: Number(raw.totalMatches) ?? 0,
-      cards: Array.from(dedupedByName.values()).sort((a, b) => {
-        const playsDelta = b.totalPlays - a.totalPlays;
-        if (playsDelta !== 0) return playsDelta;
-        return a.cardName.localeCompare(b.cardName);
-      }),
-    };
+    return normalizeChampionCardStatsResponse(raw);
   } catch {
     return { totalMatches: 0, cards: [] };
   }
