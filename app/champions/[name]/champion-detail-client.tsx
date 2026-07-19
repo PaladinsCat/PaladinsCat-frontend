@@ -11,7 +11,7 @@ import SmartImage from "@/components/SmartImage";
 import CanonicalTalentImage from "@/components/canonical-talent-image";
 import { championSlug } from "@/lib/utils";
 import { getStatQuality } from "@/lib/stat-quality";
-import { mapImagePath } from "@/lib/map-images";
+import { matchMapImagePath } from "@/lib/map-images";
 import {
   getChampionData,
   type ChampionData,
@@ -484,12 +484,12 @@ export default function ChampionDetailPage() {
               return (
                 <Link
                   key={map.name}
-                  href={`/stats/maps/${encodeURIComponent(map.name)}`}
+                  href={`/game/maps/${encodeURIComponent(map.name)}`}
                   className="group overflow-hidden rounded-xl border bg-pc-bg-elevated transition-colors hover:border-pc-accent-mid"
                   style={{ borderColor: quality.borderColor }}
                 >
                   <div className="relative h-36 overflow-hidden bg-pc-bg">
-                    <SmartImage src={mapImagePath(map.name)} alt="" className="h-full w-full object-cover opacity-75 transition-transform duration-300 group-hover:scale-105" />
+                    <SmartImage src={matchMapImagePath(map.name)} alt="" className="h-full w-full object-cover opacity-75 transition-transform duration-300 group-hover:scale-105" />
                     <div className="absolute inset-0 bg-gradient-to-t from-pc-bg-elevated via-pc-bg-elevated/10 to-transparent" />
                     <h3 className="absolute bottom-3 left-4 right-4 truncate text-base font-bold text-pc-text group-hover:text-pc-accent">
                       {map.name.replace(/^Ranked\s+/, "")}
