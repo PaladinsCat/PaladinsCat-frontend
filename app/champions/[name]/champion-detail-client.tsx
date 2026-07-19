@@ -635,7 +635,7 @@ function SkillCard({ skill }: { skill: ChampionSkill }) {
           )}
         </div>
         {skill.description && (
-          <p className="text-xs text-pc-text-secondary leading-relaxed">{skill.description}</p>
+          <p className="text-xs text-pc-text-secondary leading-relaxed">{t(`champions.${championSlug(skill.name)}.skills.${skill.name.replace(/[^a-z0-9]/gi, '')}.description`, skill.description)}</p>
         )}
       </div>
     </div>
@@ -674,7 +674,7 @@ function TalentCard({
       <div className="flex-1 min-w-0">
         <div className="text-xs font-medium text-pc-accent mb-0.5">{talent.name}</div>
         {talent.description && (
-          <p className="text-xs text-pc-text-secondary leading-relaxed">{talent.description}</p>
+          <p className="text-xs text-pc-text-secondary leading-relaxed">{t(`champions.${championSlug(talent.name)}.talents.${talent.name.replace(/[^a-z0-9]/gi, '')}.description`, talent.description)}</p>
         )}
         {talent.category && (
           <div className="text-xs text-pc-text-muted mt-1">{t("generated.champions.linked")}{" "}{talent.category}</div>
