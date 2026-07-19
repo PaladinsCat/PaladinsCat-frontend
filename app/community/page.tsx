@@ -46,11 +46,19 @@ export default function CommunityPage() {
         <h1 className="text-2xl font-bold text-pc-accent sm:text-3xl">
           <ScrambleText text={t("generated.community.community")} speed={30} iterations={15} delayFromCenter={false} />
         </h1>
-        <Link
-          href="/community/create"
-          className="pc-touch-target inline-flex items-center px-4 py-2 bg-pc-accent hover:bg-pc-accent-secondary text-white font-semibold rounded-lg transition-colors text-sm"
-        >
-          {t("generated.community.newPost")}</Link>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href="/community/diminishing-returns"
+            className="pc-touch-target inline-flex items-center rounded-lg border border-pc-accent/40 bg-pc-accent/10 px-4 py-2 text-sm font-semibold text-pc-accent transition-colors hover:bg-pc-accent/20"
+          >
+            {t("diminishingReturns.navLabel")}
+          </Link>
+          <Link
+            href="/community/create"
+            className="pc-touch-target inline-flex items-center px-4 py-2 bg-pc-accent hover:bg-pc-accent-secondary text-white font-semibold rounded-lg transition-colors text-sm"
+          >
+            {t("generated.community.newPost")}</Link>
+        </div>
       </div>
 
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(17rem,1fr)]">

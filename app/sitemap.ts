@@ -59,6 +59,7 @@ const staticRoutes: Array<{
   { path: "/stats/maps", changeFrequency: "daily", priority: 0.7 },
   { path: "/builds", changeFrequency: "daily", priority: 0.8 },
   { path: "/community", changeFrequency: "daily", priority: 0.8 },
+  { path: "/community/diminishing-returns", changeFrequency: "weekly", priority: 0.8 },
   { path: "/tierlists", changeFrequency: "daily", priority: 0.8 },
   { path: "/blog", changeFrequency: "daily", priority: 0.8 },
   { path: "/changelog", changeFrequency: "daily", priority: 0.8 },

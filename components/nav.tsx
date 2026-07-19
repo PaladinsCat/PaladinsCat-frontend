@@ -63,6 +63,7 @@ export default function Nav() {
       title: t("nav.community"),
       links: [
         { href: "/community", label: t("nav.community") },
+        { href: "/community/diminishing-returns", label: t("diminishingReturns.navLabel") },
         { href: "/builds", label: t("nav.builds") },
         { href: "/tierlists", label: t("menu.tierLists") },
       ],

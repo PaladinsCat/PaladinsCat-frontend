@@ -8,6 +8,7 @@ import mapMessages from "./catalog/game/maps.json";
 import talentMessages from "./catalog/game/talents.json";
 import homeMessages from "./catalog/pages/home.json";
 import localizationMessages from "./catalog/pages/localization.json";
+import diminishingReturnsMessages from "./catalog/pages/diminishing-returns.json";
 import statusMessages from "./catalog/system/status.json";
 import generatedUiMessages from "./catalog/generated/ui.json";
 import seoMessages from "./catalog/seo/metadata.json";
@@ -23,6 +24,7 @@ export const EN_MESSAGES = {
   ...asyncMessages,
   ...homeMessages,
   ...localizationMessages,
+  ...diminishingReturnsMessages,
   ...statusMessages,
   ...talentMessages,
   ...itemMessages,
