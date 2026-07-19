@@ -208,7 +208,12 @@ export default function DiminishingReturnsPage() {
   }, [champion, t]);
 
   useEffect(() => {
-    if (!reference || !pendingLoadout || pendingLoadout.championId !== championId) return;
+    if (
+      !reference
+      || !pendingLoadout
+      || pendingLoadout.championId !== championId
+      || reference.championId !== championId
+    ) return;
     const cardIds = new Set(reference.cards.map((card) => card.id));
     const talentIds = new Set(reference.talents.map((talent) => talent.id));
     setSelectedCards(pendingLoadout.cardIds.slice(0, MAX_CARDS).flatMap((id, index) => (

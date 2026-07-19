@@ -31,6 +31,7 @@ export interface BuildTalentReference {
 }
 
 export interface BuildReferenceData {
+  championId: number;
   champion?: ChampionData;
   items: BuildItemReference[];
   cards: BuildCardReference[];
@@ -176,19 +177,24 @@ async function buildItems(): Promise<BuildItemReference[]> {
     fetchReferenceItems().catch(() => [] as RawItem[]),
     loadLocalItems(),
   ]);
-  const byName = new Map<string, RawItem>();
+  const dbByName = new Map<string, RawItem>();
   const localByName = new Map<string, RawItem>();
   for (const row of localItems) {
     localByName.set(normalizeName(nameOf(row, "item")), row);
   }
-  for (const row of [...localItems, ...(dbItems as RawItem[])]) {
-    byName.set(normalizeName(nameOf(row, "item")), row);
+  for (const row of dbItems as RawItem[]) {
+    dbByName.set(normalizeName(nameOf(row, "item")), row);
   }
 
   return CURRENT_ITEMS.map((item) => {
-    const row = byName.get(normalizeName(item.name));
-    const localRow = localByName.get(normalizeName(item.name));
-    const id = row ? idOf(row, "item") : item.fallbackId;
+    const key = normalizeName(item.name);
+    const dbRow = dbByName.get(key);
+    const localRow = localByName.get(key);
+    const row = dbRow ?? localRow;
+    // The bundled file contains historical item IDs. Use it for descriptions
+    // and images only; current IDs come from the database or the maintained
+    // fallback roster so removed/reused store entries cannot collide.
+    const id = dbRow ? idOf(dbRow, "item") : item.fallbackId;
     return {
       id: Number.isFinite(id) && id > 0 ? id : item.fallbackId,
       name: item.name,
@@ -272,7 +278,7 @@ export async function loadBuildReferenceData(championId: number, championSlug: s
     buildCards(championId, champion),
     buildTalents(championId, champion),
   ]);
-  return { champion, items, cards, talents };
+  return { championId, champion, items, cards, talents };
 }
 
 export function groupByCategory<T extends { category: string }>(rows: T[]): Array<[string, T[]]> {

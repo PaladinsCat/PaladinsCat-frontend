@@ -63,7 +63,7 @@ function getBuildReference(championId: number, championName: string) {
       ? Promise.resolve(cached)
       : loadBuildReferenceData(championId, championSlug(championName))
           .then((value) => writeBrowserResult(cacheKey, value, REFERENCE_CACHE_TTL_MS))
-          .catch(() => ({ items: [], cards: [], talents: [] }));
+          .catch(() => ({ championId, items: [], cards: [], talents: [] }));
     referenceByChampion.set(championId, promise);
   }
   return promise;
