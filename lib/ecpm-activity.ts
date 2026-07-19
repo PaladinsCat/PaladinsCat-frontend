@@ -2,17 +2,25 @@ export const ECPM_ACTIVITY_THRESHOLDS = {
   fullAfk: 40,
   partialAfk: 60,
   disconnected: 80,
+  engaged: 120,
 } as const;
 
-export type EcpmActivityLevel = "engaged" | "disconnected" | "partial-afk" | "full-afk";
+export type EcpmActivityLevel = "engaged" | "possible-disconnect" | "disconnected" | "partial-afk" | "full-afk";
 export type EcpmActivityLabelKey =
   | "generated.stats.egpm.engaged"
+  | "common.activity.possibleDisconnect"
   | "generated.stats.egpm.disconnected"
   | "generated.stats.egpm.partialAfk"
   | "generated.stats.egpm.fullAfk";
 
+export interface EcpmConfidenceBracket {
+  minimum: number;
+  maximum: number;
+}
+
 export function ecpmActivityLevel(value: number): EcpmActivityLevel {
-  if (value >= ECPM_ACTIVITY_THRESHOLDS.disconnected) return "engaged";
+  if (value >= ECPM_ACTIVITY_THRESHOLDS.engaged) return "engaged";
+  if (value >= ECPM_ACTIVITY_THRESHOLDS.disconnected) return "possible-disconnect";
   if (value >= ECPM_ACTIVITY_THRESHOLDS.partialAfk) return "disconnected";
   if (value >= ECPM_ACTIVITY_THRESHOLDS.fullAfk) return "partial-afk";
   return "full-afk";
@@ -22,6 +30,7 @@ export function ecpmActivityTextClass(value: number | null | undefined): string 
   if (value == null || !Number.isFinite(value)) return "text-pc-text-muted";
   switch (ecpmActivityLevel(value)) {
     case "engaged": return "text-emerald-400";
+    case "possible-disconnect": return "text-yellow-300";
     case "disconnected": return "text-yellow-400";
     case "partial-afk": return "text-orange-400";
     case "full-afk": return "text-red-400";
@@ -32,13 +41,30 @@ export function ecpmActivityLabelKey(value: number | null | undefined): EcpmActi
   if (value == null || !Number.isFinite(value)) return null;
   switch (ecpmActivityLevel(value)) {
     case "engaged": return "generated.stats.egpm.engaged";
+    case "possible-disconnect": return "common.activity.possibleDisconnect";
     case "disconnected": return "generated.stats.egpm.disconnected";
     case "partial-afk": return "generated.stats.egpm.partialAfk";
     case "full-afk": return "generated.stats.egpm.fullAfk";
   }
 }
 
+export function ecpmConfidenceBracket(value: number | null | undefined): EcpmConfidenceBracket | null {
+  if (value == null || !Number.isFinite(value)) return null;
+  switch (ecpmActivityLevel(value)) {
+    case "engaged": return { minimum: 0, maximum: 9 };
+    case "possible-disconnect": return { minimum: 10, maximum: 24 };
+    case "disconnected": return { minimum: 25, maximum: 49 };
+    case "partial-afk": return { minimum: 50, maximum: 74 };
+    case "full-afk": return { minimum: 75, maximum: 100 };
+  }
+}
+
+/** Conservative moderation policy: review 60–119 eCPM, auto-flag only below 60. */
+export function isAutomaticAfkFlag(value: number | null | undefined): boolean {
+  return value != null && Number.isFinite(value) && value < ECPM_ACTIVITY_THRESHOLDS.partialAfk;
+}
+
 export function ecpmActivityScaleMax(values: number[]): number {
-  const largest = Math.max(ECPM_ACTIVITY_THRESHOLDS.disconnected, ...values.filter(Number.isFinite));
-  return Math.max(120, Math.ceil(largest / 20) * 20);
+  const largest = Math.max(ECPM_ACTIVITY_THRESHOLDS.engaged, ...values.filter(Number.isFinite));
+  return Math.max(160, Math.ceil(largest / 20) * 20);
 }

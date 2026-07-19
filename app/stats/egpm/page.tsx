@@ -8,6 +8,11 @@ import { RouteSkeleton } from "@/components/route-skeleton";
 import { fetchBaselines, type BaselineEntry } from "@/lib/api-client";
 import { useLobbyTier } from "@/lib/lobby-tier-context";
 import { useLocalization } from "@/lib/localization-context";
+import {
+  ECPM_ACTIVITY_THRESHOLDS,
+  ecpmConfidenceBracket,
+  type EcpmActivityLabelKey,
+} from "@/lib/ecpm-activity";
 
 const ROLE_ORDER = ["Global", "Damage", "Flank", "Support", "Frontline"];
 const ROLE_COLORS: Record<string, string> = {
@@ -25,7 +30,7 @@ const SORT_OPTIONS = [
 ] as const;
 
 export default function EgpmDetailPage() {
-  const { t, formatNumber } = useLocalization();
+  const { t, formatNumber, formatPercent } = useLocalization();
   const format = (value: number) => formatNumber(value, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const { definition: lobbyTier, ready } = useLobbyTier();
   const [rows, setRows] = useState<BaselineEntry[]>([]);
@@ -97,13 +102,23 @@ export default function EgpmDetailPage() {
           </div>
           <div className="pc-card">
             <h2 className="pc-card-title">{t("generated.stats.afkSeverityThresholds")}</h2>
-            <div className="mt-3 grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
+            <div className="mt-3 grid grid-cols-2 gap-2 text-xs sm:grid-cols-3 xl:grid-cols-5">
               {([
-                ["generated.stats.egpm.engaged", "≥ 80", "text-emerald-400"], ["generated.stats.egpm.disconnected", "60–79", "text-yellow-400"],
-                ["generated.stats.egpm.partialAfk", "40–59", "text-orange-400"], ["generated.stats.egpm.fullAfk", "< 40", "text-red-400"],
-              ] as const).map(([labelKey, range, color]) => <div key={labelKey} className="rounded-lg border border-pc-border bg-pc-bg p-3"><div className={`font-semibold ${color}`}>{t(labelKey)}</div><div className="mt-1 font-mono text-pc-text-secondary">{range} {t("generated.stats.ecpm")}</div></div>)}
+                ["generated.stats.egpm.engaged", ECPM_ACTIVITY_THRESHOLDS.engaged, `≥ ${ECPM_ACTIVITY_THRESHOLDS.engaged}`, "text-emerald-400"],
+                ["common.activity.possibleDisconnect", 100, `${ECPM_ACTIVITY_THRESHOLDS.disconnected}–${ECPM_ACTIVITY_THRESHOLDS.engaged - 1}`, "text-yellow-300"],
+                ["generated.stats.egpm.disconnected", 70, `${ECPM_ACTIVITY_THRESHOLDS.partialAfk}–${ECPM_ACTIVITY_THRESHOLDS.disconnected - 1}`, "text-yellow-400"],
+                ["generated.stats.egpm.partialAfk", 50, `${ECPM_ACTIVITY_THRESHOLDS.fullAfk}–${ECPM_ACTIVITY_THRESHOLDS.partialAfk - 1}`, "text-orange-400"],
+                ["generated.stats.egpm.fullAfk", 20, `< ${ECPM_ACTIVITY_THRESHOLDS.fullAfk}`, "text-red-400"],
+              ] as const).map(([labelKey, sample, range, color]) => {
+                const bracket = ecpmConfidenceBracket(sample)!;
+                return <div key={labelKey} className="rounded-lg border border-pc-border bg-pc-bg p-3">
+                  <div className={`font-semibold ${color}`}>{t(labelKey as EcpmActivityLabelKey)}</div>
+                  <div className="mt-1 font-mono text-pc-text-secondary">{range} {t("generated.stats.ecpm")}</div>
+                  <div className="mt-1 font-mono text-pc-text-muted">{t("common.activity.confidenceBracket")}: {formatPercent(bracket.minimum)}–{formatPercent(bracket.maximum)}</div>
+                </div>;
+              })}
             </div>
-            <p className="mt-3 text-xs leading-relaxed text-pc-text-muted">{t("generated.stats.theseAreFixedDetectionThresholdsTheRoleAndGlobalPercentiles")}</p>
+            <p className="mt-3 text-xs leading-relaxed text-pc-text-muted">{t("common.activity.reviewPolicy")} {t("generated.stats.theseAreFixedDetectionThresholdsTheRoleAndGlobalPercentiles")}</p>
           </div>
         </section>
 

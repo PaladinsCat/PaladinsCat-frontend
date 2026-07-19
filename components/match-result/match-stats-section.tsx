@@ -7,7 +7,7 @@ import { championSlug } from "@/lib/utils";
 import { computeDamageStats } from "./format";
 import { MatchPlayerLink, matchPlayerKey } from "./player-identity";
 import { useLocalization } from "@/lib/localization-context";
-import { ecpmActivityLabelKey, ecpmActivityTextClass } from "@/lib/ecpm-activity";
+import { ecpmActivityLabelKey, ecpmActivityTextClass, ecpmConfidenceBracket } from "@/lib/ecpm-activity";
 
 interface MatchStatsSectionProps {
   team1Players: MatchPlayerDetail[];
@@ -42,13 +42,17 @@ function PlayerRow({
   wins: boolean;
   teamLabel: string;
 }) {
-  const { t, formatNumber } = useLocalization();
+  const { t, formatNumber, formatPercent } = useLocalization();
   const championHref = player.champion_name
     ? `/champions/${championSlug(player.champion_name)}`
     : undefined;
   const damageStats = computeDamageStats(player);
   const totalDamage = damageStats.totalDamage;
   const activityLabelKey = ecpmActivityLabelKey(player.egpm);
+  const confidenceBracket = ecpmConfidenceBracket(player.egpm);
+  const activityLabel = activityLabelKey && confidenceBracket
+    ? `${t(activityLabelKey)} · ${formatPercent(confidenceBracket.minimum)}–${formatPercent(confidenceBracket.maximum)}`
+    : "—";
 
   const icon = getChampionIconSafe(player.champion_name) || "/images/champions/Champion_Generic_Icon.avif";
 
@@ -137,7 +141,7 @@ function PlayerRow({
         {formatNumber(player.healing_self)}
       </td>
       <td className={`px-2 py-2 text-center text-xs font-semibold whitespace-nowrap ${ecpmActivityTextClass(player.egpm)}`}>
-        {activityLabelKey ? t(activityLabelKey) : "—"}
+        {activityLabel}
       </td>
 
     </tr>
@@ -147,11 +151,15 @@ function PlayerRow({
 /* ── Main section ── */
 
 function MobilePlayerCard({ player, wins }: { player: MatchPlayerDetail; wins: boolean }) {
-  const { t, formatNumber } = useLocalization();
+  const { t, formatNumber, formatPercent } = useLocalization();
   const damageStats = computeDamageStats(player);
   const damage = damageStats.totalDamage;
   const champion = player.champion_name || `Champion #${player.champion_id}`;
   const activityLabelKey = ecpmActivityLabelKey(player.egpm);
+  const confidenceBracket = ecpmConfidenceBracket(player.egpm);
+  const activityLabel = activityLabelKey && confidenceBracket
+    ? `${t(activityLabelKey)} · ${formatPercent(confidenceBracket.minimum)}–${formatPercent(confidenceBracket.maximum)}`
+    : "—";
   const activityClass = ecpmActivityTextClass(player.egpm);
   const metrics = [
     { label: t("generated.match.stats.credits"), value: formatNumber(player.gold_earned) },
@@ -171,7 +179,7 @@ function MobilePlayerCard({ player, wins }: { player: MatchPlayerDetail; wins: b
     { label: t("generated.match.stats.healing"), value: formatNumber(player.healing) },
     { label: t("common.metrics.hpm"), value: formatNumber(player.healing_per_minute, { minimumFractionDigits: 0, maximumFractionDigits: 0 }) },
     { label: t("generated.match.stats.self"), value: formatNumber(player.healing_self) },
-    { label: t("common.metrics.afk"), value: activityLabelKey ? t(activityLabelKey) : "—", className: activityClass },
+    { label: t("common.metrics.afk"), value: activityLabel, className: activityClass },
   ];
 
   return <article className={`border-b border-pc-border/60 p-3 last:border-b-0 ${wins ? "bg-emerald-400/[0.035]" : ""}`}>

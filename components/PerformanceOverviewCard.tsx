@@ -1,7 +1,12 @@
 "use client";
 
 import { useLocalization } from "@/lib/localization-context";
-import { ECPM_ACTIVITY_THRESHOLDS, ecpmActivityScaleMax } from "@/lib/ecpm-activity";
+import {
+  ECPM_ACTIVITY_THRESHOLDS,
+  ecpmActivityScaleMax,
+  ecpmConfidenceBracket,
+  type EcpmActivityLabelKey,
+} from "@/lib/ecpm-activity";
 
 interface MetricRow {
   key: string;
@@ -19,7 +24,7 @@ export function PerformanceOverviewCard({
 }: {
   metrics: MetricRow[];
 }) {
-  const { formatNumber } = useLocalization();
+  const { t, formatNumber, formatPercent } = useLocalization();
   const formatMetric = (key: string, value: number) => formatNumber(value, key === "kda"
     ? { minimumFractionDigits: 1, maximumFractionDigits: 1 }
     : { maximumFractionDigits: 0 });
@@ -31,8 +36,25 @@ export function PerformanceOverviewCard({
   const ecpmScaleMax = isEcpmDistribution
     ? ecpmActivityScaleMax(metrics.flatMap(({ p90, mean }) => [p90, mean]))
     : null;
+  const ecpmLegend = [
+    { value: 120, labelKey: "generated.stats.egpm.engaged" as EcpmActivityLabelKey, color: "bg-emerald-400" },
+    { value: 100, labelKey: "common.activity.possibleDisconnect" as EcpmActivityLabelKey, color: "bg-yellow-300" },
+    { value: 70, labelKey: "generated.stats.egpm.disconnected" as EcpmActivityLabelKey, color: "bg-yellow-400" },
+    { value: 50, labelKey: "generated.stats.egpm.partialAfk" as EcpmActivityLabelKey, color: "bg-orange-400" },
+    { value: 20, labelKey: "generated.stats.egpm.fullAfk" as EcpmActivityLabelKey, color: "bg-red-400" },
+  ];
   return (
     <div className="h-full bg-pc-bg-elevated border border-pc-border rounded-xl p-4">
+      {isEcpmDistribution && <div className="mb-3 flex flex-wrap gap-x-3 gap-y-1 border-b border-pc-border/50 pb-2">
+        {ecpmLegend.map(({ value, labelKey, color }) => {
+          const bracket = ecpmConfidenceBracket(value)!;
+          return <span key={labelKey} className="inline-flex items-center gap-1 text-xs text-pc-text-muted" title={t("common.activity.confidenceBracket")}>
+            <span className={`h-1.5 w-1.5 rounded-full ${color}`} />
+            <span>{t(labelKey)}</span>
+            <span className="font-mono text-pc-text-secondary">{formatPercent(bracket.minimum)}–{formatPercent(bracket.maximum)}</span>
+          </span>;
+        })}
+      </div>}
       <div className="space-y-2">
         {metrics.map(({ key, label, color, p10, p25, mean, p75, p90 }) => (
           <div key={key} className="flex items-center gap-3">
@@ -83,7 +105,7 @@ function RangeBar({
   p90: number;
   ecpmScaleMax: number | null;
 }) {
-  const { t } = useLocalization();
+  const { t, formatPercent } = useLocalization();
   const domainMin = ecpmScaleMax == null ? p10 : 0;
   const domainMax = ecpmScaleMax ?? p90;
   const range = Math.max(1, domainMax - domainMin);
@@ -94,10 +116,11 @@ function RangeBar({
   const p75Pct = toPct(p75);
   const p90Pct = toPct(p90);
   const activityBands = ecpmScaleMax == null ? [] : [
-    { start: 0, end: ECPM_ACTIVITY_THRESHOLDS.fullAfk, color: "rgba(248, 113, 113, 0.24)", label: t("generated.stats.egpm.fullAfk") },
-    { start: ECPM_ACTIVITY_THRESHOLDS.fullAfk, end: ECPM_ACTIVITY_THRESHOLDS.partialAfk, color: "rgba(251, 146, 60, 0.20)", label: t("generated.stats.egpm.partialAfk") },
-    { start: ECPM_ACTIVITY_THRESHOLDS.partialAfk, end: ECPM_ACTIVITY_THRESHOLDS.disconnected, color: "rgba(250, 204, 21, 0.16)", label: t("generated.stats.egpm.disconnected") },
-    { start: ECPM_ACTIVITY_THRESHOLDS.disconnected, end: ecpmScaleMax, color: "rgba(52, 211, 153, 0.08)", label: t("generated.stats.egpm.engaged") },
+    { start: 0, end: ECPM_ACTIVITY_THRESHOLDS.fullAfk, sample: 20, color: "rgba(248, 113, 113, 0.24)", label: t("generated.stats.egpm.fullAfk") },
+    { start: ECPM_ACTIVITY_THRESHOLDS.fullAfk, end: ECPM_ACTIVITY_THRESHOLDS.partialAfk, sample: 50, color: "rgba(251, 146, 60, 0.20)", label: t("generated.stats.egpm.partialAfk") },
+    { start: ECPM_ACTIVITY_THRESHOLDS.partialAfk, end: ECPM_ACTIVITY_THRESHOLDS.disconnected, sample: 70, color: "rgba(250, 204, 21, 0.18)", label: t("generated.stats.egpm.disconnected") },
+    { start: ECPM_ACTIVITY_THRESHOLDS.disconnected, end: ECPM_ACTIVITY_THRESHOLDS.engaged, sample: 100, color: "rgba(253, 224, 71, 0.12)", label: t("common.activity.possibleDisconnect") },
+    { start: ECPM_ACTIVITY_THRESHOLDS.engaged, end: ecpmScaleMax, sample: 120, color: "rgba(52, 211, 153, 0.08)", label: t("generated.stats.egpm.engaged") },
   ];
 
   return (
@@ -107,12 +130,16 @@ function RangeBar({
         {activityBands.map((band) => <div
           key={band.label}
           className="absolute inset-y-0"
-          title={band.label}
+          title={t("common.activity.confidenceValue", {
+            label: band.label,
+            minimum: formatPercent(ecpmConfidenceBracket(band.sample)!.minimum),
+            maximum: formatPercent(ecpmConfidenceBracket(band.sample)!.maximum),
+          })}
           style={{ left: `${toPct(band.start)}%`, width: `${toPct(band.end) - toPct(band.start)}%`, background: band.color }}
         />)}
       </div>
 
-      {ecpmScaleMax != null && [40, 60, 80].map((threshold) => <div
+      {ecpmScaleMax != null && [40, 60, 80, 120].map((threshold) => <div
         key={threshold}
         className="absolute inset-y-0 w-px bg-pc-text/25"
         style={{ left: `${toPct(threshold)}%` }}
