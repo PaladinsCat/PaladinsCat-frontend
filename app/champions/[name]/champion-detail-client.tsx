@@ -38,6 +38,8 @@ import { useLocalization } from "@/lib/localization-context";
 const CHAMPION_DATA_BASE = "/_pc";
 const CHAMPION_METRICS = [
   { key: "dpm", labelKey: "common.metrics.damagePerMinute", colorClass: "text-red-400", accent: "#f87171" },
+  { key: "wpm", labelKey: "common.metrics.weaponPerMinute", colorClass: "text-orange-400", accent: "#fb923c" },
+  { key: "apm", labelKey: "common.metrics.abilityPerMinute", colorClass: "text-fuchsia-400", accent: "#e879f9" },
   { key: "gpm", labelKey: "common.metrics.creditsPerMinute", colorClass: "text-yellow-400", accent: "#facc15" },
   { key: "hpm", labelKey: "common.metrics.healingPerMinute", colorClass: "text-emerald-400", accent: "#34d399" },
   { key: "mpm", labelKey: "common.metrics.shieldingPerMinute", colorClass: "text-blue-400", accent: "#60a5fa" },
@@ -312,7 +314,7 @@ export default function ChampionDetailPage() {
                   <StatCard label={t("generated.players.wins")} value={formatNum(stats.totalWins)} />
                 </div>
               )}
-              <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-5">
+              <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-7">
                 {CHAMPION_METRICS.map((metric) => (
                   <ChampionMetricCard
                     key={metric.key}

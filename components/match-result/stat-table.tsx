@@ -167,6 +167,14 @@ export default function StatTable({ player, fact, wins }: StatTableRowProps) {
                 <div className="text-sm font-medium text-pc-text">{formatNumber(player.damage_per_minute, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
+                <div className="text-xs text-pc-text-muted">{t("common.metrics.wpm")}</div>
+                <div className="text-sm font-medium text-pc-text">{damageStats.weaponPerMinute == null ? "—" : formatNumber(damageStats.weaponPerMinute, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
+              </div>
+              <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
+                <div className="text-xs text-pc-text-muted">{t("common.metrics.apm")}</div>
+                <div className="text-sm font-medium text-pc-text">{damageStats.abilityPerMinute == null ? "—" : formatNumber(damageStats.abilityPerMinute, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
+              </div>
+              <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
                 <div className="text-xs text-pc-text-muted">{t("generated.matches.kda")}</div>
                 <div className="text-sm font-medium text-pc-text">{formatNumber(player.kda, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
               </div>
@@ -198,7 +206,7 @@ export default function StatTable({ player, fact, wins }: StatTableRowProps) {
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
                 <div className="text-xs text-pc-text-muted">{t("generated.matches.weapon")}</div>
-                <div className="text-sm font-medium text-pc-text">{formatNumber(damageStats.weaponDamage)}</div>
+                <div className="text-sm font-medium text-pc-text">{damageStats.hasWeaponBreakdown ? formatNumber(damageStats.weaponDamage) : "—"}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
                 <div className="text-xs text-pc-text-muted">{t("generated.matches.ability")}</div>

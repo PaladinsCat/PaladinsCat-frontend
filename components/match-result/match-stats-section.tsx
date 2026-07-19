@@ -47,12 +47,6 @@ function PlayerRow({
     : undefined;
   const damageStats = computeDamageStats(player);
   const totalDamage = damageStats.totalDamage;
-  const weaponDamage = damageStats.weaponDamage;
-  const hasWeaponBreakdown =
-    player.source !== "recovered" || weaponDamage > 0 || totalDamage === 0;
-  const nonWeaponDamage = hasWeaponBreakdown
-    ? Math.max(totalDamage - weaponDamage, 0)
-    : null;
 
   const icon = getChampionIconSafe(player.champion_name) || "/images/champions/Champion_Generic_Icon.avif";
 
@@ -111,7 +105,16 @@ function PlayerRow({
         {formatNumber(player.damage_per_minute, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
       </td>
       <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
-        {hasWeaponBreakdown ? formatNumber(nonWeaponDamage) : "—"}
+        {damageStats.hasWeaponBreakdown ? formatNumber(damageStats.weaponDamage) : "—"}
+      </td>
+      <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
+        {damageStats.weaponPerMinute == null ? "—" : formatNumber(damageStats.weaponPerMinute, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+      </td>
+      <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
+        {damageStats.nonWeaponDamage == null ? "—" : formatNumber(damageStats.nonWeaponDamage)}
+      </td>
+      <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
+        {damageStats.abilityPerMinute == null ? "—" : formatNumber(damageStats.abilityPerMinute, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
       </td>
       <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
         {formatNumber(player.damage_taken)}
@@ -145,9 +148,6 @@ function MobilePlayerCard({ player, wins }: { player: MatchPlayerDetail; wins: b
   const { t, formatNumber, formatPercent } = useLocalization();
   const damageStats = computeDamageStats(player);
   const damage = damageStats.totalDamage;
-  const abilityDamage = player.source !== "recovered" || damageStats.weaponDamage > 0 || damage === 0
-    ? Math.max(damage - damageStats.weaponDamage, 0)
-    : null;
   const champion = player.champion_name || `Champion #${player.champion_id}`;
   const metrics = [
     [t("generated.match.stats.credits"), formatNumber(player.gold_earned)],
@@ -157,7 +157,10 @@ function MobilePlayerCard({ player, wins }: { player: MatchPlayerDetail; wins: b
     [t("generated.match.stats.obj"), formatNumber(player.objective_assists)],
     [t("generated.match.stats.damage"), formatNumber(damage)],
     [t("common.metrics.dpm"), formatNumber(player.damage_per_minute, { minimumFractionDigits: 0, maximumFractionDigits: 0 })],
-    [t("generated.match.stats.abil"), abilityDamage == null ? "—" : formatNumber(abilityDamage)],
+    [t("generated.matches.weapon"), damageStats.hasWeaponBreakdown ? formatNumber(damageStats.weaponDamage) : "—"],
+    [t("common.metrics.wpm"), damageStats.weaponPerMinute == null ? "—" : formatNumber(damageStats.weaponPerMinute, { minimumFractionDigits: 0, maximumFractionDigits: 0 })],
+    [t("generated.match.stats.abil"), damageStats.nonWeaponDamage == null ? "—" : formatNumber(damageStats.nonWeaponDamage)],
+    [t("common.metrics.apm"), damageStats.abilityPerMinute == null ? "—" : formatNumber(damageStats.abilityPerMinute, { minimumFractionDigits: 0, maximumFractionDigits: 0 })],
     [t("generated.match.stats.taken"), formatNumber(player.damage_taken)],
     [t("generated.match.stats.shielding"), formatNumber(player.damage_mitigated)],
     [t("common.metrics.spm"), formatNumber(player.mitigation_per_minute, { minimumFractionDigits: 0, maximumFractionDigits: 0 })],
@@ -193,7 +196,7 @@ export default function MatchStatsSection({
   const { t } = useLocalization();
   const statColumns = [
     t("generated.match.stats.player"), t("generated.match.stats.credits"), t("common.metrics.cpm"), t("common.metrics.ecpm"), t("common.metrics.kda"), t("generated.match.stats.obj"),
-    t("common.roles.damageShort"), t("common.metrics.dpm"), t("generated.match.stats.abil"), t("generated.match.stats.taken"), t("generated.match.stats.shielding"), t("common.metrics.spm"), t("generated.match.stats.healing"), t("common.metrics.hpm"), t("generated.match.stats.self"), t("common.metrics.afk"),
+    t("common.roles.damageShort"), t("common.metrics.dpm"), t("generated.matches.weapon"), t("common.metrics.wpm"), t("generated.match.stats.abil"), t("common.metrics.apm"), t("generated.match.stats.taken"), t("generated.match.stats.shielding"), t("common.metrics.spm"), t("generated.match.stats.healing"), t("common.metrics.hpm"), t("generated.match.stats.self"), t("common.metrics.afk"),
   ];
   return (
     <section className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">

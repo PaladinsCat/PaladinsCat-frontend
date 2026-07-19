@@ -413,7 +413,7 @@ export interface PerformanceMetricSummary {
   sampleSize: number;
 }
 
-export type PerformanceMetricKey = 'dpm' | 'hpm' | 'gpm' | 'egpm' | 'mpm' | 'kda';
+export type PerformanceMetricKey = 'dpm' | 'wpm' | 'apm' | 'hpm' | 'gpm' | 'egpm' | 'mpm' | 'kda';
 
 export type PerformanceMetricsResponse = Partial<Record<PerformanceMetricKey, PerformanceMetricSummary>>;
 

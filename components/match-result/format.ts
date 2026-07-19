@@ -26,8 +26,23 @@ export function computeDamageStats(p: MatchPlayerDetail) {
     hasWeaponBreakdown && totalDamage > 0
       ? (weaponDamage / totalDamage) * 100
       : null;
+  const minutes = p.time_in_match > 0 ? p.time_in_match / 60 : 0;
+  const weaponPerMinute = hasWeaponBreakdown && minutes > 0
+    ? weaponDamage / minutes
+    : null;
+  const abilityPerMinute = nonWeaponDamage != null && minutes > 0
+    ? nonWeaponDamage / minutes
+    : null;
 
-  return { totalDamage, weaponDamage, nonWeaponDamage, weaponShare };
+  return {
+    totalDamage,
+    weaponDamage,
+    nonWeaponDamage,
+    weaponShare,
+    weaponPerMinute,
+    abilityPerMinute,
+    hasWeaponBreakdown,
+  };
 }
 
 /* ── Player profile helpers ── */
