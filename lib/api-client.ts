@@ -4236,14 +4236,18 @@ export function deriveMissingMatchCreditRates(detail: MatchDetailWithBans): Matc
     ...detail,
     players: detail.players.map((player) => {
       const credits = Number(player.gold_earned ?? 0);
-      const seconds = Number(player.time_in_match ?? 0) > 0
-        ? Number(player.time_in_match)
-        : Number(detail.match.duration_seconds ?? 0);
+      const seconds = Number(detail.match.duration_seconds ?? 0);
       const storedCpm = Number(player.gold_per_minute ?? 0);
-      if (storedCpm > 0 || credits <= 0 || seconds <= 0) return player;
+      const storedEcpm = Number(player.egpm ?? 0);
+      if ((storedCpm > 0 && storedEcpm > 0) || credits <= 0 || seconds <= 0) return player;
       return {
         ...player,
-        gold_per_minute: Math.round((credits * 60 / seconds) * 100) / 100,
+        gold_per_minute: storedCpm > 0
+          ? player.gold_per_minute
+          : Math.round((credits * 60 / seconds) * 100) / 100,
+        egpm: storedEcpm > 0
+          ? player.egpm
+          : Math.round(((credits - 500) * 60 / seconds) * 100) / 100,
       };
     }),
   };
