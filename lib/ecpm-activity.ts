@@ -1,7 +1,7 @@
 export const ECPM_ACTIVITY_THRESHOLDS = {
-  fullAfk: 40,
-  partialAfk: 60,
-  disconnected: 80,
+  fullAfk: 70,
+  partialAfk: 90,
+  disconnected: 110,
   engaged: 120,
 } as const;
 
@@ -12,11 +12,6 @@ export type EcpmActivityLabelKey =
   | "generated.stats.egpm.disconnected"
   | "generated.stats.egpm.partialAfk"
   | "generated.stats.egpm.fullAfk";
-
-export interface EcpmConfidenceBracket {
-  minimum: number;
-  maximum: number;
-}
 
 export function ecpmActivityLevel(value: number): EcpmActivityLevel {
   if (value >= ECPM_ACTIVITY_THRESHOLDS.engaged) return "engaged";
@@ -48,20 +43,9 @@ export function ecpmActivityLabelKey(value: number | null | undefined): EcpmActi
   }
 }
 
-export function ecpmConfidenceBracket(value: number | null | undefined): EcpmConfidenceBracket | null {
-  if (value == null || !Number.isFinite(value)) return null;
-  switch (ecpmActivityLevel(value)) {
-    case "engaged": return { minimum: 0, maximum: 9 };
-    case "possible-disconnect": return { minimum: 10, maximum: 24 };
-    case "disconnected": return { minimum: 25, maximum: 49 };
-    case "partial-afk": return { minimum: 50, maximum: 74 };
-    case "full-afk": return { minimum: 75, maximum: 100 };
-  }
-}
-
-/** Conservative moderation policy: review 60–119 eCPM, auto-flag only below 60. */
+/** Conservative moderation policy: review 70–119 eCPM, auto-flag only at passive-credit pace or below. */
 export function isAutomaticAfkFlag(value: number | null | undefined): boolean {
-  return value != null && Number.isFinite(value) && value < ECPM_ACTIVITY_THRESHOLDS.partialAfk;
+  return value != null && Number.isFinite(value) && value < ECPM_ACTIVITY_THRESHOLDS.fullAfk;
 }
 
 export function ecpmActivityScaleMax(values: number[]): number {

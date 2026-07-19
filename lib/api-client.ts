@@ -440,8 +440,9 @@ export interface EcpmCandidatePage {
   nextCursor: string | null;
   bracket: EcpmCandidateBracket;
   range: { minimum: number; maximumExclusive: number };
-  confidence: { minimum: number; maximum: number };
   automaticFlag: boolean;
+  sampleSize: number;
+  bracketCounts: Record<EcpmCandidateBracket, { count: number; percentage: number }>;
 }
 
 export async function fetchEcpmCandidates(params: {
@@ -481,11 +482,14 @@ export async function fetchEcpmCandidates(params: {
       minimum: Number(raw.range?.minimum ?? 0),
       maximumExclusive: Number(raw.range?.maximumExclusive ?? 0),
     },
-    confidence: {
-      minimum: Number(raw.confidence?.minimum ?? 0),
-      maximum: Number(raw.confidence?.maximum ?? 0),
-    },
     automaticFlag: Boolean(raw.automatic_flag),
+    sampleSize: Number(raw.sample_size ?? 0),
+    bracketCounts: Object.fromEntries(
+      (['possible-disconnect', 'disconnected', 'partial-afk', 'full-afk'] as EcpmCandidateBracket[]).map((bracket) => [bracket, {
+        count: Number(raw.bracket_counts?.[bracket]?.count ?? 0),
+        percentage: Number(raw.bracket_counts?.[bracket]?.percentage ?? 0),
+      }]),
+    ) as Record<EcpmCandidateBracket, { count: number; percentage: number }>,
   };
 }
 

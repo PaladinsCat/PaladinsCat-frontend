@@ -7,7 +7,7 @@ import { championSlug } from "@/lib/utils";
 import { computeDamageStats } from "./format";
 import { MatchPlayerLink, matchPlayerKey } from "./player-identity";
 import { useLocalization } from "@/lib/localization-context";
-import { ecpmActivityLabelKey, ecpmActivityTextClass, ecpmConfidenceBracket } from "@/lib/ecpm-activity";
+import { ecpmActivityLabelKey, ecpmActivityTextClass } from "@/lib/ecpm-activity";
 
 interface MatchStatsSectionProps {
   team1Players: MatchPlayerDetail[];
@@ -42,17 +42,14 @@ function PlayerRow({
   wins: boolean;
   teamLabel: string;
 }) {
-  const { t, formatNumber, formatPercent } = useLocalization();
+  const { t, formatNumber } = useLocalization();
   const championHref = player.champion_name
     ? `/champions/${championSlug(player.champion_name)}`
     : undefined;
   const damageStats = computeDamageStats(player);
   const totalDamage = damageStats.totalDamage;
   const activityLabelKey = ecpmActivityLabelKey(player.egpm);
-  const confidenceBracket = ecpmConfidenceBracket(player.egpm);
-  const activityLabel = activityLabelKey && confidenceBracket
-    ? `${t(activityLabelKey)} · ${formatPercent(confidenceBracket.minimum)}–${formatPercent(confidenceBracket.maximum)}`
-    : "—";
+  const activityLabel = activityLabelKey ? t(activityLabelKey) : "—";
 
   const icon = getChampionIconSafe(player.champion_name) || "/images/champions/Champion_Generic_Icon.avif";
 
@@ -151,15 +148,12 @@ function PlayerRow({
 /* ── Main section ── */
 
 function MobilePlayerCard({ player, wins }: { player: MatchPlayerDetail; wins: boolean }) {
-  const { t, formatNumber, formatPercent } = useLocalization();
+  const { t, formatNumber } = useLocalization();
   const damageStats = computeDamageStats(player);
   const damage = damageStats.totalDamage;
   const champion = player.champion_name || `Champion #${player.champion_id}`;
   const activityLabelKey = ecpmActivityLabelKey(player.egpm);
-  const confidenceBracket = ecpmConfidenceBracket(player.egpm);
-  const activityLabel = activityLabelKey && confidenceBracket
-    ? `${t(activityLabelKey)} · ${formatPercent(confidenceBracket.minimum)}–${formatPercent(confidenceBracket.maximum)}`
-    : "—";
+  const activityLabel = activityLabelKey ? t(activityLabelKey) : "—";
   const activityClass = ecpmActivityTextClass(player.egpm);
   const metrics = [
     { label: t("generated.match.stats.credits"), value: formatNumber(player.gold_earned) },
