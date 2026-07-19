@@ -100,27 +100,41 @@ const ROLE_ICONS: Record<string, string> = {
   Support: "/images/icons/Class_Support_Icon.avif",
 };
 
-function AvgTierCard({ stats }: { stats: ChampionStats }) {
-  const { t , formatNumber} = useLocalization();
-  if (stats.avgRating == null) {
-    return (
-      <div className="pc-surface-light rounded-lg border border-pc-border p-3 text-center">
-        <div className="text-xs text-pc-text-muted mb-1">{t("generated.champions.avgTier")}</div>
-        <div className="font-mono text-base text-pc-text">—</div>
-      </div>
-    );
-  }
-  const tier = Math.round(stats.avgRating);
-  const effective = resolveEffectiveTier(tier, 0);
-  const iconPath = getRankIconPath(tier, 0);
-  const color = getTierColor(effective.displayTier);
+function RankedSummaryCard({ stats }: { stats: ChampionStats }) {
+  const { t, formatNumber, formatPercent } = useLocalization();
+  const tier = stats.avgRating == null ? null : Math.round(stats.avgRating);
+  const effective = tier == null ? null : resolveEffectiveTier(tier, 0);
+  const iconPath = tier == null ? null : getRankIconPath(tier, 0);
+  const color = effective == null ? "text-pc-text" : getTierColor(effective.displayTier);
 
   return (
-    <div className="pc-surface-light rounded-lg border border-pc-border p-3 text-center">
-      <div className="mb-1 text-xs text-pc-text-muted">{t("generated.champions.avgTier")}</div>
-      <img src={iconPath} alt={effective.displayName} className="mx-auto h-9 w-9 object-contain" />
-      <div className={`mt-0.5 text-xs font-semibold ${color}`}>{effective.displayName}</div>
-      <div className="text-xs font-mono text-pc-text-muted mt-0.5">{formatNumber(stats.avgRating, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</div>
+    <div className="pc-surface-light rounded-lg border border-pc-border p-3">
+      <div className="grid grid-cols-2 gap-x-3 gap-y-4 sm:grid-cols-4 sm:divide-x sm:divide-pc-border">
+        <div className="min-w-0 text-center sm:px-3 sm:first:pl-0">
+          <div className="mb-1 text-xs text-pc-text-muted">{t("generated.champions.avgTier")}</div>
+          {effective && iconPath ? (
+            <div className="flex items-center justify-center gap-2">
+              <img src={iconPath} alt={effective.displayName} className="h-9 w-9 shrink-0 object-contain" />
+              <div className="min-w-0 text-left">
+                <div className={`truncate text-xs font-semibold ${color}`}>{effective.displayName}</div>
+                <div className="font-mono text-xs text-pc-text-muted">{formatNumber(stats.avgRating, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</div>
+              </div>
+            </div>
+          ) : <div className="font-mono text-lg text-pc-text">—</div>}
+        </div>
+        <SummaryMetric label={t("common.sort.winRate")} value={stats.avgWinRate == null ? "—" : formatPercent(stats.avgWinRate)} accent />
+        <SummaryMetric label={t("common.sort.plays")} value={stats.totalPlays == null ? "—" : formatNumber(stats.totalPlays)} />
+        <SummaryMetric label={t("generated.players.wins")} value={stats.totalWins == null ? "—" : formatNumber(stats.totalWins)} />
+      </div>
+    </div>
+  );
+}
+
+function SummaryMetric({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
+  return (
+    <div className="flex min-h-12 min-w-0 flex-col justify-center text-center sm:px-3">
+      <div className="mb-1 text-xs text-pc-text-muted">{label}</div>
+      <div className={`font-mono text-lg ${accent ? "text-pc-accent" : "text-pc-text"}`}>{value}</div>
     </div>
   );
 }
@@ -235,9 +249,6 @@ export default function ChampionDetailPage() {
   const maxMapPickRate = useMemo(() => Math.max(1, ...championMaps.map((map) => map.pickRate)), [championMaps]);
   if (dataLoaded && !championData && !staticChampion) return notFound();
 
-  const formatNum = (n: number | null) => (n != null ? formatNumber(n) : "—");
-  const formatPct = (n: number | null) => formatPercent(n);
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -305,17 +316,20 @@ export default function ChampionDetailPage() {
           {/* Compact ranked summary leads the analysis column. */}
           <section className="space-y-2">
             <h2 className="pc-card-title shadow-sm">{t("generated.champions.rankedPerformance")}</h2>
-            <div className="pc-card space-y-3 p-4">
-              {stats && (
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                  <AvgTierCard stats={stats} />
-                  <StatCard label={t("common.sort.winRate")} value={formatPct(stats.avgWinRate)} accent />
-                  <StatCard label={t("common.sort.plays")} value={formatNum(stats.totalPlays)} />
-                  <StatCard label={t("generated.players.wins")} value={formatNum(stats.totalWins)} />
-                </div>
-              )}
-              <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-7">
-                {CHAMPION_METRICS.map((metric) => (
+            <div className="pc-card space-y-5 p-4">
+              {stats && <RankedSummaryCard stats={stats} />}
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                {CHAMPION_METRICS.slice(0, 3).map((metric) => (
+                  <ChampionMetricCard
+                    key={metric.key}
+                    metric={metric}
+                    champion={championPerformance[metric.key]}
+                    global={globalPerformance[metric.key]}
+                  />
+                ))}
+              </div>
+              <div className="grid grid-cols-1 gap-3 border-t border-pc-border pt-5 sm:grid-cols-2">
+                {CHAMPION_METRICS.slice(3).map((metric) => (
                   <ChampionMetricCard
                     key={metric.key}
                     metric={metric}
@@ -521,15 +535,6 @@ export default function ChampionDetailPage() {
   );
 }
 
-function StatCard({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
-  return (
-    <div className="pc-surface-light flex min-h-20 flex-col justify-center rounded-lg border border-pc-border p-3 text-center">
-      <div className="text-xs text-pc-text-muted mb-1">{label}</div>
-      <div className={`font-mono text-base ${accent ? "text-pc-accent" : "text-pc-text"}`}>{value}</div>
-    </div>
-  );
-}
-
 function ChampionMetricCard({
   metric,
   champion,
@@ -574,14 +579,10 @@ function ChampionMetricCard({
         </div>
       </div>
 
-      <div className="mb-2 grid grid-cols-3 gap-1.5 text-xs">
+      <div className="mb-2 grid grid-cols-2 gap-3 text-xs">
         <div>
           <div className="text-pc-text-muted uppercase tracking-wider">{t("generated.champions.p10")}</div>
           <div className="text-pc-text-secondary font-mono">{formatMetric(p10)}</div>
-        </div>
-        <div>
-          <div className="text-pc-text-muted uppercase tracking-wider">{t("generated.champions.mode")}</div>
-          <div className="text-pc-text-secondary font-mono">{formatMetric(champion?.mode ?? 0)}</div>
         </div>
         <div>
           <div className="text-pc-text-muted uppercase tracking-wider">{t("generated.champions.p90")}</div>
