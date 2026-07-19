@@ -32,11 +32,22 @@ import {
 import { getRankIconPath, getTierColor, resolveEffectiveTier } from "@/lib/tier-utils";
 import { withStoredLobbyTier } from "@/lib/lobby-tier";
 import { useLocalization } from "@/lib/localization-context";
+import { EN_MESSAGES, type TranslationKey } from "@/lib/localization/messages";
 
 // Keep this client request on the neutral same-origin proxy. Some embedded
 // browsers block background requests below /api, while /_pc is forwarded to
 // the same backend and serves the Redis-backed page bundle.
 const CHAMPION_DATA_BASE = "/_pc";
+
+function championDescriptionKey(
+  championName: string,
+  section: "skills" | "talents",
+  entryName: string,
+): TranslationKey | null {
+  const candidate = `champions.${championSlug(championName)}.${section}.${championSlug(entryName)}.description`;
+  return candidate in EN_MESSAGES ? candidate as TranslationKey : null;
+}
+
 const CHAMPION_METRICS = [
   { key: "dpm", labelKey: "common.metrics.damagePerMinute", shortLabelKey: "common.metrics.dpm", colorClass: "text-red-400" },
   { key: "wpm", labelKey: "common.metrics.weaponPerMinute", shortLabelKey: "common.metrics.wpm", colorClass: "text-orange-400" },
@@ -328,7 +339,7 @@ export default function ChampionDetailPage() {
               <div className="pc-card">
               <div className="space-y-3">
                 {championData.skills.map((skill) => (
-                  <SkillCard key={skill.name} skill={skill} />
+                  <SkillCard key={skill.name} championName={championData.name} skill={skill} />
                 ))}
               </div>
               </div>
@@ -370,6 +381,7 @@ export default function ChampionDetailPage() {
                   return (
                     <TalentCard
                       key={talent.name}
+                      championName={championData.name}
                       talent={talent}
                       stat={stat ?? undefined}
                       totalMatches={talentStats?.totalMatches ?? 0}
@@ -594,7 +606,7 @@ function StatBadge({ label, value }: { label: string; value: string }) {
   );
 }
 
-function SkillCard({ skill }: { skill: ChampionSkill }) {
+function SkillCard({ championName, skill }: { championName: string; skill: ChampionSkill }) {
   const { t } = useLocalization();
   const icons = [skill.iconUrl, skill.iconUrl2, skill.iconUrl3].filter(Boolean) as string[];
   const [activeIdx, setActiveIdx] = useState(0);
@@ -609,6 +621,7 @@ function SkillCard({ skill }: { skill: ChampionSkill }) {
   }, [icons.length]);
 
   const activeIcon = icons[activeIdx] || "";
+  const descriptionKey = championDescriptionKey(championName, "skills", skill.name);
 
   return (
     <div className="pc-surface-light rounded-lg p-4 border border-pc-border flex items-start gap-4">
@@ -635,7 +648,7 @@ function SkillCard({ skill }: { skill: ChampionSkill }) {
           )}
         </div>
         {skill.description && (
-          <p className="text-xs text-pc-text-secondary leading-relaxed">{skill.description}</p>
+          <p className="text-xs text-pc-text-secondary leading-relaxed">{descriptionKey ? t(descriptionKey) : skill.description}</p>
         )}
       </div>
     </div>
@@ -643,12 +656,14 @@ function SkillCard({ skill }: { skill: ChampionSkill }) {
 }
 
 function TalentCard({
+  championName,
   talent,
   stat,
   totalMatches,
   maxPickRate,
   href,
 }: {
+  championName: string;
   talent: ChampionTalent;
   stat?: ChampionTalentStat;
   totalMatches?: number;
@@ -659,6 +674,7 @@ function TalentCard({
   const formatPlays = (value: number) => formatNumber(value, { notation: "compact", maximumFractionDigits: 1 });
   const pickRate = stat && totalMatches && totalMatches > 0 ? (stat.totalPlays / totalMatches) * 100 : 0;
   const quality = stat ? getStatQuality(stat.winRate, pickRate, maxPickRate ?? 100) : null;
+  const descriptionKey = championDescriptionKey(championName, "talents", talent.name);
 
   const content = (
     <>
@@ -674,7 +690,7 @@ function TalentCard({
       <div className="flex-1 min-w-0">
         <div className="text-xs font-medium text-pc-accent mb-0.5">{talent.name}</div>
         {talent.description && (
-          <p className="text-xs text-pc-text-secondary leading-relaxed">{talent.description}</p>
+          <p className="text-xs text-pc-text-secondary leading-relaxed">{descriptionKey ? t(descriptionKey) : talent.description}</p>
         )}
         {talent.category && (
           <div className="text-xs text-pc-text-muted mt-1">{t("generated.champions.linked")}{" "}{talent.category}</div>

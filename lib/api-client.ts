@@ -172,6 +172,54 @@ export interface CheaterPlayer {
   topReasons: Array<{ reason: string; count: number }>;
 }
 
+export interface AutomaticAfkPlayer extends CheaterPlayer {
+  automaticMatchCount: number;
+  firstSeen: string | null;
+  lastSeen: string | null;
+  lowestEcpm: number;
+  averageEcpm: number;
+}
+
+export interface AutomaticAfkPlayerPage {
+  players: AutomaticAfkPlayer[];
+  totalCount: number;
+}
+
+export interface AutomaticAfkMatchSummary {
+  matchId: number;
+  entryDatetime: string | null;
+  map: string | null;
+  queueId: number;
+  region: string | null;
+  durationSeconds: number;
+  championId: number | null;
+  championName: string | null;
+  winStatus: string | null;
+  kills: number;
+  deaths: number;
+  assists: number;
+  leagueTier: number;
+  leaguePoints: number;
+  source: string;
+  ecpm: number;
+}
+
+export interface AutomaticAfkPlayerDetail {
+  player: {
+    id: string;
+    name: string;
+    platform: string;
+    region: string;
+    communityMarked: boolean;
+    automaticMatchCount: number;
+    firstSeen: string | null;
+    lastSeen: string | null;
+    lowestEcpm: number;
+    averageEcpm: number;
+  };
+  matches: AutomaticAfkMatchSummary[];
+}
+
 export interface BoostedPlayer extends CheaterPlayer {
   partyMatchCount: number;
   firstSeen: string | null;
@@ -249,6 +297,80 @@ export async function fetchCheaterPlayers(params?: { cheater?: boolean; susOnly?
   } catch {
     return [];
   }
+}
+
+function mapAutomaticAfkPlayer(row: any): AutomaticAfkPlayer {
+  return {
+    id: String(row.id),
+    name: String(row.name ?? `Player ${row.id}`),
+    platform: String(row.platform ?? 'Unknown'),
+    region: String(row.region ?? 'Unknown'),
+    kbmTier: row.kbm_tier ?? null,
+    cheater: Boolean(row.cheater),
+    susCount: Number(row.sus_count ?? 0),
+    dropper: Boolean(row.dropper),
+    afkWintrade: Boolean(row.afk_wintrade),
+    boosted: Boolean(row.boosted),
+    altAccount: Boolean(row.alt_account),
+    weirdoCount: Number(row.weirdo_count ?? 0),
+    hallOfFameCount: Number(row.hall_of_fame_count ?? 0),
+    avgDpm: row.avg_dpm == null ? null : Number(row.avg_dpm),
+    avgHpm: row.avg_hpm == null ? null : Number(row.avg_hpm),
+    avgCpm: row.avg_egpm == null ? null : Number(row.avg_egpm),
+    avgSpm: row.avg_mpm == null ? null : Number(row.avg_mpm),
+    totalMatches: Number(row.total_matches ?? 0),
+    winRate: row.win_rate == null ? null : Number(row.win_rate),
+    topReasons: [],
+    automaticMatchCount: Number(row.automatic_match_count ?? 0),
+    firstSeen: row.first_seen ?? null,
+    lastSeen: row.last_seen ?? null,
+    lowestEcpm: Number(row.lowest_ecpm ?? 0),
+    averageEcpm: Number(row.average_ecpm ?? 0),
+  };
+}
+
+export async function fetchAutomaticAfkPlayers(limit = 100): Promise<AutomaticAfkPlayerPage> {
+  const rows = await fetchJson<any[]>(`/players/automatic-afk?limit=${Math.min(Math.max(limit, 1), 100)}`);
+  return {
+    players: rows.map(mapAutomaticAfkPlayer),
+    totalCount: Number(rows[0]?.total_count ?? rows.length),
+  };
+}
+
+export async function fetchAutomaticAfkPlayerDetail(playerId: string): Promise<AutomaticAfkPlayerDetail> {
+  const raw = await fetchJson<any>(`/players/automatic-afk/${encodeURIComponent(playerId)}`);
+  return {
+    player: {
+      id: String(raw.player.id),
+      name: String(raw.player.name ?? `Player ${raw.player.id}`),
+      platform: String(raw.player.platform ?? 'Unknown'),
+      region: String(raw.player.region ?? 'Unknown'),
+      communityMarked: Boolean(raw.player.afk_wintrade),
+      automaticMatchCount: Number(raw.player.automatic_match_count ?? 0),
+      firstSeen: raw.player.first_seen ?? null,
+      lastSeen: raw.player.last_seen ?? null,
+      lowestEcpm: Number(raw.player.lowest_ecpm ?? 0),
+      averageEcpm: Number(raw.player.average_ecpm ?? 0),
+    },
+    matches: (raw.matches ?? []).map((row: any) => ({
+      matchId: Number(row.match_id),
+      entryDatetime: row.entry_datetime ?? null,
+      map: row.map == null ? null : String(row.map),
+      queueId: Number(row.queue_id ?? 0),
+      region: row.region == null ? null : String(row.region),
+      durationSeconds: Number(row.duration_seconds ?? 0),
+      championId: row.champion_id == null ? null : Number(row.champion_id),
+      championName: row.champion_name == null ? null : String(row.champion_name),
+      winStatus: row.win_status == null ? null : String(row.win_status),
+      kills: Number(row.kills ?? 0),
+      deaths: Number(row.deaths ?? 0),
+      assists: Number(row.assists ?? 0),
+      leagueTier: Number(row.league_tier ?? 0),
+      leaguePoints: Number(row.league_points ?? 0),
+      source: String(row.source ?? 'direct'),
+      ecpm: Number(row.ecpm ?? 0),
+    })),
+  };
 }
 
 export interface ClassLeaderboardEntry {
@@ -416,82 +538,6 @@ export interface PerformanceMetricSummary {
 export type PerformanceMetricKey = 'dpm' | 'wpm' | 'apm' | 'hpm' | 'gpm' | 'egpm' | 'mpm' | 'kda';
 
 export type PerformanceMetricsResponse = Partial<Record<PerformanceMetricKey, PerformanceMetricSummary>>;
-
-export type EcpmCandidateBracket = 'possible-disconnect' | 'disconnected' | 'partial-afk' | 'full-afk';
-
-export interface EcpmCandidate {
-  playerId: number;
-  playerName: string;
-  matchId: string;
-  entryDatetime: string;
-  championId: number;
-  championName: string;
-  className: string;
-  ecpm: number;
-  winStatus: string;
-  map: string | null;
-  region: string | null;
-  durationSeconds: number;
-  recovered: boolean;
-}
-
-export interface EcpmCandidatePage {
-  data: EcpmCandidate[];
-  nextCursor: string | null;
-  bracket: EcpmCandidateBracket;
-  range: { minimum: number; maximumExclusive: number };
-  automaticFlag: boolean;
-  sampleSize: number;
-  bracketCounts: Record<EcpmCandidateBracket, { count: number; percentage: number }>;
-}
-
-export async function fetchEcpmCandidates(params: {
-  bracket: EcpmCandidateBracket;
-  queueId?: number;
-  tierMin?: number;
-  tierMax?: number;
-  cursor?: string;
-  limit?: number;
-}): Promise<EcpmCandidatePage> {
-  const search = new URLSearchParams({ bracket: params.bracket });
-  search.set('queueId', String(params.queueId ?? 486));
-  if (params.tierMin != null) search.set('tierMin', String(params.tierMin));
-  if (params.tierMax != null) search.set('tierMax', String(params.tierMax));
-  if (params.cursor) search.set('cursor', params.cursor);
-  if (params.limit != null) search.set('limit', String(params.limit));
-  const raw = await fetchJson<any>(`/stats/ecpm-candidates?${search.toString()}`);
-  return {
-    data: (raw.data ?? []).map((row: any) => ({
-      playerId: Number(row.player_id),
-      playerName: String(row.player_name ?? `Player ${row.player_id}`),
-      matchId: String(row.match_id),
-      entryDatetime: String(row.entry_datetime),
-      championId: Number(row.champion_id),
-      championName: String(row.champion_name ?? ''),
-      className: String(row.class_name ?? ''),
-      ecpm: Number(row.egpm ?? 0),
-      winStatus: String(row.win_status ?? ''),
-      map: row.map == null ? null : String(row.map),
-      region: row.region == null ? null : String(row.region),
-      durationSeconds: Number(row.duration_seconds ?? 0),
-      recovered: Boolean(row.recovered),
-    })),
-    nextCursor: raw.next_cursor == null ? null : String(raw.next_cursor),
-    bracket: raw.bracket as EcpmCandidateBracket,
-    range: {
-      minimum: Number(raw.range?.minimum ?? 0),
-      maximumExclusive: Number(raw.range?.maximumExclusive ?? 0),
-    },
-    automaticFlag: Boolean(raw.automatic_flag),
-    sampleSize: Number(raw.sample_size ?? 0),
-    bracketCounts: Object.fromEntries(
-      (['possible-disconnect', 'disconnected', 'partial-afk', 'full-afk'] as EcpmCandidateBracket[]).map((bracket) => [bracket, {
-        count: Number(raw.bracket_counts?.[bracket]?.count ?? 0),
-        percentage: Number(raw.bracket_counts?.[bracket]?.percentage ?? 0),
-      }]),
-    ) as Record<EcpmCandidateBracket, { count: number; percentage: number }>,
-  };
-}
 
 function mapMetricSummary(raw: any): PerformanceMetricSummary {
   return {

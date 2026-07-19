@@ -12,6 +12,7 @@ import diminishingReturnsMessages from "./catalog/pages/diminishing-returns.json
 import statusMessages from "./catalog/system/status.json";
 import generatedUiMessages from "./catalog/generated/ui.json";
 import seoMessages from "./catalog/seo/metadata.json";
+import championMessages from "./catalog/game/champions.json";
 
 export const EN_MESSAGES = {
   // Generated strings are a fallback-only catalog. Keep them first so curated
@@ -30,6 +31,7 @@ export const EN_MESSAGES = {
   ...itemMessages,
   ...mapMessages,
   ...seoMessages,
+  ...championMessages,
 };
 export type TranslationKey = keyof typeof EN_MESSAGES;
 export type TranslationValues = Record<string, string | number>;
