@@ -1,5 +1,6 @@
 {
   "diminishingReturns.title": "Diminishing Return Calculator",
+  "diminishingReturns.betaWarning": "Beta feature — calculations may contain errors. Please report any errors to NabiCook.",
   "diminishingReturns.navLabel": "Diminishing Returns",
   "diminishingReturns.subtitle": "Stack champion, talent, card, and item effects and estimate their simultaneous in-game values.",
   "diminishingReturns.sourceNote": "Formula based on the Official Paladins Wiki. Conditional effects are calculated as if they are active at the same time.",

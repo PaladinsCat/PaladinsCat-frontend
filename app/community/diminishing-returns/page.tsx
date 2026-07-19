@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Calculator, ChevronRight, Download, ExternalLink, Info, X } from "lucide-react";
+import { AlertTriangle, Calculator, ChevronRight, Download, ExternalLink, Info, X } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import {
   fetchChampions,
@@ -331,6 +331,10 @@ export default function DiminishingReturnsPage() {
 
   return (
     <div className="space-y-6">
+      <div role="alert" className="flex items-start gap-3 rounded-xl border border-red-500/60 bg-red-950/70 px-4 py-3 text-sm font-semibold text-red-100 shadow-lg shadow-red-950/20">
+        <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-400" aria-hidden="true" />
+        <p>{t("diminishingReturns.betaWarning")}</p>
+      </div>
       <header className="relative overflow-hidden rounded-2xl border border-pc-accent/25 bg-gradient-to-br from-pc-bg-elevated via-pc-bg-elevated to-pc-accent/10 p-5 sm:p-7">
         <div className="absolute -right-12 -top-16 h-48 w-48 rounded-full bg-pc-accent/10 blur-3xl" />
         <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
