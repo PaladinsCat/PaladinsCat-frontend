@@ -100,26 +100,23 @@ export default function MapSlideshow() {
     : `image-set(url(${JSON.stringify(currentWallpaper.avif)}) type("image/avif"), url(${JSON.stringify(currentWallpaper.png)}) type("image/png"))`;
 
   if (!wallpaperEnabled) {
-    return <div className="fixed inset-0 -z-10 bg-pc-bg" aria-hidden="true" />;
+    return <div className="pc-wallpaper-viewport -z-10 bg-pc-bg" aria-hidden="true" />;
   }
 
   if (customWallpapers.length === 1) {
     return (
       <div
-        className="fixed inset-0 -z-10 bg-pc-bg"
+        className="pc-wallpaper-dimmed pc-wallpaper-image pc-wallpaper-viewport -z-10 bg-pc-bg"
         aria-hidden="true"
         style={{
           backgroundImage: `url(${JSON.stringify(customWallpapers[0].source)})`,
-          backgroundPosition: "center",
-          backgroundSize: "cover",
-          filter: "brightness(0.4)",
         }}
       />
     );
   }
 
   return (
-    <div className="fixed inset-0 -z-10 overflow-hidden" aria-hidden="true" style={{ backgroundColor: "var(--pc-bg)" }}>
+    <div className="pc-wallpaper-dimmed pc-wallpaper-viewport -z-10 overflow-hidden" aria-hidden="true" style={{ backgroundColor: "var(--pc-bg)" }}>
       <AnimatePresence>
         <motion.div
           key={currentWallpaperKey}
@@ -127,6 +124,7 @@ export default function MapSlideshow() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 1.5 }}
+          className="pc-wallpaper-image"
           style={{
             position: "absolute",
             top: 0,
@@ -134,9 +132,6 @@ export default function MapSlideshow() {
             width: "100%",
             height: "100%",
             backgroundImage: currentWallpaperImage,
-            backgroundPosition: "center",
-            backgroundSize: "cover",
-            filter: "brightness(0.4)",
           }}
         />
       </AnimatePresence>

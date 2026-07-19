@@ -393,13 +393,13 @@ function MetricsPageClient() {
   const handleTabChange = (key: string) => {
     const params = new URLSearchParams(searchParams);
     params.set("tab", key);
-    router.replace(`/stats/metrics?${params.toString()}`, { scroll: false });
+    router.replace(`/stats/performance?${params.toString()}`, { scroll: false });
   };
 
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/stats" className="text-pc-accent text-xs hover:underline mb-2 inline-block">
+        <Link href="/stats/performance" className="text-pc-accent text-xs hover:underline mb-2 inline-block">
           {t("generated.stats.backToGlobalStats")}</Link>
         <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.stats.performanceMetrics")}</h1>
         <p className="text-pc-text-muted text-sm mt-1">{t("generated.stats.compareChampionPerformanceAcrossAllMetrics")}</p>

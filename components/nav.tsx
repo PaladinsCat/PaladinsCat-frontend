@@ -115,7 +115,11 @@ export default function Nav() {
         { href: "/players/hall-of-fame", label: t("moderation.hallOfFameTitle") },
       ],
     },
-    ...headerGroups.slice(2),
+    {
+      title: t("nav.stats"),
+      links: headerGroups[2].links,
+    },
+    ...headerGroups.slice(3),
     { title: t("menu.site"), links: [{ href: "/localization", label: t("nav.localization") }, { href: "/about", label: t("menu.about") }, { href: "/contact", label: t("menu.contact") }, { href: "/privacy", label: t("menu.privacy") }, { href: "/terms", label: t("menu.terms") }] },
   ];
 
@@ -128,6 +132,18 @@ export default function Nav() {
     };
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [sideMenuOpen]);
+
+  useEffect(() => {
+    if (!sideMenuOpen) return;
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousRootOverflow = document.documentElement.style.overflow;
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousRootOverflow;
+    };
   }, [sideMenuOpen]);
 
   useEffect(() => {
@@ -222,7 +238,7 @@ export default function Nav() {
                       <svg className="h-3.5 w-3.5 transition-transform group-hover:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
                     </span>
                     <div className="pointer-events-none invisible absolute left-1/2 top-full z-20 w-64 -translate-x-1/2 pt-2 opacity-0 transition-all group-hover:pointer-events-auto group-hover:visible group-hover:opacity-100">
-                      <div className="rounded-lg border border-pc-border bg-pc-bg-secondary p-2 shadow-xl" role="menu" aria-label={group.title}>
+                      <div className="max-h-[calc(100vh-5rem)] overflow-y-auto overscroll-contain rounded-lg border border-pc-border bg-pc-bg-secondary p-2 shadow-xl" role="menu" aria-label={group.title}>
                         {group.links.map((link) => (
                           <Link
                             key={link.href}
@@ -329,7 +345,7 @@ export default function Nav() {
               <Link href="/" onClick={() => setSideMenuOpen(false)} className="flex items-center gap-2 font-bold text-pc-text"><img src="/images/icons/paladinscat.avif" alt="" className="h-6 w-6" />{t("generated.common.paladinscat")}</Link>
               <button onClick={() => setSideMenuOpen(false)} className="rounded-lg p-2 text-pc-text-secondary hover:bg-pc-bg-elevated hover:text-pc-accent" aria-label={t("nav.closeSiteMenu")}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
             </div>
-            <div className="flex-1 overflow-y-auto px-4 py-5">
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-5">
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                 {menuSections.map((section) => <section key={section.title}><h2 className="mb-2 px-2 text-xs font-bold uppercase tracking-widest text-pc-text-muted">{section.title}</h2><div className="space-y-0.5">{section.links.map((link) => <Link key={link.href} href={link.href} onClick={() => setSideMenuOpen(false)} className={`block rounded-lg px-2.5 py-2 text-sm transition-colors ${isMenuActive(link.href) ? "bg-pc-bg-elevated text-pc-accent" : "text-pc-text-secondary hover:bg-pc-bg-elevated hover:text-pc-text"}`}>{link.label}</Link>)}</div></section>)}
                 <section>

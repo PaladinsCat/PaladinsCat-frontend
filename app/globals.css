@@ -124,6 +124,28 @@ canvas {
   max-width: 100%;
 }
 
+.pc-wallpaper-viewport {
+  position: fixed;
+  inset: 0;
+}
+
+.pc-wallpaper-image {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+/* Keep the fixed image on a simple compositing path while scrolling. Applying
+   `filter` directly to a fixed layer can make mobile browsers re-rasterize it
+   at a different scale; a separate tint gives the same contrast without it. */
+.pc-wallpaper-dimmed::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  background: rgb(0 0 0 / 60%);
+}
+
 /* ── Component Utilities ── */
 
 /* Card: elevated bg, 16px radius, 1px border, default shadow */

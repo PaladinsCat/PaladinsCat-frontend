@@ -402,7 +402,7 @@ export default function ChampionDetailPage() {
                           return (
                             <Link
                               key={item.itemId}
-                              href={`/stats/items/${item.itemId}`}
+                              href={`/game/items/${item.itemId}`}
                               className="group flex flex-col items-center rounded-lg border border-transparent py-1 text-center transition-colors hover:border-pc-accent-mid"
                               style={{ borderColor: quality.borderColor }}
                             >

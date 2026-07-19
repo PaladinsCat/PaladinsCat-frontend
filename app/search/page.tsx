@@ -123,7 +123,7 @@ function staticReferenceResults(q: string, index: StaticReferenceIndex): Univers
       id: String(row.id),
       title: row.name,
       subtitle: row.itemType || "Item",
-      href: "/stats/items",
+      href: `/game/items/${row.id}`,
       score: rankStaticName(row.name, q, 74),
       meta: { itemType: row.itemType },
     }));

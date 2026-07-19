@@ -217,7 +217,7 @@ export default function StatsPage() {
         <div className="flex h-full flex-col">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-bold text-pc-text">{t("generated.stats.performanceOverview")}</h2>
-            <Link href="/stats/metrics" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">
+            <Link href="/stats/performance" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">
               {t("generated.stats.detail")}</Link>
           </div>
         {overviewLoading ? (
@@ -258,7 +258,7 @@ export default function StatsPage() {
         <div className="flex h-full flex-col">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-bold text-pc-text">{t("generated.stats.ecpmByRole")}</h2>
-            <Link href="/stats/egpm" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">{t("generated.stats.detail")}</Link>
+            <Link href="/stats/ecpm" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">{t("generated.stats.detail")}</Link>
           </div>
           {egpmLoading ? <DataCardSkeleton rows={5} /> : (
             <ContentFade className="flex-1">
@@ -403,7 +403,7 @@ export default function StatsPage() {
                   {itemSort === key && (itemSortDir === "desc" ? " ↓" : " ↑")}
                 </button>
               ))}
-              <Link href="/stats/items" className="ml-1 text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">
+              <Link href="/game/items" className="ml-1 text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">
                 {t("generated.stats.detail")}</Link>
             </div>
           </div>
@@ -427,7 +427,7 @@ export default function StatsPage() {
                       return (
                       <Link
                         key={item.name}
-                        href={`/stats/items/${item.itemId}`}
+                        href={`/game/items/${item.itemId}`}
                         className="flex flex-col items-center text-center py-1 rounded-lg border border-transparent transition-colors"
                         style={{ borderColor: quality.borderColor }}
                       >
@@ -460,7 +460,7 @@ export default function StatsPage() {
         <section className="lg:col-span-2 lg:order-2">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-bold text-pc-text">{t("generated.stats.mapStats")}</h2>
-            <Link href="/stats/maps" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">{t("generated.stats.detail")}</Link>
+            <Link href="/game/maps" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">{t("generated.stats.detail")}</Link>
           </div>
           {overviewLoading ? <DataCardSkeleton rows={8} /> : <ContentFade className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
             {sortedMaps.length === 0 ? (
@@ -520,13 +520,13 @@ export default function StatsPage() {
               <h2 className="text-sm font-bold text-pc-text">{t("generated.stats.compositionStats")}</h2>
               <p className="text-xs text-pc-text-muted">{t("generated.stats.teamShapeFrontlineDamageFlankSupport")}</p>
             </div>
-            <Link href="/stats/compositions" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">{t("generated.stats.detail")}</Link>
+            <Link href="/game/compositions" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">{t("generated.stats.detail")}</Link>
           </div>
           {compositionsLoading ? <DataCardSkeleton rows={5} /> : <ContentFade className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated">
             {compositions.length === 0 ? <div className="p-4 text-sm text-pc-text-muted">{t("generated.stats.compositionStatsUnavailable")}</div> : (
               <div className="divide-y divide-pc-border/50">
                 {compositions.slice(0, 5).map((composition) => (
-                  <Link key={composition.composition} href="/stats/compositions" className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-pc-bg-secondary/60">
+                  <Link key={composition.composition} href="/game/compositions" className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-pc-bg-secondary/60">
                     <div className="w-20 font-mono text-xs font-semibold text-pc-text">{composition.composition}</div>
                     <div className="min-w-0 flex-1 text-xs text-pc-text-muted">{formatNumber(composition.totalMatches)} {t("generated.stats.rankedMatches")}</div>
                     <span className={composition.winRate >= 50 ? "text-xs font-bold text-emerald-400" : "text-xs font-bold text-rose-400"}>{formatPercent(composition.winRate)}</span>

@@ -26,7 +26,6 @@ const staticRoutes: Array<{
   priority: number;
 }> = [
   { path: "/", changeFrequency: "hourly", priority: 1 },
-  { path: "/stats", changeFrequency: "hourly", priority: 0.95 },
   { path: "/champions", changeFrequency: "hourly", priority: 0.95 },
   { path: "/players", changeFrequency: "hourly", priority: 0.9 },
   { path: "/matches", changeFrequency: "hourly", priority: 0.85 },
@@ -43,20 +42,20 @@ const staticRoutes: Array<{
   { path: "/players/hall-of-fame", changeFrequency: "daily", priority: 0.6 },
   { path: "/players/private-accounts", changeFrequency: "daily", priority: 0.6 },
   { path: "/players/parties", changeFrequency: "daily", priority: 0.6 },
+  { path: "/players/droppers", changeFrequency: "daily", priority: 0.6 },
+  { path: "/players/afk-wintrade", changeFrequency: "daily", priority: 0.6 },
+  { path: "/players/alt-accounts", changeFrequency: "daily", priority: 0.6 },
   { path: "/stats/winrate", changeFrequency: "hourly", priority: 0.85 },
   { path: "/stats/banrate", changeFrequency: "hourly", priority: 0.85 },
   { path: "/stats/skins", changeFrequency: "daily", priority: 0.8 },
   { path: "/stats/performance", changeFrequency: "hourly", priority: 0.9 },
   { path: "/stats/ecpm", changeFrequency: "hourly", priority: 0.85 },
   { path: "/stats/activity", changeFrequency: "hourly", priority: 0.8 },
-  { path: "/stats/metrics", changeFrequency: "hourly", priority: 0.85 },
   { path: "/stats/tiers", changeFrequency: "hourly", priority: 0.8 },
-  { path: "/stats/items", changeFrequency: "daily", priority: 0.75 },
   { path: "/stats/talents", changeFrequency: "daily", priority: 0.75 },
   { path: "/stats/loadouts", changeFrequency: "daily", priority: 0.75 },
   { path: "/stats/regions", changeFrequency: "daily", priority: 0.7 },
   { path: "/stats/platforms", changeFrequency: "daily", priority: 0.7 },
-  { path: "/stats/maps", changeFrequency: "daily", priority: 0.7 },
   { path: "/builds", changeFrequency: "daily", priority: 0.8 },
   { path: "/community", changeFrequency: "daily", priority: 0.8 },
   { path: "/community/diminishing-returns", changeFrequency: "weekly", priority: 0.8 },
@@ -64,6 +63,7 @@ const staticRoutes: Array<{
   { path: "/blog", changeFrequency: "daily", priority: 0.8 },
   { path: "/changelog", changeFrequency: "daily", priority: 0.8 },
   { path: "/operations/stats", changeFrequency: "hourly", priority: 0.8 },
+  { path: "/localization", changeFrequency: "monthly", priority: 0.5 },
   { path: "/about", changeFrequency: "monthly", priority: 0.45 },
   { path: "/privacy", changeFrequency: "yearly", priority: 0.2 },
   { path: "/terms", changeFrequency: "yearly", priority: 0.2 },
@@ -90,7 +90,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }));
 
   const mapEntries = RANKED_MAPS.map((mapName) => ({
-    url: `${SITE_URL}/stats/maps/${encodeURIComponent(mapName)}`,
+    url: `${SITE_URL}/game/maps/${encodeURIComponent(mapName)}`,
     changeFrequency: "weekly" as const,
     priority: 0.68,
   }));

@@ -60,7 +60,7 @@ export default function EgpmDetailPage() {
   return (
     <div className="space-y-7">
       <header>
-        <Link href="/stats" className="text-sm text-pc-text-secondary transition-colors hover:text-pc-accent">{t("generated.stats.globalStats")}</Link>
+        <Link href="/stats/performance" className="text-sm text-pc-text-secondary transition-colors hover:text-pc-accent">{t("generated.stats.globalStats")}</Link>
         <div className="mt-3">
           <div>
             <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.stats.effectiveCreditsPerMinute")}</h1>
