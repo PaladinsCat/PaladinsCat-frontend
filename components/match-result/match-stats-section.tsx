@@ -7,6 +7,7 @@ import { championSlug } from "@/lib/utils";
 import { computeDamageStats } from "./format";
 import { MatchPlayerLink, matchPlayerKey } from "./player-identity";
 import { useLocalization } from "@/lib/localization-context";
+import { ecpmActivityLabelKey, ecpmActivityTextClass } from "@/lib/ecpm-activity";
 
 interface MatchStatsSectionProps {
   team1Players: MatchPlayerDetail[];
@@ -41,12 +42,13 @@ function PlayerRow({
   wins: boolean;
   teamLabel: string;
 }) {
-  const { t, formatNumber, formatPercent } = useLocalization();
+  const { t, formatNumber } = useLocalization();
   const championHref = player.champion_name
     ? `/champions/${championSlug(player.champion_name)}`
     : undefined;
   const damageStats = computeDamageStats(player);
   const totalDamage = damageStats.totalDamage;
+  const activityLabelKey = ecpmActivityLabelKey(player.egpm);
 
   const icon = getChampionIconSafe(player.champion_name) || "/images/champions/Champion_Generic_Icon.avif";
 
@@ -89,7 +91,7 @@ function PlayerRow({
       <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
         {formatNumber(player.gold_per_minute, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
       </td>
-      <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
+      <td className={`px-2 py-2 text-center text-xs font-semibold whitespace-nowrap ${ecpmActivityTextClass(player.egpm)}`}>
         {formatNumber(player.egpm, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
       </td>
       <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
@@ -134,8 +136,8 @@ function PlayerRow({
       <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
         {formatNumber(player.healing_self)}
       </td>
-      <td className="px-2 py-2 text-center text-xs whitespace-nowrap">
-        {formatPercent(player.afk_rate)}
+      <td className={`px-2 py-2 text-center text-xs font-semibold whitespace-nowrap ${ecpmActivityTextClass(player.egpm)}`}>
+        {activityLabelKey ? t(activityLabelKey) : "—"}
       </td>
 
     </tr>
@@ -145,29 +147,31 @@ function PlayerRow({
 /* ── Main section ── */
 
 function MobilePlayerCard({ player, wins }: { player: MatchPlayerDetail; wins: boolean }) {
-  const { t, formatNumber, formatPercent } = useLocalization();
+  const { t, formatNumber } = useLocalization();
   const damageStats = computeDamageStats(player);
   const damage = damageStats.totalDamage;
   const champion = player.champion_name || `Champion #${player.champion_id}`;
+  const activityLabelKey = ecpmActivityLabelKey(player.egpm);
+  const activityClass = ecpmActivityTextClass(player.egpm);
   const metrics = [
-    [t("generated.match.stats.credits"), formatNumber(player.gold_earned)],
-    [t("common.metrics.cpm"), formatNumber(player.gold_per_minute, { minimumFractionDigits: 0, maximumFractionDigits: 0 })],
-    [t("common.metrics.ecpm"), formatNumber(player.egpm, { minimumFractionDigits: 0, maximumFractionDigits: 0 })],
-    [t("common.metrics.kda"), formatNumber(player.kda, { minimumFractionDigits: 2, maximumFractionDigits: 2 })],
-    [t("generated.match.stats.obj"), formatNumber(player.objective_assists)],
-    [t("generated.match.stats.damage"), formatNumber(damage)],
-    [t("common.metrics.dpm"), formatNumber(player.damage_per_minute, { minimumFractionDigits: 0, maximumFractionDigits: 0 })],
-    [t("generated.matches.weapon"), damageStats.hasWeaponBreakdown ? formatNumber(damageStats.weaponDamage) : "—"],
-    [t("common.metrics.wpm"), damageStats.weaponPerMinute == null ? "—" : formatNumber(damageStats.weaponPerMinute, { minimumFractionDigits: 0, maximumFractionDigits: 0 })],
-    [t("generated.match.stats.abil"), damageStats.nonWeaponDamage == null ? "—" : formatNumber(damageStats.nonWeaponDamage)],
-    [t("common.metrics.apm"), damageStats.abilityPerMinute == null ? "—" : formatNumber(damageStats.abilityPerMinute, { minimumFractionDigits: 0, maximumFractionDigits: 0 })],
-    [t("generated.match.stats.taken"), formatNumber(player.damage_taken)],
-    [t("generated.match.stats.shielding"), formatNumber(player.damage_mitigated)],
-    [t("common.metrics.spm"), formatNumber(player.mitigation_per_minute, { minimumFractionDigits: 0, maximumFractionDigits: 0 })],
-    [t("generated.match.stats.healing"), formatNumber(player.healing)],
-    [t("common.metrics.hpm"), formatNumber(player.healing_per_minute, { minimumFractionDigits: 0, maximumFractionDigits: 0 })],
-    [t("generated.match.stats.self"), formatNumber(player.healing_self)],
-    [t("common.metrics.afk"), formatPercent(player.afk_rate)],
+    { label: t("generated.match.stats.credits"), value: formatNumber(player.gold_earned) },
+    { label: t("common.metrics.cpm"), value: formatNumber(player.gold_per_minute, { minimumFractionDigits: 0, maximumFractionDigits: 0 }) },
+    { label: t("common.metrics.ecpm"), value: formatNumber(player.egpm, { minimumFractionDigits: 0, maximumFractionDigits: 0 }), className: activityClass },
+    { label: t("common.metrics.kda"), value: formatNumber(player.kda, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) },
+    { label: t("generated.match.stats.obj"), value: formatNumber(player.objective_assists) },
+    { label: t("generated.match.stats.damage"), value: formatNumber(damage) },
+    { label: t("common.metrics.dpm"), value: formatNumber(player.damage_per_minute, { minimumFractionDigits: 0, maximumFractionDigits: 0 }) },
+    { label: t("generated.matches.weapon"), value: damageStats.hasWeaponBreakdown ? formatNumber(damageStats.weaponDamage) : "—" },
+    { label: t("common.metrics.wpm"), value: damageStats.weaponPerMinute == null ? "—" : formatNumber(damageStats.weaponPerMinute, { minimumFractionDigits: 0, maximumFractionDigits: 0 }) },
+    { label: t("generated.match.stats.abil"), value: damageStats.nonWeaponDamage == null ? "—" : formatNumber(damageStats.nonWeaponDamage) },
+    { label: t("common.metrics.apm"), value: damageStats.abilityPerMinute == null ? "—" : formatNumber(damageStats.abilityPerMinute, { minimumFractionDigits: 0, maximumFractionDigits: 0 }) },
+    { label: t("generated.match.stats.taken"), value: formatNumber(player.damage_taken) },
+    { label: t("generated.match.stats.shielding"), value: formatNumber(player.damage_mitigated) },
+    { label: t("common.metrics.spm"), value: formatNumber(player.mitigation_per_minute, { minimumFractionDigits: 0, maximumFractionDigits: 0 }) },
+    { label: t("generated.match.stats.healing"), value: formatNumber(player.healing) },
+    { label: t("common.metrics.hpm"), value: formatNumber(player.healing_per_minute, { minimumFractionDigits: 0, maximumFractionDigits: 0 }) },
+    { label: t("generated.match.stats.self"), value: formatNumber(player.healing_self) },
+    { label: t("common.metrics.afk"), value: activityLabelKey ? t(activityLabelKey) : "—", className: activityClass },
   ];
 
   return <article className={`border-b border-pc-border/60 p-3 last:border-b-0 ${wins ? "bg-emerald-400/[0.035]" : ""}`}>
@@ -179,7 +183,7 @@ function MobilePlayerCard({ player, wins }: { player: MatchPlayerDetail; wins: b
       </div>
     </div>
     <dl className="mt-3 grid grid-cols-2 gap-1.5 min-[420px]:grid-cols-3">
-      {metrics.map(([label, value]) => <div key={label} className="rounded-lg border border-pc-border/60 bg-pc-bg-secondary/50 px-2.5 py-2"><dt className="text-xs uppercase tracking-wide text-pc-text-muted">{label}</dt><dd className="mt-0.5 truncate font-mono text-xs font-semibold text-pc-text">{value}</dd></div>)}
+      {metrics.map(({ label, value, className }) => <div key={label} className="rounded-lg border border-pc-border/60 bg-pc-bg-secondary/50 px-2.5 py-2"><dt className="text-xs uppercase tracking-wide text-pc-text-muted">{label}</dt><dd className={`mt-0.5 truncate font-mono text-xs font-semibold ${className ?? "text-pc-text"}`}>{value}</dd></div>)}
     </dl>
   </article>;
 }

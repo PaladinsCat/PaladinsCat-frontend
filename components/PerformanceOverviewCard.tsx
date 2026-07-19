@@ -1,6 +1,7 @@
 "use client";
 
 import { useLocalization } from "@/lib/localization-context";
+import { ECPM_ACTIVITY_THRESHOLDS, ecpmActivityScaleMax } from "@/lib/ecpm-activity";
 
 interface MetricRow {
   key: string;
@@ -26,6 +27,10 @@ export function PerformanceOverviewCard({
     if (Math.abs(value) >= 1000) return formatNumber(value, { maximumFractionDigits: 0 });
     return formatNumber(value, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
   };
+  const isEcpmDistribution = metrics.length > 0 && metrics.every(({ key }) => key.startsWith("egpm-"));
+  const ecpmScaleMax = isEcpmDistribution
+    ? ecpmActivityScaleMax(metrics.flatMap(({ p90, mean }) => [p90, mean]))
+    : null;
   return (
     <div className="h-full bg-pc-bg-elevated border border-pc-border rounded-xl p-4">
       <div className="space-y-2">
@@ -38,7 +43,15 @@ export function PerformanceOverviewCard({
               </div>
             </div>
             <div className="flex-1">
-              <RangeBar color={color} mean={mean} p10={p10} p25={p25} p75={p75} p90={p90} />
+              <RangeBar
+                color={color}
+                mean={mean}
+                p10={p10}
+                p25={p25}
+                p75={p75}
+                p90={p90}
+                ecpmScaleMax={ecpmScaleMax}
+              />
             </div>
             <div className="w-12 shrink-0 text-xs text-pc-text-muted tabular-nums leading-tight">
               <div>{formatCompact(p10)}</div>
@@ -60,6 +73,7 @@ function RangeBar({
   p25,
   p75,
   p90,
+  ecpmScaleMax,
 }: {
   color: string;
   mean: number;
@@ -67,24 +81,50 @@ function RangeBar({
   p25: number;
   p75: number;
   p90: number;
+  ecpmScaleMax: number | null;
 }) {
-  const range = Math.max(1, p90 - p10);
-  const toPct = (v: number) => Math.max(1, Math.min(99, ((v - p10) / range) * 100));
+  const { t } = useLocalization();
+  const domainMin = ecpmScaleMax == null ? p10 : 0;
+  const domainMax = ecpmScaleMax ?? p90;
+  const range = Math.max(1, domainMax - domainMin);
+  const toPct = (v: number) => Math.max(0, Math.min(100, ((v - domainMin) / range) * 100));
+  const p10Pct = toPct(p10);
   const meanPct = toPct(mean);
   const p25Pct = toPct(p25);
   const p75Pct = toPct(p75);
+  const p90Pct = toPct(p90);
+  const activityBands = ecpmScaleMax == null ? [] : [
+    { start: 0, end: ECPM_ACTIVITY_THRESHOLDS.fullAfk, color: "rgba(248, 113, 113, 0.24)", label: t("generated.stats.egpm.fullAfk") },
+    { start: ECPM_ACTIVITY_THRESHOLDS.fullAfk, end: ECPM_ACTIVITY_THRESHOLDS.partialAfk, color: "rgba(251, 146, 60, 0.20)", label: t("generated.stats.egpm.partialAfk") },
+    { start: ECPM_ACTIVITY_THRESHOLDS.partialAfk, end: ECPM_ACTIVITY_THRESHOLDS.disconnected, color: "rgba(250, 204, 21, 0.16)", label: t("generated.stats.egpm.disconnected") },
+    { start: ECPM_ACTIVITY_THRESHOLDS.disconnected, end: ecpmScaleMax, color: "rgba(52, 211, 153, 0.08)", label: t("generated.stats.egpm.engaged") },
+  ];
 
   return (
     <div className="relative h-6">
-      {/* Track — full range background */}
-      <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-1 rounded-full bg-pc-text-muted/10" />
+      {/* Track — eCPM uses a fixed zero-based scale so AFK values cannot look healthy. */}
+      <div className="absolute inset-x-0 top-1/2 h-3 -translate-y-1/2 overflow-hidden rounded-sm bg-pc-text-muted/10">
+        {activityBands.map((band) => <div
+          key={band.label}
+          className="absolute inset-y-0"
+          title={band.label}
+          style={{ left: `${toPct(band.start)}%`, width: `${toPct(band.end) - toPct(band.start)}%`, background: band.color }}
+        />)}
+      </div>
+
+      {ecpmScaleMax != null && [40, 60, 80].map((threshold) => <div
+        key={threshold}
+        className="absolute inset-y-0 w-px bg-pc-text/25"
+        style={{ left: `${toPct(threshold)}%` }}
+        title={String(threshold)}
+      />)}
 
       {/* Whisker line — p10 to p25 and p75 to p90 */}
       <div
         className="absolute top-1/2 -translate-y-1/2 h-0.5 rounded-full"
         style={{
-          left: "0%",
-          width: `${p25Pct}%`,
+          left: `${p10Pct}%`,
+          width: `${Math.max(0, p25Pct - p10Pct)}%`,
           background: color,
           opacity: 0.3,
         }}
@@ -93,7 +133,7 @@ function RangeBar({
         className="absolute top-1/2 -translate-y-1/2 h-0.5 rounded-full"
         style={{
           left: `${p75Pct}%`,
-          width: `${100 - p75Pct}%`,
+          width: `${Math.max(0, p90Pct - p75Pct)}%`,
           background: color,
           opacity: 0.3,
         }}

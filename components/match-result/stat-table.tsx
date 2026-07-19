@@ -11,6 +11,7 @@ import PartyBadge, { getPartyNumber } from "./party-badge";
 import { MatchPlayerLink } from "./player-identity";
 import CanonicalTalentImage from "@/components/canonical-talent-image";
 import { useLocalization } from "@/lib/localization-context";
+import { ecpmActivityLabelKey, ecpmActivityTextClass } from "@/lib/ecpm-activity";
 
 interface StatTableRowProps {
   player: MatchPlayerDetail;
@@ -23,6 +24,7 @@ export default function StatTable({ player, fact, wins }: StatTableRowProps) {
   const [expanded, setExpanded] = useState(false);
   const damageStats = computeDamageStats(player);
   const championHref = player.champion_name ? `/champions/${championSlug(player.champion_name)}` : undefined;
+  const activityLabelKey = ecpmActivityLabelKey(player.egpm);
 
   const rowBg = wins ? "bg-green-500/5" : "bg-red-500/5";
   const rowBorder = wins ? "border-green-500/20" : "border-red-500/20";
@@ -192,7 +194,7 @@ export default function StatTable({ player, fact, wins }: StatTableRowProps) {
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
                 <div className="text-xs text-pc-text-muted">{t("generated.matches.ecpm")}</div>
-                <div className="text-sm font-medium text-pc-text">{formatNumber(player.egpm, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
+                <div className={`text-sm font-semibold ${ecpmActivityTextClass(player.egpm)}`}>{formatNumber(player.egpm, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
                 <div className="text-xs text-pc-text-muted">{t("generated.matches.spm")}</div>
@@ -318,7 +320,7 @@ export default function StatTable({ player, fact, wins }: StatTableRowProps) {
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
                 <div className="text-xs text-pc-text-muted">{t("generated.matches.afkRate")}</div>
-                <div className="text-sm font-medium text-pc-text">{formatPercent(player.afk_rate)}</div>
+                <div className={`text-sm font-semibold ${ecpmActivityTextClass(player.egpm)}`}>{activityLabelKey ? t(activityLabelKey) : "—"}</div>
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
                 <div className="text-xs text-pc-text-muted">{t("generated.matches.winStatus")}</div>
