@@ -113,6 +113,39 @@ body {
   overflow-x: clip;
 }
 
+/* Shared PaladinsCat scrollbar treatment. This was originally injected only
+   by the home search; keeping it global makes page and nested-panel scrolling
+   use the same compact teal design. */
+* {
+  scrollbar-color: var(--pc-accent-secondary) var(--pc-bg-elevated);
+  scrollbar-width: thin;
+}
+
+*::-webkit-scrollbar {
+  width: 0.5rem;
+  height: 0.5rem;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--pc-bg-elevated);
+  box-shadow: inset 1px 0 var(--pc-border);
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--pc-accent-secondary);
+  border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--pc-accent);
+}
+
+*::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
 main,
 main > div {
   min-width: 0;

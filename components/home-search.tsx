@@ -69,7 +69,6 @@ export default function HomeSearch({ onSearchActiveChange }: HomeSearchProps) {
       transition={{ delay: 0.3 }}
       className="mx-auto mb-16 max-w-md"
     >
-      <style>{t("generated.search.homeSearchResultsScrollbarColorVarPcAccentSecondaryVar")}</style>
       <form
         action="/search"
         method="GET"

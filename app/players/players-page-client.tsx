@@ -40,12 +40,6 @@ const EMPTY_COUNTS: PlayersOverview["communityCounts"] = {
   altAccounts: 0,
 };
 
-const LEADERBOARD_LINKS = [
-  { href: "/players/leaderboard", labelKey: "menu.rankedLeaderboard" },
-  { href: "/players/elo", labelKey: "menu.eloLeaderboard" },
-  { href: "/players/performance", labelKey: "menu.performanceLeaderboard" },
-] as const;
-
 export default function PlayersPageClient({ initialOverview }: { initialOverview: PlayersOverview | null }) {
   const { t , formatNumber} = useLocalization();
   const [query, setQuery] = useState("");
@@ -142,18 +136,6 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
           {!searching && !searchError && results.length === 0 && <p className="text-sm text-pc-text-muted">{t("generated.players.noPlayersFound")}</p>}
         </div>
       )}
-
-      <section>
-        <h2 className="mb-3 text-sm font-bold uppercase tracking-wider text-pc-text-muted">{t("menu.leaderboards")}</h2>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          {LEADERBOARD_LINKS.map((link) => (
-            <Link key={link.href} href={link.href} className="group flex min-h-16 min-w-0 items-center justify-between gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated px-4 py-3 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary">
-              <span className="truncate text-sm font-semibold text-pc-text group-hover:text-pc-accent">{t(link.labelKey)}</span>
-              <span className="shrink-0 text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent">→</span>
-            </Link>
-          ))}
-        </div>
-      </section>
 
       <div
         className="mx-auto grid w-full max-w-7xl gap-3"
