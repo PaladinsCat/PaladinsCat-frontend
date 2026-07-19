@@ -170,5 +170,13 @@
   "common.activity.confidenceBracket": "AFK confidence bracket",
   "common.activity.confidenceValue": "{label}: {minimum}–{maximum}",
   "common.activity.possibleDisconnect": "Possible disconnect",
-  "common.activity.reviewPolicy": "Confidence brackets are conservative review bands, not proof. Players at 60–119 eCPM are shown for review; only values below 60 are automatically flagged."
+  "common.activity.reviewPolicy": "Confidence brackets are conservative review bands, not proof. Players at 60–119 eCPM are shown for review; only values below 60 are automatically flagged.",
+  "common.activity.candidates": "Recent eCPM candidates",
+  "common.activity.candidatesDescription": "Inspect recent completed ranked player-matches by confidence bracket. New pages use a stable cursor as matches arrive.",
+  "common.activity.reviewOnly": "Review only",
+  "common.activity.automaticFlag": "Automatic flag",
+  "common.activity.policy": "Policy",
+  "common.activity.noCandidates": "No candidates were found in this bracket and lobby-tier scope.",
+  "common.activity.loadMoreCandidates": "Load more candidates",
+  "common.activity.candidatesLoadFailed": "Candidates could not be loaded. Try again."
 }

@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { PerformanceOverviewCard } from "@/components/PerformanceOverviewCard";
 import { ContentFade, EmptyState } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
+import { EcpmCandidateList } from "@/components/ecpm-candidate-list";
 import { fetchBaselines, type BaselineEntry } from "@/lib/api-client";
 import { useLobbyTier } from "@/lib/lobby-tier-context";
 import { useLocalization } from "@/lib/localization-context";
@@ -121,6 +122,8 @@ export default function EgpmDetailPage() {
             <p className="mt-3 text-xs leading-relaxed text-pc-text-muted">{t("common.activity.reviewPolicy")} {t("generated.stats.theseAreFixedDetectionThresholdsTheRoleAndGlobalPercentiles")}</p>
           </div>
         </section>
+
+        <EcpmCandidateList tierMin={lobbyTier.tierMin} tierMax={lobbyTier.tierMax} />
 
         <section>
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">

@@ -417,6 +417,78 @@ export type PerformanceMetricKey = 'dpm' | 'wpm' | 'apm' | 'hpm' | 'gpm' | 'egpm
 
 export type PerformanceMetricsResponse = Partial<Record<PerformanceMetricKey, PerformanceMetricSummary>>;
 
+export type EcpmCandidateBracket = 'possible-disconnect' | 'disconnected' | 'partial-afk' | 'full-afk';
+
+export interface EcpmCandidate {
+  playerId: number;
+  playerName: string;
+  matchId: string;
+  entryDatetime: string;
+  championId: number;
+  championName: string;
+  className: string;
+  ecpm: number;
+  winStatus: string;
+  map: string | null;
+  region: string | null;
+  durationSeconds: number;
+  recovered: boolean;
+}
+
+export interface EcpmCandidatePage {
+  data: EcpmCandidate[];
+  nextCursor: string | null;
+  bracket: EcpmCandidateBracket;
+  range: { minimum: number; maximumExclusive: number };
+  confidence: { minimum: number; maximum: number };
+  automaticFlag: boolean;
+}
+
+export async function fetchEcpmCandidates(params: {
+  bracket: EcpmCandidateBracket;
+  queueId?: number;
+  tierMin?: number;
+  tierMax?: number;
+  cursor?: string;
+  limit?: number;
+}): Promise<EcpmCandidatePage> {
+  const search = new URLSearchParams({ bracket: params.bracket });
+  search.set('queueId', String(params.queueId ?? 486));
+  if (params.tierMin != null) search.set('tierMin', String(params.tierMin));
+  if (params.tierMax != null) search.set('tierMax', String(params.tierMax));
+  if (params.cursor) search.set('cursor', params.cursor);
+  if (params.limit != null) search.set('limit', String(params.limit));
+  const raw = await fetchJson<any>(`/stats/ecpm-candidates?${search.toString()}`);
+  return {
+    data: (raw.data ?? []).map((row: any) => ({
+      playerId: Number(row.player_id),
+      playerName: String(row.player_name ?? `Player ${row.player_id}`),
+      matchId: String(row.match_id),
+      entryDatetime: String(row.entry_datetime),
+      championId: Number(row.champion_id),
+      championName: String(row.champion_name ?? ''),
+      className: String(row.class_name ?? ''),
+      ecpm: Number(row.egpm ?? 0),
+      winStatus: String(row.win_status ?? ''),
+      map: row.map == null ? null : String(row.map),
+      region: row.region == null ? null : String(row.region),
+      durationSeconds: Number(row.duration_seconds ?? 0),
+      recovered: Boolean(row.recovered),
+    })),
+    nextCursor: raw.next_cursor == null ? null : String(raw.next_cursor),
+    bracket: raw.bracket as EcpmCandidateBracket,
+    range: {
+      minimum: Number(raw.range?.minimum ?? 0),
+      maximumExclusive: Number(raw.range?.maximumExclusive ?? 0),
+    },
+    confidence: {
+      minimum: Number(raw.confidence?.minimum ?? 0),
+      maximum: Number(raw.confidence?.maximum ?? 0),
+    },
+    automaticFlag: Boolean(raw.automatic_flag),
+  };
+}
+
 function mapMetricSummary(raw: any): PerformanceMetricSummary {
   return {
     min: Number(raw?.min ?? 0),
