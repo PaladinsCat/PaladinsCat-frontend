@@ -4226,6 +4226,24 @@ export interface MatchDetailWithBans {
   bans: MatchBan[];
 }
 
+export function deriveMissingMatchCreditRates(detail: MatchDetailWithBans): MatchDetailWithBans {
+  return {
+    ...detail,
+    players: detail.players.map((player) => {
+      const credits = Number(player.gold_earned ?? 0);
+      const seconds = Number(player.time_in_match ?? 0) > 0
+        ? Number(player.time_in_match)
+        : Number(detail.match.duration_seconds ?? 0);
+      const storedCpm = Number(player.gold_per_minute ?? 0);
+      if (storedCpm > 0 || credits <= 0 || seconds <= 0) return player;
+      return {
+        ...player,
+        gold_per_minute: Math.round((credits * 60 / seconds) * 100) / 100,
+      };
+    }),
+  };
+}
+
 export interface MatchFactPlayer {
   player_id: number;
   player_name: string;
@@ -4401,7 +4419,7 @@ export async function fetchMatchDetail(matchId: number): Promise<MatchDetailWith
     { timeoutMs: 130_000, retries: 0 },
   );
   if (raw.matches.length === 0) return null;
-  return raw.matches[0];
+  return deriveMissingMatchCreditRates(raw.matches[0]);
 }
 
 export async function fetchMatchFact(matchId: number): Promise<MatchFact | null> {

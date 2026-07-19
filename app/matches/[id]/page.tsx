@@ -173,9 +173,9 @@ export default function MatchDetailPage() {
     async function load() {
       setLoading(true);
       setError(null);
-      // v8 carries the canonical leaderboard rank used to distinguish the
-      // top-100 Grandmasters from tier-26 Masters ranked 101+.
-      const cacheKey = `paladinscat:match-result:v8:${numericMatchId}`;
+      // v9 invalidates cached recovered rows whose stored CPM was zero before
+      // credit-rate derivation moved to the database/read boundary.
+      const cacheKey = `paladinscat:match-result:v9:${numericMatchId}`;
       try {
         const cached = reloadKey === 0 ? readBrowserResult<CachedMatchResult>(cacheKey) : null;
         if (cached) {
