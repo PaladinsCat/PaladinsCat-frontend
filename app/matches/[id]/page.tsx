@@ -173,9 +173,9 @@ export default function MatchDetailPage() {
     async function load() {
       setLoading(true);
       setError(null);
-      // v7 adds private-account moderation to the stored scoreboard snapshot.
-      // Bump the key so an older session snapshot cannot hide the new tag.
-      const cacheKey = `paladinscat:match-result:v7:${numericMatchId}`;
+      // v8 carries the canonical leaderboard rank used to distinguish the
+      // top-100 Grandmasters from tier-26 Masters ranked 101+.
+      const cacheKey = `paladinscat:match-result:v8:${numericMatchId}`;
       try {
         const cached = reloadKey === 0 ? readBrowserResult<CachedMatchResult>(cacheKey) : null;
         if (cached) {
