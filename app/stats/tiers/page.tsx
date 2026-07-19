@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { fetchTierSummary, fetchTiers, type TierStat, type TierSummary } from "@/lib/api-client";
-import { getRankIconPath } from "@/lib/tier-utils";
+import { getRankIconPath, TIER_NAMES } from "@/lib/tier-utils";
 import { EmptyState, ErrorState } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { useLocalization } from "@/lib/localization-context";
@@ -21,8 +21,9 @@ const EMPTY_SUMMARY: TierSummary = {
 function normalizeTiers(rows: TierStat[], count: number): TierStat[] {
   return Array.from({ length: count }, (_, index) => {
     const tierSort = index + 1;
-    return rows.find((row) => row.tierSort === tierSort) ?? {
-      tier: tierSort === 27 ? "Grandmaster" : `Tier ${tierSort}`,
+    const row = rows.find((candidate) => candidate.tierSort === tierSort);
+    return row ? { ...row, tier: TIER_NAMES[tierSort] ?? row.tier } : {
+      tier: TIER_NAMES[tierSort] ?? `Tier ${tierSort}`,
       tierSort,
       totalPlays: 0,
       avgWinRate: 0,
@@ -154,7 +155,11 @@ export default function TiersPage() {
   }, []);
 
   const normalizedProfiles = useMemo(() => normalizeTiers(profileTiers, 27), [profileTiers]);
-  const normalizedMatches = useMemo(() => normalizeTiers(matchTiers, 27), [matchTiers]);
+  // Match facts only carry Hi-Rez League_Tier values through tier 26. They
+  // cannot distinguish the live top-100 Grandmaster subset, so tier 26 is the
+  // combined Master/Grandmaster activity bucket and no synthetic tier 27 is
+  // rendered here.
+  const normalizedMatches = useMemo(() => normalizeTiers(matchTiers, 26), [matchTiers]);
   const profileAvg = summary.avgProfileTier || weightedAverage(normalizedProfiles);
   const activeAvg = summary.avgParticipationTier || weightedAverage(normalizedMatches);
   const cards: Array<
