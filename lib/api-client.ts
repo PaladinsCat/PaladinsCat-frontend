@@ -4301,6 +4301,17 @@ export interface MatchHourlyStats {
   regions: Array<{ region: string; matchesPerHour: number; totalToday: number }>;
   hourly?: Array<{ hour: number; date?: string; NA: number; EU: number; Asia: number; BR: number; OCE: number; LATAM: number; total: number }>;
   currentHour?: number;
+  allQueuesTotal24h?: number;
+  queues?: MatchQueueActivity[];
+}
+
+export interface MatchQueueActivity {
+  queueId: number;
+  queueName: string;
+  ranked: boolean;
+  total24h: number;
+  regions: Array<{ region: string; total24h: number; matchesPerHour: number }>;
+  hourly: Array<{ hour: number; date: string; total: number; regions: Record<string, number> }>;
 }
 
 export async function fetchMatchHourlyStats(): Promise<MatchHourlyStats> {
