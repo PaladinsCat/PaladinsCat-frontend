@@ -11,6 +11,7 @@
   "game/talents",
   "game/items",
   "game/maps",
+  "game/champions",
   "generated/ui",
   "seo/metadata"
 ]
