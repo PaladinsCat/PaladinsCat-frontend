@@ -809,15 +809,15 @@
       {
         "name": "Explosive Personality",
         "key": "F",
-        "damage": "",
+        "damage": "235",
         "cooldown": "10s",
-        "description": "",
+        "description": "Jump forwards and upwards, damaging and Knocking Back enemies caught behind and below you. You can use this ability up to three times before it goes on Cooldown.",
         "iconUrl": "/images/skills/Ability_Explosive_Personality.png"
       },
       {
         "name": "Long Live The Queen",
         "key": "E",
-        "damage": "",
+        "damage": "1900",
         "cooldown": "Ultimate",
         "description": "Summon and control a large rocket that you can ride into enemies or send flying in the direction of your crosshairs by reactivating the ability.",
         "iconUrl": "/images/skills/Ability_Long_Live_The_Queen.png"
@@ -949,7 +949,7 @@
       {
         "name": "Detonate",
         "key": "RMB",
-        "damage": "",
+        "damage": "850",
         "cooldown": "",
         "description": "Detonate your active sticky bombs to blast away nearby enemies, dealing 850 damage per explosion.",
         "iconUrl": "/images/skills/Ability_Detonate.png"
@@ -959,7 +959,7 @@
         "key": "Q",
         "damage": "",
         "cooldown": "12s",
-        "description": "",
+        "description": "Throw out a grumpy bomb that explodes with rage to deal 800 damage and Stuns enemies.",
         "iconUrl": "/images/skills/Ability_Grumpy_Bomb.png"
       },
       {
@@ -967,7 +967,7 @@
         "key": "F",
         "damage": "",
         "cooldown": "8s",
-        "description": "",
+        "description": "Throw an unstable bomb that sticks to any surface and can be used to Knockback yourself or enemies, dealing 150 damage to enemies hit.",
         "iconUrl": "/images/skills/Ability_Poppy_Bomb.png"
       },
       {
@@ -975,7 +975,7 @@
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": "",
+        "description": "Embody your reign and become the King Bomb, able to roll around and explode to deal 2500 damage and Stun enemies caught in your kingly blast.",
         "iconUrl": "/images/skills/Ability_King_Bomb.png"
       }
     ],
@@ -4838,9 +4838,9 @@
       {
         "name": "Spitting Cobra",
         "key": "LMB",
-        "damage": "",
+        "damage": "425 /0.55s - 200",
         "cooldown": "",
-        "description": "",
+        "description": "Fire a glob of venom from your cobra every 0.55s that deals 425 damage. Reloading tosses your cobra for 200 damage and a deadly Stun effect.",
         "iconUrl": "/images/skills/WeaponAttack_Mal'Damba_Icon.png"
       },
       {
@@ -4854,7 +4854,7 @@
       {
         "name": "Gourd",
         "key": "Q",
-        "damage": "",
+        "damage": "65 /0.2s  55 /0.2s",
         "cooldown": "10s",
         "description": "Toss a potent alchemic gourd that explodes on the ground, dealing 55 damage every 0.2s to enemies and healing allies for 65 every 0.2s.",
         "iconUrl": "/images/skills/Ability_Gourd.png"
@@ -4872,7 +4872,7 @@
         "key": "E",
         "damage": "",
         "cooldown": "Ultimate",
-        "description": "",
+        "description": "Fire a dark vessel that explodes when it lands, causing all enemies close enough to flee in Fear at its sight.",
         "iconUrl": "/images/skills/Ability_Dread_Serpent.png"
       }
     ],
@@ -6554,7 +6554,7 @@
         "key": "RMB",
         "damage": "",
         "cooldown": "8s",
-        "description": "",
+        "description": "Your next Longbow arrow will Cripple enemies, preventing them from using movement abilities for 2s.",
         "iconUrl": "/images/skills/Ability_Crippling_Arrow.png"
       },
       {

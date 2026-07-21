@@ -622,6 +622,7 @@ function SkillCard({ championName, skill }: { championName: string; skill: Champ
 
   const activeIcon = icons[activeIdx] || "";
   const descriptionKey = championDescriptionKey(championName, "skills", skill.name);
+  const description = descriptionKey ? t(descriptionKey) : skill.description;
 
   return (
     <div className="pc-surface-light rounded-lg p-4 border border-pc-border flex items-start gap-4">
@@ -647,8 +648,8 @@ function SkillCard({ championName, skill }: { championName: string; skill: Champ
             <span className="text-xs font-mono text-pc-text-muted">{t("generated.champions.cd")}{" "}{skill.cooldown}</span>
           )}
         </div>
-        {skill.description && (
-          <p className="text-xs text-pc-text-secondary leading-relaxed">{descriptionKey ? t(descriptionKey) : skill.description}</p>
+        {description && (
+          <p className="text-xs text-pc-text-secondary leading-relaxed">{description}</p>
         )}
       </div>
     </div>
