@@ -281,6 +281,13 @@ export async function loadBuildReferenceData(championId: number, championSlug: s
   return { championId, champion, items, cards, talents };
 }
 
+/** Load only the card data needed by saved-deck views. This avoids fetching
+ * item and talent references on a route that never renders either dataset. */
+export async function loadBuildCardReferences(championId: number, championSlug: string): Promise<BuildCardReference[]> {
+  const champion = championSlug ? await getChampionData(championSlug).catch(() => undefined) : undefined;
+  return buildCards(championId, champion);
+}
+
 export function groupByCategory<T extends { category: string }>(rows: T[]): Array<[string, T[]]> {
   const grouped = new Map<string, T[]>();
   for (const row of rows) {
