@@ -32,3 +32,16 @@
   .cards { grid-template-columns: 1fr; }
   .card { max-width: 316px; justify-self: center; }
 }
+
+/* html-to-image clones this state into a stable Discord-compatible canvas. */
+.detail[data-image-export="true"] { width: 1280px; height: 720px; min-height: 720px; border-radius: 20px; }
+.detail[data-image-export="true"] .header { min-height: 238px; padding: 28px 38px; }
+.detail[data-image-export="true"] .brand { font-size: 25px; }
+.detail[data-image-export="true"] .brand img { width: 32px; height: 32px; }
+.detail[data-image-export="true"] .identity h1 { font-size: 54px; }
+.detail[data-image-export="true"] .context { font-size: 15px; }
+.detail[data-image-export="true"] .cards { grid-template-columns: repeat(5,minmax(0,1fr)); gap: 4px; padding: 0 16px 18px; }
+.detail[data-image-export="true"] .card { max-width: none; justify-self: stretch; }
+.detail[data-image-export="true"] .card h2 { font-size: 18px; }
+.detail[data-image-export="true"] .card p { font-size: 14px; }
+.detail[data-image-export="true"] .level { font-size: 27px; }

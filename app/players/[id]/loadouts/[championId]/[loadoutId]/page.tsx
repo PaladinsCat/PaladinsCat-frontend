@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import SmartImage from "@/components/SmartImage";
 import { ErrorState, LoadingPanel } from "@/components/async-state";
+import LoadoutExportButton from "@/components/loadout-export-button";
 import { fetchPlayerLoadoutDeck, fetchPlayerProfile, type PlayerLoadout, type PlayerLoadoutFreshness } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { loadBuildCardReferences, type BuildCardReference } from "@/lib/build-reference";
@@ -46,6 +47,7 @@ export default function PlayerLoadoutDetailPage() {
   const [playerName, setPlayerName] = useState(`Player ${playerId}`);
   const [references, setReferences] = useState<BuildCardReference[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const loadoutRef = useRef<HTMLElement>(null);
   const championName = loadout?.championId === championId ? loadout.championName : "";
   const formatCardValue = (value: number) => formatNumber(value, { maximumFractionDigits: 2 });
 
@@ -72,8 +74,11 @@ export default function PlayerLoadoutDetailPage() {
 
   const entries = loadout.cardIds.slice(0, 5).map((cardId, index) => ({ cardId, level: Math.max(1, loadout.cardLevels[index] ?? 1), card: cardsById.get(cardId) }));
   return <div className="space-y-4">
-    <Link href={`/players/${playerId}/loadouts/${championId}`} className="inline-block text-xs text-pc-accent hover:underline">← {championName} {t("generated.players.savedDecks")}</Link>
-    <section className={styles.detail} aria-label={t("generated.players.fiveCardSavedDeck")}>
+    <div className="flex items-center justify-between gap-3">
+      <Link href={`/players/${playerId}/loadouts/${championId}`} className="inline-block text-xs text-pc-accent hover:underline">← {championName} {t("generated.players.savedDecks")}</Link>
+      <LoadoutExportButton championName={championName} loadoutId={loadoutId} target={loadoutRef} />
+    </div>
+    <section ref={loadoutRef} className={styles.detail} aria-label={t("generated.players.fiveCardSavedDeck")}>
       <SmartImage src={championBanner(championName)} onError={(event) => { event.currentTarget.src = getChampionIconSafe(championName); }} alt="" aria-hidden="true" className={styles.background} />
       <header className={styles.header}>
         <div className={styles.identity}>
@@ -95,6 +100,5 @@ export default function PlayerLoadoutDetailPage() {
         })}
       </section>
     </section>
-    <div className="rounded-xl border border-pc-border bg-pc-bg-secondary/50 px-4 py-3 text-xs text-pc-text-muted">{t("generated.players.savedLoadoutsAreReadFromTheLocalCacheReturnTo")}</div>
   </div>;
 }
