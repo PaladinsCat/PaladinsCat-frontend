@@ -1,0 +1,37 @@
+[
+  {
+    "level": 1,
+    "rarity": "Common",
+    "iconUrl": "/images/cards/frames/Card_Frame_Level_1_Common.avif",
+    "pngUrl": "/images/cards/frames/Card_Frame_Level_1_Common.png",
+    "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/0/09/CardSkin_Frame_OB67_Silver_Common.png/revision/latest?cb=20180316231021"
+  },
+  {
+    "level": 2,
+    "rarity": "Uncommon",
+    "iconUrl": "/images/cards/frames/Card_Frame_Level_2_Uncommon.avif",
+    "pngUrl": "/images/cards/frames/Card_Frame_Level_2_Uncommon.png",
+    "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/f/fc/CardSkin_Frame_OB67_Silver_Uncommon.png/revision/latest?cb=20180316231031"
+  },
+  {
+    "level": 3,
+    "rarity": "Rare",
+    "iconUrl": "/images/cards/frames/Card_Frame_Level_3_Rare.avif",
+    "pngUrl": "/images/cards/frames/Card_Frame_Level_3_Rare.png",
+    "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/8/86/CardSkin_Frame_OB67_Silver_Rare.png/revision/latest?cb=20180316231029"
+  },
+  {
+    "level": 4,
+    "rarity": "Epic",
+    "iconUrl": "/images/cards/frames/Card_Frame_Level_4_Epic.avif",
+    "pngUrl": "/images/cards/frames/Card_Frame_Level_4_Epic.png",
+    "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/c/c4/CardSkin_Frame_OB67_Silver_Epic.png/revision/latest?cb=20180316231024"
+  },
+  {
+    "level": 5,
+    "rarity": "Legendary",
+    "iconUrl": "/images/cards/frames/Card_Frame_Level_5_Legendary.avif",
+    "pngUrl": "/images/cards/frames/Card_Frame_Level_5_Legendary.png",
+    "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/9/93/CardSkin_Frame_OB67_Silver_Legendary.png/revision/latest?cb=20180316231026"
+  }
+]
