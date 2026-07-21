@@ -3,21 +3,21 @@
 .header { position: relative; z-index: 1; min-height: 238px; padding: 28px 38px; border-bottom: 1px solid rgba(72,211,190,.22); background: rgba(5,9,15,.58); }
 .header::before { content: ""; position: absolute; inset: 0; pointer-events: none; -webkit-backdrop-filter: blur(7px); backdrop-filter: blur(7px); -webkit-mask-image: linear-gradient(90deg,#000,transparent 20%,transparent 80%,#000); mask-image: linear-gradient(90deg,#000,transparent 20%,transparent 80%,#000); }
 .identity { position: relative; z-index: 1; min-width: 0; }
-.brand { display: flex; align-items: center; gap: 11px; font-size: 25px; line-height: 1; font-weight: 820; letter-spacing: -.025em; }
+.brand { display: flex; align-items: center; gap: 11px; font-size: 25px; line-height: 1; font-weight: 400; letter-spacing: -.025em; }
 .brand img { width: 32px; height: 32px; object-fit: contain; }
-.tag { display: inline-flex; height: 23px; align-items: center; padding: 0 9px; border: 1px solid rgba(55,214,192,.34); border-radius: 999px; color: #bff7ee; background: rgba(15,118,110,.25); font-size: 12px; font-weight: 760; letter-spacing: .035em; }
-.identity h1 { max-width: min(760px,100%); margin: 10px 0 0; padding-bottom: 4px; overflow: hidden; color: #f4f7fb; font-size: clamp(32px,4.3vw,54px); line-height: 1.08; font-weight: 760; letter-spacing: -.02em; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 3px 5px rgba(0,0,0,.45); }
-.context { display: flex; align-items: center; gap: 10px; margin-top: 8px; overflow: hidden; color: #d3dce7; font-size: 15px; line-height: 1.1; font-weight: 760; text-transform: uppercase; letter-spacing: .11em; white-space: nowrap; }
+.tag { display: inline-flex; height: 23px; align-items: center; padding: 0 9px; border: 1px solid rgba(55,214,192,.34); border-radius: 999px; color: #bff7ee; background: rgba(15,118,110,.25); font-size: 12px; font-weight: 400; letter-spacing: .035em; }
+.identity h1 { max-width: min(760px,100%); margin: 10px 0 0; padding-bottom: 4px; overflow: hidden; color: #f4f7fb; font-size: clamp(32px,4.3vw,54px); line-height: 1.08; font-weight: 400; letter-spacing: -.02em; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 3px 5px rgba(0,0,0,.45); }
+.context { display: flex; align-items: center; gap: 10px; margin-top: 8px; overflow: hidden; color: #d3dce7; font-size: 15px; line-height: 1.1; font-weight: 400; text-transform: uppercase; letter-spacing: .11em; white-space: nowrap; }
 .context span { overflow: hidden; text-overflow: ellipsis; }
 .context span + span::before { content: "·"; margin-right: 9px; color: #667386; }
 .cards { position: relative; z-index: 2; display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 4px; align-items: start; padding: 0 16px 18px; border-bottom: 1px solid rgba(148,163,184,.14); background: color-mix(in srgb,#161618 80%,transparent); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
 .card { position: relative; width: 100%; aspect-ratio: 316/480; filter: drop-shadow(0 3px 5px rgba(0,0,0,.45)); }
 .cardArt { position: absolute; z-index: 1; left: 6.5%; top: 8.7%; width: 87%; height: 44%; object-fit: cover; background: #071014; }
 .cardFrame { position: absolute; z-index: 2; inset: 0; width: 100%; height: 100%; object-fit: fill; pointer-events: none; }
-.card h2 { position: absolute; z-index: 3; left: 9%; top: 51.2%; width: 82%; height: 6.8%; margin: 0; padding: 0 5px; display: flex; align-items: center; justify-content: center; overflow: hidden; color: #fff; font-size: clamp(12px,1.4vw,18px); line-height: 1; text-align: center; text-overflow: ellipsis; text-shadow: 0 2px 2px #111; white-space: nowrap; }
+.card h2 { position: absolute; z-index: 3; left: 9%; top: 51.2%; width: 82%; height: 6.8%; margin: 0; padding: 0 5px; display: flex; align-items: center; justify-content: center; overflow: hidden; color: #fff; font-size: clamp(12px,1.4vw,18px); line-height: 1; font-weight: 700; text-align: center; text-overflow: ellipsis; text-shadow: 0 2px 2px #111; white-space: nowrap; }
 .card h2.longCardName { padding-inline: 2px; font-size: clamp(12px,1.1vw,14px); letter-spacing: -.015em; }
 .card p { position: absolute; z-index: 3; left: 9.5%; top: 59.5%; width: 81%; height: 29%; margin: 0; padding: 4px 9px 0; display: flex; align-items: flex-start; justify-content: center; overflow: hidden; color: #303943; font-size: clamp(12px,1.1vw,14px); line-height: 1.25; font-weight: 700; text-align: center; }
-.level { position: absolute; z-index: 3; left: 13.2%; top: 92.7%; width: 20%; aspect-ratio: 1; transform: translate(-47%,-44%); display: flex; align-items: center; justify-content: center; padding: 0; color: #f7fbff; font-size: clamp(20px,2.1vw,27px); line-height: 1; font-weight: 820; font-variant-numeric: tabular-nums; text-shadow: 0 2px 3px #10151d; }
+.level { position: absolute; z-index: 3; left: 13.2%; top: 92.7%; width: 20%; aspect-ratio: 1; transform: translate(-47%,-44%); display: flex; align-items: center; justify-content: center; padding: 0; color: #f7fbff; font-size: clamp(20px,2.1vw,27px); line-height: 1; font-weight: 400; font-variant-numeric: tabular-nums; text-shadow: 0 2px 3px #10151d; }
 
 @media (max-width: 900px) {
   .detail { min-height: 0; }
