@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const apiDestination =
   process.env.NEXT_SERVER_API_URL ||
   process.env.NEXT_PUBLIC_API_URL ||
-  "http://localhost:3304";
+  "https://paladinscat.com/api";
 
 const nextConfig: NextConfig = {
   output: undefined,
