@@ -91,6 +91,7 @@ export default function StatsPage() {
   const [itemSortDir, setItemSortDir] = useState<"asc" | "desc">("desc");
   const [expandedBannedId, setExpandedBannedId] = useState<number | null>(null);
   const [metrics, setMetrics] = useState(EMPTY_METRICS);
+  const [champions, setChampions] = useState<Champion[]>([]);
   const [items, setItems] = useState<PageItemStat[]>([]);
   const [maps, setMaps] = useState<PageMapStat[]>([]);
   const [tiers, setTiers] = useState<TierStat[]>([]);
@@ -151,8 +152,6 @@ export default function StatsPage() {
       });
     return () => { cancelled = true; };
   }, [lobbyTierReady, lobbyTier.tierMax, lobbyTier.tierMin]);
-
-  const [champions, setChampions] = useState<Champion[]>([]);
 
   const toggleItemSort = (key: SortKey) => {
     if (itemSort === key) {

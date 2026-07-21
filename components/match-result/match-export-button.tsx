@@ -25,7 +25,7 @@ export default function MatchExportButton(props: MatchExportButtonProps) {
       // html-to-image serializes a CSS pseudo-element background unreliably.
       // The scoreboard exposes the identical map as an image only while it is
       // being captured, so the browser output retains the rendered backdrop.
-      scoreboard.dataset.imageExport = "true";
+      scoreboard.setAttribute("data-image-export", "true");
       try {
         await Promise.all(Array.from(scoreboard.querySelectorAll("img")).map((image) => {
           if (image.complete) return image.decode?.().catch(() => undefined) ?? Promise.resolve();
@@ -56,7 +56,7 @@ export default function MatchExportButton(props: MatchExportButtonProps) {
         anchor.remove();
         setMessage(t("generated.matches.pngSaved"));
       } finally {
-        delete scoreboard.dataset.imageExport;
+        scoreboard.removeAttribute("data-image-export");
       }
     } catch (error) {
       setMessage(error instanceof Error ? error.message : t("generated.components.matchResult.matchExportButton.couldNotSaveMatchImage"));
