@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useReducedMotion } from "framer-motion";
 
 const scrambleChars = "!@#$%&*+-=[]{}|;:,.<>?/~ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
@@ -25,13 +26,12 @@ function ScrambleLetter({
   speed: number;
   iterations: number;
 }) {
-  const [displayed, setDisplayed] = useState(char);
+  const [displayed, setDisplayed] = useState(randomChar);
   const [isRevealed, setIsRevealed] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     let count = 0;
-    setDisplayed(randomChar());
 
     intervalRef.current = setInterval(() => {
       count++;
@@ -59,21 +59,26 @@ export default function ScrambleText({
   className = "",
   delayFromCenter = true,
 }: ScrambleTextProps) {
+  const reduceMotion = useReducedMotion();
   const centerIndex = Math.floor(text.length / 2);
   const letters = text.split("");
 
+  if (reduceMotion) {
+    return <span className={`inline-flex ${className}`}>{text}</span>;
+  }
+
   return (
-    <span className={`inline-flex ${className}`}>
+    <span className={`inline-flex ${className}`} aria-label={text}>
       {letters.map((letter, i) => {
         const distanceFromCenter = Math.abs(i - centerIndex);
         const staggerDelay = delayFromCenter ? distanceFromCenter * 80 : i * 30;
 
         if (letter === ' ') {
-          return <span key={i} className="inline-block w-[0.35em]" aria-hidden="true" />;
+          return <span key={`${i}-space`} className="inline-block w-[0.35em]" aria-hidden="true" />;
         }
 
         return (
-          <span key={i} style={{ animationDelay: `${staggerDelay}ms` }}>
+          <span key={`${i}-${letter}`} aria-hidden="true" style={{ animationDelay: `${staggerDelay}ms` }}>
             <ScrambleLetter char={letter} speed={speed} iterations={iterations} />
           </span>
         );
