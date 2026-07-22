@@ -13,6 +13,20 @@ import PlayerName from "@/components/player-name";
 import PlayerDirectoryGrid from "@/components/player-directory-grid";
 import { useLocalization } from "@/lib/localization-context";
 
+const DIRECTORY_PAGE_SIZE = 100;
+
+async function fetchAllCheaterPlayers(): Promise<CheaterPlayer[]> {
+  const players: CheaterPlayer[] = [];
+  const seenPlayerIds = new Set<string>();
+  for (let offset = 0; ; offset += DIRECTORY_PAGE_SIZE) {
+    const page = await fetchCheaterPlayers({ cheater: true, limit: DIRECTORY_PAGE_SIZE, offset });
+    const newPlayers = page.filter((player) => player.cheater && !seenPlayerIds.has(String(player.id)));
+    newPlayers.forEach((player) => seenPlayerIds.add(String(player.id)));
+    players.push(...newPlayers);
+    if (page.length < DIRECTORY_PAGE_SIZE || newPlayers.length === 0) return players;
+  }
+}
+
 export default function CheatersPage() {
   const { t } = useLocalization();
   const [data, setData] = useState<CheaterPlayer[]>([]);
@@ -24,10 +38,10 @@ export default function CheatersPage() {
       setLoading(true);
       try {
         const [cheaters, privateCheaters] = await Promise.all([
-          fetchCheaterPlayers({ cheater: true, limit: 100 }),
+          fetchAllCheaterPlayers(),
           fetchPrivateAccountsDirectory({ cheater: true, pageSize: 100 }),
         ]);
-        setData(cheaters.filter(c => c.cheater));
+        setData(cheaters);
         setPrivateData(privateCheaters.items.filter(account => account.cheater));
       } catch {
         setData([]);

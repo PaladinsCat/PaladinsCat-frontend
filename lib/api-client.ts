@@ -260,7 +260,7 @@ export interface BoostedPlayerDetail {
   matches: BoostedMatchSummary[];
 }
 
-export async function fetchCheaterPlayers(params?: { cheater?: boolean; susOnly?: boolean; weirdoOnly?: boolean; hallOfFameOnly?: boolean; dropperOnly?: boolean; afkWintradeOnly?: boolean; altAccountOnly?: boolean; limit?: number }): Promise<CheaterPlayer[]> {
+export async function fetchCheaterPlayers(params?: { cheater?: boolean; susOnly?: boolean; weirdoOnly?: boolean; hallOfFameOnly?: boolean; dropperOnly?: boolean; afkWintradeOnly?: boolean; altAccountOnly?: boolean; limit?: number; offset?: number }): Promise<CheaterPlayer[]> {
   const query = new URLSearchParams();
   if (params?.cheater) query.set('cheater', 'true');
   if (params?.susOnly) query.set('susOnly', 'true');
@@ -270,6 +270,7 @@ export async function fetchCheaterPlayers(params?: { cheater?: boolean; susOnly?
   if (params?.afkWintradeOnly) query.set('afkWintradeOnly', 'true');
   if (params?.altAccountOnly) query.set('altAccountOnly', 'true');
   if (params?.limit) query.set('limit', String(params.limit));
+  if (params?.offset != null) query.set('offset', String(params.offset));
   query.set('perPage', String(params?.limit || 100));
   try {
     const raw = await fetchJson<Array<{
