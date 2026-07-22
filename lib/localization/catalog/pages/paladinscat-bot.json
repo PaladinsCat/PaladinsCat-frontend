@@ -38,7 +38,7 @@
   "bot.commandChampion": "Read database-backed ranked records, lobby tier, performance metrics, and talents globally or for a selected tier range.",
   "bot.commandMaps": "Review every ranked map by matches played, map-pool share, and average duration.",
   "bot.commandComposition": "See the five most-played ranked team compositions and their win rates.",
-  "bot.commandItems": "Compare global ranked item usage, pick rate, and win rate, optionally filtered by lobby tier.",
+  "bot.commandItems": "Compare ranked item usage, pick rate, and win rate after choosing Global or a lobby tier range.",
   "bot.privacyEyebrow": "Built for trust",
   "bot.privacyTitle": "The bot listens for commands—not conversations.",
   "bot.privacyBody": "PaladinsCat uses Discord's native slash commands and the standard Guilds intent. It does not request privileged message-content, presence, or member intents.",
