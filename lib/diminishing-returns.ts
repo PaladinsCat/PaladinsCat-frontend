@@ -13,7 +13,9 @@ export type EffectKey =
   | "maximum-ammo"
   | "shield-health"
   | "shield-effectiveness"
-  | "weapon-damage";
+  | "weapon-damage"
+  | "weapon-damage-deployables"
+  | "weapon-damage-shields";
 
 export type EffectSourceType = "talent" | "card" | "item";
 export type EffectDirection = "increase" | "decrease";
@@ -94,6 +96,87 @@ function effect(
   }];
 }
 
+type WeaponDamageScenario = "players" | "deployables" | "shields";
+
+type TalentWeaponDamageRule = {
+  patterns: RegExp[];
+  scenarios: WeaponDamageScenario[];
+  target?: EffectTarget;
+  direction?: EffectDirection;
+  stackPattern?: RegExp;
+  fixedStacks?: number;
+};
+
+const ALL_WEAPON_DAMAGE_SCENARIOS: WeaponDamageScenario[] = ["players", "deployables", "shields"];
+
+/**
+ * Conditional talents frequently describe the same outgoing weapon stat with
+ * incompatible grammar. Keep their scope keyed to stable game IDs so a broad
+ * text match cannot turn ability damage, maximum-Health damage, or flat damage
+ * procs into a misleading weapon percentage.
+ */
+const TALENT_WEAPON_DAMAGE_RULES: Record<number, TalentWeaponDamageRule> = {
+  16370: { patterns: [new RegExp(`damage you deal with your weapon shots[^.]*?by\\s+${NUMBER}%`, "i")], scenarios: ALL_WEAPON_DAMAGE_SCENARIOS }, // Over the Moon
+  16384: { patterns: [new RegExp(`weapon shot's damage[^.]*?by\\s+${NUMBER}%`, "i")], scenarios: ALL_WEAPON_DAMAGE_SCENARIOS }, // Exaction
+  16406: { patterns: [new RegExp(`damage of each of your daggers[^.]*?by\\s+${NUMBER}%`, "i")], scenarios: ALL_WEAPON_DAMAGE_SCENARIOS }, // Cat Burglar
+  16383: { patterns: [new RegExp(`damage dealt[^.]*?Rocket Launcher or Salvo[^.]*?by\\s+${NUMBER}%`, "i")], scenarios: ALL_WEAPON_DAMAGE_SCENARIOS }, // Fusillade
+  16456: { patterns: [new RegExp(`fully-charged shot[^.]*?additional\\s+${NUMBER}%\\s+damage`, "i")], scenarios: ALL_WEAPON_DAMAGE_SCENARIOS }, // Steady Aim
+  16433: { patterns: [new RegExp(`weapon shot[^.]*?deals\\s+${NUMBER}%\\s+increased damage`, "i")], scenarios: ["players"] }, // Pluck
+  18814: { patterns: [new RegExp(`Heirloom Rifle damage[^.]*?by\\s+${NUMBER}%`, "i")], scenarios: ["players"], stackPattern: /stacking up to\s+(\d+)\s+times/i }, // Precision
+  33708: { patterns: [new RegExp(`Carbine Rifle[^.]*?deals\\s+${NUMBER}%\\s+bonus damage`, "i")], scenarios: ["players"] }, // High Voltage
+  26957: { patterns: [new RegExp(`gain\\s+${NUMBER}%\\s+increased weapon damage`, "i")], scenarios: ALL_WEAPON_DAMAGE_SCENARIOS }, // Paratrooper
+  20315: { patterns: [new RegExp(`gain\\s+${NUMBER}%\\s+increased damage`, "i")], scenarios: ALL_WEAPON_DAMAGE_SCENARIOS }, // Opportunity in Chaos
+  19223: { patterns: [new RegExp(`deal\\s+${NUMBER}%\\s+increased weapon damage`, "i")], scenarios: ALL_WEAPON_DAMAGE_SCENARIOS, target: "ally" }, // Luminary
+  31891: { patterns: [new RegExp(`take\\s+${NUMBER}%\\s+additional weapon damage`, "i")], scenarios: ["players"], target: "enemy" }, // Abyssal Breach
+  16391: { patterns: [new RegExp(`take\\s+${NUMBER}%\\s+increased damage from your weapon shots`, "i")], scenarios: ["players"], target: "enemy" }, // Catalyst
+  16914: { patterns: [new RegExp(`damage you deal to your Retribution target[^.]*?by\\s+${NUMBER}%`, "i")], scenarios: ["players"] }, // Discovery
+  16386: { patterns: [new RegExp(`damage you deal to targets Slowed by Net Shot[^.]*?by\\s+${NUMBER}%`, "i")], scenarios: ["players"] }, // Ensnare
+  27509: { patterns: [new RegExp(`enemies take\\s+${NUMBER}%\\s+more (?:damage|DMG)`, "i")], scenarios: ["players"], target: "enemy" }, // Window of Opportunity
+  16451: { patterns: [new RegExp(`damage done by allies[^.]*?by\\s+${NUMBER}%`, "i")], scenarios: ALL_WEAPON_DAMAGE_SCENARIOS, target: "ally" }, // Field Study
+  22890: { patterns: [new RegExp(`reduce your damage-per-shot by\\s+${NUMBER}%`, "i")], scenarios: ALL_WEAPON_DAMAGE_SCENARIOS, direction: "decrease" }, // Storm of Bullets
+  // Soul Collector has 15 charges; Resuscitate changes the per-charge value.
+  33709: { patterns: [new RegExp(`weapon (?:damage|DMG) bonus[^.]*?to\\s+${NUMBER}%\\s+per charge`, "i")], scenarios: ALL_WEAPON_DAMAGE_SCENARIOS, fixedStacks: 15 }, // Resuscitate
+  16389: { patterns: [new RegExp(`maximum damage scaling over distance[^.]*?by\\s+${NUMBER}%`, "i")], scenarios: ALL_WEAPON_DAMAGE_SCENARIOS }, // Ferocity
+  31059: { patterns: [new RegExp(`War's attacks[^.]*?additional\\s+${NUMBER}%\\s+damage`, "i")], scenarios: ["players"] }, // It's Got Some Heft
+};
+
+function weaponDamageEffects(
+  value: number | null,
+  source: Omit<DetectedEffect, "key" | "value" | "direction" | "target">,
+  options: {
+    scenarios?: WeaponDamageScenario[];
+    direction?: EffectDirection;
+    target?: EffectTarget;
+  } = {},
+): DetectedEffect[] {
+  const keyByScenario: Record<WeaponDamageScenario, EffectKey> = {
+    players: "weapon-damage",
+    deployables: "weapon-damage-deployables",
+    shields: "weapon-damage-shields",
+  };
+  return (options.scenarios ?? ALL_WEAPON_DAMAGE_SCENARIOS).flatMap((scenario) => effect(
+    keyByScenario[scenario],
+    value,
+    source,
+    { direction: options.direction, target: options.target },
+  ));
+}
+
+function detectTalentWeaponDamage(
+  input: { id: number; type: EffectSourceType },
+  description: string,
+  source: Omit<DetectedEffect, "key" | "value" | "direction" | "target">,
+): DetectedEffect[] | null {
+  if (input.type !== "talent") return null;
+  const rule = TALENT_WEAPON_DAMAGE_RULES[input.id];
+  if (!rule) return null;
+  const perStack = numericMatch(description, rule.patterns);
+  if (perStack == null) return [];
+  const describedStacks = rule.stackPattern ? numericMatch(description, [rule.stackPattern]) : null;
+  const stacks = rule.fixedStacks ?? describedStacks ?? 1;
+  return weaponDamageEffects(perStack * stacks, source, rule);
+}
+
 /**
  * Extract only explicit, calculator-safe stat changes. The full source text is
  * retained because many Paladins bonuses are conditional and should be read as
@@ -132,7 +215,7 @@ export function detectDescriptionEffects(input: {
 
   if (!/duration and effectiveness of crowd control/i.test(description)) {
     const slow = numericMatch(description, [
-      new RegExp(`(?:slow|slows)[^.]*?by\\s+${NUMBER}%`, "i"),
+      new RegExp(`\\b(?:slow|slows)\\b[^.]*?by\\s+${NUMBER}%`, "i"),
       new RegExp(`reduce (?:an enemy's|the enemy's|the target's|their) movement speed[^.]*?by\\s+${NUMBER}%`, "i"),
     ]);
     results.push(...effect("movement-speed", slow, source, { direction: "decrease", target: "enemy" }));
@@ -171,7 +254,8 @@ export function detectDescriptionEffects(input: {
     new RegExp(`(?:enemies|targets?|players?)[^.]*?take\\s+${NUMBER}%\\s+(?:additional|increased|more)\\s+damage`, "i"),
     new RegExp(`increase (?:the )?damage (?:an enemy|enemies|the target|targets?) (?:takes?|receives?)[^.]*?by\\s+${NUMBER}%`, "i"),
   ]);
-  if (damageTaken != null) {
+  const weaponSpecificDamageTaken = /weapon (?:shots?|damage)\b/i.test(description);
+  if (damageTaken != null && !weaponSpecificDamageTaken) {
     const directOnly = /direct attacks?|direct damage/i.test(description);
     const areaOnly = /area of effect|area damage|blast damage/i.test(description);
     if (!areaOnly) results.push(...effect("damage-reduction-direct", damageTaken, source, { direction: "decrease", target: "enemy" }));
@@ -247,12 +331,33 @@ export function detectDescriptionEffects(input: {
   ]);
   results.push(...effect("shield-effectiveness", shieldEffectiveness, source));
 
+  const talentWeaponDamage = detectTalentWeaponDamage(input, description, source);
+  if (talentWeaponDamage != null) results.push(...talentWeaponDamage);
+
+  const deployableDamage = numericMatch(description, [
+    new RegExp(`weapon (?:shots|attacks)[^.]*?deal\\s+${NUMBER}%\\s+increased damage to deployables`, "i"),
+  ]);
+  const shieldDamage = numericMatch(description, [
+    new RegExp(`weapon (?:shots|attacks)[^.]*?deal\\s+${NUMBER}%\\s+increased damage to shields`, "i"),
+  ]);
   const weaponDamage = numericMatch(description, [
-    new RegExp(`weapon (?:shots|attacks)[^.]*?deal\\s+${NUMBER}%\\s+increased damage`, "i"),
+    new RegExp(`weapon (?:shots?|attacks?)[^.]*?deals?\\s+${NUMBER}%\\s+increased damage`, "i"),
     new RegExp(`increase (?:your )?weapon damage[^.]*?by\\s+${NUMBER}%`, "i"),
     new RegExp(`increase (?:your )?in-hand weapon damage dealt[^.]*?by\\s+${NUMBER}%`, "i"),
+    new RegExp(`increase (?:the )?damage you deal with (?:your )?weapon shots[^.]*?by\\s+${NUMBER}%`, "i"),
+    new RegExp(`weapon shot's damage[^.]*?increased by\\s+${NUMBER}%`, "i"),
+    new RegExp(`weapon shots?[^.]*?deal(?:s)? an additional\\s+${NUMBER}%\\s+damage`, "i"),
   ]);
-  results.push(...effect("weapon-damage", weaponDamage, source));
+  if (talentWeaponDamage != null) {
+    // Talent rules above preserve player-only, ally, enemy, and stack scope.
+  } else if (deployableDamage != null) {
+    results.push(...effect("weapon-damage-deployables", deployableDamage, source));
+  } else if (shieldDamage != null) {
+    results.push(...effect("weapon-damage-shields", shieldDamage, source));
+  } else if (weaponDamage != null) {
+    // General weapon bonuses affect players and carry into target-specific scenarios.
+    results.push(...weaponDamageEffects(weaponDamage, source));
+  }
 
   const levelThreeBundle = numericMatch(description, [
     new RegExp(`gain\\s+${NUMBER}%\\s+movement, mount, cooldown, and ultimate charge speed`, "i"),
@@ -358,10 +463,15 @@ export function calculateAdditiveValue(values: number[]): DiminishedValue {
 }
 
 export function extractWeaponDamageOverride(description: string | null | undefined): number | null {
+  const weaponTagged = /^\s*\[Weapon\]/i.test(description ?? "");
   const text = resolveScaledDescription(description, 1);
   const value = numericMatch(text, [
     new RegExp(`your weapon[^.]*?dealing\\s+${NUMBER}\\s+(?:direct )?damage`, "i"),
     new RegExp(`weapon (?:shots|attacks)[^.]*?deal\\s+${NUMBER}\\s+(?:direct )?damage`, "i"),
+    ...(weaponTagged ? [
+      new RegExp(`(?:deals?|dealing)\\s+${NUMBER}\\s+(?:direct )?damage`, "i"),
+      new RegExp(`firing[^.]*?${NUMBER}-damage shots`, "i"),
+    ] : []),
   ]);
   return value != null && value > 0 ? value : null;
 }

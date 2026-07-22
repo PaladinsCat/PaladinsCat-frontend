@@ -53,6 +53,8 @@ const EFFECT_ORDER: EffectKey[] = [
   "ultimate-charge",
   "mount-speed",
   "weapon-damage",
+  "weapon-damage-deployables",
+  "weapon-damage-shields",
   "maximum-health",
   "maximum-ammo",
   "shield-health",
@@ -74,7 +76,9 @@ const EFFECT_LABELS = {
   "maximum-ammo": "diminishingReturns.maximumAmmo",
   "shield-health": "diminishingReturns.shieldHealth",
   "shield-effectiveness": "diminishingReturns.shieldEffectiveness",
-  "weapon-damage": "diminishingReturns.weaponDamage",
+  "weapon-damage": "diminishingReturns.weaponDamagePlayers",
+  "weapon-damage-deployables": "diminishingReturns.weaponDamageDeployables",
+  "weapon-damage-shields": "diminishingReturns.weaponDamageShields",
 } as const;
 
 const EFFECT_TARGET_LABELS = {
@@ -258,7 +262,8 @@ export default function DiminishingReturnsPage() {
     const collect = (input: Parameters<typeof detectDescriptionEffects>[0]) => {
       const detected = detectDescriptionEffects(input);
       values.push(...detected);
-      if (!detected.length) unsupported.push({ id: input.id, name: input.name, description: resolveScaledDescription(input.description, input.level ?? 1) });
+      const hasWeaponOverride = input.type === "talent" && extractWeaponDamageOverride(input.description) != null;
+      if (!detected.length && !hasWeaponOverride) unsupported.push({ id: input.id, name: input.name, description: resolveScaledDescription(input.description, input.level ?? 1) });
     };
     if (selectedTalent) {
       collect({ id: selectedTalent.id, name: selectedTalent.name, type: "talent", description: selectedTalent.description });
@@ -353,7 +358,9 @@ export default function DiminishingReturnsPage() {
     if (key === "cooldown-reduction") return t("diminishingReturns.cooldownRaw", { value: formatNumber(Math.max(0, 1 - final / 100), { maximumFractionDigits: 3 }) });
     if (key === "reload-speed") return t("diminishingReturns.reloadRaw", { value: formatNumber(Math.max(0, 1 - final / 100), { maximumFractionDigits: 3 }) });
     if (key === "ultimate-charge") return t("diminishingReturns.chargeRaw", { value: formatNumber(1 + final / 100, { maximumFractionDigits: 3 }) });
-    if (key === "weapon-damage" && (weaponOverride || primaryDamage)) return t("diminishingReturns.weaponDamageRaw", { value: formatNumber((weaponOverride || primaryDamage) * (1 + final / 100), { maximumFractionDigits: 1 }) });
+    if (key === "weapon-damage" && (weaponOverride || primaryDamage)) return t("diminishingReturns.weaponDamagePlayersRaw", { value: formatNumber((weaponOverride || primaryDamage) * (1 + final / 100), { maximumFractionDigits: 1 }) });
+    if (key === "weapon-damage-deployables" && (weaponOverride || primaryDamage)) return t("diminishingReturns.weaponDamageDeployablesRaw", { value: formatNumber((weaponOverride || primaryDamage) * (1 + final / 100), { maximumFractionDigits: 1 }) });
+    if (key === "weapon-damage-shields" && (weaponOverride || primaryDamage)) return t("diminishingReturns.weaponDamageShieldsRaw", { value: formatNumber((weaponOverride || primaryDamage) * (1 + final / 100), { maximumFractionDigits: 1 }) });
     if (key === "maximum-health") return t("diminishingReturns.healthRaw", { value: formatNumber(baseHealth + flatValue) });
     if (key === "maximum-ammo") return t("diminishingReturns.ammoRaw", { value: formatNumber(flatValue) });
     if (key === "shield-health") return t("diminishingReturns.shieldRaw", { value: formatNumber(flatValue) });
@@ -486,7 +493,7 @@ export default function DiminishingReturnsPage() {
                       if (!sources.length) return [];
                       const signedValues = sources.map((entry) => entry.direction === "decrease" ? -entry.value : entry.value);
                       const flat = key === "maximum-health" || key === "maximum-ammo" || key === "shield-health";
-                      const additiveOnly = flat || key === "weapon-damage";
+                      const additiveOnly = flat || key === "weapon-damage" || key === "weapon-damage-deployables" || key === "weapon-damage-shields";
                       const calculated = additiveOnly
                         ? calculateAdditiveValue(signedValues)
                         : calculateDiminishedValue(signedValues, { movement: key === "movement-speed" || key === "mount-speed", reload: key === "reload-speed" });
@@ -495,7 +502,7 @@ export default function DiminishingReturnsPage() {
                       return [<article key={effectGroupKey(key, target)} className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-secondary/45">
                         <div className="border-b border-pc-border/70 p-3">
                           <div className="flex flex-wrap items-center justify-between gap-2"><h3 className="text-sm font-semibold text-pc-text">{t(EFFECT_LABELS[key])}</h3><span className="rounded-full border border-pc-border bg-pc-bg px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-pc-text-muted">{t(EFFECT_TARGET_LABELS[target])}</span></div>
-                          <div className="mt-2 grid grid-cols-2 gap-2"><div><div className="text-xs uppercase tracking-wide text-pc-text-muted">{t("diminishingReturns.additive")}</div><div className="mt-0.5 font-mono text-lg font-bold text-pc-text">{flat ? t("diminishingReturns.signedFlatValue", { value: formatNumber(calculated.additive) }) : t("diminishingReturns.percentValue", { value: formatNumber(calculated.additive, { maximumFractionDigits: 2 }) })}</div></div><div><div className="text-xs uppercase tracking-wide text-pc-text-muted">{t("diminishingReturns.afterDiminishing")}</div><div className="mt-0.5 font-mono text-lg font-bold text-pc-accent">{flat ? t("diminishingReturns.signedFlatValue", { value: formatNumber(calculated.final) }) : t("diminishingReturns.percentValue", { value: formatNumber(calculated.final, { maximumFractionDigits: 2 }) })}</div></div></div>
+                          <div className="mt-2 grid grid-cols-2 gap-2"><div><div className="text-xs uppercase tracking-wide text-pc-text-muted">{t("diminishingReturns.additive")}</div><div className="mt-0.5 font-mono text-lg font-bold text-pc-text">{flat ? t("diminishingReturns.signedFlatValue", { value: formatNumber(calculated.additive) }) : t("diminishingReturns.percentValue", { value: formatNumber(calculated.additive, { maximumFractionDigits: 2 }) })}</div></div><div><div className="text-xs uppercase tracking-wide text-pc-text-muted">{t(additiveOnly ? "diminishingReturns.afterStacking" : "diminishingReturns.afterDiminishing")}</div><div className="mt-0.5 font-mono text-lg font-bold text-pc-accent">{flat ? t("diminishingReturns.signedFlatValue", { value: formatNumber(calculated.final) }) : t("diminishingReturns.percentValue", { value: formatNumber(calculated.final, { maximumFractionDigits: 2 }) })}</div></div></div>
                           {!additiveOnly && (calculated.thresholdApplied || hasOpposition) && <div className="mt-2 space-y-1 rounded-lg border border-pc-border/70 bg-pc-bg px-2.5 py-2 text-xs text-pc-text-secondary">
                             {calculated.positive.additive > 0 && <p>{t("diminishingReturns.directionBreakdown", { direction: t("diminishingReturns.positiveGroup"), base: formatNumber(calculated.positive.guaranteedBase, { maximumFractionDigits: 2 }), subject: formatNumber(Math.max(0, calculated.positive.additive - calculated.positive.guaranteedBase), { maximumFractionDigits: 2 }), final: formatNumber(calculated.positive.final, { maximumFractionDigits: 2 }) })}</p>}
                             {calculated.negative.additive > 0 && <p>{t("diminishingReturns.directionBreakdown", { direction: t("diminishingReturns.opposingGroup"), base: formatNumber(calculated.negative.guaranteedBase, { maximumFractionDigits: 2 }), subject: formatNumber(Math.max(0, calculated.negative.additive - calculated.negative.guaranteedBase), { maximumFractionDigits: 2 }), final: formatNumber(calculated.negative.final, { maximumFractionDigits: 2 }) })}</p>}
