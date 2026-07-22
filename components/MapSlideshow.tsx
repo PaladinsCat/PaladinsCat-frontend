@@ -9,6 +9,11 @@ import {
   WALLPAPER_CHANGE_EVENT,
 } from "@/lib/wallpaper-preference";
 import { DEFAULT_WALLPAPERS, type BuiltInWallpaper } from "@/lib/wallpaper-images";
+import {
+  extractWallpaperAccents,
+  HOME_CAT_ACCENT_PROPERTY,
+  HOME_PLATFORM_ACCENT_PROPERTY,
+} from "@/lib/wallpaper-accent";
 
 type WallpaperSlide = BuiltInWallpaper | string;
 
@@ -98,6 +103,32 @@ export default function MapSlideshow() {
   const currentWallpaperImage = typeof currentWallpaper === "string"
     ? `url(${JSON.stringify(currentWallpaper)})`
     : `image-set(url(${JSON.stringify(currentWallpaper.avif)}) type("image/avif"), url(${JSON.stringify(currentWallpaper.png)}) type("image/png"))`;
+  const currentWallpaperAccentSource = typeof currentWallpaper === "string"
+    ? currentWallpaper
+    : currentWallpaper.png;
+
+  useEffect(() => {
+    let active = true;
+    if (!wallpaperEnabled) {
+      document.documentElement.style.removeProperty(HOME_CAT_ACCENT_PROPERTY);
+      document.documentElement.style.removeProperty(HOME_PLATFORM_ACCENT_PROPERTY);
+      return () => { active = false; };
+    }
+
+    void extractWallpaperAccents(currentWallpaperAccentSource).then(({ primary, secondary }) => {
+      if (!active) return;
+      if (primary) document.documentElement.style.setProperty(HOME_CAT_ACCENT_PROPERTY, primary);
+      else document.documentElement.style.removeProperty(HOME_CAT_ACCENT_PROPERTY);
+      if (secondary) document.documentElement.style.setProperty(HOME_PLATFORM_ACCENT_PROPERTY, secondary);
+      else document.documentElement.style.removeProperty(HOME_PLATFORM_ACCENT_PROPERTY);
+    });
+    return () => { active = false; };
+  }, [currentWallpaperAccentSource, wallpaperEnabled]);
+
+  useEffect(() => () => {
+    document.documentElement.style.removeProperty(HOME_CAT_ACCENT_PROPERTY);
+    document.documentElement.style.removeProperty(HOME_PLATFORM_ACCENT_PROPERTY);
+  }, []);
 
   if (!wallpaperEnabled) {
     return <div className="pc-wallpaper-viewport -z-10 bg-pc-bg" aria-hidden="true" />;

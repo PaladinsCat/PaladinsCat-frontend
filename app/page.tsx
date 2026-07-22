@@ -24,6 +24,8 @@ export default function HomePage() {
   const { t } = useLocalization();
   const reduceMotion = useReducedMotion();
   const [siteVersion, setSiteVersion] = useState<SiteVersion | null>(null);
+  const exploreTitleLead = t("home.exploreTitleLead");
+  const exploreTitleAccentStart = exploreTitleLead.lastIndexOf(" ") + 1;
 
   useEffect(() => {
     const load = async () => {
@@ -112,7 +114,7 @@ export default function HomePage() {
               speed={30}
               iterations={15}
               delayFromCenter={false}
-              className="text-pc-accent"
+              className="pc-home-cat-accent"
             />
             <AnimatePresence mode="wait" initial={false}>
               {siteVersion?.version ? (
@@ -162,9 +164,14 @@ export default function HomePage() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.6 }}
           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-          className="mx-auto max-w-2xl text-center text-3xl font-bold tracking-tight text-pc-text sm:text-4xl"
+          className="mx-auto max-w-2xl text-center text-3xl font-bold tracking-tight text-pc-text drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)] sm:text-4xl"
         >
-          <span className="block">{t("home.exploreTitleLead")}</span>
+          <span className="block">
+            {exploreTitleLead.slice(0, exploreTitleAccentStart)}
+            <span className="pc-home-platform-accent">
+              {exploreTitleLead.slice(exploreTitleAccentStart)}
+            </span>
+          </span>
           <span className="mt-1 block">{t("home.exploreTitleRest")}</span>
         </motion.h2>
 

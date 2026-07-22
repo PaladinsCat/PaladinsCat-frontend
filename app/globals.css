@@ -179,6 +179,16 @@ canvas {
   background: rgb(0 0 0 / 60%);
 }
 
+.pc-home-cat-accent {
+  color: var(--pc-home-cat-accent, var(--pc-accent));
+  transition: color 1.5s ease;
+}
+
+.pc-home-platform-accent {
+  color: var(--pc-home-platform-accent, var(--pc-text));
+  transition: color 1.5s ease;
+}
+
 /* ── Component Utilities ── */
 
 /* Card: elevated bg, 16px radius, 1px border, default shadow */
