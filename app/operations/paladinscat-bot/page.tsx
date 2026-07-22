@@ -33,6 +33,9 @@ export default async function PaladinsCatBotPage() {
     ["/current", t("bot.commandCurrent")],
     ["/loadout", t("bot.commandLoadouts")],
     ["/champion", t("bot.commandChampion")],
+    ["/maps", t("bot.commandMaps")],
+    ["/composition", t("bot.commandComposition")],
+    ["/items", t("bot.commandItems")],
   ];
 
   return (
