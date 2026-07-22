@@ -16,6 +16,7 @@ import { championSlug } from "@/lib/utils";
 import { useLobbyTier } from "@/lib/lobby-tier-context";
 import { LoadingIndicator } from "@/components/async-state";
 import { useLocalization } from "@/lib/localization-context";
+import { useRouteSettledLoading } from "@/lib/route-transition-context";
 
 const ROLES = [
   { value: "Frontline", labelKey: "common.roles.frontline", icon: "/images/icons/Class_Front_Line_Icon.avif" },
@@ -45,6 +46,7 @@ export default function SkinStatsPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState<(typeof PAGE_SIZES)[number]>(25);
   const [loading, setLoading] = useState(true);
+  const displayLoading = useRouteSettledLoading(loading);
   const { definition: lobbyTier, ready: lobbyTierReady } = useLobbyTier();
 
   useEffect(() => { fetchChampions({ limit: "200" }).then(setChampions).catch(() => setChampions([])); }, []);
@@ -125,7 +127,7 @@ export default function SkinStatsPage() {
         <section className="min-w-0 xl:self-start">
           <div className="mb-3 xl:min-h-14"><h2 className="text-sm font-bold text-pc-text">{t("skins.brokenTitle")}</h2><p className="text-xs text-pc-text-muted">{t("skins.brokenDescription")}</p></div>
           <div className="flex overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated">
-            {loading ? <div className="flex flex-1 items-center justify-center p-8 text-center"><LoadingIndicator /></div> : visibleBrokenRows.length === 0 ? <div className="flex flex-1 items-center p-6 text-sm text-pc-text-muted">{t("generated.stats.noBrokenSkinData")}</div> : <div className="min-w-0 flex-1 divide-y divide-pc-border/50">{visibleBrokenRows.map((skin) => <Link key={`${skin.championId}-${skin.skinId}`} href={`/champions/${championSlug(skin.championName)}`} className="flex items-center gap-3 px-3 py-2.5 transition-colors hover:bg-pc-bg-secondary/60"><img src={getChampionIconSafe(skin.championName)} alt="" className="h-8 w-8 rounded object-contain" /><div className="min-w-0 flex-1"><div className="truncate text-xs font-medium text-pc-text">{skin.skinName}</div><div className="text-xs text-pc-text-muted">{skin.championName} · {formatNumber(skin.totalPlays)} {t("generated.stats.plays.0effba4")}</div></div><div className="text-right"><div className="text-xs font-bold text-rose-400">{formatPercent(skin.usageShare)}</div><div className="text-xs text-pc-text-muted">{t("generated.stats.wr")} {formatPercent(skin.winRate)}</div></div></Link>)}</div>}
+            {displayLoading ? <div className="flex min-h-48 flex-1 items-center justify-center p-8 text-center"><LoadingIndicator /></div> : visibleBrokenRows.length === 0 ? <div className="flex flex-1 items-center p-6 text-sm text-pc-text-muted">{t("generated.stats.noBrokenSkinData")}</div> : <div className="min-w-0 flex-1 divide-y divide-pc-border/50">{visibleBrokenRows.map((skin) => <Link key={`${skin.championId}-${skin.skinId}`} href={`/champions/${championSlug(skin.championName)}`} className="flex items-center gap-3 px-3 py-2.5 transition-colors hover:bg-pc-bg-secondary/60"><img src={getChampionIconSafe(skin.championName)} alt="" className="h-8 w-8 rounded object-contain" /><div className="min-w-0 flex-1"><div className="truncate text-xs font-medium text-pc-text">{skin.skinName}</div><div className="text-xs text-pc-text-muted">{skin.championName} · {formatNumber(skin.totalPlays)} {t("generated.stats.plays.0effba4")}</div></div><div className="text-right"><div className="text-xs font-bold text-rose-400">{formatPercent(skin.usageShare)}</div><div className="text-xs text-pc-text-muted">{t("generated.stats.wr")} {formatPercent(skin.winRate)}</div></div></Link>)}</div>}
           </div>
         </section>
 
@@ -137,19 +139,19 @@ export default function SkinStatsPage() {
           <div className="min-w-0 flex-1"><div className="truncate text-sm font-semibold text-pc-text">{row.skinName}</div><div className="text-xs text-pc-text-muted">{row.championName} {t("generated.stats.id")}{" "}{row.skinId}</div><div className="mt-1 text-xs text-pc-text-secondary">{formatNumber(row.totalPlays)} {t("generated.stats.plays.25857f6")}{" "}{formatRecord(row.wins, row.losses)}</div></div>
           <span className={row.winRate >= 50 ? "shrink-0 font-bold text-emerald-400" : "shrink-0 font-bold text-rose-400"}>{formatPercent(row.winRate)}</span>
         </Link>)}
-        {!loading && visibleRows.length === 0 && <div className="pc-mobile-panel p-6 text-center text-sm text-pc-text-muted">{t("generated.stats.noSkinStatisticsMatchTheseFilters")}</div>}
-        {loading && <div className="pc-mobile-panel p-6 text-center"><LoadingIndicator /></div>}
+        {!displayLoading && visibleRows.length === 0 && <div className="pc-mobile-panel p-6 text-center text-sm text-pc-text-muted">{t("generated.stats.noSkinStatisticsMatchTheseFilters")}</div>}
+        {displayLoading && <div className="pc-mobile-panel min-h-48 p-6 text-center"><LoadingIndicator /></div>}
       </div>
 
       <div className="hidden overflow-x-auto rounded-xl border border-pc-border bg-pc-bg-elevated md:block">
         <table className="w-full min-w-[680px] text-sm"><thead className="border-b border-pc-border bg-pc-bg-elevated text-left text-xs text-pc-text-muted"><tr><th className="px-3 py-2.5">{t("generated.stats.skin")}</th><th className="px-3 py-2.5">{t("generated.stats.champion")}</th><th className="px-3 py-2.5 text-right">{t("generated.stats.plays")}</th><th className="px-3 py-2.5 text-right">{t("generated.stats.wL")}</th><th className="px-3 py-2.5 text-right">{t("generated.stats.winRate.49a3838")}</th></tr></thead><tbody>
           {pagedRows.map((row) => <tr key={`${row.championId}-${row.skinId}`} className="border-b border-pc-border/50 transition-colors hover:bg-pc-bg-secondary/60"><td className="px-3 py-2"><div className="font-medium text-pc-text">{row.skinName}</div><div className="text-xs text-pc-text-muted">{t("generated.stats.id.89f89c0")}{" "}{row.skinId}</div></td><td className="px-3 py-2"><Link href={`/champions/${championSlug(row.championName)}`} className="flex items-center gap-2 text-pc-text-secondary hover:text-pc-accent"><img src={getChampionIconSafe(row.championName)} alt="" className="h-6 w-6 rounded object-contain" />{row.championName}</Link></td><td className="px-3 py-2 text-right text-pc-text">{formatNumber(row.totalPlays)}</td><td className="px-3 py-2 text-right text-pc-text-secondary">{formatNumber(row.wins)} / {formatNumber(row.losses)}</td><td className={row.winRate >= 50 ? "px-3 py-2 text-right font-semibold text-emerald-400" : "px-3 py-2 text-right font-semibold text-rose-400"}>{formatPercent(row.winRate)}</td></tr>)}
-          {!loading && visibleRows.length === 0 && <tr><td colSpan={5} className="px-4 py-10 text-center text-pc-text-muted">{t("generated.stats.noSkinStatisticsMatchTheseFilters")}</td></tr>}
-          {loading && <tr><td colSpan={5} className="px-4 py-10 text-center"><LoadingIndicator /></td></tr>}
+          {!displayLoading && visibleRows.length === 0 && <tr><td colSpan={5} className="px-4 py-10 text-center text-pc-text-muted">{t("generated.stats.noSkinStatisticsMatchTheseFilters")}</td></tr>}
+          {displayLoading && <tr><td colSpan={5} className="h-48 px-4 py-10 text-center"><LoadingIndicator /></td></tr>}
         </tbody></table>
       </div>
 
-      {!loading && visibleRows.length > 0 && (
+      {!displayLoading && visibleRows.length > 0 && (
         <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated px-3 py-2">
           <div className="text-xs text-pc-text-muted">
             {t("skins.showingStatus", { start: pageStart, end: pageEnd, total: formatNumber(visibleRows.length) })}

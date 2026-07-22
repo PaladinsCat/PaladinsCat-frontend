@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { fetchPosts, fetchTwitchStreams, type Post, type TwitchStream } from "@/lib/api-client";
 import ScrambleText from "@/components/ScrambleText";
-import { formatLocalDateTime } from "@/lib/time-format";
 import { EmptyState, ErrorState } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { LoadingPanel } from "@/components/async-state";
@@ -47,12 +46,6 @@ export default function CommunityPage() {
           <ScrambleText text={t("generated.community.community")} speed={30} iterations={15} delayFromCenter={false} />
         </h1>
         <div className="flex flex-wrap gap-2">
-          <Link
-            href="/community/diminishing-returns"
-            className="pc-touch-target inline-flex items-center rounded-lg border border-pc-accent/40 bg-pc-accent/10 px-4 py-2 text-sm font-semibold text-pc-accent transition-colors hover:bg-pc-accent/20"
-          >
-            {t("diminishingReturns.navLabel")}
-          </Link>
           <Link
             href="/community/create"
             className="pc-touch-target inline-flex items-center px-4 py-2 bg-pc-accent hover:bg-pc-accent-secondary text-white font-semibold rounded-lg transition-colors text-sm"

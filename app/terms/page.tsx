@@ -1,94 +1,43 @@
-"use client";
+import {
+  AlertTriangle,
+  BadgeCheck,
+  Ban,
+  FilePenLine,
+  Gavel,
+  Globe2,
+  KeyRound,
+  MessageSquareText,
+  Scale,
+  Send,
+} from "lucide-react";
+import PublicPolicyPage, { type PublicPolicySection } from "@/components/PublicPolicyPage";
+import { getServerLocalization } from "@/lib/server-localization";
 
-import ScrambleText from "@/components/ScrambleText";
-import { useLocalization } from "@/lib/localization-context";
+const POLICY_DATE = new Date(Date.UTC(2026, 6, 22));
 
-export default function TermsPage() {
-  const { locale, t } = useLocalization();
-  return (
-    <div className="space-y-12 max-w-3xl mx-auto text-center">
+export default async function TermsPage() {
+  const { locale, t } = await getServerLocalization();
+  const sections: PublicPolicySection[] = [
+    { id: "acceptance", title: t("generated.terms.text1AcceptanceOfTerms"), body: t("generated.terms.bodyAcceptanceOfTerms"), icon: BadgeCheck },
+    { id: "service", title: t("generated.terms.text2UseOfTheService"), body: t("generated.terms.bodyUseOfTheService"), icon: Globe2 },
+    { id: "accounts", title: t("generated.terms.text3UserAccounts"), body: t("generated.terms.bodyUserAccounts"), icon: KeyRound },
+    { id: "intellectual-property", title: t("generated.terms.text4IntellectualProperty"), body: t("generated.terms.bodyIntellectualProperty"), icon: Scale },
+    { id: "user-content", title: t("generated.terms.text5UserContent"), body: t("generated.terms.bodyUserContent"), icon: MessageSquareText },
+    { id: "disclaimers", title: t("generated.terms.text6LimitationOfLiability"), body: t("generated.terms.bodyLimitationOfLiability"), icon: AlertTriangle },
+    { id: "third-parties", title: t("generated.terms.text7ThirdPartyServices"), body: t("generated.terms.bodyThirdPartyServices"), icon: Gavel },
+    { id: "moderation", title: t("generated.terms.text8Termination"), body: t("generated.terms.bodyTermination"), icon: Ban },
+    { id: "changes", title: t("generated.terms.text9ChangesToTerms"), body: t("generated.terms.bodyChangesToTerms"), icon: FilePenLine },
+    { id: "contact", title: t("generated.terms.text10Contact"), body: t("generated.terms.bodyContact"), icon: Send, link: { href: "https://discord.gg/VqYMXAR", label: t("generated.terms.discordServer") } },
+  ];
 
-      {/* ── Header ── */}
-      <section className="space-y-2">
-        <h1 className="text-3xl font-bold text-pc-accent">
-          <ScrambleText text={t("generated.terms.termsOfUse")} speed={30} iterations={15} delayFromCenter={false} />
-        </h1>
-        <p className="text-pc-text-muted text-sm drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]">
-          {t("generated.terms.lastUpdated")}{" "}{new Date().toLocaleDateString(locale, { year: "numeric", month: "long", day: "numeric" })}
-        </p>
-      </section>
-
-      {/* ── Sections ── */}
-      <div className="space-y-6 text-left">
-        {[
-          {
-            title: t("generated.terms.text1AcceptanceOfTerms"),
-            body: t("generated.terms.bodyAcceptanceOfTerms"),
-          },
-          {
-            title: t("generated.terms.text2UseOfTheService"),
-            body: t("generated.terms.bodyUseOfTheService"),
-          },
-          {
-            title: t("generated.terms.text3UserAccounts"),
-            body: t("generated.terms.bodyUserAccounts"),
-          },
-          {
-            title: t("generated.terms.text4IntellectualProperty"),
-            body: t("generated.terms.bodyIntellectualProperty"),
-          },
-          {
-            title: t("generated.terms.text5UserContent"),
-            body: t("generated.terms.bodyUserContent"),
-          },
-          {
-            title: t("generated.terms.text6LimitationOfLiability"),
-            body: t("generated.terms.bodyLimitationOfLiability"),
-          },
-          {
-            title: t("generated.terms.text7ThirdPartyServices"),
-            body: t("generated.terms.bodyThirdPartyServices"),
-          },
-          {
-            title: t("generated.terms.text8Termination"),
-            body: t("generated.terms.bodyTermination"),
-          },
-          {
-            title: t("generated.terms.text9ChangesToTerms"),
-            body: t("generated.terms.bodyChangesToTerms"),
-          },
-          {
-            title: t("generated.terms.text10Contact"),
-            body: t("generated.terms.bodyContact"),
-            link: { text: t("generated.terms.discordServer"), href: "https://discord.gg/VqYMXAR" },
-          },
-        ].map((section) => (
-          <div key={section.title} className="bg-pc-bg-elevated border border-pc-border rounded-xl p-5 hover:border-pc-accent-mid transition-colors">
-            <h2 className="text-pc-text font-semibold text-sm mb-2">{section.title}</h2>
-            <p className="text-pc-text-secondary text-sm leading-relaxed">
-              {section.body}
-              {section.link && (
-                <a
-                  href={section.link.href}
-                  className="text-pc-accent hover:underline"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {section.link.text}
-                </a>
-              )}
-              {section.link && "."}
-            </p>
-          </div>
-        ))}
-      </div>
-
-      {/* ── Attribution ── */}
-      <section className="border-t border-pc-border pt-8">
-        <p className="text-pc-text-muted text-sm leading-relaxed drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]">
-          {t("generated.terms.paladinscatIsAFanMadeProjectAndIsNotAffiliated")}</p>
-      </section>
-
-    </div>
-  );
+  return <PublicPolicyPage
+    eyebrow={t("generated.terms.eyebrow")}
+    title={t("generated.terms.termsOfUse")}
+    intro={t("generated.terms.heroIntro")}
+    updatedLabel={t("generated.terms.lastUpdated")}
+    updatedDate={POLICY_DATE.toLocaleDateString(locale, { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" })}
+    badges={[t("generated.terms.badgeData"), t("generated.terms.badgeCommunity"), t("generated.terms.badgeAvailability")]}
+    sections={sections}
+    notice={t("generated.terms.paladinscatIsAFanMadeProjectAndIsNotAffiliated")}
+  />;
 }

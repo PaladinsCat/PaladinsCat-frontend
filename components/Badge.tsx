@@ -32,9 +32,9 @@ const variantStyles: Record<BadgeVariant, { bg: string; text: string; border: st
     border: "rgba(234, 179, 8, 0.2)",
   },
   ranked: {
-    bg: "rgba(51, 182, 177, 0.1)",
+    bg: "color-mix(in srgb, var(--pc-accent) 10%, transparent)",
     text: "var(--pc-accent)",
-    border: "rgba(51, 182, 177, 0.2)",
+    border: "color-mix(in srgb, var(--pc-accent) 20%, transparent)",
   },
   mode: {
     bg: "var(--pc-bg)",

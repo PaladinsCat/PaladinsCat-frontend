@@ -7,10 +7,11 @@ import { fetchChampions, type Champion } from "@/lib/api-client";
 import { STATIC_CHAMPIONS } from "@/lib/static-champions";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
-import { getRankIconPath, getTierColor } from "@/lib/tier-utils";
+import { getRankIconPath } from "@/lib/tier-utils";
 import { getStatQuality } from "@/lib/stat-quality";
 import { useLocalization } from "@/lib/localization-context";
 import { Palette, ShieldAlert, Trophy } from "lucide-react";
+import { ROUTE_CONTENT_SETTLE_MS } from "@/lib/route-transition-context";
 
 const ROLES = [
   { value: "Frontline", labelKey: "common.roles.frontline", icon: "/images/icons/Class_Front_Line_Icon.avif" },
@@ -18,7 +19,6 @@ const ROLES = [
   { value: "Flank", labelKey: "common.roles.flank", icon: "/images/icons/Class_Flank_Icon.avif" },
   { value: "Support", labelKey: "common.roles.support", icon: "/images/icons/Class_Support_Icon.avif" },
 ] as const;
-const TIERS = ["Iron", "Bronze", "Silver", "Gold", "Platinum", "Diamond", "Master", "Grandmaster"] as const;
 
 /** Build the guaranteed base list: all 59 champions, no stats. */
 function buildStaticBase(): Champion[] {
@@ -42,7 +42,6 @@ function buildStaticBase(): Champion[] {
 export default function ChampionTable() {
   const { t , formatNumber} = useLocalization();
   const [champions, setChampions] = useState<Champion[]>(buildStaticBase);
-  const [loading, setLoading] = useState(false);
   const [dbAvailable, setDbAvailable] = useState<boolean | null>(null); // null = checking
   const [filterRole, setFilterRole] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<"name" | "winRate" | "banRate" | "popularity">("name");
@@ -56,6 +55,16 @@ export default function ChampionTable() {
   // Try to fetch DB stats in the background and merge them in
   useEffect(() => {
     let cancelled = false;
+    let revealTimer: number | undefined;
+    const entranceStartedAt = performance.now();
+
+    const revealAfterEntrance = (reveal: () => void) => {
+      const elapsed = performance.now() - entranceStartedAt;
+      const remaining = Math.max(0, ROUTE_CONTENT_SETTLE_MS - elapsed);
+      revealTimer = window.setTimeout(() => {
+        if (!cancelled) reveal();
+      }, remaining);
+    };
 
     async function tryFetchStats() {
       try {
@@ -71,37 +80,42 @@ export default function ChampionTable() {
           // keeps the visible list durable without requiring every fallback name
           // to exactly match the live database string.
           const statsByName = new Map(data.map((d) => [championSlug(d.name), d]));
-          setChampions((prev) =>
-            prev.map((c) => {
-              const dbData = statsByName.get(championSlug(c.name));
-              if (dbData) {
-                return {
-                  ...c,
-                  name: dbData.name || c.name,
-                  winRate: dbData.winRate ?? c.winRate,
-                  pickRate: dbData.pickRate ?? c.pickRate,
-                  banRate: dbData.banRate ?? c.banRate,
-                  rating: dbData.rating ?? c.rating,
-                  totalMatches: dbData.totalMatches ?? c.totalMatches,
-                  totalPlays: dbData.totalPlays ?? c.totalPlays,
-                  wins: dbData.wins ?? c.wins,
-                  imagePath: dbData.imagePath || c.imagePath,
-                };
-              }
-              return c;
-            })
-          );
-          setDbAvailable(true);
+          revealAfterEntrance(() => {
+            setChampions((prev) =>
+              prev.map((c) => {
+                const dbData = statsByName.get(championSlug(c.name));
+                if (dbData) {
+                  return {
+                    ...c,
+                    name: dbData.name || c.name,
+                    winRate: dbData.winRate ?? c.winRate,
+                    pickRate: dbData.pickRate ?? c.pickRate,
+                    banRate: dbData.banRate ?? c.banRate,
+                    rating: dbData.rating ?? c.rating,
+                    totalMatches: dbData.totalMatches ?? c.totalMatches,
+                    totalPlays: dbData.totalPlays ?? c.totalPlays,
+                    wins: dbData.wins ?? c.wins,
+                    imagePath: dbData.imagePath || c.imagePath,
+                  };
+                }
+                return c;
+              })
+            );
+            setDbAvailable(true);
+          });
         } else {
-          setDbAvailable(false);
+          revealAfterEntrance(() => setDbAvailable(false));
         }
       } catch {
-        if (!cancelled) setDbAvailable(false);
+        if (!cancelled) revealAfterEntrance(() => setDbAvailable(false));
       }
     }
 
     tryFetchStats();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+      if (revealTimer !== undefined) window.clearTimeout(revealTimer);
+    };
   }, []);
 
   const filtered = useMemo(() => champions
@@ -241,7 +255,7 @@ export default function ChampionTable() {
             return (
               <Link key={c.id} href={`/champions/${championSlug(c.name)}`}>
                 <div
-                  className="group relative flex items-center gap-3.5 p-3 rounded-xl bg-pc-bg-elevated border border-pc-border hover:border-pc-accent-mid transition-all duration-200 hover:shadow-[0_0_20px_rgba(51,182,177,0.08)]"
+                  className="group relative flex min-h-20 items-center gap-3.5 rounded-xl border border-pc-border bg-pc-bg-elevated p-3 transition-[border-color,box-shadow,background-color] duration-200 hover:border-pc-accent-mid hover:shadow-[0_0_20px_var(--pc-accent-glow-subtle)]"
                   style={quality ? { borderColor: quality.borderColor } : undefined}
                 >
                   {/* Rank icon — top right */}
@@ -281,20 +295,18 @@ export default function ChampionTable() {
                       )}
                     </div>
 
-                    {/* Row 2: stats — wraps on narrow cards */}
-                    <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs">
-                      <span className={quality?.textClass ?? "text-pc-text-muted"} style={quality ? { color: quality.color } : undefined}>
-                        <span className="text-pc-text-muted mr-1">{t("generated.champions.wr")}</span>
+                    {/* Row 2: reserve three stable metric columns while DB stats resolve. */}
+                    <div className={`grid grid-cols-[auto_auto_minmax(0,1fr)] items-center gap-1 text-xs tabular-nums transition-opacity duration-300 ${dbAvailable === null ? "opacity-50" : "opacity-100"}`}>
+                      <span className={`min-w-0 whitespace-nowrap ${quality?.textClass ?? "text-pc-text-muted"}`} style={quality ? { color: quality.color } : undefined}>
+                        <span className="text-pc-text-muted">{t("generated.champions.wr")}</span>
                         {c.winRate != null ? t("generated.champions.value1", { value1: c.winRate }) : "—"}
                       </span>
-                      <span className="text-pc-border">|</span>
-                      <span className={c.banRate != null ? "text-rose-400" : "text-pc-text-muted"}>
-                        <span className="text-pc-text-muted mr-1">{t("generated.champions.br")}</span>
+                      <span className={`ml-0.5 min-w-0 whitespace-nowrap ${c.banRate != null ? "text-rose-400" : "text-pc-text-muted"}`}>
+                        <span className="text-pc-text-muted">{t("generated.champions.br")}</span>
                         {c.banRate != null ? t("generated.champions.value1", { value1: c.banRate }) : "—"}
                       </span>
-                      <span className="text-pc-border">|</span>
-                      <span className="text-pc-text-muted whitespace-nowrap">
-                        <span className="mr-1">{t("generated.champions.plays")}</span>
+                      <span className="min-w-0 whitespace-nowrap text-right text-pc-text-muted">
+                        <span>{t("generated.champions.plays")}</span>
                         <span className="text-pc-text-secondary">{formatPlays(c.totalPlays)}</span>
                       </span>
                     </div>

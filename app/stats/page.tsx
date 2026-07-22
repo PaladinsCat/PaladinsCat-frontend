@@ -20,6 +20,7 @@ import { useLobbyTier } from "@/lib/lobby-tier-context";
 import { ContentFade } from "@/components/async-state";
 import { ChartCardSkeleton, DataCardSkeleton } from "@/components/route-skeleton";
 import { useLocalization } from "@/lib/localization-context";
+import { useRouteSettledLoading } from "@/lib/route-transition-context";
 
 const ROLES = ["Frontline", "Damage", "Flank", "Support"] as const;
 
@@ -104,6 +105,11 @@ export default function StatsPage() {
   const [compositionsLoading, setCompositionsLoading] = useState(true);
   const [brokenSkins, setBrokenSkins] = useState<BrokenSkinStat[]>([]);
   const [brokenSkinsLoading, setBrokenSkinsLoading] = useState(true);
+  const overviewPending = useRouteSettledLoading(overviewLoading);
+  const egpmPending = useRouteSettledLoading(egpmLoading);
+  const skinsPending = useRouteSettledLoading(skinsLoading);
+  const compositionsPending = useRouteSettledLoading(compositionsLoading);
+  const brokenSkinsPending = useRouteSettledLoading(brokenSkinsLoading);
 
   useEffect(() => {
     if (!lobbyTierReady) return;
@@ -219,7 +225,7 @@ export default function StatsPage() {
             <Link href="/stats/performance" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">
               {t("generated.stats.detail")}</Link>
           </div>
-        {overviewLoading ? (
+        {overviewPending ? (
           <DataCardSkeleton rows={5} />
         ) : <ContentFade className="flex-1">{(() => {
           const perfRows = [
@@ -227,7 +233,7 @@ export default function StatsPage() {
             { key: "hpm", label: t("generated.stats.hpm"), color: "#34d399" },
             { key: "gpm", label: t("generated.stats.cpm"), color: "#facc15" },
             { key: "mpm", label: t("generated.stats.spm"), color: "#60a5fa" },
-            { key: "kda", label: t("generated.stats.kda"), color: "#33b6b1" },
+            { key: "kda", label: t("generated.stats.kda"), color: "var(--pc-accent)" },
           ].map(({ key, label, color }) => {
             const d = metrics[key as keyof typeof metrics] as {
               p10: number;
@@ -259,7 +265,7 @@ export default function StatsPage() {
             <h2 className="text-sm font-bold text-pc-text">{t("generated.stats.ecpmByRole")}</h2>
             <Link href="/stats/ecpm" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">{t("generated.stats.detail")}</Link>
           </div>
-          {egpmLoading ? <DataCardSkeleton rows={5} /> : (
+          {egpmPending ? <DataCardSkeleton rows={5} /> : (
             <ContentFade className="flex-1">
               <PerformanceOverviewCard metrics={orderedEgpmBaselines.map((row) => ({
                 key: `egpm-${row.role}`,
@@ -280,7 +286,7 @@ export default function StatsPage() {
             <h2 className="text-sm font-bold text-pc-text">{t("generated.stats.rankedPlayerDistribution")}</h2>
             <Link href="/stats/tiers" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">{t("generated.stats.detail")}</Link>
           </div>
-          {overviewLoading ? <ChartCardSkeleton /> : <ContentFade className="flex-1 bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
+          {overviewPending ? <ChartCardSkeleton /> : <ContentFade className="flex-1 bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
             <div className="flex h-full min-h-48 items-end justify-center gap-1.5 pb-2">
               {displayTiers.map((tier) => {
                 const height = Math.max(4, Math.round((tier.totalPlays / maxTierCount) * 116));
@@ -309,7 +315,7 @@ export default function StatsPage() {
             <Link href="/stats/banrate" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">{t("generated.stats.banRateDetail")}</Link>
           </div>
         </div>
-        {overviewLoading ? <DataCardSkeleton rows={10} columns={2} /> : <ContentFade className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
+        {overviewPending ? <DataCardSkeleton rows={10} columns={2} /> : <ContentFade className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
           <div className="grid grid-cols-1 gap-5 min-[480px]:grid-cols-2 min-[480px]:gap-4">
             {/* Left: Top Win Rate */}
             <div>
@@ -406,7 +412,7 @@ export default function StatsPage() {
                 {t("generated.stats.detail")}</Link>
             </div>
           </div>
-          {overviewLoading ? <DataCardSkeleton rows={4} columns={2} /> : <ContentFade className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 space-y-4">
+          {overviewPending ? <DataCardSkeleton rows={4} columns={2} /> : <ContentFade className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 space-y-4">
             {sortedItems.length === 0 && (
               <div className="text-sm text-pc-text-muted">{t("generated.stats.itemStatsUnavailable")}</div>
             )}
@@ -461,7 +467,7 @@ export default function StatsPage() {
             <h2 className="text-sm font-bold text-pc-text">{t("generated.stats.mapStats")}</h2>
             <Link href="/game/maps" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">{t("generated.stats.detail")}</Link>
           </div>
-          {overviewLoading ? <DataCardSkeleton rows={8} /> : <ContentFade className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
+          {overviewPending ? <DataCardSkeleton rows={8} /> : <ContentFade className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
             {sortedMaps.length === 0 ? (
               <div className="p-4 text-sm text-pc-text-muted">{t("generated.stats.mapStatsUnavailable")}</div>
             ) : (
@@ -498,7 +504,7 @@ export default function StatsPage() {
             </div>
             <Link href="/stats/skins" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">{t("generated.stats.detail")}</Link>
           </div>
-          {skinsLoading ? <DataCardSkeleton rows={5} /> : <ContentFade className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated">
+          {skinsPending ? <DataCardSkeleton rows={5} /> : <ContentFade className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated">
             {skinStats.length === 0 ? <div className="p-4 text-sm text-pc-text-muted">{t("generated.stats.skinStatsUnavailable")}</div> : (
               <div className="divide-y divide-pc-border/50">
                 {skinStats.map((skin) => (
@@ -521,7 +527,7 @@ export default function StatsPage() {
             </div>
             <Link href="/game/compositions" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">{t("generated.stats.detail")}</Link>
           </div>
-          {compositionsLoading ? <DataCardSkeleton rows={5} /> : <ContentFade className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated">
+          {compositionsPending ? <DataCardSkeleton rows={5} /> : <ContentFade className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated">
             {compositions.length === 0 ? <div className="p-4 text-sm text-pc-text-muted">{t("generated.stats.compositionStatsUnavailable")}</div> : (
               <div className="divide-y divide-pc-border/50">
                 {compositions.slice(0, 5).map((composition) => (
@@ -545,7 +551,7 @@ export default function StatsPage() {
               <p className="text-xs text-pc-text-muted">{t("generated.stats.int16OverflowSkinId32767UsageSharePerChampion")}</p>
             </div>
           </div>
-          {brokenSkinsLoading ? <DataCardSkeleton rows={5} /> : <ContentFade className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated">
+          {brokenSkinsPending ? <DataCardSkeleton rows={5} /> : <ContentFade className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated">
             {brokenSkins.length === 0 ? <div className="p-4 text-sm text-pc-text-muted">{t("generated.stats.noBrokenSkinData")}</div> : (
               <div className="divide-y divide-pc-border/50">
                 {brokenSkins.map((skin) => (

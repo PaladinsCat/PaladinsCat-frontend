@@ -9,6 +9,7 @@ import Link from "next/link";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
 import { useLocalization } from "@/lib/localization-context";
+import { useRouteSettledLoading } from "@/lib/route-transition-context";
 
 type SortKey = "championName" | "totalUses" | "winRate" | "avgDpm" | "avgHpm";
 type SortDir = "asc" | "desc";
@@ -20,6 +21,7 @@ export default function LoadoutsPage() {
   const [error, setError] = useState<string | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>("winRate");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const displayLoading = useRouteSettledLoading(loading);
 
   useEffect(() => {
     fetchLoadouts()
@@ -55,7 +57,7 @@ export default function LoadoutsPage() {
         <button type="button" onClick={() => setSortDir((direction) => direction === "asc" ? "desc" : "asc")} className="pc-touch-target mt-[1.35rem] rounded-lg border border-pc-border bg-pc-bg-elevated px-3 text-pc-accent" aria-label={t("generated.stats.sortValue1", { value1: sortDir === "asc" ? t("generated.stats.descending") : t("generated.stats.ascending") })}>{sortDir === "asc" ? "↑" : "↓"}</button>
       </div>
 
-      {loading ? (
+      {displayLoading ? (
         <DataTableSkeleton />
       ) : error ? (
         <ErrorState message={String(error)} />

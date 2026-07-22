@@ -81,7 +81,8 @@ export default function HomeSearch({ onSearchActiveChange }: HomeSearchProps) {
         className="group flex items-center gap-2"
       >
         <div
-          className={`pc-glass relative flex-1 rounded-lg border transition-all duration-200 ease-out hover:scale-[1.02] hover:border-pc-accent-mid hover:shadow-[0_10px_26px_rgba(51,182,177,0.14)] focus-within:scale-[1.02] focus-within:border-pc-accent-mid focus-within:shadow-[0_10px_26px_rgba(51,182,177,0.14)] ${hovered || focused ? "scale-[1.02] border-pc-accent-mid shadow-[0_10px_26px_rgba(51,182,177,0.14)]" : "border-white/5"}`}
+          data-active={hovered || focused ? "true" : undefined}
+          className={`pc-glass pc-home-search-shell relative flex-1 rounded-lg border transition-all duration-200 ease-out hover:scale-[1.02] hover:border-pc-accent-mid focus-within:scale-[1.02] focus-within:border-pc-accent-mid focus-within:ring-1 focus-within:ring-pc-accent/30 ${hovered || focused ? "scale-[1.02] border-pc-accent-mid" : "border-white/5"}`}
         >
           <input
             type="text"
@@ -115,7 +116,7 @@ export default function HomeSearch({ onSearchActiveChange }: HomeSearchProps) {
                 animate={{ opacity: 1, scale: 1, rotate: 0 }}
                 exit={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.7, rotate: 30 }}
                 whileTap={reduceMotion ? undefined : { scale: 0.82 }}
-                className="absolute inset-y-0 right-3 flex cursor-pointer items-center text-pc-text-muted transition-colors hover:text-white"
+                className="absolute inset-y-0 right-3 flex cursor-pointer items-center text-pc-text-muted transition-colors hover:text-pc-accent"
               >
                 <X className="h-4 w-4" aria-hidden="true" />
               </motion.button>
@@ -210,7 +211,7 @@ export default function HomeSearch({ onSearchActiveChange }: HomeSearchProps) {
           whileHover={reduceMotion ? undefined : { scale: 1.08, rotate: -3 }}
           whileTap={reduceMotion ? undefined : { scale: 0.9 }}
           transition={{ type: "spring", stiffness: 350, damping: 18 }}
-          className="pc-glass flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/5 text-pc-text-muted transition-colors hover:border-pc-accent-mid hover:text-pc-accent hover:shadow-[0_0_22px_rgba(51,182,177,0.18)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent"
+          className="pc-glass pc-accent-icon-button flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/5 text-pc-text-muted transition-colors hover:border-pc-accent-mid hover:text-pc-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent"
         >
           <Search className={`h-4 w-4 transition-colors ${hovered || focused ? "text-pc-accent" : "text-pc-text-muted group-hover:text-pc-accent group-focus-within:text-pc-accent"}`} aria-hidden="true" />
         </motion.button>

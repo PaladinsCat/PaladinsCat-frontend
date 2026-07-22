@@ -12,9 +12,11 @@ import {
   type PerformanceMetricKey,
   type PerformanceMetricSummary,
 } from "@/lib/api-client";
-import { LoadingPanel } from "@/components/async-state";
+import { ContentFade } from "@/components/async-state";
+import { RouteSkeleton } from "@/components/route-skeleton";
 import { useLocalization } from "@/lib/localization-context";
 import type { TranslationKey } from "@/lib/localization/messages";
+import { useRouteSettledLoading } from "@/lib/route-transition-context";
 
 /* ── Metric configs ── */
 
@@ -32,7 +34,7 @@ const METRIC_CONFIGS: MetricConfig[] = [
   { key: "hpm", labelKey: "common.metrics.hpm", fullLabelKey: "common.metrics.healingPerMinute", color: "#34d399", fill: "rgba(52,211,153,0.15)", isDecimal: false },
   { key: "gpm", labelKey: "common.metrics.cpm", fullLabelKey: "common.metrics.creditsPerMinute", color: "#facc15", fill: "rgba(250,204,21,0.15)", isDecimal: false },
   { key: "mpm", labelKey: "common.metrics.spm", fullLabelKey: "common.metrics.shieldingPerMinute", color: "#60a5fa", fill: "rgba(96,165,250,0.15)", isDecimal: false },
-  { key: "kda", labelKey: "common.metrics.kda", fullLabelKey: "common.metrics.kdaRatio", color: "#33b6b1", fill: "rgba(51,182,177,0.15)", isDecimal: true },
+  { key: "kda", labelKey: "common.metrics.kda", fullLabelKey: "common.metrics.kdaRatio", color: "var(--pc-accent)", fill: "color-mix(in srgb, var(--pc-accent) 15%, transparent)", isDecimal: true },
 ];
 
 const CLASS_ICONS: Record<string, string> = {
@@ -170,16 +172,20 @@ function MetricPanel({ config }: { config: MetricConfig }) {
   const { t , formatNumber, formatPercent} = useLocalization();
   const [metricSummary, setMetricSummary] = useState<PerformanceMetricSummary>(() => emptySummary());
   const [classData, setClassData] = useState<ClassMetricData[]>(() => buildClassData([], {}));
+  const [loading, setLoading] = useState(true);
+  const displayLoading = useRouteSettledLoading(loading);
 
   useEffect(() => {
     const metric = config.key as PerformanceMetricKey;
     if (!VALID_METRIC_KEYS.has(metric)) {
       setMetricSummary(emptySummary());
       setClassData(buildClassData([], {}));
+      setLoading(false);
       return;
     }
 
     let cancelled = false;
+    setLoading(true);
 
     async function load() {
       const [dashboard, championRows] = await Promise.all([
@@ -193,12 +199,14 @@ function MetricPanel({ config }: { config: MetricConfig }) {
 
       setMetricSummary(normalizeSummary(dashboard.summary));
       setClassData(buildClassData(championRows, classSummaries));
+      setLoading(false);
     }
 
     load().catch(() => {
       if (!cancelled) {
         setMetricSummary(emptySummary());
         setClassData(buildClassData([], {}));
+        setLoading(false);
       }
     });
 
@@ -224,8 +232,10 @@ function MetricPanel({ config }: { config: MetricConfig }) {
   const globalRange = metricSummary.max - metricSummary.min || 1;
   const globalMeanPct = Math.max(0, Math.min(100, ((globalMean - metricSummary.min) / globalRange) * 100));
 
+  if (displayLoading) return <RouteSkeleton variant="dashboard" />;
+
   return (
-    <div className="space-y-6">
+    <ContentFade className="space-y-6">
       {/* Global summary card */}
       <section className="bg-pc-bg-elevated border border-pc-border rounded-xl p-5">
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-5">
@@ -373,7 +383,7 @@ function MetricPanel({ config }: { config: MetricConfig }) {
           );
         })}
       </section>
-    </div>
+    </ContentFade>
   );
 }
 
@@ -414,7 +424,7 @@ function MetricsPageClient() {
 
 export default function MetricsPage() {
   return (
-    <Suspense fallback={<LoadingPanel />}>
+    <Suspense fallback={<RouteSkeleton variant="dashboard" />}>
       <MetricsPageClient />
     </Suspense>
   );

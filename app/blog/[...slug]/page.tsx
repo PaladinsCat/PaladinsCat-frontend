@@ -85,7 +85,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           <span>{post.date}</span>
         </div>
 
-        <div className="blog-markdown text-base leading-8 text-pc-text-secondary [overflow-wrap:anywhere]">
+        <div data-allow-native-drag="true" className="blog-markdown text-base leading-8 text-pc-text-secondary [overflow-wrap:anywhere]">
           <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
             {post.content}
           </ReactMarkdown>

@@ -8,6 +8,7 @@ import { RouteSkeleton } from "@/components/route-skeleton";
 import { fetchBaselines, type BaselineEntry } from "@/lib/api-client";
 import { useLobbyTier } from "@/lib/lobby-tier-context";
 import { useLocalization } from "@/lib/localization-context";
+import { useRouteSettledLoading } from "@/lib/route-transition-context";
 import {
   ECPM_ACTIVITY_THRESHOLDS,
   type EcpmActivityLabelKey,
@@ -35,6 +36,7 @@ export default function EgpmDetailPage() {
   const [rows, setRows] = useState<BaselineEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [sort, setSort] = useState<"role" | "average" | "samples">("role");
+  const displayLoading = useRouteSettledLoading(loading);
 
   useEffect(() => {
     if (!ready) return;
@@ -54,10 +56,10 @@ export default function EgpmDetailPage() {
   }), [rows, sort]);
   const global = rows.find((row) => row.role === "Global") ?? null;
 
-  if (loading) return <RouteSkeleton variant="dashboard" />;
+  if (displayLoading) return <RouteSkeleton variant="dashboard" />;
 
   return (
-    <div className="space-y-7">
+    <ContentFade className="space-y-7">
       <header>
         <Link href="/stats/performance" className="text-sm text-pc-text-secondary transition-colors hover:text-pc-accent">{t("generated.stats.globalStats")}</Link>
         <div className="mt-3">
@@ -134,6 +136,6 @@ export default function EgpmDetailPage() {
           </div>
         </section>
       </>}
-    </div>
+    </ContentFade>
   );
 }

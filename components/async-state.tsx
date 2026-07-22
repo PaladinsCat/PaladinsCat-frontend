@@ -5,20 +5,47 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { AlertTriangle, Inbox, LoaderCircle, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLocalization } from "@/lib/localization-context";
+import { useRouteSettled } from "@/lib/route-transition-context";
 
 const transition = { duration: 0.2, ease: "easeOut" as const };
 
 export function ContentFade({ children, className }: { children: ReactNode; className?: string }) {
   const reduceMotion = useReducedMotion();
+  const routeSettled = useRouteSettled();
   return (
     <motion.div
       initial={reduceMotion ? false : { opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
+      animate={routeSettled ? { opacity: 1, y: 0 } : { opacity: 0, y: 6 }}
       transition={transition}
       className={className}
     >
       {children}
     </motion.div>
+  );
+}
+
+export function StableMetricValue({
+  value,
+  className,
+  minWidthCh = 4,
+}: {
+  value: string | number;
+  className?: string;
+  minWidthCh?: number;
+}) {
+  const reduceMotion = useReducedMotion();
+  return (
+    <span className={cn("inline-grid tabular-nums", className)} style={{ minWidth: `${minWidthCh}ch` }}>
+      <motion.span
+        key={String(value)}
+        className="col-start-1 row-start-1 whitespace-nowrap"
+        initial={reduceMotion ? false : { opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={transition}
+      >
+        {value}
+      </motion.span>
+    </span>
   );
 }
 

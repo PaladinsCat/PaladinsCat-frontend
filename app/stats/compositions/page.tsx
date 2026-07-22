@@ -4,8 +4,9 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { fetchMatchCompositions, type MatchCompositionStat } from "@/lib/api-client";
 import { useLobbyTier } from "@/lib/lobby-tier-context";
-import { LoadingIndicator } from "@/components/async-state";
+import { LoadingIndicator, StableMetricValue } from "@/components/async-state";
 import { useLocalization } from "@/lib/localization-context";
+import { useRouteSettledLoading } from "@/lib/route-transition-context";
 
 type SortKey = "totalMatches" | "winRate";
 const PAGE_SIZES = [10, 25, 50, 100] as const;
@@ -26,6 +27,7 @@ export default function CompositionStatsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const { definition: lobbyTier, ready: lobbyTierReady } = useLobbyTier();
+  const displayLoading = useRouteSettledLoading(loading);
 
   useEffect(() => {
     let cancelled = false;
@@ -77,7 +79,7 @@ export default function CompositionStatsPage() {
           [t("compositions.summary.mostCommon"), rows[0]?.composition ?? "—"],
           [t("compositions.summary.trackedMatches"), formatNumber(rows.reduce((sum, row) => sum + row.totalMatches, 0))],
           [t("compositions.summary.bestSampledWinRate"), rows.length ? formatPercent(Math.max(...rows.filter((row) => row.totalMatches >= 20).map((row) => row.winRate), 0)) : "—"],
-        ].map(([label, value]) => <div key={label} className="rounded-xl border border-pc-border bg-pc-bg-elevated p-4"><div className="text-xs uppercase tracking-wider text-pc-text-muted">{label}</div><div className="mt-1 truncate text-lg font-bold text-pc-text">{value}</div></div>)}
+        ].map(([label, value]) => <div key={label} className="min-h-20 rounded-xl border border-pc-border bg-pc-bg-elevated p-4"><div className="text-xs uppercase tracking-wider text-pc-text-muted">{label}</div><div className="mt-1 min-h-7 truncate text-lg font-bold text-pc-text"><StableMetricValue value={displayLoading ? "—" : value} /></div></div>)}
       </div>
 
       <div className="flex flex-wrap items-center gap-2 lg:hidden">
@@ -92,7 +94,7 @@ export default function CompositionStatsPage() {
           <div className="mt-3 grid grid-cols-4 gap-1.5">{CLASS_COLUMNS.map((column) => <div key={column.key} className="rounded-lg bg-pc-bg-secondary/60 p-2 text-center"><img src={column.icon} alt="" className="mx-auto h-5 w-5 object-contain" /><div className="mt-1 font-mono text-sm font-semibold text-pc-text">{row[column.key]}</div><div className="truncate text-xs uppercase text-pc-text-muted">{t(column.labelKey)}</div></div>)}</div>
           <div className="mt-3 flex items-center justify-between text-xs"><span className="text-pc-text-secondary">{formatNumber(row.totalMatches)} {t("generated.stats.matches.9f3e924")}</span><span className="text-pc-text-muted">{formatRecord(row.wins, row.losses)}</span></div>
         </article>)}
-        {pagedRows.length === 0 && <div className="pc-mobile-panel p-6 text-center text-sm text-pc-text-muted">{loading ? <LoadingIndicator /> : t("generated.stats.compositionStatisticsAreNotAvailableForThisLobbyScopeYet")}</div>}
+        {pagedRows.length === 0 && <div className="pc-mobile-panel min-h-48 p-6 text-center text-sm text-pc-text-muted">{displayLoading ? <LoadingIndicator /> : t("generated.stats.compositionStatisticsAreNotAvailableForThisLobbyScopeYet")}</div>}
       </div>
 
       <div className="mx-auto hidden w-full max-w-5xl overflow-x-auto rounded-xl border border-pc-border bg-pc-bg-elevated shadow-lg shadow-black/10 lg:block">
@@ -119,12 +121,12 @@ export default function CompositionStatsPage() {
               <td className="px-3 py-3 text-right text-pc-text-secondary">{formatNumber(row.wins)} / {formatNumber(row.losses)}</td>
               <td className={row.winRate >= 50 ? "px-4 py-3 text-right font-semibold text-emerald-400" : "px-4 py-3 text-right font-semibold text-rose-400"}>{formatPercent(row.winRate)}</td>
             </tr>)}
-            {pagedRows.length === 0 && <tr><td colSpan={8} className="px-4 py-10 text-center text-pc-text-muted">{loading ? <LoadingIndicator /> : t("generated.stats.compositionStatisticsAreNotAvailableForThisLobbyScopeYet")}</td></tr>}
+            {pagedRows.length === 0 && <tr><td colSpan={8} className="h-48 px-4 py-10 text-center text-pc-text-muted">{displayLoading ? <LoadingIndicator /> : t("generated.stats.compositionStatisticsAreNotAvailableForThisLobbyScopeYet")}</td></tr>}
           </tbody>
         </table>
       </div>
 
-      {!loading && sorted.length > 0 && (
+      {!displayLoading && sorted.length > 0 && (
         <nav className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated px-3 py-2" aria-label={t("generated.changelog.pagination")}>
           <div className="text-xs text-pc-text-muted">
             {t("skins.showingStatus", { start: pageStart, end: pageEnd, total: formatNumber(sorted.length) })}

@@ -6,8 +6,9 @@ import { fetchItemDetail, fetchItems, type ItemDetailStats, type ItemStat } from
 import { loadBuildReferenceData, type BuildItemCategory, type BuildItemReference } from "@/lib/build-reference";
 import { getStatQuality } from "@/lib/stat-quality";
 import ContextBackLink from "@/components/context-back-link";
-import { LoadingPanel } from "@/components/async-state";
+import { RouteSkeleton } from "@/components/route-skeleton";
 import { useLocalization } from "@/lib/localization-context";
+import { useRouteSettledLoading } from "@/lib/route-transition-context";
 
 function itemIcon(name: string) { return `/images/items/${name.replace(/\s+/g, "_")}_Icon.avif`; }
 function weightedWinRate(items: ItemStat[]) {
@@ -36,6 +37,7 @@ export default function ItemDetailPage() {
   const [references, setReferences] = useState<BuildItemReference[]>([]);
   const [selectedRole, setSelectedRole] = useState<ChampionRole | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const displayLoading = useRouteSettledLoading(!loaded);
   const itemId = Number(params.itemId);
 
   useEffect(() => {
@@ -73,7 +75,7 @@ export default function ItemDetailPage() {
   const categoryFor = (item: ItemStat): BuildItemCategory => referenceById.get(item.itemId)?.category ?? referenceByName.get(item.itemName.toLowerCase())?.category ?? "Utility";
   const currentCategory = detail ? referenceById.get(detail.itemId)?.category ?? referenceByName.get(detail.itemName.toLowerCase())?.category ?? "Utility" : "Utility";
 
-  if (!detail) return loaded ? <div className="pc-card py-12 text-center text-sm text-pc-text-secondary">{t("generated.stats.noItemStatisticsAreAvailableForThisQueue")}</div> : <LoadingPanel />;
+  if (!detail) return displayLoading ? <RouteSkeleton variant="detail" /> : <div className="pc-card py-12 text-center text-sm text-pc-text-secondary">{t("generated.stats.noItemStatisticsAreAvailableForThisQueue")}</div>;
   const overallQuality = getStatQuality(detail.winRate, 1, 1);
   const chartSlots = [...detail.slots].sort((a, b) => Number(a.slot) - Number(b.slot));
   const chartLevels = [...detail.levels].sort((a, b) => Number(b.level) - Number(a.level));

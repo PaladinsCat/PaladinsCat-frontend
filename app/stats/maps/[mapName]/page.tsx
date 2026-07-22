@@ -18,7 +18,9 @@ import { getStatQuality } from "@/lib/stat-quality";
 import { mapImagePath } from "@/lib/map-images";
 import { STATIC_CHAMPIONS } from "@/lib/static-champions";
 import { LoadingIndicator, LoadingPanel } from "@/components/async-state";
+import { RouteSkeleton } from "@/components/route-skeleton";
 import { useLocalization } from "@/lib/localization-context";
+import { useRouteSettledLoading } from "@/lib/route-transition-context";
 
 function itemIcon(name: string) { return `/images/items/${name.replace(/\s+/g, "_")}_Icon.avif`; }
 function rateColor(rate: number) { return getStatQuality(rate, 1, 1).color; }
@@ -136,6 +138,7 @@ export default function MapDetailPage() {
   const mapName = decodeURIComponent(params.mapName);
   const [detail, setDetail] = useState<MapDetailStats | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const displayLoading = useRouteSettledLoading(!loaded);
   const [activeSection, setActiveSection] = useState<MapSection>("champions");
   const [championRole, setChampionRole] = useState<string | null>(null);
   const [championSort, setChampionSort] = useState<ChampionSort>("winRate");
@@ -217,7 +220,7 @@ export default function MapDetailPage() {
     comparisonRequests.current[section] = request;
   }
 
-  if (!detail) return loaded ? <div className="pc-card py-12 text-center text-sm text-pc-text-secondary">{t("generated.stats.mapStatisticsAreUnavailable")}</div> : <LoadingPanel />;
+  if (!detail) return displayLoading ? <RouteSkeleton variant="detail" /> : <div className="pc-card py-12 text-center text-sm text-pc-text-secondary">{t("generated.stats.mapStatisticsAreUnavailable")}</div>;
   const { map } = detail;
 
   return (

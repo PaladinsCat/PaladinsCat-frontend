@@ -8,6 +8,7 @@ import Link from "next/link";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
 import { useLocalization } from "@/lib/localization-context";
+import { useRouteSettledLoading } from "@/lib/route-transition-context";
 
 export default function TalentsPage() {
   const { t , formatNumber, formatPercent} = useLocalization();
@@ -15,6 +16,7 @@ export default function TalentsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedChampion, setSelectedChampion] = useState<string | null>(null);
+  const displayLoading = useRouteSettledLoading(loading);
 
   useEffect(() => {
     fetchTalents()
@@ -52,7 +54,7 @@ export default function TalentsPage() {
           </button>
         ))}
       </div>
-      {loading ? (
+      {displayLoading ? (
         <DataTableSkeleton />
       ) : error ? (
         <ErrorState message={String(error)} />
@@ -67,7 +69,7 @@ export default function TalentsPage() {
           </Link>)}
         </div>
       )}
-      {!loading && !error && filtered.length > 0 && (
+      {!displayLoading && !error && filtered.length > 0 && (
         <div className="hidden overflow-x-auto sm:block">
           <table className="w-full text-left">
             <thead className="bg-pc-bg-elevated">

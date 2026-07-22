@@ -134,7 +134,7 @@ function ChampionCard({ champion }: { champion: PlayerChampionStat }) {
   const role = ROLES.find((entry) => entry.value === champion.role);
   const masteryLevel = championMasteryLevelFromXp(champion.xp);
   return (
-    <article className="group relative rounded-xl border border-pc-border bg-pc-bg-elevated p-3 transition-all duration-200 hover:border-pc-accent-mid hover:shadow-[0_0_20px_rgba(51,182,177,0.08)]">
+    <article className="group relative rounded-xl border border-pc-border bg-pc-bg-elevated p-3 transition-all duration-200 hover:border-pc-accent-mid hover:shadow-[0_0_20px_var(--pc-accent-glow-subtle)]">
       <div className="flex items-center gap-3.5">
         <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-pc-border/50 bg-pc-bg-elevated transition-colors group-hover:border-pc-accent-deep/50"><img src={getChampionIconSafe(champion.championName)} alt="" className="h-full w-full object-contain" /></div>
         <div className="min-w-0 flex-1">

@@ -6,6 +6,7 @@ import { getRankIconPath, TIER_NAMES } from "@/lib/tier-utils";
 import { EmptyState, ErrorState } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { useLocalization } from "@/lib/localization-context";
+import { useRouteSettledLoading } from "@/lib/route-transition-context";
 
 const EMPTY_SUMMARY: TierSummary = {
   profilePlayers: 0,
@@ -138,6 +139,7 @@ export default function TiersPage() {
   const [summary, setSummary] = useState<TierSummary>(EMPTY_SUMMARY);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const displayLoading = useRouteSettledLoading(loading);
 
   useEffect(() => {
     Promise.all([
@@ -182,7 +184,7 @@ export default function TiersPage() {
         <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.stats.tierDistribution")}</h1>
       </div>
 
-      {loading ? (
+      {displayLoading ? (
         <RouteSkeleton variant="dashboard" />
       ) : error ? (
         <ErrorState message={error} />

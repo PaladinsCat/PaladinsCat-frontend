@@ -7,6 +7,9 @@ import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
 import { useLocalization } from "@/lib/localization-context";
 import type { TranslationKey } from "@/lib/localization/messages";
+import { ContentFade } from "@/components/async-state";
+import { RouteSkeleton } from "@/components/route-skeleton";
+import { useRouteSettledLoading } from "@/lib/route-transition-context";
 
 type RateMetricKey = "winRate" | "banRate";
 
@@ -112,6 +115,8 @@ function pctDiff(value: number, base: number): number {
 export default function ChampionRateDetailPage({ config }: { config: RateMetricConfig }) {
   const { t, formatNumber, formatPercent: formatRate, formatSignedPercent } = useLocalization();
   const [champions, setChampions] = useState<Champion[]>([]);
+  const [loading, setLoading] = useState(true);
+  const displayLoading = useRouteSettledLoading(loading);
 
   useEffect(() => {
     let cancelled = false;
@@ -122,6 +127,9 @@ export default function ChampionRateDetailPage({ config }: { config: RateMetricC
       })
       .catch(() => {
         if (!cancelled) setChampions([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
       });
 
     return () => {
@@ -136,8 +144,10 @@ export default function ChampionRateDetailPage({ config }: { config: RateMetricC
   const totalMatches = allRows.reduce((sum, row) => sum + row.matches, 0);
   const totalBans = allRows.reduce((sum, row) => sum + row.bans, 0);
 
+  if (displayLoading) return <RouteSkeleton variant="dashboard" />;
+
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-6">
+    <ContentFade className="mx-auto w-full max-w-6xl space-y-6">
       <div>
         <Link href="/champions" className="text-pc-accent text-xs hover:underline mb-2 inline-block">{t("nav.champions")}</Link>
         <h1 className="pc-heading pc-heading-lg text-pc-accent">{t(config.labelKey)}</h1>
@@ -271,6 +281,6 @@ export default function ChampionRateDetailPage({ config }: { config: RateMetricC
           );
         })}
       </section>
-    </div>
+    </ContentFade>
   );
 }

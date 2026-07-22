@@ -1,4 +1,5 @@
 import type { HTMLAttributes, ReactNode } from "react";
+import { StableMetricValue } from "@/components/async-state";
 
 export interface CardProps extends HTMLAttributes<HTMLDivElement> {
   title?: string;
@@ -60,7 +61,7 @@ export function StatsGrid({ items }: { items: StatsItem[] }) {
     <div className="pc-stats-grid">
       {items.map((item) => (
         <div key={item.label}>
-          <div className="pc-stats-value">{item.value}</div>
+          <div className="pc-stats-value"><StableMetricValue value={item.value} /></div>
           <div className="pc-stats-label">{item.label}</div>
         </div>
       ))}

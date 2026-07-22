@@ -4,9 +4,10 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { fetchKdaHistory, fetchDpmHistory, fetchGlickoHistory, type KdaHistoryEntry, type DpmHistoryEntry, type GlickoHistoryEntry } from "@/lib/api-client";
-import { formatLocalMonthDay } from "@/lib/time-format";
-import { LoadingPanel } from "@/components/async-state";
 import { useLocalization } from "@/lib/localization-context";
+import { useRouteSettledLoading } from "@/lib/route-transition-context";
+import { RouteSkeleton } from "@/components/route-skeleton";
+import { ContentFade } from "@/components/async-state";
 
 export default function PlayerChartsPage({ params }: { params: Promise<{ id: string }> }) {
   const { t , formatMonthDay} = useLocalization();
@@ -17,6 +18,7 @@ export default function PlayerChartsPage({ params }: { params: Promise<{ id: str
   const [error, setError] = useState<string | null>(null);
   const [days, setDays] = useState(30);
   const [id, setId] = useState<string | null>(null);
+  const displayLoading = useRouteSettledLoading(loading);
 
   useEffect(() => {
     params.then((p) => setId(p.id));
@@ -46,11 +48,11 @@ export default function PlayerChartsPage({ params }: { params: Promise<{ id: str
   }, [loadData]);
 
 
-  if (loading) return <LoadingPanel />;
+  if (displayLoading) return <RouteSkeleton variant="detail" />;
   if (error) return <div className="text-center py-12 text-pc-text-muted">{error}</div>;
 
   return (
-    <div className="space-y-8">
+    <ContentFade className="space-y-8">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link href={`/players/${id}`} className="text-pc-text-secondary hover:text-pc-accent transition-colors">
@@ -136,6 +138,6 @@ export default function PlayerChartsPage({ params }: { params: Promise<{ id: str
           </ResponsiveContainer>
         )}
       </div>
-    </div>
+    </ContentFade>
   );
 }

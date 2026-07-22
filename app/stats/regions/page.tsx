@@ -3,15 +3,17 @@
 import { useEffect, useState } from "react";
 import Card from "@/components/Card";
 import { fetchRegions, type RegionStat } from "@/lib/api-client";
-import { EmptyState, ErrorState } from "@/components/async-state";
+import { ContentFade, EmptyState, ErrorState } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { useLocalization } from "@/lib/localization-context";
+import { useRouteSettledLoading } from "@/lib/route-transition-context";
 
 export default function RegionsPage() {
   const { t , formatPercent} = useLocalization();
   const [regions, setRegions] = useState<RegionStat[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const displayLoading = useRouteSettledLoading(loading);
 
   useEffect(() => {
     fetchRegions()
@@ -24,14 +26,14 @@ export default function RegionsPage() {
     <div className="space-y-6">
       <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.stats.regionalMeta")}</h1>
 
-      {loading ? (
+      {displayLoading ? (
         <RouteSkeleton variant="dashboard" />
       ) : error ? (
         <ErrorState message={String(error)} />
       ) : regions.length === 0 ? (
         <EmptyState title={t("generated.stats.noRegionalStatistics")} description={t("generated.stats.regionalChampionTrendsWillAppearWhenRankedDataIsAvailable")} />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <ContentFade className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {regions.map((r) => (
             <Card key={r.regionCode} title={r.regionName}>
               <p className="pc-body text-sm mb-4">{r.continent}</p>
@@ -45,7 +47,7 @@ export default function RegionsPage() {
               </div>
             </Card>
           ))}
-        </div>
+        </ContentFade>
       )}
     </div>
   );

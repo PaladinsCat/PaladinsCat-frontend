@@ -13,6 +13,7 @@ import {
   extractWallpaperAccents,
   HOME_CAT_ACCENT_PROPERTY,
   HOME_PLATFORM_ACCENT_PROPERTY,
+  HOME_THIRD_ACCENT_PROPERTY,
 } from "@/lib/wallpaper-accent";
 
 type WallpaperSlide = BuiltInWallpaper | string;
@@ -112,15 +113,18 @@ export default function MapSlideshow() {
     if (!wallpaperEnabled) {
       document.documentElement.style.removeProperty(HOME_CAT_ACCENT_PROPERTY);
       document.documentElement.style.removeProperty(HOME_PLATFORM_ACCENT_PROPERTY);
+      document.documentElement.style.removeProperty(HOME_THIRD_ACCENT_PROPERTY);
       return () => { active = false; };
     }
 
-    void extractWallpaperAccents(currentWallpaperAccentSource).then(({ primary, secondary }) => {
+    void extractWallpaperAccents(currentWallpaperAccentSource).then(({ primary, secondary, tertiary }) => {
       if (!active) return;
       if (primary) document.documentElement.style.setProperty(HOME_CAT_ACCENT_PROPERTY, primary);
       else document.documentElement.style.removeProperty(HOME_CAT_ACCENT_PROPERTY);
       if (secondary) document.documentElement.style.setProperty(HOME_PLATFORM_ACCENT_PROPERTY, secondary);
       else document.documentElement.style.removeProperty(HOME_PLATFORM_ACCENT_PROPERTY);
+      if (tertiary) document.documentElement.style.setProperty(HOME_THIRD_ACCENT_PROPERTY, tertiary);
+      else document.documentElement.style.removeProperty(HOME_THIRD_ACCENT_PROPERTY);
     });
     return () => { active = false; };
   }, [currentWallpaperAccentSource, wallpaperEnabled]);
@@ -128,6 +132,7 @@ export default function MapSlideshow() {
   useEffect(() => () => {
     document.documentElement.style.removeProperty(HOME_CAT_ACCENT_PROPERTY);
     document.documentElement.style.removeProperty(HOME_PLATFORM_ACCENT_PROPERTY);
+    document.documentElement.style.removeProperty(HOME_THIRD_ACCENT_PROPERTY);
   }, []);
 
   if (!wallpaperEnabled) {
@@ -148,13 +153,13 @@ export default function MapSlideshow() {
 
   return (
     <div className="pc-wallpaper-dimmed pc-wallpaper-viewport -z-10 overflow-hidden" aria-hidden="true" style={{ backgroundColor: "var(--pc-bg)" }}>
-      <AnimatePresence>
+      <AnimatePresence initial={false} mode="sync">
         <motion.div
           key={currentWallpaperKey}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 1.5 }}
+          transition={{ duration: 2.1, ease: [0.4, 0, 0.2, 1] }}
           className="pc-wallpaper-image"
           style={{
             position: "absolute",
@@ -163,6 +168,9 @@ export default function MapSlideshow() {
             width: "100%",
             height: "100%",
             backgroundImage: currentWallpaperImage,
+            backfaceVisibility: "hidden",
+            transform: "translateZ(0)",
+            willChange: "opacity",
           }}
         />
       </AnimatePresence>

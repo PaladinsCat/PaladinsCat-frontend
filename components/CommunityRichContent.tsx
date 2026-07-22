@@ -36,7 +36,7 @@ export default function CommunityRichContent({ content }: { content: string }) {
   const { t } = useLocalization();
   const parts = content.split(/(https?:\/\/[^\s<]+)/gi);
   return (
-    <div className="space-y-4 whitespace-pre-wrap break-words text-pc-text">
+    <div data-allow-native-drag="true" className="space-y-4 whitespace-pre-wrap break-words text-pc-text">
       <p>
         {parts.map((part, index) => {
           if (!/^https?:\/\//i.test(part)) return <Fragment key={index}>{part}</Fragment>;

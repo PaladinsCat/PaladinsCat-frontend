@@ -8,11 +8,13 @@
   --color-pc-bg: #1b1b1f;
   --color-pc-bg-secondary: #161618;
   --color-pc-bg-elevated: #202127;
-  --color-pc-accent: #33b6b1;
-  --color-pc-accent-secondary: #268d89;
-  --color-pc-accent-deep: #186360;
-  --color-pc-accent-mid: #23837f;
-  --color-pc-accent-light: #99dbd8;
+  --color-pc-accent: var(--pc-accent);
+  --color-pc-accent-secondary: var(--pc-accent-secondary);
+  --color-pc-accent-deep: var(--pc-accent-deep);
+  --color-pc-accent-mid: var(--pc-accent-mid);
+  --color-pc-accent-light: var(--pc-accent-light);
+  --color-pc-accent-alt: var(--pc-accent-alt);
+  --color-pc-accent-third: var(--pc-accent-third);
   --color-pc-border: #3c3f44;
   --color-pc-text: #dfdfd6;
   --color-pc-text-secondary: #98989f;
@@ -29,12 +31,18 @@
   --pc-bg-secondary: oklch(0.140 0.002 280); /* #161618 — secondary surfaces (nav, hero bar) */
   --pc-bg-elevated: oklch(0.210 0.005 280);   /* #202127 — cards, elevated surfaces */
 
-  /* Accent — teal brand colors, from deep to light */
-  --pc-accent: oklch(0.720 0.060 185);        /* #33b6b1 — primary accent (buttons, links, active states) */
-  --pc-accent-secondary: oklch(0.620 0.055 185); /* #268d89 — hover state for accent */
-  --pc-accent-deep: oklch(0.450 0.045 185);   /* #186360 — borders, subtle accents */
-  --pc-accent-mid: oklch(0.560 0.055 185);    /* #23837f — card hover borders */
-  --pc-accent-light: oklch(0.850 0.040 185);  /* #99dbd8 — light text accents, icons */
+  /* Accent — wallpaper colors feed the global brand palette. Removing the
+     wallpaper properties restores the original teal values automatically. */
+  --pc-accent: var(--pc-home-cat-accent, oklch(0.720 0.060 185));
+  --pc-accent-secondary: color-mix(in oklch, var(--pc-accent) 82%, black);
+  --pc-accent-deep: color-mix(in oklch, var(--pc-accent) 58%, black);
+  --pc-accent-mid: color-mix(in oklch, var(--pc-accent) 72%, black);
+  --pc-accent-light: color-mix(in oklch, var(--pc-accent) 62%, white);
+  --pc-accent-alt: var(--pc-home-platform-accent, oklch(0.700 0.110 295));
+  --pc-accent-third: var(--pc-home-third-accent, oklch(0.760 0.120 75));
+  --pc-accent-glow-subtle: color-mix(in srgb, var(--pc-accent) 8%, transparent);
+  --pc-accent-glow-soft: color-mix(in srgb, var(--pc-accent) 14%, transparent);
+  --pc-accent-glow: color-mix(in srgb, var(--pc-accent) 18%, transparent);
 
   /* Border — subtle separation between elements */
   --pc-border: oklch(0.420 0.010 280);        /* #3c3f44 — default borders */
@@ -105,6 +113,23 @@ body {
   color: var(--pc-text);
   /* Inter is primary font — loaded from Google Fonts above */
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Application chrome should feel like an interface, not a draggable document.
+   Inputs and explicitly marked reading surfaces retain normal text selection. */
+body :where(img, svg, a) {
+  -webkit-user-drag: none;
+}
+
+body :where(input, textarea, [contenteditable="true"], [data-allow-native-drag="true"], [data-allow-native-drag="true"] *) {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+body :where([data-allow-native-drag="true"], [data-allow-native-drag="true"] *, [draggable="true"], [draggable="true"] *) {
+  -webkit-user-drag: auto;
 }
 
 html,
@@ -113,11 +138,30 @@ body {
   overflow-x: clip;
 }
 
-/* Shared PaladinsCat scrollbar treatment. This was originally injected only
-   by the home search; keeping it global makes page and nested-panel scrolling
-   use the same compact teal design. */
+html {
+  /* Reserve the native scrollbar lane even while wallpaper mode locks scroll,
+     so centered content never shifts as the scrollbar appears or disappears. */
+  scrollbar-gutter: stable;
+}
+
+/* The home wallpaper owns the full visual viewport. Hide the native scrollbar
+   there and render a fixed overlay thumb instead, so scrolling never changes
+   layout width or exposes a browser-painted gutter beside the wallpaper. */
+html:has(.pc-home-root) {
+  scrollbar-gutter: auto;
+  scrollbar-width: none;
+}
+
+html:has(.pc-home-root)::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* Shared PaladinsCat scrollbar treatment. Wallpaper colors flow through the
+   root accent properties; pages without a sampled palette retain the original
+   teal treatment through the nested fallbacks. */
 * {
-  scrollbar-color: var(--pc-accent-secondary) var(--pc-bg-elevated);
+  scrollbar-color: var(--pc-home-cat-accent, var(--pc-accent-secondary)) var(--pc-bg-elevated);
   scrollbar-width: thin;
 }
 
@@ -129,15 +173,17 @@ body {
 *::-webkit-scrollbar-track {
   background: var(--pc-bg-elevated);
   box-shadow: inset 1px 0 var(--pc-border);
+  transition: background 240ms ease, box-shadow 240ms ease;
 }
 
 *::-webkit-scrollbar-thumb {
-  background: var(--pc-accent-secondary);
+  background: var(--pc-home-cat-accent, var(--pc-accent-secondary));
   border-radius: 999px;
+  transition: background 240ms ease;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background: var(--pc-accent);
+  background: var(--pc-home-platform-accent, var(--pc-accent));
 }
 
 *::-webkit-scrollbar-button {
@@ -159,7 +205,11 @@ canvas {
 
 .pc-wallpaper-viewport {
   position: fixed;
-  inset: 0;
+  /* Showcase mode temporarily removes the native gutter, so the visual
+     viewport can be covered directly without creating horizontal overflow. */
+  inset: 0 auto auto 0;
+  width: 100vw;
+  height: 100dvh;
 }
 
 .pc-wallpaper-image {
@@ -176,7 +226,212 @@ canvas {
   inset: 0;
   content: "";
   pointer-events: none;
-  background: rgb(0 0 0 / 60%);
+  background: #000;
+  opacity: 0.6;
+  transition: opacity 280ms ease-out;
+  will-change: opacity;
+}
+
+/* Clicking the home logo enters a reversible wallpaper showcase. Reducing the
+   tint from 60% to 30% halves the dimming without applying a costly filter to
+   the fixed image layer. */
+html[data-home-wallpaper-phase] {
+  overflow-y: auto;
+  overscroll-behavior: none;
+  scrollbar-color: transparent transparent;
+}
+
+/* The surrounding UI and brand are fully invisible when this flag is added or
+   removed, so the native gutter can safely disappear without a visible layout
+   shift. With scrolling locked there is no reason to reserve an empty lane. */
+html[data-home-wallpaper-mode="true"] {
+  overflow-x: hidden;
+  overflow-y: hidden;
+  scrollbar-gutter: auto;
+}
+
+html[data-home-wallpaper-phase]::-webkit-scrollbar-track,
+html[data-home-wallpaper-phase]::-webkit-scrollbar-thumb {
+  background: transparent;
+  box-shadow: none;
+}
+
+.pc-home-overlay-scrollbar {
+  position: fixed;
+  inset: 0 0 0 auto;
+  z-index: 80;
+  width: 10px;
+  height: 100dvh;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 180ms ease-out;
+}
+
+.pc-home-overlay-scrollbar[data-visible="true"] {
+  opacity: 1;
+}
+
+.pc-home-overlay-scrollbar > span {
+  position: absolute;
+  top: 0;
+  right: 2px;
+  width: 6px;
+  border-radius: 999px;
+  background: var(--pc-home-cat-accent, var(--pc-accent-secondary));
+  box-shadow: 0 0 10px color-mix(in srgb, var(--pc-home-cat-accent, var(--pc-accent-secondary)) 28%, transparent);
+  transition: height 180ms ease-out, background 1.2s ease, box-shadow 1.2s ease;
+  will-change: transform;
+}
+
+html[data-home-wallpaper-phase] .pc-home-overlay-scrollbar {
+  opacity: 0;
+}
+
+html[data-home-wallpaper-phase="fading"] .pc-wallpaper-dimmed::after,
+html[data-home-wallpaper-phase="returning"] .pc-wallpaper-dimmed::after,
+html[data-home-wallpaper-mode="true"] .pc-wallpaper-dimmed::after {
+  opacity: 0.3;
+}
+
+@keyframes pc-home-ui-fade {
+  0% {
+    opacity: 1;
+    visibility: visible;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes pc-home-ui-reveal {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+html[data-home-wallpaper-phase="fading"] body > :not(.pc-wallpaper-viewport):not(main):not(script),
+html[data-home-wallpaper-phase="fading"] .pc-home-search,
+html[data-home-wallpaper-phase="fading"] .pc-home-explore,
+html[data-home-wallpaper-phase="fading"] .pc-home-tagline,
+html[data-home-wallpaper-phase="fading"] .pc-home-version {
+  pointer-events: none;
+  animation: pc-home-ui-fade 180ms ease-out forwards;
+  will-change: opacity;
+}
+
+/* Framer transforms and glass filters promote these pieces to independent
+   compositor layers. Fade the promoted layers themselves as well as their
+   wrappers so the input surface and card arrows cannot linger for a frame. */
+html[data-home-wallpaper-phase="fading"] .pc-home-search > *,
+html[data-home-wallpaper-phase="fading"] .pc-home-feature-card,
+html[data-home-wallpaper-phase="fading"] .pc-home-card-arrow {
+  pointer-events: none !important;
+  animation: pc-home-ui-fade 120ms linear forwards !important;
+  will-change: opacity;
+}
+
+/* Backdrop-filter and large blurred auras can remain on separate compositor
+   layers after their parent starts fading. Remove those effects immediately;
+   the card/input surfaces themselves still participate in the clean fade. */
+html[data-home-wallpaper-phase="fading"] .pc-home-search .pc-glass,
+html[data-home-wallpaper-phase="fading"] .pc-home-explore .pc-glass {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+html[data-home-wallpaper-phase="fading"] .pc-home-card-aura {
+  display: none !important;
+}
+
+html[data-home-wallpaper-phase="settling"] body > :not(.pc-wallpaper-viewport):not(main):not(script),
+html[data-home-wallpaper-phase="settling"] .pc-home-search,
+html[data-home-wallpaper-phase="settling"] .pc-home-explore,
+html[data-home-wallpaper-phase="settling"] .pc-home-tagline,
+html[data-home-wallpaper-phase="settling"] .pc-home-version {
+  pointer-events: none;
+  animation: pc-home-ui-reveal 320ms ease-out both;
+  will-change: opacity;
+}
+
+html[data-home-wallpaper-phase="fading"] nextjs-portal,
+html[data-home-wallpaper-phase="settling"] nextjs-portal {
+  display: none !important;
+}
+
+html[data-home-wallpaper-mode="true"] body > :not(.pc-wallpaper-viewport):not(main):not(script) {
+  pointer-events: none;
+  display: none !important;
+}
+
+html[data-home-wallpaper-mode="true"] nextjs-portal {
+  display: none !important;
+}
+
+/* Restore the normal document geometry before the brand travels home. Keeping
+   the surrounding UI invisible (rather than display:none) gives Framer the
+   exact original center as its layout target and prevents a final position
+   jump when the page returns. */
+html[data-home-wallpaper-phase="returning"] body > :not(.pc-wallpaper-viewport):not(main):not(script),
+html[data-home-wallpaper-phase="returning"] .pc-home-search,
+html[data-home-wallpaper-phase="returning"] .pc-home-explore,
+html[data-home-wallpaper-phase="returning"] .pc-home-tagline,
+html[data-home-wallpaper-phase="returning"] .pc-home-version {
+  pointer-events: none;
+  visibility: hidden;
+}
+
+html[data-home-wallpaper-phase="returning"] nextjs-portal {
+  display: none !important;
+}
+
+.pc-home-brand {
+  width: fit-content;
+  margin-inline: auto;
+}
+
+.pc-home-root[data-wallpaper-mode="true"] .pc-home-brand {
+  position: fixed;
+  right: max(clamp(1.5rem, 4vw, 4rem), env(safe-area-inset-right));
+  bottom: max(clamp(1.5rem, 4vw, 4rem), env(safe-area-inset-bottom));
+  z-index: 10;
+  margin-bottom: 0;
+}
+
+html[data-home-wallpaper-mode="true"] .pc-home-search,
+html[data-home-wallpaper-mode="true"] .pc-home-explore,
+html[data-home-wallpaper-mode="true"] .pc-home-tagline,
+html[data-home-wallpaper-mode="true"] .pc-home-version {
+  pointer-events: none;
+  display: none !important;
+}
+
+/* Active mode fully retires the independent compositor layers. During the
+   return trip they are restored to layout but remain hard-hidden until the
+   brand reaches its original position and the reveal phase begins. */
+html[data-home-wallpaper-phase="returning"] .pc-home-search *,
+html[data-home-wallpaper-phase="returning"] .pc-home-explore * {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-home-wallpaper-phase="fading"] body > :not(.pc-wallpaper-viewport):not(main):not(script),
+  html[data-home-wallpaper-phase="fading"] .pc-home-search,
+  html[data-home-wallpaper-phase="fading"] .pc-home-explore,
+  html[data-home-wallpaper-phase="fading"] .pc-home-tagline,
+  html[data-home-wallpaper-phase="fading"] .pc-home-version,
+  html[data-home-wallpaper-phase="settling"] body > :not(.pc-wallpaper-viewport):not(main):not(script),
+  html[data-home-wallpaper-phase="settling"] .pc-home-search,
+  html[data-home-wallpaper-phase="settling"] .pc-home-explore,
+  html[data-home-wallpaper-phase="settling"] .pc-home-tagline,
+  html[data-home-wallpaper-phase="settling"] .pc-home-version {
+    animation-duration: 1ms;
+  }
 }
 
 .pc-home-cat-accent {
@@ -185,8 +440,90 @@ canvas {
 }
 
 .pc-home-platform-accent {
-  color: var(--pc-home-platform-accent, var(--pc-text));
+  color: var(--pc-accent-alt);
   transition: color 1.5s ease;
+}
+
+.pc-home-root[data-search-active="true"] .pc-home-brand,
+.pc-home-root[data-search-active="true"] .pc-home-explore {
+  pointer-events: none;
+  opacity: 0;
+}
+
+.pc-home-brand,
+.pc-home-explore {
+  transition: opacity 180ms ease-out;
+}
+
+.pc-home-search {
+  position: relative;
+  z-index: 50;
+}
+
+.pc-home-search-shell:is(:hover, :focus-within, [data-active="true"]) {
+  box-shadow: 0 10px 26px var(--pc-accent-glow-soft);
+}
+
+.pc-accent-icon-button:hover {
+  box-shadow: 0 0 22px var(--pc-accent-glow);
+}
+
+.pc-home-feature-card {
+  --pc-card-accent: var(--pc-accent);
+}
+
+.pc-home-feature-card[data-card-accent="secondary"] {
+  --pc-card-accent: var(--pc-accent-alt);
+}
+
+.pc-home-feature-card[data-card-accent="tertiary"] {
+  --pc-card-accent: var(--pc-accent-third);
+}
+
+.pc-home-feature-card:hover {
+  border-color: color-mix(in srgb, var(--pc-card-accent) 72%, transparent);
+}
+
+.pc-home-feature-card .pc-home-card-aura {
+  background: color-mix(in srgb, var(--pc-card-accent) 15%, transparent);
+}
+
+.pc-home-feature-card .pc-home-card-icon {
+  color: var(--pc-card-accent);
+  background: color-mix(in srgb, var(--pc-card-accent) 10%, transparent);
+  border-color: color-mix(in srgb, var(--pc-card-accent) 24%, transparent);
+}
+
+.pc-home-feature-card:hover .pc-home-card-icon {
+  box-shadow: 0 0 24px color-mix(in srgb, var(--pc-card-accent) 18%, transparent);
+}
+
+.pc-home-feature-card:hover .pc-home-card-arrow {
+  color: var(--pc-card-accent);
+}
+
+.pc-home-feature-card .pc-home-card-rule {
+  background: linear-gradient(90deg, transparent, var(--pc-card-accent), transparent);
+}
+
+.pc-search-result::after {
+  position: absolute;
+  inset: auto 1.25rem 0;
+  height: 1px;
+  content: "";
+  background: linear-gradient(90deg, transparent, var(--pc-accent), transparent);
+  opacity: 0;
+  transform: scaleX(0.45);
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+.pc-search-result:hover {
+  box-shadow: 0 12px 30px oklch(0 0 0 / 0.2), 0 0 22px var(--pc-accent-glow-subtle);
+}
+
+.pc-search-result:hover::after {
+  opacity: 0.8;
+  transform: scaleX(1);
 }
 
 /* ── Component Utilities ── */
@@ -454,13 +791,19 @@ main :where(a, button, input, select, textarea):focus-visible {
   transform: translateZ(0);
 }
 
+/* Match the search-page field to the 12px home search shell. The doubled
+   class selector intentionally outranks the shared 8px `.pc-input` radius. */
+.pc-input.pc-search-page-input {
+  border-radius: 12px;
+}
+
 .pc-input::placeholder {
   color: var(--pc-text-muted);
 }
 
 .pc-input:focus {
   border-color: var(--pc-accent);
-  box-shadow: 0 0 0 3px rgba(51, 182, 177, 0.15);
+  box-shadow: 0 0 0 3px var(--pc-accent-glow-soft);
 }
 
 /* Search pill: pill-shaped, max-width, centered */
@@ -487,7 +830,7 @@ main :where(a, button, input, select, textarea):focus-visible {
 
 .pc-search-pill:focus {
   border-color: var(--pc-accent);
-  box-shadow: 0 0 0 3px rgba(51, 182, 177, 0.15);
+  box-shadow: 0 0 0 3px var(--pc-accent-glow-soft);
 }
 
 /* Select: styled dropdown matching input spec */
@@ -509,7 +852,7 @@ main :where(a, button, input, select, textarea):focus-visible {
 
 .pc-select:focus {
   border-color: var(--pc-accent);
-  box-shadow: 0 0 0 3px rgba(51, 182, 177, 0.15);
+  box-shadow: 0 0 0 3px var(--pc-accent-glow-soft);
 }
 
 /* Label: uppercase, letter-spacing, muted */
@@ -659,6 +1002,11 @@ main :where(a, button, input, select, textarea):focus-visible {
 }
 
 /* Page wrapper: consistent max-width, padding */
+.pc-route-stage {
+  min-width: 0;
+  transform-origin: 50% 4rem;
+}
+
 .pc-page {
   max-width: 72rem;
   margin-left: auto;

@@ -206,7 +206,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
   const canEditPost = currentUser ? currentUser.id === post.userId || currentUser.isAdmin : false;
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-5xl space-y-6 px-4 py-8">
       <Link href="/community" className="text-pc-text-secondary hover:text-pc-accent transition-colors">
         {t("generated.community.backToCommunity")}</Link>
 

@@ -12,13 +12,14 @@ import ReportModal from "@/components/ReportModal";
 import AltAccountRelationModal from "@/components/alt-account-relation-modal";
 import { formatLocalDate, formatLocalDateTime } from "@/lib/time-format";
 import { ErrorState, LoadingIndicator, LoadingOverlay, LoadingPanel } from "@/components/async-state";
-import { RouteSkeleton } from "@/components/route-skeleton";
+import { DataTableSkeleton, RouteSkeleton } from "@/components/route-skeleton";
 import SmartImage from "@/components/SmartImage";
 import { formatKda } from "@/lib/kda";
 import PlayerName, { PlayerModerationTag } from "@/components/player-name";
 import { fetchPlayerModeration } from "@/lib/player-moderation";
 import { useLocalization } from "@/lib/localization-context";
 import { estimateLiveTeamWinChance } from "@/lib/live-team-estimate";
+import { useRouteSettledLoading } from "@/lib/route-transition-context";
 
 interface PlayerData {
   id: string;
@@ -188,6 +189,7 @@ export default function PlayerProfilePage() {
   const [matches, setMatches] = useState<MatchRecord[]>([]);
   const [profileLoading, setProfileLoading] = useState(true);
   const [matchesLoading, setMatchesLoading] = useState(true);
+  const displayProfileLoading = useRouteSettledLoading(profileLoading);
   const [error, setError] = useState<string | null>(null);
 
   // Button states
@@ -449,7 +451,7 @@ export default function PlayerProfilePage() {
     return () => { cancelled = true; };
   }, [id, historyFetchKey]);
 
-  if (profileLoading) {
+  if (displayProfileLoading) {
     return <RouteSkeleton variant="profile" />;
   }
 
@@ -744,7 +746,7 @@ export default function PlayerProfilePage() {
             </div>
             <div className="pc-card">
               {matchesLoading ? (
-                <LoadingPanel compact />
+                <DataTableSkeleton rows={6} className="border-0" />
               ) : matches.length === 0 ? (
                 <p className="text-pc-text-muted text-sm">{t("generated.players.noMatchesRecordedYet")}</p>
               ) : (

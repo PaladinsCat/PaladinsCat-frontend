@@ -14,6 +14,7 @@ import LobbyTierBanner from "@/components/LobbyTierBanner";
 import SiteAnalytics from "@/components/SiteAnalytics";
 import DeploymentUpdateBanner from "@/components/DeploymentUpdateBanner";
 import ImageAssetFallback from "@/components/ImageAssetFallback";
+import CoreUiDragGuard from "@/components/CoreUiDragGuard";
 import { cn } from "@/lib/utils";
 import { SEO_KEYWORDS, SITE_NAME, SITE_URL } from "@/lib/seo";
 import { getServerLocalization } from "@/lib/server-localization";
@@ -104,6 +105,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang={locale} className={cn("dark", "font-sans")}>
       <head></head>
       <body className="min-h-screen bg-pc-bg text-pc-text flex flex-col">
+        <CoreUiDragGuard />
         <ImageAssetFallback />
         <script
           type="application/ld+json"

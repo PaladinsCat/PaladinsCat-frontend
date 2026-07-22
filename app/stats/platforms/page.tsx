@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { fetchPlatforms, type LoadoutStat } from "@/lib/api-client";
+import { fetchPlatforms } from "@/lib/api-client";
 import { BarChartComponent } from "@/components/Chart";
-import { EmptyState, ErrorState } from "@/components/async-state";
+import { ContentFade, EmptyState, ErrorState } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { useLocalization } from "@/lib/localization-context";
+import { useRouteSettledLoading } from "@/lib/route-transition-context";
 
 export default function PlatformsPage() {
   const { t } = useLocalization();
@@ -13,6 +14,7 @@ export default function PlatformsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
+  const displayLoading = useRouteSettledLoading(loading);
 
   useEffect(() => {
     fetchPlatforms()
@@ -56,14 +58,14 @@ export default function PlatformsPage() {
           </button>
         ))}
       </div>
-      {loading ? (
+      {displayLoading ? (
         <RouteSkeleton variant="detail" />
       ) : error ? (
         <ErrorState message={String(error)} />
       ) : chartData.length === 0 ? (
         <EmptyState title={t("generated.stats.noPlatformStatistics")} description={t("generated.stats.platformComparisonsWillAppearWhenRankedDataIsAvailable")} />
       ) : (
-        <BarChartComponent
+        <ContentFade><BarChartComponent
           data={chartData}
           xKey="champion"
           yKeys={["winRate"]}
@@ -73,7 +75,7 @@ export default function PlatformsPage() {
           colors={["#4ade80"]}
           showLegend={false}
           showXAxis={false}
-        />
+        /></ContentFade>
       )}
     </div>
   );

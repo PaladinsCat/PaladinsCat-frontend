@@ -16,6 +16,7 @@ import { getChampionIconSafe } from "@/lib/champion-icons";
 import { AsyncButton, EmptyState, ErrorState, LoadingPanel } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { PlayerSearchSubtitle } from "@/components/player-search-result";
+import ScrambleText from "@/components/ScrambleText";
 import { useLocalization } from "@/lib/localization-context";
 
 const TYPE_LABEL: Record<UniversalSearchType, string> = {
@@ -28,11 +29,11 @@ const TYPE_LABEL: Record<UniversalSearchType, string> = {
 };
 
 const TYPE_STYLE: Record<UniversalSearchType, string> = {
-  player: "border-cyan-400/30 bg-cyan-400/10 text-cyan-300",
+  player: "border-pc-accent/30 bg-pc-accent/10 text-pc-accent",
   match: "border-emerald-400/30 bg-emerald-400/10 text-emerald-300",
-  champion: "border-pc-accent/30 bg-pc-accent/10 text-pc-accent",
+  champion: "border-pc-accent-alt/30 bg-pc-accent-alt/10 text-pc-accent-alt",
   item: "border-amber-400/30 bg-amber-400/10 text-amber-300",
-  card: "border-violet-400/30 bg-violet-400/10 text-violet-300",
+  card: "border-pc-accent-third/30 bg-pc-accent-third/10 text-pc-accent-third",
   talent: "border-rose-400/30 bg-rose-400/10 text-rose-300",
 };
 
@@ -263,19 +264,19 @@ const SearchResultGroups = memo(function SearchResultGroups({
   if (grouped.length === 0) return null;
 
   return (
-    <div className="space-y-5">
+    <div className="mx-auto max-w-3xl space-y-7">
       {grouped.map(([type, rows]) => (
-        <section key={type} className="space-y-2">
-          <div className="flex items-center gap-2 px-1">
-            <h2 className="text-sm font-semibold text-pc-text">{TYPE_LABEL[type]}</h2>
-            <span className="text-xs text-pc-text-muted">{rows.length}</span>
+        <section key={type} className="space-y-2.5">
+          <div className="flex items-center gap-2 px-1.5">
+            <h2 className="text-xs font-bold uppercase tracking-[0.16em] text-pc-text-secondary">{TYPE_LABEL[type]}</h2>
+            <span className="rounded-full border border-pc-border/70 bg-pc-bg-elevated/80 px-2 py-0.5 text-xs tabular-nums text-pc-text-muted">{rows.length}</span>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+          <div className="space-y-2.5">
             {rows.map((result) => (
               <Link
                 key={`${result.type}-${result.id}-${result.href}`}
                 href={result.href}
-                className="group flex items-center gap-3 rounded-lg border border-pc-border bg-pc-bg-elevated p-3 hover:border-pc-accent-mid transition-colors"
+                className="pc-search-result group relative flex items-center gap-3 overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated/90 p-3.5 transition-all duration-200 hover:-translate-y-0.5 hover:border-pc-accent-mid"
               >
                 <ResultIcon result={result} />
                 <div className="min-w-0 flex-1">
@@ -291,8 +292,8 @@ const SearchResultGroups = memo(function SearchResultGroups({
                     <PlayerSearchSubtitle result={result} />
                   </p>
                 </div>
-                <span className="text-xs text-pc-text-muted group-hover:text-pc-accent transition-colors">
-                  {t("generated.search.view")}</span>
+                <span className="shrink-0 text-lg text-pc-text-muted transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-pc-accent" aria-hidden="true">→</span>
+                <span className="sr-only">{t("generated.search.view")}</span>
               </Link>
             ))}
           </div>
@@ -416,10 +417,12 @@ function SearchPageBody() {
   const visibleRemoteActions = remoteActions.filter((action) => action.show);
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-3">
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.search.search")}</h1>
-        <form onSubmit={submit} className="flex max-w-3xl gap-2">
+    <div className="mx-auto w-full max-w-4xl space-y-8 py-2 sm:py-6">
+      <section className="px-4 py-6 text-center sm:px-8 sm:py-8">
+        <h1 className="pc-heading pc-heading-lg text-pc-accent drop-shadow-[0_3px_10px_rgba(0,0,0,0.9)]">
+          <ScrambleText text={t("generated.search.search")} speed={30} iterations={15} delayFromCenter={false} />
+        </h1>
+        <form onSubmit={submit} className="mx-auto mt-6 flex max-w-2xl gap-2">
           <div className="relative flex-1">
             <input
               type="search"
@@ -427,8 +430,9 @@ function SearchPageBody() {
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               aria-label={t("generated.search.searchPlayersMatchesChampionsItemsCardsTalents")}
+              placeholder={t("generated.search.searchPlayersMatchesChampionsItemsCardsTalents")}
               autoFocus
-              className="pc-input w-full text-sm pr-10"
+              className="pc-input pc-search-page-input h-11 w-full rounded-lg pr-10 text-sm"
             />
             {query && (
               <button
@@ -441,7 +445,7 @@ function SearchPageBody() {
                   setSearched(false);
                   window.history.replaceState(null, "", "/search");
                 }}
-                className="absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-pc-text-muted hover:bg-pc-bg hover:text-pc-text transition-colors"
+                className="absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-pc-text-muted transition-colors hover:bg-pc-bg hover:text-pc-accent"
               >
                 <svg viewBox="0 0 20 20" aria-hidden="true" className="h-4 w-4">
                   <path
@@ -459,7 +463,7 @@ function SearchPageBody() {
             type="submit"
             aria-label={t("generated.search.search")}
             title={t("generated.search.search")}
-            className="pc-glass flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-pc-border text-pc-text-muted hover:border-pc-accent-mid hover:text-pc-accent transition-colors"
+            className="pc-glass pc-accent-icon-button flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-pc-border text-pc-text-muted transition-colors hover:border-pc-accent-mid hover:text-pc-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4">
               <path
@@ -473,9 +477,9 @@ function SearchPageBody() {
             </svg>
           </button>
         </form>
-      </div>
+      </section>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="mx-auto flex max-w-3xl flex-wrap justify-center gap-2">
         {(["player", "match", "champion", "talent", "card", "item"] as UniversalSearchType[]).map((type) => {
           const count = results.filter((result) => result.type === type).length;
           return (
@@ -487,7 +491,8 @@ function SearchPageBody() {
       </div>
 
       {searched && visibleRemoteActions.length > 0 && (
-        <div className="pc-glass flex flex-wrap items-center gap-2 rounded-lg border border-pc-border p-3">
+        <div className="pc-glass mx-auto flex w-fit max-w-full flex-wrap items-center justify-center gap-2 rounded-xl border border-pc-border px-4 py-2.5">
+          <span className="text-xs text-pc-text-muted">{t("generated.search.exactLookupLocalDbIsCheckedFirst")}</span>
           {visibleRemoteActions.map((action) => (
             <AsyncButton
               key={action.target}
@@ -500,24 +505,23 @@ function SearchPageBody() {
               {action.label}
             </AsyncButton>
           ))}
-          <span className="text-xs text-pc-text-muted">{t("generated.search.exactLookupLocalDbIsCheckedFirst")}</span>
         </div>
       )}
 
       {remoteNotice && (
-        <div className="pc-card text-xs text-pc-text-muted">{remoteNotice}</div>
+        <div className="pc-card mx-auto max-w-3xl text-xs text-pc-text-muted">{remoteNotice}</div>
       )}
 
       {loading && results.length === 0 && (
-        <LoadingPanel />
+        <div className="mx-auto max-w-3xl"><LoadingPanel /></div>
       )}
 
       {error && (
-        <ErrorState title={t("generated.search.searchUnavailable")} message={error} />
+        <div className="mx-auto max-w-3xl"><ErrorState title={t("generated.search.searchUnavailable")} message={error} /></div>
       )}
 
       {!loading && searched && results.length === 0 && !error && (
-        <EmptyState title={t("generated.search.noResultsFound")} description={t("generated.search.tryABroaderNamePlayerIdMatchIdChampionItem")} />
+        <div className="mx-auto max-w-3xl"><EmptyState title={t("generated.search.noResultsFound")} description={t("generated.search.tryABroaderNamePlayerIdMatchIdChampionItem")} /></div>
       )}
 
       <SearchResultGroups grouped={grouped} />

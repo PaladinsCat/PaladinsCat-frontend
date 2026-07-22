@@ -5,6 +5,7 @@ import Link from "next/link";
 import { fetchMatchesOverview, type MatchHourlyStats, type MatchQueueActivity } from "@/lib/api-client";
 import { LoadingPanel } from "@/components/async-state";
 import { useLocalization } from "@/lib/localization-context";
+import { useRouteSettledLoading } from "@/lib/route-transition-context";
 
 const REGION_COLORS: Record<string, string> = {
   NA: "bg-emerald-500",
@@ -86,6 +87,7 @@ export default function PlayerActivityPanel() {
   const [droppedIdsByHour, setDroppedIdsByHour] = useState<Record<string, string[]>>({});
   const [selectedQueue, setSelectedQueue] = useState<"all" | number>("all");
   const [loading, setLoading] = useState(true);
+  const displayLoading = useRouteSettledLoading(loading);
 
   useEffect(() => {
     let active = true;
@@ -147,10 +149,10 @@ export default function PlayerActivityPanel() {
               {queues.map(queue => <option key={queue.queueId} value={queue.queueId}>{queue.queueName} ({queue.queueId})</option>)}
             </select>
           </label>
-          {!loading && <span className="font-mono text-sm font-bold text-pc-accent">{formatNumber(display.total24h)}</span>}
+          {!displayLoading && <span className="font-mono text-sm font-bold text-pc-accent">{formatNumber(display.total24h)}</span>}
         </div>
 
-        {loading ? <LoadingPanel compact /> : <div className="space-y-1">
+        {displayLoading ? <LoadingPanel compact className="min-h-[30rem]" /> : <div className="space-y-1">
           <div className="mb-3 flex flex-wrap gap-x-3 gap-y-1">
             {activeRegions.map(region => <span key={region.region} className="inline-flex items-center gap-1.5 text-xs text-pc-text-muted"><span className={`h-2 w-2 rounded-full ${REGION_COLORS[region.region] ?? REGION_COLORS.Unknown}`} />{region.region} · {formatNumber(region.total24h)}</span>)}
             {activeRegions.length === 0 && <span className="text-xs text-pc-text-muted">{t("playerActivity.noMatches")}</span>}
@@ -169,7 +171,7 @@ export default function PlayerActivityPanel() {
         </div>}
       </section>
 
-      {!loading && <section className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+      {!displayLoading && <section className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
         {queues.map(queue => <button
           key={queue.queueId}
           type="button"
