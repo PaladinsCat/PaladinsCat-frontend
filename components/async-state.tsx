@@ -33,7 +33,7 @@ export function LoadingPanel({
     <ContentFade
       className={cn(
         "flex items-center justify-center gap-3 text-pc-text-secondary",
-        compact ? "py-5" : "pc-card min-h-40 py-10",
+        compact ? "py-5" : "min-h-40 py-10",
         className,
       )}
     >
@@ -66,9 +66,7 @@ export function LoadingOverlay({ visible }: { visible: boolean }) {
           aria-live="polite"
           aria-busy="true"
         >
-          <div className="flex items-center gap-2 rounded-xl border border-pc-border bg-pc-bg-elevated px-4 py-2 text-sm font-medium text-pc-text shadow-xl">
-            <LoadingIndicator className="gap-2" />
-          </div>
+          <LoadingIndicator className="gap-2" />
         </motion.div>
       )}
     </AnimatePresence>

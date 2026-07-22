@@ -55,7 +55,7 @@ function AllMapComparison({
     >
       <summary className="cursor-pointer select-none text-xs font-medium text-pc-accent">{summary}</summary>
       {loading || (!loaded && !failed) ? (
-        <LoadingIndicator className="mt-2 rounded-lg border border-pc-border/60 bg-pc-bg px-2 py-2" />
+        <LoadingIndicator className="mt-2" />
       ) : failed ? (
         <p className="mt-2 rounded-lg border border-rose-500/40 bg-rose-500/10 px-2 py-2 text-xs text-rose-300">{error}</p>
       ) : rows.length > 0 ? (

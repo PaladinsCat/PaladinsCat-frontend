@@ -152,7 +152,7 @@ export default function AdminDashboardPage() {
         <span>{t("generated.admin.signedInAs")}{" "}{user.username}{t("generated.admin.thisRouteAndItsDataEndpointRequireAnAdminSession")}</span>
         <span>{t("generated.admin.snapshot")}{" "}{formatDateTime(dashboard.generatedAt)}</span>
       </footer>
-      {loading && <LoadingPanel compact className="fixed bottom-20 right-5 z-50 rounded-xl border border-pc-border bg-pc-bg-elevated px-4 shadow-xl" />}
+      {loading && <LoadingPanel compact className="fixed bottom-20 right-5 z-50" />}
     </ContentFade>
   );
 }
