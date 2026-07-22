@@ -24,16 +24,19 @@ import SmartImage from "@/components/SmartImage";
 import CanonicalTalentImage from "@/components/canonical-talent-image";
 import { useLocalization } from "@/lib/localization-context";
 import {
+  calculateAdditiveValue,
   calculateDiminishedValue,
   detectDescriptionEffects,
   extractWeaponDamageOverride,
   resolveScaledDescription,
   type DetectedEffect,
   type EffectKey,
+  type EffectTarget,
 } from "@/lib/diminishing-returns";
 
 const MAX_CARDS = 5;
 const MAX_ITEMS = 4;
+const EFFECT_TARGET_ORDER: EffectTarget[] = ["self", "enemy", "ally", "unknown"];
 
 type CardSelection = { id: number; level: number };
 type ItemSelection = { id: number; level: number };
@@ -73,6 +76,17 @@ const EFFECT_LABELS = {
   "shield-effectiveness": "diminishingReturns.shieldEffectiveness",
   "weapon-damage": "diminishingReturns.weaponDamage",
 } as const;
+
+const EFFECT_TARGET_LABELS = {
+  self: "diminishingReturns.targetSelf",
+  enemy: "diminishingReturns.targetEnemy",
+  ally: "diminishingReturns.targetAlly",
+  unknown: "diminishingReturns.targetUnknown",
+} as const;
+
+function effectGroupKey(key: EffectKey, target: EffectTarget) {
+  return `${key}:${target}`;
+}
 
 function SelectableImage({ src, alt }: { src?: string | null; alt: string }) {
   return src ? (
@@ -237,27 +251,40 @@ export default function DiminishingReturnsPage() {
   const pointTotal = selectedCards.reduce((sum, card) => sum + card.level, 0);
 
   const selectedTalent = reference?.talents.find((talent) => talent.id === selectedTalentId) ?? null;
-  const effects = useMemo(() => {
-    if (!reference) return [];
+  const effectAnalysis = useMemo(() => {
+    if (!reference) return { effects: [] as DetectedEffect[], unsupported: [] as Array<{ id: number; name: string; description: string }> };
     const values: DetectedEffect[] = [];
+    const unsupported: Array<{ id: number; name: string; description: string }> = [];
+    const collect = (input: Parameters<typeof detectDescriptionEffects>[0]) => {
+      const detected = detectDescriptionEffects(input);
+      values.push(...detected);
+      if (!detected.length) unsupported.push({ id: input.id, name: input.name, description: resolveScaledDescription(input.description, input.level ?? 1) });
+    };
     if (selectedTalent) {
-      values.push(...detectDescriptionEffects({ id: selectedTalent.id, name: selectedTalent.name, type: "talent", description: selectedTalent.description }));
+      collect({ id: selectedTalent.id, name: selectedTalent.name, type: "talent", description: selectedTalent.description });
     }
     for (const selection of selectedCards) {
       const card = reference.cards.find((entry) => entry.id === selection.id);
-      if (card) values.push(...detectDescriptionEffects({ id: card.id, name: card.name, type: "card", description: card.description, level: selection.level }));
+      if (card) collect({ id: card.id, name: card.name, type: "card", description: card.description, level: selection.level });
     }
     for (const selection of selectedItems) {
       const item = reference.items.find((entry) => entry.id === selection.id);
       if (item) {
         const description = item.description ?? (item.descriptionKey ? t(item.descriptionKey) : null);
-        values.push(...detectDescriptionEffects({ id: item.id, name: item.name, type: "item", description, level: selection.level }));
+        collect({ id: item.id, name: item.name, type: "item", description, level: selection.level });
       }
     }
-    return values;
+    return { effects: values, unsupported };
   }, [reference, selectedCards, selectedItems, selectedTalent, t]);
+  const effects = effectAnalysis.effects;
+  const unsupportedEffects = effectAnalysis.unsupported;
 
-  const groupedEffects = useMemo(() => new Map(EFFECT_ORDER.map((key) => [key, effects.filter((entry) => entry.key === key)])), [effects]);
+  const groupedEffects = useMemo(() => new Map(
+    EFFECT_ORDER.flatMap((key) => EFFECT_TARGET_ORDER.map((target) => [
+      effectGroupKey(key, target),
+      effects.filter((entry) => entry.key === key && entry.target === target),
+    ] as const)),
+  ), [effects]);
   const baseHealth = parseNumber(reference?.champion?.stats.health);
   const baseSpeed = parseNumber(reference?.champion?.stats.speed);
   const primaryDamage = parseNumber(reference?.champion?.skills[0]?.damage);
@@ -454,26 +481,45 @@ export default function DiminishingReturnsPage() {
                 <div><h2 className="pc-card-title">{t("diminishingReturns.results")}</h2><p className="mt-1 text-xs leading-5 text-pc-text-muted">{t("diminishingReturns.conditionalWarning")}</p></div>
                 {effects.length === 0 ? <p className="rounded-xl border border-dashed border-pc-border p-5 text-sm leading-6 text-pc-text-muted">{t("diminishingReturns.emptyResults")}</p> : (
                   <div className="space-y-3">
-                    {EFFECT_ORDER.flatMap((key) => {
-                      const sources = groupedEffects.get(key) ?? [];
+                    {EFFECT_ORDER.flatMap((key) => EFFECT_TARGET_ORDER.flatMap((target) => {
+                      const sources = groupedEffects.get(effectGroupKey(key, target)) ?? [];
                       if (!sources.length) return [];
+                      const signedValues = sources.map((entry) => entry.direction === "decrease" ? -entry.value : entry.value);
                       const flat = key === "maximum-health" || key === "maximum-ammo" || key === "shield-health";
                       const additiveOnly = flat || key === "weapon-damage";
                       const calculated = additiveOnly
-                        ? { additive: sources.reduce((sum, entry) => sum + entry.value, 0), final: sources.reduce((sum, entry) => sum + entry.value, 0), lost: 0, capped: false }
-                        : calculateDiminishedValue(sources.map((entry) => entry.value), { movement: key === "movement-speed" || key === "mount-speed", reload: key === "reload-speed" });
-                      const raw = rawEstimate(key, calculated.final, calculated.additive);
-                      return [<article key={key} className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-secondary/45">
-                        <div className="border-b border-pc-border/70 p-3"><h3 className="text-sm font-semibold text-pc-text">{t(EFFECT_LABELS[key])}</h3><div className="mt-2 grid grid-cols-2 gap-2"><div><div className="text-xs uppercase tracking-wide text-pc-text-muted">{t("diminishingReturns.additive")}</div><div className="mt-0.5 font-mono text-lg font-bold text-pc-text">{flat ? t("diminishingReturns.signedFlatValue", { value: formatNumber(calculated.additive) }) : t("diminishingReturns.percentValue", { value: formatNumber(calculated.additive, { maximumFractionDigits: 2 }) })}</div></div><div><div className="text-xs uppercase tracking-wide text-pc-text-muted">{t("diminishingReturns.afterDiminishing")}</div><div className="mt-0.5 font-mono text-lg font-bold text-pc-accent">{flat ? t("diminishingReturns.signedFlatValue", { value: formatNumber(calculated.final) }) : t("diminishingReturns.percentValue", { value: formatNumber(calculated.final, { maximumFractionDigits: 2 }) })}</div></div></div>{calculated.lost > 0.005 && <p className="mt-1 text-xs text-amber-300">{t("diminishingReturns.reduction", { value: t("diminishingReturns.percentValue", { value: formatNumber(calculated.lost, { maximumFractionDigits: 2 }) }) })}</p>}{calculated.capped && <p className="mt-1 text-xs text-amber-300">{t("diminishingReturns.capApplied")}</p>}{raw && <p className="mt-2 rounded-lg bg-pc-bg px-2.5 py-2 text-xs text-pc-text-secondary"><span className="font-semibold text-pc-text">{t("diminishingReturns.rawEstimate")}:</span> {raw}</p>}</div>
-                        <div className="space-y-2 p-3">{sources.map((source, index) => <div key={`${source.sourceType}-${source.sourceId}-${index}`}><div className="flex items-center justify-between gap-2 text-xs"><span className="font-semibold text-pc-text">{source.sourceName}</span><span className="font-mono text-pc-accent">{t(flat ? "diminishingReturns.signedFlatValue" : source.value > 0 ? "diminishingReturns.signedPercentValue" : "diminishingReturns.percentValue", { value: formatNumber(source.value, { maximumFractionDigits: 2 }) })}</span></div><p className="mt-0.5 text-xs leading-4 text-pc-text-muted">{source.description}</p></div>)}</div>
+                        ? calculateAdditiveValue(signedValues)
+                        : calculateDiminishedValue(signedValues, { movement: key === "movement-speed" || key === "mount-speed", reload: key === "reload-speed" });
+                      const raw = target === "self" || target === "unknown" ? rawEstimate(key, calculated.final, calculated.additive) : null;
+                      const hasOpposition = calculated.positive.additive > 0 && calculated.negative.additive > 0;
+                      return [<article key={effectGroupKey(key, target)} className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-secondary/45">
+                        <div className="border-b border-pc-border/70 p-3">
+                          <div className="flex flex-wrap items-center justify-between gap-2"><h3 className="text-sm font-semibold text-pc-text">{t(EFFECT_LABELS[key])}</h3><span className="rounded-full border border-pc-border bg-pc-bg px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-pc-text-muted">{t(EFFECT_TARGET_LABELS[target])}</span></div>
+                          <div className="mt-2 grid grid-cols-2 gap-2"><div><div className="text-xs uppercase tracking-wide text-pc-text-muted">{t("diminishingReturns.additive")}</div><div className="mt-0.5 font-mono text-lg font-bold text-pc-text">{flat ? t("diminishingReturns.signedFlatValue", { value: formatNumber(calculated.additive) }) : t("diminishingReturns.percentValue", { value: formatNumber(calculated.additive, { maximumFractionDigits: 2 }) })}</div></div><div><div className="text-xs uppercase tracking-wide text-pc-text-muted">{t("diminishingReturns.afterDiminishing")}</div><div className="mt-0.5 font-mono text-lg font-bold text-pc-accent">{flat ? t("diminishingReturns.signedFlatValue", { value: formatNumber(calculated.final) }) : t("diminishingReturns.percentValue", { value: formatNumber(calculated.final, { maximumFractionDigits: 2 }) })}</div></div></div>
+                          {!additiveOnly && (calculated.thresholdApplied || hasOpposition) && <div className="mt-2 space-y-1 rounded-lg border border-pc-border/70 bg-pc-bg px-2.5 py-2 text-xs text-pc-text-secondary">
+                            {calculated.positive.additive > 0 && <p>{t("diminishingReturns.directionBreakdown", { direction: t("diminishingReturns.positiveGroup"), base: formatNumber(calculated.positive.guaranteedBase, { maximumFractionDigits: 2 }), subject: formatNumber(Math.max(0, calculated.positive.additive - calculated.positive.guaranteedBase), { maximumFractionDigits: 2 }), final: formatNumber(calculated.positive.final, { maximumFractionDigits: 2 }) })}</p>}
+                            {calculated.negative.additive > 0 && <p>{t("diminishingReturns.directionBreakdown", { direction: t("diminishingReturns.opposingGroup"), base: formatNumber(calculated.negative.guaranteedBase, { maximumFractionDigits: 2 }), subject: formatNumber(Math.max(0, calculated.negative.additive - calculated.negative.guaranteedBase), { maximumFractionDigits: 2 }), final: formatNumber(calculated.negative.final, { maximumFractionDigits: 2 }) })}</p>}
+                          </div>}
+                          {calculated.lost > 0.005 && <p className="mt-1 text-xs text-amber-300">{t("diminishingReturns.reduction", { value: t("diminishingReturns.percentValue", { value: formatNumber(calculated.lost, { maximumFractionDigits: 2 }) }) })}</p>}{calculated.capped && <p className="mt-1 text-xs text-amber-300">{t("diminishingReturns.capApplied")}</p>}{raw && <p className="mt-2 rounded-lg bg-pc-bg px-2.5 py-2 text-xs text-pc-text-secondary"><span className="font-semibold text-pc-text">{t("diminishingReturns.rawEstimate")}:</span> {raw}</p>}
+                        </div>
+                        <div className="space-y-2 p-3">{sources.map((source, index) => { const signedValue = source.direction === "decrease" ? -source.value : source.value; return <div key={`${source.sourceType}-${source.sourceId}-${index}`}><div className="flex items-center justify-between gap-2 text-xs"><span className="font-semibold text-pc-text">{source.sourceName}</span><span className="font-mono text-pc-accent">{t(flat ? "diminishingReturns.signedFlatValue" : signedValue > 0 ? "diminishingReturns.signedPercentValue" : "diminishingReturns.percentValue", { value: formatNumber(signedValue, { maximumFractionDigits: 2 }) })}</span></div><p className="mt-0.5 text-xs leading-4 text-pc-text-muted">{source.description}</p></div>; })}</div>
                       </article>];
-                    })}
+                    }))}
                   </div>
                 )}
+                {unsupportedEffects.length > 0 && <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-3">
+                  <h3 className="text-sm font-semibold text-amber-200">{t("diminishingReturns.unsupportedTitle")}</h3>
+                  <p className="mt-1 text-xs leading-5 text-pc-text-muted">{t("diminishingReturns.unsupportedDescription")}</p>
+                  <div className="mt-2 space-y-2">{unsupportedEffects.map((source) => <div key={source.id}><p className="text-xs font-semibold text-pc-text">{source.name}</p><p className="text-xs leading-4 text-pc-text-muted">{source.description || t("diminishingReturns.noDetectedEffect")}</p></div>)}</div>
+                </div>}
               </section>
 
               {effects.some((entry) => entry.key === "cooldown-reduction") && reference.champion.skills.some((skill) => parseNumber(skill.cooldown) > 0) && (() => {
-                const cooldown = calculateDiminishedValue((groupedEffects.get("cooldown-reduction") ?? []).map((entry) => entry.value)).final;
+                const cooldownSources = [
+                  ...(groupedEffects.get(effectGroupKey("cooldown-reduction", "self")) ?? []),
+                  ...(groupedEffects.get(effectGroupKey("cooldown-reduction", "unknown")) ?? []),
+                ];
+                const cooldown = calculateDiminishedValue(cooldownSources.map((entry) => entry.direction === "decrease" ? -entry.value : entry.value)).final;
                 return <section className="pc-card"><h2 className="mb-3 text-sm font-semibold text-pc-text">{t("diminishingReturns.adjustedCooldowns")}</h2><div className="space-y-2">{reference.champion.skills.flatMap((skill) => { const seconds = parseNumber(skill.cooldown); return seconds > 0 ? [<div key={skill.name} className="flex items-center justify-between gap-3 text-xs"><span className="text-pc-text-secondary">{skill.name}</span><span className="font-mono font-semibold text-pc-accent">{t("diminishingReturns.secondsValue", { value: formatNumber(seconds * (1 - cooldown / 100), { maximumFractionDigits: 2 }) })}</span></div>] : []; })}</div></section>;
               })()}
 

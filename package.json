@@ -9,6 +9,7 @@
     "build": "node scripts/audit-image-assets.mjs && next build",
     "start": "next start",
     "lint": "eslint .",
+    "test:diminishing-returns": "node --experimental-strip-types --test lib/diminishing-returns.test.ts",
     "generate-types": "npx openapi-typescript http://localhost:3005/openapi.json -o lib/types.gen.ts",
     "sync-community-locales": "node scripts/sync-community-locales.mjs",
     "sync-pinned-locales": "node scripts/copy-pinned-locales.mjs",

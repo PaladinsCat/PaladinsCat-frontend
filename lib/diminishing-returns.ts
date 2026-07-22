@@ -16,14 +16,28 @@ export type EffectKey =
   | "weapon-damage";
 
 export type EffectSourceType = "talent" | "card" | "item";
+export type EffectDirection = "increase" | "decrease";
+export type EffectTarget = "self" | "enemy" | "ally" | "unknown";
 
 export interface DetectedEffect {
   key: EffectKey;
   value: number;
+  direction: EffectDirection;
+  target: EffectTarget;
   sourceId: number;
   sourceName: string;
   sourceType: EffectSourceType;
   description: string;
+}
+
+export interface DirectionalDiminishedValue {
+  additive: number;
+  guaranteedBase: number;
+  beforeCap: number;
+  final: number;
+  diminishedAmount: number;
+  thresholdApplied: boolean;
+  capApplied: boolean;
 }
 
 export interface DiminishedValue {
@@ -31,9 +45,14 @@ export interface DiminishedValue {
   final: number;
   lost: number;
   capped: boolean;
+  thresholdApplied: boolean;
+  positive: DirectionalDiminishedValue;
+  negative: DirectionalDiminishedValue;
 }
 
 const NUMBER = "(-?(?:\\d+(?:\\.\\d*)?|\\.\\d+))";
+const THRESHOLD = 30;
+const EPSILON = 1e-9;
 
 function numericMatch(text: string, patterns: RegExp[]): number | null {
   for (const pattern of patterns) {
@@ -63,9 +82,16 @@ export function resolveScaledDescription(description: string | null | undefined,
 function effect(
   key: EffectKey,
   value: number | null,
-  source: Omit<DetectedEffect, "key" | "value">,
+  source: Omit<DetectedEffect, "key" | "value" | "direction" | "target">,
+  options?: { direction?: EffectDirection; target?: EffectTarget },
 ): DetectedEffect[] {
-  return value == null || value === 0 ? [] : [{ ...source, key, value }];
+  return value == null || value === 0 ? [] : [{
+    ...source,
+    key,
+    value: Math.abs(value),
+    direction: options?.direction ?? "increase",
+    target: options?.target ?? "self",
+  }];
 }
 
 /**
@@ -100,8 +126,17 @@ export function detectDescriptionEffects(input: {
 
   const movementPenalty = numericMatch(description, [
     new RegExp(`reduce your movement speed(?: bonus)?[^.]*?by\\s+${NUMBER}%`, "i"),
+    new RegExp(`slow yourself[^.]*?by\\s+${NUMBER}%`, "i"),
   ]);
-  results.push(...effect("movement-speed", movementPenalty == null ? null : -Math.abs(movementPenalty), source));
+  results.push(...effect("movement-speed", movementPenalty, source, { direction: "decrease", target: "self" }));
+
+  if (!/duration and effectiveness of crowd control/i.test(description)) {
+    const slow = numericMatch(description, [
+      new RegExp(`(?:slow|slows)[^.]*?by\\s+${NUMBER}%`, "i"),
+      new RegExp(`reduce (?:an enemy's|the enemy's|the target's|their) movement speed[^.]*?by\\s+${NUMBER}%`, "i"),
+    ]);
+    results.push(...effect("movement-speed", slow, source, { direction: "decrease", target: "enemy" }));
+  }
 
   const mountSpeed = numericMatch(description, [
     new RegExp(`increase your mount speed[^.]*?by\\s+${NUMBER}%`, "i"),
@@ -121,6 +156,28 @@ export function detectDescriptionEffects(input: {
     if (!directOnly) results.push(...effect("damage-reduction-area", damageReduction, source));
   }
 
+  const selfDamageTaken = numericMatch(description, [
+    new RegExp(`(?:you|your champion) take\\s+${NUMBER}%\\s+(?:additional|increased|more)\\s+damage`, "i"),
+    new RegExp(`increase your damage taken[^.]*?by\\s+${NUMBER}%`, "i"),
+  ]);
+  if (selfDamageTaken != null) {
+    const directOnly = /direct attacks?|direct damage/i.test(description);
+    const areaOnly = /area of effect|area damage|blast damage/i.test(description);
+    if (!areaOnly) results.push(...effect("damage-reduction-direct", selfDamageTaken, source, { direction: "decrease", target: "self" }));
+    if (!directOnly) results.push(...effect("damage-reduction-area", selfDamageTaken, source, { direction: "decrease", target: "self" }));
+  }
+
+  const damageTaken = numericMatch(description, [
+    new RegExp(`(?:enemies|targets?|players?)[^.]*?take\\s+${NUMBER}%\\s+(?:additional|increased|more)\\s+damage`, "i"),
+    new RegExp(`increase (?:the )?damage (?:an enemy|enemies|the target|targets?) (?:takes?|receives?)[^.]*?by\\s+${NUMBER}%`, "i"),
+  ]);
+  if (damageTaken != null) {
+    const directOnly = /direct attacks?|direct damage/i.test(description);
+    const areaOnly = /area of effect|area damage|blast damage/i.test(description);
+    if (!areaOnly) results.push(...effect("damage-reduction-direct", damageTaken, source, { direction: "decrease", target: "enemy" }));
+    if (!directOnly) results.push(...effect("damage-reduction-area", damageTaken, source, { direction: "decrease", target: "enemy" }));
+  }
+
   const lifeSteal = numericMatch(description, [
     new RegExp(`${NUMBER}%\\s+life\\s*steal`, "i"),
     new RegExp(`life\\s*steal[^.]*?by\\s+${NUMBER}%`, "i"),
@@ -132,6 +189,16 @@ export function detectDescriptionEffects(input: {
     new RegExp(`increase (?:your )?(?:healing received|healing from other players)[^.]*?by\\s+${NUMBER}%`, "i"),
   ]);
   results.push(...effect("healing-received", healingReceived, source));
+
+  const healingReduction = numericMatch(description, [
+    new RegExp(`reduce (?:the )?(?:healing received|healing (?:an enemy|enemies|the target|targets?) receives?)[^.]*?by\\s+${NUMBER}%`, "i"),
+    new RegExp(`(?:enemy|enemies|target|targets?) receive(?:s)?\\s+${NUMBER}%\\s+less healing`, "i"),
+    new RegExp(`receive\\s+${NUMBER}%\\s+less healing`, "i"),
+  ]);
+  if (healingReduction != null) {
+    const target: EffectTarget = /(?:enemy|enemies|target|targets?)/i.test(description) ? "enemy" : "self";
+    results.push(...effect("healing-received", healingReduction, source, { direction: "decrease", target }));
+  }
 
   const crowdControlReduction = numericMatch(description, [
     new RegExp(`reduce (?:the )?duration and effectiveness of crowd control and slows[^.]*?by\\s+${NUMBER}%`, "i"),
@@ -200,35 +267,93 @@ export function detectDescriptionEffects(input: {
   return results;
 }
 
-function diminishOneSide(values: number[], movement: boolean): { value: number; capped: boolean } {
+function emptyDirectionalValue(): DirectionalDiminishedValue {
+  return {
+    additive: 0,
+    guaranteedBase: 0,
+    beforeCap: 0,
+    final: 0,
+    diminishedAmount: 0,
+    thresholdApplied: false,
+    capApplied: false,
+  };
+}
+
+export function calculateDirectionalDiminishedValue(values: number[], movement = false): DirectionalDiminishedValue {
   const bonuses = values.filter((value) => Number.isFinite(value) && value > 0);
-  if (!bonuses.length) return { value: 0, capped: false };
-  const cap = movement ? 1.5 : 0.95;
-  const total = bonuses.reduce((sum, value) => sum + value, 0) / 100;
-  const highest = Math.max(...bonuses) / 100;
-  if (total <= 0.3 || bonuses.length === 1) {
-    return { value: Math.min(total, cap) * 100, capped: total > cap };
+  if (!bonuses.length) return emptyDirectionalValue();
+
+  const cap = movement ? 150 : 95;
+  const additive = bonuses.reduce((sum, value) => sum + value, 0);
+  const highest = Math.max(...bonuses);
+  const thresholdApplied = bonuses.length > 1 && additive > THRESHOLD + EPSILON;
+  const guaranteedBase = thresholdApplied ? Math.max(highest, THRESHOLD) : additive;
+
+  let beforeCap = additive;
+  if (thresholdApplied) {
+    const totalFraction = additive / 100;
+    const baseFraction = guaranteedBase / 100;
+    const diminishedFraction = movement
+      ? baseFraction + (1.5 - baseFraction) * ((totalFraction - baseFraction) / (totalFraction + 1.06))
+      : baseFraction + (0.95 - baseFraction) * ((totalFraction - baseFraction) / (totalFraction + 0.5));
+    // The curve must never manufacture value or undercut the guaranteed base.
+    beforeCap = Math.min(additive, Math.max(guaranteedBase, diminishedFraction * 100));
   }
-  const diminished = movement
-    ? highest + (1.5 - highest) * ((total - highest) / (total + 1.06))
-    : highest + (0.95 - highest) * ((total - highest) / (total + 0.5));
-  return { value: Math.min(diminished, cap) * 100, capped: diminished > cap || total > cap };
+
+  const capApplied = beforeCap > cap + EPSILON;
+  const final = Math.max(0, Math.min(beforeCap, cap));
+  return {
+    additive,
+    guaranteedBase,
+    beforeCap,
+    final,
+    diminishedAmount: Math.max(0, additive - beforeCap),
+    thresholdApplied,
+    capApplied,
+  };
 }
 
 export function calculateDiminishedValue(values: number[], options?: { movement?: boolean; reload?: boolean }): DiminishedValue {
-  const additive = values.reduce((sum, value) => sum + (Number.isFinite(value) ? value : 0), 0);
+  const finiteValues = values.filter(Number.isFinite);
+  const additive = finiteValues.reduce((sum, value) => sum + value, 0);
   if (options?.reload) {
     const final = Math.max(-60, Math.min(60, additive));
-    return { additive, final, lost: Math.abs(additive) - Math.abs(final), capped: Math.abs(additive) > 60 };
+    const capApplied = Math.abs(additive) > 60 + EPSILON;
+    const positiveAdditive = finiteValues.filter((value) => value > 0).reduce((sum, value) => sum + value, 0);
+    const negativeAdditive = finiteValues.filter((value) => value < 0).reduce((sum, value) => sum + Math.abs(value), 0);
+    const positive = { ...emptyDirectionalValue(), additive: positiveAdditive, guaranteedBase: positiveAdditive, beforeCap: positiveAdditive, final: Math.min(positiveAdditive, 60), capApplied: positiveAdditive > 60 + EPSILON };
+    const negative = { ...emptyDirectionalValue(), additive: negativeAdditive, guaranteedBase: negativeAdditive, beforeCap: negativeAdditive, final: Math.min(negativeAdditive, 60), capApplied: negativeAdditive > 60 + EPSILON };
+    return { additive, final, lost: Math.max(0, Math.abs(additive) - Math.abs(final)), capped: capApplied, thresholdApplied: false, positive, negative };
   }
-  const positive = diminishOneSide(values.filter((value) => value > 0), Boolean(options?.movement));
-  const negative = diminishOneSide(values.filter((value) => value < 0).map(Math.abs), Boolean(options?.movement));
-  const final = positive.value - negative.value;
+  const positive = calculateDirectionalDiminishedValue(finiteValues.filter((value) => value > 0), Boolean(options?.movement));
+  const negative = calculateDirectionalDiminishedValue(finiteValues.filter((value) => value < 0).map(Math.abs), Boolean(options?.movement));
+  const final = positive.final - negative.final;
   return {
     additive,
     final,
-    lost: Math.abs(additive) - Math.abs(final),
-    capped: positive.capped || negative.capped,
+    lost: Math.max(0, Math.abs(additive) - Math.abs(final)),
+    capped: positive.capApplied || negative.capApplied,
+    thresholdApplied: positive.thresholdApplied || negative.thresholdApplied,
+    positive,
+    negative,
+  };
+}
+
+export function calculateAdditiveValue(values: number[]): DiminishedValue {
+  const finiteValues = values.filter(Number.isFinite);
+  const additive = finiteValues.reduce((sum, value) => sum + value, 0);
+  const positiveAdditive = finiteValues.filter((value) => value > 0).reduce((sum, value) => sum + value, 0);
+  const negativeAdditive = finiteValues.filter((value) => value < 0).reduce((sum, value) => sum + Math.abs(value), 0);
+  const positive = { ...emptyDirectionalValue(), additive: positiveAdditive, guaranteedBase: positiveAdditive, beforeCap: positiveAdditive, final: positiveAdditive };
+  const negative = { ...emptyDirectionalValue(), additive: negativeAdditive, guaranteedBase: negativeAdditive, beforeCap: negativeAdditive, final: negativeAdditive };
+  return {
+    additive,
+    final: additive,
+    lost: 0,
+    capped: false,
+    thresholdApplied: false,
+    positive,
+    negative,
   };
 }
 
