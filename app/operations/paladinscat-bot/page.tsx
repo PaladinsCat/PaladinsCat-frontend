@@ -4,17 +4,20 @@ import {
   Check,
   ExternalLink,
   Gamepad2,
-  History,
   Image as ImageIcon,
   Search,
   ShieldCheck,
   Sparkles,
   Terminal,
+  UserPlus,
   UserRoundSearch,
 } from "lucide-react";
+import Image from "next/image";
 import { getServerLocalization } from "@/lib/server-localization";
 
-const INVITE_URL = "https://discord.com/oauth2/authorize?client_id=1504377146020200539&permissions=52224&integration_type=0&scope=bot+applications.commands";
+const DISCORD_CLIENT_ID = "1504377146020200539";
+const SERVER_INSTALL_URL = `https://discord.com/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&integration_type=0&scope=applications.commands`;
+const USER_INSTALL_URL = `https://discord.com/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&integration_type=1&scope=applications.commands`;
 
 export default async function PaladinsCatBotPage() {
   const { t } = await getServerLocalization();
@@ -22,7 +25,7 @@ export default async function PaladinsCatBotPage() {
   const features = [
     { icon: UserRoundSearch, title: t("bot.featurePlayerTitle"), body: t("bot.featurePlayerBody"), command: "/player" },
     { icon: ImageIcon, title: t("bot.featureMatchTitle"), body: t("bot.featureMatchBody"), command: "/match" },
-    { icon: History, title: t("bot.featureHistoryTitle"), body: t("bot.featureHistoryBody"), command: "/history" },
+    { icon: Activity, title: t("bot.featureLiveTitle"), body: t("bot.featureLiveBody"), command: "/current" },
     { icon: Gamepad2, title: t("bot.featurePrepTitle"), body: t("bot.featurePrepBody"), command: "/loadout" },
   ];
   const commands = [
@@ -57,20 +60,25 @@ export default async function PaladinsCatBotPage() {
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <a
-                href={INVITE_URL}
+                href={SERVER_INSTALL_URL}
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#5865f2] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-[#5865f2]/20 transition hover:bg-[#6873f5]"
               >
                 <Bot className="h-5 w-5" aria-hidden="true" />
-                {t("bot.invite")}
+                {t("bot.inviteServer")}
                 <ExternalLink className="h-4 w-4" aria-hidden="true" />
               </a>
-              <a href="#commands" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-pc-border bg-pc-bg-elevated/80 px-6 py-3 text-sm font-bold text-pc-text transition hover:border-pc-accent-mid hover:text-pc-accent">
-                <Terminal className="h-4 w-4" aria-hidden="true" />
-                {t("bot.viewCommands")}
+              <a href={USER_INSTALL_URL} target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[#5865f2]/40 bg-[#5865f2]/10 px-6 py-3 text-sm font-bold text-[#c8ccff] transition hover:border-[#7882f7] hover:bg-[#5865f2]/15">
+                <UserPlus className="h-4 w-4" aria-hidden="true" />
+                {t("bot.inviteUser")}
+                <ExternalLink className="h-4 w-4" aria-hidden="true" />
               </a>
             </div>
+            <a href="#commands" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-pc-text-secondary transition hover:text-pc-accent">
+              <Terminal className="h-4 w-4" aria-hidden="true" />
+              {t("bot.viewCommands")}
+            </a>
             <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-xs text-pc-text-muted">
               {[t("bot.freeBadge"), t("bot.slashBadge"), t("bot.lightBadge")].map((badge) => (
                 <span key={badge} className="inline-flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-pc-accent" aria-hidden="true" />{badge}</span>
@@ -84,7 +92,7 @@ export default async function PaladinsCatBotPage() {
               <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
                 <div className="flex items-center gap-3">
                   <span className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-pc-accent/15">
-                    <img src="/images/icons/paladinscat.avif" alt="" className="h-7 w-7 rounded-md" />
+                    <Image src="/images/icons/paladinscat.avif" alt="" width={28} height={28} unoptimized className="h-7 w-7 rounded-md" />
                     <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-[#111216] bg-emerald-400" />
                   </span>
                   <span><span className="block text-sm font-bold text-white">{t("generated.common.paladinscat")}</span><span className="text-xs text-emerald-400">{t("bot.previewOnline")}</span></span>
@@ -178,11 +186,18 @@ export default async function PaladinsCatBotPage() {
         <Activity className="mx-auto h-7 w-7 text-pc-accent" aria-hidden="true" />
         <h2 className="mt-4 text-3xl font-bold tracking-tight text-pc-text sm:text-4xl">{t("bot.finalTitle")}</h2>
         <p className="mx-auto mt-4 max-w-2xl leading-7 text-pc-text-secondary">{t("bot.finalBody")}</p>
-        <a href={INVITE_URL} target="_blank" rel="noreferrer" className="mt-8 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#5865f2] px-7 py-3.5 text-sm font-bold text-white shadow-lg shadow-[#5865f2]/20 transition hover:bg-[#6873f5]">
-          <Bot className="h-5 w-5" aria-hidden="true" />
-          {t("bot.invite")}
-          <ExternalLink className="h-4 w-4" aria-hidden="true" />
-        </a>
+        <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+          <a href={SERVER_INSTALL_URL} target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#5865f2] px-7 py-3.5 text-sm font-bold text-white shadow-lg shadow-[#5865f2]/20 transition hover:bg-[#6873f5]">
+            <Bot className="h-5 w-5" aria-hidden="true" />
+            {t("bot.inviteServer")}
+            <ExternalLink className="h-4 w-4" aria-hidden="true" />
+          </a>
+          <a href={USER_INSTALL_URL} target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[#5865f2]/40 bg-[#5865f2]/10 px-7 py-3.5 text-sm font-bold text-[#c8ccff] transition hover:border-[#7882f7] hover:bg-[#5865f2]/15">
+            <UserPlus className="h-5 w-5" aria-hidden="true" />
+            {t("bot.inviteUser")}
+            <ExternalLink className="h-4 w-4" aria-hidden="true" />
+          </a>
+        </div>
         <p className="mt-4 text-xs text-pc-text-muted">{t("bot.finalNote")}</p>
       </section>
     </div>
