@@ -2,13 +2,10 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { Clock3, ImageIcon, LockKeyhole, UserRound, UserRoundCog } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { useTimeZone } from "@/lib/time-zone-context";
-import { formatLocalDate, formatLocalDateTime } from "@/lib/time-format";
 import { fixedUtcOffsetFromTimeZone, fixedUtcOffsetToTimeZone, getFixedUtcOffsetOptions, getSupportedTimeZones } from "@/lib/time-zone";
-import { useLobbyTier } from "@/lib/lobby-tier-context";
-import { LOBBY_TIER_OPTIONS, type LobbyTierFilter } from "@/lib/lobby-tier";
 import { LoadingIndicator, LoadingPanel } from "@/components/async-state";
 import PlayerLinkCard from "@/components/player-link-card";
 import {
@@ -16,36 +13,33 @@ import {
   changePassword,
   updateProfile,
   type AccountDetails,
-  getAccountNotifications,
-  markAccountNotificationRead,
-  type AccountNotification,
 } from "@/lib/api-client";
 import {
   clearCustomWallpaper,
   addCustomWallpaperFiles,
   addCustomWallpaperUrl,
+  getWallpaperEnabled,
   removeCustomWallpaper,
   resolveCustomWallpapers,
   setWallpaperEnabled,
+  WALLPAPER_CHANGE_EVENT,
   type ResolvedCustomWallpaper,
 } from "@/lib/wallpaper-preference";
 import { useLocalization } from "@/lib/localization-context";
 
 export default function AccountPage() {
-  const { t , formatDateTime, formatDate} = useLocalization();
+  const { t, formatDate } = useLocalization();
   const { user: authUser, refresh } = useAuth();
   const { timeZone, setTimeZone } = useTimeZone();
-  const { filter: lobbyTierFilter, definition: lobbyTierDefinition, setFilter: setLobbyTierFilter } = useLobbyTier();
   const router = useRouter();
   const [account, setAccount] = useState<AccountDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [customWallpapers, setCustomWallpapersState] = useState<ResolvedCustomWallpaper[]>([]);
+  const [wallpaperEnabled, setWallpaperEnabledState] = useState(true);
   const [wallpaperUrl, setWallpaperUrl] = useState("");
   const [wallpaperError, setWallpaperError] = useState<string | null>(null);
-
-  const [notifications, setNotifications] = useState<AccountNotification[]>([]);
 
   // ── Password change state ──
   const [currentPw, setCurrentPw] = useState("");
@@ -70,13 +64,9 @@ export default function AccountPage() {
 
   const loadAccount = useCallback(async () => {
     try {
-      const [data, inbox] = await Promise.all([
-        getAccountDetails(),
-        getAccountNotifications().catch(() => []),
-      ]);
+      const data = await getAccountDetails();
       setAccount(data);
       setBio(data.user.bio ?? "");
-      setNotifications(inbox);
     } catch (err) {
       if (err instanceof Error) {
         if (err.message === "Not authenticated" || err.message.includes("401")) {
@@ -107,6 +97,17 @@ export default function AccountPage() {
   useEffect(() => {
     void refreshCustomWallpaper();
   }, [refreshCustomWallpaper]);
+
+  useEffect(() => {
+    const syncWallpaperPreference = () => setWallpaperEnabledState(getWallpaperEnabled());
+    syncWallpaperPreference();
+    window.addEventListener(WALLPAPER_CHANGE_EVENT, syncWallpaperPreference);
+    window.addEventListener("storage", syncWallpaperPreference);
+    return () => {
+      window.removeEventListener(WALLPAPER_CHANGE_EVENT, syncWallpaperPreference);
+      window.removeEventListener("storage", syncWallpaperPreference);
+    };
+  }, []);
 
   useEffect(() => () => {
     customWallpapers.forEach((wallpaper) => {
@@ -159,14 +160,6 @@ export default function AccountPage() {
     }
   };
 
-  const handleNotificationOpen = (notification: AccountNotification) => {
-    if (notification.readAt) return;
-    setNotifications((current) => current.map((entry) => entry.id === notification.id ? { ...entry, readAt: new Date().toISOString() } : entry));
-    void markAccountNotificationRead(notification.id).catch(() => {
-      setNotifications((current) => current.map((entry) => entry.id === notification.id ? { ...entry, readAt: null } : entry));
-    });
-  };
-
   const handleSaveTimeZone = async () => {
     setSavingTimeZone(true);
     setError(null);
@@ -194,6 +187,12 @@ export default function AccountPage() {
     } catch (err) {
       setWallpaperError(err instanceof Error ? err.message : "Unable to save this wallpaper.");
     }
+  };
+
+  const handleWallpaperToggle = () => {
+    const next = !wallpaperEnabled;
+    setWallpaperEnabledState(next);
+    setWallpaperEnabled(next);
   };
 
   const handleWallpaperFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -252,50 +251,39 @@ export default function AccountPage() {
   const { user, linkedPlayer } = account;
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="mx-auto max-w-5xl">
       {/* ── Header ── */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-pc-accent">{t("generated.account.accountSettings")}</h1>
-        <p className="text-pc-text-secondary mt-1">
-          {t("generated.account.manageYourProfileLinkYourPaladinsPlayerAndChangeYour")}</p>
-      </div>
+      <section className="relative overflow-hidden rounded-2xl border border-pc-border bg-pc-bg-secondary/90 px-6 py-8 shadow-2xl backdrop-blur-sm sm:px-8 sm:py-10">
+        <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-pc-accent/20 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-32 left-1/3 h-56 w-56 rounded-full bg-pc-accent-alt/15 blur-3xl" />
+        <div className="relative flex items-start gap-4 sm:items-center">
+          <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-pc-accent/25 bg-pc-accent/10 text-pc-accent shadow-lg shadow-pc-accent/10">
+            <UserRoundCog className="h-7 w-7" aria-hidden="true" />
+          </span>
+          <div>
+            <h1 className="text-3xl font-extrabold tracking-tight text-pc-text sm:text-4xl">{t("generated.account.accountSettings")}</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-pc-text-secondary sm:text-base">
+              {t("generated.account.manageYourProfileLinkYourPaladinsPlayerAndChangeYour")}</p>
+          </div>
+        </div>
+      </section>
 
       {/* ── Alerts ── */}
-      {error && (
-        <div className="mb-4 bg-red-900/30 border border-red-700/50 rounded-lg p-3 text-red-400 text-sm">
-          {error}
-        </div>
-      )}
-      {success && (
-        <div className="mb-4 bg-emerald-900/30 border border-emerald-700/50 rounded-lg p-3 text-emerald-400 text-sm">
-          {success}
-        </div>
-      )}
+      {(error || success) && <div className="mt-4 space-y-3">
+        {error && <div className="rounded-xl border border-red-700/50 bg-red-900/30 p-4 text-sm text-red-300">{error}</div>}
+        {success && <div className="rounded-xl border border-emerald-700/50 bg-emerald-900/30 p-4 text-sm text-emerald-300">{success}</div>}
+      </div>}
 
-      {/* ── Community notifications ── */}
-      <div className="mb-6 rounded-lg border border-pc-border bg-pc-bg-elevated p-6">
-        <div className="mb-3 flex items-center justify-between gap-3">
-          <div>
-            <h2 className="text-lg font-semibold text-pc-text">{t("generated.account.notifications")}</h2>
-            <p className="text-sm text-pc-text-secondary">{t("generated.account.repliesToYourCommunityPostsAppearHere")}</p>
-          </div>
-          {notifications.some((notification) => !notification.readAt) && <span className="rounded-full bg-pc-accent/15 px-2 py-1 text-xs font-semibold text-pc-accent">{notifications.filter((notification) => !notification.readAt).length} {t("generated.account.new")}</span>}
-        </div>
-        {notifications.length === 0 ? <p className="rounded-lg bg-pc-bg-secondary px-3 py-4 text-sm text-pc-text-muted">{t("generated.account.noCommunityNotificationsYet")}</p> : (
-          <div className="divide-y divide-pc-border overflow-hidden rounded-lg border border-pc-border/70">
-            {notifications.map((notification) => {
-              const href = notification.postId ? `/community/${notification.postId}` : "/community";
-              return <Link key={notification.id} href={href} onClick={() => handleNotificationOpen(notification)} className={`block px-4 py-3 transition-colors hover:bg-pc-bg-secondary ${notification.readAt ? "text-pc-text-secondary" : "bg-pc-accent/5 text-pc-text"}`}>
-                <div className="flex items-start justify-between gap-3"><div className="min-w-0"><div className="text-sm"><span className="font-semibold">{notification.actorUsername}</span> {t("generated.account.repliedTo")}{" "}<span className="font-medium">{notification.postTitle ?? t("generated.account.yourPost")}</span></div>{notification.commentContent && <div className="mt-1 line-clamp-1 text-xs text-pc-text-muted">{notification.commentContent}</div>}</div><time className="shrink-0 text-xs text-pc-text-muted">{formatDateTime(notification.createdAt)}</time></div>
-              </Link>;
-            })}
-          </div>
-        )}
-      </div>
+      <div className="mt-6 grid gap-6 lg:grid-cols-2">
 
       {/* ── Time Zone ── */}
-      <div className="bg-pc-bg-elevated rounded-lg border border-pc-border p-6 mb-6">
-        <h2 className="text-lg font-semibold text-pc-text mb-2">{t("generated.account.timeZone")}</h2>
+      <section className="rounded-2xl border border-pc-border bg-pc-bg-elevated/85 p-6 shadow-xl backdrop-blur-sm lg:col-span-2">
+        <div className="mb-2 flex items-center gap-3">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-pc-accent/20 bg-pc-accent/10 text-pc-accent">
+            <Clock3 className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <h2 className="text-lg font-semibold text-pc-text">{t("generated.account.timeZone")}</h2>
+        </div>
         <p className="text-pc-text-secondary text-sm mb-4">
           {t("generated.account.allTimestampsAndMatchSearchHourWindowsUseThisTime")}</p>
         <div className="flex flex-col lg:flex-row gap-3">
@@ -307,7 +295,7 @@ export default function AccountPage() {
                 setSelectedUtcOffset("");
                 setSelectedTimeZone(event.target.value);
               }}
-              className="w-full px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
+              className="w-full rounded-xl border border-pc-border bg-pc-bg-secondary px-3 py-2.5 text-pc-text focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
             >
               <option value="" disabled>{t("generated.account.selectATimeZone")}</option>
               {timeZones.map((zone) => <option key={zone} value={zone}>{zone}</option>)}
@@ -321,7 +309,7 @@ export default function AccountPage() {
                 setSelectedUtcOffset(event.target.value);
                 if (event.target.value) setSelectedTimeZone(fixedUtcOffsetToTimeZone(Number(event.target.value)));
               }}
-              className="w-full px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
+              className="w-full rounded-xl border border-pc-border bg-pc-bg-secondary px-3 py-2.5 text-pc-text focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
             >
               <option value="">{t("generated.account.useIanaTimeZone")}</option>
               {utcOffsetOptions.map((offset) => <option key={offset.value} value={offset.value}>{offset.label}</option>)}
@@ -330,35 +318,38 @@ export default function AccountPage() {
           <button
             onClick={handleSaveTimeZone}
             disabled={savingTimeZone || selectedTimeZone === timeZone}
-            className="px-4 py-2 lg:self-end bg-pc-accent hover:bg-pc-accent-secondary text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+            className="rounded-xl bg-pc-accent px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-pc-accent-secondary disabled:cursor-not-allowed disabled:opacity-50 lg:self-end"
           >
             {savingTimeZone ? <LoadingIndicator className="gap-2" /> : t("generated.account.saveTimeZone")}
           </button>
         </div>
-      </div>
-
-      {/* ── Global ranked lobby preference ── */}
-      <div className="mb-6 rounded-lg border border-pc-border bg-pc-bg-elevated p-6">
-        <h2 className="mb-2 text-lg font-semibold text-pc-text">{t("generated.account.rankedLobbyScope")}</h2>
-        <p className="mb-4 text-sm text-pc-text-secondary">
-          {t("generated.account.chooseTheRankedLobbyRangeUsedByTierAwareStatistics")}</p>
-        <label className="block text-xs text-pc-text-muted">
-          {t("generated.account.lobbyTier")}<select
-            value={lobbyTierFilter}
-            onChange={(event) => setLobbyTierFilter(event.target.value as LobbyTierFilter)}
-            className="mt-1.5 w-full rounded-lg border border-pc-border bg-pc-bg-secondary px-3 py-2 text-sm text-pc-text focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
-          >
-            {LOBBY_TIER_OPTIONS.map((option) => <option key={option.value} value={option.value}>{t(option.labelKey)}</option>)}
-          </select>
-        </label>
-        <p className="mt-2 text-xs text-pc-text-muted">{t(lobbyTierDefinition.descriptionKey)}</p>
-      </div>
+      </section>
 
       {/* ── Custom wallpaper ── */}
-      <div className="mb-6 rounded-lg border border-pc-border bg-pc-bg-elevated p-6">
-        <h2 className="mb-2 text-lg font-semibold text-pc-text">{t("generated.account.customWallpaper")}</h2>
+      <section className="rounded-2xl border border-pc-border bg-pc-bg-elevated/85 p-6 shadow-xl backdrop-blur-sm lg:col-span-2">
+        <div className="mb-2 flex items-center gap-3">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-pc-accent-alt/20 bg-pc-accent-alt/10 text-pc-accent-alt">
+            <ImageIcon className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <h2 className="text-lg font-semibold text-pc-text">{t("generated.account.customWallpaper")}</h2>
+        </div>
         <p className="mb-4 text-sm text-pc-text-secondary">
           {t("generated.account.useYourOwnImageBehindEveryPageImagesAndLinks")}</p>
+
+        <button
+          type="button"
+          onClick={handleWallpaperToggle}
+          className="mb-4 flex w-full items-center justify-between rounded-xl border border-pc-border bg-pc-bg-secondary/90 px-4 py-3 text-left transition-colors hover:border-pc-accent-mid"
+          aria-pressed={wallpaperEnabled}
+        >
+          <span>
+            <span className="block text-sm font-semibold text-pc-text">{t("menu.mapWallpaper")}</span>
+            <span className="mt-0.5 block text-xs text-pc-text-muted">{wallpaperEnabled ? t("menu.enabled") : t("menu.darkGreyOnly")}</span>
+          </span>
+          <span className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${wallpaperEnabled ? "bg-pc-accent" : "bg-pc-bg"}`} aria-hidden="true">
+            <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${wallpaperEnabled ? "translate-x-4" : "translate-x-0.5"}`} />
+          </span>
+        </button>
 
         {customWallpapers.length > 0 && (
           <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -395,13 +386,13 @@ export default function AccountPage() {
                 value={wallpaperUrl}
                 onChange={(event) => setWallpaperUrl(event.target.value)}
                 placeholder={t("generated.account.httpsExampleComWallpaperJpg")}
-                className="min-w-0 flex-1 rounded-lg border border-pc-border bg-pc-bg-secondary px-3 py-2 text-sm text-pc-text placeholder-pc-text-muted focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
+                className="min-w-0 flex-1 rounded-xl border border-pc-border bg-pc-bg-secondary px-3 py-2.5 text-sm text-pc-text placeholder-pc-text-muted focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
               />
               <button
                 type="button"
                 onClick={() => void applyCustomWallpaperUrl()}
                 disabled={!wallpaperUrl.trim()}
-                className="rounded-lg bg-pc-accent px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-pc-accent-secondary disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-xl bg-pc-accent px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-pc-accent-secondary disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {t("generated.account.addLink")}</button>
             </div>
@@ -415,38 +406,43 @@ export default function AccountPage() {
           </div>
           <p className="text-xs text-pc-text-muted">{t("generated.account.selectOneOrMoreImagesEachUploadedImageCanBe")}</p>
         </div>
-      </div>
+      </section>
 
       {/* ── Profile Info ── */}
-      <div className="bg-pc-bg-elevated rounded-lg border border-pc-border p-6 mb-6">
-        <h2 className="text-lg font-semibold text-pc-text mb-4">{t("generated.account.profile")}</h2>
+      <section className="rounded-2xl border border-pc-border bg-pc-bg-elevated/85 p-6 shadow-xl backdrop-blur-sm">
+        <div className="mb-4 flex items-center gap-3">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-pc-accent-secondary/20 bg-pc-accent-secondary/10 text-pc-accent-secondary">
+            <UserRound className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <h2 className="text-lg font-semibold text-pc-text">{t("generated.account.profile")}</h2>
+        </div>
 
-        <div className="grid grid-cols-2 gap-4 mb-4">
+        <div className="mb-4 grid gap-4 sm:grid-cols-2">
           <div>
             <label className="block text-sm font-medium text-pc-text-secondary mb-1">
               {t("generated.account.username")}</label>
-            <div className="px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text">
+            <div className="rounded-xl border border-pc-border bg-pc-bg-secondary px-3 py-2.5 text-pc-text">
               {user.username}
             </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-pc-text-secondary mb-1">
               {t("generated.account.email")}</label>
-            <div className="px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text">
+            <div className="rounded-xl border border-pc-border bg-pc-bg-secondary px-3 py-2.5 text-pc-text">
               {user.email}
             </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-pc-text-secondary mb-1">
               {t("generated.account.memberSince")}</label>
-            <div className="px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text">
+            <div className="rounded-xl border border-pc-border bg-pc-bg-secondary px-3 py-2.5 text-pc-text">
               {formatDate(user.createdAt)}
             </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-pc-text-secondary mb-1">
               {t("generated.account.lastLogin")}</label>
-            <div className="px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text">
+            <div className="rounded-xl border border-pc-border bg-pc-bg-secondary px-3 py-2.5 text-pc-text">
               {formatDate(user.lastLogin)}
             </div>
           </div>
@@ -459,7 +455,7 @@ export default function AccountPage() {
             id="bio"
             value={bio}
             onChange={(e) => setBio(e.target.value)}
-            className="w-full px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text placeholder-pc-text-muted focus:outline-none focus:ring-2 focus:ring-pc-accent/50 resize-y min-h-[80px]"
+            className="min-h-[96px] w-full resize-y rounded-xl border border-pc-border bg-pc-bg-secondary px-3 py-2.5 text-pc-text placeholder-pc-text-muted focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
             placeholder={t("generated.account.tellUsAboutYourself")}
             rows={3}
           />
@@ -468,14 +464,14 @@ export default function AccountPage() {
         <button
           onClick={handleSaveProfile}
           disabled={savingProfile}
-          className="px-4 py-2 bg-pc-accent hover:bg-pc-accent-secondary text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+          className="rounded-xl bg-pc-accent px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-pc-accent-secondary disabled:cursor-not-allowed disabled:opacity-50"
         >
           {savingProfile ? <LoadingIndicator className="gap-2" /> : t("generated.account.saveProfile")}
         </button>
-      </div>
+      </section>
 
       {/* ── Player Linking ── */}
-      <div className="mb-6">
+      <div className="min-w-0">
         <PlayerLinkCard
           linkedPlayer={linkedPlayer}
           onChanged={async () => {
@@ -486,9 +482,13 @@ export default function AccountPage() {
       </div>
 
       {/* ── Password Change ── */}
-      <div className="bg-pc-bg-elevated rounded-lg border border-pc-border p-6 mb-6">
-        <h2 className="text-lg font-semibold text-pc-text mb-4">
-          {t("generated.account.changePassword")}</h2>
+      <section className="rounded-2xl border border-pc-border bg-pc-bg-elevated/85 p-6 shadow-xl backdrop-blur-sm lg:col-span-2">
+        <div className="mb-4 flex items-center gap-3">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-pc-accent-third/20 bg-pc-accent-third/10 text-pc-accent-third">
+            <LockKeyhole className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <h2 className="text-lg font-semibold text-pc-text">{t("generated.account.changePassword")}</h2>
+        </div>
 
         {pwError && (
           <div className="mb-3 bg-red-900/30 border border-red-700/50 rounded-lg p-3 text-red-400 text-sm">
@@ -496,7 +496,7 @@ export default function AccountPage() {
           </div>
         )}
 
-        <form onSubmit={handleChangePassword} className="space-y-3">
+        <form onSubmit={handleChangePassword} className="grid gap-4 md:grid-cols-3">
           <div>
             <label htmlFor="currentPw" className="block text-sm font-medium text-pc-text-secondary mb-1">
               {t("generated.account.currentPassword")}</label>
@@ -509,7 +509,7 @@ export default function AccountPage() {
                 setPwError(null);
               }}
               required
-              className="w-full px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text placeholder-pc-text-muted focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
+              className="w-full rounded-xl border border-pc-border bg-pc-bg-secondary px-3 py-2.5 text-pc-text placeholder-pc-text-muted focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
               placeholder={t("generated.account.enterCurrentPassword")}
             />
           </div>
@@ -527,7 +527,7 @@ export default function AccountPage() {
               }}
               required
               minLength={6}
-              className="w-full px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text placeholder-pc-text-muted focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
+              className="w-full rounded-xl border border-pc-border bg-pc-bg-secondary px-3 py-2.5 text-pc-text placeholder-pc-text-muted focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
               placeholder={t("generated.account.text6Characters")}
             />
           </div>
@@ -545,7 +545,7 @@ export default function AccountPage() {
               }}
               required
               minLength={6}
-              className="w-full px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text placeholder-pc-text-muted focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
+              className="w-full rounded-xl border border-pc-border bg-pc-bg-secondary px-3 py-2.5 text-pc-text placeholder-pc-text-muted focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
               placeholder={t("generated.account.reEnterNewPassword")}
             />
           </div>
@@ -553,11 +553,12 @@ export default function AccountPage() {
           <button
             type="submit"
             disabled={changingPw}
-            className="w-full py-2.5 bg-pc-accent hover:bg-pc-accent-secondary text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full rounded-xl bg-pc-accent py-2.5 font-semibold text-white transition-colors hover:bg-pc-accent-secondary disabled:cursor-not-allowed disabled:opacity-50 md:col-span-3"
           >
             {changingPw ? t("generated.account.changing") : t("generated.account.changePassword")}
           </button>
         </form>
+      </section>
       </div>
     </div>
   );

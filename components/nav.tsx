@@ -74,6 +74,28 @@ export default function Nav() {
     },
   ];
 
+  const statsOverviewLinks = [
+    { href: "/stats", label: t("menu.globalStats") },
+    { href: "/stats/performance", label: t("menu.performanceOverview") },
+    { href: "/stats/metrics", label: t("menu.performanceMetrics") },
+    { href: "/stats/ecpm", label: t("menu.effectiveCredits") },
+    { href: "/stats/activity", label: t("menu.playerActivity") },
+    { href: "/stats/tiers", label: t("menu.rankedDistribution") },
+    { href: "/stats/regions", label: t("menu.regions") },
+    { href: "/stats/platforms", label: t("menu.platforms") },
+  ];
+
+  const gameStatsLinks = [
+    { href: "/stats/winrate", label: t("menu.championWinRates") },
+    { href: "/stats/banrate", label: t("menu.championBanRates") },
+    { href: "/stats/talents", label: t("menu.talentPerformance") },
+    { href: "/stats/loadouts", label: t("menu.loadoutMeta") },
+    { href: "/stats/items", label: t("menu.itemMeta") },
+    { href: "/stats/maps", label: t("menu.mapStats") },
+    { href: "/stats/compositions", label: t("menu.compositionStats") },
+    { href: "/stats/skins", label: t("menu.skinStats") },
+  ];
+
   // The full side menu mirrors the directory architecture rather than the
   // compact desktop hover menu. This keeps every player directory reachable
   // on mobile while separating leaderboards from moderation and community
@@ -113,7 +135,11 @@ export default function Nav() {
     },
     {
       title: t("nav.stats"),
-      links: headerGroups[2].links,
+      links: statsOverviewLinks,
+    },
+    {
+      title: t("menu.gameStats"),
+      links: gameStatsLinks,
     },
     ...headerGroups.slice(3),
     { title: t("menu.site"), links: [{ href: "/localization", label: t("nav.localization") }, { href: "/about", label: t("menu.about") }, { href: "/contact", label: t("menu.contact") }, { href: "/privacy", label: t("menu.privacy") }, { href: "/terms", label: t("menu.terms") }] },
