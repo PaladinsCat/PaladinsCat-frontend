@@ -63,6 +63,7 @@ const staticRoutes: Array<{
   { path: "/blog", changeFrequency: "daily", priority: 0.8 },
   { path: "/changelog", changeFrequency: "daily", priority: 0.8 },
   { path: "/operations/stats", changeFrequency: "hourly", priority: 0.8 },
+  { path: "/operations/paladinscat-bot", changeFrequency: "monthly", priority: 0.75 },
   { path: "/localization", changeFrequency: "monthly", priority: 0.5 },
   { path: "/about", changeFrequency: "monthly", priority: 0.45 },
   { path: "/privacy", changeFrequency: "yearly", priority: 0.2 },

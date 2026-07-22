@@ -18,6 +18,7 @@ import { formatKda } from "@/lib/kda";
 import PlayerName, { PlayerModerationTag } from "@/components/player-name";
 import { fetchPlayerModeration } from "@/lib/player-moderation";
 import { useLocalization } from "@/lib/localization-context";
+import { estimateLiveTeamWinChance } from "@/lib/live-team-estimate";
 
 interface PlayerData {
   id: string;
@@ -466,6 +467,9 @@ export default function PlayerProfilePage() {
   }
 
   const { player, queueRatings, championRatings } = response;
+  const currentMatchWinChance = estimateLiveTeamWinChance(
+    Array.isArray(currentMatch?.players) ? currentMatch.players : [],
+  );
   // `wins`/`losses` are the account-wide Hi-Rez totals. The denormalized
   // `total_*` columns are ranked-ingest aggregates and must not drive the
   // global profile performance summary.
@@ -1037,9 +1041,18 @@ export default function PlayerProfilePage() {
                       const team = currentMatch.players.filter((p: any) => Number(p.task_force) === taskForce);
                       return (
                         <section key={taskForce} className="overflow-hidden rounded-xl border border-pc-border/70 bg-pc-bg-secondary/40">
-                          <div className={`flex items-center justify-between border-b border-pc-border/60 px-4 py-3 text-sm font-semibold ${taskForce === 1 ? 'text-sky-300' : 'text-rose-300'}`}>
+                          <div className={`flex items-center justify-between gap-3 border-b border-pc-border/60 px-4 py-3 text-sm font-semibold ${taskForce === 1 ? 'text-sky-300' : 'text-rose-300'}`}>
                             <span>{t("generated.players.team")}{" "}{taskForce}</span>
-                            <span className="text-xs font-normal text-pc-text-muted">{team.length} {t("generated.players.players.2912fa5")}</span>
+                            <div className="flex flex-wrap items-center justify-end gap-2">
+                              {currentMatchWinChance && (
+                                <span className={`rounded-full border px-2 py-1 text-xs font-semibold ${taskForce === 1 ? 'border-sky-400/25 bg-sky-400/10 text-sky-200' : 'border-rose-400/25 bg-rose-400/10 text-rose-200'}`}>
+                                  {t("liveMatch.estimatedWinChance", {
+                                    percent: formatNumber(taskForce === 1 ? currentMatchWinChance.teamOne : currentMatchWinChance.teamTwo),
+                                  })}
+                                </span>
+                              )}
+                              <span className="text-xs font-normal text-pc-text-muted">{team.length} {t("generated.players.players.2912fa5")}</span>
+                            </div>
                           </div>
                           <div className="divide-y divide-pc-border/50">
                             {team.map((p: any) => {
@@ -1115,6 +1128,9 @@ export default function PlayerProfilePage() {
                       );
                     })}
                   </div>
+                )}
+                {currentMatchWinChance && (
+                  <p className="text-center text-xs leading-5 text-pc-text-muted">{t("liveMatch.estimateMethod")}</p>
                 )}
               </div>
             )}

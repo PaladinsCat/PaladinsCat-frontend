@@ -73,6 +73,7 @@ export default function Nav() {
       links: [
         { href: "/blog", label: t(BLOG_COPY_KEYS.title) },
         { href: "/changelog", label: t("menu.changelog") },
+        { href: "/operations/paladinscat-bot", label: t("menu.paladinsCatBot") },
         { href: "/operations/stats", label: t("menu.paladinsCatStats") },
       ],
     },
