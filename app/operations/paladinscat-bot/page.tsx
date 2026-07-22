@@ -48,10 +48,6 @@ export default async function PaladinsCatBotPage() {
         <div className="pointer-events-none absolute -bottom-48 left-1/4 h-80 w-80 rounded-full bg-pc-accent/15 blur-3xl" />
         <div className="relative grid items-center gap-12 lg:grid-cols-[1.08fr_0.92fr] lg:gap-16">
           <div>
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#5865f2]/40 bg-[#5865f2]/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.16em] text-[#aeb4ff]">
-              <Bot className="h-4 w-4" aria-hidden="true" />
-              {t("bot.eyebrow")}
-            </div>
             <h1 className="max-w-3xl text-4xl font-extrabold leading-[1.08] tracking-tight text-pc-text sm:text-5xl lg:text-6xl">
               {t("bot.titleLead")} <span className="text-pc-accent">{t("bot.titleAccent")}</span>
             </h1>

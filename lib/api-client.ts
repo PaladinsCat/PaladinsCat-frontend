@@ -1427,6 +1427,7 @@ export interface Notification {
   timestamp: string;
   importance: number;
   message: string;
+  readAt?: string | null;
 }
 
 export interface NotificationInput {
@@ -1640,12 +1641,14 @@ function mapNotification(raw: {
   timestamp?: string;
   importance?: number | string;
   message: string;
+  read_at?: string | null;
 }): Notification {
   return {
     id: raw.id,
     timestamp: raw.timestamp ?? "",
     importance: Number(raw.importance ?? 0),
     message: raw.message,
+    readAt: raw.read_at,
   };
 }
 
@@ -1660,6 +1663,36 @@ export async function fetchNotifications(params?: { limit?: number }): Promise<N
   } catch {
     return [];
   }
+}
+
+export async function fetchAccountSiteNotifications(params?: { limit?: number }): Promise<Notification[]> {
+  const token = getAuthToken();
+  if (!token) throw new Error(API_ERROR_KEYS.notAuthenticated);
+  const limit = params?.limit ?? 8;
+  const raw = await fetchJson<{ data?: Array<{
+    id: number; timestamp?: string; importance?: number | string; message: string; read_at?: string | null;
+  }> }>(`/auth/account/site-notifications?limit=${limit}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return (raw.data ?? []).map(mapNotification);
+}
+
+export async function markSiteNotificationRead(notificationId: number): Promise<void> {
+  const token = getAuthToken();
+  if (!token) throw new Error(API_ERROR_KEYS.notAuthenticated);
+  await fetchJson(`/auth/account/site-notifications/${notificationId}/read`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export async function markAllSiteNotificationsRead(): Promise<void> {
+  const token = getAuthToken();
+  if (!token) throw new Error(API_ERROR_KEYS.notAuthenticated);
+  await fetchJson(`/auth/account/site-notifications/read-all`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+  });
 }
 
 export async function fetchAdminNotifications(): Promise<Notification[]> {

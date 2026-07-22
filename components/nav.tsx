@@ -14,12 +14,8 @@ import {
   setWallpaperEnabled,
   WALLPAPER_CHANGE_EVENT,
 } from "@/lib/wallpaper-preference";
-import {
-  getHomeAlertsEnabled,
-  setHomeAlertsEnabled,
-  HOME_ALERTS_CHANGE_EVENT,
-} from "@/lib/home-alert-preference";
 import PlayerName from "@/components/player-name";
+import NotificationMenu from "@/components/notification-menu";
 import { BLOG_COPY_KEYS } from "@/lib/blog-copy";
 
 export default function Nav() {
@@ -28,7 +24,6 @@ export default function Nav() {
   const { locale, setLocale, t } = useLocalization();
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
   const [wallpaperEnabled, setWallpaperEnabledState] = useState(true);
-  const [homeAlertsEnabled, setHomeAlertsEnabledState] = useState(true);
 
   const headerGroups = [
     {
@@ -159,17 +154,6 @@ export default function Nav() {
   }, []);
 
   useEffect(() => {
-    const syncHomeAlertsPreference = () => setHomeAlertsEnabledState(getHomeAlertsEnabled());
-    syncHomeAlertsPreference();
-    window.addEventListener(HOME_ALERTS_CHANGE_EVENT, syncHomeAlertsPreference);
-    window.addEventListener("storage", syncHomeAlertsPreference);
-    return () => {
-      window.removeEventListener(HOME_ALERTS_CHANGE_EVENT, syncHomeAlertsPreference);
-      window.removeEventListener("storage", syncHomeAlertsPreference);
-    };
-  }, []);
-
-  useEffect(() => {
     const openSiteMenu = () => setSideMenuOpen(true);
     window.addEventListener("paladinscat:open-site-menu", openSiteMenu);
     return () => window.removeEventListener("paladinscat:open-site-menu", openSiteMenu);
@@ -186,22 +170,10 @@ export default function Nav() {
     setWallpaperEnabled(next);
   }
 
-  function handleHomeAlertsToggle() {
-    const next = !homeAlertsEnabled;
-    setHomeAlertsEnabledState(next);
-    setHomeAlertsEnabled(next);
-  }
-
-  function selectHeaderLocale(nextLocale: Locale) {
-    setLocale(nextLocale);
-  }
-
   function selectSideMenuLocale(nextLocale: Locale) {
     setLocale(nextLocale);
     setSideMenuOpen(false);
   }
-
-  const localeCode = locale.split("-")[0].toUpperCase();
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -260,33 +232,7 @@ export default function Nav() {
             {/* Right: grouped menu and account controls */}
             {/* Player search lives on /players page; champion search on /champions page */}
             <div className="flex shrink-0 items-center justify-end gap-4">
-              <div className="group relative">
-                <span
-                  className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm font-medium text-pc-text-secondary transition-colors group-hover:bg-pc-bg-elevated"
-                  aria-label={t("nav.language")}
-                >
-                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="12" cy="12" r="10" /><path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20M12 2a15.3 15.3 0 0 0 0 20" /></svg>
-                  {localeCode}
-                  <svg className="h-3.5 w-3.5 transition-transform group-hover:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
-                </span>
-                  <div className="pointer-events-none invisible absolute right-0 top-full z-10 w-52 pt-2 opacity-0 transition-all group-hover:pointer-events-auto group-hover:visible group-hover:opacity-100" role="listbox" aria-label={t("nav.language")}>
-                    <div className="rounded-lg border border-pc-border bg-pc-bg-secondary p-1 shadow-xl">
-                    {SUPPORTED_LOCALES.map(({ code, nativeName }) => (
-                      <button
-                        key={code}
-                        type="button"
-                        onClick={() => selectHeaderLocale(code)}
-                        className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm transition-colors ${locale === code ? "bg-pc-bg-elevated text-pc-accent" : "text-pc-text-secondary hover:bg-pc-bg-elevated hover:text-pc-text"}`}
-                        role="option"
-                        aria-selected={locale === code}
-                      >
-                        {nativeName}
-                        <span className="text-xs text-pc-text-muted">{code.split("-")[0].toUpperCase()}</span>
-                      </button>
-                    ))}
-                    </div>
-                  </div>
-              </div>
+              <NotificationMenu />
               <button
                 onClick={() => setSideMenuOpen(true)}
                 className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm text-pc-text-secondary transition-colors hover:bg-pc-bg-elevated hover:text-pc-accent"
@@ -326,14 +272,17 @@ export default function Nav() {
               <img src="/images/icons/paladinscat.avif" alt="" className="w-7 h-7" />
               {t("generated.common.paladinscat")}</Link>
 
-            {/* Mobile hamburger button — opens the complete site menu */}
-            <button
-              onClick={() => setSideMenuOpen(true)}
-              className="text-pc-text hover:text-pc-accent transition-colors p-2"
-              aria-label={t("generated.common.menu")}
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M3 12h18M3 6h18M3 18h18" /></svg>
-            </button>
+            <div className="flex items-center gap-1">
+              <NotificationMenu />
+              {/* Mobile hamburger button — opens the complete site menu */}
+              <button
+                onClick={() => setSideMenuOpen(true)}
+                className="text-pc-text hover:text-pc-accent transition-colors p-2"
+                aria-label={t("generated.common.menu")}
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M3 12h18M3 6h18M3 18h18" /></svg>
+              </button>
+            </div>
           </div>
         </div>
       </nav>
@@ -381,20 +330,6 @@ export default function Nav() {
                     </span>
                     <span className={`relative h-5 w-9 rounded-full transition-colors ${wallpaperEnabled ? "bg-pc-accent" : "bg-pc-bg"}`} aria-hidden="true">
                       <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${wallpaperEnabled ? "translate-x-4" : "translate-x-0.5"}`} />
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleHomeAlertsToggle}
-                    className="flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-sm text-pc-text-secondary transition-colors hover:bg-pc-bg-elevated hover:text-pc-text"
-                    aria-pressed={homeAlertsEnabled}
-                  >
-                    <span>
-                      <span className="block">{t("menu.homeAlerts")}</span>
-                      <span className="mt-0.5 block text-xs text-pc-text-muted">{homeAlertsEnabled ? t("menu.enabled") : t("menu.hidden")}</span>
-                    </span>
-                    <span className={`relative h-5 w-9 rounded-full transition-colors ${homeAlertsEnabled ? "bg-pc-accent" : "bg-pc-bg"}`} aria-hidden="true">
-                      <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${homeAlertsEnabled ? "translate-x-4" : "translate-x-0.5"}`} />
                     </span>
                   </button>
                 </section>
