@@ -251,7 +251,8 @@ export default function BrowserScoreboard({ match, queueLabel, team1, team2, ban
                     <span className="brand-name"><img src="/images/icons/paladinscat.avif" alt="" /> {t("generated.matches.paladinscat")}</span>
                     <div className="status-tags">
                       <span className={`status-tag ${ranked ? "ranked" : "casual"}`}>{ranked ? t("generated.matches.ranked") : t("generated.matches.casual")}</span>
-                      {match.broken && !match.recovered && <span className="status-tag broken">{t("generated.matches.broken")}</span>}
+                      {match.limited && <span className="status-tag limited" title={match.limited_reason || undefined}>{t("generated.matches.limited")}</span>}
+                      {match.broken && !match.recovered && !match.limited && <span className="status-tag broken">{t("generated.matches.broken")}</span>}
                       {match.recovered && <span className="status-tag recovered">{t("generated.matches.recovered")}</span>}
                       {match.private && <span className="status-tag private">{t("generated.matches.private")}</span>}
                     </div>

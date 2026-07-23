@@ -4374,6 +4374,8 @@ export interface MatchData {
   recovered: boolean;
   broken: boolean;
   private: boolean;
+  limited: boolean;
+  limited_reason?: string | null;
 }
 
 /**
