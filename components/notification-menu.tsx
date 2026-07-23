@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Bell, CheckCheck, LoaderCircle } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import {
   fetchAccountSiteNotifications,
@@ -26,24 +26,34 @@ export default function NotificationMenu() {
   const [loading, setLoading] = useState(true);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
+  const requestSequenceRef = useRef(0);
+  const signedIn = Boolean(user);
 
-  useEffect(() => {
+  const loadNotifications = useCallback(async () => {
     if (authLoading) return;
-    let active = true;
-    const request = user
+    const requestId = ++requestSequenceRef.current;
+    const request = signedIn
       ? fetchAccountSiteNotifications({ limit: 8 })
       : fetchNotifications({ limit: 8 });
-    void request
-      .catch(() => fetchNotifications({ limit: 8 }))
-      .then((rows) => {
-        if (!active) return;
-        setNotifications(rows);
-        setLoading(false);
-      });
+    try {
+      const rows = await request.catch(() => fetchNotifications({ limit: 8 }));
+      if (requestId !== requestSequenceRef.current) return;
+      setNotifications(rows);
+    } finally {
+      if (requestId === requestSequenceRef.current) setLoading(false);
+    }
+  }, [authLoading, signedIn]);
+
+  useEffect(() => {
+    void loadNotifications();
+    const refreshTimer = window.setInterval(() => {
+      if (document.visibilityState === "visible") void loadNotifications();
+    }, 60_000);
     return () => {
-      active = false;
+      window.clearInterval(refreshTimer);
+      requestSequenceRef.current += 1;
     };
-  }, [authLoading, user]);
+  }, [loadNotifications]);
 
   useEffect(() => {
     if (!open) return;
@@ -89,12 +99,17 @@ export default function NotificationMenu() {
   const buttonLabel = unreadCount > 0
     ? t("notifications.openUnread", { count: unreadCount })
     : t("notifications.open");
+  const toggleMenu = () => {
+    const nextOpen = !open;
+    setOpen(nextOpen);
+    if (nextOpen) void loadNotifications();
+  };
 
   return (
     <div ref={containerRef} className="relative">
       <button
         type="button"
-        onClick={() => setOpen((current) => !current)}
+        onClick={toggleMenu}
         className={`relative inline-flex h-9 w-9 items-center justify-center rounded-lg text-pc-text-secondary transition-colors hover:bg-pc-bg-elevated hover:text-pc-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent ${open ? "bg-pc-bg-elevated text-pc-accent" : ""}`}
         aria-label={buttonLabel}
         aria-haspopup="dialog"
