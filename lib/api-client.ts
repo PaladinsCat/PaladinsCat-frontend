@@ -330,8 +330,18 @@ function mapAutomaticAfkPlayer(row: any): AutomaticAfkPlayer {
   };
 }
 
-export async function fetchAutomaticAfkPlayers(limit = 100): Promise<AutomaticAfkPlayerPage> {
-  const rows = await fetchJson<any[]>(`/players/automatic-afk?limit=${Math.min(Math.max(limit, 1), 100)}`);
+export async function fetchAutomaticAfkPlayers({
+  limit = 24,
+  offset = 0,
+}: {
+  limit?: number;
+  offset?: number;
+} = {}): Promise<AutomaticAfkPlayerPage> {
+  const query = new URLSearchParams({
+    limit: String(Math.min(Math.max(limit, 1), 100)),
+    offset: String(Math.max(offset, 0)),
+  });
+  const rows = await fetchJson<any[]>(`/players/automatic-afk?${query.toString()}`);
   return {
     players: rows.map(mapAutomaticAfkPlayer),
     totalCount: Number(rows[0]?.total_count ?? rows.length),
