@@ -297,12 +297,8 @@ export default function PlayerProfilePage() {
       })
       .then((data) => {
         if (!cancelled) {
-          const expiresAt = data.profileRefresh?.expires_at
-            ? new Date(data.profileRefresh.expires_at).getTime()
-            : Number.NaN;
           const now = Date.now();
           setResponse(data);
-          setRefreshCooldownUntil(Number.isFinite(expiresAt) && expiresAt > now ? expiresAt : null);
           setRefreshClock(now);
           setError(null);
           setProfileLoading(false);
@@ -362,29 +358,28 @@ export default function PlayerProfilePage() {
     setRefreshFeedback({ kind, message });
   }, []);
 
-  // Refresh handler — use the database during the TTL and only ask the backend
-  // for an expired profile. The backend independently enforces the same rule.
+  // Profile fields retain their own TTL, but each permitted action asks the
+  // backend to re-check match history. This lets a visitor retry after an early
+  // click while ingestion is still registering the newest matches.
   const handleRefresh = useCallback(async () => {
-    const freshness = response?.profileRefresh;
-    const expiresAt = freshness?.expires_at ? new Date(freshness.expires_at).getTime() : Number.NaN;
-    if (freshness && Number.isFinite(expiresAt) && expiresAt > Date.now()) {
-      // Profile fields have their own 10-minute TTL. Match history is a
-      // separate database-backed cache, so still re-read it when a visitor
-      // presses Refresh; this surfaces newly persisted casual matches without
-      // spending an unnecessary profile API call.
-      setHistoryFetchKey((key) => key + 1);
-      showRefreshCooldown(freshness.expires_at, freshness.remaining_seconds);
-      return;
-    }
-
     setRefreshing(true);
     setRefreshFeedback(null);
     try {
       const res = await fetch(`${API_BASE}/players/${id}/refresh`, { method: 'POST' });
       const data = await res.json();
-      if (res.status === 429 && data?.error?.code === 'PROFILE_REFRESH_COOLDOWN') {
+      if (res.status === 429) {
         const details = data.error.details || {};
-        showRefreshCooldown(details.expires_at, details.remaining_seconds);
+        const retryAfter = Number(
+          details.retry_after_seconds
+          ?? res.headers.get('Retry-After')
+          ?? 0,
+        );
+        showRefreshCooldown(
+          null,
+          retryAfter,
+          'warning',
+          t("common.playerRefresh.limitReached"),
+        );
         return;
       }
       if (!res.ok) {
@@ -392,14 +387,26 @@ export default function PlayerProfilePage() {
       }
 
       const relatedRefreshError = data?.historyRefresh?.error || data?.championStatsRefresh?.error;
-      showRefreshCooldown(
-        data?.profileRefresh?.expires_at,
-        data?.profileRefresh?.remaining_seconds,
-        relatedRefreshError ? 'warning' : 'success',
-        relatedRefreshError
-          ? 'Profile refreshed, but some related data could not be updated. Next refresh available in'
-          : 'Profile, match history, and champion totals refreshed. Next refresh available in',
-      );
+      const remaining = Math.max(0, Number(data?.refreshQuota?.remaining ?? 0));
+      if (remaining === 0) {
+        showRefreshCooldown(
+          data?.refreshQuota?.reset_at,
+          data?.refreshQuota?.remaining_seconds,
+          relatedRefreshError ? 'warning' : 'success',
+          t("common.playerRefresh.limitReached"),
+        );
+      } else {
+        setRefreshCooldownUntil(null);
+        setRefreshFeedback({
+          kind: relatedRefreshError ? 'warning' : 'success',
+          message: t(
+            relatedRefreshError
+              ? "common.playerRefresh.partial"
+              : "common.playerRefresh.success",
+            { remaining: formatNumber(remaining) },
+          ),
+        });
+      }
       setFetchKey(k => k + 1);
       setHistoryFetchKey((key) => key + 1);
     } catch (err) {
@@ -411,7 +418,7 @@ export default function PlayerProfilePage() {
     } finally {
       setRefreshing(false);
     }
-  }, [id, response?.profileRefresh, showRefreshCooldown]);
+  }, [formatNumber, id, showRefreshCooldown, t]);
 
   // Current match handler
   const handleCurrentMatch = useCallback(async () => {
@@ -528,7 +535,7 @@ export default function PlayerProfilePage() {
             onClick={handleRefresh}
             disabled={refreshDisabled}
             className="inline-flex items-center gap-1.5 rounded-lg border border-pc-border/70 bg-pc-bg-secondary/90 px-3 py-2 text-xs font-semibold text-pc-text transition-colors hover:border-pc-accent-mid hover:text-pc-accent disabled:cursor-not-allowed disabled:opacity-50"
-            title={t("generated.players.refreshProfile10MinuteCooldown")}
+            title={t("common.playerRefresh.quotaTitle")}
           >
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={refreshing ? 'animate-spin' : ''} aria-hidden="true"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
             {refreshing ? t("generated.players.refreshing") : refreshRemainingMs > 0 ? t("generated.players.refreshInValue1", { value1: formatCooldown(refreshRemainingMs) }) : t("generated.players.refresh")}
