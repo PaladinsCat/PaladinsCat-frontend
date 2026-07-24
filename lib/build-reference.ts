@@ -221,7 +221,7 @@ async function buildCards(championId: number, champion?: ChampionData): Promise<
       id: id > 0 ? id : -(index + 1),
       name: card.name,
       category: card.category || "General",
-      description: row?.description ?? card.description ?? null,
+      description: card.description ?? row?.description ?? null,
       iconUrl: card.iconUrl ?? row?.icon_url ?? row?.iconUrl ?? null,
     };
   });
@@ -245,7 +245,7 @@ async function buildTalents(championId: number, champion?: ChampionData): Promis
       id: talent.id,
       name: talent.name,
       category: talent.category || "Talent",
-      description: row?.description ?? talent.description ?? null,
+      description: talent.description ?? row?.description ?? null,
       iconUrl: talent.iconUrl ?? row?.icon_url ?? row?.iconUrl ?? null,
     };
   });

@@ -736,7 +736,7 @@
     "talents": [
       {
         "name": "Persistence",
-        "description": "Reduce the damage you take by {4|4}% while at or below 40% Health.",
+        "description": "Gain 30% Lifesteal on your hits with Judgement.",
         "category": "",
         "iconUrl": "/images/champions/Talent Azaan Persistence.avif",
         "id": 27718
@@ -1235,7 +1235,7 @@
       },
       {
         "name": "Eureka Moment",
-        "description": "Generate 1 ammo for every {2,000|-200}explosive damage done.",
+        "description": "Generate 1 ammo for every {2,000|-200} explosive damage done.",
         "category": "General",
         "iconUrl": "/images/cards/Card_Eureka_Moment.avif",
         "cooldown": null,
@@ -1425,7 +1425,7 @@
     "loadouts": [
       {
         "name": "Ablative Coating",
-        "description": "Heal for {100|100}for each enemy hit with Poppy Bomb.",
+        "description": "Heal for {100|100} for each enemy hit with Poppy Bomb.",
         "category": "Poppy Bomb",
         "iconUrl": "/images/cards/Card_Ablative_Coating.avif",
         "cooldown": null,
@@ -1465,7 +1465,7 @@
       },
       {
         "name": "Doomsday",
-        "description": "Heals for {130|130}after using Grumpy Bomb.",
+        "description": "Heals for {130|130} after using Grumpy Bomb.",
         "category": "Grumpy Bomb",
         "iconUrl": "/images/cards/Card_Doomsday.avif",
         "cooldown": null,
@@ -1473,7 +1473,7 @@
       },
       {
         "name": "Explosive Entrance",
-        "description": "Heal for {75|75}after using Poppy Bomb.",
+        "description": "Heal for {75|75} after using Poppy Bomb.",
         "category": "Poppy Bomb",
         "iconUrl": "/images/cards/Card_Explosive_Entrance.avif",
         "cooldown": null,
@@ -1481,7 +1481,7 @@
       },
       {
         "name": "Fallout",
-        "description": "Increase Grumpy Bomb\u2019s Stun duration by {0.1|0.1}s.",
+        "description": "Increase Grumpy Bomb’s Stun duration by {0.1|0.1}s.",
         "category": "Grumpy Bomb",
         "iconUrl": "/images/cards/Card_Fallout.avif",
         "cooldown": null,
@@ -1497,7 +1497,7 @@
       },
       {
         "name": "King's Court",
-        "description": "Heal for {15|15}for each Sticky Bomb you Detonate.",
+        "description": "Heal for {15|15} for each Sticky Bomb you Detonate.",
         "category": "Detonate",
         "iconUrl": "/images/cards/Card_Kings_Court.avif",
         "cooldown": null,
@@ -1846,7 +1846,7 @@
     "talents": [
       {
         "name": "Measured Cadence",
-        "description": "Automatically fire a weaker copy of Rogue\u2019s Tempo for every 4 Ammo consumed. This copy deals 400 damage and reduces Rogue's Tempo's Cooldown by 15% on hit.",
+        "description": "Automatically fire a weaker copy of Rogue’s Tempo for every 4 Ammo consumed. This copy deals 400 damage and reduces Rogue's Tempo's Cooldown by 15% on hit.",
         "category": "",
         "iconUrl": "/images/champions/Talent Caspian Measured Cadence.avif",
         "id": 31057
@@ -1860,7 +1860,7 @@
       },
       {
         "name": "It's Got Some Heft",
-        "description": "War deals 50 more damage per hit and hits 20% farther, but its fire rate is decreased by 20%. War's attacks now deal an additional 20% damage to each enemy hit for each enemy hit in total with your attack.",
+        "description": "War deals 50 more damage per hit and hits 20% farther, but its fire rate is decreased by 20%. War's attacks now deal an additional 20% damage to each enemy hit for each enemy hit in total with your attack",
         "category": "",
         "iconUrl": "/images/champions/Talent Caspian It's Got Some Heft.avif",
         "id": 31059
@@ -1869,7 +1869,7 @@
     "loadouts": [
       {
         "name": "A Brief Respite",
-        "description": "Reduce the Cooldown of Deadly Momentum by {1|1}s after hitting at least one enemy with Rogue\u2019s Tempo.",
+        "description": "Reduce the Cooldown of Deadly Momentum by {1|1}s after hitting at least one enemy with Rogue’s Tempo.",
         "category": "Rogue&#39;s Tempo",
         "iconUrl": "/images/cards/Card_A_Brief_Respite.avif",
         "cooldown": null,
@@ -1885,7 +1885,7 @@
       },
       {
         "name": "Casual Competency",
-        "description": "Hitting an enemy with Rogue\u2019s Tempo grants you {1|1} stacks of Piercing Momentum and Sharp Momentum.",
+        "description": "Hitting an enemy with Rogue’s Tempo grants you {1|1} stacks of Piercing Momentum and Sharp Momentum.",
         "category": "Rogue&#39;s Tempo",
         "iconUrl": "/images/cards/Card_Casual_Competency.avif",
         "cooldown": null,
@@ -1925,7 +1925,7 @@
       },
       {
         "name": "In the Thick of It",
-        "description": "Generate {3|3} Ammo after hitting at least one enemy with Rogue\u2019s Tempo.",
+        "description": "Generate {3|3} Ammo after hitting at least one enemy with Rogue’s Tempo.",
         "category": "Rogue&#39;s Tempo",
         "iconUrl": "/images/cards/Card_In_the_Thick_of_It.avif",
         "cooldown": null,
@@ -1941,7 +1941,7 @@
       },
       {
         "name": "Shady Dealings",
-        "description": "Gain {2|2} credits for each enemy Champion hit with Rogue\u2019s Tempo.",
+        "description": "Gain {2|2} credits for each enemy Champion hit with Rogue’s Tempo.",
         "category": "Rogue&#39;s Tempo",
         "iconUrl": "/images/cards/Card_Shady_Dealings.avif",
         "cooldown": null,
@@ -2369,7 +2369,7 @@
       },
       {
         "name": "Grand Design",
-        "description": "Grants Marked ally {2.5|2.5}% Lifesteal and Corvus shares 100% of the Healing done due to the Marked target\u2019s granted Lifesteal.",
+        "description": "Grants Marked ally {2.5|2.5}% Lifesteal and Corvus shares 100% of the Healing done due to the Marked target’s granted Lifesteal.",
         "category": "Mark of Fate",
         "iconUrl": "/images/cards/Card_Grand_Design.avif",
         "cooldown": null,
@@ -2543,7 +2543,7 @@
       },
       {
         "name": "Blow the Man Down",
-        "description": "Enemies hit by Harpoon\u2019s Slow have their Movement Speed reduced by an additional {6|6}%.",
+        "description": "Enemies hit by Harpoon’s Slow have their Movement Speed reduced by an additional {6|6}%.",
         "category": "Harpoon",
         "iconUrl": "/images/cards/Card_Blow_the_Man_Down.avif",
         "cooldown": null,
@@ -2551,7 +2551,7 @@
       },
       {
         "name": "Crow's Nest",
-        "description": "Hitting yourself with Broadside now applies a",
+        "description": "Hitting yourself with Broadside now applies a Knockup of {500|150}.",
         "category": "Broadside",
         "iconUrl": "/images/cards/Card_Crow's_Nest.avif",
         "cooldown": null,
@@ -2703,7 +2703,7 @@
         "iconUrl": "/images/skills/Ability_Salvo.png",
         "iconUrl2": null,
         "iconUrl3": null,
-        "damage": "6\u00d7250",
+        "damage": "6×250",
         "healing": null,
         "cooldown": "18s",
         "description": "Load all your rockets into your launcher and unleash them with your next attack for a rapid-fire assault, dealing 250 damage per rocket."
@@ -3321,7 +3321,7 @@
       },
       {
         "name": "Unstoppable Force",
-        "description": "Apply a",
+        "description": "Apply a Knockback of {800|200} to enemies hit by Charge.",
         "category": "Charge",
         "iconUrl": "/images/cards/Card_Unstoppable_Force.avif",
         "cooldown": null,
@@ -3487,7 +3487,7 @@
       },
       {
         "name": "Light Forge",
-        "description": "Hitting Kindle Soul increases you and your target\u2019s Movement Speed by {5|5}% for 2s.",
+        "description": "Hitting Kindle Soul increases you and your target’s Movement Speed by {5|5}% for 2s.",
         "category": "Kindle Soul",
         "iconUrl": "/images/cards/Card_Light_Forge.avif",
         "cooldown": null,
@@ -4423,7 +4423,7 @@
       },
       {
         "name": "Summit",
-        "description": "Apply a",
+        "description": "Apply a Knockup of {300|300} to yourself after using Impasse underneath yourself.",
         "category": "Impasse",
         "iconUrl": "/images/cards/Card_Summit.avif",
         "cooldown": null,
@@ -5814,7 +5814,7 @@
         "damage": null,
         "healing": null,
         "cooldown": "6s",
-        "description": "You have a Retribution target that is revealed to you when nearby. Killing your target grants additional Credits if they are on a killstreak. Activating Retribution randomly selects a new target."
+        "description": "Focus on a random target, Revealing them when nearby. Killing them grants additional credits if they were on a killstreak."
       },
       {
         "name": "Combat Slide",
@@ -5873,7 +5873,7 @@
       },
       {
         "name": "Commencement",
-        "description": "Increase the distance of Combat Slide by {10 ;10}%.",
+        "description": "Increase the distance of Combat Slide by {10|10}%.",
         "category": "Combat Slide",
         "iconUrl": "/images/cards/Card_Commencement.avif",
         "cooldown": null,
@@ -5969,7 +5969,7 @@
       },
       {
         "name": "Warrants Out",
-        "description": "Increase your Movement Speed by {8 ;8}% for 2s after Combat Slide ends.",
+        "description": "Increase your Movement Speed by {8|8}% for 2s after Combat Slide ends.",
         "category": "Combat Slide",
         "iconUrl": "/images/cards/Card_Warrants_Out.avif",
         "cooldown": null,
@@ -5985,7 +5985,7 @@
       },
       {
         "name": "Wicked Don't Rest",
-        "description": "Reduce the Cooldown of Combat Slide by {5 ;5}% for each enemy hit by your weapons.",
+        "description": "Reduce the Cooldown of Combat Slide by {5|5}% for each enemy hit by your weapons.",
         "category": "Combat Slide",
         "iconUrl": "/images/cards/Card_Wicked_Dont_Rest.avif",
         "cooldown": null,
@@ -6300,7 +6300,7 @@
       },
       {
         "name": "Murderous Intent",
-        "description": "Hitting an enemy with Heart of Crimson while they\u2019re affected by Blood Hex or Swarm increases your movement speed by 10% and attack speed by 11% for 4s. Stacks up to 3 times.",
+        "description": "Hitting an enemy with Heart of Crimson while they’re affected by Blood Hex or Swarm increases your movement speed by 10% and attack speed by 11% for 4s. Stacks up to 3 times.",
         "category": "",
         "iconUrl": "/images/champions/Talent Lillith Murderous Intent.avif",
         "id": 33002
@@ -6317,7 +6317,7 @@
       },
       {
         "name": "Blood Sense",
-        "description": "Hitting an enemy with Blood Hex will",
+        "description": "Hitting an enemy with Blood Hex will Reveal them to your team for {0.5|0.5}s.",
         "category": "Blood Hex",
         "iconUrl": "/images/cards/Card_Blood_Sense.avif",
         "cooldown": null,
@@ -6325,7 +6325,7 @@
       },
       {
         "name": "Charmed",
-        "description": "Increase your ally\u2019s Movement Speed by {4|4}% while they are marked by Blood Hex.",
+        "description": "Increase your ally’s Movement Speed by {4|4}% while they are marked by Blood Hex.",
         "category": "Blood Hex",
         "iconUrl": "/images/cards/Card_Charmed.avif",
         "cooldown": null,
@@ -6455,7 +6455,7 @@
         "iconUrl": "/images/skills/WeaponAttack_Maeve_Icon.png",
         "iconUrl2": null,
         "iconUrl3": null,
-        "damage": "2\u00d7 400",
+        "damage": "2× 400",
         "healing": null,
         "cooldown": null,
         "description": "Fling two daggers to impale your enemies, each dealing 400 damage."
@@ -6744,7 +6744,7 @@
       },
       {
         "name": "Leviathan",
-        "description": "Dredge Anchor now also pulls you toward the enemy and Stuns them. Increase your Ultimate charge rate by 25% and Health by 500. Ancient Rage now also increases your Movement Speed by 45%.",
+        "description": "Increase your Ultimate charge rate by 25% and Health by 500. Ancient Rage now causes Makoa to grow 50% in size, resets all his Cooldowns, and increases his Movement Speed by 45%.",
         "category": "",
         "iconUrl": "/images/champions/Talent Makoa Leviathan.avif",
         "id": 16432
@@ -7047,7 +7047,7 @@
       },
       {
         "name": "Pungent Gourd",
-        "description": "Increase your Allies\u2019 and your Movement Speed by {8|8}% while in your Gourd.",
+        "description": "Increase your Allies’ and your Movement Speed by {8|8}% while in your Gourd.",
         "category": "Gourd",
         "iconUrl": "/images/cards/Card_Pungent_Gourd.avif",
         "cooldown": null,
@@ -7168,7 +7168,7 @@
         "damage": null,
         "healing": null,
         "cooldown": "Ultimate",
-        "description": "Transform enemies into helpless treats, which are executed if Moji makes contact with them."
+        "description": "Polymorph a single victim into a delicious, helpless treat that you can eat, killing them instantly."
       }
     ],
     "talents": [
@@ -7237,7 +7237,7 @@
       },
       {
         "name": "Greater Good",
-        "description": "When an ally receives max Magic Marks, they gain a {20|20}Health Shield while marked.",
+        "description": "When an ally receives max Magic Marks, they gain a {20|20} Health Shield while marked.",
         "category": "Familiar Spray",
         "iconUrl": "/images/cards/Card_Greater_Good.avif",
         "cooldown": null,
@@ -7343,7 +7343,7 @@
         "iconUrl": "/images/skills/WeaponAttack_Nyx_Icon.png",
         "iconUrl2": null,
         "iconUrl3": null,
-        "damage": "3\u00d7 200 /1s - 2\u00d7 425 /1s",
+        "damage": "3× 200 /1s - 2× 425 /1s",
         "healing": null,
         "cooldown": null,
         "description": "Punch in a five hit attack chain, dealing 200 three times and 425 two times. Resets to the first hit after missing 2 hits or after 1.25s."
@@ -7410,7 +7410,7 @@
       },
       {
         "name": "Subjugation",
-        "description": "Increase the distance traveled by Juggernaut by {8|8}%.",
+        "description": "Royal Presence's reactivation now only hits the first enemy in its path, and instead Roots them for 2.25s. Increase the Range of the reactivation by 50%.",
         "category": "",
         "iconUrl": "/images/champions/Talent Nyx Subjugation.avif",
         "id": 31892
@@ -7590,7 +7590,7 @@
         "damage": null,
         "healing": null,
         "cooldown": "16s",
-        "description": "Create an opaque, anti-gravity dome that hides allies and disorients and Slows enemies while inside of it - lasts for 3.5s."
+        "description": "Create an opaque, anti-gravity dome that hides allies and disorients and Slows enemies while inside of it – lasts for 3.5s."
       },
       {
         "name": "Commanding Leap",
@@ -7697,7 +7697,7 @@
       },
       {
         "name": "High Ground",
-        "description": "Increase the jump strength of Octavia\u2019s Commanding Leap by {5|5}%.",
+        "description": "Increase the jump strength of Octavia’s Commanding Leap by {5|5}%.",
         "category": "Commanding Leap",
         "iconUrl": "/images/cards/Card_High Ground.avif",
         "cooldown": null,
@@ -7812,7 +7812,7 @@
         "damage": "400",
         "healing": null,
         "cooldown": "10s",
-        "description": "Alter gravity and Lift targeted enemy into the air, then Push them away, dealing 400 damage. Enemies with Ominous Brand are Weakened to Aphotic Reaver and Burn for 3s."
+        "description": "Alter gravity and Lift targeted enemy into the air. before Pushing them away and dealing 400 damage. Enemies with Ominous Brand are Weakened to Aphotic Reaver and Burn for 3s."
       },
       {
         "name": "Dark Stride",
@@ -7840,7 +7840,7 @@
     "talents": [
       {
         "name": "Everyone Dies",
-        "description": "Hitting an enemy with Dark Stride now reduces Gravity Vice\u2019s Cooldown by 50%, and Dark Stride\u2019s damage is increased by 100.",
+        "description": "Hitting an enemy with Dark Stride now reduces Gravity Vice’s Cooldown by 50%, and Dark Stride’s damage is increased by 100.",
         "category": "",
         "iconUrl": "/images/champions/Talent Omen Everyone Dies.avif",
         "id": 32760
@@ -7879,7 +7879,7 @@
       },
       {
         "name": "Dusk Trail",
-        "description": "Heal for {15|15} each time Dark Stride\u2019s trail deals damage to an enemy.",
+        "description": "Heal for {15|15} each time Dark Stride’s trail deals damage to an enemy.",
         "category": "Dark Stride",
         "iconUrl": "/images/cards/Card_Dusk_Trail.avif",
         "cooldown": null,
@@ -7919,7 +7919,7 @@
       },
       {
         "name": "I Am Everywhere",
-        "description": "Increase your Movement Speed by {7|7}%",
+        "description": "Increase your Movement Speed by {7|7}% for 3s after using Dark Stride.",
         "category": "Dark Stride",
         "iconUrl": "/images/cards/Card_I_Am_Everywhere.avif",
         "cooldown": null,
@@ -7927,7 +7927,7 @@
       },
       {
         "name": "Lightless",
-        "description": "Increase the duration of Dark Stride\u2019s trail by {1|1}s.",
+        "description": "Increase the duration of Dark Stride’s trail by {1|1}s.",
         "category": "Dark Stride",
         "iconUrl": "/images/cards/Card_Lightless.avif",
         "cooldown": null,
@@ -8323,7 +8323,7 @@
       },
       {
         "name": "Apocalypse",
-        "description": "Heal for {150|150}for each champion hit by Juggernaut.",
+        "description": "Heal for {150|150} for each champion hit by Juggernaut.",
         "category": "Juggernaut",
         "iconUrl": "/images/cards/Card_Apocalypse.avif",
         "cooldown": null,
@@ -8331,7 +8331,7 @@
       },
       {
         "name": "Declaration of War",
-        "description": "Increase the potency of Juggernaut\u2019s Knockup and Knockback by {7|7}%.",
+        "description": "Increase the potency of Juggernaut’s Knockup and Knockback by {7|7}%.",
         "category": "Juggernaut",
         "iconUrl": "/images/cards/Card_Declaration_of_War.avif",
         "cooldown": null,
@@ -8403,7 +8403,7 @@
       },
       {
         "name": "Tormented Fissure",
-        "description": "Generate {25|25}Ammo after activating Ignition.",
+        "description": "Generate {25|25} Ammo after activating Ignition.",
         "category": "Ignition",
         "iconUrl": "/images/cards/Card_Tormented_Fissure.avif",
         "cooldown": null,
@@ -8411,7 +8411,7 @@
       },
       {
         "name": "Triumphant Ascension",
-        "description": "Heal for {100|100}after activating Soul Harvest.",
+        "description": "Heal for {100|100} after activating Soul Harvest.",
         "category": "Soul Harvest",
         "iconUrl": "/images/cards/Card_Triumphant_Ascension.avif",
         "cooldown": null,
@@ -8467,7 +8467,7 @@
         "damage": null,
         "healing": null,
         "cooldown": "4s",
-        "description": "A magical ability that heals an ally for 1000 over 1.5s. The heal bounces to nearby allies for 500 over 1.5s, up to 3 times."
+        "description": "Manifest arcane forces and send it forth, bouncing between your initial target and up to 4 additional allies, Healing them for 550 per bounce. Linked allies are healed for 30% more."
       },
       {
         "name": "Spirit Link",
@@ -8478,7 +8478,7 @@
         "damage": null,
         "healing": null,
         "cooldown": "Ultimate",
-        "description": "A magical ability that shields an ally for 300 for 4s and increases their Movement Speed by 10%."
+        "description": "Tether to an ally or enemy. While Linked to an ally, you passively Heal them and grant them Ultimate charge. While Linked to an enemy, passively Slow and deal damage to them."
       },
       {
         "name": "Envelop",
@@ -8489,7 +8489,7 @@
         "damage": null,
         "healing": null,
         "cooldown": "14s",
-        "description": "Gain damage mitigation, increased Movement Speed, and increased Jump Height for 3s."
+        "description": "Reduce the max damage you can take to 275 per instance of damage and increase your Movement Speed and Jump Height for 3s. Linked allies are also affected by Envelop."
       },
       {
         "name": "Vivify",
@@ -8500,7 +8500,7 @@
         "damage": null,
         "healing": null,
         "cooldown": "Ultimate",
-        "description": "Grant yourself and a nearby ally invulnerability for 1.5s and heal them for 75% of their maximum Health over 2s."
+        "description": "Infuse a Linked ally with life, making them Immune to damage for 2s and Healing them by 75% after a brief delay. You gain Damage Immunity and 75% Healing."
       }
     ],
     "talents": [
@@ -8513,14 +8513,14 @@
       },
       {
         "name": "Restraint",
-        "description": "Increase the duration of Focus and grant Reload Speed.",
+        "description": "While Envelop is active and you are Linked to an enemy, prevent them from Healing.",
         "category": "",
         "iconUrl": "/images/champions/Talent Rei Restraint.avif",
         "id": 27314
       },
       {
         "name": "Focus",
-        "description": "Spirit Link\u2019s Cooldown is increased to 6s and it now only lasts for 3s, but its base effects are tripled.",
+        "description": "Spirit Link’s Cooldown is increased to 6s and it now only lasts for 3s, but its base effects are tripled.",
         "category": "",
         "iconUrl": "/images/champions/Talent Rei Focus.avif",
         "id": 27315
@@ -8545,7 +8545,7 @@
       },
       {
         "name": "Arcane Maelstrom",
-        "description": "Using Envelop reduces your linked friendly target\u2019s Cooldowns by {7|7}%.",
+        "description": "Using Envelop reduces your linked friendly target’s Cooldowns by {7|7}%.",
         "category": "Envelop",
         "iconUrl": "/images/cards/Card_Arcane_Maelstrom.avif",
         "cooldown": null,
@@ -8908,7 +8908,7 @@
         "iconUrl": "/images/skills/Ability_Ricochet.png",
         "iconUrl2": null,
         "iconUrl3": null,
-        "damage": "100 (Coin) \u2014 300 (Deflected Shot)  750 (Explosion)",
+        "damage": "100 (Coin) — 300 (Deflected Shot)  750 (Explosion)",
         "healing": null,
         "cooldown": "3 Pips",
         "description": "Costs 3 Pips. Toss & fire a coin to deal damage to the weakest enemy in range. Shoot at it again to cause an explosion."
@@ -8933,7 +8933,7 @@
         "damage": "250+ 25 /0.4s",
         "healing": null,
         "cooldown": "5 Pips",
-        "description": "Flip to Knock yourself and enemies away, damaging and Burning them."
+        "description": "Costs 5 Pips. Flip to Knock yourself and enemies away, damaging and Burning them."
       },
       {
         "name": "Wallbang",
@@ -9021,7 +9021,7 @@
       },
       {
         "name": "Hide",
-        "description": "Increase the duration of Saati\u2019s invisibility by {0.12|0.125}s after deployment of Dead Ringer.",
+        "description": "Increase the duration of Saati’s invisibility by {0.12|0.125}s after deployment of Dead Ringer.",
         "category": "Dead Ringer",
         "iconUrl": "/images/cards/Card_Hide.avif",
         "cooldown": null,
@@ -9029,7 +9029,7 @@
       },
       {
         "name": "Paper Design",
-        "description": "Decrease the time between bursts of Dead Ringer\u2019s inhand fire by {8|8}%.",
+        "description": "Decrease the time between bursts of Dead Ringer’s inhand fire by {8|8}%.",
         "category": "Dead Ringer",
         "iconUrl": "/images/cards/Card_Paper_Design.avif",
         "cooldown": null,
@@ -9053,7 +9053,7 @@
       },
       {
         "name": "Seek",
-        "description": "Increase the duration of Dead Ringer\u2019s reveal on destruction by {0.5|0.5}s.",
+        "description": "Increase the duration of Dead Ringer’s reveal on destruction by {0.5|0.5}s.",
         "category": "Dead Ringer",
         "iconUrl": "/images/cards/Card_Seek.avif",
         "cooldown": null,
@@ -9144,7 +9144,7 @@
         "damage": null,
         "healing": null,
         "cooldown": "7s",
-        "description": "Detonate Soul Orb charges on enemies for additional damage. Each charge also restores Seris' health."
+        "description": "Detonate your Soul Orb charges, dealing 100 damage for each stack on an enemy and Stunning enemies with 4 stacks. Each stack detonated Heals you for 12% of your maximum Health."
       },
       {
         "name": "Shadow Travel",
@@ -9166,7 +9166,7 @@
         "damage": null,
         "healing": null,
         "cooldown": "Ultimate",
-        "description": "Throw a soul orb forward that stuns and pulls enemies near it, making it a great tide-turner."
+        "description": "Cast your soul core onto the battlefield, causing a tear in reality to manifest, dealing 200 damage and dragging nearby enemies in to Stun."
       }
     ],
     "talents": [
@@ -9186,7 +9186,7 @@
       },
       {
         "name": "Internal Torment",
-        "description": "Resuscitate yourself when defeated, restoring a portion of your Health.",
+        "description": "Rending Soul on a target with maximum Soul Orbs Reveals them to your team & causes them to take 20% increased damage for 3s.",
         "category": "",
         "iconUrl": "/images/champions/Talent Seris Internal Torment.avif",
         "id": 33441
@@ -9408,7 +9408,7 @@
       },
       {
         "name": "Sand Trap",
-        "description": "Crippling Arrow now explodes in a 20-unit-radius area on contact, dealing up to 300 additional Area Damage to enemies hit, but its Cripple is reduced by 1s.",
+        "description": "Crippling Arrow now explodes in a 20-unit-radius area on contact, dealing up to 300 additional Area Damage to enemies hit, but its Cripple is reduced by 1s. The blast is fully effective within 12 units.",
         "category": "",
         "iconUrl": "/images/champions/Talent Sha Lin Sand Trap.avif",
         "id": 20263
@@ -9577,7 +9577,7 @@
         "damage": null,
         "healing": null,
         "cooldown": "8s",
-        "description": "Fire a poison bolt that deals damage over time."
+        "description": "Fire 3 bolts that Poison for 10% of the target's health as damage over 4s."
       },
       {
         "name": "Smoke Screen",
@@ -10021,7 +10021,7 @@
         "damage": null,
         "healing": null,
         "cooldown": "10s",
-        "description": "Throw a powerful uppercut that launches you forward."
+        "description": "Charge forward to deal 600 damage and Knock enemies straight back."
       },
       {
         "name": "Overcharge",
@@ -10054,7 +10054,7 @@
         "damage": null,
         "healing": null,
         "cooldown": "Ultimate",
-        "description": "Channel ancient power to become unstoppable."
+        "description": "Teleport directly to an unsuspecting enemy, dealing 600 damage and applying Knockback."
       }
     ],
     "talents": [
@@ -10074,7 +10074,7 @@
       },
       {
         "name": "Nothing Personal",
-        "description": "Increase the damage dealt by Inner Strength.",
+        "description": "Increase your Ultimate charge rate by 15% and enemies at or below 65% Health are Revealed to you.",
         "category": "",
         "iconUrl": "/images/champions/Talent Talus Nothing Personal.avif",
         "id": 19706
@@ -10265,7 +10265,7 @@
         "damage": null,
         "healing": null,
         "cooldown": "12s",
-        "description": "Leap into the air and slam down, dealing damage and stunning enemies."
+        "description": "Leap into the air and smash down in a vicious attack in an area in front of you, dealing 500 damage to enemies hit and Slowing them."
       },
       {
         "name": "Reanimate",
@@ -10289,7 +10289,7 @@
       },
       {
         "name": "Crush",
-        "description": "Shatterfall deals 50% more damage and has a larger area of effect, but its Cooldown is increased by 4s.",
+        "description": "Shatterfall Stuns enemies hit for 1s, but no longer Slows.",
         "category": "",
         "iconUrl": "/images/champions/Talent Terminus Crush.avif",
         "id": 20028
@@ -10687,7 +10687,7 @@
         "damage": null,
         "healing": null,
         "cooldown": "11s",
-        "description": "Cast a spell that nullifies the next enemy ability."
+        "description": "Focus your Gauntlet, Silencing your target and Shocking for 800 damage over 2s."
       },
       {
         "name": "Protection",
@@ -10720,7 +10720,7 @@
         "damage": null,
         "healing": null,
         "cooldown": "Ultimate",
-        "description": "Fire a massive beam of energy that deals damage to all enemies in its path."
+        "description": "Unleash the latent power of your Gauntlet to channel a massive wave of energy that deals 60 damage every 0.1s and Knocks enemies back."
       }
     ],
     "talents": [
@@ -10979,7 +10979,7 @@
       },
       {
         "name": "Favored Quarry",
-        "description": "Increase the duration of Hunter\u2019s Mark by {0.6|0.6}s.",
+        "description": "Increase the duration of Hunter’s Mark by {0.6|0.6}s.",
         "category": "Hunter&#39;s Mark",
         "iconUrl": "/images/cards/Card_Favored_Quarry.avif",
         "cooldown": null,
@@ -11827,7 +11827,7 @@
         "iconUrl": "/images/skills/Ability_Sentinels.png",
         "iconUrl2": null,
         "iconUrl3": null,
-        "damage": "2\u00d7 150 / 1s",
+        "damage": "2× 150 / 1s",
         "healing": null,
         "cooldown": "Ultimate",
         "description": "Summon 2 drones that fire Shock blasts where you are shooting every 1s, dealing 150 damage."
@@ -12019,7 +12019,7 @@
         "damage": null,
         "healing": null,
         "cooldown": "11s",
-        "description": "Fire a powerful beam that deals damage to enemies in its path."
+        "description": "Jump up and slash down, becoming Immune. On impact, deal 600 damage and apply Knockback. Consuming maximum Darkness deals increased damage and Slows."
       },
       {
         "name": "Dark Siphon",
@@ -12030,7 +12030,7 @@
         "damage": null,
         "healing": null,
         "cooldown": "6s",
-        "description": "Siphon life force from nearby enemies, dealing damage and healing Vora."
+        "description": "Deals 200 damage on hit and an additional 400 damage over time. Hitting an enemy Heals for 300 over 2s. Consuming maximum Darkness stacks Cripples on hit for 1.5s."
       },
       {
         "name": "Tendril",
@@ -12058,7 +12058,7 @@
     "talents": [
       {
         "name": "Unyielding Pressure",
-        "description": "Your Dark Siphon now deals an additional 10% of the target\u2019s maximum Health as damage over 1.5s.",
+        "description": "Your Dark Siphon now deals an additional 10% of the target’s maximum Health as damage over 1.5s.",
         "category": "",
         "iconUrl": "/images/champions/Talent Vora Unyielding Pressure.avif",
         "id": 25572
