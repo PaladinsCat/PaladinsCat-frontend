@@ -23,14 +23,16 @@ export default async function PaladinsCatBotPage() {
   const { t } = await getServerLocalization();
 
   const features = [
-    { icon: UserRoundSearch, title: t("bot.featurePlayerTitle"), body: t("bot.featurePlayerBody"), command: "/player" },
+    { icon: UserRoundSearch, title: t("bot.featurePlayerTitle"), body: t("bot.featurePlayerBody"), command: "/profile" },
     { icon: ImageIcon, title: t("bot.featureMatchTitle"), body: t("bot.featureMatchBody"), command: "/match" },
     { icon: Activity, title: t("bot.featureLiveTitle"), body: t("bot.featureLiveBody"), command: "/current" },
     { icon: Gamepad2, title: t("bot.featurePrepTitle"), body: t("bot.featurePrepBody"), command: "/loadout" },
   ];
   const commands = [
     ["/help", t("bot.commandHelp")],
-    ["/player", t("bot.commandPlayer")],
+    ["/save", t("bot.commandSave")],
+    ["/profile", t("bot.commandPlayer")],
+    ["/player", t("bot.commandPlayerAlias")],
     ["/match", t("bot.commandMatch")],
     ["/history", t("bot.commandHistory")],
     ["/current", t("bot.commandCurrent")],
