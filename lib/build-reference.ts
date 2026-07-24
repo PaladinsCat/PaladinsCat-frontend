@@ -2,8 +2,14 @@ import { fetchReferenceCards, fetchReferenceItems, fetchReferenceTalents } from 
 import { getChampionData, type ChampionData } from "@/lib/champion-data";
 import { canonicalCardNameKey } from "@/lib/card-name";
 import type { TranslationKey } from "@/lib/localization/messages";
+import {
+  ACTIVE_ITEMS,
+  activeItemTierAtLevel,
+  type ActiveItemCategory,
+  type ActiveItemTier,
+} from "@/lib/active-items";
 
-export type BuildItemCategory = "Offense" | "Defense" | "Healing" | "Utility";
+export type BuildItemCategory = ActiveItemCategory;
 
 export interface BuildItemReference {
   id: number;
@@ -12,6 +18,8 @@ export interface BuildItemReference {
   description?: string | null;
   descriptionKey?: TranslationKey | null;
   iconUrl?: string | null;
+  tiers: readonly ActiveItemTier[];
+  sourceUrl: string;
 }
 
 export interface BuildCardReference {
@@ -76,29 +84,6 @@ type RawTalent = {
   category?: string | null;
 };
 
-const CURRENT_ITEMS: Array<{ name: string; category: BuildItemCategory; fallbackId: number; fallbackDescriptionKey?: TranslationKey }> = [
-  { name: "Bulldozer", category: "Offense", fallbackId: 13079 },
-  { name: "Deft Hands", category: "Offense", fallbackId: 13235 },
-  { name: "Lethality", category: "Offense", fallbackId: 31100, fallbackDescriptionKey: "items.fallback.lethality" },
-  { name: "Trigger Scent", category: "Offense", fallbackId: 33071, fallbackDescriptionKey: "items.fallback.triggerScent" },
-  { name: "Wrecker", category: "Offense", fallbackId: 13071 },
-  { name: "Blast Shields", category: "Defense", fallbackId: 33618 },
-  { name: "Guardian", category: "Defense", fallbackId: 13228, fallbackDescriptionKey: "items.fallback.guardian" },
-  { name: "Haven", category: "Defense", fallbackId: 13229 },
-  { name: "Resilience", category: "Defense", fallbackId: 11683 },
-  { name: "Sentinel", category: "Defense", fallbackId: 33075, fallbackDescriptionKey: "items.fallback.sentinel" },
-  { name: "Bloodbath", category: "Healing", fallbackId: 33070, fallbackDescriptionKey: "items.fallback.bloodbath" },
-  { name: "Life Rip", category: "Healing", fallbackId: 12010 },
-  { name: "Meditation", category: "Healing", fallbackId: 33082, fallbackDescriptionKey: "items.fallback.meditation" },
-  { name: "Rejuvenate", category: "Healing", fallbackId: 14633 },
-  { name: "Veteran", category: "Healing", fallbackId: 13224 },
-  { name: "Chronos", category: "Utility", fallbackId: 11723 },
-  { name: "Hoard", category: "Utility", fallbackId: 33081, fallbackDescriptionKey: "items.fallback.hoard" },
-  { name: "Master Riding", category: "Utility", fallbackId: 11646 },
-  { name: "Morale Boost", category: "Utility", fallbackId: 13165 },
-  { name: "Nimble", category: "Utility", fallbackId: 11826 },
-];
-
 let localItemPromise: Promise<RawItem[]> | null = null;
 let localCardPromise: Promise<RawCard[]> | null = null;
 let localTalentPromise: Promise<RawTalent[]> | null = null;
@@ -109,20 +94,6 @@ function normalizeName(value: string | null | undefined) {
     .replace(/[’']/g, "")
     .replace(/[^a-z0-9]+/g, "")
     .trim();
-}
-
-function usableDescription(value: string | null | undefined) {
-  const description = String(value ?? "").trim();
-  return description && !/^reference placeholder\b/i.test(description) ? description : null;
-}
-
-function withItemScaleFactors(value: string | null | undefined) {
-  const description = usableDescription(value);
-  if (!description) return null;
-  // Older item references expose scalable values as {base}. Store the item
-  // contract explicitly as {base|increase per level}; two-part tokens from
-  // newer references are preserved as-is.
-  return description.replace(/\{\s*(-?(?:\d+(?:\.\d*)?|\.\d+))\s*\}/g, (_match, base: string) => `{${base}|${base}}`);
 }
 
 function itemIconPath(name: string) {
@@ -186,7 +157,7 @@ async function buildItems(): Promise<BuildItemReference[]> {
     dbByName.set(normalizeName(nameOf(row, "item")), row);
   }
 
-  return CURRENT_ITEMS.map((item) => {
+  return ACTIVE_ITEMS.map((item) => {
     const key = normalizeName(item.name);
     const dbRow = dbByName.get(key);
     const localRow = localByName.get(key);
@@ -199,11 +170,20 @@ async function buildItems(): Promise<BuildItemReference[]> {
       id: Number.isFinite(id) && id > 0 ? id : item.fallbackId,
       name: item.name,
       category: item.category,
-      description: withItemScaleFactors(row?.description) ?? withItemScaleFactors(localRow?.description) ?? null,
-      descriptionKey: item.fallbackDescriptionKey ?? null,
+      description: item.tiers[0].description,
+      descriptionKey: null,
       iconUrl: row?.icon_url ?? row?.iconUrl ?? itemIconPath(item.name),
+      tiers: item.tiers.map((tier) => ({ ...tier })),
+      sourceUrl: `https://paladins.fandom.com/wiki/${item.wikiSlug}`,
     };
   });
+}
+
+export function itemDescriptionAtLevel(
+  item: Pick<BuildItemReference, "description" | "tiers"> | null | undefined,
+  level: number,
+): string | null {
+  return activeItemTierAtLevel(item?.tiers, level)?.description ?? item?.description ?? null;
 }
 
 async function buildCards(championId: number, champion?: ChampionData): Promise<BuildCardReference[]> {

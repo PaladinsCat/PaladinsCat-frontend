@@ -2,6 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { ExternalLink } from "lucide-react";
 import { fetchItemDetail, fetchItems, type ItemDetailStats, type ItemStat } from "@/lib/api-client";
 import { loadBuildReferenceData, type BuildItemCategory, type BuildItemReference } from "@/lib/build-reference";
 import { getStatQuality } from "@/lib/stat-quality";
@@ -73,7 +74,10 @@ export default function ItemDetailPage() {
   const referenceById = useMemo(() => new Map(references.map((item) => [item.id, item])), [references]);
   const referenceByName = useMemo(() => new Map(references.map((item) => [item.name.toLowerCase(), item])), [references]);
   const categoryFor = (item: ItemStat): BuildItemCategory => referenceById.get(item.itemId)?.category ?? referenceByName.get(item.itemName.toLowerCase())?.category ?? "Utility";
-  const currentCategory = detail ? referenceById.get(detail.itemId)?.category ?? referenceByName.get(detail.itemName.toLowerCase())?.category ?? "Utility" : "Utility";
+  const currentReference = detail
+    ? referenceById.get(detail.itemId) ?? referenceByName.get(detail.itemName.toLowerCase())
+    : null;
+  const currentCategory = currentReference?.category ?? "Utility";
 
   if (!detail) return displayLoading ? <RouteSkeleton variant="detail" /> : <div className="pc-card py-12 text-center text-sm text-pc-text-secondary">{t("generated.stats.noItemStatisticsAreAvailableForThisQueue")}</div>;
   const overallQuality = getStatQuality(detail.winRate, 1, 1);
@@ -87,8 +91,28 @@ export default function ItemDetailPage() {
   return <div className="space-y-6">
     <div><ContextBackLink fallbackHref="/game/items" label={t("generated.stats.back")} /></div>
     <section className="rounded-xl border border-pc-border bg-pc-bg-elevated p-5" style={{ borderColor: overallQuality.borderColor }}>
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center"><img src={itemIcon(detail.itemName)} alt="" className="h-16 w-16 rounded-lg object-contain" /><div className="min-w-0 flex-1"><h1 className="pc-heading pc-heading-lg text-pc-accent">{detail.itemName}</h1><p className="mt-1 text-sm text-pc-text-secondary">{t("generated.stats.rankedItemPerformanceByPurchaseSlotAndFinalUpgradeLevel")}</p></div><div className="grid w-full grid-cols-2 gap-3 text-left sm:w-auto sm:grid-cols-3 sm:gap-5 sm:text-right"><div><div className="text-xs uppercase text-pc-text-muted">{t("generated.stats.winRate")}</div><div className="text-xl font-bold" style={{ color: overallQuality.color }}>{percent(detail.winRate)}</div><div className="mt-1 flex flex-wrap gap-x-2 text-xs sm:justify-end"><span className={vsClass != null && vsClass >= 0 ? "text-emerald-400" : "text-red-400"}>{signedPercent(vsClass)} {t("generated.stats.vsClass")} <span className="text-pc-text-muted">({currentCategory})</span></span><span className={vsGlobal != null && vsGlobal >= 0 ? "text-emerald-400" : "text-red-400"}>{signedPercent(vsGlobal)} {t("generated.stats.vsGlobal")}</span></div></div><div><div className="text-xs uppercase text-pc-text-muted">{t("generated.stats.purchases")}</div><div className="text-xl font-bold text-pc-text">{formatNumber(detail.totalUses)}</div></div><div className="col-span-2 sm:col-span-1"><div className="text-xs uppercase text-pc-text-muted">{t("generated.stats.record")}</div><div className="text-sm font-semibold text-pc-text">{formatRecord(detail.wins, detail.losses)}</div></div></div></div>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center"><img src={currentReference?.iconUrl ?? itemIcon(detail.itemName)} alt="" className="h-16 w-16 rounded-lg object-contain" /><div className="min-w-0 flex-1"><h1 className="pc-heading pc-heading-lg text-pc-accent">{detail.itemName}</h1><p className="mt-1 text-sm text-pc-text-secondary">{t("generated.stats.rankedItemPerformanceByPurchaseSlotAndFinalUpgradeLevel")}</p></div><div className="grid w-full grid-cols-2 gap-3 text-left sm:w-auto sm:grid-cols-3 sm:gap-5 sm:text-right"><div><div className="text-xs uppercase text-pc-text-muted">{t("generated.stats.winRate")}</div><div className="text-xl font-bold" style={{ color: overallQuality.color }}>{percent(detail.winRate)}</div><div className="mt-1 flex flex-wrap gap-x-2 text-xs sm:justify-end"><span className={vsClass != null && vsClass >= 0 ? "text-emerald-400" : "text-red-400"}>{signedPercent(vsClass)} {t("generated.stats.vsClass")} <span className="text-pc-text-muted">({currentCategory})</span></span><span className={vsGlobal != null && vsGlobal >= 0 ? "text-emerald-400" : "text-red-400"}>{signedPercent(vsGlobal)} {t("generated.stats.vsGlobal")}</span></div></div><div><div className="text-xs uppercase text-pc-text-muted">{t("generated.stats.purchases")}</div><div className="text-xl font-bold text-pc-text">{formatNumber(detail.totalUses)}</div></div><div className="col-span-2 sm:col-span-1"><div className="text-xs uppercase text-pc-text-muted">{t("generated.stats.record")}</div><div className="text-sm font-semibold text-pc-text">{formatRecord(detail.wins, detail.losses)}</div></div></div></div>
     </section>
+    {currentReference?.tiers.length ? <section className="pc-card">
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-3 border-b border-pc-border/60 pb-4">
+        <div>
+          <h2 className="pc-card-title mb-1">{t("items.tiers.title")}</h2>
+          <p className="text-xs leading-5 text-pc-text-secondary">{t("items.tiers.description")}</p>
+        </div>
+        <a href={currentReference.sourceUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-lg border border-pc-border bg-pc-bg-secondary px-3 py-2 text-xs font-semibold text-pc-text-secondary transition-colors hover:border-pc-accent-mid hover:text-pc-accent">
+          {t("items.tiers.source")}<ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+        </a>
+      </div>
+      <div className="grid gap-3 md:grid-cols-3">
+        {currentReference.tiers.map((tier) => <article key={tier.level} className="rounded-xl border border-pc-border bg-pc-bg-secondary/45 p-4">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-sm font-bold text-pc-accent">{t("generated.stats.levelValue1", { value1: tier.level })}</span>
+            <span className="rounded-full border border-pc-border bg-pc-bg px-2.5 py-1 text-xs font-semibold text-pc-text-secondary">{t("items.tiers.totalCost", { cost: formatNumber(tier.cost) })}</span>
+          </div>
+          <p className="mt-3 text-sm leading-6 text-pc-text">{tier.description}</p>
+        </article>)}
+      </div>
+    </section> : null}
     <section className="pc-card">
       <div className="mb-4 border-b border-pc-border/60 pb-4">
         <div className="flex flex-wrap items-center gap-2">

@@ -11,6 +11,7 @@ import {
   type PlayerLoadout,
 } from "@/lib/api-client";
 import {
+  itemDescriptionAtLevel,
   loadBuildReferenceData,
   type BuildCardReference,
   type BuildItemReference,
@@ -275,8 +276,9 @@ export default function DiminishingReturnsPage() {
     for (const selection of selectedItems) {
       const item = reference.items.find((entry) => entry.id === selection.id);
       if (item) {
-        const description = item.description ?? (item.descriptionKey ? t(item.descriptionKey) : null);
-        collect({ id: item.id, name: item.name, type: "item", description, level: selection.level });
+        const tierDescription = itemDescriptionAtLevel(item, selection.level);
+        const description = tierDescription ?? (item.descriptionKey ? t(item.descriptionKey) : null);
+        collect({ id: item.id, name: item.name, type: "item", description, level: tierDescription ? 1 : selection.level });
       }
     }
     return { effects: values, unsupported };
@@ -476,8 +478,9 @@ export default function DiminishingReturnsPage() {
                 <div className="grid gap-3 md:grid-cols-2">
                   {reference.items.map((item) => {
                     const level = itemSelections.get(item.id);
-                    const description = item.description ?? (item.descriptionKey ? t(item.descriptionKey) : null);
-                    return <SelectionCard key={item.id} name={item.name} image={item.iconUrl} description={resolveScaledDescription(description, level ?? 1)} selected={level != null} disabled={level == null && selectedItems.length >= MAX_ITEMS} level={level} maximumLevel={3} onToggle={() => toggleItem(item)} onLevelChange={(next) => setSelectedItems((current) => current.map((entry) => entry.id === item.id ? { ...entry, level: next } : entry))} />;
+                    const tierDescription = itemDescriptionAtLevel(item, level ?? 1);
+                    const description = tierDescription ?? (item.descriptionKey ? t(item.descriptionKey) : null);
+                    return <SelectionCard key={item.id} name={item.name} image={item.iconUrl} description={resolveScaledDescription(description, tierDescription ? 1 : level ?? 1)} selected={level != null} disabled={level == null && selectedItems.length >= MAX_ITEMS} level={level} maximumLevel={3} onToggle={() => toggleItem(item)} onLevelChange={(next) => setSelectedItems((current) => current.map((entry) => entry.id === item.id ? { ...entry, level: next } : entry))} />;
                   })}
                 </div>
               </section>

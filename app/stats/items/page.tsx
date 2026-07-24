@@ -3,7 +3,12 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { fetchItems, type ItemStat } from "@/lib/api-client";
-import { loadBuildReferenceData, type BuildItemCategory, type BuildItemReference } from "@/lib/build-reference";
+import {
+  itemDescriptionAtLevel,
+  loadBuildReferenceData,
+  type BuildItemCategory,
+  type BuildItemReference,
+} from "@/lib/build-reference";
 import { getStatQuality } from "@/lib/stat-quality";
 import { useLocalization } from "@/lib/localization-context";
 
@@ -13,16 +18,6 @@ function itemIcon(name: string) {
 
 function categoryColor(category: BuildItemCategory) {
   return category === "Offense" ? "text-red-400" : category === "Defense" ? "text-blue-400" : category === "Healing" ? "text-emerald-400" : "text-amber-400";
-}
-
-function formatItemDescription(description: string | null | undefined, formatNumber: (value: number, options?: Intl.NumberFormatOptions) => string, level = 1): string | null {
-  if (!description) return null;
-  return description
-    .replace(/^\s*(?:\[[^\]]+\]\s*)+/, "")
-    .replace(/\{\s*(?:scale\s*=\s*)?(-?(?:\d+(?:\.\d*)?|\.\d+))\s*\|\s*(-?(?:\d+(?:\.\d*)?|\.\d+))\s*\}/gi, (_match, base: string, increase: string) => (
-      formatNumber(Number(base) + Number(increase) * Math.max(0, level - 1), { maximumFractionDigits: 2 })
-    ))
-    .replace(/\{\s*(-?(?:\d+(?:\.\d*)?|\.\d+))\s*\}/g, (_match, value: string) => formatNumber(Number(value), { maximumFractionDigits: 2 }));
 }
 
 export default function ItemsPage() {
@@ -85,9 +80,8 @@ export default function ItemsPage() {
               {categoryItems.map((item) => {
             const pickRate = itemPickRate(item);
             const quality = getStatQuality(item.winRate, pickRate, maxPickRate);
-            const reference = referenceById.get(item.itemId);
-            const referenceDescription = reference?.description ?? (reference?.descriptionKey ? t(reference.descriptionKey) : null);
-            const description = formatItemDescription(referenceDescription, formatNumber, 1) ?? t("items.overviewFallbackDescription");
+            const reference = referenceById.get(item.itemId) ?? referenceByName.get(item.itemName.toLowerCase());
+            const description = itemDescriptionAtLevel(reference, 1) ?? t("items.overviewFallbackDescription");
             return <Link key={item.itemId} href={`/game/items/${item.itemId}`} className="pc-surface-light group block rounded-lg border p-3 text-left transition-colors hover:border-pc-accent-mid" style={{ borderColor: quality.borderColor }}>
               <div className="flex items-start gap-3">
                 <img src={reference?.iconUrl ?? itemIcon(item.itemName)} alt={item.itemName} className="h-10 w-12 shrink-0 rounded border border-pc-border bg-pc-bg/50 object-contain" />

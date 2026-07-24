@@ -16,7 +16,12 @@ import {
   type MatchPlayerDetail,
 } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
-import { loadBuildReferenceData, type BuildItemReference, type BuildReferenceData } from "@/lib/build-reference";
+import {
+  itemDescriptionAtLevel,
+  loadBuildReferenceData,
+  type BuildItemReference,
+  type BuildReferenceData,
+} from "@/lib/build-reference";
 import { championSlug } from "@/lib/utils";
 import { canonicalLocalImageUrl } from "@/lib/image-assets";
 import { canonicalCardNameKey } from "@/lib/card-name";
@@ -424,9 +429,12 @@ function PlayerBuildRow({
             const entry = findReference("items", item.item_id, item.item_name) as BuildItemReference | undefined;
             const level = Math.max(1, (item.item_level ?? 0) + 1);
             const name = item.item_name ?? entry?.name ?? t("common.entity.itemNumber", { number: item.item_id });
-            const description = entry?.description ?? (entry?.descriptionKey ? t(entry.descriptionKey) : null) ?? item.description;
+            const tierDescription = itemDescriptionAtLevel(entry, level);
+            const description = tierDescription
+              ?? (entry?.descriptionKey ? t(entry.descriptionKey) : null)
+              ?? item.description;
             const itemMetric = itemMetricAtRecordedSlotAndLevel(item.item_id, item.item_name, item.slot, item.item_level ?? 0);
-            return <DetailEntry key={`item-detail-${item.slot}-${item.item_id}`} name={name} href={`/game/items/${item.item_id}?returnTo=${returnToQuery}`} onNavigate={preserveMatchPosition} label={t("common.match.itemSlotLevel", { slot: item.slot, level })} description={formatDescription(description, level, formatNumber) ?? (reference ? t("common.fallback.descriptionUnavailable") : <LoadingIndicator className="gap-1.5 text-xs" />)} sources={[entry?.iconUrl, item.icon_url, item.fallback_icon_url]} level={level} metric={itemMetric} showMetrics metricsLoaded={itemMetrics !== null} maxPickRate={maxItemPickRate} playsLabel={t("common.count.uses")} />;
+            return <DetailEntry key={`item-detail-${item.slot}-${item.item_id}`} name={name} href={`/game/items/${item.item_id}?returnTo=${returnToQuery}`} onNavigate={preserveMatchPosition} label={t("common.match.itemSlotLevel", { slot: item.slot, level })} description={formatDescription(description, tierDescription ? 1 : level, formatNumber) ?? (reference ? t("common.fallback.descriptionUnavailable") : <LoadingIndicator className="gap-1.5 text-xs" />)} sources={[entry?.iconUrl, item.icon_url, item.fallback_icon_url]} level={level} metric={itemMetric} showMetrics metricsLoaded={itemMetrics !== null} maxPickRate={maxItemPickRate} playsLabel={t("common.count.uses")} />;
           })}
           {items.length === 0 && <p className="text-xs text-pc-text-muted">{t("generated.matches.noPurchasedItemsWereRecorded")}</p>}
         </section>

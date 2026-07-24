@@ -1,0 +1,226 @@
+{
+  "auditedAt": "2026-07-24",
+  "source": "https://paladins.fandom.com/wiki/Items",
+  "items": [
+    {
+      "name": "Bulldozer",
+      "category": "Offense",
+      "fallbackId": 13079,
+      "wikiSlug": "Bulldozer",
+      "tiers": [
+        { "level": 1, "cost": 150, "description": "Your weapon shots deal 50% increased Damage to Deployables, Pets, and Illusions." },
+        { "level": 2, "cost": 300, "description": "Your weapon shots deal 100% increased Damage to Deployables, Pets, and Illusions." },
+        { "level": 3, "cost": 450, "description": "Your weapon shots deal 150% increased Damage to Deployables, Pets, and Illusions." }
+      ]
+    },
+    {
+      "name": "Deft Hands",
+      "category": "Offense",
+      "fallbackId": 13235,
+      "wikiSlug": "Deft_Hands",
+      "tiers": [
+        { "level": 1, "cost": 200, "description": "Increase your Reload Speed by 20%." },
+        { "level": 2, "cost": 400, "description": "Increase your Reload Speed by 40%." },
+        { "level": 3, "cost": 600, "description": "Increase your Reload Speed by 60%." }
+      ]
+    },
+    {
+      "name": "Lethality",
+      "category": "Offense",
+      "fallbackId": 31100,
+      "wikiSlug": "Lethality",
+      "tiers": [
+        { "level": 1, "cost": 200, "description": "Increase your Movement Speed by 20% and Jump Height by 60% for 5s after getting an Elimination." },
+        { "level": 2, "cost": 400, "description": "Increase your Movement Speed by 40% and Jump Height by 120% for 5s after getting an Elimination." },
+        { "level": 3, "cost": 600, "description": "Increase your Movement Speed by 60% and Jump Height by 180% for 5s after getting an Elimination." }
+      ]
+    },
+    {
+      "name": "Trigger Scent",
+      "category": "Offense",
+      "fallbackId": 33071,
+      "wikiSlug": "Trigger_Scent",
+      "tiers": [
+        { "level": 1, "cost": 250, "description": "Increase your in-hand weapon damage dealt by 6% for 5s after getting an Elimination." },
+        { "level": 2, "cost": 500, "description": "Increase your in-hand weapon damage dealt by 12% for 5s after getting an Elimination." },
+        { "level": 3, "cost": 750, "description": "Increase your in-hand weapon damage dealt by 18% for 5s after getting an Elimination." }
+      ]
+    },
+    {
+      "name": "Wrecker",
+      "category": "Offense",
+      "fallbackId": 13071,
+      "wikiSlug": "Wrecker",
+      "tiers": [
+        { "level": 1, "cost": 300, "description": "Your weapon attacks deal 50% increased Damage to Shields." },
+        { "level": 2, "cost": 600, "description": "Your weapon attacks deal 100% increased Damage to Shields." },
+        { "level": 3, "cost": 900, "description": "Your weapon attacks deal 150% increased Damage to Shields." }
+      ]
+    },
+    {
+      "name": "Blast Shields",
+      "category": "Defense",
+      "fallbackId": 33618,
+      "wikiSlug": "Blast_Shields",
+      "tiers": [
+        { "level": 1, "cost": 275, "description": "Reduce the Damage you take from Area of Effect attacks by 6%." },
+        { "level": 2, "cost": 550, "description": "Reduce the Damage you take from Area of Effect attacks by 12%." },
+        { "level": 3, "cost": 825, "description": "Reduce the Damage you take from Area of Effect attacks by 18%." }
+      ]
+    },
+    {
+      "name": "Guardian",
+      "category": "Defense",
+      "fallbackId": 13228,
+      "wikiSlug": "Guardian",
+      "tiers": [
+        { "level": 1, "cost": 250, "description": "Increase the effectiveness of Shields you create by 20%." },
+        { "level": 2, "cost": 500, "description": "Increase the effectiveness of Shields you create by 40%." },
+        { "level": 3, "cost": 750, "description": "Increase the effectiveness of Shields you create by 60%." }
+      ]
+    },
+    {
+      "name": "Haven",
+      "category": "Defense",
+      "fallbackId": 13229,
+      "wikiSlug": "Haven",
+      "tiers": [
+        { "level": 1, "cost": 300, "description": "Reduce the Damage you take from Direct attacks by 6%." },
+        { "level": 2, "cost": 600, "description": "Reduce the Damage you take from Direct attacks by 12%." },
+        { "level": 3, "cost": 900, "description": "Reduce the Damage you take from Direct attacks by 18%." }
+      ]
+    },
+    {
+      "name": "Resilience",
+      "category": "Defense",
+      "fallbackId": 11683,
+      "wikiSlug": "Resilience",
+      "tiers": [
+        { "level": 1, "cost": 200, "description": "Reduce the duration or effectiveness of Crowd Control effects by 25%." },
+        { "level": 2, "cost": 400, "description": "Reduce the duration or effectiveness of Crowd Control effects by 50%." },
+        { "level": 3, "cost": 600, "description": "Reduce the duration or effectiveness of Crowd Control effects by 75%." }
+      ]
+    },
+    {
+      "name": "Sentinel",
+      "category": "Defense",
+      "fallbackId": 33075,
+      "wikiSlug": "Sentinel",
+      "tiers": [
+        { "level": 1, "cost": 225, "description": "Gain a 200-Health Shield for 5s after earning an Elimination. Stacks up to 3 times." },
+        { "level": 2, "cost": 450, "description": "Gain a 400-Health Shield for 5s after earning an Elimination. Stacks up to 3 times." },
+        { "level": 3, "cost": 675, "description": "Gain a 600-Health Shield for 5s after earning an Elimination. Stacks up to 3 times." }
+      ]
+    },
+    {
+      "name": "Bloodbath",
+      "category": "Healing",
+      "fallbackId": 33070,
+      "wikiSlug": "Bloodbath",
+      "tiers": [
+        { "level": 1, "cost": 300, "description": "Kills True Heal you, and Eliminations True Heal you and the ally who got the kill, for 360 Health over 4s. Stacks up to 2 times." },
+        { "level": 2, "cost": 600, "description": "Kills True Heal you, and Eliminations True Heal you and the ally who got the kill, for 720 Health over 4s. Stacks up to 2 times." },
+        { "level": 3, "cost": 900, "description": "Kills True Heal you, and Eliminations True Heal you and the ally who got the kill, for 1080 Health over 4s. Stacks up to 2 times." }
+      ]
+    },
+    {
+      "name": "Life Rip",
+      "category": "Healing",
+      "fallbackId": 12010,
+      "wikiSlug": "Life_Rip",
+      "tiers": [
+        { "level": 1, "cost": 225, "description": "Your weapon shots gain 20% Lifesteal." },
+        { "level": 2, "cost": 450, "description": "Your weapon shots gain 40% Lifesteal." },
+        { "level": 3, "cost": 675, "description": "Your weapon shots gain 60% Lifesteal." }
+      ]
+    },
+    {
+      "name": "Meditation",
+      "category": "Healing",
+      "fallbackId": 33082,
+      "wikiSlug": "Meditation",
+      "tiers": [
+        { "level": 1, "cost": 175, "description": "Heal for an additional 2.5% of your maximum Health every 0.25s while out of combat." },
+        { "level": 2, "cost": 350, "description": "Heal for an additional 5% of your maximum Health every 0.25s while out of combat." },
+        { "level": 3, "cost": 525, "description": "Heal for an additional 7.5% of your maximum Health every 0.25s while out of combat." }
+      ]
+    },
+    {
+      "name": "Rejuvenate",
+      "category": "Healing",
+      "fallbackId": 14633,
+      "wikiSlug": "Rejuvenate",
+      "tiers": [
+        { "level": 1, "cost": 250, "description": "Increase your healing output by 10%. This does not include healing from Lifesteal effects." },
+        { "level": 2, "cost": 500, "description": "Increase your healing output by 20%. This does not include healing from Lifesteal effects." },
+        { "level": 3, "cost": 750, "description": "Increase your healing output by 30%. This does not include healing from Lifesteal effects." }
+      ]
+    },
+    {
+      "name": "Veteran",
+      "category": "Healing",
+      "fallbackId": 13224,
+      "wikiSlug": "Veteran",
+      "tiers": [
+        { "level": 1, "cost": 275, "description": "Increase your base maximum Health by 6%." },
+        { "level": 2, "cost": 550, "description": "Increase your base maximum Health by 12%." },
+        { "level": 3, "cost": 825, "description": "Increase your base maximum Health by 18%." }
+      ]
+    },
+    {
+      "name": "Chronos",
+      "category": "Utility",
+      "fallbackId": 11723,
+      "wikiSlug": "Chronos",
+      "tiers": [
+        { "level": 1, "cost": 300, "description": "Reduce the Cooldown of all your abilities by 10%." },
+        { "level": 2, "cost": 600, "description": "Reduce the Cooldown of all your abilities by 20%." },
+        { "level": 3, "cost": 900, "description": "Reduce the Cooldown of all your abilities by 30%." }
+      ]
+    },
+    {
+      "name": "Hoard",
+      "category": "Utility",
+      "fallbackId": 33081,
+      "wikiSlug": "Hoard",
+      "tiers": [
+        { "level": 1, "cost": 200, "description": "Gain 10 Credits on Eliminations and 10 Credits every 20s." },
+        { "level": 2, "cost": 400, "description": "Gain 20 Credits on Eliminations and 10 Credits every 10s." },
+        { "level": 3, "cost": 1750, "description": "Gain 10% Movement, Mount, Cooldown, and Ultimate Charge speed." }
+      ]
+    },
+    {
+      "name": "Master Riding",
+      "category": "Utility",
+      "fallbackId": 11646,
+      "wikiSlug": "Master_Riding",
+      "tiers": [
+        { "level": 1, "cost": 225, "description": "Increase your Mount Speed by 15%." },
+        { "level": 2, "cost": 450, "description": "Increase your Mount Speed by 30%." },
+        { "level": 3, "cost": 675, "description": "Increase your Mount Speed by 45%." }
+      ]
+    },
+    {
+      "name": "Morale Boost",
+      "category": "Utility",
+      "fallbackId": 13165,
+      "wikiSlug": "Morale_Boost",
+      "tiers": [
+        { "level": 1, "cost": 250, "description": "Increase your base Ultimate charge rate by 10%." },
+        { "level": 2, "cost": 500, "description": "Increase your base Ultimate charge rate by 20%." },
+        { "level": 3, "cost": 750, "description": "Increase your base Ultimate charge rate by 30%." }
+      ]
+    },
+    {
+      "name": "Nimble",
+      "category": "Utility",
+      "fallbackId": 11826,
+      "wikiSlug": "Nimble",
+      "tiers": [
+        { "level": 1, "cost": 125, "description": "Gain 10% Movement Speed." },
+        { "level": 2, "cost": 250, "description": "Gain 20% Movement Speed." },
+        { "level": 3, "cost": 375, "description": "Gain 30% Movement Speed." }
+      ]
+    }
+  ]
+}
