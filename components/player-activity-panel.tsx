@@ -180,7 +180,7 @@ export default function PlayerActivityPanel() {
             const current = index === display.hourly.length - 1;
             return <div key={`${entry.date}|${entry.hour}`} className={`grid grid-cols-[3.5rem_1fr_2.5rem] items-center gap-2 rounded px-1 py-1 ${current ? "bg-pc-accent/8 ring-1 ring-pc-accent/20" : "hover:bg-pc-bg-secondary/50"}`}>
               <span className={`text-right font-mono text-xs ${current ? "font-semibold text-pc-accent" : "text-pc-text-muted"}`}>{formatHourFromUtcBucket(entry.date, entry.hour)}</span>
-              <ActivityBar entry={entry} max={maxHourly} />
+              <ActivityBar entry={entry} max={maxHourly} formatNumber={formatNumber} />
               <span className={`text-right font-mono text-xs font-semibold ${entry.total > 0 ? "text-pc-text" : "text-pc-text-muted/30"}`}>{entry.total || "-"}</span>
             </div>;
           })}
@@ -232,9 +232,31 @@ export default function PlayerActivityPanel() {
   );
 }
 
-function ActivityBar({ entry, max }: { entry: DisplayActivity["hourly"][number]; max: number }) {
+function ActivityBar({
+  entry,
+  max,
+  formatNumber,
+}: {
+  entry: DisplayActivity["hourly"][number];
+  max: number;
+  formatNumber: (value: number) => string;
+}) {
   const parts = Object.entries(entry.regions).filter(([, value]) => value > 0);
-  return <div className="h-3 min-w-0 overflow-hidden rounded-full bg-pc-bg"><div className="flex h-full overflow-hidden rounded-full" style={{ width: `${(entry.total / max) * 100}%` }}>{parts.map(([region, value]) => <span key={region} className={REGION_COLORS[region] ?? REGION_COLORS.Unknown} style={{ width: `${(value / entry.total) * 100}%` }} />)}</div></div>;
+  return <div className="relative h-3 min-w-0 rounded-full bg-pc-bg">
+    <div className="flex h-full rounded-full" style={{ width: `${(entry.total / max) * 100}%` }}>
+      {parts.map(([region, value], index) => <span
+        key={region}
+        className={`group relative h-full ${REGION_COLORS[region] ?? REGION_COLORS.Unknown} ${
+          index === 0 ? "rounded-l-full" : ""
+        } ${index === parts.length - 1 ? "rounded-r-full" : ""}`}
+        style={{ width: `${(value / entry.total) * 100}%` }}
+      >
+        <span className="pointer-events-none invisible absolute bottom-full left-1/2 z-30 mb-2 -translate-x-1/2 whitespace-nowrap rounded-md border border-pc-border bg-pc-bg-secondary px-2 py-1 font-mono text-xs font-semibold text-pc-text opacity-0 shadow-lg transition-[opacity,transform] duration-150 group-hover:visible group-hover:-translate-y-0.5 group-hover:opacity-100">
+          {region} · {formatNumber(value)}
+        </span>
+      </span>)}
+    </div>
+  </div>;
 }
 
 function WeeklyTrend({
