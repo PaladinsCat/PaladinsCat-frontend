@@ -1679,12 +1679,12 @@ export async function fetchAccountSiteNotifications(params?: { limit?: number })
   const token = getAuthToken();
   if (!token) throw new Error(API_ERROR_KEYS.notAuthenticated);
   const limit = params?.limit ?? 8;
-  const raw = await fetchJson<{ data?: Array<{
+  const rows = await fetchJson<Array<{
     id: number; timestamp?: string; importance?: number | string; message: string; read_at?: string | null;
-  }> }>(`/auth/account/site-notifications?limit=${limit}`, {
+  }>>(`/auth/account/site-notifications?limit=${limit}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
-  return (raw.data ?? []).map(mapNotification);
+  return rows.map(mapNotification);
 }
 
 export async function markSiteNotificationRead(notificationId: number): Promise<void> {
@@ -3630,12 +3630,12 @@ export interface AccountNotification {
 export async function getAccountNotifications(limit = 25): Promise<AccountNotification[]> {
   const token = getAuthToken();
   if (!token) throw new Error(API_ERROR_KEYS.notAuthenticated);
-  const raw = await fetchJson<{ data?: Array<{
+  const rows = await fetchJson<Array<{
     id: number; type: "community_comment"; post_id: number | null; comment_id: number | null;
     actor_username: string; post_title: string | null; comment_content: string | null;
     read_at: string | null; created_at: string;
-  }> }>(`/auth/account/notifications?limit=${limit}`, { headers: { Authorization: `Bearer ${token}` } });
-  return (raw.data ?? []).map((notification) => ({
+  }>>(`/auth/account/notifications?limit=${limit}`, { headers: { Authorization: `Bearer ${token}` } });
+  return rows.map((notification) => ({
     id: notification.id,
     type: notification.type,
     postId: notification.post_id,
