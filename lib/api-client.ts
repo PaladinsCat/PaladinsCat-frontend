@@ -4588,19 +4588,27 @@ export interface PresenceMatchIdsResponse {
     match_id: string;
     queue_id: number;
   }>;
-  next_cursor: string | null;
+  page: {
+    current: number;
+    size: number;
+    total_pages: number;
+  };
 }
 
 export async function fetchPresenceMatchIds(options: {
   queueId?: number;
-  cursor?: string;
-  limit?: number;
+  page?: number;
+  perPage?: number;
 } = {}): Promise<PresenceMatchIdsResponse> {
-  const params = new URLSearchParams({ limit: String(options.limit ?? 250) });
+  const params = new URLSearchParams({
+    page: String(options.page ?? 1),
+    per_page: String(options.perPage ?? 250),
+  });
   if (options.queueId != null) params.set('queue_id', String(options.queueId));
-  if (options.cursor) params.set('cursor', options.cursor);
   return fetchJson<PresenceMatchIdsResponse>(`/stats/presence/match-ids?${params.toString()}`);
 }
+
+export type PresencePlayerSort = 'matches' | 'alphabetical';
 
 export interface PresencePlayersResponse {
   window_hours: number;
@@ -4610,18 +4618,28 @@ export interface PresencePlayersResponse {
   players: Array<{
     player_id: string;
     player_name: string;
+    matches_played: number;
   }>;
-  next_cursor: string | null;
+  sort: PresencePlayerSort;
+  page: {
+    current: number;
+    size: number;
+    total_pages: number;
+  };
 }
 
 export async function fetchPresencePlayers(options: {
   queueId?: number;
-  cursor?: string;
-  limit?: number;
+  page?: number;
+  perPage?: number;
+  sort?: PresencePlayerSort;
 } = {}): Promise<PresencePlayersResponse> {
-  const params = new URLSearchParams({ limit: String(options.limit ?? 250) });
+  const params = new URLSearchParams({
+    page: String(options.page ?? 1),
+    per_page: String(options.perPage ?? 250),
+    sort: options.sort ?? 'matches',
+  });
   if (options.queueId != null) params.set('queue_id', String(options.queueId));
-  if (options.cursor) params.set('cursor', options.cursor);
   return fetchJson<PresencePlayersResponse>(`/stats/presence/players?${params.toString()}`);
 }
 

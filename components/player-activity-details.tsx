@@ -8,6 +8,7 @@ import {
   fetchPresenceMatchIds,
   fetchPresencePlayers,
   type PresenceMatchIdsResponse,
+  type PresencePlayerSort,
   type PresencePlayersResponse,
 } from "@/lib/api-client";
 import { useLocalization } from "@/lib/localization-context";
@@ -22,12 +23,11 @@ export default function PlayerActivityDetails() {
   const { t, formatNumber } = useLocalization();
   const [activeTab, setActiveTab] = useState<EvidenceTab>("matches");
   const [selectedQueue, setSelectedQueue] = useState<"all" | number>("all");
+  const [page, setPage] = useState(1);
+  const [playerSort, setPlayerSort] = useState<PresencePlayerSort>("matches");
   const [matchResponse, setMatchResponse] = useState<PresenceMatchIdsResponse | null>(null);
   const [playerResponse, setPlayerResponse] = useState<PresencePlayersResponse | null>(null);
-  const [matchIds, setMatchIds] = useState<PresenceMatchIdsResponse["match_ids"]>([]);
-  const [players, setPlayers] = useState<PresencePlayersResponse["players"]>([]);
   const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const displayLoading = useRouteSettledLoading(loading);
 
@@ -39,15 +39,21 @@ export default function PlayerActivityDetails() {
       setError(null);
       try {
         if (activeTab === "matches") {
-          const next = await fetchPresenceMatchIds({ queueId });
+          const next = await fetchPresenceMatchIds({ queueId, page });
           if (!active) return;
+          if (next.page.total_pages > 0 && page > next.page.total_pages) {
+            setPage(next.page.total_pages);
+            return;
+          }
           setMatchResponse(next);
-          setMatchIds(next.match_ids);
         } else {
-          const next = await fetchPresencePlayers({ queueId });
+          const next = await fetchPresencePlayers({ queueId, page, sort: playerSort });
           if (!active) return;
+          if (next.page.total_pages > 0 && page > next.page.total_pages) {
+            setPage(next.page.total_pages);
+            return;
+          }
           setPlayerResponse(next);
-          setPlayers(next.players);
         }
       } catch {
         if (active) setError(t("playerActivity.detailsLoadError"));
@@ -59,43 +65,18 @@ export default function PlayerActivityDetails() {
     return () => {
       active = false;
     };
-  }, [activeTab, selectedQueue, t]);
-
-  const loadMore = async () => {
-    if (loadingMore) return;
-    const queueId = selectedQueue === "all" ? undefined : selectedQueue;
-    setLoadingMore(true);
-    setError(null);
-    try {
-      if (activeTab === "matches" && matchResponse?.next_cursor) {
-        const next = await fetchPresenceMatchIds({
-          queueId,
-          cursor: matchResponse.next_cursor,
-        });
-        setMatchIds(current => [...current, ...next.match_ids]);
-        setMatchResponse(next);
-      } else if (activeTab === "players" && playerResponse?.next_cursor) {
-        const next = await fetchPresencePlayers({
-          queueId,
-          cursor: playerResponse.next_cursor,
-        });
-        setPlayers(current => [...current, ...next.players]);
-        setPlayerResponse(next);
-      }
-    } catch {
-      setError(t("playerActivity.detailsLoadError"));
-    } finally {
-      setLoadingMore(false);
-    }
-  };
+  }, [activeTab, page, playerSort, selectedQueue, t]);
 
   const queues = matchResponse?.queues ?? [];
+  const matchIds = matchResponse?.match_ids ?? [];
+  const players = playerResponse?.players ?? [];
   const total = activeTab === "matches"
     ? matchResponse?.total_matches
     : playerResponse?.total_players;
-  const nextCursor = activeTab === "matches"
-    ? matchResponse?.next_cursor
-    : playerResponse?.next_cursor;
+  const pageInfo = activeTab === "matches"
+    ? matchResponse?.page
+    : playerResponse?.page;
+  const totalPages = pageInfo?.total_pages ?? 0;
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-5">
@@ -135,9 +116,10 @@ export default function PlayerActivityDetails() {
             {t("playerActivity.queue")}
             <select
               value={selectedQueue}
-              onChange={event =>
-                setSelectedQueue(event.target.value === "all" ? "all" : Number(event.target.value))
-              }
+              onChange={event => {
+                setSelectedQueue(event.target.value === "all" ? "all" : Number(event.target.value));
+                setPage(1);
+              }}
               className="rounded-lg border border-pc-border bg-pc-bg px-2.5 py-1.5 text-xs text-pc-text"
             >
               <option value="all">{t("playerActivity.allQueues")}</option>
@@ -148,6 +130,22 @@ export default function PlayerActivityDetails() {
               ))}
             </select>
           </label>
+          {activeTab === "players" && (
+            <label className="flex items-center gap-2 text-xs text-pc-text-secondary">
+              {t("playerActivity.sort")}
+              <select
+                value={playerSort}
+                onChange={event => {
+                  setPlayerSort(event.target.value as PresencePlayerSort);
+                  setPage(1);
+                }}
+                className="rounded-lg border border-pc-border bg-pc-bg px-2.5 py-1.5 text-xs text-pc-text"
+              >
+                <option value="matches">{t("playerActivity.sortMostMatches")}</option>
+                <option value="alphabetical">{t("playerActivity.sortAlphabetical")}</option>
+              </select>
+            </label>
+          )}
         </div>
       </section>
 
@@ -162,7 +160,10 @@ export default function PlayerActivityDetails() {
             type="button"
             role="tab"
             aria-selected={activeTab === tab}
-            onClick={() => setActiveTab(tab)}
+            onClick={() => {
+              setActiveTab(tab);
+              setPage(1);
+            }}
             className={`border-b-2 px-4 py-2.5 text-sm font-semibold transition-colors ${
               activeTab === tab
                 ? "border-pc-accent text-pc-accent"
@@ -202,6 +203,9 @@ export default function PlayerActivityDetails() {
                   className="text-pc-text-secondary transition-colors hover:text-pc-accent"
                 >
                   {player.player_name}
+                  <span className="text-pc-text-muted">
+                    {" · "}{formatNumber(player.matches_played)}
+                  </span>
                 </Link>
               ))}
             </div>
@@ -224,19 +228,45 @@ export default function PlayerActivityDetails() {
             </div>
           )}
 
-          {nextCursor && (
-            <div className="flex justify-center">
+          {totalPages > 1 && (
+            <nav
+              aria-label={t("playerActivity.pagination")}
+              className="flex flex-wrap items-center justify-center gap-2"
+            >
               <button
                 type="button"
-                onClick={() => void loadMore()}
-                disabled={loadingMore}
-                className="pc-btn-secondary min-w-32 disabled:cursor-wait disabled:opacity-60"
+                onClick={() => setPage(current => Math.max(1, current - 1))}
+                disabled={page <= 1}
+                className="pc-btn-secondary disabled:cursor-not-allowed disabled:opacity-40"
               >
-                {loadingMore
-                  ? t("playerActivity.loadingMoreEvidence")
-                  : t("playerActivity.loadMoreEvidence")}
+                {t("playerActivity.previousPage")}
               </button>
-            </div>
+              <label className="flex items-center gap-2 text-xs text-pc-text-secondary">
+                {t("playerActivity.page")}
+                <select
+                  value={page}
+                  onChange={event => setPage(Number(event.target.value))}
+                  className="rounded-lg border border-pc-border bg-pc-bg px-2.5 py-1.5 text-xs text-pc-text"
+                >
+                  {Array.from({ length: totalPages }, (_, index) => index + 1).map(option => (
+                    <option key={option} value={option}>
+                      {formatNumber(option)}
+                    </option>
+                  ))}
+                </select>
+                <span className="text-pc-text-muted">
+                  {t("playerActivity.ofPages", { total: formatNumber(totalPages) })}
+                </span>
+              </label>
+              <button
+                type="button"
+                onClick={() => setPage(current => Math.min(totalPages, current + 1))}
+                disabled={page >= totalPages}
+                className="pc-btn-secondary disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {t("playerActivity.nextPage")}
+              </button>
+            </nav>
           )}
         </div>
       )}
