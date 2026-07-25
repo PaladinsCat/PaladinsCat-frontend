@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import SmartImage from "@/components/SmartImage";
 import CanonicalTalentImage from "@/components/canonical-talent-image";
@@ -11,6 +11,7 @@ import {
   type MapCategoryComparisonStat,
   type MapComparisonSection,
   type MapDetailStats,
+  type PublicStatsScope,
 } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
@@ -132,10 +133,26 @@ const ITEM_CLASS_LABEL_KEYS = {
   Offense: "maps.itemClass.offense",
 } as const;
 
+const STATS_SCOPE_LABEL_KEYS = {
+  ranked: "stats.scope.ranked",
+  casual: "stats.scope.casual",
+  bot: "stats.scope.bot",
+  team_deathmatch: "stats.scope.teamDeathmatch",
+  arcade: "stats.scope.arcade",
+  wave_defense: "stats.scope.waveDefense",
+  experiment: "stats.scope.experiment",
+  newcomer: "stats.scope.newcomer",
+} as const;
+
 export default function MapDetailPage() {
   const { formatDuration, formatNumber, formatPercent, formatRecord, t } = useLocalization();
   const params = useParams<{ mapName: string }>();
+  const searchParams = useSearchParams();
   const mapName = decodeURIComponent(params.mapName);
+  const requestedScope = searchParams.get("scope");
+  const statsScope: PublicStatsScope = (
+    ["casual", "bot", "team_deathmatch", "arcade", "wave_defense", "experiment", "newcomer"] as string[]
+  ).includes(requestedScope ?? "") ? requestedScope as PublicStatsScope : "ranked";
   const [detail, setDetail] = useState<MapDetailStats | null>(null);
   const [loaded, setLoaded] = useState(false);
   const displayLoading = useRouteSettledLoading(!loaded);
@@ -153,14 +170,22 @@ export default function MapDetailPage() {
   useEffect(() => {
     let cancelled = false;
     setLoaded(false);
+    setDetail(null);
     setComparisonCache({});
     setComparisonFailed({});
     setComparisonLoading({});
     comparisonRequests.current = {};
     comparisonMapName.current = mapName;
-    fetchMapDetail(mapName).then((data) => { if (!cancelled) setDetail(data); }).finally(() => { if (!cancelled) setLoaded(true); });
+    fetchMapDetail(mapName, { scope: statsScope }).then((data) => { if (!cancelled) setDetail(data); }).finally(() => { if (!cancelled) setLoaded(true); });
     return () => { cancelled = true; };
-  }, [mapName]);
+  }, [mapName, statsScope]);
+
+  useEffect(() => {
+    if (statsScope !== "ranked") {
+      setActiveSection("champions");
+      if (championSort === "banRate") setChampionSort("winRate");
+    }
+  }, [statsScope, championSort]);
 
   const talentsByChampion = useMemo(() => {
     const grouped = new Map<number, MapDetailStats["talents"]>();
@@ -200,6 +225,7 @@ export default function MapDetailPage() {
   }, [comparisonRows]);
 
   function loadCategoryComparison(section: MapComparisonSection) {
+    if (statsScope !== "ranked") return;
     if (Object.prototype.hasOwnProperty.call(comparisonCache, section) || comparisonRequests.current[section]) return;
     setComparisonFailed((current) => ({ ...current, [section]: false }));
     setComparisonLoading((current) => ({ ...current, [section]: true }));
@@ -225,19 +251,19 @@ export default function MapDetailPage() {
 
   return (
     <div className="space-y-6">
-      <Link href="/game/maps" className="text-sm text-pc-text-secondary hover:text-pc-accent">{t("generated.stats.allMaps")}</Link>
+      <Link href={`/game/maps?scope=${statsScope}`} className="text-sm text-pc-text-secondary hover:text-pc-accent">{t("generated.stats.allMaps")}</Link>
 
       <section className="relative overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated">
         <SmartImage src={mapImagePath(map.name)} alt="" className="absolute inset-0 h-full w-full object-cover opacity-25" />
         <div className="absolute inset-0 bg-gradient-to-r from-pc-bg-elevated via-pc-bg-elevated/90 to-pc-bg-elevated/45" />
         <div className="relative grid gap-5 p-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end sm:p-7">
-          <div><p className="text-xs font-bold uppercase tracking-[0.18em] text-pc-text-muted">{t("generated.stats.rankedMapMeta")}</p><h1 className="mt-1 pc-heading pc-heading-lg text-pc-accent">{map.name.replace(/^Ranked\s+/, "")}</h1><p className="mt-1 text-sm text-pc-text-secondary">{t("maps.detailDescription")}</p></div>
+          <div><p className="text-xs font-bold uppercase tracking-[0.18em] text-pc-text-muted">{statsScope === "ranked" ? t("generated.stats.rankedMapMeta") : t("stats.scope.mapMeta", { mode: t(STATS_SCOPE_LABEL_KEYS[statsScope]) })}</p><h1 className="mt-1 pc-heading pc-heading-lg text-pc-accent">{map.name.replace(/^Ranked\s+/, "")}</h1><p className="mt-1 text-sm text-pc-text-secondary">{t("maps.detailDescription")}</p></div>
           <div className="grid grid-cols-3 divide-x divide-pc-border rounded-lg border border-pc-border bg-pc-bg-secondary/70 text-center"><div className="px-4 py-2.5"><div className="text-xs uppercase text-pc-text-muted">{t("generated.stats.mapShare.77ce64b")}</div><div className="mt-1 font-bold text-pc-accent">{formatPercent(map.distributionRate)}</div></div><div className="px-4 py-2.5"><div className="text-xs uppercase text-pc-text-muted">{t("generated.stats.matches")}</div><div className="mt-1 font-bold text-pc-text">{formatNumber(map.totalMatches)}</div></div><div className="px-4 py-2.5"><div className="text-xs uppercase text-pc-text-muted">{t("generated.stats.avgTime.53a0360")}</div><div className="mt-1 font-bold text-pc-text">{formatDuration(map.avgDurationSeconds)}</div></div></div>
         </div>
       </section>
 
       <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {MAP_SECTIONS.map((section) => (
+          {MAP_SECTIONS.filter((section) => statsScope === "ranked" || section.key === "champions").map((section) => (
             <button
               key={section.key}
               type="button"
@@ -261,7 +287,7 @@ export default function MapDetailPage() {
               {ROLES.map((role) => <button key={role.value} type="button" onClick={() => setChampionRole(role.value)} className={`flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] transition-colors ${championRole === role.value ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-muted hover:text-pc-text"}`}><img src={role.icon} alt="" className="h-5 w-5" />{t(role.labelKey)}</button>)}
             </div>
             <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {CHAMPION_SORTS.map((sort) => <button key={sort.key} type="button" onClick={() => setChampionSort(sort.key)} className={`shrink-0 rounded-lg px-3 py-2 text-xs font-medium transition-colors ${championSort === sort.key ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-text-secondary hover:text-pc-text"}`}>{t(sort.labelKey)}</button>)}
+              {CHAMPION_SORTS.filter((sort) => statsScope === "ranked" || sort.key !== "banRate").map((sort) => <button key={sort.key} type="button" onClick={() => setChampionSort(sort.key)} className={`shrink-0 rounded-lg px-3 py-2 text-xs font-medium transition-colors ${championSort === sort.key ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-text-secondary hover:text-pc-text"}`}>{t(sort.labelKey)}</button>)}
             </div>
           </div>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
@@ -269,9 +295,9 @@ export default function MapDetailPage() {
               const quality = getStatQuality(champion.winRate, champion.pickRate, Math.max(1, ...detail.champions.map((row) => row.pickRate)));
               const compared = comparisonByEntity.get(String(champion.championId)) ?? [];
               return <div key={champion.championId} className="group rounded-lg border bg-pc-bg-elevated p-2.5 transition-colors hover:border-pc-accent-mid" style={{ borderColor: quality.borderColor }}>
-                <Link href={`/champions/${championSlug(champion.championName)}`} className="flex items-center gap-2"><img src={getChampionIconSafe(champion.championName)} alt="" className="h-9 w-9 shrink-0 rounded-md object-contain" /><div className="min-w-0 flex-1"><div className="truncate text-xs font-semibold text-pc-text group-hover:text-pc-accent">{champion.championName}</div><div className="mt-0.5 text-xs uppercase text-pc-text-muted">{t(ROLE_LABEL_KEYS.get(CHAMPION_ROLE_BY_SLUG.get(championSlug(champion.championName)) ?? "") ?? "common.roles.global")}</div></div></Link>
-                <div className="mt-2 grid grid-cols-3 gap-1 border-t border-pc-border/60 pt-2 text-center"><div><div className="text-xs text-pc-text-muted">{t("generated.stats.wr")}</div><div className="text-xs font-bold" style={{ color: rateColor(champion.winRate) }}>{formatPercent(champion.winRate)}</div><div className="text-xs text-pc-text-muted">{formatRecord(champion.wins, champion.losses)}</div></div><div><div className="text-xs text-pc-text-muted">{t("generated.stats.pr")}</div><div className="text-xs font-semibold text-pc-text">{formatPercent(champion.pickRate)}</div><div className="text-xs text-pc-text-muted">{formatNumber(champion.totalPlays)} {t("generated.stats.picks")}</div></div><div><div className="text-xs text-pc-text-muted">{t("generated.stats.br")}</div><div className="text-xs font-semibold text-rose-400">{formatPercent(champion.banRate)}</div><div className="text-xs text-pc-text-muted">{formatNumber(champion.totalBans)} {t("generated.stats.bans")}</div></div></div>
-                <AllMapComparison rows={compared} summary={t("maps.compareOtherMaps")} empty={t("maps.noComparisonData")} error={t("maps.comparisonFailed")} loaded={Object.prototype.hasOwnProperty.call(comparisonCache, "champions")} loading={comparisonLoading.champions === true} failed={comparisonFailed.champions === true} onOpen={() => loadCategoryComparison("champions")} metrics={(row) => [{ label: t("generated.stats.wr"), value: formatPercent(row.winRate), color: rateColor(row.winRate) }, { label: t("generated.stats.pr"), value: formatPercent(row.pickRate) }, { label: t("generated.stats.br"), value: formatPercent(row.banRate) }]} />
+                <Link href={`/champions/${championSlug(champion.championName)}?scope=${statsScope}`} className="flex items-center gap-2"><img src={getChampionIconSafe(champion.championName)} alt="" className="h-9 w-9 shrink-0 rounded-md object-contain" /><div className="min-w-0 flex-1"><div className="truncate text-xs font-semibold text-pc-text group-hover:text-pc-accent">{champion.championName}</div><div className="mt-0.5 text-xs uppercase text-pc-text-muted">{t(ROLE_LABEL_KEYS.get(CHAMPION_ROLE_BY_SLUG.get(championSlug(champion.championName)) ?? "") ?? "common.roles.global")}</div></div></Link>
+                <div className={`mt-2 grid gap-1 border-t border-pc-border/60 pt-2 text-center ${statsScope === "ranked" ? "grid-cols-3" : "grid-cols-2"}`}><div><div className="text-xs text-pc-text-muted">{t("generated.stats.wr")}</div><div className="text-xs font-bold" style={{ color: rateColor(champion.winRate) }}>{formatPercent(champion.winRate)}</div><div className="text-xs text-pc-text-muted">{formatRecord(champion.wins, champion.losses)}</div></div><div><div className="text-xs text-pc-text-muted">{t("generated.stats.pr")}</div><div className="text-xs font-semibold text-pc-text">{formatPercent(champion.pickRate)}</div><div className="text-xs text-pc-text-muted">{formatNumber(champion.totalPlays)} {t("generated.stats.picks")}</div></div>{statsScope === "ranked" && <div><div className="text-xs text-pc-text-muted">{t("generated.stats.br")}</div><div className="text-xs font-semibold text-rose-400">{formatPercent(champion.banRate)}</div><div className="text-xs text-pc-text-muted">{formatNumber(champion.totalBans)} {t("generated.stats.bans")}</div></div>}</div>
+                {statsScope === "ranked" && <AllMapComparison rows={compared} summary={t("maps.compareOtherMaps")} empty={t("maps.noComparisonData")} error={t("maps.comparisonFailed")} loaded={Object.prototype.hasOwnProperty.call(comparisonCache, "champions")} loading={comparisonLoading.champions === true} failed={comparisonFailed.champions === true} onOpen={() => loadCategoryComparison("champions")} metrics={(row) => [{ label: t("generated.stats.wr"), value: formatPercent(row.winRate), color: rateColor(row.winRate) }, { label: t("generated.stats.pr"), value: formatPercent(row.pickRate) }, { label: t("generated.stats.br"), value: formatPercent(row.banRate) }]} />}
               </div>;
             })}
           </div>

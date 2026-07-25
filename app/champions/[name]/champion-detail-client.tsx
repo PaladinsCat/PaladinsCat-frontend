@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useParams, notFound } from "next/navigation";
+import { useParams, useSearchParams, notFound } from "next/navigation";
 import { STATIC_CHAMPIONS } from "@/lib/static-champions";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import ScrambleText from "@/components/ScrambleText";
@@ -28,6 +28,9 @@ import {
   type PerformanceMetricSummary,
   type ChampionPerformanceDistribution,
   type ChampionMapStat,
+  fetchStatsChampions,
+  fetchChampionMapStats,
+  type PublicStatsScope,
 } from "@/lib/api-client";
 import { getRankIconPath, getTierColor, resolveEffectiveTier } from "@/lib/tier-utils";
 import { withStoredLobbyTier } from "@/lib/lobby-tier";
@@ -66,6 +69,16 @@ const ITEM_CATEGORY_BY_NAME: Record<string, string> = {
 };
 
 const ITEM_CATEGORIES = ["Defense", "Utility", "Healing", "Offense"] as const;
+const STATS_SCOPE_LABEL_KEYS = {
+  ranked: "stats.scope.ranked",
+  casual: "stats.scope.casual",
+  bot: "stats.scope.bot",
+  team_deathmatch: "stats.scope.teamDeathmatch",
+  arcade: "stats.scope.arcade",
+  wave_defense: "stats.scope.waveDefense",
+  experiment: "stats.scope.experiment",
+  newcomer: "stats.scope.newcomer",
+} as const;
 
 function itemIcon(name: string) {
   return `/images/items/${name.replace(/\s+/g, "_")}_Icon.avif`;
@@ -116,10 +129,12 @@ function RankedPerformanceCard({
   stats,
   championPerformance,
   globalPerformance,
+  isRanked,
 }: {
   stats: ChampionStats;
   championPerformance: Partial<Record<PerformanceMetricKey, ChampionPerformanceDistribution>>;
   globalPerformance: PerformanceMetricsResponse;
+  isRanked: boolean;
 }) {
   const { t, formatNumber, formatPercent } = useLocalization();
   const tier = stats.avgRating == null ? null : Math.round(stats.avgRating);
@@ -132,8 +147,8 @@ function RankedPerformanceCard({
 
   return (
     <div>
-      <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,3fr)]">
-        <div className="min-w-0 text-center sm:border-r sm:border-pc-border sm:pr-4">
+      <div className={`grid gap-4 ${isRanked ? "sm:grid-cols-[minmax(0,1fr)_minmax(0,3fr)]" : ""}`}>
+        {isRanked && <div className="min-w-0 text-center sm:border-r sm:border-pc-border sm:pr-4">
           <div className="mb-1 text-xs text-pc-text-muted">{t("generated.champions.avgTier")}</div>
           {effective && iconPath ? (
             <div className="flex items-center justify-center gap-2">
@@ -144,7 +159,7 @@ function RankedPerformanceCard({
               </div>
             </div>
           ) : <div className="font-mono text-lg text-pc-text">—</div>}
-        </div>
+        </div>}
         <div className="flex min-h-14 flex-wrap items-center justify-center gap-x-4 gap-y-2 px-2 py-2 sm:flex-nowrap sm:gap-x-5">
           <div className="flex items-baseline gap-2">
             <span className="font-mono text-lg text-pc-accent">{stats.avgWinRate == null ? "—" : formatPercent(stats.avgWinRate)}</span>
@@ -164,7 +179,7 @@ function RankedPerformanceCard({
           </div>
         </div>
       </div>
-      <div className="mt-4 grid grid-cols-2 border-t border-pc-border pt-4 sm:grid-cols-4 lg:grid-cols-7 lg:divide-x lg:divide-pc-border">
+      {isRanked && <div className="mt-4 grid grid-cols-2 border-t border-pc-border pt-4 sm:grid-cols-4 lg:grid-cols-7 lg:divide-x lg:divide-pc-border">
         {CHAMPION_METRICS.map((metric) => (
           <ChampionMetricCell
             key={metric.key}
@@ -173,7 +188,7 @@ function RankedPerformanceCard({
             global={globalPerformance[metric.key]}
           />
         ))}
-      </div>
+      </div>}
     </div>
   );
 }
@@ -181,8 +196,13 @@ function RankedPerformanceCard({
 export default function ChampionDetailPage() {
   const { t , formatNumber, formatPercent} = useLocalization();
   const params = useParams();
+  const searchParams = useSearchParams();
   const rawName = params?.name;
   const name = Array.isArray(rawName) ? rawName[0] ?? "" : rawName ?? "";
+  const requestedScope = searchParams.get("scope");
+  const statsScope: PublicStatsScope = (
+    ["casual", "bot", "team_deathmatch", "arcade", "wave_defense", "experiment", "newcomer"] as string[]
+  ).includes(requestedScope ?? "") ? requestedScope as PublicStatsScope : "ranked";
 
   const [championData, setChampionData] = useState<ChampionData | null>(null);
   const [dataLoaded, setDataLoaded] = useState(false);
@@ -250,8 +270,34 @@ export default function ChampionDetailPage() {
     };
 
     setLoading(true);
+    setStats(null);
+    setTalentStats(null);
     setChampionItems([]);
     setChampionMaps([]);
+    setGlobalPerformance({});
+    setChampionPerformance({});
+    setTierStats([]);
+    setPatchTrends([]);
+
+    if (statsScope !== "ranked") {
+      fetchStatsChampions({ scope: statsScope, limit: 200 }).then(async (champions) => {
+        const row = champions.find((entry) => championSlug(entry.championName) === championSlug(staticChampion.name));
+        const maps = row ? await fetchChampionMapStats(row.championId, { scope: statsScope }) : [];
+        setStats(row ? {
+          avgRating: null,
+          avgWinRate: row.winRate,
+          totalPlays: row.totalPlays,
+          totalMatches: row.totalPlays,
+          totalWins: row.totalPlays == null ? null : Math.round(row.totalPlays * row.winRate / 100),
+        } : null);
+        setChampionMaps(maps);
+        setTalentStats(null);
+      }).catch(() => {
+        setStats(null);
+        setChampionMaps([]);
+      }).finally(() => setLoading(false));
+      return;
+    }
 
     // One cached bundle replaces the old fan-out of champion-specific
     // requests. Redis serves a warm entry immediately and refreshes it in the
@@ -271,7 +317,7 @@ export default function ChampionDetailPage() {
         setChampionPerformance({});
       })
       .finally(() => setLoading(false));
-  }, [championData, staticChampion]);
+  }, [championData, staticChampion, statsScope]);
 
 
   const talentStatsById = useMemo(() => {
@@ -354,13 +400,16 @@ export default function ChampionDetailPage() {
           )}
           {/* Compact ranked summary leads the analysis column. */}
           <section className="space-y-2">
-            <h2 className="pc-card-title shadow-sm">{t("generated.champions.rankedPerformance")}</h2>
+            <h2 className="pc-card-title shadow-sm">
+              {statsScope === "ranked" ? t("generated.champions.rankedPerformance") : t("stats.scope.performance", { mode: t(STATS_SCOPE_LABEL_KEYS[statsScope]) })}
+            </h2>
             <div className="pc-card p-4">
               {stats && (
                 <RankedPerformanceCard
                   stats={stats}
                   championPerformance={championPerformance}
                   globalPerformance={globalPerformance}
+                  isRanked={statsScope === "ranked"}
                 />
               )}
             </div>
@@ -396,7 +445,7 @@ export default function ChampionDetailPage() {
           )}
 
           {/* Champion-specific ranked item purchases. */}
-          <section className="space-y-2">
+          {statsScope === "ranked" && <section className="space-y-2">
             <h2 className="pc-card-title shadow-sm">{t("generated.champions.itemStats")}</h2>
             <div className="pc-card space-y-4 p-4">
               {championItems.length === 0 ? (
@@ -434,7 +483,7 @@ export default function ChampionDetailPage() {
                 })
               )}
             </div>
-          </section>
+          </section>}
 
         </div>
       </div>
@@ -513,12 +562,12 @@ export default function ChampionDetailPage() {
         <div>
           <h2 className="pc-card-title">{t("generated.champions.mapStats")}</h2>
           <p className="mt-1 text-xs text-pc-text-secondary">
-            {t("generated.champions.rankedPerformanceByMapPickRateIsEachMapS")}</p>
+            {statsScope === "ranked" ? t("generated.champions.rankedPerformanceByMapPickRateIsEachMapS") : t("stats.scope.performanceByMap", { mode: t(STATS_SCOPE_LABEL_KEYS[statsScope]) })}</p>
         </div>
         {loading ? (
           <LoadingPanel />
         ) : championMaps.length === 0 ? (
-          <div className="pc-card text-sm text-pc-text-muted">{t("generated.champions.noRankedMapStatisticsAreAvailableYet")}</div>
+          <div className="pc-card text-sm text-pc-text-muted">{statsScope === "ranked" ? t("generated.champions.noRankedMapStatisticsAreAvailableYet") : t("stats.scope.noMapStats", { mode: t(STATS_SCOPE_LABEL_KEYS[statsScope]) })}</div>
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {championMaps.map((map) => {

@@ -98,9 +98,14 @@ export default function MatchesPage() {
   };
 
   return <div className="space-y-6">
-    <header>
-      <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.matches.matches")}</h1>
-      <p className="mt-1 text-sm text-pc-text-secondary">{t("matches.description")}</p>
+    <header className="flex flex-wrap items-start justify-between gap-3">
+      <div>
+        <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.matches.matches")}</h1>
+        <p className="mt-1 text-sm text-pc-text-secondary">{t("matches.description")}</p>
+      </div>
+      <Link href="/matches/dropped" className="rounded-lg border border-pc-border bg-pc-bg-elevated px-3 py-2 text-xs text-pc-text-secondary transition-colors hover:border-pc-accent-mid hover:text-pc-accent">
+        {t("matches.dropped.link")}
+      </Link>
     </header>
 
     <section className="pc-card">

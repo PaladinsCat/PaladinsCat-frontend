@@ -14,5 +14,6 @@ export function useRouteSettled() {
 }
 
 export function useRouteSettledLoading(loading: boolean) {
-  return loading || !useRouteSettled();
+  const routeSettled = useRouteSettled();
+  return loading || !routeSettled;
 }

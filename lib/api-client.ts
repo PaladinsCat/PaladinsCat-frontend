@@ -503,6 +503,7 @@ export async function fetchPerformanceLeaderboard(params: {
   role?: string;
   region?: string;
   queueId?: number;
+  scope?: 'ranked' | 'casual';
 }): Promise<PerformanceLeaderboardEntry[]> {
   const query = new URLSearchParams();
   query.set('metric', params.metric);
@@ -510,6 +511,7 @@ export async function fetchPerformanceLeaderboard(params: {
   if (params.role) query.set('role', params.role);
   if (params.region) query.set('region', params.region);
   if (params.queueId != null) query.set('queueId', String(params.queueId));
+  if (params.scope) query.set('scope', params.scope);
   try {
     const raw = await fetchJson<Array<{
       rank: number; match_id: number | string; player_id: number; player_name: string;
@@ -571,6 +573,7 @@ export async function fetchPerformanceMetrics(params?: {
   queueId?: number;
   tierMin?: number;
   tierMax?: number;
+  scope?: 'ranked' | 'casual';
 }): Promise<PerformanceMetricsResponse> {
   const query = new URLSearchParams();
   if (params?.metric) query.set('metric', params.metric);
@@ -578,6 +581,7 @@ export async function fetchPerformanceMetrics(params?: {
   if (params?.queueId != null) query.set('queueId', String(params.queueId));
   if (params?.tierMin != null) query.set('tierMin', String(params.tierMin));
   if (params?.tierMax != null) query.set('tierMax', String(params.tierMax));
+  if (params?.scope) query.set('scope', params.scope);
   try {
     const raw = await fetchJson<Record<string, any>>(`/stats/performance-metrics${query.toString() ? `?${query.toString()}` : ''}`);
     return Object.fromEntries(
@@ -1898,17 +1902,29 @@ function mapChampionsOverview(raw: ChampionOverviewRaw): Champion[] {
   });
 }
 
-export async function fetchChampions(_params?: {
+export type PublicStatsScope =
+  | 'ranked'
+  | 'casual'
+  | 'bot'
+  | 'team_deathmatch'
+  | 'arcade'
+  | 'wave_defense'
+  | 'experiment'
+  | 'newcomer';
+
+export async function fetchChampions(params?: {
   limit?: string;
   offset?: string;
   tier?: string;
   region?: string;
   patch?: string;
+  scope?: PublicStatsScope;
 }): Promise<Champion[]> {
-  const cacheKey = getStoredLobbyTierFilter();
+  const statsScope = params?.scope ?? 'ranked';
+  const cacheKey = `${statsScope}|${statsScope === 'ranked' ? getStoredLobbyTierFilter() : ''}`;
   if (championsOverviewCache?.key === cacheKey && championsOverviewCache.expiresAt > Date.now()) return championsOverviewCache.value;
   if (championsOverviewInFlight?.key === cacheKey) return championsOverviewInFlight.promise;
-  const promise = fetchJson<ChampionOverviewRaw>('/champions/overview', { unwrapData: false })
+  const promise = fetchJson<ChampionOverviewRaw>(`/champions/overview?scope=${encodeURIComponent(statsScope)}`, { unwrapData: false })
     .then((raw) => {
       const value = mapChampionsOverview(raw);
       championsOverviewCache = { key: cacheKey, value, expiresAt: Date.now() + 300_000 };
@@ -2483,10 +2499,12 @@ function mapStatsChampionRows(raw: Array<{
   }));
 }
 
-export async function fetchStatsChampions(params?: { sort?: string; limit?: number }): Promise<StatsChampion[]> {
+export async function fetchStatsChampions(params?: { sort?: string; limit?: number; scope?: PublicStatsScope; queueId?: number }): Promise<StatsChampion[]> {
   const query = new URLSearchParams();
   if (params?.sort) query.set('sort', params.sort);
   if (params?.limit != null) query.set('limit', String(params.limit));
+  if (params?.scope) query.set('scope', params.scope);
+  if (params?.queueId != null) query.set('queueId', String(params.queueId));
   try {
     const raw = await fetchJson<Array<{
       champion_id: number; champion_name: string;
@@ -2694,10 +2712,11 @@ export async function fetchItemDetail(itemId: number, mode: 'ranked' = 'ranked',
   }
 }
 
-export async function fetchMapStats(params?: { queueId?: number; limit?: number }): Promise<MapStat[]> {
+export async function fetchMapStats(params?: { queueId?: number; limit?: number; scope?: PublicStatsScope }): Promise<MapStat[]> {
   const query = new URLSearchParams();
   if (params?.queueId != null) query.set('queueId', String(params.queueId));
   if (params?.limit != null) query.set('limit', String(params.limit));
+  if (params?.scope) query.set('scope', params.scope);
   try {
     const raw = await fetchJson<Array<{
       map: string;
@@ -2716,8 +2735,11 @@ export async function fetchMapStats(params?: { queueId?: number; limit?: number 
   }
 }
 
-export async function fetchChampionMapStats(championId: number): Promise<ChampionMapStat[]> {
+export async function fetchChampionMapStats(championId: number, params?: { scope?: PublicStatsScope; queueId?: number }): Promise<ChampionMapStat[]> {
   try {
+    const query = new URLSearchParams();
+    if (params?.scope) query.set('scope', params.scope);
+    if (params?.queueId != null) query.set('queueId', String(params.queueId));
     const raw = await fetchJson<Array<{
       map: string;
       total_plays: number | string;
@@ -2725,7 +2747,7 @@ export async function fetchChampionMapStats(championId: number): Promise<Champio
       losses: number | string;
       win_rate: number | string;
       pick_rate: number | string;
-    }>>(`/stats/champions/${championId}/maps`);
+    }>>(`/stats/champions/${championId}/maps${query.toString() ? `?${query.toString()}` : ''}`);
     return raw.map((row) => ({
       name: row.map,
       totalPlays: Number(row.total_plays ?? 0),
@@ -2739,9 +2761,11 @@ export async function fetchChampionMapStats(championId: number): Promise<Champio
   }
 }
 
-export async function fetchMapDetail(mapName: string): Promise<MapDetailStats | null> {
+export async function fetchMapDetail(mapName: string, params?: { scope?: PublicStatsScope }): Promise<MapDetailStats | null> {
   try {
-    const raw = await fetchJson<any>(`/stats/maps/${encodeURIComponent(mapName)}`);
+    const query = new URLSearchParams();
+    if (params?.scope) query.set('scope', params.scope);
+    const raw = await fetchJson<any>(`/stats/maps/${encodeURIComponent(mapName)}${query.toString() ? `?${query.toString()}` : ''}`);
     const number = (value: unknown) => Number(value ?? 0);
     const map = raw.map;
     return {
@@ -4498,6 +4522,12 @@ export interface MatchHourlyStats {
   currentHour?: number;
   allQueuesTotal24h?: number;
   queues?: MatchQueueActivity[];
+  weekly?: Array<{
+    date: string;
+    total: number;
+    ranked: number;
+    queues: Record<string, number>;
+  }>;
 }
 
 export interface MatchQueueActivity {
@@ -4511,6 +4541,37 @@ export interface MatchQueueActivity {
 
 export async function fetchMatchHourlyStats(): Promise<MatchHourlyStats> {
   return fetchJson<MatchHourlyStats>('/matches/hourly-stats');
+}
+
+export interface PresenceStats {
+  window_hours: number;
+  observed_at: string;
+  public_players: number;
+  private_players: number;
+  unresolved_private_observations: number;
+  public_by_scope: Array<{ stats_scope: PublicStatsScope; players: number }>;
+  private_by_scope: Array<{ stats_scope: PublicStatsScope; players: number }>;
+  unresolved_by_scope: Array<{ stats_scope: PublicStatsScope; observations: number }>;
+  public_by_queue: Array<{
+    queue_id: number;
+    queue_name: string;
+    stats_scope: PublicStatsScope;
+    players: number;
+  }>;
+  public_by_platform: Array<{ platform: string; players: number }>;
+  profile_coverage: {
+    total: number;
+    fresh: number;
+    platform_known: number;
+    platform_unknown: number;
+    last_enrichment_at: string | null;
+  };
+}
+
+export async function fetchPresenceStats(): Promise<PresenceStats> {
+  // Version the activity view so a deployment cannot briefly receive the
+  // previous cached response shape from the shared stats route cache.
+  return fetchJson<PresenceStats>('/stats/presence?view=activity-v2');
 }
 
 export interface DroppedMatchHourlySummary {
@@ -4588,6 +4649,55 @@ export async function fetchDroppedMatches(params: {
   if (params.hour !== undefined) query.set('hour', String(params.hour));
   if (params.refresh === false) query.set('refresh', 'false');
   return fetchJson<DroppedMatchListResponse>(`/matches/dropped?${query.toString()}`);
+}
+
+export interface NonrankedDroppedMatchRecord {
+  match_id: string;
+  date: string;
+  hour: number;
+  queue_id: number;
+  queue_name: string;
+  stats_scope: PublicStatsScope;
+  region: string;
+  quality: string;
+  direct_player_count: number;
+  roster_player_count: number;
+  detail_attempts: number;
+  roster_attempts: number;
+  terminal_reason: string;
+  completed_at: string;
+}
+
+export interface NonrankedDroppedMatchResponse {
+  date: string | null;
+  scope: PublicStatsScope | null;
+  hour: number | null;
+  count: number;
+  summary: Array<{
+    date: string;
+    hour: number;
+    stats_scope: PublicStatsScope;
+    queue_id: number;
+    queue_name: string;
+    dropped: number;
+  }>;
+  matches: NonrankedDroppedMatchRecord[];
+}
+
+export async function fetchNonrankedDroppedMatches(params?: {
+  date?: string;
+  scope?: PublicStatsScope;
+  hour?: number;
+  limit?: number;
+  offset?: number;
+}): Promise<NonrankedDroppedMatchResponse> {
+  const query = new URLSearchParams();
+  if (params?.date) query.set('date', params.date);
+  if (params?.scope) query.set('scope', params.scope);
+  if (params?.hour != null) query.set('hour', String(params.hour));
+  query.set('limit', String(params?.limit ?? 500));
+  if (params?.offset != null) query.set('offset', String(params.offset));
+  return fetchJson<NonrankedDroppedMatchResponse>(`/matches/dropped/nonranked?${query.toString()}`);
 }
 
 export async function fetchMatchDetail(matchId: number): Promise<MatchDetailWithBans | null> {
@@ -4669,10 +4779,15 @@ export interface MatchesOverview {
 const matchesOverviewCache = new Map<string, { value: MatchesOverview; expiresAt: number }>();
 const matchesOverviewInFlight = new Map<string, Promise<MatchesOverview>>();
 
-export async function fetchMatchesOverview(params?: { tierMin?: number; tierMax?: number }): Promise<MatchesOverview> {
+export async function fetchMatchesOverview(params?: {
+  tierMin?: number;
+  tierMax?: number;
+  view?: 'activity-v2';
+}): Promise<MatchesOverview> {
   const query = new URLSearchParams();
   if (params?.tierMin != null) query.set('tierMin', String(params.tierMin));
   if (params?.tierMax != null) query.set('tierMax', String(params.tierMax));
+  if (params?.view) query.set('view', params.view);
   const cacheKey = query.toString() || 'all';
   const cached = matchesOverviewCache.get(cacheKey);
   if (cached && cached.expiresAt > Date.now()) return cached.value;

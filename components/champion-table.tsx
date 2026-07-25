@@ -3,7 +3,7 @@
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import ScrambleText from "@/components/ScrambleText";
-import { fetchChampions, type Champion } from "@/lib/api-client";
+import { fetchChampions, type Champion, type PublicStatsScope } from "@/lib/api-client";
 import { STATIC_CHAMPIONS } from "@/lib/static-champions";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
@@ -18,6 +18,17 @@ const ROLES = [
   { value: "Damage", labelKey: "common.roles.damage", icon: "/images/icons/Class_Damage_Icon.avif" },
   { value: "Flank", labelKey: "common.roles.flank", icon: "/images/icons/Class_Flank_Icon.avif" },
   { value: "Support", labelKey: "common.roles.support", icon: "/images/icons/Class_Support_Icon.avif" },
+] as const;
+
+const STAT_SCOPES = [
+  { value: "ranked", labelKey: "stats.scope.ranked" },
+  { value: "casual", labelKey: "stats.scope.casual" },
+  { value: "team_deathmatch", labelKey: "stats.scope.teamDeathmatch" },
+  { value: "arcade", labelKey: "stats.scope.arcade" },
+  { value: "wave_defense", labelKey: "stats.scope.waveDefense" },
+  { value: "experiment", labelKey: "stats.scope.experiment" },
+  { value: "newcomer", labelKey: "stats.scope.newcomer" },
+  { value: "bot", labelKey: "stats.scope.bot" },
 ] as const;
 
 /** Build the guaranteed base list: all 59 champions, no stats. */
@@ -47,6 +58,7 @@ export default function ChampionTable() {
   const [sortBy, setSortBy] = useState<"name" | "winRate" | "banRate" | "popularity">("name");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [searchQuery, setSearchQuery] = useState("");
+  const [statsScope, setStatsScope] = useState<PublicStatsScope>("ranked");
   const deferredFilterRole = useDeferredValue(filterRole);
   const deferredSortBy = useDeferredValue(sortBy);
   const deferredSortDir = useDeferredValue(sortDir);
@@ -68,7 +80,9 @@ export default function ChampionTable() {
 
     async function tryFetchStats() {
       try {
-        const data = await fetchChampions();
+        setDbAvailable(null);
+        setChampions(buildStaticBase());
+        const data = await fetchChampions({ scope: statsScope });
         if (cancelled) return;
 
         if (data.length > 0) {
@@ -116,7 +130,7 @@ export default function ChampionTable() {
       cancelled = true;
       if (revealTimer !== undefined) window.clearTimeout(revealTimer);
     };
-  }, []);
+  }, [statsScope]);
 
   const filtered = useMemo(() => champions
     .filter((c) => {
@@ -162,6 +176,18 @@ export default function ChampionTable() {
         <div className="space-y-3 2xl:col-start-1 2xl:row-start-1">
           {/* Filters */}
           <div className="flex flex-wrap items-center gap-3">
+            <select
+              value={statsScope}
+              onChange={(event) => {
+                const next = event.target.value as PublicStatsScope;
+                setStatsScope(next);
+                if (next !== "ranked" && sortBy === "banRate") setSortBy("winRate");
+              }}
+              className="pc-select"
+              aria-label={t("stats.scope.label")}
+            >
+              {STAT_SCOPES.map((scope) => <option key={scope.value} value={scope.value}>{t(scope.labelKey)}</option>)}
+            </select>
             <div className="relative w-full max-w-xs">
               <input
                 type="text"
@@ -187,7 +213,7 @@ export default function ChampionTable() {
             >
               <option value="name">{t("generated.champions.name")}</option>
               <option value="winRate">{t("generated.champions.winRate")}</option>
-              <option value="banRate">{t("generated.champions.banRate")}</option>
+              {statsScope === "ranked" && <option value="banRate">{t("generated.champions.banRate")}</option>}
               <option value="popularity">{t("generated.champions.popularity")}</option>
             </select>
             <button
@@ -253,13 +279,13 @@ export default function ChampionTable() {
             };
             const quality = c.winRate != null ? getStatQuality(c.winRate, c.pickRate, maxChampionPickRate) : null;
             return (
-              <Link key={c.id} href={`/champions/${championSlug(c.name)}`}>
+              <Link key={c.id} href={`/champions/${championSlug(c.name)}?scope=${statsScope}`}>
                 <div
                   className="group relative flex min-h-20 items-center gap-3.5 rounded-xl border border-pc-border bg-pc-bg-elevated p-3 transition-[border-color,box-shadow,background-color] duration-200 hover:border-pc-accent-mid hover:shadow-[0_0_20px_var(--pc-accent-glow-subtle)]"
                   style={quality ? { borderColor: quality.borderColor } : undefined}
                 >
                   {/* Rank icon — top right */}
-                  {c.rating != null && (
+                  {statsScope === "ranked" && c.rating != null && (
                     <div className="absolute top-2 right-2">
                       <img
                         src={getRankIconPath(Math.round(c.rating), 0)}
@@ -301,10 +327,12 @@ export default function ChampionTable() {
                         <span className="text-pc-text-muted">{t("generated.champions.wr")}</span>
                         {c.winRate != null ? t("generated.champions.value1", { value1: c.winRate }) : "—"}
                       </span>
-                      <span className={`ml-0.5 min-w-0 whitespace-nowrap ${c.banRate != null ? "text-rose-400" : "text-pc-text-muted"}`}>
-                        <span className="text-pc-text-muted">{t("generated.champions.br")}</span>
-                        {c.banRate != null ? t("generated.champions.value1", { value1: c.banRate }) : "—"}
-                      </span>
+                      {statsScope === "ranked" ? (
+                        <span className={`ml-0.5 min-w-0 whitespace-nowrap ${c.banRate != null ? "text-rose-400" : "text-pc-text-muted"}`}>
+                          <span className="text-pc-text-muted">{t("generated.champions.br")}</span>
+                          {c.banRate != null ? t("generated.champions.value1", { value1: c.banRate }) : "—"}
+                        </span>
+                      ) : <span className="ml-0.5 min-w-0 whitespace-nowrap text-pc-text-muted">—</span>}
                       <span className="min-w-0 whitespace-nowrap text-right text-pc-text-muted">
                         <span>{t("generated.champions.plays")}</span>
                         <span className="text-pc-text-secondary">{formatPlays(c.totalPlays)}</span>

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { fetchMatchesOverview, type MatchHourlyStats, type MatchQueueActivity } from "@/lib/api-client";
+import { fetchMatchesOverview, fetchPresenceStats, type MatchHourlyStats, type MatchQueueActivity, type PresenceStats } from "@/lib/api-client";
 import { LoadingPanel } from "@/components/async-state";
 import { useLocalization } from "@/lib/localization-context";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
@@ -85,6 +85,7 @@ export default function PlayerActivityPanel() {
   const { t, formatNumber, formatHourFromUtcBucket } = useLocalization();
   const [hourlyStats, setHourlyStats] = useState<MatchHourlyStats | null>(null);
   const [droppedIdsByHour, setDroppedIdsByHour] = useState<Record<string, string[]>>({});
+  const [presence, setPresence] = useState<PresenceStats | null>(null);
   const [selectedQueue, setSelectedQueue] = useState<"all" | number>("all");
   const [loading, setLoading] = useState(true);
   const displayLoading = useRouteSettledLoading(loading);
@@ -97,10 +98,14 @@ export default function PlayerActivityPanel() {
         // Activity is a global match-count surface. Lobby tier preferences are
         // intentionally not sent because ID-only casual discovery has no
         // player-detail/tier data and must remain comparable with ranked.
-        const overview = await fetchMatchesOverview();
+        const [overview, presenceResult] = await Promise.all([
+          fetchMatchesOverview({ view: "activity-v2" }),
+          fetchPresenceStats().catch(() => null),
+        ]);
         if (!active) return;
         setHourlyStats(overview.hourly);
         setDroppedIdsByHour(overview.droppedIdsByHour);
+        setPresence(presenceResult);
       } finally {
         if (active) setLoading(false);
       }
@@ -119,6 +124,12 @@ export default function PlayerActivityPanel() {
     .filter(region => region.total24h > 0)
     .sort((left, right) => right.total24h - left.total24h);
   const maxHourly = Math.max(...display.hourly.map(entry => entry.total), 1);
+  const weekly = useMemo(() => (hourlyStats?.weekly ?? []).map(day => ({
+    ...day,
+    displayTotal: selectedQueue === "all"
+      ? day.total
+      : Number(day.queues[String(selectedQueue)] ?? 0),
+  })), [hourlyStats?.weekly, selectedQueue]);
   const rankedHourly = hourlyStats?.hourly ?? [];
   const droppedRows = useMemo(() => rankedHourly
     .map((entry: any) => ({ ...entry, droppedIds: droppedIdsByHour[`${entry.date}|${entry.hour}`] ?? [] }))
@@ -132,7 +143,8 @@ export default function PlayerActivityPanel() {
         <p className="mt-1 text-sm text-pc-text-secondary">{t("playerActivity.description")}</p>
       </header>
 
-      <section className="pc-card p-3 sm:p-4">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <section className="pc-card min-w-0 p-3 sm:p-4">
         <div className="mb-3 flex flex-wrap items-center gap-3 border-b border-pc-border/50 pb-3">
           <div className="mr-auto">
             <h2 className="text-sm font-bold text-pc-text">{t("playerActivity.matches24h")}</h2>
@@ -157,12 +169,12 @@ export default function PlayerActivityPanel() {
             {activeRegions.map(region => <span key={region.region} className="inline-flex items-center gap-1.5 text-xs text-pc-text-muted"><span className={`h-2 w-2 rounded-full ${REGION_COLORS[region.region] ?? REGION_COLORS.Unknown}`} />{region.region} · {formatNumber(region.total24h)}</span>)}
             {activeRegions.length === 0 && <span className="text-xs text-pc-text-muted">{t("playerActivity.noMatches")}</span>}
           </div>
-          <div className="grid grid-cols-[4rem_1fr_4rem] gap-2 border-b border-pc-border/30 px-1 pb-1 text-center text-xs uppercase text-pc-text-muted">
+          <div className="grid grid-cols-[3.5rem_1fr_2.5rem] gap-2 border-b border-pc-border/30 px-1 pb-1 text-center text-xs uppercase text-pc-text-muted">
             <span>{t("generated.matches.localTime")}</span><span>{t("playerActivity.region")}</span><span>Σ</span>
           </div>
           {display.hourly.map((entry, index) => {
             const current = index === display.hourly.length - 1;
-            return <div key={`${entry.date}|${entry.hour}`} className={`grid grid-cols-[4rem_1fr_4rem] items-center gap-2 rounded px-1 py-1 ${current ? "bg-pc-accent/8 ring-1 ring-pc-accent/20" : "hover:bg-pc-bg-secondary/50"}`}>
+            return <div key={`${entry.date}|${entry.hour}`} className={`grid grid-cols-[3.5rem_1fr_2.5rem] items-center gap-2 rounded px-1 py-1 ${current ? "bg-pc-accent/8 ring-1 ring-pc-accent/20" : "hover:bg-pc-bg-secondary/50"}`}>
               <span className={`text-right font-mono text-xs ${current ? "font-semibold text-pc-accent" : "text-pc-text-muted"}`}>{formatHourFromUtcBucket(entry.date, entry.hour)}</span>
               <ActivityBar entry={entry} max={maxHourly} />
               <span className={`text-right font-mono text-xs font-semibold ${entry.total > 0 ? "text-pc-text" : "text-pc-text-muted/30"}`}>{entry.total || "-"}</span>
@@ -171,17 +183,16 @@ export default function PlayerActivityPanel() {
         </div>}
       </section>
 
-      {!displayLoading && <section className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
-        {queues.map(queue => <button
-          key={queue.queueId}
-          type="button"
-          onClick={() => setSelectedQueue(queue.queueId)}
-          className={`rounded-xl border p-3 text-left transition-colors ${selectedQueue === queue.queueId ? "border-pc-accent bg-pc-accent/10" : "border-pc-border bg-pc-bg-elevated hover:border-pc-accent-mid"}`}
-        >
-          <div className="truncate text-xs font-semibold text-pc-text">{queue.queueName}</div>
-          <div className="mt-1 flex items-end justify-between gap-2"><span className="font-mono text-lg font-bold text-pc-accent">{formatNumber(queue.total24h)}</span><span className="font-mono text-xs text-pc-text-muted">#{queue.queueId}</span></div>
-        </button>)}
-      </section>}
+      <WeeklyTrend
+        loading={displayLoading}
+        days={weekly}
+        title={t("playerActivity.weeklyTrend")}
+        subtitle={selectedQueue === "all"
+          ? t("playerActivity.allQueues")
+          : queues.find(queue => queue.queueId === selectedQueue)?.queueName ?? ""}
+        formatNumber={formatNumber}
+      />
+      </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <section className="pc-card p-3 sm:p-4">
@@ -196,6 +207,19 @@ export default function PlayerActivityPanel() {
           <section className="pc-card p-3 text-xs leading-relaxed text-pc-text-secondary sm:p-4"><span className="font-medium text-pc-text">{t("generated.matches.discoveryRunsHourlyAtHh30")}</span> {t("playerActivity.discoveryDescription")}</section>
         </aside>
       </div>
+
+      {!displayLoading && presence && <PlayerPresenceBreakdown
+        presence={presence}
+        formatNumber={formatNumber}
+        title={t("playerActivity.players24h")}
+        queueTitle={t("playerActivity.playersByQueue")}
+        platformTitle={t("playerActivity.playersByPlatform")}
+        publicLabel={t("playerActivity.publicPlayers24h")}
+        privateLabel={t("playerActivity.privatePlayers24h")}
+        unresolvedLabel={t("playerActivity.unresolvedPrivate24h")}
+        coverageLabel={t("playerActivity.platformCoverage")}
+        overlapNote={t("playerActivity.queueOverlapNote")}
+      />}
     </div>
   );
 }
@@ -203,4 +227,164 @@ export default function PlayerActivityPanel() {
 function ActivityBar({ entry, max }: { entry: DisplayActivity["hourly"][number]; max: number }) {
   const parts = Object.entries(entry.regions).filter(([, value]) => value > 0);
   return <div className="h-3 min-w-0 overflow-hidden rounded-full bg-pc-bg"><div className="flex h-full overflow-hidden rounded-full" style={{ width: `${(entry.total / max) * 100}%` }}>{parts.map(([region, value]) => <span key={region} className={REGION_COLORS[region] ?? REGION_COLORS.Unknown} style={{ width: `${(value / entry.total) * 100}%` }} />)}</div></div>;
+}
+
+function WeeklyTrend({
+  loading,
+  days,
+  title,
+  subtitle,
+  formatNumber,
+}: {
+  loading: boolean;
+  days: Array<{ date: string; displayTotal: number }>;
+  title: string;
+  subtitle: string;
+  formatNumber: (value: number) => string;
+}) {
+  const max = Math.max(...days.map(day => day.displayTotal), 1);
+  return <section className="pc-card min-w-0 p-3 sm:p-4">
+    <div className="border-b border-pc-border/50 pb-3">
+      <h2 className="text-sm font-bold text-pc-text">{title}</h2>
+      <p className="mt-0.5 text-xs text-pc-text-muted">{subtitle}</p>
+    </div>
+    {loading ? <LoadingPanel compact className="min-h-[30rem]" /> : <div className="flex min-h-[30rem] flex-col">
+      <div className="mt-5 grid flex-1 grid-cols-7 items-end gap-2 border-b border-pc-border/50 px-1 pb-0">
+        {days.map(day => {
+          const height = day.displayTotal > 0 ? Math.max(5, (day.displayTotal / max) * 100) : 1;
+          return <div key={day.date} className="group flex h-full min-w-0 flex-col justify-end text-center">
+            <span className="mb-2 truncate font-mono text-xs font-semibold text-pc-text transition-colors group-hover:text-pc-accent">
+              {formatNumber(day.displayTotal)}
+            </span>
+            <div
+              className="min-h-px rounded-t-md bg-gradient-to-t from-pc-accent/45 to-pc-accent transition-[height,filter] duration-500 ease-out group-hover:brightness-125"
+              style={{ height: `${height}%` }}
+            />
+          </div>;
+        })}
+      </div>
+      <div className="grid grid-cols-7 gap-2 px-1 pt-2">
+        {days.map(day => <div key={day.date} className="truncate text-center text-xs text-pc-text-muted">
+          {new Date(`${day.date}T00:00:00Z`).toLocaleDateString(undefined, { weekday: "short", timeZone: "UTC" })}
+        </div>)}
+      </div>
+      {days.length === 0 && <div className="flex flex-1 items-center justify-center text-sm text-pc-text-muted">—</div>}
+    </div>}
+  </section>;
+}
+
+function PlayerPresenceBreakdown({
+  presence,
+  formatNumber,
+  title,
+  queueTitle,
+  platformTitle,
+  publicLabel,
+  privateLabel,
+  unresolvedLabel,
+  coverageLabel,
+  overlapNote,
+}: {
+  presence: PresenceStats;
+  formatNumber: (value: number) => string;
+  title: string;
+  queueTitle: string;
+  platformTitle: string;
+  publicLabel: string;
+  privateLabel: string;
+  unresolvedLabel: string;
+  coverageLabel: string;
+  overlapNote: string;
+}) {
+  const queues = presence.public_by_queue ?? [];
+  const platforms = presence.public_by_platform ?? [];
+  const coverage = presence.profile_coverage;
+  const maxQueue = Math.max(...queues.map(queue => Number(queue.players)), 1);
+  const maxPlatform = Math.max(...platforms.map(platform => Number(platform.players)), 1);
+  const known = coverage?.platform_known ?? platforms
+    .filter(row => row.platform !== "Unknown")
+    .reduce((sum, row) => sum + Number(row.players), 0);
+  const coverageTotal = coverage?.total ?? presence.public_players;
+  const coveragePercent = coverageTotal > 0 ? Math.round((known / coverageTotal) * 100) : 0;
+
+  return <section className="pc-card overflow-hidden">
+    <div className="flex flex-wrap items-end justify-between gap-3 border-b border-pc-border/50 p-4">
+      <div>
+        <div className="text-xs font-semibold uppercase tracking-wider text-pc-text-muted">{title}</div>
+        <div className="mt-1 font-mono text-3xl font-bold text-pc-accent">{formatNumber(presence.public_players)}</div>
+        <div className="text-xs text-pc-text-muted">{publicLabel}</div>
+      </div>
+      <div className="flex flex-wrap gap-2 text-xs">
+        <span className="rounded-full border border-violet-400/25 bg-violet-400/10 px-2.5 py-1 text-violet-200">
+          {privateLabel}: {formatNumber(presence.private_players)}
+        </span>
+        <span className="rounded-full border border-amber-400/25 bg-amber-400/10 px-2.5 py-1 text-amber-200">
+          {unresolvedLabel}: {formatNumber(presence.unresolved_private_observations)}
+        </span>
+      </div>
+    </div>
+    <div className="grid grid-cols-1 divide-y divide-pc-border/50 lg:grid-cols-2 lg:divide-x lg:divide-y-0">
+      <div className="p-4">
+        <h2 className="text-sm font-bold text-pc-text">{queueTitle}</h2>
+        <p className="mt-1 text-xs text-pc-text-muted">{overlapNote}</p>
+        <div className="mt-4 space-y-3">
+          {queues.map(queue => <MetricBar
+            key={queue.queue_id}
+            label={queue.queue_name}
+            value={Number(queue.players)}
+            max={maxQueue}
+            detail={String(queue.queue_id)}
+            formatNumber={formatNumber}
+          />)}
+          {queues.length === 0 && <span className="text-xs text-pc-text-muted">—</span>}
+        </div>
+      </div>
+      <div className="p-4">
+        <div className="flex items-start justify-between gap-3">
+          <h2 className="text-sm font-bold text-pc-text">{platformTitle}</h2>
+          <span className="font-mono text-xs text-pc-text-muted">{coverageLabel}: {coveragePercent}%</span>
+        </div>
+        <div className="mt-4 space-y-3">
+          {platforms.map(platform => <MetricBar
+            key={platform.platform}
+            label={platform.platform}
+            value={Number(platform.players)}
+            max={maxPlatform}
+            formatNumber={formatNumber}
+            muted={platform.platform === "Unknown"}
+          />)}
+          {platforms.length === 0 && <span className="text-xs text-pc-text-muted">—</span>}
+        </div>
+      </div>
+    </div>
+  </section>;
+}
+
+function MetricBar({
+  label,
+  value,
+  max,
+  detail,
+  formatNumber,
+  muted = false,
+}: {
+  label: string;
+  value: number;
+  max: number;
+  detail?: string;
+  formatNumber: (value: number) => string;
+  muted?: boolean;
+}) {
+  return <div>
+    <div className="mb-1 flex items-center justify-between gap-3 text-xs">
+      <span className="truncate font-medium text-pc-text">{label}</span>
+      <span className="shrink-0 font-mono text-pc-text-secondary">{formatNumber(value)} {detail && <span className="text-pc-text-muted">#{detail}</span>}</span>
+    </div>
+    <div className="h-1.5 overflow-hidden rounded-full bg-pc-bg">
+      <div
+        className={`h-full rounded-full transition-[width] duration-500 ease-out ${muted ? "bg-slate-500" : "bg-pc-accent"}`}
+        style={{ width: `${Math.max(value > 0 ? 2 : 0, (value / max) * 100)}%` }}
+      />
+    </div>
+  </div>;
 }

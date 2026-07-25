@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { fetchPerformanceLeaderboard, fetchPerformanceMetrics, type PerformanceLeaderboardEntry, type PerformanceMetricSummary } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
@@ -18,47 +18,75 @@ const METRICS = [
   { key: "mpm", labelKey: "common.metrics.shieldingPerMinute", color: "text-blue-400", role: "Frontline" },
 ] as const satisfies ReadonlyArray<{ key: "gpm" | "hpm" | "dpm" | "mpm"; labelKey: TranslationKey; color: string; role?: "Support" | "Damage" | "Frontline" }>;
 
+type PerformanceScope = "ranked" | "casual";
+
 export default function PerformanceLeaderboardPage() {
   const { t , formatNumber} = useLocalization();
+  const [scope, setScope] = useState<PerformanceScope>("ranked");
   const [metric, setMetric] = useState<(typeof METRICS)[number]["key"]>("gpm");
-  const [rows, setRows] = useState<PerformanceLeaderboardEntry[]>([]);
-  const [summary, setSummary] = useState<PerformanceMetricSummary | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [result, setResult] = useState<{
+    key: string;
+    rows: PerformanceLeaderboardEntry[];
+    summary: PerformanceMetricSummary | null;
+  }>({ key: "", rows: [], summary: null });
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState<TablePageSize>(25);
   const config = METRICS.find((entry) => entry.key === metric)!;
+  const requestKey = `${scope}:${metric}:${config.role ?? "Global"}`;
+  const loading = result.key !== requestKey;
+  const rows = loading ? [] : result.rows;
+  const summary = loading ? null : result.summary;
 
   useEffect(() => {
     let active = true;
-    setLoading(true);
-    setSummary(null);
     Promise.all([
-      fetchPerformanceLeaderboard({ metric, limit: 100, queueId: 486, role: config.role }),
-      fetchPerformanceMetrics({ metric, queueId: 486, role: config.role }),
+      fetchPerformanceLeaderboard({
+        metric,
+        limit: 100,
+        scope,
+        queueId: scope === "ranked" ? 486 : undefined,
+        role: config.role,
+      }),
+      fetchPerformanceMetrics({
+        metric,
+        scope,
+        queueId: scope === "ranked" ? 486 : undefined,
+        role: config.role,
+      }),
     ])
       .then(([data, metrics]) => {
         if (!active) return;
-        setRows(data);
-        setSummary(metrics[metric] ?? null);
-      })
-      .finally(() => { if (active) setLoading(false); });
+        setResult({
+          key: requestKey,
+          rows: data,
+          summary: metrics[metric] ?? null,
+        });
+      });
     return () => { active = false; };
-  }, [config.role, metric]);
+  }, [config.role, metric, requestKey, scope]);
 
-  const visibleRows = useMemo(
-    () => rows.slice((page - 1) * pageSize, page * pageSize),
-    [page, pageSize, rows],
-  );
+  const visibleRows = rows.slice((page - 1) * pageSize, page * pageSize);
 
-  useEffect(() => {
-    setPage(1);
-  }, [metric]);
+  const scopeLabel = t(scope === "ranked" ? "stats.scope.ranked" : "stats.scope.casual");
 
   return <div className="mx-auto w-full max-w-5xl space-y-5">
     <header>
       <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("menu.performanceLeaderboard")}</h1>
-      <p className="mt-1 text-sm text-pc-text-secondary">{t("generated.players.rankedPerformance")}</p>
+      <p className="mt-1 text-sm text-pc-text-secondary">{t("performance.scopeDescription", { mode: scopeLabel })}</p>
     </header>
+
+    <div className="inline-grid grid-cols-2 rounded-xl border border-pc-border bg-pc-bg-elevated p-1" role="tablist" aria-label={t("performance.modeLabel")}>
+      {(["ranked", "casual"] as const).map((value) => <button
+        key={value}
+        type="button"
+        role="tab"
+        aria-selected={scope === value}
+        onClick={() => { setScope(value); setPage(1); }}
+        className={`min-w-28 rounded-lg px-4 py-2 text-sm font-bold transition-colors ${scope === value ? "bg-pc-accent text-pc-bg" : "text-pc-text-secondary hover:bg-pc-bg-secondary hover:text-pc-text"}`}
+      >
+        {t(value === "ranked" ? "stats.scope.ranked" : "stats.scope.casual")}
+      </button>)}
+    </div>
 
     {summary && summary.sampleSize > 0 && <PerformanceRangeBellCurve
       metricLabel={config.role ? t("performance.roleMetric", { role: t(config.role === "Support" ? "common.roles.support" : config.role === "Damage" ? "common.roles.damage" : "common.roles.frontline"), metric: t(config.labelKey) }) : t(config.labelKey)}
@@ -77,7 +105,7 @@ export default function PerformanceLeaderboardPage() {
     />}
 
     <div className="grid grid-cols-2 gap-2 rounded-xl border border-pc-border bg-pc-bg-elevated p-1 sm:grid-cols-4">
-      {METRICS.map((entry) => <button key={entry.key} type="button" onClick={() => setMetric(entry.key)} className={`rounded-lg px-3 py-2 text-xs font-bold transition-colors sm:text-sm ${metric === entry.key ? "bg-pc-accent text-pc-bg" : "text-pc-text-secondary hover:bg-pc-bg-secondary hover:text-pc-text"}`}>{t(entry.labelKey)}</button>)}
+      {METRICS.map((entry) => <button key={entry.key} type="button" onClick={() => { setMetric(entry.key); setPage(1); }} className={`rounded-lg px-3 py-2 text-xs font-bold transition-colors sm:text-sm ${metric === entry.key ? "bg-pc-accent text-pc-bg" : "text-pc-text-secondary hover:bg-pc-bg-secondary hover:text-pc-text"}`}>{t(entry.labelKey)}</button>)}
     </div>
 
     {loading ? <LoadingPanel /> : <div className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated">
@@ -103,7 +131,7 @@ export default function PerformanceLeaderboardPage() {
           </tr>)}</tbody>
         </table>
       </div>
-      {rows.length === 0 ? <div className="p-10 text-center text-sm text-pc-text-muted">{t("generated.players.noRankedData")}</div> : <TablePagination page={page} pageSize={pageSize} totalItems={rows.length} onPageChange={setPage} onPageSizeChange={(size) => { setPageSize(size); setPage(1); }} />}
+      {rows.length === 0 ? <div className="p-10 text-center text-sm text-pc-text-muted">{t("performance.noData", { mode: scopeLabel })}</div> : <TablePagination page={page} pageSize={pageSize} totalItems={rows.length} onPageChange={setPage} onPageSizeChange={(size) => { setPageSize(size); setPage(1); }} />}
     </div>}
   </div>;
 }
