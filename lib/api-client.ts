@@ -4527,6 +4527,8 @@ export interface MatchHourlyStats {
     total: number;
     ranked: number;
     queues: Record<string, number>;
+    players: number;
+    playerQueues: Record<string, number>;
   }>;
 }
 
@@ -4559,6 +4561,7 @@ export interface PresenceStats {
     players: number;
   }>;
   public_by_platform: Array<{ platform: string; players: number }>;
+  public_by_region: Array<{ region: string; players: number }>;
   profile_coverage: {
     total: number;
     fresh: number;
@@ -4571,7 +4574,7 @@ export interface PresenceStats {
 export async function fetchPresenceStats(): Promise<PresenceStats> {
   // Version the activity view so a deployment cannot briefly receive the
   // previous cached response shape from the shared stats route cache.
-  return fetchJson<PresenceStats>('/stats/presence?view=activity-v2');
+  return fetchJson<PresenceStats>('/stats/presence?view=activity-v3');
 }
 
 export interface PresenceMatchIdsResponse {
@@ -4899,7 +4902,7 @@ const matchesOverviewInFlight = new Map<string, Promise<MatchesOverview>>();
 export async function fetchMatchesOverview(params?: {
   tierMin?: number;
   tierMax?: number;
-  view?: 'activity-v2';
+  view?: 'activity-v2' | 'activity-v3';
 }): Promise<MatchesOverview> {
   const query = new URLSearchParams();
   if (params?.tierMin != null) query.set('tierMin', String(params.tierMin));

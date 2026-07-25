@@ -100,7 +100,7 @@ export default function PlayerActivityPanel() {
         // intentionally not sent because ID-only casual discovery has no
         // player-detail/tier data and must remain comparable with ranked.
         const [overview, presenceResult] = await Promise.all([
-          fetchMatchesOverview({ view: "activity-v2" }),
+          fetchMatchesOverview({ view: "activity-v3" }),
           fetchPresenceStats().catch(() => null),
         ]);
         if (!active) return;
@@ -130,6 +130,9 @@ export default function PlayerActivityPanel() {
     displayTotal: selectedQueue === "all"
       ? day.total
       : Number(day.queues[String(selectedQueue)] ?? 0),
+    displayPlayers: selectedQueue === "all"
+      ? Number(day.players ?? 0)
+      : Number(day.playerQueues?.[String(selectedQueue)] ?? 0),
   })), [hourlyStats?.weekly, selectedQueue]);
   const rankedHourly = hourlyStats?.hourly ?? [];
   const droppedRows = useMemo(() => rankedHourly
@@ -191,6 +194,8 @@ export default function PlayerActivityPanel() {
         subtitle={selectedQueue === "all"
           ? t("playerActivity.allQueues")
           : queues.find(queue => queue.queueId === selectedQueue)?.queueName ?? ""}
+        matchesLabel={t("playerActivity.weeklyMatches")}
+        playersLabel={t("playerActivity.weeklyPlayers")}
         formatNumber={formatNumber}
       />
       </div>
@@ -215,6 +220,7 @@ export default function PlayerActivityPanel() {
         title={t("playerActivity.players24h")}
         queueTitle={t("playerActivity.playersByQueue")}
         platformTitle={t("playerActivity.playersByPlatform")}
+        regionTitle={t("playerActivity.playersByRegion")}
         publicLabel={t("playerActivity.publicPlayers24h")}
         privateLabel={t("playerActivity.privatePlayers24h")}
         unresolvedLabel={t("playerActivity.unresolvedPrivate24h")}
@@ -236,43 +242,96 @@ function WeeklyTrend({
   days,
   title,
   subtitle,
+  matchesLabel,
+  playersLabel,
   formatNumber,
 }: {
   loading: boolean;
-  days: Array<{ date: string; displayTotal: number }>;
+  days: Array<{ date: string; displayTotal: number; displayPlayers: number }>;
   title: string;
   subtitle: string;
+  matchesLabel: string;
+  playersLabel: string;
   formatNumber: (value: number) => string;
 }) {
-  const max = Math.max(...days.map(day => day.displayTotal), 1);
   return <section className="pc-card min-w-0 p-3 sm:p-4">
     <div className="border-b border-pc-border/50 pb-3">
       <h2 className="text-sm font-bold text-pc-text">{title}</h2>
       <p className="mt-0.5 text-xs text-pc-text-muted">{subtitle}</p>
     </div>
     {loading ? <LoadingPanel compact className="min-h-[30rem]" /> : <div className="flex min-h-[30rem] flex-col">
-      <div className="mt-5 grid flex-1 grid-cols-7 items-end gap-2 border-b border-pc-border/50 px-1 pb-0">
-        {days.map(day => {
-          const height = day.displayTotal > 0 ? Math.max(5, (day.displayTotal / max) * 100) : 1;
-          return <div key={day.date} className="group flex h-full min-w-0 flex-col justify-end text-center">
-            <span className="mb-2 truncate font-mono text-xs font-semibold text-pc-text transition-colors group-hover:text-pc-accent">
-              {formatNumber(day.displayTotal)}
-            </span>
-            <div
-              className="min-h-px rounded-t-md bg-gradient-to-t from-pc-accent/45 to-pc-accent transition-[height,filter] duration-500 ease-out group-hover:brightness-125"
-              style={{ height: `${height}%` }}
-            />
-          </div>;
-        })}
-      </div>
-      <div className="grid grid-cols-7 gap-2 px-1 pt-2">
-        {days.map(day => <div key={day.date} className="truncate text-center text-xs text-pc-text-muted">
-          {new Date(`${day.date}T00:00:00Z`).toLocaleDateString(undefined, { weekday: "short", timeZone: "UTC" })}
-        </div>)}
-      </div>
-      {days.length === 0 && <div className="flex flex-1 items-center justify-center text-sm text-pc-text-muted">—</div>}
+      {days.length > 0 ? <>
+        <WeeklySeriesChart
+          days={days}
+          label={matchesLabel}
+          getValue={day => day.displayTotal}
+          formatNumber={formatNumber}
+          tone="matches"
+        />
+        <div className="my-4 border-t border-pc-border/60" />
+        <WeeklySeriesChart
+          days={days}
+          label={playersLabel}
+          getValue={day => day.displayPlayers}
+          formatNumber={formatNumber}
+          tone="players"
+        />
+      </> : <div className="flex flex-1 items-center justify-center text-sm text-pc-text-muted">—</div>}
     </div>}
   </section>;
+}
+
+function WeeklySeriesChart({
+  days,
+  label,
+  getValue,
+  formatNumber,
+  tone,
+}: {
+  days: Array<{ date: string; displayTotal: number; displayPlayers: number }>;
+  label: string;
+  getValue: (day: { date: string; displayTotal: number; displayPlayers: number }) => number;
+  formatNumber: (value: number) => string;
+  tone: "matches" | "players";
+}) {
+  const max = Math.max(...days.map(getValue), 1);
+  const isPlayers = tone === "players";
+
+  return <div className="flex min-h-0 flex-1 flex-col pt-4">
+    <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-pc-text-muted">
+      <span className={`h-2 w-2 rounded-full ${isPlayers ? "bg-violet-400" : "bg-pc-accent"}`} />
+      {label}
+    </div>
+    <div className="mt-3 grid min-h-[8rem] flex-1 grid-cols-7 items-end gap-2 border-b border-pc-border/50 px-1">
+      {days.map(day => {
+        const value = getValue(day);
+        const height = value > 0 ? Math.max(5, (value / max) * 100) : 1;
+        return <div key={day.date} className="group flex h-full min-w-0 flex-col text-center">
+          <div className={`mb-2 truncate font-mono text-xs font-semibold transition-colors ${
+            isPlayers ? "text-violet-300 group-hover:text-violet-200" : "text-pc-text group-hover:text-pc-accent"
+          }`}>
+            {formatNumber(value)}
+          </div>
+          <div className="flex min-h-0 flex-1 items-end justify-center">
+            <div
+              className={`h-full w-4 max-w-[50%] min-h-px rounded-t-md transition-[height,filter] duration-500 ease-out group-hover:brightness-125 ${
+                isPlayers
+                  ? "bg-gradient-to-t from-violet-500/45 to-violet-400"
+                  : "bg-gradient-to-t from-pc-accent/45 to-pc-accent"
+              }`}
+              style={{ height: `${height}%` }}
+            />
+          </div>
+        </div>;
+      })}
+    </div>
+    <div className="grid grid-cols-7 gap-2 px-1 pt-2">
+      {days.map(day => <div key={day.date} className="truncate text-center text-xs text-pc-text-muted">
+        {new Date(`${day.date}T00:00:00Z`).toLocaleDateString(undefined, { weekday: "short", timeZone: "UTC" })}
+      </div>
+      )}
+    </div>
+  </div>;
 }
 
 function PlayerPresenceBreakdown({
@@ -281,6 +340,7 @@ function PlayerPresenceBreakdown({
   title,
   queueTitle,
   platformTitle,
+  regionTitle,
   publicLabel,
   privateLabel,
   unresolvedLabel,
@@ -293,6 +353,7 @@ function PlayerPresenceBreakdown({
   title: string;
   queueTitle: string;
   platformTitle: string;
+  regionTitle: string;
   publicLabel: string;
   privateLabel: string;
   unresolvedLabel: string;
@@ -302,9 +363,12 @@ function PlayerPresenceBreakdown({
 }) {
   const queues = presence.public_by_queue ?? [];
   const platforms = presence.public_by_platform ?? [];
+  const regions = [...(presence.public_by_region ?? [])]
+    .sort((left, right) => Number(right.players) - Number(left.players));
   const coverage = presence.profile_coverage;
   const maxQueue = Math.max(...queues.map(queue => Number(queue.players)), 1);
   const maxPlatform = Math.max(...platforms.map(platform => Number(platform.players)), 1);
+  const maxRegion = Math.max(...regions.map(region => Number(region.players)), 1);
   const known = coverage?.platform_known ?? platforms
     .filter(row => row.platform !== "Unknown")
     .reduce((sum, row) => sum + Number(row.players), 0);
@@ -361,6 +425,20 @@ function PlayerPresenceBreakdown({
             muted={platform.platform === "Unknown"}
           />)}
           {platforms.length === 0 && <span className="text-xs text-pc-text-muted">—</span>}
+        </div>
+        <div className="mt-6 border-t border-pc-border/50 pt-4">
+          <h2 className="text-sm font-bold text-pc-text">{regionTitle}</h2>
+          <div className="mt-4 space-y-3">
+            {regions.map(region => <MetricBar
+              key={region.region}
+              label={region.region}
+              value={Number(region.players)}
+              max={maxRegion}
+              formatNumber={formatNumber}
+              muted={region.region === "Unknown"}
+            />)}
+            {regions.length === 0 && <span className="text-xs text-pc-text-muted">—</span>}
+          </div>
         </div>
       </div>
     </div>
