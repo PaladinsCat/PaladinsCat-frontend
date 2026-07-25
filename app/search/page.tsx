@@ -415,6 +415,9 @@ function SearchPageBody() {
     { target: "player-name", label: t("generated.search.searchHiRezExactPlayerName"), show: canRemotePlayerNameLookup(q) },
   ];
   const visibleRemoteActions = remoteActions.filter((action) => action.show);
+  const remoteLookupPrompt = isLikelyMatchId(q)
+    ? t("generated.search.matchNotFound")
+    : t("generated.search.exactLookupLocalDbIsCheckedFirst");
 
   return (
     <div className="mx-auto w-full max-w-4xl space-y-8 py-2 sm:py-6">
@@ -492,7 +495,7 @@ function SearchPageBody() {
 
       {searched && visibleRemoteActions.length > 0 && (
         <div className="pc-glass mx-auto flex w-fit max-w-full flex-wrap items-center justify-center gap-2 rounded-xl border border-pc-border px-4 py-2.5">
-          <span className="text-xs text-pc-text-muted">{t("generated.search.exactLookupLocalDbIsCheckedFirst")}</span>
+          <span className="text-xs text-pc-text-muted">{remoteLookupPrompt}</span>
           {visibleRemoteActions.map((action) => (
             <AsyncButton
               key={action.target}
