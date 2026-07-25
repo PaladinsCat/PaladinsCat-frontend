@@ -6,7 +6,6 @@ import { PerformanceOverviewCard } from "@/components/PerformanceOverviewCard";
 import { ContentFade, EmptyState } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { fetchBaselines, type BaselineEntry } from "@/lib/api-client";
-import { useLobbyTier } from "@/lib/lobby-tier-context";
 import { useLocalization } from "@/lib/localization-context";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
 import {
@@ -32,22 +31,20 @@ const SORT_OPTIONS = [
 export default function EgpmDetailPage() {
   const { t, formatNumber } = useLocalization();
   const format = (value: number) => formatNumber(value, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  const { definition: lobbyTier, ready } = useLobbyTier();
   const [rows, setRows] = useState<BaselineEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [sort, setSort] = useState<"role" | "average" | "samples">("role");
   const displayLoading = useRouteSettledLoading(loading);
 
   useEffect(() => {
-    if (!ready) return;
     let cancelled = false;
     setLoading(true);
-    fetchBaselines({ queueId: 486, tierMin: lobbyTier.tierMin, tierMax: lobbyTier.tierMax })
+    fetchBaselines({ queueId: 486 })
       .then((next) => { if (!cancelled) setRows(next); })
       .catch(() => { if (!cancelled) setRows([]); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [lobbyTier.tierMax, lobbyTier.tierMin, ready]);
+  }, []);
 
   const ordered = useMemo(() => [...rows].sort((a, b) => {
     if (sort === "average") return b.avgEcpm - a.avgEcpm;
@@ -70,7 +67,7 @@ export default function EgpmDetailPage() {
         </div>
       </header>
 
-      {rows.length === 0 ? <EmptyState title={t("generated.stats.noEcpmBaselines")} description={t("generated.stats.noCompleteRankedObservationsMatchThisLobbyTierScope")} /> : <>
+      {rows.length === 0 ? <EmptyState title={t("generated.stats.noEcpmBaselines")} description={t("ecpm.noDataDescription")} /> : <>
         <section>
           <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
             <div><h2 className="text-sm font-bold text-pc-text">{t("generated.stats.currentPlayerBaseDistribution")}</h2><p className="mt-1 text-xs text-pc-text-muted">{t("generated.stats.whiskersShowP10P90TheBoxShowsP25P75And")}</p></div>

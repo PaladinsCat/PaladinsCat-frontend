@@ -7,6 +7,7 @@ import { useLobbyTier } from "@/lib/lobby-tier-context";
 import { LOBBY_TIER_OPTIONS, type LobbyTierFilter } from "@/lib/lobby-tier";
 import { LoadingIndicator } from "@/components/async-state";
 import { useLocalization } from "@/lib/localization-context";
+import { routeUsesLobbyTierSelector } from "@/lib/lobby-tier-route";
 
 export default function LobbyTierBanner() {
   const { t } = useLocalization();
@@ -14,11 +15,7 @@ export default function LobbyTierBanner() {
   const { isLoggedIn, isLoading: authLoading } = useAuth();
   const { filter, definition, ready, setFilter } = useLobbyTier();
 
-  const statisticsRoute = ["/champions", "/matches", "/stats", "/game"].some(
-    (root) => pathname === root || pathname.startsWith(`${root}/`),
-  );
-
-  if (authLoading || !isLoggedIn || !statisticsRoute) return null;
+  if (authLoading || !isLoggedIn || !routeUsesLobbyTierSelector(pathname)) return null;
 
   const changeScope = (next: LobbyTierFilter) => {
     if (next === filter) return;
