@@ -4574,6 +4574,57 @@ export async function fetchPresenceStats(): Promise<PresenceStats> {
   return fetchJson<PresenceStats>('/stats/presence?view=activity-v2');
 }
 
+export interface PresenceMatchIdsResponse {
+  window_hours: number;
+  observed_at: string;
+  total_matches: number;
+  selected_queue_id: number | null;
+  queues: Array<{
+    queue_id: number;
+    queue_name: string;
+    matches: number;
+  }>;
+  match_ids: Array<{
+    match_id: string;
+    queue_id: number;
+  }>;
+  next_cursor: string | null;
+}
+
+export async function fetchPresenceMatchIds(options: {
+  queueId?: number;
+  cursor?: string;
+  limit?: number;
+} = {}): Promise<PresenceMatchIdsResponse> {
+  const params = new URLSearchParams({ limit: String(options.limit ?? 250) });
+  if (options.queueId != null) params.set('queue_id', String(options.queueId));
+  if (options.cursor) params.set('cursor', options.cursor);
+  return fetchJson<PresenceMatchIdsResponse>(`/stats/presence/match-ids?${params.toString()}`);
+}
+
+export interface PresencePlayersResponse {
+  window_hours: number;
+  observed_at: string;
+  total_players: number;
+  selected_queue_id: number | null;
+  players: Array<{
+    player_id: string;
+    player_name: string;
+  }>;
+  next_cursor: string | null;
+}
+
+export async function fetchPresencePlayers(options: {
+  queueId?: number;
+  cursor?: string;
+  limit?: number;
+} = {}): Promise<PresencePlayersResponse> {
+  const params = new URLSearchParams({ limit: String(options.limit ?? 250) });
+  if (options.queueId != null) params.set('queue_id', String(options.queueId));
+  if (options.cursor) params.set('cursor', options.cursor);
+  return fetchJson<PresencePlayersResponse>(`/stats/presence/players?${params.toString()}`);
+}
+
 export interface PresenceDetailPlayer {
   player_id: string;
   player_name: string;

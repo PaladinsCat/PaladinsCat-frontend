@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { ExternalLink, UsersRound } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { ExternalLink } from "lucide-react";
+import { useEffect, useState } from "react";
 import { LoadingPanel } from "@/components/async-state";
 import {
-  fetchPresenceDetails,
-  type PresenceDetailMatch,
-  type PresenceDetailsResponse,
+  fetchPresenceMatchIds,
+  fetchPresencePlayers,
+  type PresenceMatchIdsResponse,
+  type PresencePlayersResponse,
 } from "@/lib/api-client";
 import { useLocalization } from "@/lib/localization-context";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
@@ -15,35 +16,16 @@ import { useRouteSettledLoading } from "@/lib/route-transition-context";
 const METHODOLOGY_URL =
   "https://github.com/NabiCook/PaladinsCat/blob/main/docs/blog/public-release/how-paladinscat-counts-active-players.md";
 
-function groupPlayersByPlatform(match: PresenceDetailMatch) {
-  const groups = new Map<string, PresenceDetailMatch["players"]>();
-  for (const player of match.players) {
-    const platform = player.platform || "Unknown";
-    const existing = groups.get(platform) ?? [];
-    existing.push(player);
-    groups.set(platform, existing);
-  }
-  return [...groups.entries()].sort(([left], [right]) => left.localeCompare(right));
-}
-
-function statusTone(status: string) {
-  if (["complete", "complete_direct", "recovered"].includes(status)) {
-    return "border-emerald-400/25 bg-emerald-400/10 text-emerald-200";
-  }
-  if (["partial_roster", "roster_only", "limited", "broken"].includes(status)) {
-    return "border-amber-400/25 bg-amber-400/10 text-amber-200";
-  }
-  if (status === "dropped") {
-    return "border-rose-400/25 bg-rose-400/10 text-rose-200";
-  }
-  return "border-pc-border bg-pc-bg-secondary text-pc-text-muted";
-}
+type EvidenceTab = "matches" | "players";
 
 export default function PlayerActivityDetails() {
-  const { t, formatDateTime, formatNumber } = useLocalization();
+  const { t, formatNumber } = useLocalization();
+  const [activeTab, setActiveTab] = useState<EvidenceTab>("matches");
   const [selectedQueue, setSelectedQueue] = useState<"all" | number>("all");
-  const [response, setResponse] = useState<PresenceDetailsResponse | null>(null);
-  const [matches, setMatches] = useState<PresenceDetailMatch[]>([]);
+  const [matchResponse, setMatchResponse] = useState<PresenceMatchIdsResponse | null>(null);
+  const [playerResponse, setPlayerResponse] = useState<PresencePlayersResponse | null>(null);
+  const [matchIds, setMatchIds] = useState<PresenceMatchIdsResponse["match_ids"]>([]);
+  const [players, setPlayers] = useState<PresencePlayersResponse["players"]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -51,16 +33,22 @@ export default function PlayerActivityDetails() {
 
   useEffect(() => {
     let active = true;
+    const queueId = selectedQueue === "all" ? undefined : selectedQueue;
     const load = async () => {
       setLoading(true);
       setError(null);
       try {
-        const next = await fetchPresenceDetails({
-          queueId: selectedQueue === "all" ? undefined : selectedQueue,
-        });
-        if (!active) return;
-        setResponse(next);
-        setMatches(next.matches);
+        if (activeTab === "matches") {
+          const next = await fetchPresenceMatchIds({ queueId });
+          if (!active) return;
+          setMatchResponse(next);
+          setMatchIds(next.match_ids);
+        } else {
+          const next = await fetchPresencePlayers({ queueId });
+          if (!active) return;
+          setPlayerResponse(next);
+          setPlayers(next.players);
+        }
       } catch {
         if (active) setError(t("playerActivity.detailsLoadError"));
       } finally {
@@ -71,25 +59,29 @@ export default function PlayerActivityDetails() {
     return () => {
       active = false;
     };
-  }, [selectedQueue, t]);
-
-  const queues = response?.queues ?? [];
-  const visiblePlayers = useMemo(
-    () => matches.reduce((sum, match) => sum + match.players.length, 0),
-    [matches],
-  );
+  }, [activeTab, selectedQueue, t]);
 
   const loadMore = async () => {
-    if (!response?.next_cursor || loadingMore) return;
+    if (loadingMore) return;
+    const queueId = selectedQueue === "all" ? undefined : selectedQueue;
     setLoadingMore(true);
     setError(null);
     try {
-      const next = await fetchPresenceDetails({
-        queueId: selectedQueue === "all" ? undefined : selectedQueue,
-        cursor: response.next_cursor,
-      });
-      setMatches(current => [...current, ...next.matches]);
-      setResponse(next);
+      if (activeTab === "matches" && matchResponse?.next_cursor) {
+        const next = await fetchPresenceMatchIds({
+          queueId,
+          cursor: matchResponse.next_cursor,
+        });
+        setMatchIds(current => [...current, ...next.match_ids]);
+        setMatchResponse(next);
+      } else if (activeTab === "players" && playerResponse?.next_cursor) {
+        const next = await fetchPresencePlayers({
+          queueId,
+          cursor: playerResponse.next_cursor,
+        });
+        setPlayers(current => [...current, ...next.players]);
+        setPlayerResponse(next);
+      }
     } catch {
       setError(t("playerActivity.detailsLoadError"));
     } finally {
@@ -97,8 +89,16 @@ export default function PlayerActivityDetails() {
     }
   };
 
+  const queues = matchResponse?.queues ?? [];
+  const total = activeTab === "matches"
+    ? matchResponse?.total_matches
+    : playerResponse?.total_players;
+  const nextCursor = activeTab === "matches"
+    ? matchResponse?.next_cursor
+    : playerResponse?.next_cursor;
+
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-5">
+    <div className="mx-auto w-full max-w-5xl space-y-5">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="pc-heading pc-heading-lg text-pc-accent">
@@ -123,14 +123,13 @@ export default function PlayerActivityDetails() {
         <div className="flex flex-wrap items-end gap-4">
           <div className="mr-auto">
             <div className="text-xs font-semibold uppercase tracking-wider text-pc-text-muted">
-              {t("playerActivity.trackedMatches24h")}
+              {activeTab === "matches"
+                ? t("playerActivity.trackedMatches24h")
+                : t("playerActivity.trackedPlayers24h")}
             </div>
             <div className="mt-1 font-mono text-3xl font-bold text-pc-accent">
-              {response ? formatNumber(response.total_matches) : "—"}
+              {total == null ? "—" : formatNumber(total)}
             </div>
-            <p className="mt-1 max-w-2xl text-xs text-pc-text-muted">
-              {t("playerActivity.detailsOverlapNote")}
-            </p>
           </div>
           <label className="flex items-center gap-2 text-xs text-pc-text-secondary">
             {t("playerActivity.queue")}
@@ -152,102 +151,71 @@ export default function PlayerActivityDetails() {
         </div>
       </section>
 
+      <div
+        role="tablist"
+        aria-label={t("playerActivity.evidenceTabs")}
+        className="flex border-b border-pc-border"
+      >
+        {(["matches", "players"] as const).map(tab => (
+          <button
+            key={tab}
+            type="button"
+            role="tab"
+            aria-selected={activeTab === tab}
+            onClick={() => setActiveTab(tab)}
+            className={`border-b-2 px-4 py-2.5 text-sm font-semibold transition-colors ${
+              activeTab === tab
+                ? "border-pc-accent text-pc-accent"
+                : "border-transparent text-pc-text-muted hover:text-pc-text"
+            }`}
+          >
+            {tab === "matches"
+              ? t("playerActivity.matchesTab")
+              : t("playerActivity.playersTab")}
+          </button>
+        ))}
+      </div>
+
       {displayLoading ? (
-        <LoadingPanel className="min-h-[32rem]" />
+        <LoadingPanel className="min-h-[24rem]" />
       ) : (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between text-xs text-pc-text-muted">
-            <span>
-              {formatNumber(matches.length)} {t("playerActivity.matchesLoaded")}
-            </span>
-            <span>
-              {formatNumber(visiblePlayers)} {t("playerActivity.playerRowsLoaded")}
-            </span>
-          </div>
+        <div className="space-y-5">
+          {activeTab === "matches" ? (
+            <ul className="flex flex-wrap gap-x-5 gap-y-2 border-y border-pc-border/60 py-4 font-mono text-sm">
+              {matchIds.map(match => (
+                <li key={`${match.match_id}:${match.queue_id}`}>
+                  <Link
+                    href={`/matches/${match.match_id}`}
+                    className="text-pc-text-secondary transition-colors hover:text-pc-accent"
+                  >
+                    {match.match_id}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="flex flex-wrap gap-x-5 gap-y-2 border-y border-pc-border/60 py-4 text-sm">
+              {players.map(player => (
+                <Link
+                  key={player.player_id}
+                  href={`/players/${player.player_id}`}
+                  className="text-pc-text-secondary transition-colors hover:text-pc-accent"
+                >
+                  {player.player_name}
+                </Link>
+              ))}
+            </div>
+          )}
 
-          {matches.map(match => {
-            const platformGroups = groupPlayersByPlatform(match);
-            return (
-              <article key={`${match.match_id}:${match.queue_id}`} className="pc-card overflow-hidden">
-                <div className="flex flex-wrap items-start gap-3 border-b border-pc-border/50 p-4">
-                  <div className="mr-auto">
-                    <Link
-                      href={`/matches/${match.match_id}`}
-                      className="font-mono text-base font-bold text-pc-text transition-colors hover:text-pc-accent"
-                    >
-                      #{match.match_id}
-                    </Link>
-                    <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-pc-text-muted">
-                      <span>{match.queue_name} · {match.queue_id}</span>
-                      <span>{match.region}</span>
-                      <span>{match.map}</span>
-                      <time dateTime={match.entry_datetime}>
-                        {formatDateTime(match.entry_datetime)}
-                      </time>
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap justify-end gap-2">
-                    <span className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${statusTone(match.status)}`}>
-                      {match.status.replaceAll("_", " ")}
-                    </span>
-                    {match.quality !== "unknown" && (
-                      <span className="rounded-full border border-pc-border bg-pc-bg-secondary px-2.5 py-1 text-xs text-pc-text-muted">
-                        {match.quality}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {platformGroups.length > 0 ? (
-                  <div className="grid grid-cols-1 divide-y divide-pc-border/40 lg:grid-cols-2 lg:divide-x lg:divide-y-0">
-                    {platformGroups.map(([platform, players]) => (
-                      <section key={platform} className="p-4">
-                        <div className="mb-3 flex items-center justify-between gap-3">
-                          <h2 className="text-xs font-bold uppercase tracking-wider text-pc-text-muted">
-                            {platform}
-                          </h2>
-                          <span className="font-mono text-xs text-pc-text-muted">{players.length}</span>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          {players.map((player, index) =>
-                            Number(player.player_id) > 0 ? (
-                              <Link
-                                key={`${player.player_id}:${index}`}
-                                href={`/players/${player.player_id}`}
-                                className="rounded-lg border border-pc-border/60 bg-pc-bg/60 px-2.5 py-1.5 text-xs text-pc-text-secondary transition-colors hover:border-pc-accent/40 hover:text-pc-accent"
-                              >
-                                {player.player_name}
-                              </Link>
-                            ) : (
-                              <span
-                                key={`${player.player_name}:${index}`}
-                                className="rounded-lg border border-pc-border/50 bg-pc-bg/40 px-2.5 py-1.5 text-xs text-pc-text-muted"
-                              >
-                                {player.player_name}
-                              </span>
-                            ),
-                          )}
-                        </div>
-                      </section>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2 p-4 text-xs text-pc-text-muted">
-                    <UsersRound aria-hidden="true" className="h-4 w-4" />
-                    <span>{t("playerActivity.noPlayerEvidence")}</span>
-                    {match.terminal_reason && (
-                      <span className="font-mono text-amber-200">· {match.terminal_reason}</span>
-                    )}
-                  </div>
-                )}
-              </article>
-            );
-          })}
-
-          {matches.length === 0 && !error && (
-            <section className="pc-card p-8 text-center text-sm text-pc-text-muted">
+          {activeTab === "matches" && matchIds.length === 0 && !error && (
+            <p className="py-8 text-center text-sm text-pc-text-muted">
               {t("playerActivity.noMatches")}
-            </section>
+            </p>
+          )}
+          {activeTab === "players" && players.length === 0 && !error && (
+            <p className="py-8 text-center text-sm text-pc-text-muted">
+              {t("playerActivity.noPlayers")}
+            </p>
           )}
 
           {error && (
@@ -256,15 +224,17 @@ export default function PlayerActivityDetails() {
             </div>
           )}
 
-          {response?.next_cursor && (
-            <div className="flex justify-center pt-2">
+          {nextCursor && (
+            <div className="flex justify-center">
               <button
                 type="button"
                 onClick={() => void loadMore()}
                 disabled={loadingMore}
                 className="pc-btn-secondary min-w-32 disabled:cursor-wait disabled:opacity-60"
               >
-                {loadingMore ? t("playerActivity.loadingMoreMatches") : t("playerActivity.loadMoreMatches")}
+                {loadingMore
+                  ? t("playerActivity.loadingMoreEvidence")
+                  : t("playerActivity.loadMoreEvidence")}
               </button>
             </div>
           )}
