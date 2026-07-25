@@ -58,6 +58,8 @@
   "playerActivity.readMethodology": "Read the counting methodology",
   "playerActivity.trackedMatches24h": "Tracked matches · last 24 hours",
   "playerActivity.trackedPlayers24h": "Public players · last 24 hours",
+  "playerActivity.matchEvidenceCoverage": "Player evidence covers {represented} of {total} tracked matches",
+  "playerActivity.playerParticipations": "{total} reconstructed player-match participations",
   "playerActivity.evidenceTabs": "Player activity evidence",
   "playerActivity.matchesTab": "Matches",
   "playerActivity.playersTab": "Players",

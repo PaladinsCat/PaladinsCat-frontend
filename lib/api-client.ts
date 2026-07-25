@@ -4604,6 +4604,7 @@ export async function fetchPresenceMatchIds(options: {
   perPage?: number;
 } = {}): Promise<PresenceMatchIdsResponse> {
   const params = new URLSearchParams({
+    view: 'facts-v2',
     page: String(options.page ?? 1),
     per_page: String(options.perPage ?? 250),
   });
@@ -4617,6 +4618,10 @@ export interface PresencePlayersResponse {
   window_hours: number;
   observed_at: string;
   total_players: number;
+  total_matches?: number;
+  represented_matches?: number;
+  unrepresented_matches?: number;
+  total_participations?: number;
   selected_queue_id: number | null;
   players: Array<{
     player_id: string;
@@ -4638,6 +4643,7 @@ export async function fetchPresencePlayers(options: {
   sort?: PresencePlayerSort;
 } = {}): Promise<PresencePlayersResponse> {
   const params = new URLSearchParams({
+    view: 'facts-v2',
     page: String(options.page ?? 1),
     per_page: String(options.perPage ?? 250),
     sort: options.sort ?? 'matches',

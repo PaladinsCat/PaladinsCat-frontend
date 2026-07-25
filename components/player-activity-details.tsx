@@ -111,6 +111,24 @@ export default function PlayerActivityDetails() {
             <div className="mt-1 font-mono text-3xl font-bold text-pc-accent">
               {total == null ? "—" : formatNumber(total)}
             </div>
+            {activeTab === "players"
+              && playerResponse?.represented_matches != null
+              && playerResponse.total_matches != null
+              && playerResponse.total_participations != null && (
+              <div className="mt-1 space-y-0.5 text-xs text-pc-text-muted">
+                <div>
+                  {t("playerActivity.matchEvidenceCoverage", {
+                    represented: formatNumber(playerResponse.represented_matches),
+                    total: formatNumber(playerResponse.total_matches),
+                  })}
+                </div>
+                <div>
+                  {t("playerActivity.playerParticipations", {
+                    total: formatNumber(playerResponse.total_participations),
+                  })}
+                </div>
+              </div>
+            )}
           </div>
           <label className="flex items-center gap-2 text-xs text-pc-text-secondary">
             {t("playerActivity.queue")}
