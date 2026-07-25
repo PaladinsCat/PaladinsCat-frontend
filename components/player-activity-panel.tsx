@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { fetchMatchesOverview, fetchPresenceStats, type MatchHourlyStats, type MatchQueueActivity, type PresenceStats } from "@/lib/api-client";
 import { LoadingPanel } from "@/components/async-state";
+import CardDetailLink from "@/components/card-detail-link";
 import { useLocalization } from "@/lib/localization-context";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
 
@@ -219,6 +220,7 @@ export default function PlayerActivityPanel() {
         unresolvedLabel={t("playerActivity.unresolvedPrivate24h")}
         coverageLabel={t("playerActivity.platformCoverage")}
         overlapNote={t("playerActivity.queueOverlapNote")}
+        detailsLabel={t("playerActivity.viewDetails")}
       />}
     </div>
   );
@@ -284,6 +286,7 @@ function PlayerPresenceBreakdown({
   unresolvedLabel,
   coverageLabel,
   overlapNote,
+  detailsLabel,
 }: {
   presence: PresenceStats;
   formatNumber: (value: number) => string;
@@ -295,6 +298,7 @@ function PlayerPresenceBreakdown({
   unresolvedLabel: string;
   coverageLabel: string;
   overlapNote: string;
+  detailsLabel: string;
 }) {
   const queues = presence.public_by_queue ?? [];
   const platforms = presence.public_by_platform ?? [];
@@ -308,19 +312,22 @@ function PlayerPresenceBreakdown({
   const coveragePercent = coverageTotal > 0 ? Math.round((known / coverageTotal) * 100) : 0;
 
   return <section className="pc-card overflow-hidden">
-    <div className="flex flex-wrap items-end justify-between gap-3 border-b border-pc-border/50 p-4">
+    <div className="flex flex-wrap items-start justify-between gap-3 border-b border-pc-border/50 p-4">
       <div>
         <div className="text-xs font-semibold uppercase tracking-wider text-pc-text-muted">{title}</div>
         <div className="mt-1 font-mono text-3xl font-bold text-pc-accent">{formatNumber(presence.public_players)}</div>
         <div className="text-xs text-pc-text-muted">{publicLabel}</div>
       </div>
-      <div className="flex flex-wrap gap-2 text-xs">
-        <span className="rounded-full border border-violet-400/25 bg-violet-400/10 px-2.5 py-1 text-violet-200">
-          {privateLabel}: {formatNumber(presence.private_players)}
-        </span>
-        <span className="rounded-full border border-amber-400/25 bg-amber-400/10 px-2.5 py-1 text-amber-200">
-          {unresolvedLabel}: {formatNumber(presence.unresolved_private_observations)}
-        </span>
+      <div className="flex flex-col items-end gap-3">
+        <CardDetailLink href="/stats/activity/details" label={detailsLabel} />
+        <div className="flex flex-wrap justify-end gap-2 text-xs">
+          <span className="rounded-full border border-violet-400/25 bg-violet-400/10 px-2.5 py-1 text-violet-200">
+            {privateLabel}: {formatNumber(presence.private_players)}
+          </span>
+          <span className="rounded-full border border-amber-400/25 bg-amber-400/10 px-2.5 py-1 text-amber-200">
+            {unresolvedLabel}: {formatNumber(presence.unresolved_private_observations)}
+          </span>
+        </div>
       </div>
     </div>
     <div className="grid grid-cols-1 divide-y divide-pc-border/50 lg:grid-cols-2 lg:divide-x lg:divide-y-0">

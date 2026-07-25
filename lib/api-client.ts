@@ -4574,6 +4574,54 @@ export async function fetchPresenceStats(): Promise<PresenceStats> {
   return fetchJson<PresenceStats>('/stats/presence?view=activity-v2');
 }
 
+export interface PresenceDetailPlayer {
+  player_id: string;
+  player_name: string;
+  platform: string;
+  participant_kind: string;
+  source: string;
+}
+
+export interface PresenceDetailMatch {
+  match_id: string;
+  queue_id: number;
+  queue_name: string;
+  stats_scope: PublicStatsScope;
+  entry_datetime: string;
+  region: string;
+  map: string;
+  status: string;
+  quality: string;
+  terminal_reason: string | null;
+  players: PresenceDetailPlayer[];
+}
+
+export interface PresenceDetailsResponse {
+  window_hours: number;
+  observed_at: string;
+  total_matches: number;
+  selected_queue_id: number | null;
+  queues: Array<{
+    queue_id: number;
+    queue_name: string;
+    stats_scope: PublicStatsScope;
+    matches: number;
+  }>;
+  matches: PresenceDetailMatch[];
+  next_cursor: string | null;
+}
+
+export async function fetchPresenceDetails(options: {
+  queueId?: number;
+  cursor?: string;
+  limit?: number;
+} = {}): Promise<PresenceDetailsResponse> {
+  const params = new URLSearchParams({ limit: String(options.limit ?? 25) });
+  if (options.queueId != null) params.set('queue_id', String(options.queueId));
+  if (options.cursor) params.set('cursor', options.cursor);
+  return fetchJson<PresenceDetailsResponse>(`/stats/presence/details?${params.toString()}`);
+}
+
 export interface DroppedMatchHourlySummary {
   hour: number;
   tracked: number;
