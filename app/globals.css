@@ -222,7 +222,7 @@ canvas {
    neutral, text-only statement. The SVG contains lettering only: no caution
    bands, colored stripes, or wallpaper-derived palette. */
 .pc-activity-statement-background {
-  background-color: var(--pc-bg);
+  background-color: #000 !important;
   background-image: url('/images/patterns/paladins-2-transparency-statement.svg');
   background-position: 0 0;
   background-repeat: repeat;
@@ -1017,8 +1017,8 @@ main :where(a, button, input, select, textarea):focus-visible {
 .pc-player-activity-page .pc-card:not(.pc-card--opaque):not(.pc-card-opaque),
 .pc-player-activity-page .pc-surface-light {
   background-color: rgba(24, 25, 31, 0.3) !important;
-  -webkit-backdrop-filter: none !important;
-  backdrop-filter: none !important;
+  -webkit-backdrop-filter: blur(3px) !important;
+  backdrop-filter: blur(3px) !important;
 }
 
 /* Page wrapper: consistent max-width, padding */

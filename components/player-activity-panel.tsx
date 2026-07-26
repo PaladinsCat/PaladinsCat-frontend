@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { fetchMatchesOverview, fetchPresenceStats, type MatchHourlyStats, type MatchQueueActivity, type PresenceStats } from "@/lib/api-client";
 import { LoadingPanel } from "@/components/async-state";
@@ -19,6 +19,8 @@ const REGION_COLORS: Record<string, string> = {
   LATAM: "bg-orange-500",
   Unknown: "bg-slate-500",
 };
+
+const PALADINS_2_STATEMENT = "PaladinsCat does not support Paladins 2 Project";
 
 type DisplayActivity = {
   total24h: number;
@@ -180,22 +182,27 @@ export default function PlayerActivityPanel() {
           {!displayLoading && <span className="font-mono text-sm font-bold text-pc-accent">{formatNumber(display.total24h)}</span>}
         </div>
 
-        {displayLoading ? <LoadingPanel compact className="min-h-[30rem]" /> : <div className="space-y-1">
+        {displayLoading ? <LoadingPanel compact className="min-h-[30rem]" /> : <div>
           <div className="mb-3 flex flex-wrap gap-x-3 gap-y-1">
             {activeRegions.map(region => <span key={region.region} className="inline-flex items-center gap-1.5 text-xs text-pc-text-muted"><span className={`h-2 w-2 rounded-full ${REGION_COLORS[region.region] ?? REGION_COLORS.Unknown}`} />{region.region} · {formatNumber(region.total24h)}</span>)}
             {activeRegions.length === 0 && <span className="text-xs text-pc-text-muted">{t("playerActivity.noMatches")}</span>}
           </div>
+          <ActivityChartStatement className="mb-3 text-center" />
           <div className="grid grid-cols-[3.5rem_1fr_2.5rem] gap-2 border-b border-pc-border/30 px-1 pb-1 text-center text-xs uppercase text-pc-text-muted">
             <span>{t("generated.matches.localTime")}</span><span>{t("playerActivity.region")}</span><span>Σ</span>
           </div>
           {display.hourly.map((entry, index) => {
             const current = index === display.hourly.length - 1;
-            return <div key={`${entry.date}|${entry.hour}`} className={`grid grid-cols-[3.5rem_1fr_2.5rem] items-center gap-2 rounded px-1 py-1 ${current ? "bg-pc-accent/8 ring-1 ring-pc-accent/20" : "hover:bg-pc-bg-secondary/50"}`}>
-              <span className={`text-right font-mono text-xs ${current ? "font-semibold text-pc-accent" : "text-pc-text-muted"}`}>{formatHourFromUtcBucket(entry.date, entry.hour)}</span>
-              <ActivityBar entry={entry} max={maxHourly} formatNumber={formatNumber} />
-              <span className={`text-right font-mono text-xs font-semibold ${entry.total > 0 ? "text-pc-text" : "text-pc-text-muted/30"}`}>{entry.total || "-"}</span>
-            </div>;
+            return <Fragment key={`${entry.date}|${entry.hour}`}>
+              <div className={`grid grid-cols-[3.5rem_1fr_2.5rem] items-center gap-2 rounded px-1 py-1 ${current ? "bg-pc-accent/8 ring-1 ring-pc-accent/20" : "hover:bg-pc-bg-secondary/50"}`}>
+                <span className={`text-right font-mono text-xs ${current ? "font-semibold text-pc-accent" : "text-pc-text-muted"}`}>{formatHourFromUtcBucket(entry.date, entry.hour)}</span>
+                <ActivityBar entry={entry} max={maxHourly} formatNumber={formatNumber} />
+                <span className={`text-right font-mono text-xs font-semibold ${entry.total > 0 ? "text-pc-text" : "text-pc-text-muted/30"}`}>{entry.total || "-"}</span>
+              </div>
+              {index < display.hourly.length - 1 && <ActivityChartStatement className="px-1 py-0.5 text-center" />}
+            </Fragment>;
           })}
+          <ActivityChartStatement className="px-1 py-0.5 text-center" />
         </div>}
       </section>
 
@@ -214,9 +221,17 @@ export default function PlayerActivityPanel() {
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <section className="pc-card p-3 sm:p-4">
-          <h2 className="text-sm font-bold text-pc-text">{t("playerActivity.regions24h")}</h2>
+          <div className="flex min-w-0 items-center justify-between gap-3">
+            <h2 className="shrink-0 text-sm font-bold text-pc-text">{t("playerActivity.regions24h")}</h2>
+            <ActivityChartStatement className="min-w-0 text-right" />
+          </div>
           <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
-            {display.regions.map(region => <div key={region.region} className="pc-surface-light rounded-lg border border-pc-border/50 p-3 text-center"><div className="text-xs uppercase text-pc-text-muted">{region.region}</div><div className="font-mono text-xl font-bold text-pc-accent">{formatNumber(region.total24h)}</div><div className="text-xs text-pc-text-muted">{formatNumber(region.matchesPerHour)}{t("generated.matches.hr")}</div></div>)}
+            {display.regions.map((region, index) => <Fragment key={region.region}>
+              <div className="pc-surface-light rounded-lg border border-pc-border/50 p-3 text-center"><div className="text-xs uppercase text-pc-text-muted">{region.region}</div><div className="font-mono text-xl font-bold text-pc-accent">{formatNumber(region.total24h)}</div><div className="text-xs text-pc-text-muted">{formatNumber(region.matchesPerHour)}{t("generated.matches.hr")}</div></div>
+              {index % 2 === 1 && index < display.regions.length - 1 && <ActivityChartStatement className="col-span-full text-center sm:hidden" />}
+              {index % 3 === 2 && index < display.regions.length - 1 && <ActivityChartStatement className="col-span-full hidden text-center sm:block" />}
+            </Fragment>)}
+            {display.regions.length > 0 && <ActivityChartStatement className="col-span-full text-center" />}
           </div>
         </section>
 
@@ -338,26 +353,30 @@ function WeeklySeriesChart({
       <span className={`h-2 w-2 rounded-full ${isPlayers ? "bg-violet-400" : "bg-pc-accent"}`} />
       {label}
     </div>
-    <div className="mt-3 grid min-h-[8rem] flex-1 grid-cols-7 items-end gap-2 border-b border-pc-border/50 px-1">
+    <div className="mt-3 grid grid-cols-7 gap-2 px-1">
+      {days.map(day => {
+        const value = getValue(day);
+        return <div key={day.date} className={`truncate text-center font-mono text-xs font-semibold ${
+          isPlayers ? "text-violet-300" : "text-pc-text"
+        }`}>
+          {formatNumber(value)}
+        </div>;
+      })}
+    </div>
+    <ActivityChartStatement className="my-2 text-center" />
+    <div className="grid min-h-[6rem] flex-1 grid-cols-7 items-end gap-2 border-b border-pc-border/50 px-1">
       {days.map(day => {
         const value = getValue(day);
         const height = value > 0 ? Math.max(5, (value / max) * 100) : 1;
-        return <div key={day.date} className="group flex h-full min-w-0 flex-col text-center">
-          <div className={`mb-2 truncate font-mono text-xs font-semibold transition-colors ${
-            isPlayers ? "text-violet-300 group-hover:text-violet-200" : "text-pc-text group-hover:text-pc-accent"
-          }`}>
-            {formatNumber(value)}
-          </div>
-          <div className="flex min-h-0 flex-1 items-end justify-center">
-            <div
-              className={`h-full w-4 max-w-[50%] min-h-px rounded-t-md transition-[height,filter] duration-500 ease-out group-hover:brightness-125 ${
-                isPlayers
-                  ? "bg-gradient-to-t from-violet-500/45 to-violet-400"
-                  : "bg-gradient-to-t from-pc-accent/45 to-pc-accent"
-              }`}
-              style={{ height: `${height}%` }}
-            />
-          </div>
+        return <div key={day.date} className="group flex h-full min-w-0 items-end justify-center text-center">
+          <div
+            className={`h-full w-4 max-w-[50%] min-h-px rounded-t-md transition-[height,filter] duration-500 ease-out group-hover:brightness-125 ${
+              isPlayers
+                ? "bg-gradient-to-t from-violet-500/45 to-violet-400"
+                : "bg-gradient-to-t from-pc-accent/45 to-pc-accent"
+            }`}
+            style={{ height: `${height}%` }}
+          />
         </div>;
       })}
     </div>
@@ -429,7 +448,9 @@ function PlayerPresenceBreakdown({
     <div className="flex flex-wrap items-start justify-between gap-3 border-b border-pc-border/50 p-4">
       <div>
         <div className="text-xs font-semibold uppercase tracking-wider text-pc-text-muted">{title}</div>
+        <ActivityChartStatement className="mt-1" />
         <div className="mt-1 font-mono text-3xl font-bold text-pc-accent">{formatNumber(presence.public_players)}</div>
+        <ActivityChartStatement className="mt-1" />
         <div className="text-xs text-pc-text-muted">{publicLabel}</div>
         <div className="mt-2 text-xs text-pc-text-secondary">
           {possibleTotalLabel}:{" "}
@@ -459,15 +480,19 @@ function PlayerPresenceBreakdown({
       <div className="p-4">
         <h2 className="text-sm font-bold text-pc-text">{queueTitle}</h2>
         <p className="mt-1 text-xs text-pc-text-muted">{overlapNote}</p>
-        <div className="mt-4 space-y-3">
-          {queues.map(queue => <MetricBar
-            key={queue.queue_id}
-            label={queue.queue_name}
-            value={Number(queue.players)}
-            max={maxQueue}
-            detail={String(queue.queue_id)}
-            formatNumber={formatNumber}
-          />)}
+        <div className="mt-4 space-y-1">
+          {queues.length > 0 && <ActivityChartStatement className="text-right" />}
+          {queues.map((queue, index) => <Fragment key={queue.queue_id}>
+            <MetricBar
+              label={queue.queue_name}
+              value={Number(queue.players)}
+              max={maxQueue}
+              detail={String(queue.queue_id)}
+              formatNumber={formatNumber}
+            />
+            {index < queues.length - 1 && <ActivityChartStatement className="text-right" />}
+          </Fragment>)}
+          {queues.length > 0 && <ActivityChartStatement className="text-right" />}
           {queues.length === 0 && <span className="text-xs text-pc-text-muted">—</span>}
         </div>
       </div>
@@ -476,34 +501,48 @@ function PlayerPresenceBreakdown({
           <h2 className="text-sm font-bold text-pc-text">{platformTitle}</h2>
           <span className="font-mono text-xs text-pc-text-muted">{coverageLabel}: {coveragePercent}%</span>
         </div>
-        <div className="mt-4 space-y-3">
-          {platforms.map(platform => <MetricBar
-            key={platform.platform}
-            label={platform.platform}
-            value={Number(platform.players)}
-            max={maxPlatform}
-            formatNumber={formatNumber}
-            muted={platform.platform === "Unknown"}
-          />)}
+        <div className="mt-4 space-y-1">
+          {platforms.length > 0 && <ActivityChartStatement className="text-right" />}
+          {platforms.map((platform, index) => <Fragment key={platform.platform}>
+            <MetricBar
+              label={platform.platform}
+              value={Number(platform.players)}
+              max={maxPlatform}
+              formatNumber={formatNumber}
+              muted={platform.platform === "Unknown"}
+            />
+            {index < platforms.length - 1 && <ActivityChartStatement className="text-right" />}
+          </Fragment>)}
+          {platforms.length > 0 && <ActivityChartStatement className="text-right" />}
           {platforms.length === 0 && <span className="text-xs text-pc-text-muted">—</span>}
         </div>
         <div className="mt-6 border-t border-pc-border/50 pt-4">
           <h2 className="text-sm font-bold text-pc-text">{regionTitle}</h2>
-          <div className="mt-4 space-y-3">
-            {regions.map(region => <MetricBar
-              key={region.region}
-              label={region.region}
-              value={Number(region.players)}
-              max={maxRegion}
-              formatNumber={formatNumber}
-              muted={region.region === "Unknown"}
-            />)}
+          <div className="mt-4 space-y-1">
+            {regions.length > 0 && <ActivityChartStatement className="text-right" />}
+            {regions.map((region, index) => <Fragment key={region.region}>
+              <MetricBar
+                label={region.region}
+                value={Number(region.players)}
+                max={maxRegion}
+                formatNumber={formatNumber}
+                muted={region.region === "Unknown"}
+              />
+              {index < regions.length - 1 && <ActivityChartStatement className="text-right" />}
+            </Fragment>)}
+            {regions.length > 0 && <ActivityChartStatement className="text-right" />}
             {regions.length === 0 && <span className="text-xs text-pc-text-muted">—</span>}
           </div>
         </div>
       </div>
     </div>
   </section>;
+}
+
+function ActivityChartStatement({ className = "" }: { className?: string }) {
+  return <p className={`overflow-hidden text-ellipsis whitespace-nowrap text-[11px] font-bold leading-none text-[#ff0000] ${className}`}>
+    {PALADINS_2_STATEMENT}
+  </p>;
 }
 
 function MetricBar({
