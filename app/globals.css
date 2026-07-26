@@ -218,6 +218,17 @@ canvas {
   background-size: cover;
 }
 
+/* Player Activity intentionally replaces character wallpaper art with a
+   neutral, text-only statement. The SVG contains lettering only: no caution
+   bands, colored stripes, or wallpaper-derived palette. */
+.pc-activity-statement-background {
+  background-color: var(--pc-bg);
+  background-image: url('/images/patterns/paladins-2-transparency-statement.svg');
+  background-position: 0 0;
+  background-repeat: repeat;
+  background-size: 1600px 1600px;
+}
+
 /* Keep the fixed image on a simple compositing path while scrolling. Applying
    `filter` directly to a fixed layer can make mobile browsers re-rasterize it
    at a different scale; a separate tint gives the same contrast without it. */
@@ -999,6 +1010,15 @@ main :where(a, button, input, select, textarea):focus-visible {
    background-color: var(--pc-glass-bg-subtle);
    backdrop-filter: var(--pc-glass-blur);
    -webkit-backdrop-filter: var(--pc-glass-blur);
+}
+
+/* Keep activity metrics legible over the route's statement pattern without
+   changing the glass treatment used by cards elsewhere on the site. */
+.pc-player-activity-page .pc-card:not(.pc-card--opaque):not(.pc-card-opaque),
+.pc-player-activity-page .pc-surface-light {
+  background-color: rgba(24, 25, 31, 0.3) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
 }
 
 /* Page wrapper: consistent max-width, padding */

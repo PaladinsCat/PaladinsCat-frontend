@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1600" viewBox="0 0 1600 1600">
+  <defs>
+    <pattern
+      id="project-statement"
+      width="430"
+      height="56.568542"
+      patternUnits="userSpaceOnUse"
+      patternTransform="rotate(-45)"
+    >
+      <text
+        x="0"
+        y="17"
+        fill="#610000"
+        fill-opacity=".7"
+        font-family="Inter, Arial, sans-serif"
+        font-size="12"
+        font-weight="700"
+        textLength="430"
+        lengthAdjust="spacing"
+      >PaladinsCat does not support Paladins 2 project for lack of transparency.&#160;</text>
+    </pattern>
+    <pattern
+      id="trust-statement"
+      width="325"
+      height="56.568542"
+      patternUnits="userSpaceOnUse"
+      patternTransform="rotate(-45)"
+    >
+      <text
+        x="0"
+        y="45.284271"
+        fill="#610000"
+        fill-opacity=".7"
+        font-family="Inter, Arial, sans-serif"
+        font-size="12"
+        font-weight="700"
+        textLength="325"
+        lengthAdjust="spacing"
+      >In statistics, once a trust is lost, it is lost forever.&#160;</text>
+    </pattern>
+  </defs>
+  <rect width="1600" height="1600" fill="url(#project-statement)" />
+  <rect width="1600" height="1600" fill="url(#trust-statement)" />
+</svg>

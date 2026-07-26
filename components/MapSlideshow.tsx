@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { usePathname } from "next/navigation";
 import {
   getWallpaperEnabled,
   resolveCustomWallpapers,
@@ -28,6 +29,7 @@ const INTERVAL_MS = 10_000;
  * then shuffles order client-side after mount.
  */
 export default function MapSlideshow() {
+  const pathname = usePathname();
   const [wallpaperEnabled, setWallpaperEnabled] = useState(true);
   const [customWallpapers, setCustomWallpapers] = useState<ResolvedCustomWallpaper[]>([]);
   // Deterministic on server: always start at index 0
@@ -35,6 +37,7 @@ export default function MapSlideshow() {
   // Null until client mounts and shuffles
   const [order, setOrder] = useState<BuiltInWallpaper[] | null>(null);
   const mounted = useRef(false);
+  const wallpaperActive = wallpaperEnabled && pathname !== "/stats/activity";
 
   useEffect(() => {
     let active = true;
@@ -110,7 +113,7 @@ export default function MapSlideshow() {
 
   useEffect(() => {
     let active = true;
-    if (!wallpaperEnabled) {
+    if (!wallpaperActive) {
       document.documentElement.style.removeProperty(HOME_CAT_ACCENT_PROPERTY);
       document.documentElement.style.removeProperty(HOME_PLATFORM_ACCENT_PROPERTY);
       document.documentElement.style.removeProperty(HOME_THIRD_ACCENT_PROPERTY);
@@ -127,7 +130,7 @@ export default function MapSlideshow() {
       else document.documentElement.style.removeProperty(HOME_THIRD_ACCENT_PROPERTY);
     });
     return () => { active = false; };
-  }, [currentWallpaperAccentSource, wallpaperEnabled]);
+  }, [currentWallpaperAccentSource, wallpaperActive]);
 
   useEffect(() => () => {
     document.documentElement.style.removeProperty(HOME_CAT_ACCENT_PROPERTY);
@@ -135,8 +138,13 @@ export default function MapSlideshow() {
     document.documentElement.style.removeProperty(HOME_THIRD_ACCENT_PROPERTY);
   }, []);
 
-  if (!wallpaperEnabled) {
-    return <div className="pc-wallpaper-viewport -z-10 bg-pc-bg" aria-hidden="true" />;
+  if (!wallpaperActive) {
+    return (
+      <div
+        className={`pc-wallpaper-viewport -z-10 bg-pc-bg${pathname === "/stats/activity" ? " pc-activity-statement-background" : ""}`}
+        aria-hidden="true"
+      />
+    );
   }
 
   if (customWallpapers.length === 1) {
