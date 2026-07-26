@@ -164,10 +164,10 @@ export default function ChampionTable() {
       <div className="grid grid-cols-1 gap-4 2xl:grid-cols-[minmax(32rem,0.95fr)_minmax(0,2fr)] 2xl:items-start">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 2xl:col-start-2 2xl:row-start-1">
           {[
-            { href: "/stats/winrate", title: t("menu.championWinRates"), description: t("menu.winRateDescription"), icon: Trophy, tone: "text-emerald-300" },
-            { href: "/stats/banrate", title: t("menu.championBanRates"), description: t("menu.banRateDescription"), icon: ShieldAlert, tone: "text-rose-300" },
-            { href: "/stats/skins", title: t("menu.skinStats"), description: t("menu.skinStatsDescription"), icon: Palette, tone: "text-violet-300" },
-          ].map(({ href, title, description, icon: Icon, tone }) => <Link key={href} href={href} className="group flex min-h-16 items-center gap-2.5 rounded-xl border border-pc-border bg-pc-bg-elevated px-3 py-2.5 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary"><Icon aria-hidden="true" className={`h-7 w-7 shrink-0 ${tone}`} strokeWidth={1.5} /><div className="min-w-0 flex-1"><h2 className="text-sm font-semibold leading-tight text-pc-text group-hover:text-pc-accent">{title}</h2><p className="mt-0.5 text-[11px] leading-tight text-pc-text-muted">{description}</p></div><span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent">→</span></Link>)}
+            { href: "/stats/winrate", title: t("menu.championWinRates"), icon: Trophy, tone: "text-emerald-300" },
+            { href: "/stats/banrate", title: t("menu.championBanRates"), icon: ShieldAlert, tone: "text-rose-300" },
+            { href: "/stats/skins", title: t("menu.skinStats"), icon: Palette, tone: "text-violet-300" },
+          ].map(({ href, title, icon: Icon, tone }) => <Link key={href} href={href} className="group flex min-h-14 items-center gap-2.5 rounded-xl border border-pc-border bg-pc-bg-elevated px-3 py-2.5 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary"><Icon aria-hidden="true" className={`h-7 w-7 shrink-0 ${tone}`} strokeWidth={1.5} /><h2 className="min-w-0 flex-1 text-sm font-semibold leading-tight text-pc-text group-hover:text-pc-accent">{title}</h2><span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent">→</span></Link>)}
         </div>
 
         <div className="space-y-3 2xl:col-start-1 2xl:row-start-1">

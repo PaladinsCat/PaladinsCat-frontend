@@ -97,7 +97,7 @@ export default function MatchesPage() {
     setPage(1);
   };
 
-  return <div className="space-y-6">
+  return <div className="mx-auto max-w-6xl space-y-6">
     <header className="flex flex-wrap items-start justify-between gap-3">
       <div>
         <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.matches.matches")}</h1>
