@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { AsyncButton, LoadingPanel } from "@/components/async-state";
 import { useLocalization } from "@/lib/localization-context";
+import { isApiErrorKey } from "@/lib/api-client";
 
 export default function LoginPage() {
   return (
@@ -35,7 +36,11 @@ function LoginForm() {
       await login(username.trim(), password);
       router.push(redirectPath);
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("generated.auth.login.page.loginfailed"));
+      if (!(err instanceof Error) || !err.message) {
+        setError(t("generated.auth.login.page.loginfailed"));
+      } else {
+        setError(isApiErrorKey(err.message) ? t(err.message) : err.message);
+      }
     } finally {
       setLoading(false);
     }

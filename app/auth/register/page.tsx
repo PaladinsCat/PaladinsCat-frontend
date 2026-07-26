@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { register } from "@/lib/api-client";
+import { isApiErrorKey, register } from "@/lib/api-client";
 import { AsyncButton } from "@/components/async-state";
 import { useLocalization } from "@/lib/localization-context";
 
@@ -33,7 +33,11 @@ export default function RegisterPage() {
       await register(username.trim(), email.trim(), password);
       router.push("/");
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("generated.auth.register.page.registrationfailed"));
+      if (!(err instanceof Error) || !err.message) {
+        setError(t("generated.auth.register.page.registrationfailed"));
+      } else {
+        setError(isApiErrorKey(err.message) ? t(err.message) : err.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -62,6 +66,8 @@ export default function RegisterPage() {
               type="text"
               required
               minLength={3}
+              maxLength={32}
+              pattern="[A-Za-z0-9_-]+"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="w-full px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text placeholder-pc-text-muted focus:outline-none focus:ring-2 focus:ring-pc-accent/50"

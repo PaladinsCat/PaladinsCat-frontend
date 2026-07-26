@@ -1537,6 +1537,13 @@ export const API_ERROR_KEYS = {
   authenticationRequired: "generated.api.authenticationRequired",
 } as const;
 
+export type ApiErrorKey = (typeof API_ERROR_KEYS)[keyof typeof API_ERROR_KEYS];
+
+export function isApiErrorKey(value: unknown): value is ApiErrorKey {
+  return typeof value === "string"
+    && (Object.values(API_ERROR_KEYS) as string[]).includes(value);
+}
+
 async function fetchJson<T>(path: string, options?: RequestInit & { retries?: number; unwrapData?: boolean; timeoutMs?: number }): Promise<T> {
   const retries = options?.retries ?? 2;
   const unwrapData = options?.unwrapData ?? true;
@@ -1562,6 +1569,12 @@ async function fetchJson<T>(path: string, options?: RequestInit & { retries?: nu
       }
       const errBody = await res.json().catch(() => null);
       const message = typeof errBody?.error === "string" ? errBody.error : errBody?.error?.message;
+      // Expected client errors are intentionally written by the backend for the
+      // person making the request (validation, conflicts, rate limits, and so on).
+      // Preserve them instead of collapsing every response into a generic key.
+      if (res.status < 500 && typeof message === "string" && message.trim()) {
+        throw new Error(message.trim());
+      }
       throw new Error(API_ERROR_KEYS.genericFailure);
     }
     const json = await res.json();
