@@ -23,7 +23,7 @@ export type AdminDashboard = {
   };
   site: {
     totals: { matches: number; rankedMatches: number; players: number; registeredUsers: number; communityBuilds: number; databaseBytes: number };
-    pipeline: { bufferPending: number; bufferProcessing: number; bufferFailed: number; bufferProcessed: number };
+    pipeline: { bufferPending: number; bufferProjectionPending: number; bufferProcessing: number; bufferFailed: number; bufferProcessed: number };
   };
   hirez: {
     keys: AdminApiKey[];
@@ -81,6 +81,7 @@ export async function fetchAdminDashboard(): Promise<AdminDashboard> {
       },
       pipeline: {
         bufferPending: numberValue(pipeline.buffer_pending), bufferProcessing: numberValue(pipeline.buffer_processing),
+        bufferProjectionPending: numberValue(pipeline.buffer_projection_pending),
         bufferFailed: numberValue(pipeline.buffer_failed), bufferProcessed: numberValue(pipeline.buffer_processed),
       },
     },
