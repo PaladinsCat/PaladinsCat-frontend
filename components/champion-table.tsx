@@ -57,12 +57,10 @@ export default function ChampionTable() {
   const [filterRole, setFilterRole] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<"name" | "winRate" | "banRate" | "popularity">("name");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
-  const [searchQuery, setSearchQuery] = useState("");
   const [statsScope, setStatsScope] = useState<PublicStatsScope>("ranked");
   const deferredFilterRole = useDeferredValue(filterRole);
   const deferredSortBy = useDeferredValue(sortBy);
   const deferredSortDir = useDeferredValue(sortDir);
-  const deferredSearchQuery = useDeferredValue(searchQuery);
 
   // Try to fetch DB stats in the background and merge them in
   useEffect(() => {
@@ -134,9 +132,8 @@ export default function ChampionTable() {
 
   const filtered = useMemo(() => champions
     .filter((c) => {
-      const matchesSearch = c.name.toLowerCase().includes(deferredSearchQuery.toLowerCase());
       const matchesRole = !deferredFilterRole || (c.roles && c.roles.includes(deferredFilterRole));
-      return matchesSearch && matchesRole;
+      return matchesRole;
     })
     .sort((a, b) => {
       // Nulls sink to the bottom for stat sorts.
@@ -152,7 +149,7 @@ export default function ChampionTable() {
         case "popularity": return nullsLast(a.totalPlays, b.totalPlays);
         default:           return deferredSortDir === "asc" ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
       }
-    }), [champions, deferredFilterRole, deferredSearchQuery, deferredSortBy, deferredSortDir]);
+    }), [champions, deferredFilterRole, deferredSortBy, deferredSortDir]);
   const maxChampionPickRate = useMemo(
     () => Math.max(1, ...champions.map((champion) => champion.pickRate ?? 0)),
     [champions],
@@ -164,13 +161,13 @@ export default function ChampionTable() {
         <ScrambleText text={t("generated.champions.champions")} speed={30} iterations={15} delayFromCenter={false} />
       </h1>
 
-      <div className="grid grid-cols-1 gap-4 2xl:grid-cols-[minmax(32rem,0.95fr)_minmax(0,2fr)] 2xl:items-stretch">
+      <div className="grid grid-cols-1 gap-4 2xl:grid-cols-[minmax(32rem,0.95fr)_minmax(0,2fr)] 2xl:items-start">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 2xl:col-start-2 2xl:row-start-1">
           {[
             { href: "/stats/winrate", title: t("menu.championWinRates"), description: t("menu.winRateDescription"), icon: Trophy, tone: "text-emerald-300" },
             { href: "/stats/banrate", title: t("menu.championBanRates"), description: t("menu.banRateDescription"), icon: ShieldAlert, tone: "text-rose-300" },
             { href: "/stats/skins", title: t("menu.skinStats"), description: t("menu.skinStatsDescription"), icon: Palette, tone: "text-violet-300" },
-          ].map(({ href, title, description, icon: Icon, tone }) => <Link key={href} href={href} className="group flex min-h-20 items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-4 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary"><Icon aria-hidden="true" className={`h-10 w-10 shrink-0 ${tone}`} strokeWidth={1.5} /><div className="min-w-0 flex-1"><h2 className="text-sm font-semibold text-pc-text group-hover:text-pc-accent">{title}</h2><p className="mt-0.5 text-xs text-pc-text-muted">{description}</p></div><span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent">→</span></Link>)}
+          ].map(({ href, title, description, icon: Icon, tone }) => <Link key={href} href={href} className="group flex min-h-16 items-center gap-2.5 rounded-xl border border-pc-border bg-pc-bg-elevated px-3 py-2.5 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary"><Icon aria-hidden="true" className={`h-7 w-7 shrink-0 ${tone}`} strokeWidth={1.5} /><div className="min-w-0 flex-1"><h2 className="text-sm font-semibold leading-tight text-pc-text group-hover:text-pc-accent">{title}</h2><p className="mt-0.5 text-[11px] leading-tight text-pc-text-muted">{description}</p></div><span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent">→</span></Link>)}
         </div>
 
         <div className="space-y-3 2xl:col-start-1 2xl:row-start-1">
@@ -188,41 +185,25 @@ export default function ChampionTable() {
             >
               {STAT_SCOPES.map((scope) => <option key={scope.value} value={scope.value}>{t(scope.labelKey)}</option>)}
             </select>
-            <div className="relative w-full max-w-xs">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={t("generated.champions.searchChampions")}
-                className="pc-input w-full pr-8"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-pc-text-muted transition-colors hover:text-pc-text"
-                  aria-label={t("generated.champions.clearSearch")}
-                >
-                  ✕
-                </button>
-              )}
+            <div className="flex w-full min-w-[16rem] max-w-sm flex-1 items-center gap-2">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                className="pc-select min-w-0 flex-1"
+              >
+                <option value="name">{t("generated.champions.name")}</option>
+                <option value="winRate">{t("generated.champions.winRate")}</option>
+                {statsScope === "ranked" && <option value="banRate">{t("generated.champions.banRate")}</option>}
+                <option value="popularity">{t("generated.champions.popularity")}</option>
+              </select>
+              <button
+                onClick={() => setSortDir(sortDir === "asc" ? "desc" : "asc")}
+                className="pc-select flex shrink-0 cursor-pointer items-center gap-1"
+                title={sortDir === "asc" ? t("generated.champions.ascending") : t("generated.champions.descending")}
+              >
+                {sortDir === "asc" ? "↑" : "↓"}
+              </button>
             </div>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-              className="pc-select"
-            >
-              <option value="name">{t("generated.champions.name")}</option>
-              <option value="winRate">{t("generated.champions.winRate")}</option>
-              {statsScope === "ranked" && <option value="banRate">{t("generated.champions.banRate")}</option>}
-              <option value="popularity">{t("generated.champions.popularity")}</option>
-            </select>
-            <button
-              onClick={() => setSortDir(sortDir === "asc" ? "desc" : "asc")}
-              className="pc-select flex cursor-pointer items-center gap-1"
-              title={sortDir === "asc" ? t("generated.champions.ascending") : t("generated.champions.descending")}
-            >
-              {sortDir === "asc" ? "↑" : "↓"}
-            </button>
           </div>
 
           {/* Class filter tabs */}
