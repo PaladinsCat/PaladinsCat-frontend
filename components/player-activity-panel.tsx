@@ -540,7 +540,7 @@ function PlayerPresenceBreakdown({
 }
 
 function ActivityChartStatement({ className = "" }: { className?: string }) {
-  return <p className={`overflow-hidden text-ellipsis whitespace-nowrap text-[11px] font-bold leading-none text-[#ff0000] ${className}`}>
+  return <p className={`overflow-hidden text-ellipsis whitespace-nowrap text-xs font-bold leading-none text-[#ff0000] ${className}`}>
     {PALADINS_2_STATEMENT}
   </p>;
 }
