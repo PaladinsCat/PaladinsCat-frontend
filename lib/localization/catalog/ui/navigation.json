@@ -62,6 +62,8 @@
   "playerActivity.trackedPlayers24h": "Public players · last 24 hours",
   "playerActivity.matchEvidenceCoverage": "Player evidence covers {represented} of {total} tracked matches",
   "playerActivity.playerParticipations": "{total} reconstructed player-match participations",
+  "playerActivity.unresolvedPlayerRange": "Unresolved player range",
+  "playerActivity.possiblePlayerTotal": "Possible unique-player total",
   "playerActivity.evidenceTabs": "Player activity evidence",
   "playerActivity.matchesTab": "Matches",
   "playerActivity.playersTab": "Players",

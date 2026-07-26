@@ -4549,6 +4549,11 @@ export interface PresenceStats {
   window_hours: number;
   observed_at: string;
   public_players: number;
+  unresolved_player_slots_lower: number;
+  unresolved_player_slots_upper: number;
+  unresolved_matches: number;
+  public_players_lower_bound: number;
+  public_players_upper_bound: number;
   private_players: number;
   unresolved_private_observations: number;
   public_by_scope: Array<{ stats_scope: PublicStatsScope; players: number }>;
@@ -4574,7 +4579,7 @@ export interface PresenceStats {
 export async function fetchPresenceStats(): Promise<PresenceStats> {
   // Version the activity view so a deployment cannot briefly receive the
   // previous cached response shape from the shared stats route cache.
-  return fetchJson<PresenceStats>('/stats/presence?view=activity-v3');
+  return fetchJson<PresenceStats>('/stats/presence?view=activity-v4');
 }
 
 export interface PresenceMatchIdsResponse {
@@ -4618,6 +4623,11 @@ export interface PresencePlayersResponse {
   window_hours: number;
   observed_at: string;
   total_players: number;
+  unresolved_player_slots_lower: number;
+  unresolved_player_slots_upper: number;
+  unresolved_matches: number;
+  public_players_lower_bound: number;
+  public_players_upper_bound: number;
   total_matches?: number;
   represented_matches?: number;
   unrepresented_matches?: number;
@@ -4643,7 +4653,7 @@ export async function fetchPresencePlayers(options: {
   sort?: PresencePlayerSort;
 } = {}): Promise<PresencePlayersResponse> {
   const params = new URLSearchParams({
-    view: 'facts-v2',
+    view: 'facts-v3',
     page: String(options.page ?? 1),
     per_page: String(options.perPage ?? 250),
     sort: options.sort ?? 'matches',

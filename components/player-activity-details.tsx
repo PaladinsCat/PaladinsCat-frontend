@@ -77,6 +77,13 @@ export default function PlayerActivityDetails() {
     ? matchResponse?.page
     : playerResponse?.page;
   const totalPages = pageInfo?.total_pages ?? 0;
+  const unresolvedUpper = Number(playerResponse?.unresolved_player_slots_upper ?? 0);
+  const playerLowerBound = Number(
+    playerResponse?.public_players_lower_bound ?? playerResponse?.total_players ?? 0,
+  );
+  const playerUpperBound = Number(
+    playerResponse?.public_players_upper_bound ?? playerLowerBound + unresolvedUpper,
+  );
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-5">
@@ -126,6 +133,15 @@ export default function PlayerActivityDetails() {
                   {t("playerActivity.playerParticipations", {
                     total: formatNumber(playerResponse.total_participations),
                   })}
+                </div>
+                <div className="text-rose-200">
+                  {t("playerActivity.unresolvedPlayerRange")}: +0–
+                  {formatNumber(unresolvedUpper)}
+                  {" · "}
+                  {t("playerActivity.possiblePlayerTotal")}:{" "}
+                  {formatNumber(playerLowerBound)}
+                  {"–"}
+                  {formatNumber(playerUpperBound)}
                 </div>
               </div>
             )}

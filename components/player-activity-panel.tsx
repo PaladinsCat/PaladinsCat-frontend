@@ -236,6 +236,8 @@ export default function PlayerActivityPanel() {
         publicLabel={t("playerActivity.publicPlayers24h")}
         privateLabel={t("playerActivity.privatePlayers24h")}
         unresolvedLabel={t("playerActivity.unresolvedPrivate24h")}
+        unresolvedRangeLabel={t("playerActivity.unresolvedPlayerRange")}
+        possibleTotalLabel={t("playerActivity.possiblePlayerTotal")}
         coverageLabel={t("playerActivity.platformCoverage")}
         overlapNote={t("playerActivity.queueOverlapNote")}
         detailsLabel={t("playerActivity.viewDetails")}
@@ -378,6 +380,8 @@ function PlayerPresenceBreakdown({
   publicLabel,
   privateLabel,
   unresolvedLabel,
+  unresolvedRangeLabel,
+  possibleTotalLabel,
   coverageLabel,
   overlapNote,
   detailsLabel,
@@ -391,6 +395,8 @@ function PlayerPresenceBreakdown({
   publicLabel: string;
   privateLabel: string;
   unresolvedLabel: string;
+  unresolvedRangeLabel: string;
+  possibleTotalLabel: string;
   coverageLabel: string;
   overlapNote: string;
   detailsLabel: string;
@@ -408,6 +414,16 @@ function PlayerPresenceBreakdown({
     .reduce((sum, row) => sum + Number(row.players), 0);
   const coverageTotal = coverage?.total ?? presence.public_players;
   const coveragePercent = coverageTotal > 0 ? Math.round((known / coverageTotal) * 100) : 0;
+  // Frontend and backend containers roll independently during deployment.
+  // Preserve the confirmed count while an older cached/API response briefly
+  // lacks the new uncertainty fields.
+  const unresolvedUpper = Number(presence.unresolved_player_slots_upper ?? 0);
+  const playerLowerBound = Number(
+    presence.public_players_lower_bound ?? presence.public_players,
+  );
+  const playerUpperBound = Number(
+    presence.public_players_upper_bound ?? playerLowerBound + unresolvedUpper,
+  );
 
   return <section className="pc-card overflow-hidden">
     <div className="flex flex-wrap items-start justify-between gap-3 border-b border-pc-border/50 p-4">
@@ -415,6 +431,14 @@ function PlayerPresenceBreakdown({
         <div className="text-xs font-semibold uppercase tracking-wider text-pc-text-muted">{title}</div>
         <div className="mt-1 font-mono text-3xl font-bold text-pc-accent">{formatNumber(presence.public_players)}</div>
         <div className="text-xs text-pc-text-muted">{publicLabel}</div>
+        <div className="mt-2 text-xs text-pc-text-secondary">
+          {possibleTotalLabel}:{" "}
+          <span className="font-mono text-pc-text">
+            {formatNumber(playerLowerBound)}
+            {"–"}
+            {formatNumber(playerUpperBound)}
+          </span>
+        </div>
       </div>
       <div className="flex flex-col items-end gap-3">
         <CardDetailLink href="/stats/activity/details" label={detailsLabel} />
@@ -424,6 +448,9 @@ function PlayerPresenceBreakdown({
           </span>
           <span className="rounded-full border border-amber-400/25 bg-amber-400/10 px-2.5 py-1 text-amber-200">
             {unresolvedLabel}: {formatNumber(presence.unresolved_private_observations)}
+          </span>
+          <span className="rounded-full border border-rose-400/25 bg-rose-400/10 px-2.5 py-1 text-rose-200">
+            {unresolvedRangeLabel}: +0–{formatNumber(unresolvedUpper)}
           </span>
         </div>
       </div>
