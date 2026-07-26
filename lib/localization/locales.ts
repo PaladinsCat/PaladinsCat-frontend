@@ -2,7 +2,17 @@
 // until its locale files exist in the community locale repository.
 export const SUPPORTED_LOCALES = [
   { code: "en", nativeName: "English" },
+  { code: "de", nativeName: "Deutsch" },
+  { code: "es-419", nativeName: "Español (Latinoamérica)" },
+  { code: "fr", nativeName: "Français" },
+  { code: "ja", nativeName: "日本語" },
   { code: "ko", nativeName: "한국어" },
+  { code: "pl", nativeName: "Polski" },
+  { code: "pt-BR", nativeName: "Português (Brasil)" },
+  { code: "ru", nativeName: "Русский" },
+  { code: "tr", nativeName: "Türkçe" },
+  { code: "zh-CN", nativeName: "简体中文" },
+  { code: "zh-TW", nativeName: "繁體中文" },
 ] as const;
 
 // Contributor targets are intentionally separate from public locales: they let
@@ -10,14 +20,16 @@ export const SUPPORTED_LOCALES = [
 // visible in the site header.
 export const CONTRIBUTOR_LOCALES = [
   { code: "de", nativeName: "Deutsch" },
-  { code: "es", nativeName: "Español" },
+  { code: "es-419", nativeName: "Español (Latinoamérica)" },
   { code: "fr", nativeName: "Français" },
+  { code: "ja", nativeName: "日本語" },
   { code: "ko", nativeName: "한국어" },
   { code: "pl", nativeName: "Polski" },
   { code: "pt-BR", nativeName: "Português (Brasil)" },
   { code: "ru", nativeName: "Русский" },
   { code: "tr", nativeName: "Türkçe" },
   { code: "zh-CN", nativeName: "简体中文" },
+  { code: "zh-TW", nativeName: "繁體中文" },
 ] as const;
 
 export type Locale = (typeof SUPPORTED_LOCALES)[number]["code"];

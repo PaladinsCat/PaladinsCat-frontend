@@ -2,13 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
-import {
-  SUPPORTED_LOCALES,
-  type Locale,
-  useLocalization,
-} from "@/lib/localization-context";
+import { SUPPORTED_LOCALES, useLocalization } from "@/lib/localization-context";
 import {
   getWallpaperEnabled,
   setWallpaperEnabled,
@@ -18,10 +14,70 @@ import PlayerName from "@/components/player-name";
 import NotificationMenu from "@/components/notification-menu";
 import { BLOG_COPY_KEYS } from "@/lib/blog-copy";
 
+function LanguageMenu() {
+  const { locale, setLocale, t } = useLocalization();
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const activeLocale = SUPPORTED_LOCALES.find(({ code }) => code === locale) ?? SUPPORTED_LOCALES[0];
+
+  useEffect(() => {
+    if (!open) return;
+    const closeOnPointerDown = (event: MouseEvent) => {
+      if (!menuRef.current?.contains(event.target as Node)) setOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("mousedown", closeOnPointerDown);
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      window.removeEventListener("mousedown", closeOnPointerDown);
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [open]);
+
+  return (
+    <div ref={menuRef} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((current) => !current)}
+        className="inline-flex h-9 items-center gap-1.5 rounded-lg px-2 text-sm text-pc-text-secondary transition-colors hover:bg-pc-bg-elevated hover:text-pc-accent"
+        aria-label={t("nav.language")}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+      >
+        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="12" cy="12" r="10" /><path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20M12 2a15.3 15.3 0 0 0 0 20" /></svg>
+        <span className="max-w-20 truncate text-xs font-semibold tracking-wide">{activeLocale.code.toUpperCase()}</span>
+        <svg className={`h-3 w-3 transition-transform ${open ? "rotate-180" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+      </button>
+      {open && (
+        <div className="absolute right-0 top-full z-30 mt-2 w-60 overflow-hidden rounded-xl border border-pc-border bg-pc-bg-secondary p-1 shadow-2xl" role="listbox" aria-label={t("nav.language")}>
+          {SUPPORTED_LOCALES.map(({ code, nativeName }) => (
+            <button
+              key={code}
+              type="button"
+              onClick={() => {
+                setLocale(code);
+                setOpen(false);
+              }}
+              className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition-colors ${locale === code ? "bg-pc-bg-elevated text-pc-accent" : "text-pc-text-secondary hover:bg-pc-bg-elevated hover:text-pc-text"}`}
+              role="option"
+              aria-selected={locale === code}
+            >
+              <span>{nativeName}</span>
+              <span className="text-xs text-pc-text-muted">{code.toUpperCase()}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Nav() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
-  const { locale, setLocale, t } = useLocalization();
+  const { t } = useLocalization();
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
   const [wallpaperEnabled, setWallpaperEnabledState] = useState(true);
 
@@ -196,11 +252,6 @@ export default function Nav() {
     setWallpaperEnabled(next);
   }
 
-  function selectSideMenuLocale(nextLocale: Locale) {
-    setLocale(nextLocale);
-    setSideMenuOpen(false);
-  }
-
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
   const isMenuActive = (href: string) => {
@@ -258,6 +309,7 @@ export default function Nav() {
             {/* Right: grouped menu and account controls */}
             {/* Player search lives on /players page; champion search on /champions page */}
             <div className="flex shrink-0 items-center justify-end gap-4">
+              <LanguageMenu />
               <NotificationMenu />
               <button
                 onClick={() => setSideMenuOpen(true)}
@@ -299,6 +351,7 @@ export default function Nav() {
               {t("generated.common.paladinscat")}</Link>
 
             <div className="flex items-center gap-1">
+              <LanguageMenu />
               <NotificationMenu />
               {/* Mobile hamburger button — opens the complete site menu */}
               <button
@@ -324,24 +377,6 @@ export default function Nav() {
             <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-5">
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                 {menuSections.map((section) => <section key={section.title}><h2 className="mb-2 px-2 text-xs font-bold uppercase tracking-widest text-pc-text-muted">{section.title}</h2><div className="space-y-0.5">{section.links.map((link) => <Link key={link.href} href={link.href} onClick={() => setSideMenuOpen(false)} className={`block rounded-lg px-2.5 py-2 text-sm transition-colors ${isMenuActive(link.href) ? "bg-pc-bg-elevated text-pc-accent" : "text-pc-text-secondary hover:bg-pc-bg-elevated hover:text-pc-text"}`}>{link.label}</Link>)}</div></section>)}
-                <section>
-                  <h2 className="mb-2 px-2 text-xs font-bold uppercase tracking-widest text-pc-text-muted">{t("nav.language")}</h2>
-                  <div className="overflow-hidden rounded-lg border border-pc-border bg-pc-bg p-1" role="listbox" aria-label={t("nav.language")}>
-                    {SUPPORTED_LOCALES.map(({ code, nativeName }) => (
-                      <button
-                        key={code}
-                        type="button"
-                        onClick={() => selectSideMenuLocale(code)}
-                        className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm transition-colors ${locale === code ? "bg-pc-bg-elevated text-pc-accent" : "text-pc-text-secondary hover:bg-pc-bg-elevated hover:text-pc-text"}`}
-                        role="option"
-                        aria-selected={locale === code}
-                      >
-                        <span className="inline-flex items-center gap-2"><svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="12" cy="12" r="10" /><path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20M12 2a15.3 15.3 0 0 0 0 20" /></svg>{nativeName}</span>
-                        <span className="text-xs text-pc-text-muted">{code.split("-")[0].toUpperCase()}</span>
-                      </button>
-                    ))}
-                  </div>
-                </section>
                 <section>
                   <h2 className="mb-2 px-2 text-xs font-bold uppercase tracking-widest text-pc-text-muted">{t("menu.appearance")}</h2>
                   <button
