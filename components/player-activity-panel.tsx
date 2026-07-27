@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { createContext, Fragment, useContext, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { fetchMatchesOverview, fetchPresenceStats, type MatchHourlyStats, type MatchQueueActivity, type PresenceStats } from "@/lib/api-client";
 import { LoadingPanel } from "@/components/async-state";
@@ -21,6 +21,7 @@ const REGION_COLORS: Record<string, string> = {
 };
 
 const PALADINS_2_STATEMENT = "PaladinsCat does not support Paladins 2 Project";
+const ActivityStatementContext = createContext(true);
 
 type DisplayActivity = {
   total24h: number;
@@ -84,7 +85,7 @@ function aggregateQueues(queues: MatchQueueActivity[]): DisplayActivity {
   };
 }
 
-export default function PlayerActivityPanel() {
+export default function PlayerActivityPanel({ showStatements = true }: { showStatements?: boolean }) {
   const { t, formatNumber, formatHourFromUtcBucket } = useLocalization();
   const [hourlyStats, setHourlyStats] = useState<MatchHourlyStats | null>(null);
   const [droppedIdsByHour, setDroppedIdsByHour] = useState<Record<string, string[]>>({});
@@ -143,6 +144,7 @@ export default function PlayerActivityPanel() {
   const showRankedHealth = selectedQueue === 486;
 
   return (
+    <ActivityStatementContext.Provider value={showStatements}>
     <div className="mx-auto w-full max-w-6xl space-y-5">
       <header>
         <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("menu.playerActivity")}</h1>
@@ -182,7 +184,7 @@ export default function PlayerActivityPanel() {
           {!displayLoading && <span className="font-mono text-sm font-bold text-pc-accent">{formatNumber(display.total24h)}</span>}
         </div>
 
-        {displayLoading ? <LoadingPanel compact className="min-h-[30rem]" /> : <div>
+        {displayLoading ? <LoadingPanel compact className="min-h-[30rem]" /> : <div className={showStatements ? "" : "space-y-1"}>
           <div className="mb-3 flex flex-wrap gap-x-3 gap-y-1">
             {activeRegions.map(region => <span key={region.region} className="inline-flex items-center gap-1.5 text-xs text-pc-text-muted"><span className={`h-2 w-2 rounded-full ${REGION_COLORS[region.region] ?? REGION_COLORS.Unknown}`} />{region.region} · {formatNumber(region.total24h)}</span>)}
             {activeRegions.length === 0 && <span className="text-xs text-pc-text-muted">{t("playerActivity.noMatches")}</span>}
@@ -258,6 +260,7 @@ export default function PlayerActivityPanel() {
         detailsLabel={t("playerActivity.viewDetails")}
       />}
     </div>
+    </ActivityStatementContext.Provider>
   );
 }
 
@@ -347,6 +350,44 @@ function WeeklySeriesChart({
 }) {
   const max = Math.max(...days.map(getValue), 1);
   const isPlayers = tone === "players";
+  const showStatements = useContext(ActivityStatementContext);
+
+  if (!showStatements) {
+    return <div className="flex min-h-0 flex-1 flex-col pt-4">
+      <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-pc-text-muted">
+        <span className={`h-2 w-2 rounded-full ${isPlayers ? "bg-violet-400" : "bg-pc-accent"}`} />
+        {label}
+      </div>
+      <div className="mt-3 grid min-h-[8rem] flex-1 grid-cols-7 items-end gap-2 border-b border-pc-border/50 px-1">
+        {days.map(day => {
+          const value = getValue(day);
+          const height = value > 0 ? Math.max(5, (value / max) * 100) : 1;
+          return <div key={day.date} className="group flex h-full min-w-0 flex-col text-center">
+            <div className={`mb-2 truncate font-mono text-xs font-semibold transition-colors ${
+              isPlayers ? "text-violet-300 group-hover:text-violet-200" : "text-pc-text group-hover:text-pc-accent"
+            }`}>
+              {formatNumber(value)}
+            </div>
+            <div className="flex min-h-0 flex-1 items-end justify-center">
+              <div
+                className={`h-full w-4 max-w-[50%] min-h-px rounded-t-md transition-[height,filter] duration-500 ease-out group-hover:brightness-125 ${
+                  isPlayers
+                    ? "bg-gradient-to-t from-violet-500/45 to-violet-400"
+                    : "bg-gradient-to-t from-pc-accent/45 to-pc-accent"
+                }`}
+                style={{ height: `${height}%` }}
+              />
+            </div>
+          </div>;
+        })}
+      </div>
+      <div className="grid grid-cols-7 gap-2 px-1 pt-2">
+        {days.map(day => <div key={day.date} className="truncate text-center text-xs text-pc-text-muted">
+          {new Date(`${day.date}T00:00:00Z`).toLocaleDateString(undefined, { weekday: "short", timeZone: "UTC" })}
+        </div>)}
+      </div>
+    </div>;
+  }
 
   return <div className="flex min-h-0 flex-1 flex-col pt-4">
     <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-pc-text-muted">
@@ -420,6 +461,7 @@ function PlayerPresenceBreakdown({
   overlapNote: string;
   detailsLabel: string;
 }) {
+  const showStatements = useContext(ActivityStatementContext);
   const queues = presence.public_by_queue ?? [];
   const platforms = presence.public_by_platform ?? [];
   const regions = [...(presence.public_by_region ?? [])]
@@ -480,7 +522,7 @@ function PlayerPresenceBreakdown({
       <div className="p-4">
         <h2 className="text-sm font-bold text-pc-text">{queueTitle}</h2>
         <p className="mt-1 text-xs text-pc-text-muted">{overlapNote}</p>
-        <div className="mt-4 space-y-1">
+        <div className={`mt-4 ${showStatements ? "space-y-1" : "space-y-3"}`}>
           {queues.length > 0 && <ActivityChartStatement className="text-right" />}
           {queues.map((queue, index) => <Fragment key={queue.queue_id}>
             <MetricBar
@@ -501,7 +543,7 @@ function PlayerPresenceBreakdown({
           <h2 className="text-sm font-bold text-pc-text">{platformTitle}</h2>
           <span className="font-mono text-xs text-pc-text-muted">{coverageLabel}: {coveragePercent}%</span>
         </div>
-        <div className="mt-4 space-y-1">
+        <div className={`mt-4 ${showStatements ? "space-y-1" : "space-y-3"}`}>
           {platforms.length > 0 && <ActivityChartStatement className="text-right" />}
           {platforms.map((platform, index) => <Fragment key={platform.platform}>
             <MetricBar
@@ -518,7 +560,7 @@ function PlayerPresenceBreakdown({
         </div>
         <div className="mt-6 border-t border-pc-border/50 pt-4">
           <h2 className="text-sm font-bold text-pc-text">{regionTitle}</h2>
-          <div className="mt-4 space-y-1">
+          <div className={`mt-4 ${showStatements ? "space-y-1" : "space-y-3"}`}>
             {regions.length > 0 && <ActivityChartStatement className="text-right" />}
             {regions.map((region, index) => <Fragment key={region.region}>
               <MetricBar
@@ -540,6 +582,8 @@ function PlayerPresenceBreakdown({
 }
 
 function ActivityChartStatement({ className = "" }: { className?: string }) {
+  const showStatements = useContext(ActivityStatementContext);
+  if (!showStatements) return null;
   return <p className={`overflow-hidden text-ellipsis whitespace-nowrap text-xs font-bold leading-none text-[#ff0000] ${className}`}>
     {PALADINS_2_STATEMENT}
   </p>;

@@ -37,7 +37,9 @@ export default function MapSlideshow() {
   // Null until client mounts and shuffles
   const [order, setOrder] = useState<BuiltInWallpaper[] | null>(null);
   const mounted = useRef(false);
-  const wallpaperActive = wallpaperEnabled && pathname !== "/stats/activity";
+  const isPublicActivity = pathname === "/stats/activity";
+  const isCleanActivity = pathname === "/stats/activity/clean";
+  const wallpaperActive = wallpaperEnabled && !isPublicActivity && !isCleanActivity;
 
   useEffect(() => {
     let active = true;
@@ -141,7 +143,7 @@ export default function MapSlideshow() {
   if (!wallpaperActive) {
     return (
       <div
-        className={`pc-wallpaper-viewport -z-10 bg-pc-bg${pathname === "/stats/activity" ? " pc-activity-statement-background" : ""}`}
+        className={`pc-wallpaper-viewport -z-10 bg-pc-bg${isPublicActivity ? " pc-activity-statement-background" : ""}`}
         aria-hidden="true"
       />
     );

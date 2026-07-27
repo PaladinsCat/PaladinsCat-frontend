@@ -80,6 +80,7 @@ export default function Nav() {
   const { t } = useLocalization();
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
   const [wallpaperEnabled, setWallpaperEnabledState] = useState(true);
+  const activityHref = user?.linkedPlayerId ? "/stats/activity/clean" : "/stats/activity";
 
   const headerGroups = [
     {
@@ -106,7 +107,7 @@ export default function Nav() {
       links: [
         { href: "/stats/performance", label: t("menu.performanceOverview") },
         { href: "/stats/ecpm", label: t("menu.effectiveCredits") },
-        { href: "/stats/activity", label: t("menu.playerActivity") },
+        { href: activityHref, label: t("menu.playerActivity") },
         { href: "/stats/tiers", label: t("menu.rankedDistribution") },
       ],
     },
@@ -135,7 +136,7 @@ export default function Nav() {
     { href: "/stats/performance", label: t("menu.performanceOverview") },
     { href: "/stats/metrics", label: t("menu.performanceMetrics") },
     { href: "/stats/ecpm", label: t("menu.effectiveCredits") },
-    { href: "/stats/activity", label: t("menu.playerActivity") },
+    { href: activityHref, label: t("menu.playerActivity") },
     { href: "/stats/tiers", label: t("menu.rankedDistribution") },
     { href: "/stats/regions", label: t("menu.regions") },
     { href: "/stats/platforms", label: t("menu.platforms") },

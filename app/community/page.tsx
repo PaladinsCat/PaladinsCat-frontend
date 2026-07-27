@@ -10,6 +10,8 @@ import { LoadingPanel } from "@/components/async-state";
 import { VerifiedPlayerBadge } from "@/components/player-name";
 import { useLocalization } from "@/lib/localization-context";
 
+const HIDDEN_TWITCH_CHANNEL_LOGINS = new Set(["paladins2ttv"]);
+
 export default function CommunityPage() {
   const { t , formatNumber, formatDateTime} = useLocalization();
   const [posts, setPosts] = useState<Post[]>([]);
@@ -31,7 +33,9 @@ export default function CommunityPage() {
     }
     load();
     fetchTwitchStreams()
-      .then((response) => setStreams(response.streams))
+      .then((response) => setStreams(response.streams.filter(
+        (stream) => !HIDDEN_TWITCH_CHANNEL_LOGINS.has(stream.userLogin.trim().toLowerCase()),
+      )))
       .catch(() => setStreams([]))
       .finally(() => setStreamsLoading(false));
   }, []);
