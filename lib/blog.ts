@@ -20,6 +20,7 @@ export interface BlogPost {
   category: BlogCategory;
   title: string;
   date: string;
+  publishedAt: string;
   author: string;
   excerpt: string;
   content: string;
@@ -101,6 +102,12 @@ function parsePost(sourcePath: string, rawContent: string): BlogPost | null {
     .replace(/<!--[\s\S]*?-->/g, "")
     .replace(/^\s*#\s+.+(?:\r?\n)+/, "")
     .trim();
+  const metadataDate = (data as any).publishedAt ?? (data as any).date;
+  const publishedAt = metadataDate instanceof Date
+    ? metadataDate.toISOString()
+    : typeof metadataDate === "string" && metadataDate.trim()
+      ? metadataDate.trim()
+      : date;
 
   return {
     slug,
@@ -108,6 +115,7 @@ function parsePost(sourcePath: string, rawContent: string): BlogPost | null {
     category: sourcePathToCategory(sourcePath),
     title: (data as any).title ?? title,
     date: (data as any).date ?? date,
+    publishedAt,
     author: (data as any).author ?? "PaladinsCat Team",
     excerpt: (data as any).excerpt ?? excerpt,
     content: renderedContent,
@@ -194,7 +202,10 @@ function dateValue(d: string): number {
 export async function getAllPosts(): Promise<BlogPost[]> {
   try {
     const posts = await fetchPostsFromGitHub();
-    return posts.sort((a, b) => dateValue(b.date) - dateValue(a.date));
+    return posts.sort((a, b) => {
+      const newestFirst = dateValue(b.publishedAt) - dateValue(a.publishedAt);
+      return newestFirst || a.slug.localeCompare(b.slug);
+    });
   } catch (error) {
     // A GitHub outage or rate limit must not turn /blog into a server error.
     console.error("[blog] unable to load GitHub posts", error);
