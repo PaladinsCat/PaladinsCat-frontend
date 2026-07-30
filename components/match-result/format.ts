@@ -9,16 +9,18 @@ import type { MatchResultPlayer, PlayerProfileData, TeamAverages } from "./types
 /* ── Damage math (preserves recovered-match guard) ── */
 
 export function computeDamageStats(p: MatchPlayerDetail) {
-  const totalDamage = p.damage_done_physical + p.damage_done_magical;
+  // The API's total player damage is stored in the historical
+  // `damage_done_physical` field. Magical and in-hand values are optional
+  // breakdown fields already included in that total.
+  const totalDamage = p.damage_done_physical;
   const weaponDamage = p.damage_done_in_hand ?? 0;
 
   // Recovered matches can be reconstructed from player history / recovery
   // endpoints that do not include `Damage_Done_In_Hand`. In that case total
   // damage is still useful for DPM and rankings, but the weapon-vs-ability
-  // split is unknown. Treat missing recovered weapon data as unavailable
-  // instead of showing a misleading 0 weapon / full ability breakdown.
-  const hasWeaponBreakdown =
-    p.source !== "recovered" || weaponDamage > 0 || totalDamage === 0;
+  // split is unknown. No partial recovered field can make that split
+  // trustworthy, so recovered rows report total damage/DPM only.
+  const hasWeaponBreakdown = p.source !== "recovered";
   const nonWeaponDamage = hasWeaponBreakdown
     ? Math.max(totalDamage - weaponDamage, 0)
     : null;

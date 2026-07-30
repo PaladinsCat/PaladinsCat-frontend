@@ -220,16 +220,6 @@ export default function StatTable({ player, fact, wins }: StatTableRowProps) {
                 <div className="text-sm font-medium text-pc-text">{formatPercent(damageStats.weaponShare)}</div>
               </div>
 
-              {/* Damage breakdown: raw physical + magical */}
-              <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-xs text-pc-text-muted">{t("generated.matches.physicalDmg")}</div>
-                <div className="text-sm font-medium text-pc-text">{formatNumber(player.damage_done_physical)}</div>
-              </div>
-              <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
-                <div className="text-xs text-pc-text-muted">{t("generated.matches.magicalDmg")}</div>
-                <div className="text-sm font-medium text-pc-text">{formatNumber(player.damage_done_magical)}</div>
-              </div>
-
               {/* Healing breakdown */}
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
                 <div className="text-xs text-pc-text-muted">{t("generated.matches.healing")}</div>
