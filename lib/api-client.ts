@@ -2649,7 +2649,7 @@ export async function fetchLoadouts(params?: {
   }));
 }
 
-export async function fetchItems(params?: { mode?: string; limit?: number; championId?: number; role?: 'Frontline' | 'Damage' | 'Flank' | 'Support'; summary?: boolean; tierMin?: number; tierMax?: number }): Promise<ItemStat[]> {
+export async function fetchItems(params?: { mode?: 'ranked' | 'casual'; limit?: number; championId?: number; role?: 'Frontline' | 'Damage' | 'Flank' | 'Support'; summary?: boolean; tierMin?: number; tierMax?: number; scope?: string; queueId?: number }): Promise<ItemStat[]> {
   const query = new URLSearchParams();
   if (params?.mode) query.set('mode', params.mode);
   if (params?.limit != null) query.set('limit', String(params.limit));
@@ -2658,6 +2658,8 @@ export async function fetchItems(params?: { mode?: string; limit?: number; champ
   if (params?.summary) query.set('summary', 'true');
   if (params?.tierMin != null) query.set('tierMin', String(params.tierMin));
   if (params?.tierMax != null) query.set('tierMax', String(params.tierMax));
+  if (params?.scope) query.set('scope', params.scope);
+  if (params?.queueId != null) query.set('queueId', String(params.queueId));
   try {
     const raw = await fetchJson<Array<{
       item_id: number; item_name: string;

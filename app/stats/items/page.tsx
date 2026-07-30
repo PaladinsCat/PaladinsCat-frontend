@@ -23,23 +23,39 @@ function categoryColor(category: BuildItemCategory) {
 export default function ItemsPage() {
   const { t, formatNumber, formatPercent } = useLocalization();
   const formatCount = (value: number) => formatNumber(value, { notation: "compact", maximumFractionDigits: 1 });
+  const [mode, setMode] = useState<"ranked" | "casual">("ranked");
+  const [modeReady, setModeReady] = useState(false);
   const [items, setItems] = useState<ItemStat[]>([]);
   const [references, setReferences] = useState<BuildItemReference[]>([]);
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<"uses" | "winRate">("uses");
 
   useEffect(() => {
+    const requestedMode = new URLSearchParams(window.location.search).get("mode");
+    if (requestedMode === "casual") setMode("casual");
+    setModeReady(true);
+    loadBuildReferenceData(0, "").then((reference) => setReferences(reference.items));
+  }, []);
+
+  useEffect(() => {
+    if (!modeReady) return;
     let active = true;
-    Promise.all([
-      fetchItems({ mode: "ranked", limit: 200 }),
-      loadBuildReferenceData(0, ""),
-    ]).then(([itemStats, reference]) => {
+    fetchItems({ mode, limit: 200 }).then((itemStats) => {
       if (!active) return;
       setItems(itemStats);
-      setReferences(reference.items);
+    }).catch(() => {
+      if (active) setItems([]);
     });
     return () => { active = false; };
-  }, []);
+  }, [mode, modeReady]);
+
+  const selectMode = (nextMode: "ranked" | "casual") => {
+    setMode(nextMode);
+    const url = new URL(window.location.href);
+    if (nextMode === "ranked") url.searchParams.delete("mode");
+    else url.searchParams.set("mode", nextMode);
+    window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}`);
+  };
 
   const totalUses = items.reduce((sum, item) => sum + item.totalUsage, 0);
   const referenceById = useMemo(() => new Map(references.map((item) => [item.id, item])), [references]);
@@ -63,6 +79,17 @@ export default function ItemsPage() {
 
       <div className="flex flex-col gap-3 sm:flex-row">
         <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t("generated.stats.searchItems")} className="w-full rounded-lg border border-pc-border bg-pc-bg-elevated px-3 py-2 text-sm text-pc-text outline-none placeholder:text-pc-text-muted focus:border-pc-accent sm:max-w-sm" />
+        <div className="flex gap-2 text-xs" aria-label={t("stats.scope.label")}>
+          {(["ranked", "casual"] as const).map((value) => <button
+            key={value}
+            type="button"
+            aria-pressed={mode === value}
+            onClick={() => selectMode(value)}
+            className={`rounded-lg px-3 py-2 ${mode === value ? "bg-pc-accent text-pc-bg" : "bg-pc-card text-pc-text-secondary hover:text-pc-text"}`}
+          >
+            {t(value === "ranked" ? "stats.scope.ranked" : "stats.scope.casual")}
+          </button>)}
+        </div>
         <div className="flex gap-2 text-xs">
           <button onClick={() => setSort("uses")} className={`rounded-lg px-3 py-2 ${sort === "uses" ? "bg-pc-accent text-pc-bg" : "bg-pc-card text-pc-text-secondary hover:text-pc-text"}`}>{t("generated.stats.mostPicked")}</button>
           <button onClick={() => setSort("winRate")} className={`rounded-lg px-3 py-2 ${sort === "winRate" ? "bg-pc-accent text-pc-bg" : "bg-pc-card text-pc-text-secondary hover:text-pc-text"}`}>{t("generated.stats.winRate")}</button>
@@ -82,7 +109,7 @@ export default function ItemsPage() {
             const quality = getStatQuality(item.winRate, pickRate, maxPickRate);
             const reference = referenceById.get(item.itemId) ?? referenceByName.get(item.itemName.toLowerCase());
             const description = itemDescriptionAtLevel(reference, 1) ?? t("items.overviewFallbackDescription");
-            return <Link key={item.itemId} href={`/game/items/${item.itemId}`} className="pc-surface-light group block rounded-lg border p-3 text-left transition-colors hover:border-pc-accent-mid" style={{ borderColor: quality.borderColor }}>
+            return <Link key={item.itemId} href={`/game/items/${item.itemId}${mode === "casual" ? "?mode=casual" : ""}`} className="pc-surface-light group block rounded-lg border p-3 text-left transition-colors hover:border-pc-accent-mid" style={{ borderColor: quality.borderColor }}>
               <div className="flex items-start gap-3">
                 <img src={reference?.iconUrl ?? itemIcon(item.itemName)} alt={item.itemName} className="h-10 w-12 shrink-0 rounded border border-pc-border bg-pc-bg/50 object-contain" />
                 <div className="min-w-0 flex-1">
