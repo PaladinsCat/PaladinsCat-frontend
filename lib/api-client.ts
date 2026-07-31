@@ -1573,9 +1573,9 @@ async function fetchJson<T>(path: string, options?: RequestInit & { retries?: nu
       // person making the request (validation, conflicts, rate limits, and so on).
       // Preserve them instead of collapsing every response into a generic key.
       if (res.status < 500 && typeof message === "string" && message.trim()) {
-        throw new Error(message.trim());
+        throw new ApiRequestError(message.trim(), res.status);
       }
-      throw new Error(API_ERROR_KEYS.genericFailure);
+      throw new ApiRequestError(API_ERROR_KEYS.genericFailure, res.status);
     }
     const json = await res.json();
     // Handle normalized list envelopes when callers only need the rows.
@@ -1677,6 +1677,17 @@ function mapNotification(raw: {
     message: raw.message,
     readAt: raw.read_at,
   };
+}
+
+class ApiRequestError extends Error {
+  constructor(message: string, readonly status: number) {
+    super(message);
+    this.name = "ApiRequestError";
+  }
+}
+
+export function isAuthenticationRejection(error: unknown): boolean {
+  return error instanceof ApiRequestError && (error.status === 401 || error.status === 403);
 }
 
 // ── Notifications ──

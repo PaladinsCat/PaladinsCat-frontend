@@ -13,6 +13,14 @@ import {
 } from "@/lib/api-client";
 import { useLocalization } from "@/lib/localization-context";
 
+const NOTIFICATION_SYNC_KEY = "pc_notification_sync";
+const NOTIFICATION_SYNC_EVENT = "pc-notification-sync";
+
+function publishNotificationSync() {
+  window.dispatchEvent(new Event(NOTIFICATION_SYNC_EVENT));
+  localStorage.setItem(NOTIFICATION_SYNC_KEY, String(Date.now()));
+}
+
 function notificationDot(importance: number) {
   if (importance >= 75) return "bg-amber-400";
   if (importance >= 25) return "bg-pc-accent";
@@ -32,13 +40,15 @@ export default function NotificationMenu() {
   const loadNotifications = useCallback(async () => {
     if (authLoading) return;
     const requestId = ++requestSequenceRef.current;
-    const request = signedIn
-      ? fetchAccountSiteNotifications({ limit: 8 })
-      : fetchNotifications({ limit: 8 });
     try {
-      const rows = await request.catch(() => fetchNotifications({ limit: 8 }));
+      const rows = signedIn
+        ? await fetchAccountSiteNotifications({ limit: 8 })
+        : await fetchNotifications({ limit: 8 });
       if (requestId !== requestSequenceRef.current) return;
       setNotifications(rows);
+    } catch {
+      // Preserve the last authenticated read state on transient failures. A
+      // public-feed fallback has no per-account read markers.
     } finally {
       if (requestId === requestSequenceRef.current) setLoading(false);
     }
@@ -52,6 +62,26 @@ export default function NotificationMenu() {
     return () => {
       window.clearInterval(refreshTimer);
       requestSequenceRef.current += 1;
+    };
+  }, [loadNotifications]);
+
+  useEffect(() => {
+    const sync = () => void loadNotifications();
+    const syncStorage = (event: StorageEvent) => {
+      if (event.key === NOTIFICATION_SYNC_KEY) sync();
+    };
+    const syncVisible = () => {
+      if (document.visibilityState === "visible") sync();
+    };
+    window.addEventListener(NOTIFICATION_SYNC_EVENT, sync);
+    window.addEventListener("storage", syncStorage);
+    window.addEventListener("focus", sync);
+    document.addEventListener("visibilitychange", syncVisible);
+    return () => {
+      window.removeEventListener(NOTIFICATION_SYNC_EVENT, sync);
+      window.removeEventListener("storage", syncStorage);
+      window.removeEventListener("focus", sync);
+      document.removeEventListener("visibilitychange", syncVisible);
     };
   }, [loadNotifications]);
 
@@ -81,7 +111,7 @@ export default function NotificationMenu() {
     setNotifications((current) => current.map((entry) => (
       entry.id === notification.id ? { ...entry, readAt } : entry
     )));
-    void markSiteNotificationRead(notification.id).catch(() => {
+    void markSiteNotificationRead(notification.id).then(publishNotificationSync).catch(() => {
       setNotifications((current) => current.map((entry) => (
         entry.id === notification.id ? { ...entry, readAt: null } : entry
       )));
@@ -93,7 +123,7 @@ export default function NotificationMenu() {
     const previous = notifications;
     const readAt = new Date().toISOString();
     setNotifications((current) => current.map((notification) => ({ ...notification, readAt })));
-    void markAllSiteNotificationsRead().catch(() => setNotifications(previous));
+    void markAllSiteNotificationsRead().then(publishNotificationSync).catch(() => setNotifications(previous));
   };
 
   const buttonLabel = unreadCount > 0

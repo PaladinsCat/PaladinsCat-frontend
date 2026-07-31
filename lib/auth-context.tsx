@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
-import { clearAuth, getAuthToken, getMe, login, logout, type AuthUser } from "./api-client";
+import { clearAuth, getAuthToken, getAuthUser, getMe, isAuthenticationRejection, login, logout, type AuthUser } from "./api-client";
 
 interface AuthContextValue {
   user: AuthUser | null;
@@ -23,7 +23,7 @@ export function useAuth(): AuthContextValue {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(() => getAuthUser());
   const [isLoading, setIsLoading] = useState(true);
 
   const refresh = useCallback(async () => {
@@ -37,19 +37,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const me = await getMe();
       setUser(me);
-    } catch {
+    } catch (error) {
       // A cached user without a confirmed token is only a display ghost. Clear
       // it so protected UI does not stay unlocked after the server rejects the
       // session or the browser loses the token.
-      clearAuth();
-      setUser(null);
+      if (isAuthenticationRejection(error)) {
+        clearAuth();
+        setUser(null);
+      }
     } finally {
       setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    refresh();
+    void refresh();
+    const syncSession = () => void refresh();
+    const syncVisibleSession = () => {
+      if (document.visibilityState === "visible") void refresh();
+    };
+    window.addEventListener("storage", syncSession);
+    window.addEventListener("focus", syncSession);
+    document.addEventListener("visibilitychange", syncVisibleSession);
+    return () => {
+      window.removeEventListener("storage", syncSession);
+      window.removeEventListener("focus", syncSession);
+      document.removeEventListener("visibilitychange", syncVisibleSession);
+    };
   }, [refresh]);
 
   const handleLogin = useCallback(async (username: string, password: string) => {
