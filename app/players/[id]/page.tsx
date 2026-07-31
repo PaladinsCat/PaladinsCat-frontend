@@ -120,6 +120,22 @@ interface RefreshFeedback {
   message: string;
 }
 
+interface PlayerRefreshActionResponse {
+  error?: {
+    message?: string;
+    details?: {
+      retry_after_seconds?: number;
+    };
+  };
+  historyRefresh?: { error?: string };
+  championStatsRefresh?: { error?: string };
+  refreshQuota?: {
+    remaining?: number;
+    reset_at?: string | null;
+    remaining_seconds?: number;
+  };
+}
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api";
 
 function trendArrow(trend: number): string {
@@ -366,9 +382,18 @@ export default function PlayerProfilePage() {
     setRefreshFeedback(null);
     try {
       const res = await fetch(`${API_BASE}/players/${id}/refresh`, { method: 'POST' });
-      const data = await res.json();
+      let data: PlayerRefreshActionResponse;
+      const responseBody = await res.text();
+      try {
+        data = responseBody ? JSON.parse(responseBody) : {};
+      } catch {
+        // Gateways and reverse proxies may replace an upstream 5xx JSON body
+        // with an HTML/text error page. Never surface JSON.parse internals (or
+        // markup) to the player; report the action failure consistently.
+        throw new Error(t(PLAYER_PROFILE_ERROR_KEYS.failedToRefreshProfile));
+      }
       if (res.status === 429) {
-        const details = data.error.details || {};
+        const details = data.error?.details || {};
         const retryAfter = Number(
           details.retry_after_seconds
           ?? res.headers.get('Retry-After')
