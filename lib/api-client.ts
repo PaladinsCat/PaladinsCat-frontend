@@ -2323,7 +2323,11 @@ export async function fetchPlayerMatches(id: string, params?: { limit?: string; 
     entry_datetime: string;
   }>>(`/players/${id}/matches${query.toString() ? `?${query.toString()}` : ''}`);
 
-  return raw.map((m) => ({
+  // Transitional storage can expose the same match through more than one
+  // authoritative table. Preserve the newest API ordering and render it once.
+  const uniqueMatches = [...new Map(raw.map((match) => [String(match.match_id), match])).values()];
+
+  return uniqueMatches.map((m) => ({
     matchId: m.match_id,
     championName: m.champion_name,
     isWinner: ['winner', 'win'].includes(String(m.win_status ?? '').toLowerCase()),
