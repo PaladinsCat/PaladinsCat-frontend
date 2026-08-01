@@ -90,6 +90,7 @@ export default function PlayerActivityPanel({ showStatements = true }: { showSta
   const [hourlyStats, setHourlyStats] = useState<MatchHourlyStats | null>(null);
   const [droppedIdsByHour, setDroppedIdsByHour] = useState<Record<string, string[]>>({});
   const [presence, setPresence] = useState<PresenceStats | null>(null);
+  const [activityUnavailable, setActivityUnavailable] = useState(false);
   const [selectedQueue, setSelectedQueue] = useState<"all" | number>("all");
   const [loading, setLoading] = useState(true);
   const displayLoading = useRouteSettledLoading(loading);
@@ -107,9 +108,19 @@ export default function PlayerActivityPanel({ showStatements = true }: { showSta
           fetchPresenceStats().catch(() => null),
         ]);
         if (!active) return;
+        if (!overview.hourly) {
+          setActivityUnavailable(true);
+          return;
+        }
         setHourlyStats(overview.hourly);
         setDroppedIdsByHour(overview.droppedIdsByHour);
         setPresence(presenceResult);
+        setActivityUnavailable(false);
+      } catch {
+        // Keep the last confirmed activity visible during a transient API
+        // outage. On the first load, make the failure explicit instead of
+        // rendering an empty chart as if no matches were played.
+        if (active) setActivityUnavailable(true);
       } finally {
         if (active) setLoading(false);
       }
@@ -184,10 +195,11 @@ export default function PlayerActivityPanel({ showStatements = true }: { showSta
           {!displayLoading && <span className="font-mono text-sm font-bold text-pc-accent">{formatNumber(display.total24h)}</span>}
         </div>
 
-        {displayLoading ? <LoadingPanel compact className="min-h-[30rem]" /> : <div className={showStatements ? "" : "space-y-1"}>
+        {displayLoading ? <LoadingPanel compact className="min-h-[30rem]" /> : activityUnavailable && !hourlyStats ? <div role="status" className="flex min-h-[30rem] items-center justify-center text-center text-sm text-pc-text-muted">{t("playerActivity.retrying")}</div> : <div className={showStatements ? "" : "space-y-1"}>
           <div className="mb-3 flex flex-wrap gap-x-3 gap-y-1">
             {activeRegions.map(region => <span key={region.region} className="inline-flex items-center gap-1.5 text-xs text-pc-text-muted"><span className={`h-2 w-2 rounded-full ${REGION_COLORS[region.region] ?? REGION_COLORS.Unknown}`} />{region.region} · {formatNumber(region.total24h)}</span>)}
-            {activeRegions.length === 0 && <span className="text-xs text-pc-text-muted">{t("playerActivity.noMatches")}</span>}
+            {activeRegions.length === 0 && !activityUnavailable && <span className="text-xs text-pc-text-muted">{t("playerActivity.noMatches")}</span>}
+            {activityUnavailable && hourlyStats && <span role="status" className="text-xs text-amber-300">{t("playerActivity.showingConfirmedWhileRetrying")}</span>}
           </div>
           <ActivityChartStatement className="mb-3 text-center" />
           <div className="grid grid-cols-[3.5rem_1fr_2.5rem] gap-2 border-b border-pc-border/30 px-1 pb-1 text-center text-xs uppercase text-pc-text-muted">

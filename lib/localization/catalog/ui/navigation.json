@@ -85,6 +85,8 @@
   "playerActivity.loadingMoreEvidence": "Loading…",
   "playerActivity.detailsLoadError": "The activity evidence could not be loaded. Please try again.",
   "playerActivity.noMatches": "No matches were observed for this selection.",
+  "playerActivity.retrying": "Activity data is temporarily unavailable. Retrying automatically.",
+  "playerActivity.showingConfirmedWhileRetrying": "Showing last confirmed activity while retrying.",
   "playerActivity.noPlayers": "No public players were observed for this selection.",
   "playerActivity.discoveryDescription": "Each completed hour is discovered once per queue. Casual queues store match IDs and counts only; ranked Siege continues through the full statistics and recovery pipeline.",
   "ecpm.noDataDescription": "No complete ranked observations are currently available.",
