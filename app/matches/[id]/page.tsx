@@ -175,7 +175,7 @@ export default function MatchDetailPage() {
       setError(null);
       // v9 invalidates cached recovered rows whose stored CPM was zero before
       // credit-rate derivation moved to the database/read boundary.
-      const cacheKey = `paladinscat:match-result:v9:${numericMatchId}`;
+      const cacheKey = `paladinscat:match-result:v10:${numericMatchId}`;
       try {
         const cached = reloadKey === 0 ? readBrowserResult<CachedMatchResult>(cacheKey) : null;
         if (cached) {
