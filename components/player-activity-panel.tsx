@@ -6,7 +6,6 @@ import { fetchMatchesOverview, fetchPresenceStats, type MatchHourlyStats, type M
 import { LoadingPanel } from "@/components/async-state";
 import CardDetailLink from "@/components/card-detail-link";
 import { useLocalization } from "@/lib/localization-context";
-import { useRouteSettledLoading } from "@/lib/route-transition-context";
 
 const REGION_COLORS: Record<string, string> = {
   NA: "bg-emerald-500",
@@ -93,7 +92,9 @@ export default function PlayerActivityPanel({ showStatements = true }: { showSta
   const [activityUnavailable, setActivityUnavailable] = useState(false);
   const [selectedQueue, setSelectedQueue] = useState<"all" | number>("all");
   const [loading, setLoading] = useState(true);
-  const displayLoading = useRouteSettledLoading(loading);
+  // The data request is the only loading authority here. A missed route
+  // transition timer must not keep this high-traffic page blank indefinitely.
+  const displayLoading = loading;
 
   useEffect(() => {
     let active = true;
