@@ -105,7 +105,10 @@ export default function PlayerActivityPanel({ showStatements = true }: { showSta
         // intentionally not sent because ID-only casual discovery has no
         // player-detail/tier data and must remain comparable with ranked.
         const [overview, presenceResult] = await Promise.all([
-          fetchMatchesOverview({ view: "activity-v3" }),
+          // activity-v3 adds an unindexed seven-day player rollup and can
+          // block the whole match-activity surface. Keep the public counts
+          // responsive while player totals are supplied by presence stats.
+          fetchMatchesOverview({ view: "activity-v2" }),
           fetchPresenceStats().catch(() => null),
         ]);
         if (!active) return;
