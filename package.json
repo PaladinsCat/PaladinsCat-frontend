@@ -14,6 +14,7 @@
     "generate-types": "npx openapi-typescript http://localhost:3005/openapi.json -o lib/types.gen.ts",
     "sync-community-locales": "node scripts/sync-community-locales.mjs",
     "sync-pinned-locales": "node scripts/copy-pinned-locales.mjs",
+    "sync-loading-frames": "node scripts/sync-loading-frames.mjs",
     "audit-localization": "node scripts/audit-localization.mjs",
     "audit-text-size": "node scripts/audit-text-size.mjs",
     "audit-image-assets": "node scripts/audit-image-assets.mjs",

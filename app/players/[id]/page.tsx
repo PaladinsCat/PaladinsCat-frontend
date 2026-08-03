@@ -16,6 +16,7 @@ import { DataTableSkeleton, RouteSkeleton } from "@/components/route-skeleton";
 import SmartImage from "@/components/SmartImage";
 import { formatKda } from "@/lib/kda";
 import PlayerName, { PlayerModerationTag } from "@/components/player-name";
+import PlayerLoadingFrame from "@/components/player-loading-frame";
 import { fetchPlayerModeration } from "@/lib/player-moderation";
 import { useLocalization } from "@/lib/localization-context";
 import { estimateLiveTeamWinChance } from "@/lib/live-team-estimate";
@@ -667,22 +668,12 @@ export default function PlayerProfilePage() {
 
         <div className="order-1 min-w-0 flex-1">
         <div className="flex flex-col items-start gap-4 min-[420px]:flex-row">
-          {/* Avatar */}
-          <div className="w-16 h-16 rounded-xl border-2 border-pc-accent/30 overflow-hidden shrink-0 bg-pc-bg flex items-center justify-center">
-            {avatarUrl ? (
-              <img
-                src={avatarUrl}
-                alt={player.name}
-                className="w-full h-full object-cover"
-                onError={() => setAvatarLoadFailed(true)}
-              />
-            ) : (
-              <picture>
-                <source srcSet="/images/icons/Avatar_Default_Icon.avif" type="image/avif" />
-                <img src="/images/icons/Avatar_Default_Icon.avif" alt={t("generated.players.value1SPaladinsAvatar", { value1: player.name })} className="w-full h-full object-cover" />
-              </picture>
-            )}
-          </div>
+          <PlayerLoadingFrame
+            loadingFrame={player.loading_frame}
+            avatarUrl={avatarUrl}
+            avatarAlt={t("generated.players.value1SPaladinsAvatar", { value1: player.name })}
+            onAvatarError={() => setAvatarLoadFailed(true)}
+          />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="min-w-0 break-words text-2xl font-bold leading-tight text-pc-text sm:text-3xl">
