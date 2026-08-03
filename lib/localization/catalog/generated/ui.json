@@ -135,6 +135,7 @@
   "generated.admin.changelog": "Changelog",
   "generated.admin.changelogAdmin": "Changelog Admin",
   "generated.admin.combinedDailyBudget": "Combined daily budget",
+  "generated.admin.consumer": "Consumer",
   "generated.admin.create": "Create",
   "generated.admin.createNotification": "Create Notification",
   "generated.admin.dashboardRequestFailed": "Dashboard request failed ({status}).",
