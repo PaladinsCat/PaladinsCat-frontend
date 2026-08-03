@@ -28,7 +28,7 @@ export type AdminDashboard = {
   hirez: {
     keys: AdminApiKey[];
     hourly: Array<{ hour: string; calls: number }>;
-    endpoints: Array<{ endpoint: string; calls: number; avgResponseMs: number }>;
+    endpoints: Array<{ consumer: string; endpoint: string; calls: number; avgResponseMs: number }>;
   };
 };
 
@@ -93,7 +93,10 @@ export async function fetchAdminDashboard(): Promise<AdminDashboard> {
         lastSyncError: row.last_sync_error ? String(row.last_sync_error) : null,
       })),
       hourly: (raw.hirez?.hourly ?? []).map((row: any) => ({ hour: String(row.hour), calls: numberValue(row.calls) })),
-      endpoints: (raw.hirez?.endpoints ?? []).map((row: any) => ({ endpoint: String(row.endpoint), calls: numberValue(row.calls), avgResponseMs: numberValue(row.avg_response_ms) })),
+      endpoints: (raw.hirez?.endpoints ?? []).map((row: any) => ({
+        consumer: String(row.consumer ?? "unknown"), endpoint: String(row.endpoint),
+        calls: numberValue(row.calls), avgResponseMs: numberValue(row.avg_response_ms),
+      })),
     },
   };
 }
