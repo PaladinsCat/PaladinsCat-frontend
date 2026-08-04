@@ -26,6 +26,18 @@
   --color-pc-discord-text-light: #c8ccff;
   --color-pc-chart-green: #4ade80;
   --color-pc-chart-amber: #f59e0b;
+
+  /* Chart custom property aliases for inline var() usage */
+  --pc-chart-amber: #f59e0b;
+  --pc-chart-red: #ef4444;
+  --pc-chart-green: #4ade80;
+  --pc-chart-violet: #8b5cf6;
+  --pc-chart-sky: #06b6d4;
+  --pc-chart-text: #F9FAFB;
+  --pc-chart-text-secondary: #9CA3AF;
+  --pc-chart-grid: #1F2937;
+
+  --color-pc-chart-green: #4ade80;
   --color-pc-chart-red: #ef4444;
   --color-pc-chart-violet: #8b5cf6;
   --color-pc-chart-sky: #06b6d4;
