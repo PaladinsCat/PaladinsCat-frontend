@@ -10,6 +10,7 @@ import {
   type PublicStatsScope,
 } from "@/lib/api-client";
 import { useLocalization } from "@/lib/localization-context";
+import { SpotlightCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 const SCOPES = [
   { value: "", labelKey: "matches.dropped.allModes" },

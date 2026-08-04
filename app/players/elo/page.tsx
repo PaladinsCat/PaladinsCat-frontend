@@ -16,6 +16,8 @@ import TablePagination, { type TablePageSize } from "@/components/table-paginati
 
 import { useSearchParams } from "next/navigation";
 import { useLocalization } from "@/lib/localization-context";
+import { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation } from "@/components/aceternity";
+
 type ELOMode = "champion" | "account";
 
 const CLASS_ICONS: Record<string, string> = {

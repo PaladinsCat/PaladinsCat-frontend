@@ -8,6 +8,8 @@ import { formatLocalDateTime } from "@/lib/time-format";
 import { EmptyState, ErrorState } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { useLocalization } from "@/lib/localization-context";
+import { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation } from "@/components/aceternity";
+
 
 export default function BuildsPage() {
   const { t , formatDateTime} = useLocalization();

@@ -7,6 +7,8 @@ import { fetchClassLeaderboard } from "@/lib/api-client";
 import { LoadingPanel } from "@/components/async-state";
 import PlayerName from "@/components/player-name";
 import { useLocalization } from "@/lib/localization-context";
+import { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation } from "@/components/aceternity";
+
 
 const VALID_ROLES = ["Frontline", "Damage", "Flank", "Support"] as const;
 type Role = (typeof VALID_ROLES)[number];

@@ -7,6 +7,7 @@ import { LoadingPanel } from "@/components/async-state";
 import PlayerName from "@/components/player-name";
 import PlayerDirectoryGrid from "@/components/player-directory-grid";
 import { useLocalization } from "@/lib/localization-context";
+import { SpotlightCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 export default function BoostedPlayersPage() {
   const { t , formatNumber} = useLocalization();
@@ -21,8 +22,9 @@ export default function BoostedPlayersPage() {
   }, []);
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-6">
-      <div>
+    <div className="mx-auto w-full max-w-4xl space-y-6 relative overflow-hidden">
+      <BackgroundGradientAnimation />
+      <div className="relative z-10">
         <Link href="/players" className="mb-2 inline-block text-xs text-pc-accent hover:underline">{t("generated.players.players")}</Link>
         <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("moderation.boostedPlayers")}</h1>
         <p className="mt-1 text-sm text-pc-text-secondary">{t("moderation.boostedDescription")}</p>
@@ -54,7 +56,7 @@ export default function BoostedPlayersPage() {
                 <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-pc-text-muted">{t("moderation.cheaterDuo")}</div>
                 <ul className="flex flex-wrap gap-1.5">
                   {player.cheaters.map((cheater) => (
-                    <li key={cheater.id} className="max-w-full rounded-md border border-red-500/20 bg-[#161618] px-2 py-1 text-xs leading-relaxed text-red-200 [overflow-wrap:anywhere]">
+                    <li key={cheater.id} className="max-w-full rounded-md border border-red-500/20 bg-[var(--pc-bg-secondary)] px-2 py-1 text-xs leading-relaxed text-red-200 [overflow-wrap:anywhere]">
                       <span className="font-semibold">{cheater.name}</span>
                       <span className="ml-1 text-red-200/70">· {formatNumber(cheater.matchCount)}</span>
                     </li>

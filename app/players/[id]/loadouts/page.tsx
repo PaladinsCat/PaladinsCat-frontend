@@ -8,6 +8,8 @@ import { fetchPlayerLoadouts, refreshPlayerLoadouts, type PlayerLoadoutsResponse
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { getPlayerLoadoutChampionRoster, type PlayerLoadoutChampion } from "@/lib/player-loadout-roster";
 import { useLocalization } from "@/lib/localization-context";
+import { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation } from "@/components/aceternity";
+
 
 const ROLE_ORDER = ["Frontline", "Damage", "Flank", "Support"];
 

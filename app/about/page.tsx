@@ -45,7 +45,7 @@ export default async function AboutPage() {
   ];
 
   return (
-    <div className="mx-auto max-w-6xl overflow-hidden rounded-2xl border border-pc-border bg-pc-bg-secondary/90 shadow-2xl backdrop-blur-sm">
+    <div className="mx-auto max-w-6xl overflow-hidden rounded-2xl border border-pc-border bg-pc-bg-elevated/95">
       <section className="relative overflow-hidden border-b border-pc-border px-5 py-12 sm:px-10 sm:py-16 lg:px-16 lg:py-20">
         <div className="pointer-events-none absolute -right-28 -top-36 h-96 w-96 rounded-full bg-pc-accent/20 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-48 left-1/4 h-80 w-80 rounded-full bg-pc-accent-alt/15 blur-3xl" />
@@ -70,8 +70,8 @@ export default async function AboutPage() {
           </div>
 
           <div className="relative mx-auto w-full max-w-md">
-            <div className="absolute -inset-6 rounded-[2.5rem] bg-gradient-to-br from-pc-accent/20 to-pc-accent-alt/15 blur-2xl" />
-            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#111216] p-6 shadow-2xl sm:p-8">
+            <div className="absolute -inset-6 rounded-2xl bg-gradient-to-br from-pc-accent/20 to-pc-accent-alt/15 blur-2xl" />
+            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[var(--pc-bg-secondary)] p-6 shadow-lg sm:p-8">
               <div className="flex items-center gap-4 border-b border-white/10 pb-6">
                 <span className="flex h-16 w-16 items-center justify-center rounded-2xl border border-pc-accent/20 bg-pc-accent/10">
                   <Image src="/images/icons/paladinscat.avif" alt="" width={48} height={48} unoptimized className="h-12 w-12 rounded-xl" />

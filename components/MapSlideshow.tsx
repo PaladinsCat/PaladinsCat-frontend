@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, useReducedMotion, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
 import {
   getWallpaperEnabled,
@@ -86,6 +86,7 @@ export default function MapSlideshow() {
     }
   }, []);
 
+  const reduceMotion = useReducedMotion();
   const slides = useMemo<WallpaperSlide[] | null>(
     () => customWallpapers.length > 0 ? customWallpapers.map((wallpaper) => wallpaper.source) : order,
     [customWallpapers, order],
@@ -166,10 +167,10 @@ export default function MapSlideshow() {
       <AnimatePresence initial={false} mode="sync">
         <motion.div
           key={currentWallpaperKey}
-          initial={{ opacity: 0 }}
+          initial={reduceMotion ? undefined : { opacity: 0 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 2.1, ease: [0.4, 0, 0.2, 1] }}
+          exit={reduceMotion ? undefined : { opacity: 0 }}
+          transition={reduceMotion ? undefined : { duration: 2.1, ease: [0.4, 0, 0.2, 1] }}
           className="pc-wallpaper-image"
           style={{
             position: "absolute",

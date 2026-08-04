@@ -21,6 +21,8 @@ import { fetchPlayerModeration } from "@/lib/player-moderation";
 import { useLocalization } from "@/lib/localization-context";
 import { estimateLiveTeamWinChance } from "@/lib/live-team-estimate";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
+import { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation } from "@/components/aceternity";
+
 
 interface PlayerData {
   id: string;
@@ -582,7 +584,7 @@ export default function PlayerProfilePage() {
 
           {actionMenuOpen && (
             <div
-              className="absolute right-0 top-full z-30 mt-2 w-60 max-w-[calc(100vw-3rem)] overflow-hidden rounded-xl border border-pc-border bg-pc-bg-secondary p-2 shadow-2xl"
+              className="absolute right-0 top-full z-30 mt-2 w-60 max-w-[calc(100vw-3rem)] overflow-hidden rounded-xl border border-pc-border bg-pc-bg-secondary p-2 shadow-lg"
               role="menu"
               aria-label={t("generated.players.playerActions")}
             >
@@ -1027,7 +1029,7 @@ export default function PlayerProfilePage() {
 
       {/* ── Current Match Modal ── */}
       {showCurrentMatch && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowCurrentMatch(false)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center pc-glass-dark" onClick={() => setShowCurrentMatch(false)}>
           <div className="pc-card mx-3 max-h-[calc(100vh-1.5rem)] w-full max-w-7xl overflow-y-auto p-5 sm:mx-6 sm:p-6 lg:p-7" onClick={(e) => e.stopPropagation()}>
             <div className="mb-5 flex items-center justify-between">
               <h3 className="text-xl font-bold text-pc-text sm:text-2xl">{t("generated.players.currentMatch")}</h3>

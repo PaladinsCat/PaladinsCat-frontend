@@ -9,6 +9,8 @@ import { loadBuildReferenceData, type BuildReferenceData } from "@/lib/build-ref
 import { LoadingPanel } from "@/components/async-state";
 import CanonicalTalentImage from "@/components/canonical-talent-image";
 import { useLocalization } from "@/lib/localization-context";
+import { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation } from "@/components/aceternity";
+
 
 function AssetImage({ src, alt }: { src?: string | null; alt: string }) {
   if (!src) {

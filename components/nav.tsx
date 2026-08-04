@@ -51,7 +51,7 @@ function LanguageMenu() {
         <svg className={`h-3 w-3 transition-transform ${open ? "rotate-180" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
       </button>
       {open && (
-        <div className="absolute right-0 top-full z-30 mt-2 w-60 overflow-hidden rounded-xl border border-pc-border bg-pc-bg-secondary p-1 shadow-2xl" role="listbox" aria-label={t("nav.language")}>
+        <div className="absolute right-0 top-full z-30 mt-2 w-60 overflow-hidden rounded-xl border border-pc-border bg-pc-bg-secondary p-1 shadow-lg" role="listbox" aria-label={t("nav.language")}>
           {SUPPORTED_LOCALES.map(({ code, nativeName }) => (
             <button
               key={code}
@@ -289,7 +289,7 @@ export default function Nav() {
                       <svg className="h-3.5 w-3.5 transition-transform group-hover:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
                     </span>
                     <div className="pointer-events-none invisible absolute left-1/2 top-full z-20 w-64 -translate-x-1/2 pt-2 opacity-0 transition-all group-hover:pointer-events-auto group-hover:visible group-hover:opacity-100">
-                      <div className="max-h-[calc(100vh-5rem)] overflow-y-auto overscroll-contain rounded-lg border border-pc-border bg-pc-bg-secondary p-2 shadow-xl" role="menu" aria-label={group.title}>
+                      <div className="max-h-[calc(100vh-5rem)] overflow-y-auto overscroll-contain rounded-lg border border-pc-border bg-pc-bg-secondary p-2 shadow-md" role="menu" aria-label={group.title}>
                         {group.links.map((link) => (
                           <Link
                             key={link.href}
@@ -330,7 +330,7 @@ export default function Nav() {
                     {user.linkedPlayerId ? <PlayerName playerId={user.linkedPlayerId} verified>{accountLabel}</PlayerName> : accountLabel}
                   </Link>
                   <div className="pointer-events-none invisible absolute right-0 top-full z-10 w-44 pt-2 opacity-0 transition-all group-hover:pointer-events-auto group-hover:visible group-hover:opacity-100">
-                    <div className="rounded-lg border border-pc-border bg-pc-bg-secondary p-1 shadow-xl" role="menu">
+                    <div className="rounded-lg border border-pc-border bg-pc-bg-secondary p-1 shadow-md" role="menu">
                     <Link href={profileHref} className="block rounded-md px-3 py-2 text-sm text-pc-text-secondary transition-colors hover:bg-pc-bg-elevated hover:text-pc-text" role="menuitem">{t("generated.common.profile")}</Link>
                     <Link href="/account" className="block rounded-md px-3 py-2 text-sm text-pc-text-secondary transition-colors hover:bg-pc-bg-elevated hover:text-pc-text" role="menuitem">{t("generated.common.accountSettings")}</Link>
                     <button onClick={handleLogout} className="block w-full rounded-md px-3 py-2 text-left text-sm text-pc-text-secondary transition-colors hover:bg-pc-bg-elevated hover:text-pc-text" role="menuitem">{t("nav.logout")}</button>
@@ -369,8 +369,8 @@ export default function Nav() {
 
       {sideMenuOpen && (
         <div className="fixed inset-0 z-[60]" role="dialog" aria-modal="true" aria-label={t("nav.menu")}>
-          <button className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setSideMenuOpen(false)} aria-label={t("nav.closeSiteMenu")} />
-          <aside className="absolute inset-y-0 right-0 flex w-[min(24rem,calc(100vw-2rem))] flex-col border-l border-pc-border bg-pc-bg-secondary shadow-2xl">
+          <button className="absolute inset-0 pc-glass-dark" onClick={() => setSideMenuOpen(false)} aria-label={t("nav.closeSiteMenu")} />
+          <aside className="absolute inset-y-0 right-0 flex w-[min(24rem,calc(100vw-2rem))] flex-col border-l border-pc-border bg-pc-bg-secondary shadow-lg">
             <div className="flex items-center justify-between border-b border-pc-border px-5 py-4">
               <Link href="/" onClick={() => setSideMenuOpen(false)} className="flex items-center gap-2 font-bold text-pc-text"><img src="/images/icons/paladinscat.avif" alt="" className="h-6 w-6" />{t("generated.common.paladinscat")}</Link>
               <button onClick={() => setSideMenuOpen(false)} className="rounded-lg p-2 text-pc-text-secondary hover:bg-pc-bg-elevated hover:text-pc-accent" aria-label={t("nav.closeSiteMenu")}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg></button>

@@ -19,6 +19,24 @@
   --color-pc-text: #dfdfd6;
   --color-pc-text-secondary: #98989f;
   --color-pc-text-muted: #6a6a71;
+  --color-pc-discord-primary: #5865f2;
+  --color-pc-discord-hover: #6873f5;
+  --color-pc-discord-border: #7882f7;
+  --color-pc-discord-text: #aeb4ff;
+  --color-pc-discord-text-light: #c8ccff;
+  --color-pc-chart-green: #4ade80;
+  --color-pc-chart-amber: #f59e0b;
+  --color-pc-chart-red: #ef4444;
+  --color-pc-chart-violet: #8b5cf6;
+  --color-pc-chart-sky: #06b6d4;
+  --color-pc-chart-text: #F9FAFB;
+  --color-pc-chart-text-secondary: #9CA3AF;
+  --color-pc-chart-grid: #1F2937;
+  --color-pc-role-assault: #ef4444;
+  --color-pc-role-sentinel: #34d399;
+  --color-pc-role-support: #60a5fa;
+  --color-pc-role-flank: #c084fc;
+  --color-pc-status-live: #ff0000;
 }
 
 @custom-variant dark (&:is(.dark *));
@@ -85,6 +103,33 @@
   --chart-3: var(--pc-accent-deep);
   --chart-4: oklch(0.500 0.040 185);
   --chart-5: oklch(0.400 0.035 185);
+
+  /* Recharts palette — consistent across all chart components */
+  --chart-green: #4ade80;
+  --chart-amber: #f59e0b;
+  --chart-red: #ef4444;
+  --chart-violet: #8b5cf6;
+  --chart-sky: #06b6d4;
+  --chart-text: #F9FAFB;
+  --chart-text-secondary: #9CA3AF;
+  --chart-grid: #1F2937;
+  --chart-border: #374151;
+
+  /* Discord brand — for bot pages */
+  --pc-discord-primary: #5865f2;
+  --pc-discord-hover: #6873f5;
+  --pc-discord-border: #7882f7;
+  --pc-discord-text: #aeb4ff;
+  --pc-discord-text-light: #c8ccff;
+
+  /* Role colors — for composition/stats pages */
+  --pc-role-assault: #ef4444;
+  --pc-role-sentinel: #34d399;
+  --pc-role-support: #60a5fa;
+  --pc-role-flank: #c084fc;
+
+  /* Status colors — for activity/live indicators */
+  --pc-status-live: #ff0000;
 
   --radius: 0.75rem;                            /* 12px — matches card radius */
 

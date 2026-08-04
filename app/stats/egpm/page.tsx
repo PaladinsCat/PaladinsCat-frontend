@@ -8,6 +8,8 @@ import { RouteSkeleton } from "@/components/route-skeleton";
 import { fetchBaselines, type BaselineEntry } from "@/lib/api-client";
 import { useLocalization } from "@/lib/localization-context";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
+import { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation } from "@/components/aceternity";
+
 import {
   ECPM_ACTIVITY_THRESHOLDS,
   type EcpmActivityLabelKey,
@@ -15,11 +17,11 @@ import {
 
 const ROLE_ORDER = ["Global", "Damage", "Flank", "Support", "Frontline"];
 const ROLE_COLORS: Record<string, string> = {
-  Global: "#facc15",
-  Damage: "#f87171",
-  Flank: "#c084fc",
-  Support: "#34d399",
-  Frontline: "#60a5fa",
+  Global: "var(--pc-chart-amber)",
+  Damage: "var(--pc-chart-red)",
+  Flank: "var(--pc-role-flank)",
+  Support: "var(--pc-chart-green)",
+  Frontline: "var(--pc-role-support)",
 };
 
 const SORT_OPTIONS = [
@@ -76,7 +78,7 @@ export default function EgpmDetailPage() {
           <ContentFade><PerformanceOverviewCard metrics={ROLE_ORDER.map((role) => rows.find((row) => row.role === role)).filter((row): row is BaselineEntry => Boolean(row)).map((row) => ({
             key: `egpm-${row.role}`,
             label: row.role === "Frontline" ? t("common.roles.frontlineShort") : row.role === "Support" ? t("common.roles.supportShort") : row.role === "Damage" ? t("common.roles.damageShort") : row.role === "Global" ? t("common.roles.global") : t("common.roles.flank"),
-            color: ROLE_COLORS[row.role] ?? "#facc15",
+            color: ROLE_COLORS[row.role] ?? "var(--pc-chart-amber)",
             p10: row.p10Ecpm,
             p25: row.p25Ecpm,
             mean: row.avgEcpm,

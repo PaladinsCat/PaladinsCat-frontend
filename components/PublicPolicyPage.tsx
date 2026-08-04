@@ -29,7 +29,7 @@ export default function PublicPolicyPage({
   notice: string;
 }) {
   return (
-    <div className="mx-auto max-w-6xl overflow-hidden rounded-2xl border border-pc-border bg-pc-bg-secondary/90 shadow-2xl backdrop-blur-sm">
+    <div className="mx-auto max-w-6xl overflow-hidden rounded-2xl border border-white/5 pc-glass-subtle">
       <header className="relative overflow-hidden border-b border-pc-border px-5 py-12 sm:px-10 sm:py-16 lg:px-16">
         <div className="pointer-events-none absolute -right-24 -top-36 h-80 w-80 rounded-full bg-pc-accent/20 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-40 left-1/3 h-72 w-72 rounded-full bg-pc-accent-alt/15 blur-3xl" />
@@ -39,7 +39,7 @@ export default function PublicPolicyPage({
             <h1 className="mt-4 text-4xl font-extrabold tracking-tight text-pc-text sm:text-5xl lg:text-6xl">{title}</h1>
             <p className="mt-5 max-w-2xl text-base leading-7 text-pc-text-secondary sm:text-lg sm:leading-8">{intro}</p>
           </div>
-          <div className="rounded-2xl border border-pc-border bg-pc-bg-elevated/75 px-5 py-4 shadow-xl backdrop-blur-sm">
+          <div className="rounded-2xl border border-white/5 pc-glass px-5 py-4">
             <div className="text-xs uppercase tracking-wider text-pc-text-muted">{updatedLabel}</div>
             <div className="mt-1 font-semibold text-pc-text">{updatedDate}</div>
           </div>

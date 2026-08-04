@@ -7,6 +7,8 @@ import { useLobbyTier } from "@/lib/lobby-tier-context";
 import { LoadingIndicator, StableMetricValue } from "@/components/async-state";
 import { useLocalization } from "@/lib/localization-context";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
+import { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation } from "@/components/aceternity";
+
 
 type SortKey = "totalMatches" | "winRate";
 const PAGE_SIZES = [10, 25, 50, 100] as const;

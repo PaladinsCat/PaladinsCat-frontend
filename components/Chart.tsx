@@ -12,6 +12,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import { chartColors, chartText, chartTextSecondary, chartGrid } from "@/lib/chart-colors";
 
 export interface ChartProps {
   data: Array<Record<string, unknown>>;
@@ -35,7 +36,7 @@ export function LineChartComponent({
   yLabel = "",
   title,
   height = 300,
-  colors = ["#4ade80", "#f59e0b", "#ef4444", "#8b5cf6", "#06b6d4"],
+  colors = chartColors,
   showLegend = true,
   showGrid = true,
   showTooltip = true,
@@ -47,32 +48,32 @@ export function LineChartComponent({
       {title && <h3 className="text-lg font-semibold mb-2 text-pc-text">{title}</h3>}
       <ResponsiveContainer width="100%" height={height}>
         <LineChart data={data} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
-          {showGrid && <CartesianGrid strokeDasharray="3 3" stroke="#374151" />}
+          {showGrid && <CartesianGrid strokeDasharray="3 3" stroke={chartGrid} />}
           {showXAxis && (
             <XAxis
               dataKey={xKey}
-              stroke="#9CA3AF"
+              stroke={chartTextSecondary}
               fontSize={12}
-              tick={{ fill: "#9CA3AF" }}
+              tick={{ fill: chartTextSecondary }}
             />
           )}
           {showYAxis && (
             <YAxis
-              stroke="#9CA3AF"
+              stroke={chartTextSecondary}
               fontSize={12}
-              tick={{ fill: "#9CA3AF" }}
+              tick={{ fill: chartTextSecondary }}
               label={{ value: yLabel, angle: -90, position: "insideLeft" }}
             />
           )}
           {showTooltip && (
             <Tooltip
               contentStyle={{
-                backgroundColor: "#1F2937",
-                border: "1px solid #374151",
+                backgroundColor: chartGrid,
+                border: `1px solid ${chartGrid}`,
                 borderRadius: "0.5rem",
-                color: "#F9FAFB",
+                color: chartText,
               }}
-              labelStyle={{ color: "#9CA3AF" }}
+              labelStyle={{ color: chartTextSecondary }}
             />
           )}
           {showLegend && <Legend />}
@@ -99,7 +100,7 @@ export function BarChartComponent({
   yLabel = "",
   title,
   height = 300,
-  colors = ["#4ade80", "#f59e0b", "#ef4444", "#8b5cf6", "#06b6d4"],
+  colors = chartColors,
   showLegend = true,
   showGrid = true,
   showTooltip = true,
@@ -111,32 +112,32 @@ export function BarChartComponent({
       {title && <h3 className="text-lg font-semibold mb-2 text-pc-text">{title}</h3>}
       <ResponsiveContainer width="100%" height={height}>
         <BarChart data={data} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
-          {showGrid && <CartesianGrid strokeDasharray="3 3" stroke="#374151" />}
+          {showGrid && <CartesianGrid strokeDasharray="3 3" stroke={chartGrid} />}
           {showXAxis && (
             <XAxis
               dataKey={xKey}
-              stroke="#9CA3AF"
+              stroke={chartTextSecondary}
               fontSize={12}
-              tick={{ fill: "#9CA3AF" }}
+              tick={{ fill: chartTextSecondary }}
             />
           )}
           {showYAxis && (
             <YAxis
-              stroke="#9CA3AF"
+              stroke={chartTextSecondary}
               fontSize={12}
-              tick={{ fill: "#9CA3AF" }}
+              tick={{ fill: chartTextSecondary }}
               label={{ value: yLabel, angle: -90, position: "insideLeft" }}
             />
           )}
           {showTooltip && (
             <Tooltip
               contentStyle={{
-                backgroundColor: "#1F2937",
-                border: "1px solid #374151",
+                backgroundColor: chartGrid,
+                border: `1px solid ${chartGrid}`,
                 borderRadius: "0.5rem",
-                color: "#F9FAFB",
+                color: chartText,
               }}
-              labelStyle={{ color: "#9CA3AF" }}
+              labelStyle={{ color: chartTextSecondary }}
             />
           )}
           {showLegend && <Legend />}

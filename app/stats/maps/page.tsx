@@ -7,6 +7,7 @@ import SmartImage from "@/components/SmartImage";
 import { fetchMapStats, type MapStat, type PublicStatsScope } from "@/lib/api-client";
 import { matchMapImagePath } from "@/lib/map-images";
 import { useLocalization } from "@/lib/localization-context";
+import { SpotlightCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 function duration(seconds: number) {
   const total = Math.max(0, Math.round(seconds || 0));

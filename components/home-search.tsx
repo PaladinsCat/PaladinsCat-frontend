@@ -129,7 +129,7 @@ export default function HomeSearch({ onSearchActiveChange }: HomeSearchProps) {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -5, scale: 0.99 }}
                 transition={{ duration: 0.18, ease: "easeOut" }}
-                className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-50 origin-top overflow-hidden rounded-lg border border-pc-border bg-pc-bg-elevated shadow-xl"
+                className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-50 origin-top overflow-hidden rounded-lg border border-pc-border bg-pc-bg-elevated shadow-md"
               >
                 <AnimatePresence mode="wait" initial={false}>
                   {loading ? (

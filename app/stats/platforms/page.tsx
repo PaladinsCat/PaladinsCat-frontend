@@ -7,6 +7,8 @@ import { ContentFade, EmptyState, ErrorState } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { useLocalization } from "@/lib/localization-context";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
+import { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation } from "@/components/aceternity";
+
 
 export default function PlatformsPage() {
   const { t } = useLocalization();
@@ -72,7 +74,7 @@ export default function PlatformsPage() {
           yLabel={t("generated.stats.platforms.page.winrate")}
           title={selectedPlatform ? t("generated.stats.value1TopChampions", { value1: selectedPlatform }) : t("generated.stats.topChampionsAllPlatforms")}
           height={400}
-          colors={["#4ade80"]}
+          colors={["var(--pc-chart-green)"]}
           showLegend={false}
           showXAxis={false}
         /></ContentFade>

@@ -26,7 +26,7 @@ export default function LobbyTierBanner() {
   };
 
   return (
-    <div className="relative z-40 border-b border-pc-accent/20 bg-pc-bg-secondary/95 shadow-sm backdrop-blur">
+    <div className="relative z-40 border-b border-pc-accent/20 pc-glass-subtle shadow-sm">
       <div className="mx-auto flex min-h-11 max-w-7xl items-center gap-3 px-4 py-2 sm:px-6 lg:px-8">
         <div className="flex min-w-0 flex-1 items-center gap-2">
           <span className="shrink-0 text-xs font-bold uppercase tracking-[0.14em] text-pc-text-muted">

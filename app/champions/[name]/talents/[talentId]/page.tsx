@@ -21,6 +21,7 @@ import { getStatQuality } from "@/lib/stat-quality";
 import { withStoredLobbyTier } from "@/lib/lobby-tier";
 import { championSlug } from "@/lib/utils";
 import { useLocalization } from "@/lib/localization-context";
+import { SpotlightCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 const CHAMPION_DATA_BASE = "/_pc";
 

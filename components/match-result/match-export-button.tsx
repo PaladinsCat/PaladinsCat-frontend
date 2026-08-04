@@ -45,7 +45,7 @@ export default function MatchExportButton(props: MatchExportButtonProps) {
           canvasHeight: 1152,
           pixelRatio: 1,
           cacheBust: false,
-          backgroundColor: "#161618",
+          backgroundColor: "var(--pc-bg-secondary)",
           style: { transform: "none", transformOrigin: "top left" },
         });
         const anchor = document.createElement("a");

@@ -7,6 +7,7 @@ import { ContentFade, ErrorState, StableMetricValue } from "@/components/async-s
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { useLocalization } from "@/lib/localization-context";
 import { useRouteSettled } from "@/lib/route-transition-context";
+import { SpotlightCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 function MetricCard({ label, value, companionValue, detail }: { label: string; value: number | string; companionValue?: number; detail?: string }) {
   const { formatNumber } = useLocalization();

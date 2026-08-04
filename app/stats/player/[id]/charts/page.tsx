@@ -8,6 +8,7 @@ import { useLocalization } from "@/lib/localization-context";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { ContentFade } from "@/components/async-state";
+import { SpotlightCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 export default function PlayerChartsPage({ params }: { params: Promise<{ id: string }> }) {
   const { t , formatMonthDay} = useLocalization();
@@ -78,17 +79,17 @@ export default function PlayerChartsPage({ params }: { params: Promise<{ id: str
         ) : (
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={kdaData.map((d) => ({ ...d, label: formatMonthDay(d.date) }))} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-              <XAxis dataKey="label" stroke="#9CA3AF" fontSize={12} />
-              <YAxis stroke="#9CA3AF" fontSize={12} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--pc-bg-elevated)" />
+              <XAxis dataKey="label" stroke="var(--pc-text-muted)" fontSize={12} />
+              <YAxis stroke="var(--pc-text-muted)" fontSize={12} />
               <Tooltip
-                contentStyle={{ backgroundColor: "#1F2937", border: "1px solid #374151", borderRadius: "0.5rem", color: "#F9FAFB" }}
-                labelStyle={{ color: "#9CA3AF" }}
+                contentStyle={{ backgroundColor: "var(--pc-bg-secondary)", border: "1px solid var(--pc-bg-elevated)", borderRadius: "0.5rem", color: "var(--pc-bg-elevated)" }}
+                labelStyle={{ color: "var(--pc-text-muted)" }}
               />
               <Legend />
-              <Line type="monotone" dataKey="kills" stroke="#4ade80" strokeWidth={2} dot={{ r: 3 }} />
-              <Line type="monotone" dataKey="deaths" stroke="#ef4444" strokeWidth={2} dot={{ r: 3 }} />
-              <Line type="monotone" dataKey="assists" stroke="#3b82f6" strokeWidth={2} dot={{ r: 3 }} />
+              <Line type="monotone" dataKey="kills" stroke="var(--pc-chart-green)" strokeWidth={2} dot={{ r: 3 }} />
+              <Line type="monotone" dataKey="deaths" stroke="var(--pc-chart-red)" strokeWidth={2} dot={{ r: 3 }} />
+              <Line type="monotone" dataKey="assists" stroke="var(--pc-chart-sky)" strokeWidth={2} dot={{ r: 3 }} />
             </LineChart>
           </ResponsiveContainer>
         )}
@@ -102,16 +103,16 @@ export default function PlayerChartsPage({ params }: { params: Promise<{ id: str
         ) : (
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={dpmData.map((d) => ({ ...d, label: formatMonthDay(d.date) }))} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-              <XAxis dataKey="label" stroke="#9CA3AF" fontSize={12} />
-              <YAxis stroke="#9CA3AF" fontSize={12} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--pc-bg-elevated)" />
+              <XAxis dataKey="label" stroke="var(--pc-text-muted)" fontSize={12} />
+              <YAxis stroke="var(--pc-text-muted)" fontSize={12} />
               <Tooltip
-                contentStyle={{ backgroundColor: "#1F2937", border: "1px solid #374151", borderRadius: "0.5rem", color: "#F9FAFB" }}
-                labelStyle={{ color: "#9CA3AF" }}
+                contentStyle={{ backgroundColor: "var(--pc-bg-secondary)", border: "1px solid var(--pc-bg-elevated)", borderRadius: "0.5rem", color: "var(--pc-bg-elevated)" }}
+                labelStyle={{ color: "var(--pc-text-muted)" }}
               />
               <Legend />
-              <Line type="monotone" dataKey="playerDpm" stroke="#4ade80" strokeWidth={2} dot={{ r: 3 }} name={t("generated.stats.player.[id].charts.page.playerdpm")} />
-              <Line type="monotone" dataKey="avgDpm" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} name={t("generated.stats.player.[id].charts.page.serveraverage")} />
+              <Line type="monotone" dataKey="playerDpm" stroke="var(--pc-chart-green)" strokeWidth={2} dot={{ r: 3 }} name={t("generated.stats.player.[id].charts.page.playerdpm")} />
+              <Line type="monotone" dataKey="avgDpm" stroke="var(--pc-chart-amber)" strokeWidth={2} dot={{ r: 3 }} name={t("generated.stats.player.[id].charts.page.serveraverage")} />
             </LineChart>
           </ResponsiveContainer>
         )}
@@ -125,15 +126,15 @@ export default function PlayerChartsPage({ params }: { params: Promise<{ id: str
         ) : (
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={glickoData.map((d) => ({ ...d, label: formatMonthDay(d.date) }))} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-              <XAxis dataKey="label" stroke="#9CA3AF" fontSize={12} />
-              <YAxis stroke="#9CA3AF" fontSize={12} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--pc-bg-elevated)" />
+              <XAxis dataKey="label" stroke="var(--pc-text-muted)" fontSize={12} />
+              <YAxis stroke="var(--pc-text-muted)" fontSize={12} />
               <Tooltip
-                contentStyle={{ backgroundColor: "#1F2937", border: "1px solid #374151", borderRadius: "0.5rem", color: "#F9FAFB" }}
-                labelStyle={{ color: "#9CA3AF" }}
+                contentStyle={{ backgroundColor: "var(--pc-bg-secondary)", border: "1px solid var(--pc-bg-elevated)", borderRadius: "0.5rem", color: "var(--pc-bg-elevated)" }}
+                labelStyle={{ color: "var(--pc-text-muted)" }}
               />
               <Legend />
-              <Line type="monotone" dataKey="rating" stroke="#8b5cf6" strokeWidth={2} dot={{ r: 3 }} name={t("generated.stats.player.[id].charts.page.rating")} />
+              <Line type="monotone" dataKey="rating" stroke="var(--pc-chart-violet)" strokeWidth={2} dot={{ r: 3 }} name={t("generated.stats.player.[id].charts.page.rating")} />
             </LineChart>
           </ResponsiveContainer>
         )}

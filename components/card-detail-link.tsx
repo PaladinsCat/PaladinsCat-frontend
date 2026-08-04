@@ -13,7 +13,7 @@ export default function CardDetailLink({
   return (
     <Link
       href={href}
-      className={`group/detail inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-pc-border/70 bg-pc-bg/70 px-2.5 py-1.5 text-xs font-semibold text-pc-text-secondary backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-pc-accent/50 hover:bg-pc-accent/10 hover:text-pc-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent/60 ${className}`}
+      className={`group/detail inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-white/5 pc-glass-dark px-2.5 py-1.5 text-xs font-semibold text-pc-text-secondary transition-all duration-200 hover:-translate-y-0.5 hover:border-pc-accent/50 hover:bg-pc-accent/10 hover:text-pc-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent/60 ${className}`}
     >
       <span>{label}</span>
       <ArrowUpRight

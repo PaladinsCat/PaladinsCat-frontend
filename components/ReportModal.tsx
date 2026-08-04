@@ -172,7 +172,7 @@ export default function ReportModal({ playerId, type, onClose, onSuccess, submit
   };
 
   return (
-    <div ref={overlayRef} onClick={handleOverlayClick} className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+    <div ref={overlayRef} onClick={handleOverlayClick} className="fixed inset-0 z-50 flex items-center justify-center pc-glass-dark">
       <div className="w-full max-w-md mx-4 bg-pc-bg-elevated border border-pc-border rounded-xl p-5 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-bold text-pc-text">{t(action.labelKey)}</h2>

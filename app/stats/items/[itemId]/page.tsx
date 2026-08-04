@@ -10,6 +10,7 @@ import ContextBackLink from "@/components/context-back-link";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { useLocalization } from "@/lib/localization-context";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
+import { SpotlightCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 function itemIcon(name: string) { return `/images/items/${name.replace(/\s+/g, "_")}_Icon.avif`; }
 function weightedWinRate(items: ItemStat[]) {

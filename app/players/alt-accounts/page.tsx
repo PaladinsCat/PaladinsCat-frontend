@@ -11,6 +11,8 @@ import {
   type AltAccountDirectoryGroup,
 } from "@/lib/api-client";
 import { useLocalization } from "@/lib/localization-context";
+import { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation } from "@/components/aceternity";
+
 
 const PAGE_SIZE = 24;
 

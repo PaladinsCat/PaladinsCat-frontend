@@ -597,7 +597,7 @@ function PlayerPresenceBreakdown({
 function ActivityChartStatement({ className = "" }: { className?: string }) {
   const showStatements = useContext(ActivityStatementContext);
   if (!showStatements) return null;
-  return <p className={`overflow-hidden text-ellipsis whitespace-nowrap text-xs font-bold leading-none text-[#ff0000] ${className}`}>
+  return <p className={`overflow-hidden text-ellipsis whitespace-nowrap text-xs font-bold leading-none text-[var(--pc-status-live)] ${className}`}>
     {PALADINS_2_STATEMENT}
   </p>;
 }

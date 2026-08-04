@@ -33,7 +33,7 @@ export default function LeaderboardChart({
       yLabel={t("generated.leaderboard.winRate")}
       title={resolvedTitle}
       height={400}
-      colors={["#4ade80"]}
+      colors={["var(--pc-chart-green)"]}
       showLegend={false}
       showXAxis={false}
     />

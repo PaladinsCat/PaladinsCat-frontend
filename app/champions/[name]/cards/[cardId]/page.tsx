@@ -18,6 +18,7 @@ import { getStatQuality } from "@/lib/stat-quality";
 import { ErrorState } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { useLocalization } from "@/lib/localization-context";
+import { SpotlightCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 function parseMaybeNumber(value: string | string[] | null | undefined): number | null {
   const raw = Array.isArray(value) ? value[0] : value;

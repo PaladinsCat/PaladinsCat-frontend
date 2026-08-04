@@ -17,8 +17,9 @@ import { RouteSkeleton } from "@/components/route-skeleton";
 import { useLocalization } from "@/lib/localization-context";
 import type { TranslationKey } from "@/lib/localization/messages";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
+import { chartFillRed, chartFillGreen, chartFillAmber, chartFillSky, chartRed, chartGreen, chartAmber, roleSupport, roleSentinel, roleFillSentinel, roleFillSupport } from "@/lib/chart-colors";
+import { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
-/* ── Metric configs ── */
 
 interface MetricConfig {
   key: string;
@@ -30,10 +31,10 @@ interface MetricConfig {
 }
 
 const METRIC_CONFIGS: MetricConfig[] = [
-  { key: "dpm", labelKey: "common.metrics.dpm", fullLabelKey: "common.metrics.damagePerMinute", color: "#f87171", fill: "rgba(248,113,113,0.15)", isDecimal: false },
-  { key: "hpm", labelKey: "common.metrics.hpm", fullLabelKey: "common.metrics.healingPerMinute", color: "#34d399", fill: "rgba(52,211,153,0.15)", isDecimal: false },
-  { key: "gpm", labelKey: "common.metrics.cpm", fullLabelKey: "common.metrics.creditsPerMinute", color: "#facc15", fill: "rgba(250,204,21,0.15)", isDecimal: false },
-  { key: "mpm", labelKey: "common.metrics.spm", fullLabelKey: "common.metrics.shieldingPerMinute", color: "#60a5fa", fill: "rgba(96,165,250,0.15)", isDecimal: false },
+  { key: "dpm", labelKey: "common.metrics.dpm", fullLabelKey: "common.metrics.damagePerMinute", color: chartRed, fill: chartFillRed, isDecimal: false },
+  { key: "hpm", labelKey: "common.metrics.hpm", fullLabelKey: "common.metrics.healingPerMinute", color: roleSentinel, fill: roleFillSentinel, isDecimal: false },
+  { key: "gpm", labelKey: "common.metrics.cpm", fullLabelKey: "common.metrics.creditsPerMinute", color: chartAmber, fill: chartFillAmber, isDecimal: false },
+  { key: "mpm", labelKey: "common.metrics.spm", fullLabelKey: "common.metrics.shieldingPerMinute", color: roleSupport, fill: roleFillSupport, isDecimal: false },
   { key: "kda", labelKey: "common.metrics.kda", fullLabelKey: "common.metrics.kdaRatio", color: "var(--pc-accent)", fill: "color-mix(in srgb, var(--pc-accent) 15%, transparent)", isDecimal: true },
 ];
 

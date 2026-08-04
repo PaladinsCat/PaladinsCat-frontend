@@ -16,6 +16,7 @@ import { useLocalization } from "@/lib/localization-context";
 import { PlayerModerationTag } from "@/components/player-name";
 import ReportModal from "@/components/ReportModal";
 import { useAuth } from "@/lib/auth-context";
+import { SpotlightCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 function duration(seconds: number) {
   if (!seconds) return "—";
@@ -93,7 +94,7 @@ export default function PrivateAccountDetailPage() {
               {t("generated.players.actions")}
             </button>
             {actionMenuOpen && (
-              <div className="absolute right-0 top-full z-30 mt-2 w-60 overflow-hidden rounded-xl border border-pc-border bg-pc-bg-secondary p-2 shadow-2xl" role="menu">
+              <div className="absolute right-0 top-full z-30 mt-2 w-60 overflow-hidden rounded-xl border border-pc-border bg-pc-bg-secondary p-2 shadow-lg" role="menu">
                 <div className="px-2 pb-1 pt-1 text-xs font-bold uppercase tracking-widest text-pc-text-muted">{t("generated.players.community")}</div>
                 <button type="button" role="menuitem" onClick={() => { setActionMenuOpen(false); setReportType("suspicious"); }} className="flex w-full items-center justify-between gap-3 rounded-lg px-2.5 py-2 text-left text-sm text-amber-400 transition-colors hover:bg-amber-500/10">
                   <span>{t("generated.players.reportSuspicious")}</span>

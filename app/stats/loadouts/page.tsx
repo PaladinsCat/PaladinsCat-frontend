@@ -10,6 +10,8 @@ import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
 import { useLocalization } from "@/lib/localization-context";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
+import { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation } from "@/components/aceternity";
+
 
 type SortKey = "championName" | "totalUses" | "winRate" | "avgDpm" | "avgHpm";
 type SortDir = "asc" | "desc";

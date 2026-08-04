@@ -89,7 +89,7 @@ export function LoadingOverlay({ visible }: { visible: boolean }) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={transition}
-          className="absolute inset-0 z-30 flex items-center justify-center rounded-[inherit] bg-pc-bg/70 backdrop-blur-sm"
+          className="absolute inset-0 z-30 flex items-center justify-center rounded-[inherit] pc-glass-dark"
           aria-live="polite"
           aria-busy="true"
         >

@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * Match Detail Page — /matches/[id]
  *
@@ -44,6 +46,8 @@ import { RouteSkeleton } from "@/components/route-skeleton";
 import { readBrowserResult, removeBrowserResult, writeBrowserResult } from "@/lib/browser-result-cache";
 import { getQueueLabel } from "@/lib/queue-labels";
 import { LocalizedText, useLocalization } from "@/lib/localization-context";
+import { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation } from "@/components/aceternity";
+
 import {
   fetchPlayerModerationBatch,
   fetchPrivateAccountModerationBatch,

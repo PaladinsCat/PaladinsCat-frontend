@@ -18,6 +18,7 @@ import HomeSearch from "@/components/home-search";
 import ScrambleText from "@/components/ScrambleText";
 import { useLocalization } from "@/lib/localization-context";
 
+
 const MotionLink = motion.create(Link);
 const WALLPAPER_BRAND_OUT_MS = 420;
 const WALLPAPER_BRAND_IN_MS = 480;
@@ -241,7 +242,7 @@ export default function HomePage() {
 
   return (
     <div
-      className="pc-home-root relative z-10 mx-auto max-w-6xl pb-8"
+      className="pc-home-root relative mx-auto max-w-6xl pb-8"
       data-wallpaper-mode={wallpaperModeAtCorner ? "true" : undefined}
       data-wallpaper-phase={wallpaperModePhase}
       data-search-active={searchActive ? "true" : undefined}
@@ -405,22 +406,24 @@ export default function HomePage() {
           className="mt-8 grid gap-4 md:grid-cols-3"
         >
           {exploreCards.map(({ href, icon: Icon, eyebrow, title }, index) => (
-            <MotionLink
+            <motion.div
               key={href}
-              href={href}
-              data-card-accent={index === 0 ? "primary" : index === 1 ? "secondary" : "tertiary"}
               variants={{
                 hidden: { opacity: 0, y: 22, scale: 0.97 },
                 visible: { opacity: 1, y: 0, scale: 1 },
               }}
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              whileHover={reduceMotion ? undefined : { y: -6, scale: 1.012 }}
-              whileTap={reduceMotion ? undefined : { scale: 0.985 }}
-              className="pc-glass pc-home-feature-card group relative flex min-h-44 flex-col items-center justify-center overflow-hidden rounded-2xl border border-white/5 p-6 text-center shadow-lg transition-colors duration-300 hover:shadow-[0_18px_45px_rgba(0,0,0,0.28)]"
             >
+              <MotionLink
+                href={href}
+                data-card-accent={index === 0 ? "primary" : index === 1 ? "secondary" : "tertiary"}
+                whileHover={reduceMotion ? undefined : { y: -6, scale: 1.012 }}
+                whileTap={reduceMotion ? undefined : { scale: 0.985 }}
+                className="pc-glass pc-home-feature-card group relative flex min-h-44 flex-col items-center justify-center overflow-hidden rounded-2xl border border-white/5 p-6 text-center shadow-lg transition-shadow duration-300 group-hover:shadow-pc-card-hover"
+              >
               <span
                 aria-hidden="true"
-                className="pc-home-card-aura absolute -left-20 -top-24 h-52 w-52 rounded-full opacity-35 blur-3xl transition-all duration-500 group-hover:translate-x-10 group-hover:translate-y-8 group-hover:opacity-100"
+                className="pc-home-card-aura absolute -left-20 -top-24 h-52 w-52 rounded-full opacity-35 blur-3xl transition-all duration-500 group-hover:translate-x-10 group-hover:translate-y-8 group-hover:opacity-60"
               />
               <ArrowRight className="pc-home-card-arrow absolute right-5 top-5 h-4 w-4 text-pc-text-muted transition-all duration-300 group-hover:translate-x-1" aria-hidden="true" />
               <motion.span
@@ -433,7 +436,8 @@ export default function HomePage() {
               <p className="relative mt-4 text-xs font-bold uppercase tracking-[0.16em] text-pc-text-muted transition-colors duration-300 group-hover:text-pc-text-secondary">{eyebrow}</p>
               <h3 className="relative mt-2 text-xl font-bold text-pc-text">{title}</h3>
               <span className="pc-home-card-rule absolute inset-x-8 bottom-0 h-px origin-center scale-x-0 transition-transform duration-500 group-hover:scale-x-100" aria-hidden="true" />
-            </MotionLink>
+                </MotionLink>
+            </motion.div>
           ))}
         </motion.div>
       </section>

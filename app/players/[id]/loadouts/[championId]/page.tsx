@@ -11,6 +11,7 @@ import { loadBuildReferenceData, type BuildCardReference } from "@/lib/build-ref
 import { getPlayerLoadoutChampionRoster, type PlayerLoadoutChampion } from "@/lib/player-loadout-roster";
 import { championSlug } from "@/lib/utils";
 import { useLocalization } from "@/lib/localization-context";
+import { SpotlightCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 export default function ChampionLoadoutsPage() {
   const { t } = useLocalization();

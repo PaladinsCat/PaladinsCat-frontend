@@ -9,6 +9,7 @@ import { fetchAutomaticAfkPlayerDetail, type AutomaticAfkPlayerDetail } from "@/
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { formatKda } from "@/lib/kda";
 import { useLocalization } from "@/lib/localization-context";
+import { SpotlightCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 function duration(seconds: number) {
   if (!seconds) return "—";

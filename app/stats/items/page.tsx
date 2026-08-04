@@ -11,6 +11,7 @@ import {
 } from "@/lib/build-reference";
 import { getStatQuality } from "@/lib/stat-quality";
 import { useLocalization } from "@/lib/localization-context";
+import { SpotlightCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 function itemIcon(name: string) {
   return `/images/items/${name.replace(/\s+/g, "_")}_Icon.avif`;

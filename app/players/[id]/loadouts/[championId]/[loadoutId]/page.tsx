@@ -11,6 +11,7 @@ import { getChampionIconSafe } from "@/lib/champion-icons";
 import { loadBuildCardReferences, type BuildCardReference } from "@/lib/build-reference";
 import { championSlug } from "@/lib/utils";
 import { useLocalization } from "@/lib/localization-context";
+import { SpotlightCard, BackgroundGradientAnimation } from "@/components/aceternity";
 import styles from "./page.module.css";
 
 function cardDescription(description: string | null | undefined, level: number, formatValue: (value: number) => string) {

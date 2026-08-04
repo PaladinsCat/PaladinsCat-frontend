@@ -253,11 +253,11 @@ export default function AccountPage() {
   return (
     <div className="mx-auto max-w-5xl">
       {/* ── Header ── */}
-      <section className="relative overflow-hidden rounded-2xl border border-pc-border bg-pc-bg-secondary/90 px-6 py-8 shadow-2xl backdrop-blur-sm sm:px-8 sm:py-10">
+      <section className="relative overflow-hidden rounded-2xl border border-pc-border bg-pc-bg-elevated/95 px-6 py-8 sm:px-8 sm:py-10">
         <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-pc-accent/20 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-32 left-1/3 h-56 w-56 rounded-full bg-pc-accent-alt/15 blur-3xl" />
         <div className="relative flex items-start gap-4 sm:items-center">
-          <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-pc-accent/25 bg-pc-accent/10 text-pc-accent shadow-lg shadow-pc-accent/10">
+          <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-pc-accent/25 bg-pc-accent/10 text-pc-accent shadow-pc-accent/10">
             <UserRoundCog className="h-7 w-7" aria-hidden="true" />
           </span>
           <div>
@@ -277,7 +277,7 @@ export default function AccountPage() {
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
 
       {/* ── Time Zone ── */}
-      <section className="rounded-2xl border border-pc-border bg-pc-bg-elevated/85 p-6 shadow-xl backdrop-blur-sm lg:col-span-2">
+      <section className="rounded-2xl border border-white/5 pc-glass p-6 lg:col-span-2">
         <div className="mb-2 flex items-center gap-3">
           <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-pc-accent/20 bg-pc-accent/10 text-pc-accent">
             <Clock3 className="h-5 w-5" aria-hidden="true" />
@@ -326,7 +326,7 @@ export default function AccountPage() {
       </section>
 
       {/* ── Custom wallpaper ── */}
-      <section className="rounded-2xl border border-pc-border bg-pc-bg-elevated/85 p-6 shadow-xl backdrop-blur-sm lg:col-span-2">
+      <section className="rounded-2xl border border-white/5 pc-glass p-6 lg:col-span-2">
         <div className="mb-2 flex items-center gap-3">
           <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-pc-accent-alt/20 bg-pc-accent-alt/10 text-pc-accent-alt">
             <ImageIcon className="h-5 w-5" aria-hidden="true" />
@@ -409,7 +409,7 @@ export default function AccountPage() {
       </section>
 
       {/* ── Profile Info ── */}
-      <section className="rounded-2xl border border-pc-border bg-pc-bg-elevated/85 p-6 shadow-xl backdrop-blur-sm">
+      <section className="rounded-2xl border border-white/5 pc-glass p-6">
         <div className="mb-4 flex items-center gap-3">
           <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-pc-accent-secondary/20 bg-pc-accent-secondary/10 text-pc-accent-secondary">
             <UserRound className="h-5 w-5" aria-hidden="true" />
@@ -482,7 +482,7 @@ export default function AccountPage() {
       </div>
 
       {/* ── Password Change ── */}
-      <section className="rounded-2xl border border-pc-border bg-pc-bg-elevated/85 p-6 shadow-xl backdrop-blur-sm lg:col-span-2">
+      <section className="rounded-2xl border border-white/5 pc-glass p-6 lg:col-span-2">
         <div className="mb-4 flex items-center gap-3">
           <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-pc-accent-third/20 bg-pc-accent-third/10 text-pc-accent-third">
             <LockKeyhole className="h-5 w-5" aria-hidden="true" />

@@ -21,6 +21,7 @@ import { ContentFade } from "@/components/async-state";
 import { ChartCardSkeleton, DataCardSkeleton } from "@/components/route-skeleton";
 import { useLocalization } from "@/lib/localization-context";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
+import { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 const ROLES = ["Frontline", "Damage", "Flank", "Support"] as const;
 
@@ -229,10 +230,10 @@ export default function StatsPage() {
           <DataCardSkeleton rows={5} />
         ) : <ContentFade className="flex-1">{(() => {
           const perfRows = [
-            { key: "dpm", label: t("generated.stats.dpm"), color: "#f87171" },
-            { key: "hpm", label: t("generated.stats.hpm"), color: "#34d399" },
-            { key: "gpm", label: t("generated.stats.cpm"), color: "#facc15" },
-            { key: "mpm", label: t("generated.stats.spm"), color: "#60a5fa" },
+            { key: "dpm", label: t("generated.stats.dpm"), color: "var(--pc-chart-red)" },
+            { key: "hpm", label: t("generated.stats.hpm"), color: "var(--pc-chart-green)" },
+            { key: "gpm", label: t("generated.stats.cpm"), color: "var(--pc-chart-amber)" },
+            { key: "mpm", label: t("generated.stats.spm"), color: "var(--pc-chart-sky)" },
             { key: "kda", label: t("generated.stats.kda"), color: "var(--pc-accent)" },
           ].map(({ key, label, color }) => {
             const d = metrics[key as keyof typeof metrics] as {
@@ -270,7 +271,7 @@ export default function StatsPage() {
               <PerformanceOverviewCard metrics={orderedEgpmBaselines.map((row) => ({
                 key: `egpm-${row.role}`,
                 label: row.role === "Frontline" ? t("common.roles.frontlineShort") : row.role === "Support" ? t("common.roles.supportShort") : row.role === "Damage" ? t("common.roles.damageShort") : row.role === "Global" ? t("common.roles.global") : t("common.roles.flank"),
-                color: row.role === "Global" ? "#facc15" : row.role === "Damage" ? "#f87171" : row.role === "Flank" ? "#c084fc" : row.role === "Support" ? "#34d399" : "#60a5fa",
+                color: row.role === "Global" ? "var(--pc-chart-amber)" : row.role === "Damage" ? "var(--pc-chart-red)" : row.role === "Flank" ? "var(--pc-role-flank)" : row.role === "Support" ? "var(--pc-chart-green)" : "var(--pc-chart-sky)",
                 p10: row.p10Ecpm,
                 p25: row.p25Ecpm,
                 mean: row.avgEcpm,

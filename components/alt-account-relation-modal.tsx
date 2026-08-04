@@ -148,9 +148,9 @@ export default function AltAccountRelationModal({
     <div
       ref={overlayRef}
       onClick={(event) => { if (event.target === overlayRef.current) onClose(); }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center pc-glass-dark"
     >
-      <section className="max-h-[min(90vh,48rem)] w-full max-w-xl overflow-y-auto rounded-2xl border border-fuchsia-400/25 bg-pc-bg-elevated p-5 shadow-2xl">
+      <section className="max-h-[min(90vh,48rem)] w-full max-w-xl overflow-y-auto rounded-2xl border border-fuchsia-400/25 bg-pc-bg-elevated p-5 shadow-lg">
         <header className="flex items-start justify-between gap-4">
           <div>
             <h2 className="text-lg font-bold text-pc-text">{t("moderation.altRelationTitle")}</h2>

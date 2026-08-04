@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Bell, CheckCheck, LoaderCircle } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import ReactDOM from "react-dom";
 import { useAuth } from "@/lib/auth-context";
 import {
   fetchAccountSiteNotifications,
@@ -31,6 +32,7 @@ export default function NotificationMenu() {
   const { user, isLoading: authLoading } = useAuth();
   const { t, formatDateTime } = useLocalization();
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -75,65 +77,133 @@ export default function NotificationMenu() {
     };
     window.addEventListener(NOTIFICATION_SYNC_EVENT, sync);
     window.addEventListener("storage", syncStorage);
-    window.addEventListener("focus", sync);
     document.addEventListener("visibilitychange", syncVisible);
     return () => {
       window.removeEventListener(NOTIFICATION_SYNC_EVENT, sync);
       window.removeEventListener("storage", syncStorage);
-      window.removeEventListener("focus", sync);
       document.removeEventListener("visibilitychange", syncVisible);
     };
   }, [loadNotifications]);
 
   useEffect(() => {
-    if (!open) return;
-    const handlePointerDown = (event: PointerEvent) => {
+    const close = (event: MouseEvent) => {
       if (!containerRef.current?.contains(event.target as Node)) setOpen(false);
     };
-    const handleKeyDown = (event: KeyboardEvent) => {
+    const closeKeyboard = (event: KeyboardEvent) => {
       if (event.key === "Escape") setOpen(false);
     };
-    document.addEventListener("pointerdown", handlePointerDown);
-    window.addEventListener("keydown", handleKeyDown);
+    if (open) {
+      window.addEventListener("mousedown", close);
+      window.addEventListener("keydown", closeKeyboard);
+    }
     return () => {
-      document.removeEventListener("pointerdown", handlePointerDown);
-      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("mousedown", close);
+      window.removeEventListener("keydown", closeKeyboard);
     };
   }, [open]);
 
-  const unreadCount = user
-    ? notifications.filter((notification) => !notification.readAt).length
-    : 0;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-  const markRead = (notification: Notification) => {
-    if (!user || notification.readAt) return;
-    const readAt = new Date().toISOString();
-    setNotifications((current) => current.map((entry) => (
-      entry.id === notification.id ? { ...entry, readAt } : entry
-    )));
-    void markSiteNotificationRead(notification.id).then(publishNotificationSync).catch(() => {
-      setNotifications((current) => current.map((entry) => (
-        entry.id === notification.id ? { ...entry, readAt: null } : entry
-      )));
-    });
-  };
+  const markAllRead = useCallback(async () => {
+    if (!user) return;
+    try {
+      await markAllSiteNotificationsRead();
+      setNotifications((rows) => rows.map((r) => ({ ...r, readAt: new Date().toISOString() })));
+      publishNotificationSync();
+    } catch {
+      /* ignore */
+    }
+  }, [user]);
 
-  const markAllRead = () => {
-    if (!user || unreadCount === 0) return;
-    const previous = notifications;
-    const readAt = new Date().toISOString();
-    setNotifications((current) => current.map((notification) => ({ ...notification, readAt })));
-    void markAllSiteNotificationsRead().then(publishNotificationSync).catch(() => setNotifications(previous));
-  };
+  const markRead = useCallback(
+    (notification: Notification) => {
+      if (notification.readAt) return;
+      if (user) {
+        void markSiteNotificationRead(notification.id)
+          .then(() => {
+            setNotifications((rows) => rows.map((r) => (r.id === notification.id ? { ...r, readAt: new Date().toISOString() } : r)));
+            publishNotificationSync();
+          })
+          .catch(() => {});
+      }
+      setNotifications((rows) => rows.map((r) => (r.id === notification.id ? { ...r, readAt: new Date().toISOString() } : r)));
+    },
+    [user]
+  );
 
-  const buttonLabel = unreadCount > 0
-    ? t("notifications.openUnread", { count: unreadCount })
-    : t("notifications.open");
+  const unreadCount = notifications.filter((n) => user && !n.readAt).length;
+  const buttonLabel =
+    unreadCount > 0
+      ? t("notifications.openUnread", { count: unreadCount })
+      : t("notifications.open");
   const toggleMenu = () => {
     const nextOpen = !open;
     setOpen(nextOpen);
     if (nextOpen) void loadNotifications();
   };
+
+  const dropdownContent = (
+    <div className="fixed right-4 top-[4rem] z-[70] w-[min(23rem,calc(100vw-2rem))] pt-2" style={{ maxWidth: "calc(100vw - 2rem)" }}>
+      <section className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-secondary shadow-lg" role="dialog" aria-label={t("notifications.title")}>
+        <header className="flex items-center justify-between gap-3 border-b border-pc-border px-4 py-3">
+          <div className="min-w-0">
+            <h2 className="font-semibold text-pc-text">{t("notifications.title")}</h2>
+            <p className="text-xs text-pc-text-muted">
+              {user ? (unreadCount > 0 ? t("notifications.unread", { count: unreadCount }) : t("notifications.caughtUp")) : t("notifications.latestUpdates")}
+            </p>
+          </div>
+          {user && unreadCount > 0 && (
+            <button
+              type="button"
+              onClick={markAllRead}
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-pc-accent transition-colors hover:bg-pc-accent/10"
+            >
+              <CheckCheck className="h-3.5 w-3.5" aria-hidden="true" />
+              {t("notifications.markAllRead")}
+            </button>
+          )}
+        </header>
+
+        <div className="max-h-[min(30rem,calc(100vh-7rem))] space-y-2 overflow-y-auto p-2">
+          {loading ? (
+            <div className="flex min-h-28 items-center justify-center text-pc-text-muted">
+              <LoaderCircle className="h-5 w-5 animate-spin" aria-label={t("notifications.loading")} />
+            </div>
+          ) : notifications.length > 0 ? (
+            notifications.map((notification) => {
+              const unread = Boolean(user && !notification.readAt);
+              return (
+                <button
+                  key={notification.id}
+                  type="button"
+                  onClick={() => markRead(notification)}
+                  className={`flex w-full items-start gap-3 rounded-lg border p-3 text-left transition-colors ${unread ? "border-pc-accent/25 bg-pc-bg-elevated text-pc-text hover:border-pc-accent/45" : "border-transparent bg-pc-bg-elevated/55 text-pc-text-secondary hover:border-pc-border"}`}
+                >
+                  <span className={`mt-1 h-2 w-2 shrink-0 rounded-full ${unread ? "bg-red-500" : notificationDot(notification.importance)}`} aria-hidden="true" />
+                  <span className="min-w-0 flex-1">
+                    <span className={`block text-sm leading-relaxed ${unread ? "font-medium" : ""}`}>{notification.message}</span>
+                    <time className="mt-1 block text-xs text-pc-text-muted">{formatDateTime(notification.timestamp)}</time>
+                  </span>
+                </button>
+              );
+            })
+          ) : (
+            <p className="px-3 py-8 text-center text-sm text-pc-text-muted">{t("notifications.empty")}</p>
+          )}
+        </div>
+
+        {!user && !loading && (
+          <div className="border-t border-pc-border px-4 py-3 text-xs text-pc-text-muted">
+            <Link href="/auth/login" onClick={() => setOpen(false)} className="font-medium text-pc-accent hover:text-pc-accent-light">
+              {t("notifications.login")}
+            </Link>{" "}{t("notifications.loginSuffix")}
+          </div>
+        )}
+      </section>
+    </div>
+  );
 
   return (
     <div ref={containerRef} className="relative">
@@ -151,68 +221,7 @@ export default function NotificationMenu() {
         )}
       </button>
 
-      {open && (
-        <div className="absolute right-0 top-full z-30 w-[min(23rem,calc(100vw-2rem))] pt-2">
-          <section className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-secondary shadow-2xl" role="dialog" aria-label={t("notifications.title")}>
-            <header className="flex items-center justify-between gap-3 border-b border-pc-border px-4 py-3">
-              <div className="min-w-0">
-                <h2 className="font-semibold text-pc-text">{t("notifications.title")}</h2>
-                <p className="text-xs text-pc-text-muted">
-                  {user
-                    ? (unreadCount > 0 ? t("notifications.unread", { count: unreadCount }) : t("notifications.caughtUp"))
-                    : t("notifications.latestUpdates")}
-                </p>
-              </div>
-              {user && unreadCount > 0 && (
-                <button
-                  type="button"
-                  onClick={markAllRead}
-                  className="inline-flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-pc-accent transition-colors hover:bg-pc-accent/10"
-                >
-                  <CheckCheck className="h-3.5 w-3.5" aria-hidden="true" />
-                  {t("notifications.markAllRead")}
-                </button>
-              )}
-            </header>
-
-            <div className="max-h-[min(30rem,calc(100vh-7rem))] space-y-2 overflow-y-auto p-2">
-              {loading ? (
-                <div className="flex min-h-28 items-center justify-center text-pc-text-muted">
-                  <LoaderCircle className="h-5 w-5 animate-spin" aria-label={t("notifications.loading")} />
-                </div>
-              ) : notifications.length > 0 ? (
-                notifications.map((notification) => {
-                  const unread = Boolean(user && !notification.readAt);
-                  return (
-                    <button
-                      key={notification.id}
-                      type="button"
-                      onClick={() => markRead(notification)}
-                      className={`flex w-full items-start gap-3 rounded-lg border p-3 text-left transition-colors ${unread ? "border-pc-accent/25 bg-pc-bg-elevated text-pc-text hover:border-pc-accent/45" : "border-transparent bg-pc-bg-elevated/55 text-pc-text-secondary hover:border-pc-border"}`}
-                    >
-                      <span className={`mt-1 h-2 w-2 shrink-0 rounded-full ${unread ? "bg-red-500" : notificationDot(notification.importance)}`} aria-hidden="true" />
-                      <span className="min-w-0 flex-1">
-                        <span className={`block text-sm leading-relaxed ${unread ? "font-medium" : ""}`}>{notification.message}</span>
-                        <time className="mt-1 block text-xs text-pc-text-muted">{formatDateTime(notification.timestamp)}</time>
-                      </span>
-                    </button>
-                  );
-                })
-              ) : (
-                <p className="px-3 py-8 text-center text-sm text-pc-text-muted">{t("notifications.empty")}</p>
-              )}
-            </div>
-
-            {!user && !loading && (
-              <div className="border-t border-pc-border px-4 py-3 text-xs text-pc-text-muted">
-                <Link href="/auth/login" onClick={() => setOpen(false)} className="font-medium text-pc-accent hover:text-pc-accent-light">
-                  {t("notifications.login")}
-                </Link>{" "}{t("notifications.loginSuffix")}
-              </div>
-            )}
-          </section>
-        </div>
-      )}
+      {mounted && open && dropdownContent && ReactDOM.createPortal(dropdownContent, document.body)}
     </div>
   );
 }

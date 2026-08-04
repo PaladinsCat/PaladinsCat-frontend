@@ -22,6 +22,7 @@ import { LoadingIndicator, LoadingPanel } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { useLocalization } from "@/lib/localization-context";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
+import { SpotlightCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 function itemIcon(name: string) { return `/images/items/${name.replace(/\s+/g, "_")}_Icon.avif`; }
 function rateColor(rate: number) { return getStatQuality(rate, 1, 1).color; }

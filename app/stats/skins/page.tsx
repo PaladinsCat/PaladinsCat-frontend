@@ -17,6 +17,8 @@ import { useLobbyTier } from "@/lib/lobby-tier-context";
 import { LoadingIndicator } from "@/components/async-state";
 import { useLocalization } from "@/lib/localization-context";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
+import { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation } from "@/components/aceternity";
+
 
 const ROLES = [
   { value: "Frontline", labelKey: "common.roles.frontline", icon: "/images/icons/Class_Front_Line_Icon.avif" },

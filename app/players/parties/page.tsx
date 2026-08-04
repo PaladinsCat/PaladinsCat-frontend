@@ -13,6 +13,8 @@ import {
   type PartyStackSummary,
 } from "@/lib/api-client";
 import { useLocalization } from "@/lib/localization-context";
+import { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation } from "@/components/aceternity";
+
 
 const PAGE_SIZE = 24;
 type DirectoryMode = "stacks" | "pairs";

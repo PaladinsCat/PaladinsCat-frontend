@@ -9,5 +9,6 @@ export async function generateMetadata() {
 }
 
 export default function PlayerActivityDetailsPage() {
-  return <PlayerActivityDetails />;
+  return (
+    <PlayerActivityDetails />);
 }

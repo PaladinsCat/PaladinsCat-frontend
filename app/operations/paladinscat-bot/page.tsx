@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { getServerLocalization } from "@/lib/server-localization";
+import { SpotlightCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 const DISCORD_CLIENT_ID = "1504377146020200539";
 const SERVER_INSTALL_URL = `https://discord.com/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&integration_type=0&scope=applications.commands`;
@@ -44,9 +45,9 @@ export default async function PaladinsCatBotPage() {
   ];
 
   return (
-    <div className="mx-auto max-w-6xl overflow-hidden rounded-2xl border border-pc-border bg-pc-bg-secondary/90 shadow-2xl backdrop-blur-sm">
+    <div className="mx-auto max-w-6xl overflow-hidden rounded-2xl border border-pc-border bg-pc-bg-elevated/95">
       <section className="relative overflow-hidden border-b border-pc-border px-5 py-12 sm:px-10 sm:py-16 lg:px-16 lg:py-20">
-        <div className="pointer-events-none absolute -right-32 -top-36 h-96 w-96 rounded-full bg-[#5865f2]/20 blur-3xl" />
+        <div className="pointer-events-none absolute -right-32 -top-36 h-96 w-96 rounded-full bg-[var(--pc-discord-primary)]/20 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-48 left-1/4 h-80 w-80 rounded-full bg-pc-accent/15 blur-3xl" />
         <div className="relative grid items-center gap-12 lg:grid-cols-[1.08fr_0.92fr] lg:gap-16">
           <div>
@@ -61,13 +62,13 @@ export default async function PaladinsCatBotPage() {
                 href={SERVER_INSTALL_URL}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#5865f2] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-[#5865f2]/20 transition hover:bg-[#6873f5]"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[var(--pc-discord-primary)] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-[var(--pc-discord-primary)]/20 transition hover:bg-[var(--pc-discord-hover)]"
               >
                 <Bot className="h-5 w-5" aria-hidden="true" />
                 {t("bot.inviteServer")}
                 <ExternalLink className="h-4 w-4" aria-hidden="true" />
               </a>
-              <a href={USER_INSTALL_URL} target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[#5865f2]/40 bg-[#5865f2]/10 px-6 py-3 text-sm font-bold text-[#c8ccff] transition hover:border-[#7882f7] hover:bg-[#5865f2]/15">
+              <a href={USER_INSTALL_URL} target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[var(--pc-discord-primary)]/40 bg-[var(--pc-discord-primary)]/10 px-6 py-3 text-sm font-bold text-[var(--pc-discord-text-light)] transition hover:border-[var(--pc-discord-border)] hover:bg-[var(--pc-discord-primary)]/15">
                 <UserPlus className="h-4 w-4" aria-hidden="true" />
                 {t("bot.inviteUser")}
                 <ExternalLink className="h-4 w-4" aria-hidden="true" />
@@ -85,23 +86,23 @@ export default async function PaladinsCatBotPage() {
           </div>
 
           <div className="relative mx-auto w-full max-w-lg">
-            <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-[#5865f2]/20 to-pc-accent/10 blur-xl" />
-            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#111216] shadow-2xl">
+            <div className="absolute -inset-4 rounded-2xl bg-gradient-to-br from-[var(--pc-discord-primary)]/20 to-pc-accent/10 blur-xl" />
+            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[var(--pc-bg-secondary)] shadow-lg">
               <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
                 <div className="flex items-center gap-3">
                   <span className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-pc-accent/15">
                     <Image src="/images/icons/paladinscat.avif" alt="" width={28} height={28} unoptimized className="h-7 w-7 rounded-md" />
-                    <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-[#111216] bg-emerald-400" />
+                    <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-[var(--pc-bg-secondary)] bg-emerald-400" />
                   </span>
                   <span><span className="block text-sm font-bold text-white">{t("generated.common.paladinscat")}</span><span className="text-xs text-emerald-400">{t("bot.previewOnline")}</span></span>
                 </div>
-                <Sparkles className="h-5 w-5 text-[#aeb4ff]" aria-hidden="true" />
+                <Sparkles className="h-5 w-5 text-[var(--pc-discord-text)]" aria-hidden="true" />
               </div>
               <div className="space-y-4 p-5 sm:p-6">
                 <div className="rounded-xl bg-white/[0.045] p-4">
                   <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-white/40">{t("bot.previewPrompt")}</p>
-                  <div className="flex items-center gap-2 rounded-lg bg-[#222329] px-3 py-2.5 font-mono text-sm text-white">
-                    <span className="text-[#aeb4ff]">{t("bot.previewCommand")}</span>
+                  <div className="flex items-center gap-2 rounded-lg bg-[var(--pc-bg-elevated)] px-3 py-2.5 font-mono text-sm text-white">
+                    <span className="text-[var(--pc-discord-text)]">{t("bot.previewCommand")}</span>
                     <span className="text-white/55">{t("bot.previewPlayerValue")}</span>
                   </div>
                 </div>
@@ -144,7 +145,7 @@ export default async function PaladinsCatBotPage() {
       <section id="commands" className="border-y border-pc-border bg-pc-bg/60 px-5 py-14 sm:px-10 sm:py-20 lg:px-16 scroll-mt-24">
         <div className="grid gap-10 lg:grid-cols-[0.72fr_1.28fr] lg:gap-16">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#aeb4ff]">{t("bot.commandsEyebrow")}</p>
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--pc-discord-text)]">{t("bot.commandsEyebrow")}</p>
             <h2 className="mt-3 text-3xl font-bold tracking-tight text-pc-text sm:text-4xl">{t("bot.commandsTitle")}</h2>
             <p className="mt-4 leading-7 text-pc-text-secondary">{t("bot.commandsIntro")}</p>
           </div>
@@ -160,11 +161,11 @@ export default async function PaladinsCatBotPage() {
       </section>
 
       <section className="px-5 py-14 sm:px-10 sm:py-20 lg:px-16">
-        <div className="grid overflow-hidden rounded-2xl border border-pc-accent/20 bg-gradient-to-br from-pc-accent/[0.10] to-[#5865f2]/[0.08] lg:grid-cols-[0.9fr_1.1fr]">
+        <div className="grid overflow-hidden rounded-2xl border border-pc-accent/20 bg-gradient-to-br from-pc-accent/[0.10] to-[var(--pc-discord-primary)]/[0.08] lg:grid-cols-[0.9fr_1.1fr]">
           <div className="flex min-h-64 items-center justify-center border-b border-pc-border/70 p-10 lg:border-b-0 lg:border-r">
-            <div className="relative flex h-36 w-36 items-center justify-center rounded-full border border-pc-accent/20 bg-pc-bg-secondary shadow-2xl">
+            <div className="relative flex h-36 w-36 items-center justify-center rounded-full border border-pc-accent/20 bg-pc-bg-secondary shadow-lg">
               <ShieldCheck className="h-16 w-16 text-pc-accent" aria-hidden="true" />
-              <span className="absolute -right-1 top-2 flex h-10 w-10 items-center justify-center rounded-full border border-[#5865f2]/30 bg-[#5865f2]/20"><Bot className="h-5 w-5 text-[#aeb4ff]" aria-hidden="true" /></span>
+              <span className="absolute -right-1 top-2 flex h-10 w-10 items-center justify-center rounded-full border border-[var(--pc-discord-primary)]/30 bg-[var(--pc-discord-primary)]/20"><Bot className="h-5 w-5 text-[var(--pc-discord-text)]" aria-hidden="true" /></span>
             </div>
           </div>
           <div className="p-6 sm:p-10">
@@ -185,12 +186,12 @@ export default async function PaladinsCatBotPage() {
         <h2 className="mt-4 text-3xl font-bold tracking-tight text-pc-text sm:text-4xl">{t("bot.finalTitle")}</h2>
         <p className="mx-auto mt-4 max-w-2xl leading-7 text-pc-text-secondary">{t("bot.finalBody")}</p>
         <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-          <a href={SERVER_INSTALL_URL} target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#5865f2] px-7 py-3.5 text-sm font-bold text-white shadow-lg shadow-[#5865f2]/20 transition hover:bg-[#6873f5]">
+          <a href={SERVER_INSTALL_URL} target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[var(--pc-discord-primary)] px-7 py-3.5 text-sm font-bold text-white shadow-lg shadow-[var(--pc-discord-primary)]/20 transition hover:bg-[var(--pc-discord-hover)]">
             <Bot className="h-5 w-5" aria-hidden="true" />
             {t("bot.inviteServer")}
             <ExternalLink className="h-4 w-4" aria-hidden="true" />
           </a>
-          <a href={USER_INSTALL_URL} target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[#5865f2]/40 bg-[#5865f2]/10 px-7 py-3.5 text-sm font-bold text-[#c8ccff] transition hover:border-[#7882f7] hover:bg-[#5865f2]/15">
+          <a href={USER_INSTALL_URL} target="_blank" rel="noreferrer" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[var(--pc-discord-primary)]/40 bg-[var(--pc-discord-primary)]/10 px-7 py-3.5 text-sm font-bold text-[var(--pc-discord-text-light)] transition hover:border-[var(--pc-discord-border)] hover:bg-[var(--pc-discord-primary)]/15">
             <UserPlus className="h-5 w-5" aria-hidden="true" />
             {t("bot.inviteUser")}
             <ExternalLink className="h-4 w-4" aria-hidden="true" />

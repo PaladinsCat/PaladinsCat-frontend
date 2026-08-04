@@ -7,6 +7,7 @@ import { ContentFade, EmptyState, ErrorState } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { useLocalization } from "@/lib/localization-context";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
+import { SpotlightCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 export default function RegionsPage() {
   const { t , formatPercent} = useLocalization();

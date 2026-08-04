@@ -24,7 +24,7 @@ export default function BottomNav() {
 
   return (
     <div className="fixed bottom-[max(0.5rem,env(safe-area-inset-bottom))] left-1/2 z-50 w-[calc(100vw-1rem)] max-w-sm -translate-x-1/2 sm:bottom-6">
-      <div className="grid grid-cols-5 items-center rounded-2xl border border-pc-border bg-pc-bg-elevated/90 p-1.5 shadow-lg backdrop-blur-md">
+      <div className="grid grid-cols-5 items-center rounded-2xl border border-white/5 pc-glass p-1.5">
         {items.map((item) => {
           const isActive =
             item.href === "/"
