@@ -354,7 +354,6 @@ export default function Nav() {
             <div className="flex items-center gap-1">
               <LanguageMenu />
               <NotificationMenu />
-              {/* Mobile hamburger button — opens the complete site menu */}
               <button
                 onClick={() => setSideMenuOpen(true)}
                 className="text-pc-text hover:text-pc-accent transition-colors p-2"
