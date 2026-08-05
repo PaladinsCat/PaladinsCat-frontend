@@ -10,7 +10,6 @@ import TablePagination, { type TablePageSize } from "@/components/table-paginati
 import PerformanceRangeBellCurve from "@/components/performance-range-bell-curve";
 import { useLocalization } from "@/lib/localization-context";
 import type { TranslationKey } from "@/lib/localization/messages";
-import { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 
 const METRICS = [

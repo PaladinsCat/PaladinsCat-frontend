@@ -9,7 +9,6 @@ import { fetchPrivateAccountsDirectory, type PrivateAccountSummary } from "@/lib
 import { TIER_NAMES, getRankIconPath, getTierColor } from "@/lib/tier-utils";
 import { useLocalization } from "@/lib/localization-context";
 import { PlayerModerationTag } from "@/components/player-name";
-import { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 
 const PAGE_SIZE = 24;

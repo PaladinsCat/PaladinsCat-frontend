@@ -16,7 +16,6 @@ import { useLocalization } from "@/lib/localization-context";
 import { PlayerModerationTag } from "@/components/player-name";
 import ReportModal from "@/components/ReportModal";
 import { useAuth } from "@/lib/auth-context";
-import { SpotlightCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 function duration(seconds: number) {
   if (!seconds) return "—";

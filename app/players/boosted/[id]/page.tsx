@@ -12,7 +12,6 @@ import {
 import { useLocalization } from "@/lib/localization-context";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { formatKda } from "@/lib/kda";
-import { SpotlightCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 function duration(seconds: number) {
   if (!seconds) return "—";

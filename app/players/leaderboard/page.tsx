@@ -8,7 +8,6 @@ import { LoadingPanel } from "@/components/async-state";
 import PlayerName from "@/components/player-name";
 import { useLocalization } from "@/lib/localization-context";
 import type { TranslationKey } from "@/lib/localization/messages";
-import { BackgroundGradientAnimation } from "@/components/aceternity";
 
 const TIER_GROUPS: ReadonlyArray<{
   group: string;
@@ -131,9 +130,7 @@ export default function LeaderboardPage() {
   };
 
   return (
-    <div className="relative overflow-hidden">
-      <BackgroundGradientAnimation />
-      <div className="relative z-10 space-y-6">
+    <div className="space-y-6">
       <div className="min-w-0">
         <Link href="/players" className="text-pc-accent text-xs hover:underline mb-2 inline-block">{t("generated.players.players")}</Link>
         <h1 className="pc-heading pc-heading-lg break-words text-pc-accent">{t("generated.players.rankedLeaderboard")}</h1>
@@ -452,7 +449,6 @@ export default function LeaderboardPage() {
           )}
         </div>
 
-      </div>
       </div>
     </div>
   );

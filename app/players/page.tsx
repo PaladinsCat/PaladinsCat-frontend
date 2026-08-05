@@ -4,7 +4,6 @@ import {
   type PlayersOverview,
 } from "@/lib/api-client";
 import PlayersPageClient from "./players-page-client";
-import { SpotlightCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 
 // User-facing error keys — resolved at the UI layer via t()
@@ -56,12 +55,5 @@ export default async function PlayersPage() {
     console.error("[players] Server overview fetch failed; using browser fallback", error);
   }
 
-  return (
-    <div className="relative overflow-hidden">
-      <BackgroundGradientAnimation />
-      <div className="relative z-10">
-        <PlayersPageClient initialOverview={initialOverview} />
-      </div>
-    </div>
-  );
+  return <PlayersPageClient initialOverview={initialOverview} />;
 }

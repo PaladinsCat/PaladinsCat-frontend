@@ -7,7 +7,6 @@ import { LoadingPanel } from "@/components/async-state";
 import PlayerName from "@/components/player-name";
 import PlayerDirectoryGrid from "@/components/player-directory-grid";
 import { useLocalization } from "@/lib/localization-context";
-import { SpotlightCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 export default function BoostedPlayersPage() {
   const { t , formatNumber} = useLocalization();
@@ -22,13 +21,10 @@ export default function BoostedPlayersPage() {
   }, []);
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-6 relative overflow-hidden">
-      <BackgroundGradientAnimation />
-      <div className="relative z-10">
+    <div className="mx-auto w-full max-w-4xl space-y-6">
         <Link href="/players" className="mb-2 inline-block text-xs text-pc-accent hover:underline">{t("generated.players.players")}</Link>
         <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("moderation.boostedPlayers")}</h1>
         <p className="mt-1 text-sm text-pc-text-secondary">{t("moderation.boostedDescription")}</p>
-      </div>
 
       <div className="flex items-center gap-2">
         <div className="h-2 w-2 rounded-full bg-orange-400" />

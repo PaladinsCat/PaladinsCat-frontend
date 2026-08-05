@@ -12,7 +12,6 @@ import { LoadingPanel } from "@/components/async-state";
 import PlayerName from "@/components/player-name";
 import PlayerDirectoryGrid from "@/components/player-directory-grid";
 import { useLocalization } from "@/lib/localization-context";
-import { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 
 const DIRECTORY_PAGE_SIZE = 100;

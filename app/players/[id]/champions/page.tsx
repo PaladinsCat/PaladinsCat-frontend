@@ -10,7 +10,6 @@ import { championMasteryLevelFromXp } from "@/lib/champion-mastery";
 import { formatKda } from "@/lib/kda";
 import { useLocalization } from "@/lib/localization-context";
 import { formatLocalDateTime } from "@/lib/time-format";
-import { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 
 const ROLES = [

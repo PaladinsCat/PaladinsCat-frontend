@@ -21,7 +21,6 @@ import { fetchPlayerModeration } from "@/lib/player-moderation";
 import { useLocalization } from "@/lib/localization-context";
 import { estimateLiveTeamWinChance } from "@/lib/live-team-estimate";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
-import { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 
 interface PlayerData {
