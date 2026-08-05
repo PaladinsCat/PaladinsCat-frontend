@@ -198,6 +198,7 @@
   "generated.admin.topPagesSubtitle": "Normalized public routes",
   "generated.admin.apiKeysSubtitle": "Stored relay state; viewing this page does not spend quota",
   "generated.admin.hideKeyIds": "Hide key IDs",
+  "generated.admin.maskedKeyId": "ABCD•••",
   "generated.admin.showKeyIds": "Show key IDs",
   "generated.admin.allKeysCombined": "All keys combined",
   "generated.admin.databaseSubtitle": "Current stored platform totals",
