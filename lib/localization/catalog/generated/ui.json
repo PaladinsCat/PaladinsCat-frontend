@@ -197,6 +197,8 @@
   "generated.admin.trafficSubtitle": "Anonymous browser visitors and page views",
   "generated.admin.topPagesSubtitle": "Normalized public routes",
   "generated.admin.apiKeysSubtitle": "Stored relay state; viewing this page does not spend quota",
+  "generated.admin.hideKeyIds": "Hide key IDs",
+  "generated.admin.showKeyIds": "Show key IDs",
   "generated.admin.allKeysCombined": "All keys combined",
   "generated.admin.databaseSubtitle": "Current stored platform totals",
   "generated.admin.endpointsSubtitle": "Calls and mean relay response time",

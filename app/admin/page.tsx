@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Activity, Bell, Database, Eye, Gamepad2, Gauge, HeartPulse, KeyRound, RefreshCw, ScrollText, Users } from "lucide-react";
+import { Activity, Bell, Database, Eye, EyeOff, Gamepad2, Gauge, HeartPulse, KeyRound, RefreshCw, ScrollText, Users } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { fetchAdminDashboard, type AdminDashboard } from "@/lib/admin-dashboard-api";
 import { ContentFade, ErrorState, LoadingPanel } from "@/components/async-state";
@@ -19,6 +19,7 @@ export default function AdminDashboardPage() {
   const [dashboard, setDashboard] = useState<AdminDashboard | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showKeyIds, setShowKeyIds] = useState(false);
   const isAdmin = user?.isAdmin ?? false;
 
   const load = useCallback(async () => {
@@ -110,9 +111,19 @@ export default function AdminDashboardPage() {
 
       <section className="grid grid-cols-1 gap-5 xl:grid-cols-3">
         <div className="pc-card xl:col-span-2">
-          <SectionTitle icon={KeyRound} title={t("generated.admin.hiRezApiKeys")} subtitle={t("generated.admin.apiKeysSubtitle")} />
+          <div className="flex items-start justify-between gap-3">
+            <SectionTitle icon={KeyRound} title={t("generated.admin.hiRezApiKeys")} subtitle={t("generated.admin.apiKeysSubtitle")} />
+            <button
+              type="button"
+              onClick={() => setShowKeyIds((prev) => !prev)}
+              className="pc-btn-secondary inline-flex items-center gap-1.5 whitespace-nowrap text-xs"
+            >
+              {showKeyIds ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+              {showKeyIds ? t("generated.admin.hideKeyIds") : t("generated.admin.showKeyIds")}
+            </button>
+          </div>
           <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
-            {dashboard.hirez.keys.map((key) => <ApiKeyCard key={key.devId} apiKey={key} />)}
+            {dashboard.hirez.keys.map((key) => <ApiKeyCard key={key.devId} apiKey={key} showKeyId={showKeyIds} />)}
           </div>
           <div className="mt-5">
             <div className="mb-1.5 flex justify-between text-xs text-pc-text-muted"><span>{t("generated.admin.combinedDailyBudget")}</span><span>{formatNumber(budgetPercent, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}{t("generated.admin.used")}</span></div>
@@ -171,7 +182,7 @@ function TrafficChart({ dashboard }: { dashboard: AdminDashboard }) {
   return <div className="mt-5 flex h-52 items-end gap-1.5 overflow-x-auto border-b border-pc-border pb-2">{dashboard.traffic.daily.map((row) => <div key={row.date} className="group flex min-w-9 flex-1 flex-col items-center justify-end gap-1"><div className="text-xs text-pc-text-muted opacity-0 transition-opacity group-hover:opacity-100">{formatNumber(row.visitors)}/{formatNumber(row.pageViews)}</div><div className="relative flex h-36 w-full max-w-9 items-end justify-center"><div className="w-5 rounded-t bg-pc-accent-deep/70" style={{ height: `${Math.max(2, (row.pageViews / max) * 100)}%` }} /><div className="absolute bottom-0 w-2 rounded-t bg-pc-accent" style={{ height: `${Math.max(2, (row.visitors / max) * 100)}%` }} /></div><span className="text-xs text-pc-text-muted">{new Intl.DateTimeFormat(locale, { weekday: "short", timeZone: "UTC" }).format(new Date(`${row.date}T00:00:00Z`))}</span><span className="text-xs tabular-nums text-pc-text-secondary">{formatNumber(row.matches)}</span></div>)}</div>;
 }
 
-function ApiKeyCard({ apiKey }: { apiKey: AdminDashboard["hirez"]["keys"][number] }) {
+function ApiKeyCard({ apiKey, showKeyId }: { apiKey: AdminDashboard["hirez"]["keys"][number]; showKeyId: boolean }) {
   const { t, formatNumber, formatDateTime } = useLocalization();
   const percent = apiKey.dailyLimit > 0 ? Math.min(100, (apiKey.used / apiKey.dailyLimit) * 100) : 0;
   const color = percent >= 90 ? "bg-rose-400" : percent >= 75 ? "bg-amber-400" : "bg-pc-accent";
@@ -187,7 +198,7 @@ function ApiKeyCard({ apiKey }: { apiKey: AdminDashboard["hirez"]["keys"][number
     : apiKey.status === "unhealthy"
       ? "bg-rose-400/15 text-rose-300"
       : "bg-amber-400/15 text-amber-300";
-  return <div className="rounded-xl border border-pc-border bg-pc-bg/35 p-3"><div className="flex items-center justify-between"><span className="font-mono text-xs font-bold text-pc-text">{t("generated.admin.key")}{" "}{apiKey.devId}</span><span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${statusColor}`}>{statusLabel}</span></div><div className="mt-3 flex items-end justify-between"><div><div className="text-lg font-bold tabular-nums text-pc-text">{formatNumber(apiKey.remaining)}</div><div className="text-xs text-pc-text-muted">{t("generated.admin.remaining")}</div></div><div className="text-right text-xs text-pc-text-secondary">{formatNumber(apiKey.used)} / {formatNumber(apiKey.dailyLimit)}</div></div><div className="mt-2 h-1.5 overflow-hidden rounded-full bg-pc-bg"><div className={`h-full rounded-full ${color}`} style={{ width: `${percent}%` }} /></div><div className="mt-2 truncate text-xs text-pc-text-muted">{t("generated.admin.synced")}{" "}{apiKey.lastSyncAt ? formatDateTime(apiKey.lastSyncAt) : t("generated.admin.never")}</div></div>;
+  return <div className="rounded-xl border border-pc-border bg-pc-bg/35 p-3"><div className="flex items-center justify-between"><span className="font-mono text-xs font-bold text-pc-text">{t("generated.admin.key")}{" "}{showKeyId ? apiKey.devId : "ABCD\u2022\u2022\u2022"}</span><span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${statusColor}`}>{statusLabel}</span></div><div className="mt-3 flex items-end justify-between"><div><div className="text-lg font-bold tabular-nums text-pc-text">{formatNumber(apiKey.remaining)}</div><div className="text-xs text-pc-text-muted">{t("generated.admin.remaining")}</div></div><div className="text-right text-xs text-pc-text-secondary">{formatNumber(apiKey.used)} / {formatNumber(apiKey.dailyLimit)}</div></div><div className="mt-2 h-1.5 overflow-hidden rounded-full bg-pc-bg"><div className={`h-full rounded-full ${color}`} style={{ width: `${percent}%` }} /></div><div className="mt-2 truncate text-xs text-pc-text-muted">{t("generated.admin.synced")}{" "}{apiKey.lastSyncAt ? formatDateTime(apiKey.lastSyncAt) : t("generated.admin.never")}</div></div>;
 }
 
 function HourlyBars({ rows }: { rows: Array<{ hour: string; calls: number }> }) {
