@@ -309,7 +309,7 @@ export default function Nav() {
 
             {/* Right: grouped menu and account controls */}
             {/* Player search lives on /players page; champion search on /champions page */}
-            <div className="flex shrink-0 items-center justify-end gap-4">
+            <div className="flex shrink-0 items-center justify-end gap-4" suppressHydrationWarning>
               <LanguageMenu />
               <NotificationMenu />
               <button
@@ -351,7 +351,7 @@ export default function Nav() {
               <img src="/images/icons/paladinscat.avif" alt="" className="w-7 h-7" />
               {t("generated.common.paladinscat")}</Link>
 
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1" suppressHydrationWarning>
               <LanguageMenu />
               <NotificationMenu />
               <button
