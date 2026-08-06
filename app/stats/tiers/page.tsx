@@ -133,7 +133,7 @@ function DistributionChart({
                 />
                 <div
                   className="text-xs text-pc-text-secondary tabular-nums leading-none whitespace-nowrap px-0.5"
-                  title={`${row.tier}: ${formatNumber(row.totalPlays)}`}
+                  title={t("generated.stats.value1Value2Value3", { value1: row.tier, value2: formatNumber(row.totalPlays), value3: formatNumber(share, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) })}
                 >
                   {row.totalPlays > 0 ? compactCount(row.totalPlays) : ""}
                 </div>
