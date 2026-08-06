@@ -132,7 +132,7 @@ function DistributionChart({
                   loading="lazy"
                 />
                 <div
-                  className="text-[10px] text-pc-text-secondary tabular-nums leading-none whitespace-nowrap px-0.5"
+                  className="text-xs text-pc-text-secondary tabular-nums leading-none whitespace-nowrap px-0.5"
                   title={`${row.tier}: ${formatNumber(row.totalPlays)}`}
                 >
                   {row.totalPlays > 0 ? compactCount(row.totalPlays) : ""}
