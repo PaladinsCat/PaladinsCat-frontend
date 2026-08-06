@@ -100,12 +100,37 @@ export default function ChampionCardDetailPage() {
     return (championData.loadouts ?? []).find((card) => statNameKey(card.name) === statNameKey(detail.cardName)) ?? null;
   }, [championData, detail]);
 
+  // Canonical set of current talent IDs for this champion from local data.
+  // champion-data.json holds only the 3 live talents per champion (no removed
+  // flag), whereas the backend stats payload may also include OLD/obsolete
+  // talents that are no longer in the game. Obsolete entries are identifiable
+  // by a 0 match count on the backend response.
+  const currentTalentIds = useMemo(() => {
+    const ids = new Set<number>();
+    for (const talent of championData?.talents ?? []) {
+      if (talent?.id != null) ids.add(Number(talent.id));
+    }
+    return ids;
+  }, [championData]);
+
+  const visibleTalents = useMemo(() => {
+    const all = detail?.talents ?? [];
+    if (!detail) return [];
+    if (currentTalentIds.size > 0) {
+      // Prefer the local canonical talent set so only the current 3 show, even
+      // if a live talent happens to have no recorded matches on this card.
+      return all.filter((talent) => currentTalentIds.has(talent.talentId));
+    }
+    // Fallback (local data unavailable): hide 0-match / obsolete talents.
+    return all.filter((talent) => (talent.totalPlays ?? 0) > 0);
+  }, [detail, currentTalentIds]);
+
   const selectedTalent = useMemo(() => {
     if (selectedTalentId == null) return null;
-    return (detail?.talents ?? []).find((talent) => talent.talentId === selectedTalentId) ?? null;
-  }, [detail, selectedTalentId]);
+    return visibleTalents.find((talent) => talent.talentId === selectedTalentId) ?? null;
+  }, [visibleTalents, selectedTalentId]);
 
-  const maxTalentPlays = useMemo(() => Math.max(1, ...(detail?.talents ?? []).map((talent) => talent.totalPlays)), [detail]);
+  const maxTalentPlays = useMemo(() => Math.max(1, ...visibleTalents.map((talent) => talent.totalPlays)), [visibleTalents]);
   const maxLevelPlays = useMemo(() => Math.max(1, ...(detail?.levels ?? []).map((level) => level.plays)), [detail]);
 
   function selectTalent(talentId: number | null) {
@@ -189,7 +214,7 @@ export default function ChampionCardDetailPage() {
           )}
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          {detail.talents.map((talent) => {
+          {visibleTalents.map((talent) => {
             return (
               <TalentPairingCard
                 key={talent.talentId}

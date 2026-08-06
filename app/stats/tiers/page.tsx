@@ -41,6 +41,15 @@ function weightedAverage(rows: TierStat[]): number {
   return rows.reduce((sum, row) => sum + row.tierSort * row.totalPlays, 0) / total;
 }
 
+// Compact count for tight bar labels: >=1000 renders as "1k" / "2.5k".
+// Keeps the number short so labels never overlap, without expanding chart width.
+function compactCount(value: number): string {
+  if (!Number.isFinite(value) || value < 0) return String(value || 0);
+  if (value < 1000) return String(Math.round(value));
+  const k = Math.round((value / 1000) * 10) / 10;
+  return `${k % 1 === 0 ? String(Math.round(k)) : k.toFixed(1)}k`;
+}
+
 function rankIconForTier(tierSort: number): string {
   return getRankIconPath(tierSort, tierSort === 26 ? 101 : tierSort === 27 ? 1 : 0);
 }
@@ -122,8 +131,11 @@ function DistributionChart({
                   className="h-5 w-5 object-contain drop-shadow"
                   loading="lazy"
                 />
-                <div className="text-xs text-pc-text-secondary tabular-nums leading-none">
-                  {row.totalPlays > 0 ? formatNumber(row.totalPlays) : ""}
+                <div
+                  className="text-[10px] text-pc-text-secondary tabular-nums leading-none whitespace-nowrap px-0.5"
+                  title={`${row.tier}: ${formatNumber(row.totalPlays)}`}
+                >
+                  {row.totalPlays > 0 ? compactCount(row.totalPlays) : ""}
                 </div>
               </div>
             );
