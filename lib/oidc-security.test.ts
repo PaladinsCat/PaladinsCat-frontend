@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createTransaction, getJwkForTest, requireSameOrigin, resetJwksCacheForTest, safeReturnPath, stateMatches } from "./oidc-security.ts";
 import { csrfHeader } from "./csrf.ts";
+import { readFileSync } from "node:fs";
 
 test("rejects open redirects", () => {
   for (const path of ["https://evil.example", "//evil.example", "/%5c%5cevil.example", "/admin", "/auth/login"]) assert.equal(safeReturnPath(path), "/");
@@ -41,4 +42,10 @@ test("cookie-auth CSRF header is required only for unsafe requests", () => {
   assert.equal(csrfHeader("__Host-pc_csrf=csrf-value", "POST"), "csrf-value");
   assert.equal(csrfHeader("other=value", "POST"), null);
   assert.equal(csrfHeader("__Host-pc_csrf=csrf-value", "GET"), null);
+});
+test("BFF credential is server-only and never a public environment value", () => {
+  const source = readFileSync(new URL("./oidc-bff-service.ts", import.meta.url), "utf8");
+  assert.match(source, /import "server-only"/);
+  assert.match(source, /PALADINSCAT_OIDC_BFF_SERVICE_TOKEN_FILE/);
+  assert.doesNotMatch(source, /NEXT_PUBLIC/);
 });

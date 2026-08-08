@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { codeChallenge, createTransaction, requireSameOrigin, safeReturnPath } from "@/lib/oidc-security";
+import { oidcBffServiceHeaders } from "@/lib/oidc-bff-service";
 
 export const runtime = "nodejs";
 const TX_COOKIE = "__Host-pc_oidc_txn";
@@ -12,7 +13,7 @@ export async function POST(request: NextRequest) {
   const issuer = process.env.OIDC_ISSUER;
   const clientId = process.env.OIDC_CLIENT_ID;
   if (!issuer || !clientId) return new NextResponse("OIDC is not configured", { status: 503 });
-  const stored = await fetch(`${(process.env.NEXT_SERVER_API_URL || "http://localhost:3005/api").replace(/\/$/, "")}/auth/oidc/transactions`, { method: "POST", headers: { "content-type": "application/json" }, cache: "no-store", body: JSON.stringify({ state: transaction.state, nonce: transaction.nonce, verifier: transaction.verifier, return_path: transaction.returnPath }) });
+  const stored = await fetch(`${(process.env.NEXT_SERVER_API_URL || "http://localhost:3005/api").replace(/\/$/, "")}/auth/oidc/transactions`, { method: "POST", headers: { ...oidcBffServiceHeaders(), "content-type": "application/json" }, cache: "no-store", body: JSON.stringify({ state: transaction.state, nonce: transaction.nonce, verifier: transaction.verifier, return_path: transaction.returnPath }) });
   if (stored.status !== 201) return new NextResponse("OIDC is temporarily unavailable", { status: 503 });
   const authorization = new URL(`${issuer.replace(/\/$/, "")}/protocol/openid-connect/auth`);
   authorization.searchParams.set("client_id", clientId);

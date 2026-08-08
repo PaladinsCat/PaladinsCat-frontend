@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { newCsrfToken, safeReturnPath, parseTransaction, stateMatches, validateIdToken } from "@/lib/oidc-security";
+import { oidcBffServiceHeaders } from "@/lib/oidc-bff-service";
 
 export const runtime = "nodejs";
 const TX_COOKIE = "__Host-pc_oidc_txn";
@@ -18,7 +19,7 @@ export async function GET(request: NextRequest) {
   const state = one(url, "state");
   const code = one(url, "code");
   if (!stateMatches(request.cookies.get(TX_COOKIE)?.value, state) || !code || url.searchParams.get("error")) { const response = NextResponse.redirect(new URL("/auth/login?oidc_error=1", origin())); clear(response); return response; }
-  const consume = await fetch(`${backend().replace(/\/$/, "")}/auth/oidc/transactions/consume`, { method: "POST", headers: { "content-type": "application/json" }, cache: "no-store", body: JSON.stringify({ state }) });
+  const consume = await fetch(`${backend().replace(/\/$/, "")}/auth/oidc/transactions/consume`, { method: "POST", headers: { ...oidcBffServiceHeaders(), "content-type": "application/json" }, cache: "no-store", body: JSON.stringify({ state }) });
   if (!consume.ok) { const response = NextResponse.redirect(new URL("/auth/login?oidc_error=1", origin())); clear(response); return response; }
   const txValue = await consume.json();
   const tx = parseTransaction(txValue);
@@ -32,7 +33,7 @@ export async function GET(request: NextRequest) {
   const token = await tokenResponse.json() as { access_token?: string; id_token?: string };
   if (!token.access_token || !await validateIdToken(token.id_token, issuer, clientId, tx.nonce)) { const response = NextResponse.redirect(new URL("/auth/login?oidc_error=1", origin())); clear(response); return response; }
   // Access tokens cross this server-to-server boundary only; they never reach browser JS or cookies.
-  const exchange = await fetch(`${backend().replace(/\/$/, "")}/auth/oidc/exchange`, { method: "POST", headers: { "content-type": "application/json" }, cache: "no-store", body: JSON.stringify({ access_token: token.access_token }) });
+  const exchange = await fetch(`${backend().replace(/\/$/, "")}/auth/oidc/exchange`, { method: "POST", headers: { ...oidcBffServiceHeaders(), "content-type": "application/json" }, cache: "no-store", body: JSON.stringify({ access_token: token.access_token }) });
   if (!exchange.ok) { const response = NextResponse.redirect(new URL("/auth/login?oidc_error=1", origin())); clear(response); return response; }
   const result = await exchange.json() as { token?: string; expires_at?: string };
   if (!result.token || result.token.length > 512) { const response = NextResponse.redirect(new URL("/auth/login?oidc_error=1", origin())); clear(response); return response; }

@@ -1,4 +1,4 @@
-import { createHash, createPublicKey, randomBytes, timingSafeEqual, verify } from "node:crypto";
+import { createHash, createPublicKey, randomBytes, timingSafeEqual, verify, type JsonWebKey as NodeJsonWebKey } from "node:crypto";
 
 export const OIDC_TRANSACTION_TTL_MS = 10 * 60 * 1000;
 const RETURN_PATHS = ["/", "/account", "/link-account", "/community", "/builds", "/tierlists", "/players"];
@@ -112,7 +112,7 @@ export async function validateIdToken(idToken: string | undefined, issuer: strin
     const header = decode(parts[0]);
     if (header.alg !== "RS256" || typeof header.kid !== "string") return false;
     const jwk = await getJwk(issuer, header.kid);
-    if (!jwk || !verify("RSA-SHA256", Buffer.from(`${parts[0]}.${parts[1]}`), createPublicKey({ key: jwk as JsonWebKey, format: "jwk" }), Buffer.from(parts[2], "base64url"))) return false;
+    if (!jwk || !verify("RSA-SHA256", Buffer.from(`${parts[0]}.${parts[1]}`), createPublicKey({ key: jwk as NodeJsonWebKey, format: "jwk" }), Buffer.from(parts[2], "base64url"))) return false;
     const claims = decode(parts[1]) as IdTokenClaims;
     const audience = Array.isArray(claims.aud) ? claims.aud : [claims.aud];
     if (claims.iss !== issuer || !audience.includes(clientId) || (audience.length > 1 && claims.azp !== clientId) || !claims.exp || claims.exp * 1000 <= Date.now() || !claims.iat || claims.iat * 1000 > Date.now() + 60_000 || !claims.nonce) return false;
