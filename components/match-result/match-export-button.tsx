@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type RefObject } from "react";
+import { useEffect, useState, type RefObject } from "react";
 import { toPng } from "html-to-image";
 import { LoadingIndicator } from "@/components/async-state";
 import { useLocalization } from "@/lib/localization-context";
@@ -10,10 +10,58 @@ type MatchExportButtonProps = {
   target: RefObject<HTMLElement | null>;
 };
 
+declare global {
+  interface Window {
+    __paladinscatMatchScoreboardPng?: () => Promise<string>;
+  }
+}
+
+async function scoreboardPng(scoreboard: HTMLElement) {
+  scoreboard.setAttribute("data-image-export", "true");
+  try {
+    const talentDeadline = performance.now() + 2_000;
+    while (scoreboard.querySelector('span.talent-icon[role="img"]') && performance.now() < talentDeadline) {
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    }
+    await document.fonts.ready;
+    await Promise.all(Array.from(scoreboard.querySelectorAll("img")).map((image) => {
+      if (image.complete) return image.decode?.().catch(() => undefined) ?? Promise.resolve();
+      return new Promise<void>((resolve) => {
+        image.addEventListener("load", () => resolve(), { once: true });
+        image.addEventListener("error", () => resolve(), { once: true });
+      });
+    }));
+    return await toPng(scoreboard, {
+      width: 1280,
+      height: 720,
+      canvasWidth: 2048,
+      canvasHeight: 1152,
+      pixelRatio: 1,
+      cacheBust: false,
+      backgroundColor: "var(--pc-bg-secondary)",
+      style: { transform: "none", transformOrigin: "top left" },
+    });
+  } finally {
+    scoreboard.removeAttribute("data-image-export");
+  }
+}
+
 export default function MatchExportButton(props: MatchExportButtonProps) {
   const { t } = useLocalization();
   const [exporting, setExporting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const render = async () => {
+      const scoreboard = props.target.current;
+      if (!scoreboard) throw new Error("The scoreboard is still loading");
+      return scoreboardPng(scoreboard);
+    };
+    window.__paladinscatMatchScoreboardPng = render;
+    return () => {
+      if (window.__paladinscatMatchScoreboardPng === render) delete window.__paladinscatMatchScoreboardPng;
+    };
+  }, [props.target]);
 
   async function exportImage() {
     setExporting(true);
@@ -22,42 +70,14 @@ export default function MatchExportButton(props: MatchExportButtonProps) {
       const scoreboard = props.target.current;
       if (!scoreboard) throw new Error(t("generated.matches.theScoreboardIsStillLoadingPleaseTryAgain"));
 
-      // html-to-image serializes a CSS pseudo-element background unreliably.
-      // The scoreboard exposes the identical map as an image only while it is
-      // being captured, so the browser output retains the rendered backdrop.
-      scoreboard.setAttribute("data-image-export", "true");
-      try {
-        await Promise.all(Array.from(scoreboard.querySelectorAll("img")).map((image) => {
-          if (image.complete) return image.decode?.().catch(() => undefined) ?? Promise.resolve();
-          return new Promise<void>((resolve) => {
-            image.addEventListener("load", () => resolve(), { once: true });
-            image.addEventListener("error", () => resolve(), { once: true });
-          });
-        }));
-
-        const dataUrl = await toPng(scoreboard, {
-          // The on-page scoreboard is deliberately scaled to the prototype's
-          // 2048×1152 canvas. Capture its native 1280×720 layout instead and
-          // let the canvas provide the higher-resolution PNG.
-          width: 1280,
-          height: 720,
-          canvasWidth: 2048,
-          canvasHeight: 1152,
-          pixelRatio: 1,
-          cacheBust: false,
-          backgroundColor: "var(--pc-bg-secondary)",
-          style: { transform: "none", transformOrigin: "top left" },
-        });
-        const anchor = document.createElement("a");
-        anchor.href = dataUrl;
-        anchor.download = `paladinscat-match-${props.matchId}.png`;
-        document.body.appendChild(anchor);
-        anchor.click();
-        anchor.remove();
-        setMessage(t("generated.matches.pngSaved"));
-      } finally {
-        scoreboard.removeAttribute("data-image-export");
-      }
+      const dataUrl = await scoreboardPng(scoreboard);
+      const anchor = document.createElement("a");
+      anchor.href = dataUrl;
+      anchor.download = `paladinscat-match-${props.matchId}.png`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      setMessage(t("generated.matches.pngSaved"));
     } catch (error) {
       setMessage(error instanceof Error ? error.message : t("generated.components.matchResult.matchExportButton.couldNotSaveMatchImage"));
     } finally {
