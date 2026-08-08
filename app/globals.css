@@ -271,6 +271,46 @@ canvas {
   height: auto;
 }
 
+/* Lite mode — kill CSS animations and transitions (hover effects) for
+   low-powered devices. Framer-motion is handled separately via MotionConfig. */
+html.pc-lite,
+html.pc-lite *,
+html.pc-lite *::before,
+html.pc-lite *::after {
+  animation-duration: 0.001s !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001s !important;
+  scroll-behavior: auto !important;
+}
+
+/* Force a fixed color scheme so the browser doesn't auto-adjust colors. */
+html.pc-lite {
+  color-scheme: dark;
+  /* Monotone UI accents only — images and status colors stay as-is. */
+  --pc-accent: oklch(0.85 0 0);
+  --pc-accent-secondary: oklch(0.75 0 0);
+  --pc-accent-deep: oklch(0.65 0 0);
+  --pc-accent-mid: oklch(0.72 0 0);
+  --pc-accent-light: oklch(0.90 0 0);
+  --pc-accent-alt: oklch(0.80 0 0);
+  --pc-accent-third: oklch(0.78 0 0);
+  --pc-home-cat-accent: oklch(0.85 0 0);
+  --pc-home-platform-accent: oklch(0.80 0 0);
+  --pc-home-third-accent: oklch(0.78 0 0);
+  --pc-accent-glow-subtle: oklch(0.85 0 0 / 0.08);
+  --pc-accent-glow-soft: oklch(0.85 0 0 / 0.14);
+  --pc-accent-glow: oklch(0.85 0 0 / 0.18);
+}
+
+/* Disable hover size variations (scale) — the dominant "hover size" effect.
+   Translate/rotate are left alone so positioning transforms (e.g. centered
+   dropdowns) keep working. */
+html.pc-lite *:hover,
+html.pc-lite .group:hover * {
+  --tw-scale-x: 1 !important;
+  --tw-scale-y: 1 !important;
+}
+
 .pc-wallpaper-viewport {
   position: fixed;
   /* Showcase mode temporarily removes the native gutter, so the visual

@@ -15,6 +15,7 @@ import SiteAnalytics from "@/components/SiteAnalytics";
 import DeploymentUpdateBanner from "@/components/DeploymentUpdateBanner";
 import ImageAssetFallback from "@/components/ImageAssetFallback";
 import CoreUiDragGuard from "@/components/CoreUiDragGuard";
+import LiteModeProvider from "@/components/LiteModeProvider";
 import { cn } from "@/lib/utils";
 import { SEO_KEYWORDS, SITE_NAME, SITE_URL } from "@/lib/seo";
 import { getServerLocalization } from "@/lib/server-localization";
@@ -115,6 +116,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <LocalizationProvider initialLocale={locale} initialMessages={messages}>
             <TimeZoneProvider>
               <LobbyTierProvider>
+              <LiteModeProvider>
               <SiteAnalytics />
               <MapSlideshow />
               <Nav />
@@ -130,6 +132,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               </main>
               <div className="block lg:hidden"><BottomNav /></div>
               <Footer />
+              </LiteModeProvider>
               </LobbyTierProvider>
             </TimeZoneProvider>
           </LocalizationProvider>

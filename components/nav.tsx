@@ -10,6 +10,7 @@ import {
   setWallpaperEnabled,
   WALLPAPER_CHANGE_EVENT,
 } from "@/lib/wallpaper-preference";
+import { getLiteMode, setLiteMode, LITE_MODE_CHANGE_EVENT } from "@/lib/lite-mode";
 import PlayerName from "@/components/player-name";
 import NotificationMenu from "@/components/notification-menu";
 import { BLOG_COPY_KEYS } from "@/lib/blog-copy";
@@ -80,6 +81,7 @@ export default function Nav() {
   const { t } = useLocalization();
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
   const [wallpaperEnabled, setWallpaperEnabledState] = useState(true);
+  const [liteMode, setLiteModeState] = useState(false);
   const activityHref = user?.linkedPlayerId ? "/stats/activity/clean" : "/stats/activity";
 
   const headerGroups = [
@@ -237,6 +239,17 @@ export default function Nav() {
   }, []);
 
   useEffect(() => {
+    const syncLiteMode = () => setLiteModeState(getLiteMode());
+    syncLiteMode();
+    window.addEventListener(LITE_MODE_CHANGE_EVENT, syncLiteMode);
+    window.addEventListener("storage", syncLiteMode);
+    return () => {
+      window.removeEventListener(LITE_MODE_CHANGE_EVENT, syncLiteMode);
+      window.removeEventListener("storage", syncLiteMode);
+    };
+  }, []);
+
+  useEffect(() => {
     const openSiteMenu = () => setSideMenuOpen(true);
     window.addEventListener("paladinscat:open-site-menu", openSiteMenu);
     return () => window.removeEventListener("paladinscat:open-site-menu", openSiteMenu);
@@ -251,6 +264,21 @@ export default function Nav() {
     const next = !wallpaperEnabled;
     setWallpaperEnabledState(next);
     setWallpaperEnabled(next);
+  }
+
+  function handleLiteModeToggle() {
+    const next = !liteMode;
+    setLiteModeState(next);
+    setLiteMode(next);
+    if (next) {
+      // Lite mode is for low-powered devices — also turn off the wallpaper.
+      setWallpaperEnabledState(false);
+      setWallpaperEnabled(false);
+    } else {
+      // Leaving Lite mode — restore the wallpaper.
+      setWallpaperEnabledState(true);
+      setWallpaperEnabled(true);
+    }
   }
 
   const isActive = (href: string) =>
@@ -273,9 +301,15 @@ export default function Nav() {
           <div className="hidden items-center min-[1180px]:flex" style={{ height: 64 }}>
             {/* Left: fixed-width logo */}
             <div className="shrink-0">
-              <Link href="/" className="text-xl font-bold text-pc-text hover:text-pc-text-muted transition-colors flex items-center gap-2">
+              <Link href="/" className="relative text-xl font-bold text-pc-text hover:text-pc-text-muted transition-colors flex items-center gap-2">
                 <img src="/images/icons/paladinscat.avif" alt="" className="w-7 h-7" />
-                {t("generated.common.paladinscat")}</Link>
+                {t("generated.common.paladinscat")}
+                {liteMode && (
+                  <span className="absolute -right-7 -top-2.5 rounded bg-pc-accent px-1 text-[10px] font-bold leading-tight text-pc-bg" aria-label={t("menu.liteMode")}>
+                    {t("menu.lite")}
+                  </span>
+                )}
+              </Link>
             </div>
 
             {/* Center: grouped destinations use the same hover/focus behavior as Account. */}
@@ -347,9 +381,15 @@ export default function Nav() {
 
           {/* ── Mobile Layout ── */}
           <div className="flex items-center justify-between min-[1180px]:hidden" style={{ height: 64 }}>
-            <Link href="/" className="text-xl font-bold text-pc-text hover:text-pc-text-muted transition-colors flex items-center gap-2">
+            <Link href="/" className="relative text-xl font-bold text-pc-text hover:text-pc-text-muted transition-colors flex items-center gap-2">
               <img src="/images/icons/paladinscat.avif" alt="" className="w-7 h-7" />
-              {t("generated.common.paladinscat")}</Link>
+              {t("generated.common.paladinscat")}
+              {liteMode && (
+                <span className="absolute -right-7 -top-2.5 rounded bg-pc-accent px-1 text-[10px] font-bold leading-tight text-pc-bg" aria-label={t("menu.liteMode")}>
+                  {t("menu.lite")}
+                </span>
+              )}
+            </Link>
 
             <div className="flex items-center gap-1" suppressHydrationWarning>
               <LanguageMenu />
@@ -391,6 +431,20 @@ export default function Nav() {
                     </span>
                     <span className={`relative h-5 w-9 rounded-full transition-colors ${wallpaperEnabled ? "bg-pc-accent" : "bg-pc-bg"}`} aria-hidden="true">
                       <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${wallpaperEnabled ? "translate-x-4" : "translate-x-0.5"}`} />
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleLiteModeToggle}
+                    className="flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-sm text-pc-text-secondary transition-colors hover:bg-pc-bg-elevated hover:text-pc-text"
+                    aria-pressed={liteMode}
+                  >
+                    <span>
+                      <span className="block">{t("menu.liteMode")}</span>
+                      <span className="mt-0.5 block text-xs text-pc-text-muted">{liteMode ? t("menu.enabled") : t("menu.liteModeOff")}</span>
+                    </span>
+                    <span className={`relative h-5 w-9 rounded-full transition-colors ${liteMode ? "bg-pc-accent" : "bg-pc-bg"}`} aria-hidden="true">
+                      <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${liteMode ? "translate-x-4" : "translate-x-0.5"}`} />
                     </span>
                   </button>
                 </section>
