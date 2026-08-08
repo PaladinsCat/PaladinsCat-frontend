@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { buildParAuthorizationUrl, buildPushedAuthorizationRequest, createTransaction, normalizedHttpsIssuer, parsePushedAuthorizationResponse, requireSameOrigin, safeReturnPath } from "@/lib/oidc-security";
+import { buildParAuthorizationUrl, buildPushedAuthorizationRequest, createTransaction, normalizedHttpsIssuer, parsePushedAuthorizationResponse, requireSameOrigin, resolveInternalIssuer, safeReturnPath } from "@/lib/oidc-security";
 import { oidcBffServiceHeaders } from "@/lib/oidc-bff-service";
 import { oidcClientSecret } from "@/lib/oidc-client-secret";
 
@@ -31,9 +31,10 @@ export async function POST(request: NextRequest) {
   const clientId = process.env.OIDC_CLIENT_ID;
   const clientSecret = oidcClientSecret();
   if (!issuer || !clientId || !clientSecret) return new NextResponse("OIDC is not configured", { status: 503 });
+  const serverIssuer = resolveInternalIssuer(issuer, process.env.OIDC_INTERNAL_ISSUER);
   const stored = await fetch(`${(process.env.NEXT_SERVER_API_URL || "http://localhost:3005/api").replace(/\/$/, "")}/auth/oidc/transactions`, { method: "POST", headers: { ...oidcBffServiceHeaders(), "content-type": "application/json" }, cache: "no-store", body: JSON.stringify({ state: transaction.state, nonce: transaction.nonce, verifier: transaction.verifier, return_path: transaction.returnPath }) });
   if (stored.status !== 201) return new NextResponse("OIDC is temporarily unavailable", { status: 503 });
-  const par = buildPushedAuthorizationRequest(issuer, clientId, `${origin()}/api/auth/oidc/callback`, transaction);
+  const par = buildPushedAuthorizationRequest(serverIssuer, clientId, `${origin()}/api/auth/oidc/callback`, transaction);
   par.form.set("client_secret", clientSecret);
   let requestUri: string | undefined;
   const controller = new AbortController();

@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildParAuthorizationUrl, buildPushedAuthorizationRequest, buildRpLogoutUrl, createTransaction, getJwkForTest, normalizedHttpsIssuer, parsePushedAuthorizationResponse, requireSameOrigin, resetJwksCacheForTest, safeReturnPath, stateMatches, validIdTokenHeader } from "./oidc-security.ts";
+import { buildParAuthorizationUrl, buildPushedAuthorizationRequest, buildRpLogoutUrl, createTransaction, getJwkForTest, normalizedHttpsIssuer, parsePushedAuthorizationResponse, requireSameOrigin, resetJwksCacheForTest, resolveInternalIssuer, safeReturnPath, stateMatches, validIdTokenHeader } from "./oidc-security.ts";
 import { csrfHeader } from "./csrf.ts";
 import { readFileSync } from "node:fs";
 
@@ -79,6 +79,11 @@ test("authorization parameters are pushed server-side and the browser gets only 
   assert.equal(authorization.searchParams.get("state"), null);
   assert.equal(authorization.searchParams.get("code_challenge"), null);
 });
+test("server issuer override permits only Keycloak's exact internal realm", () => {
+  const issuer = "https://auth.paladinscat.com/realms/paladinscat";
+  assert.equal(resolveInternalIssuer(issuer, "http://keycloak:8080/realms/paladinscat"), "http://keycloak:8080/realms/paladinscat");
+  for (const value of [undefined, "http://keycloak:8080/realms/other", "http://backend-rust-api:3005/realms/paladinscat", "https://evil.example/realms/paladinscat"]) assert.equal(resolveInternalIssuer(issuer, value), issuer);
+});
 test("PAR response requires a bounded-lived opaque request URI", () => {
   assert.deepEqual(parsePushedAuthorizationResponse({ request_uri: "urn:ietf:params:oauth:request_uri:abc_DEF-123", expires_in: 60 }), { requestUri: "urn:ietf:params:oauth:request_uri:abc_DEF-123", expiresIn: 60 });
   for (const value of [{ request_uri: "https://evil.example", expires_in: 60 }, { request_uri: "urn:ietf:params:oauth:request_uri:ok", expires_in: 0 }, { request_uri: "urn:ietf:params:oauth:request_uri:ok", expires_in: 601 }]) assert.equal(parsePushedAuthorizationResponse(value), null);
@@ -86,6 +91,13 @@ test("PAR response requires a bounded-lived opaque request URI", () => {
 test("OIDC login redirects the initiating POST with 303, never 307", () => {
   const source = readFileSync(new URL("../app/api/auth/oidc/login/route.ts", import.meta.url), "utf8");
   assert.match(source, /NextResponse\.redirect\(buildParAuthorizationUrl\(issuer, clientId, requestUri\), \{ status: 303 \}\)/);
+});
+test("frontend server calls use the pinned internal issuer without changing token issuer validation", () => {
+  const login = readFileSync(new URL("../app/api/auth/oidc/login/route.ts", import.meta.url), "utf8");
+  const callback = readFileSync(new URL("../app/api/auth/oidc/callback/route.ts", import.meta.url), "utf8");
+  assert.match(login, /resolveInternalIssuer\(issuer, process\.env\.OIDC_INTERNAL_ISSUER\)/);
+  assert.match(callback, /fetch\(`\$\{serverIssuer\}\/protocol\/openid-connect\/token`/);
+  assert.match(callback, /validateIdToken\(token\.id_token, issuer, clientId, tx\.nonce, serverIssuer\)/);
 });
 test("ID token typ accepts proven Keycloak and standard forms only", () => {
   assert.equal(validIdTokenHeader({ alg: "RS256", kid: "one", typ: "ID" }), true);

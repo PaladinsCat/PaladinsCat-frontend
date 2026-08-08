@@ -62,8 +62,18 @@ export function normalizedHttpsIssuer(issuer: string | undefined): string | null
   } catch { return null; }
 }
 
-export function buildPushedAuthorizationRequest(issuer: string, clientId: string, redirectUri: string, transaction: OidcTransaction): { endpoint: URL; form: URLSearchParams } {
-  const endpoint = new URL(`${issuer.replace(/\/$/, "")}/protocol/openid-connect/ext/par/request`);
+export function resolveInternalIssuer(issuer: string, override: string | undefined): string {
+  const external = new URL(issuer);
+  if (!override) return issuer;
+  try {
+    const candidate = new URL(override);
+    const internal = new URL(`http://keycloak:8080${external.pathname}`);
+    return candidate.href === internal.href ? internal.toString().replace(/\/$/, "") : issuer;
+  } catch { return issuer; }
+}
+
+export function buildPushedAuthorizationRequest(serverIssuer: string, clientId: string, redirectUri: string, transaction: OidcTransaction): { endpoint: URL; form: URLSearchParams } {
+  const endpoint = new URL(`${serverIssuer.replace(/\/$/, "")}/protocol/openid-connect/ext/par/request`);
   const form = new URLSearchParams();
   form.set("client_id", clientId);
   form.set("response_type", "code");
@@ -158,14 +168,14 @@ export function resetJwksCacheForTest() { jwksCache.clear(); }
 export async function getJwkForTest(issuer: string, kid: string) { return getJwk(issuer, kid); }
 
 // The issuer is configuration, never read from a token. This intentionally supports only Keycloak's RS256 default.
-export async function validateIdToken(idToken: string | undefined, issuer: string, clientId: string, nonce: string): Promise<boolean> {
+export async function validateIdToken(idToken: string | undefined, issuer: string, clientId: string, nonce: string, jwksIssuer = issuer): Promise<boolean> {
   if (!idToken) return false;
   const parts = idToken.split(".");
   if (parts.length !== 3) return false;
   try {
     const header = decode(parts[0]);
     if (!validIdTokenHeader(header)) return false;
-    const jwk = await getJwk(issuer, header.kid as string);
+    const jwk = await getJwk(jwksIssuer, header.kid as string);
     if (!jwk || !verify("RSA-SHA256", Buffer.from(`${parts[0]}.${parts[1]}`), createPublicKey({ key: jwk as NodeJsonWebKey, format: "jwk" }), Buffer.from(parts[2], "base64url"))) return false;
     const claims = decode(parts[1]) as IdTokenClaims;
     const audience = Array.isArray(claims.aud) ? claims.aud : [claims.aud];
