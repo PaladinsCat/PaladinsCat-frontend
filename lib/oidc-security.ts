@@ -53,6 +53,23 @@ export function codeChallenge(verifier: string): string {
   return createHash("sha256").update(verifier).digest("base64url");
 }
 
+export function buildRpLogoutUrl(issuer: string | undefined, clientId: string | undefined, postLogoutRedirectUri: string | undefined, publicOrigin: string): URL | null {
+  if (!issuer || !clientId || !postLogoutRedirectUri) return null;
+  try {
+    const issuerUrl = new URL(issuer);
+    const redirect = new URL(postLogoutRedirectUri);
+    if (issuerUrl.protocol !== "https:" || redirect.origin !== new URL(publicOrigin).origin) return null;
+    const logout = new URL(`${issuer.replace(/\/$/, "")}/protocol/openid-connect/logout`);
+    logout.searchParams.set("client_id", clientId);
+    logout.searchParams.set("post_logout_redirect_uri", postLogoutRedirectUri);
+    return logout;
+  } catch { return null; }
+}
+
+export function validIdTokenHeader(header: Record<string, unknown>): boolean {
+  return header.alg === "RS256" && typeof header.kid === "string" && (header.typ === undefined || header.typ === "ID" || header.typ === "JWT");
+}
+
 interface IdTokenClaims { iss?: string; aud?: string | string[]; azp?: string; exp?: number; iat?: number; nonce?: string; }
 function decode(part: string): Record<string, unknown> { return JSON.parse(Buffer.from(part, "base64url").toString("utf8")) as Record<string, unknown>; }
 
@@ -110,8 +127,8 @@ export async function validateIdToken(idToken: string | undefined, issuer: strin
   if (parts.length !== 3) return false;
   try {
     const header = decode(parts[0]);
-    if (header.alg !== "RS256" || typeof header.kid !== "string") return false;
-    const jwk = await getJwk(issuer, header.kid);
+    if (!validIdTokenHeader(header)) return false;
+    const jwk = await getJwk(issuer, header.kid as string);
     if (!jwk || !verify("RSA-SHA256", Buffer.from(`${parts[0]}.${parts[1]}`), createPublicKey({ key: jwk as NodeJsonWebKey, format: "jwk" }), Buffer.from(parts[2], "base64url"))) return false;
     const claims = decode(parts[1]) as IdTokenClaims;
     const audience = Array.isArray(claims.aud) ? claims.aud : [claims.aud];

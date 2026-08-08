@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createTransaction, getJwkForTest, requireSameOrigin, resetJwksCacheForTest, safeReturnPath, stateMatches } from "./oidc-security.ts";
+import { buildRpLogoutUrl, createTransaction, getJwkForTest, requireSameOrigin, resetJwksCacheForTest, safeReturnPath, stateMatches, validIdTokenHeader } from "./oidc-security.ts";
 import { csrfHeader } from "./csrf.ts";
 import { readFileSync } from "node:fs";
 
@@ -48,4 +48,24 @@ test("BFF credential is server-only and never a public environment value", () =>
   assert.match(source, /import "server-only"/);
   assert.match(source, /PALADINSCAT_OIDC_BFF_SERVICE_TOKEN_FILE/);
   assert.doesNotMatch(source, /NEXT_PUBLIC/);
+});
+test("OIDC client secret is loaded server-side from a secret file when configured", () => {
+  const source = readFileSync(new URL("./oidc-client-secret.ts", import.meta.url), "utf8");
+  assert.match(source, /import "server-only"/);
+  assert.match(source, /OIDC_CLIENT_SECRET_FILE/);
+  assert.doesNotMatch(source, /NEXT_PUBLIC/);
+});
+test("RP logout uses only the exact configured same-origin return URI", () => {
+  const logout = buildRpLogoutUrl("https://auth.paladinscat.com/realms/paladinscat", "paladinscat-web", "https://paladinscat.com/auth/login", "https://paladinscat.com");
+  assert.equal(logout?.origin, "https://auth.paladinscat.com");
+  assert.equal(logout?.searchParams.get("post_logout_redirect_uri"), "https://paladinscat.com/auth/login");
+  assert.equal(logout?.searchParams.get("client_id"), "paladinscat-web");
+  assert.equal([...logout!.searchParams.keys()].sort().join(","), "client_id,post_logout_redirect_uri");
+  assert.equal(buildRpLogoutUrl("https://auth.paladinscat.com/realms/paladinscat", "paladinscat-web", "https://evil.example/logout", "https://paladinscat.com"), null);
+});
+test("ID token typ accepts proven Keycloak and standard forms only", () => {
+  assert.equal(validIdTokenHeader({ alg: "RS256", kid: "one", typ: "ID" }), true);
+  assert.equal(validIdTokenHeader({ alg: "RS256", kid: "one", typ: "JWT" }), true);
+  assert.equal(validIdTokenHeader({ alg: "RS256", kid: "one" }), true);
+  assert.equal(validIdTokenHeader({ alg: "RS256", kid: "one", typ: "at+jwt" }), false);
 });

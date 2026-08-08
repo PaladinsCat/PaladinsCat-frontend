@@ -3592,6 +3592,15 @@ export async function logout(): Promise<void> {
     console.warn("Server logout failed; clearing local session anyway.", err);
   } finally {
     clearAuth();
+    if (typeof document !== "undefined") {
+      // A form navigation preserves the same-origin POST CSRF boundary and lets
+      // the browser follow the BFF's redirect to Keycloak's RP logout endpoint.
+      const form = document.createElement("form");
+      form.method = "POST";
+      form.action = "/api/auth/oidc/logout";
+      document.body.appendChild(form);
+      form.submit();
+    }
   }
 }
 
