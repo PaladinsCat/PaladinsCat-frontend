@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, Suspense, useDeferredValue, useEffect, useMemo, useState } from "react";
+import { memo, Suspense, useDeferredValue, useEffect, useMemo, useReducer, useRef } from "react";
 import type { FormEvent } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -18,6 +18,13 @@ import { RouteSkeleton } from "@/components/route-skeleton";
 import { PlayerSearchSubtitle } from "@/components/player-search-result";
 import ScrambleText from "@/components/ScrambleText";
 import { useLocalization } from "@/lib/localization-context";
+import {
+  createInitialSearchState,
+  mergeResults,
+  normalize,
+  searchReducer,
+  typeSort,
+} from "@/lib/search-state";
 
 const TYPE_LABEL: Record<UniversalSearchType, string> = {
   player: "Player",
@@ -55,10 +62,6 @@ type StaticReferenceIndex = {
 };
 
 let staticReferencePromise: Promise<StaticReferenceIndex> | null = null;
-
-function normalize(value: unknown) {
-  return String(value ?? "").trim().toLowerCase();
-}
 
 function slug(name: string | null | undefined) {
   return String(name ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -164,24 +167,8 @@ function staticReferenceResults(q: string, index: StaticReferenceIndex): Univers
   return [...talentResults, ...cardResults, ...itemResults];
 }
 
-function mergeResults(results: UniversalSearchResult[]) {
-  const seen = new Set<string>();
-  return results
-    .filter((result) => {
-      const key = `${result.type}:${normalize(result.title)}:${result.meta?.championId ?? ""}:${result.href}`;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    })
-    .sort((a, b) => b.score - a.score || typeSort(a.type) - typeSort(b.type) || a.title.localeCompare(b.title));
-}
-
 function resultInitial(type: UniversalSearchType) {
   return TYPE_LABEL[type].slice(0, 1);
-}
-
-function typeSort(type: UniversalSearchType) {
-  return ["player", "match", "champion", "talent", "card", "item"].indexOf(type);
 }
 
 function isNumericQuery(value: string) {
@@ -307,33 +294,37 @@ function SearchPageBody() {
   const { t } = useLocalization();
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("q") ?? "";
-  const [query, setQuery] = useState(initialQuery);
-  const [results, setResults] = useState<UniversalSearchResult[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [searched, setSearched] = useState(initialQuery.trim().length > 0);
-  const [error, setError] = useState<string | null>(null);
-  const [remoteLoadingTarget, setRemoteLoadingTarget] = useState<UniversalSearchRemoteTarget | null>(null);
-  const [remoteNotice, setRemoteNotice] = useState<string | null>(null);
-  const deferredQuery = useDeferredValue(query);
+  const [state, dispatch] = useReducer(searchReducer, initialQuery, createInitialSearchState);
+  const deferredQuery = useDeferredValue(state.query);
+  // Mirror the reducer's generation into a ref so the debounced effect can read
+  // the latest generation without re-running on every keystroke.
+  const generationRef = useRef(0);
 
   useEffect(() => {
-    setQuery(initialQuery);
+    generationRef.current = state.generation;
+  }, [state.generation]);
+
+  // Initialize the input from ?q= exactly once. useSearchParams can be empty on
+  // the first render and populate after hydration, so wait for a non-empty
+  // value — but never re-sync the URL back into the input afterwards.
+  const initializedRef = useRef(false);
+  useEffect(() => {
+    if (initializedRef.current) return;
+    if (!initialQuery) return;
+    initializedRef.current = true;
+    dispatch({ type: "set-query", query: initialQuery });
   }, [initialQuery]);
 
   useEffect(() => {
     const q = deferredQuery.trim();
-    setError(null);
-    setRemoteNotice(null);
+    const generation = generationRef.current;
     if (q.length < 2 && !/^\d+$/.test(q)) {
-      setResults([]);
-      setLoading(false);
-      setSearched(false);
+      dispatch({ type: "search-empty" });
       return;
     }
 
     const timer = window.setTimeout(() => {
-      setLoading(true);
-      setSearched(true);
+      dispatch({ type: "search-start", generation });
       Promise.all([
         fetchUniversalSearch(q, 36).catch((): UniversalSearchResponse => ({
           query: q,
@@ -343,19 +334,16 @@ function SearchPageBody() {
         loadStaticReferenceIndex().then((index) => staticReferenceResults(q, index)).catch(() => [] as UniversalSearchResult[]),
       ])
         .then(([response, staticResults]) => {
-          setResults(mergeResults([...response.data, ...staticResults]).slice(0, 48));
-          if (isLikelyMatchId(q)) {
-            setRemoteNotice(remoteLookupNotice("match-id", response.remote));
-          }
-          const params = new URLSearchParams(window.location.search);
-          params.set("q", q);
-          window.history.replaceState(null, "", `/search?${params.toString()}`);
+          dispatch({
+            type: "search-result",
+            generation,
+            results: mergeResults([...response.data, ...staticResults]).slice(0, 48),
+            remoteNotice: isLikelyMatchId(q) ? remoteLookupNotice("match-id", response.remote) : null,
+          });
         })
         .catch(() => {
-          setError(t("generated.search.searchUnavailable"));
-          setResults([]);
-        })
-        .finally(() => setLoading(false));
+          dispatch({ type: "search-error", generation, error: t("generated.search.searchUnavailable") });
+        });
     }, 180);
 
     return () => window.clearTimeout(timer);
@@ -363,44 +351,43 @@ function SearchPageBody() {
 
   const grouped = useMemo(() => {
     const byType = new Map<UniversalSearchType, UniversalSearchResult[]>();
-    for (const result of results) {
+    for (const result of state.results) {
       const list = byType.get(result.type) ?? [];
       list.push(result);
       byType.set(result.type, list);
     }
     return Array.from(byType.entries()).sort(([a], [b]) => typeSort(a) - typeSort(b));
-  }, [results]);
+  }, [state.results]);
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const q = query.trim();
+    const q = state.query.trim();
     if (!q) return;
     window.history.replaceState(null, "", `/search?q=${encodeURIComponent(q)}`);
   };
 
   const runRemoteLookup = async (target: UniversalSearchRemoteTarget) => {
-    const q = query.trim();
-    if (!q || remoteLoadingTarget) return;
+    const q = state.query.trim();
+    if (!q || state.remoteLoadingTarget) return;
 
-    setRemoteLoadingTarget(target);
-    setRemoteNotice(null);
-    setError(null);
+    dispatch({ type: "remote-start", target });
     try {
       const response = await fetchUniversalSearch(q, 36, {
         remote: true,
         remoteTarget: target,
         refresh: target === "match-id",
       });
-      setResults((current) => mergeResults([...current, ...response.data]).slice(0, 48));
-      setRemoteNotice(remoteLookupNotice(target, response.remote));
+      dispatch({
+        type: "remote-result",
+        results: response.data,
+        remoteNotice: remoteLookupNotice(target, response.remote),
+      });
     } catch {
-      setError(t("generated.search.remoteLookupUnavailable"));
-    } finally {
-      setRemoteLoadingTarget(null);
+      dispatch({ type: "remote-error", error: t("generated.search.remoteLookupUnavailable") });
     }
   };
 
-  const q = query.trim();
+  const q = state.query.trim();
   // Keep explicit Hi-Rez fallback actions visible even after local search finds
   // nearby results. A fuzzy/local player hit is not proof that the desired
   // account exists locally. Match-ID shaped numeric queries are handled
@@ -430,23 +417,20 @@ function SearchPageBody() {
             <input
               type="search"
               name="q"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
+              value={state.query}
+              onChange={(event) => dispatch({ type: "set-query", query: event.target.value })}
               aria-label={t("generated.search.searchPlayersMatchesChampionsItemsCardsTalents")}
               placeholder={t("generated.search.searchPlayersMatchesChampionsItemsCardsTalents")}
               autoFocus
               className="pc-input pc-search-page-input h-11 w-full rounded-lg pr-10 text-sm"
             />
-            {query && (
+            {state.query && (
               <button
                 type="button"
                 aria-label={t("generated.search.clearSearch")}
                 title={t("generated.search.clearSearch")}
                 onClick={() => {
-                  setQuery("");
-                  setResults([]);
-                  setSearched(false);
-                  window.history.replaceState(null, "", "/search");
+                  dispatch({ type: "clear" });
                 }}
                 className="absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-pc-text-muted transition-colors hover:bg-pc-bg hover:text-pc-accent"
               >
@@ -484,7 +468,7 @@ function SearchPageBody() {
 
       <div className="mx-auto flex max-w-3xl flex-wrap justify-center gap-2">
         {(["player", "match", "champion", "talent", "card", "item"] as UniversalSearchType[]).map((type) => {
-          const count = results.filter((result) => result.type === type).length;
+          const count = state.results.filter((result) => result.type === type).length;
           return (
             <span key={type} className={`text-xs px-2 py-1 rounded-full border ${TYPE_STYLE[type]}`}>
               {TYPE_LABEL[type]} {count}
@@ -493,7 +477,7 @@ function SearchPageBody() {
         })}
       </div>
 
-      {searched && visibleRemoteActions.length > 0 && (
+      {state.searched && visibleRemoteActions.length > 0 && (
         <div className="pc-glass mx-auto flex w-fit max-w-full flex-wrap items-center justify-center gap-2 rounded-xl border border-pc-border px-4 py-2.5">
           <span className="text-xs text-pc-text-muted">{remoteLookupPrompt}</span>
           {visibleRemoteActions.map((action) => (
@@ -501,8 +485,8 @@ function SearchPageBody() {
               key={action.target}
               type="button"
               onClick={() => runRemoteLookup(action.target)}
-              disabled={remoteLoadingTarget !== null}
-              loading={remoteLoadingTarget === action.target}
+              disabled={state.remoteLoadingTarget !== null}
+              loading={state.remoteLoadingTarget === action.target}
               className="px-3 py-1.5 rounded-md border border-pc-accent/30 bg-pc-accent/10 text-xs font-semibold text-pc-accent hover:bg-pc-accent/15 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {action.label}
@@ -511,19 +495,19 @@ function SearchPageBody() {
         </div>
       )}
 
-      {remoteNotice && (
-        <div className="pc-card mx-auto max-w-3xl text-xs text-pc-text-muted">{remoteNotice}</div>
+      {state.remoteNotice && (
+        <div className="pc-card mx-auto max-w-3xl text-xs text-pc-text-muted">{state.remoteNotice}</div>
       )}
 
-      {loading && results.length === 0 && (
+      {state.loading && state.results.length === 0 && (
         <div className="mx-auto max-w-3xl"><LoadingPanel /></div>
       )}
 
-      {error && (
-        <div className="mx-auto max-w-3xl"><ErrorState title={t("generated.search.searchUnavailable")} message={error} /></div>
+      {state.error && (
+        <div className="mx-auto max-w-3xl"><ErrorState title={t("generated.search.searchUnavailable")} message={state.error} /></div>
       )}
 
-      {!loading && searched && results.length === 0 && !error && (
+      {!state.loading && state.searched && state.results.length === 0 && !state.error && (
         <div className="mx-auto max-w-3xl"><EmptyState title={t("generated.search.noResultsFound")} description={t("generated.search.tryABroaderNamePlayerIdMatchIdChampionItem")} /></div>
       )}
 
