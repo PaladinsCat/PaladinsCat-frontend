@@ -28,6 +28,7 @@ import type {
 } from "./types.gen";
 import { championSlug } from "./utils";
 import { getStoredLobbyTierFilter, withStoredLobbyTier } from "./lobby-tier";
+import { csrfHeader } from "./csrf";
 
 export type {
   Champion,
@@ -1552,6 +1553,15 @@ async function fetchJson<T>(path: string, options?: RequestInit & { retries?: nu
   delete (fetchOptions as any).retries;
   delete (fetchOptions as any).unwrapData;
   delete (fetchOptions as any).timeoutMs;
+  const headers = new Headers(fetchOptions.headers);
+  // Legacy calls may interpolate a missing token. Let same-origin cookie auth
+  // proceed instead of sending a malformed bearer credential that takes precedence.
+  if (/^Bearer (null|undefined)$/i.test(headers.get("authorization") || "")) headers.delete("authorization");
+  const method = (fetchOptions.method || "GET").toUpperCase();
+  const csrf = typeof document !== "undefined" ? csrfHeader(document.cookie, method) : null;
+  if (csrf) headers.set("X-CSRF-Token", csrf);
+  fetchOptions.headers = headers;
+  fetchOptions.credentials = "same-origin";
 
   for (let attempt = 0; attempt <= retries; attempt++) {
     // CRITICAL: Add timeout to prevent indefinite hang on stalled backend.
@@ -3587,9 +3597,6 @@ export async function logout(): Promise<void> {
 
 export async function getMe(_userId?: number): Promise<AuthUser> {
   const token = getAuthToken();
-  if (!token) {
-    throw new Error(API_ERROR_KEYS.notAuthenticated);
-  }
   const raw = await fetchJson<{
     user_id?: number;
     id?: number;
@@ -3605,7 +3612,7 @@ export async function getMe(_userId?: number): Promise<AuthUser> {
     linked_player_id?: number | null;
     linked_player_name?: string | null;
   }>(`/auth/me`, {
-    headers: { "Authorization": `Bearer ${token}` },
+    headers: token ? { "Authorization": `Bearer ${token}` } : undefined,
   });
 
   return {

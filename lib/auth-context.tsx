@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
-import { clearAuth, getAuthToken, getAuthUser, getMe, isAuthenticationRejection, login, logout, type AuthUser } from "./api-client";
+import { clearAuth, getAuthUser, getMe, isAuthenticationRejection, login, logout, type AuthUser } from "./api-client";
 
 interface AuthContextValue {
   user: AuthUser | null;
@@ -27,13 +27,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   const refresh = useCallback(async () => {
-    const token = getAuthToken();
-    if (!token) {
-      clearAuth();
-      setUser(null);
-      setIsLoading(false);
-      return;
-    }
     try {
       const me = await getMe();
       setUser(me);

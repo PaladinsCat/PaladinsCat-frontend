@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireSameOrigin } from "@/lib/oidc-security";
 export const runtime = "nodejs";
 const SESSION_COOKIE = "__Host-pc_session";
+const CSRF_COOKIE = "__Host-pc_csrf";
 function origin() { return process.env.PALADINSCAT_PUBLIC_ORIGIN || "http://localhost:3000"; }
 function backend() { return process.env.NEXT_SERVER_API_URL || "http://localhost:3005/api"; }
 export async function POST(request: NextRequest) {
@@ -13,5 +14,6 @@ export async function POST(request: NextRequest) {
   }
   const response = NextResponse.json({ ok: true });
   response.cookies.set(SESSION_COOKIE, "", { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 0 });
+  response.cookies.set(CSRF_COOKIE, "", { httpOnly: false, secure: true, sameSite: "strict", path: "/", maxAge: 0 });
   return response;
 }

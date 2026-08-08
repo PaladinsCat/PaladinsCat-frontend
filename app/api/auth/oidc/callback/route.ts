@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readTransaction, validateIdToken } from "@/lib/oidc-security";
+import { newCsrfToken, safeReturnPath, parseTransaction, stateMatches, validateIdToken } from "@/lib/oidc-security";
 
 export const runtime = "nodejs";
 const TX_COOKIE = "__Host-pc_oidc_txn";
 const SESSION_COOKIE = "__Host-pc_session";
+const CSRF_COOKIE = "__Host-pc_csrf";
 function origin() { return process.env.PALADINSCAT_PUBLIC_ORIGIN || "http://localhost:3000"; }
 function backend() { return process.env.NEXT_SERVER_API_URL || "http://localhost:3005/api"; }
 function clear(response: NextResponse) { response.cookies.set(TX_COOKIE, "", { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 0 }); }
@@ -14,9 +15,14 @@ function one(url: URL, name: string): string | null {
 
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
-  const tx = readTransaction(request.cookies.get(TX_COOKIE)?.value, one(url, "state"));
+  const state = one(url, "state");
   const code = one(url, "code");
-  if (!tx || !code || url.searchParams.get("error")) { const response = NextResponse.redirect(new URL("/auth/login?oidc_error=1", origin())); clear(response); return response; }
+  if (!stateMatches(request.cookies.get(TX_COOKIE)?.value, state) || !code || url.searchParams.get("error")) { const response = NextResponse.redirect(new URL("/auth/login?oidc_error=1", origin())); clear(response); return response; }
+  const consume = await fetch(`${backend().replace(/\/$/, "")}/auth/oidc/transactions/consume`, { method: "POST", headers: { "content-type": "application/json" }, cache: "no-store", body: JSON.stringify({ state }) });
+  if (!consume.ok) { const response = NextResponse.redirect(new URL("/auth/login?oidc_error=1", origin())); clear(response); return response; }
+  const txValue = await consume.json();
+  const tx = parseTransaction(txValue);
+  if (!tx) { const response = NextResponse.redirect(new URL("/auth/login?oidc_error=1", origin())); clear(response); return response; }
   const issuer = process.env.OIDC_ISSUER;
   const clientId = process.env.OIDC_CLIENT_ID;
   const clientSecret = process.env.OIDC_CLIENT_SECRET;
@@ -30,8 +36,10 @@ export async function GET(request: NextRequest) {
   if (!exchange.ok) { const response = NextResponse.redirect(new URL("/auth/login?oidc_error=1", origin())); clear(response); return response; }
   const result = await exchange.json() as { token?: string; expires_at?: string };
   if (!result.token || result.token.length > 512) { const response = NextResponse.redirect(new URL("/auth/login?oidc_error=1", origin())); clear(response); return response; }
-  const response = NextResponse.redirect(new URL(tx.returnPath, origin()));
+  const response = NextResponse.redirect(new URL(safeReturnPath(tx.returnPath), origin()));
   clear(response);
   response.cookies.set(SESSION_COOKIE, result.token, { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 60 * 60 * 8 });
+  // Deliberately readable by same-origin JS only; backend requires it to match X-CSRF-Token on unsafe cookie-auth requests.
+  response.cookies.set(CSRF_COOKIE, newCsrfToken(), { httpOnly: false, secure: true, sameSite: "strict", path: "/", maxAge: 60 * 60 * 8 });
   return response;
 }
