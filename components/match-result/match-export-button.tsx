@@ -54,14 +54,14 @@ export default function MatchExportButton(props: MatchExportButtonProps) {
   useEffect(() => {
     const render = async () => {
       const scoreboard = props.target.current;
-      if (!scoreboard) throw new Error("The scoreboard is still loading");
+      if (!scoreboard) throw new Error(t("generated.matches.theScoreboardIsStillLoadingPleaseTryAgain"));
       return scoreboardPng(scoreboard);
     };
     window.__paladinscatMatchScoreboardPng = render;
     return () => {
       if (window.__paladinscatMatchScoreboardPng === render) delete window.__paladinscatMatchScoreboardPng;
     };
-  }, [props.target]);
+  }, [props.target, t]);
 
   async function exportImage() {
     setExporting(true);
