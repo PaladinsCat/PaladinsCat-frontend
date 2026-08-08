@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { newCsrfToken, safeReturnPath, parseTransaction, stateMatches, validateIdToken } from "@/lib/oidc-security";
 import { oidcBffServiceHeaders } from "@/lib/oidc-bff-service";
+import { oidcClientSecret } from "@/lib/oidc-client-secret";
 
 export const runtime = "nodejs";
 const TX_COOKIE = "__Host-pc_oidc_txn";
@@ -26,7 +27,7 @@ export async function GET(request: NextRequest) {
   if (!tx) { const response = NextResponse.redirect(new URL("/auth/login?oidc_error=1", origin())); clear(response); return response; }
   const issuer = process.env.OIDC_ISSUER;
   const clientId = process.env.OIDC_CLIENT_ID;
-  const clientSecret = process.env.OIDC_CLIENT_SECRET;
+  const clientSecret = oidcClientSecret();
   if (!issuer || !clientId || !clientSecret) { const response = NextResponse.redirect(new URL("/auth/login?oidc_error=1", origin())); clear(response); return response; }
   const tokenResponse = await fetch(`${issuer.replace(/\/$/, "")}/protocol/openid-connect/token`, { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, cache: "no-store", body: new URLSearchParams({ grant_type: "authorization_code", client_id: clientId, client_secret: clientSecret, code, code_verifier: tx.verifier, redirect_uri: `${origin()}/api/auth/oidc/callback` }) });
   if (!tokenResponse.ok) { const response = NextResponse.redirect(new URL("/auth/login?oidc_error=1", origin())); clear(response); return response; }
