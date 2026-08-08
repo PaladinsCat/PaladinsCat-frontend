@@ -95,13 +95,23 @@ function LoginForm() {
             className="w-full py-2.5 bg-pc-accent hover:bg-pc-accent-secondary text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {t("generated.auth.signIn")}</AsyncButton>
+        </form>
+
+        <div className="bg-pc-bg-elevated rounded-lg border border-pc-border px-6 pb-6 space-y-4">
+          <div className="relative py-1 text-center text-xs text-pc-text-muted before:absolute before:left-0 before:right-0 before:top-1/2 before:border-t before:border-pc-border"><span className="relative bg-pc-bg-elevated px-2">or</span></div>
+          <form action="/api/auth/oidc/login" method="post">
+            <input type="hidden" name="return" value={redirectPath} />
+            <button type="submit" className="w-full py-2.5 border border-pc-accent text-pc-accent font-semibold rounded-lg hover:bg-pc-accent/10 transition-colors">Continue with PaladinsCat</button>
+          </form>
+          <p className="text-center text-xs text-pc-text-muted">Use the new shared sign-in for PaladinsCat and translations. Existing login remains available while accounts migrate.</p>
+          <a href="https://translate.paladinscat.com/accounts/login/" className="block text-center text-xs text-pc-accent hover:text-pc-accent-light">Open the translation portal</a>
 
           <p className="text-center text-pc-text-secondary text-sm">
             {t("generated.auth.donTHaveAnAccount")}{" "}
             <Link href="/auth/register" className="text-pc-accent hover:text-pc-accent-light transition-colors">
               {t("generated.auth.createOne")}</Link>
           </p>
-        </form>
+        </div>
       </div>
     </div>
   );
