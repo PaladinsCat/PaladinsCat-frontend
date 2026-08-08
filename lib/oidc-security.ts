@@ -53,6 +53,43 @@ export function codeChallenge(verifier: string): string {
   return createHash("sha256").update(verifier).digest("base64url");
 }
 
+export function normalizedHttpsIssuer(issuer: string | undefined): string | null {
+  if (!issuer) return null;
+  try {
+    const url = new URL(issuer);
+    if (url.protocol !== "https:" || url.username || url.password || url.search || url.hash || url.pathname === "/") return null;
+    return url.toString().replace(/\/$/, "");
+  } catch { return null; }
+}
+
+export function buildPushedAuthorizationRequest(issuer: string, clientId: string, redirectUri: string, transaction: OidcTransaction): { endpoint: URL; form: URLSearchParams } {
+  const endpoint = new URL(`${issuer.replace(/\/$/, "")}/protocol/openid-connect/ext/par/request`);
+  const form = new URLSearchParams();
+  form.set("client_id", clientId);
+  form.set("response_type", "code");
+  form.set("scope", "openid profile email");
+  form.set("redirect_uri", redirectUri);
+  form.set("state", transaction.state);
+  form.set("nonce", transaction.nonce);
+  form.set("code_challenge_method", "S256");
+  form.set("code_challenge", codeChallenge(transaction.verifier));
+  return { endpoint, form };
+}
+
+export function buildParAuthorizationUrl(issuer: string, clientId: string, requestUri: string): URL {
+  const authorization = new URL(`${issuer.replace(/\/$/, "")}/protocol/openid-connect/auth`);
+  authorization.searchParams.set("client_id", clientId);
+  authorization.searchParams.set("request_uri", requestUri);
+  return authorization;
+}
+
+export function parsePushedAuthorizationResponse(value: unknown): { requestUri: string; expiresIn: number } | null {
+  const response = value as { request_uri?: unknown; expires_in?: unknown };
+  if (typeof response?.request_uri !== "string" || !/^urn:ietf:params:oauth:request_uri:[A-Za-z0-9._~-]+$/.test(response.request_uri)) return null;
+  if (!Number.isSafeInteger(response.expires_in) || (response.expires_in as number) < 1 || (response.expires_in as number) > 600) return null;
+  return { requestUri: response.request_uri, expiresIn: response.expires_in as number };
+}
+
 export function buildRpLogoutUrl(issuer: string | undefined, clientId: string | undefined, postLogoutRedirectUri: string | undefined, publicOrigin: string): URL | null {
   if (!issuer || !clientId || !postLogoutRedirectUri) return null;
   try {

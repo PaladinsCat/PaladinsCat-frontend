@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildRpLogoutUrl, createTransaction, getJwkForTest, requireSameOrigin, resetJwksCacheForTest, safeReturnPath, stateMatches, validIdTokenHeader } from "./oidc-security.ts";
+import { buildParAuthorizationUrl, buildPushedAuthorizationRequest, buildRpLogoutUrl, createTransaction, getJwkForTest, normalizedHttpsIssuer, parsePushedAuthorizationResponse, requireSameOrigin, resetJwksCacheForTest, safeReturnPath, stateMatches, validIdTokenHeader } from "./oidc-security.ts";
 import { csrfHeader } from "./csrf.ts";
 import { readFileSync } from "node:fs";
 
@@ -18,6 +18,10 @@ test("unsafe requests require exact origin", () => {
   assert.equal(requireSameOrigin("https://paladinscat.com", "https://paladinscat.com"), true);
   assert.equal(requireSameOrigin("https://evil.example", "https://paladinscat.com"), false);
   assert.equal(requireSameOrigin(null, "https://paladinscat.com"), false);
+});
+test("OIDC issuer is a query-free HTTPS realm URL", () => {
+  assert.equal(normalizedHttpsIssuer("https://auth.paladinscat.com/realms/paladinscat/"), "https://auth.paladinscat.com/realms/paladinscat");
+  for (const value of [undefined, "http://auth.paladinscat.com/realms/paladinscat", "https://auth.paladinscat.com/", "https://auth.paladinscat.com/realms/paladinscat?x=1"]) assert.equal(normalizedHttpsIssuer(value), null);
 });
 test("JWKS outage and oversized documents fail closed", async () => {
   resetJwksCacheForTest();
@@ -62,6 +66,26 @@ test("RP logout uses only the exact configured same-origin return URI", () => {
   assert.equal(logout?.searchParams.get("client_id"), "paladinscat-web");
   assert.equal([...logout!.searchParams.keys()].sort().join(","), "client_id,post_logout_redirect_uri");
   assert.equal(buildRpLogoutUrl("https://auth.paladinscat.com/realms/paladinscat", "paladinscat-web", "https://evil.example/logout", "https://paladinscat.com"), null);
+});
+test("authorization parameters are pushed server-side and the browser gets only PAR identifiers", () => {
+  const transaction = createTransaction("/");
+  const pushed = buildPushedAuthorizationRequest("https://auth.paladinscat.com/realms/paladinscat", "paladinscat-web", "https://paladinscat.com/api/auth/oidc/callback", transaction);
+  assert.equal(pushed.endpoint.pathname, "/realms/paladinscat/protocol/openid-connect/ext/par/request");
+  assert.equal(pushed.form.get("state"), transaction.state);
+  assert.equal(pushed.form.get("nonce"), transaction.nonce);
+  assert.equal(pushed.form.get("code_challenge_method"), "S256");
+  const authorization = buildParAuthorizationUrl("https://auth.paladinscat.com/realms/paladinscat", "paladinscat-web", "urn:ietf:params:oauth:request_uri:opaque");
+  assert.equal(authorization.search, "?client_id=paladinscat-web&request_uri=urn%3Aietf%3Aparams%3Aoauth%3Arequest_uri%3Aopaque");
+  assert.equal(authorization.searchParams.get("state"), null);
+  assert.equal(authorization.searchParams.get("code_challenge"), null);
+});
+test("PAR response requires a bounded-lived opaque request URI", () => {
+  assert.deepEqual(parsePushedAuthorizationResponse({ request_uri: "urn:ietf:params:oauth:request_uri:abc_DEF-123", expires_in: 60 }), { requestUri: "urn:ietf:params:oauth:request_uri:abc_DEF-123", expiresIn: 60 });
+  for (const value of [{ request_uri: "https://evil.example", expires_in: 60 }, { request_uri: "urn:ietf:params:oauth:request_uri:ok", expires_in: 0 }, { request_uri: "urn:ietf:params:oauth:request_uri:ok", expires_in: 601 }]) assert.equal(parsePushedAuthorizationResponse(value), null);
+});
+test("OIDC login redirects the initiating POST with 303, never 307", () => {
+  const source = readFileSync(new URL("../app/api/auth/oidc/login/route.ts", import.meta.url), "utf8");
+  assert.match(source, /NextResponse\.redirect\(buildParAuthorizationUrl\(issuer, clientId, requestUri\), \{ status: 303 \}\)/);
 });
 test("ID token typ accepts proven Keycloak and standard forms only", () => {
   assert.equal(validIdTokenHeader({ alg: "RS256", kid: "one", typ: "ID" }), true);
