@@ -4,6 +4,7 @@ import { BookOpen, CheckCircle2, GitBranch, Languages } from "lucide-react";
 import { useLocalization } from "@/lib/localization-context";
 
 const REPOSITORY_URL = "https://github.com/NabiCook/PaladinsCat-locales";
+const WEBLATE_URL = "https://translate.paladinscat.com";
 
 export default function LocalizationPage() {
   const { t } = useLocalization();
@@ -47,13 +48,16 @@ export default function LocalizationPage() {
       </div>
 
       <div className="flex flex-wrap gap-3">
-        <a href={REPOSITORY_URL} target="_blank" rel="noreferrer" className="pc-btn-primary inline-flex items-center gap-2">
+        <a href={WEBLATE_URL} target="_blank" rel="noreferrer" className="pc-btn-primary inline-flex items-center gap-2">
+          <Languages className="h-4 w-4" />{t("localization.openWeblate")}
+        </a>
+        <a href={REPOSITORY_URL} target="_blank" rel="noreferrer" className="pc-btn-secondary inline-flex items-center gap-2">
           <GitBranch className="h-4 w-4" />{t("localization.repository")}
         </a>
         <a href={`${REPOSITORY_URL}/blob/main/CONTRIBUTING.md`} target="_blank" rel="noreferrer" className="pc-btn-secondary inline-flex items-center gap-2">
           <BookOpen className="h-4 w-4" />{t("localization.contributingGuide")}
         </a>
-        <a href={`${REPOSITORY_URL}/blob/main/docs/CONTRIBUTING_WITH_TOLGEE.md`} target="_blank" rel="noreferrer" className="pc-btn-secondary inline-flex items-center gap-2">
+        <a href={`${REPOSITORY_URL}/blob/main/docs/WEBLATE_GITHUB_WORKFLOW.md`} target="_blank" rel="noreferrer" className="pc-btn-secondary inline-flex items-center gap-2">
           <Languages className="h-4 w-4" />{t("localization.tolgeeGuide")}
         </a>
       </div>
