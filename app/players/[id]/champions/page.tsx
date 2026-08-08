@@ -151,7 +151,9 @@ export default function PlayerChampionStatsPage() {
                   <td className="px-1.5 py-1.5 font-mono text-[11px] text-pc-text-secondary">{formatKda(champion.kills, champion.deaths, champion.assists)}</td>
                   <td className="px-1.5 py-1.5 font-mono text-[11px] text-pc-text-secondary">{formatNumber(champion.wins)}</td>
                   <td className="px-1.5 py-1.5 font-mono text-[11px] text-pc-text-secondary">{formatNumber(champion.losses)}</td>
-                  <td className="px-1.5 py-1.5 font-mono text-[11px] text-pc-text-secondary">{champion.winRate != null ? t("common.playerChampions.winPercentage", { value: formatNumber(champion.winRate) }) : "—"}</td>
+                  <td className="px-1.5 py-1.5 font-mono text-[11px]">{champion.winRate != null ? (
+                    <span className={champion.winRate >= 55 ? "text-emerald-400 font-medium" : champion.winRate >= 50 ? "text-emerald-300" : "text-rose-400"}>{t("common.playerChampions.winPercentage", { value: formatNumber(champion.winRate) })}</span>
+                  ) : "—"}</td>
                   <td className="px-1.5 py-1.5 font-mono text-[11px] text-pc-text-secondary">{t("common.format.minutesShort", { minutes: formatNumber(champion.minutesPlayed) })}</td>
                 </tr>
               ))}
