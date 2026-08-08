@@ -254,10 +254,21 @@ main > div {
   min-width: 0;
 }
 
+/* Reduce layout/render work for off-screen page content and reserve its space
+   so late-loading sections don't push the footer down (CLS). */
+main {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 60rem;
+}
+
 img,
 video,
 canvas {
   max-width: 100%;
+  /* Reserve vertical space so late-loading images don't push content (and the
+     footer) down — the dominant CLS source. Explicit size classes (h-10 w-10,
+     etc.) still win via higher specificity. */
+  height: auto;
 }
 
 .pc-wallpaper-viewport {
