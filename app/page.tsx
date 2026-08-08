@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { preload } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
@@ -17,6 +18,7 @@ import {
 import HomeSearch from "@/components/home-search";
 import ScrambleText from "@/components/ScrambleText";
 import { useLocalization } from "@/lib/localization-context";
+import { DEFAULT_WALLPAPERS } from "@/lib/wallpaper-images";
 
 
 const MotionLink = motion.create(Link);
@@ -218,6 +220,11 @@ export default function HomePage() {
     : brandIsFadingIn
       ? { duration: WALLPAPER_BRAND_IN_MS / 1000, times: [0, 0.3, 0.56, 0.78, 1], ease: [0.22, 1, 0.36, 1] as const }
       : { duration: 0 };
+
+  // The home page's LCP is the first slideshow wallpaper (a CSS background
+  // image, which browsers discover late and fetch at low priority). Preload it
+  // with high priority so it is in flight before the stylesheet is parsed.
+  preload(DEFAULT_WALLPAPERS[0].avif, { as: "image", fetchPriority: "high" });
 
   const exploreCards = [
     {

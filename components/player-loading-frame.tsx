@@ -65,6 +65,7 @@ export default function PlayerLoadingFrame({
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 h-full w-full object-contain"
           draggable={false}
+          fetchPriority="high"
         />
       </picture>
     </div>
