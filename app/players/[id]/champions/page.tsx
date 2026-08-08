@@ -7,7 +7,7 @@ import { EmptyState, ErrorState, LoadingIndicator, LoadingPanel } from "@/compon
 import { fetchPlayerChampionStats, refreshPlayerChampionStats, type PlayerChampionStat } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championMasteryLevelFromXp } from "@/lib/champion-mastery";
-import { formatKda } from "@/lib/kda";
+import { calculateKda, formatKda } from "@/lib/kda";
 import { useLocalization } from "@/lib/localization-context";
 import { formatLocalDateTime } from "@/lib/time-format";
 
@@ -19,10 +19,10 @@ const ROLES = [
   { value: "Support", labelKey: "common.roles.support", icon: "/images/icons/Class_Support_Icon.avif" },
 ] as const;
 
-type SortKey = "level" | "matches" | "winRate" | "xp" | "name";
+type SortKey = "level" | "kda" | "winRate" | "playTime";
 
 export default function PlayerChampionStatsPage() {
-  const { formatDuration, t } = useLocalization();
+  const { formatDuration, formatNumber, t } = useLocalization();
   const params = useParams<{ id: string }>();
   const playerId = String(params.id ?? "");
   const [stats, setStats] = useState<PlayerChampionStat[] | null>(null);
@@ -78,12 +78,11 @@ export default function PlayerChampionStatsPage() {
     .filter((champion) => !filterRole || champion.role === filterRole)
     .sort((a, b) => {
       const direction = sortDescending ? -1 : 1;
-      if (sortBy === "name") return direction * a.championName.localeCompare(b.championName);
-      const values: Record<Exclude<SortKey, "name">, [number, number]> = {
+      const values: Record<SortKey, [number, number]> = {
         level: [championMasteryLevelFromXp(a.xp), championMasteryLevelFromXp(b.xp)],
-        matches: [a.matchesPlayed, b.matchesPlayed],
+        kda: [calculateKda(a.kills, a.deaths, a.assists), calculateKda(b.kills, b.deaths, b.assists)],
         winRate: [a.winRate ?? -1, b.winRate ?? -1],
-        xp: [a.xp, b.xp],
+        playTime: [a.minutesPlayed, b.minutesPlayed],
       };
       const [left, right] = values[sortBy];
       return direction * (left - right)
@@ -105,58 +104,61 @@ export default function PlayerChampionStatsPage() {
         <button type="button" onClick={refresh} disabled={refreshing || refreshRemainingSeconds > 0} className="rounded-lg border border-pc-border bg-pc-bg-elevated px-3 py-2 text-xs font-semibold text-pc-text hover:border-pc-accent-mid hover:text-pc-accent disabled:cursor-not-allowed disabled:opacity-50">{refreshing ? <LoadingIndicator className="gap-2" /> : refreshRemainingSeconds > 0 ? t("generated.players.refreshInValue1", { value1: formatDuration(refreshRemainingSeconds) }) : t("common.playerChampions.refresh")}</button>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <select value={sortBy} onChange={(event) => setSortBy(event.target.value as SortKey)} className="pc-select">
-          <option value="level">{t("common.playerChampions.sortLevel")}</option>
-          <option value="matches">{t("common.playerChampions.sortMatches")}</option>
-          <option value="winRate">{t("common.metrics.winRate")}</option>
-          <option value="xp">{t("generated.players.championXp")}</option>
-          <option value="name">{t("common.playerChampions.sortName")}</option>
-        </select>
-        <button type="button" onClick={() => setSortDescending((descending) => !descending)} className="pc-select flex cursor-pointer items-center gap-1" title={sortDescending ? t("generated.champions.descending") : t("generated.champions.ascending")}>{sortDescending ? "↓" : "↑"}</button>
-      </div>
-
-      <div className="flex flex-wrap items-center gap-2">
-        <button type="button" onClick={() => setFilterRole(null)} className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] ${filterRole === null ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-muted hover:text-pc-text"}`}>{t("generated.champions.all")}</button>
-        {ROLES.map((role) => <button key={role.value} type="button" onClick={() => setFilterRole(filterRole === role.value ? null : role.value)} className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] ${filterRole === role.value ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-muted hover:text-pc-text"}`}><img src={role.icon} alt="" className="h-5 w-5" />{t(role.labelKey)}</button>)}
+      <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <button type="button" onClick={() => setFilterRole(null)} className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] ${filterRole === null ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-muted hover:text-pc-text"}`}>{t("generated.champions.all")}</button>
+          {ROLES.map((role) => <button key={role.value} type="button" onClick={() => setFilterRole(filterRole === role.value ? null : role.value)} className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] ${filterRole === role.value ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-muted hover:text-pc-text"}`}><img src={role.icon} alt="" className="h-5 w-5" />{t(role.labelKey)}</button>)}
+        </div>
+        <div className="flex items-center gap-2">
+          <select value={sortBy} onChange={(event) => setSortBy(event.target.value as SortKey)} className="pc-select">
+            <option value="level">{t("common.playerChampions.sortLevel")}</option>
+            <option value="kda">{t("common.metrics.kda")}</option>
+            <option value="winRate">{t("common.metrics.winRate")}</option>
+            <option value="playTime">{t("generated.players.playtime")}</option>
+          </select>
+          <button type="button" onClick={() => setSortDescending((descending) => !descending)} className="pc-select flex cursor-pointer items-center gap-1" title={sortDescending ? t("generated.champions.descending") : t("generated.champions.ascending")}>{sortDescending ? "↓" : "↑"}</button>
+        </div>
       </div>
 
       {champions.length === 0 ? <EmptyState title={t("common.playerChampions.empty")} /> : (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-          {champions.map((champion) => <ChampionCard key={champion.championId} champion={champion} />)}
+        <div className="mx-auto w-fit overflow-x-auto rounded-xl border border-pc-border bg-pc-bg-elevated">
+          <table className="w-fit min-w-[480px] text-sm">
+            <thead>
+              <tr className="border-b border-pc-border bg-pc-bg-secondary text-left text-xs uppercase tracking-wide text-pc-text-muted">
+                <th className="px-1.5 py-2">{t("common.playerChampions.champion")}</th>
+                <th className="px-1.5 py-2">{t("generated.players.lvl")}</th>
+                <th className="px-1.5 py-2">{t("generated.players.championXp")}</th>
+                <th className="px-1.5 py-2">{t("common.playerChampions.kdaShort")}</th>
+                <th className="px-1.5 py-2">{t("common.metrics.kdaRatio")}</th>
+                <th className="px-1.5 py-2">{t("common.playerChampions.winsShort")}</th>
+                <th className="px-1.5 py-2">{t("common.playerChampions.lossesShort")}</th>
+                <th className="px-1.5 py-2">{t("common.metrics.winRate")}</th>
+                <th className="px-1.5 py-2">{t("generated.players.playtime")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {champions.map((champion) => (
+                <tr key={champion.championId} className="border-b border-pc-border/50 last:border-0 hover:bg-pc-bg-secondary">
+                  <td className="px-1.5 py-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <img src={getChampionIconSafe(champion.championName)} alt="" className="h-5 w-5 shrink-0 rounded object-contain" />
+                      <span className="font-medium text-pc-text">{champion.championName}</span>
+                    </div>
+                  </td>
+                  <td className="px-1.5 py-1.5 font-mono text-[11px] text-pc-accent">{championMasteryLevelFromXp(champion.xp)}</td>
+                  <td className="px-1.5 py-1.5 font-mono text-[11px] text-pc-text-secondary">{formatNumber(champion.xp)}</td>
+                  <td className="px-1.5 py-1.5 font-mono text-[11px] text-pc-text-secondary">{formatNumber(champion.kills)}/{formatNumber(champion.deaths)}/{formatNumber(champion.assists)}</td>
+                  <td className="px-1.5 py-1.5 font-mono text-[11px] text-pc-text-secondary">{formatKda(champion.kills, champion.deaths, champion.assists)}</td>
+                  <td className="px-1.5 py-1.5 font-mono text-[11px] text-pc-text-secondary">{formatNumber(champion.wins)}</td>
+                  <td className="px-1.5 py-1.5 font-mono text-[11px] text-pc-text-secondary">{formatNumber(champion.losses)}</td>
+                  <td className="px-1.5 py-1.5 font-mono text-[11px] text-pc-text-secondary">{champion.winRate != null ? t("common.playerChampions.winPercentage", { value: formatNumber(champion.winRate) }) : "—"}</td>
+                  <td className="px-1.5 py-1.5 font-mono text-[11px] text-pc-text-secondary">{t("common.format.minutesShort", { minutes: formatNumber(champion.minutesPlayed) })}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>
   );
-}
-
-function ChampionCard({ champion }: { champion: PlayerChampionStat }) {
-  const { formatNumber, t , formatDateTime} = useLocalization();
-  const role = ROLES.find((entry) => entry.value === champion.role);
-  const masteryLevel = championMasteryLevelFromXp(champion.xp);
-  return (
-    <article className="group relative rounded-xl border border-pc-border bg-pc-bg-elevated p-3 transition-all duration-200 hover:border-pc-accent-mid hover:shadow-[0_0_20px_var(--pc-accent-glow-subtle)]">
-      <div className="flex items-center gap-3.5">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-pc-border/50 bg-pc-bg-elevated transition-colors group-hover:border-pc-accent-deep/50"><img src={getChampionIconSafe(champion.championName)} alt="" className="h-full w-full object-contain" /></div>
-        <div className="min-w-0 flex-1">
-          <div className="mb-1 flex items-center gap-2"><h2 className="truncate text-sm font-semibold text-pc-text transition-colors group-hover:text-pc-accent">{champion.championName}</h2><span className="shrink-0 font-mono text-xs text-pc-accent">{t("common.playerChampions.level", { level: masteryLevel })}</span>{role && <span className="flex shrink-0 items-center gap-1 rounded px-1.5 py-0.5 text-xs text-pc-text-muted pc-surface-subtle"><img src={role.icon} alt="" className="h-3 w-3" />{t(role.labelKey)}</span>}</div>
-          <div className="text-xs text-pc-text-muted">{t("generated.players.championXp")} <span className="font-mono text-pc-text-secondary">{formatNumber(champion.xp)}</span></div>
-        </div>
-      </div>
-      <div className="mt-3 grid grid-cols-2 gap-x-2 gap-y-3 border-t border-pc-border/50 pt-2.5 text-center">
-        <Metric label={t("common.playerChampions.winsLosses")} value={`${formatNumber(champion.wins)} / ${formatNumber(champion.losses)}`} />
-        <Metric label={t("common.playerChampions.kdaShort")} value={t("common.playerChampions.kdaLine", { kills: formatNumber(champion.kills), deaths: formatNumber(champion.deaths), assists: formatNumber(champion.assists) })} />
-        <Metric label={t("common.metrics.kda")} value={formatKda(champion.kills, champion.deaths, champion.assists)} />
-        <Metric label={t("generated.players.time")} value={t("common.format.minutesShort", { minutes: formatNumber(champion.minutesPlayed) })} />
-      </div>
-      <div className="mt-3 flex min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-1 border-t border-pc-border/50 pt-2 text-xs text-pc-text-muted">
-        <span className="truncate">{t("common.playerChampions.ownership")}: <span className="text-pc-text-secondary">{champion.ownershipType || "—"}</span></span>
-        <span className="whitespace-nowrap">{t("common.playerChampions.updated")}: <span className="text-pc-text-secondary">{formatDateTime(champion.lastUpdated)}</span></span>
-      </div>
-    </article>
-  );
-}
-
-function Metric({ label, value }: { label: string; value: string }) {
-  return <div><div className="text-xs uppercase text-pc-text-muted">{label}</div><div className="mt-0.5 truncate font-mono text-xs text-pc-text-secondary">{value}</div></div>;
 }
