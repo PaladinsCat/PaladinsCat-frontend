@@ -305,7 +305,7 @@ export default function Nav() {
                 <img src="/images/icons/paladinscat.avif" alt="" className="w-7 h-7" />
                 {t("generated.common.paladinscat")}
                 {liteMode && (
-                  <span className="absolute -right-7 -top-2.5 rounded bg-pc-accent px-1 text-[10px] font-bold leading-tight text-pc-bg" aria-label={t("menu.liteMode")}>
+                  <span className="absolute -right-7 -top-2.5 rounded bg-pc-accent px-1 text-xs font-bold leading-tight text-pc-bg" aria-label={t("menu.liteMode")}>
                     {t("menu.lite")}
                   </span>
                 )}
@@ -385,7 +385,7 @@ export default function Nav() {
               <img src="/images/icons/paladinscat.avif" alt="" className="w-7 h-7" />
               {t("generated.common.paladinscat")}
               {liteMode && (
-                <span className="absolute -right-7 -top-2.5 rounded bg-pc-accent px-1 text-[10px] font-bold leading-tight text-pc-bg" aria-label={t("menu.liteMode")}>
+                <span className="absolute -right-7 -top-2.5 rounded bg-pc-accent px-1 text-xs font-bold leading-tight text-pc-bg" aria-label={t("menu.liteMode")}>
                   {t("menu.lite")}
                 </span>
               )}
