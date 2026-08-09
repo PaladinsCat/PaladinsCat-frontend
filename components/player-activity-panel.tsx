@@ -168,6 +168,19 @@ export default function PlayerActivityPanel({ showStatements = true }: { showSta
   const activeRegions = display.regions
     .filter(region => region.total24h > 0)
     .sort((left, right) => right.total24h - left.total24h);
+  const matchRegionStackOrder = useMemo(() => {
+    const seen = new Set<string>();
+    const order: string[] = [];
+    for (const entry of display.hourly) {
+      for (const [region, value] of Object.entries(entry.regions)) {
+        if (value > 0 && !seen.has(region)) {
+          seen.add(region);
+          order.push(region);
+        }
+      }
+    }
+    return order;
+  }, [display.hourly]);
   const maxHourly = Math.max(...display.hourly.map(entry => entry.total), 1);
   const playerHourly = useMemo(() => {
     const rows = new Map<string, DisplayActivity["hourly"][number]>(playerBreakdown === "region"
@@ -257,6 +270,7 @@ export default function PlayerActivityPanel({ showStatements = true }: { showSta
         breakdown={playerBreakdown}
         onBreakdownChange={setPlayerBreakdown}
         regionOrder={activeRegions.map(region => region.region)}
+        regionStackOrder={matchRegionStackOrder}
         title={t("playerActivity.players24h")}
         regionModeLabel={t("playerActivity.playersByRegion")}
         platformModeLabel={t("playerActivity.playersByPlatform")}
@@ -329,13 +343,19 @@ function ActivityBar({
   max,
   formatNumber,
   colors = REGION_COLORS,
+  seriesOrder,
 }: {
   entry: DisplayActivity["hourly"][number];
   max: number;
   formatNumber: (value: number) => string;
   colors?: Record<string, string>;
+  seriesOrder?: string[];
 }) {
-  const parts = Object.entries(entry.regions).filter(([, value]) => value > 0);
+  const seriesRank = new Map((seriesOrder ?? []).map((series, index) => [series, index]));
+  const parts = Object.entries(entry.regions)
+    .filter(([, value]) => value > 0)
+    .sort((left, right) => (seriesRank.get(left[0]) ?? seriesRank.size)
+      - (seriesRank.get(right[0]) ?? seriesRank.size));
   return <div className="relative h-3 min-w-0 rounded-full bg-pc-bg">
     <div className="flex h-full rounded-full" style={{ width: `${(entry.total / max) * 100}%` }}>
       {parts.map(([region, value], index) => <span
@@ -400,6 +420,7 @@ function PlayerHourlyRegionCard({
   breakdown,
   onBreakdownChange,
   regionOrder,
+  regionStackOrder,
   title,
   regionModeLabel,
   platformModeLabel,
@@ -419,6 +440,7 @@ function PlayerHourlyRegionCard({
   breakdown: "region" | "platform";
   onBreakdownChange: (breakdown: "region" | "platform") => void;
   regionOrder: string[];
+  regionStackOrder: string[];
   title: string;
   regionModeLabel: string;
   platformModeLabel: string;
@@ -438,6 +460,9 @@ function PlayerHourlyRegionCard({
       || left.region.localeCompare(right.region));
   const platforms = [...(stats?.public_by_platform ?? [])].filter(row => row.players > 0);
   const colors = breakdown === "region" ? REGION_COLORS : PLATFORM_COLORS;
+  const seriesOrder = breakdown === "region"
+    ? regionStackOrder
+    : platforms.map(row => row.platform);
   const maxHourly = Math.max(...hourly.map(entry => entry.total), 1);
   return <section className="pc-card min-w-0 p-3 sm:p-4">
     <HourlyCardHeader
@@ -470,7 +495,7 @@ function PlayerHourlyRegionCard({
         return <Fragment key={`${entry.date}|${entry.hour}`}>
           <div className={`grid grid-cols-[3.5rem_1fr_2.5rem] items-center gap-2 rounded px-1 py-1 ${current ? "bg-pc-accent/8 ring-1 ring-pc-accent/20" : "hover:bg-pc-bg-secondary/50"}`}>
             <span className={`text-right font-mono text-xs ${current ? "font-semibold text-pc-accent" : "text-pc-text-muted"}`}>{formatHour(entry.date, entry.hour)}</span>
-            <ActivityBar entry={entry} max={maxHourly} formatNumber={formatNumber} colors={colors} />
+            <ActivityBar entry={entry} max={maxHourly} formatNumber={formatNumber} colors={colors} seriesOrder={seriesOrder} />
             <span className={`text-right font-mono text-xs font-semibold ${entry.total > 0 ? "text-pc-text" : "text-pc-text-muted/30"}`}>{entry.total || "-"}</span>
           </div>
           {index < hourly.length - 1 && <ActivityChartStatement className="px-1 py-0.5 text-center" />}
