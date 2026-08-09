@@ -326,17 +326,6 @@ html.pc-lite .group:hover * {
   background-size: cover;
 }
 
-/* Player Activity intentionally replaces character wallpaper art with a
-   neutral, text-only statement. The SVG contains lettering only: no caution
-   bands, colored stripes, or wallpaper-derived palette. */
-.pc-activity-statement-background {
-  background-color: #000 !important;
-  background-image: url('/images/patterns/paladins-2-transparency-statement.svg');
-  background-position: 0 0;
-  background-repeat: repeat;
-  background-size: 1600px 1600px;
-}
-
 /* Keep the fixed image on a simple compositing path while scrolling. Applying
    `filter` directly to a fixed layer can make mobile browsers re-rasterize it
    at a different scale; a separate tint gives the same contrast without it. */
