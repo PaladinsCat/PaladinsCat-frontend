@@ -5,6 +5,7 @@ import Link from "next/link";
 import { fetchMatchCompositions, type MatchCompositionStat } from "@/lib/api-client";
 import { useLobbyTier } from "@/lib/lobby-tier-context";
 import { LoadingIndicator, StableMetricValue } from "@/components/async-state";
+import { usePersistentDirectoryPage } from "@/components/player-directory-pagination";
 import { useLocalization } from "@/lib/localization-context";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
 import { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation } from "@/components/aceternity";
@@ -26,7 +27,7 @@ export default function CompositionStatsPage() {
   const [sortKey, setSortKey] = useState<SortKey>("totalMatches");
   const [descending, setDescending] = useState(true);
   const [pageSize, setPageSize] = useState<(typeof PAGE_SIZES)[number]>(25);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = usePersistentDirectoryPage();
   const [loading, setLoading] = useState(true);
   const { definition: lobbyTier, ready: lobbyTierReady } = useLobbyTier();
   const displayLoading = useRouteSettledLoading(loading);

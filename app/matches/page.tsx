@@ -9,6 +9,7 @@ import { useTimeZone } from "@/lib/time-zone-context";
 import { formatLocalDateTime } from "@/lib/time-format";
 import { AsyncButton, EmptyState, ErrorState } from "@/components/async-state";
 import { DataTableSkeleton } from "@/components/route-skeleton";
+import { usePersistentDirectoryPage } from "@/components/player-directory-pagination";
 import { useAuth } from "@/lib/auth-context";
 import { useLobbyTier } from "@/lib/lobby-tier-context";
 import { useLocalization } from "@/lib/localization-context";
@@ -24,7 +25,7 @@ export default function MatchesPage() {
   const tierParams = isLoggedIn ? { tierMin: lobbyTier.tierMin, tierMax: lobbyTier.tierMax } : undefined;
   const [matches, setMatches] = useState<MatchSearchResult[]>([]);
   const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = usePersistentDirectoryPage();
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

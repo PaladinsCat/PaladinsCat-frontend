@@ -2,36 +2,51 @@
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useState, type SetStateAction } from "react";
+import { usePathname } from "next/navigation";
 import { useLocalization } from "@/lib/localization-context";
 
-function readPage(param: string) {
+function readPage(param: string, storageKey: string) {
   if (typeof window === "undefined") return 1;
   const page = Number(new URLSearchParams(window.location.search).get(param));
-  return Number.isInteger(page) && page > 0 ? page : 1;
+  if (Number.isInteger(page) && page > 0) return page;
+  try {
+    const storedPage = Number(window.sessionStorage.getItem(storageKey));
+    return Number.isInteger(storedPage) && storedPage > 0 ? storedPage : 1;
+  } catch {
+    return 1;
+  }
 }
 
 export function usePersistentDirectoryPage(param = "page") {
+  const pathname = usePathname();
+  const storageKey = `pc:directory-page:${pathname}:${param}`;
   const [page, setPageState] = useState(1);
 
   useEffect(() => {
-    const syncPage = () => setPageState(readPage(param));
+    const syncPage = () => setPageState(readPage(param, storageKey));
     syncPage();
     window.addEventListener("popstate", syncPage);
     return () => window.removeEventListener("popstate", syncPage);
-  }, [param]);
+  }, [param, storageKey]);
 
   const setPage = useCallback((nextPage: SetStateAction<number>) => {
     setPageState((currentPage) => {
       const resolvedPage = typeof nextPage === "function" ? nextPage(currentPage) : nextPage;
       if (typeof window !== "undefined") {
         const url = new URL(window.location.href);
+        try {
+          if (resolvedPage <= 1) window.sessionStorage.removeItem(storageKey);
+          else window.sessionStorage.setItem(storageKey, String(resolvedPage));
+        } catch {
+          // URL persistence below still preserves browser-back restoration.
+        }
         if (resolvedPage <= 1) url.searchParams.delete(param);
         else url.searchParams.set(param, String(resolvedPage));
         window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}${url.hash}`);
       }
       return resolvedPage;
     });
-  }, [param]);
+  }, [param, storageKey]);
 
   return [page, setPage] as const;
 }

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { fetchChangelog, type ChangelogPage } from "@/lib/api-client";
 import { formatLocalDateTime, formatRelativeTime } from "@/lib/time-format";
 import { LoadingPanel } from "@/components/async-state";
+import { usePersistentDirectoryPage } from "@/components/player-directory-pagination";
 import { useLocalization } from "@/lib/localization-context";
 import type { TranslationKey } from "@/lib/localization/messages";
 
@@ -302,7 +303,7 @@ function Pagination({ page, totalPages, onChange }: { page: number; totalPages: 
 
 export default function ChangelogPage() {
   const { t } = useLocalization();
-  const [page, setPage] = useState(1);
+  const [page, setPage] = usePersistentDirectoryPage();
   const [data, setData] = useState<ChangelogPage | null>(null);
   const [loading, setLoading] = useState(true);
 

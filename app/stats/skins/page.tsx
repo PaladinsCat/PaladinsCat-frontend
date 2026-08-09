@@ -15,6 +15,7 @@ import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
 import { useLobbyTier } from "@/lib/lobby-tier-context";
 import { LoadingIndicator } from "@/components/async-state";
+import { usePersistentDirectoryPage } from "@/components/player-directory-pagination";
 import { useLocalization } from "@/lib/localization-context";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
 import { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation } from "@/components/aceternity";
@@ -45,7 +46,7 @@ export default function SkinStatsPage() {
   const [filterRole, setFilterRole] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<SkinSort>("plays");
   const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
+  const [page, setPage] = usePersistentDirectoryPage();
   const [pageSize, setPageSize] = useState<(typeof PAGE_SIZES)[number]>(25);
   const [loading, setLoading] = useState(true);
   const displayLoading = useRouteSettledLoading(loading);
