@@ -77,7 +77,7 @@ function LanguageMenu() {
 
 export default function Nav() {
   const pathname = usePathname();
-  const { user, logout } = useAuth();
+  const { user, isLoading: authLoading, logout } = useAuth();
   const { t } = useLocalization();
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
   const [wallpaperEnabled, setWallpaperEnabledState] = useState(true);
@@ -287,9 +287,12 @@ export default function Nav() {
     if (href === "/" || href === "/stats" || href === "/players") return pathname === href;
     return pathname === href || pathname.startsWith(`${href}/`);
   };
-  const profileHref = user?.linkedPlayerId ? `/players/${user.linkedPlayerId}` : "/link-account";
-  const accountLabel = user
-    ? (user.linkedPlayerName ?? user.username).replace(/_/g, " ")
+  // Auth state is client-resolved. Keep the server and first client render on
+  // the same logged-out branch until the session check completes.
+  const resolvedUser = authLoading ? null : user;
+  const profileHref = resolvedUser?.linkedPlayerId ? `/players/${resolvedUser.linkedPlayerId}` : "/link-account";
+  const accountLabel = resolvedUser
+    ? (resolvedUser.linkedPlayerName ?? resolvedUser.username).replace(/_/g, " ")
     : "";
 
   return (
@@ -355,13 +358,13 @@ export default function Nav() {
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
                 {t("nav.menu")}
               </button>
-              {user ? (
+              {resolvedUser ? (
                 <div className="group relative flex items-center">
                   <Link
                     href={profileHref}
                     className="block max-w-36 truncate rounded-md px-1 py-1 text-sm text-pc-text-secondary transition-colors hover:text-pc-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent"
                   >
-                    {user.linkedPlayerId ? <PlayerName playerId={user.linkedPlayerId} verified>{accountLabel}</PlayerName> : accountLabel}
+                    {resolvedUser.linkedPlayerId ? <PlayerName playerId={resolvedUser.linkedPlayerId} verified>{accountLabel}</PlayerName> : accountLabel}
                   </Link>
                   <div className="pointer-events-none invisible absolute right-0 top-full z-10 w-44 pt-2 opacity-0 transition-all group-hover:pointer-events-auto group-hover:visible group-hover:opacity-100">
                     <div className="rounded-lg border border-pc-border bg-pc-bg-secondary p-1 shadow-md" role="menu">
@@ -451,7 +454,7 @@ export default function Nav() {
               </div>
             </div>
             <div className="border-t border-pc-border px-5 py-4">
-              {user ? <div className="flex items-center justify-between gap-3"><Link href={profileHref} onClick={() => setSideMenuOpen(false)} className="min-w-0 truncate text-sm text-pc-text-secondary hover:text-pc-accent">{user.linkedPlayerId ? <PlayerName playerId={user.linkedPlayerId} verified>{accountLabel}</PlayerName> : accountLabel}</Link><Link href="/account" onClick={() => setSideMenuOpen(false)} className="text-xs text-pc-text-muted hover:text-pc-accent">{t("generated.common.account")}</Link><button onClick={handleLogout} className="pc-btn-ghost text-sm">{t("nav.logout")}</button></div> : <Link href="/auth/login" onClick={() => setSideMenuOpen(false)} className="pc-btn-secondary block text-center text-sm">{t("nav.login")}</Link>}
+              {resolvedUser ? <div className="flex items-center justify-between gap-3"><Link href={profileHref} onClick={() => setSideMenuOpen(false)} className="min-w-0 truncate text-sm text-pc-text-secondary hover:text-pc-accent">{resolvedUser.linkedPlayerId ? <PlayerName playerId={resolvedUser.linkedPlayerId} verified>{accountLabel}</PlayerName> : accountLabel}</Link><Link href="/account" onClick={() => setSideMenuOpen(false)} className="text-xs text-pc-text-muted hover:text-pc-accent">{t("generated.common.account")}</Link><button onClick={handleLogout} className="pc-btn-ghost text-sm">{t("nav.logout")}</button></div> : <Link href="/auth/login" onClick={() => setSideMenuOpen(false)} className="pc-btn-secondary block text-center text-sm">{t("nav.login")}</Link>}
             </div>
           </aside>
         </div>
