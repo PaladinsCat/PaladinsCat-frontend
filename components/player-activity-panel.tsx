@@ -163,18 +163,6 @@ export default function PlayerActivityPanel({ showStatements = true }: { showSta
         <p className="mt-1 text-sm text-pc-text-secondary">{t("playerActivity.description")}</p>
       </header>
 
-      <section
-        role="alert"
-        className="rounded-xl border border-red-500/50 bg-red-950/55 px-4 py-3 shadow-[0_0_24px_rgba(239,68,68,0.08)]"
-      >
-        <h2 className="text-sm font-bold text-red-200">
-          {t("playerActivity.weeklyWarningTitle")}
-        </h2>
-        <p className="mt-1 text-sm leading-relaxed text-red-100/80">
-          {t("playerActivity.weeklyWarningBody")}
-        </p>
-      </section>
-
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       <section className="pc-card min-w-0 p-3 sm:p-4">
         <div className="mb-3 flex flex-wrap items-center gap-3 border-b border-pc-border/50 pb-3">
