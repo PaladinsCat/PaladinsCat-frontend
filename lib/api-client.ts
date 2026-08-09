@@ -3486,93 +3486,11 @@ export function getAuthUser(): AuthUser | null {
   }
 }
 
-function setAuthSession(session: AuthSession) {
-  if (typeof window !== "undefined") {
-    localStorage.setItem(TOKEN_KEY, session.token);
-    localStorage.setItem(USER_KEY, JSON.stringify(session.user));
-  }
-}
-
 export function clearAuth() {
   if (typeof window !== "undefined") {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
   }
-}
-
-// ── Auth ──
-
-export async function register(username: string, email: string, password: string): Promise<AuthSession> {
-  const raw = await fetchJson<{
-    message: string;
-    user: { id: number; username: string; email?: string | null; avatar_url?: string | null; bio?: string | null; is_admin?: boolean; is_approved?: boolean; created_at?: string; last_login?: string | null; time_zone?: string | null };
-    token: string;
-    expires_at?: string;
-  }>(`/auth/register`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, email, password }),
-  });
-
-  // The backend creates the session in the same transaction window as the user
-  // insert. Do not re-login here: that turns a successful registration into a
-  // user-visible failure if a later login read hits schema drift or a transient
-  // DB issue. Store the returned session exactly like login() does.
-  const session: AuthSession = {
-    user: {
-      id: raw.user.id,
-      username: raw.user.username,
-      email: raw.user.email ?? email,
-      avatarUrl: raw.user.avatar_url ?? null,
-      bio: raw.user.bio ?? null,
-      isAdmin: raw.user.is_admin ?? false,
-      isApproved: raw.user.is_approved ?? false,
-      createdAt: raw.user.created_at ?? new Date().toISOString(),
-      lastLogin: raw.user.last_login ?? null,
-      timeZone: raw.user.time_zone ?? null,
-      linkedPlayerId: null,
-      linkedPlayerName: null,
-    },
-    token: raw.token,
-    expiresAt: raw.expires_at ?? new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(),
-  };
-
-  setAuthSession(session);
-  return session;
-}
-
-export async function login(username: string, password: string): Promise<AuthSession> {
-  const raw = await fetchJson<{
-    user: { id: number; username: string; email?: string | null; avatar_url?: string | null; bio?: string | null; is_admin?: boolean; is_approved?: boolean; created_at?: string; last_login?: string | null; time_zone?: string | null; linked_player_id?: number | null; linked_player_name?: string | null };
-    token: string;
-    expires_at?: string;
-  }>(`/auth/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password }),
-  });
-
-  const session: AuthSession = {
-    user: {
-      id: raw.user.id,
-      username: raw.user.username,
-      email: raw.user.email ?? "",
-      avatarUrl: raw.user.avatar_url ?? null,
-      bio: raw.user.bio ?? null,
-      isAdmin: raw.user.is_admin ?? false,
-      isApproved: raw.user.is_approved ?? false,
-      createdAt: raw.user.created_at ?? new Date().toISOString(),
-      lastLogin: raw.user.last_login ?? null,
-      timeZone: raw.user.time_zone ?? null,
-      linkedPlayerId: raw.user.linked_player_id ?? null,
-      linkedPlayerName: raw.user.linked_player_name ?? null,
-    },
-    token: raw.token,
-    expiresAt: raw.expires_at ?? new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(),
-  };
-
-  setAuthSession(session);
-  return session;
 }
 
 export async function logout(): Promise<void> {
@@ -3825,18 +3743,6 @@ export async function unlinkPlayer(): Promise<{ message: string }> {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
     body: JSON.stringify({ action: "unlink" }),
-  });
-}
-
-export async function changePassword(currentPassword: string, newPassword: string): Promise<{ message: string }> {
-  const token = getAuthToken();
-  if (!token) {
-    throw new Error(API_ERROR_KEYS.notAuthenticated);
-  }
-  return fetchJson<{ message: string }>("/auth/account/password", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-    body: JSON.stringify({ currentPassword, newPassword }),
   });
 }
 

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Clock3, ImageIcon, LockKeyhole, UserRound, UserRoundCog } from "lucide-react";
+import { Clock3, ImageIcon, UserRound, UserRoundCog } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { useTimeZone } from "@/lib/time-zone-context";
 import { fixedUtcOffsetFromTimeZone, fixedUtcOffsetToTimeZone, getFixedUtcOffsetOptions, getSupportedTimeZones } from "@/lib/time-zone";
@@ -10,7 +10,6 @@ import { LoadingIndicator, LoadingPanel } from "@/components/async-state";
 import PlayerLinkCard from "@/components/player-link-card";
 import {
   getAccountDetails,
-  changePassword,
   updateProfile,
   type AccountDetails,
 } from "@/lib/api-client";
@@ -40,13 +39,6 @@ export default function AccountPage() {
   const [wallpaperEnabled, setWallpaperEnabledState] = useState(true);
   const [wallpaperUrl, setWallpaperUrl] = useState("");
   const [wallpaperError, setWallpaperError] = useState<string | null>(null);
-
-  // ── Password change state ──
-  const [currentPw, setCurrentPw] = useState("");
-  const [newPw, setNewPw] = useState("");
-  const [confirmPw, setConfirmPw] = useState("");
-  const [changingPw, setChangingPw] = useState(false);
-  const [pwError, setPwError] = useState<string | null>(null);
 
   // ── Profile update state ──
   const [bio, setBio] = useState("");
@@ -114,36 +106,6 @@ export default function AccountPage() {
       if (wallpaper.revoke) URL.revokeObjectURL(wallpaper.source);
     });
   }, [customWallpapers]);
-
-  // ── Password change ──
-  const handleChangePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setPwError(null);
-    setSuccess(null);
-
-    if (newPw !== confirmPw) {
-      setPwError("Passwords do not match");
-      return;
-    }
-    if (newPw.length < 6) {
-      setPwError("Password must be at least 6 characters");
-      return;
-    }
-
-    setChangingPw(true);
-    try {
-      await changePassword(currentPw, newPw);
-      setSuccess(t("generated.account.passwordChangedSuccessfully"));
-      setCurrentPw("");
-      setNewPw("");
-      setConfirmPw("");
-      setPwError(null);
-    } catch (err) {
-      setPwError(err instanceof Error ? err.message : "Password change failed");
-    } finally {
-      setChangingPw(false);
-    }
-  };
 
   // ── Profile save ──
   const handleSaveProfile = async () => {
@@ -481,81 +443,12 @@ export default function AccountPage() {
         />
       </div>
 
-      {/* ── Password Change ── */}
+      {/* Identity credentials are exclusively managed by Keycloak. */}
       <section className="rounded-2xl border border-white/5 pc-glass p-6 lg:col-span-2">
-        <div className="mb-4 flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-pc-accent-third/20 bg-pc-accent-third/10 text-pc-accent-third">
-            <LockKeyhole className="h-5 w-5" aria-hidden="true" />
-          </span>
-          <h2 className="text-lg font-semibold text-pc-text">{t("generated.account.changePassword")}</h2>
-        </div>
-
-        {pwError && (
-          <div className="mb-3 bg-red-900/30 border border-red-700/50 rounded-lg p-3 text-red-400 text-sm">
-            {pwError}
-          </div>
-        )}
-
-        <form onSubmit={handleChangePassword} className="grid gap-4 md:grid-cols-3">
-          <div>
-            <label htmlFor="currentPw" className="block text-sm font-medium text-pc-text-secondary mb-1">
-              {t("generated.account.currentPassword")}</label>
-            <input
-              id="currentPw"
-              type="password"
-              value={currentPw}
-              onChange={(e) => {
-                setCurrentPw(e.target.value);
-                setPwError(null);
-              }}
-              required
-              className="w-full rounded-xl border border-pc-border bg-pc-bg-secondary px-3 py-2.5 text-pc-text placeholder-pc-text-muted focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
-              placeholder={t("generated.account.enterCurrentPassword")}
-            />
-          </div>
-
-          <div>
-            <label htmlFor="newPw" className="block text-sm font-medium text-pc-text-secondary mb-1">
-              {t("generated.account.newPassword")}</label>
-            <input
-              id="newPw"
-              type="password"
-              value={newPw}
-              onChange={(e) => {
-                setNewPw(e.target.value);
-                setPwError(null);
-              }}
-              required
-              minLength={6}
-              className="w-full rounded-xl border border-pc-border bg-pc-bg-secondary px-3 py-2.5 text-pc-text placeholder-pc-text-muted focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
-              placeholder={t("generated.account.text6Characters")}
-            />
-          </div>
-
-          <div>
-            <label htmlFor="confirmPw" className="block text-sm font-medium text-pc-text-secondary mb-1">
-              {t("generated.account.confirmNewPassword")}</label>
-            <input
-              id="confirmPw"
-              type="password"
-              value={confirmPw}
-              onChange={(e) => {
-                setConfirmPw(e.target.value);
-                setPwError(null);
-              }}
-              required
-              minLength={6}
-              className="w-full rounded-xl border border-pc-border bg-pc-bg-secondary px-3 py-2.5 text-pc-text placeholder-pc-text-muted focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
-              placeholder={t("generated.account.reEnterNewPassword")}
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={changingPw}
-            className="w-full rounded-xl bg-pc-accent py-2.5 font-semibold text-white transition-colors hover:bg-pc-accent-secondary disabled:cursor-not-allowed disabled:opacity-50 md:col-span-3"
-          >
-            {changingPw ? t("generated.account.changing") : t("generated.account.changePassword")}
+        <h2 className="mb-4 text-lg font-semibold text-pc-text">{t("generated.common.account")}</h2>
+        <form action="/api/auth/oidc/account" method="post">
+          <button type="submit" className="rounded-xl bg-pc-accent px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-pc-accent-secondary">
+            {t("generated.account.changePassword")}
           </button>
         </form>
       </section>

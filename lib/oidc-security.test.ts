@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildParAuthorizationUrl, buildPushedAuthorizationRequest, buildRpLogoutUrl, createTransaction, getJwkForTest, normalizedHttpsIssuer, parsePushedAuthorizationResponse, requireSameOrigin, resetJwksCacheForTest, resolveInternalIssuer, safeReturnPath, stateMatches, validIdTokenHeader } from "./oidc-security.ts";
+import { buildParAuthorizationUrl, buildPushedAuthorizationRequest, buildRpLogoutUrl, createTransaction, getJwkForTest, keycloakAccountUrl, normalizedHttpsIssuer, parsePushedAuthorizationResponse, requireSameOrigin, resetJwksCacheForTest, resolveInternalIssuer, safeReturnPath, stateMatches, validIdTokenHeader } from "./oidc-security.ts";
 import { csrfHeader } from "./csrf.ts";
 import { readFileSync } from "node:fs";
 
@@ -22,6 +22,10 @@ test("unsafe requests require exact origin", () => {
 test("OIDC issuer is a query-free HTTPS realm URL", () => {
   assert.equal(normalizedHttpsIssuer("https://auth.paladinscat.com/realms/paladinscat/"), "https://auth.paladinscat.com/realms/paladinscat");
   for (const value of [undefined, "http://auth.paladinscat.com/realms/paladinscat", "https://auth.paladinscat.com/", "https://auth.paladinscat.com/realms/paladinscat?x=1"]) assert.equal(normalizedHttpsIssuer(value), null);
+});
+test("account console is derived only from the configured realm issuer", () => {
+  assert.equal(keycloakAccountUrl("https://auth.paladinscat.com/realms/paladinscat/")?.href, "https://auth.paladinscat.com/realms/paladinscat/account/");
+  assert.equal(keycloakAccountUrl("http://auth.paladinscat.com/realms/paladinscat"), null);
 });
 test("JWKS outage and oversized documents fail closed", async () => {
   resetJwksCacheForTest();
@@ -91,6 +95,26 @@ test("PAR response requires a bounded-lived opaque request URI", () => {
 test("OIDC login redirects the initiating POST with 303, never 307", () => {
   const source = readFileSync(new URL("../app/api/auth/oidc/login/route.ts", import.meta.url), "utf8");
   assert.match(source, /NextResponse\.redirect\(buildParAuthorizationUrl\(issuer, clientId, requestUri\), \{ status: 303 \}\)/);
+});
+test("OIDC-only pages do not expose local credential forms or legacy API calls", () => {
+  const login = readFileSync(new URL("../app/auth/login/page.tsx", import.meta.url), "utf8");
+  const register = readFileSync(new URL("../app/auth/register/page.tsx", import.meta.url), "utf8");
+  const account = readFileSync(new URL("../app/account/page.tsx", import.meta.url), "utf8");
+  const accountRoute = readFileSync(new URL("../app/api/auth/oidc/account/route.ts", import.meta.url), "utf8");
+  const apiClient = readFileSync(new URL("./api-client.ts", import.meta.url), "utf8");
+  for (const source of [login, register, account]) assert.doesNotMatch(source, /\b(login|register|changePassword)\s*\(/);
+  assert.match(login, /action="\/api\/auth\/oidc\/login" method="post"/);
+  assert.match(register, /name="intent" value="create"/);
+  assert.match(account, /action="\/api\/auth\/oidc\/account" method="post"/);
+  assert.match(accountRoute, /requireSameOrigin/);
+  assert.match(accountRoute, /keycloakAccountUrl\(process\.env\.OIDC_ISSUER\)/);
+  assert.doesNotMatch(apiClient, /["`]\/auth\/(?:register|login)["`]/);
+  assert.doesNotMatch(apiClient, /["`]\/auth\/account\/password["`]/);
+});
+test("only the fixed create intent can add the Keycloak registration prompt", () => {
+  const route = readFileSync(new URL("../app/api/auth/oidc/login/route.ts", import.meta.url), "utf8");
+  assert.match(route, /requestedIntent !== null && requestedIntent !== "create"/);
+  assert.match(route, /if \(intent === "create"\) par\.form\.set\("prompt", "create"\)/);
 });
 test("frontend server calls use the pinned internal issuer without changing token issuer validation", () => {
   const login = readFileSync(new URL("../app/api/auth/oidc/login/route.ts", import.meta.url), "utf8");

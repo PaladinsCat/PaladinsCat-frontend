@@ -26,6 +26,9 @@ async function readParResponse(response: Response) {
 export async function POST(request: NextRequest) {
   if (!requireSameOrigin(request.headers.get("origin"), origin())) return new NextResponse("Forbidden", { status: 403 });
   const form = await request.formData();
+  const requestedIntent = form.get("intent");
+  if (requestedIntent !== null && requestedIntent !== "create") return new NextResponse("Invalid OIDC intent", { status: 400 });
+  const intent = requestedIntent === "create" ? "create" : "login";
   const transaction = createTransaction(safeReturnPath(String(form.get("return") || "/")));
   const issuer = normalizedHttpsIssuer(process.env.OIDC_ISSUER);
   const clientId = process.env.OIDC_CLIENT_ID;
@@ -36,6 +39,8 @@ export async function POST(request: NextRequest) {
   if (stored.status !== 201) return new NextResponse("OIDC is temporarily unavailable", { status: 503 });
   const par = buildPushedAuthorizationRequest(serverIssuer, clientId, `${origin()}/api/auth/oidc/callback`, transaction);
   par.form.set("client_secret", clientSecret);
+  // Registration is a fixed Keycloak prompt, never a browser-supplied auth parameter.
+  if (intent === "create") par.form.set("prompt", "create");
   let requestUri: string | undefined;
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 3_000);

@@ -62,6 +62,12 @@ export function normalizedHttpsIssuer(issuer: string | undefined): string | null
   } catch { return null; }
 }
 
+// The destination is derived solely from the configured realm issuer.
+export function keycloakAccountUrl(issuer: string | undefined): URL | null {
+  const normalized = normalizedHttpsIssuer(issuer);
+  return normalized ? new URL(`${normalized}/account/`) : null;
+}
+
 export function resolveInternalIssuer(issuer: string, override: string | undefined): string {
   const external = new URL(issuer);
   if (!override) return issuer;
