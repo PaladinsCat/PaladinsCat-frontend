@@ -1,3 +1,5 @@
+import { identityCutoverEnabled } from "./identity-cutover";
+
 // Browser-facing backend URL.
 //
 // In production the public website is served on port 80, while the direct
@@ -3486,11 +3488,51 @@ export function getAuthUser(): AuthUser | null {
   }
 }
 
+function setAuthSession(session: AuthSession) {
+  if (typeof window !== "undefined") {
+    localStorage.setItem(TOKEN_KEY, session.token);
+    localStorage.setItem(USER_KEY, JSON.stringify(session.user));
+  }
+}
+
 export function clearAuth() {
   if (typeof window !== "undefined") {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
   }
+}
+
+// Retained only during the explicit legacy-compatible transition build. The
+// Keycloak-only build renders no controls that can call these endpoints.
+export async function register(username: string, email: string, password: string): Promise<AuthSession> {
+  const raw = await fetchJson<{ user: { id: number; username: string; email?: string | null; avatar_url?: string | null; bio?: string | null; is_admin?: boolean; is_approved?: boolean; created_at?: string; last_login?: string | null; time_zone?: string | null }; token: string; expires_at?: string }>("/auth/register", {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username, email, password }),
+  });
+  const session: AuthSession = { user: {
+    id: raw.user.id, username: raw.user.username, email: raw.user.email ?? email,
+    avatarUrl: raw.user.avatar_url ?? null, bio: raw.user.bio ?? null,
+    isAdmin: raw.user.is_admin ?? false, isApproved: raw.user.is_approved ?? false,
+    createdAt: raw.user.created_at ?? new Date().toISOString(), lastLogin: raw.user.last_login ?? null,
+    timeZone: raw.user.time_zone ?? null, linkedPlayerId: null, linkedPlayerName: null,
+  }, token: raw.token, expiresAt: raw.expires_at ?? new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString() };
+  setAuthSession(session);
+  return session;
+}
+
+export async function login(username: string, password: string): Promise<AuthSession> {
+  const raw = await fetchJson<{ user: { id: number; username: string; email?: string | null; avatar_url?: string | null; bio?: string | null; is_admin?: boolean; is_approved?: boolean; created_at?: string; last_login?: string | null; time_zone?: string | null; linked_player_id?: number | null; linked_player_name?: string | null }; token: string; expires_at?: string }>("/auth/login", {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username, password }),
+  });
+  const session: AuthSession = { user: {
+    id: raw.user.id, username: raw.user.username, email: raw.user.email ?? "",
+    avatarUrl: raw.user.avatar_url ?? null, bio: raw.user.bio ?? null,
+    isAdmin: raw.user.is_admin ?? false, isApproved: raw.user.is_approved ?? false,
+    createdAt: raw.user.created_at ?? new Date().toISOString(), lastLogin: raw.user.last_login ?? null,
+    timeZone: raw.user.time_zone ?? null, linkedPlayerId: raw.user.linked_player_id ?? null,
+    linkedPlayerName: raw.user.linked_player_name ?? null,
+  }, token: raw.token, expiresAt: raw.expires_at ?? new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString() };
+  setAuthSession(session);
+  return session;
 }
 
 export async function logout(): Promise<void> {
@@ -3511,7 +3553,7 @@ export async function logout(): Promise<void> {
     console.warn("Server logout failed; clearing local session anyway.", err);
   } finally {
     clearAuth();
-    if (typeof document !== "undefined") {
+    if (identityCutoverEnabled && typeof document !== "undefined") {
       // A form navigation preserves the same-origin POST CSRF boundary and lets
       // the browser follow the BFF's redirect to Keycloak's RP logout endpoint.
       const form = document.createElement("form");

@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { buildParAuthorizationUrl, buildPushedAuthorizationRequest, buildRpLogoutUrl, createTransaction, getJwkForTest, keycloakAccountUrl, normalizedHttpsIssuer, parsePushedAuthorizationResponse, requireSameOrigin, resetJwksCacheForTest, resolveInternalIssuer, safeReturnPath, stateMatches, validIdTokenHeader } from "./oidc-security.ts";
 import { csrfHeader } from "./csrf.ts";
+import { isIdentityCutoverEnabled } from "./identity-cutover.ts";
 import { readFileSync } from "node:fs";
 
 test("rejects open redirects", () => {
@@ -96,20 +97,25 @@ test("OIDC login redirects the initiating POST with 303, never 307", () => {
   const source = readFileSync(new URL("../app/api/auth/oidc/login/route.ts", import.meta.url), "utf8");
   assert.match(source, /NextResponse\.redirect\(buildParAuthorizationUrl\(issuer, clientId, requestUri\), \{ status: 303 \}\)/);
 });
-test("OIDC-only pages do not expose local credential forms or legacy API calls", () => {
+test("identity cutover is explicit: default keeps legacy credentials and only true enables Keycloak-only pages", () => {
   const login = readFileSync(new URL("../app/auth/login/page.tsx", import.meta.url), "utf8");
   const register = readFileSync(new URL("../app/auth/register/page.tsx", import.meta.url), "utf8");
   const account = readFileSync(new URL("../app/account/page.tsx", import.meta.url), "utf8");
   const accountRoute = readFileSync(new URL("../app/api/auth/oidc/account/route.ts", import.meta.url), "utf8");
   const apiClient = readFileSync(new URL("./api-client.ts", import.meta.url), "utf8");
-  for (const source of [login, register, account]) assert.doesNotMatch(source, /\b(login|register|changePassword)\s*\(/);
+  assert.equal(isIdentityCutoverEnabled(undefined), false);
+  assert.equal(isIdentityCutoverEnabled("false"), false);
+  assert.equal(isIdentityCutoverEnabled("true"), true);
+  for (const source of [login, register]) assert.match(source, /identityCutoverEnabled/);
+  assert.match(login, /useAuth\(\)/);
+  assert.match(register, /await register\(/);
+  assert.match(apiClient, /"\/auth\/login"/);
+  assert.match(apiClient, /"\/auth\/register"/);
   assert.match(login, /action="\/api\/auth\/oidc\/login" method="post"/);
   assert.match(register, /name="intent" value="create"/);
   assert.match(account, /action="\/api\/auth\/oidc\/account" method="post"/);
   assert.match(accountRoute, /requireSameOrigin/);
   assert.match(accountRoute, /keycloakAccountUrl\(process\.env\.OIDC_ISSUER\)/);
-  assert.doesNotMatch(apiClient, /["`]\/auth\/(?:register|login)["`]/);
-  assert.doesNotMatch(apiClient, /["`]\/auth\/account\/password["`]/);
 });
 test("only the fixed create intent can add the Keycloak registration prompt", () => {
   const route = readFileSync(new URL("../app/api/auth/oidc/login/route.ts", import.meta.url), "utf8");

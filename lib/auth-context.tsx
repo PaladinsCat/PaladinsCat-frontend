@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
-import { clearAuth, getAuthUser, getMe, isAuthenticationRejection, logout, type AuthUser } from "./api-client";
+import { clearAuth, getAuthUser, getMe, isAuthenticationRejection, login, logout, type AuthUser } from "./api-client";
 
 interface AuthContextValue {
   user: AuthUser | null;
@@ -9,6 +9,7 @@ interface AuthContextValue {
   isLoggedIn: boolean;
   isAdmin: boolean;
   isApproved: boolean;
+  login: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
 }
@@ -58,6 +59,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [refresh]);
 
+  const handleLogin = useCallback(async (username: string, password: string) => {
+    const session = await login(username, password);
+    setUser(session.user);
+  }, []);
+
   const handleLogout = useCallback(async () => {
     await logout();
     setUser(null);
@@ -70,6 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isLoggedIn: !!user,
       isAdmin: user?.isAdmin ?? false,
       isApproved: user?.isApproved ?? false,
+      login: handleLogin,
       logout: handleLogout,
       refresh,
     }}>
