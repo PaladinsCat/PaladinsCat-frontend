@@ -13,6 +13,7 @@ import { getChampionIconSafe } from "@/lib/champion-icons";
 import { LoadingPanel } from "@/components/async-state";
 import PlayerName from "@/components/player-name";
 import TablePagination, { type TablePageSize } from "@/components/table-pagination";
+import { usePersistentDirectoryPage } from "@/components/player-directory-pagination";
 
 import { useSearchParams } from "next/navigation";
 import { useLocalization } from "@/lib/localization-context";
@@ -66,7 +67,8 @@ function ChampionEloContent() {
   const [accountPlayers, setAccountPlayers] = useState<ClassLeaderboardEntry[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = usePersistentDirectoryPage();
+  const pageResetKey = useRef<string | null>(null);
   const [pageSize, setPageSize] = useState<TablePageSize>(25);
 
   // Champion dropdown state (only shown within a class tab)
@@ -112,7 +114,9 @@ function ChampionEloContent() {
   );
 
   useEffect(() => {
-    setPage(1);
+    const nextKey = `${activeTab}:${eloMode}:${selectedChampionId ?? "none"}`;
+    if (pageResetKey.current !== null && pageResetKey.current !== nextKey) setPage(1);
+    pageResetKey.current = nextKey;
   }, [activeTab, eloMode, selectedChampionId]);
 
   // Close dropdown on outside click

@@ -21,7 +21,7 @@ export default function BoostedPlayersPage() {
   }, []);
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-6">
+    <div className="mx-auto w-full max-w-6xl space-y-6">
         <Link href="/players" className="mb-2 inline-block text-xs text-pc-accent hover:underline">{t("generated.players.players")}</Link>
         <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("moderation.boostedPlayers")}</h1>
         <p className="mt-1 text-sm text-pc-text-secondary">{t("moderation.boostedDescription")}</p>

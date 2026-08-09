@@ -60,7 +60,7 @@ export default function CheatersPage() {
   ], [data, privateData]);
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-6">
+    <div className="mx-auto w-full max-w-6xl space-y-6">
       <div>
         <Link href="/players" className="text-pc-accent text-xs hover:underline mb-2 inline-block">{t("generated.players.players")}</Link>
         <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.players.confirmedCheaters")}</h1>

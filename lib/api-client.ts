@@ -261,8 +261,9 @@ export interface BoostedPlayerDetail {
   matches: BoostedMatchSummary[];
 }
 
-export async function fetchCheaterPlayers(params?: { cheater?: boolean; susOnly?: boolean; weirdoOnly?: boolean; hallOfFameOnly?: boolean; dropperOnly?: boolean; afkWintradeOnly?: boolean; altAccountOnly?: boolean; limit?: number; offset?: number }): Promise<CheaterPlayer[]> {
+export async function fetchCheaterPlayers(params?: { name?: string; cheater?: boolean; susOnly?: boolean; weirdoOnly?: boolean; hallOfFameOnly?: boolean; dropperOnly?: boolean; afkWintradeOnly?: boolean; altAccountOnly?: boolean; limit?: number; offset?: number }): Promise<CheaterPlayer[]> {
   const query = new URLSearchParams();
+  if (params?.name?.trim()) query.set('name', params.name.trim());
   if (params?.cheater) query.set('cheater', 'true');
   if (params?.susOnly) query.set('susOnly', 'true');
   if (params?.weirdoOnly) query.set('weirdoOnly', 'true');

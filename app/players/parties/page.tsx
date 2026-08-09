@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { CalendarClock, Search, UsersRound } from "lucide-react";
 import { LoadingPanel } from "@/components/async-state";
-import PlayerDirectoryPagination from "@/components/player-directory-pagination";
+import PlayerDirectoryPagination, { usePersistentDirectoryPage } from "@/components/player-directory-pagination";
 import PlayerName from "@/components/player-name";
 import {
   fetchPartyPairsDirectory,
@@ -31,7 +31,7 @@ export default function RankedPartiesPage() {
   const [stacks, setStacks] = useState<PartyStackSummary[]>([]);
   const [stackSize, setStackSize] = useState<number | null>(null);
   const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = usePersistentDirectoryPage();
   const [totalPages, setTotalPages] = useState(1);
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");

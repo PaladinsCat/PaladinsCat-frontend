@@ -11,7 +11,7 @@ import {
 import { LoadingPanel } from "@/components/async-state";
 import PlayerName from "@/components/player-name";
 import PlayerDirectoryGrid from "@/components/player-directory-grid";
-import PlayerDirectoryPagination from "@/components/player-directory-pagination";
+import PlayerDirectoryPagination, { usePersistentDirectoryPage } from "@/components/player-directory-pagination";
 import { useLocalization } from "@/lib/localization-context";
 import type { TranslationKey } from "@/lib/localization/messages";
 
@@ -37,7 +37,7 @@ export default function PlayerModerationDirectory({
   const [players, setPlayers] = useState<CheaterPlayer[]>([]);
   const [automaticPlayers, setAutomaticPlayers] = useState<AutomaticAfkPlayer[]>([]);
   const [automaticPlayerCount, setAutomaticPlayerCount] = useState(0);
-  const [automaticPage, setAutomaticPage] = useState(1);
+  const [automaticPage, setAutomaticPage] = usePersistentDirectoryPage("automaticPage");
   const [communityLoading, setCommunityLoading] = useState(true);
   const [loadedAutomaticPage, setLoadedAutomaticPage] = useState<number | null>(null);
   const showAutomaticAfk = filter === "afkWintradeOnly";
@@ -110,7 +110,7 @@ export default function PlayerModerationDirectory({
   const initialLoading = communityLoading || (showAutomaticAfk && automaticLoading && automaticPlayers.length === 0);
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-6">
+    <div className="mx-auto w-full max-w-6xl space-y-6">
       <div>
         <Link href="/players" className="mb-2 inline-block text-xs text-pc-accent hover:underline">{t("generated.players.players")}</Link>
         <h1 className="pc-heading pc-heading-lg text-pc-accent">{t(titleKey)}</h1>

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { CalendarClock, Info, LockKeyhole, Search } from "lucide-react";
 import { LoadingPanel } from "@/components/async-state";
-import PlayerDirectoryPagination from "@/components/player-directory-pagination";
+import PlayerDirectoryPagination, { usePersistentDirectoryPage } from "@/components/player-directory-pagination";
 import { fetchPrivateAccountsDirectory, type PrivateAccountSummary } from "@/lib/api-client";
 import { TIER_NAMES, getRankIconPath, getTierColor } from "@/lib/tier-utils";
 import { useLocalization } from "@/lib/localization-context";
@@ -18,7 +18,7 @@ export default function PrivateAccountsPage() {
   const observedAt = formatDateTime;
   const [accounts, setAccounts] = useState<PrivateAccountSummary[]>([]);
   const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = usePersistentDirectoryPage();
   const [totalPages, setTotalPages] = useState(1);
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");

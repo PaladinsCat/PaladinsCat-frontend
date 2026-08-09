@@ -1,7 +1,40 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useCallback, useEffect, useState, type SetStateAction } from "react";
 import { useLocalization } from "@/lib/localization-context";
+
+function readPage(param: string) {
+  if (typeof window === "undefined") return 1;
+  const page = Number(new URLSearchParams(window.location.search).get(param));
+  return Number.isInteger(page) && page > 0 ? page : 1;
+}
+
+export function usePersistentDirectoryPage(param = "page") {
+  const [page, setPageState] = useState(1);
+
+  useEffect(() => {
+    const syncPage = () => setPageState(readPage(param));
+    syncPage();
+    window.addEventListener("popstate", syncPage);
+    return () => window.removeEventListener("popstate", syncPage);
+  }, [param]);
+
+  const setPage = useCallback((nextPage: SetStateAction<number>) => {
+    setPageState((currentPage) => {
+      const resolvedPage = typeof nextPage === "function" ? nextPage(currentPage) : nextPage;
+      if (typeof window !== "undefined") {
+        const url = new URL(window.location.href);
+        if (resolvedPage <= 1) url.searchParams.delete(param);
+        else url.searchParams.set(param, String(resolvedPage));
+        window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}${url.hash}`);
+      }
+      return resolvedPage;
+    });
+  }, [param]);
+
+  return [page, setPage] as const;
+}
 
 interface Props {
   page: number;

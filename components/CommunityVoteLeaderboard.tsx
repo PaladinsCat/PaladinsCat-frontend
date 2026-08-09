@@ -45,7 +45,7 @@ export default function CommunityVoteLeaderboard({ kind }: { kind: VoteKind }) {
     : "border-emerald-500/20 text-emerald-300 bg-emerald-500/10";
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-6">
+    <div className="mx-auto w-full max-w-6xl space-y-6">
       <div>
         <Link href="/players" className="text-pc-accent text-xs hover:underline mb-2 inline-block">{t("generated.components.players")}</Link>
         <h1 className="pc-heading pc-heading-lg text-pc-accent">{t(config.titleKey)}</h1>
@@ -57,7 +57,12 @@ export default function CommunityVoteLeaderboard({ kind }: { kind: VoteKind }) {
       ) : players.length === 0 ? (
         <div className="text-center py-12 text-pc-text-secondary text-sm">{t("generated.components.noCommunityVotesYet")}</div>
       ) : (
-        <PlayerDirectoryGrid items={players} getKey={(player) => player.id}>
+        <PlayerDirectoryGrid
+          items={players}
+          getKey={(player) => player.id}
+          pageSize={32}
+          gridClassName="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+        >
           {(player, index) => (
             <Link
               href={`/players/${player.id}`}

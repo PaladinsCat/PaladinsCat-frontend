@@ -7,6 +7,7 @@ import { getChampionIconSafe } from "@/lib/champion-icons";
 import PlayerName from "@/components/player-name";
 import { LoadingPanel } from "@/components/async-state";
 import TablePagination, { type TablePageSize } from "@/components/table-pagination";
+import { usePersistentDirectoryPage } from "@/components/player-directory-pagination";
 import PerformanceRangeBellCurve from "@/components/performance-range-bell-curve";
 import { useLocalization } from "@/lib/localization-context";
 import type { TranslationKey } from "@/lib/localization/messages";
@@ -30,7 +31,7 @@ export default function PerformanceLeaderboardPage() {
     rows: PerformanceLeaderboardEntry[];
     summary: PerformanceMetricSummary | null;
   }>({ key: "", rows: [], summary: null });
-  const [page, setPage] = useState(1);
+  const [page, setPage] = usePersistentDirectoryPage();
   const [pageSize, setPageSize] = useState<TablePageSize>(25);
   const config = METRICS.find((entry) => entry.key === metric)!;
   const requestKey = `${scope}:${metric}:${config.role ?? "Global"}`;

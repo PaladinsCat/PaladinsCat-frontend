@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 import { useEffect, useState } from "react";
 import { LoadingPanel } from "@/components/async-state";
+import { usePersistentDirectoryPage } from "@/components/player-directory-pagination";
 import {
   fetchPresenceMatchIds,
   fetchPresencePlayers,
@@ -23,7 +24,7 @@ export default function PlayerActivityDetails() {
   const { t, formatNumber } = useLocalization();
   const [activeTab, setActiveTab] = useState<EvidenceTab>("matches");
   const [selectedQueue, setSelectedQueue] = useState<"all" | number>("all");
-  const [page, setPage] = useState(1);
+  const [page, setPage] = usePersistentDirectoryPage("activityPage");
   const [playerSort, setPlayerSort] = useState<PresencePlayerSort>("matches");
   const [matchResponse, setMatchResponse] = useState<PresenceMatchIdsResponse | null>(null);
   const [playerResponse, setPlayerResponse] = useState<PresencePlayersResponse | null>(null);
