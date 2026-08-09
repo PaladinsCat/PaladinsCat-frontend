@@ -4598,6 +4598,12 @@ export interface PresenceStats {
   }>;
   public_by_platform: Array<{ platform: string; players: number }>;
   public_by_region: Array<{ region: string; players: number }>;
+  public_hourly_by_region: Array<{
+    date: string;
+    hour: number;
+    total: number;
+    regions: Record<string, number>;
+  }>;
   profile_coverage: {
     total: number;
     fresh: number;

@@ -140,6 +140,15 @@ export default function PlayerActivityPanel({ showStatements = true }: { showSta
     .filter(region => region.total24h > 0)
     .sort((left, right) => right.total24h - left.total24h);
   const maxHourly = Math.max(...display.hourly.map(entry => entry.total), 1);
+  const playerHourly = useMemo(() => {
+    const rows = new Map((presence?.public_hourly_by_region ?? []).map(entry => [`${entry.date}|${entry.hour}`, entry]));
+    return display.hourly.map(slot => rows.get(`${slot.date}|${slot.hour}`) ?? {
+      date: slot.date,
+      hour: slot.hour,
+      total: 0,
+      regions: {},
+    });
+  }, [display.hourly, presence?.public_hourly_by_region]);
   const weekly = useMemo(() => (hourlyStats?.weekly ?? []).map(day => ({
     ...day,
     displayTotal: selectedQueue === "all"
@@ -209,6 +218,19 @@ export default function PlayerActivityPanel({ showStatements = true }: { showSta
         </div>}
       </section>
 
+      <PlayerHourlyRegionCard
+        loading={displayLoading}
+        presence={presence}
+        hourly={playerHourly}
+        title={t("playerActivity.players24h")}
+        subtitle={t("playerActivity.playersByRegion")}
+        timeLabel={t("generated.matches.localTime")}
+        regionLabel={t("playerActivity.region")}
+        formatNumber={formatNumber}
+        formatHour={formatHourFromUtcBucket}
+      />
+      </div>
+
       <WeeklyTrend
         loading={displayLoading}
         days={weekly}
@@ -220,7 +242,6 @@ export default function PlayerActivityPanel({ showStatements = true }: { showSta
         playersLabel={t("playerActivity.weeklyPlayers")}
         formatNumber={formatNumber}
       />
-      </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <section className="pc-card p-3 sm:p-4">
@@ -290,6 +311,61 @@ function ActivityBar({
       </span>)}
     </div>
   </div>;
+}
+
+function PlayerHourlyRegionCard({
+  loading,
+  presence,
+  hourly,
+  title,
+  subtitle,
+  timeLabel,
+  regionLabel,
+  formatNumber,
+  formatHour,
+}: {
+  loading: boolean;
+  presence: PresenceStats | null;
+  hourly: DisplayActivity["hourly"];
+  title: string;
+  subtitle: string;
+  timeLabel: string;
+  regionLabel: string;
+  formatNumber: (value: number) => string;
+  formatHour: (date: string, hour: number) => string;
+}) {
+  const regions = [...(presence?.public_by_region ?? [])].filter(row => row.players > 0);
+  const maxHourly = Math.max(...hourly.map(entry => entry.total), 1);
+  return <section className="pc-card min-w-0 p-3 sm:p-4">
+    <div className="mb-3 flex items-center gap-3 border-b border-pc-border/50 pb-3">
+      <div className="mr-auto">
+        <h2 className="text-sm font-bold text-pc-text">{title}</h2>
+        <p className="mt-0.5 text-xs text-pc-text-muted">{subtitle}</p>
+      </div>
+      {!loading && presence && <span className="font-mono text-sm font-bold text-pc-accent">{formatNumber(presence.public_players)}</span>}
+    </div>
+    {loading ? <LoadingPanel compact className="min-h-[30rem]" /> : !presence ? <div role="status" className="flex min-h-[30rem] items-center justify-center text-center text-sm text-pc-text-muted">—</div> : <div>
+      <div className="mb-3 flex flex-wrap gap-x-3 gap-y-1">
+        {regions.map(row => <span key={row.region} className="inline-flex items-center gap-1.5 text-xs text-pc-text-muted"><span className={`h-2 w-2 rounded-full ${REGION_COLORS[row.region] ?? REGION_COLORS.Unknown}`} />{row.region} · {formatNumber(row.players)}</span>)}
+      </div>
+      <ActivityChartStatement className="mb-3 text-center" />
+      <div className="grid grid-cols-[3.5rem_1fr_2.5rem] gap-2 border-b border-pc-border/30 px-1 pb-1 text-center text-xs uppercase text-pc-text-muted">
+        <span>{timeLabel}</span><span>{regionLabel}</span><span>Σ</span>
+      </div>
+      {hourly.map((entry, index) => {
+        const current = index === hourly.length - 1;
+        return <Fragment key={`${entry.date}|${entry.hour}`}>
+          <div className={`grid grid-cols-[3.5rem_1fr_2.5rem] items-center gap-2 rounded px-1 py-1 ${current ? "bg-pc-accent/8 ring-1 ring-pc-accent/20" : "hover:bg-pc-bg-secondary/50"}`}>
+            <span className={`text-right font-mono text-xs ${current ? "font-semibold text-pc-accent" : "text-pc-text-muted"}`}>{formatHour(entry.date, entry.hour)}</span>
+            <ActivityBar entry={entry} max={maxHourly} formatNumber={formatNumber} />
+            <span className={`text-right font-mono text-xs font-semibold ${entry.total > 0 ? "text-pc-text" : "text-pc-text-muted/30"}`}>{entry.total || "-"}</span>
+          </div>
+          {index < hourly.length - 1 && <ActivityChartStatement className="px-1 py-0.5 text-center" />}
+        </Fragment>;
+      })}
+      <ActivityChartStatement className="px-1 py-0.5 text-center" />
+    </div>}
+  </section>;
 }
 
 function WeeklyTrend({
