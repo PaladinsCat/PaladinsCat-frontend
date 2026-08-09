@@ -374,14 +374,14 @@ function HourlyCardHeader({
   total: number | null;
   formatNumber: (value: number) => string;
 }) {
-  return <div className="mb-3 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-pc-border/50 pb-3 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
+  return <div className="mb-3 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-b border-pc-border/50 pb-3 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
     <div className="col-span-2 min-w-0 sm:col-span-1">
       <h2 className="truncate text-sm font-bold text-pc-text">{title}</h2>
       <div className="mt-0.5 truncate text-xs text-pc-text-muted">{subtitle}</div>
     </div>
     <label className="flex shrink-0 items-center gap-2 text-xs text-pc-text-secondary">
       {queueLabel}
-      <select value={selectedQueue} onChange={event => onQueueChange(event.target.value === "all" ? "all" : Number(event.target.value))} className="w-44 rounded-lg border border-pc-border bg-pc-bg px-2.5 py-1.5 text-xs text-pc-text">
+      <select value={selectedQueue} onChange={event => onQueueChange(event.target.value === "all" ? "all" : Number(event.target.value))} className="w-40 rounded-lg border border-pc-border bg-pc-bg px-2.5 py-1.5 text-xs text-pc-text">
         <option value="all">{allQueuesLabel}</option>
         {queues.map(queue => <option key={queue.queueId} value={queue.queueId}>{queue.queueName} ({queue.queueId})</option>)}
       </select>
@@ -442,7 +442,7 @@ function PlayerHourlyRegionCard({
   return <section className="pc-card min-w-0 p-3 sm:p-4">
     <HourlyCardHeader
       title={title}
-      subtitle={<span role="group" aria-label={title} className="inline-flex items-center gap-2">
+      subtitle={<span role="group" aria-label={title} className="inline-flex items-center gap-1 whitespace-nowrap tracking-tight">
         <button type="button" aria-pressed={breakdown === "region"} onClick={() => onBreakdownChange("region")} className={breakdown === "region" ? "font-semibold text-pc-accent" : "hover:text-pc-text"}>{regionModeLabel}</button>
         <span aria-hidden="true" className="text-pc-border">·</span>
         <button type="button" aria-pressed={breakdown === "platform"} onClick={() => onBreakdownChange("platform")} className={breakdown === "platform" ? "font-semibold text-pc-accent" : "hover:text-pc-text"}>{platformModeLabel}</button>
