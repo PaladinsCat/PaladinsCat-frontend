@@ -4621,11 +4621,11 @@ export interface PresenceHourlyStats {
 export async function fetchPresenceStats(): Promise<PresenceStats> {
   // Version the activity view so a deployment cannot briefly receive the
   // previous cached response shape from the shared stats route cache.
-  return fetchJson<PresenceStats>('/stats/presence?view=activity-v4');
+  return fetchJson<PresenceStats>('/stats/presence?view=activity-v4', { timeoutMs: 35_000, retries: 0 });
 }
 
 export async function fetchPresenceHourlyStats(): Promise<PresenceHourlyStats> {
-  return fetchJson<PresenceHourlyStats>('/stats/presence/hourly?view=activity-v1');
+  return fetchJson<PresenceHourlyStats>('/stats/presence/hourly?view=activity-v1', { timeoutMs: 35_000, retries: 0 });
 }
 
 export interface PresenceMatchIdsResponse {
@@ -4975,7 +4975,7 @@ export async function fetchMatchesOverview(params?: {
   if (cached && cached.expiresAt > Date.now()) return cached.value;
   const activeRequest = matchesOverviewInFlight.get(cacheKey);
   if (activeRequest) return activeRequest;
-  const request = fetchJson<any>(`/matches/overview${query.toString() ? `?${query.toString()}` : ''}`, { unwrapData: false }).then((raw) => {
+  const request = fetchJson<any>(`/matches/overview${query.toString() ? `?${query.toString()}` : ''}`, { unwrapData: false, timeoutMs: 35_000, retries: 0 }).then((raw) => {
     const value: MatchesOverview = {
       hourly: raw.hourly ?? null,
       recent: Array.isArray(raw.recent) ? raw.recent : [],
