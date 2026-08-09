@@ -4610,6 +4610,9 @@ export interface PresenceStats {
 export interface PresenceHourlyStats {
   window_hours: number;
   observed_at: string;
+  selected_queue_id: number | null;
+  public_players: number;
+  public_by_region: Array<{ region: string; players: number }>;
   hourly_by_region: Array<{
     date: string;
     hour: number;
@@ -4624,8 +4627,10 @@ export async function fetchPresenceStats(): Promise<PresenceStats> {
   return fetchJson<PresenceStats>('/stats/presence?view=activity-v4', { timeoutMs: 35_000, retries: 0 });
 }
 
-export async function fetchPresenceHourlyStats(): Promise<PresenceHourlyStats> {
-  return fetchJson<PresenceHourlyStats>('/stats/presence/hourly?view=activity-v1', { timeoutMs: 35_000, retries: 0 });
+export async function fetchPresenceHourlyStats(queueId?: number): Promise<PresenceHourlyStats> {
+  const query = new URLSearchParams({ view: 'activity-v2' });
+  if (queueId != null) query.set('queue_id', String(queueId));
+  return fetchJson<PresenceHourlyStats>(`/stats/presence/hourly?${query}`, { timeoutMs: 35_000, retries: 0 });
 }
 
 export interface PresenceMatchIdsResponse {

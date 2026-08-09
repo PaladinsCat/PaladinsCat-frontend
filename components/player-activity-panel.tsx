@@ -90,8 +90,10 @@ export default function PlayerActivityPanel({ showStatements = true }: { showSta
   const [droppedIdsByHour, setDroppedIdsByHour] = useState<Record<string, string[]>>({});
   const [presence, setPresence] = useState<PresenceStats | null>(null);
   const [presenceHourly, setPresenceHourly] = useState<PresenceHourlyStats | null>(null);
+  const [presenceHourlyLoading, setPresenceHourlyLoading] = useState(true);
   const [activityUnavailable, setActivityUnavailable] = useState(false);
   const [selectedQueue, setSelectedQueue] = useState<"all" | number>("all");
+  const [selectedPlayerQueue, setSelectedPlayerQueue] = useState<"all" | number>("all");
   const [loading, setLoading] = useState(true);
   // The data request is the only loading authority here. A missed route
   // transition timer must not keep this high-traffic page blank indefinitely.
@@ -105,10 +107,9 @@ export default function PlayerActivityPanel({ showStatements = true }: { showSta
         // Activity is a global match-count surface. Lobby tier preferences are
         // intentionally not sent because ID-only casual discovery has no
         // player-detail/tier data and must remain comparable with ranked.
-        const [overview, presenceResult, presenceHourlyResult] = await Promise.all([
+        const [overview, presenceResult] = await Promise.all([
           fetchMatchesOverview({ view: "activity-v3" }),
           fetchPresenceStats().catch(() => null),
-          fetchPresenceHourlyStats().catch(() => null),
         ]);
         if (!active) return;
         if (!overview.hourly) {
@@ -118,7 +119,6 @@ export default function PlayerActivityPanel({ showStatements = true }: { showSta
         setHourlyStats(overview.hourly);
         setDroppedIdsByHour(overview.droppedIdsByHour);
         setPresence(presenceResult);
-        setPresenceHourly(presenceHourlyResult);
         setActivityUnavailable(false);
       } catch {
         // Keep the last confirmed activity visible during a transient API
@@ -133,6 +133,21 @@ export default function PlayerActivityPanel({ showStatements = true }: { showSta
     const interval = window.setInterval(() => void load(), 60_000);
     return () => { active = false; window.clearInterval(interval); };
   }, []);
+
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      setPresenceHourlyLoading(true);
+      const result = await fetchPresenceHourlyStats(selectedPlayerQueue === "all" ? undefined : selectedPlayerQueue).catch(() => null);
+      if (active) {
+        setPresenceHourly(result);
+        setPresenceHourlyLoading(false);
+      }
+    };
+    void load();
+    const interval = window.setInterval(() => void load(), 60_000);
+    return () => { active = false; window.clearInterval(interval); };
+  }, [selectedPlayerQueue]);
 
   const queues = hourlyStats?.queues ?? rankedFallback(hourlyStats);
   const display = useMemo(() => {
@@ -222,11 +237,16 @@ export default function PlayerActivityPanel({ showStatements = true }: { showSta
       </section>
 
       <PlayerHourlyRegionCard
-        loading={displayLoading}
-        presence={presence}
+        loading={displayLoading || presenceHourlyLoading}
+        stats={presenceHourly}
         hourly={playerHourly}
+        queues={queues}
+        selectedQueue={selectedPlayerQueue}
+        onQueueChange={setSelectedPlayerQueue}
         title={t("playerActivity.players24h")}
         subtitle={t("playerActivity.playersByRegion")}
+        queueLabel={t("playerActivity.queue")}
+        allQueuesLabel={t("playerActivity.allQueues")}
         timeLabel={t("generated.matches.localTime")}
         regionLabel={t("playerActivity.region")}
         formatNumber={formatNumber}
@@ -318,36 +338,53 @@ function ActivityBar({
 
 function PlayerHourlyRegionCard({
   loading,
-  presence,
+  stats,
   hourly,
+  queues,
+  selectedQueue,
+  onQueueChange,
   title,
   subtitle,
+  queueLabel,
+  allQueuesLabel,
   timeLabel,
   regionLabel,
   formatNumber,
   formatHour,
 }: {
   loading: boolean;
-  presence: PresenceStats | null;
+  stats: PresenceHourlyStats | null;
   hourly: DisplayActivity["hourly"];
+  queues: MatchQueueActivity[];
+  selectedQueue: "all" | number;
+  onQueueChange: (queue: "all" | number) => void;
   title: string;
   subtitle: string;
+  queueLabel: string;
+  allQueuesLabel: string;
   timeLabel: string;
   regionLabel: string;
   formatNumber: (value: number) => string;
   formatHour: (date: string, hour: number) => string;
 }) {
-  const regions = [...(presence?.public_by_region ?? [])].filter(row => row.players > 0);
+  const regions = [...(stats?.public_by_region ?? [])].filter(row => row.players > 0);
   const maxHourly = Math.max(...hourly.map(entry => entry.total), 1);
   return <section className="pc-card min-w-0 p-3 sm:p-4">
-    <div className="mb-3 flex items-center gap-3 border-b border-pc-border/50 pb-3">
+    <div className="mb-3 flex flex-wrap items-center gap-3 border-b border-pc-border/50 pb-3">
       <div className="mr-auto">
         <h2 className="text-sm font-bold text-pc-text">{title}</h2>
         <p className="mt-0.5 text-xs text-pc-text-muted">{subtitle}</p>
       </div>
-      {!loading && presence && <span className="font-mono text-sm font-bold text-pc-accent">{formatNumber(presence.public_players)}</span>}
+      <label className="flex items-center gap-2 text-xs text-pc-text-secondary">
+        {queueLabel}
+        <select value={selectedQueue} onChange={event => onQueueChange(event.target.value === "all" ? "all" : Number(event.target.value))} className="rounded-lg border border-pc-border bg-pc-bg px-2.5 py-1.5 text-xs text-pc-text">
+          <option value="all">{allQueuesLabel}</option>
+          {queues.map(queue => <option key={queue.queueId} value={queue.queueId}>{queue.queueName} ({queue.queueId})</option>)}
+        </select>
+      </label>
+      {!loading && stats && <span className="font-mono text-sm font-bold text-pc-accent">{formatNumber(stats.public_players)}</span>}
     </div>
-    {loading ? <LoadingPanel compact className="min-h-[30rem]" /> : !presence ? <div role="status" className="flex min-h-[30rem] items-center justify-center text-center text-sm text-pc-text-muted">—</div> : <div>
+    {loading ? <LoadingPanel compact className="min-h-[30rem]" /> : !stats ? <div role="status" className="flex min-h-[30rem] items-center justify-center text-center text-sm text-pc-text-muted">—</div> : <div>
       <div className="mb-3 flex flex-wrap gap-x-3 gap-y-1">
         {regions.map(row => <span key={row.region} className="inline-flex items-center gap-1.5 text-xs text-pc-text-muted"><span className={`h-2 w-2 rounded-full ${REGION_COLORS[row.region] ?? REGION_COLORS.Unknown}`} />{row.region} · {formatNumber(row.players)}</span>)}
       </div>
