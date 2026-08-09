@@ -32,6 +32,7 @@ export function PlayerModerationTag({
   susCount,
   dropper,
   afkWintrade,
+  automaticAfk,
   boosted,
   altAccount,
   verified,
@@ -41,6 +42,7 @@ export function PlayerModerationTag({
   susCount?: number;
   dropper?: boolean;
   afkWintrade?: boolean;
+  automaticAfk?: boolean;
   boosted?: boolean;
   altAccount?: boolean;
   verified?: boolean;
@@ -84,7 +86,7 @@ export function PlayerModerationTag({
     {!moderation.cheater && <>
       {moderation.dropper && <span className="player-status-tag dropper shrink-0 rounded bg-[var(--pc-bg-secondary)] px-1.5 py-0.5 text-[10px] font-bold leading-none text-rose-300">{t("moderation.dropShort")}</span>}
       {moderation.susCount > 0 && <span className="player-status-tag suspicious shrink-0 rounded bg-[var(--pc-bg-secondary)] px-1.5 py-0.5 text-[10px] font-bold leading-none text-amber-400" aria-label={t("generated.players.suspiciousPlayerWithValue1Flags", { value1: moderation.susCount })}>{t("generated.players.sus")}</span>}
-      {moderation.afkWintrade && <span className="player-status-tag afk shrink-0 rounded bg-[var(--pc-bg-secondary)] px-1.5 py-0.5 text-[10px] font-bold leading-none text-sky-300">{t("moderation.afkShort")}</span>}
+      {(moderation.afkWintrade || automaticAfk) && <span className={`player-status-tag afk shrink-0 rounded border px-1.5 py-0.5 text-[10px] font-bold leading-none ${automaticAfk ? moderation.afkWintrade ? "border-red-400/30 bg-red-400/10 text-sky-300" : "border-red-400/30 bg-red-400/10 text-red-300" : "border-sky-400/30 bg-sky-400/10 text-sky-300"}`}>{t("moderation.afkShort")}</span>}
       {moderation.boosted && <span className="player-status-tag boosted shrink-0 rounded bg-[var(--pc-bg-secondary)] px-1.5 py-0.5 text-[10px] font-bold leading-none text-orange-300">{t("moderation.boostedShort")}</span>}
       {moderation.altAccount && <span className="player-status-tag alt shrink-0 rounded bg-[var(--pc-bg-secondary)] px-1.5 py-0.5 text-[10px] font-bold leading-none text-violet-300">{t("moderation.altShort")}</span>}
     </>}
@@ -99,6 +101,7 @@ export default function PlayerName({
   susCount,
   dropper,
   afkWintrade,
+  automaticAfk,
   boosted,
   altAccount,
   verified,
@@ -110,6 +113,7 @@ export default function PlayerName({
   susCount?: number;
   dropper?: boolean;
   afkWintrade?: boolean;
+  automaticAfk?: boolean;
   boosted?: boolean;
   altAccount?: boolean;
   verified?: boolean;
@@ -118,7 +122,7 @@ export default function PlayerName({
   return (
     <span className={`inline-flex max-h-10 max-w-full min-w-0 flex-wrap items-center gap-1 overflow-hidden align-middle ${className}`}>
       <span className="min-w-0 truncate">{children}</span>
-      <PlayerModerationTag playerId={playerId} cheater={cheater} susCount={susCount} dropper={dropper} afkWintrade={afkWintrade} boosted={boosted} altAccount={altAccount} verified={verified} />
+      <PlayerModerationTag playerId={playerId} cheater={cheater} susCount={susCount} dropper={dropper} afkWintrade={afkWintrade} automaticAfk={automaticAfk} boosted={boosted} altAccount={altAccount} verified={verified} />
     </span>
   );
 }

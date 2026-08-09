@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { Search } from "lucide-react";
 import {
   fetchCheaterPlayers,
   fetchPrivateAccountsDirectory,
@@ -11,48 +12,74 @@ import {
 import { LoadingPanel } from "@/components/async-state";
 import PlayerName from "@/components/player-name";
 import PlayerDirectoryGrid from "@/components/player-directory-grid";
+import { getCoreCheaterReason } from "@/lib/cheater-reasons";
 import { useLocalization } from "@/lib/localization-context";
 
 
-const DIRECTORY_PAGE_SIZE = 100;
+const FETCH_PAGE_SIZE = 100;
+const DISPLAY_PAGE_SIZE = 32;
 
-async function fetchAllCheaterPlayers(): Promise<CheaterPlayer[]> {
+async function fetchAllCheaterPlayers(name: string): Promise<CheaterPlayer[]> {
   const players: CheaterPlayer[] = [];
   const seenPlayerIds = new Set<string>();
-  for (let offset = 0; ; offset += DIRECTORY_PAGE_SIZE) {
-    const page = await fetchCheaterPlayers({ cheater: true, limit: DIRECTORY_PAGE_SIZE, offset });
+  for (let offset = 0; ; offset += FETCH_PAGE_SIZE) {
+    const page = await fetchCheaterPlayers({ name: name || undefined, cheater: true, limit: FETCH_PAGE_SIZE, offset });
     const newPlayers = page.filter((player) => player.cheater && !seenPlayerIds.has(String(player.id)));
     newPlayers.forEach((player) => seenPlayerIds.add(String(player.id)));
     players.push(...newPlayers);
-    if (page.length < DIRECTORY_PAGE_SIZE || newPlayers.length === 0) return players;
+    if (page.length < FETCH_PAGE_SIZE || newPlayers.length === 0) return players;
+  }
+}
+
+async function fetchAllCheaterPrivateAccounts(name: string): Promise<PrivateAccountSummary[]> {
+  const accounts: PrivateAccountSummary[] = [];
+  for (let page = 1; ; page += 1) {
+    const result = await fetchPrivateAccountsDirectory({
+      cheater: true,
+      page,
+      pageSize: FETCH_PAGE_SIZE,
+      query: name || undefined,
+    });
+    accounts.push(...result.items.filter((account) => account.cheater));
+    if (page >= result.totalPages || result.items.length < FETCH_PAGE_SIZE) return accounts;
   }
 }
 
 export default function CheatersPage() {
-  const { t } = useLocalization();
+  const { t, formatNumber } = useLocalization();
   const [data, setData] = useState<CheaterPlayer[]>([]);
   const [privateData, setPrivateData] = useState<PrivateAccountSummary[]>([]);
   const [loading, setLoading] = useState(true);
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
-    async function load() {
+    let active = true;
+    const timer = window.setTimeout(() => {
       setLoading(true);
-      try {
-        const [cheaters, privateCheaters] = await Promise.all([
-          fetchAllCheaterPlayers(),
-          fetchPrivateAccountsDirectory({ cheater: true, pageSize: 100 }),
-        ]);
-        setData(cheaters);
-        setPrivateData(privateCheaters.items.filter(account => account.cheater));
-      } catch {
-        setData([]);
-        setPrivateData([]);
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
-  }, []);
+      const normalizedQuery = query.trim();
+      Promise.all([
+        fetchAllCheaterPlayers(normalizedQuery),
+        fetchAllCheaterPrivateAccounts(normalizedQuery),
+      ])
+        .then(([cheaters, privateAccounts]) => {
+          if (!active) return;
+          setData(cheaters);
+          setPrivateData(privateAccounts);
+        })
+        .catch(() => {
+          if (!active) return;
+          setData([]);
+          setPrivateData([]);
+        })
+        .finally(() => {
+          if (active) setLoading(false);
+        });
+    }, 250);
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
+  }, [query]);
 
   const entries = useMemo(() => [
     ...data.map((player) => ({ kind: "player" as const, id: player.id, player })),
@@ -60,7 +87,7 @@ export default function CheatersPage() {
   ], [data, privateData]);
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-6">
+    <div className="mx-auto w-full max-w-6xl space-y-5">
       <div>
         <Link href="/players" className="text-pc-accent text-xs hover:underline mb-2 inline-block">{t("generated.players.players")}</Link>
         <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.players.confirmedCheaters")}</h1>
@@ -68,9 +95,21 @@ export default function CheatersPage() {
           {t("generated.players.confirmedCheatingAccountsAndTheirPrimaryReportReason")}</p>
       </div>
 
-      <div className="flex items-center gap-2">
-        <div className="w-2 h-2 rounded-full bg-red-500" />
-        <span className="text-pc-text-muted text-xs">{data.length + privateData.length} {t("generated.players.confirmed")}</span>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <label className="relative block w-full sm:max-w-sm">
+          <span className="sr-only">{t("generated.players.searchByInGameNameOrPlayerId")}</span>
+          <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-pc-text-muted" />
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder={t("generated.players.searchByInGameNameOrPlayerId")}
+            className="w-full rounded-xl border border-pc-border bg-pc-bg-elevated py-2.5 pl-9 pr-3 text-sm text-pc-text outline-none transition-colors placeholder:text-pc-text-muted focus:border-pc-accent-mid"
+          />
+        </label>
+        <span className="flex items-center gap-2 text-xs text-pc-text-muted">
+          <span className="h-2 w-2 rounded-full bg-red-500" />
+          {formatNumber(data.length + privateData.length)} {t("generated.players.confirmed")}
+        </span>
       </div>
 
       {loading ? (
@@ -78,14 +117,20 @@ export default function CheatersPage() {
       ) : data.length + privateData.length === 0 ? (
         <div className="text-center py-12 text-pc-text-secondary text-sm">{t("generated.players.noConfirmedCheatersFound")}</div>
       ) : (
-        <PlayerDirectoryGrid items={entries} getKey={(entry) => `${entry.kind}:${entry.id}`}>
+        <PlayerDirectoryGrid
+          items={entries}
+          getKey={(entry) => `${entry.kind}:${entry.id}`}
+          loading={loading}
+          pageSize={DISPLAY_PAGE_SIZE}
+          gridClassName="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+        >
           {(entry) => {
             const isPrivate = entry.kind === "private";
-            const reason = isPrivate ? entry.account.cheaterReason : entry.player.topReasons[0]?.reason;
+            const reason = getCoreCheaterReason(isPrivate ? entry.account.cheaterReason : entry.player.topReasons[0]?.reason);
             return (
               <Link
                 href={isPrivate ? `/players/private-accounts/${entry.account.id}` : `/players/${entry.player.id}`}
-                className="flex h-full min-h-24 flex-col gap-3 rounded-xl border border-red-500/20 bg-pc-bg-elevated p-4 transition-colors hover:border-red-400/40 hover:bg-red-500/[0.04]"
+                className="flex h-full min-h-24 flex-col gap-2 rounded-xl border border-red-500/20 bg-pc-bg-elevated p-3 transition-colors hover:border-red-400/40 hover:bg-red-500/[0.04]"
               >
                 <div className="min-w-0 truncate text-sm font-semibold text-pc-text">
                   {isPrivate ? (
@@ -95,7 +140,6 @@ export default function CheatersPage() {
                   )}
                 </div>
                 <div className="min-w-0">
-                  <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-pc-text-muted">{t("generated.players.topReason")}</div>
                   {reason ? (
                     <span className="inline-block max-w-full break-words rounded-md border border-pc-border bg-pc-bg px-2 py-1 text-xs leading-relaxed text-pc-text-secondary [overflow-wrap:anywhere]">{reason}</span>
                   ) : (
