@@ -1109,13 +1109,13 @@ main :where(a, button, input, select, textarea):focus-visible {
    -webkit-backdrop-filter: var(--pc-glass-blur);
 }
 
-/* Keep activity metrics legible over the route's statement pattern without
-   changing the glass treatment used by cards elsewhere on the site. */
+/* Activity cards use the same opaque elevated surface as other dense stats
+   cards so the rotating wallpaper does not bleed through the data. */
 .pc-player-activity-page .pc-card:not(.pc-card--opaque):not(.pc-card-opaque),
 .pc-player-activity-page .pc-surface-light {
-  background-color: rgba(24, 25, 31, 0.3) !important;
-  -webkit-backdrop-filter: blur(3px) !important;
-  backdrop-filter: blur(3px) !important;
+  background-color: var(--pc-bg-elevated) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
 }
 
 /* Page wrapper: consistent max-width, padding */
