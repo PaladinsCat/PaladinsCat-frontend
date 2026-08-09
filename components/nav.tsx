@@ -82,7 +82,7 @@ export default function Nav() {
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
   const [wallpaperEnabled, setWallpaperEnabledState] = useState(true);
   const [liteMode, setLiteModeState] = useState(false);
-  const activityHref = user?.linkedPlayerId ? "/stats/activity/clean" : "/stats/activity";
+  const activityHref = "/stats/activity";
 
   const headerGroups = [
     {
