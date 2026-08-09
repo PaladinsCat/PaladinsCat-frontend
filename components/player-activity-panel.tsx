@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, Fragment, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, Fragment, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { fetchMatchesOverview, fetchPresenceHourlyStats, fetchPresenceStats, type MatchHourlyStats, type MatchQueueActivity, type PresenceHourlyStats, type PresenceStats } from "@/lib/api-client";
 import { LoadingPanel } from "@/components/async-state";
@@ -16,6 +16,16 @@ const REGION_COLORS: Record<string, string> = {
   BR: "bg-amber-500",
   OCE: "bg-cyan-500",
   LATAM: "bg-orange-500",
+  Unknown: "bg-slate-500",
+};
+
+const PLATFORM_COLORS: Record<string, string> = {
+  Steam: "bg-sky-500",
+  PSN: "bg-indigo-500",
+  "Epic Games": "bg-violet-500",
+  XboxLive: "bg-emerald-500",
+  Hirez: "bg-amber-500",
+  Nintendo: "bg-red-500",
   Unknown: "bg-slate-500",
 };
 
@@ -94,6 +104,7 @@ export default function PlayerActivityPanel({ showStatements = true }: { showSta
   const [activityUnavailable, setActivityUnavailable] = useState(false);
   const [selectedQueue, setSelectedQueue] = useState<"all" | number>("all");
   const [selectedPlayerQueue, setSelectedPlayerQueue] = useState<"all" | number>("all");
+  const [playerBreakdown, setPlayerBreakdown] = useState<"region" | "platform">("region");
   const [loading, setLoading] = useState(true);
   // The data request is the only loading authority here. A missed route
   // transition timer must not keep this high-traffic page blank indefinitely.
@@ -159,14 +170,21 @@ export default function PlayerActivityPanel({ showStatements = true }: { showSta
     .sort((left, right) => right.total24h - left.total24h);
   const maxHourly = Math.max(...display.hourly.map(entry => entry.total), 1);
   const playerHourly = useMemo(() => {
-    const rows = new Map((presenceHourly?.hourly_by_region ?? []).map(entry => [`${entry.date}|${entry.hour}`, entry]));
+    const rows = new Map<string, DisplayActivity["hourly"][number]>(playerBreakdown === "region"
+      ? (presenceHourly?.hourly_by_region ?? []).map(entry => [`${entry.date}|${entry.hour}`, entry])
+      : (presenceHourly?.hourly_by_platform ?? []).map(entry => [`${entry.date}|${entry.hour}`, {
+        date: entry.date,
+        hour: entry.hour,
+        total: entry.total,
+        regions: entry.platforms,
+      }]));
     return display.hourly.map(slot => rows.get(`${slot.date}|${slot.hour}`) ?? {
       date: slot.date,
       hour: slot.hour,
       total: 0,
       regions: {},
     });
-  }, [display.hourly, presenceHourly?.hourly_by_region]);
+  }, [display.hourly, playerBreakdown, presenceHourly?.hourly_by_platform, presenceHourly?.hourly_by_region]);
   const weekly = useMemo(() => (hourlyStats?.weekly ?? []).map(day => ({
     ...day,
     displayTotal: selectedQueue === "all"
@@ -236,8 +254,12 @@ export default function PlayerActivityPanel({ showStatements = true }: { showSta
         queues={queues}
         selectedQueue={selectedPlayerQueue}
         onQueueChange={setSelectedPlayerQueue}
+        breakdown={playerBreakdown}
+        onBreakdownChange={setPlayerBreakdown}
+        regionOrder={activeRegions.map(region => region.region)}
         title={t("playerActivity.players24h")}
-        subtitle={t("playerActivity.playersByRegion")}
+        regionModeLabel={t("playerActivity.playersByRegion")}
+        platformModeLabel={t("playerActivity.playersByPlatform")}
         queueLabel={t("playerActivity.queue")}
         allQueuesLabel={t("playerActivity.allQueues")}
         timeLabel={t("generated.matches.localTime")}
@@ -306,17 +328,19 @@ function ActivityBar({
   entry,
   max,
   formatNumber,
+  colors = REGION_COLORS,
 }: {
   entry: DisplayActivity["hourly"][number];
   max: number;
   formatNumber: (value: number) => string;
+  colors?: Record<string, string>;
 }) {
   const parts = Object.entries(entry.regions).filter(([, value]) => value > 0);
   return <div className="relative h-3 min-w-0 rounded-full bg-pc-bg">
     <div className="flex h-full rounded-full" style={{ width: `${(entry.total / max) * 100}%` }}>
       {parts.map(([region, value], index) => <span
         key={region}
-        className={`group relative h-full ${REGION_COLORS[region] ?? REGION_COLORS.Unknown} ${
+        className={`group relative h-full ${colors[region] ?? colors.Unknown ?? REGION_COLORS.Unknown} ${
           index === 0 ? "rounded-l-full" : ""
         } ${index === parts.length - 1 ? "rounded-r-full" : ""}`}
         style={{ width: `${(value / entry.total) * 100}%` }}
@@ -341,7 +365,7 @@ function HourlyCardHeader({
   formatNumber,
 }: {
   title: string;
-  subtitle: string;
+  subtitle: ReactNode;
   queueLabel: string;
   allQueuesLabel: string;
   queues: MatchQueueActivity[];
@@ -353,7 +377,7 @@ function HourlyCardHeader({
   return <div className="mb-3 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-pc-border/50 pb-3 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
     <div className="col-span-2 min-w-0 sm:col-span-1">
       <h2 className="truncate text-sm font-bold text-pc-text">{title}</h2>
-      <p className="mt-0.5 truncate text-xs text-pc-text-muted">{subtitle}</p>
+      <div className="mt-0.5 truncate text-xs text-pc-text-muted">{subtitle}</div>
     </div>
     <label className="flex shrink-0 items-center gap-2 text-xs text-pc-text-secondary">
       {queueLabel}
@@ -373,8 +397,12 @@ function PlayerHourlyRegionCard({
   queues,
   selectedQueue,
   onQueueChange,
+  breakdown,
+  onBreakdownChange,
+  regionOrder,
   title,
-  subtitle,
+  regionModeLabel,
+  platformModeLabel,
   queueLabel,
   allQueuesLabel,
   timeLabel,
@@ -388,8 +416,12 @@ function PlayerHourlyRegionCard({
   queues: MatchQueueActivity[];
   selectedQueue: "all" | number;
   onQueueChange: (queue: "all" | number) => void;
+  breakdown: "region" | "platform";
+  onBreakdownChange: (breakdown: "region" | "platform") => void;
+  regionOrder: string[];
   title: string;
-  subtitle: string;
+  regionModeLabel: string;
+  platformModeLabel: string;
   queueLabel: string;
   allQueuesLabel: string;
   timeLabel: string;
@@ -397,12 +429,24 @@ function PlayerHourlyRegionCard({
   formatNumber: (value: number) => string;
   formatHour: (date: string, hour: number) => string;
 }) {
-  const regions = [...(stats?.public_by_region ?? [])].filter(row => row.players > 0);
+  const regionRank = new Map(regionOrder.map((region, index) => [region, index]));
+  const regions = [...(stats?.public_by_region ?? [])]
+    .filter(row => row.players > 0)
+    .sort((left, right) => (regionRank.get(left.region) ?? regionOrder.length)
+      - (regionRank.get(right.region) ?? regionOrder.length)
+      || right.players - left.players
+      || left.region.localeCompare(right.region));
+  const platforms = [...(stats?.public_by_platform ?? [])].filter(row => row.players > 0);
+  const colors = breakdown === "region" ? REGION_COLORS : PLATFORM_COLORS;
   const maxHourly = Math.max(...hourly.map(entry => entry.total), 1);
   return <section className="pc-card min-w-0 p-3 sm:p-4">
     <HourlyCardHeader
       title={title}
-      subtitle={subtitle}
+      subtitle={<span role="group" aria-label={title} className="inline-flex items-center gap-2">
+        <button type="button" aria-pressed={breakdown === "region"} onClick={() => onBreakdownChange("region")} className={breakdown === "region" ? "font-semibold text-pc-accent" : "hover:text-pc-text"}>{regionModeLabel}</button>
+        <span aria-hidden="true" className="text-pc-border">·</span>
+        <button type="button" aria-pressed={breakdown === "platform"} onClick={() => onBreakdownChange("platform")} className={breakdown === "platform" ? "font-semibold text-pc-accent" : "hover:text-pc-text"}>{platformModeLabel}</button>
+      </span>}
       queueLabel={queueLabel}
       allQueuesLabel={allQueuesLabel}
       queues={queues}
@@ -413,18 +457,20 @@ function PlayerHourlyRegionCard({
     />
     {loading ? <LoadingPanel compact className="min-h-[30rem]" /> : !stats ? <div role="status" className="flex min-h-[30rem] items-center justify-center text-center text-sm text-pc-text-muted">—</div> : <div>
       <div className="mb-3 flex flex-wrap gap-x-3 gap-y-1">
-        {regions.map(row => <span key={row.region} className="inline-flex items-center gap-1.5 text-xs text-pc-text-muted"><span className={`h-2 w-2 rounded-full ${REGION_COLORS[row.region] ?? REGION_COLORS.Unknown}`} />{row.region} · {formatNumber(row.players)}</span>)}
+        {breakdown === "region"
+          ? regions.map(row => <span key={row.region} className="inline-flex items-center gap-1.5 text-xs text-pc-text-muted"><span className={`h-2 w-2 rounded-full ${colors[row.region] ?? colors.Unknown}`} />{row.region} · {formatNumber(row.players)}</span>)
+          : platforms.map(row => <span key={row.platform} className="inline-flex items-center gap-1.5 text-xs text-pc-text-muted"><span className={`h-2 w-2 rounded-full ${colors[row.platform] ?? colors.Unknown}`} />{row.platform} · {formatNumber(row.players)}</span>)}
       </div>
       <ActivityChartStatement className="mb-3 text-center" />
       <div className="grid grid-cols-[3.5rem_1fr_2.5rem] gap-2 border-b border-pc-border/30 px-1 pb-1 text-center text-xs uppercase text-pc-text-muted">
-        <span>{timeLabel}</span><span>{regionLabel}</span><span>Σ</span>
+        <span>{timeLabel}</span><span>{breakdown === "region" ? regionLabel : platformModeLabel}</span><span>Σ</span>
       </div>
       {hourly.map((entry, index) => {
         const current = index === hourly.length - 1;
         return <Fragment key={`${entry.date}|${entry.hour}`}>
           <div className={`grid grid-cols-[3.5rem_1fr_2.5rem] items-center gap-2 rounded px-1 py-1 ${current ? "bg-pc-accent/8 ring-1 ring-pc-accent/20" : "hover:bg-pc-bg-secondary/50"}`}>
             <span className={`text-right font-mono text-xs ${current ? "font-semibold text-pc-accent" : "text-pc-text-muted"}`}>{formatHour(entry.date, entry.hour)}</span>
-            <ActivityBar entry={entry} max={maxHourly} formatNumber={formatNumber} />
+            <ActivityBar entry={entry} max={maxHourly} formatNumber={formatNumber} colors={colors} />
             <span className={`text-right font-mono text-xs font-semibold ${entry.total > 0 ? "text-pc-text" : "text-pc-text-muted/30"}`}>{entry.total || "-"}</span>
           </div>
           {index < hourly.length - 1 && <ActivityChartStatement className="px-1 py-0.5 text-center" />}

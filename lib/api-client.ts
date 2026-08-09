@@ -4613,11 +4613,18 @@ export interface PresenceHourlyStats {
   selected_queue_id: number | null;
   public_players: number;
   public_by_region: Array<{ region: string; players: number }>;
+  public_by_platform: Array<{ platform: string; players: number }>;
   hourly_by_region: Array<{
     date: string;
     hour: number;
     total: number;
     regions: Record<string, number>;
+  }>;
+  hourly_by_platform: Array<{
+    date: string;
+    hour: number;
+    total: number;
+    platforms: Record<string, number>;
   }>;
 }
 
@@ -4628,7 +4635,7 @@ export async function fetchPresenceStats(): Promise<PresenceStats> {
 }
 
 export async function fetchPresenceHourlyStats(queueId?: number): Promise<PresenceHourlyStats> {
-  const query = new URLSearchParams({ view: 'activity-v2' });
+  const query = new URLSearchParams({ view: 'activity-v3' });
   if (queueId != null) query.set('queue_id', String(queueId));
   return fetchJson<PresenceHourlyStats>(`/stats/presence/hourly?${query}`, { timeoutMs: 35_000, retries: 0 });
 }
