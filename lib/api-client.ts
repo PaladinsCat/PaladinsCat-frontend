@@ -1454,6 +1454,11 @@ export interface NotificationInput {
   message: string;
 }
 
+export interface ActivityBanner {
+  enabled: boolean;
+  message: string;
+}
+
 // ── Changelog ──
 
 export interface ChangelogEntry {
@@ -1716,6 +1721,15 @@ export async function fetchNotifications(params?: { limit?: number }): Promise<N
   }
 }
 
+export async function fetchActivityBanner(): Promise<ActivityBanner | null> {
+  try {
+    const raw = await fetchJson<any>(`/stats/activity-banner`, { retries: 1, unwrapData: false });
+    return { enabled: Boolean(raw.enabled), message: String(raw.message ?? "") };
+  } catch {
+    return null;
+  }
+}
+
 export async function fetchAccountSiteNotifications(params?: { limit?: number }): Promise<Notification[]> {
   const token = getAuthToken();
   if (!token) throw new Error(API_ERROR_KEYS.notAuthenticated);
@@ -1785,6 +1799,28 @@ export async function deleteAdminNotification(id: number): Promise<void> {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` },
   });
+}
+
+export async function fetchAdminActivityBanner(): Promise<ActivityBanner> {
+  const token = getAuthToken();
+  if (!token) throw new Error(API_ERROR_KEYS.notAuthenticated);
+  const raw = await fetchJson<any>(`/admin/activity-banner`, {
+    headers: { Authorization: `Bearer ${token}` },
+    unwrapData: false,
+  });
+  return { enabled: Boolean(raw.enabled), message: String(raw.message ?? "") };
+}
+
+export async function updateAdminActivityBanner(input: ActivityBanner): Promise<ActivityBanner> {
+  const token = getAuthToken();
+  if (!token) throw new Error(API_ERROR_KEYS.notAuthenticated);
+  const raw = await fetchJson<any>(`/admin/activity-banner`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify(input),
+    unwrapData: false,
+  });
+  return { enabled: Boolean(raw.enabled), message: String(raw.message ?? "") };
 }
 
 // ── Changelog ──

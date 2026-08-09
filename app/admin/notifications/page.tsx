@@ -4,8 +4,11 @@ import { useEffect, useState } from "react";
 import {
   createAdminNotification,
   deleteAdminNotification,
+  fetchAdminActivityBanner,
   fetchAdminNotifications,
+  updateAdminActivityBanner,
   updateAdminNotification,
+  type ActivityBanner,
   type Notification,
   type NotificationInput,
 } from "@/lib/api-client";
@@ -25,6 +28,8 @@ const emptyDraft: Draft = {
   importance: 0,
   message: "",
 };
+
+const emptyActivityBanner: ActivityBanner = { enabled: false, message: "" };
 
 function toLocalInput(value: string | null) {
   if (!value) return "";
@@ -62,8 +67,10 @@ export default function AdminNotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [drafts, setDrafts] = useState<Record<number, Draft>>({});
   const [newDraft, setNewDraft] = useState<Draft>(emptyDraft);
+  const [activityBanner, setActivityBanner] = useState<ActivityBanner>(emptyActivityBanner);
   const [loading, setLoading] = useState(false);
   const [savingId, setSavingId] = useState<number | null>(null);
+  const [savingBanner, setSavingBanner] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
 
@@ -76,9 +83,10 @@ export default function AdminNotificationsPage() {
     setError(null);
     setStatus(null);
     try {
-      const rows = await fetchAdminNotifications();
+      const [rows, banner] = await Promise.all([fetchAdminNotifications(), fetchAdminActivityBanner()]);
       setNotifications(rows);
       setDrafts(Object.fromEntries(rows.map((notification) => [notification.id, fromNotification(notification)])));
+      setActivityBanner(banner);
       setStatus(t("generated.admin.notifications.page.loadednotifications"));
     } catch (err) {
       setError(err instanceof Error ? err.message : t("generated.admin.notifications.page.failedtoloadnotifications"));
@@ -137,6 +145,23 @@ export default function AdminNotificationsPage() {
     }
   }
 
+  async function saveActivityBanner() {
+    setSavingBanner(true);
+    setError(null);
+    setStatus(null);
+    try {
+      const message = activityBanner.message.trim();
+      if (activityBanner.enabled && !message) throw new Error(t("generated.admin.messageIsRequired"));
+      const saved = await updateAdminActivityBanner({ enabled: activityBanner.enabled, message });
+      setActivityBanner(saved);
+      setStatus(t("generated.admin.notifications.page.notificationsaved"));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("generated.admin.notifications.page.failedtosavenotification"));
+    } finally {
+      setSavingBanner(false);
+    }
+  }
+
   function updateDraft(id: number, patch: Partial<Draft>) {
     setDrafts((current) => ({ ...current, [id]: { ...current[id], ...patch } }));
   }
@@ -175,6 +200,38 @@ export default function AdminNotificationsPage() {
 
       {error && <div className="text-sm text-red-400">{error}</div>}
       {status && <div className="text-sm text-emerald-400">{status}</div>}
+
+      <section className="bg-pc-bg-elevated border border-pc-border rounded-lg p-4 space-y-4">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-lg font-bold text-pc-text">{t("menu.playerActivity")} · {t("generated.admin.notifications")}</h2>
+          <label className="inline-flex items-center gap-2 text-sm text-pc-text-secondary">
+            <input
+              type="checkbox"
+              checked={activityBanner.enabled}
+              onChange={(event) => setActivityBanner((current) => ({ ...current, enabled: event.target.checked }))}
+            />
+            {t("menu.enabled")}
+          </label>
+        </div>
+        <div>
+          <label className="block text-xs text-pc-text-muted mb-1">{t("generated.admin.message")}</label>
+          <textarea
+            value={activityBanner.message}
+            onChange={(event) => setActivityBanner((current) => ({ ...current, message: event.target.value }))}
+            rows={3}
+            maxLength={500}
+            className="pc-input w-full resize-y"
+          />
+        </div>
+        <button
+          type="button"
+          onClick={() => void saveActivityBanner()}
+          disabled={savingBanner}
+          className="px-4 py-2 rounded-lg bg-pc-accent text-pc-bg font-semibold text-sm disabled:opacity-50"
+        >
+          {t("generated.admin.save")}
+        </button>
+      </section>
 
       <section className="bg-pc-bg-elevated border border-pc-border rounded-lg p-4 space-y-4">
         <h2 className="text-lg font-bold text-pc-text">{t("generated.admin.createNotification")}</h2>
