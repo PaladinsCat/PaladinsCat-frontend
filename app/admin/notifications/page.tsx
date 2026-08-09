@@ -203,7 +203,7 @@ export default function AdminNotificationsPage() {
 
       <section className="bg-pc-bg-elevated border border-pc-border rounded-lg p-4 space-y-4">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="text-lg font-bold text-pc-text">{t("menu.playerActivity")} · {t("generated.admin.notifications")}</h2>
+          <h2 className="text-lg font-bold text-pc-text">{t("siteBanner.title")}</h2>
           <label className="inline-flex items-center gap-2 text-sm text-pc-text-secondary">
             <input
               type="checkbox"

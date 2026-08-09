@@ -13,6 +13,7 @@ import { LobbyTierProvider } from "@/lib/lobby-tier-context";
 import LobbyTierBanner from "@/components/LobbyTierBanner";
 import SiteAnalytics from "@/components/SiteAnalytics";
 import DeploymentUpdateBanner from "@/components/DeploymentUpdateBanner";
+import SiteBanner from "@/components/SiteBanner";
 import ImageAssetFallback from "@/components/ImageAssetFallback";
 import CoreUiDragGuard from "@/components/CoreUiDragGuard";
 import LiteModeProvider from "@/components/LiteModeProvider";
@@ -121,6 +122,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <MapSlideshow />
               <Nav />
               <DeploymentUpdateBanner />
+              <SiteBanner />
               <LobbyTierBanner />
               <HirezOutageBanner />
               {/* Content container: responsive width that fills common desktop sizes */}

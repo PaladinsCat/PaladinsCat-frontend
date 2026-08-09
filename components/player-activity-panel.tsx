@@ -2,7 +2,7 @@
 
 import { createContext, Fragment, useContext, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { fetchActivityBanner, fetchMatchesOverview, fetchPresenceStats, type ActivityBanner, type MatchHourlyStats, type MatchQueueActivity, type PresenceStats } from "@/lib/api-client";
+import { fetchMatchesOverview, fetchPresenceStats, type MatchHourlyStats, type MatchQueueActivity, type PresenceStats } from "@/lib/api-client";
 import { LoadingPanel } from "@/components/async-state";
 import CardDetailLink from "@/components/card-detail-link";
 import { useLocalization } from "@/lib/localization-context";
@@ -89,7 +89,6 @@ export default function PlayerActivityPanel({ showStatements = true }: { showSta
   const [hourlyStats, setHourlyStats] = useState<MatchHourlyStats | null>(null);
   const [droppedIdsByHour, setDroppedIdsByHour] = useState<Record<string, string[]>>({});
   const [presence, setPresence] = useState<PresenceStats | null>(null);
-  const [activityBanner, setActivityBanner] = useState<ActivityBanner | null>(null);
   const [activityUnavailable, setActivityUnavailable] = useState(false);
   const [selectedQueue, setSelectedQueue] = useState<"all" | number>("all");
   const [loading, setLoading] = useState(true);
@@ -105,13 +104,11 @@ export default function PlayerActivityPanel({ showStatements = true }: { showSta
         // Activity is a global match-count surface. Lobby tier preferences are
         // intentionally not sent because ID-only casual discovery has no
         // player-detail/tier data and must remain comparable with ranked.
-        const [overview, presenceResult, activityBannerResult] = await Promise.all([
+        const [overview, presenceResult] = await Promise.all([
           fetchMatchesOverview({ view: "activity-v3" }),
           fetchPresenceStats().catch(() => null),
-          fetchActivityBanner(),
         ]);
         if (!active) return;
-        setActivityBanner(activityBannerResult);
         if (!overview.hourly) {
           setActivityUnavailable(true);
           return;
@@ -165,12 +162,6 @@ export default function PlayerActivityPanel({ showStatements = true }: { showSta
         <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("menu.playerActivity")}</h1>
         <p className="mt-1 text-sm text-pc-text-secondary">{t("playerActivity.description")}</p>
       </header>
-
-      {activityBanner?.enabled && activityBanner.message.trim() && (
-        <section role="status" className="rounded-xl border border-pc-accent/30 bg-pc-bg-elevated px-4 py-3 shadow-lg">
-          <p className="text-sm leading-relaxed text-pc-text">{activityBanner.message}</p>
-        </section>
-      )}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       <section className="pc-card min-w-0 p-3 sm:p-4">

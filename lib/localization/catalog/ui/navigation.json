@@ -23,6 +23,8 @@
   "notifications.empty": "No notifications yet.",
   "notifications.login": "Log in",
   "notifications.loginSuffix": "to track what you've read.",
+  "siteBanner.title": "Site-wide banner",
+  "siteBanner.dismiss": "Dismiss site-wide banner",
   "nav.login": "Login",
   "nav.logout": "Logout",
   "menu.browse": "Browse",
