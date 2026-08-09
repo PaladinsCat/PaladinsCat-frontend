@@ -2,7 +2,7 @@
 
 import { createContext, Fragment, useContext, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { fetchMatchesOverview, fetchPresenceStats, type MatchHourlyStats, type MatchQueueActivity, type PresenceStats } from "@/lib/api-client";
+import { fetchMatchesOverview, fetchPresenceHourlyStats, fetchPresenceStats, type MatchHourlyStats, type MatchQueueActivity, type PresenceHourlyStats, type PresenceStats } from "@/lib/api-client";
 import { LoadingPanel } from "@/components/async-state";
 import CardDetailLink from "@/components/card-detail-link";
 import { useLocalization } from "@/lib/localization-context";
@@ -89,6 +89,7 @@ export default function PlayerActivityPanel({ showStatements = true }: { showSta
   const [hourlyStats, setHourlyStats] = useState<MatchHourlyStats | null>(null);
   const [droppedIdsByHour, setDroppedIdsByHour] = useState<Record<string, string[]>>({});
   const [presence, setPresence] = useState<PresenceStats | null>(null);
+  const [presenceHourly, setPresenceHourly] = useState<PresenceHourlyStats | null>(null);
   const [activityUnavailable, setActivityUnavailable] = useState(false);
   const [selectedQueue, setSelectedQueue] = useState<"all" | number>("all");
   const [loading, setLoading] = useState(true);
@@ -104,9 +105,10 @@ export default function PlayerActivityPanel({ showStatements = true }: { showSta
         // Activity is a global match-count surface. Lobby tier preferences are
         // intentionally not sent because ID-only casual discovery has no
         // player-detail/tier data and must remain comparable with ranked.
-        const [overview, presenceResult] = await Promise.all([
+        const [overview, presenceResult, presenceHourlyResult] = await Promise.all([
           fetchMatchesOverview({ view: "activity-v3" }),
           fetchPresenceStats().catch(() => null),
+          fetchPresenceHourlyStats().catch(() => null),
         ]);
         if (!active) return;
         if (!overview.hourly) {
@@ -116,6 +118,7 @@ export default function PlayerActivityPanel({ showStatements = true }: { showSta
         setHourlyStats(overview.hourly);
         setDroppedIdsByHour(overview.droppedIdsByHour);
         setPresence(presenceResult);
+        setPresenceHourly(presenceHourlyResult);
         setActivityUnavailable(false);
       } catch {
         // Keep the last confirmed activity visible during a transient API
@@ -141,14 +144,14 @@ export default function PlayerActivityPanel({ showStatements = true }: { showSta
     .sort((left, right) => right.total24h - left.total24h);
   const maxHourly = Math.max(...display.hourly.map(entry => entry.total), 1);
   const playerHourly = useMemo(() => {
-    const rows = new Map((presence?.public_hourly_by_region ?? []).map(entry => [`${entry.date}|${entry.hour}`, entry]));
+    const rows = new Map((presenceHourly?.hourly_by_region ?? []).map(entry => [`${entry.date}|${entry.hour}`, entry]));
     return display.hourly.map(slot => rows.get(`${slot.date}|${slot.hour}`) ?? {
       date: slot.date,
       hour: slot.hour,
       total: 0,
       regions: {},
     });
-  }, [display.hourly, presence?.public_hourly_by_region]);
+  }, [display.hourly, presenceHourly?.hourly_by_region]);
   const weekly = useMemo(() => (hourlyStats?.weekly ?? []).map(day => ({
     ...day,
     displayTotal: selectedQueue === "all"

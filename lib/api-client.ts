@@ -4598,12 +4598,6 @@ export interface PresenceStats {
   }>;
   public_by_platform: Array<{ platform: string; players: number }>;
   public_by_region: Array<{ region: string; players: number }>;
-  public_hourly_by_region: Array<{
-    date: string;
-    hour: number;
-    total: number;
-    regions: Record<string, number>;
-  }>;
   profile_coverage: {
     total: number;
     fresh: number;
@@ -4613,10 +4607,25 @@ export interface PresenceStats {
   };
 }
 
+export interface PresenceHourlyStats {
+  window_hours: number;
+  observed_at: string;
+  hourly_by_region: Array<{
+    date: string;
+    hour: number;
+    total: number;
+    regions: Record<string, number>;
+  }>;
+}
+
 export async function fetchPresenceStats(): Promise<PresenceStats> {
   // Version the activity view so a deployment cannot briefly receive the
   // previous cached response shape from the shared stats route cache.
   return fetchJson<PresenceStats>('/stats/presence?view=activity-v4');
+}
+
+export async function fetchPresenceHourlyStats(): Promise<PresenceHourlyStats> {
+  return fetchJson<PresenceHourlyStats>('/stats/presence/hourly?view=activity-v1');
 }
 
 export interface PresenceMatchIdsResponse {
