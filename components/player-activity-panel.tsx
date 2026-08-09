@@ -192,26 +192,19 @@ export default function PlayerActivityPanel({ showStatements = true }: { showSta
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       <section className="pc-card min-w-0 p-3 sm:p-4">
-        <div className="mb-3 flex flex-wrap items-center gap-3 border-b border-pc-border/50 pb-3">
-          <div className="mr-auto">
-            <h2 className="text-sm font-bold text-pc-text">{t("playerActivity.matches24h")}</h2>
-            <p className="mt-0.5 text-xs text-pc-text-muted">{t("playerActivity.queueAndRegion")}</p>
-          </div>
-          <label className="flex items-center gap-2 text-xs text-pc-text-secondary">
-            {t("playerActivity.queue")}
-            <select
-              value={selectedQueue}
-              onChange={event => setSelectedQueue(event.target.value === "all" ? "all" : Number(event.target.value))}
-              className="rounded-lg border border-pc-border bg-pc-bg px-2.5 py-1.5 text-xs text-pc-text"
-            >
-              <option value="all">{t("playerActivity.allQueues")}</option>
-              {queues.map(queue => <option key={queue.queueId} value={queue.queueId}>{queue.queueName} ({queue.queueId})</option>)}
-            </select>
-          </label>
-          {!displayLoading && <span className="font-mono text-sm font-bold text-pc-accent">{formatNumber(display.total24h)}</span>}
-        </div>
+        <HourlyCardHeader
+          title={t("playerActivity.matches24h")}
+          subtitle={t("playerActivity.queueAndRegion")}
+          queueLabel={t("playerActivity.queue")}
+          allQueuesLabel={t("playerActivity.allQueues")}
+          queues={queues}
+          selectedQueue={selectedQueue}
+          onQueueChange={setSelectedQueue}
+          total={displayLoading ? null : display.total24h}
+          formatNumber={formatNumber}
+        />
 
-        {displayLoading ? <LoadingPanel compact className="min-h-[30rem]" /> : activityUnavailable && !hourlyStats ? <div role="status" className="flex min-h-[30rem] items-center justify-center text-center text-sm text-pc-text-muted">{t("playerActivity.retrying")}</div> : <div className={showStatements ? "" : "space-y-1"}>
+        {displayLoading ? <LoadingPanel compact className="min-h-[30rem]" /> : activityUnavailable && !hourlyStats ? <div role="status" className="flex min-h-[30rem] items-center justify-center text-center text-sm text-pc-text-muted">{t("playerActivity.retrying")}</div> : <div>
           <div className="mb-3 flex flex-wrap gap-x-3 gap-y-1">
             {activeRegions.map(region => <span key={region.region} className="inline-flex items-center gap-1.5 text-xs text-pc-text-muted"><span className={`h-2 w-2 rounded-full ${REGION_COLORS[region.region] ?? REGION_COLORS.Unknown}`} />{region.region} · {formatNumber(region.total24h)}</span>)}
             {activeRegions.length === 0 && !activityUnavailable && <span className="text-xs text-pc-text-muted">{t("playerActivity.noMatches")}</span>}
@@ -336,6 +329,43 @@ function ActivityBar({
   </div>;
 }
 
+function HourlyCardHeader({
+  title,
+  subtitle,
+  queueLabel,
+  allQueuesLabel,
+  queues,
+  selectedQueue,
+  onQueueChange,
+  total,
+  formatNumber,
+}: {
+  title: string;
+  subtitle: string;
+  queueLabel: string;
+  allQueuesLabel: string;
+  queues: MatchQueueActivity[];
+  selectedQueue: "all" | number;
+  onQueueChange: (queue: "all" | number) => void;
+  total: number | null;
+  formatNumber: (value: number) => string;
+}) {
+  return <div className="mb-3 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-pc-border/50 pb-3 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
+    <div className="col-span-2 min-w-0 sm:col-span-1">
+      <h2 className="truncate text-sm font-bold text-pc-text">{title}</h2>
+      <p className="mt-0.5 truncate text-xs text-pc-text-muted">{subtitle}</p>
+    </div>
+    <label className="flex shrink-0 items-center gap-2 text-xs text-pc-text-secondary">
+      {queueLabel}
+      <select value={selectedQueue} onChange={event => onQueueChange(event.target.value === "all" ? "all" : Number(event.target.value))} className="w-44 rounded-lg border border-pc-border bg-pc-bg px-2.5 py-1.5 text-xs text-pc-text">
+        <option value="all">{allQueuesLabel}</option>
+        {queues.map(queue => <option key={queue.queueId} value={queue.queueId}>{queue.queueName} ({queue.queueId})</option>)}
+      </select>
+    </label>
+    {total !== null && <span className="text-right font-mono text-sm font-bold text-pc-accent">{formatNumber(total)}</span>}
+  </div>;
+}
+
 function PlayerHourlyRegionCard({
   loading,
   stats,
@@ -370,20 +400,17 @@ function PlayerHourlyRegionCard({
   const regions = [...(stats?.public_by_region ?? [])].filter(row => row.players > 0);
   const maxHourly = Math.max(...hourly.map(entry => entry.total), 1);
   return <section className="pc-card min-w-0 p-3 sm:p-4">
-    <div className="mb-3 flex flex-wrap items-center gap-3 border-b border-pc-border/50 pb-3">
-      <div className="mr-auto">
-        <h2 className="text-sm font-bold text-pc-text">{title}</h2>
-        <p className="mt-0.5 text-xs text-pc-text-muted">{subtitle}</p>
-      </div>
-      <label className="flex items-center gap-2 text-xs text-pc-text-secondary">
-        {queueLabel}
-        <select value={selectedQueue} onChange={event => onQueueChange(event.target.value === "all" ? "all" : Number(event.target.value))} className="rounded-lg border border-pc-border bg-pc-bg px-2.5 py-1.5 text-xs text-pc-text">
-          <option value="all">{allQueuesLabel}</option>
-          {queues.map(queue => <option key={queue.queueId} value={queue.queueId}>{queue.queueName} ({queue.queueId})</option>)}
-        </select>
-      </label>
-      {!loading && stats && <span className="font-mono text-sm font-bold text-pc-accent">{formatNumber(stats.public_players)}</span>}
-    </div>
+    <HourlyCardHeader
+      title={title}
+      subtitle={subtitle}
+      queueLabel={queueLabel}
+      allQueuesLabel={allQueuesLabel}
+      queues={queues}
+      selectedQueue={selectedQueue}
+      onQueueChange={onQueueChange}
+      total={!loading && stats ? stats.public_players : null}
+      formatNumber={formatNumber}
+    />
     {loading ? <LoadingPanel compact className="min-h-[30rem]" /> : !stats ? <div role="status" className="flex min-h-[30rem] items-center justify-center text-center text-sm text-pc-text-muted">—</div> : <div>
       <div className="mb-3 flex flex-wrap gap-x-3 gap-y-1">
         {regions.map(row => <span key={row.region} className="inline-flex items-center gap-1.5 text-xs text-pc-text-muted"><span className={`h-2 w-2 rounded-full ${REGION_COLORS[row.region] ?? REGION_COLORS.Unknown}`} />{row.region} · {formatNumber(row.players)}</span>)}
