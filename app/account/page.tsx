@@ -28,7 +28,7 @@ import { useLocalization } from "@/lib/localization-context";
 
 export default function AccountPage() {
   const { t, formatDate } = useLocalization();
-  const { user: authUser, refresh } = useAuth();
+  const { user: authUser, isLoading: authLoading, refresh } = useAuth();
   const { timeZone, setTimeZone } = useTimeZone();
   const router = useRouter();
   const [account, setAccount] = useState<AccountDetails | null>(null);
@@ -75,12 +75,13 @@ export default function AccountPage() {
   }, [router]);
 
   useEffect(() => {
+    if (authLoading) return;
     if (!authUser) {
       router.push("/auth/login");
       return;
     }
     loadAccount();
-  }, [authUser, router, loadAccount]);
+  }, [authLoading, authUser, router, loadAccount]);
 
   const refreshCustomWallpaper = useCallback(async () => {
     setCustomWallpapersState(await resolveCustomWallpapers().catch(() => []));
@@ -196,7 +197,7 @@ export default function AccountPage() {
     }
   };
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <LoadingPanel className="min-h-[50vh]" />
     );
