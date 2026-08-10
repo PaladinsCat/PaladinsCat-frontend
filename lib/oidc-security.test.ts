@@ -119,6 +119,14 @@ test("identity cutover is explicit: default keeps legacy credentials and only tr
   assert.match(accountRoute, /requireSameOrigin/);
   assert.match(accountRoute, /keycloakAccountUrl\(process\.env\.OIDC_ISSUER\)/);
 });
+test("transitional OIDC cookie sessions can load account data and terminate centrally", () => {
+  const apiClient = readFileSync(new URL("./api-client.ts", import.meta.url), "utf8");
+  assert.match(apiClient, /function accountAuthHeaders\(\)/);
+  assert.match(apiClient, /headers: accountAuthHeaders\(\)/);
+  assert.match(apiClient, /startsWith\("__Host-pc_csrf="\)/);
+  assert.match(apiClient, /identityCutoverEnabled \|\| hasOidcCookieSession/);
+  assert.match(apiClient, /form\.action = "\/api\/auth\/oidc\/logout"/);
+});
 test("only the fixed create intent can add the Keycloak registration prompt", () => {
   const route = readFileSync(new URL("../app/api/auth/oidc/login/route.ts", import.meta.url), "utf8");
   assert.match(route, /requestedIntent !== null && requestedIntent !== "create"/);

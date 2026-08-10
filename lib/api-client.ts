@@ -3573,6 +3573,8 @@ export async function login(username: string, password: string): Promise<AuthSes
 
 export async function logout(): Promise<void> {
   const token = getAuthToken();
+  const hasOidcCookieSession = typeof document !== "undefined"
+    && document.cookie.split(";").some((part) => part.trim().startsWith("__Host-pc_csrf="));
   try {
     if (token) {
       // Logout must be local-first from the user's perspective. The server call
@@ -3589,7 +3591,7 @@ export async function logout(): Promise<void> {
     console.warn("Server logout failed; clearing local session anyway.", err);
   } finally {
     clearAuth();
-    if (identityCutoverEnabled && typeof document !== "undefined") {
+    if ((identityCutoverEnabled || hasOidcCookieSession) && typeof document !== "undefined") {
       // A form navigation preserves the same-origin POST CSRF boundary and lets
       // the browser follow the BFF's redirect to Keycloak's RP logout endpoint.
       const form = document.createElement("form");
@@ -3668,6 +3670,11 @@ export async function getUserProfile(userId: number): Promise<AuthUser> {
 
 // ── Account Management ──
 
+function accountAuthHeaders(): Record<string, string> {
+  const token = getAuthToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 export interface AccountDetails {
   user: AuthUser & { linked_player_id: number | null };
   linkedPlayer: {
@@ -3695,13 +3702,11 @@ export interface AccountNotification {
 }
 
 export async function getAccountNotifications(limit = 25): Promise<AccountNotification[]> {
-  const token = getAuthToken();
-  if (!token) throw new Error(API_ERROR_KEYS.notAuthenticated);
   const rows = await fetchJson<Array<{
     id: number; type: "community_comment"; post_id: number | null; comment_id: number | null;
     actor_username: string; post_title: string | null; comment_content: string | null;
     read_at: string | null; created_at: string;
-  }>>(`/auth/account/notifications?limit=${limit}`, { headers: { Authorization: `Bearer ${token}` } });
+  }>>(`/auth/account/notifications?limit=${limit}`, { headers: accountAuthHeaders() });
   return rows.map((notification) => ({
     id: notification.id,
     type: notification.type,
@@ -3716,24 +3721,18 @@ export async function getAccountNotifications(limit = 25): Promise<AccountNotifi
 }
 
 export async function markAccountNotificationRead(notificationId: number): Promise<void> {
-  const token = getAuthToken();
-  if (!token) throw new Error(API_ERROR_KEYS.notAuthenticated);
   await fetchJson(`/auth/account/notifications/${notificationId}/read`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${token}` },
+    headers: accountAuthHeaders(),
   });
 }
 
 export async function getAccountDetails(): Promise<AccountDetails> {
-  const token = getAuthToken();
-  if (!token) {
-    throw new Error(API_ERROR_KEYS.notAuthenticated);
-  }
   const raw = await fetchJson<{
     user: { id: number; username: string; email: string; avatar_url: string | null; bio: string | null; is_admin?: boolean; is_approved?: boolean; linked_player_id: number | null; created_at: string; last_login: string | null; time_zone?: string | null };
     linkedPlayer: AccountDetails["linkedPlayer"];
   }>("/auth/account", {
-    headers: { Authorization: `Bearer ${token}` },
+    headers: accountAuthHeaders(),
   });
   return {
     user: {
@@ -3756,13 +3755,9 @@ export async function getAccountDetails(): Promise<AccountDetails> {
 }
 
 export async function linkPlayerId(playerId: number): Promise<{ message: string; player: { id: number; name: string } }> {
-  const token = getAuthToken();
-  if (!token) {
-    throw new Error(API_ERROR_KEYS.notAuthenticated);
-  }
   return fetchJson<{ message: string; player: { id: number; name: string } }>("/auth/account/player-link", {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    headers: { "Content-Type": "application/json", ...accountAuthHeaders() },
     body: JSON.stringify({ action: "link", playerId }),
   });
 }
@@ -3774,64 +3769,48 @@ export interface PlayerLinkVerification {
 }
 
 export async function getPlayerLinkVerification(): Promise<PlayerLinkVerification | null> {
-  const token = getAuthToken();
-  if (!token) throw new Error(API_ERROR_KEYS.notAuthenticated);
   const raw = await fetchJson<{ verification: PlayerLinkVerification | null }>("/auth/account/player-link/verification", {
-    headers: { Authorization: `Bearer ${token}` },
+    headers: accountAuthHeaders(),
   });
   return raw.verification;
 }
 
 export async function startPlayerLinkVerification(playerId: number): Promise<PlayerLinkVerification> {
-  const token = getAuthToken();
-  if (!token) throw new Error(API_ERROR_KEYS.notAuthenticated);
   const raw = await fetchJson<{ verification: PlayerLinkVerification }>("/auth/account/player-link/verification", {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    headers: { "Content-Type": "application/json", ...accountAuthHeaders() },
     body: JSON.stringify({ playerId }),
   });
   return raw.verification;
 }
 
 export async function verifyPlayerLink(): Promise<{ message: string; player: { id: number; name: string } }> {
-  const token = getAuthToken();
-  if (!token) throw new Error(API_ERROR_KEYS.notAuthenticated);
   return fetchJson<{ message: string; player: { id: number; name: string } }>("/auth/account/player-link/verification/check", {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    headers: { "Content-Type": "application/json", ...accountAuthHeaders() },
     body: JSON.stringify({}),
   });
 }
 
 export async function cancelPlayerLinkVerification(): Promise<void> {
-  const token = getAuthToken();
-  if (!token) throw new Error(API_ERROR_KEYS.notAuthenticated);
   await fetchJson<{ message: string }>("/auth/account/player-link/verification", {
     method: "DELETE",
-    headers: { Authorization: `Bearer ${token}` },
+    headers: accountAuthHeaders(),
   });
 }
 
 export async function unlinkPlayer(): Promise<{ message: string }> {
-  const token = getAuthToken();
-  if (!token) {
-    throw new Error(API_ERROR_KEYS.notAuthenticated);
-  }
   return fetchJson<{ message: string }>("/auth/account/player-link", {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    headers: { "Content-Type": "application/json", ...accountAuthHeaders() },
     body: JSON.stringify({ action: "unlink" }),
   });
 }
 
 export async function updateProfile(data: { avatar_url?: string | null; bio?: string | null; time_zone?: string }): Promise<{ message: string }> {
-  const token = getAuthToken();
-  if (!token) {
-    throw new Error(API_ERROR_KEYS.notAuthenticated);
-  }
   return fetchJson<{ message: string }>("/auth/profile", {
     method: "PUT",
-    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+    headers: { "Content-Type": "application/json", ...accountAuthHeaders() },
     body: JSON.stringify(data),
   });
 }
