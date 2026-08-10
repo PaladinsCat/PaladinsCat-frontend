@@ -114,7 +114,8 @@ test("identity cutover is explicit: default keeps legacy credentials and only tr
   assert.match(login, /action="\/api\/auth\/oidc\/login" method="post"/);
   assert.match(login, /<OidcLoginForm returnPath=\{redirectPath\} \/>/);
   assert.match(login, /generated\.auth\.oidc\.divider/);
-  assert.match(register, /NextResponse\.redirect\(new URL\("\/api\/auth\/oidc\/login\?intent=create", request\.url\), 307\)/);
+  assert.match(register, /process\.env\.PALADINSCAT_PUBLIC_ORIGIN \|\| new URL\(request\.url\)\.origin/);
+  assert.match(register, /NextResponse\.redirect\(new URL\("\/api\/auth\/oidc\/login\?intent=create", publicOrigin\), 307\)/);
   assert.match(account, /action="\/api\/auth\/oidc\/account" method="post"/);
   assert.match(account, /if \(authLoading\) return/);
   assert.match(accountRoute, /requireSameOrigin/);
