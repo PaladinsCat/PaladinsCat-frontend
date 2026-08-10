@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { AsyncButton } from "@/components/async-state";
 import { isApiErrorKey, register } from "@/lib/api-client";
 import { identityCutoverEnabled } from "@/lib/identity-cutover";
@@ -19,13 +18,13 @@ function CentralRegistration() {
 }
 
 function LegacyRegistration() {
-  const { t } = useLocalization(); const router = useRouter();
+  const { t } = useLocalization();
   const [username, setUsername] = useState(""); const [email, setEmail] = useState(""); const [password, setPassword] = useState(""); const [passwordConfirm, setPasswordConfirm] = useState(""); const [loading, setLoading] = useState(false); const [error, setError] = useState<string | null>(null);
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault(); setError(null);
     if (password !== passwordConfirm) { setError(t("generated.auth.passwordsDoNotMatch")); return; }
     setLoading(true);
-    try { await register(username.trim(), email.trim(), password); router.push("/"); }
+    try { await register(username.trim(), email.trim(), password); window.location.assign("/"); }
     catch (err) { setError(err instanceof Error && err.message ? (isApiErrorKey(err.message) ? t(err.message) : err.message) : t("generated.auth.register.page.registrationfailed")); }
     finally { setLoading(false); }
   }
