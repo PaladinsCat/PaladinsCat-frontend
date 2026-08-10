@@ -99,7 +99,7 @@ test("OIDC login redirects the initiating POST with 303, never 307", () => {
 });
 test("identity cutover is explicit: default keeps legacy credentials and only true enables Keycloak-only pages", () => {
   const login = readFileSync(new URL("../app/auth/login/page.tsx", import.meta.url), "utf8");
-  const register = readFileSync(new URL("../app/auth/register/page.tsx", import.meta.url), "utf8");
+  const register = readFileSync(new URL("../app/auth/register/route.ts", import.meta.url), "utf8");
   const account = readFileSync(new URL("../app/account/page.tsx", import.meta.url), "utf8");
   const accountRoute = readFileSync(new URL("../app/api/auth/oidc/account/route.ts", import.meta.url), "utf8");
   const apiClient = readFileSync(new URL("./api-client.ts", import.meta.url), "utf8");
@@ -114,7 +114,7 @@ test("identity cutover is explicit: default keeps legacy credentials and only tr
   assert.match(login, /action="\/api\/auth\/oidc\/login" method="post"/);
   assert.match(login, /<OidcLoginForm returnPath=\{redirectPath\} \/>/);
   assert.match(login, /generated\.auth\.oidc\.divider/);
-  assert.match(register, /redirect\("\/api\/auth\/oidc\/login\?intent=create"\)/);
+  assert.match(register, /NextResponse\.redirect\(new URL\("\/api\/auth\/oidc\/login\?intent=create", request\.url\), 307\)/);
   assert.match(account, /action="\/api\/auth\/oidc\/account" method="post"/);
   assert.match(account, /if \(authLoading\) return/);
   assert.match(accountRoute, /requireSameOrigin/);
