@@ -23,13 +23,8 @@ async function readParResponse(response: Response) {
   try { return parsePushedAuthorizationResponse(JSON.parse(Buffer.concat(chunks.map((chunk) => Buffer.from(chunk))).toString("utf8"))); } catch { return null; }
 }
 
-export async function POST(request: NextRequest) {
-  if (!requireSameOrigin(request.headers.get("origin"), origin())) return new NextResponse("Forbidden", { status: 403 });
-  const form = await request.formData();
-  const requestedIntent = form.get("intent");
-  if (requestedIntent !== null && requestedIntent !== "create") return new NextResponse("Invalid OIDC intent", { status: 400 });
-  const intent = requestedIntent === "create" ? "create" : "login";
-  const transaction = createTransaction(safeReturnPath(String(form.get("return") || "/")));
+async function startOidc(intent: "login" | "create", returnPath: string) {
+  const transaction = createTransaction(returnPath);
   const issuer = normalizedHttpsIssuer(process.env.OIDC_ISSUER);
   const clientId = process.env.OIDC_CLIENT_ID;
   const clientSecret = oidcClientSecret();
@@ -54,4 +49,18 @@ export async function POST(request: NextRequest) {
   const response = NextResponse.redirect(buildParAuthorizationUrl(issuer, clientId, requestUri), { status: 303 });
   response.cookies.set(TX_COOKIE, transaction.state, { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 600 });
   return response;
+}
+
+export async function POST(request: NextRequest) {
+  if (!requireSameOrigin(request.headers.get("origin"), origin())) return new NextResponse("Forbidden", { status: 403 });
+  const form = await request.formData();
+  const requestedIntent = form.get("intent");
+  if (requestedIntent !== null && requestedIntent !== "create") return new NextResponse("Invalid OIDC intent", { status: 400 });
+  return startOidc(requestedIntent === "create" ? "create" : "login", safeReturnPath(String(form.get("return") || "/")));
+}
+
+export async function GET(request: NextRequest) {
+  const entries = [...request.nextUrl.searchParams.entries()];
+  if (entries.length !== 1 || entries[0][0] !== "intent" || entries[0][1] !== "create") return new NextResponse("Not found", { status: 404 });
+  return startOidc("create", "/");
 }

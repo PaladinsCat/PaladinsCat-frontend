@@ -114,8 +114,7 @@ test("identity cutover is explicit: default keeps legacy credentials and only tr
   assert.match(login, /action="\/api\/auth\/oidc\/login" method="post"/);
   assert.match(login, /<OidcLoginForm returnPath=\{redirectPath\} \/>/);
   assert.match(login, /generated\.auth\.oidc\.divider/);
-  assert.match(register, /name="intent" value="create"/);
-  assert.match(register, /formRef\.current\?\.requestSubmit\(\)/);
+  assert.match(register, /redirect\("\/api\/auth\/oidc\/login\?intent=create"\)/);
   assert.match(account, /action="\/api\/auth\/oidc\/account" method="post"/);
   assert.match(account, /if \(authLoading\) return/);
   assert.match(accountRoute, /requireSameOrigin/);
@@ -135,6 +134,8 @@ test("only the fixed create intent can add the Keycloak registration prompt", ()
   const route = readFileSync(new URL("../app/api/auth/oidc/login/route.ts", import.meta.url), "utf8");
   assert.match(route, /requestedIntent !== null && requestedIntent !== "create"/);
   assert.match(route, /if \(intent === "create"\) par\.form\.set\("prompt", "create"\)/);
+  assert.match(route, /entries\.length !== 1.*entries\[0\]\[0\] !== "intent".*entries\[0\]\[1\] !== "create"/);
+  assert.match(route, /return startOidc\("create", "\/"\)/);
 });
 test("frontend server calls use the pinned internal issuer without changing token issuer validation", () => {
   const login = readFileSync(new URL("../app/api/auth/oidc/login/route.ts", import.meta.url), "utf8");
