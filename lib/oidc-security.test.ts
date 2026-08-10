@@ -124,6 +124,8 @@ test("transitional OIDC cookie sessions can load account data and terminate cent
   const apiClient = readFileSync(new URL("./api-client.ts", import.meta.url), "utf8");
   assert.match(apiClient, /function accountAuthHeaders\(\)/);
   assert.match(apiClient, /headers: accountAuthHeaders\(\)/);
+  const adminDashboard = readFileSync(new URL("./admin-dashboard-api.ts", import.meta.url), "utf8");
+  assert.doesNotMatch(adminDashboard, /if \(!token\).*sessionRequired/);
   assert.match(apiClient, /startsWith\("__Host-pc_csrf="\)/);
   assert.match(apiClient, /identityCutoverEnabled \|\| hasOidcCookieSession/);
   assert.match(apiClient, /form\.action = "\/api\/auth\/oidc\/logout"/);

@@ -43,9 +43,8 @@ export const ADMIN_ERROR_KEYS = {
 
 export async function fetchAdminDashboard(): Promise<AdminDashboard> {
   const token = getAuthToken();
-  if (!token) throw new Error(ADMIN_ERROR_KEYS.sessionRequired);
   const response = await fetch("/api/admin/dashboard", {
-    headers: { Authorization: `Bearer ${token}` },
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     credentials: "same-origin",
     cache: "no-store",
   });
