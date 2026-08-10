@@ -106,9 +106,9 @@ test("identity cutover is explicit: default keeps legacy credentials and only tr
   assert.equal(isIdentityCutoverEnabled(undefined), false);
   assert.equal(isIdentityCutoverEnabled("false"), false);
   assert.equal(isIdentityCutoverEnabled("true"), true);
-  for (const source of [login, register]) assert.match(source, /identityCutoverEnabled/);
+  assert.match(login, /identityCutoverEnabled/);
+  assert.doesNotMatch(register, /identityCutoverEnabled|LegacyRegistration|await register\(/);
   assert.match(login, /useAuth\(\)/);
-  assert.match(register, /await register\(/);
   assert.match(apiClient, /"\/auth\/login"/);
   assert.match(apiClient, /"\/auth\/register"/);
   assert.match(login, /action="\/api\/auth\/oidc\/login" method="post"/);
