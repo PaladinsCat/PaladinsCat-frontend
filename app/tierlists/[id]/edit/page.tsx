@@ -4,19 +4,20 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import TierListEditor from "@/components/tier-list-editor";
 import { LoadingPanel } from "@/components/async-state";
-import { getAuthUser } from "@/lib/api-client";
 import { fetchTierList, type TierListSummary } from "@/lib/tierlists-api";
 import { useLocalization } from "@/lib/localization-context";
+import { useAuth } from "@/lib/auth-context";
 
 export default function EditTierListPage({ params }: { params: Promise<{ id: string }> }) {
   const { t } = useLocalization();
+  const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const [list, setList] = useState<TierListSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
-    const user = getAuthUser();
+    if (authLoading) return () => { active = false; };
     if (!user) {
       router.replace("/auth/login");
       return () => { active = false; };
@@ -35,7 +36,7 @@ export default function EditTierListPage({ params }: { params: Promise<{ id: str
         if (active) setError(reason instanceof Error ? reason.message : t("tierLists.updateError"));
       });
     return () => { active = false; };
-  }, [params, router, t]);
+  }, [authLoading, params, router, t, user]);
 
   if (error) return <div className="py-12 text-center text-sm text-rose-300">{error}</div>;
   if (!list) return <LoadingPanel />;

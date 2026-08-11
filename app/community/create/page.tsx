@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { createPost, getAuthUser, getAuthToken } from "@/lib/api-client";
+import { createPost, getAuthUser, getAuthToken, hasCookieAuthSession } from "@/lib/api-client";
 import { AsyncButton } from "@/components/async-state";
 import { useLocalization } from "@/lib/localization-context";
 
@@ -21,7 +21,7 @@ export default function CreatePostPage() {
 
     const user = getAuthUser();
     const token = getAuthToken();
-    if (!user || !token) {
+    if (!user || (!token && !hasCookieAuthSession())) {
       window.location.href = "/auth/login";
       return;
     }

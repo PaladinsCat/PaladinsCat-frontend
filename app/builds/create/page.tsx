@@ -8,6 +8,7 @@ import {
   fetchChampions,
   getAuthToken,
   getAuthUser,
+  hasCookieAuthSession,
   type BuildCardSelection,
   type ChampionNameOnly,
 } from "@/lib/api-client";
@@ -284,7 +285,7 @@ export default function CreateBuildPage() {
     }
     const user = getAuthUser();
     const token = getAuthToken();
-    if (!user || !token) {
+    if (!user || (!token && !hasCookieAuthSession())) {
       router.push("/auth/login");
       return;
     }

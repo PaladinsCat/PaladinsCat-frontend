@@ -14,6 +14,7 @@ import {
   updatePost,
   getAuthUser,
   getAuthToken,
+  hasCookieAuthSession,
   type Comment,
   type PostDetail,
 } from "@/lib/api-client";
@@ -67,7 +68,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
   function requireAuth() {
     const token = getAuthToken();
     const user = getAuthUser();
-    if (!token || !user) {
+    if ((!token && !hasCookieAuthSession()) || !user) {
       window.location.href = "/auth/login";
       return null;
     }

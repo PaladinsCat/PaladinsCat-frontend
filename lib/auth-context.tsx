@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
-import { clearAuth, getAuthUser, getMe, isAuthenticationRejection, login, logout, type AuthUser } from "./api-client";
+import { cacheAuthUser, clearAuth, getAuthUser, getMe, isAuthenticationRejection, login, logout, type AuthUser } from "./api-client";
 
 interface AuthContextValue {
   user: AuthUser | null;
@@ -29,6 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refresh = useCallback(async () => {
     try {
       const me = await getMe();
+      cacheAuthUser(me);
       setUser(me);
     } catch (error) {
       // A cached user without a confirmed token is only a display ghost. Clear

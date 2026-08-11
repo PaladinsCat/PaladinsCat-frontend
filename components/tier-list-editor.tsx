@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, type DragEvent, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { fetchChampions, getAuthToken, type Champion } from "@/lib/api-client";
+import { fetchChampions, getAuthToken, hasCookieAuthSession, type Champion } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import {
   createTierList,
@@ -106,7 +106,7 @@ export default function TierListEditor({
     event.preventDefault();
     setError(null);
     const token = getAuthToken();
-    if (!token) {
+    if (!token && !hasCookieAuthSession()) {
       setError(t("tierLists.loginRequired"));
       return;
     }

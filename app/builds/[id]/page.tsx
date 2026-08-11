@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
-import { getBuildDetail, toggleBuildLike, getAuthUser, getAuthToken, type Build } from "@/lib/api-client";
+import { getBuildDetail, toggleBuildLike, getAuthUser, getAuthToken, hasCookieAuthSession, type Build } from "@/lib/api-client";
 import { formatLocalDateTime } from "@/lib/time-format";
 import { championSlug } from "@/lib/utils";
 import { loadBuildReferenceData, type BuildReferenceData } from "@/lib/build-reference";
@@ -75,7 +75,7 @@ export default function BuildDetailPage({ params }: { params: Promise<{ id: stri
     if (!build) return;
     const token = getAuthToken();
     const user = getAuthUser();
-    if (!token || !user) {
+    if ((!token && !hasCookieAuthSession()) || !user) {
       window.location.href = "/auth/login";
       return;
     }

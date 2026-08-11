@@ -131,7 +131,11 @@ test("transitional OIDC cookie sessions can load account data and terminate cent
   assert.doesNotMatch(adminDashboard, /if \(!token\).*sessionRequired/);
   assert.match(apiClient, /startsWith\("__Host-pc_csrf="\)/);
   assert.match(apiClient, /function hasCookieAuthSession\(\)/);
+  assert.match(apiClient, /function cacheAuthUser\(user: AuthUser\)/);
   assert.doesNotMatch(apiClient, /if \(!token\) throw new Error\(API_ERROR_KEYS\.(?:notAuthenticated|authenticationRequired)\);/);
+  const tierLists = readFileSync(new URL("./tierlists-api.ts", import.meta.url), "utf8");
+  assert.match(tierLists, /credentials: "same-origin"/);
+  assert.match(tierLists, /X-CSRF-Token/);
   assert.match(apiClient, /identityCutoverEnabled \|\| hasOidcCookieSession/);
   assert.match(apiClient, /form\.action = "\/api\/auth\/oidc\/logout"/);
 });

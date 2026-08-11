@@ -9,6 +9,7 @@ import {
   deletePost,
   getAuthToken,
   getAuthUser,
+  hasCookieAuthSession,
   getPostDetail,
   togglePostLike,
   updateComment,
@@ -56,7 +57,7 @@ export default function TierListDetailPage({ params }: { params: Promise<{ id: s
   function requireAuth() {
     const token = getAuthToken();
     const user = getAuthUser();
-    if (!token || !user) { window.location.href = "/auth/login"; return null; }
+    if ((!token && !hasCookieAuthSession()) || !user) { window.location.href = "/auth/login"; return null; }
     return { token, user };
   }
 

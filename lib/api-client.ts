@@ -3532,6 +3532,10 @@ export function getAuthUser(): AuthUser | null {
   }
 }
 
+export function cacheAuthUser(user: AuthUser): void {
+  if (typeof window !== "undefined") localStorage.setItem(USER_KEY, JSON.stringify(user));
+}
+
 function setAuthSession(session: AuthSession) {
   if (typeof window !== "undefined") {
     localStorage.setItem(TOKEN_KEY, session.token);
@@ -4013,7 +4017,7 @@ export async function fetchTwitchStreams(): Promise<TwitchStreamsResponse> {
   };
 }
 
-export async function createPost(userId: number, title: string, content: string, buildId: number | null, token: string): Promise<Post> {
+export async function createPost(userId: number, title: string, content: string, buildId: number | null, token: string | null): Promise<Post> {
   const raw = await fetchJson<RawPost>(`/community/posts`, {
     method: "POST",
     headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
@@ -4035,7 +4039,7 @@ export async function getPostDetail(postId: number): Promise<PostDetail> {
   };
 }
 
-export async function updatePost(postId: number, title: string, content: string, token: string): Promise<Post> {
+export async function updatePost(postId: number, title: string, content: string, token: string | null): Promise<Post> {
   const raw = await fetchJson<RawPost>(`/community/posts/${postId}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
@@ -4045,14 +4049,14 @@ export async function updatePost(postId: number, title: string, content: string,
   return mapPost(raw);
 }
 
-export async function deletePost(postId: number, token: string): Promise<void> {
+export async function deletePost(postId: number, token: string | null): Promise<void> {
   await fetchJson<{ deleted: boolean; id: number }>(`/community/posts/${postId}`, {
     method: "DELETE",
     headers: { "Authorization": `Bearer ${token}` },
   });
 }
 
-export async function addComment(postId: number, userId: number, content: string, parentId: number | null, token: string): Promise<Comment> {
+export async function addComment(postId: number, userId: number, content: string, parentId: number | null, token: string | null): Promise<Comment> {
   const raw = await fetchJson<RawComment>(`/community/posts/${postId}/comments`, {
     method: "POST",
     headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
@@ -4062,7 +4066,7 @@ export async function addComment(postId: number, userId: number, content: string
   return mapComment(raw);
 }
 
-export async function updateComment(commentId: number, content: string, token: string): Promise<Comment> {
+export async function updateComment(commentId: number, content: string, token: string | null): Promise<Comment> {
   const raw = await fetchJson<RawComment>(`/community/comments/${commentId}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
@@ -4072,14 +4076,14 @@ export async function updateComment(commentId: number, content: string, token: s
   return mapComment(raw);
 }
 
-export async function deleteComment(commentId: number, token: string): Promise<void> {
+export async function deleteComment(commentId: number, token: string | null): Promise<void> {
   await fetchJson<{ deleted: boolean; id: number }>(`/community/comments/${commentId}`, {
     method: "DELETE",
     headers: { "Authorization": `Bearer ${token}` },
   });
 }
 
-export async function togglePostLike(postId: number, userId: number, token: string): Promise<number> {
+export async function togglePostLike(postId: number, userId: number, token: string | null): Promise<number> {
   const raw = await fetchJson<{ likes: number }>(`/community/posts/${postId}/like`, {
     method: "POST",
     headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
@@ -4193,7 +4197,7 @@ export async function createBuild(
   talents: number[],
   notes: string | null,
   visibility: string,
-  token: string,
+  token: string | null,
 ): Promise<Build> {
   void userId;
   const raw = await fetchJson<RawBuild>(`/builds`, {
@@ -4219,7 +4223,7 @@ export async function getBuildDetail(buildId: number): Promise<Build> {
   return mapBuild(raw);
 }
 
-export async function toggleBuildLike(buildId: number, userId: number, token: string): Promise<number> {
+export async function toggleBuildLike(buildId: number, userId: number, token: string | null): Promise<number> {
   void userId;
   const raw = await fetchJson<{ likes: number }>(`/builds/${buildId}/like`, {
     method: "POST",

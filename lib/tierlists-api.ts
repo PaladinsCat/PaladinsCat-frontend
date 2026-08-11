@@ -38,7 +38,11 @@ type RawTierList = {
 };
 
 async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE}${path}`, init);
+  const headers = new Headers(init?.headers);
+  if (/^Bearer (null|undefined)$/i.test(headers.get("authorization") || "")) headers.delete("authorization");
+  const csrf = typeof document !== "undefined" ? csrfHeader(document.cookie, init?.method ?? "GET") : null;
+  if (csrf) headers.set("X-CSRF-Token", csrf);
+  const response = await fetch(`${API_BASE}${path}`, { ...init, headers, credentials: "same-origin" });
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
     const message = payload && typeof payload.error === "string" ? payload.error : `Request failed (${response.status})`;
@@ -81,7 +85,7 @@ export async function createTierList(input: {
   title: string;
   description: string;
   entries: Array<{ championId: number; tier: TierName; position: number }>;
-  token: string;
+  token: string | null;
 }): Promise<{ postId: number }> {
   return requestJson<{ postId: number }>("/tierlists", {
     method: "POST",
@@ -94,7 +98,7 @@ export async function updateTierList(postId: number, input: {
   title: string;
   description: string;
   entries: Array<{ championId: number; tier: TierName; position: number }>;
-  token: string;
+  token: string | null;
 }): Promise<{ postId: number }> {
   return requestJson<{ postId: number }>(`/tierlists/${postId}`, {
     method: "PUT",
@@ -102,3 +106,4 @@ export async function updateTierList(postId: number, input: {
     body: JSON.stringify({ title: input.title, description: input.description, entries: input.entries }),
   });
 }
+import { csrfHeader } from "./csrf";
