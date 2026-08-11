@@ -148,6 +148,7 @@
   "generated.admin.hiRezBudget": "Hi-Rez budget",
   "generated.admin.hiRezEndpoints24Hours": "Hi-Rez endpoints — 24 hours",
   "generated.admin.importance": "Importance",
+  "generated.admin.identityAdmin": "Identity admin",
   "generated.admin.key": "Key",
   "generated.admin.loggedInAs": "Logged in as",
   "generated.admin.message": "Message",
