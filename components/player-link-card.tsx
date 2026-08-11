@@ -7,6 +7,7 @@ import {
   cancelPlayerLinkVerification,
   fetchPlayerSearch,
   getPlayerLinkVerification,
+  isApiErrorKey,
   startPlayerLinkVerification,
   unlinkPlayer,
   verifyPlayerLink,
@@ -76,7 +77,10 @@ export default function PlayerLinkCard({ linkedPlayer, onChanged }: Props) {
       const result = await verifyPlayerLink();
       setVerification(null); setSuccess(t("generated.players.linkedToValue1", { value1: result.player.name }));
       await onChanged();
-    } catch (err) { setError(err instanceof Error ? err.message : t("generated.account.linkVerifyFailed")); }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : t("generated.account.linkVerifyFailed");
+      setError(isApiErrorKey(message) ? t(message) : message);
+    }
     finally { setLinking(false); }
   }, [onChanged]);
 
