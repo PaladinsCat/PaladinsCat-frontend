@@ -20,7 +20,7 @@ export function computeDamageStats(p: MatchPlayerDetail) {
   // damage is still useful for DPM and rankings, but the weapon-vs-ability
   // split is unknown. No partial recovered field can make that split
   // trustworthy, so recovered rows report total damage/DPM only.
-  const hasWeaponBreakdown = p.source !== "recovered";
+  const hasWeaponBreakdown = p.source !== "recovered" && p.damage_done_in_hand != null;
   const nonWeaponDamage = hasWeaponBreakdown
     ? Math.max(totalDamage - weaponDamage, 0)
     : null;
