@@ -3,7 +3,7 @@ import { relative, resolve } from "node:path";
 
 const frontendRoot = resolve(import.meta.dirname, "..");
 const repository = resolve(
-  process.env.PALADINSCAT_LOCALES_REPO || resolve(frontendRoot, "..", "..", "community-locales"),
+  process.env.PALADINSCAT_LOCALES_REPO || resolve(frontendRoot, "locales"),
 );
 const canonicalRoot = resolve(frontendRoot, "lib", "localization", "catalog");
 const pinnedEnglishRoot = resolve(repository, "locales", "en");
@@ -55,7 +55,7 @@ if (!await sameJson(
 
 if (differences.length) {
   throw new Error(
-    `Pinned locale source is not synchronized with the frontend canonical English catalog:\n- ${differences.join("\n- ")}\nSync a dedicated locale authoring clone, merge its PR, then update the community-locales pin.`,
+    `Pinned locale source is not synchronized with the frontend canonical English catalog:\n- ${differences.join("\n- ")}\nSync a dedicated locale authoring clone, merge its PR, then update the locales pin.`,
   );
 }
 

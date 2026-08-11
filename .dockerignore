@@ -14,9 +14,9 @@ dev/
 taskflow/
 src/backend/
 src/discord-bot/
-src/frontend/.next/
-src/frontend/out/
-src/frontend/public/locales/
+.next/
+out/
+public/locales/
 *.log
 *.md
 docker-compose*.yml

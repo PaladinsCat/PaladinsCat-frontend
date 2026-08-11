@@ -18,21 +18,21 @@ ENV NEXT_SERVER_API_URL=${NEXT_SERVER_API_URL}
 ENV NEXT_BUILD_CPUS=${NEXT_BUILD_CPUS}
 ENV NEXT_PUBLIC_LOCALE_BASE_URL=${NEXT_PUBLIC_LOCALE_BASE_URL}
 ENV NEXT_PUBLIC_IDENTITY_CUTOVER_ENABLED=${NEXT_PUBLIC_IDENTITY_CUTOVER_ENABLED}
-COPY src/frontend/package.json src/frontend/package-lock.json src/frontend/tsconfig.json ./
+COPY package.json package-lock.json tsconfig.json ./
 RUN npm ci
-COPY community-locales /community-locales
-ENV PALADINSCAT_LOCALES_REPO=/community-locales
-COPY src/frontend/ .
+COPY locales /locales
+ENV PALADINSCAT_LOCALES_REPO=/locales
+COPY . .
 RUN npm run build
 
 # Dev stage
 FROM node:22-alpine AS dev
 WORKDIR /app
-COPY src/frontend/package.json ./
+COPY package.json ./
 RUN npm install
-COPY community-locales /community-locales
-ENV PALADINSCAT_LOCALES_REPO=/community-locales
-COPY src/frontend/ ./
+COPY locales /locales
+ENV PALADINSCAT_LOCALES_REPO=/locales
+COPY . ./
 CMD ["sh", "-c", "npm install && npm run dev -- -H 0.0.0.0"]
 
 # Prod runtime

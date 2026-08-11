@@ -1,0 +1,11 @@
+/node_modules/
+/.next/
+/out/
+/public/locales/
+/.env
+/.env.*
+!/.env.example
+/env/
+/secrets/
+/local/
+*.log
