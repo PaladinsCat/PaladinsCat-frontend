@@ -1320,7 +1320,7 @@ export async function fetchAltAccountRelationsDirectory(params: { page?: number;
 
 export async function fetchMyAltAccountRelations(playerId: string | number): Promise<MyAltAccountRelation[]> {
   const token = getAuthToken();
-  if (!token) throw new Error(API_ERROR_KEYS.authenticationRequired);
+  if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.authenticationRequired);
   const rows = await fetchJson<any[]>(`/players/${playerId}/alt-account-relations/mine`, {
     headers: { Authorization: `Bearer ${token}` },
     cache: 'no-store',
@@ -1338,7 +1338,7 @@ export async function fetchMyAltAccountRelations(playerId: string | number): Pro
 
 export async function voteAltAccountRelation(playerId: string | number, otherPlayerId: string | number, otherRole: 'main' | 'alt'): Promise<{ success: boolean; replaced: boolean }> {
   const token = getAuthToken();
-  if (!token) throw new Error(API_ERROR_KEYS.authenticationRequired);
+  if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.authenticationRequired);
   return fetchJson(`/players/${playerId}/alt-account-relations`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -1348,7 +1348,7 @@ export async function voteAltAccountRelation(playerId: string | number, otherPla
 
 export async function clearMyAltAccountRelation(playerId: string | number, otherPlayerId: string | number): Promise<{ success: boolean; removed: boolean }> {
   const token = getAuthToken();
-  if (!token) throw new Error(API_ERROR_KEYS.authenticationRequired);
+  if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.authenticationRequired);
   return fetchJson(`/players/${playerId}/alt-account-relations/${otherPlayerId}`, {
     method: 'DELETE',
     headers: { Authorization: `Bearer ${token}` },
@@ -1732,7 +1732,7 @@ export async function fetchActivityBanner(): Promise<ActivityBanner | null> {
 
 export async function fetchAccountSiteNotifications(params?: { limit?: number }): Promise<Notification[]> {
   const token = getAuthToken();
-  if (!token) throw new Error(API_ERROR_KEYS.notAuthenticated);
+  if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.notAuthenticated);
   const limit = params?.limit ?? 8;
   const rows = await fetchJson<Array<{
     id: number; timestamp?: string; importance?: number | string; message: string; read_at?: string | null;
@@ -1744,7 +1744,7 @@ export async function fetchAccountSiteNotifications(params?: { limit?: number })
 
 export async function markSiteNotificationRead(notificationId: number): Promise<void> {
   const token = getAuthToken();
-  if (!token) throw new Error(API_ERROR_KEYS.notAuthenticated);
+  if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.notAuthenticated);
   await fetchJson(`/auth/account/site-notifications/${notificationId}/read`, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
@@ -1753,7 +1753,7 @@ export async function markSiteNotificationRead(notificationId: number): Promise<
 
 export async function markAllSiteNotificationsRead(): Promise<void> {
   const token = getAuthToken();
-  if (!token) throw new Error(API_ERROR_KEYS.notAuthenticated);
+  if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.notAuthenticated);
   await fetchJson(`/auth/account/site-notifications/read-all`, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
@@ -1854,7 +1854,7 @@ export async function fetchChangelog(params?: { page?: number; perPage?: number 
 
 export async function fetchAdminChangelog(): Promise<ChangelogEntry[]> {
   const token = getAuthToken();
-  if (!token) throw new Error(API_ERROR_KEYS.notAuthenticated);
+  if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.notAuthenticated);
   const raw = await fetchJson<any[]>('/admin/changelog', {
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -1863,7 +1863,7 @@ export async function fetchAdminChangelog(): Promise<ChangelogEntry[]> {
 
 export async function updateAdminChangelog(id: number, input: AdminChangelogInput): Promise<ChangelogEntry> {
   const token = getAuthToken();
-  if (!token) throw new Error(API_ERROR_KEYS.notAuthenticated);
+  if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.notAuthenticated);
   const raw = await fetchJson<any>(`/admin/changelog/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -3834,9 +3834,7 @@ export interface ReportOptions {
 
 export async function reportPlayer(playerId: string | number, opts: ReportOptions): Promise<{ success: boolean; message: string }> {
   const token = getAuthToken();
-  if (!token) {
-    throw new Error(API_ERROR_KEYS.authenticationRequired);
-  }
+  if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.authenticationRequired);
   const body: Record<string, string> = { type: opts.type };
   if (opts.reason?.trim()) body.reason = opts.reason.trim();
   const raw = await fetchJson<{ success: boolean; message: string }>(`/players/${playerId}/report`, {
@@ -3852,9 +3850,7 @@ export async function reportPrivateAccount(privateId: string | number, opts: Rep
     throw new Error(API_ERROR_KEYS.genericFailure);
   }
   const token = getAuthToken();
-  if (!token) {
-    throw new Error(API_ERROR_KEYS.authenticationRequired);
-  }
+  if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.authenticationRequired);
   const body: Record<string, string> = { type: opts.type };
   if (opts.reason?.trim()) body.reason = opts.reason.trim();
   return fetchJson<{ success: boolean; message: string }>(`/player-ext/private/${privateId}/report`, {
@@ -3868,9 +3864,7 @@ export type ClearablePlayerTag = 'cheater' | 'suspicious' | 'dropper' | 'afk_win
 
 export async function clearPlayerTag(playerId: string | number, tag: ClearablePlayerTag): Promise<{ success: boolean; message: string; cleared: boolean }> {
   const token = getAuthToken();
-  if (!token) {
-    throw new Error(API_ERROR_KEYS.authenticationRequired);
-  }
+  if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.authenticationRequired);
   return fetchJson<{ success: boolean; message: string; cleared: boolean }>(`/players/${playerId}/clear-tag`, {
     method: "POST",
     headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
