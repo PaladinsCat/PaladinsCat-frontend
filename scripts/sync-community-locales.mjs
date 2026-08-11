@@ -4,13 +4,17 @@ import { fileURLToPath } from "node:url";
 
 const frontendRoot = resolve(import.meta.dirname, "..");
 const targetRepository = process.argv[2]
-  || process.env.PALADINSCAT_LOCALES_REPO
-  || resolve(frontendRoot, "..", "..", "..", "PaladinsCat-locales");
+  || process.env.PALADINSCAT_LOCALES_AUTHORING_REPO;
+if (!targetRepository) {
+  throw new Error(
+    "Provide a dedicated PaladinsCat-locales authoring clone as an argument or set PALADINSCAT_LOCALES_AUTHORING_REPO. Do not use the pinned community-locales submodule.",
+  );
+}
 try {
   await access(targetRepository);
 } catch {
   throw new Error(
-    "Provide the public locale repository path as an argument or set PALADINSCAT_LOCALES_REPO.",
+    `Locale authoring repository does not exist at ${targetRepository}.`,
   );
 }
 
