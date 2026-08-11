@@ -1762,7 +1762,7 @@ export async function markAllSiteNotificationsRead(): Promise<void> {
 
 export async function fetchAdminNotifications(): Promise<Notification[]> {
   const token = getAuthToken();
-  if (!token) throw new Error(API_ERROR_KEYS.notAuthenticated);
+  if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.notAuthenticated);
   const raw = await fetchJson<any[]>(
     `/admin/notifications`,
     { headers: { Authorization: `Bearer ${token}` } }
@@ -1772,7 +1772,7 @@ export async function fetchAdminNotifications(): Promise<Notification[]> {
 
 export async function createAdminNotification(input: NotificationInput): Promise<Notification> {
   const token = getAuthToken();
-  if (!token) throw new Error(API_ERROR_KEYS.notAuthenticated);
+  if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.notAuthenticated);
   const raw = await fetchJson<any>(`/admin/notifications`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
@@ -1783,7 +1783,7 @@ export async function createAdminNotification(input: NotificationInput): Promise
 
 export async function updateAdminNotification(id: number, input: Partial<NotificationInput>): Promise<Notification> {
   const token = getAuthToken();
-  if (!token) throw new Error(API_ERROR_KEYS.notAuthenticated);
+  if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.notAuthenticated);
   const raw = await fetchJson<any>(`/admin/notifications/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
@@ -1794,7 +1794,7 @@ export async function updateAdminNotification(id: number, input: Partial<Notific
 
 export async function deleteAdminNotification(id: number): Promise<void> {
   const token = getAuthToken();
-  if (!token) throw new Error(API_ERROR_KEYS.notAuthenticated);
+  if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.notAuthenticated);
   await fetchJson<{ deleted: boolean; id: number }>(`/admin/notifications/${id}`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` },
@@ -1803,7 +1803,7 @@ export async function deleteAdminNotification(id: number): Promise<void> {
 
 export async function fetchAdminActivityBanner(): Promise<ActivityBanner> {
   const token = getAuthToken();
-  if (!token) throw new Error(API_ERROR_KEYS.notAuthenticated);
+  if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.notAuthenticated);
   const raw = await fetchJson<any>(`/admin/activity-banner`, {
     headers: { Authorization: `Bearer ${token}` },
     unwrapData: false,
@@ -1813,7 +1813,7 @@ export async function fetchAdminActivityBanner(): Promise<ActivityBanner> {
 
 export async function updateAdminActivityBanner(input: ActivityBanner): Promise<ActivityBanner> {
   const token = getAuthToken();
-  if (!token) throw new Error(API_ERROR_KEYS.notAuthenticated);
+  if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.notAuthenticated);
   const raw = await fetchJson<any>(`/admin/activity-banner`, {
     method: "PUT",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
@@ -3507,6 +3507,14 @@ const USER_KEY = "pc_auth_user";
 export function getAuthToken(): string | null {
   if (typeof window === "undefined") return null;
   return localStorage.getItem(TOKEN_KEY);
+}
+
+// OIDC keeps the opaque backend session in an HttpOnly cookie, so browser code
+// cannot read its value. Its paired readable CSRF cookie is the signal that a
+// same-origin API request can use that session instead of a legacy bearer token.
+export function hasCookieAuthSession(): boolean {
+  return typeof document !== "undefined"
+    && document.cookie.split(";").some((part) => part.trim().startsWith("__Host-pc_csrf="));
 }
 
 export function getAuthUser(): AuthUser | null {
