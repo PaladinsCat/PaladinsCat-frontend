@@ -97,8 +97,9 @@ test("OIDC login redirects the initiating POST with 303, never 307", () => {
   const source = readFileSync(new URL("../app/api/auth/oidc/login/route.ts", import.meta.url), "utf8");
   assert.match(source, /NextResponse\.redirect\(buildParAuthorizationUrl\(issuer, clientId, requestUri\), \{ status: 303 \}\)/);
 });
-test("identity cutover is explicit: default keeps legacy credentials and only true enables Keycloak-only pages", () => {
+test("PaladinsCat login entry points post directly into the Keycloak OIDC flow", () => {
   const login = readFileSync(new URL("../app/auth/login/page.tsx", import.meta.url), "utf8");
+  const nav = readFileSync(new URL("../components/nav.tsx", import.meta.url), "utf8");
   const register = readFileSync(new URL("../app/auth/register/route.ts", import.meta.url), "utf8");
   const account = readFileSync(new URL("../app/account/page.tsx", import.meta.url), "utf8");
   const accountRoute = readFileSync(new URL("../app/api/auth/oidc/account/route.ts", import.meta.url), "utf8");
@@ -106,14 +107,14 @@ test("identity cutover is explicit: default keeps legacy credentials and only tr
   assert.equal(isIdentityCutoverEnabled(undefined), false);
   assert.equal(isIdentityCutoverEnabled("false"), false);
   assert.equal(isIdentityCutoverEnabled("true"), true);
-  assert.match(login, /identityCutoverEnabled/);
   assert.doesNotMatch(register, /identityCutoverEnabled|LegacyRegistration|await register\(/);
-  assert.match(login, /useAuth\(\)/);
+  assert.doesNotMatch(login, /useAuth\(\)|LegacyLogin|type="password"|generated\.auth\.oidc\.divider/);
   assert.match(apiClient, /"\/auth\/login"/);
   assert.match(apiClient, /"\/auth\/register"/);
   assert.match(login, /action="\/api\/auth\/oidc\/login" method="post"/);
-  assert.match(login, /<OidcLoginForm returnPath=\{redirectPath\} \/>/);
-  assert.match(login, /generated\.auth\.oidc\.divider/);
+  assert.match(login, /formRef\.current\?\.requestSubmit\(\)/);
+  assert.match(nav, /action="\/api\/auth\/oidc\/login" method="post"/);
+  assert.doesNotMatch(nav, /href="\/auth\/login"/);
   assert.match(register, /process\.env\.PALADINSCAT_PUBLIC_ORIGIN \|\| new URL\(request\.url\)\.origin/);
   assert.match(register, /NextResponse\.redirect\(new URL\("\/api\/auth\/oidc\/login\?intent=create", publicOrigin\), 307\)/);
   assert.match(account, /action="\/api\/auth\/oidc\/account" method="post"/);
