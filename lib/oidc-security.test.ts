@@ -5,6 +5,12 @@ import { csrfHeader } from "./csrf.ts";
 import { isIdentityCutoverEnabled } from "./identity-cutover.ts";
 import { readFileSync } from "node:fs";
 
+test("Inter is self-hosted rather than fetched from a third party", () => {
+  const source = readFileSync(new URL("../app/globals.css", import.meta.url), "utf8");
+  assert.doesNotMatch(source, /fonts\.(googleapis|gstatic)\.com/);
+  assert.match(source, /url\("\/fonts\/inter-latin\.woff2"\)/);
+});
+
 test("rejects open redirects", () => {
   for (const path of ["https://evil.example", "//evil.example", "/%5c%5cevil.example", "/admin", "/auth/login"]) assert.equal(safeReturnPath(path), "/");
   assert.equal(safeReturnPath("/players/42?tab=builds"), "/players/42?tab=builds");
