@@ -65,9 +65,9 @@ test("OIDC client secret is loaded server-side from a secret file when configure
   assert.doesNotMatch(source, /NEXT_PUBLIC/);
 });
 test("RP logout uses only the exact configured same-origin return URI", () => {
-  const logout = buildRpLogoutUrl("https://auth.paladinscat.com/realms/paladinscat", "paladinscat-web", "https://paladinscat.com/auth/login", "https://paladinscat.com");
+  const logout = buildRpLogoutUrl("https://auth.paladinscat.com/realms/paladinscat", "paladinscat-web", "https://paladinscat.com/", "https://paladinscat.com");
   assert.equal(logout?.origin, "https://auth.paladinscat.com");
-  assert.equal(logout?.searchParams.get("post_logout_redirect_uri"), "https://paladinscat.com/auth/login");
+  assert.equal(logout?.searchParams.get("post_logout_redirect_uri"), "https://paladinscat.com/");
   assert.equal(logout?.searchParams.get("client_id"), "paladinscat-web");
   assert.equal([...logout!.searchParams.keys()].sort().join(","), "client_id,post_logout_redirect_uri");
   assert.equal(buildRpLogoutUrl("https://auth.paladinscat.com/realms/paladinscat", "paladinscat-web", "https://evil.example/logout", "https://paladinscat.com"), null);

@@ -13,8 +13,8 @@ export async function POST(request: NextRequest) {
     await fetch(`${backend().replace(/\/$/, "")}/auth/logout`, { method: "POST", headers: { authorization: `Bearer ${session}` }, cache: "no-store" }).catch(() => undefined);
   }
   const centralLogout = buildRpLogoutUrl(process.env.OIDC_ISSUER, process.env.OIDC_CLIENT_ID, process.env.OIDC_POST_LOGOUT_REDIRECT_URI, origin());
-  // Missing or unsafe RP-logout configuration still clears local credentials and returns to local login.
-  const response = NextResponse.redirect(centralLogout || new URL("/auth/login", origin()), { status: 303 });
+  // Missing or unsafe RP-logout configuration still clears local credentials and returns home.
+  const response = NextResponse.redirect(centralLogout || new URL("/", origin()), { status: 303 });
   response.cookies.set(SESSION_COOKIE, "", { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 0 });
   response.cookies.set(CSRF_COOKIE, "", { httpOnly: false, secure: true, sameSite: "strict", path: "/", maxAge: 0 });
   return response;
