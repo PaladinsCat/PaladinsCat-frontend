@@ -115,6 +115,7 @@ test("PaladinsCat login entry points post directly into the Keycloak OIDC flow",
   assert.match(login, /formRef\.current\?\.requestSubmit\(\)/);
   assert.match(nav, /action="\/api\/auth\/oidc\/login" method="post"/);
   assert.doesNotMatch(nav, /href="\/auth\/login"/);
+  assert.doesNotMatch(nav, /type="submit" onClick=\{\(\) => setSideMenuOpen\(false\)\}/);
   assert.match(register, /process\.env\.PALADINSCAT_PUBLIC_ORIGIN \|\| new URL\(request\.url\)\.origin/);
   assert.match(register, /NextResponse\.redirect\(new URL\("\/api\/auth\/oidc\/login\?intent=create", publicOrigin\), 307\)/);
   assert.match(account, /action="\/api\/auth\/oidc\/account" method="post"/);
