@@ -6,6 +6,14 @@ secrets/
 env/
 .env
 .env.*
+**/.env
+**/.env.*
+**/secrets/**
+**/env/**
+**/*.key
+**/*.pem
+**/*.p12
+**/*.pfx
 logs/
 backups/
 data/
