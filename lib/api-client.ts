@@ -1465,6 +1465,8 @@ export interface ChangelogEntry {
   id: number;
   component: string;
   version: string;
+  componentVersion: string;
+  totalVersion: string | null;
   gitCommit: string;
   gitCommitShort: string;
   gitBranch: string | null;
@@ -1886,7 +1888,9 @@ function mapChangelogEntry(raw: any): ChangelogEntry {
   return {
     id: Number(raw?.id ?? 0),
     component: String(raw?.component ?? 'legacy-monorepo'),
-    version: String(raw?.version ?? ''),
+    version: String(raw?.componentVersion ?? raw?.version ?? ''),
+    componentVersion: String(raw?.componentVersion ?? raw?.version ?? ''),
+    totalVersion: raw?.totalVersion == null ? null : String(raw.totalVersion),
     gitCommit: String(raw?.gitCommit ?? ''),
     gitCommitShort: String(raw?.gitCommitShort ?? ''),
     gitBranch: raw?.gitBranch ?? null,

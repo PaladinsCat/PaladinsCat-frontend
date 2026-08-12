@@ -155,11 +155,11 @@ function VersionHistoryGraph({ entries }: { entries: ChangelogPage["data"] }) {
               {/* Info */}
               <div className="pb-4 flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="truncate text-xs font-semibold text-pc-text-secondary">
-                    {componentLabel(entry.component)}
-                  </span>
                   <span className={`text-xs font-bold font-mono ${textColor}`}>
-                    {entry.version}
+                    {entry.totalVersion ?? entry.componentVersion}
+                  </span>
+                  <span className="truncate text-xs font-semibold text-pc-text-secondary">
+                    {componentLabel(entry.component)} {entry.totalVersion ? entry.componentVersion : ""}
                   </span>
                   <span className="text-xs font-mono text-pc-text-muted truncate">
                     {entry.gitCommitShort}
@@ -207,10 +207,10 @@ function ChangelogEntry({ entry, index }: { entry: ChangelogPage["data"][number]
     <article className="group pb-6 border-b border-pc-border last:border-b-0">
       {/* Header row */}
       <div className="flex items-center gap-2 flex-wrap mb-1">
+        <span className="text-sm font-bold text-pc-text">{entry.totalVersion ?? entry.componentVersion}</span>
         <span className="rounded-md border border-pc-border bg-pc-bg-secondary px-2 py-0.5 text-xs font-semibold text-pc-text-secondary">
-          {componentLabel(entry.component)}
+          {componentLabel(entry.component)} {entry.totalVersion ? entry.componentVersion : ""}
         </span>
-        <span className="text-sm font-bold text-pc-text">{entry.version}</span>
         <span className={`rounded-full border px-2 py-0.5 text-xs font-bold uppercase tracking-wide ${
           entry.releaseType === "major"
             ? "border-rose-500/40 bg-rose-500/10 text-rose-400"
