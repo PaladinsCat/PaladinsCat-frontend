@@ -18,16 +18,12 @@
     "sync-pinned-locales": "node scripts/copy-pinned-locales.mjs",
     "check-localization-source": "node scripts/check-locale-source-parity.mjs",
     "prepare-locales": "node scripts/check-locale-source-parity.mjs && node scripts/copy-pinned-locales.mjs",
-    "sync-loading-frames": "node scripts/sync-loading-frames.mjs",
     "audit-localization": "node scripts/audit-localization.mjs",
     "audit-text-size": "node scripts/audit-text-size.mjs",
     "audit-image-assets": "node scripts/audit-image-assets.mjs",
     "audit-champion-data": "node scripts/audit-champion-data.mjs",
-    "audit:champion-wiki": "node scripts/audit-champion-wiki.mjs",
     "check-localization-catalog": "node scripts/check-localization-catalog.mjs",
-    "check-localization-keys": "node scripts/check-localization-keys.mjs",
-    "migrate-localization": "node scripts/migrate-hardcoded-localization.mjs",
-    "sync-talent-assets": "node scripts/sync-champion-talent-ids.js"
+    "check-localization-keys": "node scripts/check-localization-keys.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
