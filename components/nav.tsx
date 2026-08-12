@@ -129,6 +129,7 @@ export default function Nav() {
         { href: "/changelog", label: t("menu.changelog") },
         { href: "/operations/paladinscat-bot", label: t("menu.paladinsCatBot") },
         { href: "/operations/stats", label: t("menu.paladinsCatStats") },
+        { href: "https://translate.paladinscat.com/", label: t("nav.localization") },
       ],
     },
   ];
