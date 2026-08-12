@@ -6,4 +6,21 @@ if [ "$2" != "$expected" ]; then
   echo "[repository-boundary] BLOCKED: unexpected push destination: $2" >&2
   exit 1
 fi
-exec pwsh.exe -NoProfile -ExecutionPolicy Bypass -File "$root/scripts/security/Test-FullHistoryCredentialBoundary.ps1" -RepositoryRoot "$root"
+
+zero="0000000000000000000000000000000000000000"
+remote_main=""
+while read -r local_ref local_sha remote_ref remote_sha; do
+  [ "$remote_ref" = "refs/heads/main" ] || continue
+  remote_main="$remote_sha"
+  if [ "$local_sha" = "$zero" ]; then
+    echo "[main-safety] BLOCKED: deleting main is not permitted." >&2
+    exit 1
+  fi
+  if [ "$remote_sha" != "$zero" ] && ! git merge-base --is-ancestor "$remote_sha" "$local_sha"; then
+    echo "[main-safety] BLOCKED: main must move forward without rewriting history. Fetch/rebase first." >&2
+    exit 1
+  fi
+done
+
+pwsh.exe -NoProfile -ExecutionPolicy Bypass -File "$root/scripts/security/Test-FullHistoryCredentialBoundary.ps1" -RepositoryRoot "$root"
+pwsh.exe -NoProfile -ExecutionPolicy Bypass -File "$root/scripts/security/Backup-GitRepository.ps1" -RepositoryRoot "$root" -RemoteMainCommit "$remote_main"
