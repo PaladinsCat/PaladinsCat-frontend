@@ -81,6 +81,24 @@ function sourceLabel(source: string | null, t: (key: TranslationKey) => string) 
   return labels[source] ? t(labels[source]) : source;
 }
 
+function componentLabel(component: string) {
+  const labels: Record<string, string> = {
+    frontend: "Frontend",
+    backend: "Backend",
+    "backend-rust-api": "Backend API",
+    "backend-rust-auto-ingester": "Ingest worker",
+    "backend-rust-hourly-gap-checker": "Gap-check worker",
+    hirezrelay: "Hi-Rez relay",
+    discordbot: "Discord bot",
+    "discord-bot": "Discord bot",
+    database: "Database",
+    platform: "Platform",
+    stack: "Full stack",
+    "legacy-monorepo": "Legacy monorepo",
+  };
+  return labels[component] ?? component.replace(/[-_]+/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
 function getVersionColor(type: "major" | "minor" | "patch") {
   switch (type) {
     case "major": return "bg-rose-500";
@@ -137,6 +155,9 @@ function VersionHistoryGraph({ entries }: { entries: ChangelogPage["data"] }) {
               {/* Info */}
               <div className="pb-4 flex-1 min-w-0">
                 <div className="flex items-center gap-2">
+                  <span className="truncate text-xs font-semibold text-pc-text-secondary">
+                    {componentLabel(entry.component)}
+                  </span>
                   <span className={`text-xs font-bold font-mono ${textColor}`}>
                     {entry.version}
                   </span>
@@ -186,6 +207,9 @@ function ChangelogEntry({ entry, index }: { entry: ChangelogPage["data"][number]
     <article className="group pb-6 border-b border-pc-border last:border-b-0">
       {/* Header row */}
       <div className="flex items-center gap-2 flex-wrap mb-1">
+        <span className="rounded-md border border-pc-border bg-pc-bg-secondary px-2 py-0.5 text-xs font-semibold text-pc-text-secondary">
+          {componentLabel(entry.component)}
+        </span>
         <span className="text-sm font-bold text-pc-text">{entry.version}</span>
         <span className={`rounded-full border px-2 py-0.5 text-xs font-bold uppercase tracking-wide ${
           entry.releaseType === "major"

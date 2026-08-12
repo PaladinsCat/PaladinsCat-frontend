@@ -1463,6 +1463,7 @@ export interface ActivityBanner {
 
 export interface ChangelogEntry {
   id: number;
+  component: string;
   version: string;
   gitCommit: string;
   gitCommitShort: string;
@@ -1884,6 +1885,7 @@ function mapChangelogEntry(raw: any): ChangelogEntry {
   const releaseType = changeCount >= 10 ? 'major' : changeCount >= 5 ? 'minor' : 'patch';
   return {
     id: Number(raw?.id ?? 0),
+    component: String(raw?.component ?? 'legacy-monorepo'),
     version: String(raw?.version ?? ''),
     gitCommit: String(raw?.gitCommit ?? ''),
     gitCommitShort: String(raw?.gitCommitShort ?? ''),
