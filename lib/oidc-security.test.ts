@@ -110,7 +110,7 @@ test("OIDC transaction limits use only the validated Cloudflare client address",
   assert.match(source, /\{ "x-forwarded-for": clientIp \}/);
   assert.doesNotMatch(source, /headers\.get\("x-forwarded-for"\)/);
 });
-test("PaladinsCat login entry points post directly into the Keycloak OIDC flow", () => {
+test("PaladinsCat login entry points use native links into the server-side OIDC flow", () => {
   const login = readFileSync(new URL("../app/auth/login/page.tsx", import.meta.url), "utf8");
   const nav = readFileSync(new URL("../components/nav.tsx", import.meta.url), "utf8");
   const register = readFileSync(new URL("../app/auth/register/route.ts", import.meta.url), "utf8");
@@ -126,9 +126,9 @@ test("PaladinsCat login entry points post directly into the Keycloak OIDC flow",
   assert.match(apiClient, /"\/auth\/register"/);
   assert.match(login, /redirect\(href\)/);
   assert.match(login, /\/api\/auth\/oidc\/login\?return=/);
-  assert.match(nav, /action="\/api\/auth\/oidc\/login" method="post"/);
-  assert.doesNotMatch(nav, /href="\/auth\/login"/);
-  assert.doesNotMatch(nav, /type="submit" onClick=\{\(\) => setSideMenuOpen\(false\)\}/);
+  assert.match(nav, /const loginHref = `\/auth\/login\?redirect=\$\{encodeURIComponent\(pathname \|\| "\/"\)\}`/);
+  assert.match(nav, /<Link href=\{loginHref\}/);
+  assert.doesNotMatch(nav, /action="\/api\/auth\/oidc\/login"/);
   assert.match(register, /process\.env\.PALADINSCAT_PUBLIC_ORIGIN \|\| new URL\(request\.url\)\.origin/);
   assert.match(register, /NextResponse\.redirect\(new URL\("\/api\/auth\/oidc\/login\?intent=create", publicOrigin\), 307\)/);
   assert.match(account, /action="\/api\/auth\/oidc\/account" method="post"/);
