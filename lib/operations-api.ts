@@ -1,78 +1,20 @@
+import { fetchJson, getAuthToken } from "./api-client";
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api";
+export interface PublicOperationsStats { generatedAt:string; release:{version:string;gitCommitShort:string;deployedAt:string|null}; traffic:{activeUsers:number;activeWindowSeconds:number;heartbeatSeconds:number;visitorsToday:number;viewsToday:number;visitorDays7d:number;views7d:number}; catalog:{matches:number;rankedMatches:number;casualMatches:number;players:number;registeredUsers:number;verifiedUsers:number;communityBuilds:number;tierLists:number;communityPosts:number;recoveredMatches:number;incompleteMatches:number;latestMatchAt:string|null}; ingestCoverage:{totalMatches:number;directMatches:number;recoveredMatches:number}; }
+export async function fetchPublicOperationsStats():Promise<PublicOperationsStats>{const response=await fetch(`${API_BASE}/operations/stats`);const raw=await response.json().catch(()=>({}));if(!response.ok)throw new Error(typeof raw.error==="string"?raw.error:`Request failed (${response.status})`);const summary=raw.traffic?.summary??{},catalog=raw.catalog??{};return {generatedAt:String(raw.generated_at??""),release:{version:String(raw.release?.version??""),gitCommitShort:String(raw.release?.git_commit_short??""),deployedAt:raw.release?.deployed_at==null?null:String(raw.release.deployed_at)},traffic:{activeUsers:Number(summary.active_users??0),activeWindowSeconds:Number(summary.active_window_seconds??300),heartbeatSeconds:Number(summary.heartbeat_seconds??60),visitorsToday:Number(summary.visitors_today??0),viewsToday:Number(summary.views_today??0),visitorDays7d:Number(summary.visitor_days_7d??0),views7d:Number(summary.views_7d??0)},catalog:{matches:Number(catalog.matches??0),rankedMatches:Number(catalog.ranked_matches??0),casualMatches:Number(catalog.casual_matches??0),players:Number(catalog.players??0),registeredUsers:Number(catalog.registered_users??0),verifiedUsers:Number(catalog.verified_users??0),communityBuilds:Number(catalog.community_builds??0),tierLists:Number(catalog.tier_lists??0),communityPosts:Number(catalog.community_posts??0),recoveredMatches:Number(catalog.recovered_matches??0),incompleteMatches:Number(catalog.incomplete_matches??0),latestMatchAt:catalog.latest_match_at==null?null:String(catalog.latest_match_at)},ingestCoverage:{totalMatches:Number(raw.ingest_coverage?.total_matches??0),directMatches:Number(raw.ingest_coverage?.direct_matches??0),recoveredMatches:Number(raw.ingest_coverage?.recovered_matches??0)}}}
 
-export interface PublicOperationsStats {
-  generatedAt: string;
-  release: { version: string; gitCommitShort: string; deployedAt: string | null };
-  traffic: {
-    activeUsers: number;
-    activeWindowSeconds: number;
-    heartbeatSeconds: number;
-    visitorsToday: number;
-    viewsToday: number;
-    visitorDays7d: number;
-    views7d: number;
-  };
-  catalog: {
-    matches: number;
-    rankedMatches: number;
-    casualMatches: number;
-    players: number;
-    registeredUsers: number;
-    verifiedUsers: number;
-    communityBuilds: number;
-    tierLists: number;
-    communityPosts: number;
-    recoveredMatches: number;
-    incompleteMatches: number;
-    latestMatchAt: string | null;
-  };
-  ingestCoverage: {
-    totalMatches: number;
-    directMatches: number;
-    recoveredMatches: number;
-  };
-}
-
-export async function fetchPublicOperationsStats(): Promise<PublicOperationsStats> {
-  const response = await fetch(`${API_BASE}/operations/stats`);
-  const raw = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(typeof raw.error === "string" ? raw.error : `Request failed (${response.status})`);
-  const summary = raw.traffic?.summary ?? {};
-  const catalog = raw.catalog ?? {};
-  return {
-    generatedAt: String(raw.generated_at ?? ""),
-    release: {
-      version: String(raw.release?.version ?? ""),
-      gitCommitShort: String(raw.release?.git_commit_short ?? ""),
-      deployedAt: raw.release?.deployed_at == null ? null : String(raw.release.deployed_at),
-    },
-    traffic: {
-      activeUsers: Number(summary.active_users ?? 0),
-      activeWindowSeconds: Number(summary.active_window_seconds ?? 300),
-      heartbeatSeconds: Number(summary.heartbeat_seconds ?? 60),
-      visitorsToday: Number(summary.visitors_today ?? 0),
-      viewsToday: Number(summary.views_today ?? 0),
-      visitorDays7d: Number(summary.visitor_days_7d ?? 0),
-      views7d: Number(summary.views_7d ?? 0),
-    },
-    catalog: {
-      matches: Number(catalog.matches ?? 0),
-      rankedMatches: Number(catalog.ranked_matches ?? 0),
-      casualMatches: Number(catalog.casual_matches ?? 0),
-      players: Number(catalog.players ?? 0),
-      registeredUsers: Number(catalog.registered_users ?? 0),
-      verifiedUsers: Number(catalog.verified_users ?? 0),
-      communityBuilds: Number(catalog.community_builds ?? 0),
-      tierLists: Number(catalog.tier_lists ?? 0),
-      communityPosts: Number(catalog.community_posts ?? 0),
-      recoveredMatches: Number(catalog.recovered_matches ?? 0),
-      incompleteMatches: Number(catalog.incomplete_matches ?? 0),
-      latestMatchAt: catalog.latest_match_at == null ? null : String(catalog.latest_match_at),
-    },
-    ingestCoverage: {
-      totalMatches: Number(raw.ingest_coverage?.total_matches ?? 0),
-      directMatches: Number(raw.ingest_coverage?.direct_matches ?? 0),
-      recoveredMatches: Number(raw.ingest_coverage?.recovered_matches ?? 0),
-    },
-  };
-}
+export type TicketType = "bug" | "feature";
+export type TicketStatus = "received" | "under_review" | "planned" | "closed";
+export type Ticket = { id: number; code: string; kind: TicketType; status: TicketStatus; title: string; details: string; requester: string; created_at: string; updated_at: string };
+export type TicketComment = { id: number; body: string; author: string; created_at: string };
+export type WorkColumn = "backlog" | "building" | "review" | "done";
+export type WorkItem = { id: number; code: string; title: string; component: string; column_name: WorkColumn; priority: "low" | "normal" | "high"; assignee: string | null; details: string };
+const auth = () => { const token = getAuthToken(); return token ? { Authorization: `Bearer ${token}` } : undefined; };
+export async function listTickets(page: number, perPage = 20) { return fetchJson<{ data: Ticket[]; page: { current: number; total_pages: number } }>(`/tickets?page=${page}&per_page=${perPage}`, { unwrapData: false }); }
+export async function createTicket(input: { kind: TicketType; title: string; details: string }) { return fetchJson<Ticket>("/tickets", { method: "POST", headers: { "Content-Type": "application/json", ...auth() }, body: JSON.stringify(input), retries: 0 }); }
+export async function getTicket(id: string) { return fetchJson<{ ticket: Ticket; comments: TicketComment[] }>(`/tickets/${encodeURIComponent(id)}`, { unwrapData: false }); }
+export async function commentTicket(id: string, body: string) { return fetchJson<{ ticket: Ticket; comments: TicketComment[] }>(`/tickets/${encodeURIComponent(id)}/comments`, { method: "POST", headers: { "Content-Type": "application/json", ...auth() }, body: JSON.stringify({ body }), unwrapData: false, retries: 0 }); }
+export async function updateTicket(id: string, status: TicketStatus) { return fetchJson<{ ticket: Ticket; comments: TicketComment[] }>(`/tickets/${encodeURIComponent(id)}`, { method: "PUT", headers: { "Content-Type": "application/json", ...auth() }, body: JSON.stringify({ status }), unwrapData: false, retries: 0 }); }
+export async function listWorkItems() { return fetchJson<WorkItem[]>("/projects", { headers: auth() }); }
+export async function createWorkItem(input: { title: string; component: string }) { return fetchJson<{ id: number }>("/projects", { method: "POST", headers: { "Content-Type": "application/json", ...auth() }, body: JSON.stringify(input), retries: 0 }); }
+export async function updateWorkItem(id: number, input: Omit<WorkItem, "id" | "code">) { return fetchJson(`/projects/${id}`, { method: "PUT", headers: { "Content-Type": "application/json", ...auth() }, body: JSON.stringify({ title: input.title, component: input.component, column: input.column_name, priority: input.priority, assignee: input.assignee ?? "", details: input.details }), retries: 0 }); }

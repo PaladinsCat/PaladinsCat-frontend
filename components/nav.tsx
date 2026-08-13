@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { SUPPORTED_LOCALES, useLocalization } from "@/lib/localization-context";
@@ -83,6 +83,10 @@ export default function Nav() {
   const [wallpaperEnabled, setWallpaperEnabledState] = useState(true);
   const [liteMode, setLiteModeState] = useState(false);
   const activityHref = "/stats/activity";
+  const canAccessProjects = user?.isAdmin === true || user?.isProjectDeveloper === true;
+  const canAccessAdmin = user?.isAdmin === true;
+  const projectsHref = "/operations/projects";
+  const developerHref = "/operations/developer";
 
   const headerGroups = [
     {
@@ -127,6 +131,10 @@ export default function Nav() {
       links: [
         { href: "/blog", label: t(BLOG_COPY_KEYS.title) },
         { href: "/changelog", label: t("menu.changelog") },
+        { href: "/operations/tickets", label: t("generated.operations.tickets") },
+        ...(canAccessProjects ? [{ href: projectsHref, label: t("generated.operations.projects") }] : []),
+        ...(canAccessProjects ? [{ href: developerHref, label: t("generated.operations.developer") }] : []),
+        ...(canAccessAdmin ? [{ href: "/admin", label: t("generated.operations.roleAdmin") }] : []),
         { href: "/operations/paladinscat-bot", label: t("menu.paladinsCatBot") },
         { href: "/operations/stats", label: t("menu.paladinsCatStats") },
         { href: "https://translate.paladinscat.com/", label: t("nav.localization") },

@@ -5,43 +5,54 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Activity, Bell, Database, Eye, EyeOff, Gamepad2, Gauge, HeartPulse, KeyRound, RefreshCw, ScrollText, Users } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { fetchAdminDashboard, type AdminDashboard } from "@/lib/admin-dashboard-api";
+import { fetchAdminDashboard, searchManagedAccounts, updateManagedAccountRole, type AdminDashboard, type ManagedAccount } from "@/lib/admin-dashboard-api";
 import { ContentFade, ErrorState, LoadingPanel } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { formatLocalDateTime } from "@/lib/time-format";
 import { useLocalization } from "@/lib/localization-context";
 
-export default function AdminDashboardPage() {
+type AccountRole = "User" | "Moderator" | "Developer" | "Admin";
+type PreviewAccount = { id: number; username: string; email: string; role: AccountRole };
+const PREVIEW_DASHBOARD: AdminDashboard = {
+  generatedAt: "2026-08-12T12:00:00Z",
+  traffic: { summary: { activeUsers: 42, activeWindowSeconds: 300, heartbeatSeconds: 60, visitorsToday: 184, viewsToday: 1294, visitorsYesterday: 171, visitorDays7d: 1086, views7d: 7420 }, daily: ["2026-08-06", "2026-08-07", "2026-08-08", "2026-08-09", "2026-08-10", "2026-08-11", "2026-08-12"].map((date, index) => ({ date, visitors: 112 + index * 11, pageViews: 688 + index * 81, matches: 920 + index * 33 })), topPages: [{ path: "/players", pageViews: 921 }, { path: "/matches", pageViews: 643 }, { path: "/champions", pageViews: 512 }] },
+  site: { totals: { matches: 248531, rankedMatches: 128650, casualMatches: 119881, directMatches: 234012, recoveredMatches: 14219, incompleteMatches: 300, players: 98234, registeredUsers: 126, verifiedAccounts: 88, communityBuilds: 87, databaseBytes: 1073741824 }, pipeline: { bufferPending: 0, bufferProjectionPending: 0, bufferProcessing: 1, bufferFailed: 0, bufferProcessed: 248531 } },
+  hirez: { keys: [{ devId: "preview-key", status: "healthy", used: 120, dailyLimit: 5000, remaining: 4880, callsTotal: 20932, consecutiveFailures: 0, lastUsed: "2026-08-12T11:58:00Z", lastSyncAt: "2026-08-12T11:58:00Z", lastSyncError: null }], hourly: Array.from({ length: 12 }, (_, index) => ({ hour: `${String(index + 8).padStart(2, "0")}:00`, calls: 60 + index * 9 })), endpoints: [{ consumer: "frontend", endpoint: "getplayer", calls: 892, avgResponseMs: 183 }, { consumer: "worker", endpoint: "getmatchdetails", calls: 428, avgResponseMs: 241 }] },
+};
+
+export default function AdminDashboardPage({ mode = "admin" }: { mode?: "admin" | "developer" }) {
   const { t, formatNumber , formatDateTime} = useLocalization();
   const formatBytes = (value: number) => formatNumber(value, { notation: "compact", maximumFractionDigits: 2, style: "unit", unit: "byte", unitDisplay: "short" });
   const router = useRouter();
   const { user, isLoading: authLoading } = useAuth();
+  const developerMode = mode === "developer";
   const [dashboard, setDashboard] = useState<AdminDashboard | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showKeyIds, setShowKeyIds] = useState(false);
-  const isAdmin = user?.isAdmin ?? false;
+  const isAdmin = user?.isAdmin === true;
+  const canView = developerMode ? user?.isAdmin === true || user?.isProjectDeveloper === true : isAdmin;
 
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      setDashboard(await fetchAdminDashboard());
+      setDashboard(await fetchAdminDashboard(developerMode ? "developer" : "admin"));
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : t("generated.admin.page.admindashboardunavailable"));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [developerMode, t]);
 
   useEffect(() => {
     if (authLoading) return;
     if (!user) { router.replace("/auth/login"); return; }
-    if (!isAdmin) { router.replace("/"); return; }
+    if (!canView) { router.replace("/"); return; }
     void load();
     const interval = window.setInterval(() => void load(), 60_000);
     return () => window.clearInterval(interval);
-  }, [authLoading, user, isAdmin, load, router]);
+  }, [authLoading, user, canView, load, router]);
 
   const apiBudget = useMemo(() => {
     const keys = dashboard?.hirez.keys ?? [];
@@ -52,7 +63,7 @@ export default function AdminDashboardPage() {
     }), { used: 0, limit: 0, remaining: 0 });
   }, [dashboard]);
 
-  if (authLoading || !user || !isAdmin) return <RouteSkeleton variant="dashboard" />;
+  if (authLoading || !user || !canView) return <RouteSkeleton variant="dashboard" />;
   if (!dashboard && loading) return <RouteSkeleton variant="dashboard" />;
   if (!dashboard && error) return <ErrorState title={t("generated.admin.adminDashboardUnavailable")} message={error} onRetry={() => void load()} />;
   if (!dashboard) return null;
@@ -62,13 +73,14 @@ export default function AdminDashboardPage() {
   const pipeline = dashboard.site.pipeline;
   const budgetPercent = apiBudget.limit > 0 ? Math.min(100, (apiBudget.used / apiBudget.limit) * 100) : 0;
   const activeWindowMinutes = Math.ceil(summary.activeWindowSeconds / 60);
+  const ingestCoverage = totals.matches > 0 ? ((totals.directMatches + totals.recoveredMatches) / totals.matches) * 100 : 0;
 
   return (
     <ContentFade className="space-y-7">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <div className="text-xs font-bold uppercase tracking-[0.18em] text-pc-text-muted">{t("generated.admin.privateOperations")}</div>
-          <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.admin.adminDashboard")}</h1>
+          <h1 className="pc-heading pc-heading-lg text-pc-accent">{developerMode ? t("generated.operations.developer") : t("generated.admin.adminDashboard")}</h1>
           <p className="mt-1 text-sm text-pc-text-secondary">{t("generated.admin.trafficPlatformHealthIngestionAndHiRezQuotaTelemetry")}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -114,14 +126,14 @@ export default function AdminDashboardPage() {
         <div className="pc-card xl:col-span-2">
           <div className="flex items-start justify-between gap-3">
             <SectionTitle icon={KeyRound} title={t("generated.admin.hiRezApiKeys")} subtitle={t("generated.admin.apiKeysSubtitle")} />
-            <button
+            {!developerMode && <button
               type="button"
               onClick={() => setShowKeyIds((prev) => !prev)}
               className="pc-btn-secondary inline-flex items-center gap-1.5 whitespace-nowrap text-xs"
             >
               {showKeyIds ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
               {showKeyIds ? t("generated.admin.hideKeyIds") : t("generated.admin.showKeyIds")}
-            </button>
+            </button>}
           </div>
           <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
             {dashboard.hirez.keys.map((key, idx) => <ApiKeyCard key={key.devId} apiKey={key} index={idx} showKeyId={showKeyIds} />)}
@@ -139,10 +151,32 @@ export default function AdminDashboardPage() {
 
       <section className="grid grid-cols-1 gap-5 xl:grid-cols-2">
         <div className="pc-card">
+          <SectionTitle icon={Database} title={t("generated.operations.adminTrackedData")} subtitle="" />
+          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <SmallStat label={t("generated.operations.adminMatches")} value={formatNumber(totals.matches)} />
+            <SmallStat label={t("generated.operations.adminRanked")} value={formatNumber(totals.rankedMatches)} />
+            <SmallStat label={t("generated.operations.adminCasual")} value={formatNumber(totals.casualMatches)} />
+            <SmallStat label={t("generated.operations.adminPlayers")} value={formatNumber(totals.players)} />
+          </div>
+        </div>
+        <div className="pc-card">
+          <SectionTitle icon={Activity} title={t("generated.operations.adminIngestCoverage")} subtitle="" />
+          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <SmallStat label={t("generated.operations.adminCoverage")} value={`${formatNumber(ingestCoverage, { maximumFractionDigits: 1 })}%`} />
+            <SmallStat label={t("generated.operations.adminDirect")} value={formatNumber(totals.directMatches)} />
+            <SmallStat label={t("generated.operations.adminRecovered")} value={formatNumber(totals.recoveredMatches)} />
+            <SmallStat label={t("generated.operations.adminIncomplete")} value={formatNumber(totals.incompleteMatches)} tone={totals.incompleteMatches > 0 ? "warn" : "normal"} />
+          </div>
+        </div>
+      </section>
+
+      <section className="grid grid-cols-1 gap-5 xl:grid-cols-2">
+        <div className="pc-card">
           <SectionTitle icon={Database} title={t("generated.admin.websiteDatabase")} subtitle={t("generated.admin.databaseSubtitle")} />
           <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
             <SmallStat label={t("generated.admin.players")} value={formatNumber(totals.players)} />
-            <SmallStat label={t("generated.admin.users")} value={formatNumber(totals.registeredUsers)} />
+            <SmallStat label={t("generated.operations.adminRegistered")} value={formatNumber(totals.registeredUsers)} />
+            <SmallStat label={t("generated.operations.adminVerified")} value={formatNumber(totals.verifiedAccounts)} />
             <SmallStat label={t("generated.admin.builds")} value={formatNumber(totals.communityBuilds)} />
             <SmallStat label={t("generated.admin.database")} value={formatBytes(totals.databaseBytes)} />
             <SmallStat label={t("generated.admin.bufferPending")} value={formatNumber(pipeline.bufferPending)} tone={pipeline.bufferPending > 0 ? "warn" : "normal"} />
@@ -160,14 +194,18 @@ export default function AdminDashboardPage() {
         </div>
       </section>
 
+      {!developerMode && <AdminRoleManager />}
+
       <footer className="flex flex-wrap items-center justify-between gap-2 text-xs text-pc-text-muted">
-        <span>{t("generated.admin.signedInAs")}{" "}{user.username}{t("generated.admin.thisRouteAndItsDataEndpointRequireAnAdminSession")}</span>
+        <span>{developerMode ? (user?.username ?? "Local developer") : <>{t("generated.admin.signedInAs")}{" "}{user?.username ?? "Local admin"}{t("generated.admin.thisRouteAndItsDataEndpointRequireAnAdminSession")}</>}</span>
         <span>{t("generated.admin.snapshot")}{" "}{formatDateTime(dashboard.generatedAt)}</span>
       </footer>
       {loading && <LoadingPanel compact className="fixed bottom-20 right-5 z-50" />}
     </ContentFade>
   );
 }
+
+function AdminRoleManager(){const{t}=useLocalization();const[query,setQuery]=useState("");const[accounts,setAccounts]=useState<ManagedAccount[]>([]);const[selected,setSelected]=useState<ManagedAccount|null>(null);async function search(){if(query.trim().length<2)return;const rows=await searchManagedAccounts(query);setAccounts(rows);setSelected(rows[0]??null)}async function save(form:FormData){if(!selected)return;const role=String(form.get("role")) as ManagedAccount["role"];await updateManagedAccountRole(selected.id,role);setSelected({...selected,role});setAccounts(rows=>rows.map(row=>row.id===selected.id?{...row,role}:row))}return <section className="pc-card p-5"><div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_16rem]"><div><div className="flex gap-2"><input value={query} onChange={e=>setQuery(e.target.value)} placeholder={t("generated.operations.adminSearchAccounts")} className="min-w-0 flex-1 rounded-lg border border-pc-border bg-pc-bg px-3 py-2 text-sm text-pc-text"/><button type="button" onClick={()=>void search()} className="pc-btn-secondary text-sm">{t("generated.operations.adminSearch")}</button></div><div className="mt-2 max-h-44 overflow-y-auto rounded-lg border border-pc-border">{accounts.map(account=><button key={account.id} type="button" onClick={()=>setSelected(account)} className="grid w-full grid-cols-[minmax(0,1fr)_auto] gap-3 border-b border-pc-border px-3 py-2 text-left"><span><span className="block truncate text-sm text-pc-text">{account.username}</span><span className="block truncate text-xs text-pc-text-muted">{account.email}</span></span><span className="text-xs text-pc-text-muted">{account.role}</span></button>)}</div></div>{selected&&<form action={save} className="space-y-4"><span className="block truncate text-sm text-pc-text">{selected.username}</span><select name="role" defaultValue={selected.role} className="w-full rounded-lg border border-pc-border bg-pc-bg px-3 py-2 text-sm text-pc-text"><option value="user">{t("generated.operations.roleUser")}</option><option value="moderator">{t("generated.operations.roleModerator")}</option><option value="developer">{t("generated.operations.developer")}</option><option value="admin">{t("generated.operations.roleAdmin")}</option></select><button className="pc-btn-primary w-full text-sm">{t("generated.operations.projectsSave")}</button></form>}</div></section>}
 
 function MetricCard({ icon: Icon, label, value, detail }: { icon: typeof Users; label: string; value: string; detail: string }) {
   return <div className="pc-card p-4"><div className="flex items-center gap-2 text-xs text-pc-text-muted"><Icon className="h-4 w-4 text-pc-accent" />{label}</div><div className="mt-2 text-2xl font-bold tabular-nums text-pc-text">{value}</div><div className="mt-1 text-xs text-pc-text-muted">{detail}</div></div>;

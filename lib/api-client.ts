@@ -1556,7 +1556,7 @@ export function isApiErrorKey(value: unknown): value is ApiErrorKey {
     && (Object.values(API_ERROR_KEYS) as string[]).includes(value);
 }
 
-async function fetchJson<T>(path: string, options?: RequestInit & { retries?: number; unwrapData?: boolean; timeoutMs?: number }): Promise<T> {
+export async function fetchJson<T>(path: string, options?: RequestInit & { retries?: number; unwrapData?: boolean; timeoutMs?: number }): Promise<T> {
   const retries = options?.retries ?? 2;
   const unwrapData = options?.unwrapData ?? true;
   const timeoutMs = options?.timeoutMs ?? FETCH_TIMEOUT_MS;
@@ -3492,6 +3492,7 @@ export interface AuthUser {
   bio: string | null;
   isAdmin: boolean;
   isApproved: boolean;
+  isProjectDeveloper?: boolean;
   createdAt: string;
   lastLogin: string | null;
   timeZone: string | null;
@@ -3632,6 +3633,7 @@ export async function getMe(_userId?: number): Promise<AuthUser> {
     bio: string | null;
     is_admin?: boolean;
     is_approved?: boolean;
+    is_project_developer?: boolean;
     created_at?: string;
     last_login?: string | null;
     time_zone?: string | null;
@@ -3649,6 +3651,7 @@ export async function getMe(_userId?: number): Promise<AuthUser> {
     bio: raw.bio,
     isAdmin: raw.is_admin ?? false,
     isApproved: raw.is_approved ?? false,
+    isProjectDeveloper: raw.is_project_developer ?? false,
     createdAt: raw.created_at ?? "",
     lastLogin: raw.last_login ?? null,
     timeZone: raw.time_zone ?? null,

@@ -1,4 +1,4 @@
-import { getAuthToken } from "./api-client";
+import { fetchJson, getAuthToken } from "./api-client";
 
 export type AdminDailyTraffic = { date: string; visitors: number; pageViews: number; matches: number };
 export type AdminApiKey = {
@@ -22,7 +22,7 @@ export type AdminDashboard = {
     topPages: Array<{ path: string; pageViews: number }>;
   };
   site: {
-    totals: { matches: number; rankedMatches: number; players: number; registeredUsers: number; communityBuilds: number; databaseBytes: number };
+    totals: { matches: number; rankedMatches: number; casualMatches: number; directMatches: number; recoveredMatches: number; incompleteMatches: number; players: number; registeredUsers: number; verifiedAccounts: number; communityBuilds: number; databaseBytes: number };
     pipeline: { bufferPending: number; bufferProjectionPending: number; bufferProcessing: number; bufferFailed: number; bufferProcessed: number };
   };
   hirez: {
@@ -41,9 +41,9 @@ export const ADMIN_ERROR_KEYS = {
   dashboardRequestFailed: "generated.admin.dashboardRequestFailed",
 } as const;
 
-export async function fetchAdminDashboard(): Promise<AdminDashboard> {
+export async function fetchAdminDashboard(mode: "admin" | "developer" = "admin"): Promise<AdminDashboard> {
   const token = getAuthToken();
-  const response = await fetch("/api/admin/dashboard", {
+  const response = await fetch(mode === "developer" ? "/api/developer/dashboard" : "/api/admin/dashboard", {
     headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     credentials: "same-origin",
     cache: "no-store",
@@ -75,8 +75,8 @@ export async function fetchAdminDashboard(): Promise<AdminDashboard> {
     },
     site: {
       totals: {
-        matches: numberValue(totals.matches), rankedMatches: numberValue(totals.ranked_matches), players: numberValue(totals.players),
-        registeredUsers: numberValue(totals.registered_users), communityBuilds: numberValue(totals.community_builds), databaseBytes: numberValue(totals.database_bytes),
+        matches: numberValue(totals.matches), rankedMatches: numberValue(totals.ranked_matches), casualMatches: numberValue(totals.casual_matches), directMatches: numberValue(totals.direct_matches), recoveredMatches: numberValue(totals.recovered_matches), incompleteMatches: numberValue(totals.incomplete_matches), players: numberValue(totals.players),
+        registeredUsers: numberValue(totals.registered_users), verifiedAccounts: numberValue(totals.verified_accounts), communityBuilds: numberValue(totals.community_builds), databaseBytes: numberValue(totals.database_bytes),
       },
       pipeline: {
         bufferPending: numberValue(pipeline.buffer_pending), bufferProcessing: numberValue(pipeline.buffer_processing),
@@ -86,7 +86,7 @@ export async function fetchAdminDashboard(): Promise<AdminDashboard> {
     },
     hirez: {
       keys: (raw.hirez?.keys ?? []).map((row: any) => ({
-        devId: String(row.dev_id), status: String(row.status ?? "unknown"), used: numberValue(row.used), dailyLimit: numberValue(row.daily_limit),
+        devId: String(row.label ?? row.dev_id ?? "Key"), status: String(row.status ?? "unknown"), used: numberValue(row.used), dailyLimit: numberValue(row.daily_limit),
         remaining: numberValue(row.remaining), callsTotal: numberValue(row.calls_total), consecutiveFailures: numberValue(row.consecutive_failures),
         lastUsed: row.last_used ? String(row.last_used) : null, lastSyncAt: row.last_sync_at ? String(row.last_sync_at) : null,
         lastSyncError: row.last_sync_error ? String(row.last_sync_error) : null,
@@ -99,3 +99,7 @@ export async function fetchAdminDashboard(): Promise<AdminDashboard> {
     },
   };
 }
+
+export type ManagedAccount = { id: number; username: string; email: string; role: "user" | "moderator" | "developer" | "admin" };
+export async function searchManagedAccounts(query: string): Promise<ManagedAccount[]> { const token=getAuthToken(); return fetchJson<ManagedAccount[]>(`/admin/accounts?q=${encodeURIComponent(query)}`,{headers:token?{Authorization:`Bearer ${token}`} : undefined}); }
+export async function updateManagedAccountRole(id:number,role:ManagedAccount["role"]):Promise<void>{const token=getAuthToken();await fetchJson(`/admin/accounts/${id}/role`,{method:"PUT",headers:{"Content-Type":"application/json",...(token?{Authorization:`Bearer ${token}`}:{})},body:JSON.stringify({role}),retries:0});}
