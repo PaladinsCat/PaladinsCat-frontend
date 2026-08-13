@@ -49,11 +49,11 @@ export default function NotificationMenu() {
   const roRef = useRef<ResizeObserver | null>(null);
   const signedIn = Boolean(user);
 
-  // Live ref for resize callbacks — avoids stale `open` in closure
-  const openRef = useRef(open);
-  openRef.current = open;
+    // Whether the portal element has been created (mirrored from portalRef so the
+    // render pass can read it without touching the ref during render).
+    const [portalEl, setPortalEl] = useState<HTMLDivElement | null>(null);
 
-  /** Position portal: centered on button, clamped to viewport edges */
+    /** Position portal: centered on button, clamped to viewport edges */
   function positionPortal(btn: HTMLButtonElement, portal: HTMLDivElement) {
     const rect = btn.getBoundingClientRect();
     // Hidden button → hide portal
@@ -73,12 +73,13 @@ export default function NotificationMenu() {
   }
 
   // Mount: create portal + cleanup
-  useEffect(() => {
-    portalRef.current = createPortalContainer();
-    return () => {
-      if (portalRef.current) portalRef.current.remove();
-    };
-  }, []);
+    useEffect(() => {
+      portalRef.current = createPortalContainer();
+      setPortalEl(portalRef.current);
+      return () => {
+        if (portalRef.current) portalRef.current.remove();
+      };
+    }, []);
 
   // Continuous rAF positioning while open + show/hide
   useEffect(() => {
@@ -245,7 +246,7 @@ export default function NotificationMenu() {
           <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-pc-bg-secondary" aria-hidden="true" />
         )}
       </button>
-      {mounted && open && portalRef.current && ReactDOM.createPortal(dropdownContent, portalRef.current)}
+      {mounted && open && portalEl && ReactDOM.createPortal(dropdownContent, portalEl)}
     </div>
   );
 }

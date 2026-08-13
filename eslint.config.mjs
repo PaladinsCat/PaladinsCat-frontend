@@ -19,13 +19,27 @@ export default defineConfig([
     },
   },
   {
-    files: ["scripts/**/*.{js,mjs}"],
-    rules: {
-      "@next/next/no-assign-module-variable": "off",
-      "react-hooks/rules-of-hooks": "off",
+      files: ["scripts/**/*.{js,mjs}"],
+      rules: {
+        "@next/next/no-assign-module-variable": "off",
+        "react-hooks/rules-of-hooks": "off",
+      },
     },
-  },
-  globalIgnores([
+    {
+      // Locale helper scripts are plain CommonJS/ESM interop tooling that
+      // legitimately use `require()` and assign to `module` for dual exports.
+      files: ["locales/scripts/**/*.cjs"],
+      rules: {
+        "@typescript-eslint/no-require-imports": "off",
+      },
+    },
+    {
+      files: ["locales/scripts/**/*.mjs", "locales/scripts/**/*.js"],
+      rules: {
+        "@next/next/no-assign-module-variable": "off",
+      },
+    },
+    globalIgnores([
     ".next/**",
     "out/**",
     "public/locales/**",

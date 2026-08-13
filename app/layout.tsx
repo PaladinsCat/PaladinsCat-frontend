@@ -18,6 +18,7 @@ import ImageAssetFallback from "@/components/ImageAssetFallback";
 import CoreUiDragGuard from "@/components/CoreUiDragGuard";
 import LiteModeProvider from "@/components/LiteModeProvider";
 import { cn } from "@/lib/utils";
+import { headers } from "next/headers";
 import { SEO_KEYWORDS, SITE_NAME, SITE_URL } from "@/lib/seo";
 import { getServerLocalization } from "@/lib/server-localization";
 
@@ -70,6 +71,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { locale, messages, t } = await getServerLocalization();
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [
@@ -110,9 +112,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <CoreUiDragGuard />
         <ImageAssetFallback />
         <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-        />
+                  nonce={nonce}
+                  type="application/ld+json"
+                  dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+                />
         <AuthProvider>
           <LocalizationProvider initialLocale={locale} initialMessages={messages}>
             <TimeZoneProvider>

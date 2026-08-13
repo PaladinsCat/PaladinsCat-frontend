@@ -1,0 +1,5 @@
+# Code Owners
+*            @NabiCook
+/app/        @NabiCook
+/components/ @NabiCook
+/lib/        @NabiCook

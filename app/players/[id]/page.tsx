@@ -694,7 +694,7 @@ export default function PlayerProfilePage() {
             {/* Title + loading frame */}
             <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
               {player.title && (
-                <span className="text-sm text-pc-text-secondary sm:text-base" dangerouslySetInnerHTML={{ __html: player.title }} />
+                <span className="text-sm text-pc-text-secondary sm:text-base">{player.title}</span>
               )}
               {player.loading_frame && (
                 <span className="text-sm font-medium text-pc-accent/80 sm:text-base">▸ {player.loading_frame}</span>
