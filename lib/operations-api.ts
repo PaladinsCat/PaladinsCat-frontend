@@ -10,9 +10,9 @@ export type TicketComment = { id: number; body: string; author: string; created_
 export type WorkColumn = "backlog" | "building" | "review" | "done";
 export type WorkItem = { id: number; code: string; title: string; component: string; column_name: WorkColumn; priority: "low" | "normal" | "high"; assignee: string | null; details: string };
 const auth = () => { const token = getAuthToken(); return token ? { Authorization: `Bearer ${token}` } : undefined; };
-export async function listTickets(page: number, perPage = 20) { return fetchJson<{ data: Ticket[]; page: { current: number; total_pages: number } }>(`/tickets?page=${page}&per_page=${perPage}`, { unwrapData: false }); }
+export async function listTickets(page: number, perPage = 20) { return fetchJson<{ data: Ticket[]; page: { current: number; total_pages: number } }>(`/tickets?page=${page}&per_page=${perPage}`, { headers: auth(), unwrapData: false }); }
 export async function createTicket(input: { kind: TicketType; title: string; details: string }) { return fetchJson<Ticket>("/tickets", { method: "POST", headers: { "Content-Type": "application/json", ...auth() }, body: JSON.stringify(input), retries: 0 }); }
-export async function getTicket(id: string) { return fetchJson<{ ticket: Ticket; comments: TicketComment[] }>(`/tickets/${encodeURIComponent(id)}`, { unwrapData: false }); }
+export async function getTicket(id: string) { return fetchJson<{ ticket: Ticket; comments: TicketComment[] }>(`/tickets/${encodeURIComponent(id)}`, { headers: auth(), unwrapData: false }); }
 export async function commentTicket(id: string, body: string) { return fetchJson<{ ticket: Ticket; comments: TicketComment[] }>(`/tickets/${encodeURIComponent(id)}/comments`, { method: "POST", headers: { "Content-Type": "application/json", ...auth() }, body: JSON.stringify({ body }), unwrapData: false, retries: 0 }); }
 export async function updateTicket(id: string, status: TicketStatus) { return fetchJson<{ ticket: Ticket; comments: TicketComment[] }>(`/tickets/${encodeURIComponent(id)}`, { method: "PUT", headers: { "Content-Type": "application/json", ...auth() }, body: JSON.stringify({ status }), unwrapData: false, retries: 0 }); }
 export async function listWorkItems() { return fetchJson<WorkItem[]>("/projects", { headers: auth() }); }

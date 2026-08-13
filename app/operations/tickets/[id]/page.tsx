@@ -3,15 +3,18 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ArrowLeft, MessageSquare } from "lucide-react";
+import { OperationsAuthWall } from "@/components/operations-auth-wall";
 import { useAuth } from "@/lib/auth-context";
 import { useLocalization } from "@/lib/localization-context";
 import { commentTicket, getTicket, updateTicket, type TicketStatus } from "@/lib/operations-api";
 export default function TicketDetailPage() {
-  const { user }=useAuth(); const { t }=useLocalization(); const params=useParams<{id:string}>(); const id=String(params.id??"");
+  const { user,isLoading }=useAuth(); const { t }=useLocalization(); const params=useParams<{id:string}>(); const id=String(params.id??"");
   const [data,setData]=useState<Awaited<ReturnType<typeof getTicket>>|null>(null); const [error,setError]=useState<string|null>(null); const [busy,setBusy]=useState(false);
-  useEffect(()=>{ void getTicket(id).then(setData).catch(reason=>setError(reason instanceof Error?reason.message:"Ticket not found")); },[id]);
+  useEffect(()=>{if(isLoading||!user)return;void getTicket(id).then(setData).catch(reason=>setError(reason instanceof Error?reason.message:"Ticket not found"));},[id,isLoading,user]);
   async function add(form:FormData) { const body=String(form.get("comment")??"").trim(); if(!body)return; setBusy(true); try { setData(await commentTicket(id,body)); } catch(reason) { setError(reason instanceof Error?reason.message:"Unable to add comment"); } finally { setBusy(false); } }
   async function status(value:TicketStatus) { setBusy(true); try { setData(await updateTicket(id,value)); } catch(reason) { setError(reason instanceof Error?reason.message:"Unable to update ticket"); } finally { setBusy(false); } }
+  if(isLoading)return <div className="pc-card p-6 text-sm text-pc-text-secondary">{t("generated.operations.ticketLoading")}</div>;
+  if(!user)return <OperationsAuthWall/>;
   if(error&&!data)return <div className="pc-card p-6"><Link href="/operations/tickets" className="pc-btn-secondary inline-flex items-center gap-2 text-sm"><ArrowLeft className="h-4 w-4"/>{t("generated.operations.tickets")}</Link><p className="mt-4 text-sm text-pc-text-secondary">{error}</p></div>;
   if(!data)return <div className="pc-card p-6 text-sm text-pc-text-secondary">{t("generated.operations.ticketLoading")}</div>;
   const labels: Record<TicketStatus,string> = { received:t("generated.operations.ticketReceived"), under_review:t("generated.operations.ticketUnderReview"), planned:t("generated.operations.ticketPlanned"), closed:t("generated.operations.ticketClosed") };
