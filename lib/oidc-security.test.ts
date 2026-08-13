@@ -103,6 +103,13 @@ test("OIDC login redirects the initiating POST with 303, never 307", () => {
   const source = readFileSync(new URL("../app/api/auth/oidc/login/route.ts", import.meta.url), "utf8");
   assert.match(source, /NextResponse\.redirect\(buildParAuthorizationUrl\(issuer, clientId, requestUri\), \{ status: 303 \}\)/);
 });
+test("OIDC transaction limits use only the validated Cloudflare client address", () => {
+  const source = readFileSync(new URL("../app/api/auth/oidc/login/route.ts", import.meta.url), "utf8");
+  assert.match(source, /headers\.get\("cf-connecting-ip"\)/);
+  assert.match(source, /address && isIP\(address\)/);
+  assert.match(source, /\{ "x-forwarded-for": clientIp \}/);
+  assert.doesNotMatch(source, /headers\.get\("x-forwarded-for"\)/);
+});
 test("PaladinsCat login entry points post directly into the Keycloak OIDC flow", () => {
   const login = readFileSync(new URL("../app/auth/login/page.tsx", import.meta.url), "utf8");
   const nav = readFileSync(new URL("../components/nav.tsx", import.meta.url), "utf8");
@@ -150,7 +157,7 @@ test("only the fixed create intent can add the Keycloak registration prompt", ()
   assert.match(route, /requestedIntent !== null && requestedIntent !== "create"/);
   assert.match(route, /if \(intent === "create"\) par\.form\.set\("prompt", "create"\)/);
   assert.match(route, /entries\.length !== 1.*entries\[0\]\[0\] !== "intent".*entries\[0\]\[1\] !== "create"/);
-  assert.match(route, /return startOidc\("create", "\/"\)/);
+  assert.match(route, /return startOidc\("create", "\/", clientAddress\(request\)\)/);
 });
 test("frontend server calls use the pinned internal issuer without changing token issuer validation", () => {
   const login = readFileSync(new URL("../app/api/auth/oidc/login/route.ts", import.meta.url), "utf8");

@@ -2,11 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { buildParAuthorizationUrl, buildPushedAuthorizationRequest, createTransaction, normalizedHttpsIssuer, parsePushedAuthorizationResponse, requireSameOrigin, resolveInternalIssuer, safeReturnPath } from "@/lib/oidc-security";
 import { oidcBffServiceHeaders } from "@/lib/oidc-bff-service";
 import { oidcClientSecret } from "@/lib/oidc-client-secret";
+import { isIP } from "node:net";
 
 export const runtime = "nodejs";
 const TX_COOKIE = "__Host-pc_oidc_txn";
 const PAR_MAX_BYTES = 8 * 1024;
 function origin() { return process.env.PALADINSCAT_PUBLIC_ORIGIN || "http://localhost:3000"; }
+function clientAddress(request: NextRequest): string | undefined {
+  const address = request.headers.get("cf-connecting-ip")?.trim();
+  return address && isIP(address) ? address : undefined;
+}
 
 async function readParResponse(response: Response) {
   const reader = response.body?.getReader();
@@ -23,14 +28,14 @@ async function readParResponse(response: Response) {
   try { return parsePushedAuthorizationResponse(JSON.parse(Buffer.concat(chunks.map((chunk) => Buffer.from(chunk))).toString("utf8"))); } catch { return null; }
 }
 
-async function startOidc(intent: "login" | "create", returnPath: string) {
+async function startOidc(intent: "login" | "create", returnPath: string, clientIp?: string) {
   const transaction = createTransaction(returnPath);
   const issuer = normalizedHttpsIssuer(process.env.OIDC_ISSUER);
   const clientId = process.env.OIDC_CLIENT_ID;
   const clientSecret = oidcClientSecret();
   if (!issuer || !clientId || !clientSecret) return new NextResponse("OIDC is not configured", { status: 503 });
   const serverIssuer = resolveInternalIssuer(issuer, process.env.OIDC_INTERNAL_ISSUER);
-  const stored = await fetch(`${(process.env.NEXT_SERVER_API_URL || "http://localhost:3005/api").replace(/\/$/, "")}/auth/oidc/transactions`, { method: "POST", headers: { ...oidcBffServiceHeaders(), "content-type": "application/json" }, cache: "no-store", body: JSON.stringify({ state: transaction.state, nonce: transaction.nonce, verifier: transaction.verifier, return_path: transaction.returnPath }) });
+  const stored = await fetch(`${(process.env.NEXT_SERVER_API_URL || "http://localhost:3005/api").replace(/\/$/, "")}/auth/oidc/transactions`, { method: "POST", headers: { ...oidcBffServiceHeaders(), ...(clientIp ? { "x-forwarded-for": clientIp } : {}), "content-type": "application/json" }, cache: "no-store", body: JSON.stringify({ state: transaction.state, nonce: transaction.nonce, verifier: transaction.verifier, return_path: transaction.returnPath }) });
   if (stored.status !== 201) return new NextResponse("OIDC is temporarily unavailable", { status: 503 });
   const par = buildPushedAuthorizationRequest(serverIssuer, clientId, `${origin()}/api/auth/oidc/callback`, transaction);
   par.form.set("client_secret", clientSecret);
@@ -56,11 +61,11 @@ export async function POST(request: NextRequest) {
   const form = await request.formData();
   const requestedIntent = form.get("intent");
   if (requestedIntent !== null && requestedIntent !== "create") return new NextResponse("Invalid OIDC intent", { status: 400 });
-  return startOidc(requestedIntent === "create" ? "create" : "login", safeReturnPath(String(form.get("return") || "/")));
+  return startOidc(requestedIntent === "create" ? "create" : "login", safeReturnPath(String(form.get("return") || "/")), clientAddress(request));
 }
 
 export async function GET(request: NextRequest) {
   const entries = [...request.nextUrl.searchParams.entries()];
   if (entries.length !== 1 || entries[0][0] !== "intent" || entries[0][1] !== "create") return new NextResponse("Not found", { status: 404 });
-  return startOidc("create", "/");
+  return startOidc("create", "/", clientAddress(request));
 }
