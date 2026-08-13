@@ -25,7 +25,10 @@ export function middleware(request: NextRequest) {
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-inline'`,
     // Next.js injects inline styles (Tailwind, PostCSS, next/font) server-side.
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: blob:",
+    // Player avatars, live-stream previews, and repository-owned blog images
+    // are rendered from these fixed upstreams. Keep this an explicit allowlist;
+    // do not broaden it to arbitrary HTTPS image hosts.
+    "img-src 'self' data: blob: https://hirez-api.onrender.com https://static-cdn.jtvnw.net https://raw.githubusercontent.com",
     "font-src 'self' data:",
     // Same-origin /api is the proxied backend; api.github.com powers the blog feed.
     "connect-src 'self' https://api.github.com",
