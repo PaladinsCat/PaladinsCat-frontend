@@ -66,6 +66,8 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   const entries = [...request.nextUrl.searchParams.entries()];
-  if (entries.length !== 1 || entries[0][0] !== "intent" || entries[0][1] !== "create") return new NextResponse("Not found", { status: 404 });
-  return startOidc("create", "/", clientAddress(request));
+  if (entries.length === 0) return startOidc("login", "/", clientAddress(request));
+  if (entries.length === 1 && entries[0][0] === "return") return startOidc("login", safeReturnPath(entries[0][1]), clientAddress(request));
+  if (entries.length === 1 && entries[0][0] === "intent" && entries[0][1] === "create") return startOidc("create", "/", clientAddress(request));
+  return new NextResponse("Not found", { status: 404 });
 }

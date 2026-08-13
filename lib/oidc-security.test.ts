@@ -121,11 +121,11 @@ test("PaladinsCat login entry points post directly into the Keycloak OIDC flow",
   assert.equal(isIdentityCutoverEnabled("false"), false);
   assert.equal(isIdentityCutoverEnabled("true"), true);
   assert.doesNotMatch(register, /identityCutoverEnabled|LegacyRegistration|await register\(/);
-  assert.doesNotMatch(login, /useAuth\(\)|LegacyLogin|type="password"|generated\.auth\.oidc\.divider/);
+  assert.doesNotMatch(login, /useAuth\(\)|LegacyLogin|type="password"|generated\.auth\.oidc\.divider|requestSubmit/);
   assert.match(apiClient, /"\/auth\/login"/);
   assert.match(apiClient, /"\/auth\/register"/);
-  assert.match(login, /action="\/api\/auth\/oidc\/login" method="post"/);
-  assert.match(login, /formRef\.current\?\.requestSubmit\(\)/);
+  assert.match(login, /redirect\(href\)/);
+  assert.match(login, /\/api\/auth\/oidc\/login\?return=/);
   assert.match(nav, /action="\/api\/auth\/oidc\/login" method="post"/);
   assert.doesNotMatch(nav, /href="\/auth\/login"/);
   assert.doesNotMatch(nav, /type="submit" onClick=\{\(\) => setSideMenuOpen\(false\)\}/);
@@ -156,8 +156,17 @@ test("only the fixed create intent can add the Keycloak registration prompt", ()
   const route = readFileSync(new URL("../app/api/auth/oidc/login/route.ts", import.meta.url), "utf8");
   assert.match(route, /requestedIntent !== null && requestedIntent !== "create"/);
   assert.match(route, /if \(intent === "create"\) par\.form\.set\("prompt", "create"\)/);
-  assert.match(route, /entries\.length !== 1.*entries\[0\]\[0\] !== "intent".*entries\[0\]\[1\] !== "create"/);
+  assert.match(route, /entries\.length === 1 && entries\[0\]\[0\] === "intent" && entries\[0\]\[1\] === "create"/);
   assert.match(route, /return startOidc\("create", "\/", clientAddress\(request\)\)/);
+});
+test("login begins server-side and the failure page retries with a plain link", () => {
+  const page = readFileSync(new URL("../app/auth/login/page.tsx", import.meta.url), "utf8");
+  const failure = readFileSync(new URL("../app/auth/login/login-failure.tsx", import.meta.url), "utf8");
+  const route = readFileSync(new URL("../app/api/auth/oidc/login/route.ts", import.meta.url), "utf8");
+  assert.match(page, /redirect\(href\)/);
+  assert.doesNotMatch(page, /useEffect|requestSubmit|<form/);
+  assert.match(failure, /<a href=\{href\}/);
+  assert.match(route, /return startOidc\("login", safeReturnPath\(entries\[0\]\[1\]\), clientAddress\(request\)\)/);
 });
 test("frontend server calls use the pinned internal issuer without changing token issuer validation", () => {
   const login = readFileSync(new URL("../app/api/auth/oidc/login/route.ts", import.meta.url), "utf8");
