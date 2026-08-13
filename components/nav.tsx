@@ -385,7 +385,7 @@ export default function Nav() {
                   </div>
                 </div>
               ) : (
-                <Link href={loginHref} className="pc-btn-secondary text-sm">{t("nav.login")}</Link>
+                <a href={loginHref} className="pc-btn-secondary text-sm">{t("nav.login")}</a>
               )}
             </div>
           </div>
@@ -462,7 +462,7 @@ export default function Nav() {
               </div>
             </div>
             <div className="border-t border-pc-border px-5 py-4">
-              {resolvedUser ? <div className="flex items-center justify-between gap-3"><Link href={profileHref} onClick={() => setSideMenuOpen(false)} className="min-w-0 truncate text-sm text-pc-text-secondary hover:text-pc-accent">{resolvedUser.linkedPlayerId ? <PlayerName playerId={resolvedUser.linkedPlayerId} verified>{accountLabel}</PlayerName> : accountLabel}</Link><Link href="/account" onClick={() => setSideMenuOpen(false)} className="text-xs text-pc-text-muted hover:text-pc-accent">{t("generated.common.account")}</Link><button onClick={handleLogout} className="pc-btn-ghost text-sm">{t("nav.logout")}</button></div> : <Link href={loginHref} onClick={() => setSideMenuOpen(false)} className="pc-btn-secondary block w-full text-center text-sm">{t("nav.login")}</Link>}
+              {resolvedUser ? <div className="flex items-center justify-between gap-3"><Link href={profileHref} onClick={() => setSideMenuOpen(false)} className="min-w-0 truncate text-sm text-pc-text-secondary hover:text-pc-accent">{resolvedUser.linkedPlayerId ? <PlayerName playerId={resolvedUser.linkedPlayerId} verified>{accountLabel}</PlayerName> : accountLabel}</Link><Link href="/account" onClick={() => setSideMenuOpen(false)} className="text-xs text-pc-text-muted hover:text-pc-accent">{t("generated.common.account")}</Link><button onClick={handleLogout} className="pc-btn-ghost text-sm">{t("nav.logout")}</button></div> : <a href={loginHref} className="pc-btn-secondary block w-full text-center text-sm">{t("nav.login")}</a>}
             </div>
           </aside>
         </div>

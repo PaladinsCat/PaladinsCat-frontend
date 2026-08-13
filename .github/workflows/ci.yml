@@ -40,3 +40,9 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Install Chromium for auth UI tests
+        run: npx playwright install --with-deps chromium
+
+      - name: Auth UI browser tests
+        run: npm run test:ui:auth

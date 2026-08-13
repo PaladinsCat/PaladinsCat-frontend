@@ -127,7 +127,8 @@ test("PaladinsCat login entry points use native links into the server-side OIDC 
   assert.match(login, /redirect\(href\)/);
   assert.match(login, /\/api\/auth\/oidc\/login\?return=/);
   assert.match(nav, /const loginHref = `\/auth\/login\?redirect=\$\{encodeURIComponent\(pathname \|\| "\/"\)\}`/);
-  assert.match(nav, /<Link href=\{loginHref\}/);
+  assert.equal(nav.match(/<a href=\{loginHref\}/g)?.length, 2);
+  assert.doesNotMatch(nav, /<Link href=\{loginHref\}/);
   assert.doesNotMatch(nav, /action="\/api\/auth\/oidc\/login"/);
   assert.match(register, /process\.env\.PALADINSCAT_PUBLIC_ORIGIN \|\| new URL\(request\.url\)\.origin/);
   assert.match(register, /NextResponse\.redirect\(new URL\("\/api\/auth\/oidc\/login\?intent=create", publicOrigin\), 307\)/);

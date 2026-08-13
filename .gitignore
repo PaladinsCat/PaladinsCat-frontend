@@ -10,3 +10,5 @@
 /secrets/
 /local/
 *.log
+/test-results/
+/playwright-report/

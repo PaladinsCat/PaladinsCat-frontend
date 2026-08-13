@@ -13,6 +13,7 @@
     "test:search": "node --experimental-strip-types --test lib/search-state.test.ts",
     "test:items": "node --experimental-strip-types --test lib/active-items.test.ts",
     "test:oidc": "node --experimental-strip-types --test lib/oidc-security.test.ts",
+    "test:ui:auth": "playwright test test/auth-login-ui.spec.ts",
     "test:operations": "node --test lib/operations-security.test.mjs",
     "generate-types": "npx openapi-typescript http://localhost:3005/openapi.json -o lib/types.gen.ts",
     "sync-community-locales": "node scripts/sync-community-locales.mjs",
@@ -49,6 +50,7 @@
     "tw-animate-css": "^1.4.0"
   },
   "devDependencies": {
+    "@playwright/test": "1.62.1",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^22",
     "@types/react": "^19",
