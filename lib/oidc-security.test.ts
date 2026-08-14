@@ -139,7 +139,7 @@ test("PaladinsCat login entry points use native links into the server-side OIDC 
 });
 test("transitional OIDC cookie sessions can load account data and terminate centrally", () => {
   const apiClient = readFileSync(new URL("./api-client.ts", import.meta.url), "utf8");
-  assert.match(apiClient, /function accountAuthHeaders\(\)/);
+  assert.match(apiClient, /function accountAuthHeaders\(token: string \| null = getAuthToken\(\)\)/);
   assert.match(apiClient, /headers: accountAuthHeaders\(\)/);
   assert.match(apiClient, /reportPlayer[\s\S]*?headers: \{ "Content-Type": "application\/json", \.\.\.accountAuthHeaders\(\) \}/);
   const playerReportClient = apiClient.slice(apiClient.indexOf("export async function reportPlayer"), apiClient.indexOf("export type ClearablePlayerTag"));
@@ -153,6 +153,14 @@ test("transitional OIDC cookie sessions can load account data and terminate cent
   const tierLists = readFileSync(new URL("./tierlists-api.ts", import.meta.url), "utf8");
   assert.match(tierLists, /credentials: "same-origin"/);
   assert.match(tierLists, /X-CSRF-Token/);
+  const operations = readFileSync(new URL("./operations-api.ts", import.meta.url), "utf8");
+  assert.match(operations, /accountAuthHeaders\(\)/);
+  assert.match(tierLists, /accountAuthHeaders\(input\.token\)/);
+  assert.match(adminDashboard, /accountAuthHeaders\(\)/);
+  assert.equal(apiClient.match(/Authorization: `Bearer \$\{token\}`/g)?.length, 1);
+  for (const source of [adminDashboard, operations, tierLists]) {
+    assert.doesNotMatch(source, /Authorization\s*:\s*`Bearer \$\{/);
+  }
   assert.match(apiClient, /identityCutoverEnabled \|\| hasOidcCookieSession/);
   assert.match(apiClient, /form\.action = "\/api\/auth\/oidc\/logout"/);
 });

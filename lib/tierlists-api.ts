@@ -1,3 +1,6 @@
+import { accountAuthHeaders } from "./api-client";
+import { csrfHeader } from "./csrf";
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api";
 
 export type TierName = "S" | "A" | "B" | "C" | "D" | "F";
@@ -89,7 +92,7 @@ export async function createTierList(input: {
 }): Promise<{ postId: number }> {
   return requestJson<{ postId: number }>("/tierlists", {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${input.token}` },
+    headers: { "Content-Type": "application/json", ...accountAuthHeaders(input.token) },
     body: JSON.stringify({ title: input.title, description: input.description, entries: input.entries }),
   });
 }
@@ -102,8 +105,7 @@ export async function updateTierList(postId: number, input: {
 }): Promise<{ postId: number }> {
   return requestJson<{ postId: number }>(`/tierlists/${postId}`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${input.token}` },
+    headers: { "Content-Type": "application/json", ...accountAuthHeaders(input.token) },
     body: JSON.stringify({ title: input.title, description: input.description, entries: input.entries }),
   });
 }
-import { csrfHeader } from "./csrf";

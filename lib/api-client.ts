@@ -1322,7 +1322,7 @@ export async function fetchMyAltAccountRelations(playerId: string | number): Pro
   const token = getAuthToken();
   if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.authenticationRequired);
   const rows = await fetchJson<any[]>(`/players/${playerId}/alt-account-relations/mine`, {
-    headers: { Authorization: `Bearer ${token}` },
+    headers: accountAuthHeaders(token),
     cache: 'no-store',
   });
   return rows.map((row) => ({
@@ -1341,7 +1341,7 @@ export async function voteAltAccountRelation(playerId: string | number, otherPla
   if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.authenticationRequired);
   return fetchJson(`/players/${playerId}/alt-account-relations`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    headers: { 'Content-Type': 'application/json', ...accountAuthHeaders(token) },
     body: JSON.stringify({ otherPlayerId, otherRole }),
   });
 }
@@ -1351,7 +1351,7 @@ export async function clearMyAltAccountRelation(playerId: string | number, other
   if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.authenticationRequired);
   return fetchJson(`/players/${playerId}/alt-account-relations/${otherPlayerId}`, {
     method: 'DELETE',
-    headers: { Authorization: `Bearer ${token}` },
+    headers: accountAuthHeaders(token),
   });
 }
 
@@ -1740,7 +1740,7 @@ export async function fetchAccountSiteNotifications(params?: { limit?: number })
   const rows = await fetchJson<Array<{
     id: number; timestamp?: string; importance?: number | string; message: string; read_at?: string | null;
   }>>(`/auth/account/site-notifications?limit=${limit}`, {
-    headers: { Authorization: `Bearer ${token}` },
+    headers: accountAuthHeaders(token),
   });
   return rows.map(mapNotification);
 }
@@ -1750,7 +1750,7 @@ export async function markSiteNotificationRead(notificationId: number): Promise<
   if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.notAuthenticated);
   await fetchJson(`/auth/account/site-notifications/${notificationId}/read`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${token}` },
+    headers: accountAuthHeaders(token),
   });
 }
 
@@ -1759,7 +1759,7 @@ export async function markAllSiteNotificationsRead(): Promise<void> {
   if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.notAuthenticated);
   await fetchJson(`/auth/account/site-notifications/read-all`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${token}` },
+    headers: accountAuthHeaders(token),
   });
 }
 
@@ -1768,7 +1768,7 @@ export async function fetchAdminNotifications(): Promise<Notification[]> {
   if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.notAuthenticated);
   const raw = await fetchJson<any[]>(
     `/admin/notifications`,
-    { headers: { Authorization: `Bearer ${token}` } }
+    { headers: accountAuthHeaders(token) }
   );
   return raw.map(mapNotification);
 }
@@ -1778,7 +1778,7 @@ export async function createAdminNotification(input: NotificationInput): Promise
   if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.notAuthenticated);
   const raw = await fetchJson<any>(`/admin/notifications`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    headers: { "Content-Type": "application/json", ...accountAuthHeaders(token) },
     body: JSON.stringify(input),
   });
   return mapNotification(raw);
@@ -1789,7 +1789,7 @@ export async function updateAdminNotification(id: number, input: Partial<Notific
   if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.notAuthenticated);
   const raw = await fetchJson<any>(`/admin/notifications/${id}`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    headers: { "Content-Type": "application/json", ...accountAuthHeaders(token) },
     body: JSON.stringify(input),
   });
   return mapNotification(raw);
@@ -1800,7 +1800,7 @@ export async function deleteAdminNotification(id: number): Promise<void> {
   if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.notAuthenticated);
   await fetchJson<{ deleted: boolean; id: number }>(`/admin/notifications/${id}`, {
     method: "DELETE",
-    headers: { Authorization: `Bearer ${token}` },
+    headers: accountAuthHeaders(token),
   });
 }
 
@@ -1808,7 +1808,7 @@ export async function fetchAdminActivityBanner(): Promise<ActivityBanner> {
   const token = getAuthToken();
   if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.notAuthenticated);
   const raw = await fetchJson<any>(`/admin/activity-banner`, {
-    headers: { Authorization: `Bearer ${token}` },
+    headers: accountAuthHeaders(token),
     unwrapData: false,
   });
   return { enabled: Boolean(raw.enabled), message: String(raw.message ?? "") };
@@ -1819,7 +1819,7 @@ export async function updateAdminActivityBanner(input: ActivityBanner): Promise<
   if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.notAuthenticated);
   const raw = await fetchJson<any>(`/admin/activity-banner`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    headers: { "Content-Type": "application/json", ...accountAuthHeaders(token) },
     body: JSON.stringify(input),
     unwrapData: false,
   });
@@ -1859,7 +1859,7 @@ export async function fetchAdminChangelog(): Promise<ChangelogEntry[]> {
   const token = getAuthToken();
   if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.notAuthenticated);
   const raw = await fetchJson<any[]>('/admin/changelog', {
-    headers: { Authorization: `Bearer ${token}` },
+    headers: accountAuthHeaders(token),
   });
   return raw.map(mapChangelogEntry);
 }
@@ -1869,7 +1869,7 @@ export async function updateAdminChangelog(id: number, input: AdminChangelogInpu
   if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.notAuthenticated);
   const raw = await fetchJson<any>(`/admin/changelog/${id}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    headers: { 'Content-Type': 'application/json', ...accountAuthHeaders(token) },
     body: JSON.stringify(input),
   });
   return mapChangelogEntry(raw);
@@ -3602,7 +3602,7 @@ export async function logout(): Promise<void> {
       // zombie logged-in state. Local storage is cleared in finally below.
       await fetchJson<unknown>(`/auth/logout`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        headers: { "Content-Type": "application/json", ...accountAuthHeaders(token) },
         retries: 0,
       });
     }
@@ -3640,7 +3640,7 @@ export async function getMe(_userId?: number): Promise<AuthUser> {
     linked_player_id?: number | null;
     linked_player_name?: string | null;
   }>(`/auth/me`, {
-    headers: token ? { "Authorization": `Bearer ${token}` } : undefined,
+    headers: accountAuthHeaders(token),
   });
 
   return {
@@ -3691,8 +3691,7 @@ export async function getUserProfile(userId: number): Promise<AuthUser> {
 
 // ── Account Management ──
 
-function accountAuthHeaders(): Record<string, string> {
-  const token = getAuthToken();
+export function accountAuthHeaders(token: string | null = getAuthToken()): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
@@ -4029,7 +4028,7 @@ export async function fetchTwitchStreams(): Promise<TwitchStreamsResponse> {
 export async function createPost(userId: number, title: string, content: string, buildId: number | null, token: string | null): Promise<Post> {
   const raw = await fetchJson<RawPost>(`/community/posts`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+    headers: { "Content-Type": "application/json", ...accountAuthHeaders(token) },
     body: JSON.stringify({ title, content, build_id: buildId }),
   });
 
@@ -4051,7 +4050,7 @@ export async function getPostDetail(postId: number): Promise<PostDetail> {
 export async function updatePost(postId: number, title: string, content: string, token: string | null): Promise<Post> {
   const raw = await fetchJson<RawPost>(`/community/posts/${postId}`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+    headers: { "Content-Type": "application/json", ...accountAuthHeaders(token) },
     body: JSON.stringify({ title, content }),
   });
 
@@ -4061,14 +4060,14 @@ export async function updatePost(postId: number, title: string, content: string,
 export async function deletePost(postId: number, token: string | null): Promise<void> {
   await fetchJson<{ deleted: boolean; id: number }>(`/community/posts/${postId}`, {
     method: "DELETE",
-    headers: { "Authorization": `Bearer ${token}` },
+    headers: accountAuthHeaders(token),
   });
 }
 
 export async function addComment(postId: number, userId: number, content: string, parentId: number | null, token: string | null): Promise<Comment> {
   const raw = await fetchJson<RawComment>(`/community/posts/${postId}/comments`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+    headers: { "Content-Type": "application/json", ...accountAuthHeaders(token) },
     body: JSON.stringify({ content, parent_id: parentId }),
   });
 
@@ -4078,7 +4077,7 @@ export async function addComment(postId: number, userId: number, content: string
 export async function updateComment(commentId: number, content: string, token: string | null): Promise<Comment> {
   const raw = await fetchJson<RawComment>(`/community/comments/${commentId}`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+    headers: { "Content-Type": "application/json", ...accountAuthHeaders(token) },
     body: JSON.stringify({ content }),
   });
 
@@ -4088,14 +4087,14 @@ export async function updateComment(commentId: number, content: string, token: s
 export async function deleteComment(commentId: number, token: string | null): Promise<void> {
   await fetchJson<{ deleted: boolean; id: number }>(`/community/comments/${commentId}`, {
     method: "DELETE",
-    headers: { "Authorization": `Bearer ${token}` },
+    headers: accountAuthHeaders(token),
   });
 }
 
 export async function togglePostLike(postId: number, userId: number, token: string | null): Promise<number> {
   const raw = await fetchJson<{ likes: number }>(`/community/posts/${postId}/like`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+    headers: { "Content-Type": "application/json", ...accountAuthHeaders(token) },
     body: JSON.stringify({}),
   });
 
@@ -4211,7 +4210,7 @@ export async function createBuild(
   void userId;
   const raw = await fetchJson<RawBuild>(`/builds`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+    headers: { "Content-Type": "application/json", ...accountAuthHeaders(token) },
     body: JSON.stringify({
       champion_id: championId,
       name,
@@ -4236,7 +4235,7 @@ export async function toggleBuildLike(buildId: number, userId: number, token: st
   void userId;
   const raw = await fetchJson<{ likes: number }>(`/builds/${buildId}/like`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+    headers: { "Content-Type": "application/json", ...accountAuthHeaders(token) },
   });
 
   return raw.likes;

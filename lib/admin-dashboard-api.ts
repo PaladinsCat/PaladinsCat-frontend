@@ -1,4 +1,4 @@
-import { fetchJson, getAuthToken } from "./api-client";
+import { accountAuthHeaders, fetchJson } from "./api-client";
 
 export type AdminDailyTraffic = { date: string; visitors: number; pageViews: number; matches: number };
 export type AdminApiKey = {
@@ -42,9 +42,8 @@ export const ADMIN_ERROR_KEYS = {
 } as const;
 
 export async function fetchAdminDashboard(mode: "admin" | "developer" = "admin"): Promise<AdminDashboard> {
-  const token = getAuthToken();
   const response = await fetch(mode === "developer" ? "/api/developer/dashboard" : "/api/admin/dashboard", {
-    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    headers: accountAuthHeaders(),
     credentials: "same-origin",
     cache: "no-store",
   });
@@ -101,5 +100,5 @@ export async function fetchAdminDashboard(mode: "admin" | "developer" = "admin")
 }
 
 export type ManagedAccount = { id: number; username: string; email: string; role: "user" | "moderator" | "developer" | "admin" };
-export async function searchManagedAccounts(query: string): Promise<ManagedAccount[]> { const token=getAuthToken(); return fetchJson<ManagedAccount[]>(`/admin/accounts?q=${encodeURIComponent(query)}`,{headers:token?{Authorization:`Bearer ${token}`} : undefined}); }
-export async function updateManagedAccountRole(id:number,role:ManagedAccount["role"]):Promise<void>{const token=getAuthToken();await fetchJson(`/admin/accounts/${id}/role`,{method:"PUT",headers:{"Content-Type":"application/json",...(token?{Authorization:`Bearer ${token}`}:{})},body:JSON.stringify({role}),retries:0});}
+export async function searchManagedAccounts(query: string): Promise<ManagedAccount[]> { return fetchJson<ManagedAccount[]>(`/admin/accounts?q=${encodeURIComponent(query)}`,{headers:accountAuthHeaders()}); }
+export async function updateManagedAccountRole(id:number,role:ManagedAccount["role"]):Promise<void>{await fetchJson(`/admin/accounts/${id}/role`,{method:"PUT",headers:{"Content-Type":"application/json",...accountAuthHeaders()},body:JSON.stringify({role}),retries:0});}
