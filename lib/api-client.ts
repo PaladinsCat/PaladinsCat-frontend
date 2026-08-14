@@ -3852,7 +3852,7 @@ export async function reportPlayer(playerId: string | number, opts: ReportOption
   if (opts.reason?.trim()) body.reason = opts.reason.trim();
   const raw = await fetchJson<{ success: boolean; message: string }>(`/players/${playerId}/report`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+    headers: { "Content-Type": "application/json", ...accountAuthHeaders() },
     body: JSON.stringify(body),
   });
   return raw;
@@ -3868,7 +3868,7 @@ export async function reportPrivateAccount(privateId: string | number, opts: Rep
   if (opts.reason?.trim()) body.reason = opts.reason.trim();
   return fetchJson<{ success: boolean; message: string }>(`/player-ext/private/${privateId}/report`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    headers: { 'Content-Type': 'application/json', ...accountAuthHeaders() },
     body: JSON.stringify(body),
   });
 }
@@ -3880,7 +3880,7 @@ export async function clearPlayerTag(playerId: string | number, tag: ClearablePl
   if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.authenticationRequired);
   return fetchJson<{ success: boolean; message: string; cleared: boolean }>(`/players/${playerId}/clear-tag`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+    headers: { "Content-Type": "application/json", ...accountAuthHeaders() },
     body: JSON.stringify({ tag }),
   });
 }
