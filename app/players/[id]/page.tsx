@@ -21,6 +21,7 @@ import { fetchPlayerModeration } from "@/lib/player-moderation";
 import { useLocalization } from "@/lib/localization-context";
 import { estimateLiveTeamWinChance } from "@/lib/live-team-estimate";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
+import { csrfHeader } from "@/lib/csrf";
 
 
 interface PlayerData {
@@ -383,7 +384,12 @@ export default function PlayerProfilePage() {
     setRefreshing(true);
     setRefreshFeedback(null);
     try {
-      const res = await fetch(`${API_BASE}/players/${id}/refresh`, { method: 'POST' });
+      const csrf = csrfHeader(document.cookie, 'POST');
+      const res = await fetch(`${API_BASE}/players/${id}/refresh`, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: csrf ? { 'X-CSRF-Token': csrf } : undefined,
+      });
       let data: PlayerRefreshActionResponse;
       const responseBody = await res.text();
       try {

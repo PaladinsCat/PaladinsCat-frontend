@@ -58,6 +58,12 @@ test("cookie-auth CSRF header is required only for unsafe requests", () => {
   assert.equal(csrfHeader("other=value", "POST"), null);
   assert.equal(csrfHeader("__Host-pc_csrf=csrf-value", "GET"), null);
 });
+test("player refresh forwards the cookie-auth CSRF token", () => {
+  const source = readFileSync(new URL("../app/players/[id]/page.tsx", import.meta.url), "utf8");
+  assert.match(source, /csrfHeader\(document\.cookie, 'POST'\)/);
+  assert.match(source, /'X-CSRF-Token': csrf/);
+  assert.match(source, /credentials: 'same-origin'/);
+});
 test("BFF credential is server-only and never a public environment value", () => {
   const source = readFileSync(new URL("./oidc-bff-service.ts", import.meta.url), "utf8");
   assert.match(source, /import "server-only"/);
