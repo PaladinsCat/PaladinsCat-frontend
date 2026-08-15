@@ -13,6 +13,7 @@
     "test:search": "node --experimental-strip-types --test lib/search-state.test.ts",
     "test:items": "node --experimental-strip-types --test lib/active-items.test.ts",
     "test:oidc": "node --experimental-strip-types --test lib/oidc-security.test.ts",
+    "test:public-v1": "node --experimental-strip-types --test lib/public-v1.test.ts",
     "test:ui:auth": "playwright test test/auth-login-ui.spec.ts",
     "test:operations": "node --test lib/operations-security.test.mjs",
     "generate-types": "npx openapi-typescript http://localhost:3005/openapi.json -o lib/types.gen.ts",
