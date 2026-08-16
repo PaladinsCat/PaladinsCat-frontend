@@ -52,11 +52,12 @@ export type SearchAction =
   | { type: "remote-error"; error: string };
 
 export function createInitialSearchState(initialQuery: string): SearchState {
+  const hasInitialQuery = initialQuery.trim().length > 0;
   return {
     query: initialQuery,
     results: [],
-    loading: false,
-    searched: initialQuery.trim().length > 0,
+    loading: hasInitialQuery,
+    searched: hasInitialQuery,
     error: null,
     remoteLoadingTarget: null,
     remoteNotice: null,
@@ -70,6 +71,7 @@ export function searchReducer(state: SearchState, action: SearchAction): SearchS
       return {
         ...state,
         query: action.query,
+        loading: action.query.trim().length > 0,
         error: null,
         remoteNotice: null,
         generation: state.generation + 1,

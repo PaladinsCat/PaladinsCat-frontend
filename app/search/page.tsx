@@ -368,7 +368,7 @@ function SearchPageBody() {
 
   const runRemoteLookup = async (target: UniversalSearchRemoteTarget) => {
     const q = state.query.trim();
-    if (!q || state.remoteLoadingTarget) return;
+    if (!q || state.loading || state.remoteLoadingTarget) return;
 
     dispatch({ type: "remote-start", target });
     try {
@@ -485,7 +485,7 @@ function SearchPageBody() {
               key={action.target}
               type="button"
               onClick={() => runRemoteLookup(action.target)}
-              disabled={state.remoteLoadingTarget !== null}
+              disabled={state.loading || state.remoteLoadingTarget !== null}
               loading={state.remoteLoadingTarget === action.target}
               className="px-3 py-1.5 rounded-md border border-pc-accent/30 bg-pc-accent/10 text-xs font-semibold text-pc-accent hover:bg-pc-accent/15 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >

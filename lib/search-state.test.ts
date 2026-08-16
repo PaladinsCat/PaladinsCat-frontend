@@ -14,6 +14,18 @@ function playerResult(title: string): UniversalSearchResult {
   };
 }
 
+test("a URL-seeded match lookup stays pending until automatic search settles", () => {
+  const initial = createInitialSearchState("1281483173");
+  assert.equal(initial.loading, true);
+  assert.equal(initial.searched, true);
+
+  const typed = searchReducer(createInitialSearchState(""), {
+    type: "set-query",
+    query: "1281483173",
+  });
+  assert.equal(typed.loading, true);
+});
+
 test("test → clear → apple keeps apple in the input and shows only Apple results", () => {
   let state = createInitialSearchState("");
 
