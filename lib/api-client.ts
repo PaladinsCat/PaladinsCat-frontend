@@ -4423,6 +4423,10 @@ export interface MatchData {
   entry_datetime: string;
   map: string;
   queue_id: number;
+  queue_name?: string | null;
+  stats_scope?: string | null;
+  participant_model?: string | null;
+  is_custom?: boolean;
   duration_seconds: number;
   region: string;
   team1_score: number | null;

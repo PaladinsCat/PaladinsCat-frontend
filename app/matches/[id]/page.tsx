@@ -268,7 +268,7 @@ export default function MatchDetailPage() {
 
   /* ── Derived data ── */
 
-  const queueLabel = match ? getQueueLabel(match.match.queue_id) : "";
+  const queueLabel = match ? getQueueLabel(match.match.queue_id, match.match.queue_name) : "";
 
   // Keep task-force ordering stable throughout the header, matchup, metrics, and builds.
   // The winner flags provide the visual emphasis without swapping the score columns.

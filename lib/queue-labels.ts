@@ -17,6 +17,7 @@ const QUEUE_LABELS: Record<number, string> = {
   486: "Ranked Siege",
 };
 
-export function getQueueLabel(queueId: number): string {
-  return QUEUE_LABELS[queueId] ?? `Queue #${queueId}`;
+export function getQueueLabel(queueId: number, queueName?: string | null): string {
+  const storedName = queueName?.trim();
+  return storedName || QUEUE_LABELS[queueId] || `Queue #${queueId}`;
 }
