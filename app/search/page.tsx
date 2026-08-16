@@ -272,7 +272,9 @@ const SearchResultGroups = memo(function SearchResultGroups({
                       {result.title}
                     </span>
                     <span className={`shrink-0 text-xs px-1.5 py-0.5 rounded-full border ${TYPE_STYLE[result.type]}`}>
-                      {TYPE_LABEL[result.type]}
+                      {result.type === "match" && result.meta?.isCustom === true
+                        ? "Custom"
+                        : TYPE_LABEL[result.type]}
                     </span>
                   </div>
                   <p className="truncate text-xs text-pc-text-muted mt-1">
