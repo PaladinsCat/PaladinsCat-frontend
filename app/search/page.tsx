@@ -307,7 +307,9 @@ function SearchPageBody() {
   // Initialize the input from ?q= exactly once. useSearchParams can be empty on
   // the first render and populate after hydration, so wait for a non-empty
   // value — but never re-sync the URL back into the input afterwards.
-  const initializedRef = useRef(false);
+  // A query already available on the first render initialized the reducer;
+  // do not dispatch the same query again and invalidate its in-flight result.
+  const initializedRef = useRef(Boolean(initialQuery));
   useEffect(() => {
     if (initializedRef.current) return;
     if (!initialQuery) return;
