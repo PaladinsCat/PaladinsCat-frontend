@@ -111,8 +111,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className="min-h-screen bg-pc-bg text-pc-text flex flex-col">
         <CoreUiDragGuard />
         <ImageAssetFallback />
+        {/* suppressHydrationWarning: the per-request CSP nonce is injected into
+            the server-rendered script but absent from the client hydration tree
+            (browsers strip it after execution) — a known Next.js dev-mode
+            mismatch (vercel/next.js#77952). Only the nonce attr differs. */}
         <script
                   nonce={nonce}
+                  suppressHydrationWarning
                   type="application/ld+json"
                   dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
                 />

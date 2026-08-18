@@ -14,8 +14,11 @@ import { NextRequest, NextResponse } from "next/server";
  *
  * style-src keeps `'unsafe-inline'` because Next.js + Tailwind rely on inline
  * <style> injection; removing it breaks the app rather than hardening it.
+ *
+ * NOTE: This file was `middleware.ts` until the Next.js 16 rename to the
+ * `proxy` file convention (https://nextjs.org/docs/messages/middleware-to-proxy).
  */
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const nonce = crypto.randomUUID().replaceAll("-", "");
 
   const csp = [
