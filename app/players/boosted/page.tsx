@@ -6,7 +6,7 @@ import { Search } from "lucide-react";
 import { fetchBoostedPlayerDetail, fetchBoostedPlayers, fetchCheaterPlayers, type BoostedPlayer } from "@/lib/api-client";
 import { LoadingPanel } from "@/components/async-state";
 import PlayerName from "@/components/player-name";
-import PlayerDirectoryGrid from "@/components/player-directory-grid";
+import PlayerDirectoryGrid, { PLAYER_DIRECTORY_CARD_CLASS } from "@/components/player-directory-grid";
 import { useLocalization } from "@/lib/localization-context";
 
 const FETCH_PAGE_SIZE = 100;
@@ -117,7 +117,7 @@ export default function BoostedPlayersPage() {
           {(player) => (
             <Link
               href={`/players/boosted/${player.id}`}
-              className="group flex h-full min-h-24 flex-col gap-3 rounded-xl border border-orange-400/20 bg-pc-bg-elevated p-4 transition-colors hover:border-orange-400/40 hover:bg-orange-400/[0.04]"
+              className={`${PLAYER_DIRECTORY_CARD_CLASS} group flex-col justify-center gap-1 border-orange-400/20 hover:border-orange-400/40 hover:bg-orange-400/[0.04]`}
             >
               <div className="min-w-0">
                 <div className="truncate text-sm font-semibold text-pc-text transition-colors group-hover:text-pc-accent">
@@ -126,13 +126,14 @@ export default function BoostedPlayersPage() {
               </div>
 
               <div className="min-w-0">
-                <ul className="flex flex-wrap gap-1.5">
-                  {player.cheaters.map((cheater) => (
-                    <li key={cheater.id} className="max-w-full rounded-md border border-red-500/20 bg-[var(--pc-bg-secondary)] px-2 py-1 text-xs leading-relaxed text-red-200 [overflow-wrap:anywhere]">
+                <ul className="flex min-w-0 items-center gap-1.5 overflow-hidden" title={player.cheaters.map((cheater) => `${cheater.name} · ${formatNumber(cheater.matchCount)}`).join(", ")}>
+                  {player.cheaters.slice(0, 1).map((cheater) => (
+                    <li key={cheater.id} className="min-w-0 flex-1 truncate rounded-md border border-red-500/20 bg-[var(--pc-bg-secondary)] px-2 py-0.5 text-xs leading-tight text-red-200">
                       <span className="font-semibold">{cheater.name}</span>
                       <span className="ml-1 text-red-200/70">· {formatNumber(cheater.matchCount)}</span>
                     </li>
                   ))}
+                  {player.cheaters.length > 1 && <li className="shrink-0 text-xs font-semibold text-red-200/70">+{formatNumber(player.cheaters.length - 1)}</li>}
                 </ul>
               </div>
             </Link>

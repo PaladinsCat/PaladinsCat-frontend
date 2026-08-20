@@ -6,7 +6,7 @@ import { Search } from "lucide-react";
 import { fetchCheaterPlayers, fetchPrivateAccountsDirectory, type CheaterPlayer, type PrivateAccountSummary } from "@/lib/api-client";
 import { LoadingPanel } from "@/components/async-state";
 import PlayerName from "@/components/player-name";
-import PlayerDirectoryGrid from "@/components/player-directory-grid";
+import PlayerDirectoryGrid, { PLAYER_DIRECTORY_CARD_CLASS } from "@/components/player-directory-grid";
 import { useLocalization } from "@/lib/localization-context";
 import { hasPlayerTag } from "@/lib/player-tag-threshold";
 
@@ -133,7 +133,7 @@ export default function SuspiciousPage() {
             return (
             <Link
               href={isPrivate ? `/players/private-accounts/${entry.account.id}` : `/players/${entry.player.id}`}
-              className="flex h-full min-h-24 flex-col gap-2 rounded-xl border border-amber-500/20 bg-pc-bg-elevated p-3 transition-colors hover:border-amber-400/40 hover:bg-amber-500/[0.04]"
+              className={`${PLAYER_DIRECTORY_CARD_CLASS} flex-col justify-center gap-1 border-amber-500/20 hover:border-amber-400/40 hover:bg-amber-500/[0.04]`}
             >
               <div className="flex min-w-0 items-start justify-between gap-2">
                 <div className="min-w-0 truncate text-sm font-semibold text-pc-text">
@@ -147,16 +147,17 @@ export default function SuspiciousPage() {
               </div>
               <div className="min-w-0">
                 {reasons.length > 0 ? (
-                  <ul className="flex min-w-0 flex-wrap gap-1.5">
-                    {reasons.map((reason) => (
+                  <ul className="flex min-w-0 items-center gap-1.5 overflow-hidden" title={reasons.map((reason) => reason.reason).join(", ")}>
+                    {reasons.slice(0, 1).map((reason) => (
                       <li
                         key={reason.reason}
-                        className="max-w-full break-words rounded-md border border-pc-border bg-pc-bg px-2 py-1 text-xs leading-relaxed text-pc-text-secondary [overflow-wrap:anywhere]"
+                        className="min-w-0 flex-1 truncate rounded-md border border-pc-border bg-pc-bg px-2 py-0.5 text-xs leading-tight text-pc-text-secondary"
                       >
                         {reason.reason}
                         {reason.count > 1 && <span className="ml-1 text-pc-text-muted">×{reason.count}</span>}
                       </li>
                     ))}
+                    {reasons.length > 1 && <li className="shrink-0 text-xs font-semibold text-pc-text-muted">+{formatNumber(reasons.length - 1)}</li>}
                   </ul>
                 ) : (
                   <span className="text-xs text-pc-text-muted">{t("generated.players.noReasonRecorded")}</span>

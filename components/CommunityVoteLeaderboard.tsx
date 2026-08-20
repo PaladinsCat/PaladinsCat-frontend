@@ -5,7 +5,7 @@ import Link from "next/link";
 import { fetchCheaterPlayers, type CheaterPlayer } from "@/lib/api-client";
 import { LoadingPanel } from "@/components/async-state";
 import PlayerName from "@/components/player-name";
-import PlayerDirectoryGrid from "@/components/player-directory-grid";
+import PlayerDirectoryGrid, { PLAYER_DIRECTORY_CARD_CLASS } from "@/components/player-directory-grid";
 import { useLocalization } from "@/lib/localization-context";
 
 type VoteKind = "weirdo" | "hall_of_fame";
@@ -66,7 +66,7 @@ export default function CommunityVoteLeaderboard({ kind }: { kind: VoteKind }) {
           {(player, index) => (
             <Link
               href={`/players/${player.id}`}
-              className="flex h-full min-h-20 items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-4 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary"
+              className={`${PLAYER_DIRECTORY_CARD_CLASS} items-center gap-3 border-pc-border hover:border-pc-accent-mid hover:bg-pc-bg-secondary`}
             >
               <span className="w-6 text-xs text-pc-text-muted">{index + 1}</span>
               <span className="flex-1 min-w-0 text-sm font-medium text-pc-text truncate"><PlayerName playerId={player.id} cheater={player.cheater} susCount={player.susCount}>{player.name}</PlayerName></span>

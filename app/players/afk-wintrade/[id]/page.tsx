@@ -72,7 +72,7 @@ export default function AutomaticAfkPlayerDetailPage() {
       </header>
 
       <section className="grid grid-cols-2 overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated sm:grid-cols-4 sm:divide-x sm:divide-pc-border">
-        <div className="border-b border-pc-border p-4 sm:border-b-0"><div className="text-xs text-pc-text-muted">{t("moderation.flaggedMatches")}</div><div className="mt-1 text-xl font-semibold text-pc-text">{formatNumber(player.automaticMatchCount)}</div></div>
+        <div className="border-b border-pc-border p-4 sm:border-b-0"><div className="text-xs text-pc-text-muted">{t("common.playerChampions.sortMatches")}</div><div className="mt-1 text-xl font-semibold text-pc-text">{formatNumber(player.automaticMatchCount)}</div></div>
         <div className="border-b border-l border-pc-border p-4 sm:border-b-0 sm:border-l-0"><div className="text-xs text-pc-text-muted">{t("moderation.lowestEcpm")}</div><div className="mt-1 text-xl font-semibold text-red-300">{formatNumber(player.lowestEcpm, { maximumFractionDigits: 2 })}</div></div>
         <div className="p-4"><div className="text-xs text-pc-text-muted">{t("generated.players.firstObserved")}</div><div className="mt-1 text-sm font-semibold text-pc-text">{formatDateTime(player.firstSeen)}</div></div>
         <div className="border-l border-pc-border p-4 sm:border-l-0"><div className="text-xs text-pc-text-muted">{t("generated.players.lastObserved")}</div><div className="mt-1 text-sm font-semibold text-pc-text">{formatDateTime(player.lastSeen)}</div></div>

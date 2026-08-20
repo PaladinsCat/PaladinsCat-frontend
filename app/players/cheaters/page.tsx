@@ -11,7 +11,7 @@ import {
 } from "@/lib/api-client";
 import { LoadingPanel } from "@/components/async-state";
 import PlayerName from "@/components/player-name";
-import PlayerDirectoryGrid from "@/components/player-directory-grid";
+import PlayerDirectoryGrid, { PLAYER_DIRECTORY_CARD_CLASS } from "@/components/player-directory-grid";
 import { getCoreCheaterReason } from "@/lib/cheater-reasons";
 import { useLocalization } from "@/lib/localization-context";
 
@@ -131,7 +131,7 @@ export default function CheatersPage() {
             return (
               <Link
                 href={isPrivate ? `/players/private-accounts/${entry.account.id}` : `/players/${entry.player.id}`}
-                className="flex h-full min-h-24 flex-col gap-2 rounded-xl border border-red-500/20 bg-pc-bg-elevated p-3 transition-colors hover:border-red-400/40 hover:bg-red-500/[0.04]"
+                className={`${PLAYER_DIRECTORY_CARD_CLASS} flex-col justify-center gap-1 border-red-500/20 hover:border-red-400/40 hover:bg-red-500/[0.04]`}
               >
                 <div className="min-w-0 truncate text-sm font-semibold text-pc-text">
                   {isPrivate ? (
@@ -142,7 +142,7 @@ export default function CheatersPage() {
                 </div>
                 <div className="min-w-0">
                   {reason ? (
-                    <span className="inline-block max-w-full break-words rounded-md border border-pc-border bg-pc-bg px-2 py-1 text-xs leading-relaxed text-pc-text-secondary [overflow-wrap:anywhere]">{reason}</span>
+                    <span className="block max-w-full truncate rounded-md border border-pc-border bg-pc-bg px-2 py-0.5 text-xs leading-tight text-pc-text-secondary" title={reason}>{reason}</span>
                   ) : (
                     <span className="text-xs text-pc-text-muted">{t("generated.players.noReasonRecorded")}</span>
                   )}

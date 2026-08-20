@@ -11,7 +11,7 @@ import {
 } from "@/lib/api-client";
 import { LoadingPanel } from "@/components/async-state";
 import PlayerName from "@/components/player-name";
-import PlayerDirectoryGrid from "@/components/player-directory-grid";
+import PlayerDirectoryGrid, { PLAYER_DIRECTORY_CARD_CLASS } from "@/components/player-directory-grid";
 import PlayerDirectoryPagination, { usePersistentDirectoryPage } from "@/components/player-directory-pagination";
 import { useLocalization } from "@/lib/localization-context";
 import type { TranslationKey } from "@/lib/localization/messages";
@@ -126,10 +126,9 @@ export default function PlayerModerationDirectory({
     <PlayerDirectoryGrid items={players} getKey={(player) => player.id} loading={communityLoading}>
       {(player) => {
         const voteCount = communityVoteCount(player, filter);
-        return <Link href={`/players/${player.id}`} className={`flex min-h-24 h-full flex-col gap-2 rounded-xl border bg-pc-bg-elevated p-3 transition-colors hover:border-pc-accent-mid ${borderClass}`}>
-          <div className="flex min-w-0 items-start justify-between gap-2">
-            <div className="min-w-0 truncate text-sm font-semibold text-pc-text">
-              <PlayerName
+        return <Link href={`/players/${player.id}`} className={`${PLAYER_DIRECTORY_CARD_CLASS} items-center justify-between gap-2 hover:border-pc-accent-mid ${borderClass}`}>
+          <div className="min-w-0 truncate text-sm font-semibold text-pc-text">
+            <PlayerName
                 playerId={player.id}
                 cheater={player.cheater}
                 susCount={player.susCount}
@@ -142,12 +141,11 @@ export default function PlayerModerationDirectory({
                 altAccountVoteCount={player.altAccountVoteCount}
               >
                 {player.name}
-              </PlayerName>
-            </div>
-            <span className={`w-fit shrink-0 rounded-full border px-2 py-1 text-xs font-semibold ${voteClass}`}>
-              {formatNumber(voteCount)} {voteCount === 1 ? t("moderation.suspiciousVote") : t("moderation.suspiciousVotes")}
-            </span>
+            </PlayerName>
           </div>
+          <span className={`w-fit shrink-0 rounded-full border px-2 py-1 text-xs font-semibold ${voteClass}`}>
+            {formatNumber(voteCount)} {voteCount === 1 ? t("moderation.suspiciousVote") : t("moderation.suspiciousVotes")}
+          </span>
         </Link>;
       }}
     </PlayerDirectoryGrid>
@@ -194,9 +192,9 @@ export default function PlayerModerationDirectory({
 
       {showAutomaticAfk && <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-pc-text-muted">
         <span className="font-semibold text-pc-text-secondary">{t("moderation.afkBadgeLegend")}</span>
-        <span className="flex items-center gap-1.5"><span className="rounded border border-red-400/30 bg-red-400/10 px-1.5 py-0.5 font-bold leading-none text-red-300">{t("moderation.afkShort")}</span>{t("moderation.afkAutomaticOnly")}</span>
-        <span className="flex items-center gap-1.5"><span className="rounded border border-sky-400/30 bg-sky-400/10 px-1.5 py-0.5 font-bold leading-none text-sky-300">{t("moderation.afkShort")}</span>{t("moderation.afkCommunityOnly")}</span>
-        <span className="flex items-center gap-1.5"><span className="rounded border border-red-400/30 bg-red-400/10 px-1.5 py-0.5 font-bold leading-none text-sky-300">{t("moderation.afkShort")}</span>{t("moderation.afkAutomaticCommunity")}</span>
+        <span className="flex items-center gap-1.5"><span className="rounded border border-red-400/50 bg-[var(--pc-bg-secondary)] px-1.5 py-0.5 font-bold leading-none text-red-300">{t("moderation.afkShort")}</span>{t("moderation.afkAutomaticOnly")}</span>
+        <span className="flex items-center gap-1.5"><span className="rounded border border-sky-400/50 bg-[var(--pc-bg-secondary)] px-1.5 py-0.5 font-bold leading-none text-sky-300">{t("moderation.afkShort")}</span>{t("moderation.afkCommunityOnly")}</span>
+        <span className="flex items-center gap-1.5"><span className="rounded border border-red-400/50 bg-[var(--pc-bg-secondary)] px-1.5 py-0.5 font-bold leading-none text-sky-300">{t("moderation.afkShort")}</span>{t("moderation.afkAutomaticCommunity")}</span>
       </div>}
 
       {initialLoading ? (
@@ -215,10 +213,13 @@ export default function PlayerModerationDirectory({
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {automaticPlayers.map((player) => (
                     <div key={player.id} className="min-w-0">
-                      <Link href={`/players/afk-wintrade/${player.id}`} className="group flex h-full min-h-14 items-center rounded-xl border border-red-400/20 bg-pc-bg-elevated p-3 transition-colors hover:border-red-400/40 hover:bg-red-400/[0.04]">
+                      <Link href={`/players/afk-wintrade/${player.id}`} className={`${PLAYER_DIRECTORY_CARD_CLASS} group items-center justify-between gap-2 border-red-400/20 hover:border-red-400/40 hover:bg-red-400/[0.04]`}>
                         <div className="min-w-0 truncate text-sm font-semibold text-pc-text transition-colors group-hover:text-pc-accent">
                           <PlayerName playerId={player.id} cheater={player.cheater} susCount={player.susCount} dropper={player.dropper} dropperVoteCount={player.dropperVoteCount} afkWintrade={player.afkWintrade} afkWintradeVoteCount={player.afkWintradeVoteCount} automaticAfk={hasPlayerTag(player.automaticMatchCount)} automaticAfkCount={player.automaticMatchCount} boosted={player.boosted} altAccount={player.altAccount}>{player.name}</PlayerName>
                         </div>
+                        <span className="w-fit shrink-0 rounded-full border border-red-400/30 bg-red-400/15 px-2 py-1 text-xs font-semibold text-red-100">
+                          {formatNumber(player.automaticMatchCount)} {t("generated.players.matches.9f3e924")}
+                        </span>
                       </Link>
                     </div>
                   ))}

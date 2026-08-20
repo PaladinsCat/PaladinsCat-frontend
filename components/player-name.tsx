@@ -28,6 +28,16 @@ const EMPTY_MODERATION: PlayerModeration = {
   verified: false,
 };
 
+const PLAYER_TAG_CLASS = "player-status-tag shrink-0 rounded bg-[var(--pc-bg-secondary)] px-1.5 py-0.5 text-[10px] font-bold leading-none";
+const AUTOMATIC_TAG_ACCENT: Record<NonNullable<PlayerModerationTagProps["automaticTag"]>, string> = {
+  TANK: "text-sky-300",
+  SUP: "text-emerald-300",
+  DPS: "text-orange-300",
+  FLANK: "text-violet-300",
+  NOOB: "text-amber-300",
+  CARRY: "text-cyan-300",
+};
+
 export function VerifiedPlayerBadge({ className = "", iconClassName = "h-3.5 w-3.5" }: { className?: string; iconClassName?: string }) {
   const { t } = useLocalization();
   return (
@@ -134,16 +144,16 @@ export function PlayerModerationTag({
 
   return <span className="inline-flex max-h-10 min-w-0 flex-wrap items-center gap-1 overflow-hidden">
     {moderation.verified && <VerifiedPlayerBadge />}
-    {moderation.cheater && <span className="player-status-tag cheater shrink-0 rounded bg-[var(--pc-bg-secondary)] px-1.5 py-0.5 text-[10px] font-bold leading-none text-red-400" aria-label={t("generated.players.confirmedCheater")}>{t("generated.players.cheater")}</span>}
+    {moderation.cheater && <span className={`${PLAYER_TAG_CLASS} cheater text-red-400`} aria-label={t("generated.players.confirmedCheater")}>{t("generated.players.cheater")}</span>}
     {!moderation.cheater && <>
-      {moderation.dropper && hasPlayerTag(moderation.dropperVoteCount) && <span className="player-status-tag dropper shrink-0 rounded bg-[var(--pc-bg-secondary)] px-1.5 py-0.5 text-[10px] font-bold leading-none text-rose-300">{t("moderation.dropShort")}</span>}
-      {hasPlayerTag(moderation.susCount) && <span className="player-status-tag suspicious shrink-0 rounded bg-[var(--pc-bg-secondary)] px-1.5 py-0.5 text-[10px] font-bold leading-none text-amber-400" aria-label={t("generated.players.suspiciousPlayerWithValue1Flags", { value1: moderation.susCount })}>{t("generated.players.sus")}</span>}
-      {(communityAfk || automaticAfkTagged) && <span className={`player-status-tag afk shrink-0 rounded border px-1.5 py-0.5 text-[10px] font-bold leading-none ${automaticAfkTagged ? communityAfk ? "border-red-400/30 bg-red-400/10 text-sky-300" : "border-red-400/30 bg-red-400/10 text-red-300" : "border-sky-400/30 bg-sky-400/10 text-sky-300"}`}>{t("moderation.afkShort")}</span>}
-      {(wallShooter || hasPlayerTag(moderation.wallShooterCount)) && <span className="player-status-tag wall-shooter shrink-0 rounded border border-cyan-400/30 bg-cyan-400/10 px-1.5 py-0.5 text-[10px] font-bold leading-none text-cyan-200">{t("moderation.wallShort")}</span>}
-      {(masterFeeding || hasPlayerTag(moderation.masterFeedingCount)) && <span className="player-status-tag master-feeding shrink-0 rounded border border-rose-400/30 bg-rose-400/10 px-1.5 py-0.5 text-[10px] font-bold leading-none text-rose-200">{t("moderation.feedShort")}</span>}
-      {automaticTags.map((tag) => <span key={tag} className="player-status-tag performance-diff shrink-0 rounded border border-indigo-400/30 bg-indigo-400/10 px-1.5 py-0.5 text-[10px] font-bold leading-none text-indigo-100">{tag}</span>)}
-      {moderation.boosted && hasPlayerTag(moderation.boostedMatchCount) && <span className="player-status-tag boosted shrink-0 rounded bg-[var(--pc-bg-secondary)] px-1.5 py-0.5 text-[10px] font-bold leading-none text-orange-300">{t("moderation.boostedShort")}</span>}
-      {moderation.altAccount && hasPlayerTag(moderation.altAccountVoteCount) && <span className="player-status-tag alt shrink-0 rounded bg-[var(--pc-bg-secondary)] px-1.5 py-0.5 text-[10px] font-bold leading-none text-violet-300">{t("moderation.altShort")}</span>}
+      {moderation.dropper && hasPlayerTag(moderation.dropperVoteCount) && <span className={`${PLAYER_TAG_CLASS} dropper text-rose-300`}>{t("moderation.dropShort")}</span>}
+      {hasPlayerTag(moderation.susCount) && <span className={`${PLAYER_TAG_CLASS} suspicious text-amber-400`} aria-label={t("generated.players.suspiciousPlayerWithValue1Flags", { value1: moderation.susCount })}>{t("generated.players.sus")}</span>}
+      {(communityAfk || automaticAfkTagged) && <span className={`${PLAYER_TAG_CLASS} afk border ${automaticAfkTagged ? communityAfk ? "border-red-400/50 text-sky-300" : "border-red-400/50 text-red-300" : "border-sky-400/50 text-sky-300"}`}>{t("moderation.afkShort")}</span>}
+      {(wallShooter || hasPlayerTag(moderation.wallShooterCount)) && <span className={`${PLAYER_TAG_CLASS} wall-shooter text-cyan-300`}>{t("moderation.wallShort")}</span>}
+      {(masterFeeding || hasPlayerTag(moderation.masterFeedingCount)) && <span className={`${PLAYER_TAG_CLASS} master-feeding text-rose-300`}>{t("moderation.feedShort")}</span>}
+      {automaticTags.map((tag) => <span key={tag} className={`${PLAYER_TAG_CLASS} performance-diff ${AUTOMATIC_TAG_ACCENT[tag]}`}>{tag}</span>)}
+      {moderation.boosted && hasPlayerTag(moderation.boostedMatchCount) && <span className={`${PLAYER_TAG_CLASS} boosted text-orange-300`}>{t("moderation.boostedShort")}</span>}
+      {moderation.altAccount && hasPlayerTag(moderation.altAccountVoteCount) && <span className={`${PLAYER_TAG_CLASS} alt text-violet-300`}>{t("moderation.altShort")}</span>}
     </>}
   </span>;
 }

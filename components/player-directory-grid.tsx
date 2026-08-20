@@ -4,6 +4,7 @@ import { useEffect, useMemo, type ReactNode } from "react";
 import PlayerDirectoryPagination, { usePersistentDirectoryPage } from "@/components/player-directory-pagination";
 
 const PLAYER_DIRECTORY_PAGE_SIZE = 32;
+export const PLAYER_DIRECTORY_CARD_CLASS = "flex h-16 min-h-16 min-w-0 overflow-hidden rounded-xl border bg-pc-bg-elevated px-3 py-2 transition-colors";
 
 export default function PlayerDirectoryGrid<T>({
   items,
@@ -32,7 +33,7 @@ export default function PlayerDirectoryGrid<T>({
     if (page > totalPages) {
       setPage(totalPages);
     }
-  }, [page, totalPages]);
+  }, [page, setPage, totalPages]);
 
   return (
     <div className="space-y-4">
