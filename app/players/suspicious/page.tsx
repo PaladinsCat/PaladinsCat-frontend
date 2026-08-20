@@ -8,10 +8,10 @@ import { LoadingPanel } from "@/components/async-state";
 import PlayerName from "@/components/player-name";
 import PlayerDirectoryGrid from "@/components/player-directory-grid";
 import { useLocalization } from "@/lib/localization-context";
+import { hasPlayerTag } from "@/lib/player-tag-threshold";
 
 const FETCH_PAGE_SIZE = 100;
 const DISPLAY_PAGE_SIZE = 32;
-const SUSPICIOUS_TAG_MINIMUM_FLAGS = 5;
 
 async function fetchAllSuspiciousPlayers(name: string): Promise<CheaterPlayer[]> {
   const players: CheaterPlayer[] = [];
@@ -128,7 +128,7 @@ export default function SuspiciousPage() {
           {(entry) => {
             const isPrivate = entry.kind === "private";
             const susCount = isPrivate ? entry.account.susCount : entry.player.susCount;
-            const visibleSusCount = susCount >= SUSPICIOUS_TAG_MINIMUM_FLAGS ? susCount : 0;
+            const visibleSusCount = hasPlayerTag(susCount) ? susCount : 0;
             const reasons = isPrivate ? entry.account.topReasons : entry.player.topReasons;
             return (
             <Link

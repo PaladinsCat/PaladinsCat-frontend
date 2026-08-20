@@ -9,9 +9,9 @@ import PlayerName from "@/components/player-name";
 import { fetchPerformanceDiffPlayers, type AutomaticPerformanceDiffPlayer, type PerformanceDiffMetric } from "@/lib/api-client";
 import { useLocalization } from "@/lib/localization-context";
 import type { TranslationKey } from "@/lib/localization/messages";
+import { hasPlayerTag } from "@/lib/player-tag-threshold";
 
 const PAGE_SIZE = 32;
-const TAG_MINIMUM_FLAGS = 5;
 
 type MetricConfig = {
   titleKey: TranslationKey;
@@ -158,7 +158,7 @@ export default function PerformanceDiffDirectory({ metric }: { metric: Performan
               <Link key={player.id} href={`/players/${player.id}`} className={`flex min-h-24 h-full flex-col gap-2 rounded-xl border bg-pc-bg-elevated p-3 transition-colors ${config.cardClass}`}>
                 <div className="flex min-w-0 items-start justify-between gap-2">
                   <div className="min-w-0 truncate text-sm font-semibold text-pc-text">
-                    <PlayerName playerId={player.id} cheater={player.cheater} susCount={player.susCount} dropper={player.dropper && Number(player.dropperVoteCount ?? 0) >= 5} afkWintrade={player.afkWintrade && Number(player.afkWintradeVoteCount ?? 0) >= 5} automaticTag={player.metricCount >= TAG_MINIMUM_FLAGS ? config.tag : undefined} boosted={player.boosted} altAccount={player.altAccount}>
+                    <PlayerName playerId={player.id} cheater={player.cheater} susCount={player.susCount} dropper={player.dropper} dropperVoteCount={player.dropperVoteCount} afkWintrade={player.afkWintrade} afkWintradeVoteCount={player.afkWintradeVoteCount} automaticTag={hasPlayerTag(player.metricCount) ? config.tag : undefined} boosted={player.boosted} altAccount={player.altAccount}>
                       {player.name}
                     </PlayerName>
                   </div>

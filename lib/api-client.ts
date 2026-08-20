@@ -1,4 +1,5 @@
 import { identityCutoverEnabled } from "./identity-cutover";
+import { hasPlayerTag } from "./player-tag-threshold";
 
 // Browser-facing backend URL.
 //
@@ -166,6 +167,7 @@ export interface CheaterPlayer {
   afkWintradeVoteCount?: number;
   boosted: boolean;
   altAccount: boolean;
+  altAccountVoteCount?: number;
   weirdoCount: number;
   hallOfFameCount: number;
   avgDpm: number | null;
@@ -300,8 +302,6 @@ export interface BoostedPlayerDetail {
   matches: BoostedMatchSummary[];
 }
 
-const BOOSTED_TAG_MINIMUM_MATCHES = 5;
-
 export async function fetchCheaterPlayers(params?: { name?: string; cheater?: boolean; susOnly?: boolean; weirdoOnly?: boolean; hallOfFameOnly?: boolean; dropperOnly?: boolean; afkWintradeOnly?: boolean; altAccountOnly?: boolean; limit?: number; offset?: number }): Promise<CheaterPlayer[]> {
   const query = new URLSearchParams();
   if (params?.name?.trim()) query.set('name', params.name.trim());
@@ -319,7 +319,7 @@ export async function fetchCheaterPlayers(params?: { name?: string; cheater?: bo
     const raw = await fetchJson<Array<{
       id: string; name: string; platform: string; region: string;
       kbm_tier?: string | null; cheater?: boolean; sus_count?: number;
-      dropper?: boolean; dropper_vote_count?: number; afk_wintrade?: boolean; afk_wintrade_vote_count?: number; boosted?: boolean; alt_account?: boolean;
+      dropper?: boolean; dropper_vote_count?: number; afk_wintrade?: boolean; afk_wintrade_vote_count?: number; boosted?: boolean; alt_account?: boolean; alt_account_vote_count?: number;
       weirdo_count?: number; hall_of_fame_count?: number;
       avg_dpm?: number | null; avg_hpm?: number | null; avg_egpm?: number | null;
       avg_mpm?: number | null; total_matches?: number; win_rate?: number | null;
@@ -331,7 +331,7 @@ export async function fetchCheaterPlayers(params?: { name?: string; cheater?: bo
       susCount: r.sus_count ?? 0,
       dropper: Boolean(r.dropper), dropperVoteCount: Number(r.dropper_vote_count ?? 0),
       afkWintrade: Boolean(r.afk_wintrade), afkWintradeVoteCount: Number(r.afk_wintrade_vote_count ?? 0),
-      boosted: Boolean(r.boosted), altAccount: Boolean(r.alt_account),
+      boosted: Boolean(r.boosted), altAccount: Boolean(r.alt_account), altAccountVoteCount: Number(r.alt_account_vote_count ?? 0),
       weirdoCount: r.weirdo_count ?? 0,
       hallOfFameCount: r.hall_of_fame_count ?? 0,
       avgDpm: r.avg_dpm ?? null, avgHpm: r.avg_hpm ?? null,
@@ -985,7 +985,7 @@ function mapBoostedPlayer(row: any): BoostedPlayer {
     dropper: Boolean(row.dropper), afkWintrade: Boolean(row.afk_wintrade),
     // The boosted directory deliberately keeps every observed association, but
     // the visible moderation tag begins at five cumulative matches.
-    boosted: partyMatchCount >= BOOSTED_TAG_MINIMUM_MATCHES, altAccount: Boolean(row.alt_account),
+    boosted: hasPlayerTag(partyMatchCount), altAccount: Boolean(row.alt_account),
     weirdoCount: Number(row.weirdo_count ?? 0), hallOfFameCount: Number(row.hall_of_fame_count ?? 0),
     avgDpm: row.avg_dpm ?? null, avgHpm: row.avg_hpm ?? null,
     avgCpm: row.avg_egpm ?? null, avgSpm: row.avg_mpm ?? null,

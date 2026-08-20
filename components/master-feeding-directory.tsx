@@ -8,9 +8,9 @@ import PlayerDirectoryPagination, { usePersistentDirectoryPage } from "@/compone
 import PlayerName from "@/components/player-name";
 import { fetchMasterFeedingPlayers, type AutomaticMasterFeedingPlayer } from "@/lib/api-client";
 import { useLocalization } from "@/lib/localization-context";
+import { hasPlayerTag } from "@/lib/player-tag-threshold";
 
 const PAGE_SIZE = 32;
-const FEED_TAG_MINIMUM_FLAGS = 5;
 
 export default function MasterFeedingDirectory() {
   const { t, formatNumber } = useLocalization();
@@ -94,9 +94,12 @@ export default function MasterFeedingDirectory() {
                       playerId={player.id}
                       cheater={player.cheater}
                       susCount={player.susCount}
-                      dropper={player.dropper && Number(player.dropperVoteCount ?? 0) >= 5}
-                      afkWintrade={player.afkWintrade && Number(player.afkWintradeVoteCount ?? 0) >= 5}
-                      masterFeeding={player.masterFeedingCount >= FEED_TAG_MINIMUM_FLAGS}
+                      dropper={player.dropper}
+                      dropperVoteCount={player.dropperVoteCount}
+                      afkWintrade={player.afkWintrade}
+                      afkWintradeVoteCount={player.afkWintradeVoteCount}
+                      masterFeeding={hasPlayerTag(player.masterFeedingCount)}
+                      masterFeedingCount={player.masterFeedingCount}
                       boosted={player.boosted}
                       altAccount={player.altAccount}
                     >

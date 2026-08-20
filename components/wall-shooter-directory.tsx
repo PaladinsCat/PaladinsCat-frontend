@@ -8,9 +8,9 @@ import PlayerDirectoryPagination, { usePersistentDirectoryPage } from "@/compone
 import PlayerName from "@/components/player-name";
 import { fetchWallShooterPlayers, type AutomaticWallShooterPlayer } from "@/lib/api-client";
 import { useLocalization } from "@/lib/localization-context";
+import { hasPlayerTag } from "@/lib/player-tag-threshold";
 
 const PAGE_SIZE = 32;
-const WALL_TAG_MINIMUM_FLAGS = 6;
 
 export default function WallShooterDirectory() {
   const { t, formatNumber } = useLocalization();
@@ -94,9 +94,12 @@ export default function WallShooterDirectory() {
                       playerId={player.id}
                       cheater={player.cheater}
                       susCount={player.susCount}
-                      dropper={player.dropper && Number(player.dropperVoteCount ?? 0) >= 5}
-                      afkWintrade={player.afkWintrade && Number(player.afkWintradeVoteCount ?? 0) >= 5}
-                      wallShooter={player.wallShooterCount >= WALL_TAG_MINIMUM_FLAGS}
+                      dropper={player.dropper}
+                      dropperVoteCount={player.dropperVoteCount}
+                      afkWintrade={player.afkWintrade}
+                      afkWintradeVoteCount={player.afkWintradeVoteCount}
+                      wallShooter={hasPlayerTag(player.wallShooterCount)}
+                      wallShooterCount={player.wallShooterCount}
                       boosted={player.boosted}
                       altAccount={player.altAccount}
                     >

@@ -2,9 +2,22 @@ export type PlayerModeration = {
   cheater: boolean;
   susCount: number;
   dropper: boolean;
+  dropperVoteCount: number;
   afkWintrade: boolean;
+  afkWintradeVoteCount: number;
   boosted: boolean;
+  boostedMatchCount: number;
   altAccount: boolean;
+  altAccountVoteCount: number;
+  automaticAfkCount: number;
+  wallShooterCount: number;
+  masterFeedingCount: number;
+  tankDiffCount: number;
+  supportDiffCount: number;
+  dpsDiffCount: number;
+  flankDiffCount: number;
+  noobCount: number;
+  hypercarryCount: number;
   verified: boolean;
 };
 
@@ -12,9 +25,22 @@ const EMPTY: PlayerModeration = {
   cheater: false,
   susCount: 0,
   dropper: false,
+  dropperVoteCount: 0,
   afkWintrade: false,
+  afkWintradeVoteCount: 0,
   boosted: false,
+  boostedMatchCount: 0,
   altAccount: false,
+  altAccountVoteCount: 0,
+  automaticAfkCount: 0,
+  wallShooterCount: 0,
+  masterFeedingCount: 0,
+  tankDiffCount: 0,
+  supportDiffCount: 0,
+  dpsDiffCount: 0,
+  flankDiffCount: 0,
+  noobCount: 0,
+  hypercarryCount: 0,
   verified: false,
 };
 const TTL_MS = 5 * 60 * 1000;
@@ -38,9 +64,22 @@ export function mergePlayerModeration(
     cheater: supplied.cheater === undefined ? fallback.cheater : Boolean(supplied.cheater),
     susCount: supplied.susCount === undefined ? fallback.susCount : Number(supplied.susCount) || 0,
     dropper: supplied.dropper === undefined ? fallback.dropper : Boolean(supplied.dropper),
+    dropperVoteCount: supplied.dropperVoteCount === undefined ? fallback.dropperVoteCount : Number(supplied.dropperVoteCount) || 0,
     afkWintrade: supplied.afkWintrade === undefined ? fallback.afkWintrade : Boolean(supplied.afkWintrade),
+    afkWintradeVoteCount: supplied.afkWintradeVoteCount === undefined ? fallback.afkWintradeVoteCount : Number(supplied.afkWintradeVoteCount) || 0,
     boosted: supplied.boosted === undefined ? fallback.boosted : Boolean(supplied.boosted),
+    boostedMatchCount: supplied.boostedMatchCount === undefined ? fallback.boostedMatchCount : Number(supplied.boostedMatchCount) || 0,
     altAccount: supplied.altAccount === undefined ? fallback.altAccount : Boolean(supplied.altAccount),
+    altAccountVoteCount: supplied.altAccountVoteCount === undefined ? fallback.altAccountVoteCount : Number(supplied.altAccountVoteCount) || 0,
+    automaticAfkCount: supplied.automaticAfkCount === undefined ? fallback.automaticAfkCount : Number(supplied.automaticAfkCount) || 0,
+    wallShooterCount: supplied.wallShooterCount === undefined ? fallback.wallShooterCount : Number(supplied.wallShooterCount) || 0,
+    masterFeedingCount: supplied.masterFeedingCount === undefined ? fallback.masterFeedingCount : Number(supplied.masterFeedingCount) || 0,
+    tankDiffCount: supplied.tankDiffCount === undefined ? fallback.tankDiffCount : Number(supplied.tankDiffCount) || 0,
+    supportDiffCount: supplied.supportDiffCount === undefined ? fallback.supportDiffCount : Number(supplied.supportDiffCount) || 0,
+    dpsDiffCount: supplied.dpsDiffCount === undefined ? fallback.dpsDiffCount : Number(supplied.dpsDiffCount) || 0,
+    flankDiffCount: supplied.flankDiffCount === undefined ? fallback.flankDiffCount : Number(supplied.flankDiffCount) || 0,
+    noobCount: supplied.noobCount === undefined ? fallback.noobCount : Number(supplied.noobCount) || 0,
+    hypercarryCount: supplied.hypercarryCount === undefined ? fallback.hypercarryCount : Number(supplied.hypercarryCount) || 0,
     verified: supplied.verified === undefined ? fallback.verified : Boolean(supplied.verified),
   };
 }
@@ -50,9 +89,22 @@ type BulkPlayer = {
   cheater?: boolean;
   sus_count?: number;
   dropper?: boolean;
+  dropper_vote_count?: number;
   afk_wintrade?: boolean;
+  afk_wintrade_vote_count?: number;
   boosted?: boolean;
+  boosted_match_count?: number;
   alt_account?: boolean;
+  alt_account_vote_count?: number;
+  automatic_afk_count?: number;
+  wall_shooter_count?: number;
+  master_feeding_count?: number;
+  tank_diff_count?: number;
+  support_diff_count?: number;
+  dps_diff_count?: number;
+  flank_diff_count?: number;
+  noob_count?: number;
+  hypercarry_count?: number;
   verified?: boolean;
 };
 
@@ -65,9 +117,22 @@ function moderationFromRow(player: BulkPlayer): PlayerModeration {
     cheater: Boolean(player.cheater),
     susCount: Number(player.sus_count ?? 0),
     dropper: Boolean(player.dropper),
+    dropperVoteCount: Number(player.dropper_vote_count ?? 0),
     afkWintrade: Boolean(player.afk_wintrade),
+    afkWintradeVoteCount: Number(player.afk_wintrade_vote_count ?? 0),
     boosted: Boolean(player.boosted),
+    boostedMatchCount: Number(player.boosted_match_count ?? 0),
     altAccount: Boolean(player.alt_account),
+    altAccountVoteCount: Number(player.alt_account_vote_count ?? 0),
+    automaticAfkCount: Number(player.automatic_afk_count ?? 0),
+    wallShooterCount: Number(player.wall_shooter_count ?? 0),
+    masterFeedingCount: Number(player.master_feeding_count ?? 0),
+    tankDiffCount: Number(player.tank_diff_count ?? 0),
+    supportDiffCount: Number(player.support_diff_count ?? 0),
+    dpsDiffCount: Number(player.dps_diff_count ?? 0),
+    flankDiffCount: Number(player.flank_diff_count ?? 0),
+    noobCount: Number(player.noob_count ?? 0),
+    hypercarryCount: Number(player.hypercarry_count ?? 0),
     verified: Boolean(player.verified),
   };
 }
@@ -122,9 +187,22 @@ export async function fetchPrivateAccountModerationBatch(
     cheater: Boolean(account.cheater),
     susCount: Number(account.sus_count ?? 0),
     dropper: false,
+    dropperVoteCount: 0,
     afkWintrade: false,
+    afkWintradeVoteCount: 0,
     boosted: false,
+    boostedMatchCount: 0,
     altAccount: false,
+    altAccountVoteCount: 0,
+    automaticAfkCount: 0,
+    wallShooterCount: 0,
+    masterFeedingCount: 0,
+    tankDiffCount: 0,
+    supportDiffCount: 0,
+    dpsDiffCount: 0,
+    flankDiffCount: 0,
+    noobCount: 0,
+    hypercarryCount: 0,
     verified: false,
   }]));
 }

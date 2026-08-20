@@ -121,7 +121,7 @@ export default function BoostedPlayersPage() {
             >
               <div className="min-w-0">
                 <div className="truncate text-sm font-semibold text-pc-text transition-colors group-hover:text-pc-accent">
-                  <PlayerName playerId={player.id} cheater={player.cheater} susCount={player.susCount} boosted={player.boosted}>{player.name}</PlayerName>
+                  <PlayerName playerId={player.id} cheater={player.cheater} susCount={player.susCount} boosted={player.boosted} boostedMatchCount={player.partyMatchCount}>{player.name}</PlayerName>
                 </div>
               </div>
 
