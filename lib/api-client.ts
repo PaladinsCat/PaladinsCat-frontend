@@ -201,6 +201,30 @@ export interface AutomaticWallShooterPlayerPage {
   totalCount: number;
 }
 
+export interface AutomaticMasterFeedingPlayer extends CheaterPlayer {
+  masterFeedingCount: number;
+  firstSeen: string | null;
+  lastSeen: string | null;
+}
+
+export interface AutomaticMasterFeedingPlayerPage {
+  players: AutomaticMasterFeedingPlayer[];
+  totalCount: number;
+}
+
+export type PerformanceDiffMetric = "tank-diff" | "support-diff" | "dps-diff" | "flank-diff" | "the-noob" | "hypercarry";
+
+export interface AutomaticPerformanceDiffPlayer extends CheaterPlayer {
+  metricCount: number;
+  firstSeen: string | null;
+  lastSeen: string | null;
+}
+
+export interface AutomaticPerformanceDiffPlayerPage {
+  players: AutomaticPerformanceDiffPlayer[];
+  totalCount: number;
+}
+
 export interface AutomaticAfkMatchSummary {
   matchId: number;
   entryDatetime: string | null;
@@ -418,6 +442,66 @@ export async function fetchWallShooterPlayers({
   const rows = await fetchJson<any[]>(`/players/wall-shooters?${query.toString()}`);
   return {
     players: rows.map(mapAutomaticWallShooterPlayer),
+    totalCount: Number(rows[0]?.total_count ?? rows.length),
+  };
+}
+
+function mapAutomaticMasterFeedingPlayer(row: any): AutomaticMasterFeedingPlayer {
+  return {
+    ...mapAutomaticWallShooterPlayer(row),
+    masterFeedingCount: Number(row.master_feeding_count ?? 0),
+    firstSeen: row.first_seen ?? null,
+    lastSeen: row.last_seen ?? null,
+  };
+}
+
+export async function fetchMasterFeedingPlayers({
+  name,
+  limit = 32,
+  offset = 0,
+}: {
+  name?: string;
+  limit?: number;
+  offset?: number;
+} = {}): Promise<AutomaticMasterFeedingPlayerPage> {
+  const query = new URLSearchParams({
+    limit: String(Math.min(Math.max(limit, 1), 100)),
+    offset: String(Math.max(offset, 0)),
+  });
+  if (name?.trim()) query.set('name', name.trim());
+  const rows = await fetchJson<any[]>(`/players/master-feeding?${query.toString()}`);
+  return {
+    players: rows.map(mapAutomaticMasterFeedingPlayer),
+    totalCount: Number(rows[0]?.total_count ?? rows.length),
+  };
+}
+
+function mapAutomaticPerformanceDiffPlayer(row: any): AutomaticPerformanceDiffPlayer {
+  return {
+    ...mapAutomaticWallShooterPlayer(row),
+    metricCount: Number(row.metric_count ?? 0),
+    firstSeen: row.first_seen ?? null,
+    lastSeen: row.last_seen ?? null,
+  };
+}
+
+export async function fetchPerformanceDiffPlayers(metric: PerformanceDiffMetric, {
+  name,
+  limit = 32,
+  offset = 0,
+}: {
+  name?: string;
+  limit?: number;
+  offset?: number;
+} = {}): Promise<AutomaticPerformanceDiffPlayerPage> {
+  const query = new URLSearchParams({
+    limit: String(Math.min(Math.max(limit, 1), 100)),
+    offset: String(Math.max(offset, 0)),
+  });
+  if (name?.trim()) query.set('name', name.trim());
+  const rows = await fetchJson<any[]>(`/players/performance-diff/${metric}?${query.toString()}`);
+  return {
+    players: rows.map(mapAutomaticPerformanceDiffPlayer),
     totalCount: Number(rows[0]?.total_count ?? rows.length),
   };
 }
@@ -883,6 +967,13 @@ export interface PlayersOverview {
     privateAccounts: number;
     parties: number;
     wallShooters: number;
+    masterFeeding: number;
+    tankDiff: number;
+    supportDiff: number;
+    dpsDiff: number;
+    flankDiff: number;
+    noob: number;
+    hypercarry: number;
   };
 }
 
@@ -1222,6 +1313,13 @@ export function mapPlayersOverviewResponse(raw: any): PlayersOverview {
     privateAccounts: Number(raw.directory_counts?.private_accounts ?? raw.private_accounts?.[0]?.total_count ?? privateAccounts.length),
     parties: Number(raw.directory_counts?.parties ?? raw.party_pairs?.[0]?.total_count ?? partyPairs.length),
     wallShooters: Number(raw.directory_counts?.wall_shooters ?? 0),
+    masterFeeding: Number(raw.directory_counts?.master_feeding ?? 0),
+    tankDiff: Number(raw.directory_counts?.tank_diff ?? 0),
+    supportDiff: Number(raw.directory_counts?.support_diff ?? 0),
+    dpsDiff: Number(raw.directory_counts?.dps_diff ?? 0),
+    flankDiff: Number(raw.directory_counts?.flank_diff ?? 0),
+    noob: Number(raw.directory_counts?.noob ?? 0),
+    hypercarry: Number(raw.directory_counts?.hypercarry ?? 0),
   };
 
   return {

@@ -8,10 +8,17 @@ import {
   BrickWall,
   CircleSlash2,
   Clock3,
+  Crosshair,
   Copy,
+  CircleHelp,
+  HeartPulse,
   LockKeyhole,
+  Shield,
   ShieldAlert,
+  Skull,
   Sparkles,
+  Swords,
+  Trophy,
   UsersRound,
 } from "lucide-react";
 import { fetchPlayersOverview, type PlayersOverview } from "@/lib/api-client";
@@ -46,6 +53,13 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
     privateAccounts: 0,
     parties: 0,
     wallShooters: 0,
+    masterFeeding: 0,
+    tankDiff: 0,
+    supportDiff: 0,
+    dpsDiff: 0,
+    flankDiff: 0,
+    noob: 0,
+    hypercarry: 0,
   });
   const [overviewLoading, setOverviewLoading] = useState(initialOverview == null);
 
@@ -76,6 +90,13 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
     { href: "/players/droppers", titleKey: "moderation.droppersTitle", descriptionKey: "moderation.accounts", count: communityCounts.droppers, icon: CircleSlash2, iconClass: "text-rose-300" },
     { href: "/players/afk-wintrade", titleKey: "moderation.afkWintradeTitle", descriptionKey: "moderation.accounts", count: communityCounts.afkWintrade, icon: Clock3, iconClass: "text-sky-300" },
     { href: "/players/wall-shooters", titleKey: "moderation.wallShooterTitle", descriptionKey: "moderation.wallShooterAccounts", count: directoryCounts.wallShooters, icon: BrickWall, iconClass: "text-cyan-300" },
+    { href: "/players/master-feeding", titleKey: "moderation.masterFeedingTitle", descriptionKey: "moderation.masterFeedingAccounts", count: directoryCounts.masterFeeding, icon: Skull, iconClass: "text-rose-300" },
+    { href: "/players/tank-diff", titleKey: "moderation.tankDiffTitle", descriptionKey: "moderation.performanceDiffAccounts", count: directoryCounts.tankDiff, icon: Shield, iconClass: "text-sky-300" },
+    { href: "/players/support-diff", titleKey: "moderation.supportDiffTitle", descriptionKey: "moderation.performanceDiffAccounts", count: directoryCounts.supportDiff, icon: HeartPulse, iconClass: "text-emerald-300" },
+    { href: "/players/dps-diff", titleKey: "moderation.dpsDiffTitle", descriptionKey: "moderation.performanceDiffAccounts", count: directoryCounts.dpsDiff, icon: Crosshair, iconClass: "text-orange-300" },
+    { href: "/players/flank-diff", titleKey: "moderation.flankDiffTitle", descriptionKey: "moderation.performanceDiffAccounts", count: directoryCounts.flankDiff, icon: Swords, iconClass: "text-violet-300" },
+    { href: "/players/the-noob", titleKey: "moderation.noobTitle", descriptionKey: "moderation.performanceDiffAccounts", count: directoryCounts.noob, icon: CircleHelp, iconClass: "text-amber-300" },
+    { href: "/players/hypercarry", titleKey: "moderation.hypercarryTitle", descriptionKey: "moderation.performanceDiffAccounts", count: directoryCounts.hypercarry, icon: Trophy, iconClass: "text-cyan-300" },
     { href: "/players/alt-accounts", titleKey: "moderation.altAccountsTitle", descriptionKey: "moderation.accounts", count: communityCounts.altAccounts, icon: Copy, iconClass: "text-fuchsia-300" },
   ], [communityCounts, directoryCounts]);
 
