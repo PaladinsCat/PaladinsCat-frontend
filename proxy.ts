@@ -19,12 +19,19 @@ import { NextRequest, NextResponse } from "next/server";
  * `proxy` file convention (https://nextjs.org/docs/messages/middleware-to-proxy).
  */
 export function proxy(request: NextRequest) {
+  // The production nonce policy makes Next's development runtime defer client
+  // hydration. Dev servers must not be used as a public surface; let Next
+  // handle its local assets and HMR without injecting production headers.
+  if (process.env.NODE_ENV === "development") {
+    return NextResponse.next();
+  }
+
   const nonce = crypto.randomUUID().replaceAll("-", "");
 
   const csp = [
     "default-src 'self'",
-    // NOTE: 'unsafe-inline' below is a legacy fallback only; browsers that
-    // support 'strict-dynamic' ignore it.
+    // 'unsafe-inline' below is a legacy fallback only; browsers that support
+    // 'strict-dynamic' ignore it.
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-inline'`,
     // Next.js injects inline styles (Tailwind, PostCSS, next/font) server-side.
     "style-src 'self' 'unsafe-inline'",
@@ -57,6 +64,6 @@ export const config = {
   // Apply only to page (HTML) document navigations; skip proxied API traffic,
   // Next static chunks, images, and other asset files.
   matcher: [
-    "/((?!_next/static|_next/image|api|images/favicon|robots.txt|sitemap\\.xml|manifest\\.webmanifest).*)",
+    "/((?!_next/static|_next/image|_next/webpack-hmr|api|images/favicon|robots.txt|sitemap\\.xml|manifest\\.webmanifest).*)",
   ],
 };

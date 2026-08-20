@@ -161,7 +161,9 @@ export interface CheaterPlayer {
   cheater: boolean;
   susCount: number;
   dropper: boolean;
+  dropperVoteCount?: number;
   afkWintrade: boolean;
+  afkWintradeVoteCount?: number;
   boosted: boolean;
   altAccount: boolean;
   weirdoCount: number;
@@ -185,6 +187,17 @@ export interface AutomaticAfkPlayer extends CheaterPlayer {
 
 export interface AutomaticAfkPlayerPage {
   players: AutomaticAfkPlayer[];
+  totalCount: number;
+}
+
+export interface AutomaticWallShooterPlayer extends CheaterPlayer {
+  wallShooterCount: number;
+  firstSeen: string | null;
+  lastSeen: string | null;
+}
+
+export interface AutomaticWallShooterPlayerPage {
+  players: AutomaticWallShooterPlayer[];
   totalCount: number;
 }
 
@@ -263,6 +276,8 @@ export interface BoostedPlayerDetail {
   matches: BoostedMatchSummary[];
 }
 
+const BOOSTED_TAG_MINIMUM_MATCHES = 5;
+
 export async function fetchCheaterPlayers(params?: { name?: string; cheater?: boolean; susOnly?: boolean; weirdoOnly?: boolean; hallOfFameOnly?: boolean; dropperOnly?: boolean; afkWintradeOnly?: boolean; altAccountOnly?: boolean; limit?: number; offset?: number }): Promise<CheaterPlayer[]> {
   const query = new URLSearchParams();
   if (params?.name?.trim()) query.set('name', params.name.trim());
@@ -280,7 +295,7 @@ export async function fetchCheaterPlayers(params?: { name?: string; cheater?: bo
     const raw = await fetchJson<Array<{
       id: string; name: string; platform: string; region: string;
       kbm_tier?: string | null; cheater?: boolean; sus_count?: number;
-      dropper?: boolean; afk_wintrade?: boolean; boosted?: boolean; alt_account?: boolean;
+      dropper?: boolean; dropper_vote_count?: number; afk_wintrade?: boolean; afk_wintrade_vote_count?: number; boosted?: boolean; alt_account?: boolean;
       weirdo_count?: number; hall_of_fame_count?: number;
       avg_dpm?: number | null; avg_hpm?: number | null; avg_egpm?: number | null;
       avg_mpm?: number | null; total_matches?: number; win_rate?: number | null;
@@ -290,7 +305,8 @@ export async function fetchCheaterPlayers(params?: { name?: string; cheater?: bo
       id: r.id, name: r.name, platform: r.platform, region: r.region,
       kbmTier: r.kbm_tier ?? null, cheater: r.cheater ?? false,
       susCount: r.sus_count ?? 0,
-      dropper: Boolean(r.dropper), afkWintrade: Boolean(r.afk_wintrade),
+      dropper: Boolean(r.dropper), dropperVoteCount: Number(r.dropper_vote_count ?? 0),
+      afkWintrade: Boolean(r.afk_wintrade), afkWintradeVoteCount: Number(r.afk_wintrade_vote_count ?? 0),
       boosted: Boolean(r.boosted), altAccount: Boolean(r.alt_account),
       weirdoCount: r.weirdo_count ?? 0,
       hallOfFameCount: r.hall_of_fame_count ?? 0,
@@ -313,8 +329,8 @@ function mapAutomaticAfkPlayer(row: any): AutomaticAfkPlayer {
     kbmTier: row.kbm_tier ?? null,
     cheater: Boolean(row.cheater),
     susCount: Number(row.sus_count ?? 0),
-    dropper: Boolean(row.dropper),
-    afkWintrade: Boolean(row.afk_wintrade),
+    dropper: Boolean(row.dropper), dropperVoteCount: Number(row.dropper_vote_count ?? 0),
+    afkWintrade: Boolean(row.afk_wintrade), afkWintradeVoteCount: Number(row.afk_wintrade_vote_count ?? 0),
     boosted: Boolean(row.boosted),
     altAccount: Boolean(row.alt_account),
     weirdoCount: Number(row.weirdo_count ?? 0),
@@ -335,9 +351,11 @@ function mapAutomaticAfkPlayer(row: any): AutomaticAfkPlayer {
 }
 
 export async function fetchAutomaticAfkPlayers({
+  name,
   limit = 24,
   offset = 0,
 }: {
+  name?: string;
   limit?: number;
   offset?: number;
 } = {}): Promise<AutomaticAfkPlayerPage> {
@@ -345,9 +363,61 @@ export async function fetchAutomaticAfkPlayers({
     limit: String(Math.min(Math.max(limit, 1), 100)),
     offset: String(Math.max(offset, 0)),
   });
+  if (name?.trim()) query.set('name', name.trim());
   const rows = await fetchJson<any[]>(`/players/automatic-afk?${query.toString()}`);
   return {
     players: rows.map(mapAutomaticAfkPlayer),
+    totalCount: Number(rows[0]?.total_count ?? rows.length),
+  };
+}
+
+function mapAutomaticWallShooterPlayer(row: any): AutomaticWallShooterPlayer {
+  return {
+    id: String(row.id),
+    name: String(row.name ?? `Player ${row.id}`),
+    platform: String(row.platform ?? 'Unknown'),
+    region: String(row.region ?? 'Unknown'),
+    kbmTier: row.kbm_tier ?? null,
+    cheater: Boolean(row.cheater),
+    susCount: Number(row.sus_count ?? 0),
+    dropper: Boolean(row.dropper),
+    dropperVoteCount: Number(row.dropper_vote_count ?? 0),
+    afkWintrade: Boolean(row.afk_wintrade),
+    afkWintradeVoteCount: Number(row.afk_wintrade_vote_count ?? 0),
+    boosted: Boolean(row.boosted),
+    altAccount: Boolean(row.alt_account),
+    weirdoCount: Number(row.weirdo_count ?? 0),
+    hallOfFameCount: Number(row.hall_of_fame_count ?? 0),
+    avgDpm: row.avg_dpm == null ? null : Number(row.avg_dpm),
+    avgHpm: row.avg_hpm == null ? null : Number(row.avg_hpm),
+    avgCpm: row.avg_egpm == null ? null : Number(row.avg_egpm),
+    avgSpm: row.avg_mpm == null ? null : Number(row.avg_mpm),
+    totalMatches: Number(row.total_matches ?? 0),
+    winRate: row.win_rate == null ? null : Number(row.win_rate),
+    topReasons: [],
+    wallShooterCount: Number(row.wall_shooter_count ?? 0),
+    firstSeen: row.first_seen ?? null,
+    lastSeen: row.last_seen ?? null,
+  };
+}
+
+export async function fetchWallShooterPlayers({
+  name,
+  limit = 32,
+  offset = 0,
+}: {
+  name?: string;
+  limit?: number;
+  offset?: number;
+} = {}): Promise<AutomaticWallShooterPlayerPage> {
+  const query = new URLSearchParams({
+    limit: String(Math.min(Math.max(limit, 1), 100)),
+    offset: String(Math.max(offset, 0)),
+  });
+  if (name?.trim()) query.set('name', name.trim());
+  const rows = await fetchJson<any[]>(`/players/wall-shooters?${query.toString()}`);
+  return {
+    players: rows.map(mapAutomaticWallShooterPlayer),
     totalCount: Number(rows[0]?.total_count ?? rows.length),
   };
 }
@@ -812,21 +882,25 @@ export interface PlayersOverview {
   directoryCounts: {
     privateAccounts: number;
     parties: number;
+    wallShooters: number;
   };
 }
 
 function mapBoostedPlayer(row: any): BoostedPlayer {
+  const partyMatchCount = Number(row.party_match_count ?? 0);
   return {
     id: String(row.id), name: row.name, platform: row.platform, region: row.region,
     kbmTier: row.kbm_tier ?? null, cheater: Boolean(row.cheater), susCount: Number(row.sus_count ?? 0),
     dropper: Boolean(row.dropper), afkWintrade: Boolean(row.afk_wintrade),
-    boosted: Boolean(row.boosted ?? true), altAccount: Boolean(row.alt_account),
+    // The boosted directory deliberately keeps every observed association, but
+    // the visible moderation tag begins at five cumulative matches.
+    boosted: partyMatchCount >= BOOSTED_TAG_MINIMUM_MATCHES, altAccount: Boolean(row.alt_account),
     weirdoCount: Number(row.weirdo_count ?? 0), hallOfFameCount: Number(row.hall_of_fame_count ?? 0),
     avgDpm: row.avg_dpm ?? null, avgHpm: row.avg_hpm ?? null,
     avgCpm: row.avg_egpm ?? null, avgSpm: row.avg_mpm ?? null,
     totalMatches: Number(row.total_matches ?? 0), winRate: row.win_rate == null ? null : Number(row.win_rate),
     topReasons: [],
-    partyMatchCount: Number(row.party_match_count ?? 0),
+    partyMatchCount,
     firstSeen: row.first_seen ?? null,
     lastSeen: row.last_seen ?? null,
     cheaters: (row.cheaters ?? []).map((cheater: any) => ({
@@ -839,8 +913,14 @@ function mapBoostedPlayer(row: any): BoostedPlayer {
   };
 }
 
-export async function fetchBoostedPlayers(limit = 100): Promise<BoostedPlayer[]> {
-  const raw = await fetchJson<any[]>(`/players/boosted?limit=${Math.min(Math.max(limit, 1), 100)}`);
+export async function fetchBoostedPlayers({ name, limit = 100, offset = 0 }: { name?: string; limit?: number; offset?: number } = {}): Promise<BoostedPlayer[]> {
+  const query = new URLSearchParams({
+    limit: String(Math.min(Math.max(limit, 1), 100)),
+    offset: String(Math.max(offset, 0)),
+  });
+  if (name?.trim()) query.set("name", name.trim());
+  if (name?.trim()) query.set("name", name.trim());
+  const raw = await fetchJson<any[]>(`/players/boosted?${query.toString()}`);
   return raw.map(mapBoostedPlayer);
 }
 
@@ -1141,6 +1221,7 @@ export function mapPlayersOverviewResponse(raw: any): PlayersOverview {
   const directoryCounts = {
     privateAccounts: Number(raw.directory_counts?.private_accounts ?? raw.private_accounts?.[0]?.total_count ?? privateAccounts.length),
     parties: Number(raw.directory_counts?.parties ?? raw.party_pairs?.[0]?.total_count ?? partyPairs.length),
+    wallShooters: Number(raw.directory_counts?.wall_shooters ?? 0),
   };
 
   return {

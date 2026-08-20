@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   Award,
   BadgeAlert,
+  BrickWall,
   CircleSlash2,
   Clock3,
   Copy,
@@ -44,6 +45,7 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
   const [directoryCounts, setDirectoryCounts] = useState<PlayersOverview["directoryCounts"]>(initialOverview?.directoryCounts ?? {
     privateAccounts: 0,
     parties: 0,
+    wallShooters: 0,
   });
   const [overviewLoading, setOverviewLoading] = useState(initialOverview == null);
 
@@ -73,6 +75,7 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
     { href: "/players/hall-of-fame", titleKey: "moderation.hallOfFameTitle", descriptionKey: "moderation.votes", count: communityCounts.hallOfFame, icon: Award, iconClass: "text-emerald-300" },
     { href: "/players/droppers", titleKey: "moderation.droppersTitle", descriptionKey: "moderation.accounts", count: communityCounts.droppers, icon: CircleSlash2, iconClass: "text-rose-300" },
     { href: "/players/afk-wintrade", titleKey: "moderation.afkWintradeTitle", descriptionKey: "moderation.accounts", count: communityCounts.afkWintrade, icon: Clock3, iconClass: "text-sky-300" },
+    { href: "/players/wall-shooters", titleKey: "moderation.wallShooterTitle", descriptionKey: "moderation.wallShooterAccounts", count: directoryCounts.wallShooters, icon: BrickWall, iconClass: "text-cyan-300" },
     { href: "/players/alt-accounts", titleKey: "moderation.altAccountsTitle", descriptionKey: "moderation.accounts", count: communityCounts.altAccounts, icon: Copy, iconClass: "text-fuchsia-300" },
   ], [communityCounts, directoryCounts]);
 

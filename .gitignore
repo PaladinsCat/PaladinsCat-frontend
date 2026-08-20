@@ -1,5 +1,5 @@
 /node_modules/
-/.next/
+/.next*/
 /tsconfig.tsbuildinfo
 /out/
 /public/locales/

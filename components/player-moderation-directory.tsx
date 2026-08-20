@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { Search } from "lucide-react";
 import {
   fetchAutomaticAfkPlayers,
   fetchCheaterPlayers,
@@ -17,21 +18,50 @@ import type { TranslationKey } from "@/lib/localization/messages";
 
 type ModerationFilter = "dropperOnly" | "afkWintradeOnly" | "altAccountOnly";
 const AUTOMATIC_AFK_PAGE_SIZE = 32;
+const COMMUNITY_PAGE_SIZE = 100;
+const COMMUNITY_TAG_MINIMUM_VOTES = 5;
+
+async function fetchAllCommunityPlayers(filter: ModerationFilter, name: string): Promise<CheaterPlayer[]> {
+  const players: CheaterPlayer[] = [];
+  const seen = new Set<string>();
+  for (let offset = 0; ; offset += COMMUNITY_PAGE_SIZE) {
+    const page = await fetchCheaterPlayers({
+      [filter]: true,
+      name: name || undefined,
+      limit: COMMUNITY_PAGE_SIZE,
+      offset,
+    });
+    const newPlayers = page.filter((player) => !seen.has(player.id));
+    newPlayers.forEach((player) => seen.add(player.id));
+    players.push(...newPlayers);
+    if (page.length < COMMUNITY_PAGE_SIZE || newPlayers.length === 0) return players;
+  }
+}
+
+function communityVoteCount(player: CheaterPlayer, filter: ModerationFilter): number {
+  return filter === "dropperOnly"
+    ? Number(player.dropperVoteCount ?? 0)
+    : Number(player.afkWintradeVoteCount ?? 0);
+}
 
 export default function PlayerModerationDirectory({
   titleKey,
-  descriptionKey,
+  noticeKey,
   emptyKey,
   filter,
   accentClass,
   borderClass,
+  noticeClass,
+  voteClass,
 }: {
   titleKey: TranslationKey;
-  descriptionKey: TranslationKey;
+  noticeKey: TranslationKey;
   emptyKey: TranslationKey;
   filter: ModerationFilter;
   accentClass: string;
   borderClass: string;
+  noticeClass: string;
+  voteClass: string;
 }) {
   const { t, formatNumber } = useLocalization();
   const [players, setPlayers] = useState<CheaterPlayer[]>([]);
@@ -39,29 +69,37 @@ export default function PlayerModerationDirectory({
   const [automaticPlayerCount, setAutomaticPlayerCount] = useState(0);
   const [automaticPage, setAutomaticPage] = usePersistentDirectoryPage("automaticPage");
   const [communityLoading, setCommunityLoading] = useState(true);
-  const [loadedAutomaticPage, setLoadedAutomaticPage] = useState<number | null>(null);
+  const [loadedAutomaticKey, setLoadedAutomaticKey] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
   const showAutomaticAfk = filter === "afkWintradeOnly";
+  const normalizedQuery = query.trim();
+  const automaticRequestKey = `${normalizedQuery}:${automaticPage}`;
 
   useEffect(() => {
     let active = true;
-    fetchCheaterPlayers({ [filter]: true, limit: 100 })
-      .then((communityRows) => {
-        if (!active) return;
-        setPlayers(communityRows);
-      })
-      .catch(() => {
-        if (!active) return;
-        setPlayers([]);
-      })
-      .finally(() => { if (active) setCommunityLoading(false); });
-    return () => { active = false; };
-  }, [filter]);
+    const timer = window.setTimeout(() => {
+      setCommunityLoading(true);
+      fetchAllCommunityPlayers(filter, normalizedQuery)
+        .then((communityRows) => {
+          if (active) setPlayers(communityRows);
+        })
+        .catch(() => {
+          if (active) setPlayers([]);
+        })
+        .finally(() => { if (active) setCommunityLoading(false); });
+    }, 250);
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
+  }, [filter, normalizedQuery]);
 
   useEffect(() => {
     if (!showAutomaticAfk) return;
 
     let active = true;
     fetchAutomaticAfkPlayers({
+      name: normalizedQuery || undefined,
       limit: AUTOMATIC_AFK_PAGE_SIZE,
       offset: (automaticPage - 1) * AUTOMATIC_AFK_PAGE_SIZE,
     })
@@ -69,61 +107,84 @@ export default function PlayerModerationDirectory({
         if (!active) return;
         setAutomaticPlayers(automaticResult.players);
         setAutomaticPlayerCount(automaticResult.totalCount);
-        setLoadedAutomaticPage(automaticPage);
+        setLoadedAutomaticKey(automaticRequestKey);
       })
       .catch(() => {
         if (!active) return;
         setAutomaticPlayers([]);
         setAutomaticPlayerCount(0);
-        setLoadedAutomaticPage(automaticPage);
+        setLoadedAutomaticKey(automaticRequestKey);
       })
     return () => { active = false; };
-  }, [automaticPage, showAutomaticAfk]);
+  }, [automaticPage, automaticRequestKey, normalizedQuery, showAutomaticAfk]);
 
   const communityDirectory = players.length === 0 ? (
     <div className="py-8 text-center text-sm text-pc-text-secondary">{t(emptyKey)}</div>
   ) : (
-    <PlayerDirectoryGrid items={players} getKey={(player) => player.id}>
-      {(player) => (
-        <Link href={`/players/${player.id}`} className={`flex min-h-14 h-full items-center rounded-xl border bg-pc-bg-elevated p-3 transition-colors hover:border-pc-accent-mid ${borderClass}`}>
-          <div className="min-w-0">
-            <PlayerName
-              playerId={player.id}
-              cheater={player.cheater}
-              susCount={player.susCount}
-              dropper={player.dropper}
-              afkWintrade={player.afkWintrade}
-              boosted={player.boosted}
-              altAccount={player.altAccount}
-            >
-              {player.name}
-            </PlayerName>
+    <PlayerDirectoryGrid items={players} getKey={(player) => player.id} loading={communityLoading}>
+      {(player) => {
+        const voteCount = communityVoteCount(player, filter);
+        return <Link href={`/players/${player.id}`} className={`flex min-h-24 h-full flex-col gap-2 rounded-xl border bg-pc-bg-elevated p-3 transition-colors hover:border-pc-accent-mid ${borderClass}`}>
+          <div className="flex min-w-0 items-start justify-between gap-2">
+            <div className="min-w-0 truncate text-sm font-semibold text-pc-text">
+              <PlayerName
+                playerId={player.id}
+                cheater={player.cheater}
+                susCount={player.susCount}
+                dropper={player.dropper && Number(player.dropperVoteCount ?? 0) >= COMMUNITY_TAG_MINIMUM_VOTES}
+                afkWintrade={player.afkWintrade && Number(player.afkWintradeVoteCount ?? 0) >= COMMUNITY_TAG_MINIMUM_VOTES}
+                boosted={player.boosted}
+                altAccount={player.altAccount}
+              >
+                {player.name}
+              </PlayerName>
+            </div>
+            <span className={`w-fit shrink-0 rounded-full border px-2 py-1 text-xs font-semibold ${voteClass}`}>
+              {formatNumber(voteCount)} {voteCount === 1 ? t("moderation.suspiciousVote") : t("moderation.suspiciousVotes")}
+            </span>
           </div>
-        </Link>
-      )}
+        </Link>;
+      }}
     </PlayerDirectoryGrid>
   );
   const automaticTotalPages = Math.max(1, Math.ceil(automaticPlayerCount / AUTOMATIC_AFK_PAGE_SIZE));
-  const automaticLoading = showAutomaticAfk && loadedAutomaticPage !== automaticPage;
-  const initialLoading = communityLoading || (showAutomaticAfk && automaticLoading && automaticPlayers.length === 0);
+  const automaticLoading = showAutomaticAfk && loadedAutomaticKey !== automaticRequestKey;
+  const initialLoading = communityLoading;
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-6">
       <div>
         <Link href="/players" className="mb-2 inline-block text-xs text-pc-accent hover:underline">{t("generated.players.players")}</Link>
         <h1 className="pc-heading pc-heading-lg text-pc-accent">{t(titleKey)}</h1>
-        <p className="mt-1 text-sm text-pc-text-secondary">{t(descriptionKey)}</p>
+        <div className={`mt-3 rounded-xl border px-4 py-3 text-sm font-medium backdrop-blur-md ${noticeClass}`} role="note">
+          {t(noticeKey)}
+        </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-        <span className="flex items-center gap-2">
-          <span className={`h-2 w-2 rounded-full ${showAutomaticAfk ? "bg-sky-400" : accentClass}`} />
-          <span className="text-xs text-pc-text-muted">{t("moderation.value1CommunityMarked", { value1: formatNumber(players.length) })}</span>
-        </span>
-        {showAutomaticAfk && <span className="flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-red-400" />
-          <span className="text-xs text-pc-text-muted">{t("moderation.value1AutomaticallyFlaggedPlayers", { value1: formatNumber(automaticPlayerCount) })}</span>
-        </span>}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <label className="relative block w-full sm:max-w-sm">
+          <span className="sr-only">{t("generated.players.searchByInGameNameOrPlayerId")}</span>
+          <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-pc-text-muted" />
+          <input
+            value={query}
+            onChange={(event) => {
+              setQuery(event.target.value);
+              setAutomaticPage(1);
+            }}
+            placeholder={t("generated.players.searchByInGameNameOrPlayerId")}
+            className="w-full rounded-xl border border-pc-border bg-pc-bg-elevated py-2.5 pl-9 pr-3 text-sm text-pc-text outline-none transition-colors placeholder:text-pc-text-muted focus:border-pc-accent-mid"
+          />
+        </label>
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+          <span className="flex items-center gap-2">
+            <span className={`h-2 w-2 rounded-full ${showAutomaticAfk ? "bg-sky-400" : accentClass}`} />
+            <span className="text-xs text-pc-text-muted">{t("moderation.value1CommunityMarked", { value1: formatNumber(players.length) })}</span>
+          </span>
+          {showAutomaticAfk && <span className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-red-400" />
+            <span className="text-xs text-pc-text-muted">{t("moderation.value1AutomaticallyFlaggedPlayers", { value1: formatNumber(automaticPlayerCount) })}</span>
+          </span>}
+        </div>
       </div>
 
       {showAutomaticAfk && <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-pc-text-muted">
@@ -140,7 +201,9 @@ export default function PlayerModerationDirectory({
           <section>
             <h2 className="text-sm font-bold text-pc-text">{t("moderation.automaticallyFlaggedPlayers")}</h2>
             <p className="mt-1 mb-3 text-xs text-pc-text-muted">{t("moderation.automaticAfkDescription")}</p>
-            {automaticPlayers.length === 0 ? (
+            {automaticLoading && automaticPlayers.length === 0 ? (
+              <LoadingPanel compact />
+            ) : automaticPlayers.length === 0 ? (
               <div className="py-8 text-center text-sm text-pc-text-secondary">{t("moderation.noAutomaticAfk")}</div>
             ) : (
               <div className={`space-y-4 transition-opacity ${automaticLoading ? "opacity-55" : "opacity-100"}`}>
@@ -149,7 +212,7 @@ export default function PlayerModerationDirectory({
                     <div key={player.id} className="min-w-0">
                       <Link href={`/players/afk-wintrade/${player.id}`} className="group flex h-full min-h-14 items-center rounded-xl border border-red-400/20 bg-pc-bg-elevated p-3 transition-colors hover:border-red-400/40 hover:bg-red-400/[0.04]">
                         <div className="min-w-0 truncate text-sm font-semibold text-pc-text transition-colors group-hover:text-pc-accent">
-                          <PlayerName playerId={player.id} cheater={player.cheater} susCount={player.susCount} dropper={player.dropper} afkWintrade={player.afkWintrade} automaticAfk={true} boosted={player.boosted} altAccount={player.altAccount}>{player.name}</PlayerName>
+                          <PlayerName playerId={player.id} cheater={player.cheater} susCount={player.susCount} dropper={player.dropper && Number(player.dropperVoteCount ?? 0) >= COMMUNITY_TAG_MINIMUM_VOTES} afkWintrade={player.afkWintrade && Number(player.afkWintradeVoteCount ?? 0) >= COMMUNITY_TAG_MINIMUM_VOTES} automaticAfk={true} boosted={player.boosted} altAccount={player.altAccount}>{player.name}</PlayerName>
                         </div>
                       </Link>
                     </div>

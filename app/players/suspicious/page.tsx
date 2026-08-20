@@ -11,6 +11,7 @@ import { useLocalization } from "@/lib/localization-context";
 
 const FETCH_PAGE_SIZE = 100;
 const DISPLAY_PAGE_SIZE = 32;
+const SUSPICIOUS_TAG_MINIMUM_FLAGS = 5;
 
 async function fetchAllSuspiciousPlayers(name: string): Promise<CheaterPlayer[]> {
   const players: CheaterPlayer[] = [];
@@ -90,8 +91,9 @@ export default function SuspiciousPage() {
       <div>
         <Link href="/players" className="text-pc-accent text-xs hover:underline mb-2 inline-block">{t("generated.players.players")}</Link>
         <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.players.suspiciousPlayers")}</h1>
-        <p className="text-pc-text-secondary text-sm mt-1">
-          {t("generated.players.playersFlaggedForUnusualBehaviorUnderInvestigation")}</p>
+        <div className="mt-3 rounded-xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-sm font-medium text-amber-50 backdrop-blur-md" role="note">
+          {t("moderation.suspiciousThresholdNotice")}
+        </div>
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -126,6 +128,7 @@ export default function SuspiciousPage() {
           {(entry) => {
             const isPrivate = entry.kind === "private";
             const susCount = isPrivate ? entry.account.susCount : entry.player.susCount;
+            const visibleSusCount = susCount >= SUSPICIOUS_TAG_MINIMUM_FLAGS ? susCount : 0;
             const reasons = isPrivate ? entry.account.topReasons : entry.player.topReasons;
             return (
             <Link
@@ -135,11 +138,11 @@ export default function SuspiciousPage() {
               <div className="flex min-w-0 items-start justify-between gap-2">
                 <div className="min-w-0 truncate text-sm font-semibold text-pc-text">
                   {isPrivate
-                    ? <PlayerName playerId={0} cheater={entry.account.cheater} susCount={entry.account.susCount} verified={false}>{entry.account.displayName}</PlayerName>
-                    : <PlayerName playerId={entry.player.id} cheater={entry.player.cheater} susCount={entry.player.susCount}>{entry.player.name}</PlayerName>}
+                    ? <PlayerName playerId={0} cheater={entry.account.cheater} susCount={visibleSusCount} verified={false}>{entry.account.displayName}</PlayerName>
+                    : <PlayerName playerId={entry.player.id} cheater={entry.player.cheater} susCount={visibleSusCount}>{entry.player.name}</PlayerName>}
                 </div>
                 <span className="w-fit shrink-0 rounded-full border border-amber-500/30 bg-amber-500/15 px-2 py-1 text-xs font-semibold text-amber-300">
-                  {formatNumber(susCount)} {susCount === 1 ? t("generated.players.flag") : t("generated.players.flags")}
+                  {formatNumber(susCount)} {susCount === 1 ? t("moderation.suspiciousVote") : t("moderation.suspiciousVotes")}
                 </span>
               </div>
               <div className="min-w-0">

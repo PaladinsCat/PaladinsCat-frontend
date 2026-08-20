@@ -7,6 +7,9 @@ const apiDestination =
 
 const nextConfig: NextConfig = {
   output: undefined,
+  // A local proxy instance can run beside another Next dev server without
+  // contending for its .next/dev lock. Production keeps the normal .next path.
+  distDir: process.env.NEXT_DIST_DIR || ".next",
   experimental: {
     // Production builds on the local desktop can fan out to many workers, but
     // the VPS runs the whole Docker stack in a 2GB budget. Keep static

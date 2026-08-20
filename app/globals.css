@@ -1,4 +1,7 @@
-@import "tailwindcss";
+@import "tailwindcss" source(none);
+@source "../app";
+@source "../components";
+@source "../lib";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
@@ -126,6 +129,7 @@
   --pc-border: oklch(0.420 0.010 280);        /* #3c3f44 — default borders */
 
   /* Text — three levels of emphasis */
+  --pc-title: oklch(0.960 0.003 280);          /* bright neutral page titles */
   --pc-text: oklch(0.870 0.005 280);          /* #dfdfd6 — primary text */
   --pc-text-secondary: oklch(0.620 0.005 280); /* #98989f — secondary text, descriptions */
   --pc-text-muted: oklch(0.450 0.005 280);    /* #6a6a71 — labels, placeholders, disabled */
@@ -135,7 +139,7 @@
   --pc-glass-bg: rgba(24, 25, 31, 0.82);
   --pc-glass-bg-light: rgba(24, 25, 31, 0.45);
   --pc-glass-bg-subtle: rgba(24, 25, 31, 0.35);
-  --pc-glass-blur: blur(4px) saturate(0.9) brightness(0.9) contrast(0.9);
+  --pc-glass-blur: blur(12px) saturate(0.9) brightness(0.9) contrast(0.9);
 
   /* ── shadcn/ui theme variables — mapped to PaladinsCat dark theme ── */
   --background: var(--pc-bg);
@@ -757,22 +761,8 @@ main :where(a, button, input, select, textarea):focus-visible {
   outline-offset: 2px;
 }
 
-/* Opaque variant for leaderboard */
-.pc-card--opaque {
-  background-color: var(--pc-bg-elevated) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
 .pc-card:hover {
   border-color: var(--pc-accent-mid);
-}
-
-/* Opaque modifier — restores full opacity on cards that also have pc-card-opaque */
-.pc-card.pc-card-opaque {
-  background-color: var(--pc-bg-elevated) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
 }
 
 /* Card variant: no padding (for tables, lists) */
@@ -1020,10 +1010,16 @@ main :where(a, button, input, select, textarea):focus-visible {
   margin-bottom: 6px;
 }
 
-/* Heading: semibold, pc-text */
+/* Heading: semibold, bright neutral text */
 .pc-heading {
   font-weight: 600;
-  color: var(--pc-text);
+  color: var(--pc-title);
+}
+
+/* Page titles must remain neutral even when an older route supplies the
+   accent utility class. */
+.pc-heading.text-pc-accent {
+  color: var(--pc-title);
 }
 
 .pc-heading-lg {
@@ -1110,20 +1106,38 @@ main :where(a, button, input, select, textarea):focus-visible {
    to all glass surfaces. Uses !important on both properties so they cannot
    be overridden by Tailwind utility classes or inline styles. */
 [class~="bg-pc-bg-elevated"],
+[class~="bg-pc-bg-elevated/50"],
+[class~="bg-pc-bg-elevated/70"],
+[class~="bg-pc-bg-elevated/75"],
+[class~="bg-pc-bg-elevated/80"],
 [class~="bg-pc-bg-elevated/90"],
+[class~="bg-pc-bg-elevated/95"],
 [class~="bg-pc-bg-secondary"][class*="border"]:not(nav):not(footer),
 [class~="bg-pc-bg-secondary"][class*="rounded"]:not(nav):not(footer),
+[class~="bg-pc-bg-secondary/40"][class*="rounded"],
+[class~="bg-pc-bg-secondary/45"][class*="rounded"],
+[class~="bg-pc-bg-secondary/50"][class*="rounded"],
+[class~="bg-pc-bg-secondary/60"][class*="rounded"],
 [class~="bg-pc-bg-secondary/70"][class*="rounded"],
 [class~="bg-pc-bg-secondary/80"][class*="rounded"],
+[class~="bg-pc-bg-secondary/90"][class*="rounded"],
 [class~="bg-pc-accent/8"][class*="rounded"],
 [class~="bg-pc-bg"][class*="rounded"],
+[class~="bg-pc-bg/25"][class*="rounded"],
 [class~="bg-pc-bg"][class*="border"][class*="rounded"],
 [class~="bg-pc-bg/50"][class*="border"][class*="rounded"],
 [class~="bg-pc-bg/30"][class*="border"][class*="rounded"],
+[class~="bg-pc-bg/35"][class*="border"][class*="rounded"],
+[class~="bg-pc-bg/45"][class*="border"][class*="rounded"],
+[class~="bg-pc-bg/55"][class*="border"][class*="rounded"],
+[class~="bg-pc-bg/60"][class*="border"][class*="rounded"],
 [class~="bg-pc-card"],
+[class~="bg-pc-card/50"],
+[class~="bg-[var(--pc-bg-elevated)]"][class*="rounded"],
+[class~="bg-[var(--pc-bg-secondary)]"][class*="border"][class*="rounded"],
 .bg-card,
 .pc-glass,
-.pc-card:not(.pc-card--opaque):not(.pc-card-opaque),
+.pc-card,
 .pc-card-flush,
 .pc-input,
 .pc-search-pill,
@@ -1155,15 +1169,6 @@ main :where(a, button, input, select, textarea):focus-visible {
    background-color: var(--pc-glass-bg-subtle);
    backdrop-filter: var(--pc-glass-blur);
    -webkit-backdrop-filter: var(--pc-glass-blur);
-}
-
-/* Activity cards use the same opaque elevated surface as other dense stats
-   cards so the rotating wallpaper does not bleed through the data. */
-.pc-player-activity-page .pc-card:not(.pc-card--opaque):not(.pc-card-opaque),
-.pc-player-activity-page .pc-surface-light {
-  background-color: var(--pc-bg-elevated) !important;
-  -webkit-backdrop-filter: none !important;
-  backdrop-filter: none !important;
 }
 
 /* Page wrapper: consistent max-width, padding */
