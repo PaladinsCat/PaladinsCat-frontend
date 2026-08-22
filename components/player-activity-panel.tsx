@@ -2,7 +2,7 @@
 
 import { createContext, Fragment, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
-import { fetchMatchesOverview, fetchPresenceHourlyStats, fetchPresenceStats, type MatchHourlyStats, type MatchQueueActivity, type PresenceHourlyStats, type PresenceStats } from "@/lib/api-client";
+import { fetchMatchesOverview, fetchPresenceHourlyStats, fetchPresenceStats, type MatchHourlyStats, type MatchQueueActivity, type MatchesOverview, type PresenceHourlyStats, type PresenceStats } from "@/lib/api-client";
 import { LoadingPanel } from "@/components/async-state";
 import CardDetailLink from "@/components/card-detail-link";
 import { useLocalization } from "@/lib/localization-context";
@@ -36,6 +36,12 @@ type DisplayActivity = {
   total24h: number;
   regions: Array<{ region: string; total24h: number; matchesPerHour: number }>;
   hourly: Array<{ hour: number; date: string; total: number; regions: Record<string, number> }>;
+};
+
+export type PlayerActivityInitialData = {
+  overview: MatchesOverview | null;
+  presence: PresenceStats | null;
+  presenceHourly: PresenceHourlyStats | null;
 };
 
 function rankedFallback(stats: MatchHourlyStats | null): MatchQueueActivity[] {
@@ -94,18 +100,27 @@ function aggregateQueues(queues: MatchQueueActivity[]): DisplayActivity {
   };
 }
 
-export default function PlayerActivityPanel({ showStatements = true }: { showStatements?: boolean }) {
+export default function PlayerActivityPanel({
+  showStatements = true,
+  initialData = null,
+}: {
+  showStatements?: boolean;
+  initialData?: PlayerActivityInitialData | null;
+}) {
   const { t, formatNumber, formatHourFromUtcBucket } = useLocalization();
-  const [hourlyStats, setHourlyStats] = useState<MatchHourlyStats | null>(null);
-  const [droppedIdsByHour, setDroppedIdsByHour] = useState<Record<string, string[]>>({});
-  const [presence, setPresence] = useState<PresenceStats | null>(null);
-  const [presenceHourly, setPresenceHourly] = useState<PresenceHourlyStats | null>(null);
-  const [presenceHourlyLoading, setPresenceHourlyLoading] = useState(true);
-  const [activityUnavailable, setActivityUnavailable] = useState(false);
+  // Keep the server payload stable for this mounted page. Starting with it
+  // avoids a blank client-only render and the duplicate hydration fetch.
+  const [serverData] = useState<PlayerActivityInitialData | null>(initialData);
+  const [hourlyStats, setHourlyStats] = useState<MatchHourlyStats | null>(() => serverData?.overview?.hourly ?? null);
+  const [droppedIdsByHour, setDroppedIdsByHour] = useState<Record<string, string[]>>(() => serverData?.overview?.droppedIdsByHour ?? {});
+  const [presence, setPresence] = useState<PresenceStats | null>(() => serverData?.presence ?? null);
+  const [presenceHourly, setPresenceHourly] = useState<PresenceHourlyStats | null>(() => serverData?.presenceHourly ?? null);
+  const [presenceHourlyLoading, setPresenceHourlyLoading] = useState(() => serverData?.presenceHourly == null);
+  const [activityUnavailable, setActivityUnavailable] = useState(() => serverData?.overview != null && !serverData.overview.hourly);
   const [selectedQueue, setSelectedQueue] = useState<"all" | number>("all");
   const [selectedPlayerQueue, setSelectedPlayerQueue] = useState<"all" | number>("all");
   const [playerBreakdown, setPlayerBreakdown] = useState<"region" | "platform">("region");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => serverData?.overview == null);
   // The data request is the only loading authority here. A missed route
   // transition timer must not keep this high-traffic page blank indefinitely.
   const displayLoading = loading;
@@ -140,10 +155,12 @@ export default function PlayerActivityPanel({ showStatements = true }: { showSta
         if (active) setLoading(false);
       }
     };
-    void load();
+    // The server already obtained the first payload. Refresh it on the normal
+    // cadence instead of reissuing the same requests during hydration.
+    if (!serverData?.overview?.hourly) void load();
     const interval = window.setInterval(() => void load(), 60_000);
     return () => { active = false; window.clearInterval(interval); };
-  }, []);
+  }, [serverData]);
 
   useEffect(() => {
     let active = true;
@@ -155,10 +172,10 @@ export default function PlayerActivityPanel({ showStatements = true }: { showSta
         setPresenceHourlyLoading(false);
       }
     };
-    void load();
+    if (!serverData?.presenceHourly) void load();
     const interval = window.setInterval(() => void load(), 60_000);
     return () => { active = false; window.clearInterval(interval); };
-  }, [selectedPlayerQueue]);
+  }, [selectedPlayerQueue, serverData]);
 
   const queues = hourlyStats?.queues ?? rankedFallback(hourlyStats);
   const display = useMemo(() => {
