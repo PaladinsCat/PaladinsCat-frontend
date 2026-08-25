@@ -20,7 +20,7 @@ import PlayerLoadingFrame from "@/components/player-loading-frame";
 import { fetchPlayerModeration } from "@/lib/player-moderation";
 import { useLocalization } from "@/lib/localization-context";
 import { estimateLiveTeamWinChance } from "@/lib/live-team-estimate";
-import { parsePlayerTitle } from "@/lib/player-title";
+import { parsePlayerTitle, parsePlayerTitleSegments } from "@/lib/player-title";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
 import { csrfHeader } from "@/lib/csrf";
 
@@ -540,9 +540,11 @@ export default function PlayerProfilePage() {
       : 'text-amber-300 bg-amber-500/10 border-amber-500/20';
   const rawAvatarUrl = player.avatar_url?.trim();
   const avatarUrl = !avatarLoadFailed && /^https?:\/\//i.test(rawAvatarUrl ?? '') ? rawAvatarUrl : null;
-  // Hi-Rez titles arrive as `<font color="...">text</font>` markup. Parse it so
-  // the color is applied as a style and only the plain text is rendered.
-  const parsedTitle = parsePlayerTitle(player.title ?? '');
+  // Hi-Rez titles arrive as `<font color="...">text</font>` markup (possibly
+    // several concatenated tags for multi-color titles). Parse it so each
+    // segment's color is applied as a style and only plain text is rendered.
+    const titleSegments = parsePlayerTitleSegments(player.title ?? '');
+    const parsedTitle = parsePlayerTitle(player.title ?? '');
 
   return (
     <div className="space-y-5">
@@ -704,13 +706,19 @@ export default function PlayerProfilePage() {
             {/* Title + loading frame */}
             <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
               {player.title && (
-                <span
-                  className="text-sm text-pc-text-secondary sm:text-base"
-                  style={parsedTitle.color ? { color: parsedTitle.color } : undefined}
-                >
-                  {parsedTitle.text}
-                </span>
-              )}
+                              <span className="text-sm text-pc-text-secondary sm:text-base">
+                                {titleSegments
+                                  ? titleSegments.map((segment, index) => (
+                                      <span
+                                        key={index}
+                                        style={segment.color ? { color: segment.color } : undefined}
+                                      >
+                                        {segment.text}
+                                      </span>
+                                    ))
+                                  : parsedTitle.text}
+                              </span>
+                            )}
               {player.loading_frame && (
                 <span className="text-sm font-medium text-pc-accent/80 sm:text-base">▸ {player.loading_frame}</span>
               )}

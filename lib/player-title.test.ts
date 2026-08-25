@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { parsePlayerTitle } from "./player-title.ts";
+import { parsePlayerTitle, parsePlayerTitleSegments } from "./player-title.ts";
 
 test("parses a double-quoted hex color title (production sample)", () => {
   const parsed = parsePlayerTitle('<font color="#b52834">never forgives, never forgets</font>');
@@ -55,4 +55,41 @@ test("trims surrounding whitespace and newlines", () => {
     text: "hi",
     color: "red",
   });
+});
+
+test("parses concatenated multi-color font tags (production PRIDE sample)", () => {
+  const raw =
+    '<font color="#E40204">P</font><font color="#FF8C00">R</font>' +
+    '<font color="#FFED00">I</font><font color="#008026">D</font>' +
+    '<font color="#AD379D">E</font>';
+  const segments = parsePlayerTitleSegments(raw);
+  assert.deepEqual(
+    segments?.map((s) => s.text),
+    ["P", "R", "I", "D", "E"],
+  );
+  assert.deepEqual(
+    segments?.map((s) => s.color),
+    ["#E40204", "#FF8C00", "#FFED00", "#008026", "#AD379D"],
+  );
+  // Multiple distinct colors -> no single color, text is the concatenation.
+  assert.deepEqual(parsePlayerTitle(raw), { text: "PRIDE", color: null });
+});
+
+test("keeps the color when every segment shares it", () => {
+  const raw = '<font color="#b52834">never </font><font color="#b52834">forgives</font>';
+  assert.deepEqual(parsePlayerTitle(raw), { text: "never forgives", color: "#b52834" });
+});
+
+test("falls back to plain text when markup is mixed with plain text", () => {
+  const parsed = parsePlayerTitle('<font color="red">hi</font> there');
+  assert.equal(parsed.text, '<font color="red">hi</font> there');
+  assert.equal(parsed.color, null);
+  assert.equal(parsePlayerTitleSegments('<font color="red">hi</font> there'), null);
+});
+
+test("still rejects nested tags inside multi-segment markup", () => {
+  const raw =
+    '<font color="red"><img src=x onerror=alert(1)>a</font><font color="blue">b</font>';
+  assert.equal(parsePlayerTitleSegments(raw), null);
+  assert.equal(parsePlayerTitle(raw).color, null);
 });
