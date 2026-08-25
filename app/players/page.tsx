@@ -1,9 +1,14 @@
 import { unstable_cache } from "next/cache";
+import type { Metadata } from "next";
 import {
   mapPlayersOverviewResponse,
   type PlayersOverview,
 } from "@/lib/api-client";
 import PlayersPageClient from "./players-page-client";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/players" },
+};
 
 
 // User-facing error keys — resolved at the UI layer via t()

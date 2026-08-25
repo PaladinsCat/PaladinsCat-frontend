@@ -3,7 +3,6 @@ import { createLocalizedMetadata } from "@/lib/server-localization";
 export async function generateMetadata() {
   return createLocalizedMetadata("seo.stats.title", {
     descriptionKey: "seo.stats.description",
-    metadata: { alternates: { canonical: "/stats" } },
   });
 }
 

@@ -2118,7 +2118,7 @@ export async function fetchSiteVersion(): Promise<SiteVersion | null> {
 
 // ── Champions ──
 
-type ChampionOverviewRaw = {
+export type ChampionOverviewRaw = {
   champions?: Array<{
     id: number; name: string; roles?: string; title?: string; health?: number; speed?: number; image_path?: string | null;
   }>;
@@ -2128,7 +2128,7 @@ type ChampionOverviewRaw = {
 let championsOverviewCache: { key: string; value: Champion[]; expiresAt: number } | null = null;
 let championsOverviewInFlight: { key: string; promise: Promise<Champion[]> } | null = null;
 
-function mapChampionsOverview(raw: ChampionOverviewRaw): Champion[] {
+export function mapChampionsOverview(raw: ChampionOverviewRaw): Champion[] {
   const catalog = raw.champions ?? [];
   const stats = mapStatsChampionRows(raw.stats ?? []);
   const statsById = new Map(stats.map((stat) => [stat.championId, stat]));

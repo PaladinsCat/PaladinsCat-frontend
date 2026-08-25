@@ -33,9 +33,10 @@ import {
   type PublicStatsScope,
 } from "@/lib/api-client";
 import { getRankIconPath, getTierColor, resolveEffectiveTier } from "@/lib/tier-utils";
-import { withStoredLobbyTier } from "@/lib/lobby-tier";
+import { getStoredLobbyTierFilter, withStoredLobbyTier } from "@/lib/lobby-tier";
 import { useLocalization } from "@/lib/localization-context";
 import { EN_MESSAGES, type TranslationKey } from "@/lib/localization/messages";
+import type { ChampionPagePayload } from "@/lib/champion-page-data";
 
 // Keep this client request on the neutral same-origin proxy. Some embedded
 // browsers block background requests below /api, while /_pc is forwarded to
@@ -95,14 +96,16 @@ interface ChampionStats {
   totalWins: number | null;
 }
 
-export type ChampionPagePayload = {
-  stats: Record<string, unknown> | null;
-  talentStats: ChampionTalentStatsResponse | null;
-  items: ItemStat[];
-  maps: ChampionMapStat[];
-  performance: PerformanceMetricsResponse;
-  championPerformance: Partial<Record<PerformanceMetricKey, ChampionPerformanceDistribution>>;
-};
+function statsFromPageData(data: ChampionPagePayload | null): ChampionStats | null {
+  const stats = data?.stats;
+  return stats ? {
+    avgRating: stats.avg_league_tier != null ? Number(stats.avg_league_tier) : null,
+    avgWinRate: stats.win_rate != null ? Number(stats.win_rate) : null,
+    totalPlays: stats.total_matches != null ? Number(stats.total_matches) : null,
+    totalMatches: stats.total_matches != null ? Number(stats.total_matches) : null,
+    totalWins: stats.wins != null ? Number(stats.wins) : null,
+  } : null;
+}
 
 // Tier/trend types from existing API
 interface TierStat {
@@ -193,7 +196,13 @@ function RankedPerformanceCard({
   );
 }
 
-export default function ChampionDetailPage() {
+export default function ChampionDetailPage({
+  initialChampionData = null,
+  initialPageData = null,
+}: {
+  initialChampionData?: ChampionData | null;
+  initialPageData?: ChampionPagePayload | null;
+}) {
   const { t , formatNumber, formatPercent} = useLocalization();
   const params = useParams();
   const searchParams = useSearchParams();
@@ -204,17 +213,19 @@ export default function ChampionDetailPage() {
     ["casual", "bot", "team_deathmatch", "arcade", "wave_defense", "experiment", "newcomer"] as string[]
   ).includes(requestedScope ?? "") ? requestedScope as PublicStatsScope : "ranked";
 
-  const [championData, setChampionData] = useState<ChampionData | null>(null);
-  const [dataLoaded, setDataLoaded] = useState(false);
-  const [stats, setStats] = useState<ChampionStats | null>(null);
-  const [talentStats, setTalentStats] = useState<ChampionTalentStatsResponse | null>(null);
-  const [championItems, setChampionItems] = useState<ItemStat[]>([]);
-  const [championMaps, setChampionMaps] = useState<ChampionMapStat[]>([]);
-  const [globalPerformance, setGlobalPerformance] = useState<PerformanceMetricsResponse>({});
-  const [championPerformance, setChampionPerformance] = useState<Partial<Record<PerformanceMetricKey, ChampionPerformanceDistribution>>>({});
+  const [championData, setChampionData] = useState<ChampionData | null>(initialChampionData);
+  const [dataLoaded, setDataLoaded] = useState(Boolean(initialChampionData));
+  const [stats, setStats] = useState<ChampionStats | null>(() => statsFromPageData(initialPageData));
+  const [talentStats, setTalentStats] = useState<ChampionTalentStatsResponse | null>(() => (
+    initialPageData?.talentStats ? normalizeChampionTalentStatsResponse(initialPageData.talentStats) : null
+  ));
+  const [championItems, setChampionItems] = useState<ItemStat[]>(initialPageData?.items ?? []);
+  const [championMaps, setChampionMaps] = useState<ChampionMapStat[]>(initialPageData?.maps ?? []);
+  const [globalPerformance, setGlobalPerformance] = useState<PerformanceMetricsResponse>(initialPageData?.performance ?? {});
+  const [championPerformance, setChampionPerformance] = useState<Partial<Record<PerformanceMetricKey, ChampionPerformanceDistribution>>>(initialPageData?.championPerformance ?? {});
   const [tierStats, setTierStats] = useState<TierStat[]>([]);
   const [patchTrends, setPatchTrends] = useState<PatchTrend[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialPageData);
 
   // Static champion reference metadata lets direct /champions/[name] routes
   // resolve icons/roles before DB-backed stats load. It must never provide
@@ -225,15 +236,17 @@ export default function ChampionDetailPage() {
 
   useEffect(() => {
     let cancelled = false;
+    const preserveInitialChampionData = initialChampionData != null
+      && championSlug(initialChampionData.name) === championSlug(name);
 
-    setDataLoaded(false);
+    if (!preserveInitialChampionData) setDataLoaded(false);
     getChampionData(name)
       .then((data) => {
         if (cancelled) return;
         setChampionData(data ? { ...data, roles: data.roles.length > 0 ? data.roles : staticChampion?.roles ?? [] } : null);
       })
       .catch(() => {
-        if (!cancelled) setChampionData(null);
+        if (!cancelled && !preserveInitialChampionData) setChampionData(null);
       })
       .finally(() => {
         if (!cancelled) setDataLoaded(true);
@@ -242,7 +255,7 @@ export default function ChampionDetailPage() {
     return () => {
       cancelled = true;
     };
-  }, [staticChampion?.roles, name]);
+  }, [initialChampionData, staticChampion?.roles, name]);
 
   useEffect(() => {
     if (!championData) {
@@ -254,14 +267,7 @@ export default function ChampionDetailPage() {
       return;
     }
     const applyPageData = (data: ChampionPagePayload) => {
-      const s = data.stats;
-      setStats(s ? {
-        avgRating: s.avg_league_tier != null ? Number(s.avg_league_tier) : null,
-        avgWinRate: s.win_rate != null ? Number(s.win_rate) : null,
-        totalPlays: s.total_matches != null ? Number(s.total_matches) : null,
-        totalMatches: s.total_matches != null ? Number(s.total_matches) : null,
-        totalWins: s.wins != null ? Number(s.wins) : null,
-      } : null);
+      setStats(statsFromPageData(data));
       setTalentStats(data.talentStats ? normalizeChampionTalentStatsResponse(data.talentStats) : null);
       setChampionItems(data.items);
       setChampionMaps(data.maps);
@@ -269,15 +275,19 @@ export default function ChampionDetailPage() {
       setChampionPerformance(data.championPerformance);
     };
 
-    setLoading(true);
-    setStats(null);
-    setTalentStats(null);
-    setChampionItems([]);
-    setChampionMaps([]);
-    setGlobalPerformance({});
-    setChampionPerformance({});
-    setTierStats([]);
-    setPatchTrends([]);
+    const preserveInitialRankedData = statsScope === "ranked" && initialPageData != null;
+    if (preserveInitialRankedData && getStoredLobbyTierFilter() === "all") return;
+    if (!preserveInitialRankedData) {
+      setLoading(true);
+      setStats(null);
+      setTalentStats(null);
+      setChampionItems([]);
+      setChampionMaps([]);
+      setGlobalPerformance({});
+      setChampionPerformance({});
+      setTierStats([]);
+      setPatchTrends([]);
+    }
 
     if (statsScope !== "ranked") {
       fetchStatsChampions({ scope: statsScope, limit: 200 }).then(async (champions) => {
@@ -309,15 +319,17 @@ export default function ChampionDetailPage() {
       })
       .then(applyPageData)
       .catch(() => {
-        setStats(null);
-        setTalentStats(null);
-        setChampionItems([]);
-        setChampionMaps([]);
-        setGlobalPerformance({});
-        setChampionPerformance({});
+        if (!preserveInitialRankedData) {
+          setStats(null);
+          setTalentStats(null);
+          setChampionItems([]);
+          setChampionMaps([]);
+          setGlobalPerformance({});
+          setChampionPerformance({});
+        }
       })
       .finally(() => setLoading(false));
-  }, [championData, staticChampion, statsScope]);
+  }, [championData, initialPageData, staticChampion, statsScope]);
 
 
   const talentStatsById = useMemo(() => {

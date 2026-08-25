@@ -1,7 +1,9 @@
 import type { MetadataRoute } from "next";
+import { unstable_cache } from "next/cache";
 import { SITE_URL } from "@/lib/seo";
 import { STATIC_CHAMPIONS } from "@/lib/static-champions";
 import { championSlug } from "@/lib/utils";
+import { getAllPosts, getPostLink } from "@/lib/blog";
 
 const PLAYER_ROLES = ["frontline", "damage", "flank", "support"] as const;
 // These URLs remain useful after a map leaves rotation because their historic
@@ -72,7 +74,11 @@ const staticRoutes: Array<{
   { path: "/contact", changeFrequency: "yearly", priority: 0.2 },
 ];
 
-export default function sitemap(): MetadataRoute.Sitemap {
+const getCachedBlogPosts = unstable_cache(getAllPosts, ["sitemap-blog-posts"], {
+  revalidate: 3600,
+});
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticEntries = staticRoutes.map((route) => ({
     url: `${SITE_URL}${route.path}`,
     changeFrequency: route.changeFrequency,
@@ -97,5 +103,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.68,
   }));
 
-  return [...staticEntries, ...championEntries, ...roleEntries, ...mapEntries];
+  const blogEntries = (await getCachedBlogPosts()).map((post) => ({
+    url: `${SITE_URL}${getPostLink(post.slug)}`,
+    lastModified: post.publishedAt,
+    changeFrequency: "monthly" as const,
+    priority: 0.7,
+  }));
+
+  return [...staticEntries, ...championEntries, ...roleEntries, ...mapEntries, ...blogEntries];
 }

@@ -1,4 +1,5 @@
 import ChampionRateDetailPage from "@/components/ChampionRateDetailPage";
+import { getInitialRankedChampions } from "@/lib/server-champions";
 
 const CONFIG = {
   key: "banRate" as const,
@@ -7,7 +8,14 @@ const CONFIG = {
   fill: "rgba(251,113,133,0.16)",
 } as const;
 
-export default function BanRatePage() {
+export const dynamic = "force-dynamic";
+
+export default async function BanRatePage() {
+  const initialChampions = await getInitialRankedChampions().catch((error) => {
+    console.error("[stats/banrate] Server champion fetch failed; using browser fallback", error);
+    return null;
+  });
+
   return (
-    <ChampionRateDetailPage config={CONFIG} />);
+    <ChampionRateDetailPage config={CONFIG} initialChampions={initialChampions} />);
 }

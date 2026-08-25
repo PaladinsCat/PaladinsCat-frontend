@@ -10,6 +10,7 @@ import { championSlug } from "@/lib/utils";
 import { getRankIconPath } from "@/lib/tier-utils";
 import { getStatQuality } from "@/lib/stat-quality";
 import { useLocalization } from "@/lib/localization-context";
+import { getStoredLobbyTierFilter } from "@/lib/lobby-tier";
 import { Palette, ShieldAlert, Trophy } from "lucide-react";
 import { ROUTE_CONTENT_SETTLE_MS } from "@/lib/route-transition-context";
 
@@ -50,10 +51,21 @@ function buildStaticBase(): Champion[] {
   }));
 }
 
-export default function ChampionTable() {
+function mergeChampionStats(rows: Champion[]): Champion[] {
+  const statsByName = new Map(rows.map((row) => [championSlug(row.name), row]));
+  return buildStaticBase().map((champion) => {
+    const stats = statsByName.get(championSlug(champion.name));
+    return stats ? { ...champion, ...stats, name: stats.name || champion.name } : champion;
+  });
+}
+
+export default function ChampionTable({ initialChampions = null }: { initialChampions?: Champion[] | null }) {
   const { t , formatNumber} = useLocalization();
-  const [champions, setChampions] = useState<Champion[]>(buildStaticBase);
-  const [dbAvailable, setDbAvailable] = useState<boolean | null>(null); // null = checking
+  const hasInitialChampions = Boolean(initialChampions?.length);
+  const [champions, setChampions] = useState<Champion[]>(() => (
+    hasInitialChampions ? mergeChampionStats(initialChampions ?? []) : buildStaticBase()
+  ));
+  const [dbAvailable, setDbAvailable] = useState<boolean | null>(hasInitialChampions ? true : null); // null = checking
   const [filterRole, setFilterRole] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<"name" | "winRate" | "banRate" | "popularity">("name");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
@@ -64,6 +76,8 @@ export default function ChampionTable() {
 
   // Try to fetch DB stats in the background and merge them in
   useEffect(() => {
+    if (hasInitialChampions && statsScope === "ranked" && getStoredLobbyTierFilter() === "all") return;
+
     let cancelled = false;
     let revealTimer: number | undefined;
     const entranceStartedAt = performance.now();
@@ -78,8 +92,10 @@ export default function ChampionTable() {
 
     async function tryFetchStats() {
       try {
-        setDbAvailable(null);
-        setChampions(buildStaticBase());
+        if (!hasInitialChampions || statsScope !== "ranked") {
+          setDbAvailable(null);
+          setChampions(buildStaticBase());
+        }
         const data = await fetchChampions({ scope: statsScope });
         if (cancelled) return;
 
@@ -115,11 +131,13 @@ export default function ChampionTable() {
             );
             setDbAvailable(true);
           });
-        } else {
+        } else if (!hasInitialChampions || statsScope !== "ranked") {
           revealAfterEntrance(() => setDbAvailable(false));
         }
       } catch {
-        if (!cancelled) revealAfterEntrance(() => setDbAvailable(false));
+        if (!cancelled && (!hasInitialChampions || statsScope !== "ranked")) {
+          revealAfterEntrance(() => setDbAvailable(false));
+        }
       }
     }
 
@@ -128,7 +146,7 @@ export default function ChampionTable() {
       cancelled = true;
       if (revealTimer !== undefined) window.clearTimeout(revealTimer);
     };
-  }, [statsScope]);
+  }, [hasInitialChampions, statsScope]);
 
   const filtered = useMemo(() => champions
     .filter((c) => {

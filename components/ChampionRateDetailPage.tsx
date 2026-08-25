@@ -6,6 +6,7 @@ import { fetchChampions, type Champion } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
 import { useLocalization } from "@/lib/localization-context";
+import { getStoredLobbyTierFilter } from "@/lib/lobby-tier";
 import type { TranslationKey } from "@/lib/localization/messages";
 import { ContentFade } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
@@ -112,13 +113,23 @@ function pctDiff(value: number, base: number): number {
   return base !== 0 ? ((value - base) / base) * 100 : 0;
 }
 
-export default function ChampionRateDetailPage({ config }: { config: RateMetricConfig }) {
+export default function ChampionRateDetailPage({
+  config,
+  initialChampions = null,
+}: {
+  config: RateMetricConfig;
+  initialChampions?: Champion[] | null;
+}) {
   const { t, formatNumber, formatPercent: formatRate, formatSignedPercent } = useLocalization();
-  const [champions, setChampions] = useState<Champion[]>([]);
-  const [loading, setLoading] = useState(true);
-  const displayLoading = useRouteSettledLoading(loading);
+  const hasInitialChampions = Boolean(initialChampions?.length);
+  const [champions, setChampions] = useState<Champion[]>(initialChampions ?? []);
+  const [loading, setLoading] = useState(!hasInitialChampions);
+  const routeDisplayLoading = useRouteSettledLoading(loading);
+  const displayLoading = hasInitialChampions ? false : routeDisplayLoading;
 
   useEffect(() => {
+    if (hasInitialChampions && getStoredLobbyTierFilter() === "all") return;
+
     let cancelled = false;
 
     fetchChampions({ limit: "200" })
@@ -126,7 +137,7 @@ export default function ChampionRateDetailPage({ config }: { config: RateMetricC
         if (!cancelled) setChampions(rows);
       })
       .catch(() => {
-        if (!cancelled) setChampions([]);
+        if (!cancelled && !hasInitialChampions) setChampions([]);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -135,7 +146,7 @@ export default function ChampionRateDetailPage({ config }: { config: RateMetricC
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [hasInitialChampions]);
 
   const sections = useMemo(() => buildSections(champions, config.key), [champions, config.key]);
   const allRows = useMemo(() => sections.flatMap((section) => section.champions).sort((a, b) => b.value - a.value), [sections]);

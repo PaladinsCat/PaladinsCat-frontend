@@ -35,7 +35,6 @@ export async function generateMetadata(): Promise<Metadata> {
     creator: SITE_NAME,
     publisher: SITE_NAME,
     other: { "google-adsense-account": "ca-pub-5642439289050032" },
-    alternates: { canonical: "/" },
     icons: {
       icon: [{ url: "/images/icons/paladinscat.png", type: "image/png", sizes: "120x120" }],
       shortcut: "/images/icons/paladinscat.png",
