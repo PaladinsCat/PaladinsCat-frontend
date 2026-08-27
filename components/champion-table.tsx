@@ -3,6 +3,7 @@
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import ScrambleText from "@/components/ScrambleText";
+import SmartImage from "@/components/SmartImage";
 import { fetchChampions, type Champion, type PublicStatsScope } from "@/lib/api-client";
 import { STATIC_CHAMPIONS } from "@/lib/static-champions";
 import { getChampionIconSafe } from "@/lib/champion-icons";
@@ -55,7 +56,14 @@ function mergeChampionStats(rows: Champion[]): Champion[] {
   const statsByName = new Map(rows.map((row) => [championSlug(row.name), row]));
   return buildStaticBase().map((champion) => {
     const stats = statsByName.get(championSlug(champion.name));
-    return stats ? { ...champion, ...stats, name: stats.name || champion.name } : champion;
+    return stats
+      ? {
+          ...champion,
+          ...stats,
+          name: stats.name || champion.name,
+          imagePath: stats.imagePath || champion.imagePath,
+        }
+      : champion;
   });
 }
 
@@ -296,13 +304,15 @@ export default function ChampionTable({ initialChampions = null }: { initialCham
 
                   {/* Portrait */}
                   <div className="shrink-0 w-12 h-12 rounded-lg bg-pc-bg-elevated flex items-center justify-center overflow-hidden border border-pc-border/50 group-hover:border-pc-accent-deep/50 transition-colors">
-                    {c.imagePath ? (
-                      <img src={c.imagePath} alt={c.name} className="w-full h-full object-contain" />
-                    ) : (
-                      <span className="text-lg font-bold text-pc-accent">
-                        {c.name.charAt(0).toUpperCase()}
-                      </span>
-                    )}
+                    <SmartImage
+                      src={c.imagePath || getChampionIconSafe(c.name)}
+                      alt={c.name}
+                      width={48}
+                      height={48}
+                      loading="lazy"
+                      decoding="async"
+                      className="w-full h-full object-contain"
+                    />
                   </div>
 
                   {/* Info */}

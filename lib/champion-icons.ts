@@ -10,17 +10,19 @@ const GENERIC_ICON = "/images/champions/Champion_Generic_Icon.avif";
  * Keys are normalized (lowercased, spaces/punctuation stripped) for fuzzy matching.
  * Values are the actual filename stem (without "Champion " prefix and " Icon.avif" suffix).
  *
- * Covers 4 special cases:
+ * Covers 5 special cases:
  *   Betty La Bomba / Betty la Bomba      → "BettyLaBomba"
  *   Bomb King / Bomb king                → "BombKing"
  *   Sha Lin / Sha Lin                    → "ShaLin"
  *   Mal'Damba / Mal Damba                → "Mal'Damba" (apostrophe in filename)
+ *   VII / Vii                            → "VII"
  */
 const ICON_EXCEPTIONS: Record<string, string> = {
   'bettylabomba': 'BettyLaBomba',
   'bombking': 'BombKing',
   'shalin': 'ShaLin',
   'maldamba': "Mal'Damba",
+  'vii': 'VII',
 };
 
 function normalizeChampionName(name: string): string {

@@ -30,6 +30,7 @@ import type {
   BuildResponse,
 } from "./types.gen";
 import { championSlug } from "./utils";
+import { getChampionIconSafe } from "./champion-icons";
 import { getStoredLobbyTierFilter, withStoredLobbyTier } from "./lobby-tier";
 import { csrfHeader } from "./csrf";
 
@@ -2155,7 +2156,7 @@ export function mapChampionsOverview(raw: ChampionOverviewRaw): Champion[] {
       totalMatches: stat?.totalPlays ?? null,
       totalPlays: stat?.totalPlays ?? null,
       wins: null,
-      imagePath: r.image_path || null,
+      imagePath: getChampionIconSafe(r.name),
     };
   });
 }
