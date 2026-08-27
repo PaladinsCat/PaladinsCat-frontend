@@ -4628,6 +4628,33 @@ export interface MatchDetailWithBans {
   match: MatchData;
   players: MatchPlayerDetail[];
   bans: MatchBan[];
+  /**
+   * Complete match reads carry player loadouts in the same response as the
+   * normalized match rows. These remain optional for compatibility with
+   * older cached responses and limited historical matches.
+   */
+  fact?: MatchFact | null;
+  facts?: MatchFactPlayer[];
+  snapshots?: RatingSnapshot[];
+  rating_snapshots?: RatingSnapshot[];
+  ratingSnapshots?: RatingSnapshot[];
+  loadouts?: MatchFact | MatchFactPlayer[];
+  /** Storage tier selected by the Rust API for this read. */
+  storageStatus?: MatchStorageStatus;
+  storage_status?: MatchStorageStatus;
+  dataStatus?: MatchDataStatus;
+  dataHash?: string;
+  projectionVersion?: number;
+}
+
+export type MatchStorageStatus = "hot" | "cold";
+
+export interface MatchDataStatus {
+  tier: MatchStorageStatus;
+  source: string;
+  historical: boolean;
+  status: string;
+  retrievalMs?: number;
 }
 
 export function deriveMissingMatchCreditRates(detail: MatchDetailWithBans): MatchDetailWithBans {
@@ -5071,23 +5098,38 @@ export async function fetchNonrankedDroppedMatches(params?: {
 }
 
 export async function fetchMatchDetail(matchId: number): Promise<MatchDetailWithBans | null> {
-  const raw = await fetchJson<{ matches: MatchDetailWithBans[]; count: number; notFound?: number[] }>(
+  const raw = await fetchJson<{
+    matches: MatchDetailWithBans[];
+    count: number;
+    notFound?: number[];
+    storageStatus?: MatchStorageStatus;
+    storage_status?: MatchStorageStatus;
+    dataStatus?: MatchDataStatus;
+    dataHash?: string;
+  }>(
     `/matches/${matchId}`,
     { timeoutMs: 130_000, retries: 0 },
   );
   if (raw.matches.length === 0) return null;
-  return deriveMissingMatchCreditRates(raw.matches[0]);
+  const detail = raw.matches[0];
+  return deriveMissingMatchCreditRates({
+    ...detail,
+    storageStatus: detail.storageStatus ?? raw.storageStatus ?? raw.storage_status,
+    dataStatus: detail.dataStatus ?? raw.dataStatus,
+    dataHash: detail.dataHash ?? raw.dataHash,
+  });
 }
 
+/** @deprecated Complete match reads include facts; retained for non-page callers. */
 export async function fetchMatchFact(matchId: number): Promise<MatchFact | null> {
   try {
-    const raw = await fetchJson<MatchFact>(`/matches/fact/${matchId}`);
-    return raw;
+    return await fetchJson<MatchFact>(`/matches/fact/${matchId}`);
   } catch {
     return null;
   }
 }
 
+/** @deprecated Complete match reads include rating snapshots; retained for non-page callers. */
 export async function fetchMatchSnapshots(matchId: number): Promise<RatingSnapshot[]> {
   const raw = await fetchJson<Array<{
     player_id: number | string;

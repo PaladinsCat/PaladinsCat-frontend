@@ -4,13 +4,12 @@
  * Match Detail Page — /matches/[id]
  *
  * Data orchestration layer only. All rendering delegated to components in
- * `components/match-result/`. This page fetches match, fact, snapshots,
- * and stored profile/rating snapshots, then wires them together.
+ * `components/match-result/`. The Rust match endpoint returns one complete
+ * payload (match, players, bans, loadouts, and rating snapshots), which this
+ * page wires together without request-time fanout.
  *
  * Data sources:
- *   GET /api/matches/:id          → match metadata + players + bans
- *   GET /api/matches/fact/:id     → items, cards, talents per player
- *   GET /api/ratings/snapshots/:id → rating changes (pre/post mu/phi)
+ *   GET /api/matches/:id          → complete match payload + storage status
  *   The match response embeds the stored canonical profile, with an ingest
  *   snapshot fallback when no canonical player row exists.
  *
@@ -23,8 +22,6 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
   fetchMatchDetail,
-  fetchMatchFact,
-  fetchMatchSnapshots,
   type MatchDetailWithBans,
   type MatchFact,
   type MatchFactPlayer,
@@ -58,9 +55,28 @@ const MATCH_UI_CACHE_TTL_MS = 30 * 60 * 1000;
 
 type CachedMatchResult = {
   match: MatchDetailWithBans | null;
-  fact: MatchFact | null;
-  snapshots: RatingSnapshot[];
+  /** Legacy cache fields are accepted while old tabs/session entries expire. */
+  fact?: MatchFact | null;
+  snapshots?: RatingSnapshot[];
 };
+
+function embeddedFact(detail: MatchDetailWithBans | null, legacy?: MatchFact | null): MatchFact | null {
+  if (legacy) return legacy;
+  if (!detail) return null;
+  if (detail.fact) return detail.fact;
+  if (detail.loadouts && !Array.isArray(detail.loadouts)) return detail.loadouts;
+  if (Array.isArray(detail.loadouts)) {
+    return { match_id: detail.match.match_id, players: detail.loadouts };
+  }
+  return Array.isArray(detail.facts)
+    ? { match_id: detail.match.match_id, players: detail.facts }
+    : null;
+}
+
+function embeddedSnapshots(detail: MatchDetailWithBans | null, legacy?: RatingSnapshot[]): RatingSnapshot[] {
+  if (legacy) return legacy;
+  return detail?.snapshots ?? detail?.rating_snapshots ?? detail?.ratingSnapshots ?? [];
+}
 
 async function withCurrentStoredModeration(detail: MatchDetailWithBans): Promise<MatchDetailWithBans> {
   const [publicModeration, privateModeration] = await Promise.all([
@@ -177,9 +193,8 @@ export default function MatchDetailPage() {
     async function load() {
       setLoading(true);
       setError(null);
-      // v9 invalidates cached recovered rows whose stored CPM was zero before
-      // credit-rate derivation moved to the database/read boundary.
-      const cacheKey = `paladinscat:match-result:v10:${numericMatchId}`;
+      // v11 invalidates cached rows from the pre-complete-payload fanout path.
+      const cacheKey = `paladinscat:match-result:v11:${numericMatchId}`;
       try {
         const cached = reloadKey === 0 ? readBrowserResult<CachedMatchResult>(cacheKey) : null;
         if (cached) {
@@ -191,12 +206,13 @@ export default function MatchDetailPage() {
             : null;
           if (cancelled) return;
           setMatch(currentMatch);
-          setFact(cached.fact);
-          setSnapshots(cached.snapshots);
+          setFact(embeddedFact(currentMatch, cached.fact));
+          setSnapshots(embeddedSnapshots(currentMatch, cached.snapshots));
           return;
         }
 
-        // Match detail + fact + snapshots in parallel
+        // One Rust request supplies the complete render payload. Do not add
+        // request-time /matches/fact or /ratings/snapshots fanout here.
         const detailResult = await fetchMatchDetail(numericMatchId);
         if (cancelled) return;
         if (!detailResult) {
@@ -204,12 +220,8 @@ export default function MatchDetailPage() {
           return;
         }
         setMatch(detailResult);
-
-        const [factResult, snapResult] = await Promise.all([
-          fetchMatchFact(numericMatchId).catch(() => null),
-          fetchMatchSnapshots(numericMatchId).catch(() => []),
-        ]);
-        if (cancelled) return;
+        const factResult = embeddedFact(detailResult);
+        const snapResult = embeddedSnapshots(detailResult);
         setFact(factResult);
         setSnapshots(snapResult);
 
