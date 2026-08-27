@@ -1,20 +1,24 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getPostBySlug, getPostLink, resolveBlogAssetUrl, resolveBlogLink } from "@/lib/blog";
+import { getAllPosts, getPostBySlug, getPostLink, resolveBlogAssetUrl, resolveBlogLink } from "@/lib/blog";
 import { BLOG_COPY_KEYS } from "@/lib/blog-copy";
 import { getServerLocalization } from "@/lib/server-localization";
 import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-// Blog content is owned by GitHub. Always render against its current contents
-// while keeping the public /blog slug independent from its category directory.
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+// Blog content changes only with the public repository. Generate the known
+// routes into the image and retain ISR for newly published posts.
+export const revalidate = 300;
 
 type BlogPostPageProps = { params: Promise<{ slug: string[] }> };
 
 function joinSlug(slug: string[]): string {
   return slug.join("/");
+}
+
+export async function generateStaticParams() {
+  const posts = await getAllPosts();
+  return posts.map((post) => ({ slug: post.slug.split("/") }));
 }
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
