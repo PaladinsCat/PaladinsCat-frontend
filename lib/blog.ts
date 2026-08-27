@@ -209,10 +209,30 @@ function dateValue(d: string): number {
   return isNaN(t) ? 0 : t;
 }
 
+const getCachedPosts = unstable_cache(
+  fetchPostsFromGitHub,
+  ["blog-posts-v2"],
+  { revalidate: 300, tags: ["blog"] },
+);
+
+let postsInFlight: Promise<BlogPost[]> | null = null;
+
+async function loadCachedPosts(): Promise<BlogPost[]> {
+  if (postsInFlight) return postsInFlight;
+
+  const request = getCachedPosts();
+  postsInFlight = request;
+  try {
+    return await request;
+  } finally {
+    if (postsInFlight === request) postsInFlight = null;
+  }
+}
+
 export async function getAllPosts(): Promise<BlogPost[]> {
   try {
-    const posts = await getCachedPosts();
-    return posts.sort((a, b) => {
+    const posts = await loadCachedPosts();
+    return [...posts].sort((a, b) => {
       const newestFirst = dateValue(b.publishedAt) - dateValue(a.publishedAt);
       return newestFirst || a.slug.localeCompare(b.slug);
     });
@@ -223,35 +243,18 @@ export async function getAllPosts(): Promise<BlogPost[]> {
   }
 }
 
-const getCachedPosts = unstable_cache(
-  fetchPostsFromGitHub,
-  ["blog-posts-v2"],
-  { revalidate: 300, tags: ["blog"] },
-);
-
 export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
   const normalizedSlug = normalizeSlug(slug);
   if (!normalizedSlug) return null;
 
   try {
-    return await getCachedPostBySlug(normalizedSlug);
+    const posts = await loadCachedPosts();
+    return posts.find((post) => post.slug === normalizedSlug) ?? null;
   } catch (error) {
     console.error(`[blog] unable to load post ${slug}`, error);
     return null;
   }
 }
-
-const getCachedPostBySlug = unstable_cache(
-  async (normalizedSlug: string): Promise<BlogPost | null> => {
-    const sourcePaths = await discoverMarkdownFiles();
-    const matches = sourcePaths.filter(sourcePath => sourcePathToSlug(sourcePath) === normalizedSlug);
-    if (matches.length === 0) return null;
-    if (matches.length > 1) throw new Error(`Duplicate GitHub blog slug: ${normalizedSlug}`);
-    return fetchPostFromGitHub(matches[0]);
-  },
-  ["blog-post-by-slug-v2"],
-  { revalidate: 300, tags: ["blog"] },
-);
 
 export function getPostLink(slug: string): string {
   const normalizedSlug = normalizeSlug(slug);
