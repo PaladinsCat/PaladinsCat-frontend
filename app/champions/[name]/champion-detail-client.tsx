@@ -312,7 +312,9 @@ export default function ChampionDetailPage({
     // One cached bundle replaces the old fan-out of champion-specific
     // requests. Redis serves a warm entry immediately and refreshes it in the
     // background after its TTL.
-    fetch(`${CHAMPION_DATA_BASE}${withStoredLobbyTier(`/champions/${championSlug(staticChampion.name)}/page-data`)}`)
+    fetch(`${CHAMPION_DATA_BASE}${withStoredLobbyTier(`/champions/${championSlug(staticChampion.name)}/page-data`)}`, {
+      signal: AbortSignal.timeout(750),
+    })
       .then((response) => {
         if (!response.ok) throw new Error(t("generated.champions.championPageDataUnavailable"));
         return response.json() as Promise<ChampionPagePayload>;

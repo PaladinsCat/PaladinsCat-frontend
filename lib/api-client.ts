@@ -2806,7 +2806,7 @@ export async function fetchRegions(): Promise<RegionStat[]> {
   }));
 }
 
-export async function fetchPlatforms(): Promise<Array<{
+export async function fetchPlatforms(options?: { timeoutMs?: number }): Promise<Array<{
   platform: string;
   championId: number;
   championName: string;
@@ -2823,7 +2823,7 @@ export async function fetchPlatforms(): Promise<Array<{
     win_rate: number | string;
     avg_dpm: number | string;
     avg_hpm: number | string;
-  }>>(`/stats/platforms`);
+  }>>(`/stats/platforms`, { timeoutMs: options?.timeoutMs, retries: 0 });
 
   return raw.map((r) => ({
     platform: r.platform,

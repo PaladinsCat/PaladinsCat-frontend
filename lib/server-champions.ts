@@ -10,7 +10,7 @@ import { fetchServerJson } from "@/lib/server-api";
 
 const getCachedRankedChampions = unstable_cache(
   async (): Promise<Champion[]> => {
-    const raw = await fetchServerJson<ChampionOverviewRaw>("/champions/overview?scope=ranked");
+    const raw = await fetchServerJson<ChampionOverviewRaw>("/champions/overview?scope=ranked", { timeoutMs: 700 });
     return mapChampionsOverview(raw);
   },
   ["ranked-champions-initial-v1"],
