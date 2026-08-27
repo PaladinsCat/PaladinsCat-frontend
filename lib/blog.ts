@@ -1,4 +1,5 @@
 import matter from "gray-matter";
+import { unstable_cache } from "next/cache";
 
 const GITHUB_REPO = process.env.BLOG_GITHUB_REPO || "NabiCook/PaladinsCat";
 const BLOG_GITHUB_PATH = (process.env.BLOG_GITHUB_PATH || "docs/blog").replace(/^\/+|\/+$/g, "");
@@ -142,7 +143,7 @@ function githubHeaders(): Record<string, string> {
   return headers;
 }
 
-async function discoverMarkdownFiles(): Promise<string[]> {
+async function discoverMarkdownFilesUncached(): Promise<string[]> {
   const treeUrl = `${GITHUB_API_BASE}/${GITHUB_REPO}/git/trees/${encodeURIComponent(BLOG_GITHUB_REF)}?recursive=1`;
   const response = await fetch(treeUrl, {
     headers: githubHeaders(),
@@ -165,6 +166,15 @@ async function discoverMarkdownFiles(): Promise<string[]> {
     ))
     .map(entry => entry.path);
 }
+
+// Blog content is public and changes only when the source repository changes.
+// Keep the GitHub tree lookup out of the request path after the first read;
+// this also prevents every post page from repeating the same API call.
+const discoverMarkdownFiles = unstable_cache(
+  discoverMarkdownFilesUncached,
+  ["blog-markdown-tree-v1"],
+  { revalidate: 300, tags: ["blog"] },
+);
 
 async function fetchPostFromGitHub(sourcePath: string): Promise<BlogPost | null> {
   const prefix = `${BLOG_GITHUB_PATH}/`;
@@ -201,7 +211,7 @@ function dateValue(d: string): number {
 
 export async function getAllPosts(): Promise<BlogPost[]> {
   try {
-    const posts = await fetchPostsFromGitHub();
+    const posts = await getCachedPosts();
     return posts.sort((a, b) => {
       const newestFirst = dateValue(b.publishedAt) - dateValue(a.publishedAt);
       return newestFirst || a.slug.localeCompare(b.slug);
@@ -213,21 +223,35 @@ export async function getAllPosts(): Promise<BlogPost[]> {
   }
 }
 
+const getCachedPosts = unstable_cache(
+  fetchPostsFromGitHub,
+  ["blog-posts-v2"],
+  { revalidate: 300, tags: ["blog"] },
+);
+
 export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
   const normalizedSlug = normalizeSlug(slug);
   if (!normalizedSlug) return null;
 
   try {
-    const sourcePaths = await discoverMarkdownFiles();
-    const matches = sourcePaths.filter(sourcePath => sourcePathToSlug(sourcePath) === normalizedSlug);
-    if (matches.length === 0) return null;
-    if (matches.length > 1) throw new Error(`Duplicate GitHub blog slug: ${normalizedSlug}`);
-    return fetchPostFromGitHub(matches[0]);
+    return await getCachedPostBySlug(normalizedSlug);
   } catch (error) {
     console.error(`[blog] unable to load post ${slug}`, error);
     return null;
   }
 }
+
+const getCachedPostBySlug = unstable_cache(
+  async (normalizedSlug: string): Promise<BlogPost | null> => {
+    const sourcePaths = await discoverMarkdownFiles();
+    const matches = sourcePaths.filter(sourcePath => sourcePathToSlug(sourcePath) === normalizedSlug);
+    if (matches.length === 0) return null;
+    if (matches.length > 1) throw new Error(`Duplicate GitHub blog slug: ${normalizedSlug}`);
+    return fetchPostFromGitHub(matches[0]);
+  },
+  ["blog-post-by-slug-v2"],
+  { revalidate: 300, tags: ["blog"] },
+);
 
 export function getPostLink(slug: string): string {
   const normalizedSlug = normalizeSlug(slug);

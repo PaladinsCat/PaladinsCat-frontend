@@ -2,8 +2,11 @@
 
 import { createContext, useContext } from "react";
 
-export const ROUTE_ENTER_DURATION_MS = 460;
-export const ROUTE_CONTENT_SETTLE_MS = ROUTE_ENTER_DURATION_MS + 40;
+// Keep the transition perceptible without making content wait behind an
+// animation. Data readiness is governed by the request itself, not by the
+// decorative route motion.
+export const ROUTE_ENTER_DURATION_MS = 120;
+export const ROUTE_CONTENT_SETTLE_MS = 0;
 
 const RouteSettledContext = createContext(true);
 
