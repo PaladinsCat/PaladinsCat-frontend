@@ -12,6 +12,8 @@ updates:
         versions: [">=10.0.0"]
       - dependency-name: "framer-motion"
         versions: [">=13.0.0"]
+      - dependency-name: "@types/node"
+        versions: [">=23.0.0"]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
