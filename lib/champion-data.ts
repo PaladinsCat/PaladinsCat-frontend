@@ -22,6 +22,7 @@ export interface ChampionTalent {
 }
 
 export interface ChampionLoadout {
+  id: number;
   name: string;
   description: string;
   category: string;

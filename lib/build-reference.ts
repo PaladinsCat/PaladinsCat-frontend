@@ -193,10 +193,13 @@ async function buildCards(championId: number, champion?: ChampionData): Promise<
     loadLocalCards(),
   ]);
   const byNameAndChampion = new Map<string, RawCard>();
+  const byId = new Map<number, RawCard>();
   const byName = new Map<string, RawCard>();
   const byCanonicalNameAndChampion = new Map<string, RawCard>();
   const byCanonicalName = new Map<string, RawCard>();
   for (const row of [...localCards, ...(dbCards as RawCard[])]) {
+    const rowId = idOf(row, "card");
+    if (rowId > 0) byId.set(rowId, row);
     const key = normalizeName(nameOf(row, "card"));
     if (!key) continue;
     byName.set(key, row);
@@ -212,13 +215,13 @@ async function buildCards(championId: number, champion?: ChampionData): Promise<
   return champion.loadouts.map((card, index) => {
     const key = normalizeName(card.name);
     const canonicalKey = canonicalCardNameKey(card.name);
-    const row = byNameAndChampion.get(`${championId}:${key}`)
+    const row = byId.get(card.id)
+      ?? byNameAndChampion.get(`${championId}:${key}`)
       ?? byCanonicalNameAndChampion.get(`${championId}:${canonicalKey}`)
       ?? byName.get(key)
       ?? byCanonicalName.get(canonicalKey);
-    const id = row ? idOf(row, "card") : 0;
     return {
-      id: id > 0 ? id : -(index + 1),
+      id: card.id > 0 ? card.id : (row ? idOf(row, "card") : -(index + 1)),
       name: card.name,
       category: card.category || "General",
       description: card.description ?? row?.description ?? null,

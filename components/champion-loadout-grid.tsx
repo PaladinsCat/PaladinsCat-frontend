@@ -34,6 +34,7 @@ export default function ChampionLoadoutGrid({
     notation: "compact",
     maximumFractionDigits: 1,
   });
+  const statsById = new Map(cardStats.cards.map((stat) => [stat.cardId, stat]));
   const statsByName = new Map(cardStats.cards.map((stat) => [statNameKey(stat.cardName), stat]));
   const maxCardPickRate = Math.max(
     1,
@@ -52,7 +53,8 @@ export default function ChampionLoadoutGrid({
           <h3 className="mb-2 text-xs font-medium uppercase tracking-wider text-pc-text-muted">{category}</h3>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {cards.map((card) => {
-              const stat: ChampionCardStat | undefined = statsByName.get(statNameKey(card.name));
+              const stat: ChampionCardStat | undefined = statsById.get(card.id)
+                ?? statsByName.get(statNameKey(card.name));
               const pickRate = stat ? (stat.totalPlays / Math.max(1, cardStats.totalMatches)) * 100 : 0;
               const quality = stat ? getStatQuality(stat.winRate, pickRate, maxCardPickRate) : null;
               const maxLevelPlays = stat ? Math.max(1, ...stat.levels.map((level) => level.plays)) : 1;
