@@ -123,7 +123,7 @@ export function validIdTokenHeader(header: Record<string, unknown>): boolean {
   return header.alg === "RS256" && typeof header.kid === "string" && (header.typ === undefined || header.typ === "ID" || header.typ === "JWT");
 }
 
-interface IdTokenClaims { iss?: string; aud?: string | string[]; azp?: string; exp?: number; iat?: number; nonce?: string; }
+interface IdTokenClaims { iss?: string; aud?: string | string[]; azp?: string; exp?: number; iat?: number; nonce?: string; keepSignedIn?: boolean; }
 function decode(part: string): Record<string, unknown> { return JSON.parse(Buffer.from(part, "base64url").toString("utf8")) as Record<string, unknown>; }
 
 async function readBoundedJson(response: Response): Promise<{ keys?: Array<Record<string, unknown>> } | null> {
@@ -174,18 +174,39 @@ export function resetJwksCacheForTest() { jwksCache.clear(); }
 export async function getJwkForTest(issuer: string, kid: string) { return getJwk(issuer, kid); }
 
 // The issuer is configuration, never read from a token. This intentionally supports only Keycloak's RS256 default.
-export async function validateIdToken(idToken: string | undefined, issuer: string, clientId: string, nonce: string, jwksIssuer = issuer): Promise<boolean> {
-  if (!idToken) return false;
+export async function validateIdToken(idToken: string | undefined, issuer: string, clientId: string, nonce: string, jwksIssuer = issuer): Promise<IdTokenClaims | null> {
+  if (!idToken) return null;
   const parts = idToken.split(".");
-  if (parts.length !== 3) return false;
+  if (parts.length !== 3) return null;
   try {
     const header = decode(parts[0]);
-    if (!validIdTokenHeader(header)) return false;
+    if (!validIdTokenHeader(header)) return null;
     const jwk = await getJwk(jwksIssuer, header.kid as string);
-    if (!jwk || !verify("RSA-SHA256", Buffer.from(`${parts[0]}.${parts[1]}`), createPublicKey({ key: jwk as NodeJsonWebKey, format: "jwk" }), Buffer.from(parts[2], "base64url"))) return false;
+    if (!jwk || !verify("RSA-SHA256", Buffer.from(`${parts[0]}.${parts[1]}`), createPublicKey({ key: jwk as NodeJsonWebKey, format: "jwk" }), Buffer.from(parts[2], "base64url"))) return null;
     const claims = decode(parts[1]) as IdTokenClaims;
     const audience = Array.isArray(claims.aud) ? claims.aud : [claims.aud];
-    if (claims.iss !== issuer || !audience.includes(clientId) || (audience.length > 1 && claims.azp !== clientId) || !claims.exp || claims.exp * 1000 <= Date.now() || !claims.iat || claims.iat * 1000 > Date.now() + 60_000 || !claims.nonce) return false;
-    return equal(claims.nonce, nonce);
-  } catch { return false; }
+    if (claims.iss !== issuer || !audience.includes(clientId) || (audience.length > 1 && claims.azp !== clientId) || !claims.exp || claims.exp * 1000 <= Date.now() || !claims.iat || claims.iat * 1000 > Date.now() + 60_000 || !claims.nonce) return null;
+    return equal(claims.nonce, nonce) ? claims : null;
+  } catch { return null; }
+}
+
+// Backchannel logout tokens are Keycloak-issued, RS256, typ=Logout or logout+jwt (Keycloak 26.x). The issuer is configuration, never read from a token.
+export interface LogoutTokenClaims { jti: string; sid: string | null; }
+export function validLogoutTokenHeader(header: Record<string, unknown>): boolean {
+  return header.alg === "RS256" && typeof header.kid === "string" && (header.typ === "Logout" || header.typ === "logout+jwt");
+}
+
+export async function validateLogoutToken(logoutToken: string, issuer: string, clientId: string, jwksIssuer = issuer): Promise<LogoutTokenClaims | null> {
+  const parts = logoutToken.split(".");
+  if (parts.length !== 3) return null;
+  try {
+    const header = decode(parts[0]);
+    if (!validLogoutTokenHeader(header)) return null;
+    const jwk = await getJwk(jwksIssuer, header.kid as string);
+    if (!jwk || !verify("RSA-SHA256", Buffer.from(`${parts[0]}.${parts[1]}`), createPublicKey({ key: jwk as NodeJsonWebKey, format: "jwk" }), Buffer.from(parts[2], "base64url"))) return null;
+    const claims = decode(parts[1]) as { iss?: string; aud?: string | string[]; exp?: number; iat?: number; jti?: string; sid?: string; events?: Record<string, unknown> };
+    const audience = Array.isArray(claims.aud) ? claims.aud : [claims.aud];
+    if (claims.iss !== issuer || !audience.includes(clientId) || !claims.exp || claims.exp * 1000 <= Date.now() || !claims.iat || claims.iat * 1000 > Date.now() + 60_000 || claims.events?.["http://schemas.openid.net/event/backchannel-logout"] === undefined && claims.events?.["backchannel-logout"] !== true || typeof claims.jti !== "string" || claims.jti.length === 0) return null;
+    return { jti: claims.jti, sid: typeof claims.sid === "string" && claims.sid.length > 0 ? claims.sid : null };
+  } catch { return null; }
 }

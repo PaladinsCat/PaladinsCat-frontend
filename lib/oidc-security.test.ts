@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildParAuthorizationUrl, buildPushedAuthorizationRequest, buildRpLogoutUrl, createTransaction, getJwkForTest, keycloakAccountUrl, normalizedHttpsIssuer, parsePushedAuthorizationResponse, requireSameOrigin, resetJwksCacheForTest, resolveInternalIssuer, safeReturnPath, stateMatches, validIdTokenHeader } from "./oidc-security.ts";
+import { buildParAuthorizationUrl, buildPushedAuthorizationRequest, buildRpLogoutUrl, createTransaction, getJwkForTest, keycloakAccountUrl, normalizedHttpsIssuer, parsePushedAuthorizationResponse, requireSameOrigin, resetJwksCacheForTest, resolveInternalIssuer, safeReturnPath, stateMatches, validIdTokenHeader, validLogoutTokenHeader, validateLogoutToken } from "./oidc-security.ts";
 import { csrfHeader } from "./csrf.ts";
 import { isIdentityCutoverEnabled } from "./identity-cutover.ts";
 import { readFileSync } from "node:fs";
@@ -191,11 +191,46 @@ test("frontend server calls use the pinned internal issuer without changing toke
   const callback = readFileSync(new URL("../app/api/auth/oidc/callback/route.ts", import.meta.url), "utf8");
   assert.match(login, /resolveInternalIssuer\(issuer, process\.env\.OIDC_INTERNAL_ISSUER\)/);
   assert.match(callback, /fetch\(`\$\{serverIssuer\}\/protocol\/openid-connect\/token`/);
-  assert.match(callback, /validateIdToken\(token\.id_token, issuer, clientId, tx\.nonce, serverIssuer\)/);
+  assert.match(callback, /const idClaims = await validateIdToken\(token\.id_token, issuer, clientId, tx\.nonce, serverIssuer\)/);
 });
 test("ID token typ accepts proven Keycloak and standard forms only", () => {
   assert.equal(validIdTokenHeader({ alg: "RS256", kid: "one", typ: "ID" }), true);
   assert.equal(validIdTokenHeader({ alg: "RS256", kid: "one", typ: "JWT" }), true);
   assert.equal(validIdTokenHeader({ alg: "RS256", kid: "one" }), true);
   assert.equal(validIdTokenHeader({ alg: "RS256", kid: "one", typ: "at+jwt" }), false);
+});
+
+test("backchannel logout token header requires RS256, kid, and typ=Logout", () => {
+  assert.equal(validLogoutTokenHeader({ alg: "RS256", kid: "one", typ: "Logout" }), true);
+
+  assert.equal(validLogoutTokenHeader({ alg: "RS256", kid: "one", typ: "logout+jwt" }), true);
+  assert.equal(validLogoutTokenHeader({ alg: "RS256", kid: "one", typ: "ID" }), false);
+  assert.equal(validLogoutTokenHeader({ alg: "HS256", kid: "one", typ: "Logout" }), false);
+  assert.equal(validLogoutTokenHeader({ alg: "RS256", typ: "Logout" }), false);
+});
+
+test("backchannel logout token validation fails closed on malformed or unsigned input", async () => {
+  resetJwksCacheForTest();
+  const original = globalThis.fetch;
+  globalThis.fetch = async () => new Response("offline", { status: 503 });
+  for (const value of ["", "not-a-jwt", "a.b", "a.b.c", "eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ4In0.sig"]) assert.equal(await validateLogoutToken(value, "https://auth.example/realms/paladinscat", "paladinscat-web"), null);
+  globalThis.fetch = original;
+});
+
+test("callback exchange requests 72h only when the ID token authorizes it and sizes cookies to backend expiry", () => {
+  const callback = readFileSync(new URL("../app/api/auth/oidc/callback/route.ts", import.meta.url), "utf8");
+  assert.match(callback, /const keepSignedIn = idClaims\.keepSignedIn === true;/);
+  assert.match(callback, /keepSignedIn \? \{ access_token: token\.access_token, session_ttl_hours: 72 \} : \{ access_token: token\.access_token \}/);
+  assert.match(callback, /const expiresMs = Date\.parse\(result\.expires_at\)/);
+  assert.match(callback, /maxAge: sessionMaxAge/);
+  assert.doesNotMatch(callback, /maxAge: 60 \* 60 \* 8/);
+});
+
+test("backchannel logout route verifies the token then calls the service-token backend revocation", () => {
+  const route = readFileSync(new URL("../app/api/auth/oidc/backchannel-logout/route.ts", import.meta.url), "utf8");
+  assert.match(route, /validateLogoutToken\(logoutToken, issuer, clientId, serverIssuer\)/);
+  assert.match(route, /oidcBffServiceHeaders\(\)/);
+  assert.match(route, /\/auth\/oidc\/backchannel-logout/);
+  assert.match(route, /if \(!claims \|\| !claims\.sid\)/);
+  assert.doesNotMatch(route, /logout_token\)/);
 });

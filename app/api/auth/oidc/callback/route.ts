@@ -33,16 +33,21 @@ export async function GET(request: NextRequest) {
   const tokenResponse = await fetch(`${serverIssuer}/protocol/openid-connect/token`, { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, cache: "no-store", body: new URLSearchParams({ grant_type: "authorization_code", client_id: clientId, client_secret: clientSecret, code, code_verifier: tx.verifier, redirect_uri: `${origin()}/api/auth/oidc/callback` }) });
   if (!tokenResponse.ok) { const response = NextResponse.redirect(new URL("/auth/login?oidc_error=1", origin())); clear(response); return response; }
   const token = await tokenResponse.json() as { access_token?: string; id_token?: string };
-  if (!token.access_token || !await validateIdToken(token.id_token, issuer, clientId, tx.nonce, serverIssuer)) { const response = NextResponse.redirect(new URL("/auth/login?oidc_error=1", origin())); clear(response); return response; }
+  const idClaims = await validateIdToken(token.id_token, issuer, clientId, tx.nonce, serverIssuer);
+  if (!token.access_token || !idClaims) { const response = NextResponse.redirect(new URL("/auth/login?oidc_error=1", origin())); clear(response); return response; }
   // Access tokens cross this server-to-server boundary only; they never reach browser JS or cookies.
-  const exchange = await fetch(`${backend().replace(/\/$/, "")}/auth/oidc/exchange`, { method: "POST", headers: { ...oidcBffServiceHeaders(), "content-type": "application/json" }, cache: "no-store", body: JSON.stringify({ access_token: token.access_token }) });
+  const keepSignedIn = idClaims.keepSignedIn === true;
+  const exchange = await fetch(`${backend().replace(/\/$/, "")}/auth/oidc/exchange`, { method: "POST", headers: { ...oidcBffServiceHeaders(), "content-type": "application/json" }, cache: "no-store", body: JSON.stringify(keepSignedIn ? { access_token: token.access_token, session_ttl_hours: 72 } : { access_token: token.access_token }) });
   if (!exchange.ok) { const response = NextResponse.redirect(new URL("/auth/login?oidc_error=1", origin())); clear(response); return response; }
   const result = await exchange.json() as { token?: string; expires_at?: string };
-  if (!result.token || result.token.length > 512) { const response = NextResponse.redirect(new URL("/auth/login?oidc_error=1", origin())); clear(response); return response; }
+  if (!result.token || result.token.length > 512 || !result.expires_at) { const response = NextResponse.redirect(new URL("/auth/login?oidc_error=1", origin())); clear(response); return response; }
+  const expiresMs = Date.parse(result.expires_at);
+  const sessionMaxAge = Number.isFinite(expiresMs) ? Math.floor((expiresMs - Date.now()) / 1000) : 60 * 60 * 8;
+  if (sessionMaxAge <= 0) { const response = NextResponse.redirect(new URL("/auth/login?oidc_error=1", origin())); clear(response); return response; }
   const response = NextResponse.redirect(new URL(safeReturnPath(tx.returnPath), origin()));
   clear(response);
-  response.cookies.set(SESSION_COOKIE, result.token, { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 60 * 60 * 8 });
+  response.cookies.set(SESSION_COOKIE, result.token, { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: sessionMaxAge });
   // Deliberately readable by same-origin JS only; backend requires it to match X-CSRF-Token on unsafe cookie-auth requests.
-  response.cookies.set(CSRF_COOKIE, newCsrfToken(), { httpOnly: false, secure: true, sameSite: "strict", path: "/", maxAge: 60 * 60 * 8 });
+  response.cookies.set(CSRF_COOKIE, newCsrfToken(), { httpOnly: false, secure: true, sameSite: "strict", path: "/", maxAge: sessionMaxAge });
   return response;
 }
