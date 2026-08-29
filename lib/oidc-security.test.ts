@@ -219,7 +219,7 @@ test("backchannel logout token validation fails closed on malformed or unsigned 
 
 test("callback exchange requests 72h only when the ID token authorizes it and sizes cookies to backend expiry", () => {
   const callback = readFileSync(new URL("../app/api/auth/oidc/callback/route.ts", import.meta.url), "utf8");
-  assert.match(callback, /const keepSignedIn = idClaims\.keepSignedIn === true;/);
+  assert.match(callback, /const keepSignedIn = idClaims\.pc_keep_signed_in === true;/);
   assert.match(callback, /keepSignedIn \? \{ access_token: token\.access_token, session_ttl_hours: 72 \} : \{ access_token: token\.access_token \}/);
   assert.match(callback, /const expiresMs = Date\.parse\(result\.expires_at\)/);
   assert.match(callback, /maxAge: sessionMaxAge/);

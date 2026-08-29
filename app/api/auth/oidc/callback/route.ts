@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
   const idClaims = await validateIdToken(token.id_token, issuer, clientId, tx.nonce, serverIssuer);
   if (!token.access_token || !idClaims) { const response = NextResponse.redirect(new URL("/auth/login?oidc_error=1", origin())); clear(response); return response; }
   // Access tokens cross this server-to-server boundary only; they never reach browser JS or cookies.
-  const keepSignedIn = idClaims.keepSignedIn === true;
+  const keepSignedIn = idClaims.pc_keep_signed_in === true;
   const exchange = await fetch(`${backend().replace(/\/$/, "")}/auth/oidc/exchange`, { method: "POST", headers: { ...oidcBffServiceHeaders(), "content-type": "application/json" }, cache: "no-store", body: JSON.stringify(keepSignedIn ? { access_token: token.access_token, session_ttl_hours: 72 } : { access_token: token.access_token }) });
   if (!exchange.ok) { const response = NextResponse.redirect(new URL("/auth/login?oidc_error=1", origin())); clear(response); return response; }
   const result = await exchange.json() as { token?: string; expires_at?: string };
