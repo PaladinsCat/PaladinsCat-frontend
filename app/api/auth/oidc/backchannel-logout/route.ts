@@ -25,11 +25,14 @@ export async function POST(request: NextRequest) {
   }
   const claims = await validateLogoutToken(logoutToken, issuer, clientId, serverIssuer);
   if (!claims || !claims.sid) return new NextResponse("Invalid logout token", { status: 401 });
+  // Forward the raw logout_token form-encoded. The backend (Form binding) is the
+  // authority: it re-validates signature/issuer/audience, applies jti replay
+  // protection, and revokes the session row bound to the token's sid.
   const revoke = await fetch(`${backend().replace(/\/$/, "")}/auth/oidc/backchannel-logout`, {
     method: "POST",
-    headers: { ...oidcBffServiceHeaders(), "content-type": "application/json" },
+    headers: { ...oidcBffServiceHeaders(), "content-type": "application/x-www-form-urlencoded" },
     cache: "no-store",
-    body: JSON.stringify({ jti: claims.jti, oidc_session_id: claims.sid }),
+    body: new URLSearchParams({ logout_token: logoutToken }),
   }).catch(() => undefined);
   // The browser receives an opaque success; the session row is already revoked by the backend.
   return new NextResponse(null, { status: revoke && revoke.ok ? 204 : 502 });
