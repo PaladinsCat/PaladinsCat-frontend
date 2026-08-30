@@ -23,9 +23,10 @@ const TIER_GROUPS: ReadonlyArray<{
   ]},
 ];
 
-type SortKey = "points" | "winRate" | "totalWins" | "trend";
+type SortKey = "rank" | "points" | "winRate" | "totalWins" | "trend";
 
 const SORT_OPTIONS: Array<{ key: SortKey; labelKey: TranslationKey }> = [
+  { key: "rank", labelKey: "generated.players.rank" },
   { key: "points", labelKey: "common.sort.points" },
   { key: "winRate", labelKey: "common.sort.winRate" },
   { key: "totalWins", labelKey: "common.sort.totalWins" },
@@ -58,8 +59,8 @@ export default function LeaderboardPage() {
   const [players, setPlayers] = useState<RankedPlayer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [sortKey, setSortKey] = useState<SortKey>("points");
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [sortKey, setSortKey] = useState<SortKey>("rank");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(["Diamond"]));
 
@@ -103,6 +104,7 @@ export default function LeaderboardPage() {
   const sorted = [...filtered].sort((a, b) => {
     const getVal = (p: RankedPlayer, key: SortKey) => {
       switch (key) {
+        case "rank": return p.rank;
         case "points": return p.points;
         case "winRate": return p.winRate ?? 0;
         case "totalWins": return p.wins ?? 0;
