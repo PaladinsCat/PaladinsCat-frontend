@@ -47,9 +47,9 @@ export default function BuildsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-pc-accent">
+        <h2 className="text-xl font-bold text-pc-accent">
           <ScrambleText text={t("generated.builds.builds")} speed={30} iterations={15} delayFromCenter={false} />
-        </h1>
+        </h2>
         <Link
           href="/builds/create"
           className="px-4 py-2 bg-pc-accent hover:bg-pc-accent-secondary text-white font-semibold rounded-lg transition-colors text-sm"

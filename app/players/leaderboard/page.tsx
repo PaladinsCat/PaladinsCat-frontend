@@ -136,6 +136,7 @@ export default function LeaderboardPage() {
       <div className="min-w-0">
         <Link href="/players" className="text-pc-accent text-xs hover:underline mb-2 inline-block">{t("generated.players.players")}</Link>
         <h1 className="pc-heading pc-heading-lg break-words text-pc-accent">{t("generated.players.rankedLeaderboard")}</h1>
+        <p className="mt-2 max-w-3xl text-sm leading-6 text-pc-text-secondary">{t("seo.players.leaderboard.description")}</p>
       </div>
 
       {/* Main layout: sidebar + content */}

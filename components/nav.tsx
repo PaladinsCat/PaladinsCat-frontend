@@ -145,7 +145,7 @@ export default function Nav() {
   const statsOverviewLinks = [
     { href: "/stats", label: t("menu.globalStats") },
     { href: "/stats/performance", label: t("menu.performanceOverview") },
-    { href: "/stats/metrics", label: t("menu.performanceMetrics") },
+    { href: "/stats/performance", label: t("menu.performanceMetrics") },
     { href: "/stats/ecpm", label: t("menu.effectiveCredits") },
     { href: activityHref, label: t("menu.playerActivity") },
     { href: "/stats/tiers", label: t("menu.rankedDistribution") },

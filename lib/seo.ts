@@ -13,6 +13,11 @@ export const SEO_KEYWORDS = [
   "Paladins win rate",
   "Paladins ELO",
   "Paladins Glicko",
+  "Paladins builds",
+  "Paladins loadouts",
+  "Paladins ranks",
+  "Paladins tier list",
+  "Paladins player count",
 ];
 
 export function absoluteUrl(path = "/") {
@@ -26,4 +31,8 @@ export function seoTitle(title: string) {
 
 export function cleanDescription(description: string) {
   return description.replace(/\s+/g, " ").trim();
+}
+
+export function serializeJsonLd(value: unknown) {
+  return JSON.stringify(value).replace(/</g, "\\u003c");
 }

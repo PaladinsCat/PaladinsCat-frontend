@@ -186,6 +186,7 @@ export default function ChampionTable({ initialChampions = null }: { initialCham
       <h1 className="pc-heading pc-heading-lg text-pc-accent drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)]">
         <ScrambleText text={t("generated.champions.champions")} speed={30} iterations={15} delayFromCenter={false} />
       </h1>
+      <p className="max-w-4xl text-sm leading-6 text-pc-text-secondary">{t("seo.champions.description")}</p>
 
       <div className="grid grid-cols-1 gap-4 2xl:grid-cols-[minmax(32rem,0.95fr)_minmax(0,2fr)] 2xl:items-start">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 2xl:col-start-2 2xl:row-start-1">

@@ -38,7 +38,7 @@
   "matches.description": "Search stored match history by match ID, player, region, or map.",
   "matches.matchIdPlaceholder": "Enter a match ID",
   "matches.invalidMatchId": "Enter a valid match ID.",
-  "playerActivity.description": "Review the last 24 hours of tracked match activity across every known queue and region.",
+  "playerActivity.description": "Review tracked Paladins player counts and matches from the last 24 hours across known queues, platforms, and regions.",
   "playerActivity.matches24h": "24h Match Activity",
   "playerActivity.queueAndRegion": "Global match recovery by queue and region",
   "playerActivity.queue": "Queue",
