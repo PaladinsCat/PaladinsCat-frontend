@@ -3770,10 +3770,25 @@ export async function login(username: string, password: string): Promise<AuthSes
   return session;
 }
 
+function submitOidcLogout(): void {
+  const form = document.createElement("form");
+  form.method = "POST";
+  form.action = "/api/auth/oidc/logout";
+  document.body.appendChild(form);
+  form.submit();
+}
+
 export async function logout(): Promise<void> {
-  const token = getAuthToken();
   const hasOidcCookieSession = typeof document !== "undefined"
     && document.cookie.split(";").some((part) => part.trim().startsWith("__Host-pc_csrf="));
+  if ((identityCutoverEnabled || hasOidcCookieSession) && typeof document !== "undefined") {
+    // Keep the RP logout navigation on the original user gesture. Waiting for a
+    // stale transition token first can prevent Keycloak SSO termination.
+    clearAuth();
+    submitOidcLogout();
+    return;
+  }
+  const token = getAuthToken();
   try {
     if (token) {
       // Logout must be local-first from the user's perspective. The server call
@@ -3790,15 +3805,6 @@ export async function logout(): Promise<void> {
     console.warn("Server logout failed; clearing local session anyway.", err);
   } finally {
     clearAuth();
-    if ((identityCutoverEnabled || hasOidcCookieSession) && typeof document !== "undefined") {
-      // A form navigation preserves the same-origin POST CSRF boundary and lets
-      // the browser follow the BFF's redirect to Keycloak's RP logout endpoint.
-      const form = document.createElement("form");
-      form.method = "POST";
-      form.action = "/api/auth/oidc/logout";
-      document.body.appendChild(form);
-      form.submit();
-    }
   }
 }
 

@@ -201,6 +201,8 @@ test("transitional OIDC cookie sessions can load account data and terminate cent
   }
   assert.match(apiClient, /identityCutoverEnabled \|\| hasOidcCookieSession/);
   assert.match(apiClient, /form\.action = "\/api\/auth\/oidc\/logout"/);
+  const logoutSource = apiClient.slice(apiClient.indexOf("export async function logout"));
+  assert.ok(logoutSource.indexOf("submitOidcLogout();") < logoutSource.indexOf("await fetchJson"));
 });
 test("only the fixed create intent can add the Keycloak registration prompt", () => {
   const route = readFileSync(new URL("../app/api/auth/oidc/login/route.ts", import.meta.url), "utf8");
