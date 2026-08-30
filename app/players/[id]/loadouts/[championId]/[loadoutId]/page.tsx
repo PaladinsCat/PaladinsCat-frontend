@@ -98,7 +98,7 @@ export default function PlayerLoadoutDetailPage() {
           return <article key={cardId} className={styles.card} aria-label={t("common.match.cardLevel", { level })}>
             <SmartImage src={card?.iconUrl || "/images/icons/Player_Loadouts_Icon.png"} alt="" className={styles.cardArt} />
             <SmartImage src={loadoutFrame(level)} alt="" className={styles.cardFrame} />
-            <h2 className={name.length >= 21 ? styles.longCardName : undefined}>{name}</h2>
+            <h2 className={name.length >= 22 ? styles.extraLongCardName : name.length >= 20 ? styles.longCardName : undefined}>{name}</h2>
             <p>{cardDescription(card?.description, level, formatCardValue)}</p>
             <span className={styles.level}>{level}</span>
           </article>;

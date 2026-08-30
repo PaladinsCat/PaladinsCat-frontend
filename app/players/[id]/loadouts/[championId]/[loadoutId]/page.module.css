@@ -14,8 +14,9 @@
 .card { position: relative; width: 100%; aspect-ratio: 316/480; filter: drop-shadow(0 3px 5px rgba(0,0,0,.45)); }
 .cardArt { position: absolute; z-index: 1; left: 6.5%; top: 8.7%; width: 87%; height: 44%; object-fit: cover; background: #071014; }
 .cardFrame { position: absolute; z-index: 2; inset: 0; width: 100%; height: 100%; object-fit: fill; pointer-events: none; }
-.card h2 { position: absolute; z-index: 3; left: 9%; top: 51.2%; width: 82%; height: 6.8%; margin: 0; padding: 0 5px; transform: translateY(-1px); display: flex; align-items: center; justify-content: center; overflow: hidden; color: #fff; font-size: clamp(12px,1.4vw,18px); line-height: 1; font-weight: 500; text-align: center; text-overflow: ellipsis; text-shadow: 0 2px 2px #111; white-space: nowrap; }
-.card h2.longCardName { padding-inline: 2px; font-size: clamp(12px,1.1vw,14px); letter-spacing: -.015em; }
+.card h2 { position: absolute; z-index: 3; left: 9%; top: 51.2%; width: 82%; height: 6.8%; margin: 0; padding: 0 5px; transform: translateY(-1px); display: flex; align-items: center; justify-content: center; overflow: hidden; color: #fff; font-size: clamp(12px,1.4vw,18px); line-height: 1; font-weight: 800; letter-spacing: -.02em; text-align: center; text-overflow: ellipsis; text-shadow: 0 2px 2px #111; white-space: nowrap; }
+.card h2.longCardName { padding-inline: 2px; font-size: clamp(12px,1.1vw,14px); letter-spacing: -.025em; }
+.card h2.extraLongCardName { padding-inline: 1px; font-size: clamp(11px,1vw,13px); letter-spacing: -.035em; }
 .card p { position: absolute; z-index: 3; left: 9.5%; top: 59.5%; width: 81%; height: 29%; margin: 0; padding: 4px 9px 0; display: flex; align-items: flex-start; justify-content: center; overflow: hidden; color: #303943; font-size: clamp(12px,1.1vw,14px); line-height: 1.25; font-weight: 700; text-align: center; }
 .level { position: absolute; z-index: 3; left: 13.2%; top: 92.7%; width: 20%; aspect-ratio: 1; transform: translate(-47%,-44%); display: flex; align-items: center; justify-content: center; padding: 0; color: #f7fbff; font-size: clamp(20px,2.1vw,27px); line-height: 1; font-weight: 680; font-variant-numeric: tabular-nums; text-shadow: 0 2px 3px #10151d; }
 
@@ -44,6 +45,7 @@
 .detail[data-image-export="true"] .cards { grid-template-columns: repeat(5,minmax(0,1fr)); gap: 4px; padding: 0 16px 18px; }
 .detail[data-image-export="true"] .card { max-width: none; justify-self: stretch; }
 .detail[data-image-export="true"] .card h2 { font-size: 18px; }
-.detail[data-image-export="true"] .card h2.longCardName { padding-inline: 2px; font-size: 14px; letter-spacing: -.015em; }
+.detail[data-image-export="true"] .card h2.longCardName { padding-inline: 2px; font-size: 14px; letter-spacing: -.025em; }
+.detail[data-image-export="true"] .card h2.extraLongCardName { padding-inline: 1px; font-size: 13px; letter-spacing: -.035em; }
 .detail[data-image-export="true"] .card p { font-size: 14px; }
 .detail[data-image-export="true"] .level { font-size: 27px; }
