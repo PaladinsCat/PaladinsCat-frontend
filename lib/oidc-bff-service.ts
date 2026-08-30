@@ -1,6 +1,6 @@
 import "server-only";
 import { createPrivateKey, createSign, randomUUID } from "node:crypto";
-import { readFileSync, statSync } from "node:fs";
+import { readFileSync } from "node:fs";
 
 type CachedToken = { value: string; usableUntil: number };
 let cached: CachedToken | undefined;
@@ -17,9 +17,11 @@ function base64Url(value: string | Buffer): string {
 }
 
 function clientAssertion(issuer: string, clientId: string, privateKeyFile: string): string {
-  const keySize = statSync(privateKeyFile).size;
-  if (keySize <= 0 || keySize > 32 * 1024) throw new Error("Service identity private key is invalid");
-  const privateKey = createPrivateKey(readFileSync(privateKeyFile));
+  const privateKeyBytes = readFileSync(privateKeyFile);
+  if (privateKeyBytes.length <= 0 || privateKeyBytes.length > 32 * 1024) {
+    throw new Error("Service identity private key is invalid");
+  }
+  const privateKey = createPrivateKey(privateKeyBytes);
   if (privateKey.asymmetricKeyType !== "rsa" || (privateKey.asymmetricKeyDetails?.modulusLength ?? 0) < 3072) {
     throw new Error("Service identity requires an RSA key of at least 3072 bits");
   }

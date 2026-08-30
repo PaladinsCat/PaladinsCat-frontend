@@ -93,3 +93,8 @@ test("still rejects nested tags inside multi-segment markup", () => {
   assert.equal(parsePlayerTitleSegments(raw), null);
   assert.equal(parsePlayerTitle(raw).color, null);
 });
+
+test("rejects adversarial repeated attributes without whole-string backtracking", () => {
+  const raw = `<font ${"x color=".repeat(6_400)}"red">x</font>!`;
+  assert.equal(parsePlayerTitleSegments(raw), null);
+});

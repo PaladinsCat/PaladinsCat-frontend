@@ -23,12 +23,10 @@ export interface PlayerTitleSegment {
   color: string | null;
 }
 
-// The markup is one or more concatenated font tags. The attribute section and
-// the text content are both restricted to a safe character set (no `<` or `>`)
-// so a nested tag can never be swallowed, and attribute values may be quoted
-// or bare.
-const FONT_TITLE_PATTERN =
-  /^(?:<font\s+[^<>]*color\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))[^<>]*>([^<>]*)<\/font>)+$/i;
+// Attribute values may be quoted or bare. Segment boundaries are located with
+// indexOf below so malformed input is processed linearly instead of by a
+// backtracking whole-string expression.
+const COLOR_ATTRIBUTE_PATTERN = /color\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i;
 
 /**
  * Parse the font-tag segments of a raw Hi-Rez player title.
@@ -42,16 +40,40 @@ export function parsePlayerTitleSegments(raw: string): PlayerTitleSegment[] | nu
   if (!trimmed) {
     return [];
   }
-  if (!FONT_TITLE_PATTERN.test(trimmed)) {
-    return null;
-  }
 
   const segments: PlayerTitleSegment[] = [];
-  const segmentPattern =
-    /<font\s+[^<>]*color\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))[^<>]*>([^<>]*)<\/font>/gi;
-  let match: RegExpExecArray | null;
-  while ((match = segmentPattern.exec(trimmed)) !== null) {
-    segments.push({ text: match[4], color: sanitizeColor(match[1] ?? match[2] ?? match[3] ?? "") });
+  const lower = trimmed.toLowerCase();
+  let cursor = 0;
+  while (cursor < trimmed.length) {
+    if (lower.slice(cursor, cursor + 5) !== "<font" || !/\s/.test(trimmed[cursor + 5] ?? "")) {
+      return null;
+    }
+    const tagEnd = trimmed.indexOf(">", cursor + 6);
+    if (tagEnd === -1) {
+      return null;
+    }
+    const attributes = trimmed.slice(cursor + 5, tagEnd);
+    if (attributes.includes("<")) {
+      return null;
+    }
+    const colorMatch = COLOR_ATTRIBUTE_PATTERN.exec(attributes);
+    if (!colorMatch) {
+      return null;
+    }
+    const textStart = tagEnd + 1;
+    const closeStart = lower.indexOf("</font>", textStart);
+    if (closeStart === -1) {
+      return null;
+    }
+    const text = trimmed.slice(textStart, closeStart);
+    if (text.includes("<") || text.includes(">")) {
+      return null;
+    }
+    segments.push({
+      text,
+      color: sanitizeColor(colorMatch[1] ?? colorMatch[2] ?? colorMatch[3] ?? ""),
+    });
+    cursor = closeStart + "</font>".length;
   }
   // Trim only the outer edges so spaces between segments are preserved.
   if (segments.length > 0) {
