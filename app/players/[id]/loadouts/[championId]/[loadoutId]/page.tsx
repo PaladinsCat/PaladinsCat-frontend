@@ -32,7 +32,12 @@ function loadoutFrame(level: number) {
 }
 
 function championBanner(name: string) {
-  const assetName = name === "Betty La Bomba" ? "Betty_la_Bomba" : name.replaceAll(" ", "_");
+  const normalized = name.toLowerCase().replace(/[^a-z]/g, "");
+  const assetName = normalized === "bettylabomba"
+    ? "Betty_la_Bomba"
+    : normalized === "maldamba"
+      ? "Mal'Damba"
+      : name.trim().replaceAll(" ", "_");
   return `/images/champions/Banner_${assetName}.avif`;
 }
 
