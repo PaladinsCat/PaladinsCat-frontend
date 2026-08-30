@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { buildRpLogoutUrl, requireSameOrigin } from "@/lib/oidc-security";
+import { buildRpLogoutUrl, normalizedHttpsIssuer, requireSameOrigin, resolveInternalIssuer } from "@/lib/oidc-security";
 import { oidcBffServiceHeaders } from "@/lib/oidc-bff-service";
+import { oidcClientSecret } from "@/lib/oidc-client-secret";
 export const runtime = "nodejs";
 const SESSION_COOKIE = "__Host-pc_session";
 const CSRF_COOKIE = "__Host-pc_csrf";
@@ -16,9 +17,29 @@ export async function POST(request: NextRequest) {
   if (session) {
     // This opaque legacy-compatible session is read only by the BFF; it is never exposed to browser JavaScript.
     // The BFF-only endpoint returns the stored id_token_hint (or nothing for pre-cutover sessions) and is the only path that can read it.
-    const hint = await fetch(`${backend()}/auth/oidc/logout`, { method: "POST", headers: { ...await oidcBffServiceHeaders(), "content-type": "application/json" }, body: JSON.stringify({ session_token: session }), cache: "no-store" }).then((response) => (response.ok ? response.json() : null)).catch(() => null) as { id_token_hint?: string } | null;
+    const hint = await fetch(`${backend()}/auth/oidc/logout`, { method: "POST", headers: { ...await oidcBffServiceHeaders(), "content-type": "application/json" }, body: JSON.stringify({ session_token: session }), cache: "no-store" }).then((response) => (response.ok ? response.json() : null)).catch(() => null) as { id_token_hint?: string; refresh_token?: string } | null;
     if (hint?.id_token_hint && typeof hint.id_token_hint === "string" && hint.id_token_hint.length <= 16_384) idTokenHint = hint.id_token_hint;
-    await fetch(`${backend()}/auth/logout`, { method: "POST", headers: { authorization: `Bearer ${session}` }, cache: "no-store" }).catch(() => undefined);
+    const issuer = normalizedHttpsIssuer(process.env.OIDC_ISSUER);
+    const clientId = process.env.OIDC_CLIENT_ID;
+    const clientSecret = oidcClientSecret();
+    const refreshToken = hint?.refresh_token;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3_000);
+    const upstreamLogout = issuer && clientId && clientSecret && typeof refreshToken === "string" && refreshToken.length <= 16_384
+      ? fetch(`${resolveInternalIssuer(issuer, process.env.OIDC_INTERNAL_ISSUER)}/protocol/openid-connect/logout`, {
+          method: "POST",
+          headers: { "content-type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({ client_id: clientId, client_secret: clientSecret, refresh_token: refreshToken }),
+          cache: "no-store",
+          redirect: "manual",
+          signal: controller.signal,
+        }).catch(() => undefined)
+      : Promise.resolve(undefined);
+    await Promise.allSettled([
+      upstreamLogout,
+      fetch(`${backend()}/auth/logout`, { method: "POST", headers: { authorization: `Bearer ${session}` }, cache: "no-store" }),
+    ]);
+    clearTimeout(timeout);
   }
   const centralLogout = buildRpLogoutUrl(process.env.OIDC_ISSUER, process.env.OIDC_CLIENT_ID, process.env.OIDC_POST_LOGOUT_REDIRECT_URI, origin(), idTokenHint);
   // Missing or unsafe RP-logout configuration still clears local credentials and returns home.

@@ -111,6 +111,9 @@ test("logout route fetches the BFF-only hint then builds the RP-logout URL", () 
   assert.match(route, /\/auth\/oidc\/logout/);
   assert.match(route, /await oidcBffServiceHeaders\(\)/);
   assert.match(route, /JSON\.stringify\(\{ session_token: session \}\)/);
+  assert.match(route, /refresh_token: refreshToken/);
+  assert.match(route, /client_secret: clientSecret/);
+  assert.match(route, /resolveInternalIssuer\(issuer, process\.env\.OIDC_INTERNAL_ISSUER\).*protocol\/openid-connect\/logout/s);
   assert.match(route, /buildRpLogoutUrl\(process\.env\.OIDC_ISSUER, process\.env\.OIDC_CLIENT_ID, process\.env\.OIDC_POST_LOGOUT_REDIRECT_URI, origin\(\), idTokenHint\)/);
   assert.doesNotMatch(route, /NEXT_PUBLIC/);
 });
@@ -255,6 +258,7 @@ test("callback exchange requests 72h only when the ID token authorizes it and si
   const callback = readFileSync(new URL("../app/api/auth/oidc/callback/route.ts", import.meta.url), "utf8");
   assert.match(callback, /const keepSignedIn = idClaims\.pc_keep_signed_in === true;/);
   assert.match(callback, /id_token: token\.id_token/);
+  assert.match(callback, /refresh_token: token\.refresh_token/);
   assert.match(callback, /if \(keepSignedIn\) exchangeBody\.session_ttl_hours = 72;/);
   assert.match(callback, /const expiresMs = Date\.parse\(result\.expires_at\)/);
   assert.match(callback, /maxAge: sessionMaxAge/);

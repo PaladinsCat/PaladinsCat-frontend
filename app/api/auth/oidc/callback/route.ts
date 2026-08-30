@@ -35,13 +35,13 @@ export async function GET(request: NextRequest) {
   const serverIssuer = resolveInternalIssuer(issuer, process.env.OIDC_INTERNAL_ISSUER);
   const tokenResponse = await fetch(`${serverIssuer}/protocol/openid-connect/token`, { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, cache: "no-store", body: new URLSearchParams({ grant_type: "authorization_code", client_id: clientId, client_secret: clientSecret, code, code_verifier: tx.verifier, redirect_uri: `${origin()}/api/auth/oidc/callback` }) });
   if (!tokenResponse.ok) { const response = NextResponse.redirect(new URL("/auth/login?oidc_error=1", origin())); clear(response); return response; }
-  const token = await tokenResponse.json() as { access_token?: string; id_token?: string };
+  const token = await tokenResponse.json() as { access_token?: string; id_token?: string; refresh_token?: string };
   const idClaims = await validateIdToken(token.id_token, issuer, clientId, tx.nonce, serverIssuer);
-  if (!token.access_token || !token.id_token || !idClaims) { const response = NextResponse.redirect(new URL("/auth/login?oidc_error=1", origin())); clear(response); return response; }
+  if (!token.access_token || !token.id_token || !token.refresh_token || !idClaims) { const response = NextResponse.redirect(new URL("/auth/login?oidc_error=1", origin())); clear(response); return response; }
   // Access tokens cross this server-to-server boundary only; they never reach browser JS or cookies.
   const keepSignedIn = idClaims.pc_keep_signed_in === true;
   // The validated id_token crosses this server-to-server boundary only; the backend stores it (encrypted) so RP-initiated logout can name the SSO session via id_token_hint.
-  const exchangeBody: { access_token: string; id_token: string; session_ttl_hours?: number } = { access_token: token.access_token, id_token: token.id_token };
+  const exchangeBody: { access_token: string; id_token: string; refresh_token: string; session_ttl_hours?: number } = { access_token: token.access_token, id_token: token.id_token, refresh_token: token.refresh_token };
   if (keepSignedIn) exchangeBody.session_ttl_hours = 72;
   const exchange = await fetch(`${backend()}/auth/oidc/exchange`, { method: "POST", headers: { ...await oidcBffServiceHeaders(), "content-type": "application/json" }, cache: "no-store", body: JSON.stringify(exchangeBody) });
   if (!exchange.ok) { const response = NextResponse.redirect(new URL("/auth/login?oidc_error=1", origin())); clear(response); return response; }
