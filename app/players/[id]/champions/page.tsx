@@ -53,7 +53,7 @@ export default function PlayerChampionStatsPage() {
       setRefreshRemainingSeconds(0);
       return;
     }
-    const updateRemaining = () => setRefreshRemainingSeconds(Math.max(0, Math.ceil((lastUpdated + 10 * 60 * 1000 - Date.now()) / 1000)));
+    const updateRemaining = () => setRefreshRemainingSeconds(Math.max(0, Math.ceil((lastUpdated + 3 * 60 * 1000 - Date.now()) / 1000)));
     updateRemaining();
     const timer = window.setInterval(updateRemaining, 1000);
     return () => window.clearInterval(timer);

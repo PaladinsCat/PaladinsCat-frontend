@@ -2613,7 +2613,7 @@ export interface PlayerLoadoutsResponse {
 
 function mapPlayerLoadoutFreshness(raw: any): PlayerLoadoutFreshness {
   return {
-    ttlSeconds: Number(raw?.ttl_seconds ?? 86_400),
+    ttlSeconds: Number(raw?.ttl_seconds ?? 180),
     refreshedAt: raw?.refreshed_at ?? null,
     expiresAt: raw?.expires_at ?? null,
     remainingSeconds: Number(raw?.remaining_seconds ?? 0),

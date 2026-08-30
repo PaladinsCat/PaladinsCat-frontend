@@ -126,6 +126,7 @@ interface RefreshFeedback {
 }
 
 interface PlayerRefreshActionResponse {
+  message?: string;
   error?: {
     message?: string;
     details?: {
@@ -423,6 +424,13 @@ export default function PlayerProfileClient({
       }
 
       const relatedRefreshError = data?.historyRefresh?.error || data?.championStatsRefresh?.error;
+      if (!data.refreshQuota) {
+        setRefreshCooldownUntil(null);
+        setRefreshFeedback({ kind: 'success', message: data.message || t("common.playerRefresh.success", { remaining: formatNumber(5) }) });
+        setFetchKey(k => k + 1);
+        setHistoryFetchKey((key) => key + 1);
+        return;
+      }
       const remaining = Math.max(0, Number(data?.refreshQuota?.remaining ?? 0));
       if (remaining === 0) {
         showRefreshCooldown(

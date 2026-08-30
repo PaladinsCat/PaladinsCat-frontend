@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ErrorState, LoadingIndicator, LoadingPanel } from "@/components/async-state";
@@ -72,23 +72,6 @@ export default function PlayerLoadoutsPage() {
       setRefreshing(false);
     }
   };
-
-  // Auto-refresh the first time the loadouts page is visited while the data is
-  // empty or stale and the manual-refresh cooldown has elapsed. This lets the
-  // page pull loadouts from Hi-Rez on first load instead of showing empty
-  // cards and forcing the user to click "Refresh" manually. Guarded so it only
-  // fires once per page visit (per 10-min TTL window).
-  const autoRefreshDone = useRef(false);
-  useEffect(() => {
-    if (!data || loading || refreshing || autoRefreshDone.current) return;
-    if (data.loadouts.length > 0 && !data.freshness.expired) {
-      autoRefreshDone.current = true;
-      return;
-    }
-    if (manualRefreshRemainingSeconds > 0) return;
-    autoRefreshDone.current = true;
-    void refresh();
-  }, [data, loading, refreshing, manualRefreshRemainingSeconds]);
 
   const counts = useMemo(() => new Map(data?.loadouts.reduce((entries, loadout) => {
     entries.set(loadout.championId, (entries.get(loadout.championId) ?? 0) + 1);
