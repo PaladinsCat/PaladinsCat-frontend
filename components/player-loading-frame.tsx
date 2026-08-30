@@ -18,16 +18,26 @@ function Avatar({
     <img
       src={avatarUrl}
       alt={avatarAlt}
+      width={96}
+      height={96}
       className="h-full w-full object-cover"
       draggable={false}
+      decoding="async"
+      fetchPriority="high"
+      loading="eager"
       onError={onAvatarError}
     />
   ) : (
     <img
       src="/images/icons/Avatar_Default_Icon.avif"
       alt={avatarAlt}
+      width={96}
+      height={96}
       className="h-full w-full object-cover"
       draggable={false}
+      decoding="async"
+      fetchPriority="high"
+      loading="eager"
     />
   );
 }
@@ -42,8 +52,10 @@ export default function PlayerLoadingFrame({
 
   if (!frame) {
     return (
-      <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border-2 border-pc-accent/30 bg-pc-bg">
-        <Avatar avatarUrl={avatarUrl} avatarAlt={avatarAlt} onAvatarError={onAvatarError} />
+      <div className="relative h-[7rem] w-[5.2rem] shrink-0">
+        <div className="absolute left-1/2 top-0 flex h-16 w-16 -translate-x-1/2 items-center justify-center overflow-hidden rounded-xl border-2 border-pc-accent/30 bg-pc-bg">
+          <Avatar avatarUrl={avatarUrl} avatarAlt={avatarAlt} onAvatarError={onAvatarError} />
+        </div>
       </div>
     );
   }
@@ -65,7 +77,7 @@ export default function PlayerLoadingFrame({
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 h-full w-full object-contain"
           draggable={false}
-          fetchPriority="high"
+          decoding="async"
         />
       </picture>
     </div>
