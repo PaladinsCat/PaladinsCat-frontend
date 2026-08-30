@@ -152,6 +152,7 @@
   "operations.matches": "All matches",
   "operations.rankedMatches": "Ranked matches",
   "operations.casualMatches": "Casual matches",
+  "operations.specialMatches": "Special matches",
   "operations.players": "Observed public accounts",
   "operations.registeredUsers": "Registered users",
   "operations.registeredVerifiedUsers": "Registered / verified users",
