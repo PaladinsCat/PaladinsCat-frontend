@@ -8,6 +8,10 @@ export const runtime = "nodejs";
 const TX_COOKIE = "__Host-pc_oidc_txn";
 const PAR_MAX_BYTES = 8 * 1024;
 function origin() { return process.env.PALADINSCAT_PUBLIC_ORIGIN || "http://localhost:3000"; }
+function backend() {
+  const base = (process.env.NEXT_SERVER_API_URL || "http://localhost:3005").replace(/\/$/, "");
+  return base.endsWith("/v1") ? base : `${base}/v1`;
+}
 function clientAddress(request: NextRequest): string | undefined {
   const address = request.headers.get("cf-connecting-ip")?.trim();
   return address && isIP(address) ? address : undefined;
@@ -35,7 +39,7 @@ async function startOidc(intent: "login" | "create", returnPath: string, clientI
   const clientSecret = oidcClientSecret();
   if (!issuer || !clientId || !clientSecret) return new NextResponse("OIDC is not configured", { status: 503 });
   const serverIssuer = resolveInternalIssuer(issuer, process.env.OIDC_INTERNAL_ISSUER);
-  const stored = await fetch(`${(process.env.NEXT_SERVER_API_URL || "http://localhost:3005/api").replace(/\/$/, "")}/auth/oidc/transactions`, { method: "POST", headers: { ...oidcBffServiceHeaders(), ...(clientIp ? { "x-forwarded-for": clientIp } : {}), "content-type": "application/json" }, cache: "no-store", body: JSON.stringify({ state: transaction.state, nonce: transaction.nonce, verifier: transaction.verifier, return_path: transaction.returnPath }) });
+  const stored = await fetch(`${backend()}/auth/oidc/transactions`, { method: "POST", headers: { ...await oidcBffServiceHeaders(), ...(clientIp ? { "x-forwarded-for": clientIp } : {}), "content-type": "application/json" }, cache: "no-store", body: JSON.stringify({ state: transaction.state, nonce: transaction.nonce, verifier: transaction.verifier, return_path: transaction.returnPath }) });
   if (stored.status !== 201) return new NextResponse("OIDC is temporarily unavailable", { status: 503 });
   const par = buildPushedAuthorizationRequest(serverIssuer, clientId, `${origin()}/api/auth/oidc/callback`, transaction);
   par.form.set("client_secret", clientSecret);

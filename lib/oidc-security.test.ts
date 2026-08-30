@@ -67,7 +67,15 @@ test("player refresh forwards the cookie-auth CSRF token", () => {
 test("BFF credential is server-only and never a public environment value", () => {
   const source = readFileSync(new URL("./oidc-bff-service.ts", import.meta.url), "utf8");
   assert.match(source, /import "server-only"/);
-  assert.match(source, /PALADINSCAT_OIDC_BFF_SERVICE_TOKEN_FILE/);
+  assert.match(source, /PALADINSCAT_SERVICE_OIDC_PRIVATE_KEY_FILE/);
+  assert.match(source, /client_assertion_type/);
+  assert.match(source, /RSA-SHA256/);
+  assert.match(source, /base64Url\(signer\.sign\(privateKey\)\)/);
+  assert.match(source, /modulusLength.*3072/s);
+  assert.match(source, /64 \* 1024/);
+  assert.match(source, /exp: now \+ 60/);
+  assert.match(source, /jti: randomUUID\(\)/);
+  assert.doesNotMatch(source, /PALADINSCAT_OIDC_BFF_SERVICE_TOKEN/);
   assert.doesNotMatch(source, /NEXT_PUBLIC/);
 });
 test("OIDC client secret is loaded server-side from a secret file when configured", () => {
@@ -226,11 +234,11 @@ test("callback exchange requests 72h only when the ID token authorizes it and si
   assert.doesNotMatch(callback, /maxAge: 60 \* 60 \* 8/);
 });
 
-test("backchannel logout route verifies the token then calls the service-token backend revocation", () => {
+test("backchannel logout route verifies the token then calls the v1 backend revocation", () => {
   const route = readFileSync(new URL("../app/api/auth/oidc/backchannel-logout/route.ts", import.meta.url), "utf8");
   assert.match(route, /validateLogoutToken\(logoutToken, issuer, clientId, serverIssuer\)/);
-  assert.match(route, /oidcBffServiceHeaders\(\)/);
-  assert.match(route, /\/auth\/oidc\/backchannel-logout/);
+  assert.match(route, /await oidcBffServiceHeaders\(\)/);
+  assert.match(route, /backend\(\).*\/auth\/oidc\/backchannel-logout/s);
   assert.match(route, /if \(!claims \|\| !claims\.sid\)/);
   assert.doesNotMatch(route, /logout_token\)/);
 });

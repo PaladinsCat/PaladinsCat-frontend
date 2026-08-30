@@ -3,7 +3,10 @@ import { normalizedHttpsIssuer, resolveInternalIssuer, validateLogoutToken } fro
 import { oidcBffServiceHeaders } from "@/lib/oidc-bff-service";
 
 export const runtime = "nodejs";
-function backend() { return process.env.NEXT_SERVER_API_URL || "http://localhost:3005/api"; }
+function backend() {
+  const base = (process.env.NEXT_SERVER_API_URL || "http://localhost:3005").replace(/\/$/, "");
+  return base.endsWith("/v1") ? base : `${base}/v1`;
+}
 
 // Keycloak POSTs a form-encoded logout_token (RS256, typ=Logout) here on backchannel logout.
 // This route verifies the token server-side, then calls the service-token-protected backend
@@ -28,9 +31,9 @@ export async function POST(request: NextRequest) {
   // Forward the raw logout_token form-encoded. The backend (Form binding) is the
   // authority: it re-validates signature/issuer/audience, applies jti replay
   // protection, and revokes the session row bound to the token's sid.
-  const revoke = await fetch(`${backend().replace(/\/$/, "")}/auth/oidc/backchannel-logout`, {
+  const revoke = await fetch(`${backend()}/auth/oidc/backchannel-logout`, {
     method: "POST",
-    headers: { ...oidcBffServiceHeaders(), "content-type": "application/x-www-form-urlencoded" },
+    headers: { ...await oidcBffServiceHeaders(), "content-type": "application/x-www-form-urlencoded" },
     cache: "no-store",
     body: new URLSearchParams({ logout_token: logoutToken }),
   }).catch(() => undefined);

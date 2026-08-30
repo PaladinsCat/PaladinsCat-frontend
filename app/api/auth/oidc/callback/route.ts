@@ -8,7 +8,10 @@ const TX_COOKIE = "__Host-pc_oidc_txn";
 const SESSION_COOKIE = "__Host-pc_session";
 const CSRF_COOKIE = "__Host-pc_csrf";
 function origin() { return process.env.PALADINSCAT_PUBLIC_ORIGIN || "http://localhost:3000"; }
-function backend() { return process.env.NEXT_SERVER_API_URL || "http://localhost:3005/api"; }
+function backend() {
+  const base = (process.env.NEXT_SERVER_API_URL || "http://localhost:3005").replace(/\/$/, "");
+  return base.endsWith("/v1") ? base : `${base}/v1`;
+}
 function clear(response: NextResponse) { response.cookies.set(TX_COOKIE, "", { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 0 }); }
 function one(url: URL, name: string): string | null {
   const values = url.searchParams.getAll(name);
@@ -20,7 +23,7 @@ export async function GET(request: NextRequest) {
   const state = one(url, "state");
   const code = one(url, "code");
   if (!stateMatches(request.cookies.get(TX_COOKIE)?.value, state) || !code || url.searchParams.get("error")) { const response = NextResponse.redirect(new URL("/auth/login?oidc_error=1", origin())); clear(response); return response; }
-  const consume = await fetch(`${backend().replace(/\/$/, "")}/auth/oidc/transactions/consume`, { method: "POST", headers: { ...oidcBffServiceHeaders(), "content-type": "application/json" }, cache: "no-store", body: JSON.stringify({ state }) });
+  const consume = await fetch(`${backend()}/auth/oidc/transactions/consume`, { method: "POST", headers: { ...await oidcBffServiceHeaders(), "content-type": "application/json" }, cache: "no-store", body: JSON.stringify({ state }) });
   if (!consume.ok) { const response = NextResponse.redirect(new URL("/auth/login?oidc_error=1", origin())); clear(response); return response; }
   const txValue = await consume.json();
   const tx = parseTransaction(txValue);
@@ -37,7 +40,7 @@ export async function GET(request: NextRequest) {
   if (!token.access_token || !idClaims) { const response = NextResponse.redirect(new URL("/auth/login?oidc_error=1", origin())); clear(response); return response; }
   // Access tokens cross this server-to-server boundary only; they never reach browser JS or cookies.
   const keepSignedIn = idClaims.pc_keep_signed_in === true;
-  const exchange = await fetch(`${backend().replace(/\/$/, "")}/auth/oidc/exchange`, { method: "POST", headers: { ...oidcBffServiceHeaders(), "content-type": "application/json" }, cache: "no-store", body: JSON.stringify(keepSignedIn ? { access_token: token.access_token, session_ttl_hours: 72 } : { access_token: token.access_token }) });
+  const exchange = await fetch(`${backend()}/auth/oidc/exchange`, { method: "POST", headers: { ...await oidcBffServiceHeaders(), "content-type": "application/json" }, cache: "no-store", body: JSON.stringify(keepSignedIn ? { access_token: token.access_token, session_ttl_hours: 72 } : { access_token: token.access_token }) });
   if (!exchange.ok) { const response = NextResponse.redirect(new URL("/auth/login?oidc_error=1", origin())); clear(response); return response; }
   const result = await exchange.json() as { token?: string; expires_at?: string };
   if (!result.token || result.token.length > 512 || !result.expires_at) { const response = NextResponse.redirect(new URL("/auth/login?oidc_error=1", origin())); clear(response); return response; }
