@@ -62,7 +62,11 @@ async function startOidc(intent: "login" | "create", returnPath: string, clientI
 
 export async function POST(request: NextRequest) {
   if (!requireSameOrigin(request.headers.get("origin"), origin())) return new NextResponse("Forbidden", { status: 403 });
-  const form = await request.formData();
+  const contentType = request.headers.get("content-type")?.split(";", 1)[0].trim().toLowerCase();
+  if (contentType && contentType !== "application/x-www-form-urlencoded" && contentType !== "multipart/form-data") return new NextResponse("Unsupported media type", { status: 415 });
+  let form: FormData;
+  try { form = contentType ? await request.formData() : new FormData(); }
+  catch { return new NextResponse("Invalid form", { status: 400 }); }
   const requestedIntent = form.get("intent");
   if (requestedIntent !== null && requestedIntent !== "create") return new NextResponse("Invalid OIDC intent", { status: 400 });
   return startOidc(requestedIntent === "create" ? "create" : "login", safeReturnPath(String(form.get("return") || "/")), clientAddress(request));

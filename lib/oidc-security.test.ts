@@ -116,6 +116,8 @@ test("PAR response requires a bounded-lived opaque request URI", () => {
 test("OIDC login redirects the initiating POST with 303, never 307", () => {
   const source = readFileSync(new URL("../app/api/auth/oidc/login/route.ts", import.meta.url), "utf8");
   assert.match(source, /NextResponse\.redirect\(buildParAuthorizationUrl\(issuer, clientId, requestUri\), \{ status: 303 \}\)/);
+  assert.match(source, /contentType \? await request\.formData\(\) : new FormData\(\)/);
+  assert.match(source, /catch \{ return new NextResponse\("Invalid form", \{ status: 400 \}\); \}/);
 });
 test("OIDC transaction limits use only the validated Cloudflare client address", () => {
   const source = readFileSync(new URL("../app/api/auth/oidc/login/route.ts", import.meta.url), "utf8");
