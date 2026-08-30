@@ -92,6 +92,28 @@ test("RP logout uses only the exact configured same-origin return URI", () => {
   assert.equal([...logout!.searchParams.keys()].sort().join(","), "client_id,post_logout_redirect_uri");
   assert.equal(buildRpLogoutUrl("https://auth.paladinscat.com/realms/paladinscat", "paladinscat-web", "https://evil.example/logout", "https://paladinscat.com"), null);
 });
+test("RP logout names the SSO session via id_token_hint and falls back for pre-cutover sessions", () => {
+  const base = "https://auth.paladinscat.com/realms/paladinscat";
+  const hint = "eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJzZXNzaW9uLWlkLTIifQ.signature";
+  const withHint = buildRpLogoutUrl(base, "paladinscat-web", "https://paladinscat.com/", "https://paladinscat.com", hint);
+  assert.equal(withHint?.searchParams.get("id_token_hint"), hint);
+  assert.equal(withHint?.href.endsWith(`id_token_hint=${encodeURIComponent(hint)}`), true);
+  assert.equal([...withHint!.searchParams.keys()].sort().join(","), "client_id,id_token_hint,post_logout_redirect_uri");
+  for (const absent of [undefined, null, ""]) {
+    const fallback = buildRpLogoutUrl(base, "paladinscat-web", "https://paladinscat.com/", "https://paladinscat.com", absent);
+    assert.equal(fallback?.searchParams.get("id_token_hint"), null);
+    assert.equal([...fallback!.searchParams.keys()].sort().join(","), "client_id,post_logout_redirect_uri");
+  }
+  assert.equal(buildRpLogoutUrl(base, "paladinscat-web", "https://paladinscat.com/", "https://paladinscat.com", "x".repeat(16_385))?.searchParams.get("id_token_hint"), null);
+});
+test("logout route fetches the BFF-only hint then builds the RP-logout URL", () => {
+  const route = readFileSync(new URL("../app/api/auth/oidc/logout/route.ts", import.meta.url), "utf8");
+  assert.match(route, /\/auth\/oidc\/logout/);
+  assert.match(route, /await oidcBffServiceHeaders\(\)/);
+  assert.match(route, /JSON\.stringify\(\{ session_token: session \}\)/);
+  assert.match(route, /buildRpLogoutUrl\(process\.env\.OIDC_ISSUER, process\.env\.OIDC_CLIENT_ID, process\.env\.OIDC_POST_LOGOUT_REDIRECT_URI, origin\(\), idTokenHint\)/);
+  assert.doesNotMatch(route, /NEXT_PUBLIC/);
+});
 test("authorization parameters are pushed server-side and the browser gets only PAR identifiers", () => {
   const transaction = createTransaction("/");
   const pushed = buildPushedAuthorizationRequest("https://auth.paladinscat.com/realms/paladinscat", "paladinscat-web", "https://paladinscat.com/api/auth/oidc/callback", transaction);
@@ -230,7 +252,8 @@ test("backchannel logout token validation fails closed on malformed or unsigned 
 test("callback exchange requests 72h only when the ID token authorizes it and sizes cookies to backend expiry", () => {
   const callback = readFileSync(new URL("../app/api/auth/oidc/callback/route.ts", import.meta.url), "utf8");
   assert.match(callback, /const keepSignedIn = idClaims\.pc_keep_signed_in === true;/);
-  assert.match(callback, /keepSignedIn \? \{ access_token: token\.access_token, session_ttl_hours: 72 \} : \{ access_token: token\.access_token \}/);
+  assert.match(callback, /id_token: token\.id_token/);
+  assert.match(callback, /if \(keepSignedIn\) exchangeBody\.session_ttl_hours = 72;/);
   assert.match(callback, /const expiresMs = Date\.parse\(result\.expires_at\)/);
   assert.match(callback, /maxAge: sessionMaxAge/);
   assert.doesNotMatch(callback, /maxAge: 60 \* 60 \* 8/);

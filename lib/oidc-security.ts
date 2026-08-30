@@ -106,7 +106,7 @@ export function parsePushedAuthorizationResponse(value: unknown): { requestUri: 
   return { requestUri: response.request_uri, expiresIn: response.expires_in as number };
 }
 
-export function buildRpLogoutUrl(issuer: string | undefined, clientId: string | undefined, postLogoutRedirectUri: string | undefined, publicOrigin: string): URL | null {
+export function buildRpLogoutUrl(issuer: string | undefined, clientId: string | undefined, postLogoutRedirectUri: string | undefined, publicOrigin: string, idTokenHint?: string | null): URL | null {
   if (!issuer || !clientId || !postLogoutRedirectUri) return null;
   try {
     const issuerUrl = new URL(issuer);
@@ -115,6 +115,9 @@ export function buildRpLogoutUrl(issuer: string | undefined, clientId: string | 
     const logout = new URL(`${issuer.replace(/\/$/, "")}/protocol/openid-connect/logout`);
     logout.searchParams.set("client_id", clientId);
     logout.searchParams.set("post_logout_redirect_uri", postLogoutRedirectUri);
+    // id_token_hint names the upstream SSO session to terminate; absent for
+    // pre-cutover sessions that have no stored hint (cookie-fallback behavior).
+    if (idTokenHint && idTokenHint.length <= 16_384) logout.searchParams.set("id_token_hint", idTokenHint);
     return logout;
   } catch { return null; }
 }
