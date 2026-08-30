@@ -22,35 +22,52 @@ function ScrambleLetter({
   char,
   speed,
   iterations,
+  delay,
 }: {
   char: string;
   speed: number;
   iterations: number;
+  delay: number;
 }) {
-  const [displayed, setDisplayed] = useState(randomChar);
-  const [isRevealed, setIsRevealed] = useState(false);
+  const [displayed, setDisplayed] = useState("");
+  const [isRevealed, setIsRevealed] = useState(true);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    let count = 0;
+    let count = 1;
+    const timeout = setTimeout(() => {
+      setDisplayed(randomChar());
+      setIsRevealed(false);
 
-    intervalRef.current = setInterval(() => {
-      count++;
-      if (count >= iterations) {
-        if (intervalRef.current) clearInterval(intervalRef.current);
-        setDisplayed(char);
-        setIsRevealed(true);
-      } else {
-        setDisplayed(randomChar());
-      }
-    }, speed);
+      intervalRef.current = setInterval(() => {
+        count++;
+        if (count >= iterations) {
+          if (intervalRef.current) clearInterval(intervalRef.current);
+          setIsRevealed(true);
+        } else {
+          setDisplayed(randomChar());
+        }
+      }, speed);
+    }, delay);
 
     return () => {
+      clearTimeout(timeout);
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [char, speed, iterations]);
+  }, [char, delay, speed, iterations]);
 
-  return <span style={{ opacity: isRevealed ? 1 : 0.35, transition: 'opacity 0.4s ease' }}>{displayed}</span>;
+  return (
+    <span className="relative inline-block">
+      <span>{char}</span>
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0"
+        style={{ opacity: isRevealed ? 0 : 0.35, transition: "opacity 0.4s ease" }}
+      >
+        {displayed}
+      </span>
+    </span>
+  );
 }
 
 export default function ScrambleText({
@@ -69,7 +86,8 @@ export default function ScrambleText({
   }
 
   return (
-    <span className={`inline-flex ${className}`} aria-label={text}>
+    <span className={`relative inline-flex ${className}`}>
+      <span className="sr-only">{text}</span>
       {letters.map((letter, i) => {
         const distanceFromCenter = Math.abs(i - centerIndex);
         const staggerDelay = delayFromCenter ? distanceFromCenter * 80 : i * 30;
@@ -79,8 +97,8 @@ export default function ScrambleText({
         }
 
         return (
-          <span key={`${i}-${letter}`} aria-hidden="true" style={{ animationDelay: `${staggerDelay}ms` }}>
-            <ScrambleLetter char={letter} speed={speed} iterations={iterations} />
+          <span key={`${i}-${letter}`} aria-hidden="true">
+            <ScrambleLetter char={letter} speed={speed} iterations={iterations} delay={staggerDelay} />
           </span>
         );
       })}

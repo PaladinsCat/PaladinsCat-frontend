@@ -15,7 +15,7 @@ import PlayerName from "@/components/player-name";
 import NotificationMenu from "@/components/notification-menu";
 import { BLOG_COPY_KEYS } from "@/lib/blog-copy";
 
-function LanguageMenu() {
+function LanguageMenu({ compact = false }: { compact?: boolean }) {
   const { locale, setLocale, t } = useLocalization();
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -38,18 +38,18 @@ function LanguageMenu() {
   }, [open]);
 
   return (
-    <div ref={menuRef} className="relative">
+    <div ref={menuRef} className={`relative shrink-0 ${compact ? "w-10 min-[1360px]:w-16" : "w-16"}`}>
       <button
         type="button"
         onClick={() => setOpen((current) => !current)}
-        className="inline-flex h-9 items-center gap-1.5 rounded-lg px-2 text-sm text-pc-text-secondary transition-colors hover:bg-pc-bg-elevated hover:text-pc-accent"
+        className="inline-flex h-9 w-full items-center justify-center gap-1 rounded-lg px-1.5 text-sm text-pc-text-secondary transition-colors hover:bg-pc-bg-elevated hover:text-pc-accent"
         aria-label={t("nav.language")}
         aria-haspopup="listbox"
         aria-expanded={open}
       >
         <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="12" cy="12" r="10" /><path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20M12 2a15.3 15.3 0 0 0 0 20" /></svg>
-        <span className="max-w-20 truncate text-xs font-semibold tracking-wide">{activeLocale.code.toUpperCase()}</span>
-        <svg className={`h-3 w-3 transition-transform ${open ? "rotate-180" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+        <span className={`max-w-20 truncate text-xs font-semibold tracking-wide ${compact ? "hidden min-[1360px]:inline" : ""}`}>{activeLocale.code.toUpperCase()}</span>
+        <svg className={`h-3 w-3 transition-transform ${compact ? "hidden min-[1360px]:block" : ""} ${open ? "rotate-180" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
       </button>
       {open && (
         <div className="absolute right-0 top-full z-30 mt-2 w-60 overflow-hidden rounded-xl border border-pc-border bg-pc-bg-secondary p-1 shadow-lg" role="listbox" aria-label={t("nav.language")}>
@@ -310,10 +310,10 @@ export default function Nav() {
       {/* Nav: sticky top, secondary bg, subtle bottom border, shadow for depth */}
       <nav className="sticky top-0 z-50 bg-pc-bg-secondary border-b border-pc-border shadow-sm">
         <div className="mx-auto max-w-[1536px] px-4 sm:px-6 lg:px-8">
-          {/* ── Desktop Layout: fixed edges with a flexible link group ── */}
-          <div className="hidden items-center min-[1180px]:flex" style={{ height: 64 }}>
+          {/* ── Desktop Layout: equal side tracks keep the destinations centered ── */}
+          <div className="hidden grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center min-[1180px]:grid" style={{ height: 64 }}>
             {/* Left: fixed-width logo */}
-            <div className="shrink-0">
+            <div className="min-w-0 justify-self-start">
               <Link href="/" className="relative text-xl font-bold text-pc-text hover:text-pc-text-muted transition-colors flex items-center gap-2">
                 <img src="/images/icons/paladinscat.avif" alt="" className="w-7 h-7" />
                 {t("generated.common.paladinscat")}
@@ -326,7 +326,7 @@ export default function Nav() {
             </div>
 
             {/* Center: grouped destinations use the same hover/focus behavior as Account. */}
-            <div className="flex min-w-0 flex-1 items-center justify-center gap-3 px-5 xl:gap-5 xl:px-8 2xl:gap-7">
+            <div className="flex min-w-0 items-center justify-center gap-2 xl:gap-4 xl:px-4 2xl:gap-7 2xl:px-8">
               {headerGroups.map((group) => {
                 const groupActive = group.links.some((link) => isActive(link.href));
                 return (
@@ -356,37 +356,39 @@ export default function Nav() {
 
             {/* Right: grouped menu and account controls */}
             {/* Player search lives on /players page; champion search on /champions page */}
-            <div className="flex shrink-0 items-center justify-end gap-4" suppressHydrationWarning>
-              <LanguageMenu />
+            <div className="flex min-w-0 justify-self-end items-center justify-end gap-3" suppressHydrationWarning>
+              <LanguageMenu compact />
               <NotificationMenu />
               <button
                 onClick={() => setSideMenuOpen(true)}
-                className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm text-pc-text-secondary transition-colors hover:bg-pc-bg-elevated hover:text-pc-accent"
+                className="inline-flex w-20 shrink-0 items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-sm text-pc-text-secondary transition-colors hover:bg-pc-bg-elevated hover:text-pc-accent min-[1360px]:w-24"
                 aria-label={t("nav.openSiteMenu")}
                 aria-expanded={sideMenuOpen}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
-                {t("nav.menu")}
+                <span className="truncate">{t("nav.menu")}</span>
               </button>
-              {resolvedUser ? (
-                <div className="group relative flex items-center">
-                  <Link
-                    href={profileHref}
-                    className="block max-w-36 truncate rounded-md px-1 py-1 text-sm text-pc-text-secondary transition-colors hover:text-pc-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent"
-                  >
-                    {resolvedUser.linkedPlayerId ? <PlayerName playerId={resolvedUser.linkedPlayerId} verified>{accountLabel}</PlayerName> : accountLabel}
-                  </Link>
-                  <div className="pointer-events-none invisible absolute right-0 top-full z-10 w-44 pt-2 opacity-0 transition-all group-hover:pointer-events-auto group-hover:visible group-hover:opacity-100">
-                    <div className="rounded-lg border border-pc-border bg-pc-bg-secondary p-1 shadow-md" role="menu">
-                    <Link href={profileHref} className="block rounded-md px-3 py-2 text-sm text-pc-text-secondary transition-colors hover:bg-pc-bg-elevated hover:text-pc-text" role="menuitem">{t("generated.common.profile")}</Link>
-                    <Link href="/account" className="block rounded-md px-3 py-2 text-sm text-pc-text-secondary transition-colors hover:bg-pc-bg-elevated hover:text-pc-text" role="menuitem">{t("generated.common.accountSettings")}</Link>
-                    <button onClick={handleLogout} className="block w-full rounded-md px-3 py-2 text-left text-sm text-pc-text-secondary transition-colors hover:bg-pc-bg-elevated hover:text-pc-text" role="menuitem">{t("nav.logout")}</button>
+              <div className="w-24 shrink-0 min-[1360px]:w-28">
+                {resolvedUser ? (
+                  <div className="group relative flex w-full items-center">
+                    <Link
+                      href={profileHref}
+                      className="block w-full truncate rounded-md px-1 py-1 text-sm text-pc-text-secondary transition-colors hover:text-pc-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent"
+                    >
+                      {resolvedUser.linkedPlayerId ? <PlayerName playerId={resolvedUser.linkedPlayerId} verified>{accountLabel}</PlayerName> : accountLabel}
+                    </Link>
+                    <div className="pointer-events-none invisible absolute right-0 top-full z-10 w-44 pt-2 opacity-0 transition-all group-hover:pointer-events-auto group-hover:visible group-hover:opacity-100">
+                      <div className="rounded-lg border border-pc-border bg-pc-bg-secondary p-1 shadow-md" role="menu">
+                        <Link href={profileHref} className="block rounded-md px-3 py-2 text-sm text-pc-text-secondary transition-colors hover:bg-pc-bg-elevated hover:text-pc-text" role="menuitem">{t("generated.common.profile")}</Link>
+                        <Link href="/account" className="block rounded-md px-3 py-2 text-sm text-pc-text-secondary transition-colors hover:bg-pc-bg-elevated hover:text-pc-text" role="menuitem">{t("generated.common.accountSettings")}</Link>
+                        <button onClick={handleLogout} className="block w-full rounded-md px-3 py-2 text-left text-sm text-pc-text-secondary transition-colors hover:bg-pc-bg-elevated hover:text-pc-text" role="menuitem">{t("nav.logout")}</button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ) : (
-                <a href={loginHref} className="pc-btn-secondary text-sm">{t("nav.login")}</a>
-              )}
+                ) : (
+                  <a href={loginHref} className="pc-btn-secondary inline-flex w-full justify-center text-sm" aria-label={t("nav.login")}><span className="truncate">{t("nav.login")}</span></a>
+                )}
+              </div>
             </div>
           </div>
 
