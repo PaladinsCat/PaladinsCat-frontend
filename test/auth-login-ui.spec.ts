@@ -11,11 +11,13 @@ async function stubLoginHandoff(page: Page) {
 }
 
 test("desktop Login control performs a browser-native OIDC handoff", async ({ page }) => {
-  await page.setViewportSize({ width: 1400, height: 900 });
+  await page.setViewportSize({ width: 1280, height: 900 });
   await stubLoginHandoff(page);
   await page.goto("/");
 
   const login = page.getByRole("link", { name: "Login", exact: true });
+  await expect(page.getByRole("button", { name: "Language" })).toContainText("EN");
+  expect((await login.boundingBox())?.width).toBeLessThan(96);
   await expect(login).toHaveAttribute("href", "/auth/login?redirect=%2F");
   await login.click();
 
