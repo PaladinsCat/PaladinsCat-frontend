@@ -19,7 +19,7 @@ import CoreUiDragGuard from "@/components/CoreUiDragGuard";
 import LiteModeProvider from "@/components/LiteModeProvider";
 import { cn } from "@/lib/utils";
 import { headers } from "next/headers";
-import { SEO_KEYWORDS, SITE_NAME, SITE_URL } from "@/lib/seo";
+import { SEO_KEYWORDS, SITE_NAME, SITE_URL, serializeJsonLd } from "@/lib/seo";
 import { getServerLocalization } from "@/lib/server-localization";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -30,7 +30,6 @@ export async function generateMetadata(): Promise<Metadata> {
     applicationName: SITE_NAME,
     title: { default: title, template: `%s | ${SITE_NAME}` },
     description: t("seo.root.description"),
-    keywords: SEO_KEYWORDS,
     authors: [{ name: SITE_NAME }],
     creator: SITE_NAME,
     publisher: SITE_NAME,
@@ -75,27 +74,46 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     "@context": "https://schema.org",
     "@graph": [
       {
-        "@type": t("generated.layout.website"),
+        "@type": "WebSite",
         "@id": `${SITE_URL}/#website`,
         name: SITE_NAME,
         url: SITE_URL,
         description: t("seo.root.structuredDescription"),
         inLanguage: locale,
+        publisher: { "@id": `${SITE_URL}/#organization` },
+        about: { "@id": `${SITE_URL}/#paladins-game` },
       },
       {
-        "@type": t("generated.layout.organization"),
+        "@type": "Organization",
         "@id": `${SITE_URL}/#organization`,
         name: SITE_NAME,
         url: SITE_URL,
-        logo: `${SITE_URL}/images/icons/paladinscat.avif`,
+        logo: {
+          "@type": "ImageObject",
+          url: `${SITE_URL}/images/icons/paladinscat.png`,
+          width: 120,
+          height: 120,
+        },
       },
       {
-        "@type": t("generated.layout.dataset"),
+        "@type": "VideoGame",
+        "@id": `${SITE_URL}/#paladins-game`,
+        name: "Paladins: Champions of the Realm",
+        alternateName: "Paladins",
+        url: "https://www.paladins.com/",
+        sameAs: "https://www.paladins.com/",
+        genre: ["Hero shooter", "First-person shooter"],
+      },
+      {
+        "@type": "Dataset",
         "@id": `${SITE_URL}/#dataset`,
         name: t("seo.root.datasetName"),
         url: SITE_URL,
         description: t("seo.root.datasetDescription"),
         keywords: SEO_KEYWORDS.join(", "),
+        inLanguage: locale,
+        isAccessibleForFree: true,
+        about: { "@id": `${SITE_URL}/#paladins-game` },
         creator: {
           "@id": `${SITE_URL}/#organization`,
         },
@@ -118,7 +136,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   nonce={nonce}
                   suppressHydrationWarning
                   type="application/ld+json"
-                  dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+                  dangerouslySetInnerHTML={{ __html: serializeJsonLd(structuredData) }}
                 />
         <AuthProvider>
           <LocalizationProvider initialLocale={locale} initialMessages={messages}>

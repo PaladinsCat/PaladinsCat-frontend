@@ -1,5 +1,6 @@
-import { fetchServerJson } from "@/lib/server-api";
-import PlayerProfileClient, { type PlayerResponse } from "./player-profile-client";
+import { getServerPlayerProfile } from "@/lib/player-profile-server";
+import type { PlayerResponse } from "@/lib/player-profile-types";
+import PlayerProfileClient from "./player-profile-client";
 
 export const dynamic = "force-dynamic";
 
@@ -12,10 +13,7 @@ export default async function PlayerProfilePage({
   let initialResponse: PlayerResponse | null = null;
 
   try {
-    initialResponse = await fetchServerJson<PlayerResponse>(
-      `/players/${encodeURIComponent(id)}`,
-      { timeoutMs: 8_000 },
-    );
+    initialResponse = await getServerPlayerProfile(id);
   } catch (error) {
     console.error(`[players/${id}] Server profile fetch failed; using browser fallback`, error);
   }
