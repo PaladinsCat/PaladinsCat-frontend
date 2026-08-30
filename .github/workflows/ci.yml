@@ -38,6 +38,9 @@ jobs:
       - name: Operations security tests
         run: npm run test:operations
 
+      - name: Champion page request tests
+        run: npm run test:champion-page
+
       - name: Build
         run: npm run build
 

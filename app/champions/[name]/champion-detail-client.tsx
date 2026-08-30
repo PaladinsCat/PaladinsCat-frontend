@@ -36,7 +36,7 @@ import { getRankIconPath, getTierColor, resolveEffectiveTier } from "@/lib/tier-
 import { getStoredLobbyTierFilter, withStoredLobbyTier } from "@/lib/lobby-tier";
 import { useLocalization } from "@/lib/localization-context";
 import { EN_MESSAGES, type TranslationKey } from "@/lib/localization/messages";
-import type { ChampionPagePayload } from "@/lib/champion-page-data";
+import { CHAMPION_PAGE_CLIENT_TIMEOUT_MS, type ChampionPagePayload } from "@/lib/champion-page-data";
 
 // Keep this client request on the neutral same-origin proxy. Some embedded
 // browsers block background requests below /api, while /_pc is forwarded to
@@ -313,7 +313,7 @@ export default function ChampionDetailPage({
     // requests. Redis serves a warm entry immediately and refreshes it in the
     // background after its TTL.
     fetch(`${CHAMPION_DATA_BASE}${withStoredLobbyTier(`/champions/${championSlug(staticChampion.name)}/page-data`)}`, {
-      signal: AbortSignal.timeout(750),
+      signal: AbortSignal.timeout(CHAMPION_PAGE_CLIENT_TIMEOUT_MS),
     })
       .then((response) => {
         if (!response.ok) throw new Error(t("generated.champions.championPageDataUnavailable"));
