@@ -308,7 +308,10 @@ export async function fetchCheaterPlayers(params?: { name?: string; cheater?: bo
   const query = new URLSearchParams();
   if (params?.name?.trim()) query.set('name', params.name.trim());
   if (params?.cheater) query.set('cheater', 'true');
-  if (params?.exploiter) query.set('exploiter', 'true');
+  if (params?.exploiter) {
+    query.set('exploiter', 'true');
+    query.set('directoryVersion', '2');
+  }
   if (params?.susOnly) query.set('susOnly', 'true');
   if (params?.weirdoOnly) query.set('weirdoOnly', 'true');
   if (params?.hallOfFameOnly) query.set('hallOfFameOnly', 'true');
