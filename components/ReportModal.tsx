@@ -64,6 +64,17 @@ const ACTIONS: Record<PlayerAction, {
       { labelKey: "moderation.other", value: "other" },
     ],
   },
+  exploiter: {
+    labelKey: "moderation.flagCheater",
+    submitLabelKey: "moderation.confirmCheater",
+    accent: "red",
+    promptKey: "moderation.promptCheater",
+    reasons: [
+      { labelKey: "moderation.verifiedCheatingEvidence", value: "verified_exploit_evidence" },
+      { labelKey: "moderation.accountReview", value: "account_review" },
+      { labelKey: "moderation.other", value: "other" },
+    ],
+  },
   dropper: {
     labelKey: "moderation.voteDropper",
     submitLabelKey: "moderation.voteDropper",
@@ -99,6 +110,9 @@ export default function ReportModal({ playerId, type, onClose, onSuccess, submit
   const [success, setSuccess] = useState(false);
   const overlayRef = useRef<HTMLDivElement>(null);
   const action = ACTIONS[type];
+  const actionLabel = type === "exploiter" ? t("moderation.flagExploiter") : t(action.labelKey);
+  const submitLabel = type === "exploiter" ? t("moderation.confirmExploiter") : t(action.submitLabelKey);
+  const actionPrompt = type === "exploiter" ? t("moderation.promptExploiter") : t(action.promptKey);
   const reasonRequired = action.reasonRequired !== false;
   const isOther = selectedReason === "other";
 
@@ -121,7 +135,7 @@ export default function ReportModal({ playerId, type, onClose, onSuccess, submit
       return;
     }
     if (reasonRequired && isOther && !customReason.trim()) {
-      setError(t(action.promptKey));
+      setError(actionPrompt);
       return;
     }
 
@@ -175,7 +189,7 @@ export default function ReportModal({ playerId, type, onClose, onSuccess, submit
     <div ref={overlayRef} onClick={handleOverlayClick} className="fixed inset-0 z-50 flex items-center justify-center pc-glass-dark">
       <div className="w-full max-w-md mx-4 bg-pc-bg-elevated border border-pc-border rounded-xl p-5 space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold text-pc-text">{t(action.labelKey)}</h2>
+          <h2 className="text-sm font-bold text-pc-text">{actionLabel}</h2>
           <button onClick={onClose} className="text-pc-text-muted hover:text-pc-text transition-colors" aria-label={t("generated.components.close")}>✕</button>
         </div>
 
@@ -205,14 +219,14 @@ export default function ReportModal({ playerId, type, onClose, onSuccess, submit
             {isOther && (
               <div className="space-y-2">
                 <label className="text-xs text-pc-text-muted uppercase tracking-wider">{t("generated.components.describe")}</label>
-                <textarea value={customReason} onChange={(event) => setCustomReason(event.target.value)} placeholder={t(action.promptKey)} rows={3} className="w-full px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text placeholder-pc-text-muted text-sm focus:outline-none focus:ring-2 focus:ring-pc-accent/50 resize-none" autoFocus />
+                <textarea value={customReason} onChange={(event) => setCustomReason(event.target.value)} placeholder={actionPrompt} rows={3} className="w-full px-3 py-2 bg-pc-bg-secondary border border-pc-border rounded-lg text-pc-text placeholder-pc-text-muted text-sm focus:outline-none focus:ring-2 focus:ring-pc-accent/50 resize-none" autoFocus />
               </div>
             )}
 
             {error && <div className="text-red-400 text-xs bg-red-900/20 border border-red-700/30 rounded-lg px-3 py-2">{error}</div>}
 
             <button type="submit" disabled={submitting} className={`w-full py-2.5 rounded-lg text-sm font-semibold text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${submitColor[action.accent]}`}>
-              {submitting ? t("generated.components.submitting") : t(action.submitLabelKey)}
+              {submitting ? t("generated.components.submitting") : submitLabel}
             </button>
           </form>
         )}

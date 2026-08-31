@@ -7,6 +7,7 @@ import { hasPlayerTag } from "@/lib/player-tag-threshold";
 
 const EMPTY_MODERATION: PlayerModeration = {
   cheater: false,
+  exploiter: false,
   susCount: 0,
   dropper: false,
   dropperVoteCount: 0,
@@ -53,6 +54,7 @@ export function VerifiedPlayerBadge({ className = "", iconClassName = "h-3.5 w-3
 export type PlayerModerationTagProps = {
   playerId: string | number;
   cheater?: boolean;
+  exploiter?: boolean;
   susCount?: number;
   dropper?: boolean;
   dropperVoteCount?: number;
@@ -75,6 +77,7 @@ export type PlayerModerationTagProps = {
 export function PlayerModerationTag({
   playerId,
   cheater,
+  exploiter,
   susCount,
   dropper,
   dropperVoteCount,
@@ -96,6 +99,7 @@ export function PlayerModerationTag({
   const { t } = useLocalization();
   const suppliedModeration = {
     cheater,
+    exploiter,
     susCount,
     dropper,
     dropperVoteCount,
@@ -128,7 +132,7 @@ export function PlayerModerationTag({
       }
     });
     return () => { active = false; };
-  }, [afkWintrade, afkWintradeVoteCount, altAccount, altAccountVoteCount, automaticAfkCount, boosted, boostedMatchCount, cheater, dropper, dropperVoteCount, masterFeedingCount, playerId, susCount, verified, wallShooterCount]);
+  }, [afkWintrade, afkWintradeVoteCount, altAccount, altAccountVoteCount, automaticAfkCount, boosted, boostedMatchCount, cheater, dropper, dropperVoteCount, exploiter, masterFeedingCount, playerId, susCount, verified, wallShooterCount]);
 
   const communityAfk = moderation.afkWintrade && hasPlayerTag(moderation.afkWintradeVoteCount);
   const automaticAfkTagged = Boolean(automaticAfk) || hasPlayerTag(moderation.automaticAfkCount);
@@ -145,7 +149,8 @@ export function PlayerModerationTag({
   return <span className="inline-flex max-h-10 min-w-0 flex-wrap items-center gap-1 overflow-hidden">
     {moderation.verified && <VerifiedPlayerBadge />}
     {moderation.cheater && <span className={`${PLAYER_TAG_CLASS} cheater text-red-400`} aria-label={t("generated.players.confirmedCheater")}>{t("generated.players.cheater")}</span>}
-    {!moderation.cheater && <>
+    {moderation.exploiter && <span className={`${PLAYER_TAG_CLASS} exploiter text-orange-400`} aria-label={t("moderation.exploiterAria")}>{t("moderation.exploiterShort")}</span>}
+    {!moderation.cheater && !moderation.exploiter && <>
       {moderation.dropper && hasPlayerTag(moderation.dropperVoteCount) && <span className={`${PLAYER_TAG_CLASS} dropper text-rose-300`}>{t("moderation.dropShort")}</span>}
       {hasPlayerTag(moderation.susCount) && <span className={`${PLAYER_TAG_CLASS} suspicious text-amber-400`} aria-label={t("generated.players.suspiciousPlayerWithValue1Flags", { value1: moderation.susCount })}>{t("generated.players.sus")}</span>}
       {(communityAfk || automaticAfkTagged) && <span className={`${PLAYER_TAG_CLASS} afk border ${automaticAfkTagged ? communityAfk ? "border-red-400/50 text-sky-300" : "border-red-400/50 text-red-300" : "border-sky-400/50 text-sky-300"}`}>{t("moderation.afkShort")}</span>}

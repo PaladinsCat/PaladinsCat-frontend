@@ -37,6 +37,7 @@ export interface PlayerProfileData {
   capturedAt?: string | null;
   snapshotSource?: string | null;
   cheater?: boolean;
+  exploiter?: boolean;
   susCount?: number;
   verified?: boolean;
   totalMatches: number;
