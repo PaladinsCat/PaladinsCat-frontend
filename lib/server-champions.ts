@@ -1,3 +1,7 @@
+/**
+ * Keeps server champions server-side and aligned with its data source.
+ * Preserve its server boundary and caller-facing data contracts.
+ */
 import "server-only";
 
 import { unstable_cache } from "next/cache";
@@ -17,6 +21,9 @@ const getCachedRankedChampions = unstable_cache(
   { revalidate: 300, tags: ["ranked-champions"] },
 );
 
+/**
+ * Loads the ranked champion catalog used to seed server-rendered views.
+ */
 export async function getInitialRankedChampions(): Promise<Champion[]> {
   return getCachedRankedChampions();
 }

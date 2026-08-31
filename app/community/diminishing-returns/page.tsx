@@ -1,5 +1,8 @@
+/**
+ * Define the community diminishing returns page responsibility boundary.
+ * Coordinates community diminishing returns page data loading, authorization, and presentation.
+ */
 "use client";
-
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { AlertTriangle, Calculator, ChevronRight, Download, ExternalLink, Info, X } from "lucide-react";
@@ -177,6 +180,10 @@ function parseNumber(value: string | null | undefined) {
   return Number.isFinite(number) ? number : 0;
 }
 
+/**
+ * Handles the exported route operation using its declared request and response contract.
+ * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ */
 export default function DiminishingReturnsPage() {
   const { t, formatNumber } = useLocalization();
   const { user, isLoading: authLoading } = useAuth();

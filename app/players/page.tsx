@@ -1,3 +1,8 @@
+/**
+ * Define the player route surface for page and its local data boundary.
+ * This file owns the page, layout, loading state, or route handler named by its path.
+ * It does not own unrelated player sections or shared library policy.
+ */
 import { unstable_cache } from "next/cache";
 import type { Metadata } from "next";
 import {
@@ -6,12 +11,20 @@ import {
 } from "@/lib/api-client";
 import PlayersPageClient from "./players-page-client";
 
+/**
+ * Build SEO metadata for the player page route.
+ * Returns the Next.js metadata object consumed by this route without mutating application data.
+ */
 export const metadata: Metadata = {
   alternates: { canonical: "/players" },
 };
 
 
 // User-facing error keys — resolved at the UI layer via t()
+/**
+ * Define translation keys for failures in the player page view.
+ * Returns the stable key map consumed by localized error messages.
+ */
 export const PLAYERS_ERROR_KEYS = {
   overviewConfigUnavailable: "generated.players.overviewConfigUnavailable",
   overviewUnavailable: "generated.players.overviewUnavailable",
@@ -50,8 +63,16 @@ const getCachedPlayersOverview = unstable_cache(
 // Render HTML per request, but resolve the expensive data from Next's shared
 // five-minute server cache. This avoids build-time API access and removes the
 // client hydration fetch that previously caused the visible loading delay.
+/**
+ * Select dynamic rendering for the player page route.
+ * Returns the framework rendering mode constant used by this route.
+ */
 export const dynamic = "force-dynamic";
 
+/**
+ * Render the PlayersPage view for the player page route.
+ * Returns the React tree for the route and its declared inputs.
+ */
 export default async function PlayersPage() {
   let initialOverview: PlayersOverview | null = null;
   try {

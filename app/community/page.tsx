@@ -1,5 +1,8 @@
+/**
+ * Define the community page responsibility boundary.
+ * Coordinates community page data loading, authorization, and presentation.
+ */
 "use client";
-
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { fetchPosts, fetchTwitchStreams, type Post, type TwitchStream } from "@/lib/api-client";
@@ -12,6 +15,10 @@ import { useLocalization } from "@/lib/localization-context";
 
 const HIDDEN_TWITCH_CHANNEL_LOGINS = new Set(["paladins2ttv"]);
 
+/**
+ * Handles the exported route operation using its declared request and response contract.
+ * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ */
 export default function CommunityPage() {
   const { t , formatNumber, formatDateTime} = useLocalization();
   const [posts, setPosts] = useState<Post[]>([]);

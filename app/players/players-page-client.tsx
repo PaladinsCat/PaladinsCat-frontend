@@ -1,3 +1,8 @@
+/**
+ * Define the player route surface for players-page-client and its local data boundary.
+ * This file owns the page, layout, loading state, or route handler named by its path.
+ * It does not own unrelated player sections or shared library policy.
+ */
 "use client";
 
 import { useEffect, useMemo, useState, type ComponentType } from "react";
@@ -25,10 +30,12 @@ import { fetchPlayersOverview, type PlayersOverview } from "@/lib/api-client";
 import ScrambleText from "@/components/ScrambleText";
 import { useLocalization } from "@/lib/localization-context";
 import type { TranslationKey } from "@/lib/localization/messages";
+import PlayerName from "@/components/player-name";
 
 type DirectoryCard = {
   href: string;
-  titleKey: TranslationKey;
+  titleKey?: TranslationKey;
+  title?: string;
   descriptionKey: TranslationKey;
   count: number;
   icon: ComponentType<{ className?: string; strokeWidth?: number; "aria-hidden"?: boolean }>;
@@ -37,6 +44,7 @@ type DirectoryCard = {
 
 const EMPTY_COUNTS: PlayersOverview["communityCounts"] = {
   cheaters: 0,
+  exploiters: 0,
   boosted: 0,
   suspicious: 0,
   weirdos: 0,
@@ -46,9 +54,14 @@ const EMPTY_COUNTS: PlayersOverview["communityCounts"] = {
   altAccounts: 0,
 };
 
+/**
+ * Render the PlayersPageClient view for the player players-page-client route.
+ * Returns the React tree for the route and its declared inputs.
+ */
 export default function PlayersPageClient({ initialOverview }: { initialOverview: PlayersOverview | null }) {
-  const { t , formatNumber} = useLocalization();
+  const { t, formatNumber, formatDateTime } = useLocalization();
   const [communityCounts, setCommunityCounts] = useState(initialOverview?.communityCounts ?? EMPTY_COUNTS);
+  const [bestDuo, setBestDuo] = useState(initialOverview?.bestDuo ?? null);
   const [directoryCounts, setDirectoryCounts] = useState<PlayersOverview["directoryCounts"]>(initialOverview?.directoryCounts ?? {
     privateAccounts: 0,
     parties: 0,
@@ -71,6 +84,7 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
         if (cancelled) return;
         setCommunityCounts(overview.communityCounts);
         setDirectoryCounts(overview.directoryCounts);
+        setBestDuo(overview.bestDuo);
       })
       .catch(() => undefined)
       .finally(() => {
@@ -83,6 +97,7 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
     { href: "/players/private-accounts", titleKey: "generated.players.privateAccounts", descriptionKey: "moderation.accounts", count: directoryCounts.privateAccounts, icon: LockKeyhole, iconClass: "text-slate-300" },
     { href: "/players/parties", titleKey: "generated.players.rankedParties", descriptionKey: "moderation.pairs", count: directoryCounts.parties, icon: UsersRound, iconClass: "text-cyan-300" },
     { href: "/players/cheaters", titleKey: "generated.players.cheaters", descriptionKey: "moderation.accounts", count: communityCounts.cheaters, icon: ShieldAlert, iconClass: "text-red-400" },
+    { href: "/players/exploiters", titleKey: "moderation.exploiterTitle", descriptionKey: "moderation.accounts", count: communityCounts.exploiters, icon: ShieldAlert, iconClass: "text-orange-400" },
     { href: "/players/boosted", titleKey: "moderation.boostedPlayers", descriptionKey: "moderation.accounts", count: communityCounts.boosted, icon: Award, iconClass: "text-orange-300" },
     { href: "/players/suspicious", titleKey: "generated.players.suspiciousPlayers", descriptionKey: "moderation.accounts", count: communityCounts.suspicious, icon: BadgeAlert, iconClass: "text-amber-300" },
     { href: "/players/weirdos", titleKey: "moderation.weirdoTitle", descriptionKey: "moderation.votes", count: communityCounts.weirdos, icon: Sparkles, iconClass: "text-violet-300" },
@@ -108,6 +123,29 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
         </h1>
       </div>
 
+      {bestDuo && (
+        <Link href="/players/parties?view=pairs" data-card-accent="primary" className="pc-glass group relative block overflow-hidden rounded-2xl border border-white/5 p-5 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/40 hover:shadow-xl sm:p-6">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex min-w-0 items-start gap-4">
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-cyan-400/20 bg-cyan-400/10"><UsersRound aria-hidden="true" className="h-7 w-7 text-cyan-300" /></span>
+              <div className="min-w-0">
+                <div className="text-xs font-semibold uppercase tracking-[0.16em] text-cyan-300">{t("common.bestDuo.title")}</div>
+                <h2 className="mt-1 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xl font-bold text-pc-text">
+                  <PlayerName playerId={bestDuo.sourcePlayerId}>{bestDuo.sourcePlayerName}</PlayerName><span className="text-cyan-300">+</span><PlayerName playerId={bestDuo.targetPlayerId}>{bestDuo.targetPlayerName}</PlayerName>
+                </h2>
+                <p className="mt-1 text-sm text-pc-text-muted">{t("common.bestDuo.description")}</p>
+              </div>
+            </div>
+            <div className="grid shrink-0 grid-cols-2 gap-2 sm:grid-cols-4">
+              <div className="rounded-xl bg-pc-bg-secondary/70 px-3 py-2"><div className="text-xs text-pc-text-muted">{t("generated.players.matches")}</div><div className="font-mono text-lg font-bold text-cyan-300">{formatNumber(bestDuo.matchCount)}</div></div>
+              <div className="rounded-xl bg-pc-bg-secondary/70 px-3 py-2"><div className="text-xs text-pc-text-muted">{t("generated.players.firstObserved")}</div><div className="text-xs font-semibold text-pc-text">{formatDateTime(bestDuo.firstSeen)}</div></div>
+              <div className="rounded-xl bg-pc-bg-secondary/70 px-3 py-2"><div className="text-xs text-pc-text-muted">{t("generated.players.lastObserved")}</div><div className="text-xs font-semibold text-pc-text">{formatDateTime(bestDuo.lastSeen)}</div></div>
+              <div className="rounded-xl bg-pc-bg-secondary/70 px-3 py-2"><div className="text-xs text-pc-text-muted">{t("common.bestDuo.observedDays", { count: formatNumber(bestDuo.observedDays) })}</div><div className="text-xs font-semibold text-emerald-300">{t("common.bestDuo.matchesPerWeek", { count: formatNumber(bestDuo.matchesPerWeek, { maximumFractionDigits: 1 }) })}</div></div>
+            </div>
+          </div>
+        </Link>
+      )}
+
       <div
         className="mx-auto grid w-full max-w-7xl gap-3"
         style={{ gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 13.5rem), 1fr))" }}
@@ -118,7 +156,7 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
             <Link key={card.href} href={card.href} className="group flex min-h-20 min-w-0 items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-4 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary">
               <Icon aria-hidden={true} className={`h-9 w-9 shrink-0 ${card.iconClass}`} strokeWidth={1.5} />
               <div className="min-w-0 flex-1">
-                <h2 className="truncate text-sm font-semibold text-pc-text group-hover:text-pc-accent">{t(card.titleKey)}</h2>
+                <h2 className="truncate text-sm font-semibold text-pc-text group-hover:text-pc-accent">{card.title ?? t(card.titleKey!)}</h2>
                 <p className="mt-0.5 truncate text-xs text-pc-text-muted">
                   {overviewLoading ? t("moderation.loadingDirectory") : t(card.descriptionKey, { value1: formatNumber(card.count) })}
                 </p>

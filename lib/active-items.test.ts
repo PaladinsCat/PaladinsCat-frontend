@@ -1,3 +1,6 @@
+/** Tests active-item filtering and cache-backed item selection.
+ * These tests verify active-item filtering and selection behavior.
+ */
 import test from "node:test";
 import assert from "node:assert/strict";
 import { ACTIVE_ITEMS, activeItemTierAtLevel } from "./active-items.ts";

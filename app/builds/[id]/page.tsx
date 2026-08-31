@@ -1,3 +1,7 @@
+/**
+ * Render the builds id page and its data composition.
+ * Assemble the page content exposed at this location.
+ */
 "use client";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
@@ -35,6 +39,10 @@ function AssetRow({ iconUrl, title, subtitle, talentId }: { iconUrl?: string | n
   );
 }
 
+/**
+ * Render the BuildDetailPage view for builds id page.
+ * Return the React tree for the declared inputs and page data.
+ */
 export default function BuildDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { t , formatDateTime} = useLocalization();
   const [build, setBuild] = useState<Build | null>(null);

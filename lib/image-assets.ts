@@ -36,10 +36,16 @@ export function localImageSources(src: string): LocalImageSources {
   };
 }
 
+/** Apply preferredLocalImageUrl to the declared input values.
+ * Contract: returns the module-specific validated, stored, formatted, or resolved value without external side effects.
+ */
 export function preferredLocalImageUrl(src: string): string {
   return localImageSources(src).preferred;
 }
 
+/** Apply fallbackLocalImageUrl to the declared input values.
+ * Contract: returns the module-specific validated, stored, formatted, or resolved value without external side effects.
+ */
 export function fallbackLocalImageUrl(src: string): string {
   return localImageSources(src).fallback;
 }

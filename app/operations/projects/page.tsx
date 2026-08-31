@@ -1,5 +1,8 @@
+/**
+ * Define the operations projects page responsibility boundary.
+ * Coordinates operations projects page data loading, authorization, and presentation.
+ */
 "use client";
-
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ArrowLeft, CircleDot, Code2, LockKeyhole, Plus, X } from "lucide-react";
@@ -12,6 +15,10 @@ type Priority = "Low" | "Normal" | "High";
 const columns: Column[] = ["Backlog", "Building", "Review", "Done"];
 const projectComponents = ["Frontend", "Backend", "Discord Bot", "Wiki", "Localization", "WatchCat", "Operations"] as const;
 
+/**
+ * Handles the exported route operation using its declared request and response contract.
+ * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ */
 export default function ProjectsPage() {
   const { user, isLoading } = useAuth();
   const { t } = useLocalization();

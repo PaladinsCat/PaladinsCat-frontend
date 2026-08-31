@@ -1,5 +1,8 @@
+/**
+ * Define the top-level statistics page route.
+ * Loads summary statistics and renders the localized stats navigation view.
+ */
 "use client";
-
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
@@ -86,6 +89,10 @@ function mapMapStats(maps: Array<{ name: string; totalMatches: number; distribut
   }));
 }
 
+/**
+ * Renders the exported statistics view with its route data.
+ * Returns the declared route value; network, cache, and navigation effects follow the implementation.
+ */
 export default function StatsPage() {
   const { t , formatPercent, formatNumber} = useLocalization();
   const { definition: lobbyTier, ready: lobbyTierReady } = useLobbyTier();

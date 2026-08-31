@@ -1,5 +1,8 @@
+/**
+ * Define the admin changelog page responsibility boundary.
+ * Coordinates admin changelog page data loading, authorization, and presentation.
+ */
 "use client";
-
 import { useEffect, useState } from 'react';
 import { RefreshCw, Save } from 'lucide-react';
 import {
@@ -12,6 +15,10 @@ import { LoadingPanel } from '@/components/async-state';
 import { formatLocalDateTime } from '@/lib/time-format';
 import { useLocalization } from "@/lib/localization-context";
 
+/**
+ * Handles the exported route operation using its declared request and response contract.
+ * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ */
 export default function AdminChangelogPage() {
   const { t , formatDateTime} = useLocalization();
   const { user, isLoading } = useAuth();

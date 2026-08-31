@@ -1,3 +1,7 @@
+/**
+ * Render the builds page and its data composition.
+ * Assemble the page content exposed at this location.
+ */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -11,6 +15,10 @@ import { useLocalization } from "@/lib/localization-context";
 import { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 
+/**
+ * Render the BuildsPage view for builds page.
+ * Return the React tree for the declared inputs and page data.
+ */
 export default function BuildsPage() {
   const { t , formatDateTime} = useLocalization();
   const [builds, setBuilds] = useState<Build[]>([]);

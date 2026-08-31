@@ -1,3 +1,6 @@
+/** Defines localized message payloads and message lookup types.
+ * The module owns the existing URL, context, or locale-message boundary.
+ */
 import asyncMessages from "./catalog/ui/async.json";
 import footerMessages from "./catalog/ui/footer.json";
 import navigationMessages from "./catalog/ui/navigation.json";
@@ -15,6 +18,9 @@ import generatedUiMessages from "./catalog/generated/ui.json";
 import seoMessages from "./catalog/seo/metadata.json";
 import championMessages from "./catalog/game/champions.json";
 
+/** Apply EN_MESSAGES to lobby-tier or localization inputs.
+ * Contract: returns the normalized route, context state, or message value while preserving existing browser behavior.
+ */
 export const EN_MESSAGES = {
   // Generated strings are a fallback-only catalog. Keep them first so curated
   // modules remain authoritative when a key exists in both catalogs.
@@ -39,6 +45,9 @@ export type TranslationKey = keyof typeof EN_MESSAGES;
 export type TranslationValues = Record<string, string | number>;
 export type LocaleMessages = Partial<Record<TranslationKey, string>>;
 
+/** Apply sanitizeLocaleMessages to lobby-tier or localization inputs.
+ * Contract: returns the normalized route, context state, or message value while preserving existing browser behavior.
+ */
 export function sanitizeLocaleMessages(payload: unknown): LocaleMessages {
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) return {};
 
@@ -51,6 +60,9 @@ export function sanitizeLocaleMessages(payload: unknown): LocaleMessages {
   return messages;
 }
 
+/** Apply formatMessage to lobby-tier or localization inputs.
+ * Contract: returns the normalized route, context state, or message value while preserving existing browser behavior.
+ */
 export function formatMessage(
   message: string,
   values?: TranslationValues,
@@ -61,6 +73,9 @@ export function formatMessage(
   ));
 }
 
+/** Apply translate to lobby-tier or localization inputs.
+ * Contract: returns the normalized route, context state, or message value while preserving existing browser behavior.
+ */
 export function translate(
   messages: LocaleMessages,
   key: TranslationKey,

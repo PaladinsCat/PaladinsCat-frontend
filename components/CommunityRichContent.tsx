@@ -1,3 +1,6 @@
+/** CommunityRichContent component/module.
+ * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ */
 "use client";
 
 import { Fragment } from "react";
@@ -32,6 +35,9 @@ function videoEmbed(url: string): VideoEmbed | null {
   return null;
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export default function CommunityRichContent({ content }: { content: string }) {
   const { t } = useLocalization();
   const parts = content.split(/(https?:\/\/[^\s<]+)/gi);

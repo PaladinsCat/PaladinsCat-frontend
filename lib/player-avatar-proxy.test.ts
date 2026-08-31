@@ -1,3 +1,6 @@
+/** Tests player-avatar proxy validation and responses.
+ * The module owns its existing image, OIDC, proxy, roster, or moderation boundary.
+ */
 import assert from "node:assert/strict";
 import test from "node:test";
 import {

@@ -1,5 +1,12 @@
+/**
+ * Defines oidc-security's shared contracts and runtime helpers.
+ * Keep behavior aligned with its callers and browser/server boundary.
+ */
 import { createHash, createPublicKey, randomBytes, timingSafeEqual, verify, type JsonWebKey as NodeJsonWebKey } from "node:crypto";
 
+/**
+ * Defines the  o i d c_ t r a n s a c t i o n_ t t l_ m s contract used by this module.
+ */
 export const OIDC_TRANSACTION_TTL_MS = 10 * 60 * 1000;
 const RETURN_PATHS = ["/", "/account", "/link-account", "/community", "/builds", "/tierlists", "/players"];
 const JWKS_TTL_MS = 5 * 60 * 1000;
@@ -7,6 +14,9 @@ const JWKS_REFRESH_COOLDOWN_MS = 30 * 1000;
 const JWKS_MAX_BYTES = 128 * 1024;
 const jwksCache = new Map<string, { keys: Array<Record<string, unknown>>; expiresAt: number; forcedAt: number }>();
 
+/**
+ * Defines the  oidc transaction contract used by this module.
+ */
 export interface OidcTransaction {
   state: string;
   nonce: string;
@@ -17,6 +27,9 @@ export interface OidcTransaction {
 
 function b64(bytes: Buffer) { return bytes.toString("base64url"); }
 function random(size = 32) { return b64(randomBytes(size)); }
+/**
+ * Defines the new csrf token contract used by this module.
+ */
 export function newCsrfToken() { return random(); }
 function equal(left: string, right: string): boolean {
   const a = Buffer.from(left);
@@ -24,20 +37,32 @@ function equal(left: string, right: string): boolean {
   return a.length === b.length && timingSafeEqual(a, b);
 }
 
+/**
+ * Defines the safe return path contract used by this module.
+ */
 export function safeReturnPath(value: string | null | undefined): string {
   if (!value || !value.startsWith("/") || value.startsWith("//") || value.includes("\\")) return "/";
   const path = value.split("?")[0];
   return RETURN_PATHS.some((allowed) => path === allowed || (allowed !== "/" && path.startsWith(`${allowed}/`))) ? value : "/";
 }
 
+/**
+ * Performs the create transaction operation with this module's boundary checks.
+ */
 export function createTransaction(returnPath: string): OidcTransaction {
   return { state: random(), nonce: random(), verifier: random(48), returnPath: safeReturnPath(returnPath), issuedAt: Date.now() };
 }
 
+/**
+ * Defines the state matches contract used by this module.
+ */
 export function stateMatches(cookieState: string | undefined, callbackState: string | null): boolean {
   return !!cookieState && !!callbackState && equal(cookieState, callbackState);
 }
 
+/**
+ * Transforms or validates parse transaction according to this module's data contract.
+ */
 export function parseTransaction(value: unknown): OidcTransaction | null {
   const tx = value as Partial<OidcTransaction> & { return_path?: unknown };
   const returnPath = typeof tx?.returnPath === "string" ? tx.returnPath : tx.return_path;
@@ -45,14 +70,23 @@ export function parseTransaction(value: unknown): OidcTransaction | null {
   return { state: tx.state, nonce: tx.nonce, verifier: tx.verifier, returnPath: safeReturnPath(returnPath), issuedAt: 0 };
 }
 
+/**
+ * Performs the require same origin operation with this module's boundary checks.
+ */
 export function requireSameOrigin(origin: string | null, publicOrigin: string): boolean {
   return origin === publicOrigin;
 }
 
+/**
+ * Performs the code challenge operation with this module's boundary checks.
+ */
 export function codeChallenge(verifier: string): string {
   return createHash("sha256").update(verifier).digest("base64url");
 }
 
+/**
+ * Transforms or validates normalized https issuer according to this module's data contract.
+ */
 export function normalizedHttpsIssuer(issuer: string | undefined): string | null {
   if (!issuer) return null;
   try {
@@ -63,11 +97,17 @@ export function normalizedHttpsIssuer(issuer: string | undefined): string | null
 }
 
 // The destination is derived solely from the configured realm issuer.
+/**
+ * Defines the keycloak account url contract used by this module.
+ */
 export function keycloakAccountUrl(issuer: string | undefined): URL | null {
   const normalized = normalizedHttpsIssuer(issuer);
   return normalized ? new URL(`${normalized}/account/`) : null;
 }
 
+/**
+ * Transforms or validates resolve internal issuer according to this module's data contract.
+ */
 export function resolveInternalIssuer(issuer: string, override: string | undefined): string {
   const external = new URL(issuer);
   if (!override) return issuer;
@@ -78,6 +118,9 @@ export function resolveInternalIssuer(issuer: string, override: string | undefin
   } catch { return issuer; }
 }
 
+/**
+ * Performs the build pushed authorization request operation with this module's boundary checks.
+ */
 export function buildPushedAuthorizationRequest(serverIssuer: string, clientId: string, redirectUri: string, transaction: OidcTransaction): { endpoint: URL; form: URLSearchParams } {
   const endpoint = new URL(`${serverIssuer.replace(/\/$/, "")}/protocol/openid-connect/ext/par/request`);
   const form = new URLSearchParams();
@@ -92,6 +135,9 @@ export function buildPushedAuthorizationRequest(serverIssuer: string, clientId: 
   return { endpoint, form };
 }
 
+/**
+ * Performs the build par authorization url operation with this module's boundary checks.
+ */
 export function buildParAuthorizationUrl(issuer: string, clientId: string, requestUri: string): URL {
   const authorization = new URL(`${issuer.replace(/\/$/, "")}/protocol/openid-connect/auth`);
   authorization.searchParams.set("client_id", clientId);
@@ -99,6 +145,9 @@ export function buildParAuthorizationUrl(issuer: string, clientId: string, reque
   return authorization;
 }
 
+/**
+ * Transforms or validates parse pushed authorization response according to this module's data contract.
+ */
 export function parsePushedAuthorizationResponse(value: unknown): { requestUri: string; expiresIn: number } | null {
   const response = value as { request_uri?: unknown; expires_in?: unknown };
   if (typeof response?.request_uri !== "string" || !/^urn:ietf:params:oauth:request_uri:[A-Za-z0-9._~-]+$/.test(response.request_uri)) return null;
@@ -106,6 +155,9 @@ export function parsePushedAuthorizationResponse(value: unknown): { requestUri: 
   return { requestUri: response.request_uri, expiresIn: response.expires_in as number };
 }
 
+/**
+ * Performs the build rp logout url operation with this module's boundary checks.
+ */
 export function buildRpLogoutUrl(issuer: string | undefined, clientId: string | undefined, postLogoutRedirectUri: string | undefined, publicOrigin: string, idTokenHint?: string | null): URL | null {
   if (!issuer || !clientId || !postLogoutRedirectUri) return null;
   try {
@@ -122,6 +174,9 @@ export function buildRpLogoutUrl(issuer: string | undefined, clientId: string | 
   } catch { return null; }
 }
 
+/**
+ * Transforms or validates valid id token header according to this module's data contract.
+ */
 export function validIdTokenHeader(header: Record<string, unknown>): boolean {
   return header.alg === "RS256" && typeof header.kid === "string" && (header.typ === undefined || header.typ === "ID" || header.typ === "JWT");
 }
@@ -173,10 +228,19 @@ async function getJwk(issuer: string, kid: string): Promise<Record<string, unkno
   return key || null;
 }
 
+/**
+ * Defines the reset jwks cache for test contract used by this module.
+ */
 export function resetJwksCacheForTest() { jwksCache.clear(); }
+/**
+ * Reads jwk for test from the module's configured source.
+ */
 export async function getJwkForTest(issuer: string, kid: string) { return getJwk(issuer, kid); }
 
 // The issuer is configuration, never read from a token. This intentionally supports only Keycloak's RS256 default.
+/**
+ * Transforms or validates validate id token according to this module's data contract.
+ */
 export async function validateIdToken(idToken: string | undefined, issuer: string, clientId: string, nonce: string, jwksIssuer = issuer): Promise<IdTokenClaims | null> {
   if (!idToken) return null;
   const parts = idToken.split(".");
@@ -194,11 +258,20 @@ export async function validateIdToken(idToken: string | undefined, issuer: strin
 }
 
 // Backchannel logout tokens are Keycloak-issued, RS256, typ=Logout or logout+jwt (Keycloak 26.x). The issuer is configuration, never read from a token.
+/**
+ * Defines the  logout token claims contract used by this module.
+ */
 export interface LogoutTokenClaims { jti: string; sid: string | null; }
+/**
+ * Transforms or validates valid logout token header according to this module's data contract.
+ */
 export function validLogoutTokenHeader(header: Record<string, unknown>): boolean {
   return header.alg === "RS256" && typeof header.kid === "string" && (header.typ === "Logout" || header.typ === "logout+jwt");
 }
 
+/**
+ * Transforms or validates validate logout token according to this module's data contract.
+ */
 export async function validateLogoutToken(logoutToken: string, issuer: string, clientId: string, jwksIssuer = issuer): Promise<LogoutTokenClaims | null> {
   const parts = logoutToken.split(".");
   if (parts.length !== 3) return null;

@@ -1,3 +1,7 @@
+/**
+ * Define the privacy page responsibility boundary.
+ * Coordinates privacy page data loading, authorization, and presentation.
+ */
 import {
   Baby,
   Cookie,
@@ -15,6 +19,7 @@ import { getServerLocalization } from "@/lib/server-localization";
 
 const POLICY_DATE = new Date(Date.UTC(2026, 6, 22));
 
+/** Render the localized privacy policy with its dated policy sections. */
 export default async function PrivacyPage() {
   const { locale, t } = await getServerLocalization();
   const sections: PublicPolicySection[] = [

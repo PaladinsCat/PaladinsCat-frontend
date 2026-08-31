@@ -1,3 +1,4 @@
+/** Define the typed API contract consumed by player profile server and client views. */
 interface PlayerData {
   id: string;
   name: string;
@@ -40,6 +41,7 @@ interface PlayerData {
   avg_shpm: number | null;
   avg_mpm: number | null;
   cheater: boolean;
+  exploiter: boolean;
   dropper: boolean;
   afk_wintrade: boolean;
   alt_account: boolean;

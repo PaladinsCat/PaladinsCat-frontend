@@ -9,6 +9,11 @@ export const TIER_NAMES: Record<number, string> = {
   26: "Master", 27: "Grandmaster",
 };
 
+/**
+ * Map tier thresholds to the Tailwind classes used for rank colors.
+ *
+ * Exposes display constants only; reading it has no network, authentication, cache, or persistence effects.
+ */
 export const TIER_COLORS: Record<number, string> = {
   0: "text-pc-text-muted", 1: "text-amber-700", 6: "text-gray-300", 11: "text-yellow-400",
   16: "text-sky-400", 21: "text-violet-400", 26: "text-emerald-400", 27: "text-rose-400",

@@ -1,10 +1,14 @@
+/**
+ * Define the player route surface for id player-profile-client and its local data boundary.
+ * This file owns the page, layout, loading state, or route handler named by its path.
+ * It does not own unrelated player sections or shared library policy.
+ */
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getChampionIconSafe } from "@/lib/champion-icons";
-import { championSlug } from "@/lib/utils";
 import { clearPlayerTag, fetchPlayerMatches, type ClearablePlayerTag, type MatchRecord, type ReportType } from "@/lib/api-client";
 import { getTierColor, resolveEffectiveTier, getRankIconPath } from "@/lib/tier-utils";
 import { useAuth } from "@/lib/auth-context";
@@ -25,6 +29,7 @@ import { useRouteSettledLoading } from "@/lib/route-transition-context";
 import { csrfHeader } from "@/lib/csrf";
 import { playerAvatarProxyPath } from "@/lib/player-avatar-proxy";
 import type { PlayerResponse } from "@/lib/player-profile-types";
+import PlayerRelationshipSummaryCard from "@/components/player-relationship-summary";
 
 interface RefreshFeedback {
   kind: 'warning' | 'success' | 'error';
@@ -79,12 +84,20 @@ function StatGrid({ children }: { children: React.ReactNode }) {
 
 
 // User-facing error keys — resolved at the UI layer via t()
+/**
+ * Define translation keys for failures in the player id player-profile-client view.
+ * Returns the stable key map consumed by localized error messages.
+ */
 export const PLAYER_PROFILE_ERROR_KEYS = {
   failedToLoadProfile: "generated.players.failedToLoadProfile",
   failedToRefreshProfile: "generated.players.failedToRefreshProfile",
   failedToFetchLiveMatchData: "generated.players.failedToFetchLiveMatchData",
 } as const;
 
+/**
+ * Render the PlayerProfileClient view for the player id player-profile-client route.
+ * Returns the React tree for the route and its declared inputs.
+ */
 export default function PlayerProfileClient({
   id,
   initialResponse,
@@ -198,6 +211,8 @@ export default function PlayerProfileClient({
     if (!isAdmin) return;
     const confirmation = tag === 'cheater'
       ? t("moderation.confirmClearCheaterTag")
+      : tag === 'exploiter'
+        ? t("moderation.confirmClearModerationTag")
       : tag === 'suspicious'
         ? t("moderation.confirmClearSuspiciousTag")
         : t("moderation.confirmClearModerationTag");
@@ -425,7 +440,7 @@ export default function PlayerProfileClient({
     );
   }
 
-  const { player, queueRatings, championRatings } = response;
+  const { player, queueRatings } = response;
   const currentMatchWinChance = estimateLiveTeamWinChance(
     Array.isArray(currentMatch?.players) ? currentMatch.players : [],
   );
@@ -542,9 +557,18 @@ export default function PlayerProfileClient({
                   <div className="px-2 pb-1 text-xs font-bold uppercase tracking-widest text-pc-text-muted">{t("generated.players.moderation")}</div>
                   <button type="button" role="menuitem" onClick={() => { setActionMenuOpen(false); openReportModal('cheater'); }} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-red-400 transition-colors hover:bg-red-500/10">
                     {t("generated.players.flagAsCheater")}</button>
+                  {isAdmin && (
+                    <button type="button" role="menuitem" onClick={() => { setActionMenuOpen(false); openReportModal('exploiter'); }} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-orange-400 transition-colors hover:bg-orange-500/10">
+                      {t("moderation.flagExploiter")}</button>
+                  )}
                   {isAdmin && player.cheater && (
                     <button type="button" role="menuitem" disabled={clearingTag !== null} onClick={() => clearModerationTag('cheater')} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-red-300 transition-colors hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-50">
                       {clearingTag === 'cheater' ? t("generated.components.submitting") : t("moderation.clearCheaterTag")}
+                    </button>
+                  )}
+                  {isAdmin && player.exploiter && (
+                    <button type="button" role="menuitem" disabled={clearingTag !== null} onClick={() => clearModerationTag('exploiter')} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-orange-300 transition-colors hover:bg-orange-500/10 disabled:cursor-not-allowed disabled:opacity-50">
+                      {clearingTag === 'exploiter' ? t("generated.components.submitting") : t("moderation.clearExploiterTag")}
                     </button>
                   )}
                   {isAdmin && player.sus_count > 0 && (
@@ -612,6 +636,7 @@ export default function PlayerProfileClient({
               <PlayerModerationTag
                 playerId={player.id}
                 cheater={player.cheater}
+                exploiter={player.exploiter}
                 susCount={player.sus_count}
                 dropper={player.dropper}
                 afkWintrade={player.afk_wintrade}
@@ -803,6 +828,8 @@ export default function PlayerProfileClient({
             </Link>
           </div>
 
+          <PlayerRelationshipSummaryCard playerId={id} />
+
           {/* KBM Ranked */}
           <div>
             <h2 className="pc-card-title shadow-sm">{t("generated.players.ranked")}</h2>
@@ -900,49 +927,6 @@ export default function PlayerProfileClient({
               </div>
             </div>
           </div>
-
-          {/* Champion Ratings */}
-          {championRatings.length > 0 && (
-            <div>
-              <h2 className="pc-card-title shadow-sm">{t("generated.players.championRatings")}</h2>
-              <div className="pc-card">
-                <div className="space-y-2">
-                  {championRatings.slice(0, 10).map((cr) => {
-                    if (!cr.champion_name) return null;
-                    return (
-                    <div key={cr.champion_id} className="flex items-center gap-2 py-1.5 border-b border-pc-border/30 last:border-0">
-                      <img
-                        src={getChampionIconSafe(cr.champion_name)}
-                        alt={cr.champion_name}
-                        className="w-6 h-6 rounded object-contain shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <Link
-                            href={`/champions/${championSlug(cr.champion_name)}`}
-                            className="text-xs text-pc-text hover:text-pc-accent transition-colors truncate"
-                          >
-                            {cr.champion_name}
-                          </Link>
-                          <span className="text-xs font-mono text-pc-accent ml-2">{formatNumber(Number(cr.mu), { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-pc-text-muted">
-                          <span>{cr.matches_played} {t("generated.players.games")}</span>
-                          <span>·</span>
-                          <span>
-                            {cr.matches_played > 0
-                              ? t("generated.players.value1Wr", { value1: formatNumber(((cr.wins / cr.matches_played) * 100), { minimumFractionDigits: 0, maximumFractionDigits: 0 }) })
-                              : t("generated.players.noWr")}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Queue Ratings (if multiple queues) */}
           {queueRatings.length > 1 && (

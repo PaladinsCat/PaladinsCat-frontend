@@ -1,3 +1,4 @@
+/** Render champion bans with localized labels, icons, and links to champion pages. */
 "use client";
 
 import type { MatchBan } from "@/lib/api-client";
@@ -32,6 +33,7 @@ interface BansSectionProps {
   }>;
 }
 
+/** Display both teams' ban choices, returning no section when the match has no bans. */
 export default function BansSection({ bans }: BansSectionProps) {
   const { t } = useLocalization();
   if (bans.length === 0) return null;

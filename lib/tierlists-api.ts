@@ -1,3 +1,8 @@
+/**
+ * Own client adapters for reading and editing player-authored champion tier lists.
+ *
+ * This module handles API requests and account headers; it does not render tier-list pages.
+ */
 import { accountAuthHeaders } from "./api-client";
 import { csrfHeader } from "./csrf";
 
@@ -75,15 +80,30 @@ function mapTierList(raw: RawTierList): TierListSummary {
   };
 }
 
+/**
+ * Fetch the newest tier lists for the public listing.
+ *
+ * Accepts limit; returns tier-list summaries after an API request using account-aware headers.
+ */
 export async function fetchTierLists(limit = 30): Promise<TierListSummary[]> {
   const rows = await requestJson<RawTierList[]>(`/tierlists?limit=${Math.max(1, Math.min(limit, 100))}`);
   return rows.map(mapTierList);
 }
 
+/**
+ * Fetch one tier list and its champion placements by post ID.
+ *
+ * Accepts postId; returns a tier-list summary after an authenticated-capable API request.
+ */
 export async function fetchTierList(postId: number): Promise<TierListSummary> {
   return mapTierList(await requestJson<RawTierList>(`/tierlists/${postId}`, { cache: "no-store" }));
 }
 
+/**
+ * Create a tier list from its title, description, and ordered entries.
+ *
+ * Accepts input; returns the created summary after an authenticated state-changing API request.
+ */
 export async function createTierList(input: {
   title: string;
   description: string;
@@ -97,6 +117,11 @@ export async function createTierList(input: {
   });
 }
 
+/**
+ * Replace the editable fields and entries of an existing tier list.
+ *
+ * Accepts postId and input; returns the updated summary after an authenticated API mutation.
+ */
 export async function updateTierList(postId: number, input: {
   title: string;
   description: string;

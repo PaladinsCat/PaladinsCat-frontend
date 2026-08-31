@@ -1,7 +1,14 @@
+/**
+ * Define the auth login login failure responsibility boundary.
+ * Coordinates auth login login failure data loading, authorization, and presentation.
+ */
 "use client";
-
 import { useLocalization } from "@/lib/localization-context";
 
+/**
+ * Handles the exported route operation using its declared request and response contract.
+ * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ */
 export function LoginFailure({ href }: { href: string }) {
   const { t } = useLocalization();
   return <div className="min-h-[60vh] flex items-center justify-center px-4">

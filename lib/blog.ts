@@ -1,3 +1,7 @@
+/**
+ * Defines blog's shared contracts and runtime helpers.
+ * Keep behavior aligned with its callers and browser/server boundary.
+ */
 import matter from "gray-matter";
 import { unstable_cache } from "next/cache";
 
@@ -8,13 +12,25 @@ const GITHUB_API_BASE = "https://api.github.com/repos";
 const GITHUB_RAW_BASE = `https://raw.githubusercontent.com/${GITHUB_REPO}/${BLOG_GITHUB_REF}/${BLOG_GITHUB_PATH}`;
 const BLOG_FETCH_TIMEOUT_MS = 10_000;
 
+/**
+ * Defines the  b l o g_ c a t e g o r i e s contract used by this module.
+ */
 export const BLOG_CATEGORIES = ["public-release", "q-and-a", "guide"] as const;
+/**
+ * Defines the  blog category contract used by this module.
+ */
 export type BlogCategory = (typeof BLOG_CATEGORIES)[number];
 
+/**
+ * Transforms or validates is blog category according to this module's data contract.
+ */
 export function isBlogCategory(value: string | undefined): value is BlogCategory {
   return BLOG_CATEGORIES.includes(value as BlogCategory);
 }
 
+/**
+ * Defines the  blog post contract used by this module.
+ */
 export interface BlogPost {
   slug: string;
   sourcePath: string;
@@ -229,6 +245,9 @@ async function loadCachedPosts(): Promise<BlogPost[]> {
   }
 }
 
+/**
+ * Reads all posts from the module's configured source.
+ */
 export async function getAllPosts(): Promise<BlogPost[]> {
   try {
     const posts = await loadCachedPosts();
@@ -243,6 +262,9 @@ export async function getAllPosts(): Promise<BlogPost[]> {
   }
 }
 
+/**
+ * Reads post by slug from the module's configured source.
+ */
 export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
   const normalizedSlug = normalizeSlug(slug);
   if (!normalizedSlug) return null;
@@ -256,6 +278,9 @@ export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
   }
 }
 
+/**
+ * Reads post link from the module's configured source.
+ */
 export function getPostLink(slug: string): string {
   const normalizedSlug = normalizeSlug(slug);
   return normalizedSlug ? `/blog/${encodePath(normalizedSlug)}` : "/blog";

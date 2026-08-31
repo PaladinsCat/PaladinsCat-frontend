@@ -1,6 +1,13 @@
+/**
+ * Renders score block data for match-result views.
+ * Keeps the component's interaction and accessibility behavior intact.
+ */
 import type { ScoreBlockData } from "./types";
 import { LocalizedText } from "@/lib/localization-context";
 
+/** Render ScoreBlock from its declared props and match data.
+ * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
+ */
 export default function ScoreBlock({ data }: { data: ScoreBlockData }) {
   return (
     <div className="flex items-center justify-center gap-6 py-4">

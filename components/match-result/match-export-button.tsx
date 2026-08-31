@@ -1,3 +1,7 @@
+/**
+ * Renders match export button data for match-result views.
+ * Keeps the component's interaction and accessibility behavior intact.
+ */
 "use client";
 
 import { useEffect, useState, type RefObject } from "react";
@@ -17,6 +21,9 @@ declare global {
 }
 
 async function scoreboardPng(scoreboard: HTMLElement) {
+  const exportMap = scoreboard.querySelector<HTMLImageElement>("img.scoreboard-map");
+  const exportMapSource = exportMap?.dataset.exportSrc;
+  if (exportMap && exportMapSource) exportMap.src = exportMapSource;
   scoreboard.setAttribute("data-image-export", "true");
   try {
     const talentDeadline = performance.now() + 2_000;
@@ -43,9 +50,13 @@ async function scoreboardPng(scoreboard: HTMLElement) {
     });
   } finally {
     scoreboard.removeAttribute("data-image-export");
+    exportMap?.removeAttribute("src");
   }
 }
 
+/** Render MatchExportButton from its declared props and match data.
+ * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
+ */
 export default function MatchExportButton(props: MatchExportButtonProps) {
   const { t } = useLocalization();
   const [exporting, setExporting] = useState(false);

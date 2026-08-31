@@ -1,3 +1,6 @@
+/** notification-menu component/module.
+ * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ */
 "use client";
 
 import Link from "next/link";
@@ -36,6 +39,9 @@ function notificationDot(importance: number) {
   return "bg-pc-text-muted";
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export default function NotificationMenu() {
   const { user, isLoading: authLoading } = useAuth();
   const { t, formatDateTime } = useLocalization();

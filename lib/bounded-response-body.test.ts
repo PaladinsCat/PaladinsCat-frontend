@@ -1,3 +1,6 @@
+/** Tests bounded response-body parsing behavior.
+ * These tests verify response-body size limits before parsing.
+ */
 import assert from "node:assert/strict";
 import test from "node:test";
 import { readBodyWithinLimit } from "./bounded-response-body.ts";

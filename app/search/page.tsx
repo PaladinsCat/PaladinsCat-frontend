@@ -1,3 +1,7 @@
+/**
+ * Render the search page and its data composition.
+ * Assemble the page content exposed at this location.
+ */
 "use client";
 
 import { memo, Suspense, useDeferredValue, useEffect, useMemo, useReducer, useRef } from "react";
@@ -520,6 +524,10 @@ function SearchPageBody() {
   );
 }
 
+/**
+ * Render the SearchPage view for search page.
+ * Return the React tree for the declared inputs and page data.
+ */
 export default function SearchPage() {
   return (
     <Suspense fallback={<RouteSkeleton variant="list" />}>

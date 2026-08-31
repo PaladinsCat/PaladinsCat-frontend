@@ -1,3 +1,7 @@
+/**
+ * Compose metadata and child content for champions name layout.
+ * Keep SEO and nesting behavior local to this layout.
+ */
 import type { Metadata } from "next";
 import { preload } from "react-dom";
 import { STATIC_CHAMPIONS } from "@/lib/static-champions";
@@ -22,6 +26,10 @@ const ROLE_KEYS: Record<string, TranslationKey> = {
   Support: "common.roles.support",
 };
 
+/**
+ * Build SEO metadata for champions name layout.
+ * Return the Next.js metadata object used by the page without mutating application data.
+ */
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { name } = await params;
   const champion = championFromSlug(name);
@@ -43,6 +51,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+/**
+ * Render the ChampionDetailLayout view for champions name layout.
+ * Return the React tree for the declared inputs and page data.
+ */
 export default async function ChampionDetailLayout({ children, params }: Props) {
   const { name } = await params;
   const champion = championFromSlug(name);

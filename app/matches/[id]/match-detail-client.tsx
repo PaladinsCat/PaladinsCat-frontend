@@ -1,3 +1,7 @@
+/**
+ * Manage interactive state for the matches id match-detail-client client view.
+ * Coordinate local events and consume the declared component inputs.
+ */
 "use client";
 
 /**
@@ -98,6 +102,7 @@ async function withCurrentStoredModeration(detail: MatchDetailWithBans): Promise
         profile_snapshot: {
           ...player.profile_snapshot,
           cheater: current.cheater,
+          exploiter: current.exploiter,
           sus_count: current.susCount,
         },
       };
@@ -152,6 +157,7 @@ function storedProfileForMatch(player: MatchPlayerDetail): PlayerProfileData | n
     capturedAt: snapshot.captured_at,
     snapshotSource: snapshot.source,
     cheater: snapshot.cheater === true,
+    exploiter: snapshot.exploiter === true,
     susCount: finiteNumber(snapshot.sus_count) ?? 0,
     verified: snapshot.verified === true,
     totalMatches: globalMatches,
@@ -174,6 +180,10 @@ function storedProfileForMatch(player: MatchPlayerDetail): PlayerProfileData | n
 
 /* ── Page component ── */
 
+/**
+ * Render the MatchDetailPage view for matches id match-detail-client.
+ * Return the React tree for the declared inputs and page data.
+ */
 export default function MatchDetailPage({ initialMatch = null }: { initialMatch?: MatchDetailWithBans | null }) {
   const { t } = useLocalization();
   const params = useParams();

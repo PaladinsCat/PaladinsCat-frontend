@@ -1,3 +1,6 @@
+/** Tests OIDC security validation and rejection behavior.
+ * The module owns its existing image, OIDC, proxy, roster, or moderation boundary.
+ */
 import test from "node:test";
 import assert from "node:assert/strict";
 import { buildParAuthorizationUrl, buildPushedAuthorizationRequest, buildRpLogoutUrl, createTransaction, getJwkForTest, keycloakAccountUrl, normalizedHttpsIssuer, parsePushedAuthorizationResponse, requireSameOrigin, resetJwksCacheForTest, resolveInternalIssuer, safeReturnPath, stateMatches, validIdTokenHeader, validLogoutTokenHeader, validateLogoutToken } from "./oidc-security.ts";

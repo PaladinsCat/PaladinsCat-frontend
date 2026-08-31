@@ -1,3 +1,4 @@
+/** Verify SEO label normalization and safe JSON-LD serialization. */
 import assert from "node:assert/strict";
 import test from "node:test";
 import { cleanSeoLabel, serializeJsonLd } from "./seo.ts";

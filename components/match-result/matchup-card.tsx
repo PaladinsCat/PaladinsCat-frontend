@@ -1,3 +1,7 @@
+/**
+ * Renders matchup card data for match-result views.
+ * Keeps the component's interaction and accessibility behavior intact.
+ */
 "use client";
 
 import Link from "next/link";
@@ -28,6 +32,9 @@ function RecordSummary({ label, wins, total, tone, eloLabel, elo }: { label: str
   </div>;
 }
 
+/** Render MatchupCard from its declared props and match data.
+ * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
+ */
 export default function MatchupCard({ player }: { player: MatchResultPlayer }) {
   const { t , formatNumber} = useLocalization();
   const { matchData: md, profileData: profile } = player;

@@ -1,3 +1,6 @@
+/** Loads build-reference data and resolves champion metadata.
+ * This module resolves build references and related champion metadata.
+ */
 import { fetchReferenceCards, fetchReferenceItems, fetchReferenceTalents } from "@/lib/api-client";
 import { getChampionData, type ChampionData } from "@/lib/champion-data";
 import { canonicalCardNameKey } from "@/lib/card-name";
@@ -179,6 +182,9 @@ async function buildItems(): Promise<BuildItemReference[]> {
   });
 }
 
+/** itemDescriptionAtLevel applies the module-specific transformation to its declared inputs.
+ * Contract: validates its inputs and returns the existing module result without mutating caller state.
+ */
 export function itemDescriptionAtLevel(
   item: Pick<BuildItemReference, "description" | "tiers"> | null | undefined,
   level: number,
@@ -254,6 +260,9 @@ async function buildTalents(championId: number, champion?: ChampionData): Promis
   });
 }
 
+/** loadBuildReferenceData applies the module-specific transformation to its declared inputs.
+ * Contract: validates its inputs and returns the existing module result without mutating caller state.
+ */
 export async function loadBuildReferenceData(championId: number, championSlug: string): Promise<BuildReferenceData> {
   const champion = championSlug ? await getChampionData(championSlug).catch(() => undefined) : undefined;
   const [items, cards, talents] = await Promise.all([
@@ -271,6 +280,9 @@ export async function loadBuildCardReferences(championId: number, championSlug: 
   return buildCards(championId, champion);
 }
 
+/** groupByCategory applies the module-specific transformation to its declared inputs.
+ * Contract: validates its inputs and returns the existing module result without mutating caller state.
+ */
 export function groupByCategory<T extends { category: string }>(rows: T[]): Array<[string, T[]]> {
   const grouped = new Map<string, T[]>();
   for (const row of rows) {

@@ -1,3 +1,6 @@
+/** canonical-talent-image component/module.
+ * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ */
 "use client";
 
 import { useEffect, useState } from "react";

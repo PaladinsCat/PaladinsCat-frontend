@@ -1,3 +1,7 @@
+/**
+ * Define the terms page responsibility boundary.
+ * Coordinates terms page data loading, authorization, and presentation.
+ */
 import {
   AlertTriangle,
   BadgeCheck,
@@ -15,6 +19,7 @@ import { getServerLocalization } from "@/lib/server-localization";
 
 const POLICY_DATE = new Date(Date.UTC(2026, 6, 22));
 
+/** Render the localized terms page with its dated acceptance sections. */
 export default async function TermsPage() {
   const { locale, t } = await getServerLocalization();
   const sections: PublicPolicySection[] = [

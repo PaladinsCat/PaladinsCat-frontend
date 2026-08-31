@@ -1,3 +1,6 @@
+/** Builds player loadout roster display data.
+ * The module owns its existing image, OIDC, proxy, roster, or moderation boundary.
+ */
 import { fetchChampions } from "@/lib/api-client";
 import { STATIC_CHAMPIONS } from "@/lib/static-champions";
 

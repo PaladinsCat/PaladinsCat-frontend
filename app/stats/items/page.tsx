@@ -1,5 +1,8 @@
+/**
+ * Define the stats items page route boundary.
+ * Coordinates this module's route data flow and rendered output.
+ */
 "use client";
-
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { fetchItems, type ItemStat } from "@/lib/api-client";
@@ -21,6 +24,10 @@ function categoryColor(category: BuildItemCategory) {
   return category === "Offense" ? "text-red-400" : category === "Defense" ? "text-blue-400" : category === "Healing" ? "text-emerald-400" : "text-amber-400";
 }
 
+/**
+ * Renders the exported statistics view with its route data.
+ * Returns the declared route value; network, cache, and navigation effects follow the implementation.
+ */
 export default function ItemsPage() {
   const { t, formatNumber, formatPercent } = useLocalization();
   const formatCount = (value: number) => formatNumber(value, { notation: "compact", maximumFractionDigits: 1 });

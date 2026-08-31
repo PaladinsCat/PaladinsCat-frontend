@@ -1,3 +1,6 @@
+/** Maintains browser authentication state and refreshes the current session.
+ * This context tracks the signed-in browser session and refresh state.
+ */
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
@@ -16,12 +19,18 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+/** useAuth applies the module-specific transformation to its declared inputs.
+ * Contract: validates its inputs and returns the existing module result without mutating caller state.
+ */
 export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth must be used within AuthProvider");
   return ctx;
 }
 
+/** AuthProvider applies the module-specific transformation to its declared inputs.
+ * Contract: validates its inputs and returns the existing module result without mutating caller state.
+ */
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(() => getAuthUser());
   const [isLoading, setIsLoading] = useState(true);

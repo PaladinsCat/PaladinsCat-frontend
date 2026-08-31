@@ -1,3 +1,6 @@
+/** Loads locale messages and provides localization state to the UI.
+ * The module owns the existing URL, context, or locale-message boundary.
+ */
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -72,6 +75,9 @@ function getCachedLocaleMessages(locale: Locale): LocaleMessages {
   return cached ? parseLocaleMessages(cached) ?? {} : {};
 }
 
+/** Apply LocalizationProvider to lobby-tier or localization inputs.
+ * Contract: returns the normalized route, context state, or message value while preserving existing browser behavior.
+ */
 export function LocalizationProvider({
   children,
   initialLocale = "en",
@@ -207,12 +213,18 @@ export function LocalizationProvider({
   return <LocalizationContext.Provider value={value}>{children}</LocalizationContext.Provider>;
 }
 
+/** Apply useLocalization to lobby-tier or localization inputs.
+ * Contract: returns the normalized route, context state, or message value while preserving existing browser behavior.
+ */
 export function useLocalization() {
   const context = useContext(LocalizationContext);
   if (!context) throw new Error("useLocalization must be used within a LocalizationProvider");
   return context;
 }
 
+/** Apply LocalizedText to lobby-tier or localization inputs.
+ * Contract: returns the normalized route, context state, or message value while preserving existing browser behavior.
+ */
 export function LocalizedText({
   id,
   values,

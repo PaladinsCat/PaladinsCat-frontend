@@ -184,5 +184,21 @@
   "common.activity.classification": "Classification",
   "common.activity.noCandidates": "No candidates were found in this bracket and lobby-tier scope.",
   "common.activity.loadMoreCandidates": "Load more candidates",
-  "common.activity.candidatesLoadFailed": "Candidates could not be loaded. Try again."
+  "common.activity.candidatesLoadFailed": "Candidates could not be loaded. Try again.",
+  "common.relationships.title": "Player Relationships",
+  "common.relationships.description": "Ranked teammates, opponents, and confirmed party partners.",
+  "common.relationships.teammates": "Teammates",
+  "common.relationships.opponents": "Opponents",
+  "common.relationships.partyPartners": "Party Partners",
+  "common.relationships.matchesTogether": "Matches Together",
+  "common.relationships.uniquePlayers": "Unique Players",
+  "common.relationships.encounterMix": "Ranked Encounter Mix",
+  "common.relationships.viewDetails": "View relationship details",
+  "common.relationships.empty": "No ranked relationship data is available for this player.",
+  "common.relationships.loadFailed": "Player relationships could not be loaded.",
+  "common.relationships.rankedOnly": "Relationship counts use tracked ranked matches only.",
+  "common.bestDuo.title": "Best Duo",
+  "common.bestDuo.description": "The most-played confirmed ranked party pair.",
+  "common.bestDuo.matchesPerWeek": "{count} matches per week",
+  "common.bestDuo.observedDays": "{count} observed days"
 }

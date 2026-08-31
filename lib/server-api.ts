@@ -1,3 +1,7 @@
+/**
+ * Keeps server api server-side and aligned with its data source.
+ * Preserve its server boundary and caller-facing data contracts.
+ */
 import "server-only";
 
 type ServerFetchOptions = Omit<RequestInit, "signal"> & {
@@ -17,6 +21,9 @@ function serverApiBase(): string {
   return value;
 }
 
+/**
+ * Fetches JSON from the backend with server-side caching, revalidation, and error handling.
+ */
 export async function fetchServerJson<T>(path: string, options: ServerFetchOptions = {}): Promise<T> {
   const { timeoutMs = 10_000, ...requestOptions } = options;
   const response = await fetch(`${serverApiBase()}${path.startsWith("/") ? path : `/${path}`}`, {

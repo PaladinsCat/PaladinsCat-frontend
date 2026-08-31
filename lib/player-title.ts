@@ -9,6 +9,9 @@
  * XSS vector.
  */
 
+/** Describe the parsed player-title markup returned to UI callers.
+ * Contract: carries the sanitized title text and optional color metadata.
+ */
 export interface ParsedPlayerTitle {
   /** Title text with the markup stripped. */
   text: string;
@@ -32,11 +35,29 @@ const COLOR_ATTRIBUTE_PATTERN = /color\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i
 // around font tags. React renders strings safely, but leaving those tags in the
 // string exposes the markup to users. Strip every tag-shaped token while
 // preserving ordinary angle brackets such as "2 < 3".
+/** Apply stripPlayerTitleMarkup to the declared player or request input.
+ * Contract: enforces title sanitation and returns plain text without markup.
+ */
 export function stripPlayerTitleMarkup(raw: string): string {
-  return raw
-    .replace(/<!--[\s\S]*?(?:-->|$)/g, "")
-    .replace(/<\/?[a-z][^<>]*>/gi, "")
-    .replace(/<\/?[a-z][^<>]*$/gi, "");
+  let text = "";
+  let cursor = 0;
+  while (cursor < raw.length) {
+    if (raw.startsWith("<!--", cursor)) {
+      const commentEnd = raw.indexOf("-->", cursor + 4);
+      cursor = commentEnd === -1 ? raw.length : commentEnd + 3;
+      continue;
+    }
+
+    if (raw[cursor] === "<" && /^\/?[a-z]/i.test(raw.slice(cursor + 1, cursor + 3))) {
+      const tagEnd = raw.indexOf(">", cursor + 1);
+      cursor = tagEnd === -1 ? raw.length : tagEnd + 1;
+      continue;
+    }
+
+    text += raw[cursor];
+    cursor += 1;
+  }
+  return text;
 }
 
 /**

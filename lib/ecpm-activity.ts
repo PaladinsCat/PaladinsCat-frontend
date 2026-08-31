@@ -1,3 +1,7 @@
+/**
+ * Defines ecpm-activity's shared contracts and runtime helpers.
+ * Keep behavior aligned with its callers and browser/server boundary.
+ */
 export const ECPM_ACTIVITY_THRESHOLDS = {
   fullAfk: 70,
   partialAfk: 90,
@@ -5,7 +9,13 @@ export const ECPM_ACTIVITY_THRESHOLDS = {
   engaged: 120,
 } as const;
 
+/**
+ * Defines the  ecpm activity level contract used by this module.
+ */
 export type EcpmActivityLevel = "engaged" | "possible-disconnect" | "disconnected" | "partial-afk" | "full-afk";
+/**
+ * Defines the  ecpm activity label key contract used by this module.
+ */
 export type EcpmActivityLabelKey =
   | "generated.stats.egpm.engaged"
   | "common.activity.possibleDisconnect"
@@ -13,6 +23,9 @@ export type EcpmActivityLabelKey =
   | "generated.stats.egpm.partialAfk"
   | "generated.stats.egpm.fullAfk";
 
+/**
+ * Defines the ecpm activity level contract used by this module.
+ */
 export function ecpmActivityLevel(value: number): EcpmActivityLevel {
   if (value >= ECPM_ACTIVITY_THRESHOLDS.engaged) return "engaged";
   if (value >= ECPM_ACTIVITY_THRESHOLDS.disconnected) return "possible-disconnect";
@@ -21,6 +34,9 @@ export function ecpmActivityLevel(value: number): EcpmActivityLevel {
   return "full-afk";
 }
 
+/**
+ * Defines the ecpm activity text class contract used by this module.
+ */
 export function ecpmActivityTextClass(value: number | null | undefined): string {
   if (value == null || !Number.isFinite(value)) return "text-pc-text-muted";
   switch (ecpmActivityLevel(value)) {
@@ -32,6 +48,9 @@ export function ecpmActivityTextClass(value: number | null | undefined): string 
   }
 }
 
+/**
+ * Defines the ecpm activity label key contract used by this module.
+ */
 export function ecpmActivityLabelKey(value: number | null | undefined): EcpmActivityLabelKey | null {
   if (value == null || !Number.isFinite(value)) return null;
   switch (ecpmActivityLevel(value)) {
@@ -48,6 +67,9 @@ export function isAutomaticAfkFlag(value: number | null | undefined): boolean {
   return value != null && Number.isFinite(value) && value < ECPM_ACTIVITY_THRESHOLDS.fullAfk;
 }
 
+/**
+ * Defines the ecpm activity scale max contract used by this module.
+ */
 export function ecpmActivityScaleMax(values: number[]): number {
   const largest = Math.max(ECPM_ACTIVITY_THRESHOLDS.engaged, ...values.filter(Number.isFinite));
   return Math.max(160, Math.ceil(largest / 20) * 20);

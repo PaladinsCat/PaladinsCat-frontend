@@ -1,3 +1,7 @@
+/**
+ * Renders party badge data for match-result views.
+ * Keeps the component's interaction and accessibility behavior intact.
+ */
 "use client";
 
 import { Users } from "lucide-react";
@@ -6,11 +10,17 @@ import { useLocalization } from "@/lib/localization-context";
 
 type PartyPlayer = Pick<MatchPlayerDetail, "party" | "party_number">;
 
+/** Render getPartyNumber from its declared props and match data.
+ * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
+ */
 export function getPartyNumber(player: PartyPlayer): number | null {
   const value = Number(player.party ?? player.party_number ?? 0);
   return Number.isFinite(value) && value > 0 ? Math.trunc(value) : null;
 }
 
+/** Render PartyBadge from its declared props and match data.
+ * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
+ */
 export default function PartyBadge({
   player,
   className = "",

@@ -1,3 +1,7 @@
+/**
+ * Validates universal-search state normalization, merging, and reducer transitions.
+ * Preserve its server boundary and caller-facing data contracts.
+ */
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { createInitialSearchState, searchReducer } from "./search-state.ts";

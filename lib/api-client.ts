@@ -1,3 +1,9 @@
+/**
+ * Centralize browser requests to the PaladinsCat API and map responses for client consumers.
+ *
+ * This module owns endpoint adapters, authentication headers, and local auth/cache helpers;
+ * it does not own route rendering or backend request handlers.
+ */
 import { identityCutoverEnabled } from "./identity-cutover";
 import { hasPlayerTag } from "./player-tag-threshold";
 
@@ -125,6 +131,11 @@ export interface RankedPlayer {
   leaveRate?: number;
 }
 
+/**
+ * Fetch ranked leaderboard data for client consumers.
+ *
+ * Accepts query filters; returns fetchRankedLeaderboard data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchRankedLeaderboard(params?: { tier?: string; top?: number }): Promise<RankedPlayer[]> {
   const query = new URLSearchParams();
   if (params?.tier) query.set('tier', params.tier);
@@ -161,6 +172,7 @@ export interface CheaterPlayer {
   region: string;
   kbmTier: string | null;
   cheater: boolean;
+  exploiter: boolean;
   susCount: number;
   dropper: boolean;
   dropperVoteCount?: number;
@@ -303,10 +315,15 @@ export interface BoostedPlayerDetail {
   matches: BoostedMatchSummary[];
 }
 
-export async function fetchCheaterPlayers(params?: { name?: string; cheater?: boolean; susOnly?: boolean; weirdoOnly?: boolean; hallOfFameOnly?: boolean; dropperOnly?: boolean; afkWintradeOnly?: boolean; altAccountOnly?: boolean; limit?: number; offset?: number }): Promise<CheaterPlayer[]> {
+/**
+ * Fetch filtered moderation-directory players from the backend.
+ * Accepts typed query filters and returns normalized player summaries.
+ */
+export async function fetchCheaterPlayers(params?: { name?: string; cheater?: boolean; exploiter?: boolean; susOnly?: boolean; weirdoOnly?: boolean; hallOfFameOnly?: boolean; dropperOnly?: boolean; afkWintradeOnly?: boolean; altAccountOnly?: boolean; limit?: number; offset?: number }): Promise<CheaterPlayer[]> {
   const query = new URLSearchParams();
   if (params?.name?.trim()) query.set('name', params.name.trim());
   if (params?.cheater) query.set('cheater', 'true');
+  if (params?.exploiter) query.set('exploiter', 'true');
   if (params?.susOnly) query.set('susOnly', 'true');
   if (params?.weirdoOnly) query.set('weirdoOnly', 'true');
   if (params?.hallOfFameOnly) query.set('hallOfFameOnly', 'true');
@@ -319,7 +336,7 @@ export async function fetchCheaterPlayers(params?: { name?: string; cheater?: bo
   try {
     const raw = await fetchJson<Array<{
       id: string; name: string; platform: string; region: string;
-      kbm_tier?: string | null; cheater?: boolean; sus_count?: number;
+      kbm_tier?: string | null; cheater?: boolean; exploiter?: boolean; sus_count?: number;
       dropper?: boolean; dropper_vote_count?: number; afk_wintrade?: boolean; afk_wintrade_vote_count?: number; boosted?: boolean; alt_account?: boolean; alt_account_vote_count?: number;
       weirdo_count?: number; hall_of_fame_count?: number;
       avg_dpm?: number | null; avg_hpm?: number | null; avg_egpm?: number | null;
@@ -328,7 +345,7 @@ export async function fetchCheaterPlayers(params?: { name?: string; cheater?: bo
     }>>(`/players/search?${query.toString()}`);
     return raw.map(r => ({
       id: r.id, name: r.name, platform: r.platform, region: r.region,
-      kbmTier: r.kbm_tier ?? null, cheater: r.cheater ?? false,
+      kbmTier: r.kbm_tier ?? null, cheater: r.cheater ?? false, exploiter: r.exploiter ?? false,
       susCount: r.sus_count ?? 0,
       dropper: Boolean(r.dropper), dropperVoteCount: Number(r.dropper_vote_count ?? 0),
       afkWintrade: Boolean(r.afk_wintrade), afkWintradeVoteCount: Number(r.afk_wintrade_vote_count ?? 0),
@@ -353,6 +370,7 @@ function mapAutomaticAfkPlayer(row: any): AutomaticAfkPlayer {
     region: String(row.region ?? 'Unknown'),
     kbmTier: row.kbm_tier ?? null,
     cheater: Boolean(row.cheater),
+    exploiter: Boolean(row.exploiter),
     susCount: Number(row.sus_count ?? 0),
     dropper: Boolean(row.dropper), dropperVoteCount: Number(row.dropper_vote_count ?? 0),
     afkWintrade: Boolean(row.afk_wintrade), afkWintradeVoteCount: Number(row.afk_wintrade_vote_count ?? 0),
@@ -375,6 +393,11 @@ function mapAutomaticAfkPlayer(row: any): AutomaticAfkPlayer {
   };
 }
 
+/**
+ * Fetch automatic afk players data for client consumers.
+ *
+ * Accepts name, limit, offset; returns fetchAutomaticAfkPlayers data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchAutomaticAfkPlayers({
   name,
   limit = 24,
@@ -404,6 +427,7 @@ function mapAutomaticWallShooterPlayer(row: any): AutomaticWallShooterPlayer {
     region: String(row.region ?? 'Unknown'),
     kbmTier: row.kbm_tier ?? null,
     cheater: Boolean(row.cheater),
+    exploiter: Boolean(row.exploiter),
     susCount: Number(row.sus_count ?? 0),
     dropper: Boolean(row.dropper),
     dropperVoteCount: Number(row.dropper_vote_count ?? 0),
@@ -426,6 +450,11 @@ function mapAutomaticWallShooterPlayer(row: any): AutomaticWallShooterPlayer {
   };
 }
 
+/**
+ * Fetch wall shooter players data for client consumers.
+ *
+ * Accepts name, limit, offset; returns fetchWallShooterPlayers data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchWallShooterPlayers({
   name,
   limit = 32,
@@ -456,6 +485,11 @@ function mapAutomaticMasterFeedingPlayer(row: any): AutomaticMasterFeedingPlayer
   };
 }
 
+/**
+ * Fetch master feeding players data for client consumers.
+ *
+ * Accepts name, limit, offset; returns fetchMasterFeedingPlayers data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchMasterFeedingPlayers({
   name,
   limit = 32,
@@ -486,6 +520,11 @@ function mapAutomaticPerformanceDiffPlayer(row: any): AutomaticPerformanceDiffPl
   };
 }
 
+/**
+ * Fetch performance diff players data for client consumers.
+ *
+ * Accepts metric, PerformanceDiffMetric, name, limit, offset; returns fetchPerformanceDiffPlayers data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchPerformanceDiffPlayers(metric: PerformanceDiffMetric, {
   name,
   limit = 32,
@@ -507,6 +546,11 @@ export async function fetchPerformanceDiffPlayers(metric: PerformanceDiffMetric,
   };
 }
 
+/**
+ * Fetch automatic afk player detail data for client consumers.
+ *
+ * Accepts playerId; returns fetchAutomaticAfkPlayerDetail data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchAutomaticAfkPlayerDetail(playerId: string): Promise<AutomaticAfkPlayerDetail> {
   const raw = await fetchJson<any>(`/players/automatic-afk/${encodeURIComponent(playerId)}`);
   return {
@@ -558,6 +602,11 @@ export interface ClassLeaderboardEntry {
   region: string | null;
 }
 
+/**
+ * Fetch class leaderboard data for client consumers.
+ *
+ * Accepts params, role; returns fetchClassLeaderboard data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchClassLeaderboard(params: { role: string; limit?: number; queueId?: number; mode?: 'account' | 'champion' }): Promise<ClassLeaderboardEntry[]> {
   const query = new URLSearchParams();
   query.set('role', params.role);
@@ -606,6 +655,11 @@ export interface ChampionEloEntry {
   region: string | null;
 }
 
+/**
+ * Fetch champion elo data for client consumers.
+ *
+ * Accepts params; returns fetchChampionElo data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchChampionElo(params: {
   role?: string;
   championId?: number;
@@ -656,6 +710,11 @@ export interface PerformanceLeaderboardEntry {
   platform: string | null;
 }
 
+/**
+ * Fetch performance leaderboard data for client consumers.
+ *
+ * Accepts params, metric; returns fetchPerformanceLeaderboard data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchPerformanceLeaderboard(params: {
   metric: 'dpm' | 'hpm' | 'gpm' | 'mpm';
   limit?: number;
@@ -726,6 +785,11 @@ function mapMetricSummary(raw: any): PerformanceMetricSummary {
   };
 }
 
+/**
+ * Fetch performance metrics data for client consumers.
+ *
+ * Accepts query filters; returns fetchPerformanceMetrics data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchPerformanceMetrics(params?: {
   metric?: PerformanceMetricKey;
   role?: string;
@@ -788,6 +852,11 @@ export interface ChampionPerformanceDistribution {
   totalMatches: number;
 }
 
+/**
+ * Fetch champion performance distributions data for client consumers.
+ *
+ * Accepts params, metric; returns fetchChampionPerformanceDistributions data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchChampionPerformanceDistributions(params: {
   metric: PerformanceMetricKey;
   championId?: number;
@@ -846,6 +915,11 @@ export interface BaselineEntry {
   updatedAt: string | null;
 }
 
+/**
+ * Fetch baselines data for client consumers.
+ *
+ * Accepts query filters; returns fetchBaselines data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchBaselines(params?: { role?: string; queueId?: number; tierMin?: number; tierMax?: number }): Promise<BaselineEntry[]> {
   const query = new URLSearchParams();
   if (params?.role) query.set('role', params.role);
@@ -954,8 +1028,10 @@ export interface PlayersOverview {
   hallOfFamePlayers: CheaterPlayer[];
   privateAccounts: PrivateAccountSummary[];
   partyPairs: PartyPairSummary[];
+  bestDuo: BestDuoSummary | null;
   communityCounts: {
     cheaters: number;
+    exploiters: number;
     boosted: number;
     suspicious: number;
     weirdos: number;
@@ -982,7 +1058,7 @@ function mapBoostedPlayer(row: any): BoostedPlayer {
   const partyMatchCount = Number(row.party_match_count ?? 0);
   return {
     id: String(row.id), name: row.name, platform: row.platform, region: row.region,
-    kbmTier: row.kbm_tier ?? null, cheater: Boolean(row.cheater), susCount: Number(row.sus_count ?? 0),
+    kbmTier: row.kbm_tier ?? null, cheater: Boolean(row.cheater), exploiter: Boolean(row.exploiter), susCount: Number(row.sus_count ?? 0),
     dropper: Boolean(row.dropper), afkWintrade: Boolean(row.afk_wintrade),
     // The boosted directory deliberately keeps every observed association, but
     // the visible moderation tag begins at five cumulative matches.
@@ -1005,6 +1081,11 @@ function mapBoostedPlayer(row: any): BoostedPlayer {
   };
 }
 
+/**
+ * Fetch boosted players data for client consumers.
+ *
+ * Accepts name, limit, offset; returns fetchBoostedPlayers data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchBoostedPlayers({ name, limit = 100, offset = 0 }: { name?: string; limit?: number; offset?: number } = {}): Promise<BoostedPlayer[]> {
   const query = new URLSearchParams({
     limit: String(Math.min(Math.max(limit, 1), 100)),
@@ -1016,6 +1097,99 @@ export async function fetchBoostedPlayers({ name, limit = 100, offset = 0 }: { n
   return raw.map(mapBoostedPlayer);
 }
 
+export interface BestDuoSummary {
+  sourcePlayerId: string;
+  sourcePlayerName: string;
+  targetPlayerId: string;
+  targetPlayerName: string;
+  matchCount: number;
+  firstSeen: string;
+  lastSeen: string;
+  observedDays: number;
+  matchesPerWeek: number;
+}
+
+export interface PlayerRelationshipRow {
+  otherPlayerId: string;
+  otherPlayerName: string;
+  matchCount: number;
+  firstSeen: string;
+  lastSeen: string;
+  sameParty: boolean;
+}
+
+export interface PlayerRelationshipSummary {
+  playerId: string;
+  totals: {
+    uniqueTeammates: number;
+    uniqueOpponents: number;
+    teammateMatches: number;
+    opponentMatches: number;
+    partyPartners: number;
+    partyMatches: number;
+  };
+  teammates: PlayerRelationshipRow[];
+  opponents: PlayerRelationshipRow[];
+  partyPartners: PlayerRelationshipRow[];
+}
+
+type RawRelationshipRow = {
+  other_player_id?: string | number;
+  other_player_name?: string | null;
+  match_count?: string | number | null;
+  first_seen?: string | null;
+  last_seen?: string | null;
+  same_party?: boolean | null;
+};
+
+type RawRelationshipSummary = {
+  player_id?: string | number;
+  totals?: Record<string, string | number | null>;
+  teammates?: RawRelationshipRow[];
+  opponents?: RawRelationshipRow[];
+  party_partners?: RawRelationshipRow[];
+};
+
+function mapRelationshipRow(row: RawRelationshipRow): PlayerRelationshipRow {
+  return {
+    otherPlayerId: String(row.other_player_id),
+    otherPlayerName: String(row.other_player_name ?? `Player ${row.other_player_id}`),
+    matchCount: Number(row.match_count ?? 0),
+    firstSeen: String(row.first_seen ?? ""),
+    lastSeen: String(row.last_seen ?? ""),
+    sameParty: Boolean(row.same_party),
+  };
+}
+
+/**
+ * Fetch player relationship summary data for client consumers.
+ *
+ * Accepts playerId, limit; returns fetchPlayerRelationshipSummary data after a backend request, using shared authentication and cache behavior.
+ */
+export async function fetchPlayerRelationshipSummary(playerId: string | number, limit = 6): Promise<PlayerRelationshipSummary> {
+  const raw = await fetchJson<RawRelationshipSummary>(`/coplay/summary/${encodeURIComponent(String(playerId))}?limit=${Math.min(Math.max(limit, 1), 50)}`);
+  const totals = raw.totals ?? {};
+  return {
+    playerId: String(raw.player_id ?? playerId),
+    totals: {
+      uniqueTeammates: Number(totals.unique_teammates ?? 0),
+      uniqueOpponents: Number(totals.unique_opponents ?? 0),
+      teammateMatches: Number(totals.teammate_matches ?? 0),
+      opponentMatches: Number(totals.opponent_matches ?? 0),
+      partyPartners: Number(totals.party_partners ?? 0),
+      partyMatches: Number(totals.party_matches ?? 0),
+    },
+    teammates: (raw.teammates ?? []).map(mapRelationshipRow),
+    opponents: (raw.opponents ?? []).map(mapRelationshipRow),
+    partyPartners: (raw.party_partners ?? []).map(mapRelationshipRow),
+  };
+}
+
+/**
+ * Fetch boosted player detail data for client consumers.
+ *
+ * Accepts playerId; returns fetchBoostedPlayerDetail data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchBoostedPlayerDetail(playerId: string): Promise<BoostedPlayerDetail> {
   const raw = await fetchJson<any>(`/players/boosted/${encodeURIComponent(playerId)}`);
   return {
@@ -1171,6 +1345,11 @@ function mapPartyPair(row: any): PartyPairSummary {
   };
 }
 
+/**
+ * Fetch private accounts directory data for client consumers.
+ *
+ * Accepts params; returns fetchPrivateAccountsDirectory data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchPrivateAccountsDirectory(params: { page?: number; pageSize?: number; query?: string; cheater?: boolean; suspicious?: boolean } = {}): Promise<PlayerDirectoryPage<PrivateAccountSummary>> {
   const page = Math.max(1, params.page ?? 1);
   const pageSize = Math.min(100, Math.max(1, params.pageSize ?? 24));
@@ -1183,6 +1362,11 @@ export async function fetchPrivateAccountsDirectory(params: { page?: number; pag
   return { items: rows.map(mapPrivateAccount), total, page, pageSize, totalPages: Math.max(1, Math.ceil(total / pageSize)) };
 }
 
+/**
+ * Fetch private account detail data for client consumers.
+ *
+ * Accepts privateId; returns fetchPrivateAccountDetail data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchPrivateAccountDetail(privateId: number): Promise<PrivateAccountDetail> {
   const raw = await fetchJson<any>(`/player-ext/private/${privateId}`);
   return {
@@ -1212,6 +1396,11 @@ export async function fetchPrivateAccountDetail(privateId: number): Promise<Priv
   };
 }
 
+/**
+ * Fetch party pairs directory data for client consumers.
+ *
+ * Accepts params; returns fetchPartyPairsDirectory data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchPartyPairsDirectory(params: { page?: number; pageSize?: number; query?: string } = {}): Promise<PlayerDirectoryPage<PartyPairSummary>> {
   const page = Math.max(1, params.page ?? 1);
   const pageSize = Math.min(100, Math.max(1, params.pageSize ?? 24));
@@ -1222,6 +1411,11 @@ export async function fetchPartyPairsDirectory(params: { page?: number; pageSize
   return { items: rows.map(mapPartyPair), total, page, pageSize, totalPages: Math.max(1, Math.ceil(total / pageSize)) };
 }
 
+/**
+ * Fetch party stacks directory data for client consumers.
+ *
+ * Accepts params; returns fetchPartyStacksDirectory data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchPartyStacksDirectory(params: { page?: number; pageSize?: number; query?: string; size?: number | null } = {}): Promise<PlayerDirectoryPage<PartyStackSummary>> {
   const page = Math.max(1, params.page ?? 1);
   const pageSize = Math.min(100, Math.max(1, params.pageSize ?? 24));
@@ -1276,7 +1470,7 @@ export function mapPlayersOverviewResponse(raw: any): PlayersOverview {
   });
   const mapCommunity = (row: any): CheaterPlayer => ({
     id: String(row.id), name: row.name, platform: row.platform, region: row.region,
-    kbmTier: row.kbm_tier ?? null, cheater: row.cheater ?? false, susCount: Number(row.sus_count ?? 0),
+    kbmTier: row.kbm_tier ?? null, cheater: row.cheater ?? false, exploiter: row.exploiter ?? false, susCount: Number(row.sus_count ?? 0),
     dropper: Boolean(row.dropper), afkWintrade: Boolean(row.afk_wintrade),
     boosted: Boolean(row.boosted), altAccount: Boolean(row.alt_account),
     weirdoCount: Number(row.weirdo_count ?? 0), hallOfFameCount: Number(row.hall_of_fame_count ?? 0),
@@ -1300,6 +1494,7 @@ export function mapPlayersOverviewResponse(raw: any): PlayersOverview {
   });
   const communityCounts = {
     cheaters: Number(raw.community_counts?.cheaters ?? raw.cheaters?.[0]?.total_count ?? raw.cheaters?.length ?? 0),
+    exploiters: Number(raw.community_counts?.exploiters ?? raw.exploiters?.[0]?.total_count ?? raw.exploiters?.length ?? 0),
     boosted: Number(raw.community_counts?.boosted ?? raw.boosted?.[0]?.total_count ?? raw.boosted?.length ?? 0),
     suspicious: Number(raw.community_counts?.suspicious ?? raw.suspicious?.[0]?.total_count ?? raw.suspicious?.length ?? 0),
     weirdos: Number(raw.community_counts?.weirdos ?? raw.weirdos?.[0]?.total_count ?? raw.weirdos?.length ?? 0),
@@ -1310,6 +1505,17 @@ export function mapPlayersOverviewResponse(raw: any): PlayersOverview {
   };
   const privateAccounts: PrivateAccountSummary[] = (raw.private_accounts ?? []).map(mapPrivateAccount);
   const partyPairs: PartyPairSummary[] = (raw.party_pairs ?? []).map(mapPartyPair);
+  const bestDuo: BestDuoSummary | null = raw.best_duo ? {
+    sourcePlayerId: String(raw.best_duo.source_player_id),
+    sourcePlayerName: String(raw.best_duo.source_player_name ?? "Unknown player"),
+    targetPlayerId: String(raw.best_duo.target_player_id),
+    targetPlayerName: String(raw.best_duo.target_player_name ?? "Unknown player"),
+    matchCount: Number(raw.best_duo.match_count ?? 0),
+    firstSeen: String(raw.best_duo.first_seen ?? ""),
+    lastSeen: String(raw.best_duo.last_seen ?? ""),
+    observedDays: Number(raw.best_duo.observed_days ?? 0),
+    matchesPerWeek: Number(raw.best_duo.matches_per_week ?? 0),
+  } : null;
   const directoryCounts = {
     privateAccounts: Number(raw.directory_counts?.private_accounts ?? raw.private_accounts?.[0]?.total_count ?? privateAccounts.length),
     parties: Number(raw.directory_counts?.parties ?? raw.party_pairs?.[0]?.total_count ?? partyPairs.length),
@@ -1337,6 +1543,7 @@ export function mapPlayersOverviewResponse(raw: any): PlayersOverview {
     hallOfFamePlayers: (raw.hall_of_fame ?? []).map(mapCommunity),
     privateAccounts,
     partyPairs,
+    bestDuo,
     communityCounts,
     directoryCounts,
   };
@@ -1468,6 +1675,11 @@ function mapAltRelationPlayer(row: any, prefix = ''): AltAccountRelationPlayer {
   };
 }
 
+/**
+ * Fetch alt account relations directory data for client consumers.
+ *
+ * Accepts params; returns fetchAltAccountRelationsDirectory data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchAltAccountRelationsDirectory(params: { page?: number; pageSize?: number; query?: string } = {}): Promise<PlayerDirectoryPage<AltAccountDirectoryGroup>> {
   const page = Math.max(1, params.page ?? 1);
   const pageSize = Math.min(100, Math.max(1, params.pageSize ?? 24));
@@ -1498,6 +1710,11 @@ export async function fetchAltAccountRelationsDirectory(params: { page?: number;
   return { items, total, page, pageSize, totalPages: Math.max(1, Math.ceil(total / pageSize)) };
 }
 
+/**
+ * Fetch my alt account relations data for client consumers.
+ *
+ * Accepts playerId; returns fetchMyAltAccountRelations data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchMyAltAccountRelations(playerId: string | number): Promise<MyAltAccountRelation[]> {
   const token = getAuthToken();
   if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.authenticationRequired);
@@ -1516,6 +1733,11 @@ export async function fetchMyAltAccountRelations(playerId: string | number): Pro
   }));
 }
 
+/**
+ * Record the alt account relation choice for the player relation.
+ *
+ * Accepts playerId, otherPlayerId, otherRole; returns voteAltAccountRelation data through a backend request, carrying authentication headers and applying the operation server-side.
+ */
 export async function voteAltAccountRelation(playerId: string | number, otherPlayerId: string | number, otherRole: 'main' | 'alt'): Promise<{ success: boolean; replaced: boolean }> {
   const token = getAuthToken();
   if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.authenticationRequired);
@@ -1526,6 +1748,11 @@ export async function voteAltAccountRelation(playerId: string | number, otherPla
   });
 }
 
+/**
+ * Clear my alt account relation from the account state.
+ *
+ * Accepts playerId, otherPlayerId; returns clearMyAltAccountRelation data while reading or changing local auth state without a backend request.
+ */
 export async function clearMyAltAccountRelation(playerId: string | number, otherPlayerId: string | number): Promise<{ success: boolean; removed: boolean }> {
   const token = getAuthToken();
   if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.authenticationRequired);
@@ -1722,6 +1949,11 @@ const FETCH_TIMEOUT_MS = 10000;
 
 
 // User-facing error keys — resolved at the UI layer via t()
+/**
+ * Name the shared api error keys value used by API-client callers.
+ *
+ * Exposes a typed constant with no network, authentication, cache, or persistence side effects.
+ */
 export const API_ERROR_KEYS = {
   genericFailure: "generated.api.genericFailure",
   unexpectedFetchFailure: "generated.api.unexpectedFetchFailure",
@@ -1731,11 +1963,21 @@ export const API_ERROR_KEYS = {
 
 export type ApiErrorKey = (typeof API_ERROR_KEYS)[keyof typeof API_ERROR_KEYS];
 
+/**
+ * IsApiErrorKey for the API-client data path.
+ *
+ * Accepts value; returns isApiErrorKey data from local computation without network, authentication, cache, or persistence effects.
+ */
 export function isApiErrorKey(value: unknown): value is ApiErrorKey {
   return typeof value === "string"
     && (Object.values(API_ERROR_KEYS) as string[]).includes(value);
 }
 
+/**
+ * Fetch json data for client consumers.
+ *
+ * Accepts path; returns fetchJson data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchJson<T>(path: string, options?: RequestInit & { retries?: number; unwrapData?: boolean; timeoutMs?: number }): Promise<T> {
   const retries = options?.retries ?? 2;
   const unwrapData = options?.unwrapData ?? true;
@@ -1808,6 +2050,11 @@ function splitRoles(roles: unknown): string[] | null {
 
 // ── System ──
 
+/**
+ * Fetch database stats data for client consumers.
+ *
+ * Accepts no arguments; returns fetchDatabaseStats data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchDatabaseStats(): Promise<DatabaseStats | null> {
   try {
     const raw = await fetchJson<{
@@ -1826,6 +2073,11 @@ export async function fetchDatabaseStats(): Promise<DatabaseStats | null> {
   }
 }
 
+/**
+ * Fetch system status data for client consumers.
+ *
+ * Accepts no arguments; returns fetchSystemStatus data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchSystemStatus(): Promise<SystemStatus | null> {
   try {
     const raw = await fetchJson<{
@@ -1847,6 +2099,11 @@ export async function fetchSystemStatus(): Promise<SystemStatus | null> {
   }
 }
 
+/**
+ * Fetch hirez service status data for client consumers.
+ *
+ * Accepts no arguments; returns fetchHirezServiceStatus data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchHirezServiceStatus(): Promise<HirezServiceStatus | null> {
   try {
     const raw = await fetchJson<HirezServiceStatus>(`/system/hirez-status`, { retries: 0, unwrapData: false });
@@ -1887,12 +2144,22 @@ class ApiRequestError extends Error {
   }
 }
 
+/**
+ * IsAuthenticationRejection for the API-client data path.
+ *
+ * Accepts error; returns isAuthenticationRejection data from local computation without network, authentication, cache, or persistence effects.
+ */
 export function isAuthenticationRejection(error: unknown): boolean {
   return error instanceof ApiRequestError && (error.status === 401 || error.status === 403);
 }
 
 // ── Notifications ──
 
+/**
+ * Fetch notifications data for client consumers.
+ *
+ * Accepts query filters; returns fetchNotifications data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchNotifications(params?: { limit?: number }): Promise<Notification[]> {
   const query = new URLSearchParams();
   if (params?.limit != null) query.set('limit', String(params.limit));
@@ -1904,6 +2171,11 @@ export async function fetchNotifications(params?: { limit?: number }): Promise<N
   }
 }
 
+/**
+ * Fetch activity banner data for client consumers.
+ *
+ * Accepts no arguments; returns fetchActivityBanner data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchActivityBanner(): Promise<ActivityBanner | null> {
   try {
     const raw = await fetchJson<any>(`/stats/activity-banner`, { retries: 1, unwrapData: false });
@@ -1913,6 +2185,11 @@ export async function fetchActivityBanner(): Promise<ActivityBanner | null> {
   }
 }
 
+/**
+ * Fetch account site notifications data for client consumers.
+ *
+ * Accepts query filters; returns fetchAccountSiteNotifications data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchAccountSiteNotifications(params?: { limit?: number }): Promise<Notification[]> {
   const token = getAuthToken();
   if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.notAuthenticated);
@@ -1925,6 +2202,11 @@ export async function fetchAccountSiteNotifications(params?: { limit?: number })
   return rows.map(mapNotification);
 }
 
+/**
+ * Mark site notification read in the notification API.
+ *
+ * Accepts notificationId; returns markSiteNotificationRead data through a backend request, carrying authentication headers and applying the operation server-side.
+ */
 export async function markSiteNotificationRead(notificationId: number): Promise<void> {
   const token = getAuthToken();
   if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.notAuthenticated);
@@ -1934,6 +2216,11 @@ export async function markSiteNotificationRead(notificationId: number): Promise<
   });
 }
 
+/**
+ * Mark all site notifications read in the notification API.
+ *
+ * Accepts no arguments; returns markAllSiteNotificationsRead data through a backend request, carrying authentication headers and applying the operation server-side.
+ */
 export async function markAllSiteNotificationsRead(): Promise<void> {
   const token = getAuthToken();
   if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.notAuthenticated);
@@ -1943,6 +2230,11 @@ export async function markAllSiteNotificationsRead(): Promise<void> {
   });
 }
 
+/**
+ * Fetch admin notifications data for client consumers.
+ *
+ * Accepts no arguments; returns fetchAdminNotifications data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchAdminNotifications(): Promise<Notification[]> {
   const token = getAuthToken();
   if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.notAuthenticated);
@@ -1953,6 +2245,11 @@ export async function fetchAdminNotifications(): Promise<Notification[]> {
   return raw.map(mapNotification);
 }
 
+/**
+ * Create admin notification through the community API.
+ *
+ * Accepts input; returns createAdminNotification data through a backend request, carrying authentication headers and applying the operation server-side.
+ */
 export async function createAdminNotification(input: NotificationInput): Promise<Notification> {
   const token = getAuthToken();
   if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.notAuthenticated);
@@ -1964,6 +2261,11 @@ export async function createAdminNotification(input: NotificationInput): Promise
   return mapNotification(raw);
 }
 
+/**
+ * Update admin notification through the account or community API.
+ *
+ * Accepts id, input; returns updateAdminNotification data through a backend request, carrying authentication headers and applying the operation server-side.
+ */
 export async function updateAdminNotification(id: number, input: Partial<NotificationInput>): Promise<Notification> {
   const token = getAuthToken();
   if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.notAuthenticated);
@@ -1975,6 +2277,11 @@ export async function updateAdminNotification(id: number, input: Partial<Notific
   return mapNotification(raw);
 }
 
+/**
+ * Delete admin notification through the account or community API.
+ *
+ * Accepts id; returns deleteAdminNotification data through a backend request, carrying authentication headers and applying the operation server-side.
+ */
 export async function deleteAdminNotification(id: number): Promise<void> {
   const token = getAuthToken();
   if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.notAuthenticated);
@@ -1984,6 +2291,11 @@ export async function deleteAdminNotification(id: number): Promise<void> {
   });
 }
 
+/**
+ * Fetch admin activity banner data for client consumers.
+ *
+ * Accepts no arguments; returns fetchAdminActivityBanner data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchAdminActivityBanner(): Promise<ActivityBanner> {
   const token = getAuthToken();
   if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.notAuthenticated);
@@ -1994,6 +2306,11 @@ export async function fetchAdminActivityBanner(): Promise<ActivityBanner> {
   return { enabled: Boolean(raw.enabled), message: String(raw.message ?? "") };
 }
 
+/**
+ * Update admin activity banner through the account or community API.
+ *
+ * Accepts input; returns updateAdminActivityBanner data through a backend request, carrying authentication headers and applying the operation server-side.
+ */
 export async function updateAdminActivityBanner(input: ActivityBanner): Promise<ActivityBanner> {
   const token = getAuthToken();
   if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.notAuthenticated);
@@ -2008,6 +2325,11 @@ export async function updateAdminActivityBanner(input: ActivityBanner): Promise<
 
 // ── Changelog ──
 
+/**
+ * Fetch changelog preview data for client consumers.
+ *
+ * Accepts no arguments; returns fetchChangelogPreview data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchChangelogPreview(): Promise<ChangelogEntry | null> {
   try {
     const raw = await fetchJson<any>('/meta/changelog?preview=true', { unwrapData: false });
@@ -2017,6 +2339,11 @@ export async function fetchChangelogPreview(): Promise<ChangelogEntry | null> {
   }
 }
 
+/**
+ * Fetch changelog data for client consumers.
+ *
+ * Accepts query filters; returns fetchChangelog data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchChangelog(params?: { page?: number; perPage?: number }): Promise<ChangelogPage> {
   const query = new URLSearchParams();
   if (params?.page != null) query.set('page', String(params.page));
@@ -2035,6 +2362,11 @@ export async function fetchChangelog(params?: { page?: number; perPage?: number 
   }
 }
 
+/**
+ * Fetch admin changelog data for client consumers.
+ *
+ * Accepts no arguments; returns fetchAdminChangelog data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchAdminChangelog(): Promise<ChangelogEntry[]> {
   const token = getAuthToken();
   if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.notAuthenticated);
@@ -2044,6 +2376,11 @@ export async function fetchAdminChangelog(): Promise<ChangelogEntry[]> {
   return raw.map(mapChangelogEntry);
 }
 
+/**
+ * Update admin changelog through the account or community API.
+ *
+ * Accepts id, input; returns updateAdminChangelog data through a backend request, carrying authentication headers and applying the operation server-side.
+ */
 export async function updateAdminChangelog(id: number, input: AdminChangelogInput): Promise<ChangelogEntry> {
   const token = getAuthToken();
   if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.notAuthenticated);
@@ -2102,6 +2439,11 @@ function mapSiteVersionComponent(raw: any): SiteVersionComponent {
   };
 }
 
+/**
+ * Fetch site version data for client consumers.
+ *
+ * Accepts no arguments; returns fetchSiteVersion data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchSiteVersion(): Promise<SiteVersion | null> {
   try {
     const raw = await fetchJson<any>(`/meta/version`, { retries: 0, cache: "no-store" });
@@ -2129,6 +2471,11 @@ export type ChampionOverviewRaw = {
 let championsOverviewCache: { key: string; value: Champion[]; expiresAt: number } | null = null;
 let championsOverviewInFlight: { key: string; promise: Promise<Champion[]> } | null = null;
 
+/**
+ * MapChampionsOverview for the API-client data path.
+ *
+ * Accepts raw; returns mapChampionsOverview data from local computation without network, authentication, cache, or persistence effects.
+ */
 export function mapChampionsOverview(raw: ChampionOverviewRaw): Champion[] {
   const catalog = raw.champions ?? [];
   const stats = mapStatsChampionRows(raw.stats ?? []);
@@ -2171,6 +2518,11 @@ export type PublicStatsScope =
   | 'experiment'
   | 'newcomer';
 
+/**
+ * Fetch champions data for client consumers.
+ *
+ * Accepts query filters; returns fetchChampions data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchChampions(params?: {
   limit?: string;
   offset?: string;
@@ -2197,6 +2549,11 @@ export async function fetchChampions(params?: {
   }
 }
 
+/**
+ * Fetch top winrate data for client consumers.
+ *
+ * Accepts no arguments; returns fetchTopWinrate data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchTopWinrate(): Promise<TopWinrateEntry[]> {
   const res = await fetch(`${API_BASE}${withStoredLobbyTier('/champions/top-winrate')}`);
   if (!res.ok) return [];
@@ -2204,6 +2561,11 @@ export async function fetchTopWinrate(): Promise<TopWinrateEntry[]> {
   return (await res.json()) as TopWinrateEntry[];
 }
 
+/**
+ * Fetch champion detail data for client consumers.
+ *
+ * Accepts id; returns fetchChampionDetail data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchChampionDetail(id: number): Promise<ChampionDetail> {
   const raw = await fetchJson<{
     id: number;
@@ -2245,6 +2607,11 @@ export async function fetchChampionDetail(id: number): Promise<ChampionDetail> {
   };
 }
 
+/**
+ * Fetch champion tier stats data for client consumers.
+ *
+ * Accepts id; returns fetchChampionTierStats data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchChampionTierStats(id: number): Promise<TierStats[]> {
   const raw = await fetchJson<Array<{
     tier: string;
@@ -2261,6 +2628,11 @@ export async function fetchChampionTierStats(id: number): Promise<TierStats[]> {
   }));
 }
 
+/**
+ * Fetch champion patch trends data for client consumers.
+ *
+ * Accepts id; returns fetchChampionPatchTrends data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchChampionPatchTrends(id: number): Promise<PatchTrend[]> {
   const raw = await fetchJson<Array<{
     trend_week: string;
@@ -2275,6 +2647,11 @@ export async function fetchChampionPatchTrends(id: number): Promise<PatchTrend[]
   }));
 }
 
+/**
+ * Fetch champion counters data for client consumers.
+ *
+ * Accepts id; returns fetchChampionCounters data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchChampionCounters(id: number): Promise<CounterStats> {
   const raw = await fetchJson<{
     strong_against: Array<{ opponent_champion_name: string; opponent_champion_id: number; wins: number; total_matches: number; win_rate: number }>;
@@ -2301,14 +2678,18 @@ export async function fetchChampionCounters(id: number): Promise<CounterStats> {
 
 // ── Players ──
 
-export async function fetchPlayerProfile(id: string, queueId?: number, championId?: number): Promise<PlayerProfile & { level?: number | null; kbmRank?: number | null; queueElo?: number | null; championElo?: number | null; globalWins?: number | null; globalLosses?: number | null; globalWinRate?: number | null; cheater?: boolean; susCount?: number }> {
+/**
+ * Fetch a player profile with optional queue and champion rating context.
+ * Accepts string and numeric identifiers and returns normalized profile data.
+ */
+export async function fetchPlayerProfile(id: string, queueId?: number, championId?: number): Promise<PlayerProfile & { level?: number | null; kbmRank?: number | null; queueElo?: number | null; championElo?: number | null; globalWins?: number | null; globalLosses?: number | null; globalWinRate?: number | null; cheater?: boolean; exploiter?: boolean; susCount?: number }> {
   type RawChampion = { champion_name: string; champion_id: number; wins: number; total_plays?: number; matches_played?: number; losses?: number; win_rate?: number | null; mu?: number | string | null };
   type RawPlayer = {
     id: string | number; name: string; level?: number | string | null; platform?: string | null; region?: string | null;
     kbm_tier?: string | number | null; kbm_points?: number | string | null; kbm_rank?: number | string | null;
     total_matches?: number | string | null; total_wins?: number | string | null;
     wins?: number | string | null; losses?: number | string | null;
-    cheater?: boolean | null; sus_count?: number | string | null;
+    cheater?: boolean | null; exploiter?: boolean | null; sus_count?: number | string | null;
     win_rate?: number | string | null; total_plays?: number | string | null;
     top_champions?: RawChampion[] | null;
   };
@@ -2353,6 +2734,7 @@ export async function fetchPlayerProfile(id: string, queueId?: number, championI
       ? (globalWins / (globalWins + globalLosses)) * 100
       : null,
     cheater: Boolean(player.cheater),
+    exploiter: Boolean(player.exploiter),
     susCount: numberOrNull(player.sus_count) ?? 0,
     totalMatches,
     totalWins,
@@ -2386,9 +2768,18 @@ export interface PlayerChampionStat {
   minutesPlayed: number;
   matchesPlayed: number;
   winRate: number | null;
+  rating: number | null;
+  ratingDeviation: number | null;
+  volatility: number | null;
+  ratingMatches: number;
   lastUpdated: string | null;
 }
 
+/**
+ * Fetch player champion stats data for client consumers.
+ *
+ * Accepts playerId; returns fetchPlayerChampionStats data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchPlayerChampionStats(playerId: string | number): Promise<PlayerChampionStat[]> {
   type RawStat = {
     champion_id: number | string;
@@ -2404,6 +2795,10 @@ export async function fetchPlayerChampionStats(playerId: string | number): Promi
     minutes_played?: number | string | null;
     matches_played?: number | string | null;
     win_rate?: number | string | null;
+    rating?: number | string | null;
+    rating_deviation?: number | string | null;
+    volatility?: number | string | null;
+    rating_matches?: number | string | null;
     last_updated?: string | null;
   };
   const raw = await fetchJson<RawStat[]>(`/players/${playerId}/champions`);
@@ -2431,6 +2826,10 @@ export async function fetchPlayerChampionStats(playerId: string | number): Promi
     minutesPlayed: numberOrZero(stat.minutes_played),
     matchesPlayed: numberOrZero(stat.matches_played),
     winRate: numberOrNull(stat.win_rate),
+    rating: numberOrNull(stat.rating),
+    ratingDeviation: numberOrNull(stat.rating_deviation),
+    volatility: numberOrNull(stat.volatility),
+    ratingMatches: numberOrZero(stat.rating_matches),
     lastUpdated: stat.last_updated ?? null,
   }));
 }
@@ -2442,6 +2841,11 @@ export interface PlayerChampionStatsRefreshResponse {
   };
 }
 
+/**
+ * Refresh player champion stats from the backend.
+ *
+ * Accepts playerId; returns refreshPlayerChampionStats data through a backend request, carrying authentication headers and applying the operation server-side.
+ */
 export async function refreshPlayerChampionStats(playerId: string | number): Promise<PlayerChampionStatsRefreshResponse> {
   return fetchJson<PlayerChampionStatsRefreshResponse>(`/players/${playerId}/champions/refresh`, { method: "POST" });
 }
@@ -2469,6 +2873,11 @@ export interface ItemDetailStats {
   breakdown: ItemDimensionStat[];
 }
 
+/**
+ * Fetch player search data for client consumers.
+ *
+ * Accepts query; returns fetchPlayerSearch data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchPlayerSearch(query: string): Promise<PlayerSearchResult[]> {
   const raw = await fetchJson<Array<{
     id: string;
@@ -2515,6 +2924,11 @@ export interface UniversalSearchResponse {
   };
 }
 
+/**
+ * Fetch universal search data for client consumers.
+ *
+ * Accepts queryText, limit; returns fetchUniversalSearch data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchUniversalSearch(
   queryText: string,
   limit = 30,
@@ -2530,6 +2944,11 @@ export async function fetchUniversalSearch(
   return fetchJson<UniversalSearchResponse>(`/search/universal?${query.toString()}`, { unwrapData: false });
 }
 
+/**
+ * Fetch player matches data for client consumers.
+ *
+ * Accepts id; returns fetchPlayerMatches data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchPlayerMatches(id: string, params?: { limit?: string; offset?: string }): Promise<MatchRecord[]> {
   const query = new URLSearchParams();
   if (params) {
@@ -2639,6 +3058,11 @@ function mapPlayerLoadout(raw: any): PlayerLoadout {
   };
 }
 
+/**
+ * Fetch player loadouts data for client consumers.
+ *
+ * Accepts playerId; returns fetchPlayerLoadouts data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchPlayerLoadouts(playerId: string | number): Promise<PlayerLoadoutsResponse> {
   const raw = await fetchJson<any>(`/players/${playerId}/loadouts`);
   return {
@@ -2649,6 +3073,11 @@ export async function fetchPlayerLoadouts(playerId: string | number): Promise<Pl
   };
 }
 
+/**
+ * Refresh player loadouts from the backend.
+ *
+ * Accepts playerId; returns refreshPlayerLoadouts data through a backend request, carrying authentication headers and applying the operation server-side.
+ */
 export async function refreshPlayerLoadouts(playerId: string | number): Promise<PlayerLoadoutsResponse> {
   const raw = await fetchJson<any>(`/players/${playerId}/loadouts/refresh`, { method: "POST" });
   return {
@@ -2659,6 +3088,11 @@ export async function refreshPlayerLoadouts(playerId: string | number): Promise<
   };
 }
 
+/**
+ * Fetch player loadout deck data for client consumers.
+ *
+ * Accepts playerId, loadoutId; returns fetchPlayerLoadoutDeck data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchPlayerLoadoutDeck(playerId: string | number, loadoutId: string | number): Promise<{ loadout: PlayerLoadout; freshness: PlayerLoadoutFreshness }> {
   const raw = await fetchJson<any>(`/players/${playerId}/loadouts/decks/${loadoutId}`);
   return { loadout: mapPlayerLoadout(raw.loadout), freshness: mapPlayerLoadoutFreshness(raw.freshness) };
@@ -2666,6 +3100,11 @@ export async function fetchPlayerLoadoutDeck(playerId: string | number, loadoutI
 
 // ── Stats ──
 
+/**
+ * Fetch leaderboard data for client consumers.
+ *
+ * Accepts query filters; returns fetchLeaderboard data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchLeaderboard(params?: { tier?: string; region?: string }): Promise<LeaderboardEntry[]> {
   const query = new URLSearchParams();
   if (params) {
@@ -2692,6 +3131,11 @@ export async function fetchLeaderboard(params?: { tier?: string; region?: string
   }));
 }
 
+/**
+ * Fetch patch trends data for client consumers.
+ *
+ * Accepts query filters; returns fetchPatchTrends data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchPatchTrends(params?: { champion_id?: string }): Promise<PatchTrendEntry[]> {
   const query = new URLSearchParams();
   if (params) {
@@ -2762,6 +3206,11 @@ function mapStatsChampionRows(raw: Array<{
   }));
 }
 
+/**
+ * Fetch stats champions data for client consumers.
+ *
+ * Accepts query filters; returns fetchStatsChampions data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchStatsChampions(params?: { sort?: string; limit?: number; scope?: PublicStatsScope; queueId?: number }): Promise<StatsChampion[]> {
   const query = new URLSearchParams();
   if (params?.sort) query.set('sort', params.sort);
@@ -2783,6 +3232,11 @@ export async function fetchStatsChampions(params?: { sort?: string; limit?: numb
   }
 }
 
+/**
+ * Fetch regions data for client consumers.
+ *
+ * Accepts no arguments; returns fetchRegions data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchRegions(): Promise<RegionStat[]> {
   const raw = await fetchJson<Array<{
     region_code: string;
@@ -2807,6 +3261,11 @@ export async function fetchRegions(): Promise<RegionStat[]> {
   }));
 }
 
+/**
+ * Fetch platforms data for client consumers.
+ *
+ * Accepts query filters; returns fetchPlatforms data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchPlatforms(options?: { timeoutMs?: number }): Promise<Array<{
   platform: string;
   championId: number;
@@ -2837,6 +3296,11 @@ export async function fetchPlatforms(options?: { timeoutMs?: number }): Promise<
   }));
 }
 
+/**
+ * Fetch loadouts data for client consumers.
+ *
+ * Accepts query filters; returns fetchLoadouts data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchLoadouts(params?: {
   championId?: string;
   minPlays?: string;
@@ -2899,6 +3363,11 @@ export async function fetchLoadouts(params?: {
   }));
 }
 
+/**
+ * Fetch items data for client consumers.
+ *
+ * Accepts query filters; returns fetchItems data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchItems(params?: { mode?: 'ranked' | 'casual'; limit?: number; championId?: number; role?: 'Frontline' | 'Damage' | 'Flank' | 'Support'; summary?: boolean; tierMin?: number; tierMax?: number; scope?: string; queueId?: number }): Promise<ItemStat[]> {
   const query = new URLSearchParams();
   if (params?.mode) query.set('mode', params.mode);
@@ -2943,6 +3412,11 @@ export async function fetchItems(params?: { mode?: 'ranked' | 'casual'; limit?: 
   }
 }
 
+/**
+ * Fetch item detail data for client consumers.
+ *
+ * Accepts itemId, mode; returns fetchItemDetail data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchItemDetail(itemId: number, mode: 'ranked' = 'ranked', params?: { championId?: number; role?: 'Frontline' | 'Damage' | 'Flank' | 'Support'; tierMin?: number; tierMax?: number }): Promise<ItemDetailStats | null> {
   try {
     const query = new URLSearchParams({ mode });
@@ -2977,6 +3451,11 @@ export async function fetchItemDetail(itemId: number, mode: 'ranked' = 'ranked',
   }
 }
 
+/**
+ * Fetch map stats data for client consumers.
+ *
+ * Accepts PublicStatsScope; returns fetchMapStats data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchMapStats(params?: { queueId?: number; limit?: number; scope?: PublicStatsScope }): Promise<MapStat[]> {
   const query = new URLSearchParams();
   if (params?.queueId != null) query.set('queueId', String(params.queueId));
@@ -3000,6 +3479,11 @@ export async function fetchMapStats(params?: { queueId?: number; limit?: number;
   }
 }
 
+/**
+ * Fetch champion map stats data for client consumers.
+ *
+ * Accepts championId; returns fetchChampionMapStats data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchChampionMapStats(championId: number, params?: { scope?: PublicStatsScope; queueId?: number }): Promise<ChampionMapStat[]> {
   try {
     const query = new URLSearchParams();
@@ -3026,6 +3510,11 @@ export async function fetchChampionMapStats(championId: number, params?: { scope
   }
 }
 
+/**
+ * Fetch map detail data for client consumers.
+ *
+ * Accepts mapName, PublicStatsScope; returns fetchMapDetail data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchMapDetail(mapName: string, params?: { scope?: PublicStatsScope }): Promise<MapDetailStats | null> {
   try {
     const query = new URLSearchParams();
@@ -3045,6 +3534,11 @@ export async function fetchMapDetail(mapName: string, params?: { scope?: PublicS
   }
 }
 
+/**
+ * Fetch map category comparison data for client consumers.
+ *
+ * Accepts mapName, section, MapComparisonSection; returns fetchMapCategoryComparison data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchMapCategoryComparison(
   mapName: string,
   section: MapComparisonSection,
@@ -3074,6 +3568,11 @@ export interface SkinStat {
   winRate: number;
 }
 
+/**
+ * Fetch skin stats data for client consumers.
+ *
+ * Accepts query filters; returns fetchSkinStats data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchSkinStats(params?: { championId?: number; tierMin?: number; tierMax?: number; limit?: number }): Promise<SkinStat[]> {
   const query = new URLSearchParams();
   if (params?.championId != null) query.set('championId', String(params.championId));
@@ -3109,6 +3608,11 @@ export interface BrokenSkinStat {
   usageShare: number;
 }
 
+/**
+ * Fetch broken skin stats data for client consumers.
+ *
+ * Accepts query filters; returns fetchBrokenSkinStats data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchBrokenSkinStats(params?: { championId?: number; tierMin?: number; tierMax?: number }): Promise<BrokenSkinStat[]> {
   const query = new URLSearchParams();
   if (params?.championId != null) query.set('championId', String(params.championId));
@@ -3144,6 +3648,11 @@ export interface MatchCompositionStat {
   winRate: number;
 }
 
+/**
+ * Fetch match compositions data for client consumers.
+ *
+ * Accepts query filters; returns fetchMatchCompositions data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchMatchCompositions(params?: { tierMin?: number; tierMax?: number; limit?: number; sortBy?: 'count' | 'winrate' | 'wins' | 'frontline' | 'damage' | 'flank' | 'support'; order?: 'asc' | 'desc' }): Promise<MatchCompositionStat[]> {
   const query = new URLSearchParams();
   if (params?.tierMin != null) query.set('tierMin', String(params.tierMin));
@@ -3180,6 +3689,11 @@ export interface ChampionLeaderboardEntry {
   losses: number;
 }
 
+/**
+ * Fetch champion leaderboard data for client consumers.
+ *
+ * Accepts championId, limit; returns fetchChampionLeaderboard data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchChampionLeaderboard(championId: number, limit = 25): Promise<ChampionLeaderboardEntry[]> {
   const query = new URLSearchParams({ championId: String(championId), limit: String(limit) });
   const raw = await fetchJson<Array<{
@@ -3214,6 +3728,11 @@ export interface ChampionTalentStatsResponse {
   talents: ChampionTalentStat[];
 }
 
+/**
+ * NormalizeChampionTalentStatsResponse for the API-client data path.
+ *
+ * Accepts raw; returns normalizeChampionTalentStatsResponse data from local computation without network, authentication, cache, or persistence effects.
+ */
 export function normalizeChampionTalentStatsResponse(raw: any): ChampionTalentStatsResponse {
   return {
     totalMatches: numberOrNull(raw?.totalMatches) ?? 0,
@@ -3234,6 +3753,11 @@ export function normalizeChampionTalentStatsResponse(raw: any): ChampionTalentSt
   };
 }
 
+/**
+ * Fetch champion talent stats data for client consumers.
+ *
+ * Accepts championId, mode; returns fetchChampionTalentStats data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchChampionTalentStats(
   championId: number,
   mode: 'ranked' = 'ranked',
@@ -3297,6 +3821,11 @@ function statNameKeyForCards(value: string | null | undefined): string {
     .replace(/[^a-z0-9]/g, '');
 }
 
+/**
+ * NormalizeChampionCardStatsResponse for the API-client data path.
+ *
+ * Accepts raw; returns normalizeChampionCardStatsResponse data from local computation without network, authentication, cache, or persistence effects.
+ */
 export function normalizeChampionCardStatsResponse(raw: any): ChampionCardStatsResponse {
   const mappedCards = (Array.isArray(raw?.cards) ? raw.cards : []).map((card: any) => ({
     cardId: numberOrNull(card?.cardId) ?? 0,
@@ -3351,6 +3880,11 @@ export interface ChampionCardDetailResponse {
 }
 
 
+/**
+ * Fetch champion card detail data for client consumers.
+ *
+ * Accepts championId, cardId, mode; returns fetchChampionCardDetail data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchChampionCardDetail(
   championId: number,
   cardId: number,
@@ -3389,6 +3923,11 @@ export async function fetchChampionCardDetail(
     return null;
   }
 }
+/**
+ * Fetch champion card stats data for client consumers.
+ *
+ * Accepts championId, mode; returns fetchChampionCardStats data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchChampionCardStats(
   championId: number,
   mode: 'ranked' = 'ranked',
@@ -3423,6 +3962,11 @@ export async function fetchChampionCardStats(
   }
 }
 
+/**
+ * Fetch hourly match counts data for client consumers.
+ *
+ * Accepts query filters; returns fetchHourlyMatchCounts data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchHourlyMatchCounts(params?: { date?: string; hour?: number; queueId?: number }): Promise<HourlyMatchCount[]> {
   const query = new URLSearchParams();
   if (params?.date) query.set('date', params.date);
@@ -3465,6 +4009,11 @@ export async function fetchHourlyMatchCounts(params?: { date?: string; hour?: nu
   }
 }
 
+/**
+ * Fetch tiers data for client consumers.
+ *
+ * Accepts query filters; returns fetchTiers data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchTiers(params?: { source?: 'profiles' | 'matches' }): Promise<TierStat[]> {
   const query = new URLSearchParams();
   if (params?.source) query.set('source', params.source);
@@ -3545,6 +4094,11 @@ export interface StatsPageData {
   brokenSkins: BrokenSkinStat[];
 }
 
+/**
+ * Fetch stats page data data for client consumers.
+ *
+ * Accepts query filters; returns fetchStatsPageData data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchStatsPageData(params?: { tierMin?: number; tierMax?: number }): Promise<StatsPageData> {
   const query = new URLSearchParams();
   if (params?.tierMin != null) query.set('tierMin', String(params.tierMin));
@@ -3567,6 +4121,11 @@ export async function fetchStatsPageData(params?: { tierMin?: number; tierMax?: 
   };
 }
 
+/**
+ * Fetch stats overview data for client consumers.
+ *
+ * Accepts no arguments; returns fetchStatsOverview data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchStatsOverview(): Promise<StatsOverview> {
   const cacheKey = getStoredLobbyTierFilter();
   if (statsOverviewCache?.key === cacheKey && statsOverviewCache.expiresAt > Date.now()) return statsOverviewCache.value;
@@ -3609,6 +4168,11 @@ export async function fetchStatsOverview(): Promise<StatsOverview> {
   }
 }
 
+/**
+ * Fetch tier summary data for client consumers.
+ *
+ * Accepts no arguments; returns fetchTierSummary data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchTierSummary(): Promise<TierSummary> {
   const raw = await fetchJson<{
     profile_players: number | string | null;
@@ -3633,6 +4197,11 @@ export async function fetchTierSummary(): Promise<TierSummary> {
   };
 }
 
+/**
+ * Fetch talents data for client consumers.
+ *
+ * Accepts no arguments; returns fetchTalents data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchTalents(): Promise<Array<{
   talentId: number;
   talentName: string;
@@ -3691,6 +4260,11 @@ export interface AuthSession {
 const TOKEN_KEY = "pc_auth_token";
 const USER_KEY = "pc_auth_user";
 
+/**
+ * Read or change the local auth token state.
+ *
+ * Accepts no arguments; returns getAuthToken data after a backend request, using shared authentication and cache behavior.
+ */
 export function getAuthToken(): string | null {
   if (typeof window === "undefined") return null;
   return localStorage.getItem(TOKEN_KEY);
@@ -3699,11 +4273,21 @@ export function getAuthToken(): string | null {
 // OIDC keeps the opaque backend session in an HttpOnly cookie, so browser code
 // cannot read its value. Its paired readable CSRF cookie is the signal that a
 // same-origin API request can use that session instead of a legacy bearer token.
+/**
+ * Read or change the local has cookie auth session state.
+ *
+ * Accepts no arguments; returns hasCookieAuthSession data through a backend request, carrying authentication headers and applying the operation server-side.
+ */
 export function hasCookieAuthSession(): boolean {
   return typeof document !== "undefined"
     && document.cookie.split(";").some((part) => part.trim().startsWith("__Host-pc_csrf="));
 }
 
+/**
+ * Read or change the local auth user state.
+ *
+ * Accepts no arguments; returns getAuthUser data after a backend request, using shared authentication and cache behavior.
+ */
 export function getAuthUser(): AuthUser | null {
   if (typeof window === "undefined") return null;
   const raw = localStorage.getItem(USER_KEY);
@@ -3719,6 +4303,11 @@ export function getAuthUser(): AuthUser | null {
   }
 }
 
+/**
+ * CacheAuthUser for the client authentication state.
+ *
+ * Accepts user; returns cacheAuthUser data while reading or changing local auth state without a backend request.
+ */
 export function cacheAuthUser(user: AuthUser): void {
   if (typeof window !== "undefined") localStorage.setItem(USER_KEY, JSON.stringify(user));
 }
@@ -3730,6 +4319,11 @@ function setAuthSession(session: AuthSession) {
   }
 }
 
+/**
+ * Read or change the local auth state.
+ *
+ * Accepts no arguments; returns clearAuth data while reading or changing local auth state without a backend request.
+ */
 export function clearAuth() {
   if (typeof window !== "undefined") {
     localStorage.removeItem(TOKEN_KEY);
@@ -3739,6 +4333,11 @@ export function clearAuth() {
 
 // Retained only during the explicit legacy-compatible transition build. The
 // Keycloak-only build renders no controls that can call these endpoints.
+/**
+ * Register a new account with the identity service.
+ *
+ * Accepts username, email, password; returns register data through a backend request, carrying authentication headers and applying the operation server-side.
+ */
 export async function register(username: string, email: string, password: string): Promise<AuthSession> {
   const raw = await fetchJson<{ user: { id: number; username: string; email?: string | null; avatar_url?: string | null; bio?: string | null; is_admin?: boolean; is_approved?: boolean; created_at?: string; last_login?: string | null; time_zone?: string | null }; token: string; expires_at?: string }>("/auth/register", {
     method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username, email, password }),
@@ -3754,6 +4353,11 @@ export async function register(username: string, email: string, password: string
   return session;
 }
 
+/**
+ * Authenticate account credentials and establish a client session.
+ *
+ * Accepts username, password; returns login data through a backend request, carrying authentication headers and applying the operation server-side.
+ */
 export async function login(username: string, password: string): Promise<AuthSession> {
   const raw = await fetchJson<{ user: { id: number; username: string; email?: string | null; avatar_url?: string | null; bio?: string | null; is_admin?: boolean; is_approved?: boolean; created_at?: string; last_login?: string | null; time_zone?: string | null; linked_player_id?: number | null; linked_player_name?: string | null }; token: string; expires_at?: string }>("/auth/login", {
     method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username, password }),
@@ -3778,6 +4382,11 @@ function submitOidcLogout(): void {
   form.submit();
 }
 
+/**
+ * End the current account session with the identity service.
+ *
+ * Accepts no arguments; returns logout data through a backend request, carrying authentication headers and applying the operation server-side.
+ */
 export async function logout(): Promise<void> {
   const hasOidcCookieSession = typeof document !== "undefined"
     && document.cookie.split(";").some((part) => part.trim().startsWith("__Host-pc_csrf="));
@@ -3808,6 +4417,11 @@ export async function logout(): Promise<void> {
   }
 }
 
+/**
+ * Fetch me data for client consumers.
+ *
+ * Accepts the requested identifier; returns getMe data after a backend request, using shared authentication and cache behavior.
+ */
 export async function getMe(_userId?: number): Promise<AuthUser> {
   const token = getAuthToken();
   const raw = await fetchJson<{
@@ -3846,6 +4460,11 @@ export async function getMe(_userId?: number): Promise<AuthUser> {
   };
 }
 
+/**
+ * Fetch user profile data for client consumers.
+ *
+ * Accepts userId; returns getUserProfile data after a backend request, using shared authentication and cache behavior.
+ */
 export async function getUserProfile(userId: number): Promise<AuthUser> {
   const raw = await fetchJson<{
     id: number;
@@ -3877,6 +4496,11 @@ export async function getUserProfile(userId: number): Promise<AuthUser> {
 
 // ── Account Management ──
 
+/**
+ * Read or change the local account auth headers state.
+ *
+ * Accepts token; returns accountAuthHeaders data while reading or changing local auth state without a backend request.
+ */
 export function accountAuthHeaders(token: string | null = getAuthToken()): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
@@ -3907,6 +4531,11 @@ export interface AccountNotification {
   createdAt: string;
 }
 
+/**
+ * Fetch account notifications data for client consumers.
+ *
+ * Accepts limit; returns getAccountNotifications data after a backend request, using shared authentication and cache behavior.
+ */
 export async function getAccountNotifications(limit = 25): Promise<AccountNotification[]> {
   const rows = await fetchJson<Array<{
     id: number; type: "community_comment"; post_id: number | null; comment_id: number | null;
@@ -3926,6 +4555,11 @@ export async function getAccountNotifications(limit = 25): Promise<AccountNotifi
   }));
 }
 
+/**
+ * Mark account notification read in the notification API.
+ *
+ * Accepts notificationId; returns markAccountNotificationRead data through a backend request, carrying authentication headers and applying the operation server-side.
+ */
 export async function markAccountNotificationRead(notificationId: number): Promise<void> {
   await fetchJson(`/auth/account/notifications/${notificationId}/read`, {
     method: "POST",
@@ -3933,6 +4567,11 @@ export async function markAccountNotificationRead(notificationId: number): Promi
   });
 }
 
+/**
+ * Fetch account details data for client consumers.
+ *
+ * Accepts no arguments; returns getAccountDetails data after a backend request, using shared authentication and cache behavior.
+ */
 export async function getAccountDetails(): Promise<AccountDetails> {
   const raw = await fetchJson<{
     user: { id: number; username: string; email: string; avatar_url: string | null; bio: string | null; is_admin?: boolean; is_approved?: boolean; linked_player_id: number | null; created_at: string; last_login: string | null; time_zone?: string | null };
@@ -3960,6 +4599,11 @@ export async function getAccountDetails(): Promise<AccountDetails> {
   };
 }
 
+/**
+ * Link player id to the authenticated account.
+ *
+ * Accepts playerId; returns linkPlayerId data through a backend request, carrying authentication headers and applying the operation server-side.
+ */
 export async function linkPlayerId(playerId: number): Promise<{ message: string; player: { id: number; name: string } }> {
   return fetchJson<{ message: string; player: { id: number; name: string } }>("/auth/account/player-link", {
     method: "POST",
@@ -3974,6 +4618,11 @@ export interface PlayerLinkVerification {
   expiresAt: string;
 }
 
+/**
+ * Fetch player link verification data for client consumers.
+ *
+ * Accepts no arguments; returns getPlayerLinkVerification data after a backend request, using shared authentication and cache behavior.
+ */
 export async function getPlayerLinkVerification(): Promise<PlayerLinkVerification | null> {
   const raw = await fetchJson<{ verification: PlayerLinkVerification | null }>("/auth/account/player-link/verification", {
     headers: accountAuthHeaders(),
@@ -3981,6 +4630,11 @@ export async function getPlayerLinkVerification(): Promise<PlayerLinkVerificatio
   return raw.verification;
 }
 
+/**
+ * Start player link verification verification for the authenticated account.
+ *
+ * Accepts playerId; returns startPlayerLinkVerification data through a backend request, carrying authentication headers and applying the operation server-side.
+ */
 export async function startPlayerLinkVerification(playerId: number): Promise<PlayerLinkVerification> {
   const raw = await fetchJson<{ verification: PlayerLinkVerification }>("/auth/account/player-link/verification", {
     method: "POST",
@@ -3990,6 +4644,11 @@ export async function startPlayerLinkVerification(playerId: number): Promise<Pla
   return raw.verification;
 }
 
+/**
+ * Verify player link for the authenticated account.
+ *
+ * Accepts no arguments; returns verifyPlayerLink data through a backend request, carrying authentication headers and applying the operation server-side.
+ */
 export async function verifyPlayerLink(): Promise<{ message: string; player: { id: number; name: string } }> {
   return fetchJson<{ message: string; player: { id: number; name: string } }>("/auth/account/player-link/verification/check", {
     method: "POST",
@@ -3998,6 +4657,11 @@ export async function verifyPlayerLink(): Promise<{ message: string; player: { i
   });
 }
 
+/**
+ * Cancel player link verification verification for the authenticated account.
+ *
+ * Accepts no arguments; returns cancelPlayerLinkVerification data through a backend request, carrying authentication headers and applying the operation server-side.
+ */
 export async function cancelPlayerLinkVerification(): Promise<void> {
   await fetchJson<{ message: string }>("/auth/account/player-link/verification", {
     method: "DELETE",
@@ -4005,6 +4669,11 @@ export async function cancelPlayerLinkVerification(): Promise<void> {
   });
 }
 
+/**
+ * Unlink player from the authenticated account.
+ *
+ * Accepts no arguments; returns unlinkPlayer data through a backend request, carrying authentication headers and applying the operation server-side.
+ */
 export async function unlinkPlayer(): Promise<{ message: string }> {
   return fetchJson<{ message: string }>("/auth/account/player-link", {
     method: "POST",
@@ -4013,6 +4682,11 @@ export async function unlinkPlayer(): Promise<{ message: string }> {
   });
 }
 
+/**
+ * Update profile through the account or community API.
+ *
+ * Accepts data; returns updateProfile data through a backend request, carrying authentication headers and applying the operation server-side.
+ */
 export async function updateProfile(data: { avatar_url?: string | null; bio?: string | null; time_zone?: string }): Promise<{ message: string }> {
   return fetchJson<{ message: string }>("/auth/profile", {
     method: "PUT",
@@ -4023,13 +4697,18 @@ export async function updateProfile(data: { avatar_url?: string | null; bio?: st
 
 // ── Player Report ──
 
-export type ReportType = 'suspicious' | 'cheater' | 'approve' | 'weirdo' | 'hall_of_fame' | 'dropper' | 'afk_wintrade';
+export type ReportType = 'suspicious' | 'cheater' | 'exploiter' | 'approve' | 'weirdo' | 'hall_of_fame' | 'dropper' | 'afk_wintrade';
 
 export interface ReportOptions {
   type: ReportType;
   reason?: string;
 }
 
+/**
+ * Report player to the moderation API.
+ *
+ * Accepts playerId, opts; returns reportPlayer data through a backend request, carrying authentication headers and applying the operation server-side.
+ */
 export async function reportPlayer(playerId: string | number, opts: ReportOptions): Promise<{ success: boolean; message: string }> {
   const token = getAuthToken();
   if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.authenticationRequired);
@@ -4043,6 +4722,11 @@ export async function reportPlayer(playerId: string | number, opts: ReportOption
   return raw;
 }
 
+/**
+ * Report private account to the moderation API.
+ *
+ * Accepts privateId, opts; returns reportPrivateAccount data through a backend request, carrying authentication headers and applying the operation server-side.
+ */
 export async function reportPrivateAccount(privateId: string | number, opts: ReportOptions): Promise<{ success: boolean; message: string }> {
   if (opts.type !== 'suspicious' && opts.type !== 'cheater') {
     throw new Error(API_ERROR_KEYS.genericFailure);
@@ -4058,8 +4742,13 @@ export async function reportPrivateAccount(privateId: string | number, opts: Rep
   });
 }
 
-export type ClearablePlayerTag = 'cheater' | 'suspicious' | 'dropper' | 'afk_wintrade' | 'alt_account';
+export type ClearablePlayerTag = 'cheater' | 'exploiter' | 'suspicious' | 'dropper' | 'afk_wintrade' | 'alt_account';
 
+/**
+ * Clear player tag from the account state.
+ *
+ * Accepts playerId, tag; returns clearPlayerTag data while reading or changing local auth state without a backend request.
+ */
 export async function clearPlayerTag(playerId: string | number, tag: ClearablePlayerTag): Promise<{ success: boolean; message: string; cleared: boolean }> {
   const token = getAuthToken();
   if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.authenticationRequired);
@@ -4174,6 +4863,11 @@ function mapComment(raw: RawComment): Comment {
 
 // ── Community ──
 
+/**
+ * Fetch posts data for client consumers.
+ *
+ * Accepts query filters; returns fetchPosts data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchPosts(params?: { userId?: string; buildId?: string; limit?: string; offset?: string }): Promise<Post[]> {
   const query = new URLSearchParams();
   if (params) {
@@ -4187,6 +4881,11 @@ export async function fetchPosts(params?: { userId?: string; buildId?: string; l
   return raw.map(mapPost);
 }
 
+/**
+ * Fetch twitch streams data for client consumers.
+ *
+ * Accepts no arguments; returns fetchTwitchStreams data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchTwitchStreams(): Promise<TwitchStreamsResponse> {
   const raw = await fetchJson<{
     configured?: boolean;
@@ -4211,6 +4910,11 @@ export async function fetchTwitchStreams(): Promise<TwitchStreamsResponse> {
   };
 }
 
+/**
+ * Create post through the community API.
+ *
+ * Accepts userId, title, content, buildId, token; returns createPost data through a backend request, carrying authentication headers and applying the operation server-side.
+ */
 export async function createPost(userId: number, title: string, content: string, buildId: number | null, token: string | null): Promise<Post> {
   const raw = await fetchJson<RawPost>(`/community/posts`, {
     method: "POST",
@@ -4221,6 +4925,11 @@ export async function createPost(userId: number, title: string, content: string,
   return mapPost(raw);
 }
 
+/**
+ * Fetch post detail data for client consumers.
+ *
+ * Accepts postId; returns getPostDetail data after a backend request, using shared authentication and cache behavior.
+ */
 export async function getPostDetail(postId: number): Promise<PostDetail> {
   const raw = await fetchJson<{
     post: RawPost;
@@ -4233,6 +4942,11 @@ export async function getPostDetail(postId: number): Promise<PostDetail> {
   };
 }
 
+/**
+ * Update post through the account or community API.
+ *
+ * Accepts postId, title, content, token; returns updatePost data through a backend request, carrying authentication headers and applying the operation server-side.
+ */
 export async function updatePost(postId: number, title: string, content: string, token: string | null): Promise<Post> {
   const raw = await fetchJson<RawPost>(`/community/posts/${postId}`, {
     method: "PUT",
@@ -4243,6 +4957,11 @@ export async function updatePost(postId: number, title: string, content: string,
   return mapPost(raw);
 }
 
+/**
+ * Delete post through the account or community API.
+ *
+ * Accepts postId, token; returns deletePost data through a backend request, carrying authentication headers and applying the operation server-side.
+ */
 export async function deletePost(postId: number, token: string | null): Promise<void> {
   await fetchJson<{ deleted: boolean; id: number }>(`/community/posts/${postId}`, {
     method: "DELETE",
@@ -4250,6 +4969,11 @@ export async function deletePost(postId: number, token: string | null): Promise<
   });
 }
 
+/**
+ * Add a reply to a community post.
+ *
+ * Accepts postId, userId, content, parentId, token; returns addComment data through a backend request, carrying authentication headers and applying the operation server-side.
+ */
 export async function addComment(postId: number, userId: number, content: string, parentId: number | null, token: string | null): Promise<Comment> {
   const raw = await fetchJson<RawComment>(`/community/posts/${postId}/comments`, {
     method: "POST",
@@ -4260,6 +4984,11 @@ export async function addComment(postId: number, userId: number, content: string
   return mapComment(raw);
 }
 
+/**
+ * Update comment through the account or community API.
+ *
+ * Accepts commentId, content, token; returns updateComment data through a backend request, carrying authentication headers and applying the operation server-side.
+ */
 export async function updateComment(commentId: number, content: string, token: string | null): Promise<Comment> {
   const raw = await fetchJson<RawComment>(`/community/comments/${commentId}`, {
     method: "PUT",
@@ -4270,6 +4999,11 @@ export async function updateComment(commentId: number, content: string, token: s
   return mapComment(raw);
 }
 
+/**
+ * Delete comment through the account or community API.
+ *
+ * Accepts commentId, token; returns deleteComment data through a backend request, carrying authentication headers and applying the operation server-side.
+ */
 export async function deleteComment(commentId: number, token: string | null): Promise<void> {
   await fetchJson<{ deleted: boolean; id: number }>(`/community/comments/${commentId}`, {
     method: "DELETE",
@@ -4277,6 +5011,11 @@ export async function deleteComment(commentId: number, token: string | null): Pr
   });
 }
 
+/**
+ * Toggle post like for the selected content item.
+ *
+ * Accepts postId, userId, token; returns togglePostLike data through a backend request, carrying authentication headers and applying the operation server-side.
+ */
 export async function togglePostLike(postId: number, userId: number, token: string | null): Promise<number> {
   const raw = await fetchJson<{ likes: number }>(`/community/posts/${postId}/like`, {
     method: "POST",
@@ -4369,6 +5108,11 @@ function mapBuild(raw: RawBuild): Build {
 
 // ── Builds ──
 
+/**
+ * Fetch builds data for client consumers.
+ *
+ * Accepts query filters; returns fetchBuilds data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchBuilds(params?: { championId?: string; visibility?: string; limit?: string; offset?: string }): Promise<Build[]> {
   const query = new URLSearchParams();
   if (params) {
@@ -4382,6 +5126,11 @@ export async function fetchBuilds(params?: { championId?: string; visibility?: s
   return raw.map(mapBuild);
 }
 
+/**
+ * Create build through the community API.
+ *
+ * Accepts userId, championId, name, items, cards, talents, notes, visibility; returns createBuild data through a backend request, carrying authentication headers and applying the operation server-side.
+ */
 export async function createBuild(
   userId: number,
   championId: number,
@@ -4412,11 +5161,21 @@ export async function createBuild(
   return mapBuild(raw);
 }
 
+/**
+ * Fetch build detail data for client consumers.
+ *
+ * Accepts buildId; returns getBuildDetail data after a backend request, using shared authentication and cache behavior.
+ */
 export async function getBuildDetail(buildId: number): Promise<Build> {
   const raw = await fetchJson<RawBuild>(`/builds/${buildId}`);
   return mapBuild(raw);
 }
 
+/**
+ * Toggle build like for the selected content item.
+ *
+ * Accepts buildId, userId, token; returns toggleBuildLike data through a backend request, carrying authentication headers and applying the operation server-side.
+ */
 export async function toggleBuildLike(buildId: number, userId: number, token: string | null): Promise<number> {
   void userId;
   const raw = await fetchJson<{ likes: number }>(`/builds/${buildId}/like`, {
@@ -4468,6 +5227,11 @@ function playerChartPath(playerId: string, days: number, limit: number) {
   return `/players/${encodeURIComponent(playerId)}/charts?${query.toString()}`;
 }
 
+/**
+ * Fetch kda history data for client consumers.
+ *
+ * Accepts playerId, days, limit; returns fetchKdaHistory data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchKdaHistory(playerId: string, days: number = 30, limit: number = 50): Promise<KdaHistoryEntry[]> {
   const raw = await fetchJson<PlayerChartRow[]>(playerChartPath(playerId, days, limit));
 
@@ -4479,6 +5243,11 @@ export async function fetchKdaHistory(playerId: string, days: number = 30, limit
   }));
 }
 
+/**
+ * Fetch dpm history data for client consumers.
+ *
+ * Accepts playerId, days, limit; returns fetchDpmHistory data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchDpmHistory(playerId: string, days: number = 30, limit: number = 50): Promise<DpmHistoryEntry[]> {
   const raw = await fetchJson<PlayerChartRow[]>(playerChartPath(playerId, days, limit));
   const values = raw.map((r) => Number(r.damage_per_minute ?? 0)).filter((value) => Number.isFinite(value));
@@ -4491,6 +5260,11 @@ export async function fetchDpmHistory(playerId: string, days: number = 30, limit
   }));
 }
 
+/**
+ * Fetch glicko history data for client consumers.
+ *
+ * Accepts playerId, days, limit; returns fetchGlickoHistory data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchGlickoHistory(playerId: string, days: number = 30, limit: number = 50): Promise<GlickoHistoryEntry[]> {
   const raw = await fetchJson<PlayerChartRow[]>(playerChartPath(playerId, days, limit));
 
@@ -4594,6 +5368,7 @@ export interface MatchPlayerProfileSnapshot {
   queue_elo: number | null;
   champion_elo: number | null;
   cheater: boolean;
+  exploiter: boolean;
   sus_count: number;
   verified: boolean;
 }
@@ -4664,6 +5439,11 @@ export interface MatchDataStatus {
   retrievalMs?: number;
 }
 
+/**
+ * DeriveMissingMatchCreditRates for the API-client data path.
+ *
+ * Accepts detail; returns deriveMissingMatchCreditRates data from local computation without network, authentication, cache, or persistence effects.
+ */
 export function deriveMissingMatchCreditRates(detail: MatchDetailWithBans): MatchDetailWithBans {
   return {
     ...detail,
@@ -4782,6 +5562,11 @@ export interface MatchQueueActivity {
   hourly: Array<{ hour: number; date: string; total: number; regions: Record<string, number> }>;
 }
 
+/**
+ * Fetch match hourly stats data for client consumers.
+ *
+ * Accepts no arguments; returns fetchMatchHourlyStats data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchMatchHourlyStats(): Promise<MatchHourlyStats> {
   return fetchJson<MatchHourlyStats>('/matches/hourly-stats');
 }
@@ -4838,12 +5623,22 @@ export interface PresenceHourlyStats {
   }>;
 }
 
+/**
+ * Fetch presence stats data for client consumers.
+ *
+ * Accepts no arguments; returns fetchPresenceStats data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchPresenceStats(): Promise<PresenceStats> {
   // Version the activity view so a deployment cannot briefly receive the
   // previous cached response shape from the shared stats route cache.
   return fetchJson<PresenceStats>('/stats/presence?view=activity-v4', { timeoutMs: 35_000, retries: 0 });
 }
 
+/**
+ * Fetch presence hourly stats data for client consumers.
+ *
+ * Accepts query filters; returns fetchPresenceHourlyStats data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchPresenceHourlyStats(queueId?: number): Promise<PresenceHourlyStats> {
   const query = new URLSearchParams({ view: 'activity-v3' });
   if (queueId != null) query.set('queue_id', String(queueId));
@@ -4871,6 +5666,11 @@ export interface PresenceMatchIdsResponse {
   };
 }
 
+/**
+ * Fetch presence match ids data for client consumers.
+ *
+ * Accepts options; returns fetchPresenceMatchIds data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchPresenceMatchIds(options: {
   queueId?: number;
   page?: number;
@@ -4914,6 +5714,11 @@ export interface PresencePlayersResponse {
   };
 }
 
+/**
+ * Fetch presence players data for client consumers.
+ *
+ * Accepts options; returns fetchPresencePlayers data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchPresencePlayers(options: {
   queueId?: number;
   page?: number;
@@ -4967,6 +5772,11 @@ export interface PresenceDetailsResponse {
   next_cursor: string | null;
 }
 
+/**
+ * Fetch presence details data for client consumers.
+ *
+ * Accepts options; returns fetchPresenceDetails data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchPresenceDetails(options: {
   queueId?: number;
   cursor?: string;
@@ -5002,6 +5812,11 @@ export interface DroppedMatchSummaryResponse {
   summary: DroppedMatchHourlySummary[];
 }
 
+/**
+ * Fetch dropped match summary data for client consumers.
+ *
+ * Accepts params, date; returns fetchDroppedMatchSummary data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchDroppedMatchSummary(params: { date: string; queueId?: number; refresh?: boolean }): Promise<DroppedMatchSummaryResponse> {
   const query = new URLSearchParams({
     date: params.date,
@@ -5036,6 +5851,11 @@ export interface DroppedMatchListResponse {
   matches: DroppedMatchRecord[];
 }
 
+/**
+ * Fetch dropped matches data for client consumers.
+ *
+ * Accepts params, date; returns fetchDroppedMatches data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchDroppedMatches(params: {
   date: string;
   queueId?: number;
@@ -5088,6 +5908,11 @@ export interface NonrankedDroppedMatchResponse {
   matches: NonrankedDroppedMatchRecord[];
 }
 
+/**
+ * Fetch nonranked dropped matches data for client consumers.
+ *
+ * Accepts query filters; returns fetchNonrankedDroppedMatches data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchNonrankedDroppedMatches(params?: {
   date?: string;
   scope?: PublicStatsScope;
@@ -5104,6 +5929,11 @@ export async function fetchNonrankedDroppedMatches(params?: {
   return fetchJson<NonrankedDroppedMatchResponse>(`/matches/dropped/nonranked?${query.toString()}`);
 }
 
+/**
+ * Fetch match detail data for client consumers.
+ *
+ * Accepts matchId; returns fetchMatchDetail data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchMatchDetail(matchId: number): Promise<MatchDetailWithBans | null> {
   const raw = await fetchJson<{
     matches: MatchDetailWithBans[];
@@ -5183,6 +6013,11 @@ export async function fetchMatchSnapshots(matchId: number): Promise<RatingSnapsh
   });
 }
 
+/**
+ * Fetch recent matches data for client consumers.
+ *
+ * Accepts query filters; returns fetchRecentMatches data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchRecentMatches(limit?: number): Promise<MatchData[]> {
   const raw = await fetchJson<MatchData[]>(`/matches/recent${limit ? `?limit=${limit}` : ''}`);
   return raw;
@@ -5198,6 +6033,11 @@ export interface MatchesOverview {
 const matchesOverviewCache = new Map<string, { value: MatchesOverview; expiresAt: number }>();
 const matchesOverviewInFlight = new Map<string, Promise<MatchesOverview>>();
 
+/**
+ * Fetch matches overview data for client consumers.
+ *
+ * Accepts query filters; returns fetchMatchesOverview data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchMatchesOverview(params?: {
   tierMin?: number;
   tierMax?: number;
@@ -5230,6 +6070,11 @@ export async function fetchMatchesOverview(params?: {
   }
 }
 
+/**
+ * Fetch match search data for client consumers.
+ *
+ * Accepts query filters; returns fetchMatchSearch data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchMatchSearch(params?: {
   championId?: string;
   queueId?: string;
@@ -5272,36 +6117,71 @@ export async function fetchMatchSearch(params?: {
 
 // ── Reference Data ──
 
+/**
+ * Fetch reference items data for client consumers.
+ *
+ * Accepts no arguments; returns fetchReferenceItems data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchReferenceItems(): Promise<Array<{ item_id: number; name: string; description?: string }>> {
   const raw = await fetchJson<any[]>(`/reference/items`);
   return raw;
 }
 
+/**
+ * Fetch reference talents data for client consumers.
+ *
+ * Accepts no arguments; returns fetchReferenceTalents data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchReferenceTalents(): Promise<Array<{ talent_id: number; name: string; champion_id: number }>> {
   const raw = await fetchJson<any[]>(`/reference/talents`);
   return raw;
 }
 
+/**
+ * Fetch reference cards data for client consumers.
+ *
+ * Accepts no arguments; returns fetchReferenceCards data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchReferenceCards(): Promise<Array<{ card_id: number; name: string }>> {
   const raw = await fetchJson<any[]>(`/reference/cards`);
   return raw;
 }
 
+/**
+ * Fetch reference queues data for client consumers.
+ *
+ * Accepts no arguments; returns fetchReferenceQueues data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchReferenceQueues(): Promise<Array<{ queue_id: number; name: string }>> {
   const raw = await fetchJson<any[]>(`/reference/queues`);
   return raw;
 }
 
+/**
+ * Fetch reference regions data for client consumers.
+ *
+ * Accepts no arguments; returns fetchReferenceRegions data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchReferenceRegions(): Promise<Array<{ region?: string; region_code?: string; name?: string; region_name?: string }>> {
   const raw = await fetchJson<any[]>(`/reference/regions`);
   return raw;
 }
 
+/**
+ * Fetch reference maps data for client consumers.
+ *
+ * Accepts no arguments; returns fetchReferenceMaps data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchReferenceMaps(): Promise<Array<{ map_id: number; name: string }>> {
   const raw = await fetchJson<any[]>(`/reference/maps`);
   return raw;
 }
 
+/**
+ * Fetch reference champions data for client consumers.
+ *
+ * Accepts no arguments; returns fetchReferenceChampions data after a backend request, using shared authentication and cache behavior.
+ */
 export async function fetchReferenceChampions(): Promise<Array<{ id: number; name: string }>> {
   const raw = await fetchJson<any[]>(`/reference/champions`);
   return raw;

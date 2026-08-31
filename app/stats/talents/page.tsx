@@ -1,5 +1,8 @@
+/**
+ * Define the stats talents page route boundary.
+ * Coordinates this module's route data flow and rendered output.
+ */
 "use client";
-
 import { useEffect, useState } from "react";
 import { fetchTalents } from "@/lib/api-client";
 import { EmptyState, ErrorState } from "@/components/async-state";
@@ -12,6 +15,10 @@ import { useRouteSettledLoading } from "@/lib/route-transition-context";
 import { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 
+/**
+ * Renders the exported statistics view with its route data.
+ * Returns the declared route value; network, cache, and navigation effects follow the implementation.
+ */
 export default function TalentsPage() {
   const { t , formatNumber, formatPercent} = useLocalization();
   const [talents, setTalents] = useState<Array<{ talentId: number; talentName: string; championId: number; championName: string; totalPlays: number; winRate: number }>>([]);

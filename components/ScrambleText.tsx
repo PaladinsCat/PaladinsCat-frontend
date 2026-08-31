@@ -1,8 +1,10 @@
+/** ScrambleText component/module.
+ * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ */
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useReducedMotion } from "framer-motion";
-import { getLiteMode } from "@/lib/lite-mode";
+import { useReducedMotion } from "@/lib/reduced-motion";
 
 const scrambleChars = "!@#$%&*+-=[]{}|;:,.<>?/~ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
@@ -70,6 +72,9 @@ function ScrambleLetter({
   );
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export default function ScrambleText({
   text,
   speed = 150,
@@ -77,7 +82,7 @@ export default function ScrambleText({
   className = "",
   delayFromCenter = true,
 }: ScrambleTextProps) {
-  const reduceMotion = useReducedMotion() || getLiteMode();
+  const reduceMotion = useReducedMotion();
   const centerIndex = Math.floor(text.length / 2);
   const letters = text.split("");
 

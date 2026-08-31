@@ -1,3 +1,6 @@
+/** Tests public-v1 path and response policy.
+ * The module owns the existing validation, policy, label, title, or preference behavior.
+ */
 import assert from "node:assert/strict";
 import test from "node:test";
 import { publicV1Path } from "./public-v1.ts";

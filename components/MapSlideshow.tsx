@@ -1,8 +1,8 @@
+/** Rotate the configured homepage wallpapers and synchronize their extracted accents. */
 "use client";
 
 import { useState, useEffect, useMemo, useRef } from "react";
-import { motion, useReducedMotion, AnimatePresence } from "framer-motion";
-import { usePathname } from "next/navigation";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   getWallpaperEnabled,
   resolveCustomWallpapers,
@@ -29,7 +29,6 @@ const INTERVAL_MS = 10_000;
  * then shuffles order client-side after mount.
  */
 export default function MapSlideshow() {
-  const pathname = usePathname();
   const [wallpaperEnabled, setWallpaperEnabled] = useState(true);
   const [customWallpapers, setCustomWallpapers] = useState<ResolvedCustomWallpaper[]>([]);
   // Deterministic on server: always start at index 0
@@ -75,12 +74,14 @@ export default function MapSlideshow() {
     // Shuffle once on mount
     if (!mounted.current) {
       mounted.current = true;
-      const arr = [...DEFAULT_WALLPAPERS];
+      // Preserve the server-rendered first wallpaper through hydration. An
+      // immediate replacement starts a second large image request before LCP.
+      const [first, ...arr] = DEFAULT_WALLPAPERS;
       for (let i = arr.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [arr[i], arr[j]] = [arr[j], arr[i]];
       }
-      setOrder(arr);
+      setOrder([first, ...arr]);
     }
   }, []);
 

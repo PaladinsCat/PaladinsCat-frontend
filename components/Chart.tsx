@@ -1,3 +1,6 @@
+/** Chart component/module.
+ * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ */
 "use client";
 
 import {
@@ -29,6 +32,9 @@ export interface ChartProps {
   showYAxis?: boolean;
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export function LineChartComponent({
   data,
   xKey,
@@ -93,6 +99,9 @@ export function LineChartComponent({
   );
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export function BarChartComponent({
   data,
   xKey,

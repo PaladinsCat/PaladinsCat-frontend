@@ -1,3 +1,7 @@
+/**
+ * Define the about page responsibility boundary.
+ * Coordinates about page data loading, authorization, and presentation.
+ */
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -18,6 +22,7 @@ import {
 import ScrambleText from "@/components/ScrambleText";
 import { getServerLocalization } from "@/lib/server-localization";
 
+/** Render the localized About page and its data-focused project principles. */
 export default async function AboutPage() {
   const { t } = await getServerLocalization();
   const principles = [

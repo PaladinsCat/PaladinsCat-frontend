@@ -1,7 +1,10 @@
+/** Render a content card with a continuously moving decorative border. */
 "use client";
 
-import { motion, useReducedMotion as useFmReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
+import { useReducedMotion } from "@/lib/reduced-motion";
 
+/** Wrap children in the animated border surface, disabling animation for reduced-motion users. */
 export function MovingBorderCard({
   children,
   className = "",
@@ -9,7 +12,7 @@ export function MovingBorderCard({
   children: React.ReactNode;
   className?: string;
 }) {
-  const shouldReduce = useFmReducedMotion() ?? false;
+  const shouldReduce = useReducedMotion();
 
   return (
     <div className={`relative p-[1px] rounded-xl overflow-hidden ${className}`}>

@@ -1,5 +1,11 @@
+/** Defines player-review reason labels and formatting.
+ * The module preserves the existing validation, storage, formatting, or asset boundary.
+ */
 const IMPORTED_ALLEGATIONS_PATTERN = /Imported from supplied confirmed-cheater list\.\s*Allegations:\s*([\s\S]*?)(?=\s*(?:Evidence match IDs:|Source lines?:|Imported from supplied confirmed-cheater list\.)|$)/gi;
 
+/** Apply getCoreCheaterReason to the declared input values.
+ * Contract: returns the module-specific validated, stored, formatted, or resolved value without external side effects.
+ */
 export function getCoreCheaterReason(reason: string | null | undefined): string {
   const value = reason?.trim() ?? "";
   if (!value || !/Imported from supplied confirmed-cheater list\./i.test(value)) return value;

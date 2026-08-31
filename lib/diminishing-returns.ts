@@ -1,3 +1,7 @@
+/**
+ * Defines diminishing-returns's shared contracts and runtime helpers.
+ * Keep behavior aligned with its callers and browser/server boundary.
+ */
 export type EffectKey =
   | "movement-speed"
   | "mount-speed"
@@ -17,10 +21,22 @@ export type EffectKey =
   | "weapon-damage-deployables"
   | "weapon-damage-shields";
 
+/**
+ * Defines the  effect source type contract used by this module.
+ */
 export type EffectSourceType = "talent" | "card" | "item";
+/**
+ * Defines the  effect direction contract used by this module.
+ */
 export type EffectDirection = "increase" | "decrease";
+/**
+ * Defines the  effect target contract used by this module.
+ */
 export type EffectTarget = "self" | "enemy" | "ally" | "unknown";
 
+/**
+ * Transforms or validates  detected effect according to this module's data contract.
+ */
 export interface DetectedEffect {
   key: EffectKey;
   value: number;
@@ -32,6 +48,9 @@ export interface DetectedEffect {
   description: string;
 }
 
+/**
+ * Defines the  directional diminished value contract used by this module.
+ */
 export interface DirectionalDiminishedValue {
   additive: number;
   guaranteedBase: number;
@@ -42,6 +61,9 @@ export interface DirectionalDiminishedValue {
   capApplied: boolean;
 }
 
+/**
+ * Defines the  diminished value contract used by this module.
+ */
 export interface DiminishedValue {
   additive: number;
   final: number;
@@ -67,6 +89,9 @@ function numericMatch(text: string, patterns: RegExp[]): number | null {
   return null;
 }
 
+/**
+ * Transforms or validates resolve scaled description according to this module's data contract.
+ */
 export function resolveScaledDescription(description: string | null | undefined, level: number): string {
   if (!description) return "";
   const safeLevel = Math.max(1, Math.min(5, Math.round(level || 1)));
@@ -384,6 +409,9 @@ function emptyDirectionalValue(): DirectionalDiminishedValue {
   };
 }
 
+/**
+ * Transforms or validates calculate directional diminished value according to this module's data contract.
+ */
 export function calculateDirectionalDiminishedValue(values: number[], movement = false): DirectionalDiminishedValue {
   const bonuses = values.filter((value) => Number.isFinite(value) && value > 0);
   if (!bonuses.length) return emptyDirectionalValue();
@@ -418,6 +446,9 @@ export function calculateDirectionalDiminishedValue(values: number[], movement =
   };
 }
 
+/**
+ * Transforms or validates calculate diminished value according to this module's data contract.
+ */
 export function calculateDiminishedValue(values: number[], options?: { movement?: boolean; reload?: boolean }): DiminishedValue {
   const finiteValues = values.filter(Number.isFinite);
   const additive = finiteValues.reduce((sum, value) => sum + value, 0);
@@ -444,6 +475,9 @@ export function calculateDiminishedValue(values: number[], options?: { movement?
   };
 }
 
+/**
+ * Transforms or validates calculate additive value according to this module's data contract.
+ */
 export function calculateAdditiveValue(values: number[]): DiminishedValue {
   const finiteValues = values.filter(Number.isFinite);
   const additive = finiteValues.reduce((sum, value) => sum + value, 0);
@@ -462,6 +496,9 @@ export function calculateAdditiveValue(values: number[]): DiminishedValue {
   };
 }
 
+/**
+ * Transforms or validates extract weapon damage override according to this module's data contract.
+ */
 export function extractWeaponDamageOverride(description: string | null | undefined): number | null {
   const weaponTagged = /^\s*\[Weapon\]/i.test(description ?? "");
   const text = resolveScaledDescription(description, 1);

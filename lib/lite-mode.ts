@@ -1,4 +1,13 @@
+/** Stores and reads the browser lite-mode preference.
+ * The module preserves the existing validation, storage, formatting, or asset boundary.
+ */
+/** Apply LITE_MODE_STORAGE_KEY to the declared input values.
+ * Contract: returns the module-specific validated, stored, formatted, or resolved value without external side effects.
+ */
 export const LITE_MODE_STORAGE_KEY = "paladinscat-lite-mode";
+/** Apply LITE_MODE_CHANGE_EVENT to the declared input values.
+ * Contract: returns the module-specific validated, stored, formatted, or resolved value without external side effects.
+ */
 export const LITE_MODE_CHANGE_EVENT = "paladinscat:lite-mode-change";
 
 /** Returns whether Lite mode (disable all animations) is enabled for this browser. */

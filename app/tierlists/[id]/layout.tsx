@@ -1,5 +1,13 @@
+/**
+ * Define the tierlists layout responsibility boundary.
+ * Coordinates tierlists layout data loading, authorization, and presentation.
+ */
 import { createLocalizedMetadata } from "@/lib/server-localization";
 
+/**
+ * Handles the exported route operation using its declared request and response contract.
+ * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ */
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   return createLocalizedMetadata("seo.tierLists.title", {
@@ -8,6 +16,10 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   });
 }
 
+/**
+ * Handles the exported route operation using its declared request and response contract.
+ * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ */
 export default function TierListDetailLayout({ children }: { children: React.ReactNode }) {
   return children;
 }

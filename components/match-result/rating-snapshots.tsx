@@ -1,9 +1,16 @@
+/**
+ * Renders rating snapshots data for match-result views.
+ * Keeps the component's interaction and accessibility behavior intact.
+ */
 "use client";
 
 import type { RatingSnapshot } from "@/lib/api-client";
 import PlayerName from "@/components/player-name";
 import { useLocalization } from "@/lib/localization-context";
 
+/** Render RatingSnapshots from its declared props and match data.
+ * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
+ */
 export default function RatingSnapshots({ snapshots }: { snapshots: RatingSnapshot[] }) {
   const { t , formatNumber} = useLocalization();
   if (snapshots.length === 0) return null;

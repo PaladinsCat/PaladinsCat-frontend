@@ -1,29 +1,27 @@
+/** async-state component/module.
+ * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ */
 "use client";
 
 import type { ButtonHTMLAttributes, ReactNode } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { AlertTriangle, Inbox, LoaderCircle, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLocalization } from "@/lib/localization-context";
-import { useRouteSettled } from "@/lib/route-transition-context";
 
-const transition = { duration: 0.2, ease: "easeOut" as const };
-
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export function ContentFade({ children, className }: { children: ReactNode; className?: string }) {
-  const reduceMotion = useReducedMotion();
-  const routeSettled = useRouteSettled();
   return (
-    <motion.div
-      initial={reduceMotion ? false : { opacity: 0, y: 6 }}
-      animate={routeSettled ? { opacity: 1, y: 0 } : { opacity: 0, y: 6 }}
-      transition={transition}
-      className={className}
-    >
+    <div className={cn("pc-content-fade", className)}>
       {children}
-    </motion.div>
+    </div>
   );
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export function StableMetricValue({
   value,
   className,
@@ -33,22 +31,21 @@ export function StableMetricValue({
   className?: string;
   minWidthCh?: number;
 }) {
-  const reduceMotion = useReducedMotion();
   return (
     <span className={cn("inline-grid tabular-nums", className)} style={{ minWidth: `${minWidthCh}ch` }}>
-      <motion.span
+      <span
         key={String(value)}
-        className="col-start-1 row-start-1 whitespace-nowrap"
-        initial={reduceMotion ? false : { opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={transition}
+        className="pc-metric-fade col-start-1 row-start-1 whitespace-nowrap"
       >
         {value}
-      </motion.span>
+      </span>
     </span>
   );
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export function LoadingPanel({
   compact = false,
   className,
@@ -69,6 +66,9 @@ export function LoadingPanel({
   );
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export function LoadingIndicator({ className }: { className?: string }) {
   const { t } = useLocalization();
   return (
@@ -79,27 +79,21 @@ export function LoadingIndicator({ className }: { className?: string }) {
   );
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export function LoadingOverlay({ visible }: { visible: boolean }) {
-  const reduceMotion = useReducedMotion();
+  if (!visible) return null;
   return (
-    <AnimatePresence>
-      {visible && (
-        <motion.div
-          initial={reduceMotion ? false : { opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={transition}
-          className="absolute inset-0 z-30 flex items-center justify-center rounded-[inherit] pc-glass-dark"
-          aria-live="polite"
-          aria-busy="true"
-        >
-          <LoadingIndicator className="gap-2" />
-        </motion.div>
-      )}
-    </AnimatePresence>
+    <div className="pc-overlay-fade absolute inset-0 z-30 flex items-center justify-center rounded-[inherit] pc-glass-dark" aria-live="polite" aria-busy="true">
+      <LoadingIndicator className="gap-2" />
+    </div>
   );
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export function EmptyState({
   title,
   description,
@@ -121,6 +115,9 @@ export function EmptyState({
   );
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export function ErrorState({
   title,
   message,
@@ -153,6 +150,9 @@ interface AsyncButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export function AsyncButton({ loading = false, children, className, disabled, ...props }: AsyncButtonProps) {
   const { t } = useLocalization();
   return (

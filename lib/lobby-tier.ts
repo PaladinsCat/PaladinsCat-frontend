@@ -1,7 +1,17 @@
+/**
+ * Defines lobby-tier's shared contracts and runtime helpers.
+ * Keep behavior aligned with its callers and browser/server boundary.
+ */
 import type { TranslationKey } from "@/lib/localization/messages";
 
+/**
+ * Defines the  lobby tier filter contract used by this module.
+ */
 export type LobbyTierFilter = "all" | "bronze-gold" | "platinum-plus" | "diamond-plus";
 
+/**
+ * Defines the  lobby tier definition contract used by this module.
+ */
 export type LobbyTierDefinition = {
   value: LobbyTierFilter;
   labelKey: TranslationKey;
@@ -10,6 +20,9 @@ export type LobbyTierDefinition = {
   tierMax?: number;
 };
 
+/**
+ * Defines the  l o b b y_ t i e r_ f i l t e r s contract used by this module.
+ */
 export const LOBBY_TIER_FILTERS: Record<LobbyTierFilter, LobbyTierDefinition> = {
   all: {
     value: "all",
@@ -39,13 +52,25 @@ export const LOBBY_TIER_FILTERS: Record<LobbyTierFilter, LobbyTierDefinition> = 
   },
 };
 
+/**
+ * Defines the  l o b b y_ t i e r_ o p t i o n s contract used by this module.
+ */
 export const LOBBY_TIER_OPTIONS = Object.values(LOBBY_TIER_FILTERS);
+/**
+ * Defines the  l o b b y_ t i e r_ s t o r a g e_ k e y contract used by this module.
+ */
 export const LOBBY_TIER_STORAGE_KEY = "pc_lobby_tier_filter";
 
+/**
+ * Transforms or validates is lobby tier filter according to this module's data contract.
+ */
 export function isLobbyTierFilter(value: unknown): value is LobbyTierFilter {
   return typeof value === "string" && value in LOBBY_TIER_FILTERS;
 }
 
+/**
+ * Reads stored lobby tier filter from the module's configured source.
+ */
 export function getStoredLobbyTierFilter(): LobbyTierFilter {
   if (typeof window === "undefined") return "all";
   const stored = window.localStorage.getItem(LOBBY_TIER_STORAGE_KEY);
@@ -71,6 +96,9 @@ const UNSCOPED_STAT_PATHS = [
   "/champions/tiers",
 ];
 
+/**
+ * Defines the with stored lobby tier contract used by this module.
+ */
 export function withStoredLobbyTier(path: string): string {
   if (typeof window === "undefined") return path;
   const pathname = path.split("?", 1)[0];

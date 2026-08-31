@@ -1,17 +1,30 @@
+/**
+ * Defines search-state's shared contracts and runtime helpers.
+ * Keep behavior aligned with its callers and browser/server boundary.
+ */
 import type {
   UniversalSearchResult,
   UniversalSearchRemoteTarget,
   UniversalSearchType,
 } from "./api-client";
 
+/**
+ * Transforms or validates normalize according to this module's data contract.
+ */
 export function normalize(value: unknown) {
   return String(value ?? "").trim().toLowerCase();
 }
 
+/**
+ * Defines the type sort contract used by this module.
+ */
 export function typeSort(type: UniversalSearchType) {
   return ["player", "match", "champion", "talent", "card", "item"].indexOf(type);
 }
 
+/**
+ * Transforms or validates merge results according to this module's data contract.
+ */
 export function mergeResults(results: UniversalSearchResult[]) {
   const seen = new Set<string>();
   return results
@@ -24,6 +37,9 @@ export function mergeResults(results: UniversalSearchResult[]) {
     .sort((a, b) => b.score - a.score || typeSort(a.type) - typeSort(b.type) || a.title.localeCompare(b.title));
 }
 
+/**
+ * Defines the  search state contract used by this module.
+ */
 export type SearchState = {
   query: string;
   results: UniversalSearchResult[];
@@ -40,6 +56,9 @@ export type SearchState = {
   generation: number;
 };
 
+/**
+ * Defines the  search action contract used by this module.
+ */
 export type SearchAction =
   | { type: "set-query"; query: string }
   | { type: "clear" }
@@ -51,6 +70,9 @@ export type SearchAction =
   | { type: "remote-result"; results: UniversalSearchResult[]; remoteNotice: string | null }
   | { type: "remote-error"; error: string };
 
+/**
+ * Performs the create initial search state operation with this module's boundary checks.
+ */
 export function createInitialSearchState(initialQuery: string): SearchState {
   const hasInitialQuery = initialQuery.trim().length > 0;
   return {
@@ -65,6 +87,9 @@ export function createInitialSearchState(initialQuery: string): SearchState {
   };
 }
 
+/**
+ * Defines the search reducer contract used by this module.
+ */
 export function searchReducer(state: SearchState, action: SearchAction): SearchState {
   switch (action.type) {
     case "set-query":

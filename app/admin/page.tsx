@@ -1,5 +1,8 @@
+/**
+ * Define the admin page responsibility boundary.
+ * Coordinates admin page data loading, authorization, and presentation.
+ */
 "use client";
-
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -20,6 +23,10 @@ const PREVIEW_DASHBOARD: AdminDashboard = {
   hirez: { keys: [{ devId: "preview-key", status: "healthy", used: 120, dailyLimit: 5000, remaining: 4880, callsTotal: 20932, consecutiveFailures: 0, lastUsed: "2026-08-12T11:58:00Z", lastSyncAt: "2026-08-12T11:58:00Z", lastSyncError: null }], hourly: Array.from({ length: 12 }, (_, index) => ({ hour: `${String(index + 8).padStart(2, "0")}:00`, calls: 60 + index * 9 })), endpoints: [{ consumer: "frontend", endpoint: "getplayer", calls: 892, avgResponseMs: 183 }, { consumer: "worker", endpoint: "getmatchdetails", calls: 428, avgResponseMs: 241 }] },
 };
 
+/**
+ * Handles the exported route operation using its declared request and response contract.
+ * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ */
 export default function AdminDashboardPage({ mode = "admin" }: { mode?: "admin" | "developer" }) {
   const { t, formatNumber , formatDateTime} = useLocalization();
   const formatBytes = (value: number) => formatNumber(value, { notation: "compact", maximumFractionDigits: 2, style: "unit", unit: "byte", unitDisplay: "short" });

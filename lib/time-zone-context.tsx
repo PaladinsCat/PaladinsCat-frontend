@@ -1,3 +1,8 @@
+/**
+ * Share the authenticated user's preferred time zone with client components.
+ *
+ * The provider validates and persists selections locally; it does not fetch or mutate API data.
+ */
 "use client";
 
 import { createContext, Fragment, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
@@ -11,12 +16,22 @@ interface TimeZoneContextValue {
 
 const TimeZoneContext = createContext<TimeZoneContextValue | null>(null);
 
+/**
+ * Read the current time-zone value and its validated setter from context.
+ *
+ * Returns the provider contract; throws when called outside TimeZoneProvider and performs no network request.
+ */
 export function useTimeZone(): TimeZoneContextValue {
   const context = useContext(TimeZoneContext);
   if (!context) throw new Error("useTimeZone must be used within TimeZoneProvider");
   return context;
 }
 
+/**
+ * Expose validated time-zone state, seeded from the user or browser preference.
+ *
+ * Accepts children; returns a context provider and persists valid changes locally without API side effects.
+ */
 export function TimeZoneProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [timeZone, setTimeZoneState] = useState("UTC");

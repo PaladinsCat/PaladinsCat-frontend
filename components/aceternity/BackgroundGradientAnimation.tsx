@@ -1,9 +1,12 @@
+/** Animate the decorative gradient backdrop while honoring the user's reduced-motion preference. */
 "use client";
 
-import { motion, useReducedMotion as useFmReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
+import { useReducedMotion } from "@/lib/reduced-motion";
 
+/** Render the non-interactive animated background, or nothing when motion should be reduced. */
 export function BackgroundGradientAnimation() {
-  const shouldReduce = useFmReducedMotion() ?? false;
+  const shouldReduce = useReducedMotion();
 
   if (shouldReduce) return null;
 

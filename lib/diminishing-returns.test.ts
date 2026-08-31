@@ -1,3 +1,6 @@
+/** Tests diminishing-return calculations and thresholds.
+ * The module preserves the existing validation, storage, formatting, or asset boundary.
+ */
 import assert from "node:assert/strict";
 import test from "node:test";
 
