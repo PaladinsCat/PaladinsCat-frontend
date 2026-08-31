@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useEffect, useMemo, useRef } from "react";
-import { motion, useReducedMotion, AnimatePresence } from "framer-motion";
-import { usePathname } from "next/navigation";
 import {
   getWallpaperEnabled,
   resolveCustomWallpapers,
@@ -29,7 +27,6 @@ const INTERVAL_MS = 10_000;
  * then shuffles order client-side after mount.
  */
 export default function MapSlideshow() {
-  const pathname = usePathname();
   const [wallpaperEnabled, setWallpaperEnabled] = useState(true);
   const [customWallpapers, setCustomWallpapers] = useState<ResolvedCustomWallpaper[]>([]);
   // Deterministic on server: always start at index 0
@@ -75,16 +72,17 @@ export default function MapSlideshow() {
     // Shuffle once on mount
     if (!mounted.current) {
       mounted.current = true;
-      const arr = [...DEFAULT_WALLPAPERS];
+      // Preserve the server-rendered first wallpaper through hydration. An
+      // immediate replacement starts a second large image request before LCP.
+      const [first, ...arr] = DEFAULT_WALLPAPERS;
       for (let i = arr.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [arr[i], arr[j]] = [arr[j], arr[i]];
       }
-      setOrder(arr);
+      setOrder([first, ...arr]);
     }
   }, []);
 
-  const reduceMotion = useReducedMotion();
   const slides = useMemo<WallpaperSlide[] | null>(
     () => customWallpapers.length > 0 ? customWallpapers.map((wallpaper) => wallpaper.source) : order,
     [customWallpapers, order],
@@ -162,27 +160,21 @@ export default function MapSlideshow() {
 
   return (
     <div className="pc-wallpaper-dimmed pc-wallpaper-viewport -z-10 overflow-hidden" aria-hidden="true" style={{ backgroundColor: "var(--pc-bg)" }}>
-      <AnimatePresence initial={false} mode="sync">
-        <motion.div
-          key={currentWallpaperKey}
-          initial={reduceMotion ? undefined : { opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={reduceMotion ? undefined : { opacity: 0 }}
-          transition={reduceMotion ? undefined : { duration: 2.1, ease: [0.4, 0, 0.2, 1] }}
-          className="pc-wallpaper-image"
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundImage: currentWallpaperImage,
-            backfaceVisibility: "hidden",
-            transform: "translateZ(0)",
-            willChange: "opacity",
-          }}
-        />
-      </AnimatePresence>
+      <div
+        key={currentWallpaperKey}
+        className="pc-wallpaper-image pc-wallpaper-fade-in"
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          backgroundImage: currentWallpaperImage,
+          backfaceVisibility: "hidden",
+          transform: "translateZ(0)",
+          willChange: "opacity",
+        }}
+      />
     </div>
   );
 }
