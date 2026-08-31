@@ -23,12 +23,15 @@ function hsl(h: number, s: number, l: number): string {
 
 function colorForScore(score: number): string {
   const clamped = clamp01(score);
+  // Picker-band spectrum (2026-08-31): uniform S 65% / L 66% so every grade
+  // renders in the dynamic-accent band; hue sweep (red -> orange -> green)
+  // carries the grade semantics.
   if (clamped < 0.5) {
     const t = clamped / 0.5;
-    return hsl(350 + 38 * t, 82, 62);
+    return hsl(350 + 38 * t, 65, 66);
   }
   const t = (clamped - 0.5) / 0.5;
-  return hsl(38 + 112 * t, 82, 58);
+  return hsl(38 + 112 * t, 65, 66);
 }
 
 /**
