@@ -244,10 +244,11 @@ export default function BrowserScoreboard({ match, queueLabel, team1, team2, ban
       <div ref={previewRef} className="relative w-full overflow-hidden" style={{ height: `${CANVAS_HEIGHT * previewScale}px` }}>
         <main className="viewport" style={{ width: CANVAS_WIDTH, maxWidth: "none", transform: `scale(${previewScale})`, transformOrigin: "top left" }}>
           <div className="scoreboard-canvas">
-            <section ref={scoreboardRef} className="scoreboard" style={{ "--scoreboard-map": `image-set(url("${mapImage.avif}") type("image/avif"), url("${mapImage.png}") type("image/png"))` } as React.CSSProperties} aria-label={t("generated.matches.paladinsMatchScoreboard")}>
-              {/* Keep the PNG as a direct child for html-to-image. The normal
-                  preview uses the AVIF-aware pseudo-element above instead. */}
-              <img className="scoreboard-map" src={mapImage.png} alt="" aria-hidden="true" fetchPriority="high" />
+            <section ref={scoreboardRef} className="scoreboard" aria-label={t("generated.matches.paladinsMatchScoreboard")}>
+              <img className="scoreboard-map-preview" src={mapImage.avif} alt="" aria-hidden="true" fetchPriority="high" decoding="async" />
+              {/* Keep an export-only PNG child for html-to-image, but omit src
+                  until export so normal page loads do not fetch 3-7 MB twice. */}
+              <img className="scoreboard-map" data-export-src={mapImage.png} alt="" aria-hidden="true" />
               <header className="hero">
                 <div className="match-identity">
                   <div className="brand-line">

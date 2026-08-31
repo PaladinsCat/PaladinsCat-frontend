@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useReducedMotion as useFmReducedMotion } from "framer-motion";
+import { useReducedMotion } from "@/lib/reduced-motion";
 import { useState } from "react";
 
 export function SpotlightCard({
@@ -10,7 +10,7 @@ export function SpotlightCard({
   children: React.ReactNode;
   className?: string;
 }) {
-  const shouldReduce = useFmReducedMotion() ?? false;
+  const shouldReduce = useReducedMotion();
   const [position, setPosition] = useState({ x: 0, y: 0 });
 
   return (

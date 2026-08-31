@@ -323,8 +323,7 @@ canvas {
   height: auto;
 }
 
-/* Lite mode — kill CSS animations and transitions (hover effects) for
-   low-powered devices. Framer-motion is handled separately via MotionConfig. */
+/* Lite mode — kill CSS animations and transitions for low-powered devices. */
 html.pc-lite,
 html.pc-lite *,
 html.pc-lite *::before,
@@ -376,6 +375,15 @@ html.pc-lite .group:hover * {
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
+}
+
+@keyframes pc-wallpaper-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.pc-wallpaper-fade-in {
+  animation: pc-wallpaper-fade-in 2.1s cubic-bezier(.4, 0, .2, 1) both;
 }
 
 /* Keep the fixed image on a simple compositing path while scrolling. Applying
@@ -1174,7 +1182,28 @@ main :where(a, button, input, select, textarea):focus-visible {
 /* Page wrapper: consistent max-width, padding */
 .pc-route-stage {
   min-width: 0;
-  transform-origin: 50% 4rem;
+  animation: pc-route-fade-in 120ms ease-out both;
+}
+
+.pc-content-fade,
+.pc-metric-fade,
+.pc-overlay-fade {
+  animation: pc-route-fade-in 200ms ease-out both;
+}
+
+@keyframes pc-route-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pc-wallpaper-fade-in,
+  .pc-route-stage,
+  .pc-content-fade,
+  .pc-metric-fade,
+  .pc-overlay-fade {
+    animation-duration: 1ms;
+  }
 }
 
 .pc-page {
@@ -1359,10 +1388,10 @@ main :where(a, button, input, select, textarea):focus-visible {
 #browser-scoreboard .viewport { width: 2048px; max-width: 100%; }
 #browser-scoreboard .scoreboard-canvas { width: 2048px; height: 1152px; transform-origin: top left; }
 #browser-scoreboard .scoreboard { position: relative; display: grid; grid-template-rows: 26px 275px 29px 86px 275px 29px; width: 1280px; height: 720px; overflow: hidden; border: 1px solid rgba(111, 130, 153, .35); border-radius: 20px; background: var(--bg); box-shadow: none; transform-origin: top left; transform: scale(1.6); }
-#browser-scoreboard .scoreboard::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: var(--scoreboard-map) center / cover no-repeat; filter: saturate(1.15); opacity: .7; }
 #browser-scoreboard .scoreboard > * { position: relative; z-index: 1; }
+#browser-scoreboard .scoreboard-map-preview { display: block; position: absolute; z-index: 0; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: saturate(1.15); opacity: .7; }
 #browser-scoreboard .scoreboard-map { display: none; }
-#browser-scoreboard .scoreboard[data-image-export="true"]::before { content: none; }
+#browser-scoreboard .scoreboard[data-image-export="true"] > .scoreboard-map-preview { display: none; }
 #browser-scoreboard .scoreboard[data-image-export="true"] > .scoreboard-map { display: block; position: absolute; z-index: 0; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: saturate(1.15); opacity: .7; }
 #browser-scoreboard .hero { position: relative; grid-row: 4; height: 86px; padding: 7px 38px 9px; display: grid; grid-template-columns: 285px 590px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); align-items: center; background: rgba(5, 9, 15, .58); border-bottom: 1px solid rgba(72, 211, 190, .22); }
 #browser-scoreboard .hero::before { content: ""; position: absolute; inset: 0; pointer-events: none; -webkit-backdrop-filter: blur(7px); backdrop-filter: blur(7px); -webkit-mask-image: linear-gradient(90deg, #000, transparent 20%, transparent 80%, #000); mask-image: linear-gradient(90deg, #000, transparent 20%, transparent 80%, #000); }
@@ -1490,7 +1519,7 @@ main :where(a, button, input, select, textarea):focus-visible {
 #browser-scoreboard[data-theme="light"] .metric.credits { --accent: #b87800; }
 #browser-scoreboard[data-theme="light"] .metric.peak::after { height: 3px; box-shadow: 0 -5px 11px var(--accent); opacity: .5; }
 #browser-scoreboard[data-theme="light"] .scoreboard { border-color: rgba(67, 83, 99, .38); }
-#browser-scoreboard[data-theme="light"] .scoreboard::before { filter: saturate(1.4); opacity: .6; }
+#browser-scoreboard[data-theme="light"] .scoreboard-map-preview { filter: saturate(1.4); opacity: .6; }
 #browser-scoreboard[data-theme="light"] .columns, #browser-scoreboard[data-theme="light"] .team-bar { color: #000; background: color-mix(in srgb, #e9edf1 80%, transparent); }
 #browser-scoreboard[data-theme="light"] .columns { border-bottom-color: rgba(57, 69, 81, .28); }
 #browser-scoreboard[data-theme="light"] .player-row { border-bottom-color: rgba(63, 76, 90, .25); }

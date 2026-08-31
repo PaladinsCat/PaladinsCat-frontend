@@ -1,9 +1,10 @@
 "use client";
 
-import { motion, useReducedMotion as useFmReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
+import { useReducedMotion } from "@/lib/reduced-motion";
 
 export function BackgroundGradientAnimation() {
-  const shouldReduce = useFmReducedMotion() ?? false;
+  const shouldReduce = useReducedMotion();
 
   if (shouldReduce) return null;
 
