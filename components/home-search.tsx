@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { useReducedMotion } from "@/lib/reduced-motion";
 import { LoaderCircle, Search, X } from "lucide-react";
@@ -25,6 +26,7 @@ type HomeSearchProps = {
 
 export default function HomeSearch({ onSearchActiveChange }: HomeSearchProps) {
   const { t } = useLocalization();
+  const router = useRouter();
   const reduceMotion = useReducedMotion();
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
@@ -77,7 +79,10 @@ export default function HomeSearch({ onSearchActiveChange }: HomeSearchProps) {
         onMouseLeave={() => setHovered(false)}
         onSubmit={(event) => {
           const formData = new FormData(event.currentTarget);
-          if (String(formData.get("q") ?? "").trim() === "") event.preventDefault();
+          if (String(formData.get("q") ?? "").trim() === "") {
+            event.preventDefault();
+            router.push("/search");
+          }
         }}
         className="group flex items-center gap-2"
       >

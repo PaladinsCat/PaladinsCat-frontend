@@ -377,15 +377,6 @@ html.pc-lite .group:hover * {
   background-size: cover;
 }
 
-@keyframes pc-wallpaper-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-.pc-wallpaper-fade-in {
-  animation: pc-wallpaper-fade-in 2.1s cubic-bezier(.4, 0, .2, 1) both;
-}
-
 /* Keep the fixed image on a simple compositing path while scrolling. Applying
    `filter` directly to a fixed layer can make mobile browsers re-rasterize it
    at a different scale; a separate tint gives the same contrast without it. */
@@ -1197,7 +1188,6 @@ main :where(a, button, input, select, textarea):focus-visible {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pc-wallpaper-fade-in,
   .pc-route-stage,
   .pc-content-fade,
   .pc-metric-fade,

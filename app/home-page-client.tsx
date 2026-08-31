@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { preload } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
@@ -43,7 +43,7 @@ function syncWallpaperModeDom(phase: WallpaperModePhase) {
   else delete root.dataset.homeWallpaperMode;
 }
 
-export default function HomePage() {
+export default function HomePage({ children }: { children?: ReactNode }) {
   const { t } = useLocalization();
   const reduceMotion = useReducedMotion();
   const [siteVersion, setSiteVersion] = useState<SiteVersion | null>(null);
@@ -231,20 +231,57 @@ export default function HomePage() {
     {
       href: "/players",
       icon: UsersRound,
-      eyebrow: t("home.explorePlayersEyebrow"),
-      title: t("home.explorePlayersTitle"),
+      title: t("menu.playerHub"),
+      description: t("home.explorePlayersTitle"),
     },
     {
       href: "/champions",
       icon: BarChart3,
-      eyebrow: t("home.exploreMetaEyebrow"),
-      title: t("home.exploreMetaTitle"),
+      title: t("nav.champions"),
+      description: t("home.exploreMetaTitle"),
     },
     {
       href: "/operations/paladinscat-bot",
       icon: Bot,
-      eyebrow: t("home.exploreBotEyebrow"),
-      title: t("home.exploreBotTitle"),
+      title: t("menu.paladinsCatBot"),
+      description: t("home.exploreBotTitle"),
+    },
+  ];
+  const communityCards = [
+    {
+      href: "https://discord.gg/FXDdbCFPB",
+      image: "/images/projects/paladins-impact-project.avif",
+      imageAlt: t("home.communityPipLogoAlt"),
+      title: t("home.communityPipTitle"),
+      description: t("home.communityPipDescription"),
+    },
+    {
+      href: "https://discord.gg/paladinsgame",
+      image: "/images/projects/paladins-discord.avif",
+      imageAlt: t("home.communityOfficialLogoAlt"),
+      title: t("home.communityOfficialTitle"),
+      description: t("home.communityOfficialDescription"),
+    },
+    {
+      href: "https://discord.gg/VqYMXAR",
+      image: "/images/icons/paladinscat.avif",
+      imageAlt: t("home.logoAlt"),
+      title: t("home.communityPaladinsCatTitle"),
+      description: t("home.communityPaladinsCatDescription"),
+    },
+    {
+      href: "https://discord.gg/YPXJEaNPPe",
+      image: "/images/projects/tempest.avif",
+      imageAlt: t("home.tempestLogoAlt"),
+      title: t("home.communityTempestTitle"),
+      description: t("home.communityTempestDescription"),
+    },
+    {
+      href: "https://discord.com/invite/YPWtdVwFPR",
+      image: "/images/projects/round-table.avif",
+      imageAlt: t("home.communityRoundTableLogoAlt"),
+      title: t("home.communityRoundTableTitle"),
+      description: t("home.communityRoundTableDescription"),
     },
   ];
 
@@ -411,9 +448,9 @@ export default function HomePage() {
             hidden: {},
             visible: { transition: { staggerChildren: 0.11 } },
           }}
-          className="mt-8 grid gap-4 md:grid-cols-3"
+          className="mt-10 grid gap-4 sm:mt-12 md:grid-cols-3"
         >
-          {exploreCards.map(({ href, icon: Icon, eyebrow, title }, index) => (
+          {exploreCards.map(({ href, icon: Icon, title, description }, index) => (
             <motion.div
               key={href}
               variants={{
@@ -441,11 +478,61 @@ export default function HomePage() {
               >
                 <Icon className="h-5 w-5" aria-hidden="true" />
               </motion.span>
-              <p className="relative mt-4 text-xs font-bold uppercase tracking-[0.16em] text-pc-text-muted transition-colors duration-300 group-hover:text-pc-text-secondary">{eyebrow}</p>
-              <h3 className="relative mt-2 text-xl font-bold text-pc-text">{title}</h3>
+              <h3 className="relative mt-4 text-lg font-bold text-pc-text">{title}</h3>
+              <p className="relative mt-2 max-w-[15rem] text-sm leading-5 text-pc-text-secondary">{description}</p>
               <span className="pc-home-card-rule absolute inset-x-8 bottom-0 h-px origin-center scale-x-0 transition-transform duration-500 group-hover:scale-x-100" aria-hidden="true" />
                 </MotionLink>
             </motion.div>
+          ))}
+        </motion.div>
+        {children}
+
+        <motion.h2
+          initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.6 }}
+          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          className="mx-auto mt-28 max-w-2xl text-center text-3xl font-bold tracking-tight text-pc-text drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)] sm:mt-32 sm:text-4xl"
+        >
+          <span className="pc-home-platform-accent block">{t("home.communityTitleLead")}</span>
+          <span className="mt-1 block">{t("home.communityTitleRest")}</span>
+        </motion.h2>
+
+        <motion.div
+          initial={reduceMotion ? false : "hidden"}
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.25 }}
+          variants={{
+            hidden: {},
+            visible: { transition: { staggerChildren: 0.11 } },
+          }}
+          className="mt-10 grid gap-3 sm:mt-12 sm:grid-cols-2 lg:grid-cols-5"
+        >
+          {communityCards.map(({ href, image, imageAlt, title, description }) => (
+            <motion.a
+              key={href}
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              variants={{
+                hidden: { opacity: 0, y: 18 },
+                visible: { opacity: 1, y: 0 },
+              }}
+              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+              whileHover={reduceMotion ? undefined : { y: -4 }}
+              whileTap={reduceMotion ? undefined : { scale: 0.985 }}
+              className="pc-glass pc-home-feature-card group relative flex min-h-36 flex-col items-center justify-center rounded-2xl border border-white/5 p-4 text-center shadow-lg transition-shadow duration-300 hover:shadow-pc-card-hover"
+            >
+              <Image
+                src={image}
+                alt={imageAlt}
+                width={56}
+                height={56}
+                className="h-12 w-12 rounded-xl object-cover drop-shadow-[0_5px_14px_rgba(0,0,0,0.4)]"
+              />
+              <h3 className="mt-3 text-sm font-bold text-pc-text">{title}</h3>
+              <p className="mt-1.5 max-w-[12rem] text-xs leading-5 text-pc-text-secondary">{description}</p>
+            </motion.a>
           ))}
         </motion.div>
       </section>

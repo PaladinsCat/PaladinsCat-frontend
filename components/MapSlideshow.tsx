@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useRef } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   getWallpaperEnabled,
   resolveCustomWallpapers,
@@ -83,6 +84,7 @@ export default function MapSlideshow() {
     }
   }, []);
 
+  const reduceMotion = useReducedMotion();
   const slides = useMemo<WallpaperSlide[] | null>(
     () => customWallpapers.length > 0 ? customWallpapers.map((wallpaper) => wallpaper.source) : order,
     [customWallpapers, order],
@@ -160,21 +162,27 @@ export default function MapSlideshow() {
 
   return (
     <div className="pc-wallpaper-dimmed pc-wallpaper-viewport -z-10 overflow-hidden" aria-hidden="true" style={{ backgroundColor: "var(--pc-bg)" }}>
-      <div
-        key={currentWallpaperKey}
-        className="pc-wallpaper-image pc-wallpaper-fade-in"
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          backgroundImage: currentWallpaperImage,
-          backfaceVisibility: "hidden",
-          transform: "translateZ(0)",
-          willChange: "opacity",
-        }}
-      />
+      <AnimatePresence initial={false} mode="sync">
+        <motion.div
+          key={currentWallpaperKey}
+          initial={reduceMotion ? undefined : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={reduceMotion ? undefined : { opacity: 0 }}
+          transition={reduceMotion ? undefined : { duration: 2.1, ease: [0.4, 0, 0.2, 1] }}
+          className="pc-wallpaper-image"
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundImage: currentWallpaperImage,
+            backfaceVisibility: "hidden",
+            transform: "translateZ(0)",
+            willChange: "opacity",
+          }}
+        />
+      </AnimatePresence>
     </div>
   );
 }
