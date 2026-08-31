@@ -133,7 +133,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang={locale} className={cn("dark", "font-sans")}>
-      <head></head>
+      <head>
+        {/* Catppuccin palette (preview) — loaded via <link> because the
+            bundler's PostCSS transform hoists external @import url() past
+            all rules, which is invalid CSS. */}
+        <link
+          href="https://cdn.jsdelivr.net/npm/@catppuccin/palette/css/catppuccin.css"
+          rel="stylesheet"
+        />
+      </head>
       <body className="min-h-screen bg-pc-bg text-pc-text flex flex-col">
         <CoreUiDragGuard />
         <ImageAssetFallback />

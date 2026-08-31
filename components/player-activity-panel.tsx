@@ -610,7 +610,7 @@ function WeeklySeriesChart({
               <div
                 className={`h-full w-4 max-w-[50%] min-h-px rounded-t-md transition-[height,filter] duration-500 ease-out group-hover:brightness-125 ${
                   isPlayers
-                    ? "bg-gradient-to-t from-violet-500/45 to-violet-400"
+                    ? "bg-gradient-to-t from-violet-500 to-violet-400"
                     : "bg-gradient-to-t from-pc-accent/45 to-pc-accent"
                 }`}
                 style={{ height: `${height}%` }}
@@ -651,7 +651,7 @@ function WeeklySeriesChart({
           <div
             className={`h-full w-4 max-w-[50%] min-h-px rounded-t-md transition-[height,filter] duration-500 ease-out group-hover:brightness-125 ${
               isPlayers
-                ? "bg-gradient-to-t from-violet-500/45 to-violet-400"
+                ? "bg-gradient-to-t from-violet-500 to-violet-400"
                 : "bg-gradient-to-t from-pc-accent/45 to-pc-accent"
             }`}
             style={{ height: `${height}%` }}
@@ -744,13 +744,13 @@ function PlayerPresenceBreakdown({
       <div className="flex flex-col items-end gap-3">
         <CardDetailLink href="/stats/activity/details" label={detailsLabel} />
         <div className="flex flex-wrap justify-end gap-2 text-xs">
-          <span className="rounded-full border border-violet-400/25 bg-violet-400/10 px-2.5 py-1 text-violet-200">
+          <span className="rounded-full border border-violet-400/30 bg-violet-400/10 px-2.5 py-1 text-violet-200">
             {privateLabel}: {formatNumber(presence.private_players)}
           </span>
-          <span className="rounded-full border border-amber-400/25 bg-amber-400/10 px-2.5 py-1 text-amber-200">
+          <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-2.5 py-1 text-amber-200">
             {unresolvedLabel}: {formatNumber(presence.unresolved_private_observations)}
           </span>
-          <span className="rounded-full border border-rose-400/25 bg-rose-400/10 px-2.5 py-1 text-rose-200">
+          <span className="rounded-full border border-rose-400/30 bg-rose-400/10 px-2.5 py-1 text-rose-200">
             {unresolvedRangeLabel}: +0–{formatNumber(unresolvedUpper)}
           </span>
         </div>
