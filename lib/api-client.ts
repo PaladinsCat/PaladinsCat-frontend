@@ -315,6 +315,31 @@ export interface BoostedPlayerDetail {
   matches: BoostedMatchSummary[];
 }
 
+export interface ExploiterEvidenceMatch {
+  matchId: number;
+  entryDatetime: string | null;
+  map: string | null;
+  queueId: number;
+  queueName: string;
+  region: string | null;
+  durationSeconds: number;
+  population: string;
+  statsScope: string;
+  championId: number | null;
+  championName: string | null;
+  winStatus: string | null;
+  kills: number;
+  deaths: number;
+  assists: number;
+  talentId: number;
+  talentName: string;
+}
+
+export interface ExploiterEvidenceDetail {
+  player: Pick<CheaterPlayer, "id" | "name" | "platform" | "region" | "cheater" | "exploiter">;
+  matches: ExploiterEvidenceMatch[];
+}
+
 /**
  * Fetch filtered moderation-directory players from the backend.
  * Accepts typed query filters and returns normalized player summaries.
@@ -1217,6 +1242,40 @@ export async function fetchBoostedPlayerDetail(playerId: string): Promise<Booste
         id: String(cheater.id ?? ''),
         name: String(cheater.name ?? 'Unknown player'),
       })).filter((cheater: { id: string }) => cheater.id.length > 0),
+    })),
+  };
+}
+
+/** Fetch the stored talent facts supporting an administrator-confirmed exploiter tag. */
+export async function fetchExploiterEvidence(playerId: string): Promise<ExploiterEvidenceDetail> {
+  const raw = await fetchJson<any>(`/players/exploiters/${encodeURIComponent(playerId)}`);
+  return {
+    player: {
+      id: String(raw.player?.id ?? playerId),
+      name: String(raw.player?.name ?? "Unknown player"),
+      platform: String(raw.player?.platform ?? "Unknown"),
+      region: String(raw.player?.region ?? "Unknown"),
+      cheater: Boolean(raw.player?.cheater),
+      exploiter: Boolean(raw.player?.exploiter),
+    },
+    matches: (raw.matches ?? []).map((row: any) => ({
+      matchId: Number(row.match_id),
+      entryDatetime: row.entry_datetime ?? null,
+      map: row.map == null ? null : String(row.map),
+      queueId: Number(row.queue_id ?? 0),
+      queueName: String(row.queue_name ?? "Unknown"),
+      region: row.region == null ? null : String(row.region),
+      durationSeconds: Number(row.duration_seconds ?? 0),
+      population: String(row.population ?? "unknown"),
+      statsScope: String(row.stats_scope ?? "unknown"),
+      championId: row.champion_id == null ? null : Number(row.champion_id),
+      championName: row.champion_name == null ? null : String(row.champion_name),
+      winStatus: row.win_status == null ? null : String(row.win_status),
+      kills: Number(row.kills ?? 0),
+      deaths: Number(row.deaths ?? 0),
+      assists: Number(row.assists ?? 0),
+      talentId: Number(row.talent_id),
+      talentName: String(row.talent_name ?? `Talent ${row.talent_id}`),
     })),
   };
 }
