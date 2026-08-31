@@ -1,3 +1,8 @@
+/**
+ * Define generated TypeScript contracts for the backend API responses.
+ *
+ * This declaration module is regenerated from the API schema and has no runtime or network side effects.
+ */
 // Auto-generated TypeScript types from Fastify backend API spec
 // Run: npm run generate-types
 

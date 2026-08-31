@@ -1,3 +1,6 @@
+/** nav component/module.
+ * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ */
 "use client";
 
 import Link from "next/link";
@@ -75,6 +78,9 @@ function LanguageMenu() {
   );
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export default function Nav() {
   const pathname = usePathname();
   const { user, isLoading: authLoading, logout } = useAuth();

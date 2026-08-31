@@ -1,11 +1,20 @@
+/** player-directory-grid component/module.
+ * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ */
 "use client";
 
 import { useEffect, useMemo, type ReactNode } from "react";
 import PlayerDirectoryPagination, { usePersistentDirectoryPage } from "@/components/player-directory-pagination";
 
 const PLAYER_DIRECTORY_PAGE_SIZE = 32;
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export const PLAYER_DIRECTORY_CARD_CLASS = "flex h-16 min-h-16 min-w-0 overflow-hidden rounded-xl border bg-pc-bg-elevated px-3 py-2 transition-colors";
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export default function PlayerDirectoryGrid<T>({
   items,
   getKey,

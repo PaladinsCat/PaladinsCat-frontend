@@ -1,3 +1,6 @@
+/** player-name component/module.
+ * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ */
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
@@ -38,6 +41,9 @@ const AUTOMATIC_TAG_ACCENT: Record<NonNullable<PlayerModerationTagProps["automat
   CARRY: "text-cyan-300",
 };
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export function VerifiedPlayerBadge({ className = "", iconClassName = "h-3.5 w-3.5" }: { className?: string; iconClassName?: string }) {
   const { t } = useLocalization();
   return (
@@ -72,6 +78,9 @@ export type PlayerModerationTagProps = {
   verified?: boolean;
 };
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export function PlayerModerationTag({
   playerId,
   cheater,

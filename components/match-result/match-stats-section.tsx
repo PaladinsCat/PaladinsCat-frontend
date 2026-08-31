@@ -1,3 +1,7 @@
+/**
+ * Renders match stats section data for match-result views.
+ * Keeps the component's interaction and accessibility behavior intact.
+ */
 "use client";
 
 import Link from "next/link";
@@ -190,6 +194,9 @@ function MobilePlayerCard({ player, wins }: { player: MatchPlayerDetail; wins: b
   </article>;
 }
 
+/** Render MatchStatsSection from its declared props and match data.
+ * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
+ */
 export default function MatchStatsSection({
   team1Players,
   team2Players,

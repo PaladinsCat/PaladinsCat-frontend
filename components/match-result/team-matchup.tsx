@@ -1,3 +1,7 @@
+/**
+ * Renders team matchup data for match-result views.
+ * Keeps the component's interaction and accessibility behavior intact.
+ */
 "use client";
 
 import type { MatchResultPlayer, TeamAverages } from "./types";
@@ -11,6 +15,9 @@ interface TeamMatchupProps {
   averages: TeamAverages;
 }
 
+/** Render TeamMatchup from its declared props and match data.
+ * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
+ */
 export default function TeamMatchup({ players, label, averages }: TeamMatchupProps) {
   const { t } = useLocalization();
   return (

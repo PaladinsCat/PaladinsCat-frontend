@@ -1,3 +1,6 @@
+/** SmartImage component/module.
+ * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ */
 "use client";
 
 import { useState, useEffect, ImgHTMLAttributes } from "react";

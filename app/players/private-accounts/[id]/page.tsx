@@ -1,3 +1,8 @@
+/**
+ * Define the player route surface for private-accounts id page and its local data boundary.
+ * This file owns the page, layout, loading state, or route handler named by its path.
+ * It does not own unrelated player sections or shared library policy.
+ */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -27,6 +32,10 @@ function tpDelta(value: number | null) {
   return `${value > 0 ? "+" : ""}${value}`;
 }
 
+/**
+ * Render the PrivateAccountDetailPage view for the player private-accounts id page route.
+ * Returns the React tree for the route and its declared inputs.
+ */
 export default function PrivateAccountDetailPage() {
   const { t, formatDateTime, formatNumber } = useLocalization();
   const { isAdmin, isApproved } = useAuth();

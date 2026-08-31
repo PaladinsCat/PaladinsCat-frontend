@@ -1,3 +1,8 @@
+/**
+ * Define the player route surface for suspicious page and its local data boundary.
+ * This file owns the page, layout, loading state, or route handler named by its path.
+ * It does not own unrelated player sections or shared library policy.
+ */
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -41,6 +46,10 @@ async function fetchAllSuspiciousPrivateAccounts(name: string): Promise<PrivateA
   }
 }
 
+/**
+ * Render the SuspiciousPage view for the player suspicious page route.
+ * Returns the React tree for the route and its declared inputs.
+ */
 export default function SuspiciousPage() {
   const { t , formatNumber} = useLocalization();
   const [data, setData] = useState<CheaterPlayer[]>([]);

@@ -1,5 +1,8 @@
+/**
+ * Define the stats maps page route boundary.
+ * Coordinates this module's route data flow and rendered output.
+ */
 "use client";
-
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -14,6 +17,10 @@ function duration(seconds: number) {
   return `${Math.floor(total / 60)}m ${total % 60}s`;
 }
 
+/**
+ * Renders the exported statistics view with its route data.
+ * Returns the declared route value; network, cache, and navigation effects follow the implementation.
+ */
 export default function MapsPage() {
   const { t , formatPercent, formatNumber} = useLocalization();
   const searchParams = useSearchParams();

@@ -1,7 +1,9 @@
+/** Render a content card with a continuously moving decorative border. */
 "use client";
 
 import { motion, useReducedMotion as useFmReducedMotion } from "framer-motion";
 
+/** Wrap children in the animated border surface, disabling animation for reduced-motion users. */
 export function MovingBorderCard({
   children,
   className = "",

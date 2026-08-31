@@ -1,3 +1,6 @@
+/** PageLayout component/module.
+ * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ */
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
@@ -11,6 +14,9 @@ import {
 
 const ROUTE_ENTER_EASE = [0.22, 1, 0.36, 1] as const;
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export default function PageLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const reduceMotion = useReducedMotion();

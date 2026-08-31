@@ -1,3 +1,6 @@
+/** LeaderboardChart component/module.
+ * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ */
 "use client";
 
 import { BarChartComponent } from "./Chart";
@@ -10,6 +13,9 @@ export interface LeaderboardChartProps {
   maxRows?: number;
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export default function LeaderboardChart({
   data,
   title,

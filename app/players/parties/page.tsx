@@ -1,3 +1,8 @@
+/**
+ * Define the player route surface for parties page and its local data boundary.
+ * This file owns the page, layout, loading state, or route handler named by its path.
+ * It does not own unrelated player sections or shared library policy.
+ */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -23,6 +28,10 @@ function MatchCount({ count }: { count: number }) {
   return <span className="shrink-0 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-2 py-1 text-xs font-semibold text-cyan-300">{formatNumber(count)} {t("generated.players.match")}{count === 1 ? "" : t("generated.players.es")}</span>;
 }
 
+/**
+ * Render the RankedPartiesPage view for the player parties page route.
+ * Returns the React tree for the route and its declared inputs.
+ */
 export default function RankedPartiesPage() {
   const { t, formatDateTime, formatNumber } = useLocalization();
   const observedAt = formatDateTime;

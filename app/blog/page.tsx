@@ -1,3 +1,7 @@
+/**
+ * Define the blog page responsibility boundary.
+ * Coordinates blog page data loading, authorization, and presentation.
+ */
 import { BLOG_CATEGORIES, getAllPosts, getPostLink, isBlogCategory, type BlogCategory } from "@/lib/blog";
 import { BLOG_COPY_KEYS } from "@/lib/blog-copy";
 import { getServerLocalization } from "@/lib/server-localization";
@@ -5,7 +9,15 @@ import Link from "next/link";
 
 // Blog content is owned by GitHub. Always render against its current contents
 // while keeping this public route at /blog.
+/**
+ * Selects request-fresh rendering for this data-dependent page.
+ * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ */
 export const dynamic = "force-dynamic";
+/**
+ * Handles the exported route operation using its declared request and response contract.
+ * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ */
 export const revalidate = 0;
 
 const CATEGORY_LABEL_KEYS = {
@@ -20,6 +32,10 @@ type BlogPageProps = {
 
 type BlogCategoryFilter = BlogCategory | "all";
 
+/**
+ * Handles the exported route operation using its declared request and response contract.
+ * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ */
 export async function generateMetadata() {
   const { t } = await getServerLocalization();
   const title = t(BLOG_COPY_KEYS.title);
@@ -32,6 +48,7 @@ export async function generateMetadata() {
   };
 }
 
+/** Render the localized blog index, filtering posts by the requested category. */
 export default async function BlogPage({ searchParams }: BlogPageProps) {
   const { t } = await getServerLocalization();
   const { category } = await searchParams;

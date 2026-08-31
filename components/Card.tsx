@@ -1,3 +1,6 @@
+/** Card component/module.
+ * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ */
 import type { HTMLAttributes, ReactNode } from "react";
 import { StableMetricValue } from "@/components/async-state";
 
@@ -9,6 +12,9 @@ export interface CardProps extends HTMLAttributes<HTMLDivElement> {
   opaque?: boolean;
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export default function Card({
   title,
   children,
@@ -56,6 +62,9 @@ export interface StatsItem {
   label: string;
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export function StatsGrid({ items }: { items: StatsItem[] }) {
   return (
     <div className="pc-stats-grid">

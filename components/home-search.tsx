@@ -1,3 +1,6 @@
+/** home-search component/module.
+ * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -22,6 +25,9 @@ type HomeSearchProps = {
   onSearchActiveChange?: (active: boolean) => void;
 };
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export default function HomeSearch({ onSearchActiveChange }: HomeSearchProps) {
   const { t } = useLocalization();
   const reduceMotion = useReducedMotion();

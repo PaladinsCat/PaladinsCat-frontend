@@ -1,3 +1,7 @@
+/**
+ * Define the operations tickets page responsibility boundary.
+ * Coordinates operations tickets page data loading, authorization, and presentation.
+ */
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -7,6 +11,10 @@ import { useAuth } from "@/lib/auth-context";
 import { useLocalization } from "@/lib/localization-context";
 import { createTicket, listTickets, type Ticket, type TicketType } from "@/lib/operations-api";
 const PAGE_SIZE = 20;
+/**
+ * Handles the exported route operation using its declared request and response contract.
+ * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ */
 export default function TicketsPage() {
   const { user,isLoading }=useAuth(); const { t }=useLocalization(); const [tickets,setTickets]=useState<Ticket[]>([]); const [page,setPage]=useState(1); const [pages,setPages]=useState(1); const [type,setType]=useState<TicketType>("bug"); const [sent,setSent]=useState(false); const [error,setError]=useState<string|null>(null); const [submitting,setSubmitting]=useState(false);
   useEffect(()=>{if(isLoading||!user)return;void listTickets(page,PAGE_SIZE).then(result=>{setTickets(result.data);setPages(Math.max(1,result.page.total_pages));}).catch(reason=>setError(reason instanceof Error?reason.message:t("generated.operations.statsLoadFailed")));},[isLoading,page,t,user]);

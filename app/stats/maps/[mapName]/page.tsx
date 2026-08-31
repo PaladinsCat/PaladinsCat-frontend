@@ -1,5 +1,8 @@
+/**
+ * Define the stats maps page route boundary.
+ * Coordinates this module's route data flow and rendered output.
+ */
 "use client";
-
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
@@ -145,6 +148,10 @@ const STATS_SCOPE_LABEL_KEYS = {
   newcomer: "stats.scope.newcomer",
 } as const;
 
+/**
+ * Renders the exported statistics view with its route data.
+ * Returns the declared route value; network, cache, and navigation effects follow the implementation.
+ */
 export default function MapDetailPage() {
   const { formatDuration, formatNumber, formatPercent, formatRecord, t } = useLocalization();
   const params = useParams<{ mapName: string }>();

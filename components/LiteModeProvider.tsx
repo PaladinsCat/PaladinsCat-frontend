@@ -1,3 +1,6 @@
+/** LiteModeProvider component/module.
+ * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ */
 "use client";
 
 import { MotionConfig } from "framer-motion";

@@ -1,3 +1,6 @@
+/** ScrambleText component/module.
+ * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ */
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -70,6 +73,9 @@ function ScrambleLetter({
   );
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export default function ScrambleText({
   text,
   speed = 150,

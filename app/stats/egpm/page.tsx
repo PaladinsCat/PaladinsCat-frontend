@@ -1,5 +1,8 @@
+/**
+ * Define the stats egpm page route boundary.
+ * Coordinates this module's route data flow and rendered output.
+ */
 "use client";
-
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { PerformanceOverviewCard } from "@/components/PerformanceOverviewCard";
@@ -30,6 +33,10 @@ const SORT_OPTIONS = [
   { value: "samples", labelKey: "generated.stats.samples" },
 ] as const;
 
+/**
+ * Renders the exported statistics view with its route data.
+ * Returns the declared route value; network, cache, and navigation effects follow the implementation.
+ */
 export default function EgpmDetailPage() {
   const { t, formatNumber } = useLocalization();
   const format = (value: number) => formatNumber(value, { minimumFractionDigits: 2, maximumFractionDigits: 2 });

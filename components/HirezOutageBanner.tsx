@@ -1,3 +1,6 @@
+/** HirezOutageBanner component/module.
+ * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ */
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -8,6 +11,9 @@ import { useLocalization } from "@/lib/localization-context";
 
 const REFRESH_MS = 60_000;
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export default function HirezOutageBanner() {
   const { t , formatTime} = useLocalization();
   const [status, setStatus] = useState<HirezServiceStatus | null>(null);

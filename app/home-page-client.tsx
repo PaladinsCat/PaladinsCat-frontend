@@ -1,5 +1,8 @@
+/**
+ * Define the home page client responsibility boundary.
+ * Coordinates home page client data loading, authorization, and presentation.
+ */
 "use client";
-
 import { useEffect, useState } from "react";
 import { preload } from "react-dom";
 import Image from "next/image";
@@ -42,6 +45,10 @@ function syncWallpaperModeDom(phase: WallpaperModePhase) {
   else delete root.dataset.homeWallpaperMode;
 }
 
+/**
+ * Handles the exported route operation using its declared request and response contract.
+ * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ */
 export default function HomePage() {
   const { t } = useLocalization();
   const reduceMotion = useReducedMotion();

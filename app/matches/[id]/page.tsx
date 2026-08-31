@@ -1,3 +1,7 @@
+/**
+ * Render the matches id page and its data composition.
+ * Assemble the page content exposed at this location.
+ */
 import { notFound } from "next/navigation";
 import { deriveMissingMatchCreditRates, type MatchDetailWithBans } from "@/lib/api-client";
 import { fetchServerJson } from "@/lib/server-api";
@@ -14,8 +18,16 @@ type MatchResponse = {
 // Match documents are public but contain a request-specific path and may read
 // hot or cold storage. Keep the response dynamic and never share it at the
 // HTML layer; the backend owns the safe data cache for this read.
+/**
+ * Select dynamic rendering for matches id page.
+ * Return the framework rendering mode constant used by this page.
+ */
 export const dynamic = "force-dynamic";
 
+/**
+ * Render the MatchDetailPage view for matches id page.
+ * Return the React tree for the declared inputs and page data.
+ */
 export default async function MatchDetailPage({
   params,
 }: {

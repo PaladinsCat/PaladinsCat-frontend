@@ -1,3 +1,8 @@
+/**
+ * Verify wallpaper accent extraction across grayscale, colorful, dark, and flat scenes.
+ *
+ * The tests exercise pure pixel transforms and perform no network, authentication, cache, or persistence work.
+ */
 import assert from "node:assert/strict";
 import test from "node:test";
 import { pickWallpaperAccent, pickWallpaperAccents } from "./wallpaper-accent.ts";

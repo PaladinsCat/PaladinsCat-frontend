@@ -1,3 +1,6 @@
+/** async-state component/module.
+ * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ */
 "use client";
 
 import type { ButtonHTMLAttributes, ReactNode } from "react";
@@ -9,6 +12,9 @@ import { useRouteSettled } from "@/lib/route-transition-context";
 
 const transition = { duration: 0.2, ease: "easeOut" as const };
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export function ContentFade({ children, className }: { children: ReactNode; className?: string }) {
   const reduceMotion = useReducedMotion();
   const routeSettled = useRouteSettled();
@@ -24,6 +30,9 @@ export function ContentFade({ children, className }: { children: ReactNode; clas
   );
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export function StableMetricValue({
   value,
   className,
@@ -49,6 +58,9 @@ export function StableMetricValue({
   );
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export function LoadingPanel({
   compact = false,
   className,
@@ -69,6 +81,9 @@ export function LoadingPanel({
   );
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export function LoadingIndicator({ className }: { className?: string }) {
   const { t } = useLocalization();
   return (
@@ -79,6 +94,9 @@ export function LoadingIndicator({ className }: { className?: string }) {
   );
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export function LoadingOverlay({ visible }: { visible: boolean }) {
   const reduceMotion = useReducedMotion();
   return (
@@ -100,6 +118,9 @@ export function LoadingOverlay({ visible }: { visible: boolean }) {
   );
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export function EmptyState({
   title,
   description,
@@ -121,6 +142,9 @@ export function EmptyState({
   );
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export function ErrorState({
   title,
   message,
@@ -153,6 +177,9 @@ interface AsyncButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export function AsyncButton({ loading = false, children, className, disabled, ...props }: AsyncButtonProps) {
   const { t } = useLocalization();
   return (

@@ -1,3 +1,8 @@
+/**
+ * Define the player route surface for id player-profile-client and its local data boundary.
+ * This file owns the page, layout, loading state, or route handler named by its path.
+ * It does not own unrelated player sections or shared library policy.
+ */
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
@@ -102,6 +107,10 @@ interface ChampionRating {
   losses: number;
 }
 
+/**
+ * Describe the API response consumed by the player profile client.
+ * Defines the typed fields mapped from backend data into the rendered profile.
+ */
 export interface PlayerResponse {
   player: PlayerData;
   queueRatings: QueueRating[];
@@ -173,12 +182,20 @@ function StatGrid({ children }: { children: React.ReactNode }) {
 
 
 // User-facing error keys — resolved at the UI layer via t()
+/**
+ * Define translation keys for failures in the player id player-profile-client view.
+ * Returns the stable key map consumed by localized error messages.
+ */
 export const PLAYER_PROFILE_ERROR_KEYS = {
   failedToLoadProfile: "generated.players.failedToLoadProfile",
   failedToRefreshProfile: "generated.players.failedToRefreshProfile",
   failedToFetchLiveMatchData: "generated.players.failedToFetchLiveMatchData",
 } as const;
 
+/**
+ * Render the PlayerProfileClient view for the player id player-profile-client route.
+ * Returns the React tree for the route and its declared inputs.
+ */
 export default function PlayerProfileClient({
   id,
   initialResponse,

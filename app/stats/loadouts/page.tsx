@@ -1,5 +1,8 @@
+/**
+ * Define the stats loadouts page route boundary.
+ * Coordinates this module's route data flow and rendered output.
+ */
 "use client";
-
 import { useEffect, useState } from "react";
 import Card from "@/components/Card";
 import { fetchLoadouts, type LoadoutStat } from "@/lib/api-client";
@@ -16,6 +19,10 @@ import { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation } from "@/
 type SortKey = "championName" | "totalUses" | "winRate" | "avgDpm" | "avgHpm";
 type SortDir = "asc" | "desc";
 
+/**
+ * Renders the exported statistics view with its route data.
+ * Returns the declared route value; network, cache, and navigation effects follow the implementation.
+ */
 export default function LoadoutsPage() {
   const { t , formatPercent, formatNumber} = useLocalization();
   const [loadouts, setLoadouts] = useState<LoadoutStat[]>([]);

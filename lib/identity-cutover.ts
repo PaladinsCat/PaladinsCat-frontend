@@ -6,4 +6,7 @@ export function isIdentityCutoverEnabled(value = process.env.NEXT_PUBLIC_IDENTIT
   return value === "true";
 }
 
+/** Apply identityCutoverEnabled to the declared input values.
+ * Contract: returns the module-specific validated, stored, formatted, or resolved value without external side effects.
+ */
 export const identityCutoverEnabled = isIdentityCutoverEnabled();

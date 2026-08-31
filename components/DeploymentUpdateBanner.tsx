@@ -1,3 +1,6 @@
+/** DeploymentUpdateBanner component/module.
+ * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -62,6 +65,9 @@ const PHASE_COPY: Partial<Record<DeploymentPhase, { titleKey: TranslationKey; bo
   failed: { titleKey: "status.updateFailed", bodyKey: "status.updateFailedMessage" },
 };
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export default function DeploymentUpdateBanner() {
   const { t } = useLocalization();
   const [state, setState] = useState<DeploymentState | null>(null);

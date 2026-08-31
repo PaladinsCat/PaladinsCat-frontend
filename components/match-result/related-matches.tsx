@@ -1,3 +1,7 @@
+/**
+ * Renders related matches data for match-result views.
+ * Keeps the component's interaction and accessibility behavior intact.
+ */
 "use client";
 
 import Link from "next/link";
@@ -12,6 +16,9 @@ function formatDuration(seconds: number): string {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
+/** Render RelatedMatches from its declared props and match data.
+ * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
+ */
 export default function RelatedMatches({ related, matchId, loading }: { related: MatchSearchResult[]; matchId: number; loading: boolean }) {
   const { t } = useLocalization();
   if (loading) return null;

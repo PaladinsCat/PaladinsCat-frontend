@@ -1,5 +1,8 @@
+/**
+ * Define the stats metrics page route boundary.
+ * Coordinates this module's route data flow and rendered output.
+ */
 "use client";
-
 import { useEffect, useMemo, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -423,6 +426,10 @@ function MetricsPageClient() {
   );
 }
 
+/**
+ * Renders the exported statistics view with its route data.
+ * Returns the declared route value; network, cache, and navigation effects follow the implementation.
+ */
 export default function MetricsPage() {
   return (
     <Suspense fallback={<RouteSkeleton variant="dashboard" />}>

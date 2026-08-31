@@ -1,8 +1,14 @@
+/** route-skeleton component/module.
+ * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ */
 import { cn } from "@/lib/utils";
 import { LoadingIndicator } from "@/components/async-state";
 
 type RouteSkeletonVariant = "dashboard" | "list" | "profile" | "match" | "detail";
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export function DataCardSkeleton({
   rows = 5,
   columns = 1,
@@ -29,6 +35,9 @@ export function DataCardSkeleton({
   );
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export function ChartCardSkeleton({ className }: { className?: string }) {
   return (
     <div aria-hidden="true" className={cn("flex min-h-56 items-end gap-2 rounded-xl border border-pc-border bg-pc-bg-elevated p-4", className)}>
@@ -37,6 +46,9 @@ export function ChartCardSkeleton({ className }: { className?: string }) {
   );
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export function DataTableSkeleton({ rows = 7, className }: { rows?: number; className?: string }) {
   return (
     <div aria-hidden="true" className={cn("overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated", className)}>
@@ -48,6 +60,9 @@ export function DataTableSkeleton({ rows = 7, className }: { rows?: number; clas
   );
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export function RouteSkeleton({ variant = "dashboard" }: { variant?: RouteSkeletonVariant }) {
   if (variant === "profile") {
     return (

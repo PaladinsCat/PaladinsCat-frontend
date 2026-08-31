@@ -1,3 +1,6 @@
+/** tier-list-editor component/module.
+ * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ */
 "use client";
 
 import { useEffect, useMemo, useState, type DragEvent, type FormEvent } from "react";
@@ -42,6 +45,9 @@ function groupsFromEntries(champions: Champion[], entries: TierListEntry[] = [])
   return groups;
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export default function TierListEditor({
   initialList,
 }: {

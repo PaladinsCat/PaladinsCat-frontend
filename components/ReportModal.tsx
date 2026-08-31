@@ -1,3 +1,6 @@
+/** ReportModal component/module.
+ * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ */
 "use client";
 
 import { useState, useRef, useEffect } from "react";
@@ -90,6 +93,9 @@ interface ReportModalProps {
   submitReport?: (targetId: string | number, options: ReportOptions) => Promise<{ success: boolean; message: string }>;
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export default function ReportModal({ playerId, type, onClose, onSuccess, submitReport = reportPlayer }: ReportModalProps) {
   const { t } = useLocalization();
   const [selectedReason, setSelectedReason] = useState("");

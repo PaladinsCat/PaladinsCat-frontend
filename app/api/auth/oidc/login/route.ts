@@ -1,9 +1,17 @@
+/**
+ * Define the api auth oidc login route responsibility boundary.
+ * Coordinates api auth oidc login route data loading, authorization, and presentation.
+ */
 import { NextRequest, NextResponse } from "next/server";
 import { buildParAuthorizationUrl, buildPushedAuthorizationRequest, createTransaction, normalizedHttpsIssuer, parsePushedAuthorizationResponse, requireSameOrigin, resolveInternalIssuer, safeReturnPath } from "@/lib/oidc-security";
 import { oidcBffServiceHeaders } from "@/lib/oidc-bff-service";
 import { oidcClientSecret } from "@/lib/oidc-client-secret";
 import { isIP } from "node:net";
 
+/**
+ * Selects the Node.js runtime required by this server handler.
+ * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ */
 export const runtime = "nodejs";
 const TX_COOKIE = "__Host-pc_oidc_txn";
 const PAR_MAX_BYTES = 8 * 1024;
@@ -60,6 +68,10 @@ async function startOidc(intent: "login" | "create", returnPath: string, clientI
   return response;
 }
 
+/**
+ * Handles the exported route operation using its declared request and response contract.
+ * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ */
 export async function POST(request: NextRequest) {
   if (!requireSameOrigin(request.headers.get("origin"), origin())) return new NextResponse("Forbidden", { status: 403 });
   const contentType = request.headers.get("content-type")?.split(";", 1)[0].trim().toLowerCase();
@@ -72,6 +84,10 @@ export async function POST(request: NextRequest) {
   return startOidc(requestedIntent === "create" ? "create" : "login", safeReturnPath(String(form.get("return") || "/")), clientAddress(request));
 }
 
+/**
+ * Handles the exported route operation using its declared request and response contract.
+ * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ */
 export async function GET(request: NextRequest) {
   const entries = [...request.nextUrl.searchParams.entries()];
   if (entries.length === 0) return startOidc("login", "/", clientAddress(request));

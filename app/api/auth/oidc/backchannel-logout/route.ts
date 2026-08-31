@@ -1,7 +1,15 @@
+/**
+ * Define the api auth oidc backchannel logout route responsibility boundary.
+ * Coordinates api auth oidc backchannel logout route data loading, authorization, and presentation.
+ */
 import { NextRequest, NextResponse } from "next/server";
 import { normalizedHttpsIssuer, resolveInternalIssuer, validateLogoutToken } from "@/lib/oidc-security";
 import { oidcBffServiceHeaders } from "@/lib/oidc-bff-service";
 
+/**
+ * Selects the Node.js runtime required by this server handler.
+ * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ */
 export const runtime = "nodejs";
 function backend() {
   const base = (process.env.NEXT_SERVER_API_URL || "http://localhost:3005").replace(/\/$/, "");
@@ -11,6 +19,10 @@ function backend() {
 // Keycloak POSTs a form-encoded logout_token (RS256, typ=Logout) here on backchannel logout.
 // This route verifies the token server-side, then calls the service-token-protected backend
 // revocation route. It is never a browser-facing page and returns no user data.
+/**
+ * Handles the exported route operation using its declared request and response contract.
+ * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ */
 export async function POST(request: NextRequest) {
   const issuer = normalizedHttpsIssuer(process.env.OIDC_ISSUER);
   const clientId = process.env.OIDC_CLIENT_ID;

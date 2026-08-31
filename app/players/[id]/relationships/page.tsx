@@ -1,3 +1,8 @@
+/**
+ * Define the player route surface for id relationships page and its local data boundary.
+ * This file owns the page, layout, loading state, or route handler named by its path.
+ * It does not own unrelated player sections or shared library policy.
+ */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -11,6 +16,10 @@ import { useLocalization } from "@/lib/localization-context";
 
 type Mode = "teammates" | "opponents" | "party";
 
+/**
+ * Render the PlayerRelationshipsPage view for the player id relationships page route.
+ * Returns the React tree for the route and its declared inputs.
+ */
 export default function PlayerRelationshipsPage() {
   const { t, formatNumber } = useLocalization();
   const params = useParams<{ id: string }>();

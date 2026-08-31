@@ -1,3 +1,8 @@
+/**
+ * Define the player route surface for cheaters page and its local data boundary.
+ * This file owns the page, layout, loading state, or route handler named by its path.
+ * It does not own unrelated player sections or shared library policy.
+ */
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -45,6 +50,10 @@ async function fetchAllCheaterPrivateAccounts(name: string): Promise<PrivateAcco
   }
 }
 
+/**
+ * Render the CheatersPage view for the player cheaters page route.
+ * Returns the React tree for the route and its declared inputs.
+ */
 export default function CheatersPage() {
   const { t, formatNumber } = useLocalization();
   const [data, setData] = useState<CheaterPlayer[]>([]);

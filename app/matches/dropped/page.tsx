@@ -1,3 +1,7 @@
+/**
+ * Render the matches dropped page and its data composition.
+ * Assemble the page content exposed at this location.
+ */
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -31,6 +35,10 @@ function reasonLabel(value: string): string {
   return value.replaceAll("_", " ");
 }
 
+/**
+ * Render the DroppedMatchesPage view for matches dropped page.
+ * Return the React tree for the declared inputs and page data.
+ */
 export default function DroppedMatchesPage() {
   const { t } = useLocalization();
   const [date, setDate] = useState(todayUtc);

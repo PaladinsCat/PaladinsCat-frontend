@@ -1,5 +1,8 @@
+/**
+ * Define the stats platforms platforms client route boundary.
+ * Coordinates this module's route data flow and rendered output.
+ */
 "use client";
-
 import { useEffect, useState } from "react";
 import { fetchPlatforms } from "@/lib/api-client";
 import { BarChartComponent } from "@/components/Chart";
@@ -9,6 +12,10 @@ import { useLocalization } from "@/lib/localization-context";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
 import { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
+/**
+ * Describe PlatformStat.
+ * Returns the declared route value; network, cache, and navigation effects follow the implementation.
+ */
 export type PlatformStat = {
   platform: string;
   championId: number;
@@ -19,6 +26,10 @@ export type PlatformStat = {
   avgHpm: number;
 };
 
+/**
+ * Renders the exported statistics view with its route data.
+ * Returns the declared route value; network, cache, and navigation effects follow the implementation.
+ */
 export default function PlatformsPage({ initialPlatforms = null }: { initialPlatforms?: PlatformStat[] | null }) {
   const { t } = useLocalization();
   const [platforms, setPlatforms] = useState<PlatformStat[]>(initialPlatforms ?? []);

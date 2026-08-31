@@ -1,3 +1,9 @@
+/**
+ * Maintain the checked-in champion catalog used by search and filter fallbacks.
+ *
+ * This module supplies identity and role metadata only; it does not synthesize
+ * live statistics or leaderboard records.
+ */
 export interface StaticChampion {
   id: number;
   name: string;
@@ -7,6 +13,11 @@ export interface StaticChampion {
 // Lightweight real champion roster used by search and filters. This is
 // reference metadata only; missing stats/leaderboard data should render empty
 // states or 404s, never synthetic rows.
+/**
+ * List the canonical champion IDs, names, and roles available to local UI filters.
+ *
+ * Returns static metadata without network, authentication, cache, or persistence effects.
+ */
 export const STATIC_CHAMPIONS: StaticChampion[] = [
   {
     "id": 1,

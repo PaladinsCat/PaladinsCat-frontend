@@ -1,3 +1,8 @@
+/**
+ * Define the player route surface for players-page-client and its local data boundary.
+ * This file owns the page, layout, loading state, or route handler named by its path.
+ * It does not own unrelated player sections or shared library policy.
+ */
 "use client";
 
 import { useEffect, useMemo, useState, type ComponentType } from "react";
@@ -47,6 +52,10 @@ const EMPTY_COUNTS: PlayersOverview["communityCounts"] = {
   altAccounts: 0,
 };
 
+/**
+ * Render the PlayersPageClient view for the player players-page-client route.
+ * Returns the React tree for the route and its declared inputs.
+ */
 export default function PlayersPageClient({ initialOverview }: { initialOverview: PlayersOverview | null }) {
   const { t, formatNumber, formatDateTime } = useLocalization();
   const [communityCounts, setCommunityCounts] = useState(initialOverview?.communityCounts ?? EMPTY_COUNTS);

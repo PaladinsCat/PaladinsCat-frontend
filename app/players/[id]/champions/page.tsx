@@ -1,3 +1,8 @@
+/**
+ * Define the player route surface for id champions page and its local data boundary.
+ * This file owns the page, layout, loading state, or route handler named by its path.
+ * It does not own unrelated player sections or shared library policy.
+ */
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -20,6 +25,10 @@ const ROLES = [
 
 type SortKey = "level" | "kda" | "winRate" | "playTime" | "rating";
 
+/**
+ * Render the PlayerChampionStatsPage view for the player id champions page route.
+ * Returns the React tree for the route and its declared inputs.
+ */
 export default function PlayerChampionStatsPage() {
   const { formatDuration, formatNumber, t } = useLocalization();
   const params = useParams<{ id: string }>();

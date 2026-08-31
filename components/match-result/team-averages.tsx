@@ -5,6 +5,9 @@
 import type { MatchResultPlayer, TeamAverages } from "./types";
 import { LocalizedText } from "@/lib/localization-context";
 
+/** Render TeamAverages from its declared props and match data.
+ * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
+ */
 export default function TeamAverages({ averages }: { averages: TeamAverages }) {
   return (
     <div className="flex flex-wrap gap-4 justify-center text-center">

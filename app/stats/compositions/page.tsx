@@ -1,5 +1,8 @@
+/**
+ * Define the stats compositions page route boundary.
+ * Coordinates this module's route data flow and rendered output.
+ */
 "use client";
-
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { fetchMatchCompositions, type MatchCompositionStat } from "@/lib/api-client";
@@ -21,6 +24,10 @@ const CLASS_COLUMNS = [
   { key: "support", labelKey: "common.roles.support", icon: "/images/icons/Class_Support_Icon.avif" },
 ] as const;
 
+/**
+ * Renders the exported statistics view with its route data.
+ * Returns the declared route value; network, cache, and navigation effects follow the implementation.
+ */
 export default function CompositionStatsPage() {
   const { t, formatNumber, formatPercent, formatRecord } = useLocalization();
   const [rows, setRows] = useState<MatchCompositionStat[]>([]);

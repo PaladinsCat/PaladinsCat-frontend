@@ -1,5 +1,8 @@
+/**
+ * Define the stats skins page route boundary.
+ * Coordinates this module's route data flow and rendered output.
+ */
 "use client";
-
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -35,6 +38,10 @@ function championRole(champions: Champion[], championId: number): string {
   return champions.find((champion) => champion.id === championId)?.roles?.[0] ?? "";
 }
 
+/**
+ * Renders the exported statistics view with its route data.
+ * Returns the declared route value; network, cache, and navigation effects follow the implementation.
+ */
 export default function SkinStatsPage() {
   const { t, formatNumber, formatPercent, formatRecord } = useLocalization();
   const searchParams = useSearchParams();

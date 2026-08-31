@@ -1,5 +1,8 @@
+/**
+ * Define the tierlists edit page responsibility boundary.
+ * Coordinates tierlists edit page data loading, authorization, and presentation.
+ */
 "use client";
-
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import TierListEditor from "@/components/tier-list-editor";
@@ -8,6 +11,10 @@ import { fetchTierList, type TierListSummary } from "@/lib/tierlists-api";
 import { useLocalization } from "@/lib/localization-context";
 import { useAuth } from "@/lib/auth-context";
 
+/**
+ * Handles the exported route operation using its declared request and response contract.
+ * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ */
 export default function EditTierListPage({ params }: { params: Promise<{ id: string }> }) {
   const { t } = useLocalization();
   const { user, isLoading: authLoading } = useAuth();

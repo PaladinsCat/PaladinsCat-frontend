@@ -1,3 +1,6 @@
+/** PerformanceOverviewCard component/module.
+ * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ */
 "use client";
 
 import { useLocalization } from "@/lib/localization-context";
@@ -18,6 +21,9 @@ interface MetricRow {
   p90: number;
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export function PerformanceOverviewCard({
   metrics,
 }: {

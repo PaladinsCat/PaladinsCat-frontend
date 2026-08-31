@@ -1,5 +1,8 @@
+/**
+ * Define the stats regions page route boundary.
+ * Coordinates this module's route data flow and rendered output.
+ */
 "use client";
-
 import { useEffect, useState } from "react";
 import Card from "@/components/Card";
 import { fetchRegions, type RegionStat } from "@/lib/api-client";
@@ -9,6 +12,10 @@ import { useLocalization } from "@/lib/localization-context";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
 import { SpotlightCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
+/**
+ * Renders the exported statistics view with its route data.
+ * Returns the declared route value; network, cache, and navigation effects follow the implementation.
+ */
 export default function RegionsPage() {
   const { t , formatPercent} = useLocalization();
   const [regions, setRegions] = useState<RegionStat[]>([]);

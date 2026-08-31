@@ -1,3 +1,6 @@
+/** Resolves champion icon assets with safe fallbacks.
+ * The module preserves canonical data, asset, or metadata behavior used by existing callers.
+ */
 // Champion icon paths — auto-resolved from public/images/champions/
 // Pattern: /images/champions/Champion {Name} Icon.avif
 // Generic fallback for champions without icons

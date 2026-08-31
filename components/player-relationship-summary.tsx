@@ -1,3 +1,6 @@
+/** player-relationship-summary component/module.
+ * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -7,6 +10,9 @@ import PlayerRelationshipBars from "@/components/player-relationship-bars";
 import { fetchPlayerRelationshipSummary, type PlayerRelationshipSummary } from "@/lib/api-client";
 import { useLocalization } from "@/lib/localization-context";
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export default function PlayerRelationshipSummaryCard({ playerId }: { playerId: string }) {
   const { t, formatNumber } = useLocalization();
   const [summary, setSummary] = useState<PlayerRelationshipSummary | null>(null);

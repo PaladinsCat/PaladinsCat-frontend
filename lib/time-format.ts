@@ -1,8 +1,15 @@
+/**
+ * Defines time-format's shared contracts and runtime helpers.
+ * Keep behavior aligned with its callers and browser/server boundary.
+ */
 import { getPreferredTimeZone } from "@/lib/time-zone";
 
 const HAS_EXPLICIT_TIME_ZONE = /(?:Z|[+-]\d{2}:?\d{2})$/i;
 const SQL_TIMESTAMP = /^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?)$/;
 
+/**
+ * Transforms or validates parse backend date according to this module's data contract.
+ */
 export function parseBackendDate(value: string | null | undefined): Date | null {
   if (!value) return null;
   const trimmed = value.trim();
@@ -16,6 +23,9 @@ export function parseBackendDate(value: string | null | undefined): Date | null 
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
+/**
+ * Transforms or validates format local date time according to this module's data contract.
+ */
 export function formatLocalDateTime(value: string | null | undefined, locale?: string): string {
   const date = parseBackendDate(value);
   if (!date) return "-";
@@ -26,6 +36,9 @@ export function formatLocalDateTime(value: string | null | undefined, locale?: s
   });
 }
 
+/**
+ * Transforms or validates format local date according to this module's data contract.
+ */
 export function formatLocalDate(value: string | null | undefined, locale?: string): string {
   const date = parseBackendDate(value);
   if (!date) return "-";
@@ -35,6 +48,9 @@ export function formatLocalDate(value: string | null | undefined, locale?: strin
   });
 }
 
+/**
+ * Transforms or validates format local month day according to this module's data contract.
+ */
 export function formatLocalMonthDay(value: string | null | undefined, locale?: string): string {
   const date = parseBackendDate(value);
   if (!date) return "-";
@@ -45,6 +61,9 @@ export function formatLocalMonthDay(value: string | null | undefined, locale?: s
   });
 }
 
+/**
+ * Transforms or validates format local hour from utc bucket according to this module's data contract.
+ */
 export function formatLocalHourFromUtcBucket(date: string | null | undefined, hour: number | null | undefined, locale?: string): string {
   if (!date || hour == null || !Number.isFinite(hour)) return "-";
   const [year, month, day] = date.split("-").map((part) => Number.parseInt(part, 10));
@@ -61,6 +80,9 @@ const MINUTE = 60 * 1000;
 const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 
+/**
+ * Transforms or validates format relative time according to this module's data contract.
+ */
 export function formatRelativeTime(value: string | null | undefined, locale?: string): string {
   const date = parseBackendDate(value);
   if (!date) return "-";
@@ -82,6 +104,9 @@ export function formatRelativeTime(value: string | null | undefined, locale?: st
   });
 }
 
+/**
+ * Transforms or validates format local time according to this module's data contract.
+ */
 export function formatLocalTime(value: string | null | undefined, locale?: string): string {
   const date = parseBackendDate(value);
   if (!date) return "-";

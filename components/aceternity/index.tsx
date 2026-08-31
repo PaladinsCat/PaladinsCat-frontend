@@ -1,3 +1,4 @@
+/** Compose the Aceternity decorative primitives into reusable page-surface layouts. */
 "use client";
 
 import { SpotlightCard } from "./SpotlightCard";
@@ -6,6 +7,7 @@ import { BackgroundGradientAnimation } from "./BackgroundGradientAnimation";
 
 export { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation };
 
+/** Wrap page children with the animated background and foreground stacking context. */
 export function AceternityLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative overflow-hidden">
@@ -15,6 +17,7 @@ export function AceternityLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
+/** Group section content with the shared Aceternity spacing and surface treatment. */
 export function AceternitySection({
   children,
   className = "",
@@ -25,6 +28,7 @@ export function AceternitySection({
   return <MovingBorderCard className={className}>{children}</MovingBorderCard>;
 }
 
+/** Render a bordered content card using the moving-border visual treatment. */
 export function AceternityCard({
   children,
   className = "",

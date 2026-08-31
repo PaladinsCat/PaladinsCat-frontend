@@ -1,3 +1,8 @@
+/**
+ * Define the player route surface for leaderboard page and its local data boundary.
+ * This file owns the page, layout, loading state, or route handler named by its path.
+ * It does not own unrelated player sections or shared library policy.
+ */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -52,6 +57,10 @@ function RankBadge({ rank }: { rank: number }) {
   return <span className="inline-flex items-center justify-center w-7 h-7 text-pc-text-muted text-sm">{rank}</span>;
 }
 
+/**
+ * Render the LeaderboardPage view for the player leaderboard page route.
+ * Returns the React tree for the route and its declared inputs.
+ */
 export default function LeaderboardPage() {
   const { t , formatNumber, formatPercent} = useLocalization();
   const [tier, setTier] = useState(26);

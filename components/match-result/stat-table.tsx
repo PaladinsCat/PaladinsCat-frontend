@@ -1,3 +1,7 @@
+/**
+ * Renders stat table data for match-result views.
+ * Keeps the component's interaction and accessibility behavior intact.
+ */
 "use client";
 
 import Link from "next/link";
@@ -19,6 +23,9 @@ interface StatTableRowProps {
   wins: boolean;
 }
 
+/** Render StatTable from its declared props and match data.
+ * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
+ */
 export default function StatTable({ player, fact, wins }: StatTableRowProps) {
   const { t, formatNumber, formatPercent } = useLocalization();
   const [expanded, setExpanded] = useState(false);

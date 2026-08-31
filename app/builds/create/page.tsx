@@ -1,3 +1,7 @@
+/**
+ * Render the builds create page and its data composition.
+ * Assemble the page content exposed at this location.
+ */
 "use client";
 
 import { useEffect, useMemo, useState, type FormEvent, type KeyboardEvent } from "react";
@@ -179,6 +183,10 @@ function CardTile({ card, selection, disabled, onToggle, onLevelChange }: {
     </div>
   );
 }
+/**
+ * Render the CreateBuildPage view for builds create page.
+ * Return the React tree for the declared inputs and page data.
+ */
 export default function CreateBuildPage() {
   const { t } = useLocalization();
   const router = useRouter();

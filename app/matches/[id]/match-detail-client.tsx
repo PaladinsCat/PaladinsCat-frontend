@@ -1,3 +1,7 @@
+/**
+ * Manage interactive state for the matches id match-detail-client client view.
+ * Coordinate local events and consume the declared component inputs.
+ */
 "use client";
 
 /**
@@ -174,6 +178,10 @@ function storedProfileForMatch(player: MatchPlayerDetail): PlayerProfileData | n
 
 /* ── Page component ── */
 
+/**
+ * Render the MatchDetailPage view for matches id match-detail-client.
+ * Return the React tree for the declared inputs and page data.
+ */
 export default function MatchDetailPage({ initialMatch = null }: { initialMatch?: MatchDetailWithBans | null }) {
   const { t } = useLocalization();
   const params = useParams();

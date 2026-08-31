@@ -75,6 +75,9 @@ const iconMap: Record<string, React.ReactNode> = {
   ranked: <TrophyIcon />,
 };
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export default function Badge({ variant = "default", children, className = "" }: BadgeProps) {
   const style = variantStyles[variant];
   const icon = iconMap[variant];

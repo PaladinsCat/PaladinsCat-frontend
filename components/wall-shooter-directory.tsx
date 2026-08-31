@@ -1,3 +1,6 @@
+/** wall-shooter-directory component/module.
+ * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -13,6 +16,9 @@ import { hasPlayerTag } from "@/lib/player-tag-threshold";
 
 const PAGE_SIZE = 32;
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export default function WallShooterDirectory() {
   const { t, formatNumber } = useLocalization();
   const [players, setPlayers] = useState<AutomaticWallShooterPlayer[]>([]);

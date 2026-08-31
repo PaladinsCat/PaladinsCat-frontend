@@ -1,3 +1,6 @@
+/** performance-range-bell-curve component/module.
+ * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ */
 import type { PerformanceMetricSummary } from "@/lib/api-client";
 
 type Labels = {

@@ -1,3 +1,6 @@
+/** Button component/module.
+ * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ */
 import Link from "next/link";
 
 export type ButtonVariant = "primary" | "secondary" | "ghost";
@@ -11,6 +14,9 @@ export interface ButtonProps {
   type?: "button" | "submit";
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export default function Button({
   variant = "primary",
   children,
@@ -44,6 +50,9 @@ export interface LinkButtonProps {
   className?: string;
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export function LinkButton({
   variant = "primary",
   children,

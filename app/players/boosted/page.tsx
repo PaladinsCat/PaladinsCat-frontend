@@ -1,3 +1,8 @@
+/**
+ * Define the player route surface for boosted page and its local data boundary.
+ * This file owns the page, layout, loading state, or route handler named by its path.
+ * It does not own unrelated player sections or shared library policy.
+ */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -56,6 +61,10 @@ async function fetchAllBoostedPlayers(name: string): Promise<BoostedPlayer[]> {
   return details.flatMap((detail) => detail.status === "fulfilled" ? [detail.value.player] : []);
 }
 
+/**
+ * Render the BoostedPlayersPage view for the player boosted page route.
+ * Returns the React tree for the route and its declared inputs.
+ */
 export default function BoostedPlayersPage() {
   const { t , formatNumber} = useLocalization();
   const [players, setPlayers] = useState<BoostedPlayer[]>([]);
