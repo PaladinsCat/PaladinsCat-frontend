@@ -52,6 +52,7 @@ export function MatchPlayerLink({ player, className = "" }: { player: MatchPlaye
     <PlayerName
       playerId={player.player_id}
       cheater={player.profile_snapshot?.cheater}
+      exploiter={player.profile_snapshot?.exploiter}
       susCount={player.profile_snapshot?.sus_count}
       verified={player.profile_snapshot?.verified}
     >

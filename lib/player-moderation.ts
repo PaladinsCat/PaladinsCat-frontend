@@ -1,5 +1,6 @@
 export type PlayerModeration = {
   cheater: boolean;
+  exploiter: boolean;
   susCount: number;
   dropper: boolean;
   dropperVoteCount: number;
@@ -23,6 +24,7 @@ export type PlayerModeration = {
 
 const EMPTY: PlayerModeration = {
   cheater: false,
+  exploiter: false,
   susCount: 0,
   dropper: false,
   dropperVoteCount: 0,
@@ -62,6 +64,7 @@ export function mergePlayerModeration(
 ): PlayerModeration {
   return {
     cheater: supplied.cheater === undefined ? fallback.cheater : Boolean(supplied.cheater),
+    exploiter: supplied.exploiter === undefined ? fallback.exploiter : Boolean(supplied.exploiter),
     susCount: supplied.susCount === undefined ? fallback.susCount : Number(supplied.susCount) || 0,
     dropper: supplied.dropper === undefined ? fallback.dropper : Boolean(supplied.dropper),
     dropperVoteCount: supplied.dropperVoteCount === undefined ? fallback.dropperVoteCount : Number(supplied.dropperVoteCount) || 0,
@@ -87,6 +90,7 @@ export function mergePlayerModeration(
 type BulkPlayer = {
   id: string | number;
   cheater?: boolean;
+  exploiter?: boolean;
   sus_count?: number;
   dropper?: boolean;
   dropper_vote_count?: number;
@@ -115,6 +119,7 @@ function moderationRows(json: { data?: { players?: BulkPlayer[] }; players?: Bul
 function moderationFromRow(player: BulkPlayer): PlayerModeration {
   return {
     cheater: Boolean(player.cheater),
+    exploiter: Boolean(player.exploiter),
     susCount: Number(player.sus_count ?? 0),
     dropper: Boolean(player.dropper),
     dropperVoteCount: Number(player.dropper_vote_count ?? 0),
@@ -185,6 +190,7 @@ export async function fetchPrivateAccountModerationBatch(
   };
   return new Map((json.accounts ?? []).map((account) => [Number(account.id), {
     cheater: Boolean(account.cheater),
+    exploiter: false,
     susCount: Number(account.sus_count ?? 0),
     dropper: false,
     dropperVoteCount: 0,

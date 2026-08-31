@@ -98,6 +98,7 @@ async function withCurrentStoredModeration(detail: MatchDetailWithBans): Promise
         profile_snapshot: {
           ...player.profile_snapshot,
           cheater: current.cheater,
+          exploiter: current.exploiter,
           sus_count: current.susCount,
         },
       };
@@ -152,6 +153,7 @@ function storedProfileForMatch(player: MatchPlayerDetail): PlayerProfileData | n
     capturedAt: snapshot.captured_at,
     snapshotSource: snapshot.source,
     cheater: snapshot.cheater === true,
+    exploiter: snapshot.exploiter === true,
     susCount: finiteNumber(snapshot.sus_count) ?? 0,
     verified: snapshot.verified === true,
     totalMatches: globalMatches,
