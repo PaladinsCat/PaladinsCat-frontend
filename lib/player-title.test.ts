@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { parsePlayerTitle, parsePlayerTitleSegments } from "./player-title.ts";
+import { parsePlayerTitle, parsePlayerTitleSegments, stripPlayerTitleMarkup } from "./player-title.ts";
 
 test("parses a double-quoted hex color title (production sample)", () => {
   const parsed = parsePlayerTitle('<font color="#b52834">never forgives, never forgets</font>');
@@ -31,17 +31,21 @@ test("plain text titles pass through without a color", () => {
   assert.deepEqual(parsePlayerTitle(""), { text: "", color: null });
 });
 
-test("rejects markup that is not a single well-formed font tag", () => {
+test("strips markup when the title is not a well-formed font segment", () => {
   assert.deepEqual(parsePlayerTitle("<font color='#b52834'>unclosed"), {
-    text: "<font color='#b52834'>unclosed",
+    text: "unclosed",
     color: null,
   });
-  assert.deepEqual(parsePlayerTitle('<b>bold</b>'), { text: "<b>bold</b>", color: null });
+  assert.deepEqual(parsePlayerTitle('<b>bold</b>'), { text: "bold", color: null });
 });
 
-test("rejects nested tags inside the font tag", () => {
+test("strips nested tags while preserving the font color", () => {
+  assert.deepEqual(parsePlayerTitle('<font color="#99ff02"><b>Evil Mojo</b></font>'), {
+    text: "Evil Mojo",
+    color: "#99ff02",
+  });
   const parsed = parsePlayerTitle('<font color="red"><img src=x onerror=alert(1)>x</font>');
-  assert.equal(parsed.color, null);
+  assert.deepEqual(parsed, { text: "x", color: "red" });
 });
 
 test("rejects color values that are not colors", () => {
@@ -82,16 +86,25 @@ test("keeps the color when every segment shares it", () => {
 
 test("falls back to plain text when markup is mixed with plain text", () => {
   const parsed = parsePlayerTitle('<font color="red">hi</font> there');
-  assert.equal(parsed.text, '<font color="red">hi</font> there');
+  assert.equal(parsed.text, "hi there");
   assert.equal(parsed.color, null);
   assert.equal(parsePlayerTitleSegments('<font color="red">hi</font> there'), null);
 });
 
-test("still rejects nested tags inside multi-segment markup", () => {
+test("strips nested tags inside multi-segment markup", () => {
   const raw =
     '<font color="red"><img src=x onerror=alert(1)>a</font><font color="blue">b</font>';
-  assert.equal(parsePlayerTitleSegments(raw), null);
+  assert.deepEqual(parsePlayerTitleSegments(raw), [
+    { text: "a", color: "red" },
+    { text: "b", color: "blue" },
+  ]);
   assert.equal(parsePlayerTitle(raw).color, null);
+});
+
+test("removes unknown, comment, and incomplete tag-shaped markup", () => {
+  assert.equal(stripPlayerTitleMarkup("<strong>A</strong><!-- x --><custom>B</custom>"), "AB");
+  assert.equal(stripPlayerTitleMarkup("<b>unfinished"), "unfinished");
+  assert.equal(stripPlayerTitleMarkup("2 < 3"), "2 < 3");
 });
 
 test("rejects adversarial repeated attributes without whole-string backtracking", () => {

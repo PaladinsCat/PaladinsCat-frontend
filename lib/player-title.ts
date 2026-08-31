@@ -28,6 +28,17 @@ export interface PlayerTitleSegment {
 // backtracking whole-string expression.
 const COLOR_ATTRIBUTE_PATTERN = /color\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i;
 
+// Player titles can contain additional legacy HTML-like formatting inside or
+// around font tags. React renders strings safely, but leaving those tags in the
+// string exposes the markup to users. Strip every tag-shaped token while
+// preserving ordinary angle brackets such as "2 < 3".
+export function stripPlayerTitleMarkup(raw: string): string {
+  return raw
+    .replace(/<!--[\s\S]*?(?:-->|$)/g, "")
+    .replace(/<\/?[a-z][^<>]*>/gi, "")
+    .replace(/<\/?[a-z][^<>]*$/gi, "");
+}
+
 /**
  * Parse the font-tag segments of a raw Hi-Rez player title.
  *
@@ -65,10 +76,7 @@ export function parsePlayerTitleSegments(raw: string): PlayerTitleSegment[] | nu
     if (closeStart === -1) {
       return null;
     }
-    const text = trimmed.slice(textStart, closeStart);
-    if (text.includes("<") || text.includes(">")) {
-      return null;
-    }
+    const text = stripPlayerTitleMarkup(trimmed.slice(textStart, closeStart));
     segments.push({
       text,
       color: sanitizeColor(colorMatch[1] ?? colorMatch[2] ?? colorMatch[3] ?? ""),
@@ -94,7 +102,7 @@ export function parsePlayerTitleSegments(raw: string): PlayerTitleSegment[] | nu
 export function parsePlayerTitle(raw: string): ParsedPlayerTitle {
   const segments = parsePlayerTitleSegments(raw);
   if (segments === null) {
-    return { text: raw, color: null };
+    return { text: stripPlayerTitleMarkup(raw).trim(), color: null };
   }
 
   const text = segments.map((s) => s.text).join("");
