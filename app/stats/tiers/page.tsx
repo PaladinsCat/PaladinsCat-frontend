@@ -196,6 +196,7 @@ export default function TiersPage() {
     <div className="mx-auto w-full max-w-5xl space-y-6">
       <div>
         <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.stats.tierDistribution")}</h1>
+        <p className="mt-2 max-w-3xl text-sm leading-6 text-pc-text-secondary">{t("seo.stats.tiers.description")}</p>
       </div>
 
       {displayLoading ? (

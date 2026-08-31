@@ -1,0 +1,11 @@
+import "server-only";
+
+import { cache } from "react";
+import { fetchServerJson } from "@/lib/server-api";
+import { isPublicPlayerId } from "@/lib/seo";
+import type { PlayerResponse } from "@/lib/player-profile-types";
+
+export const getServerPlayerProfile = cache(async (id: string): Promise<PlayerResponse> => {
+  if (!isPublicPlayerId(id)) throw new Error("Invalid public player ID");
+  return fetchServerJson<PlayerResponse>(`/players/${encodeURIComponent(id)}`, { timeoutMs: 8_000 });
+});

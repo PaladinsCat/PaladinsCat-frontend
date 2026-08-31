@@ -413,7 +413,7 @@ function MetricsPageClient() {
         <Link href="/stats/performance" className="text-pc-accent text-xs hover:underline mb-2 inline-block">
           {t("generated.stats.backToGlobalStats")}</Link>
         <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.stats.performanceMetrics")}</h1>
-        <p className="text-pc-text-muted text-sm mt-1">{t("generated.stats.compareChampionPerformanceAcrossAllMetrics")}</p>
+        <p className="mt-1 max-w-3xl text-sm leading-6 text-pc-text-secondary">{t("seo.stats.metrics.description")}</p>
       </div>
 
       <TabBar configs={METRIC_CONFIGS} activeKey={activeConfig.key} onChange={handleTabChange} />

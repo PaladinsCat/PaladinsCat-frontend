@@ -29,6 +29,7 @@ const staticRoutes: Array<{
 }> = [
   { path: "/", changeFrequency: "hourly", priority: 1 },
   { path: "/champions", changeFrequency: "hourly", priority: 0.95 },
+  { path: "/stats", changeFrequency: "hourly", priority: 0.95 },
   { path: "/players", changeFrequency: "hourly", priority: 0.9 },
   { path: "/matches", changeFrequency: "hourly", priority: 0.85 },
   { path: "/game/items", changeFrequency: "daily", priority: 0.9 },
