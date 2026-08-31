@@ -17,6 +17,7 @@ import {
   type PublicStatsScope,
 } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
+import { getChampionData } from "@/lib/champion-data";
 import { championSlug } from "@/lib/utils";
 import { getStatQuality } from "@/lib/stat-quality";
 import { mapImagePath } from "@/lib/map-images";
@@ -172,6 +173,7 @@ export default function MapDetailPage() {
   const [comparisonCache, setComparisonCache] = useState<Partial<Record<MapSection, MapCategoryComparisonStat[]>>>({});
   const [comparisonLoading, setComparisonLoading] = useState<Partial<Record<MapSection, boolean>>>({});
   const [comparisonFailed, setComparisonFailed] = useState<Partial<Record<MapSection, boolean>>>({});
+  const [canonicalTalentIds, setCanonicalTalentIds] = useState<ReadonlyMap<number, ReadonlySet<number>> | null>(null);
   const comparisonRequests = useRef<Partial<Record<MapSection, Promise<void>>>>({});
   const comparisonMapName = useRef(mapName);
 
@@ -187,6 +189,20 @@ export default function MapDetailPage() {
     fetchMapDetail(mapName, { scope: statsScope }).then((data) => { if (!cancelled) setDetail(data); }).finally(() => { if (!cancelled) setLoaded(true); });
     return () => { cancelled = true; };
   }, [mapName, statsScope]);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!detail) return () => { cancelled = true; };
+    // champion-data.json is the current three-talent authority.  Aggregates
+    // intentionally retain observed legacy talent facts for investigation.
+    void Promise.all(detail.champions.map(async (champion) => [
+      champion.championId,
+      new Set((await getChampionData(championSlug(champion.championName)))?.talents.map((talent) => talent.id) ?? []),
+    ] as const)).then((entries) => {
+      if (!cancelled) setCanonicalTalentIds(new Map(entries));
+    });
+    return () => { cancelled = true; };
+  }, [detail]);
 
   useEffect(() => {
     if (statsScope !== "ranked") {
@@ -212,13 +228,17 @@ export default function MapDetailPage() {
     .filter((champion) => !talentRole || CHAMPION_ROLE_BY_SLUG.get(championSlug(champion.championName)) === talentRole)
     .map((champion) => ({
       champion,
-      talents: [...(talentsByChampion.get(champion.championId) ?? [])].sort((a, b) => {
+      talents: [...(talentsByChampion.get(champion.championId) ?? [])]
+        .filter((talent) => canonicalTalentIds?.get(champion.championId)?.has(talent.talentId) ?? false)
+        .sort((a, b) => {
         const difference = b[talentSort] - a[talentSort];
         return difference || a.talentName.localeCompare(b.talentName);
       }),
     }))
     .filter((group) => group.talents.length > 0)
-    .sort((a, b) => (b.talents[0]?.[talentSort] ?? 0) - (a.talents[0]?.[talentSort] ?? 0)), [detail, talentRole, talentSort, talentsByChampion]);
+    .sort((a, b) => (b.talents[0]?.[talentSort] ?? 0) - (a.talents[0]?.[talentSort] ?? 0)), [canonicalTalentIds, detail, talentRole, talentSort, talentsByChampion]);
+
+  const visibleTalentCount = useMemo(() => talentGroups.reduce((count, group) => count + group.talents.length, 0), [talentGroups]);
 
   const itemsByClass = useMemo(() => ITEM_CLASSES.map((itemClass) => ({
     itemClass,
@@ -280,7 +300,7 @@ export default function MapDetailPage() {
             >
               {t(section.labelKey)}
               <span className={`text-xs ${activeSection === section.key ? "text-pc-bg/70" : "text-pc-text-muted"}`}>
-                {formatNumber(section.key === "champions" ? detail.champions.length : section.key === "talents" ? detail.talents.length : section.key === "items" ? detail.items.length : detail.compositions.length)}
+                {formatNumber(section.key === "champions" ? detail.champions.length : section.key === "talents" ? visibleTalentCount : section.key === "items" ? detail.items.length : detail.compositions.length)}
               </span>
             </button>
           ))}
