@@ -7,7 +7,8 @@ import { useEffect, useState } from "react";
 import { preload } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import { useReducedMotion } from "@/lib/reduced-motion";
 import {
   ArrowRight,
   BarChart3,

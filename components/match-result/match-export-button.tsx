@@ -21,6 +21,9 @@ declare global {
 }
 
 async function scoreboardPng(scoreboard: HTMLElement) {
+  const exportMap = scoreboard.querySelector<HTMLImageElement>("img.scoreboard-map");
+  const exportMapSource = exportMap?.dataset.exportSrc;
+  if (exportMap && exportMapSource) exportMap.src = exportMapSource;
   scoreboard.setAttribute("data-image-export", "true");
   try {
     const talentDeadline = performance.now() + 2_000;
@@ -47,6 +50,7 @@ async function scoreboardPng(scoreboard: HTMLElement) {
     });
   } finally {
     scoreboard.removeAttribute("data-image-export");
+    exportMap?.removeAttribute("src");
   }
 }
 

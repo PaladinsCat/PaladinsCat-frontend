@@ -4,8 +4,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useReducedMotion } from "framer-motion";
-import { getLiteMode } from "@/lib/lite-mode";
+import { useReducedMotion } from "@/lib/reduced-motion";
 
 const scrambleChars = "!@#$%&*+-=[]{}|;:,.<>?/~ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
@@ -83,7 +82,7 @@ export default function ScrambleText({
   className = "",
   delayFromCenter = true,
 }: ScrambleTextProps) {
-  const reduceMotion = useReducedMotion() || getLiteMode();
+  const reduceMotion = useReducedMotion();
   const centerIndex = Math.floor(text.length / 2);
   const letters = text.split("");
 

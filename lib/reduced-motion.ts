@@ -3,16 +3,28 @@
  */
 "use client";
 
-import { useReducedMotion as useFmReducedMotion } from "framer-motion";
+import { useSyncExternalStore } from "react";
+import { getLiteMode, LITE_MODE_CHANGE_EVENT } from "@/lib/lite-mode";
+
+function subscribe(callback: () => void) {
+  const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+  media.addEventListener("change", callback);
+  window.addEventListener(LITE_MODE_CHANGE_EVENT, callback);
+  window.addEventListener("storage", callback);
+  return () => {
+    media.removeEventListener("change", callback);
+    window.removeEventListener(LITE_MODE_CHANGE_EVENT, callback);
+    window.removeEventListener("storage", callback);
+  };
+}
+
+function snapshot() {
+  return getLiteMode() || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
 
 /** Apply useReducedMotion to the declared player or request input.
  * Contract: enforces the module rule and returns the documented value without changing unrelated state.
  */
 export function useReducedMotion(): boolean {
-  const fm = useFmReducedMotion();
-  if (fm === true) return true;
-  if (fm === false) return false;
-  return typeof window !== "undefined"
-    ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    : false;
+  return useSyncExternalStore(subscribe, snapshot, () => false);
 }
