@@ -108,6 +108,7 @@ test("removes unknown, comment, and incomplete tag-shaped markup", () => {
   assert.equal(stripPlayerTitleMarkup("<strong>A</strong><!-- x --><custom>B</custom>"), "AB");
   assert.equal(stripPlayerTitleMarkup("<b>unfinished"), "unfinished");
   assert.equal(stripPlayerTitleMarkup("2 < 3"), "2 < 3");
+  assert.equal(stripPlayerTitleMarkup("<scr<script>ipt>alert(1)</script>"), "ipt>alert(1)");
 });
 
 test("rejects adversarial repeated attributes without whole-string backtracking", () => {
