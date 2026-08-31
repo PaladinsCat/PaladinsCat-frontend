@@ -9,7 +9,6 @@ import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championMasteryLevelFromXp } from "@/lib/champion-mastery";
 import { calculateKda, formatKda } from "@/lib/kda";
 import { useLocalization } from "@/lib/localization-context";
-import { formatLocalDateTime } from "@/lib/time-format";
 
 
 const ROLES = [
@@ -19,7 +18,7 @@ const ROLES = [
   { value: "Support", labelKey: "common.roles.support", icon: "/images/icons/Class_Support_Icon.avif" },
 ] as const;
 
-type SortKey = "level" | "kda" | "winRate" | "playTime";
+type SortKey = "level" | "kda" | "winRate" | "playTime" | "rating";
 
 export default function PlayerChampionStatsPage() {
   const { formatDuration, formatNumber, t } = useLocalization();
@@ -83,12 +82,34 @@ export default function PlayerChampionStatsPage() {
         kda: [calculateKda(a.kills, a.deaths, a.assists), calculateKda(b.kills, b.deaths, b.assists)],
         winRate: [a.winRate ?? -1, b.winRate ?? -1],
         playTime: [a.minutesPlayed, b.minutesPlayed],
+        rating: [a.rating ?? -1, b.rating ?? -1],
       };
       const [left, right] = values[sortBy];
       return direction * (left - right)
         || (sortBy === "level" ? direction * (a.xp - b.xp) : 0)
         || a.championName.localeCompare(b.championName);
     }), [filterRole, sortBy, sortDescending, stats]);
+
+  const summary = useMemo(() => {
+    const active = (stats ?? []).filter((champion) => champion.matchesPlayed > 0);
+    const matches = active.reduce((total, champion) => total + champion.matchesPlayed, 0);
+    const wins = active.reduce((total, champion) => total + champion.wins, 0);
+    return {
+      active,
+      matches,
+      minutes: active.reduce((total, champion) => total + champion.minutesPlayed, 0),
+      winRate: matches > 0 ? (wins / matches) * 100 : 0,
+    };
+  }, [stats]);
+
+  const performanceChart = useMemo(() => [...summary.active]
+    .sort((a, b) => b.matchesPlayed - a.matchesPlayed)
+    .slice(0, 10), [summary.active]);
+
+  const ratingChart = useMemo(() => [...summary.active]
+    .filter((champion) => champion.rating != null && champion.ratingDeviation != null)
+    .sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
+    .slice(0, 10), [summary.active]);
 
   if (!stats && !error) return <LoadingPanel />;
   if (error && !stats) return <ErrorState title={t("generated.players.championUnavailable")} message={error} onRetry={load} />;
@@ -104,6 +125,67 @@ export default function PlayerChampionStatsPage() {
         <button type="button" onClick={refresh} disabled={refreshing || refreshRemainingSeconds > 0} className="rounded-lg border border-pc-border bg-pc-bg-elevated px-3 py-2 text-xs font-semibold text-pc-text hover:border-pc-accent-mid hover:text-pc-accent disabled:cursor-not-allowed disabled:opacity-50">{refreshing ? <LoadingIndicator className="gap-2" /> : refreshRemainingSeconds > 0 ? t("generated.players.refreshInValue1", { value1: formatDuration(refreshRemainingSeconds) }) : t("common.playerChampions.refresh")}</button>
       </div>
 
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {([
+          [t("generated.champions.champions"), formatNumber(summary.active.length)],
+          [t("generated.players.matches"), formatNumber(summary.matches)],
+          [t("common.metrics.winRate"), t("common.playerChampions.winPercentage", { value: formatNumber(summary.winRate, { maximumFractionDigits: 1 }) })],
+          [t("generated.players.playtime"), t("common.format.minutesShort", { minutes: formatNumber(summary.minutes) })],
+        ] as const).map(([label, value]) => (
+          <div key={label} className="pc-glass rounded-xl p-4">
+            <div className="text-xs uppercase tracking-wide text-pc-text-muted">{label}</div>
+            <div className="mt-1 text-xl font-semibold text-pc-text">{value}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid gap-4 xl:grid-cols-2">
+        <section className="pc-glass rounded-xl p-4">
+          <h2 className="pc-heading text-lg text-pc-accent">{t("generated.players.rankedPerformance")}</h2>
+          <p className="mt-1 text-xs text-pc-text-muted">{t("common.metrics.winRate")} · {t("generated.players.matches")}</p>
+          <div className="mt-4 space-y-3">
+            {performanceChart.map((champion) => (
+              <div key={champion.championId} className="grid grid-cols-[minmax(7rem,1fr)_3fr_auto] items-center gap-3 text-xs">
+                <div className="flex min-w-0 items-center gap-2 text-pc-text">
+                  <img src={getChampionIconSafe(champion.championName)} alt="" className="h-6 w-6 shrink-0 rounded object-contain" />
+                  <span className="truncate">{champion.championName}</span>
+                </div>
+                <div className="h-2.5 overflow-hidden rounded-full bg-pc-bg-secondary" aria-hidden="true">
+                  <div className="h-full rounded-full bg-pc-accent" style={{ width: `${Math.max(0, Math.min(100, champion.winRate ?? 0))}%` }} />
+                </div>
+                <div className="min-w-16 text-right font-mono text-pc-text-secondary">{formatNumber(champion.winRate ?? 0, { maximumFractionDigits: 1 })}% · {formatNumber(champion.matchesPlayed)}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="pc-glass rounded-xl p-4">
+          <h2 className="pc-heading text-lg text-pc-accent">{t("generated.players.championRatings")}</h2>
+          <p className="mt-1 text-xs text-pc-text-muted">{t("generated.players.rating")} · {t("generated.players.deviation")} · {t("generated.players.volatility")}</p>
+          {ratingChart.length === 0 ? <EmptyState title={t("generated.stats.noRatingDataAvailable")} /> : (
+            <div className="mt-4 space-y-3">
+              {ratingChart.map((champion) => {
+                const rating = champion.rating ?? 0;
+                const deviation = champion.ratingDeviation ?? 0;
+                const rangeStart = Math.max(0, Math.min(100, ((rating - deviation - 500) / 2500) * 100));
+                const rangeEnd = Math.max(rangeStart, Math.min(100, ((rating + deviation - 500) / 2500) * 100));
+                const marker = Math.max(0, Math.min(100, ((rating - 500) / 2500) * 100));
+                return (
+                  <div key={champion.championId} className="grid grid-cols-[minmax(7rem,1fr)_3fr_auto] items-center gap-3 text-xs">
+                    <span className="truncate text-pc-text">{champion.championName}</span>
+                    <div className="relative h-2.5 rounded-full bg-pc-bg-secondary" aria-hidden="true">
+                      <div className="absolute inset-y-0 rounded-full bg-pc-accent/25" style={{ left: `${rangeStart}%`, width: `${Math.max(1, rangeEnd - rangeStart)}%` }} />
+                      <div className="absolute -top-1 h-4 w-1 rounded bg-pc-accent" style={{ left: `${marker}%` }} />
+                    </div>
+                    <span className="min-w-24 text-right font-mono text-pc-text-secondary">{formatNumber(rating)} ± {formatNumber(deviation)}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
+      </div>
+
       <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
         <div className="flex flex-wrap items-center gap-2">
           <button type="button" onClick={() => setFilterRole(null)} className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] ${filterRole === null ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-muted hover:text-pc-text"}`}>{t("generated.champions.all")}</button>
@@ -115,6 +197,7 @@ export default function PlayerChampionStatsPage() {
             <option value="kda">{t("common.metrics.kda")}</option>
             <option value="winRate">{t("common.metrics.winRate")}</option>
             <option value="playTime">{t("generated.players.playtime")}</option>
+            <option value="rating">{t("generated.players.rating")}</option>
           </select>
           <button type="button" onClick={() => setSortDescending((descending) => !descending)} className="pc-select flex cursor-pointer items-center gap-1" title={sortDescending ? t("generated.champions.descending") : t("generated.champions.ascending")}>{sortDescending ? "↓" : "↑"}</button>
         </div>
@@ -133,6 +216,9 @@ export default function PlayerChampionStatsPage() {
                 <th className="px-1.5 py-2">{t("common.playerChampions.winsShort")}</th>
                 <th className="px-1.5 py-2">{t("common.playerChampions.lossesShort")}</th>
                 <th className="px-1.5 py-2">{t("common.metrics.winRate")}</th>
+                <th className="px-1.5 py-2">{t("generated.players.rating")}</th>
+                <th className="px-1.5 py-2">{t("generated.players.deviation")}</th>
+                <th className="px-1.5 py-2">{t("generated.players.volatility")}</th>
                 <th className="px-1.5 py-2">{t("generated.players.playtime")}</th>
               </tr>
             </thead>
@@ -154,6 +240,9 @@ export default function PlayerChampionStatsPage() {
                   <td className="px-1.5 py-1.5 font-mono text-xs">{champion.winRate != null ? (
                     <span className={champion.winRate >= 55 ? "text-emerald-400 font-medium" : champion.winRate >= 50 ? "text-emerald-300" : "text-rose-400"}>{t("common.playerChampions.winPercentage", { value: formatNumber(champion.winRate) })}</span>
                   ) : "—"}</td>
+                  <td className="px-1.5 py-1.5 font-mono text-xs text-pc-text-secondary">{champion.rating != null ? formatNumber(champion.rating) : "—"}</td>
+                  <td className="px-1.5 py-1.5 font-mono text-xs text-pc-text-secondary">{champion.ratingDeviation != null ? formatNumber(champion.ratingDeviation) : "—"}</td>
+                  <td className="px-1.5 py-1.5 font-mono text-xs text-pc-text-secondary">{champion.volatility != null ? formatNumber(champion.volatility, { maximumFractionDigits: 4 }) : "—"}</td>
                   <td className="px-1.5 py-1.5 font-mono text-xs text-pc-text-secondary">{t("common.format.minutesShort", { minutes: formatNumber(champion.minutesPlayed) })}</td>
                 </tr>
               ))}

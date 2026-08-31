@@ -4,7 +4,6 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getChampionIconSafe } from "@/lib/champion-icons";
-import { championSlug } from "@/lib/utils";
 import { clearPlayerTag, fetchPlayerMatches, type ClearablePlayerTag, type MatchRecord, type ReportType } from "@/lib/api-client";
 import { getTierColor, resolveEffectiveTier, getRankIconPath } from "@/lib/tier-utils";
 import { useAuth } from "@/lib/auth-context";
@@ -24,6 +23,7 @@ import { parsePlayerTitle, parsePlayerTitleSegments } from "@/lib/player-title";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
 import { csrfHeader } from "@/lib/csrf";
 import { playerAvatarProxyPath } from "@/lib/player-avatar-proxy";
+import PlayerRelationshipSummaryCard from "@/components/player-relationship-summary";
 
 
 interface PlayerData {
@@ -519,7 +519,7 @@ export default function PlayerProfileClient({
     );
   }
 
-  const { player, queueRatings, championRatings } = response;
+  const { player, queueRatings } = response;
   const currentMatchWinChance = estimateLiveTeamWinChance(
     Array.isArray(currentMatch?.players) ? currentMatch.players : [],
   );
@@ -897,6 +897,8 @@ export default function PlayerProfileClient({
             </Link>
           </div>
 
+          <PlayerRelationshipSummaryCard playerId={id} />
+
           {/* KBM Ranked */}
           <div>
             <h2 className="pc-card-title shadow-sm">{t("generated.players.ranked")}</h2>
@@ -994,49 +996,6 @@ export default function PlayerProfileClient({
               </div>
             </div>
           </div>
-
-          {/* Champion Ratings */}
-          {championRatings.length > 0 && (
-            <div>
-              <h2 className="pc-card-title shadow-sm">{t("generated.players.championRatings")}</h2>
-              <div className="pc-card">
-                <div className="space-y-2">
-                  {championRatings.slice(0, 10).map((cr) => {
-                    if (!cr.champion_name) return null;
-                    return (
-                    <div key={cr.champion_id} className="flex items-center gap-2 py-1.5 border-b border-pc-border/30 last:border-0">
-                      <img
-                        src={getChampionIconSafe(cr.champion_name)}
-                        alt={cr.champion_name}
-                        className="w-6 h-6 rounded object-contain shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <Link
-                            href={`/champions/${championSlug(cr.champion_name)}`}
-                            className="text-xs text-pc-text hover:text-pc-accent transition-colors truncate"
-                          >
-                            {cr.champion_name}
-                          </Link>
-                          <span className="text-xs font-mono text-pc-accent ml-2">{formatNumber(Number(cr.mu), { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-pc-text-muted">
-                          <span>{cr.matches_played} {t("generated.players.games")}</span>
-                          <span>·</span>
-                          <span>
-                            {cr.matches_played > 0
-                              ? t("generated.players.value1Wr", { value1: formatNumber(((cr.wins / cr.matches_played) * 100), { minimumFractionDigits: 0, maximumFractionDigits: 0 }) })
-                              : t("generated.players.noWr")}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Queue Ratings (if multiple queues) */}
           {queueRatings.length > 1 && (

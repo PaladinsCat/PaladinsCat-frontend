@@ -26,7 +26,11 @@ function MatchCount({ count }: { count: number }) {
 export default function RankedPartiesPage() {
   const { t, formatDateTime, formatNumber } = useLocalization();
   const observedAt = formatDateTime;
-  const [mode, setMode] = useState<DirectoryMode>("stacks");
+  const [mode, setMode] = useState<DirectoryMode>(() => (
+    typeof window !== "undefined" && new URLSearchParams(window.location.search).get("view") === "pairs"
+      ? "pairs"
+      : "stacks"
+  ));
   const [pairs, setPairs] = useState<PartyPairSummary[]>([]);
   const [stacks, setStacks] = useState<PartyStackSummary[]>([]);
   const [stackSize, setStackSize] = useState<number | null>(null);

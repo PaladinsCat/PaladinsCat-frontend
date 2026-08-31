@@ -25,6 +25,7 @@ import { fetchPlayersOverview, type PlayersOverview } from "@/lib/api-client";
 import ScrambleText from "@/components/ScrambleText";
 import { useLocalization } from "@/lib/localization-context";
 import type { TranslationKey } from "@/lib/localization/messages";
+import PlayerName from "@/components/player-name";
 
 type DirectoryCard = {
   href: string;
@@ -47,8 +48,9 @@ const EMPTY_COUNTS: PlayersOverview["communityCounts"] = {
 };
 
 export default function PlayersPageClient({ initialOverview }: { initialOverview: PlayersOverview | null }) {
-  const { t , formatNumber} = useLocalization();
+  const { t, formatNumber, formatDateTime } = useLocalization();
   const [communityCounts, setCommunityCounts] = useState(initialOverview?.communityCounts ?? EMPTY_COUNTS);
+  const [bestDuo, setBestDuo] = useState(initialOverview?.bestDuo ?? null);
   const [directoryCounts, setDirectoryCounts] = useState<PlayersOverview["directoryCounts"]>(initialOverview?.directoryCounts ?? {
     privateAccounts: 0,
     parties: 0,
@@ -71,6 +73,7 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
         if (cancelled) return;
         setCommunityCounts(overview.communityCounts);
         setDirectoryCounts(overview.directoryCounts);
+        setBestDuo(overview.bestDuo);
       })
       .catch(() => undefined)
       .finally(() => {
@@ -107,6 +110,29 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
           <ScrambleText text={t("generated.players.players.392feef")} speed={30} iterations={15} delayFromCenter={false} />
         </h1>
       </div>
+
+      {bestDuo && (
+        <Link href="/players/parties?view=pairs" data-card-accent="primary" className="pc-glass group relative block overflow-hidden rounded-2xl border border-white/5 p-5 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/40 hover:shadow-xl sm:p-6">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex min-w-0 items-start gap-4">
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-cyan-400/20 bg-cyan-400/10"><UsersRound aria-hidden="true" className="h-7 w-7 text-cyan-300" /></span>
+              <div className="min-w-0">
+                <div className="text-xs font-semibold uppercase tracking-[0.16em] text-cyan-300">{t("common.bestDuo.title")}</div>
+                <h2 className="mt-1 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xl font-bold text-pc-text">
+                  <PlayerName playerId={bestDuo.sourcePlayerId}>{bestDuo.sourcePlayerName}</PlayerName><span className="text-cyan-300">+</span><PlayerName playerId={bestDuo.targetPlayerId}>{bestDuo.targetPlayerName}</PlayerName>
+                </h2>
+                <p className="mt-1 text-sm text-pc-text-muted">{t("common.bestDuo.description")}</p>
+              </div>
+            </div>
+            <div className="grid shrink-0 grid-cols-2 gap-2 sm:grid-cols-4">
+              <div className="rounded-xl bg-pc-bg-secondary/70 px-3 py-2"><div className="text-xs text-pc-text-muted">{t("generated.players.matches")}</div><div className="font-mono text-lg font-bold text-cyan-300">{formatNumber(bestDuo.matchCount)}</div></div>
+              <div className="rounded-xl bg-pc-bg-secondary/70 px-3 py-2"><div className="text-xs text-pc-text-muted">{t("generated.players.firstObserved")}</div><div className="text-xs font-semibold text-pc-text">{formatDateTime(bestDuo.firstSeen)}</div></div>
+              <div className="rounded-xl bg-pc-bg-secondary/70 px-3 py-2"><div className="text-xs text-pc-text-muted">{t("generated.players.lastObserved")}</div><div className="text-xs font-semibold text-pc-text">{formatDateTime(bestDuo.lastSeen)}</div></div>
+              <div className="rounded-xl bg-pc-bg-secondary/70 px-3 py-2"><div className="text-xs text-pc-text-muted">{t("common.bestDuo.observedDays", { count: formatNumber(bestDuo.observedDays) })}</div><div className="text-xs font-semibold text-emerald-300">{t("common.bestDuo.matchesPerWeek", { count: formatNumber(bestDuo.matchesPerWeek, { maximumFractionDigits: 1 }) })}</div></div>
+            </div>
+          </div>
+        </Link>
+      )}
 
       <div
         className="mx-auto grid w-full max-w-7xl gap-3"

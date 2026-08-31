@@ -954,6 +954,7 @@ export interface PlayersOverview {
   hallOfFamePlayers: CheaterPlayer[];
   privateAccounts: PrivateAccountSummary[];
   partyPairs: PartyPairSummary[];
+  bestDuo: BestDuoSummary | null;
   communityCounts: {
     cheaters: number;
     boosted: number;
@@ -1014,6 +1015,89 @@ export async function fetchBoostedPlayers({ name, limit = 100, offset = 0 }: { n
   if (name?.trim()) query.set("name", name.trim());
   const raw = await fetchJson<any[]>(`/players/boosted?${query.toString()}`);
   return raw.map(mapBoostedPlayer);
+}
+
+export interface BestDuoSummary {
+  sourcePlayerId: string;
+  sourcePlayerName: string;
+  targetPlayerId: string;
+  targetPlayerName: string;
+  matchCount: number;
+  firstSeen: string;
+  lastSeen: string;
+  observedDays: number;
+  matchesPerWeek: number;
+}
+
+export interface PlayerRelationshipRow {
+  otherPlayerId: string;
+  otherPlayerName: string;
+  matchCount: number;
+  firstSeen: string;
+  lastSeen: string;
+  sameParty: boolean;
+}
+
+export interface PlayerRelationshipSummary {
+  playerId: string;
+  totals: {
+    uniqueTeammates: number;
+    uniqueOpponents: number;
+    teammateMatches: number;
+    opponentMatches: number;
+    partyPartners: number;
+    partyMatches: number;
+  };
+  teammates: PlayerRelationshipRow[];
+  opponents: PlayerRelationshipRow[];
+  partyPartners: PlayerRelationshipRow[];
+}
+
+type RawRelationshipRow = {
+  other_player_id?: string | number;
+  other_player_name?: string | null;
+  match_count?: string | number | null;
+  first_seen?: string | null;
+  last_seen?: string | null;
+  same_party?: boolean | null;
+};
+
+type RawRelationshipSummary = {
+  player_id?: string | number;
+  totals?: Record<string, string | number | null>;
+  teammates?: RawRelationshipRow[];
+  opponents?: RawRelationshipRow[];
+  party_partners?: RawRelationshipRow[];
+};
+
+function mapRelationshipRow(row: RawRelationshipRow): PlayerRelationshipRow {
+  return {
+    otherPlayerId: String(row.other_player_id),
+    otherPlayerName: String(row.other_player_name ?? `Player ${row.other_player_id}`),
+    matchCount: Number(row.match_count ?? 0),
+    firstSeen: String(row.first_seen ?? ""),
+    lastSeen: String(row.last_seen ?? ""),
+    sameParty: Boolean(row.same_party),
+  };
+}
+
+export async function fetchPlayerRelationshipSummary(playerId: string | number, limit = 6): Promise<PlayerRelationshipSummary> {
+  const raw = await fetchJson<RawRelationshipSummary>(`/coplay/summary/${encodeURIComponent(String(playerId))}?limit=${Math.min(Math.max(limit, 1), 50)}`);
+  const totals = raw.totals ?? {};
+  return {
+    playerId: String(raw.player_id ?? playerId),
+    totals: {
+      uniqueTeammates: Number(totals.unique_teammates ?? 0),
+      uniqueOpponents: Number(totals.unique_opponents ?? 0),
+      teammateMatches: Number(totals.teammate_matches ?? 0),
+      opponentMatches: Number(totals.opponent_matches ?? 0),
+      partyPartners: Number(totals.party_partners ?? 0),
+      partyMatches: Number(totals.party_matches ?? 0),
+    },
+    teammates: (raw.teammates ?? []).map(mapRelationshipRow),
+    opponents: (raw.opponents ?? []).map(mapRelationshipRow),
+    partyPartners: (raw.party_partners ?? []).map(mapRelationshipRow),
+  };
 }
 
 export async function fetchBoostedPlayerDetail(playerId: string): Promise<BoostedPlayerDetail> {
@@ -1310,6 +1394,17 @@ export function mapPlayersOverviewResponse(raw: any): PlayersOverview {
   };
   const privateAccounts: PrivateAccountSummary[] = (raw.private_accounts ?? []).map(mapPrivateAccount);
   const partyPairs: PartyPairSummary[] = (raw.party_pairs ?? []).map(mapPartyPair);
+  const bestDuo: BestDuoSummary | null = raw.best_duo ? {
+    sourcePlayerId: String(raw.best_duo.source_player_id),
+    sourcePlayerName: String(raw.best_duo.source_player_name ?? "Unknown player"),
+    targetPlayerId: String(raw.best_duo.target_player_id),
+    targetPlayerName: String(raw.best_duo.target_player_name ?? "Unknown player"),
+    matchCount: Number(raw.best_duo.match_count ?? 0),
+    firstSeen: String(raw.best_duo.first_seen ?? ""),
+    lastSeen: String(raw.best_duo.last_seen ?? ""),
+    observedDays: Number(raw.best_duo.observed_days ?? 0),
+    matchesPerWeek: Number(raw.best_duo.matches_per_week ?? 0),
+  } : null;
   const directoryCounts = {
     privateAccounts: Number(raw.directory_counts?.private_accounts ?? raw.private_accounts?.[0]?.total_count ?? privateAccounts.length),
     parties: Number(raw.directory_counts?.parties ?? raw.party_pairs?.[0]?.total_count ?? partyPairs.length),
@@ -1337,6 +1432,7 @@ export function mapPlayersOverviewResponse(raw: any): PlayersOverview {
     hallOfFamePlayers: (raw.hall_of_fame ?? []).map(mapCommunity),
     privateAccounts,
     partyPairs,
+    bestDuo,
     communityCounts,
     directoryCounts,
   };
@@ -2386,6 +2482,10 @@ export interface PlayerChampionStat {
   minutesPlayed: number;
   matchesPlayed: number;
   winRate: number | null;
+  rating: number | null;
+  ratingDeviation: number | null;
+  volatility: number | null;
+  ratingMatches: number;
   lastUpdated: string | null;
 }
 
@@ -2404,6 +2504,10 @@ export async function fetchPlayerChampionStats(playerId: string | number): Promi
     minutes_played?: number | string | null;
     matches_played?: number | string | null;
     win_rate?: number | string | null;
+    rating?: number | string | null;
+    rating_deviation?: number | string | null;
+    volatility?: number | string | null;
+    rating_matches?: number | string | null;
     last_updated?: string | null;
   };
   const raw = await fetchJson<RawStat[]>(`/players/${playerId}/champions`);
@@ -2431,6 +2535,10 @@ export async function fetchPlayerChampionStats(playerId: string | number): Promi
     minutesPlayed: numberOrZero(stat.minutes_played),
     matchesPlayed: numberOrZero(stat.matches_played),
     winRate: numberOrNull(stat.win_rate),
+    rating: numberOrNull(stat.rating),
+    ratingDeviation: numberOrNull(stat.rating_deviation),
+    volatility: numberOrNull(stat.volatility),
+    ratingMatches: numberOrZero(stat.rating_matches),
     lastUpdated: stat.last_updated ?? null,
   }));
 }
