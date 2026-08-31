@@ -198,6 +198,8 @@ export default function PlayerProfileClient({
     if (!isAdmin) return;
     const confirmation = tag === 'cheater'
       ? t("moderation.confirmClearCheaterTag")
+      : tag === 'exploiter'
+        ? t("moderation.confirmClearModerationTag")
       : tag === 'suspicious'
         ? t("moderation.confirmClearSuspiciousTag")
         : t("moderation.confirmClearModerationTag");
@@ -542,9 +544,18 @@ export default function PlayerProfileClient({
                   <div className="px-2 pb-1 text-xs font-bold uppercase tracking-widest text-pc-text-muted">{t("generated.players.moderation")}</div>
                   <button type="button" role="menuitem" onClick={() => { setActionMenuOpen(false); openReportModal('cheater'); }} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-red-400 transition-colors hover:bg-red-500/10">
                     {t("generated.players.flagAsCheater")}</button>
+                  {isAdmin && (
+                    <button type="button" role="menuitem" onClick={() => { setActionMenuOpen(false); openReportModal('exploiter'); }} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-orange-400 transition-colors hover:bg-orange-500/10">
+                      Flag as Exploiter</button>
+                  )}
                   {isAdmin && player.cheater && (
                     <button type="button" role="menuitem" disabled={clearingTag !== null} onClick={() => clearModerationTag('cheater')} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-red-300 transition-colors hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-50">
                       {clearingTag === 'cheater' ? t("generated.components.submitting") : t("moderation.clearCheaterTag")}
+                    </button>
+                  )}
+                  {isAdmin && player.exploiter && (
+                    <button type="button" role="menuitem" disabled={clearingTag !== null} onClick={() => clearModerationTag('exploiter')} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-orange-300 transition-colors hover:bg-orange-500/10 disabled:cursor-not-allowed disabled:opacity-50">
+                      {clearingTag === 'exploiter' ? t("generated.components.submitting") : "Clear Exploiter tag"}
                     </button>
                   )}
                   {isAdmin && player.sus_count > 0 && (
@@ -612,6 +623,7 @@ export default function PlayerProfileClient({
               <PlayerModerationTag
                 playerId={player.id}
                 cheater={player.cheater}
+                exploiter={player.exploiter}
                 susCount={player.sus_count}
                 dropper={player.dropper}
                 afkWintrade={player.afk_wintrade}

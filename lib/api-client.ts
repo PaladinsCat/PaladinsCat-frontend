@@ -161,6 +161,7 @@ export interface CheaterPlayer {
   region: string;
   kbmTier: string | null;
   cheater: boolean;
+  exploiter: boolean;
   susCount: number;
   dropper: boolean;
   dropperVoteCount?: number;
@@ -303,10 +304,11 @@ export interface BoostedPlayerDetail {
   matches: BoostedMatchSummary[];
 }
 
-export async function fetchCheaterPlayers(params?: { name?: string; cheater?: boolean; susOnly?: boolean; weirdoOnly?: boolean; hallOfFameOnly?: boolean; dropperOnly?: boolean; afkWintradeOnly?: boolean; altAccountOnly?: boolean; limit?: number; offset?: number }): Promise<CheaterPlayer[]> {
+export async function fetchCheaterPlayers(params?: { name?: string; cheater?: boolean; exploiter?: boolean; susOnly?: boolean; weirdoOnly?: boolean; hallOfFameOnly?: boolean; dropperOnly?: boolean; afkWintradeOnly?: boolean; altAccountOnly?: boolean; limit?: number; offset?: number }): Promise<CheaterPlayer[]> {
   const query = new URLSearchParams();
   if (params?.name?.trim()) query.set('name', params.name.trim());
   if (params?.cheater) query.set('cheater', 'true');
+  if (params?.exploiter) query.set('exploiter', 'true');
   if (params?.susOnly) query.set('susOnly', 'true');
   if (params?.weirdoOnly) query.set('weirdoOnly', 'true');
   if (params?.hallOfFameOnly) query.set('hallOfFameOnly', 'true');
@@ -319,7 +321,7 @@ export async function fetchCheaterPlayers(params?: { name?: string; cheater?: bo
   try {
     const raw = await fetchJson<Array<{
       id: string; name: string; platform: string; region: string;
-      kbm_tier?: string | null; cheater?: boolean; sus_count?: number;
+      kbm_tier?: string | null; cheater?: boolean; exploiter?: boolean; sus_count?: number;
       dropper?: boolean; dropper_vote_count?: number; afk_wintrade?: boolean; afk_wintrade_vote_count?: number; boosted?: boolean; alt_account?: boolean; alt_account_vote_count?: number;
       weirdo_count?: number; hall_of_fame_count?: number;
       avg_dpm?: number | null; avg_hpm?: number | null; avg_egpm?: number | null;
@@ -328,7 +330,7 @@ export async function fetchCheaterPlayers(params?: { name?: string; cheater?: bo
     }>>(`/players/search?${query.toString()}`);
     return raw.map(r => ({
       id: r.id, name: r.name, platform: r.platform, region: r.region,
-      kbmTier: r.kbm_tier ?? null, cheater: r.cheater ?? false,
+      kbmTier: r.kbm_tier ?? null, cheater: r.cheater ?? false, exploiter: r.exploiter ?? false,
       susCount: r.sus_count ?? 0,
       dropper: Boolean(r.dropper), dropperVoteCount: Number(r.dropper_vote_count ?? 0),
       afkWintrade: Boolean(r.afk_wintrade), afkWintradeVoteCount: Number(r.afk_wintrade_vote_count ?? 0),
@@ -353,6 +355,7 @@ function mapAutomaticAfkPlayer(row: any): AutomaticAfkPlayer {
     region: String(row.region ?? 'Unknown'),
     kbmTier: row.kbm_tier ?? null,
     cheater: Boolean(row.cheater),
+    exploiter: Boolean(row.exploiter),
     susCount: Number(row.sus_count ?? 0),
     dropper: Boolean(row.dropper), dropperVoteCount: Number(row.dropper_vote_count ?? 0),
     afkWintrade: Boolean(row.afk_wintrade), afkWintradeVoteCount: Number(row.afk_wintrade_vote_count ?? 0),
@@ -404,6 +407,7 @@ function mapAutomaticWallShooterPlayer(row: any): AutomaticWallShooterPlayer {
     region: String(row.region ?? 'Unknown'),
     kbmTier: row.kbm_tier ?? null,
     cheater: Boolean(row.cheater),
+    exploiter: Boolean(row.exploiter),
     susCount: Number(row.sus_count ?? 0),
     dropper: Boolean(row.dropper),
     dropperVoteCount: Number(row.dropper_vote_count ?? 0),
@@ -956,6 +960,7 @@ export interface PlayersOverview {
   partyPairs: PartyPairSummary[];
   communityCounts: {
     cheaters: number;
+    exploiters: number;
     boosted: number;
     suspicious: number;
     weirdos: number;
@@ -982,7 +987,7 @@ function mapBoostedPlayer(row: any): BoostedPlayer {
   const partyMatchCount = Number(row.party_match_count ?? 0);
   return {
     id: String(row.id), name: row.name, platform: row.platform, region: row.region,
-    kbmTier: row.kbm_tier ?? null, cheater: Boolean(row.cheater), susCount: Number(row.sus_count ?? 0),
+    kbmTier: row.kbm_tier ?? null, cheater: Boolean(row.cheater), exploiter: Boolean(row.exploiter), susCount: Number(row.sus_count ?? 0),
     dropper: Boolean(row.dropper), afkWintrade: Boolean(row.afk_wintrade),
     // The boosted directory deliberately keeps every observed association, but
     // the visible moderation tag begins at five cumulative matches.
@@ -1276,7 +1281,7 @@ export function mapPlayersOverviewResponse(raw: any): PlayersOverview {
   });
   const mapCommunity = (row: any): CheaterPlayer => ({
     id: String(row.id), name: row.name, platform: row.platform, region: row.region,
-    kbmTier: row.kbm_tier ?? null, cheater: row.cheater ?? false, susCount: Number(row.sus_count ?? 0),
+    kbmTier: row.kbm_tier ?? null, cheater: row.cheater ?? false, exploiter: row.exploiter ?? false, susCount: Number(row.sus_count ?? 0),
     dropper: Boolean(row.dropper), afkWintrade: Boolean(row.afk_wintrade),
     boosted: Boolean(row.boosted), altAccount: Boolean(row.alt_account),
     weirdoCount: Number(row.weirdo_count ?? 0), hallOfFameCount: Number(row.hall_of_fame_count ?? 0),
@@ -1300,6 +1305,7 @@ export function mapPlayersOverviewResponse(raw: any): PlayersOverview {
   });
   const communityCounts = {
     cheaters: Number(raw.community_counts?.cheaters ?? raw.cheaters?.[0]?.total_count ?? raw.cheaters?.length ?? 0),
+    exploiters: Number(raw.community_counts?.exploiters ?? raw.exploiters?.[0]?.total_count ?? raw.exploiters?.length ?? 0),
     boosted: Number(raw.community_counts?.boosted ?? raw.boosted?.[0]?.total_count ?? raw.boosted?.length ?? 0),
     suspicious: Number(raw.community_counts?.suspicious ?? raw.suspicious?.[0]?.total_count ?? raw.suspicious?.length ?? 0),
     weirdos: Number(raw.community_counts?.weirdos ?? raw.weirdos?.[0]?.total_count ?? raw.weirdos?.length ?? 0),
@@ -2301,14 +2307,14 @@ export async function fetchChampionCounters(id: number): Promise<CounterStats> {
 
 // ── Players ──
 
-export async function fetchPlayerProfile(id: string, queueId?: number, championId?: number): Promise<PlayerProfile & { level?: number | null; kbmRank?: number | null; queueElo?: number | null; championElo?: number | null; globalWins?: number | null; globalLosses?: number | null; globalWinRate?: number | null; cheater?: boolean; susCount?: number }> {
+export async function fetchPlayerProfile(id: string, queueId?: number, championId?: number): Promise<PlayerProfile & { level?: number | null; kbmRank?: number | null; queueElo?: number | null; championElo?: number | null; globalWins?: number | null; globalLosses?: number | null; globalWinRate?: number | null; cheater?: boolean; exploiter?: boolean; susCount?: number }> {
   type RawChampion = { champion_name: string; champion_id: number; wins: number; total_plays?: number; matches_played?: number; losses?: number; win_rate?: number | null; mu?: number | string | null };
   type RawPlayer = {
     id: string | number; name: string; level?: number | string | null; platform?: string | null; region?: string | null;
     kbm_tier?: string | number | null; kbm_points?: number | string | null; kbm_rank?: number | string | null;
     total_matches?: number | string | null; total_wins?: number | string | null;
     wins?: number | string | null; losses?: number | string | null;
-    cheater?: boolean | null; sus_count?: number | string | null;
+    cheater?: boolean | null; exploiter?: boolean | null; sus_count?: number | string | null;
     win_rate?: number | string | null; total_plays?: number | string | null;
     top_champions?: RawChampion[] | null;
   };
@@ -2353,6 +2359,7 @@ export async function fetchPlayerProfile(id: string, queueId?: number, championI
       ? (globalWins / (globalWins + globalLosses)) * 100
       : null,
     cheater: Boolean(player.cheater),
+    exploiter: Boolean(player.exploiter),
     susCount: numberOrNull(player.sus_count) ?? 0,
     totalMatches,
     totalWins,
@@ -4023,7 +4030,7 @@ export async function updateProfile(data: { avatar_url?: string | null; bio?: st
 
 // ── Player Report ──
 
-export type ReportType = 'suspicious' | 'cheater' | 'approve' | 'weirdo' | 'hall_of_fame' | 'dropper' | 'afk_wintrade';
+export type ReportType = 'suspicious' | 'cheater' | 'exploiter' | 'approve' | 'weirdo' | 'hall_of_fame' | 'dropper' | 'afk_wintrade';
 
 export interface ReportOptions {
   type: ReportType;
@@ -4058,7 +4065,7 @@ export async function reportPrivateAccount(privateId: string | number, opts: Rep
   });
 }
 
-export type ClearablePlayerTag = 'cheater' | 'suspicious' | 'dropper' | 'afk_wintrade' | 'alt_account';
+export type ClearablePlayerTag = 'cheater' | 'exploiter' | 'suspicious' | 'dropper' | 'afk_wintrade' | 'alt_account';
 
 export async function clearPlayerTag(playerId: string | number, tag: ClearablePlayerTag): Promise<{ success: boolean; message: string; cleared: boolean }> {
   const token = getAuthToken();
@@ -4594,6 +4601,7 @@ export interface MatchPlayerProfileSnapshot {
   queue_elo: number | null;
   champion_elo: number | null;
   cheater: boolean;
+  exploiter: boolean;
   sus_count: number;
   verified: boolean;
 }
