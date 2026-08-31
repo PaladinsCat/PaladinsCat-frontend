@@ -1,3 +1,6 @@
+/** player-link-card component/module.
+ * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ */
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
@@ -24,6 +27,9 @@ type Props = {
   onChanged: () => Promise<void> | void;
 };
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export default function PlayerLinkCard({ linkedPlayer, onChanged }: Props) {
   const { t , formatTime} = useLocalization();
   const [searchQuery, setSearchQuery] = useState("");

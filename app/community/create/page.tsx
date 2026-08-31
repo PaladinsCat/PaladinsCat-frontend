@@ -1,5 +1,8 @@
+/**
+ * Define the community create page responsibility boundary.
+ * Coordinates community create page data loading, authorization, and presentation.
+ */
 "use client";
-
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -7,6 +10,10 @@ import { createPost, getAuthUser, getAuthToken, hasCookieAuthSession } from "@/l
 import { AsyncButton } from "@/components/async-state";
 import { useLocalization } from "@/lib/localization-context";
 
+/**
+ * Handles the exported route operation using its declared request and response contract.
+ * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ */
 export default function CreatePostPage() {
   const { t } = useLocalization();
   const router = useRouter();

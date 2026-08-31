@@ -1,3 +1,6 @@
+/** Tests champion icon lookup and fallback behavior.
+ * The module preserves canonical data, asset, or metadata behavior used by existing callers.
+ */
 import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";

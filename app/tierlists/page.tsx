@@ -1,5 +1,8 @@
+/**
+ * Define the tierlists page responsibility boundary.
+ * Coordinates tierlists page data loading, authorization, and presentation.
+ */
 "use client";
-
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { fetchTierLists, type TierListSummary } from "@/lib/tierlists-api";
@@ -10,6 +13,10 @@ import { formatLocalDateTime } from "@/lib/time-format";
 import { VerifiedPlayerBadge } from "@/components/player-name";
 import { useLocalization } from "@/lib/localization-context";
 
+/**
+ * Handles the exported route operation using its declared request and response contract.
+ * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ */
 export default function TierListsPage() {
   const { t , formatDateTime} = useLocalization();
   const [lists, setLists] = useState<TierListSummary[]>([]);

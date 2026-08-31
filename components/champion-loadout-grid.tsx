@@ -1,3 +1,6 @@
+/** champion-loadout-grid component/module.
+ * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ */
 import Link from "next/link";
 import SmartImage from "@/components/SmartImage";
 import type { ChampionLoadout } from "@/lib/champion-data";
@@ -16,6 +19,9 @@ function winRateColor(winRate: number): string {
   return "text-rose-400";
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export default function ChampionLoadoutGrid({
   championSlug,
   loadouts,

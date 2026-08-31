@@ -1,5 +1,8 @@
+/**
+ * Define the operations stats page responsibility boundary.
+ * Coordinates operations stats page data loading, authorization, and presentation.
+ */
 "use client";
-
 import { useEffect, useState } from "react";
 import { Database, HeartPulse, Users } from "lucide-react";
 import { fetchPublicOperationsStats, type PublicOperationsStats } from "@/lib/operations-api";
@@ -15,6 +18,10 @@ function MetricCard({ label, value, companionValue, detail }: { label: string; v
   return <div className="min-h-24 rounded-xl border border-pc-border bg-pc-bg-elevated p-4"><div className="text-xs text-pc-text-muted">{label}</div><div className="mt-1 flex min-h-8 items-baseline text-2xl font-bold text-pc-text"><StableMetricValue value={formattedValue} />{companionValue != null && <><span className="px-1.5 font-normal text-pc-text-muted">/</span><StableMetricValue value={formatNumber(companionValue)} /></>}</div>{detail && <div className="mt-1 text-xs text-pc-text-muted">{detail}</div>}</div>;
 }
 
+/**
+ * Handles the exported route operation using its declared request and response contract.
+ * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ */
 export default function OperationsStatsPage() {
   const { t, formatDateTime, formatPercent } = useLocalization();
   const routeSettled = useRouteSettled();

@@ -1,3 +1,6 @@
+/** Maps queue identifiers to stable display labels.
+ * The module owns the existing validation, policy, label, title, or preference behavior.
+ */
 const QUEUE_LABELS: Record<number, string> = {
   1: "Casual Queue",
   2: "KBM",
@@ -17,6 +20,9 @@ const QUEUE_LABELS: Record<number, string> = {
   486: "Ranked Siege",
 };
 
+/** Apply getQueueLabel to the declared player or request input.
+ * Contract: enforces the module rule and returns the documented value without changing unrelated state.
+ */
 export function getQueueLabel(queueId: number, queueName?: string | null): string {
   const storedName = queueName?.trim();
   return storedName || QUEUE_LABELS[queueId] || `Queue #${queueId}`;

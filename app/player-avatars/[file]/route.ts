@@ -1,3 +1,7 @@
+/**
+ * Handle HTTP requests for player-avatars file route.
+ * Validate inputs and return the response assembled by this handler.
+ */
 import { NextResponse } from "next/server";
 import {
   parsePlayerAvatarFile,
@@ -21,6 +25,10 @@ function errorResponse(status: number): NextResponse {
   });
 }
 
+/**
+ * Handle the GET HTTP request for player-avatars file route.
+ * Validate the request and return the handler response with its declared status behavior.
+ */
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ file: string }> },

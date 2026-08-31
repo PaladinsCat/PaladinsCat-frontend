@@ -1,3 +1,6 @@
+/** footer component/module.
+ * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ */
 "use client";
 
 /**
@@ -14,6 +17,9 @@ import { useLocalization } from "@/lib/localization-context";
 const VERSION_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 const VERSION_REFRESH_MIN_GAP_MS = 15 * 1000;
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export default function Footer() {
   const { t } = useLocalization();
   const [siteVersion, setSiteVersion] = useState<SiteVersion | null>(null);

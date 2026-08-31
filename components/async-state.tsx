@@ -1,3 +1,6 @@
+/** async-state component/module.
+ * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ */
 "use client";
 
 import type { ButtonHTMLAttributes, ReactNode } from "react";
@@ -5,6 +8,9 @@ import { AlertTriangle, Inbox, LoaderCircle, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLocalization } from "@/lib/localization-context";
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export function ContentFade({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <div className={cn("pc-content-fade", className)}>
@@ -13,6 +19,9 @@ export function ContentFade({ children, className }: { children: ReactNode; clas
   );
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export function StableMetricValue({
   value,
   className,
@@ -34,6 +43,9 @@ export function StableMetricValue({
   );
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export function LoadingPanel({
   compact = false,
   className,
@@ -54,6 +66,9 @@ export function LoadingPanel({
   );
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export function LoadingIndicator({ className }: { className?: string }) {
   const { t } = useLocalization();
   return (
@@ -64,6 +79,9 @@ export function LoadingIndicator({ className }: { className?: string }) {
   );
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export function LoadingOverlay({ visible }: { visible: boolean }) {
   if (!visible) return null;
   return (
@@ -73,6 +91,9 @@ export function LoadingOverlay({ visible }: { visible: boolean }) {
   );
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export function EmptyState({
   title,
   description,
@@ -94,6 +115,9 @@ export function EmptyState({
   );
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export function ErrorState({
   title,
   message,
@@ -126,6 +150,9 @@ interface AsyncButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export function AsyncButton({ loading = false, children, className, disabled, ...props }: AsyncButtonProps) {
   const { t } = useLocalization();
   return (

@@ -1,3 +1,7 @@
+/**
+ * Define the stats activity page route boundary.
+ * Coordinates this module's route data flow and rendered output.
+ */
 import { unstable_cache } from "next/cache";
 import PlayerActivityPanel, { type PlayerActivityInitialData } from "@/components/player-activity-panel";
 
@@ -33,8 +37,13 @@ const getInitialActivityData = unstable_cache(
 // Render the data-bearing activity page on the first response. The browser
 // retains its minute refreshes, but a cold visitor no longer waits for JS
 // hydration before the charts become visible.
+/**
+ * Selects request-fresh rendering for statistics data.
+ * Returns the declared route value; network, cache, and navigation effects follow the implementation.
+ */
 export const dynamic = "force-dynamic";
 
+/** Render player activity statistics, seeding the client view with server data when available. */
 export default async function PlayerActivityPage() {
   const initialData = await getInitialActivityData().catch(() => null);
   return (

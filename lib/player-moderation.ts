@@ -1,3 +1,6 @@
+/** Calls player moderation APIs and maps review data.
+ * The module owns its existing image, OIDC, proxy, roster, or moderation boundary.
+ */
 export type PlayerModeration = {
   cheater: boolean;
   exploiter: boolean;
@@ -52,6 +55,9 @@ let timer: ReturnType<typeof setTimeout> | null = null;
 
 
 // User-facing error keys — resolved at the UI layer via t()
+/** Apply MODERATION_ERROR_KEYS to the declared request or domain inputs.
+ * Contract: validates inputs, preserves the existing security or mapping rules, and returns the documented result.
+ */
 export const MODERATION_ERROR_KEYS = {
   unableToLoadBadges: "generated.moderation.unableToLoadBadges",
   unableToLoadPrivateBadges: "generated.moderation.unableToLoadPrivateBadges",

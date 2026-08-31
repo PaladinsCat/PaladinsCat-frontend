@@ -1,3 +1,6 @@
+/** ChampionRateDetailPage component/module.
+ * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ */
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -113,6 +116,9 @@ function pctDiff(value: number, base: number): number {
   return base !== 0 ? ((value - base) / base) * 100 : 0;
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export default function ChampionRateDetailPage({
   config,
   initialChampions = null,

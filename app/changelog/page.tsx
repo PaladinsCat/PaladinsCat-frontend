@@ -1,5 +1,8 @@
+/**
+ * Define the changelog page responsibility boundary.
+ * Coordinates changelog page data loading, authorization, and presentation.
+ */
 "use client";
-
 import { useEffect, useMemo, useState } from "react";
 import { fetchChangelog, type ChangelogPage } from "@/lib/api-client";
 import { formatLocalDateTime, formatRelativeTime } from "@/lib/time-format";
@@ -325,6 +328,10 @@ function Pagination({ page, totalPages, onChange }: { page: number; totalPages: 
   );
 }
 
+/**
+ * Handles the exported route operation using its declared request and response contract.
+ * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ */
 export default function ChangelogPage() {
   const { t } = useLocalization();
   const [page, setPage] = usePersistentDirectoryPage();

@@ -1,3 +1,7 @@
+/**
+ * Renders match export button data for match-result views.
+ * Keeps the component's interaction and accessibility behavior intact.
+ */
 "use client";
 
 import { useEffect, useState, type RefObject } from "react";
@@ -50,6 +54,9 @@ async function scoreboardPng(scoreboard: HTMLElement) {
   }
 }
 
+/** Render MatchExportButton from its declared props and match data.
+ * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
+ */
 export default function MatchExportButton(props: MatchExportButtonProps) {
   const { t } = useLocalization();
   const [exporting, setExporting] = useState(false);

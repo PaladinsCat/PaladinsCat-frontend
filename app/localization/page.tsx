@@ -1,11 +1,18 @@
+/**
+ * Define the localization page responsibility boundary.
+ * Coordinates localization page data loading, authorization, and presentation.
+ */
 "use client";
-
 import { BookOpen, CheckCircle2, GitBranch, Languages } from "lucide-react";
 import { useLocalization } from "@/lib/localization-context";
 
 const REPOSITORY_URL = "https://github.com/PaladinsCat/PaladinsCat-locales";
 const WEBLATE_URL = "https://translate.paladinscat.com";
 
+/**
+ * Handles the exported route operation using its declared request and response contract.
+ * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ */
 export default function LocalizationPage() {
   const { t } = useLocalization();
   const steps = [

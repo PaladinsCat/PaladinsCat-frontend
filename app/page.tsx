@@ -1,3 +1,4 @@
+/** Assemble localized homepage metadata and discovery links for server rendering. */
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -16,10 +17,12 @@ import {
 import HomePageClient from "./home-page-client";
 import { getServerLocalization } from "@/lib/server-localization";
 
+/** Keep the homepage canonical URL stable for crawlers. */
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
 
+/** Render the localized homepage content around the interactive hero. */
 export default async function HomePage() {
   const { t } = await getServerLocalization();
   const topics = [

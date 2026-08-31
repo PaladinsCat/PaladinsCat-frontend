@@ -1,9 +1,15 @@
+/** operations-auth-wall component/module.
+ * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ */
 "use client";
 
 import { LockKeyhole } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useLocalization } from "@/lib/localization-context";
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export function OperationsAuthWall() {
   const { t } = useLocalization();
   const pathname = usePathname();

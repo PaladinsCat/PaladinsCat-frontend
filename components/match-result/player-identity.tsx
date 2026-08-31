@@ -1,3 +1,7 @@
+/**
+ * Renders player identity data for match-result views.
+ * Keeps the component's interaction and accessibility behavior intact.
+ */
 "use client";
 
 import Link from "next/link";
@@ -5,17 +9,26 @@ import PlayerName, { PlayerModerationTag } from "@/components/player-name";
 import type { MatchPlayerDetail } from "@/lib/api-client";
 import { useLocalization } from "@/lib/localization-context";
 
+/** Render trackedPrivateId from its declared props and match data.
+ * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
+ */
 export function trackedPrivateId(player: MatchPlayerDetail): number | null {
   const privateId = Number(player.private_player_id ?? 0);
   return Number(player.player_id) === 0 && Number.isInteger(privateId) && privateId > 0 ? privateId : null;
 }
 
+/** Render matchPlayerKey from its declared props and match data.
+ * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
+ */
 export function matchPlayerKey(player: MatchPlayerDetail): string {
   const privateId = trackedPrivateId(player);
   if (privateId) return `private:${privateId}:${Number(player.private_slot ?? 0)}`;
   return `player:${Number(player.player_id)}:${Number(player.private_slot ?? 0)}`;
 }
 
+/** Render matchPlayerHref from its declared props and match data.
+ * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
+ */
 export function matchPlayerHref(player: MatchPlayerDetail): string | null {
   const privateId = trackedPrivateId(player);
   if (privateId) return `/players/private-accounts/${privateId}`;
@@ -23,6 +36,9 @@ export function matchPlayerHref(player: MatchPlayerDetail): string | null {
   return playerId > 0 ? `/players/${playerId}` : null;
 }
 
+/** Render privateAccountCode from its declared props and match data.
+ * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
+ */
 export function privateAccountCode(player: MatchPlayerDetail): string | null {
   const privateId = trackedPrivateId(player);
   if (!privateId) return null;
@@ -31,6 +47,9 @@ export function privateAccountCode(player: MatchPlayerDetail): string | null {
   return `P-${String(privateId).padStart(6, "0")}`;
 }
 
+/** Render MatchPlayerLink from its declared props and match data.
+ * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
+ */
 export function MatchPlayerLink({ player, className = "" }: { player: MatchPlayerDetail; className?: string }) {
   const { t } = useLocalization();
   const privateId = trackedPrivateId(player);
@@ -63,6 +82,9 @@ export function MatchPlayerLink({ player, className = "" }: { player: MatchPlaye
   return href ? <Link href={href} className={className} title={privateId ? t("generated.matches.privateAccountValue1", { value1: privateId }) : player.player_name}>{content}</Link> : <span className={className}>{content}</span>;
 }
 
+/** Render MatchPlayerReference from its declared props and match data.
+ * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
+ */
 export function MatchPlayerReference({ player, className = "" }: { player: MatchPlayerDetail; className?: string }) {
   const { t } = useLocalization();
   const privateId = trackedPrivateId(player);

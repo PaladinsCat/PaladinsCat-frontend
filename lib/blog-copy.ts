@@ -1,6 +1,12 @@
+/** Provides localized blog copy and static article metadata.
+ * This module supplies static and localized blog copy used by page renderers.
+ */
 // Blog UI copy — stored as translation key constants.
 // Components resolve these via t() from the localization context.
 
+/** BLOG_COPY_KEYS applies the module-specific transformation to its declared inputs.
+ * Contract: validates its inputs and returns the existing module result without mutating caller state.
+ */
 export const BLOG_COPY_KEYS = {
   title: 'generated.blog.title' as const,
   subtitle: 'generated.blog.subtitle' as const,

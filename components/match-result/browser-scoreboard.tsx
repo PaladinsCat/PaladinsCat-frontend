@@ -1,3 +1,4 @@
+/** Render the client-side match scoreboard with teams, bans, ranks, loadouts, and totals. */
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -186,6 +187,7 @@ function TeamSummary({ label, won, team, teamNumber }: { label: string; won: boo
   );
 }
 
+/** Present match players and derived score metrics using localized, linkable team rows. */
 export default function BrowserScoreboard({ match, queueLabel, team1, team2, bans }: BrowserScoreboardProps) {
   const { formatNumber, locale, t } = useLocalization();
   const formatMatchDuration = (seconds: number) => {

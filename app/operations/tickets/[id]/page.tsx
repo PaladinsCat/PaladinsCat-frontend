@@ -1,3 +1,7 @@
+/**
+ * Define the operations tickets page responsibility boundary.
+ * Coordinates operations tickets page data loading, authorization, and presentation.
+ */
 "use client";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -7,6 +11,10 @@ import { OperationsAuthWall } from "@/components/operations-auth-wall";
 import { useAuth } from "@/lib/auth-context";
 import { useLocalization } from "@/lib/localization-context";
 import { commentTicket, deleteTicket, getTicket, updateTicket, type TicketStatus } from "@/lib/operations-api";
+/**
+ * Handles the exported route operation using its declared request and response contract.
+ * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ */
 export default function TicketDetailPage() {
   const { user,isLoading }=useAuth(); const { t }=useLocalization(); const params=useParams<{id:string}>(); const router=useRouter(); const id=String(params.id??"");
   const [data,setData]=useState<Awaited<ReturnType<typeof getTicket>>|null>(null); const [error,setError]=useState<string|null>(null); const [busy,setBusy]=useState(false);

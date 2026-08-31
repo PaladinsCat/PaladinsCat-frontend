@@ -1,3 +1,4 @@
+/** Rotate the configured homepage wallpapers and synchronize their extracted accents. */
 "use client";
 
 import { useState, useEffect, useMemo, useRef } from "react";

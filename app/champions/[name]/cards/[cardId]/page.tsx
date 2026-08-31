@@ -1,3 +1,7 @@
+/**
+ * Render the champions name cards cardId page and its data composition.
+ * Assemble the page content exposed at this location.
+ */
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -34,6 +38,10 @@ function statNameKey(value: string | null | undefined): string {
     .replace(/[^a-z0-9]/g, "");
 }
 
+/**
+ * Render the ChampionCardDetailPage view for champions name cards cardId page.
+ * Return the React tree for the declared inputs and page data.
+ */
 export default function ChampionCardDetailPage() {
   const { t, formatNumber, formatPercent: formatPct } = useLocalization();
   const formatPlays = (value: number) => formatNumber(value, { notation: "compact", maximumFractionDigits: 1 });

@@ -1,6 +1,16 @@
+/**
+ * Defines seo's shared contracts and runtime helpers.
+ * Keep behavior aligned with its callers and browser/server boundary.
+ */
 export const SITE_URL = "https://paladinscat.com";
+/**
+ * Defines the  s i t e_ n a m e contract used by this module.
+ */
 export const SITE_NAME = "PaladinsCat";
 
+/**
+ * Defines the  s e o_ k e y w o r d s contract used by this module.
+ */
 export const SEO_KEYWORDS = [
   "Paladins",
   "Paladins stats",
@@ -24,28 +34,40 @@ export const SEO_KEYWORDS = [
   "Paladins talents",
 ];
 
+/**
+ * Defines the absolute url contract used by this module.
+ */
 export function absoluteUrl(path = "/") {
   if (path.startsWith("http://") || path.startsWith("https://")) return path;
   return `${SITE_URL}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
+/**
+ * Defines the seo title contract used by this module.
+ */
 export function seoTitle(title: string) {
   return `${title} | ${SITE_NAME}`;
 }
 
+/**
+ * Defines the clean description contract used by this module.
+ */
 export function cleanDescription(description: string) {
   return description.replace(/\s+/g, " ").trim();
 }
 
+/** Normalize user-derived SEO labels and enforce their display bound. */
 export function cleanSeoLabel(value: string, fallback: string, maxLength = 64) {
   const cleaned = value.replace(/[\u0000-\u001f\u007f]/g, " ").replace(/\s+/g, " ").trim();
   return (cleaned || fallback).slice(0, maxLength);
 }
 
+/** Accept only the bounded positive decimal identifiers exposed by public player routes. */
 export function isPublicPlayerId(value: string) {
   return /^[1-9]\d{0,9}$/.test(value);
 }
 
+/** Serialize JSON-LD without allowing a literal tag opener into the HTML payload. */
 export function serializeJsonLd(value: unknown) {
   return JSON.stringify(value).replace(/</g, "\\u003c");
 }

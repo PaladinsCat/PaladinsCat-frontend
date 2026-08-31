@@ -1,3 +1,4 @@
+/** Re-export match-result types, formatters, and section components from one public entry point. */
 export * from "./types";
 export * from "./format";
 

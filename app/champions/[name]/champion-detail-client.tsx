@@ -1,3 +1,7 @@
+/**
+ * Manage interactive state for the champions name champion-detail-client client view.
+ * Coordinate local events and consume the declared component inputs.
+ */
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -196,6 +200,10 @@ function RankedPerformanceCard({
   );
 }
 
+/**
+ * Render the ChampionDetailPage view for champions name champion-detail-client.
+ * Return the React tree for the declared inputs and page data.
+ */
 export default function ChampionDetailPage({
   initialChampionData = null,
   initialPageData = null,

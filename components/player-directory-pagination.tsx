@@ -1,3 +1,6 @@
+/** player-directory-pagination component/module.
+ * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ */
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -17,6 +20,9 @@ function readPage(param: string, storageKey: string) {
   }
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export function usePersistentDirectoryPage(param = "page") {
   const pathname = usePathname();
   const storageKey = `pc:directory-page:${pathname}:${param}`;
@@ -57,6 +63,9 @@ interface Props {
   onPageChange: (page: number) => void;
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export default function PlayerDirectoryPagination({ page, totalPages, onPageChange }: Props) {
   const { t , formatNumber} = useLocalization();
   if (totalPages <= 1) return null;

@@ -1,5 +1,8 @@
+/**
+ * Define the stats tiers page route boundary.
+ * Coordinates this module's route data flow and rendered output.
+ */
 "use client";
-
 import { useEffect, useMemo, useState } from "react";
 import { fetchTierSummary, fetchTiers, type TierStat, type TierSummary } from "@/lib/api-client";
 import { getRankIconPath, TIER_NAMES } from "@/lib/tier-utils";
@@ -146,6 +149,10 @@ function DistributionChart({
   );
 }
 
+/**
+ * Renders the exported statistics view with its route data.
+ * Returns the declared route value; network, cache, and navigation effects follow the implementation.
+ */
 export default function TiersPage() {
   const { t , formatNumber} = useLocalization();
   const [profileTiers, setProfileTiers] = useState<TierStat[]>([]);

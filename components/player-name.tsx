@@ -1,3 +1,6 @@
+/** player-name component/module.
+ * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ */
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
@@ -39,6 +42,9 @@ const AUTOMATIC_TAG_ACCENT: Record<NonNullable<PlayerModerationTagProps["automat
   CARRY: "text-cyan-300",
 };
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export function VerifiedPlayerBadge({ className = "", iconClassName = "h-3.5 w-3.5" }: { className?: string; iconClassName?: string }) {
   const { t } = useLocalization();
   return (
@@ -74,6 +80,9 @@ export type PlayerModerationTagProps = {
   verified?: boolean;
 };
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export function PlayerModerationTag({
   playerId,
   cheater,
@@ -149,7 +158,7 @@ export function PlayerModerationTag({
   return <span className="inline-flex max-h-10 min-w-0 flex-wrap items-center gap-1 overflow-hidden">
     {moderation.verified && <VerifiedPlayerBadge />}
     {moderation.cheater && <span className={`${PLAYER_TAG_CLASS} cheater text-red-400`} aria-label={t("generated.players.confirmedCheater")}>{t("generated.players.cheater")}</span>}
-    {moderation.exploiter && <span className={`${PLAYER_TAG_CLASS} exploiter text-orange-400`} aria-label="Exploiter">EXPLOIT</span>}
+    {moderation.exploiter && <span className={`${PLAYER_TAG_CLASS} exploiter text-orange-400`} aria-label={t("moderation.exploiterAria")}>{t("moderation.exploiterShort")}</span>}
     {!moderation.cheater && !moderation.exploiter && <>
       {moderation.dropper && hasPlayerTag(moderation.dropperVoteCount) && <span className={`${PLAYER_TAG_CLASS} dropper text-rose-300`}>{t("moderation.dropShort")}</span>}
       {hasPlayerTag(moderation.susCount) && <span className={`${PLAYER_TAG_CLASS} suspicious text-amber-400`} aria-label={t("generated.players.suspiciousPlayerWithValue1Flags", { value1: moderation.susCount })}>{t("generated.players.sus")}</span>}

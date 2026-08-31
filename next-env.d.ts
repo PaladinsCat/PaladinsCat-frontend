@@ -1,3 +1,4 @@
+/** Register the framework-generated TypeScript declarations used by this application. */
 /// <reference types="next" />
 /// <reference types="next/image-types/global" />
 import "./.next/types/routes.d.ts";

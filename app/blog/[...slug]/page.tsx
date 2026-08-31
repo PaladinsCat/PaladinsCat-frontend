@@ -1,3 +1,7 @@
+/**
+ * Define the blog page responsibility boundary.
+ * Coordinates blog page data loading, authorization, and presentation.
+ */
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getAllPosts, getPostBySlug, getPostLink, resolveBlogAssetUrl, resolveBlogLink } from "@/lib/blog";
@@ -8,6 +12,10 @@ import remarkGfm from "remark-gfm";
 
 // Blog content changes only with the public repository. Generate the known
 // routes into the image and retain ISR for newly published posts.
+/**
+ * Handles the exported route operation using its declared request and response contract.
+ * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ */
 export const revalidate = 300;
 
 type BlogPostPageProps = { params: Promise<{ slug: string[] }> };
@@ -16,11 +24,16 @@ function joinSlug(slug: string[]): string {
   return slug.join("/");
 }
 
+/**
+ * Handles the exported route operation using its declared request and response contract.
+ * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ */
 export async function generateStaticParams() {
   const posts = await getAllPosts();
   return posts.map((post) => ({ slug: post.slug.split("/") }));
 }
 
+/** Render one localized blog post selected by its catch-all slug parameters. */
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const { t } = await getServerLocalization();
   const { slug } = await params;
@@ -105,6 +118,10 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   );
 }
 
+/**
+ * Handles the exported route operation using its declared request and response contract.
+ * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ */
 export async function generateMetadata({ params }: BlogPostPageProps) {
   const { t } = await getServerLocalization();
   const { slug } = await params;

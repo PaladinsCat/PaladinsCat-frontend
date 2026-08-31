@@ -1,11 +1,23 @@
+/**
+ * Handle HTTP requests for match-images id route.
+ * Validate inputs and return the response assembled by this handler.
+ */
 import { NextRequest } from "next/server";
 
+/**
+ * Select dynamic rendering for match-images id route.
+ * Return the framework rendering mode constant used by this page.
+ */
 export const dynamic = "force-dynamic";
 
 function rendererUrl() {
   return (process.env.PALADINSCAT_RENDER_URL ?? "http://127.0.0.1:3020").replace(/\/$/, "");
 }
 
+/**
+ * Handle the GET HTTP request for match-images id route.
+ * Validate the request and return the handler response with its declared status behavior.
+ */
 export async function GET(_request: NextRequest, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;
   if (!/^\d{6,20}$/.test(id)) return Response.json({ error: "Invalid match ID." }, { status: 400 });

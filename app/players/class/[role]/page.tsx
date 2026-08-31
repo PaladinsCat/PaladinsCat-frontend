@@ -1,3 +1,8 @@
+/**
+ * Define the player route surface for class role page and its local data boundary.
+ * This file owns the page, layout, loading state, or route handler named by its path.
+ * It does not own unrelated player sections or shared library policy.
+ */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -64,6 +69,10 @@ function RankBadge({ rank }: { rank: number }) {
   );
 }
 
+/**
+ * Render the ClassEloPage view for the player class role page route.
+ * Returns the React tree for the route and its declared inputs.
+ */
 export default function ClassEloPage() {
   const { t , formatNumber, formatPercent} = useLocalization();
   const params = useParams();

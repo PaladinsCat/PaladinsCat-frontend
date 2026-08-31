@@ -1,3 +1,6 @@
+/** CommunityVoteLeaderboard component/module.
+ * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -27,6 +30,9 @@ const CONFIG = {
   },
 } as const;
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export default function CommunityVoteLeaderboard({ kind }: { kind: VoteKind }) {
   const { t } = useLocalization();
   const config = CONFIG[kind];

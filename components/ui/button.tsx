@@ -1,3 +1,4 @@
+/** Define the shared button variants and Base UI wrapper used across the frontend. */
 import { Button as ButtonPrimitive } from "@base-ui/react/button"
 import { cva, type VariantProps } from "class-variance-authority"
 

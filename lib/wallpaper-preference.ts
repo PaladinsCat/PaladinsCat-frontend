@@ -1,9 +1,22 @@
+/**
+ * Defines wallpaper-preference's shared contracts and runtime helpers.
+ * Keep behavior aligned with its callers and browser/server boundary.
+ */
 export const WALLPAPER_STORAGE_KEY = "paladinscat-wallpaper-enabled";
+/**
+ * Defines the  c u s t o m_ w a l l p a p e r_ s t o r a g e_ k e y contract used by this module.
+ */
 export const CUSTOM_WALLPAPER_STORAGE_KEY = "paladinscat-custom-wallpaper";
+/**
+ * Defines the  w a l l p a p e r_ c h a n g e_ e v e n t contract used by this module.
+ */
 export const WALLPAPER_CHANGE_EVENT = "paladinscat:wallpaper-change";
 
 const WALLPAPER_DATABASE_NAME = "paladinscat-wallpapers";
 const WALLPAPER_OBJECT_STORE = "images";
+/**
+ * Defines the  m a x_ c u s t o m_ w a l l p a p e r_ b y t e s contract used by this module.
+ */
 export const MAX_CUSTOM_WALLPAPER_BYTES = 25 * 1024 * 1024;
 const SUPPORTED_IMAGE_TYPES = new Set([
   "image/avif",
@@ -13,10 +26,16 @@ const SUPPORTED_IMAGE_TYPES = new Set([
   "image/webp",
 ]);
 
+/**
+ * Defines the  custom wallpaper contract used by this module.
+ */
 export type CustomWallpaper =
   | { type: "url"; source: string }
   | { type: "upload"; id: string };
 
+/**
+ * Transforms or validates  resolved custom wallpaper according to this module's data contract.
+ */
 export type ResolvedCustomWallpaper = {
   source: string;
   revoke: boolean;
@@ -37,6 +56,9 @@ function notifyWallpaperChange(): void {
 }
 
 // User-facing error keys — resolved at the UI layer via t()
+/**
+ * Defines the  w a l l p a p e r_ e r r o r_ k e y s contract used by this module.
+ */
 export const WALLPAPER_ERROR_KEYS = {
   saveSetting: "generated.wallpaper.saveSettingError",
   invalidUrl: "generated.wallpaper.invalidUrlError",
@@ -133,6 +155,9 @@ function createWallpaperId(): string {
   return window.crypto.randomUUID?.() ?? `wallpaper-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
+/**
+ * Reads wallpaper enabled from the module's configured source.
+ */
 export function getWallpaperEnabled(): boolean {
   if (typeof window === "undefined") return true;
 
@@ -143,6 +168,9 @@ export function getWallpaperEnabled(): boolean {
   }
 }
 
+/**
+ * Updates wallpaper enabled using the module's persistence or validation rules.
+ */
 export function setWallpaperEnabled(enabled: boolean): void {
   try {
     window.localStorage.setItem(WALLPAPER_STORAGE_KEY, String(enabled));

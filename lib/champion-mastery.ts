@@ -1,3 +1,6 @@
+/** Calculates champion mastery display values.
+ * The module preserves canonical data, asset, or metadata behavior used by existing callers.
+ */
 const LEVEL_50_XP = 25_500_000;
 const XP_PER_LEVEL_AFTER_50 = 1_000_000;
 

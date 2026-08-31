@@ -1,3 +1,6 @@
+/** Loads and normalizes champion data for pages.
+ * The module preserves canonical data, asset, or metadata behavior used by existing callers.
+ */
 import { championSlug } from "@/lib/utils";
 import { getCanonicalTalentImageUrl } from "@/lib/image-assets";
 
@@ -75,6 +78,9 @@ async function loadChampionDataMap(): Promise<ChampionDataMap> {
   return championDataPromise;
 }
 
+/** Use getChampionData to apply the module-specific champion data or asset behavior.
+ * Contract: accepts its declared inputs and returns the documented value without changing caller-side state.
+ */
 export async function getChampionData(slug: string): Promise<ChampionData | undefined> {
   const data = await loadChampionDataMap();
   return data[championSlug(slug)];

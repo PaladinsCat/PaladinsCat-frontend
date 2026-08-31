@@ -1,3 +1,6 @@
+/** player-search-result component/module.
+ * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ */
 import type { UniversalSearchResult } from "@/lib/api-client";
 import { getRankIconPath, getTierColor, resolveEffectiveTier } from "@/lib/tier-utils";
 

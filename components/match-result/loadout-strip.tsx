@@ -1,3 +1,4 @@
+/** Render one player's selected items and talent in a compact match-result strip. */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -28,6 +29,7 @@ function MaterialIcon({ src, fallbackSrc, alt, className = "w-8 h-8 object-cover
   );
 }
 
+/** Show the player's loadout icons with localized names and fallback image handling. */
 export default function LoadoutStrip({ fact }: LoadoutStripProps) {
   const { t } = useLocalization();
   const allMaterials = [

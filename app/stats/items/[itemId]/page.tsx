@@ -1,5 +1,8 @@
+/**
+ * Define the stats items page route boundary.
+ * Coordinates this module's route data flow and rendered output.
+ */
 "use client";
-
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { ExternalLink } from "lucide-react";
@@ -30,6 +33,10 @@ const CHAMPION_ROLES = [
   { value: "Support", labelKey: "common.roles.support", icon: "/images/icons/Class_Support_Icon.avif" },
 ] as const;
 
+/**
+ * Renders the exported statistics view with its route data.
+ * Returns the declared route value; network, cache, and navigation effects follow the implementation.
+ */
 export default function ItemDetailPage() {
   const { t, formatNumber, formatPercent: percent, formatRecord, formatSignedPercent: signedPercent } = useLocalization();
   const formatCount = (value: number) => formatNumber(value, { notation: "compact", maximumFractionDigits: 1 });

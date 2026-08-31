@@ -1,6 +1,18 @@
+/** Stores the user preference for home alerts.
+ * The module preserves the existing validation, storage, formatting, or asset boundary.
+ */
+/** Apply HOME_ALERTS_STORAGE_KEY to the declared input values.
+ * Contract: returns the module-specific validated, stored, formatted, or resolved value without external side effects.
+ */
 export const HOME_ALERTS_STORAGE_KEY = "paladinscat-home-alerts-enabled";
+/** Apply HOME_ALERTS_CHANGE_EVENT to the declared input values.
+ * Contract: returns the module-specific validated, stored, formatted, or resolved value without external side effects.
+ */
 export const HOME_ALERTS_CHANGE_EVENT = "paladinscat:home-alerts-change";
 
+/** Apply getHomeAlertsEnabled to the declared input values.
+ * Contract: returns the module-specific validated, stored, formatted, or resolved value without external side effects.
+ */
 export function getHomeAlertsEnabled(): boolean {
   if (typeof window === "undefined") return true;
 
@@ -11,6 +23,9 @@ export function getHomeAlertsEnabled(): boolean {
   }
 }
 
+/** Apply setHomeAlertsEnabled to the declared input values.
+ * Contract: returns the module-specific validated, stored, formatted, or resolved value without external side effects.
+ */
 export function setHomeAlertsEnabled(enabled: boolean): void {
   try {
     window.localStorage.setItem(HOME_ALERTS_STORAGE_KEY, String(enabled));

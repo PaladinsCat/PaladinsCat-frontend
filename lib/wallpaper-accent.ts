@@ -1,5 +1,13 @@
+/**
+ * Derive readable Cat-themed accent colors from wallpaper pixels.
+ *
+ * This module owns color bucketing and browser image extraction; it does not fetch or persist wallpaper data.
+ */
+/** CSS custom property carrying the primary Cat accent; reading it has no side effects. */
 export const HOME_CAT_ACCENT_PROPERTY = "--pc-home-cat-accent";
+/** CSS custom property carrying the secondary platform accent; reading it has no side effects. */
 export const HOME_PLATFORM_ACCENT_PROPERTY = "--pc-home-platform-accent";
+/** CSS custom property carrying the tertiary wallpaper accent; reading it has no side effects. */
 export const HOME_THIRD_ACCENT_PROPERTY = "--pc-home-third-accent";
 
 const SAMPLE_SIZE = 48;
@@ -252,6 +260,11 @@ export async function extractWallpaperAccents(source: string): Promise<Wallpaper
   }
 }
 
+/**
+ * Extract one readable accent color from a wallpaper source URL.
+ *
+ * Accepts source; returns a color or null after browser image decoding, without authentication or persistence effects.
+ */
 export async function extractWallpaperAccent(source: string): Promise<string | null> {
   return (await extractWallpaperAccents(source)).primary;
 }

@@ -1,3 +1,6 @@
+/** Formats live team estimates for display.
+ * The module preserves the existing validation, storage, formatting, or asset boundary.
+ */
 export interface LiveTeamEstimatePlayer {
   task_force?: unknown;
   queue_elo?: unknown;
@@ -15,6 +18,9 @@ function numericMetric(value: unknown): number | null {
   return Number.isFinite(numeric) ? numeric : null;
 }
 
+/** Apply estimateLiveTeamWinChance to the declared input values.
+ * Contract: returns the module-specific validated, stored, formatted, or resolved value without external side effects.
+ */
 export function estimateLiveTeamWinChance(
   players: readonly LiveTeamEstimatePlayer[],
 ): LiveTeamWinChance | null {

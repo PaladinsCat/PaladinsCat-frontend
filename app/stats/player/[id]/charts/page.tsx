@@ -1,5 +1,8 @@
+/**
+ * Define the stats player charts page route boundary.
+ * Coordinates this module's route data flow and rendered output.
+ */
 "use client";
-
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
@@ -10,6 +13,10 @@ import { RouteSkeleton } from "@/components/route-skeleton";
 import { ContentFade } from "@/components/async-state";
 import { SpotlightCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
+/**
+ * Renders the exported statistics view with its route data.
+ * Returns the declared route value; network, cache, and navigation effects follow the implementation.
+ */
 export default function PlayerChartsPage({ params }: { params: Promise<{ id: string }> }) {
   const { t , formatMonthDay} = useLocalization();
   const [kdaData, setKdaData] = useState<KdaHistoryEntry[]>([]);

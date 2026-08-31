@@ -1,3 +1,8 @@
+/**
+ * Define the player route surface for id loadouts championId loadoutId page and its local data boundary.
+ * This file owns the page, layout, loading state, or route handler named by its path.
+ * It does not own unrelated player sections or shared library policy.
+ */
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -41,6 +46,10 @@ function championBanner(name: string) {
   return `/images/champions/Banner_${assetName}.avif`;
 }
 
+/**
+ * Render the PlayerLoadoutDetailPage view for the player id loadouts championId loadoutId page route.
+ * Returns the React tree for the route and its declared inputs.
+ */
 export default function PlayerLoadoutDetailPage() {
   const { t, formatNumber } = useLocalization();
   const params = useParams<{ id: string; championId: string; loadoutId: string }>();

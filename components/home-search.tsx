@@ -1,3 +1,4 @@
+/** Provide the homepage search control and lightweight result overlay. */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -24,6 +25,7 @@ type HomeSearchProps = {
   onSearchActiveChange?: (active: boolean) => void;
 };
 
+/** Search across public entities and route submitted blank queries to the search page. */
 export default function HomeSearch({ onSearchActiveChange }: HomeSearchProps) {
   const { t } = useLocalization();
   const router = useRouter();

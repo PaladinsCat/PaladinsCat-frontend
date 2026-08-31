@@ -1,3 +1,6 @@
+/** player-moderation-directory component/module.
+ * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -46,6 +49,9 @@ function communityVoteCount(player: CheaterPlayer, filter: ModerationFilter): nu
       : Number(player.altAccountVoteCount ?? 0);
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export default function PlayerModerationDirectory({
   titleKey,
   noticeKey,

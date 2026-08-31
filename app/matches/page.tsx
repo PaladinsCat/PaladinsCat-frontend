@@ -1,3 +1,7 @@
+/**
+ * Render the matches page and its data composition.
+ * Assemble the page content exposed at this location.
+ */
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
@@ -16,6 +20,10 @@ import { useLocalization } from "@/lib/localization-context";
 
 const RANKED_QUEUE_ID = "486";
 
+/**
+ * Render the MatchesPage view for matches page.
+ * Return the React tree for the declared inputs and page data.
+ */
 export default function MatchesPage() {
   const { t , formatNumber} = useLocalization();
   const router = useRouter();

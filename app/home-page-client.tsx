@@ -1,3 +1,4 @@
+/** Drive the interactive homepage hero, wallpaper mode, and discovery sections. */
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
@@ -30,6 +31,7 @@ const WALLPAPER_SCROLL_KEYS = new Set([" ", "ArrowDown", "ArrowUp", "PageDown", 
 type WallpaperModePhase = "idle" | "fading" | "arriving" | "active" | "returning" | "settling";
 type HomeScrollbarState = { top: number; height: number; visible: boolean };
 
+/** Reflect the wallpaper transition phase on the document root for coordinated styling. */
 function syncWallpaperModeDom(phase: WallpaperModePhase) {
   const root = document.documentElement;
   if (phase === "idle") {
@@ -43,6 +45,7 @@ function syncWallpaperModeDom(phase: WallpaperModePhase) {
   else delete root.dataset.homeWallpaperMode;
 }
 
+/** Render the interactive homepage shell around server-rendered discovery content. */
 export default function HomePage({ children }: { children?: ReactNode }) {
   const { t } = useLocalization();
   const reduceMotion = useReducedMotion();

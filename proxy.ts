@@ -1,3 +1,6 @@
+/** proxy component/module.
+ * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ */
 import { NextRequest, NextResponse } from "next/server";
 
 /**
@@ -60,6 +63,9 @@ export function proxy(request: NextRequest) {
   return response;
 }
 
+/** Provide this exported item.
+ * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ */
 export const config = {
   // Apply only to page (HTML) document navigations; skip proxied API traffic,
   // Next static chunks, images, and other asset files.
