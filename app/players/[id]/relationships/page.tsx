@@ -14,6 +14,7 @@ import PlayersPageHeader from "@/components/ui/players-page-header";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { fetchPlayerRelationshipSummary, type PlayerRelationshipSummary } from "@/lib/api-client";
 import { useLocalization } from "@/lib/localization-context";
+import { getStatQuality } from "@/lib/stat-quality";
 
 type Mode = "teammates" | "opponents" | "party";
 
@@ -47,6 +48,7 @@ export default function PlayerRelationshipsPage() {
   const rows = mode === "opponents" ? summary.opponents : mode === "party" ? summary.partyPartners : summary.teammates;
   const partyMetricMatches = summary.totals.partyMetricMatches;
   const partyWinRate = partyMetricMatches > 0 ? (summary.totals.partyWins / partyMetricMatches) * 100 : null;
+  const partyWinRateQuality = partyWinRate == null ? null : getStatQuality(partyWinRate, 1, 1);
   const tabs: Array<{ mode: Mode; label: string; count: number }> = [
     { mode: "teammates", label: t("common.relationships.teammates"), count: summary.totals.uniqueTeammates },
     { mode: "opponents", label: t("common.relationships.opponents"), count: summary.totals.uniqueOpponents },
@@ -63,8 +65,8 @@ export default function PlayerRelationshipsPage() {
           [t("common.relationships.opponents"), formatNumber(summary.totals.opponentMatches), "text-violet-300"],
           [t("common.relationships.partyPartners"), formatNumber(summary.totals.partyPartners), "text-amber-300"],
           [t("common.relationships.matchesTogether"), formatNumber(summary.totals.partyMatches), "text-emerald-300"],
-          [t("generated.players.winRate"), formatPercent(partyWinRate), "text-emerald-300"],
-        ].map(([label, value, color]) => <div key={String(label)} className="pc-glass-subtle rounded-xl border border-white/5 p-4"><div className="text-xs uppercase tracking-[0.14em] text-pc-text-muted">{label}</div><div className={`mt-2 font-mono text-2xl font-bold ${color}`}>{value}</div></div>)}
+          [t("generated.players.winRate"), formatPercent(partyWinRate), "", partyWinRateQuality?.color],
+        ].map(([label, value, color, inlineColor]) => <div key={String(label)} className="pc-glass-subtle rounded-xl border border-white/5 p-4"><div className="text-xs uppercase tracking-[0.14em] text-pc-text-muted">{label}</div><div className={`mt-2 font-mono text-2xl font-bold ${color}`} style={inlineColor ? { color: inlineColor } : undefined}>{value}</div></div>)}
       </div>
 
       <section>
