@@ -6,7 +6,7 @@
 .brand { display: flex; align-items: center; gap: 11px; font-size: 25px; line-height: 1; font-weight: 800; letter-spacing: -.02em; }
 .brand img { width: 32px; height: 32px; object-fit: contain; }
 .tag { display: inline-flex; height: 23px; align-items: center; padding: 0 9px; border: 1px solid rgba(55,214,192,.34); border-radius: 999px; color: #bff7ee; background: rgba(15,118,110,.25); font-size: 12px; font-weight: 760; letter-spacing: .035em; }
-.identity h1 { max-width: min(760px,100%); margin: 10px 0 0; padding-bottom: 4px; overflow: hidden; color: #f4f7fb; font-size: clamp(32px,4.3vw,54px); line-height: 1.08; font-weight: 720; letter-spacing: -.01em; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 3px 5px rgba(0,0,0,.45); }
+.playerName { max-width: min(760px,100%); margin: 10px 0 0; padding-bottom: 4px; overflow: hidden; color: #f4f7fb; font-size: clamp(32px,4.3vw,54px); line-height: 1.08; font-weight: 720; letter-spacing: -.01em; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 3px 5px rgba(0,0,0,.45); }
 .context { display: flex; align-items: center; gap: 10px; margin-top: 8px; overflow: hidden; color: #d3dce7; font-size: 15px; line-height: 1.1; font-weight: 740; text-transform: uppercase; letter-spacing: .14em; white-space: nowrap; }
 .context span { overflow: hidden; text-overflow: ellipsis; }
 .context span + span::before { content: "·"; margin-right: 9px; color: #667386; }
@@ -40,7 +40,7 @@
 .detail[data-image-export="true"] .header { min-height: 238px; padding: 28px 38px; }
 .detail[data-image-export="true"] .brand { font-size: 25px; }
 .detail[data-image-export="true"] .brand img { width: 32px; height: 32px; }
-.detail[data-image-export="true"] .identity h1 { font-size: 54px; }
+.detail[data-image-export="true"] .playerName { font-size: 54px; }
 .detail[data-image-export="true"] .context { font-size: 15px; }
 .detail[data-image-export="true"] .cards { grid-template-columns: repeat(5,minmax(0,1fr)); gap: 4px; padding: 0 16px 18px; }
 .detail[data-image-export="true"] .card { max-width: none; justify-self: stretch; }

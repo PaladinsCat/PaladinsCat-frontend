@@ -13,7 +13,6 @@ import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
 import { useLocalization } from "@/lib/localization-context";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
-import { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 
 type SortKey = "championName" | "totalUses" | "winRate" | "avgDpm" | "avgHpm";
@@ -59,7 +58,7 @@ export default function LoadoutsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.stats.loadoutMeta")}</h1>
+      <h1 className="pc-heading pc-heading-lg">{t("generated.stats.loadoutMeta")}</h1>
 
       <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 md:hidden">
         <label className="min-w-0"><span className="pc-label">{t("generated.stats.sortLoadouts")}</span><select value={sortKey} onChange={(event) => { setSortKey(event.target.value as SortKey); setSortDir("desc"); }} className="pc-select w-full"><option value="winRate">{t("generated.stats.winRate")}</option><option value="totalUses">{t("generated.stats.plays")}</option><option value="avgDpm">{t("generated.stats.averageDpm")}</option><option value="avgHpm">{t("generated.stats.averageHpm")}</option><option value="championName">{t("generated.stats.champion")}</option></select></label>

@@ -5,7 +5,6 @@
 
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import ScrambleText from "@/components/ScrambleText";
 import SmartImage from "@/components/SmartImage";
 import { fetchChampions, type Champion, type PublicStatsScope } from "@/lib/api-client";
 import { STATIC_CHAMPIONS } from "@/lib/static-champions";
@@ -15,7 +14,7 @@ import { getRankIconPath } from "@/lib/tier-utils";
 import { getStatQuality } from "@/lib/stat-quality";
 import { useLocalization } from "@/lib/localization-context";
 import { getStoredLobbyTierFilter } from "@/lib/lobby-tier";
-import { Palette, ShieldAlert, Trophy } from "lucide-react";
+import { ArrowDown, ArrowUp, ChevronRight, Palette, ShieldAlert, Trophy } from "lucide-react";
 import { ROUTE_CONTENT_SETTLE_MS } from "@/lib/route-transition-context";
 
 const ROLES = [
@@ -189,82 +188,97 @@ export default function ChampionTable({ initialChampions = null }: { initialCham
 
   return (
     <div className="space-y-6">
-      <h1 className="pc-heading pc-heading-lg text-pc-accent drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)]">
-        <ScrambleText text={t("generated.champions.champions")} speed={30} iterations={15} delayFromCenter={false} />
-      </h1>
-      <p className="max-w-4xl text-sm leading-6 text-pc-text-secondary">{t("seo.champions.description")}</p>
+      <header className="space-y-2">
+        <h1 className="pc-heading pc-heading-lg">{t("generated.champions.champions")}</h1>
+        <p className="max-w-4xl text-sm leading-6 text-pc-text-secondary">{t("seo.champions.description")}</p>
+      </header>
 
-      <div className="grid grid-cols-1 gap-4 2xl:grid-cols-[minmax(32rem,0.95fr)_minmax(0,2fr)] 2xl:items-start">
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 2xl:col-start-2 2xl:row-start-1">
+      <nav aria-label={t("menu.globalStats")} className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           {[
-            { href: "/stats/winrate", title: t("menu.championWinRates"), icon: Trophy, tone: "text-emerald-300" },
-            { href: "/stats/banrate", title: t("menu.championBanRates"), icon: ShieldAlert, tone: "text-rose-300" },
-            { href: "/stats/skins", title: t("menu.skinStats"), icon: Palette, tone: "text-violet-300" },
-          ].map(({ href, title, icon: Icon, tone }) => <Link key={href} href={href} className="group flex min-h-14 items-center gap-2.5 rounded-xl border border-pc-border bg-pc-bg-elevated px-3 py-2.5 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary"><Icon aria-hidden="true" className={`h-7 w-7 shrink-0 ${tone}`} strokeWidth={1.5} /><h2 className="min-w-0 flex-1 text-sm font-semibold leading-tight text-pc-text group-hover:text-pc-accent">{title}</h2><span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent">→</span></Link>)}
-        </div>
-
-        <div className="space-y-3 2xl:col-start-1 2xl:row-start-1">
-          {/* Filters */}
-          <div className="flex flex-wrap items-center gap-3">
-            <select
-              value={statsScope}
-              onChange={(event) => {
-                const next = event.target.value as PublicStatsScope;
-                setStatsScope(next);
-                if (next !== "ranked" && sortBy === "banRate") setSortBy("winRate");
-              }}
-              className="pc-select"
-              aria-label={t("stats.scope.label")}
+            { href: "/stats/winrate", title: t("menu.championWinRates"), description: t("menu.winRateDescription"), icon: Trophy, tone: "text-emerald-300" },
+            { href: "/stats/banrate", title: t("menu.championBanRates"), description: t("menu.banRateDescription"), icon: ShieldAlert, tone: "text-rose-300" },
+            { href: "/stats/skins", title: t("menu.skinStats"), description: t("menu.skinStatsDescription"), icon: Palette, tone: "text-violet-300" },
+          ].map(({ href, title, description, icon: Icon, tone }) => (
+            <Link
+              key={href}
+              href={href}
+              className="group flex min-h-20 items-center gap-3 rounded-2xl border border-pc-border bg-pc-bg-elevated px-4 py-3 transition-[border-color,background-color,transform] duration-200 hover:-translate-y-0.5 hover:border-pc-accent-mid hover:bg-pc-bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent motion-reduce:transform-none motion-reduce:transition-none"
             >
-              {STAT_SCOPES.map((scope) => <option key={scope.value} value={scope.value}>{t(scope.labelKey)}</option>)}
-            </select>
-            <div className="flex w-full min-w-[16rem] max-w-sm flex-1 items-center gap-2">
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-                className="pc-select min-w-0 flex-1"
-              >
-                <option value="name">{t("generated.champions.name")}</option>
-                <option value="winRate">{t("generated.champions.winRate")}</option>
-                {statsScope === "ranked" && <option value="banRate">{t("generated.champions.banRate")}</option>}
-                <option value="popularity">{t("generated.champions.popularity")}</option>
-              </select>
-              <button
-                onClick={() => setSortDir(sortDir === "asc" ? "desc" : "asc")}
-                className="pc-select flex shrink-0 cursor-pointer items-center gap-1"
-                title={sortDir === "asc" ? t("generated.champions.ascending") : t("generated.champions.descending")}
-              >
-                {sortDir === "asc" ? "↑" : "↓"}
-              </button>
-            </div>
-          </div>
+              <Icon aria-hidden="true" className={`h-7 w-7 shrink-0 ${tone}`} strokeWidth={1.5} />
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-semibold leading-tight text-pc-text group-hover:text-pc-accent">{title}</span>
+                <span className="mt-1 block text-xs leading-4 text-pc-text-muted">{description}</span>
+              </span>
+              <ChevronRight aria-hidden="true" className="h-4 w-4 shrink-0 text-pc-text-muted transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-pc-accent motion-reduce:transform-none motion-reduce:transition-none" />
+            </Link>
+          ))}
+      </nav>
 
-          {/* Class filter tabs */}
-          <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <span id="champion-class-filter-label" className="sr-only">{t("generated.champions.class.41ff354")}</span>
+        <div role="group" aria-labelledby="champion-class-filter-label" className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <button
+              type="button"
               onClick={() => setFilterRole(null)}
-              className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] ${
+              aria-pressed={filterRole === null}
+              className={`shrink-0 rounded-lg px-3 py-2 text-sm font-medium drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] transition-colors motion-reduce:transition-none ${
                 filterRole === null
                   ? "bg-pc-accent text-pc-bg"
                   : "pc-surface text-pc-muted hover:text-pc-text"
               }`}
             >
-              {t("generated.champions.all")}</button>
+              {t("generated.stats.all")}</button>
             {ROLES.map((r) => (
               <button
+                type="button"
                 key={r.value}
-                onClick={() => setFilterRole(filterRole === r.value ? null : r.value)}
-                className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] ${
+                onClick={() => setFilterRole(r.value)}
+                aria-pressed={filterRole === r.value}
+                className={`flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] transition-colors motion-reduce:transition-none ${
                   filterRole === r.value
                     ? "bg-pc-accent text-pc-bg"
                     : "pc-surface text-pc-muted hover:text-pc-text"
                 }`}
               >
-                <img src={r.icon} alt={t(r.labelKey)} className="h-5 w-5" />
+                <img src={r.icon} alt="" aria-hidden="true" className="h-5 w-5" />
                 {t(r.labelKey)}
               </button>
             ))}
-          </div>
+        </div>
+
+        <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <select
+            value={statsScope}
+            onChange={(event) => {
+              const next = event.target.value as PublicStatsScope;
+              setStatsScope(next);
+              if (next !== "ranked" && sortBy === "banRate") setSortBy("winRate");
+            }}
+            className="pc-select w-44 shrink-0"
+            aria-label={t("stats.scope.label")}
+          >
+            {STAT_SCOPES.map((scope) => <option key={scope.value} value={scope.value}>{t(scope.labelKey)}</option>)}
+          </select>
+          <select
+            value={sortBy}
+            onChange={(event) => setSortBy(event.target.value as typeof sortBy)}
+            className="pc-select w-44 shrink-0"
+            aria-label={t("skins.sortBy")}
+          >
+            <option value="name">{t("generated.champions.name")}</option>
+            <option value="winRate">{t("generated.champions.winRate")}</option>
+            {statsScope === "ranked" && <option value="banRate">{t("generated.champions.banRate")}</option>}
+            <option value="popularity">{t("generated.champions.popularity")}</option>
+          </select>
+          <button
+            type="button"
+            onClick={() => setSortDir(sortDir === "asc" ? "desc" : "asc")}
+            className="pc-surface flex h-[38px] w-11 shrink-0 items-center justify-center rounded-lg text-pc-text-secondary transition-colors hover:text-pc-text motion-reduce:transition-none"
+            aria-label={sortDir === "asc" ? t("generated.champions.ascending") : t("generated.champions.descending")}
+            title={sortDir === "asc" ? t("generated.champions.ascending") : t("generated.champions.descending")}
+          >
+            {sortDir === "asc" ? <ArrowUp aria-hidden="true" className="h-4 w-4" /> : <ArrowDown aria-hidden="true" className="h-4 w-4" />}
+          </button>
         </div>
       </div>
 
@@ -280,7 +294,10 @@ export default function ChampionTable({ initialChampions = null }: { initialCham
           <p className="pc-body">{t("generated.champions.noChampionsMatchedYourSearch")}</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
+        <div
+          className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
+          aria-busy={dbAvailable === null}
+        >
           {filtered.map((c) => {
             const roleIcon = c.roles && c.roles.length > 0
               ? ROLES.find(r => r.value === c.roles![0])?.icon
@@ -293,11 +310,12 @@ export default function ChampionTable({ initialChampions = null }: { initialCham
             };
             const quality = c.winRate != null ? getStatQuality(c.winRate, c.pickRate, maxChampionPickRate) : null;
             return (
-              <Link key={c.id} href={`/champions/${championSlug(c.name)}?scope=${statsScope}`}>
-                <div
-                  className="group relative flex min-h-20 items-center gap-3.5 rounded-xl border border-pc-border bg-pc-bg-elevated p-3 transition-[border-color,box-shadow,background-color] duration-200 hover:border-pc-accent-mid hover:shadow-[0_0_20px_var(--pc-accent-glow-subtle)]"
-                  style={quality ? { borderColor: quality.borderColor } : undefined}
-                >
+              <Link
+                key={c.id}
+                href={`/champions/${championSlug(c.name)}?scope=${statsScope}`}
+                className="group relative flex min-h-20 items-center gap-3.5 rounded-xl border border-pc-border bg-pc-bg-elevated p-3 transition-[border-color,background-color,transform] duration-200 hover:-translate-y-0.5 hover:border-pc-accent-mid hover:bg-pc-bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent motion-reduce:transform-none motion-reduce:transition-none"
+                style={quality ? { borderColor: quality.borderColor } : undefined}
+              >
                   {/* Rank icon — top right */}
                   {statsScope === "ranked" && c.rating != null && (
                     <div className="absolute top-2 right-2">
@@ -310,10 +328,10 @@ export default function ChampionTable({ initialChampions = null }: { initialCham
                   )}
 
                   {/* Portrait */}
-                  <div className="shrink-0 w-12 h-12 rounded-lg bg-pc-bg-elevated flex items-center justify-center overflow-hidden border border-pc-border/50 group-hover:border-pc-accent-deep/50 transition-colors">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-pc-border/50 bg-pc-bg-elevated transition-colors duration-200 group-hover:border-pc-accent-deep/50 motion-reduce:transition-none">
                     <SmartImage
                       src={c.imagePath || getChampionIconSafe(c.name)}
-                      alt={c.name}
+                      alt=""
                       width={48}
                       height={48}
                       loading="lazy"
@@ -331,14 +349,14 @@ export default function ChampionTable({ initialChampions = null }: { initialCham
                       </h3>
                       {c.roles && c.roles.length > 0 && (
                         <span className="shrink-0 flex items-center gap-1 text-pc-text-muted text-xs px-1.5 py-0.5 rounded pc-surface-subtle">
-                          {roleIcon && <img src={roleIcon} alt={c.roles[0]} className="w-3 h-3" />}
+                          {roleIcon && <img src={roleIcon} alt="" aria-hidden="true" className="h-3 w-3" />}
                           {c.roles[0]}
                         </span>
                       )}
                     </div>
 
                     {/* Row 2: reserve three stable metric columns while DB stats resolve. */}
-                    <div className={`grid grid-cols-[auto_auto_minmax(0,1fr)] items-center gap-1 text-xs tabular-nums transition-opacity duration-300 ${dbAvailable === null ? "opacity-50" : "opacity-100"}`}>
+                    <div className={`grid grid-cols-[auto_auto_minmax(0,1fr)] items-center gap-1 text-xs tabular-nums transition-opacity duration-200 motion-reduce:transition-none ${dbAvailable === null ? "opacity-50" : "opacity-100"}`}>
                       <span className={`min-w-0 whitespace-nowrap ${quality?.textClass ?? "text-pc-text-muted"}`} style={quality ? { color: quality.color } : undefined}>
                         <span className="text-pc-text-muted">{t("generated.champions.wr")}</span>
                         {c.winRate != null ? t("generated.champions.value1", { value1: c.winRate }) : "—"}
@@ -355,7 +373,6 @@ export default function ChampionTable({ initialChampions = null }: { initialCham
                       </span>
                     </div>
                   </div>
-                </div>
               </Link>
             );
           })}

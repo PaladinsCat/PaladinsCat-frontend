@@ -7,13 +7,15 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { CalendarClock, Info, LockKeyhole, Search } from "lucide-react";
+import { Info } from "lucide-react";
 import { LoadingPanel } from "@/components/async-state";
 import PlayerDirectoryPagination, { usePersistentDirectoryPage } from "@/components/player-directory-pagination";
 import { fetchPrivateAccountsDirectory, type PrivateAccountSummary } from "@/lib/api-client";
 import { TIER_NAMES, getRankIconPath, getTierColor } from "@/lib/tier-utils";
 import { useLocalization } from "@/lib/localization-context";
 import { PlayerModerationTag } from "@/components/player-name";
+import PlayersPageHeader from "@/components/ui/players-page-header";
+import PlayerDirectorySearch from "@/components/player-directory-search";
 
 
 const PAGE_SIZE = 24;
@@ -23,8 +25,7 @@ const PAGE_SIZE = 24;
  * Returns the React tree for the route and its declared inputs.
  */
 export default function PrivateAccountsPage() {
-  const { t, formatDateTime, formatNumber } = useLocalization();
-  const observedAt = formatDateTime;
+  const { t, formatNumber } = useLocalization();
   const [accounts, setAccounts] = useState<PrivateAccountSummary[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = usePersistentDirectoryPage();
@@ -60,19 +61,10 @@ export default function PrivateAccountsPage() {
   }, [debouncedQuery, page]);
 
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-6">
-      <header>
-        <Link href="/players" className="mb-2 inline-block text-xs text-pc-accent hover:underline">{t("generated.players.players")}</Link>
-        <div className="flex items-start gap-3">
-          <LockKeyhole aria-hidden="true" className="mt-1 h-9 w-9 shrink-0 text-slate-300" strokeWidth={1.5} />
-          <div className="min-w-0">
-            <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.players.privateAccounts")}</h1>
-            <p className="mt-1 max-w-2xl text-sm text-pc-text-secondary">{t("generated.players.pseudonymousAccountsObservedInMatchDataWhileTheirPaladinsProfiles")}</p>
-          </div>
-        </div>
-      </header>
+    <div className="space-y-6">
+      <PlayersPageHeader title={t("generated.players.privateAccounts")} />
 
-      <section className="rounded-2xl border border-violet-400/20 bg-gradient-to-br from-violet-400/[0.08] to-pc-bg-elevated p-4 sm:p-5">
+      <section className="rounded-xl border border-pc-border bg-pc-bg-elevated p-4">
         <div className="flex items-start gap-3">
           <Info aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0 text-violet-300" />
           <div className="min-w-0">
@@ -83,15 +75,7 @@ export default function PrivateAccountsPage() {
       </section>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <label className="relative block w-full sm:max-w-sm">
-          <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-pc-text-muted" />
-          <input
-            value={query}
-            onChange={(event) => { setQuery(event.target.value); setPage(1); }}
-            placeholder={t("generated.players.searchPrivateAlias")}
-            className="w-full rounded-xl border border-pc-border bg-pc-bg-elevated py-2.5 pl-9 pr-3 text-sm text-pc-text outline-none transition-colors placeholder:text-pc-text-muted focus:border-pc-accent-mid"
-          />
-        </label>
+        <PlayerDirectorySearch label={t("generated.players.searchPrivateAlias")} value={query} onChange={(value) => { setQuery(value); setPage(1); }} />
         <div className="text-xs text-pc-text-muted">{loading && accounts.length === 0 ? t("generated.players.loading") : t(total === 1 ? "common.count.trackedAccountOne" : "common.count.trackedAccountMany", { count: formatNumber(total) })}</div>
       </div>
 
@@ -119,14 +103,9 @@ export default function PrivateAccountsPage() {
                       <span className="whitespace-nowrap text-pc-text-secondary">{formatNumber(account.leaguePoints)} {t("generated.players.tp")}</span>
                     </span>
                   </div>
-                  <span className="shrink-0 rounded-full border border-slate-400/20 bg-slate-400/10 px-2 py-1 text-xs font-semibold text-slate-300">{formatNumber(account.matchCount)} {t("generated.players.matches.9f3e924")}</span>
+                  <span className="shrink-0 text-xs font-semibold tabular-nums text-slate-300">{formatNumber(account.matchCount)} {t("generated.players.matches.9f3e924")}</span>
                 </div>
 
-                <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-pc-border pt-2 text-xs text-pc-text-muted">
-                  <CalendarClock aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
-                  <span>{t("generated.players.firstObserved")}{" "}<span className="text-pc-text-secondary">{observedAt(account.firstSeen)}</span></span>
-                  <span>{t("generated.players.lastObserved")}{" "}<span className="text-pc-text-secondary">{observedAt(account.lastSeen)}</span></span>
-                </div>
               </Link>
             );
           })}

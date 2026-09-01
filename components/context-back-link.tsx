@@ -25,7 +25,7 @@ export default function ContextBackLink({ fallbackHref, label = "Back" }: { fall
   return (
     <Link href={href} scroll={returnTo ? false : undefined} className="inline-flex items-center gap-1 text-sm text-pc-text-secondary transition-colors hover:text-pc-accent">
       <span aria-hidden="true">←</span>
-      {label}
+      {label.replace(/^←\s*/, "")}
     </Link>
   );
 }

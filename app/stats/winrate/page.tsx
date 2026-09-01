@@ -26,5 +26,5 @@ export default async function WinRatePage() {
   });
 
   return (
-    <ChampionRateDetailPage config={CONFIG} initialChampions={initialChampions} />);
+    <ChampionRateDetailPage config={CONFIG} initialChampions={initialChampions} enableScopeSelection />);
 }

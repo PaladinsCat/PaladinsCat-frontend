@@ -22,11 +22,11 @@ import { championSlug } from "@/lib/utils";
 import { getStatQuality } from "@/lib/stat-quality";
 import { mapImagePath } from "@/lib/map-images";
 import { STATIC_CHAMPIONS } from "@/lib/static-champions";
-import { LoadingIndicator, LoadingPanel } from "@/components/async-state";
+import { LoadingIndicator } from "@/components/async-state";
+import ContextBackLink from "@/components/context-back-link";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { useLocalization } from "@/lib/localization-context";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
-import { SpotlightCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 function itemIcon(name: string) { return `/images/items/${name.replace(/\s+/g, "_")}_Icon.avif`; }
 function rateColor(rate: number) { return getStatQuality(rate, 1, 1).color; }
@@ -279,14 +279,14 @@ export default function MapDetailPage() {
 
   return (
     <div className="space-y-6">
-      <Link href={`/game/maps?scope=${statsScope}`} className="text-sm text-pc-text-secondary hover:text-pc-accent">{t("generated.stats.allMaps")}</Link>
+      <ContextBackLink fallbackHref={`/game/maps?scope=${statsScope}`} label={t("menu.maps")} />
 
       <section className="relative overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated">
         <SmartImage src={mapImagePath(map.name)} alt="" className="absolute inset-0 h-full w-full object-cover opacity-25" />
         <div className="absolute inset-0 bg-gradient-to-r from-pc-bg-elevated via-pc-bg-elevated/90 to-pc-bg-elevated/45" />
         <div className="relative grid gap-5 p-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end sm:p-7">
-          <div><p className="text-xs font-bold uppercase tracking-[0.18em] text-pc-text-muted">{statsScope === "ranked" ? t("generated.stats.rankedMapMeta") : t("stats.scope.mapMeta", { mode: t(STATS_SCOPE_LABEL_KEYS[statsScope]) })}</p><h1 className="mt-1 pc-heading pc-heading-lg text-pc-accent">{map.name.replace(/^Ranked\s+/, "")}</h1><p className="mt-1 text-sm text-pc-text-secondary">{t("maps.detailDescription")}</p></div>
-          <div className="grid grid-cols-3 divide-x divide-pc-border rounded-lg border border-pc-border bg-pc-bg-secondary/70 text-center"><div className="px-4 py-2.5"><div className="text-xs uppercase text-pc-text-muted">{t("generated.stats.mapShare.77ce64b")}</div><div className="mt-1 font-bold text-pc-accent">{formatPercent(map.distributionRate)}</div></div><div className="px-4 py-2.5"><div className="text-xs uppercase text-pc-text-muted">{t("generated.stats.matches")}</div><div className="mt-1 font-bold text-pc-text">{formatNumber(map.totalMatches)}</div></div><div className="px-4 py-2.5"><div className="text-xs uppercase text-pc-text-muted">{t("generated.stats.avgTime.53a0360")}</div><div className="mt-1 font-bold text-pc-text">{formatDuration(map.avgDurationSeconds)}</div></div></div>
+          <div><p className="text-xs font-bold uppercase tracking-[0.18em] text-pc-text-muted">{t(STATS_SCOPE_LABEL_KEYS[statsScope])}</p><h1 className="mt-1 pc-heading pc-heading-lg">{map.name.replace(/^Ranked\s+/, "")}</h1></div>
+          <div className="grid grid-cols-3 divide-x divide-pc-border text-center tabular-nums"><div className="px-4 py-1"><div className="text-xs uppercase text-pc-text-muted">{t("generated.stats.mapShare.77ce64b")}</div><div className="mt-1 font-bold text-pc-accent">{formatPercent(map.distributionRate)}</div></div><div className="px-4 py-1"><div className="text-xs uppercase text-pc-text-muted">{t("generated.stats.matches")}</div><div className="mt-1 font-bold text-pc-text">{formatNumber(map.totalMatches)}</div></div><div className="px-4 py-1"><div className="text-xs uppercase text-pc-text-muted">{t("generated.stats.avgTime.53a0360")}</div><div className="mt-1 font-bold text-pc-text">{formatDuration(map.avgDurationSeconds)}</div></div></div>
         </div>
       </section>
 
@@ -295,6 +295,7 @@ export default function MapDetailPage() {
             <button
               key={section.key}
               type="button"
+              aria-pressed={activeSection === section.key}
               onClick={() => setActiveSection(section.key)}
               className={`flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] transition-colors ${activeSection === section.key ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-muted hover:text-pc-text"}`}
             >
@@ -308,15 +309,15 @@ export default function MapDetailPage() {
 
       {activeSection === "champions" && (
         <section>
-          <div className="mb-3"><h2 className="pc-card-title">{t("generated.stats.championPerformance")}</h2><p className="mt-1 text-xs text-pc-text-muted">{t("generated.stats.filterByRoleAndSortCompactMapSpecificWinPick")}</p></div>
+          <h2 className="pc-card-title mb-3">{t("generated.stats.championPerformance")}</h2>
           <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              <button type="button" onClick={() => setChampionRole(null)} className={`shrink-0 rounded-lg px-3 py-2 text-sm font-medium drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] transition-colors ${championRole === null ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-muted hover:text-pc-text"}`}>{t("generated.stats.all")}</button>
-              {ROLES.map((role) => <button key={role.value} type="button" onClick={() => setChampionRole(role.value)} className={`flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] transition-colors ${championRole === role.value ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-muted hover:text-pc-text"}`}><img src={role.icon} alt="" className="h-5 w-5" />{t(role.labelKey)}</button>)}
-            </div>
-            <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {CHAMPION_SORTS.filter((sort) => statsScope === "ranked" || sort.key !== "banRate").map((sort) => <button key={sort.key} type="button" onClick={() => setChampionSort(sort.key)} className={`shrink-0 rounded-lg px-3 py-2 text-xs font-medium transition-colors ${championSort === sort.key ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-text-secondary hover:text-pc-text"}`}>{t(sort.labelKey)}</button>)}
-            </div>
+            <div><span className="mb-1.5 block text-xs text-pc-text-secondary">{t("generated.stats.role")}</span><div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="group" aria-label={t("generated.stats.role")}>
+              <button type="button" aria-pressed={championRole === null} onClick={() => setChampionRole(null)} className={`shrink-0 rounded-lg px-3 py-2 text-sm font-medium drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] transition-colors ${championRole === null ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-muted hover:text-pc-text"}`}>{t("generated.stats.all")}</button>
+              {ROLES.map((role) => <button key={role.value} type="button" aria-pressed={championRole === role.value} onClick={() => setChampionRole(role.value)} className={`flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] transition-colors ${championRole === role.value ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-muted hover:text-pc-text"}`}><img src={role.icon} alt="" className="h-5 w-5" />{t(role.labelKey)}</button>)}
+            </div></div>
+            <div><span className="mb-1.5 block text-xs text-pc-text-secondary">{t("skins.sortBy")}</span><div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="group" aria-label={t("skins.sortBy")}>
+              {CHAMPION_SORTS.filter((sort) => statsScope === "ranked" || sort.key !== "banRate").map((sort) => <button key={sort.key} type="button" aria-pressed={championSort === sort.key} onClick={() => setChampionSort(sort.key)} className={`shrink-0 rounded-lg px-3 py-2 text-xs font-medium transition-colors ${championSort === sort.key ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-text-secondary hover:text-pc-text"}`}>{t(sort.labelKey)}</button>)}
+            </div></div>
           </div>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
             {sortedChampions.map((champion) => {
@@ -334,15 +335,15 @@ export default function MapDetailPage() {
 
       {activeSection === "talents" && (
         <section>
-          <div className="mb-3"><h2 className="pc-card-title">{t("generated.stats.talentPicks")}</h2><p className="mt-1 text-xs text-pc-text-muted">{t("generated.stats.filterChampionsByRoleAndRankTheirTalentsByMap")}</p></div>
+          <h2 className="pc-card-title mb-3">{t("generated.stats.talentPicks")}</h2>
           <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              <button type="button" onClick={() => setTalentRole(null)} className={`shrink-0 rounded-lg px-3 py-2 text-sm font-medium drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] transition-colors ${talentRole === null ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-muted hover:text-pc-text"}`}>{t("generated.stats.all")}</button>
-              {ROLES.map((role) => <button key={role.value} type="button" onClick={() => setTalentRole(role.value)} className={`flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] transition-colors ${talentRole === role.value ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-muted hover:text-pc-text"}`}><img src={role.icon} alt="" className="h-5 w-5" />{t(role.labelKey)}</button>)}
-            </div>
-            <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {TALENT_SORTS.map((sort) => <button key={sort.key} type="button" onClick={() => setTalentSort(sort.key)} className={`shrink-0 rounded-lg px-3 py-2 text-xs font-medium transition-colors ${talentSort === sort.key ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-text-secondary hover:text-pc-text"}`}>{t(sort.labelKey)}</button>)}
-            </div>
+            <div><span className="mb-1.5 block text-xs text-pc-text-secondary">{t("generated.stats.role")}</span><div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="group" aria-label={t("generated.stats.role")}>
+              <button type="button" aria-pressed={talentRole === null} onClick={() => setTalentRole(null)} className={`shrink-0 rounded-lg px-3 py-2 text-sm font-medium drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] transition-colors ${talentRole === null ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-muted hover:text-pc-text"}`}>{t("generated.stats.all")}</button>
+              {ROLES.map((role) => <button key={role.value} type="button" aria-pressed={talentRole === role.value} onClick={() => setTalentRole(role.value)} className={`flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] transition-colors ${talentRole === role.value ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-muted hover:text-pc-text"}`}><img src={role.icon} alt="" className="h-5 w-5" />{t(role.labelKey)}</button>)}
+            </div></div>
+            <div><span className="mb-1.5 block text-xs text-pc-text-secondary">{t("skins.sortBy")}</span><div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="group" aria-label={t("skins.sortBy")}>
+              {TALENT_SORTS.map((sort) => <button key={sort.key} type="button" aria-pressed={talentSort === sort.key} onClick={() => setTalentSort(sort.key)} className={`shrink-0 rounded-lg px-3 py-2 text-xs font-medium transition-colors ${talentSort === sort.key ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-text-secondary hover:text-pc-text"}`}>{t(sort.labelKey)}</button>)}
+            </div></div>
           </div>
           {talentGroups.length > 0 ? <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">{talentGroups.map(({ champion, talents }) => <div key={champion.championId} className="overflow-hidden rounded-lg border border-pc-border bg-pc-bg-elevated"><div className="flex items-center gap-2 border-b border-pc-border px-2.5 py-2"><img src={getChampionIconSafe(champion.championName)} alt="" className="h-6 w-6 rounded object-contain" /><span className="min-w-0 flex-1 truncate text-xs font-semibold text-pc-text">{champion.championName}</span><span className="text-xs uppercase text-pc-text-muted">{t(ROLE_LABEL_KEYS.get(CHAMPION_ROLE_BY_SLUG.get(championSlug(champion.championName)) ?? "") ?? "common.roles.global")}</span></div><div className="divide-y divide-pc-border/50">{talents.map((talent) => {
             const compared = comparisonByEntity.get(String(talent.talentId)) ?? [];
@@ -352,14 +353,14 @@ export default function MapDetailPage() {
       )}
 
       {activeSection === "items" && (
-        <section><div className="mb-3"><h2 className="pc-card-title">{t("generated.stats.itemMeta.ba645e0")}</h2><p className="mt-1 text-xs text-pc-text-muted">{t("maps.itemDescription")}</p></div><div className="space-y-5">{itemsByClass.map(({ itemClass, items }) => <div key={itemClass}><h3 className={`mb-2 text-xs font-bold uppercase tracking-wider ${itemClassColor(itemClass)}`}>{t(ITEM_CLASS_LABEL_KEYS[itemClass])}</h3><div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">{items.map((item) => {
+        <section><h2 className="pc-card-title mb-3">{t("generated.stats.itemMeta.ba645e0")}</h2><div className="space-y-5">{itemsByClass.map(({ itemClass, items }) => <div key={itemClass}><h3 className={`mb-2 text-xs font-bold uppercase tracking-wider ${itemClassColor(itemClass)}`}>{t(ITEM_CLASS_LABEL_KEYS[itemClass])}</h3><div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">{items.map((item) => {
           const compared = comparisonByEntity.get(String(item.itemId)) ?? [];
-          return <div key={item.itemId} className="rounded-xl border border-pc-border bg-pc-bg-elevated p-2.5"><Link href={`/game/items/${item.itemId}`} className="flex items-center gap-2 transition-colors hover:text-pc-accent"><SmartImage src={itemIcon(item.itemName)} alt="" className="h-9 w-9 rounded object-contain" /><span className="min-w-0 flex-1 truncate text-xs font-medium text-pc-text">{item.itemName}</span></Link><div className="mt-2 grid grid-cols-2 gap-2 text-xs"><div><span className="block" style={{ color: rateColor(item.winRate) }}>{formatPercent(item.winRate)} {t("generated.stats.wr")}</span><span className="block text-pc-text-muted">{formatRecord(item.wins, item.losses)}</span></div><div className="text-right text-pc-text-muted"><span className="block">{formatPercent(item.pickRate)} {t("generated.stats.pr")}</span><span className="block">{formatNumber(item.totalUses)} {t("generated.stats.purchases.d29d2db")}</span></div></div><AllMapComparison rows={compared} summary={t("maps.compareOtherMaps")} empty={t("maps.noComparisonData")} error={t("maps.comparisonFailed")} loaded={Object.prototype.hasOwnProperty.call(comparisonCache, "items")} loading={comparisonLoading.items === true} failed={comparisonFailed.items === true} onOpen={() => loadCategoryComparison("items")} metrics={(row) => [{ label: t("generated.stats.wr"), value: formatPercent(row.winRate), color: rateColor(row.winRate) }, { label: t("generated.stats.pr"), value: formatPercent(row.pickRate) }, { label: t("generated.stats.purchases"), value: formatNumber(row.totalCount) }]} /></div>;
+          return <div key={item.itemId} className="rounded-xl border border-pc-border bg-pc-bg-elevated p-2.5"><Link href={`/game/items/${item.itemId}`} className="flex items-center gap-2 transition-colors hover:text-pc-accent"><SmartImage src={itemIcon(item.itemName)} alt="" className="h-12 w-12 rounded-lg object-contain" /><span className="min-w-0 flex-1 truncate text-sm font-medium text-pc-text">{item.itemName}</span></Link><div className="mt-2 grid grid-cols-2 gap-2 text-xs"><div><span className="block" style={{ color: rateColor(item.winRate) }}>{formatPercent(item.winRate)} {t("generated.stats.wr")}</span><span className="block text-pc-text-muted">{formatRecord(item.wins, item.losses)}</span></div><div className="text-right text-pc-text-muted"><span className="block">{formatPercent(item.pickRate)} {t("generated.stats.pr")}</span><span className="block">{formatNumber(item.totalUses)} {t("generated.stats.purchases.d29d2db")}</span></div></div><AllMapComparison rows={compared} summary={t("maps.compareOtherMaps")} empty={t("maps.noComparisonData")} error={t("maps.comparisonFailed")} loaded={Object.prototype.hasOwnProperty.call(comparisonCache, "items")} loading={comparisonLoading.items === true} failed={comparisonFailed.items === true} onOpen={() => loadCategoryComparison("items")} metrics={(row) => [{ label: t("generated.stats.wr"), value: formatPercent(row.winRate), color: rateColor(row.winRate) }, { label: t("generated.stats.pr"), value: formatPercent(row.pickRate) }, { label: t("generated.stats.purchases"), value: formatNumber(row.totalCount) }]} /></div>;
         })}</div></div>)}</div></section>
       )}
 
       {activeSection === "compositions" && (
-        <section><div className="mb-3"><h2 className="pc-card-title">{t("generated.stats.compositionStats")}</h2><p className="mt-1 text-xs text-pc-text-muted">{t("maps.compositionDescription")}</p></div>{detail.compositions.length > 0 ? <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{detail.compositions.map((composition) => {
+        <section><h2 className="pc-card-title mb-3">{t("generated.stats.compositionStats")}</h2>{detail.compositions.length > 0 ? <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{detail.compositions.map((composition) => {
           const compared = comparisonByEntity.get(composition.composition) ?? [];
           return <div key={composition.composition} className="rounded-xl border border-pc-border bg-pc-bg-elevated p-3"><div className="flex items-start justify-between gap-3"><div><div className="font-mono text-base font-bold text-pc-text">{composition.composition}</div><div className="text-xs text-pc-text-muted">{formatNumber(composition.totalMatches)} {t("generated.stats.matches.9f3e924")}</div></div><div className="text-right font-bold" style={{ color: rateColor(composition.winRate) }}>{formatPercent(composition.winRate)}</div></div><div className="mt-3 grid grid-cols-4 gap-1.5">{COMPOSITION_COLUMNS.map((column) => <div key={column.key} className="rounded-lg bg-pc-bg-secondary/60 p-2 text-center"><img src={column.icon} alt="" className="mx-auto h-5 w-5 object-contain" /><div className="mt-1 font-mono text-sm font-semibold text-pc-text">{formatNumber(composition[column.key])}</div><div className="truncate text-xs uppercase text-pc-text-muted">{t(column.labelKey)}</div></div>)}</div><AllMapComparison rows={compared} summary={t("maps.compareOtherMaps")} empty={t("maps.noComparisonData")} error={t("maps.comparisonFailed")} loaded={Object.prototype.hasOwnProperty.call(comparisonCache, "compositions")} loading={comparisonLoading.compositions === true} failed={comparisonFailed.compositions === true} onOpen={() => loadCategoryComparison("compositions")} metrics={(row) => [{ label: t("generated.stats.winRate"), value: formatPercent(row.winRate), color: rateColor(row.winRate) }, { label: t("generated.stats.matches"), value: formatNumber(row.totalCount) }]} /></div>;
         })}</div> : <div className="rounded-xl border border-dashed border-pc-border bg-pc-bg-elevated p-8 text-center text-sm text-pc-text-muted">{t("maps.noCompositions")}</div>}</section>

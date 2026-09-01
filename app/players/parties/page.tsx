@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { CalendarClock, Search, UsersRound } from "lucide-react";
+import { Search } from "lucide-react";
 import { LoadingPanel } from "@/components/async-state";
 import PlayerDirectoryPagination, { usePersistentDirectoryPage } from "@/components/player-directory-pagination";
 import PlayerName from "@/components/player-name";
@@ -18,14 +18,15 @@ import {
   type PartyStackSummary,
 } from "@/lib/api-client";
 import { useLocalization } from "@/lib/localization-context";
+import PlayersPageHeader from "@/components/ui/players-page-header";
 
 
 const PAGE_SIZE = 24;
 type DirectoryMode = "stacks" | "pairs";
 
-function MatchCount({ count }: { count: number }) {
+function MatchCount({ count, href }: { count: number; href: string }) {
   const { t, formatNumber } = useLocalization();
-  return <span className="shrink-0 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-2 py-1 text-xs font-semibold text-cyan-300">{formatNumber(count)} {t("generated.players.match")}{count === 1 ? "" : t("generated.players.es")}</span>;
+  return <Link href={href} className="shrink-0 text-xs font-semibold tabular-nums text-pc-accent hover:underline">{formatNumber(count)} {t("generated.players.match")}{count === 1 ? "" : t("generated.players.es")} →</Link>;
 }
 
 /**
@@ -33,8 +34,7 @@ function MatchCount({ count }: { count: number }) {
  * Returns the React tree for the route and its declared inputs.
  */
 export default function RankedPartiesPage() {
-  const { t, formatDateTime, formatNumber } = useLocalization();
-  const observedAt = formatDateTime;
+  const { t, formatNumber } = useLocalization();
   const [mode, setMode] = useState<DirectoryMode>(() => (
     typeof window !== "undefined" && new URLSearchParams(window.location.search).get("view") === "pairs"
       ? "pairs"
@@ -84,28 +84,24 @@ export default function RankedPartiesPage() {
   const changeMode = (nextMode: DirectoryMode) => {
     setMode(nextMode);
     setPage(1);
+    const url = new URL(window.location.href);
+    if (nextMode === "pairs") url.searchParams.set("view", "pairs");
+    else url.searchParams.delete("view");
+    window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}`);
   };
 
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-6">
-      <header>
-        <Link href="/players" className="mb-2 inline-block text-xs text-pc-accent hover:underline">{t("generated.players.players")}</Link>
-        <div className="flex items-start gap-3">
-          <UsersRound aria-hidden="true" className="mt-1 h-9 w-9 shrink-0 text-cyan-300" strokeWidth={1.5} />
-          <div className="min-w-0">
-            <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.players.rankedParties")}</h1>
-            <p className="mt-1 max-w-3xl text-sm text-pc-text-secondary">{t("generated.players.searchExact25PlayerStacksOrEveryCanonicalPair")}</p>
-          </div>
-        </div>
-      </header>
+    <div className="space-y-6">
+      <PlayersPageHeader title={t("generated.players.rankedParties")} />
 
-      <div className="inline-flex rounded-xl border border-pc-border bg-pc-bg-elevated p-1 text-xs font-semibold">
+      <div className="flex flex-wrap gap-2 text-xs font-semibold" role="group" aria-label={t("generated.players.rankedParties")}>
         {(["stacks", "pairs"] as DirectoryMode[]).map(option => (
           <button
             key={option}
             type="button"
             onClick={() => changeMode(option)}
-            className={`rounded-lg px-4 py-2 capitalize transition-colors ${mode === option ? "bg-cyan-500/15 text-cyan-300" : "text-pc-text-muted hover:text-pc-text"}`}
+            aria-pressed={mode === option}
+            className={`rounded-lg px-4 py-2 capitalize transition-colors ${mode === option ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-text-muted hover:text-pc-text"}`}
           >
             {option}
           </button>
@@ -113,26 +109,32 @@ export default function RankedPartiesPage() {
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex w-full flex-col gap-2 sm:max-w-xl sm:flex-row">
-          <label className="relative block min-w-0 flex-1">
-            <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-pc-text-muted" />
-            <input
-              value={query}
-              onChange={(event) => { setQuery(event.target.value); setPage(1); }}
-              placeholder={mode === "stacks" ? t("generated.players.searchAnyStackMember") : t("generated.players.searchEitherPlayer")}
-              className="w-full rounded-xl border border-pc-border bg-pc-bg-elevated py-2.5 pl-9 pr-3 text-sm text-pc-text outline-none transition-colors placeholder:text-pc-text-muted focus:border-pc-accent-mid"
-            />
+        <div className="flex w-full flex-col items-stretch gap-3 sm:max-w-xl sm:flex-row sm:items-end">
+          <label className="block min-w-0 flex-1 space-y-1.5">
+            <span className="text-xs font-semibold text-pc-text-secondary">{t("generated.players.search")}</span>
+            <span className="relative block">
+              <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-pc-text-muted" />
+              <input
+                type="search"
+                value={query}
+                onChange={(event) => { setQuery(event.target.value); setPage(1); }}
+                placeholder={mode === "stacks" ? t("generated.players.searchAnyStackMember") : t("generated.players.searchEitherPlayer")}
+                className="w-full rounded-xl border border-pc-border bg-pc-bg-elevated py-2.5 pl-9 pr-3 text-sm text-pc-text outline-none transition-colors placeholder:text-pc-text-muted focus:border-pc-accent-mid"
+              />
+            </span>
           </label>
           {mode === "stacks" && (
-            <select
-              value={stackSize ?? ""}
-              onChange={(event) => { setStackSize(event.target.value ? Number(event.target.value) : null); setPage(1); }}
-              className="rounded-xl border border-pc-border bg-pc-bg-elevated px-3 py-2.5 text-sm text-pc-text outline-none focus:border-pc-accent-mid"
-              aria-label={t("generated.players.stackSize")}
-            >
-              <option value="">{t("generated.players.allSizes")}</option>
-              {[2, 3, 4, 5].map(size => <option key={size} value={size}>{size}{t("generated.players.stack")}</option>)}
-            </select>
+            <label className="space-y-1.5">
+              <span className="block text-xs font-semibold text-pc-text-secondary">{t("generated.players.stackSize")}</span>
+              <select
+                value={stackSize ?? ""}
+                onChange={(event) => { setStackSize(event.target.value ? Number(event.target.value) : null); setPage(1); }}
+                className="w-full rounded-xl border border-pc-border bg-pc-bg-elevated px-3 py-2.5 text-sm text-pc-text outline-none focus:border-pc-accent-mid sm:w-auto"
+              >
+                <option value="">{t("generated.players.allSizes")}</option>
+                {[2, 3, 4, 5].map(size => <option key={size} value={size}>{size}{t("generated.players.stack")}</option>)}
+              </select>
+            </label>
           )}
         </div>
         <div className="text-xs text-pc-text-muted">{loading && itemsEmpty ? t("generated.players.loading") : t(mode === "stacks" ? (total === 1 ? "common.count.knownStackOne" : "common.count.knownStackMany") : (total === 1 ? "common.count.knownPairOne" : "common.count.knownPairMany"), { count: formatNumber(total) })}</div>
@@ -146,23 +148,19 @@ export default function RankedPartiesPage() {
       ) : mode === "stacks" ? (
         <div className={`grid grid-cols-1 gap-3 md:grid-cols-2 ${loading ? "opacity-60" : ""}`}>
           {stacks.map(stack => (
-            <article key={stack.groupKey} className="overflow-hidden rounded-xl border border-cyan-500/20 bg-pc-bg-elevated p-4">
+            <article key={stack.groupKey} className="pc-card overflow-hidden p-4">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-pc-text-muted">{t("generated.players.exactRanked")}{" "}{stack.stackSize}{t("generated.players.stack")}</div>
+                  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-pc-text-muted">{stack.stackSize}{t("generated.players.stack")}</div>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {stack.players.map(player => (
-                      <Link key={player.id} href={`/players/${player.id}`} className="rounded-lg border border-pc-border bg-pc-bg/50 px-2.5 py-1.5 text-sm font-semibold text-pc-text transition-colors hover:border-pc-accent-mid hover:text-pc-accent">
+                      <Link key={player.id} href={`/players/${player.id}`} className="py-1 text-sm font-semibold text-pc-text underline-offset-4 transition-colors hover:text-pc-accent hover:underline">
                         <PlayerName playerId={player.id}>{player.name}</PlayerName>
                       </Link>
                     ))}
                   </div>
                 </div>
-                <MatchCount count={stack.matchCount} />
-              </div>
-              <div className="mt-4 flex items-start gap-2 border-t border-pc-border pt-3 text-xs text-pc-text-muted">
-                <CalendarClock aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0" />
-                <div><div>{t("generated.players.firstObserved")}{" "}<span className="text-pc-text-secondary">{observedAt(stack.firstSeen)}</span></div><div className="mt-1">{t("generated.players.lastObserved")}{" "}<span className="text-pc-text-secondary">{observedAt(stack.lastSeen)}</span></div></div>
+                <MatchCount count={stack.matchCount} href={`/players/parties/stacks/${encodeURIComponent(stack.groupKey)}`} />
               </div>
             </article>
           ))}
@@ -170,21 +168,16 @@ export default function RankedPartiesPage() {
       ) : (
         <div className={`grid grid-cols-1 gap-3 md:grid-cols-2 ${loading ? "opacity-60" : ""}`}>
           {pairs.map((pair) => (
-            <article key={`${pair.sourcePlayerId}-${pair.targetPlayerId}`} className="overflow-hidden rounded-xl border border-cyan-500/20 bg-pc-bg-elevated p-4">
+            <article key={`${pair.sourcePlayerId}-${pair.targetPlayerId}`} className="pc-card overflow-hidden p-4">
               <div className="flex flex-col items-start gap-3 sm:flex-row sm:justify-between">
                 <div className="min-w-0">
-                  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-pc-text-muted">{t("generated.players.canonicalPartyPair")}</div>
-                  <div className="mt-2 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-sm font-semibold">
+                  <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-sm font-semibold">
                     <Link href={`/players/${pair.sourcePlayerId}`} className="min-w-0 break-words text-pc-text transition-colors hover:text-pc-accent [overflow-wrap:anywhere]"><PlayerName playerId={pair.sourcePlayerId}>{pair.sourcePlayerName}</PlayerName></Link>
-                    <span className="shrink-0 text-cyan-300">+</span>
+                    <span className="shrink-0 text-pc-text-muted">+</span>
                     <Link href={`/players/${pair.targetPlayerId}`} className="min-w-0 break-words text-pc-text transition-colors hover:text-pc-accent [overflow-wrap:anywhere]"><PlayerName playerId={pair.targetPlayerId}>{pair.targetPlayerName}</PlayerName></Link>
                   </div>
                 </div>
-                <MatchCount count={pair.matchCount} />
-              </div>
-              <div className="mt-4 flex items-start gap-2 border-t border-pc-border pt-3 text-xs text-pc-text-muted">
-                <CalendarClock aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0" />
-                <div><div>{t("generated.players.firstObserved")}{" "}<span className="text-pc-text-secondary">{observedAt(pair.firstSeen)}</span></div><div className="mt-1">{t("generated.players.lastObserved")}{" "}<span className="text-pc-text-secondary">{observedAt(pair.lastSeen)}</span></div></div>
+                <MatchCount count={pair.matchCount} href={`/players/parties/pairs/${Math.min(pair.sourcePlayerId, pair.targetPlayerId)}-${Math.max(pair.sourcePlayerId, pair.targetPlayerId)}`} />
               </div>
             </article>
           ))}

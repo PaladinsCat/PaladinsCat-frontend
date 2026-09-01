@@ -1138,6 +1138,15 @@ export interface PlayerRelationshipRow {
   otherPlayerId: string;
   otherPlayerName: string;
   matchCount: number;
+  metricMatchCount: number;
+  wins: number;
+  losses: number;
+  winRate: number | null;
+  metricsComplete: boolean;
+  playerRoleCounts: Record<string, number>;
+  partnerRoleCounts: Record<string, number>;
+  playerChampionCounts: Record<string, number>;
+  partnerChampionCounts: Record<string, number>;
   firstSeen: string;
   lastSeen: string;
   sameParty: boolean;
@@ -1152,6 +1161,9 @@ export interface PlayerRelationshipSummary {
     opponentMatches: number;
     partyPartners: number;
     partyMatches: number;
+    partyMetricMatches: number;
+    partyWins: number;
+    partyLosses: number;
   };
   teammates: PlayerRelationshipRow[];
   opponents: PlayerRelationshipRow[];
@@ -1162,6 +1174,15 @@ type RawRelationshipRow = {
   other_player_id?: string | number;
   other_player_name?: string | null;
   match_count?: string | number | null;
+  metric_match_count?: string | number | null;
+  wins?: string | number | null;
+  losses?: string | number | null;
+  win_rate?: string | number | null;
+  metrics_complete?: boolean | null;
+  player_role_counts?: Record<string, string | number> | null;
+  partner_role_counts?: Record<string, string | number> | null;
+  player_champion_counts?: Record<string, string | number> | null;
+  partner_champion_counts?: Record<string, string | number> | null;
   first_seen?: string | null;
   last_seen?: string | null;
   same_party?: boolean | null;
@@ -1176,10 +1197,22 @@ type RawRelationshipSummary = {
 };
 
 function mapRelationshipRow(row: RawRelationshipRow): PlayerRelationshipRow {
+  const countMap = (value: Record<string, string | number> | null | undefined) => Object.fromEntries(
+    Object.entries(value ?? {}).map(([key, count]) => [key, Number(count ?? 0)])
+  );
   return {
     otherPlayerId: String(row.other_player_id),
     otherPlayerName: String(row.other_player_name ?? `Player ${row.other_player_id}`),
     matchCount: Number(row.match_count ?? 0),
+    metricMatchCount: Number(row.metric_match_count ?? 0),
+    wins: Number(row.wins ?? 0),
+    losses: Number(row.losses ?? 0),
+    winRate: row.win_rate == null ? null : Number(row.win_rate),
+    metricsComplete: Boolean(row.metrics_complete),
+    playerRoleCounts: countMap(row.player_role_counts),
+    partnerRoleCounts: countMap(row.partner_role_counts),
+    playerChampionCounts: countMap(row.player_champion_counts),
+    partnerChampionCounts: countMap(row.partner_champion_counts),
     firstSeen: String(row.first_seen ?? ""),
     lastSeen: String(row.last_seen ?? ""),
     sameParty: Boolean(row.same_party),
@@ -1203,6 +1236,9 @@ export async function fetchPlayerRelationshipSummary(playerId: string | number, 
       opponentMatches: Number(totals.opponent_matches ?? 0),
       partyPartners: Number(totals.party_partners ?? 0),
       partyMatches: Number(totals.party_matches ?? 0),
+      partyMetricMatches: Number(totals.party_metric_matches ?? 0),
+      partyWins: Number(totals.party_wins ?? 0),
+      partyLosses: Number(totals.party_losses ?? 0),
     },
     teammates: (raw.teammates ?? []).map(mapRelationshipRow),
     opponents: (raw.opponents ?? []).map(mapRelationshipRow),
@@ -1348,6 +1384,20 @@ export interface PartyStackSummary {
   matchCount: number;
   firstSeen: string | null;
   lastSeen: string | null;
+}
+
+export interface PartyDetail {
+  kind: "pairs" | "stacks";
+  key: string;
+  party: {
+    groupKey: string | null;
+    stackSize: number;
+    players: Array<{ id: number; name: string }>;
+    matchCount: number;
+  } | null;
+  matches: MatchSearchResult[];
+  total: number;
+  page: { current: number; size: number; totalPages: number };
 }
 
 export interface PlayerDirectoryPage<T> {
@@ -1496,6 +1546,52 @@ export async function fetchPartyStacksDirectory(params: { page?: number; pageSiz
     };
   });
   return { items, total, page, pageSize, totalPages: Math.max(1, Math.ceil(total / pageSize)) };
+}
+
+export async function fetchPartyDetail(
+  kind: "pairs" | "stacks",
+  key: string,
+  params: { page?: number; pageSize?: number } = {},
+): Promise<PartyDetail> {
+  const page = Math.max(1, params.page ?? 1);
+  const pageSize = Math.min(100, Math.max(1, params.pageSize ?? 20));
+  const query = new URLSearchParams({ page: String(page), perPage: String(pageSize) });
+  const raw = await fetchJson<any>(`/coplay/parties/${kind}/${encodeURIComponent(key)}?${query.toString()}`);
+  const party = raw.party ? {
+    groupKey: raw.party.group_key == null ? null : String(raw.party.group_key),
+    stackSize: Number(raw.party.stack_size ?? raw.party.players?.length ?? 2),
+    players: (Array.isArray(raw.party.players) ? raw.party.players : []).map((player: any) => ({
+      id: Number(player.id),
+      name: String(player.name ?? `Player ${player.id}`),
+    })),
+    matchCount: Number(raw.party.match_count ?? 0),
+  } : null;
+  return {
+    kind,
+    key: String(raw.key ?? key),
+    party,
+    matches: (Array.isArray(raw.matches) ? raw.matches : []).map((match: any) => ({
+      match_id: Number(match.match_id ?? 0),
+      entry_datetime: String(match.entry_datetime ?? ""),
+      map: String(match.map ?? ""),
+      queue_id: Number(match.queue_id ?? 0),
+      duration_seconds: Number(match.duration_seconds ?? 0),
+      region: String(match.region ?? ""),
+      champion_id: Number(match.champion_id ?? 0),
+      champion_name: String(match.champion_name ?? ""),
+      win_status: String(match.win_status ?? ""),
+      kills: Number(match.kills ?? 0),
+      deaths: Number(match.deaths ?? 0),
+      assists: Number(match.assists ?? 0),
+      player_count: Number(match.player_count ?? 0),
+    })),
+    total: Number(raw.total ?? 0),
+    page: {
+      current: Number(raw.page?.current ?? page),
+      size: Number(raw.page?.size ?? pageSize),
+      totalPages: Number(raw.page?.totalPages ?? 0),
+    },
+  };
 }
 
 let playersOverviewCache: { value: PlayersOverview; expiresAt: number } | null = null;
@@ -3632,12 +3728,14 @@ export interface SkinStat {
  *
  * Accepts query filters; returns fetchSkinStats data after a backend request, using shared authentication and cache behavior.
  */
-export async function fetchSkinStats(params?: { championId?: number; tierMin?: number; tierMax?: number; limit?: number }): Promise<SkinStat[]> {
+export async function fetchSkinStats(params?: { championId?: number; tierMin?: number; tierMax?: number; limit?: number; scope?: PublicStatsScope; queueId?: number }): Promise<SkinStat[]> {
   const query = new URLSearchParams();
   if (params?.championId != null) query.set('championId', String(params.championId));
   if (params?.tierMin != null) query.set('tierMin', String(params.tierMin));
   if (params?.tierMax != null) query.set('tierMax', String(params.tierMax));
   if (params?.limit != null) query.set('limit', String(params.limit));
+  if (params?.scope) query.set('scope', params.scope);
+  if (params?.queueId != null) query.set('queueId', String(params.queueId));
   try {
     const raw = await fetchJson<any[]>(`/stats/skins${query.toString() ? `?${query.toString()}` : ''}`);
     return raw.map((row) => ({
@@ -3672,11 +3770,13 @@ export interface BrokenSkinStat {
  *
  * Accepts query filters; returns fetchBrokenSkinStats data after a backend request, using shared authentication and cache behavior.
  */
-export async function fetchBrokenSkinStats(params?: { championId?: number; tierMin?: number; tierMax?: number }): Promise<BrokenSkinStat[]> {
+export async function fetchBrokenSkinStats(params?: { championId?: number; tierMin?: number; tierMax?: number; scope?: PublicStatsScope; queueId?: number }): Promise<BrokenSkinStat[]> {
   const query = new URLSearchParams();
   if (params?.championId != null) query.set('championId', String(params.championId));
   if (params?.tierMin != null) query.set('tierMin', String(params.tierMin));
   if (params?.tierMax != null) query.set('tierMax', String(params.tierMax));
+  if (params?.scope) query.set('scope', params.scope);
+  if (params?.queueId != null) query.set('queueId', String(params.queueId));
   try {
     const raw = await fetchJson<any[]>(`/stats/broken-skins${query.toString() ? `?${query.toString()}` : ''}`);
     return raw.map((row) => ({

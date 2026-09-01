@@ -66,14 +66,14 @@ export default function AdminChangelogPage() {
 
   if (isLoading) return <LoadingPanel />;
   if (!isAdmin) {
-    return <div className="space-y-6"><h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.admin.changelogAdmin")}</h1><div className="rounded-lg border border-red-500/30 bg-pc-bg-elevated p-6 text-center"><div className="text-lg font-bold text-red-400">{t("generated.admin.accessDenied")}</div><div className="mt-2 text-sm text-pc-text-muted">{t("generated.admin.thisPageIsRestrictedToAdminAccountsOnly")}</div></div></div>;
+    return <div className="space-y-6"><h1 className="pc-heading pc-heading-lg">{t("generated.admin.changelogAdmin")}</h1><div className="rounded-lg border border-red-500/30 bg-pc-bg-elevated p-6 text-center"><div className="text-lg font-bold text-red-400">{t("generated.admin.accessDenied")}</div><div className="mt-2 text-sm text-pc-text-muted">{t("generated.admin.thisPageIsRestrictedToAdminAccountsOnly")}</div></div></div>;
   }
 
   return (
     <div className="space-y-6">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.admin.changelogAdmin")}</h1>
+          <h1 className="pc-heading pc-heading-lg">{t("generated.admin.changelogAdmin")}</h1>
           <p className="mt-1 text-sm text-pc-text-secondary">{t("generated.admin.editThePublicReleaseNotesForExistingDeploymentsEmptyText")}</p>
         </div>
         <button type="button" onClick={() => void load()} disabled={loading} className="pc-btn-secondary inline-flex items-center justify-center gap-2 text-sm disabled:opacity-60"><RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> {t("generated.admin.refresh")}</button>

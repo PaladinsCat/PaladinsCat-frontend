@@ -8,6 +8,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { PlayersBackLink } from "@/components/ui/players-page-header";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { clearPlayerTag, fetchPlayerMatches, type ClearablePlayerTag, type MatchRecord, type ReportType } from "@/lib/api-client";
 import { getTierColor, resolveEffectiveTier, getRankIconPath } from "@/lib/tier-utils";
@@ -435,7 +436,7 @@ export default function PlayerProfileClient({
           message={error || t("generated.app.players.[id].page.theplayercouldnotbefound")}
           onRetry={() => setFetchKey((key) => key + 1)}
         />
-        <Link href="/players" className="text-pc-accent text-sm hover:underline">{t("generated.players.backToPlayers")}</Link>
+        <PlayersBackLink />
       </div>
     );
   }
@@ -480,14 +481,12 @@ export default function PlayerProfileClient({
 
   return (
     <div className="space-y-5">
-      {/* Back link */}
-      <Link href="/players" className="text-pc-text-secondary hover:text-pc-accent transition-colors text-sm">
-        {t("generated.players.backToPlayers")}</Link>
+      <PlayersBackLink />
 
       {/* ── Header ── */}
       <div className="grid items-start grid-cols-1 gap-5 lg:grid-cols-3">
       <div className="space-y-5 lg:col-span-2">
-      <div className={`pc-card relative self-start ${actionMenuOpen ? 'z-40' : 'z-10'}`}>
+      <div className={`relative self-start ${actionMenuOpen ? 'z-40' : 'z-10'}`}>
         <LoadingOverlay visible={refreshing} />
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
         {/* Keep live/refresh controls visible; consolidate voting and moderation. */}
@@ -731,9 +730,8 @@ export default function PlayerProfileClient({
           <div>
             <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
               <h2 className="pc-card-title shadow-sm">{t("generated.players.recentMatches")}</h2>
-              <span className="text-xs text-pc-text-muted">{t("generated.players.allQueuesServedFromTheHistoryCache")}</span>
             </div>
-            <div className="pc-card">
+            <div>
               {matchesLoading ? (
                 <DataTableSkeleton rows={6} className="border-0" />
               ) : matches.length === 0 ? (
@@ -747,7 +745,7 @@ export default function PlayerProfileClient({
                     <div className="shrink-0 text-right"><div className="font-mono text-sm font-bold text-pc-text">{match.kills}/{match.deaths}/{match.assists}</div><div className="text-xs uppercase text-pc-text-muted">{formatKda(match.kills, match.deaths, match.assists)} {t("generated.players.kda")}</div><div className="mt-1 font-mono text-xs text-pc-text-secondary">{formatMatchDuration(match.duration)}</div></div>
                   </Link>)}
                 </div>
-                <div className="hidden overflow-x-auto lg:block">
+                <div className="pc-card-flush hidden overflow-x-auto lg:block">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-pc-border text-pc-text-muted text-left text-xs">
@@ -815,7 +813,7 @@ export default function PlayerProfileClient({
             <h2 className="pc-card-title shadow-sm">{t("generated.players.loadouts")}</h2>
             <Link href={`/players/${id}/loadouts`} className="group flex items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-3 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary">
               <SmartImage src="/images/icons/Player_Loadouts_Icon.png" alt="" className="h-11 w-11 shrink-0 object-contain" />
-              <div className="min-w-0 flex-1"><div className="text-sm font-semibold text-pc-text group-hover:text-pc-accent">{t("generated.players.playerLoadouts")}</div><div className="mt-0.5 text-xs text-pc-text-muted">{t("generated.players.viewSavedDecksByChampion")}</div></div>
+              <div className="min-w-0 flex-1 text-sm font-semibold text-pc-text group-hover:text-pc-accent">{t("generated.players.playerLoadouts")}</div>
               <span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent">→</span>
             </Link>
           </div>
@@ -823,7 +821,7 @@ export default function PlayerProfileClient({
             <h2 className="pc-card-title shadow-sm">{t("common.playerChampions.title")}</h2>
             <Link href={`/players/${id}/champions`} className="group flex items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-3 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary">
               <span className="flex h-11 w-11 shrink-0 items-center justify-center"><SmartImage src="/images/icons/GUI_End_of_Match_Player_Accolades_Icon.png" alt="" className="h-9 w-9 object-contain" /></span>
-              <div className="min-w-0 flex-1"><div className="text-sm font-semibold text-pc-text group-hover:text-pc-accent">{t("common.playerChampions.title")}</div><div className="mt-0.5 text-xs text-pc-text-muted">{t("common.playerChampions.cardDescription")}</div></div>
+              <div className="min-w-0 flex-1 text-sm font-semibold text-pc-text group-hover:text-pc-accent">{t("common.playerChampions.title")}</div>
               <span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent">→</span>
             </Link>
           </div>
@@ -877,11 +875,11 @@ export default function PlayerProfileClient({
                     <div className="text-xs text-pc-text-muted mt-0.5">{t("generated.players.glicko2Rating")}</div>
                   </div>
                   <div className="grid grid-cols-1 gap-2 text-center min-[400px]:grid-cols-2">
-                    <div className="pc-surface-light rounded p-2 border border-pc-border/50">
+                    <div className="p-2">
                       <div className="text-xs text-pc-text-muted">{t("generated.players.deviation")}</div>
                       <div className="text-xs font-mono text-pc-text">{formatNumber(Number(kbmRating.phi), { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
                     </div>
-                    <div className="pc-surface-light rounded p-2 border border-pc-border/50">
+                    <div className="p-2">
                       <div className="text-xs text-pc-text-muted">{t("generated.players.volatility")}</div>
                       <div className="text-xs font-mono text-pc-text">{formatNumber(Number(kbmRating.volatility), { minimumFractionDigits: 4, maximumFractionDigits: 4 })}</div>
                     </div>

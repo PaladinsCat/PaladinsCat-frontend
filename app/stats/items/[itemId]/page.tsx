@@ -13,7 +13,6 @@ import ContextBackLink from "@/components/context-back-link";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { useLocalization } from "@/lib/localization-context";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
-import { SpotlightCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 function itemIcon(name: string) { return `/images/items/${name.replace(/\s+/g, "_")}_Icon.avif`; }
 function weightedWinRate(items: ItemStat[]) {
@@ -97,22 +96,19 @@ export default function ItemDetailPage() {
   const vsClass = relativeDifference(detail.winRate, classAverage);
   const vsGlobal = relativeDifference(detail.winRate, globalAverage);
   return <div className="space-y-6">
-    <div><ContextBackLink fallbackHref="/game/items" label={t("generated.stats.back")} /></div>
-    <section className="rounded-xl border border-pc-border bg-pc-bg-elevated p-5" style={{ borderColor: overallQuality.borderColor }}>
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center"><img src={currentReference?.iconUrl ?? itemIcon(detail.itemName)} alt="" className="h-16 w-16 rounded-lg object-contain" /><div className="min-w-0 flex-1"><h1 className="pc-heading pc-heading-lg text-pc-accent">{detail.itemName}</h1><p className="mt-1 text-sm text-pc-text-secondary">{t("generated.stats.rankedItemPerformanceByPurchaseSlotAndFinalUpgradeLevel")}</p></div><div className="grid w-full grid-cols-2 gap-3 text-left sm:w-auto sm:grid-cols-3 sm:gap-5 sm:text-right"><div><div className="text-xs uppercase text-pc-text-muted">{t("generated.stats.winRate")}</div><div className="text-xl font-bold" style={{ color: overallQuality.color }}>{percent(detail.winRate)}</div><div className="mt-1 flex flex-wrap gap-x-2 text-xs sm:justify-end"><span className={vsClass != null && vsClass >= 0 ? "text-emerald-400" : "text-red-400"}>{signedPercent(vsClass)} {t("generated.stats.vsClass")} <span className="text-pc-text-muted">({currentCategory})</span></span><span className={vsGlobal != null && vsGlobal >= 0 ? "text-emerald-400" : "text-red-400"}>{signedPercent(vsGlobal)} {t("generated.stats.vsGlobal")}</span></div></div><div><div className="text-xs uppercase text-pc-text-muted">{t("generated.stats.purchases")}</div><div className="text-xl font-bold text-pc-text">{formatNumber(detail.totalUses)}</div></div><div className="col-span-2 sm:col-span-1"><div className="text-xs uppercase text-pc-text-muted">{t("generated.stats.record")}</div><div className="text-sm font-semibold text-pc-text">{formatRecord(detail.wins, detail.losses)}</div></div></div></div>
+    <div><ContextBackLink fallbackHref="/game/items" label={t("menu.items")} /></div>
+    <section className="rounded-xl border border-pc-border bg-pc-bg-elevated/90 p-5">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center"><img src={currentReference?.iconUrl ?? itemIcon(detail.itemName)} alt="" className="h-16 w-16 rounded-lg object-contain" /><div className="min-w-0 flex-1"><p className="text-xs font-bold uppercase tracking-[0.18em] text-pc-text-muted">{currentCategory}</p><h1 className="mt-1 pc-heading pc-heading-lg">{detail.itemName}</h1></div><div className="grid w-full grid-cols-2 gap-3 text-left tabular-nums sm:w-auto sm:grid-cols-3 sm:gap-5 sm:text-right"><div><div className="text-xs uppercase text-pc-text-muted">{t("generated.stats.winRate")}</div><div className="text-xl font-bold" style={{ color: overallQuality.color }}>{percent(detail.winRate)}</div><div className="mt-1 flex flex-wrap gap-x-2 text-xs sm:justify-end"><span className={vsClass != null && vsClass >= 0 ? "text-emerald-400" : "text-red-400"}>{signedPercent(vsClass)} {t("generated.stats.vsClass")} <span className="text-pc-text-muted">({currentCategory})</span></span><span className={vsGlobal != null && vsGlobal >= 0 ? "text-emerald-400" : "text-red-400"}>{signedPercent(vsGlobal)} {t("generated.stats.vsGlobal")}</span></div></div><div><div className="text-xs uppercase text-pc-text-muted">{t("generated.stats.purchases")}</div><div className="text-xl font-bold text-pc-text">{formatNumber(detail.totalUses)}</div></div><div className="col-span-2 sm:col-span-1"><div className="text-xs uppercase text-pc-text-muted">{t("generated.stats.record")}</div><div className="text-sm font-semibold text-pc-text">{formatRecord(detail.wins, detail.losses)}</div></div></div></div>
     </section>
-    {currentReference?.tiers.length ? <section className="pc-card">
-      <div className="mb-4 flex flex-wrap items-start justify-between gap-3 border-b border-pc-border/60 pb-4">
-        <div>
-          <h2 className="pc-card-title mb-1">{t("items.tiers.title")}</h2>
-          <p className="text-xs leading-5 text-pc-text-secondary">{t("items.tiers.description")}</p>
-        </div>
+    {currentReference?.tiers.length ? <section>
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+        <h2 className="pc-card-title">{t("items.tiers.title")}</h2>
         <a href={currentReference.sourceUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-lg border border-pc-border bg-pc-bg-secondary px-3 py-2 text-xs font-semibold text-pc-text-secondary transition-colors hover:border-pc-accent-mid hover:text-pc-accent">
           {t("items.tiers.source")}<ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
         </a>
       </div>
       <div className="grid gap-3 md:grid-cols-3">
-        {currentReference.tiers.map((tier) => <article key={tier.level} className="rounded-xl border border-pc-border bg-pc-bg-secondary/45 p-4">
+        {currentReference.tiers.map((tier) => <article key={tier.level} className="rounded-xl border border-pc-border bg-pc-bg-elevated/80 p-4">
           <div className="flex items-center justify-between gap-3">
             <span className="text-sm font-bold text-pc-accent">{t("generated.stats.levelValue1", { value1: tier.level })}</span>
             <span className="rounded-full border border-pc-border bg-pc-bg px-2.5 py-1 text-xs font-semibold text-pc-text-secondary">{t("items.tiers.totalCost", { cost: formatNumber(tier.cost) })}</span>
@@ -121,19 +117,20 @@ export default function ItemDetailPage() {
         </article>)}
       </div>
     </section> : null}
-    <section className="pc-card">
-      <div className="mb-4 border-b border-pc-border/60 pb-4">
-        <div className="flex flex-wrap items-center gap-2">
-          <button aria-pressed={selectedRole == null} onClick={() => setSelectedRole(null)} className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] ${selectedRole == null ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-text-secondary hover:text-pc-text"}`}>{t("generated.champions.all")}</button>
-          {CHAMPION_ROLES.map((role) => <button key={role.value} aria-pressed={selectedRole === role.value} onClick={() => setSelectedRole(selectedRole === role.value ? null : role.value)} className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] ${selectedRole === role.value ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-text-secondary hover:text-pc-text"}`}><img src={role.icon} alt="" className="h-5 w-5" />{t(role.labelKey)}</button>)}
+    <section>
+      <div className="mb-4">
+        <span className="mb-1.5 block text-xs text-pc-text-secondary">{t("generated.stats.role")}</span>
+        <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t("generated.stats.role")}>
+          <button type="button" aria-pressed={selectedRole == null} onClick={() => setSelectedRole(null)} className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] ${selectedRole == null ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-text-secondary hover:text-pc-text"}`}>{t("generated.champions.all")}</button>
+          {CHAMPION_ROLES.map((role) => <button type="button" key={role.value} aria-pressed={selectedRole === role.value} onClick={() => setSelectedRole(selectedRole === role.value ? null : role.value)} className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] ${selectedRole === role.value ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-text-secondary hover:text-pc-text"}`}><img src={role.icon} alt="" className="h-5 w-5" />{t(role.labelKey)}</button>)}
         </div>
       </div>
-      <div className="pc-section-heading mb-1">
-        <h2 className="pc-card-title mb-0">{t("generated.stats.slotLevel")}</h2>
-        <span className="text-xs text-pc-text-muted">{t("generated.stats.winRatePurchaseCount")}</span>
-      </div>
-      <p className="mb-4 text-xs text-pc-text-secondary">{t("generated.stats.theCompleteBreakdownShowsHowEarlyAnItemWasBought")}</p>
-      <div className="overflow-x-auto pb-1">
+      <div className="pc-card">
+        <div className="pc-section-heading mb-4">
+          <h2 className="pc-card-title mb-0">{t("generated.stats.slotLevel")}</h2>
+          <span className="text-xs text-pc-text-muted">{t("generated.stats.winRatePurchaseCount")}</span>
+        </div>
+        <div className="overflow-x-auto pb-1">
         <div>
           <div
             className="grid gap-1 sm:gap-2"
@@ -174,6 +171,7 @@ export default function ItemDetailPage() {
           <div className="mt-2 pl-20 text-center text-xs font-semibold uppercase tracking-wider text-pc-text-muted">
             {t("generated.stats.purchaseSlot")}
           </div>
+        </div>
         </div>
       </div>
     </section>
