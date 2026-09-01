@@ -17,7 +17,6 @@ import PlayerDirectoryGrid, { PLAYER_DIRECTORY_CARD_CLASS } from "@/components/p
 import PlayerDirectoryPagination, { usePersistentDirectoryPage } from "@/components/player-directory-pagination";
 import { useLocalization } from "@/lib/localization-context";
 import type { TranslationKey } from "@/lib/localization/messages";
-import { hasPlayerTag } from "@/lib/player-tag-threshold";
 import PlayersPageHeader from "@/components/ui/players-page-header";
 import PlayerDirectorySearch from "@/components/player-directory-search";
 
@@ -207,7 +206,7 @@ export default function PlayerModerationDirectory({
                     <div key={player.id} className="min-w-0">
                       <Link href={`/players/afk-wintrade/${player.id}`} className={`${PLAYER_DIRECTORY_CARD_CLASS} group items-center justify-between gap-2 border-red-400/20 hover:border-red-400/40 hover:bg-red-400/[0.04]`}>
                         <div className="min-w-0 truncate text-sm font-semibold text-pc-text transition-colors group-hover:text-pc-accent">
-                          <PlayerName playerId={player.id} cheater={player.cheater} susCount={player.susCount} dropper={player.dropper} dropperVoteCount={player.dropperVoteCount} afkWintrade={player.afkWintrade} afkWintradeVoteCount={player.afkWintradeVoteCount} automaticAfk={hasPlayerTag(player.automaticMatchCount)} automaticAfkCount={player.automaticMatchCount} boosted={player.boosted} altAccount={player.altAccount}>{player.name}</PlayerName>
+                          <PlayerName playerId={player.id} cheater={player.cheater} susCount={player.susCount} dropper={player.dropper} dropperVoteCount={player.dropperVoteCount} afkWintrade={player.afkWintrade} afkWintradeVoteCount={player.afkWintradeVoteCount} automaticAfk automaticAfkCount={player.automaticMatchCount} boosted={player.boosted} altAccount={player.altAccount}>{player.name}</PlayerName>
                         </div>
                         <span className="w-fit shrink-0 text-xs font-semibold tabular-nums text-red-100">
                           {formatNumber(player.automaticMatchCount)} {t("generated.players.matches.9f3e924")}
