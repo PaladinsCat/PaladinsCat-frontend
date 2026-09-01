@@ -1225,7 +1225,7 @@ function mapRelationshipRow(row: RawRelationshipRow): PlayerRelationshipRow {
  * Accepts playerId, limit; returns fetchPlayerRelationshipSummary data after a backend request, using shared authentication and cache behavior.
  */
 export async function fetchPlayerRelationshipSummary(playerId: string | number, limit = 6): Promise<PlayerRelationshipSummary> {
-  const raw = await fetchJson<RawRelationshipSummary>(`/coplay/summary/${encodeURIComponent(String(playerId))}?limit=${Math.min(Math.max(limit, 1), 50)}&contract=metrics-v2`);
+  const raw = await fetchJson<RawRelationshipSummary>(`/coplay/summary/${encodeURIComponent(String(playerId))}?limit=${Math.min(Math.max(limit, 1), 50)}&contract=metrics-v3`);
   const totals = raw.totals ?? {};
   return {
     playerId: String(raw.player_id ?? playerId),
