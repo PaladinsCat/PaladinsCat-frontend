@@ -87,7 +87,7 @@ export default function AdminDashboardPage({ mode = "admin" }: { mode?: "admin" 
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <div className="text-xs font-bold uppercase tracking-[0.18em] text-pc-text-muted">{t("generated.admin.privateOperations")}</div>
-          <h1 className="pc-heading pc-heading-lg text-pc-accent">{developerMode ? t("generated.operations.developer") : t("generated.admin.adminDashboard")}</h1>
+          <h1 className="pc-heading pc-heading-lg">{developerMode ? t("generated.operations.developer") : t("generated.admin.adminDashboard")}</h1>
           <p className="mt-1 text-sm text-pc-text-secondary">{t("generated.admin.trafficPlatformHealthIngestionAndHiRezQuotaTelemetry")}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">

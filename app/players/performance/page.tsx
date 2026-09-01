@@ -16,6 +16,8 @@ import { usePersistentDirectoryPage } from "@/components/player-directory-pagina
 import PerformanceRangeBellCurve from "@/components/performance-range-bell-curve";
 import { useLocalization } from "@/lib/localization-context";
 import type { TranslationKey } from "@/lib/localization/messages";
+import PlayersPageHeader from "@/components/ui/players-page-header";
+import { SegmentedControl } from "@/components/ui/segmented-control";
 
 
 const METRICS = [
@@ -77,27 +79,17 @@ export default function PerformanceLeaderboardPage() {
   }, [config.role, metric, requestKey, scope]);
 
   const visibleRows = rows.slice((page - 1) * pageSize, page * pageSize);
-
   const scopeLabel = t(scope === "ranked" ? "stats.scope.ranked" : "stats.scope.casual");
 
-  return <div className="mx-auto w-full max-w-5xl space-y-5">
-    <header>
-      <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("menu.performanceLeaderboard")}</h1>
-      <p className="mt-1 text-sm text-pc-text-secondary">{t("performance.scopeDescription", { mode: scopeLabel })}</p>
-    </header>
+  return <div className="space-y-6">
+    <PlayersPageHeader title={t("menu.performanceLeaderboard")} />
 
-    <div className="inline-grid grid-cols-2 rounded-xl border border-pc-border bg-pc-bg-elevated p-1" role="tablist" aria-label={t("performance.modeLabel")}>
-      {(["ranked", "casual"] as const).map((value) => <button
-        key={value}
-        type="button"
-        role="tab"
-        aria-selected={scope === value}
-        onClick={() => { setScope(value); setPage(1); }}
-        className={`min-w-28 rounded-lg px-4 py-2 text-sm font-bold transition-colors ${scope === value ? "bg-pc-accent text-pc-bg" : "text-pc-text-secondary hover:bg-pc-bg-secondary hover:text-pc-text"}`}
-      >
-        {t(value === "ranked" ? "stats.scope.ranked" : "stats.scope.casual")}
-      </button>)}
-    </div>
+    <SegmentedControl
+      label={t("performance.modeLabel")}
+      items={(["ranked", "casual"] as const).map((value) => ({ value, label: t(value === "ranked" ? "stats.scope.ranked" : "stats.scope.casual") }))}
+      value={scope}
+      onChange={(value) => { setScope(value); setPage(1); }}
+    />
 
     {summary && summary.sampleSize > 0 && <PerformanceRangeBellCurve
       metricLabel={config.role ? t("performance.roleMetric", { role: t(config.role === "Support" ? "common.roles.support" : config.role === "Damage" ? "common.roles.damage" : "common.roles.frontline"), metric: t(config.labelKey) }) : t(config.labelKey)}
@@ -115,11 +107,9 @@ export default function PerformanceLeaderboardPage() {
       }}
     />}
 
-    <div className="grid grid-cols-2 gap-2 rounded-xl border border-pc-border bg-pc-bg-elevated p-1 sm:grid-cols-4">
-      {METRICS.map((entry) => <button key={entry.key} type="button" onClick={() => { setMetric(entry.key); setPage(1); }} className={`rounded-lg px-3 py-2 text-xs font-bold transition-colors sm:text-sm ${metric === entry.key ? "bg-pc-accent text-pc-bg" : "text-pc-text-secondary hover:bg-pc-bg-secondary hover:text-pc-text"}`}>{t(entry.labelKey)}</button>)}
-    </div>
+    <SegmentedControl label={t("generated.stats.performanceMetrics")} items={METRICS.map((entry) => ({ value: entry.key, label: t(entry.labelKey) }))} value={metric} onChange={(value) => { setMetric(value); setPage(1); }} />
 
-    {loading ? <LoadingPanel /> : <div className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated">
+    {loading ? <LoadingPanel /> : <div className="pc-card-flush overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full min-w-[760px] text-sm">
           <thead>

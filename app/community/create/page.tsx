@@ -55,7 +55,7 @@ export default function CreatePostPage() {
       <div className="flex items-center gap-4">
         <Link href="/community" className="text-pc-text-secondary hover:text-pc-accent transition-colors">
           {t("generated.community.backToCommunity")}</Link>
-        <h1 className="text-3xl font-bold text-pc-accent">{t("generated.community.createPost")}</h1>
+        <h1 className="pc-heading pc-heading-lg">{t("generated.community.createPost")}</h1>
       </div>
 
       <form onSubmit={handleSubmit} className="bg-pc-bg-elevated rounded-lg border border-pc-border p-6 space-y-4">

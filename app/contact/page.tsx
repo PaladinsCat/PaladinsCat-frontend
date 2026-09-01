@@ -17,7 +17,7 @@ export default function ContactPage() {
 
       {/* ── Header ── */}
       <section className="space-y-2">
-        <h1 className="text-3xl font-bold text-pc-accent">
+        <h1 className="pc-heading pc-heading-lg">
           <ScrambleText text={t("generated.contact.contact")} speed={30} iterations={15} delayFromCenter={false} />
         </h1>
         <p className="text-pc-text-secondary drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">

@@ -7,13 +7,14 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Search } from "lucide-react";
 import { fetchCheaterPlayers, fetchPrivateAccountsDirectory, type CheaterPlayer, type PrivateAccountSummary } from "@/lib/api-client";
 import { LoadingPanel } from "@/components/async-state";
 import PlayerName from "@/components/player-name";
 import PlayerDirectoryGrid, { PLAYER_DIRECTORY_CARD_CLASS } from "@/components/player-directory-grid";
 import { useLocalization } from "@/lib/localization-context";
 import { hasPlayerTag } from "@/lib/player-tag-threshold";
+import PlayersPageHeader from "@/components/ui/players-page-header";
+import PlayerDirectorySearch from "@/components/player-directory-search";
 
 const FETCH_PAGE_SIZE = 100;
 const DISPLAY_PAGE_SIZE = 32;
@@ -96,26 +97,14 @@ export default function SuspiciousPage() {
   }), [data, privateData]);
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-5">
-      <div>
-        <Link href="/players" className="text-pc-accent text-xs hover:underline mb-2 inline-block">{t("generated.players.players")}</Link>
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.players.suspiciousPlayers")}</h1>
-        <div className="mt-3 rounded-xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-sm font-medium text-amber-50 backdrop-blur-md" role="note">
-          {t("moderation.suspiciousThresholdNotice")}
-        </div>
+    <div className="space-y-6">
+      <PlayersPageHeader title={t("generated.players.suspiciousPlayers")} />
+      <div className="rounded-xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-sm font-medium text-amber-50" role="note">
+        {t("moderation.suspiciousThresholdNotice")}
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <label className="relative block w-full sm:max-w-sm">
-          <span className="sr-only">{t("generated.players.searchByInGameNameOrPlayerId")}</span>
-          <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-pc-text-muted" />
-          <input
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder={t("generated.players.searchByInGameNameOrPlayerId")}
-            className="w-full rounded-xl border border-pc-border bg-pc-bg-elevated py-2.5 pl-9 pr-3 text-sm text-pc-text outline-none transition-colors placeholder:text-pc-text-muted focus:border-pc-accent-mid"
-          />
-        </label>
+        <PlayerDirectorySearch label={t("generated.players.searchByInGameNameOrPlayerId")} value={query} onChange={setQuery} />
         <span className="flex items-center gap-2 text-xs text-pc-text-muted">
           <span className="h-2 w-2 rounded-full bg-amber-500" />
           {formatNumber(entries.length)} {t("generated.players.flagged")}
@@ -150,7 +139,7 @@ export default function SuspiciousPage() {
                     ? <PlayerName playerId={0} cheater={entry.account.cheater} susCount={visibleSusCount} verified={false}>{entry.account.displayName}</PlayerName>
                     : <PlayerName playerId={entry.player.id} cheater={entry.player.cheater} susCount={visibleSusCount}>{entry.player.name}</PlayerName>}
                 </div>
-                <span className="w-fit shrink-0 rounded-full border border-amber-500/30 bg-amber-500/15 px-2 py-1 text-xs font-semibold text-amber-300">
+                <span className="w-fit shrink-0 text-xs font-semibold tabular-nums text-amber-300">
                   {formatNumber(susCount)} {susCount === 1 ? t("moderation.suspiciousVote") : t("moderation.suspiciousVotes")}
                 </span>
               </div>

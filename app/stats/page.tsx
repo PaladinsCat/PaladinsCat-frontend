@@ -24,7 +24,6 @@ import { ContentFade } from "@/components/async-state";
 import { ChartCardSkeleton, DataCardSkeleton } from "@/components/route-skeleton";
 import { useLocalization } from "@/lib/localization-context";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
-import { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 const ROLES = ["Frontline", "Damage", "Flank", "Support"] as const;
 
@@ -220,9 +219,7 @@ export default function StatsPage() {
     <div className="space-y-8">
       {/* ── Header ── */}
       <div>
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.stats.globalStats.bd3846d")}</h1>
-        <p className="text-pc-text-secondary text-sm mt-1">
-          {t("generated.stats.aggregateStatisticsAcrossAllTrackedMatches")}</p>
+        <h1 className="pc-heading pc-heading-lg">{t("generated.stats.globalStats.bd3846d")}</h1>
       </div>
 
       {/* ── Performance, eCPM, and ranked-player distribution ── */}

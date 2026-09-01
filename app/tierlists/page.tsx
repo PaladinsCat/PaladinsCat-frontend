@@ -35,7 +35,7 @@ export default function TierListsPage() {
 
   return <div className="space-y-6">
     <div className="pc-section-heading items-end">
-      <div><h1 className="pc-heading pc-heading-lg text-pc-accent">{t("tierLists.title")}</h1><p className="mt-1 text-sm text-pc-text-secondary">{t("tierLists.description")}</p></div>
+      <div><h1 className="pc-heading pc-heading-lg">{t("tierLists.title")}</h1><p className="mt-1 text-sm text-pc-text-secondary">{t("tierLists.description")}</p></div>
       <Link href="/tierlists/create" className="pc-touch-target rounded-lg bg-pc-accent px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-pc-accent-secondary">{t("tierLists.create")}</Link>
     </div>
     {lists.length === 0 ? <EmptyState title={t("tierLists.empty")} description={t("tierLists.socialHint")} /> : <div className="grid grid-cols-1 gap-5 2xl:grid-cols-2">{lists.map((list) => <Link key={list.id} href={`/tierlists/${list.id}`} className="group min-w-0 rounded-xl border border-pc-border bg-pc-bg-elevated p-4 transition-colors hover:border-pc-accent/50">

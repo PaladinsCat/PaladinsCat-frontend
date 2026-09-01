@@ -11,7 +11,6 @@ import { LoadingIndicator, StableMetricValue } from "@/components/async-state";
 import { usePersistentDirectoryPage } from "@/components/player-directory-pagination";
 import { useLocalization } from "@/lib/localization-context";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
-import { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 
 type SortKey = "totalMatches" | "winRate";
@@ -79,7 +78,7 @@ export default function CompositionStatsPage() {
     <div className="mx-auto max-w-6xl space-y-6">
       <div>
         <Link href="/matches" className="mb-2 inline-block text-xs text-pc-accent hover:underline">{t("nav.matches")}</Link>
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("compositions.title")}</h1>
+        <h1 className="pc-heading pc-heading-lg">{t("compositions.title")}</h1>
         <p className="mt-1 text-sm text-pc-text-secondary">{t("compositions.description")}</p>
       </div>
 

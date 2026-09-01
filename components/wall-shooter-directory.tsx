@@ -5,7 +5,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Search } from "lucide-react";
 import { LoadingPanel } from "@/components/async-state";
 import { PLAYER_DIRECTORY_CARD_CLASS } from "@/components/player-directory-grid";
 import PlayerDirectoryPagination, { usePersistentDirectoryPage } from "@/components/player-directory-pagination";
@@ -13,6 +12,8 @@ import PlayerName from "@/components/player-name";
 import { fetchWallShooterPlayers, type AutomaticWallShooterPlayer } from "@/lib/api-client";
 import { useLocalization } from "@/lib/localization-context";
 import { hasPlayerTag } from "@/lib/player-tag-threshold";
+import PlayersPageHeader from "@/components/ui/players-page-header";
+import PlayerDirectorySearch from "@/components/player-directory-search";
 
 const PAGE_SIZE = 32;
 
@@ -59,29 +60,14 @@ export default function WallShooterDirectory() {
   }, [normalizedQuery, page, requestKey]);
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-6">
-      <div>
-        <Link href="/players" className="mb-2 inline-block text-xs text-pc-accent hover:underline">{t("generated.players.players")}</Link>
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("moderation.wallShooterTitle")}</h1>
-        <div className="mt-3 rounded-xl border border-cyan-400/30 bg-cyan-400/10 px-4 py-3 text-sm font-medium text-cyan-50 backdrop-blur-md" role="note">
-          {t("moderation.wallShooterNotice")}
-        </div>
+    <div className="space-y-6">
+      <PlayersPageHeader title={t("moderation.wallShooterTitle")} />
+      <div className="rounded-xl border border-cyan-400/30 bg-cyan-400/10 px-4 py-3 text-sm font-medium text-cyan-50" role="note">
+        {t("moderation.wallShooterNotice")}
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <label className="relative block w-full sm:max-w-sm">
-          <span className="sr-only">{t("generated.players.searchByInGameNameOrPlayerId")}</span>
-          <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-pc-text-muted" />
-          <input
-            value={query}
-            onChange={(event) => {
-              setQuery(event.target.value);
-              setPage(1);
-            }}
-            placeholder={t("generated.players.searchByInGameNameOrPlayerId")}
-            className="w-full rounded-xl border border-pc-border bg-pc-bg-elevated py-2.5 pl-9 pr-3 text-sm text-pc-text outline-none transition-colors placeholder:text-pc-text-muted focus:border-pc-accent-mid"
-          />
-        </label>
+        <PlayerDirectorySearch label={t("generated.players.searchByInGameNameOrPlayerId")} value={query} onChange={(value) => { setQuery(value); setPage(1); }} />
         <span className="flex items-center gap-2">
           <span className="h-2 w-2 rounded-full bg-cyan-400" />
           <span className="text-xs text-pc-text-muted">{t("moderation.value1AutomaticallyFlaggedPlayers", { value1: formatNumber(totalCount) })}</span>
@@ -112,7 +98,7 @@ export default function WallShooterDirectory() {
                       {player.name}
                     </PlayerName>
                 </div>
-                <span className="w-fit shrink-0 rounded-full border border-cyan-400/30 bg-cyan-400/15 px-2 py-1 text-xs font-semibold text-cyan-200">
+                <span className="w-fit shrink-0 text-xs font-semibold tabular-nums text-cyan-200">
                   {formatNumber(player.wallShooterCount)} {t("generated.players.matches.9f3e924")}
                 </span>
               </Link>

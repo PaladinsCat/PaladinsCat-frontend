@@ -302,7 +302,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
       </div>
 
       <div className="bg-pc-bg-elevated rounded-lg border border-pc-border p-6">
-        <h2 className="text-xl font-semibold text-pc-accent mb-4">
+        <h2 className="pc-card-title mb-4">
           {t("generated.community.comments")}{comments.length})
         </h2>
 

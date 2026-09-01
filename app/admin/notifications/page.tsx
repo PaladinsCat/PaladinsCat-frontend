@@ -186,7 +186,7 @@ export default function AdminNotificationsPage() {
   if (!isAdmin) {
     return (
       <div className="space-y-6">
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.admin.notificationsAdmin")}</h1>
+        <h1 className="pc-heading pc-heading-lg">{t("generated.admin.notificationsAdmin")}</h1>
         <div className="bg-pc-bg-elevated border border-red-500/30 rounded-lg p-6 text-center space-y-2">
           <div className="text-lg font-bold text-red-400">{t("generated.admin.accessDenied")}</div>
           <div className="text-sm text-pc-text-muted">
@@ -199,7 +199,7 @@ export default function AdminNotificationsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.admin.notificationsAdmin")}</h1>
+        <h1 className="pc-heading pc-heading-lg">{t("generated.admin.notificationsAdmin")}</h1>
         <div className="text-xs text-pc-text-muted">
           {t("generated.admin.loggedInAs")}{" "}<span className="text-pc-text">{user?.username}</span>
         </div>

@@ -388,7 +388,7 @@ export default function DiminishingReturnsPage() {
         <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
             <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl border border-pc-accent/30 bg-pc-accent/10 text-pc-accent"><Calculator className="h-6 w-6" /></div>
-            <h1 className="text-2xl font-bold text-pc-accent sm:text-3xl">{t("diminishingReturns.title")}</h1>
+            <h1 className="pc-heading pc-heading-lg">{t("diminishingReturns.title")}</h1>
             <p className="mt-2 text-sm leading-6 text-pc-text-secondary">{t("diminishingReturns.subtitle")}</p>
             <p className="mt-2 text-xs leading-5 text-pc-text-muted">{t("diminishingReturns.sourceNote")}</p>
           </div>
@@ -399,7 +399,7 @@ export default function DiminishingReturnsPage() {
         </div>
       </header>
 
-      <section className="pc-card space-y-4">
+      <section className="space-y-4">
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
           <label className="space-y-2">
             <span className="text-sm font-semibold text-pc-text">{t("diminishingReturns.champion")}</span>
@@ -428,9 +428,9 @@ export default function DiminishingReturnsPage() {
               <img src={getChampionIconSafe(reference.champion.name)} alt="" className="h-14 w-14 rounded-xl object-contain" />
               <div><h2 className="pc-card-title">{reference.champion.name}</h2><p className="text-xs uppercase tracking-wider text-pc-text-muted">{t("diminishingReturns.baseStats")}</p></div>
             </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="rounded-xl border border-pc-border bg-pc-bg-secondary/50 p-4"><span className="text-xs text-pc-text-muted">{t("diminishingReturns.health")}</span><div className="mt-1 font-mono text-xl font-bold text-pc-text">{formatNumber(baseHealth)}</div></div>
-              <div className="rounded-xl border border-pc-border bg-pc-bg-secondary/50 p-4"><span className="text-xs text-pc-text-muted">{t("diminishingReturns.movementSpeed")}</span><div className="mt-1 font-mono text-xl font-bold text-pc-text">{formatNumber(baseSpeed)}</div></div>
+            <div className="grid grid-cols-2 divide-x divide-pc-border border-y border-pc-border/70 py-3">
+              <div className="pr-4"><span className="text-xs text-pc-text-muted">{t("diminishingReturns.health")}</span><div className="mt-1 font-mono text-xl font-bold text-pc-text">{formatNumber(baseHealth)}</div></div>
+              <div className="pl-4"><span className="text-xs text-pc-text-muted">{t("diminishingReturns.movementSpeed")}</span><div className="mt-1 font-mono text-xl font-bold text-pc-text">{formatNumber(baseSpeed)}</div></div>
             </div>
             <div>
               <h3 className="mb-2 text-sm font-semibold text-pc-text">{t("diminishingReturns.skills")}</h3>
@@ -454,7 +454,7 @@ export default function DiminishingReturnsPage() {
                       : skill.cooldown
                         ? t("diminishingReturns.skillCooldown", { cooldown: skill.cooldown })
                         : t("diminishingReturns.noNumericDamage");
-                  return <div key={`${skill.key}-${skill.name}`} className="flex items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-secondary/40 p-3"><SelectableImage src={skill.iconUrl} alt={skill.name} /><div className="min-w-0"><div className="truncate text-sm font-semibold text-pc-text">{skill.name}</div><div className="mt-1 text-xs text-pc-text-secondary">{summary}</div></div></div>;
+                  return <div key={`${skill.key}-${skill.name}`} className="flex items-center gap-3 border-b border-pc-border/70 py-3"><SelectableImage src={skill.iconUrl} alt={skill.name} /><div className="min-w-0"><div className="truncate text-sm font-semibold text-pc-text">{skill.name}</div><div className="mt-1 text-xs text-pc-text-secondary">{summary}</div></div></div>;
                 })}
               </div>
               {weaponOverride && <p className="mt-2 text-xs text-pc-accent">{t("diminishingReturns.weaponOverride", { value: weaponOverride })}</p>}
@@ -551,7 +551,7 @@ export default function DiminishingReturnsPage() {
       {loadoutOpen && (
         <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/75 p-4" role="dialog" aria-modal="true" aria-labelledby="loadout-dialog-title" onMouseDown={(event) => { if (event.target === event.currentTarget) setLoadoutOpen(false); }}>
           <div className="flex max-h-[85vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-pc-border bg-pc-bg-elevated shadow-lg">
-            <div className="flex items-start justify-between gap-4 border-b border-pc-border p-4 sm:p-5"><div><h2 id="loadout-dialog-title" className="text-lg font-bold text-pc-accent">{t("diminishingReturns.savedLoadouts")}</h2><p className="mt-1 text-xs leading-5 text-pc-text-secondary">{t("diminishingReturns.savedLoadoutsDescription")}</p></div><button type="button" onClick={() => setLoadoutOpen(false)} className="rounded-lg p-2 text-pc-text-muted hover:bg-pc-bg-secondary hover:text-pc-text" aria-label={t("diminishingReturns.close")}><X className="h-5 w-5" /></button></div>
+            <div className="flex items-start justify-between gap-4 border-b border-pc-border p-4 sm:p-5"><div><h2 id="loadout-dialog-title" className="pc-card-title">{t("diminishingReturns.savedLoadouts")}</h2><p className="mt-1 text-xs leading-5 text-pc-text-secondary">{t("diminishingReturns.savedLoadoutsDescription")}</p></div><button type="button" onClick={() => setLoadoutOpen(false)} className="rounded-lg p-2 text-pc-text-muted hover:bg-pc-bg-secondary hover:text-pc-text" aria-label={t("diminishingReturns.close")}><X className="h-5 w-5" /></button></div>
             <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-5">
               {loadingLoadouts ? <LoadingPanel /> : loadouts.length === 0 ? <p className="rounded-xl border border-dashed border-pc-border p-8 text-center text-sm text-pc-text-muted">{t("diminishingReturns.noSavedLoadouts")}</p> : <div className="grid gap-3 sm:grid-cols-2">{loadouts.map((loadout) => <button key={loadout.id} type="button" onClick={() => importLoadout(loadout)} className="flex items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-secondary/50 p-3 text-left transition-colors hover:border-pc-accent-mid"><img src={getChampionIconSafe(loadout.championName)} alt="" className="h-12 w-12 shrink-0 rounded-lg object-contain" /><span className="min-w-0 flex-1"><span className="block truncate text-sm font-semibold text-pc-text">{loadout.loadoutName}</span><span className="mt-1 block text-xs text-pc-text-muted">{loadout.championName} · {t("diminishingReturns.points", { points: loadout.cardLevels.reduce((sum, level) => sum + level, 0) })}</span></span><span className="shrink-0 text-xs font-semibold text-pc-accent">{t("diminishingReturns.load")}</span></button>)}</div>}
             </div>

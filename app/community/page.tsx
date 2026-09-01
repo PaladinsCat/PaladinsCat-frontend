@@ -53,7 +53,7 @@ export default function CommunityPage() {
   return (
     <div className="space-y-6">
       <div className="pc-section-heading">
-        <h1 className="text-2xl font-bold text-pc-accent sm:text-3xl">
+        <h1 className="pc-heading pc-heading-lg">
           <ScrambleText text={t("generated.community.community")} speed={30} iterations={15} delayFromCenter={false} />
         </h1>
         <div className="flex flex-wrap gap-2">

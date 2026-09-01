@@ -13,7 +13,6 @@ import { loadBuildReferenceData, type BuildReferenceData } from "@/lib/build-ref
 import { LoadingPanel } from "@/components/async-state";
 import CanonicalTalentImage from "@/components/canonical-talent-image";
 import { useLocalization } from "@/lib/localization-context";
-import { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 
 function AssetImage({ src, alt }: { src?: string | null; alt: string }) {
@@ -29,7 +28,7 @@ function AssetImage({ src, alt }: { src?: string | null; alt: string }) {
 
 function AssetRow({ iconUrl, title, subtitle, talentId }: { iconUrl?: string | null; title: string; subtitle?: string; talentId?: number }) {
   return (
-    <div className="pc-surface-light flex items-center gap-3 rounded-lg border border-pc-border p-3 text-sm text-pc-text">
+    <div className="flex items-center gap-3 border-b border-pc-border/70 py-3 text-sm text-pc-text last:border-b-0">
       {talentId ? <CanonicalTalentImage talentId={talentId} talentName={title} alt={title} className="h-10 w-10 shrink-0 rounded-md border border-pc-border object-cover" fallbackClassName="h-10 w-10 shrink-0 rounded-md border border-pc-border bg-pc-bg-secondary" /> : <AssetImage src={iconUrl} alt={title} />}
       <div className="min-w-0">
         <div className="truncate font-semibold">{title}</div>

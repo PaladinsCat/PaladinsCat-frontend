@@ -10,7 +10,6 @@ import { EmptyState, ErrorState } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { useLocalization } from "@/lib/localization-context";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
-import { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 
 const EMPTY_SUMMARY: TierSummary = {
@@ -202,8 +201,7 @@ export default function TiersPage() {
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6">
       <div>
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.stats.tierDistribution")}</h1>
-        <p className="mt-2 max-w-3xl text-sm leading-6 text-pc-text-secondary">{t("seo.stats.tiers.description")}</p>
+        <h1 className="pc-heading pc-heading-lg">{t("generated.stats.tierDistribution")}</h1>
       </div>
 
       {displayLoading ? (

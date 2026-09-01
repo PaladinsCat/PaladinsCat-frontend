@@ -746,12 +746,15 @@ html[data-home-wallpaper-phase="returning"] .pc-home-explore * {
 .pc-home-feature-card[data-card-accent="orange"] .pc-card-icon { --pc-card-accent: hsl(24 75% 68%); }
 .pc-home-feature-card[data-card-accent="amber"] .pc-card-icon { --pc-card-accent: hsl(45 78% 68%); }
 .pc-home-feature-card[data-card-accent="violet"] .pc-card-icon { --pc-card-accent: hsl(265 62% 70%); }
+.pc-home-feature-card[data-card-accent="emerald"] .pc-card-icon { --pc-card-accent: hsl(152 55% 68%); }
 .pc-home-feature-card[data-card-accent="teal"] .pc-card-icon { --pc-card-accent: hsl(165 60% 64%); }
 .pc-home-feature-card[data-card-accent="sky"] .pc-card-icon { --pc-card-accent: hsl(205 70% 68%); }
+.pc-home-feature-card[data-card-accent="rose"] .pc-card-icon { --pc-card-accent: hsl(350 56% 70%); }
 .pc-home-feature-card[data-card-accent="pink"] .pc-card-icon { --pc-card-accent: hsl(335 60% 70%); }
 .pc-home-feature-card[data-card-accent="blue"] .pc-card-icon { --pc-card-accent: hsl(235 70% 70%); }
 .pc-home-feature-card[data-card-accent="green"] .pc-card-icon { --pc-card-accent: hsl(120 55% 64%); }
 .pc-home-feature-card[data-card-accent="yellow"] .pc-card-icon { --pc-card-accent: hsl(55 70% 66%); }
+.pc-home-feature-card[data-card-accent="fuchsia"] .pc-card-icon { --pc-card-accent: hsl(302 60% 72%); }
 
 /* ═══════════════════════════════════════════════════════════════
    Global text-accent palette — picker-band override

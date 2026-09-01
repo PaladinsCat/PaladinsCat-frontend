@@ -10,7 +10,6 @@ import { ContentFade, EmptyState, ErrorState } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { useLocalization } from "@/lib/localization-context";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
-import { SpotlightCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 /**
  * Renders the exported statistics view with its route data.
@@ -32,7 +31,7 @@ export default function RegionsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.stats.regionalMeta")}</h1>
+      <h1 className="pc-heading pc-heading-lg">{t("generated.stats.regionalMeta")}</h1>
 
       {displayLoading ? (
         <RouteSkeleton variant="dashboard" />

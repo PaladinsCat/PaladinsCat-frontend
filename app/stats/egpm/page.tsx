@@ -11,7 +11,6 @@ import { RouteSkeleton } from "@/components/route-skeleton";
 import { fetchBaselines, type BaselineEntry } from "@/lib/api-client";
 import { useLocalization } from "@/lib/localization-context";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
-import { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 import {
   ECPM_ACTIVITY_THRESHOLDS,
@@ -70,7 +69,7 @@ export default function EgpmDetailPage() {
         <Link href="/stats/performance" className="text-sm text-pc-text-secondary transition-colors hover:text-pc-accent">{t("generated.stats.globalStats")}</Link>
         <div className="mt-3">
           <div>
-            <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.stats.effectiveCreditsPerMinute")}</h1>
+            <h1 className="pc-heading pc-heading-lg">{t("generated.stats.effectiveCreditsPerMinute")}</h1>
             <p className="mt-1 max-w-3xl text-sm text-pc-text-secondary">{t("generated.stats.ecpmMeasuresCreditsEarnedThroughParticipationAfterRemovingThe500")}</p>
           </div>
         </div>

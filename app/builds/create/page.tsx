@@ -326,7 +326,7 @@ export default function CreateBuildPage() {
 
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-pc-accent">{t("generated.builds.createBuild")}</h1>
+          <h1 className="pc-heading pc-heading-lg">{t("generated.builds.createBuild")}</h1>
           <p className="mt-2 text-sm text-pc-text-secondary">
             {t("generated.builds.pickAChampionThenChooseUpTo4Items5")}</p>
         </div>

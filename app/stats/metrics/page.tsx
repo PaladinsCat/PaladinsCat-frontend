@@ -21,7 +21,6 @@ import { useLocalization } from "@/lib/localization-context";
 import type { TranslationKey } from "@/lib/localization/messages";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
 import { chartFillRed, chartFillGreen, chartFillAmber, chartFillSky, chartRed, chartGreen, chartAmber, roleSupport, roleSentinel, roleFillSentinel, roleFillSupport } from "@/lib/chart-colors";
-import { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 
 interface MetricConfig {
@@ -415,8 +414,7 @@ function MetricsPageClient() {
       <div>
         <Link href="/stats/performance" className="text-pc-accent text-xs hover:underline mb-2 inline-block">
           {t("generated.stats.backToGlobalStats")}</Link>
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.stats.performanceMetrics")}</h1>
-        <p className="mt-1 max-w-3xl text-sm leading-6 text-pc-text-secondary">{t("seo.stats.metrics.description")}</p>
+        <h1 className="pc-heading pc-heading-lg">{t("generated.stats.performanceMetrics")}</h1>
       </div>
 
       <TabBar configs={METRIC_CONFIGS} activeKey={activeConfig.key} onChange={handleTabChange} />

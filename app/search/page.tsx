@@ -417,7 +417,7 @@ function SearchPageBody() {
   return (
     <div className="mx-auto w-full max-w-4xl space-y-8 py-2 sm:py-6">
       <section className="px-4 py-6 text-center sm:px-8 sm:py-8">
-        <h1 className="pc-heading pc-heading-lg text-pc-accent drop-shadow-[0_3px_10px_rgba(0,0,0,0.9)]">
+        <h1 className="pc-heading pc-heading-lg drop-shadow-[0_3px_10px_rgba(0,0,0,0.9)]">
           <ScrambleText text={t("generated.search.search")} speed={30} iterations={15} delayFromCenter={false} />
         </h1>
         <form onSubmit={submit} className="mx-auto mt-6 flex max-w-2xl gap-2">

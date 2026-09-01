@@ -22,7 +22,6 @@ import { getStatQuality } from "@/lib/stat-quality";
 import { ErrorState } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { useLocalization } from "@/lib/localization-context";
-import { SpotlightCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 function parseMaybeNumber(value: string | string[] | null | undefined): number | null {
   const raw = Array.isArray(value) ? value[0] : value;
@@ -169,19 +168,15 @@ export default function ChampionCardDetailPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center gap-3">
-        <ContextBackLink fallbackHref={`/champions/${name}`} />
-        <span className="text-pc-text-muted">/</span>
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">{detail.cardName}</h1>
-      </div>
+      <header><ContextBackLink fallbackHref={`/champions/${name}`} label={championDisplayName} /><h1 className="mt-2 pc-heading pc-heading-lg">{detail.cardName}</h1></header>
 
-      <div className="pc-card">
+      <section className="rounded-xl border border-pc-border bg-pc-bg-elevated/90 p-5">
         <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-5">
-          <div className="pc-surface-light rounded-lg border border-pc-border p-3">
+          <div className="overflow-hidden rounded-lg">
             {cardMeta?.iconUrl ? (
               <SmartImage src={cardMeta.iconUrl} alt={detail.cardName} className="w-full aspect-[4/3] rounded-md object-cover bg-pc-bg/50" />
             ) : (
-              <div className="w-full aspect-[4/3] rounded-md bg-pc-bg-elevated border border-pc-border flex items-center justify-center text-pc-text-muted">
+              <div className="flex aspect-[4/3] w-full items-center justify-center rounded-md bg-pc-bg text-pc-text-muted">
                 {t("generated.champions.noImage")}</div>
             )}
           </div>
@@ -207,9 +202,9 @@ export default function ChampionCardDetailPage() {
             )}
           </div>
         </div>
-      </div>
+      </section>
 
-      <section className="pc-card space-y-4">
+      <section className="space-y-4">
         <div className="flex items-center justify-between gap-3">
           <h2 className="pc-card-title">{t("generated.champions.talentPairings")}</h2>
           {selectedTalentId != null && (
@@ -236,7 +231,7 @@ export default function ChampionCardDetailPage() {
         </div>
       </section>
 
-      <section className="pc-card space-y-4">
+      <section className="space-y-4">
         <h2 className="pc-card-title">{t("generated.champions.levelBreakdown")}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
           {detail.levels.map((level) => (
@@ -250,7 +245,7 @@ export default function ChampionCardDetailPage() {
 
 function SummaryTile({ label, value, color }: { label: string; value: string; color?: string }) {
   return (
-    <div className="pc-surface-light rounded-lg p-4 border border-pc-border text-center">
+    <div className="p-2 text-center">
       <div className="text-xs text-pc-text-muted mb-1">{label}</div>
       <div className="text-lg font-mono text-pc-text" style={color ? { color } : undefined}>{value}</div>
     </div>
