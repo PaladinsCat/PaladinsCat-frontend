@@ -5,6 +5,7 @@
   "scripts": {
     "predev": "node scripts/check-localization-catalog.mjs && node scripts/copy-pinned-locales.mjs",
     "dev": "next dev",
+    "dev:proxy": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Start-PaladinsCatDevProxy.ps1",
     "prebuild": "npm run prepare-locales && npm run test:champion-icons && node scripts/audit-champion-data.mjs && node scripts/sync-champion-reference-data.mjs && node scripts/check-localization-catalog.mjs && node scripts/check-localization-keys.mjs && node scripts/audit-text-size.mjs && node scripts/audit-localization.mjs --strict",
     "build": "node scripts/audit-image-assets.mjs && next build",
     "start": "next start",

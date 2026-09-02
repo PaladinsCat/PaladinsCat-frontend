@@ -35,8 +35,8 @@ type DirectoryCard = {
   href: string;
   titleKey?: TranslationKey;
   title?: string;
-  descriptionKey: TranslationKey;
-  count: number;
+  descriptionKey?: TranslationKey;
+  count?: number;
   icon: ComponentType<{ className?: string; strokeWidth?: number; "aria-hidden"?: boolean }>;
   accent: "slate" | "cyan" | "red" | "orange" | "amber" | "violet" | "emerald" | "sky" | "rose" | "fuchsia";
 };
@@ -113,6 +113,35 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
     { href: "/players/alt-accounts", titleKey: "moderation.altAccountsTitle", descriptionKey: "moderation.accounts", count: communityCounts.altAccounts, icon: Copy, accent: "fuchsia" },
   ], [communityCounts, directoryCounts]);
 
+  const levelAbbreviation = t("common.playerChampions.level", { level: "" }).trim();
+  const accountLevelLabel = [t("generated.players.account"), levelAbbreviation].join(" ");
+  const championLevelLabel = [t("generated.players.champion"), levelAbbreviation].join(" ");
+  const leaderboardCards = useMemo<DirectoryCard[]>(() => [
+    { href: "/players/leaderboard", titleKey: "generated.players.ranked", icon: Trophy, accent: "amber" },
+    { href: "/players/elo/account", titleKey: "generated.players.accountElo", icon: Award, accent: "cyan" },
+    { href: "/players/elo/champion", titleKey: "generated.players.championElo", icon: Award, accent: "cyan" },
+    { href: "/players/performance/account", title: t("stats.scope.performance", { mode: t("generated.players.account") }), icon: Crosshair, accent: "rose" },
+    { href: "/players/performance/champion", title: t("stats.scope.performance", { mode: t("generated.players.champion") }), icon: Crosshair, accent: "rose" },
+    { href: "/players/levels/account", title: accountLevelLabel, icon: UsersRound, accent: "emerald" },
+    { href: "/players/levels/champion", title: championLevelLabel, icon: Swords, accent: "violet" },
+  ], [accountLevelLabel, championLevelLabel, t]);
+
+  const renderCard = (card: DirectoryCard) => {
+    const Icon = card.icon;
+    return (
+      <Link key={card.href} href={card.href} data-card-accent={card.accent} className="pc-home-feature-card group flex min-h-20 min-w-0 items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-4 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary">
+        <Icon aria-hidden={true} className="pc-card-icon h-9 w-9 shrink-0" strokeWidth={1.5} />
+        <div className="min-w-0 flex-1">
+          <h2 className={`${card.descriptionKey ? "truncate" : "whitespace-normal leading-5"} text-sm font-semibold text-pc-text group-hover:text-pc-accent`}>{card.title ?? t(card.titleKey!)}</h2>
+          {card.descriptionKey && <p className="mt-0.5 truncate text-xs text-pc-text-muted">
+            {overviewLoading && card.count != null ? t("moderation.loadingDirectory") : t(card.descriptionKey, card.count == null ? undefined : { value1: formatNumber(card.count) })}
+          </p>}
+        </div>
+        <span className="shrink-0 text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent">→</span>
+      </Link>
+    );
+  };
+
   return (
     <div className="space-y-8">
       <div>
@@ -125,22 +154,18 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
         className="mx-auto grid w-full max-w-7xl gap-3"
         style={{ gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 13.5rem), 1fr))" }}
       >
-        {cards.map((card) => {
-          const Icon = card.icon;
-          return (
-            <Link key={card.href} href={card.href} data-card-accent={card.accent} className="pc-home-feature-card group flex min-h-20 min-w-0 items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-4 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary">
-              <Icon aria-hidden={true} className="pc-card-icon h-9 w-9 shrink-0" strokeWidth={1.5} />
-              <div className="min-w-0 flex-1">
-                <h2 className="truncate text-sm font-semibold text-pc-text group-hover:text-pc-accent">{card.title ?? t(card.titleKey!)}</h2>
-                <p className="mt-0.5 truncate text-xs text-pc-text-muted">
-                  {overviewLoading ? t("moderation.loadingDirectory") : t(card.descriptionKey, { value1: formatNumber(card.count) })}
-                </p>
-              </div>
-              <span className="shrink-0 text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent">→</span>
-            </Link>
-          );
-        })}
+        {cards.map(renderCard)}
       </div>
+
+      <section aria-labelledby="leaderboards-heading" className="space-y-3">
+        <h2 id="leaderboards-heading" className="pc-heading text-xl">{t("menu.leaderboards")}</h2>
+        <div
+          className="mx-auto grid w-full max-w-7xl gap-3"
+          style={{ gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 13.5rem), 1fr))" }}
+        >
+          {leaderboardCards.map(renderCard)}
+        </div>
+      </section>
     </div>
   );
 }
