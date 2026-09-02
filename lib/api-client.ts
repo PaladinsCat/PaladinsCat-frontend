@@ -785,6 +785,9 @@ export async function fetchPerformanceLeaderboard(params: {
 
 export interface PlayerLevelLeaderboardEntry {
   rank: number;
+  classRank: number | null;
+  championRank: number | null;
+  className: string | null;
   playerId: number;
   playerName: string;
   championId: number | null;
@@ -795,17 +798,30 @@ export interface PlayerLevelLeaderboardEntry {
   platform: string | null;
 }
 
+export interface PlayerLevelLeaderboardFilters {
+  playerId?: number;
+  role?: 'Frontline' | 'Damage' | 'Flank' | 'Support';
+  championId?: number;
+}
+
 /** Fetch account-level or champion-mastery-level leaderboard rows. */
-export async function fetchPlayerLevelLeaderboard(mode: 'account' | 'champion', limit = 100): Promise<PlayerLevelLeaderboardEntry[]> {
+export async function fetchPlayerLevelLeaderboard(mode: 'account' | 'champion', limit = 100, filters: PlayerLevelLeaderboardFilters = {}): Promise<PlayerLevelLeaderboardEntry[]> {
   const query = new URLSearchParams({ mode, limit: String(limit) });
+  if (filters.playerId != null) query.set('playerId', String(filters.playerId));
+  if (filters.role != null) query.set('role', filters.role);
+  if (filters.championId != null) query.set('championId', String(filters.championId));
   try {
     const raw = await fetchJson<Array<{
-      rank: number; player_id: number; player_name: string;
+      rank: number; class_rank: number | null; champion_rank: number | null; class_name: string | null;
+      player_id: number; player_name: string;
       champion_id: number | null; champion_name: string | null;
       level: number | string; xp: number | string; region: string | null; platform: string | null;
     }>>(`/players/leaderboard/levels?${query.toString()}`);
     return raw.map((row) => ({
       rank: Number(row.rank),
+      classRank: row.class_rank == null ? null : Number(row.class_rank),
+      championRank: row.champion_rank == null ? null : Number(row.champion_rank),
+      className: row.class_name ?? null,
       playerId: Number(row.player_id),
       playerName: String(row.player_name),
       championId: row.champion_id == null ? null : Number(row.champion_id),
