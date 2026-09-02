@@ -794,6 +794,10 @@ export interface PlayerLevelLeaderboardEntry {
   championName: string | null;
   level: number;
   xp: number;
+  wins: number;
+  losses: number;
+  winRate: number | null;
+  kda: number | null;
   region: string | null;
   platform: string | null;
 }
@@ -815,7 +819,8 @@ export async function fetchPlayerLevelLeaderboard(mode: 'account' | 'champion', 
       rank: number; class_rank: number | null; champion_rank: number | null; class_name: string | null;
       player_id: number; player_name: string;
       champion_id: number | null; champion_name: string | null;
-      level: number | string; xp: number | string; region: string | null; platform: string | null;
+      level: number | string; xp: number | string; wins: number | string; losses: number | string;
+      win_rate: number | string | null; kda: number | string | null; region: string | null; platform: string | null;
     }>>(`/players/leaderboard/levels?${query.toString()}`);
     return raw.map((row) => ({
       rank: Number(row.rank),
@@ -828,6 +833,10 @@ export async function fetchPlayerLevelLeaderboard(mode: 'account' | 'champion', 
       championName: row.champion_name ?? null,
       level: Number(row.level),
       xp: Number(row.xp),
+      wins: Number(row.wins),
+      losses: Number(row.losses),
+      winRate: row.win_rate == null ? null : Number(row.win_rate),
+      kda: row.kda == null ? null : Number(row.kda),
       region: row.region ?? null,
       platform: row.platform ?? null,
     }));
