@@ -306,13 +306,6 @@ main > div {
   min-width: 0;
 }
 
-/* Reduce layout/render work for off-screen page content and reserve its space
-   so late-loading sections don't push the footer down (CLS). */
-main {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 60rem;
-}
-
 img,
 video,
 canvas {
