@@ -86,10 +86,16 @@ export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
   const visibleRows = sortedRows.slice((page - 1) * pageSize, page * pageSize);
   const positionRow = useMemo(() => {
     if (positionKey !== currentPositionKey) return null;
-    if (mode === "champion" && championId !== null) {
+    if (mode !== "champion") return positionRows[0] ?? null;
+    if (championId !== null) {
       return positionRows.find((row) => row.championId === championId) ?? null;
     }
-    return positionRows[0] ?? null;
+    return positionRows.reduce<PlayerLevelLeaderboardEntry | null>((highest, row) => {
+      if (highest === null) return row;
+      if (row.level !== highest.level) return row.level > highest.level ? row : highest;
+      if (row.xp !== highest.xp) return row.xp > highest.xp ? row : highest;
+      return row.rank < highest.rank ? row : highest;
+    }, null);
   }, [championId, currentPositionKey, mode, positionKey, positionRows]);
 
   useEffect(() => {
