@@ -9,6 +9,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { EmptyState, ErrorState, LoadingIndicator, LoadingPanel } from "@/components/async-state";
+import PlayersPageHeader from "@/components/ui/players-page-header";
 import { fetchPlayerChampionStats, refreshPlayerChampionStats, type PlayerChampionStat } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championMasteryLevelFromXp } from "@/lib/champion-mastery";
@@ -27,7 +28,7 @@ type SortKey = "level" | "kda" | "winRate" | "playTime" | "rating";
 
 /**
  * Render the PlayerChampionStatsPage view for the player id champions page route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `React.JSX.Element`
  */
 export default function PlayerChampionStatsPage() {
   const { formatDuration, formatNumber, t } = useLocalization();
@@ -125,14 +126,10 @@ export default function PlayerChampionStatsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <Link href={`/players/${playerId}`} className="mb-2 inline-block text-xs text-pc-accent hover:underline">{t("generated.players.playerProfile")}</Link>
-          <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("common.playerChampions.title")}</h1>
-          <p className="mt-1 text-sm text-pc-text-secondary">{t("common.playerChampions.allChampions", { count: stats?.length ?? 0 })}</p>
-        </div>
-        <button type="button" onClick={refresh} disabled={refreshing || refreshRemainingSeconds > 0} className="rounded-lg border border-pc-border bg-pc-bg-elevated px-3 py-2 text-xs font-semibold text-pc-text hover:border-pc-accent-mid hover:text-pc-accent disabled:cursor-not-allowed disabled:opacity-50">{refreshing ? <LoadingIndicator className="gap-2" /> : refreshRemainingSeconds > 0 ? t("generated.players.refreshInValue1", { value1: formatDuration(refreshRemainingSeconds) }) : t("common.playerChampions.refresh")}</button>
-      </div>
+      <PlayersPageHeader
+        title={t("common.playerChampions.title")}
+        actions={<button type="button" onClick={refresh} disabled={refreshing || refreshRemainingSeconds > 0} className="rounded-lg border border-pc-border bg-pc-bg-elevated px-3 py-2 text-xs font-semibold text-pc-text hover:border-pc-accent-mid hover:text-pc-accent disabled:cursor-not-allowed disabled:opacity-50">{refreshing ? <LoadingIndicator className="gap-2" /> : refreshRemainingSeconds > 0 ? t("generated.players.refreshInValue1", { value1: formatDuration(refreshRemainingSeconds) }) : t("common.playerChampions.refresh")}</button>}
+      />
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {([
@@ -150,7 +147,7 @@ export default function PlayerChampionStatsPage() {
 
       <div className="grid gap-4 xl:grid-cols-2">
         <section className="pc-glass rounded-xl p-4">
-          <h2 className="pc-heading text-lg text-pc-accent">{t("generated.players.rankedPerformance")}</h2>
+          <h2 className="pc-card-title">{t("generated.players.rankedPerformance")}</h2>
           <p className="mt-1 text-xs text-pc-text-muted">{t("common.metrics.winRate")} · {t("generated.players.matches")}</p>
           <div className="mt-4 space-y-3">
             {performanceChart.map((champion) => (
@@ -169,7 +166,7 @@ export default function PlayerChampionStatsPage() {
         </section>
 
         <section className="pc-glass rounded-xl p-4">
-          <h2 className="pc-heading text-lg text-pc-accent">{t("generated.players.championRatings")}</h2>
+          <h2 className="pc-card-title">{t("generated.players.championRatings")}</h2>
           <p className="mt-1 text-xs text-pc-text-muted">{t("generated.players.rating")} · {t("generated.players.deviation")} · {t("generated.players.volatility")}</p>
           {ratingChart.length === 0 ? <EmptyState title={t("generated.stats.noRatingDataAvailable")} /> : (
             <div className="mt-4 space-y-3">
@@ -213,8 +210,8 @@ export default function PlayerChampionStatsPage() {
       </div>
 
       {champions.length === 0 ? <EmptyState title={t("common.playerChampions.empty")} /> : (
-        <div className="mx-auto w-fit overflow-x-auto rounded-xl border border-pc-border bg-pc-bg-elevated">
-          <table className="w-fit min-w-[480px] text-sm">
+        <div className="pc-card-flush overflow-x-auto">
+          <table className="w-full min-w-[720px] text-sm">
             <thead>
               <tr className="border-b border-pc-border bg-pc-bg-secondary text-left text-xs uppercase tracking-wide text-pc-text-muted">
                 <th className="px-1.5 py-2">{t("common.playerChampions.champion")}</th>

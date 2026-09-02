@@ -37,6 +37,7 @@ const COLOR_ATTRIBUTE_PATTERN = /color\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i
 // preserving ordinary angle brackets such as "2 < 3".
 /** Apply stripPlayerTitleMarkup to the declared player or request input.
  * Contract: enforces title sanitation and returns plain text without markup.
+ * Returns: `string`
  */
 export function stripPlayerTitleMarkup(raw: string): string {
   let text = "";
@@ -119,6 +120,7 @@ export function parsePlayerTitleSegments(raw: string): PlayerTitleSegment[] | nu
  * - Plain text titles pass through unchanged with `color: null`.
  * - Anything that is not a well-formed font-tag concatenation is returned as
  *   plain text (markup stripped) so no raw HTML can ever reach the page.
+ * Returns: `object`
  */
 export function parsePlayerTitle(raw: string): ParsedPlayerTitle {
   const segments = parsePlayerTitleSegments(raw);

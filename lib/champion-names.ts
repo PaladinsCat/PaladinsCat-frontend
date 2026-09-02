@@ -62,6 +62,7 @@ export async function getChampionName(id: number): Promise<string> {
 
 /**
  * Force-refresh the map (useful for after backend reseed).
+ * Returns: `Promise<void>`
  */
 export function refreshChampionMap(): Promise<void> {
   championMap = null;
@@ -70,6 +71,7 @@ export function refreshChampionMap(): Promise<void> {
 
 /**
  * Get all available champions as { id, name } pairs.
+ * Returns: `Array<{ id: number; name: string }> | null`
  */
 export function getChampions(): Array<{ id: number; name: string }> | null {
   if (!championMap) return null;
@@ -121,6 +123,7 @@ export function useChampionName(id: number): { name: string | null; loading: boo
 
 /**
  * React hook that loads the full champion list (for dropdowns / select inputs).
+ * Returns: `object`
  */
 export function useChampions(): { champions: Array<{ id: number; name: string }> | null; loading: boolean } {
   const [champions, setChampions] = useState<Array<{ id: number; name: string }> | null>(null);

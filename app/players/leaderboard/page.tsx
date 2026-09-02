@@ -13,6 +13,7 @@ import { LoadingPanel } from "@/components/async-state";
 import PlayerName from "@/components/player-name";
 import { useLocalization } from "@/lib/localization-context";
 import type { TranslationKey } from "@/lib/localization/messages";
+import PlayersPageHeader from "@/components/ui/players-page-header";
 
 const TIER_GROUPS: ReadonlyArray<{
   group: string;
@@ -59,7 +60,7 @@ function RankBadge({ rank }: { rank: number }) {
 
 /**
  * Render the LeaderboardPage view for the player leaderboard page route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `React.JSX.Element`
  */
 export default function LeaderboardPage() {
   const { t , formatNumber, formatPercent} = useLocalization();
@@ -142,11 +143,7 @@ export default function LeaderboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="min-w-0">
-        <Link href="/players" className="text-pc-accent text-xs hover:underline mb-2 inline-block">{t("generated.players.players")}</Link>
-        <h1 className="pc-heading pc-heading-lg break-words text-pc-accent">{t("generated.players.rankedLeaderboard")}</h1>
-        <p className="mt-2 max-w-3xl text-sm leading-6 text-pc-text-secondary">{t("seo.players.leaderboard.description")}</p>
-      </div>
+      <PlayersPageHeader title={t("generated.players.rankedLeaderboard")} />
 
       {/* Main layout: sidebar + content */}
       <div className="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-[14rem_minmax(0,1fr)] lg:gap-6">
@@ -367,7 +364,7 @@ export default function LeaderboardPage() {
           )}
 
           {!loading && !error && sorted.length > 0 && (
-            <div className="hidden overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated md:block">
+            <div className="pc-card-flush hidden overflow-hidden md:block">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>

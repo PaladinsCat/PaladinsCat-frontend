@@ -12,6 +12,7 @@ export const HOME_ALERTS_CHANGE_EVENT = "paladinscat:home-alerts-change";
 
 /** Apply getHomeAlertsEnabled to the declared input values.
  * Contract: returns the module-specific validated, stored, formatted, or resolved value without external side effects.
+ * Returns: `boolean`
  */
 export function getHomeAlertsEnabled(): boolean {
   if (typeof window === "undefined") return true;
@@ -25,6 +26,7 @@ export function getHomeAlertsEnabled(): boolean {
 
 /** Apply setHomeAlertsEnabled to the declared input values.
  * Contract: returns the module-specific validated, stored, formatted, or resolved value without external side effects.
+ * Returns: `void`
  */
 export function setHomeAlertsEnabled(enabled: boolean): void {
   try {

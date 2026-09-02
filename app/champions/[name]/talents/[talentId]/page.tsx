@@ -25,7 +25,6 @@ import { getStatQuality } from "@/lib/stat-quality";
 import { withStoredLobbyTier } from "@/lib/lobby-tier";
 import { championSlug } from "@/lib/utils";
 import { useLocalization } from "@/lib/localization-context";
-import { SpotlightCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 const CHAMPION_DATA_BASE = "/_pc";
 
@@ -46,6 +45,7 @@ function parsePositiveInteger(value: string | string[] | null | undefined): numb
 /**
  * Render the ChampionTalentDetailPage view for champions name talents talentId page.
  * Return the React tree for the declared inputs and page data.
+ * Returns: `React.JSX.Element`
  */
 export default function ChampionTalentDetailPage() {
   const { t, formatNumber, formatPercent, formatRecord } = useLocalization();
@@ -175,15 +175,11 @@ export default function ChampionTalentDetailPage() {
   const quality = getStatQuality(talentStat.winRate, pickRate, 100);
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center gap-3">
-        <ContextBackLink fallbackHref={`/champions/${name}`} />
-        <span className="text-pc-text-muted" aria-hidden="true">/</span>
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">{talentStat.talentName}</h1>
-      </div>
+      <header><ContextBackLink fallbackHref={`/champions/${name}`} label={championData.name} /><h1 className="mt-2 pc-heading pc-heading-lg">{talentStat.talentName}</h1></header>
 
-      <section className="pc-card">
+      <section className="rounded-xl border border-pc-border bg-pc-bg-elevated/90 p-5">
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-[180px_1fr]">
-          <div className="pc-surface-light flex aspect-square items-center justify-center overflow-hidden rounded-lg border border-pc-border p-4 sm:max-w-[220px] lg:max-w-none">
+          <div className="flex aspect-square items-center justify-center overflow-hidden rounded-lg p-2 sm:max-w-[220px] lg:max-w-none">
             <CanonicalTalentImage talentId={talentId} talentName={talentStat.talentName} alt={talentStat.talentName} className="h-full w-full object-contain" fallbackClassName="h-full w-full" />
           </div>
           <div className="min-w-0 space-y-4">
@@ -228,7 +224,7 @@ export default function ChampionTalentDetailPage() {
 
 function SummaryTile({ label, value, color }: { label: string; value: string; color?: string }) {
   return (
-    <div className="pc-surface-light rounded-lg border border-pc-border p-4 text-center">
+    <div className="p-2 text-center">
       <div className="mb-1 text-xs text-pc-text-muted">{label}</div>
       <div className="break-words font-mono text-lg text-pc-text" style={color ? { color } : undefined}>{value}</div>
     </div>

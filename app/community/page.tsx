@@ -17,7 +17,7 @@ const HIDDEN_TWITCH_CHANNEL_LOGINS = new Set(["paladins2ttv"]);
 
 /**
  * Handles the exported route operation using its declared request and response contract.
- * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ * Returns: `React.JSX.Element`
  */
 export default function CommunityPage() {
   const { t , formatNumber, formatDateTime} = useLocalization();
@@ -53,7 +53,7 @@ export default function CommunityPage() {
   return (
     <div className="space-y-6">
       <div className="pc-section-heading">
-        <h1 className="text-2xl font-bold text-pc-accent sm:text-3xl">
+        <h1 className="pc-heading pc-heading-lg">
           <ScrambleText text={t("generated.community.community")} speed={30} iterations={15} delayFromCenter={false} />
         </h1>
         <div className="flex flex-wrap gap-2">

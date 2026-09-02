@@ -12,6 +12,8 @@ import { fetchClassLeaderboard } from "@/lib/api-client";
 import { LoadingPanel } from "@/components/async-state";
 import PlayerName from "@/components/player-name";
 import { useLocalization } from "@/lib/localization-context";
+import PlayersPageHeader from "@/components/ui/players-page-header";
+import { SegmentedRouteLinks } from "@/components/ui/segmented-control";
 
 
 const VALID_ROLES = ["Frontline", "Damage", "Flank", "Support"] as const;
@@ -22,13 +24,6 @@ const CLASS_ICONS: Record<Role, string> = {
   Damage: "/images/icons/Class_Damage_Icon.avif",
   Flank: "/images/icons/Class_Flank_Icon.avif",
   Support: "/images/icons/Class_Support_Icon.avif",
-};
-
-const ROLE_COLORS: Record<Role, string> = {
-  Frontline: "text-amber-400",
-  Damage: "text-red-400",
-  Flank: "text-purple-400",
-  Support: "text-emerald-400",
 };
 
 interface ClassEloEntry {
@@ -71,7 +66,7 @@ function RankBadge({ rank }: { rank: number }) {
 
 /**
  * Render the ClassEloPage view for the player class role page route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `React.JSX.Element`
  */
 export default function ClassEloPage() {
   const { t , formatNumber, formatPercent} = useLocalization();
@@ -152,40 +147,9 @@ export default function ClassEloPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-        <Link
-          href="/players"
-          className="text-pc-text-muted hover:text-pc-accent transition-colors text-sm flex items-center gap-1"
-        >
-          {t("generated.players.players")}</Link>
-      </div>
+      <PlayersPageHeader title={<>{role} {t("generated.players.championElo")}</>} />
 
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <img src={CLASS_ICONS[role]} alt={role} className="w-8 h-8" />
-          <h1 className="pc-heading pc-heading-lg">
-            <span className={ROLE_COLORS[role]}>{role}</span>{" "}
-            <span className="text-pc-text">{t("generated.players.championElo")}</span>
-          </h1>
-        </div>
-      </div>
-
-      <div className="flex gap-2 flex-wrap">
-        {VALID_ROLES.map((r) => (
-          <Link
-            key={r}
-            href={`/players/class/${r}`}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-              r === role
-                ? "bg-pc-accent/20 text-pc-accent border border-pc-accent/40"
-                : "bg-pc-bg-elevated text-pc-text-muted border border-pc-border hover:border-pc-accent-mid hover:text-pc-text"
-            }`}
-          >
-            <img src={CLASS_ICONS[r]} alt={r} className="w-4 h-4" />
-            {r}
-          </Link>
-        ))}
-      </div>
+      <SegmentedRouteLinks label={t("generated.players.class")} value={role} items={VALID_ROLES.map((value) => ({ value, href: `/players/class/${value}`, label: value, icon: <img src={CLASS_ICONS[value]} alt="" className="h-4 w-4" /> }))} />
 
       {loading ? (
         <LoadingPanel compact />
@@ -240,7 +204,7 @@ export default function ClassEloPage() {
                         {p.champion}
                       </td>
                       <td className="py-2.5 px-4 text-right">
-                        <span className={`font-bold ${ROLE_COLORS[role]}`}>
+                        <span className="font-bold text-pc-accent">
                           {formatNumber(p.elo)}
                         </span>
                       </td>

@@ -10,7 +10,6 @@ import { ContentFade, ErrorState, StableMetricValue } from "@/components/async-s
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { useLocalization } from "@/lib/localization-context";
 import { useRouteSettled } from "@/lib/route-transition-context";
-import { SpotlightCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 function MetricCard({ label, value, companionValue, detail }: { label: string; value: number | string; companionValue?: number; detail?: string }) {
   const { formatNumber } = useLocalization();
@@ -20,7 +19,7 @@ function MetricCard({ label, value, companionValue, detail }: { label: string; v
 
 /**
  * Handles the exported route operation using its declared request and response contract.
- * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ * Returns: `React.JSX.Element`
  */
 export default function OperationsStatsPage() {
   const { t, formatDateTime, formatPercent } = useLocalization();
@@ -43,7 +42,7 @@ export default function OperationsStatsPage() {
   const shareOfTotal = (value: number) => totalMatches > 0 ? (value / totalMatches) * 100 : 0;
 
   return <ContentFade className="mx-auto w-full max-w-5xl space-y-7 px-4 py-8">
-    <div className="flex flex-wrap items-end justify-between gap-4"><div><h1 className="pc-heading pc-heading-lg text-pc-accent">{t("operations.title")}</h1><p className="mt-1 text-sm text-pc-text-secondary">{t("operations.description")}</p></div><div className="rounded-xl border border-pc-border bg-pc-bg-elevated px-4 py-3 text-right"><div className="text-xs text-pc-text-muted">{t("operations.release")}</div><div className="font-mono text-lg font-bold text-pc-text">{data.release.version || "—"}{data.release.gitCommitShort && <span className="ml-2 text-xs font-normal text-pc-text-muted">{data.release.gitCommitShort}</span>}</div>{data.release.deployedAt && <div className="text-xs text-pc-text-muted">{t("operations.deployed", { date: formatDateTime(data.release.deployedAt) })}</div>}</div></div>
+    <div className="flex flex-wrap items-end justify-between gap-4"><div><h1 className="pc-heading pc-heading-lg">{t("operations.title")}</h1><p className="mt-1 text-sm text-pc-text-secondary">{t("operations.description")}</p></div><div className="rounded-xl border border-pc-border bg-pc-bg-elevated px-4 py-3 text-right"><div className="text-xs text-pc-text-muted">{t("operations.release")}</div><div className="font-mono text-lg font-bold text-pc-text">{data.release.version || "—"}{data.release.gitCommitShort && <span className="ml-2 text-xs font-normal text-pc-text-muted">{data.release.gitCommitShort}</span>}</div>{data.release.deployedAt && <div className="text-xs text-pc-text-muted">{t("operations.deployed", { date: formatDateTime(data.release.deployedAt) })}</div>}</div></div>
 
     <section><div className="mb-3 flex items-center gap-2"><Users className="h-4 w-4 text-pc-accent" /><h2 className="text-sm font-bold text-pc-text">{t("operations.traffic")}</h2></div><div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5"><MetricCard label={t("operations.activeUsers")} value={data.traffic.activeUsers} detail={t("operations.activeWindow", { minutes: Math.ceil(data.traffic.activeWindowSeconds / 60) })} /><MetricCard label={t("operations.visitorsToday")} value={data.traffic.visitorsToday} /><MetricCard label={t("operations.viewsToday")} value={data.traffic.viewsToday} /><MetricCard label={t("operations.visitorDays7d")} value={data.traffic.visitorDays7d} /><MetricCard label={t("operations.views7d")} value={data.traffic.views7d} /></div></section>
 

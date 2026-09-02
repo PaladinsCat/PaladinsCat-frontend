@@ -196,6 +196,7 @@ function MobilePlayerCard({ player, wins }: { player: MatchPlayerDetail; wins: b
 
 /** Render MatchStatsSection from its declared props and match data.
  * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
+ * Returns: `React.JSX.Element`
  */
 export default function MatchStatsSection({
   team1Players,

@@ -7,7 +7,7 @@ import { RouteSkeleton } from "@/components/route-skeleton";
 
 /**
  * Render the loading state for the player id loading view.
- * Returns the fallback React tree while route content is unavailable.
+ * Returns: `React.JSX.Element`
  */
 export default function Loading() {
   return <RouteSkeleton variant="profile" />;

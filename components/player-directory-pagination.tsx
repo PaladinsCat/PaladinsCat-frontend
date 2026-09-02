@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useState, type SetStateAction } from "react";
 import { usePathname } from "next/navigation";
 import { useLocalization } from "@/lib/localization-context";
+import { cn } from "@/lib/utils";
 
 function readPage(param: string, storageKey: string) {
   if (typeof window === "undefined") return 1;
@@ -22,6 +23,7 @@ function readPage(param: string, storageKey: string) {
 
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ * Returns: `Array`
  */
 export function usePersistentDirectoryPage(param = "page") {
   const pathname = usePathname();
@@ -61,17 +63,27 @@ interface Props {
   page: number;
   totalPages: number;
   onPageChange: (page: number) => void;
+  embedded?: boolean;
+  className?: string;
 }
 
 /** Provide this exported item.
+ * Returns: `React.JSX.Element`
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
  */
-export default function PlayerDirectoryPagination({ page, totalPages, onPageChange }: Props) {
+export default function PlayerDirectoryPagination({ page, totalPages, onPageChange, embedded = false, className }: Props) {
   const { t , formatNumber} = useLocalization();
   if (totalPages <= 1) return null;
 
   return (
-    <nav aria-label={t("generated.players.directoryPages")} className="flex items-center justify-between gap-4 rounded-xl border border-pc-border bg-pc-bg-elevated px-3 py-2">
+    <nav
+      aria-label={t("generated.players.directoryPages")}
+      className={cn(
+        "items-center justify-between gap-4 px-3 py-2",
+        embedded ? "border-t border-pc-border" : "rounded-xl border border-pc-border bg-pc-bg-elevated",
+        className ?? "flex",
+      )}
+    >
       <button
         type="button"
         onClick={() => onPageChange(page - 1)}

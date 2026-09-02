@@ -13,6 +13,7 @@ export const TIER_NAMES: Record<number, string> = {
  * Map tier thresholds to the Tailwind classes used for rank colors.
  *
  * Exposes display constants only; reading it has no network, authentication, cache, or persistence effects.
+ * Returns: `Record<number, string>`
  */
 export const TIER_COLORS: Record<number, string> = {
   0: "text-pc-text-muted", 1: "text-amber-700", 6: "text-gray-300", 11: "text-yellow-400",
@@ -83,6 +84,7 @@ export function resolveEffectiveTier(kbmTier: number, kbmRank: number): {
  *   rank-tiers/diamond/RankIcon_Diamond_1.avif        — tiers 21-25
  *   rank-tiers/master/RankIcon_Master.avif            — tier 26
  *   rank-tiers/grandmaster/RankIcon_Grandmaster.avif  — tier 27
+ * Returns: `string`
  */
 export function getRankIconPath(kbmTier: number, kbmRank: number): string {
   const { displayTier } = resolveEffectiveTier(kbmTier, kbmRank);

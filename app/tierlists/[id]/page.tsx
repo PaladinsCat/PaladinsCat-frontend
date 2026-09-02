@@ -29,7 +29,7 @@ import { useLocalization } from "@/lib/localization-context";
 
 /**
  * Handles the exported route operation using its declared request and response contract.
- * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ * Returns: `React.JSX.Element`
  */
 export default function TierListDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { t , formatDateTime} = useLocalization();
@@ -155,7 +155,7 @@ export default function TierListDetailPage({ params }: { params: Promise<{ id: s
       <div className="border-t border-pc-border pt-4"><button type="button" onClick={like} className="text-pc-text-secondary transition-colors hover:text-pc-accent">❤ {discussion.post.likes}</button></div>
     </article>
     <section className="rounded-xl border border-pc-border bg-pc-bg-elevated p-4 sm:p-6">
-      <h2 className="mb-4 text-lg font-semibold text-pc-accent">{t("tierLists.comments", { count: discussion.comments.length })}</h2>
+      <h2 className="pc-card-title mb-4">{t("tierLists.comments", { count: discussion.comments.length })}</h2>
       <form onSubmit={submitComment} className="mb-5 flex gap-3"><input value={comment} onChange={(event) => setComment(event.target.value)} placeholder={t("tierLists.addComment")} className="min-w-0 flex-1 rounded-lg border border-pc-border bg-pc-bg-secondary px-3 py-2 text-sm text-pc-text" /><button disabled={commenting || !comment.trim()} className="rounded-lg bg-pc-accent px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">{commenting ? <LoadingIndicator className="gap-2" /> : t("tierLists.postComment")}</button></form>
       {discussion.comments.length === 0 ? <p className="py-4 text-center text-sm text-pc-text-muted">{t("tierLists.noComments")}</p> : <div className="space-y-3">{discussion.comments.map((item) => {
         const canManageComment = currentUser ? currentUser.id === item.userId || currentUser.isAdmin : false;

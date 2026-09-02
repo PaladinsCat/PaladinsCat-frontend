@@ -7,12 +7,13 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Search } from "lucide-react";
 import { fetchBoostedPlayerDetail, fetchBoostedPlayers, fetchCheaterPlayers, type BoostedPlayer } from "@/lib/api-client";
 import { LoadingPanel } from "@/components/async-state";
 import PlayerName from "@/components/player-name";
 import PlayerDirectoryGrid, { PLAYER_DIRECTORY_CARD_CLASS } from "@/components/player-directory-grid";
 import { useLocalization } from "@/lib/localization-context";
+import PlayersPageHeader from "@/components/ui/players-page-header";
+import PlayerDirectorySearch from "@/components/player-directory-search";
 
 const FETCH_PAGE_SIZE = 100;
 
@@ -63,7 +64,7 @@ async function fetchAllBoostedPlayers(name: string): Promise<BoostedPlayer[]> {
 
 /**
  * Render the BoostedPlayersPage view for the player boosted page route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `React.JSX.Element`
  */
 export default function BoostedPlayersPage() {
   const { t , formatNumber} = useLocalization();
@@ -93,24 +94,14 @@ export default function BoostedPlayersPage() {
   }, [query]);
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-6">
-        <Link href="/players" className="mb-2 inline-block text-xs text-pc-accent hover:underline">{t("generated.players.players")}</Link>
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("moderation.boostedPlayers")}</h1>
-        <div className="rounded-xl border border-orange-400/30 bg-orange-400/10 px-4 py-3 text-sm font-medium text-orange-50 backdrop-blur-md" role="note">
-          {t("moderation.boostedThresholdNotice")}
-        </div>
+    <div className="space-y-6">
+      <PlayersPageHeader title={t("moderation.boostedPlayers")} />
+      <div className="rounded-xl border border-orange-400/30 bg-orange-400/10 px-4 py-3 text-sm font-medium text-orange-50" role="note">
+        {t("moderation.boostedThresholdNotice")}
+      </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <label className="relative block w-full sm:max-w-sm">
-          <span className="sr-only">{t("generated.players.searchByInGameNameOrPlayerId")}</span>
-          <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-pc-text-muted" />
-          <input
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder={t("generated.players.searchByInGameNameOrPlayerId")}
-            className="w-full rounded-xl border border-pc-border bg-pc-bg-elevated py-2.5 pl-9 pr-3 text-sm text-pc-text outline-none transition-colors placeholder:text-pc-text-muted focus:border-pc-accent-mid"
-          />
-        </label>
+        <PlayerDirectorySearch label={t("generated.players.searchByInGameNameOrPlayerId")} value={query} onChange={setQuery} />
         <span className="flex items-center gap-2 text-xs text-pc-text-muted">
           <span className="h-2 w-2 rounded-full bg-orange-400" />
           {formatNumber(players.length)} {t("moderation.boosted")}
@@ -137,7 +128,7 @@ export default function BoostedPlayersPage() {
               <div className="min-w-0">
                 <ul className="flex min-w-0 items-center gap-1.5 overflow-hidden" title={player.cheaters.map((cheater) => `${cheater.name} · ${formatNumber(cheater.matchCount)}`).join(", ")}>
                   {player.cheaters.slice(0, 1).map((cheater) => (
-                    <li key={cheater.id} className="min-w-0 flex-1 truncate rounded-md border border-red-500/20 bg-[var(--pc-bg-secondary)] px-2 py-0.5 text-xs leading-tight text-red-200">
+                    <li key={cheater.id} className="min-w-0 flex-1 truncate text-xs leading-tight text-red-200">
                       <span className="font-semibold">{cheater.name}</span>
                       <span className="ml-1 text-red-200/70">· {formatNumber(cheater.matchCount)}</span>
                     </li>

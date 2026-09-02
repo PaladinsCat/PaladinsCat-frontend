@@ -8,6 +8,7 @@ const XP_PER_LEVEL_AFTER_50 = 1_000_000;
  * Converts total Champion XP into the in-game Champion Mastery level.
  * The curve is L × (L + 1) × 10,000 through level 49, then 1,000,000 XP
  * for each level beginning at level 50.
+ * Returns: `number`
  */
 export function championMasteryLevelFromXp(xp: number): number {
   const totalXp = Math.max(0, Number.isFinite(xp) ? xp : 0);

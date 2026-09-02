@@ -22,6 +22,8 @@ import { usePersistentDirectoryPage } from "@/components/player-directory-pagina
 
 import { useSearchParams } from "next/navigation";
 import { useLocalization } from "@/lib/localization-context";
+import PlayersPageHeader from "@/components/ui/players-page-header";
+import { SegmentedControl } from "@/components/ui/segmented-control";
 
 type ELOMode = "champion" | "account";
 
@@ -54,22 +56,22 @@ function RankBadge({ rank }: { rank: number }) {
 
 /**
  * Render the ChampionEloPage view for the player elo page route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `React.JSX.Element`
  */
-export default function ChampionEloPage() {
+export default function ChampionEloPage({ mode }: { mode?: ELOMode }) {
   return (
     <Suspense fallback={<LoadingPanel />}>
-      <ChampionEloContent />
+      <ChampionEloContent fixedMode={mode} />
     </Suspense>
   );
 }
 
-function ChampionEloContent() {
+function ChampionEloContent({ fixedMode }: { fixedMode?: ELOMode }) {
   const { t , formatNumber, formatPercent} = useLocalization();
   const searchParams = useSearchParams();
-  const initialMode = (searchParams.get("mode") === "account" || searchParams.get("mode") === "champion") 
-    ? searchParams.get("mode") as ELOMode 
-    : "champion";
+  const initialMode = fixedMode ?? ((searchParams.get("mode") === "account" || searchParams.get("mode") === "champion")
+    ? searchParams.get("mode") as ELOMode
+    : "champion");
   const [eloMode, setEloMode] = useState<ELOMode>(initialMode);
   const [activeTab, setActiveTab] = useState<TabKey>("global");
   const [players, setPlayers] = useState<ChampionEloEntry[]>([]);
@@ -141,6 +143,7 @@ function ChampionEloContent() {
 
   // Fetch data when tab or champion changes
   useEffect(() => {
+    if (eloMode !== "champion") return;
     let cancelled = false;
     setLoading(true);
 
@@ -173,7 +176,7 @@ function ChampionEloContent() {
     return () => {
       cancelled = true;
     };
-  }, [activeTab, selectedChampionId, activeRole]);
+  }, [activeTab, eloMode, selectedChampionId, activeRole]);
 
   // Fetch account-level ELO when in account mode
   useEffect(() => {
@@ -225,74 +228,24 @@ function ChampionEloContent() {
     : null;
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-5">
-      {/* Header */}
-      <div>
-        <Link href="/players" className="text-pc-accent text-xs hover:underline mb-2 inline-block">{t("generated.players.players")}</Link>
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">
-          {eloMode === "champion" ? t("generated.players.championElo") : t("generated.players.accountElo")}
-        </h1>
-        <p className="text-pc-text-muted text-sm mt-2">
-          {eloMode === "account"
-            ? t("generated.players.topPlayersByTheirOverallAccountGlicko2RatingAll")
-            : selectedChampion
-              ? t("generated.players.topPlayersForValue1", { value1: selectedChampion.name })
-              : activeTab === "global"
-                ? t("generated.players.top100PlayersByTheirBestChampionSGlicko2")
-                : t("generated.players.topValue1PlayersByTheirBestChampionSGlicko2", { value1: activeTab })}
-          {total > 0 && <span className="text-pc-text-secondary ml-1">({formatNumber(total)} {t("generated.players.rated")}</span>}
-        </p>
-      </div>
+    <div className="space-y-6">
+      <PlayersPageHeader title={eloMode === "champion" ? t("generated.players.championElo") : t("generated.players.accountElo")} />
 
-      {/* Mode toggle: Champion vs Account */}
-      <div className="flex gap-2">
-        <button
-          onClick={() => setEloMode("champion")}
-          className={`text-xs px-4 py-2 rounded-lg font-medium transition-colors ${
-            eloMode === "champion"
-              ? "bg-pc-accent/20 text-pc-accent border border-pc-accent/40"
-              : "bg-pc-bg-elevated text-pc-text-muted border border-pc-border hover:text-pc-text"
-          }`}
-        >
-          {t("generated.players.championElo")}</button>
-        <button
-          onClick={() => setEloMode("account")}
-          className={`text-xs px-4 py-2 rounded-lg font-medium transition-colors ${
-            eloMode === "account"
-              ? "bg-pc-accent/20 text-pc-accent border border-pc-accent/40"
-              : "bg-pc-bg-elevated text-pc-text-muted border border-pc-border hover:text-pc-text"
-          }`}
-        >
-          {t("generated.players.accountElo")}</button>
-      </div>
+      {!fixedMode && <SegmentedControl label={t("generated.players.elo")} items={[
+        { value: "champion" as const, label: t("generated.players.championElo") },
+        { value: "account" as const, label: t("generated.players.accountElo") },
+      ]} value={eloMode} onChange={setEloMode} />}
 
       {/* Tabs + Champion Dropdown + Search */}
       {eloMode === "champion" && (
-      <div className="relative z-20 bg-pc-bg-elevated border border-pc-border rounded-xl p-4">
+      <div className="relative z-20">
         <div className="flex flex-col sm:flex-row sm:items-center gap-3">
           {/* Class tabs */}
-          <div className="flex flex-wrap gap-2">
-            {TABS.map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => handleTabChange(tab.key)}
-                className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-colors ${
-                  activeTab === tab.key
-                    ? "bg-pc-accent text-pc-bg font-medium"
-                    : "bg-pc-card text-pc-text-muted hover:text-pc-text"
-                }`}
-              >
-                {tab.role && (
-                  <img src={CLASS_ICONS[tab.role]} alt={tab.role} className="w-4 h-4" />
-                )}
-                {t(tab.labelKey)}
-              </button>
-            ))}
-          </div>
+          <SegmentedControl label={t("generated.players.class")} items={TABS.map((tab) => ({ value: tab.key, label: t(tab.labelKey), icon: tab.role ? <img src={CLASS_ICONS[tab.role]} alt="" className="h-4 w-4" /> : undefined }))} value={activeTab} onChange={handleTabChange} />
 
           {/* Champion dropdown (only in class tabs) */}
           {activeRole && (
-            <div className="flex items-center gap-2 ml-auto" ref={dropdownRef}>
+            <div className="ml-auto flex items-end gap-2" ref={dropdownRef}>
               <div className="relative">
                 <button
                   onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -341,7 +294,9 @@ function ChampionEloContent() {
               </div>
 
               {/* Champion search bar */}
-              <div className="relative w-48">
+              <label className="block w-48 space-y-1.5">
+                <span className="block text-xs font-semibold text-pc-text-secondary">{t("generated.players.searchChampion")}</span>
+                <span className="relative block">
                 <input
                   type="text"
                   value={championSearch}
@@ -377,7 +332,8 @@ function ChampionEloContent() {
                     ✕
                   </button>
                 )}
-              </div>
+                </span>
+              </label>
             </div>
           )}
         </div>

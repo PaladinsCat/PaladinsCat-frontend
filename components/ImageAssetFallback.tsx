@@ -13,6 +13,7 @@ const FALLBACK_MARKER = "pcPngFallback";
  * where an extra wrapper would alter layout. Catch failed local AVIF requests
  * once at the document boundary and retry the matching PNG without changing
  * those elements' geometry.
+ * Returns: `React.JSX.Element`
  */
 export default function ImageAssetFallback() {
   useEffect(() => {

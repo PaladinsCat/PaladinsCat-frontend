@@ -5,13 +5,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { fetchChampions, type Champion } from "@/lib/api-client";
+import { fetchChampions, type Champion, type PublicStatsScope } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
 import { useLocalization } from "@/lib/localization-context";
 import { getStoredLobbyTierFilter } from "@/lib/lobby-tier";
 import type { TranslationKey } from "@/lib/localization/messages";
-import { ContentFade } from "@/components/async-state";
+import { ContentFade, LoadingIndicator } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
 
@@ -25,6 +25,17 @@ interface RateMetricConfig {
 }
 
 const CLASS_ORDER = ["Frontline", "Damage", "Flank", "Support"] as const;
+
+const STAT_SCOPES = [
+  { value: "ranked", labelKey: "stats.scope.ranked" },
+  { value: "casual", labelKey: "stats.scope.casual" },
+  { value: "team_deathmatch", labelKey: "stats.scope.teamDeathmatch" },
+  { value: "arcade", labelKey: "stats.scope.arcade" },
+  { value: "wave_defense", labelKey: "stats.scope.waveDefense" },
+  { value: "experiment", labelKey: "stats.scope.experiment" },
+  { value: "newcomer", labelKey: "stats.scope.newcomer" },
+  { value: "bot", labelKey: "stats.scope.bot" },
+] as const satisfies ReadonlyArray<{ value: PublicStatsScope; labelKey: TranslationKey }>;
 
 const CLASS_ICONS: Record<string, string> = {
   Frontline: "/images/icons/Class_Front_Line_Icon.avif",
@@ -118,41 +129,55 @@ function pctDiff(value: number, base: number): number {
 
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ * Returns: `React.JSX.Element`
  */
 export default function ChampionRateDetailPage({
   config,
   initialChampions = null,
+  enableScopeSelection = false,
 }: {
   config: RateMetricConfig;
   initialChampions?: Champion[] | null;
+  enableScopeSelection?: boolean;
 }) {
   const { t, formatNumber, formatPercent: formatRate, formatSignedPercent } = useLocalization();
   const hasInitialChampions = Boolean(initialChampions?.length);
   const [champions, setChampions] = useState<Champion[]>(initialChampions ?? []);
   const [loading, setLoading] = useState(!hasInitialChampions);
+  const [hasResolved, setHasResolved] = useState(hasInitialChampions);
+  const [loadError, setLoadError] = useState(false);
+  const [statsScope, setStatsScope] = useState<PublicStatsScope>("ranked");
   const routeDisplayLoading = useRouteSettledLoading(loading);
-  const displayLoading = hasInitialChampions ? false : routeDisplayLoading;
+  const displayLoading = hasResolved ? false : routeDisplayLoading;
 
   useEffect(() => {
-    if (hasInitialChampions && getStoredLobbyTierFilter() === "all") return;
+    if (statsScope === "ranked" && hasInitialChampions && getStoredLobbyTierFilter() === "all") {
+      return;
+    }
 
     let cancelled = false;
 
-    fetchChampions({ limit: "200" })
+    fetchChampions({ limit: "200", scope: statsScope })
       .then((rows) => {
         if (!cancelled) setChampions(rows);
       })
       .catch(() => {
-        if (!cancelled && !hasInitialChampions) setChampions([]);
+        if (!cancelled) {
+          setChampions([]);
+          setLoadError(true);
+        }
       })
       .finally(() => {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+          setHasResolved(true);
+        }
       });
 
     return () => {
       cancelled = true;
     };
-  }, [hasInitialChampions]);
+  }, [hasInitialChampions, statsScope]);
 
   const sections = useMemo(() => buildSections(champions, config.key), [champions, config.key]);
   const allRows = useMemo(() => sections.flatMap((section) => section.champions).sort((a, b) => b.value - a.value), [sections]);
@@ -165,11 +190,42 @@ export default function ChampionRateDetailPage({
 
   return (
     <ContentFade className="mx-auto w-full max-w-6xl space-y-6">
-      <div>
-        <Link href="/champions" className="text-pc-accent text-xs hover:underline mb-2 inline-block">{t("nav.champions")}</Link>
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">{t(config.labelKey)}</h1>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <Link href="/champions" className="text-pc-accent text-xs hover:underline mb-2 inline-block">{t("nav.champions")}</Link>
+          <h1 className="pc-heading pc-heading-lg text-pc-accent">{t(config.labelKey)}</h1>
+        </div>
+        {enableScopeSelection && (
+          <div className="flex items-center justify-end gap-3">
+            {loading && hasResolved && <LoadingIndicator className="gap-2 text-xs text-pc-text-secondary" />}
+            <select
+              value={statsScope}
+              onChange={(event) => {
+                const next = event.target.value as PublicStatsScope;
+                setLoadError(false);
+                if (next === "ranked" && hasInitialChampions && getStoredLobbyTierFilter() === "all") {
+                  setChampions(initialChampions ?? []);
+                  setLoading(false);
+                  setHasResolved(true);
+                } else {
+                  setLoading(true);
+                }
+                setStatsScope(next);
+              }}
+              className="pc-select w-44 shrink-0"
+              aria-label={t("stats.scope.label")}
+            >
+              {STAT_SCOPES.map((scope) => <option key={scope.value} value={scope.value}>{t(scope.labelKey)}</option>)}
+            </select>
+          </div>
+        )}
       </div>
+      {loadError && <p role="alert" className="text-sm text-rose-300">{t("async.couldNotLoad")}</p>}
 
+      <div
+        aria-busy={loading}
+        className={`space-y-6 transition-opacity duration-200 motion-reduce:transition-none ${loading && hasResolved ? "opacity-55" : "opacity-100"}`}
+      >
       <section className="rounded-xl border border-pc-border bg-pc-bg-elevated p-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
           <div className="flex min-w-0 flex-1 items-center gap-4">
@@ -234,7 +290,7 @@ export default function ChampionRateDetailPage({
                 {section.champions.map((champion) => {
                   const rowVsClassPct = pctDiff(champion.value, section.average);
                   const rowVsGlobalPct = pctDiff(champion.value, globalAverage);
-                  return <Link key={champion.id} href={`/champions/${championSlug(champion.name)}`} className="flex min-w-0 items-center gap-3 p-3 transition-colors hover:bg-pc-bg/50">
+                  return <Link key={champion.id} href={`/champions/${championSlug(champion.name)}?scope=${statsScope}`} className="flex min-w-0 items-center gap-3 p-3 transition-colors hover:bg-pc-bg/50">
                     <img src={getChampionIconSafe(champion.name)} alt="" className="h-9 w-9 shrink-0 rounded-lg object-contain" />
                     <div className="min-w-0 flex-1"><div className="truncate text-sm font-semibold text-pc-text">{champion.name}</div><div className="mt-0.5 flex flex-wrap gap-x-2 text-xs"><span className={rowVsClassPct >= 0 ? "text-emerald-400" : "text-red-400"}>{formatSignedPercent(rowVsClassPct)} {t("generated.champions.class")}</span><span className={rowVsGlobalPct >= 0 ? "text-emerald-400" : "text-red-400"}>{formatSignedPercent(rowVsGlobalPct)} {t("generated.champions.global.9027cc5")}</span><span className="text-pc-text-muted">{formatNumber(champion.matches)} {t("generated.champions.matches.9f3e924")}</span></div></div>
                     <span className="shrink-0 text-right font-mono text-sm font-bold" style={{ color: config.stroke }}>{formatRate(champion.value)}{config.key === "banRate" && <span className="block text-xs font-normal text-pc-text-muted">{formatNumber(champion.bans)} {t("generated.stats.bans")}</span>}</span>
@@ -264,7 +320,7 @@ export default function ChampionRateDetailPage({
                       return (
                         <tr key={champion.id} className="border-b border-pc-border/40 hover:bg-pc-bg/50 transition-colors">
                           <td className="px-2.5 py-1.5">
-                            <Link href={`/champions/${championSlug(champion.name)}`} className="flex items-center gap-2 min-w-0 group">
+                            <Link href={`/champions/${championSlug(champion.name)}?scope=${statsScope}`} className="flex items-center gap-2 min-w-0 group">
                               <img src={getChampionIconSafe(champion.name)} alt={champion.name} className="h-6 w-6 shrink-0 rounded object-contain" />
                               <span className="text-pc-text font-medium truncate group-hover:text-pc-accent transition-colors">{champion.name}</span>
                             </Link>
@@ -298,6 +354,7 @@ export default function ChampionRateDetailPage({
           );
         })}
       </section>
+      </div>
     </ContentFade>
   );
 }

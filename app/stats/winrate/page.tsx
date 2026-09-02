@@ -14,7 +14,7 @@ const CONFIG = {
 
 /**
  * Selects request-fresh rendering for statistics data.
- * Returns the declared route value; network, cache, and navigation effects follow the implementation.
+ * Returns: `Promise<React.JSX.Element>`
  */
 export const dynamic = "force-dynamic";
 
@@ -26,5 +26,5 @@ export default async function WinRatePage() {
   });
 
   return (
-    <ChampionRateDetailPage config={CONFIG} initialChampions={initialChampions} />);
+    <ChampionRateDetailPage config={CONFIG} initialChampions={initialChampions} enableScopeSelection />);
 }

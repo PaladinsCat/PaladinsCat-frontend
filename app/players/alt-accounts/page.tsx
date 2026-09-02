@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Copy, Search, UserRound } from "lucide-react";
+import { UserRound } from "lucide-react";
 import { LoadingPanel } from "@/components/async-state";
 import PlayerDirectoryPagination, { usePersistentDirectoryPage } from "@/components/player-directory-pagination";
 import PlayerName from "@/components/player-name";
@@ -16,13 +16,15 @@ import {
   type AltAccountDirectoryGroup,
 } from "@/lib/api-client";
 import { useLocalization } from "@/lib/localization-context";
+import PlayersPageHeader from "@/components/ui/players-page-header";
+import PlayerDirectorySearch from "@/components/player-directory-search";
 
 
 const PAGE_SIZE = 24;
 
 /**
  * Render the AltAccountsPage view for the player alt-accounts page route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `React.JSX.Element`
  */
 export default function AltAccountsPage() {
   const { t , formatNumber} = useLocalization();
@@ -59,28 +61,11 @@ export default function AltAccountsPage() {
   }, [debouncedQuery, page, t]);
 
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-6">
-      <header>
-        <Link href="/players" className="mb-2 inline-block text-xs text-pc-accent hover:underline">{t("generated.players.players")}</Link>
-        <div className="flex items-start gap-3">
-          <Copy aria-hidden="true" className="mt-1 h-9 w-9 shrink-0 text-fuchsia-300" strokeWidth={1.5} />
-          <div className="min-w-0">
-            <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("moderation.altAccountsTitle")}</h1>
-            <p className="mt-1 max-w-3xl text-sm leading-6 text-pc-text-secondary">{t("moderation.altRelationshipDirectoryDescription")}</p>
-          </div>
-        </div>
-      </header>
+    <div className="space-y-6">
+      <PlayersPageHeader title={t("moderation.altAccountsTitle")} />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <label className="relative block w-full sm:max-w-sm">
-          <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-pc-text-muted" />
-          <input
-            value={query}
-            onChange={(event) => { setQuery(event.target.value); setPage(1); }}
-            placeholder={t("moderation.searchMainOrAlt")}
-            className="w-full rounded-xl border border-pc-border bg-pc-bg-elevated py-2.5 pl-9 pr-3 text-sm text-pc-text outline-none placeholder:text-pc-text-muted focus:border-fuchsia-400/55"
-          />
-        </label>
+        <PlayerDirectorySearch label={t("moderation.searchMainOrAlt")} value={query} onChange={(value) => { setQuery(value); setPage(1); }} />
         <span className="text-xs text-pc-text-muted">{t("moderation.mainAccountGroups", { value1: formatNumber(total) })}</span>
       </div>
 
@@ -101,7 +86,7 @@ export default function AltAccountsPage() {
                   </Link>
                   <p className="mt-1 text-xs text-pc-text-muted">{group.main.region} · {group.main.platform}</p>
                 </div>
-                <span className="shrink-0 rounded-full border border-fuchsia-400/20 bg-fuchsia-400/10 px-2 py-1 text-xs font-semibold text-fuchsia-200">{t("moderation.relationshipVotes", { value1: formatNumber(group.totalVotes) })}</span>
+                <span className="shrink-0 text-xs font-semibold tabular-nums text-fuchsia-200">{t("moderation.relationshipVotes", { value1: formatNumber(group.totalVotes) })}</span>
               </div>
 
               <div className="p-3">

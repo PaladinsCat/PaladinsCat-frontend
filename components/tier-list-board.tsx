@@ -20,6 +20,7 @@ const TIER_TONES: Record<TierName, string> = {
 
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ * Returns: `string`
  */
 export function tierTone(tier: TierName): string {
   return TIER_TONES[tier];
@@ -27,6 +28,7 @@ export function tierTone(tier: TierName): string {
 
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ * Returns: `React.JSX.Element`
  */
 export default function TierListBoard({ entries, compact = false }: { entries: TierListEntry[]; compact?: boolean }) {
   return <div className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-secondary/50">

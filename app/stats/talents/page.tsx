@@ -12,12 +12,11 @@ import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
 import { useLocalization } from "@/lib/localization-context";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
-import { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 
 /**
  * Renders the exported statistics view with its route data.
- * Returns the declared route value; network, cache, and navigation effects follow the implementation.
+ * Returns: `React.JSX.Element`
  */
 export default function TalentsPage() {
   const { t , formatNumber, formatPercent} = useLocalization();
@@ -41,7 +40,7 @@ export default function TalentsPage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-bold text-pc-accent sm:text-3xl">{t("generated.stats.talentPerformance")}</h1>
+      <h1 className="pc-heading pc-heading-lg">{t("generated.stats.talentPerformance")}</h1>
       <label className="block sm:hidden"><span className="pc-label">{t("generated.stats.champion")}</span><select value={selectedChampion ?? ""} onChange={(event) => setSelectedChampion(event.target.value || null)} className="pc-select w-full"><option value="">{t("generated.stats.allChampions")}</option>{champions.map((champion) => <option key={champion} value={champion}>{champion}</option>)}</select></label>
       <div className="hidden flex-wrap gap-2 sm:flex">
         <button

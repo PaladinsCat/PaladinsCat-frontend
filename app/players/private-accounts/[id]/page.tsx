@@ -8,8 +8,9 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { CalendarClock, LockKeyhole, Menu, ShieldCheck } from "lucide-react";
+import { Menu, ShieldCheck } from "lucide-react";
 import { LoadingPanel } from "@/components/async-state";
+import PlayersPageHeader from "@/components/ui/players-page-header";
 import {
   fetchPrivateAccountDetail,
   reportPrivateAccount,
@@ -34,7 +35,7 @@ function tpDelta(value: number | null) {
 
 /**
  * Render the PrivateAccountDetailPage view for the player private-accounts id page route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `React.JSX.Element`
  */
 export default function PrivateAccountDetailPage() {
   const { t, formatDateTime, formatNumber } = useLocalization();
@@ -63,34 +64,21 @@ export default function PrivateAccountDetailPage() {
   }, [privateId, reloadKey, router]);
 
   if (error) {
-    return <div className="mx-auto max-w-5xl rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-300">{error}</div>;
+    return <div className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-300">{error}</div>;
   }
-  if (!detail) return <div className="mx-auto max-w-5xl"><LoadingPanel /></div>;
+  if (!detail) return <LoadingPanel />;
 
   const { account, observations } = detail;
   const tierName = TIER_NAMES[account.leagueTier] || "Unranked";
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-6">
-      <header>
-        <Link href="/players/private-accounts" className="mb-2 inline-block text-xs text-pc-accent hover:underline">{t("generated.players.privateAccounts.a28b00d")}</Link>
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex min-w-0 items-start gap-3">
-          <LockKeyhole aria-hidden="true" className="mt-1 h-9 w-9 shrink-0 text-slate-300" strokeWidth={1.5} />
-          <div className="min-w-0">
-            <div className="mb-1 flex flex-wrap items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-pc-text-muted"><span>{t("generated.players.privateProfile")}{account.id}</span><span className="rounded border border-pc-border bg-pc-bg-elevated px-1.5 py-0.5 text-pc-text-secondary">{t("generated.players.level")}{" "}{formatNumber(account.accountLevel)}</span></div>
-            <div className="flex min-w-0 items-center gap-2">
-              <h1 className="pc-heading pc-heading-lg truncate text-pc-accent">{account.displayName}</h1>
+    <div className="space-y-6">
+      <PlayersPageHeader
+        meta={<div className="mb-1 flex flex-wrap items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-pc-text-muted"><span>{t("generated.players.privateProfile")}{account.id}</span><span className="rounded border border-pc-border bg-pc-bg-elevated px-1.5 py-0.5 text-pc-text-secondary">{t("generated.players.level")} {formatNumber(account.accountLevel)}</span>
               <PlayerModerationTag playerId={0} cheater={account.cheater} susCount={account.susCount} verified={false} />
               {account.verifiedName && <ShieldCheck aria-label={t("generated.players.verifiedFromSubmittedEvidence")} className="h-5 w-5 shrink-0 text-emerald-300" />}
-            </div>
-            <p className="mt-1 text-sm text-pc-text-secondary">
-              {account.verifiedName
-                ? t("generated.players.knownNameVerifiedFromSubmittedInGameEvidenceTheHi")
-                : t("generated.players.pseudonymousIdentityInferredConservativelyFromIndependentMatchObservations")}
-            </p>
-          </div>
-          </div>
-          <div className="relative shrink-0">
+            </div>}
+        title={account.displayName}
+        actions={<div className="relative shrink-0">
             <button
               type="button"
               onClick={() => setActionMenuOpen((open) => !open)}
@@ -119,9 +107,8 @@ export default function PrivateAccountDetailPage() {
                 )}
               </div>
             )}
-          </div>
-        </div>
-      </header>
+          </div>}
+      />
 
       <section className="grid grid-cols-2 overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated sm:grid-cols-4 sm:divide-x sm:divide-pc-border">
         <div className="border-b border-pc-border p-4 sm:border-b-0"><div className="text-xs text-pc-text-muted">{t("generated.players.latestMastery")}</div><div className="mt-1 text-xl font-semibold text-pc-text">{formatNumber(account.masteryLevel)}</div></div>
@@ -130,19 +117,14 @@ export default function PrivateAccountDetailPage() {
         <div className="border-l border-pc-border p-4 sm:border-l-0"><div className="text-xs text-pc-text-muted">{t("generated.players.trackedMatches")}</div><div className="mt-1 text-xl font-semibold text-pc-text">{formatNumber(account.matchCount)}</div></div>
       </section>
 
-      <section className="rounded-xl border border-pc-border bg-pc-bg-elevated p-4">
-        <div className="flex flex-col gap-2 text-xs text-pc-text-muted sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-2"><CalendarClock className="h-4 w-4" />{t("generated.players.observed")}{" "}{observedAt(account.firstSeen)} – {observedAt(account.lastSeen)}</div>
-          <div>{t("generated.players.identityConfidence")}{" "}{account.identityConfidence}% · {account.identityStatus}</div>
-        </div>
-      </section>
+      <div className="text-xs text-pc-text-muted">{t("generated.players.identityConfidence")}{" "}{account.identityConfidence}% · {account.identityStatus}</div>
 
       <section>
-        <h2 className="mb-3 text-sm font-semibold text-pc-text">{t("generated.players.observedMatches")}</h2>
+        <h2 className="mb-3 text-sm font-semibold text-pc-text">{t("generated.players.matches")}</h2>
         {observations.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-pc-border p-8 text-center text-sm text-pc-text-muted">{t("generated.players.noLinkedObservations")}</div>
+          <div className="rounded-xl border border-dashed border-pc-border p-8 text-center text-sm text-pc-text-muted">{t("generated.matches.noMatchingGames")}</div>
         ) : (
-          <div className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated">
+          <div className="pc-card-flush">
             {observations.map(observation => (
               <Link
                 key={`${observation.matchId}-${observation.privateSlot}`}

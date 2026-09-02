@@ -50,6 +50,7 @@ const getCachedPlatforms = unstable_cache(
 
 /**
  * Loads platform statistics for the initial server-rendered view.
+ * Returns: `Promise<PlatformStat[]>`
  */
 export function getInitialPlatforms(): Promise<PlatformStat[]> {
   return getCachedPlatforms();

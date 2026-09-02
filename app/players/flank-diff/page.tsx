@@ -7,7 +7,7 @@ import PerformanceDiffDirectory from "@/components/performance-diff-directory";
 
 /**
  * Render the FlankDiffPage view for the player flank-diff page route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `React.JSX.Element`
  */
 export default function FlankDiffPage() {
   return <PerformanceDiffDirectory metric="flank-diff" />;

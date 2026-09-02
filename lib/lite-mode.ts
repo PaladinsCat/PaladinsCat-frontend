@@ -10,7 +10,7 @@ export const LITE_MODE_STORAGE_KEY = "paladinscat-lite-mode";
  */
 export const LITE_MODE_CHANGE_EVENT = "paladinscat:lite-mode-change";
 
-/** Returns whether Lite mode (disable all animations) is enabled for this browser. */
+/** Returns whether Lite mode (disable all animations) is enabled for this browser.  Returns: `boolean`. */
 export function getLiteMode(): boolean {
   if (typeof window === "undefined") return false;
   try {

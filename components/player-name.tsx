@@ -20,6 +20,7 @@ const EMPTY_MODERATION: PlayerModeration = {
   boostedMatchCount: 0,
   altAccount: false,
   altAccountVoteCount: 0,
+  automaticAfk: false,
   automaticAfkCount: 0,
   wallShooterCount: 0,
   masterFeedingCount: 0,
@@ -82,6 +83,7 @@ export type PlayerModerationTagProps = {
 
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ * Returns: `React.JSX.Element`
  */
 export function PlayerModerationTag({
   playerId,
@@ -114,6 +116,7 @@ export function PlayerModerationTag({
     dropperVoteCount,
     afkWintrade,
     afkWintradeVoteCount,
+    automaticAfk,
     automaticAfkCount,
     wallShooterCount,
     masterFeedingCount,
@@ -141,10 +144,10 @@ export function PlayerModerationTag({
       }
     });
     return () => { active = false; };
-  }, [afkWintrade, afkWintradeVoteCount, altAccount, altAccountVoteCount, automaticAfkCount, boosted, boostedMatchCount, cheater, dropper, dropperVoteCount, exploiter, masterFeedingCount, playerId, susCount, verified, wallShooterCount]);
+  }, [afkWintrade, afkWintradeVoteCount, altAccount, altAccountVoteCount, automaticAfk, automaticAfkCount, boosted, boostedMatchCount, cheater, dropper, dropperVoteCount, exploiter, masterFeedingCount, playerId, susCount, verified, wallShooterCount]);
 
   const communityAfk = moderation.afkWintrade && hasPlayerTag(moderation.afkWintradeVoteCount);
-  const automaticAfkTagged = Boolean(automaticAfk) || hasPlayerTag(moderation.automaticAfkCount);
+  const automaticAfkTagged = moderation.automaticAfk;
   const automaticTags = ([
     ["TANK", moderation.tankDiffCount],
     ["SUP", moderation.supportDiffCount],

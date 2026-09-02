@@ -13,6 +13,7 @@ export type PlayerModeration = {
   boostedMatchCount: number;
   altAccount: boolean;
   altAccountVoteCount: number;
+  automaticAfk: boolean;
   automaticAfkCount: number;
   wallShooterCount: number;
   masterFeedingCount: number;
@@ -37,6 +38,7 @@ const EMPTY: PlayerModeration = {
   boostedMatchCount: 0,
   altAccount: false,
   altAccountVoteCount: 0,
+  automaticAfk: false,
   automaticAfkCount: 0,
   wallShooterCount: 0,
   masterFeedingCount: 0,
@@ -80,6 +82,7 @@ export function mergePlayerModeration(
     boostedMatchCount: supplied.boostedMatchCount === undefined ? fallback.boostedMatchCount : Number(supplied.boostedMatchCount) || 0,
     altAccount: supplied.altAccount === undefined ? fallback.altAccount : Boolean(supplied.altAccount),
     altAccountVoteCount: supplied.altAccountVoteCount === undefined ? fallback.altAccountVoteCount : Number(supplied.altAccountVoteCount) || 0,
+    automaticAfk: supplied.automaticAfk === undefined ? fallback.automaticAfk : Boolean(supplied.automaticAfk),
     automaticAfkCount: supplied.automaticAfkCount === undefined ? fallback.automaticAfkCount : Number(supplied.automaticAfkCount) || 0,
     wallShooterCount: supplied.wallShooterCount === undefined ? fallback.wallShooterCount : Number(supplied.wallShooterCount) || 0,
     masterFeedingCount: supplied.masterFeedingCount === undefined ? fallback.masterFeedingCount : Number(supplied.masterFeedingCount) || 0,
@@ -106,6 +109,7 @@ type BulkPlayer = {
   boosted_match_count?: number;
   alt_account?: boolean;
   alt_account_vote_count?: number;
+  automatic_afk?: boolean;
   automatic_afk_count?: number;
   wall_shooter_count?: number;
   master_feeding_count?: number;
@@ -135,6 +139,7 @@ function moderationFromRow(player: BulkPlayer): PlayerModeration {
     boostedMatchCount: Number(player.boosted_match_count ?? 0),
     altAccount: Boolean(player.alt_account),
     altAccountVoteCount: Number(player.alt_account_vote_count ?? 0),
+    automaticAfk: Boolean(player.automatic_afk),
     automaticAfkCount: Number(player.automatic_afk_count ?? 0),
     wallShooterCount: Number(player.wall_shooter_count ?? 0),
     masterFeedingCount: Number(player.master_feeding_count ?? 0),
@@ -176,6 +181,7 @@ export async function fetchPlayerModerationBatch(playerIds: Array<string | numbe
 /**
  * Read moderation for canonical private identities without mixing their serial
  * IDs into the public Hi-Rez player-ID cache.
+ * Returns: `Promise<Map<number, PlayerModeration>>`
  */
 export async function fetchPrivateAccountModerationBatch(
   privateIds: Array<string | number>,
@@ -206,6 +212,7 @@ export async function fetchPrivateAccountModerationBatch(
     boostedMatchCount: 0,
     altAccount: false,
     altAccountVoteCount: 0,
+    automaticAfk: false,
     automaticAfkCount: 0,
     wallShooterCount: 0,
     masterFeedingCount: 0,

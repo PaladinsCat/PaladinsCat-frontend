@@ -11,11 +11,10 @@ import { useLocalization } from "@/lib/localization-context";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { ContentFade } from "@/components/async-state";
-import { SpotlightCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 /**
  * Renders the exported statistics view with its route data.
- * Returns the declared route value; network, cache, and navigation effects follow the implementation.
+ * Returns: `React.JSX.Element`
  */
 export default function PlayerChartsPage({ params }: { params: Promise<{ id: string }> }) {
   const { t , formatMonthDay} = useLocalization();
@@ -65,7 +64,7 @@ export default function PlayerChartsPage({ params }: { params: Promise<{ id: str
         <div className="flex items-center gap-4">
           <Link href={`/players/${id}`} className="text-pc-text-secondary hover:text-pc-accent transition-colors">
             {t("generated.stats.backToProfile")}</Link>
-          <h1 className="text-3xl font-bold text-pc-accent">{t("generated.stats.playerCharts")}</h1>
+          <h1 className="pc-heading pc-heading-lg">{t("generated.stats.playerCharts")}</h1>
         </div>
         <select
           value={days}
@@ -80,7 +79,7 @@ export default function PlayerChartsPage({ params }: { params: Promise<{ id: str
 
       {/* KDA Chart */}
       <div className="bg-pc-bg-elevated rounded-lg border border-pc-border p-6">
-        <h2 className="text-xl font-semibold text-pc-accent mb-4">{t("generated.stats.kdaHistory")}</h2>
+        <h2 className="pc-card-title mb-4">{t("generated.stats.kdaHistory")}</h2>
         {kdaData.length === 0 ? (
           <p className="text-pc-text-muted text-center py-8">{t("generated.stats.noKdaDataAvailable")}</p>
         ) : (
@@ -104,7 +103,7 @@ export default function PlayerChartsPage({ params }: { params: Promise<{ id: str
 
       {/* DPM Chart */}
       <div className="bg-pc-bg-elevated rounded-lg border border-pc-border p-6">
-        <h2 className="text-xl font-semibold text-pc-accent mb-4">{t("generated.stats.damagePerMinute")}</h2>
+        <h2 className="pc-card-title mb-4">{t("generated.stats.damagePerMinute")}</h2>
         {dpmData.length === 0 ? (
           <p className="text-pc-text-muted text-center py-8">{t("generated.stats.noDpmDataAvailable")}</p>
         ) : (
@@ -127,7 +126,7 @@ export default function PlayerChartsPage({ params }: { params: Promise<{ id: str
 
       {/* Glicko-2 Chart */}
       <div className="bg-pc-bg-elevated rounded-lg border border-pc-border p-6">
-        <h2 className="text-xl font-semibold text-pc-accent mb-4">{t("generated.stats.glicko2Rating")}</h2>
+        <h2 className="pc-card-title mb-4">{t("generated.stats.glicko2Rating")}</h2>
         {glickoData.length === 0 ? (
           <p className="text-pc-text-muted text-center py-8">{t("generated.stats.noRatingDataAvailable")}</p>
         ) : (

@@ -47,6 +47,7 @@ export type LocaleMessages = Partial<Record<TranslationKey, string>>;
 
 /** Apply sanitizeLocaleMessages to lobby-tier or localization inputs.
  * Contract: returns the normalized route, context state, or message value while preserving existing browser behavior.
+ * Returns: `object`
  */
 export function sanitizeLocaleMessages(payload: unknown): LocaleMessages {
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) return {};

@@ -315,6 +315,31 @@ export interface BoostedPlayerDetail {
   matches: BoostedMatchSummary[];
 }
 
+export interface ExploiterEvidenceMatch {
+  matchId: number;
+  entryDatetime: string | null;
+  map: string | null;
+  queueId: number;
+  queueName: string;
+  region: string | null;
+  durationSeconds: number;
+  population: string;
+  statsScope: string;
+  championId: number | null;
+  championName: string | null;
+  winStatus: string | null;
+  kills: number;
+  deaths: number;
+  assists: number;
+  talentId: number;
+  talentName: string;
+}
+
+export interface ExploiterEvidenceDetail {
+  player: Pick<CheaterPlayer, "id" | "name" | "platform" | "region" | "cheater" | "exploiter">;
+  matches: ExploiterEvidenceMatch[];
+}
+
 /**
  * Fetch filtered moderation-directory players from the backend.
  * Accepts typed query filters and returns normalized player summaries.
@@ -699,7 +724,7 @@ export async function fetchChampionElo(params: {
 
 export interface PerformanceLeaderboardEntry {
   rank: number;
-  matchId: string;
+  matchId: string | null;
   playerId: number;
   playerName: string;
   championName: string | null;
@@ -708,6 +733,7 @@ export interface PerformanceLeaderboardEntry {
   value: number;
   region: string | null;
   platform: string | null;
+  totalMatches: number | null;
 }
 
 /**
@@ -722,6 +748,7 @@ export async function fetchPerformanceLeaderboard(params: {
   region?: string;
   queueId?: number;
   scope?: 'ranked' | 'casual';
+  mode?: 'match' | 'account' | 'champion';
 }): Promise<PerformanceLeaderboardEntry[]> {
   const query = new URLSearchParams();
   query.set('metric', params.metric);
@@ -730,15 +757,17 @@ export async function fetchPerformanceLeaderboard(params: {
   if (params.region) query.set('region', params.region);
   if (params.queueId != null) query.set('queueId', String(params.queueId));
   if (params.scope) query.set('scope', params.scope);
+  if (params.mode) query.set('mode', params.mode);
   try {
-    const raw = await fetchJson<Array<{
-      rank: number; match_id: number | string; player_id: number; player_name: string;
+    const response = await fetchJson<{ mode?: string; data: Array<{
+      rank: number; match_id: number | string | null; player_id: number; player_name: string;
       champion_name: string | null; champion_id: number | null; class_name: string | null;
-      value: number | string; region: string | null; platform: string | null;
-    }>>(`/players/leaderboard/performance?${query.toString()}`);
-    return raw.map((r) => ({
+      value: number | string; region: string | null; platform: string | null; total_matches?: number | string | null;
+    }>}>(`/players/leaderboard/performance?${query.toString()}`, { unwrapData: false });
+    if (params.mode && response.mode !== params.mode) return [];
+    return (response.data ?? []).map((r) => ({
       rank: Number(r.rank),
-      matchId: String(r.match_id),
+      matchId: r.match_id == null ? null : String(r.match_id),
       playerId: Number(r.player_id),
       playerName: r.player_name,
       championName: r.champion_name ?? null,
@@ -747,6 +776,69 @@ export async function fetchPerformanceLeaderboard(params: {
       value: typeof r.value === 'string' ? Number(r.value) : r.value,
       region: r.region ?? null,
       platform: r.platform ?? null,
+      totalMatches: r.total_matches == null ? null : Number(r.total_matches),
+    }));
+  } catch {
+    return [];
+  }
+}
+
+export interface PlayerLevelLeaderboardEntry {
+  rank: number;
+  classRank: number | null;
+  championRank: number | null;
+  className: string | null;
+  playerId: number;
+  playerName: string;
+  championId: number | null;
+  championName: string | null;
+  level: number;
+  xp: number;
+  wins: number;
+  losses: number;
+  winRate: number | null;
+  kda: number | null;
+  region: string | null;
+  platform: string | null;
+}
+
+export interface PlayerLevelLeaderboardFilters {
+  playerId?: number;
+  role?: 'Frontline' | 'Damage' | 'Flank' | 'Support';
+  championId?: number;
+}
+
+/** Fetch account-level or champion-mastery-level leaderboard rows. */
+export async function fetchPlayerLevelLeaderboard(mode: 'account' | 'champion', limit = 100, filters: PlayerLevelLeaderboardFilters = {}): Promise<PlayerLevelLeaderboardEntry[]> {
+  const query = new URLSearchParams({ mode, limit: String(limit) });
+  if (filters.playerId != null) query.set('playerId', String(filters.playerId));
+  if (filters.role != null) query.set('role', filters.role);
+  if (filters.championId != null) query.set('championId', String(filters.championId));
+  try {
+    const raw = await fetchJson<Array<{
+      rank: number; class_rank: number | null; champion_rank: number | null; class_name: string | null;
+      player_id: number; player_name: string;
+      champion_id: number | null; champion_name: string | null;
+      level: number | string; xp: number | string; wins: number | string; losses: number | string;
+      win_rate: number | string | null; kda: number | string | null; region: string | null; platform: string | null;
+    }>>(`/players/leaderboard/levels?${query.toString()}`);
+    return raw.map((row) => ({
+      rank: Number(row.rank),
+      classRank: row.class_rank == null ? null : Number(row.class_rank),
+      championRank: row.champion_rank == null ? null : Number(row.champion_rank),
+      className: row.class_name ?? null,
+      playerId: Number(row.player_id),
+      playerName: String(row.player_name),
+      championId: row.champion_id == null ? null : Number(row.champion_id),
+      championName: row.champion_name ?? null,
+      level: Number(row.level),
+      xp: Number(row.xp),
+      wins: Number(row.wins),
+      losses: Number(row.losses),
+      winRate: row.win_rate == null ? null : Number(row.win_rate),
+      kda: row.kda == null ? null : Number(row.kda),
+      region: row.region ?? null,
+      platform: row.platform ?? null,
     }));
   } catch {
     return [];
@@ -1113,6 +1205,15 @@ export interface PlayerRelationshipRow {
   otherPlayerId: string;
   otherPlayerName: string;
   matchCount: number;
+  metricMatchCount: number;
+  wins: number;
+  losses: number;
+  winRate: number | null;
+  metricsComplete: boolean;
+  playerRoleCounts: Record<string, number>;
+  partnerRoleCounts: Record<string, number>;
+  playerChampionCounts: Record<string, number>;
+  partnerChampionCounts: Record<string, number>;
   firstSeen: string;
   lastSeen: string;
   sameParty: boolean;
@@ -1127,6 +1228,9 @@ export interface PlayerRelationshipSummary {
     opponentMatches: number;
     partyPartners: number;
     partyMatches: number;
+    partyMetricMatches: number;
+    partyWins: number;
+    partyLosses: number;
   };
   teammates: PlayerRelationshipRow[];
   opponents: PlayerRelationshipRow[];
@@ -1137,6 +1241,15 @@ type RawRelationshipRow = {
   other_player_id?: string | number;
   other_player_name?: string | null;
   match_count?: string | number | null;
+  metric_match_count?: string | number | null;
+  wins?: string | number | null;
+  losses?: string | number | null;
+  win_rate?: string | number | null;
+  metrics_complete?: boolean | null;
+  player_role_counts?: Record<string, string | number> | null;
+  partner_role_counts?: Record<string, string | number> | null;
+  player_champion_counts?: Record<string, string | number> | null;
+  partner_champion_counts?: Record<string, string | number> | null;
   first_seen?: string | null;
   last_seen?: string | null;
   same_party?: boolean | null;
@@ -1151,10 +1264,22 @@ type RawRelationshipSummary = {
 };
 
 function mapRelationshipRow(row: RawRelationshipRow): PlayerRelationshipRow {
+  const countMap = (value: Record<string, string | number> | null | undefined) => Object.fromEntries(
+    Object.entries(value ?? {}).map(([key, count]) => [key, Number(count ?? 0)])
+  );
   return {
     otherPlayerId: String(row.other_player_id),
     otherPlayerName: String(row.other_player_name ?? `Player ${row.other_player_id}`),
     matchCount: Number(row.match_count ?? 0),
+    metricMatchCount: Number(row.metric_match_count ?? 0),
+    wins: Number(row.wins ?? 0),
+    losses: Number(row.losses ?? 0),
+    winRate: row.win_rate == null ? null : Number(row.win_rate),
+    metricsComplete: Boolean(row.metrics_complete),
+    playerRoleCounts: countMap(row.player_role_counts),
+    partnerRoleCounts: countMap(row.partner_role_counts),
+    playerChampionCounts: countMap(row.player_champion_counts),
+    partnerChampionCounts: countMap(row.partner_champion_counts),
     firstSeen: String(row.first_seen ?? ""),
     lastSeen: String(row.last_seen ?? ""),
     sameParty: Boolean(row.same_party),
@@ -1167,7 +1292,7 @@ function mapRelationshipRow(row: RawRelationshipRow): PlayerRelationshipRow {
  * Accepts playerId, limit; returns fetchPlayerRelationshipSummary data after a backend request, using shared authentication and cache behavior.
  */
 export async function fetchPlayerRelationshipSummary(playerId: string | number, limit = 6): Promise<PlayerRelationshipSummary> {
-  const raw = await fetchJson<RawRelationshipSummary>(`/coplay/summary/${encodeURIComponent(String(playerId))}?limit=${Math.min(Math.max(limit, 1), 50)}`);
+  const raw = await fetchJson<RawRelationshipSummary>(`/coplay/summary/${encodeURIComponent(String(playerId))}?limit=${Math.min(Math.max(limit, 1), 50)}&contract=metrics-v3`);
   const totals = raw.totals ?? {};
   return {
     playerId: String(raw.player_id ?? playerId),
@@ -1178,6 +1303,9 @@ export async function fetchPlayerRelationshipSummary(playerId: string | number, 
       opponentMatches: Number(totals.opponent_matches ?? 0),
       partyPartners: Number(totals.party_partners ?? 0),
       partyMatches: Number(totals.party_matches ?? 0),
+      partyMetricMatches: Number(totals.party_metric_matches ?? 0),
+      partyWins: Number(totals.party_wins ?? 0),
+      partyLosses: Number(totals.party_losses ?? 0),
     },
     teammates: (raw.teammates ?? []).map(mapRelationshipRow),
     opponents: (raw.opponents ?? []).map(mapRelationshipRow),
@@ -1217,6 +1345,40 @@ export async function fetchBoostedPlayerDetail(playerId: string): Promise<Booste
         id: String(cheater.id ?? ''),
         name: String(cheater.name ?? 'Unknown player'),
       })).filter((cheater: { id: string }) => cheater.id.length > 0),
+    })),
+  };
+}
+
+/** Fetch the stored talent facts supporting an administrator-confirmed exploiter tag. */
+export async function fetchExploiterEvidence(playerId: string): Promise<ExploiterEvidenceDetail> {
+  const raw = await fetchJson<any>(`/players/exploiters/${encodeURIComponent(playerId)}`);
+  return {
+    player: {
+      id: String(raw.player?.id ?? playerId),
+      name: String(raw.player?.name ?? "Unknown player"),
+      platform: String(raw.player?.platform ?? "Unknown"),
+      region: String(raw.player?.region ?? "Unknown"),
+      cheater: Boolean(raw.player?.cheater),
+      exploiter: Boolean(raw.player?.exploiter),
+    },
+    matches: (raw.matches ?? []).map((row: any) => ({
+      matchId: Number(row.match_id),
+      entryDatetime: row.entry_datetime ?? null,
+      map: row.map == null ? null : String(row.map),
+      queueId: Number(row.queue_id ?? 0),
+      queueName: String(row.queue_name ?? "Unknown"),
+      region: row.region == null ? null : String(row.region),
+      durationSeconds: Number(row.duration_seconds ?? 0),
+      population: String(row.population ?? "unknown"),
+      statsScope: String(row.stats_scope ?? "unknown"),
+      championId: row.champion_id == null ? null : Number(row.champion_id),
+      championName: row.champion_name == null ? null : String(row.champion_name),
+      winStatus: row.win_status == null ? null : String(row.win_status),
+      kills: Number(row.kills ?? 0),
+      deaths: Number(row.deaths ?? 0),
+      assists: Number(row.assists ?? 0),
+      talentId: Number(row.talent_id),
+      talentName: String(row.talent_name ?? `Talent ${row.talent_id}`),
     })),
   };
 }
@@ -1291,6 +1453,20 @@ export interface PartyStackSummary {
   lastSeen: string | null;
 }
 
+export interface PartyDetail {
+  kind: "pairs" | "stacks";
+  key: string;
+  party: {
+    groupKey: string | null;
+    stackSize: number;
+    players: Array<{ id: number; name: string }>;
+    matchCount: number;
+  } | null;
+  matches: MatchSearchResult[];
+  total: number;
+  page: { current: number; size: number; totalPages: number };
+}
+
 export interface PlayerDirectoryPage<T> {
   items: T[];
   total: number;
@@ -1349,6 +1525,7 @@ function mapPartyPair(row: any): PartyPairSummary {
  * Fetch private accounts directory data for client consumers.
  *
  * Accepts params; returns fetchPrivateAccountsDirectory data after a backend request, using shared authentication and cache behavior.
+ * Returns: `Promise<object>`
  */
 export async function fetchPrivateAccountsDirectory(params: { page?: number; pageSize?: number; query?: string; cheater?: boolean; suspicious?: boolean } = {}): Promise<PlayerDirectoryPage<PrivateAccountSummary>> {
   const page = Math.max(1, params.page ?? 1);
@@ -1365,6 +1542,7 @@ export async function fetchPrivateAccountsDirectory(params: { page?: number; pag
 /**
  * Fetch private account detail data for client consumers.
  *
+ * Returns: `Promise<object>`
  * Accepts privateId; returns fetchPrivateAccountDetail data after a backend request, using shared authentication and cache behavior.
  */
 export async function fetchPrivateAccountDetail(privateId: number): Promise<PrivateAccountDetail> {
@@ -1398,6 +1576,7 @@ export async function fetchPrivateAccountDetail(privateId: number): Promise<Priv
 
 /**
  * Fetch party pairs directory data for client consumers.
+ * Returns: `Promise<object>`
  *
  * Accepts params; returns fetchPartyPairsDirectory data after a backend request, using shared authentication and cache behavior.
  */
@@ -1412,6 +1591,7 @@ export async function fetchPartyPairsDirectory(params: { page?: number; pageSize
 }
 
 /**
+ * Returns: `Promise<object>`
  * Fetch party stacks directory data for client consumers.
  *
  * Accepts params; returns fetchPartyStacksDirectory data after a backend request, using shared authentication and cache behavior.
@@ -1439,6 +1619,52 @@ export async function fetchPartyStacksDirectory(params: { page?: number; pageSiz
   return { items, total, page, pageSize, totalPages: Math.max(1, Math.ceil(total / pageSize)) };
 }
 
+export async function fetchPartyDetail(
+  kind: "pairs" | "stacks",
+  key: string,
+  params: { page?: number; pageSize?: number } = {},
+): Promise<PartyDetail> {
+  const page = Math.max(1, params.page ?? 1);
+  const pageSize = Math.min(100, Math.max(1, params.pageSize ?? 20));
+  const query = new URLSearchParams({ page: String(page), perPage: String(pageSize) });
+  const raw = await fetchJson<any>(`/coplay/parties/${kind}/${encodeURIComponent(key)}?${query.toString()}`);
+  const party = raw.party ? {
+    groupKey: raw.party.group_key == null ? null : String(raw.party.group_key),
+    stackSize: Number(raw.party.stack_size ?? raw.party.players?.length ?? 2),
+    players: (Array.isArray(raw.party.players) ? raw.party.players : []).map((player: any) => ({
+      id: Number(player.id),
+      name: String(player.name ?? `Player ${player.id}`),
+    })),
+    matchCount: Number(raw.party.match_count ?? 0),
+  } : null;
+  return {
+    kind,
+    key: String(raw.key ?? key),
+    party,
+    matches: (Array.isArray(raw.matches) ? raw.matches : []).map((match: any) => ({
+      match_id: Number(match.match_id ?? 0),
+      entry_datetime: String(match.entry_datetime ?? ""),
+      map: String(match.map ?? ""),
+      queue_id: Number(match.queue_id ?? 0),
+      duration_seconds: Number(match.duration_seconds ?? 0),
+      region: String(match.region ?? ""),
+      champion_id: Number(match.champion_id ?? 0),
+      champion_name: String(match.champion_name ?? ""),
+      win_status: String(match.win_status ?? ""),
+      kills: Number(match.kills ?? 0),
+      deaths: Number(match.deaths ?? 0),
+      assists: Number(match.assists ?? 0),
+      player_count: Number(match.player_count ?? 0),
+    })),
+    total: Number(raw.total ?? 0),
+    page: {
+      current: Number(raw.page?.current ?? page),
+      size: Number(raw.page?.size ?? pageSize),
+      totalPages: Number(raw.page?.totalPages ?? 0),
+    },
+  };
+}
+
 let playersOverviewCache: { value: PlayersOverview; expiresAt: number } | null = null;
 let playersOverviewInFlight: Promise<PlayersOverview> | null = null;
 
@@ -1451,10 +1677,10 @@ export function mapPlayersOverviewResponse(raw: any): PlayersOverview {
     total_wins: Number(row.total_wins), win_rate: row.win_rate == null ? null : Number(row.win_rate), region: row.region ?? null,
   });
   const mapPerformance = (row: any): PerformanceLeaderboardEntry => ({
-    rank: Number(row.rank), matchId: String(row.match_id), playerId: Number(row.player_id), playerName: row.player_name,
+    rank: Number(row.rank), matchId: row.match_id == null ? null : String(row.match_id), playerId: Number(row.player_id), playerName: row.player_name,
     championName: row.champion_name ?? null, championId: row.champion_id == null ? null : Number(row.champion_id),
     className: row.class_name ?? null, value: Number(row.value),
-    region: row.region ?? null, platform: row.platform ?? null,
+    region: row.region ?? null, platform: row.platform ?? null, totalMatches: row.total_matches == null ? null : Number(row.total_matches),
   });
   const mapRanked = (row: any): RankedPlayer => ({
     rank: Number(row.rank), player_id: String(row.player_id), name: row.name, tier: Number(row.tier), points: Number(row.points),
@@ -3573,12 +3799,14 @@ export interface SkinStat {
  *
  * Accepts query filters; returns fetchSkinStats data after a backend request, using shared authentication and cache behavior.
  */
-export async function fetchSkinStats(params?: { championId?: number; tierMin?: number; tierMax?: number; limit?: number }): Promise<SkinStat[]> {
+export async function fetchSkinStats(params?: { championId?: number; tierMin?: number; tierMax?: number; limit?: number; scope?: PublicStatsScope; queueId?: number }): Promise<SkinStat[]> {
   const query = new URLSearchParams();
   if (params?.championId != null) query.set('championId', String(params.championId));
   if (params?.tierMin != null) query.set('tierMin', String(params.tierMin));
   if (params?.tierMax != null) query.set('tierMax', String(params.tierMax));
   if (params?.limit != null) query.set('limit', String(params.limit));
+  if (params?.scope) query.set('scope', params.scope);
+  if (params?.queueId != null) query.set('queueId', String(params.queueId));
   try {
     const raw = await fetchJson<any[]>(`/stats/skins${query.toString() ? `?${query.toString()}` : ''}`);
     return raw.map((row) => ({
@@ -3613,11 +3841,13 @@ export interface BrokenSkinStat {
  *
  * Accepts query filters; returns fetchBrokenSkinStats data after a backend request, using shared authentication and cache behavior.
  */
-export async function fetchBrokenSkinStats(params?: { championId?: number; tierMin?: number; tierMax?: number }): Promise<BrokenSkinStat[]> {
+export async function fetchBrokenSkinStats(params?: { championId?: number; tierMin?: number; tierMax?: number; scope?: PublicStatsScope; queueId?: number }): Promise<BrokenSkinStat[]> {
   const query = new URLSearchParams();
   if (params?.championId != null) query.set('championId', String(params.championId));
   if (params?.tierMin != null) query.set('tierMin', String(params.tierMin));
   if (params?.tierMax != null) query.set('tierMax', String(params.tierMax));
+  if (params?.scope) query.set('scope', params.scope);
+  if (params?.queueId != null) query.set('queueId', String(params.queueId));
   try {
     const raw = await fetchJson<any[]>(`/stats/broken-skins${query.toString() ? `?${query.toString()}` : ''}`);
     return raw.map((row) => ({

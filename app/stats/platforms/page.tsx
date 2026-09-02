@@ -7,7 +7,7 @@ import PlatformsClient from "./platforms-client";
 
 /**
  * Selects request-fresh rendering for statistics data.
- * Returns the declared route value; network, cache, and navigation effects follow the implementation.
+ * Returns: `Promise<React.JSX.Element>`
  */
 export const dynamic = "force-dynamic";
 

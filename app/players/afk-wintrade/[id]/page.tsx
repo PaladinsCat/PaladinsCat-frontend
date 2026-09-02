@@ -8,8 +8,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Activity } from "lucide-react";
 import { LoadingPanel } from "@/components/async-state";
+import PlayersPageHeader from "@/components/ui/players-page-header";
 import { fetchAutomaticAfkPlayerDetail, type AutomaticAfkPlayerDetail } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { formatKda } from "@/lib/kda";
@@ -34,7 +34,7 @@ function displayMatchMap(mapName: string | null, queueId: number) {
 
 /**
  * Render the AutomaticAfkPlayerDetailPage view for the player afk-wintrade id page route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `React.JSX.Element`
  */
 export default function AutomaticAfkPlayerDetailPage() {
   const { t, formatDateTime, formatNumber } = useLocalization();
@@ -54,48 +54,37 @@ export default function AutomaticAfkPlayerDetailPage() {
   }, [playerId]);
 
   if (error) {
-    return <div className="mx-auto max-w-5xl rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-300">{error}</div>;
+    return <div className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-300">{error}</div>;
   }
-  if (!detail) return <div className="mx-auto max-w-5xl"><LoadingPanel /></div>;
+  if (!detail) return <LoadingPanel />;
 
   const { player, matches } = detail;
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-6">
-      <header>
-        <Link href="/players/afk-wintrade" className="mb-2 inline-block text-xs text-pc-accent hover:underline">{t("moderation.afkWintradeTitle")}</Link>
-        <div className="flex items-start gap-3">
-          <Activity aria-hidden="true" className="mt-1 h-9 w-9 shrink-0 text-red-300" strokeWidth={1.5} />
-          <div className="min-w-0">
-            <div className="mb-1 flex flex-wrap items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-pc-text-muted">
+    <div className="space-y-6">
+      <PlayersPageHeader
+        meta={<div className="mb-1 flex flex-wrap items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-pc-text-muted">
               <span className="rounded border border-red-400/30 bg-red-400/15 px-1.5 py-0.5 text-red-300">{t("moderation.automaticAfkBadge")}</span>
               {player.communityMarked && <span className="rounded border border-sky-400/30 bg-sky-400/15 px-1.5 py-0.5 text-sky-300">{t("moderation.communityMarked")}</span>}
               <span>{player.platform}</span>
               <span>{player.region}</span>
-            </div>
-            <h1 className="pc-heading pc-heading-lg truncate">
-              <Link href={`/players/${player.id}`} className="text-pc-accent transition-colors hover:text-pc-accent-light hover:underline">{player.name}</Link>
-            </h1>
-            <p className="mt-1 max-w-2xl text-sm text-pc-text-secondary">{t("moderation.automaticAfkDetailDescription")}</p>
-          </div>
-        </div>
-      </header>
+            </div>}
+        title={<Link href={`/players/${player.id}`} className="hover:text-pc-accent hover:underline">{player.name}</Link>}
+      />
 
-      <section className="grid grid-cols-2 overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated sm:grid-cols-4 sm:divide-x sm:divide-pc-border">
-        <div className="border-b border-pc-border p-4 sm:border-b-0"><div className="text-xs text-pc-text-muted">{t("common.playerChampions.sortMatches")}</div><div className="mt-1 text-xl font-semibold text-pc-text">{formatNumber(player.automaticMatchCount)}</div></div>
-        <div className="border-b border-l border-pc-border p-4 sm:border-b-0 sm:border-l-0"><div className="text-xs text-pc-text-muted">{t("moderation.lowestEcpm")}</div><div className="mt-1 text-xl font-semibold text-red-300">{formatNumber(player.lowestEcpm, { maximumFractionDigits: 2 })}</div></div>
-        <div className="p-4"><div className="text-xs text-pc-text-muted">{t("generated.players.firstObserved")}</div><div className="mt-1 text-sm font-semibold text-pc-text">{formatDateTime(player.firstSeen)}</div></div>
-        <div className="border-l border-pc-border p-4 sm:border-l-0"><div className="text-xs text-pc-text-muted">{t("generated.players.lastObserved")}</div><div className="mt-1 text-sm font-semibold text-pc-text">{formatDateTime(player.lastSeen)}</div></div>
+      <section className="grid grid-cols-2 divide-x divide-pc-border overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated">
+        <div className="p-4"><div className="text-xs text-pc-text-muted">{t("common.playerChampions.sortMatches")}</div><div className="mt-1 text-xl font-semibold text-pc-text">{formatNumber(player.automaticMatchCount)}</div></div>
+        <div className="p-4"><div className="text-xs text-pc-text-muted">{t("moderation.lowestEcpm")}</div><div className="mt-1 text-xl font-semibold text-red-300">{formatNumber(player.lowestEcpm, { maximumFractionDigits: 2 })}</div></div>
       </section>
 
       <section>
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-          <h2 className="pc-card-title shadow-sm">{t("generated.players.observedMatches")}</h2>
+          <h2 className="pc-card-title shadow-sm">{t("generated.players.matches")}</h2>
           <span className="text-xs text-pc-text-muted">{formatNumber(matches.length)} {t("generated.players.matches.9f3e924")}</span>
         </div>
         {matches.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-pc-border p-8 text-center text-sm text-pc-text-muted">{t("generated.players.noLinkedObservations")}</div>
+          <div className="rounded-xl border border-dashed border-pc-border p-8 text-center text-sm text-pc-text-muted">{t("generated.matches.noMatchingGames")}</div>
         ) : (
-          <div className="pc-card">
+          <div>
             <div className="space-y-2 lg:hidden">
               {matches.map((match) => (
                 <div key={match.matchId} className="pc-mobile-panel flex min-w-0 items-center gap-3 p-3">
@@ -109,7 +98,7 @@ export default function AutomaticAfkPlayerDetailPage() {
                 </div>
               ))}
             </div>
-            <div className="hidden overflow-x-auto lg:block">
+            <div className="pc-card-flush hidden overflow-x-auto lg:block">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-pc-border text-left text-xs text-pc-text-muted">

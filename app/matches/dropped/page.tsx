@@ -14,7 +14,6 @@ import {
   type PublicStatsScope,
 } from "@/lib/api-client";
 import { useLocalization } from "@/lib/localization-context";
-import { SpotlightCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 const SCOPES = [
   { value: "", labelKey: "matches.dropped.allModes" },
@@ -38,6 +37,7 @@ function reasonLabel(value: string): string {
 /**
  * Render the DroppedMatchesPage view for matches dropped page.
  * Return the React tree for the declared inputs and page data.
+ * Returns: `React.JSX.Element`
  */
 export default function DroppedMatchesPage() {
   const { t } = useLocalization();
@@ -77,7 +77,7 @@ export default function DroppedMatchesPage() {
 
   return <div className="space-y-6">
     <header>
-      <h1 className="pc-heading pc-heading-lg text-pc-accent">
+      <h1 className="pc-heading pc-heading-lg">
         <ScrambleText text={t("matches.dropped.title")} speed={30} iterations={15} delayFromCenter={false} />
       </h1>
       <p className="mt-1 text-sm text-pc-text-secondary">
@@ -85,7 +85,7 @@ export default function DroppedMatchesPage() {
       </p>
     </header>
 
-    <section className="pc-card flex flex-wrap gap-3">
+    <div className="flex flex-wrap gap-3">
       <label className="text-xs text-pc-text-muted">
         {t("matches.dropped.utcDate")}
         <input type="date" value={date} onChange={(event) => setDate(event.target.value)} className="pc-input mt-1 block" />
@@ -96,7 +96,7 @@ export default function DroppedMatchesPage() {
           {SCOPES.map((entry) => <option key={entry.value || "all"} value={entry.value}>{t(entry.labelKey)}</option>)}
         </select>
       </label>
-    </section>
+    </div>
 
     {loading && <LoadingPanel compact />}
     {error && !loading && <ErrorState message={t("matches.dropped.unavailable")} />}

@@ -22,6 +22,7 @@ type CanonicalTalentImageProps = {
  * Match payload icon URLs are useful metadata, but they are not authoritative:
  * several champion talents have punctuation or historic filenames that only
  * the champion reference correctly resolves.
+ * Returns: `React.JSX.Element`
  */
 export default function CanonicalTalentImage({
   talentId,

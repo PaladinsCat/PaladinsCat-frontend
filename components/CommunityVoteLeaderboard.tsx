@@ -10,6 +10,7 @@ import { LoadingPanel } from "@/components/async-state";
 import PlayerName from "@/components/player-name";
 import PlayerDirectoryGrid, { PLAYER_DIRECTORY_CARD_CLASS } from "@/components/player-directory-grid";
 import { useLocalization } from "@/lib/localization-context";
+import PlayersPageHeader from "@/components/ui/players-page-header";
 
 type VoteKind = "weirdo" | "hall_of_fame";
 
@@ -32,6 +33,7 @@ const CONFIG = {
 
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ * Returns: `React.JSX.Element`
  */
 export default function CommunityVoteLeaderboard({ kind }: { kind: VoteKind }) {
   const { t } = useLocalization();
@@ -47,16 +49,12 @@ export default function CommunityVoteLeaderboard({ kind }: { kind: VoteKind }) {
   }, [config]);
 
   const tone = config.color === "violet"
-    ? "border-violet-500/20 text-violet-300 bg-violet-500/10"
-    : "border-emerald-500/20 text-emerald-300 bg-emerald-500/10";
+    ? "text-violet-300"
+    : "text-emerald-300";
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-6">
-      <div>
-        <Link href="/players" className="text-pc-accent text-xs hover:underline mb-2 inline-block">{t("generated.components.players")}</Link>
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">{t(config.titleKey)}</h1>
-        <p className="text-pc-text-secondary text-sm mt-1">{t(config.descriptionKey)}</p>
-      </div>
+    <div className="space-y-6">
+      <PlayersPageHeader title={t(config.titleKey)} />
 
       {loading ? (
         <LoadingPanel compact />
@@ -76,7 +74,7 @@ export default function CommunityVoteLeaderboard({ kind }: { kind: VoteKind }) {
             >
               <span className="w-6 text-xs text-pc-text-muted">{index + 1}</span>
               <span className="flex-1 min-w-0 text-sm font-medium text-pc-text truncate"><PlayerName playerId={player.id} cheater={player.cheater} susCount={player.susCount}>{player.name}</PlayerName></span>
-              <span className={`text-xs font-semibold px-2 py-1 rounded border shrink-0 ${tone}`}>{config.count(player)} {t("generated.components.votes")}</span>
+              <span className={`shrink-0 text-xs font-semibold tabular-nums ${tone}`}>{config.count(player)} {t("generated.components.votes")}</span>
             </Link>
           )}
         </PlayerDirectoryGrid>

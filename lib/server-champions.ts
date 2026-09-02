@@ -23,6 +23,7 @@ const getCachedRankedChampions = unstable_cache(
 
 /**
  * Loads the ranked champion catalog used to seed server-rendered views.
+ * Returns: `Promise<Champion[]>`
  */
 export async function getInitialRankedChampions(): Promise<Champion[]> {
   return getCachedRankedChampions();

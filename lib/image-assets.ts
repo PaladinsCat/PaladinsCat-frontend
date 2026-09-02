@@ -3,6 +3,7 @@
  * containing commas, even when the file exists in the container. Asset names
  * are therefore published without commas; normalize legacy reference data at
  * the rendering boundary as well.
+ * Returns: `string`
  */
 export function canonicalLocalImageUrl(src: string): string {
   return src.startsWith("/images/") ? src.replace(/,/g, "") : src;
@@ -38,6 +39,7 @@ export function localImageSources(src: string): LocalImageSources {
 
 /** Apply preferredLocalImageUrl to the declared input values.
  * Contract: returns the module-specific validated, stored, formatted, or resolved value without external side effects.
+ * Returns: `string`
  */
 export function preferredLocalImageUrl(src: string): string {
   return localImageSources(src).preferred;
@@ -45,12 +47,14 @@ export function preferredLocalImageUrl(src: string): string {
 
 /** Apply fallbackLocalImageUrl to the declared input values.
  * Contract: returns the module-specific validated, stored, formatted, or resolved value without external side effects.
+ * Returns: `string`
  */
 export function fallbackLocalImageUrl(src: string): string {
   return localImageSources(src).fallback;
 }
 
 /** Champion data owns exact talent asset URLs. Never reconstruct a filename
+ * Returns: `string | null`
  * from API display text; punctuation, localization, and historic names differ. */
 export function getCanonicalTalentImageUrl(source: string | null | undefined): string | null {
   return source?.startsWith("/images/") ? preferredLocalImageUrl(source) : null;

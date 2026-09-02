@@ -91,6 +91,7 @@ function numericMatch(text: string, patterns: RegExp[]): number | null {
 
 /**
  * Transforms or validates resolve scaled description according to this module's data contract.
+ * Returns: `string`
  */
 export function resolveScaledDescription(description: string | null | undefined, level: number): string {
   if (!description) return "";
@@ -206,6 +207,7 @@ function detectTalentWeaponDamage(
  * Extract only explicit, calculator-safe stat changes. The full source text is
  * retained because many Paladins bonuses are conditional and should be read as
  * a simultaneous best-case estimate, not as permanent uptime.
+ * Returns: `Array`
  */
 export function detectDescriptionEffects(input: {
   id: number;
@@ -498,6 +500,7 @@ export function calculateAdditiveValue(values: number[]): DiminishedValue {
 
 /**
  * Transforms or validates extract weapon damage override according to this module's data contract.
+ * Returns: `number | null`
  */
 export function extractWeaponDamageOverride(description: string | null | undefined): number | null {
   const weaponTagged = /^\s*\[Weapon\]/i.test(description ?? "");

@@ -18,13 +18,12 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { getServerLocalization } from "@/lib/server-localization";
-import { SpotlightCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 const DISCORD_CLIENT_ID = "1504377146020200539";
 const SERVER_INSTALL_URL = `https://discord.com/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&integration_type=0&scope=applications.commands`;
 const USER_INSTALL_URL = `https://discord.com/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&integration_type=1&scope=applications.commands`;
 
-/** Render localized installation choices for the PaladinsCat Discord bot. */
+/** Render localized installation choices for the PaladinsCat Discord bot.  Returns: `Promise<React.JSX.Element>`. */
 export default async function PaladinsCatBotPage() {
   const { t } = await getServerLocalization();
 

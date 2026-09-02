@@ -34,7 +34,7 @@ type BlogCategoryFilter = BlogCategory | "all";
 
 /**
  * Handles the exported route operation using its declared request and response contract.
- * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ * Returns: `Promise<Metadata>`
  */
 export async function generateMetadata() {
   const { t } = await getServerLocalization();
@@ -61,7 +61,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
       <div className="mb-12 text-center">
-        <h1 className="text-4xl font-bold text-pc-accent mb-3">{t(BLOG_COPY_KEYS.title)}</h1>
+        <h1 className="pc-heading pc-heading-lg mb-3">{t(BLOG_COPY_KEYS.title)}</h1>
         <p className="text-lg text-pc-text-secondary">
           {t(BLOG_COPY_KEYS.subtitle)}
         </p>

@@ -5,7 +5,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Search } from "lucide-react";
 import {
   fetchAutomaticAfkPlayers,
   fetchCheaterPlayers,
@@ -18,7 +17,8 @@ import PlayerDirectoryGrid, { PLAYER_DIRECTORY_CARD_CLASS } from "@/components/p
 import PlayerDirectoryPagination, { usePersistentDirectoryPage } from "@/components/player-directory-pagination";
 import { useLocalization } from "@/lib/localization-context";
 import type { TranslationKey } from "@/lib/localization/messages";
-import { hasPlayerTag } from "@/lib/player-tag-threshold";
+import PlayersPageHeader from "@/components/ui/players-page-header";
+import PlayerDirectorySearch from "@/components/player-directory-search";
 
 type ModerationFilter = "dropperOnly" | "afkWintradeOnly" | "altAccountOnly";
 const AUTOMATIC_AFK_PAGE_SIZE = 32;
@@ -51,6 +51,7 @@ function communityVoteCount(player: CheaterPlayer, filter: ModerationFilter): nu
 
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ * Returns: `React.JSX.Element`
  */
 export default function PlayerModerationDirectory({
   titleKey,
@@ -149,7 +150,7 @@ export default function PlayerModerationDirectory({
                 {player.name}
             </PlayerName>
           </div>
-          <span className={`w-fit shrink-0 rounded-full border px-2 py-1 text-xs font-semibold ${voteClass}`}>
+          <span className={`w-fit shrink-0 text-xs font-semibold tabular-nums ${voteClass}`}>
             {formatNumber(voteCount)} {voteCount === 1 ? t("moderation.suspiciousVote") : t("moderation.suspiciousVotes")}
           </span>
         </Link>;
@@ -161,29 +162,14 @@ export default function PlayerModerationDirectory({
   const initialLoading = communityLoading;
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-6">
-      <div>
-        <Link href="/players" className="mb-2 inline-block text-xs text-pc-accent hover:underline">{t("generated.players.players")}</Link>
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">{t(titleKey)}</h1>
-        <div className={`mt-3 rounded-xl border px-4 py-3 text-sm font-medium backdrop-blur-md ${noticeClass}`} role="note">
-          {t(noticeKey)}
-        </div>
+    <div className="space-y-6">
+      <PlayersPageHeader title={t(titleKey)} />
+      <div className={`rounded-xl border px-4 py-3 text-sm font-medium ${noticeClass}`} role="note">
+        {t(noticeKey)}
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <label className="relative block w-full sm:max-w-sm">
-          <span className="sr-only">{t("generated.players.searchByInGameNameOrPlayerId")}</span>
-          <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-pc-text-muted" />
-          <input
-            value={query}
-            onChange={(event) => {
-              setQuery(event.target.value);
-              setAutomaticPage(1);
-            }}
-            placeholder={t("generated.players.searchByInGameNameOrPlayerId")}
-            className="w-full rounded-xl border border-pc-border bg-pc-bg-elevated py-2.5 pl-9 pr-3 text-sm text-pc-text outline-none transition-colors placeholder:text-pc-text-muted focus:border-pc-accent-mid"
-          />
-        </label>
+        <PlayerDirectorySearch label={t("generated.players.searchByInGameNameOrPlayerId")} value={query} onChange={(value) => { setQuery(value); setAutomaticPage(1); }} />
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
           <span className="flex items-center gap-2">
             <span className={`h-2 w-2 rounded-full ${showAutomaticAfk ? "bg-sky-400" : accentClass}`} />
@@ -221,9 +207,9 @@ export default function PlayerModerationDirectory({
                     <div key={player.id} className="min-w-0">
                       <Link href={`/players/afk-wintrade/${player.id}`} className={`${PLAYER_DIRECTORY_CARD_CLASS} group items-center justify-between gap-2 border-red-400/20 hover:border-red-400/40 hover:bg-red-400/[0.04]`}>
                         <div className="min-w-0 truncate text-sm font-semibold text-pc-text transition-colors group-hover:text-pc-accent">
-                          <PlayerName playerId={player.id} cheater={player.cheater} susCount={player.susCount} dropper={player.dropper} dropperVoteCount={player.dropperVoteCount} afkWintrade={player.afkWintrade} afkWintradeVoteCount={player.afkWintradeVoteCount} automaticAfk={hasPlayerTag(player.automaticMatchCount)} automaticAfkCount={player.automaticMatchCount} boosted={player.boosted} altAccount={player.altAccount}>{player.name}</PlayerName>
+                          <PlayerName playerId={player.id} cheater={player.cheater} susCount={player.susCount} dropper={player.dropper} dropperVoteCount={player.dropperVoteCount} afkWintrade={player.afkWintrade} afkWintradeVoteCount={player.afkWintradeVoteCount} automaticAfk automaticAfkCount={player.automaticMatchCount} boosted={player.boosted} altAccount={player.altAccount}>{player.name}</PlayerName>
                         </div>
-                        <span className="w-fit shrink-0 rounded-full border border-red-400/30 bg-red-400/15 px-2 py-1 text-xs font-semibold text-red-100">
+                        <span className="w-fit shrink-0 text-xs font-semibold tabular-nums text-red-100">
                           {formatNumber(player.automaticMatchCount)} {t("generated.players.matches.9f3e924")}
                         </span>
                       </Link>

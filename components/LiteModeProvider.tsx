@@ -11,6 +11,7 @@ import { getLiteMode, LITE_MODE_CHANGE_EVENT } from "@/lib/lite-mode";
  *
  * When enabled it tags <html> with `pc-lite`; shared CSS and the local
  * reduced-motion hook then disable decorative animation.
+ * Returns: `React.JSX.Element`
  */
 export default function LiteModeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {

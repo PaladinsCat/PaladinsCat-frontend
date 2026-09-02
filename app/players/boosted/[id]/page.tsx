@@ -8,8 +8,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { CalendarClock, Users } from "lucide-react";
 import { LoadingPanel } from "@/components/async-state";
+import PlayersPageHeader from "@/components/ui/players-page-header";
 import {
   fetchBoostedPlayerDetail,
   type BoostedPlayerDetail,
@@ -37,7 +37,7 @@ function displayMatchMap(mapName: string | null, queueId: number) {
 
 /**
  * Render the BoostedPlayerDetailPage view for the player boosted id page route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `React.JSX.Element`
  */
 export default function BoostedPlayerDetailPage() {
   const { t, formatDateTime, formatNumber } = useLocalization();
@@ -58,43 +58,32 @@ export default function BoostedPlayerDetailPage() {
   }, [playerId]);
 
   if (error) {
-    return <div className="mx-auto max-w-5xl rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-300">{error}</div>;
+    return <div className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-300">{error}</div>;
   }
-  if (!detail) return <div className="mx-auto max-w-5xl"><LoadingPanel /></div>;
+  if (!detail) return <LoadingPanel />;
 
   const { player, matches } = detail;
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-6">
-      <header>
-        <Link href="/players/boosted" className="mb-2 inline-block text-xs text-pc-accent hover:underline">{t("moderation.boostedPlayers")}</Link>
-        <div className="flex items-start gap-3">
-          <Users aria-hidden="true" className="mt-1 h-9 w-9 shrink-0 text-orange-300" strokeWidth={1.5} />
-          <div className="min-w-0">
-            <div className="mb-1 flex flex-wrap items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-pc-text-muted">
+    <div className="space-y-6">
+      <PlayersPageHeader
+        meta={<div className="mb-1 flex flex-wrap items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-pc-text-muted">
               {player.boosted && <span className="rounded border border-orange-400/30 bg-orange-400/15 px-1.5 py-0.5 text-orange-300">{t("moderation.boosted")}</span>}
               <span>{player.platform}</span>
               <span>{player.region}</span>
-            </div>
-            <h1 className="pc-heading pc-heading-lg truncate">
-              <Link href={`/players/${player.id}`} className="text-pc-accent transition-colors hover:text-pc-accent-light hover:underline">{player.name}</Link>
-            </h1>
-            <p className="mt-1 max-w-2xl text-sm text-pc-text-secondary">{t("moderation.boostedDescription")}</p>
-          </div>
-        </div>
-      </header>
+            </div>}
+        title={<Link href={`/players/${player.id}`} className="hover:text-pc-accent hover:underline">{player.name}</Link>}
+      />
 
-      <section className="grid grid-cols-2 overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated sm:grid-cols-4 sm:divide-x sm:divide-pc-border">
-        <div className="border-b border-pc-border p-4 sm:border-b-0"><div className="text-xs text-pc-text-muted">{t("generated.players.trackedMatches")}</div><div className="mt-1 text-xl font-semibold text-pc-text">{formatNumber(matches.length)}</div></div>
-        <div className="border-b border-l border-pc-border p-4 sm:border-b-0 sm:border-l-0"><div className="text-xs text-pc-text-muted">{t("moderation.cheaterDuo")}</div><div className="mt-1 text-xl font-semibold text-pc-text">{formatNumber(player.cheaters.length)}</div></div>
-        <div className="p-4"><div className="text-xs text-pc-text-muted">{t("generated.players.firstObserved")}</div><div className="mt-1 text-sm font-semibold text-pc-text">{observedAt(player.firstSeen)}</div></div>
-        <div className="border-l border-pc-border p-4 sm:border-l-0"><div className="text-xs text-pc-text-muted">{t("generated.players.lastObserved")}</div><div className="mt-1 text-sm font-semibold text-pc-text">{observedAt(player.lastSeen)}</div></div>
+      <section className="grid grid-cols-2 divide-x divide-pc-border overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated">
+        <div className="p-4"><div className="text-xs text-pc-text-muted">{t("generated.players.trackedMatches")}</div><div className="mt-1 text-xl font-semibold text-pc-text">{formatNumber(matches.length)}</div></div>
+        <div className="p-4"><div className="text-xs text-pc-text-muted">{t("moderation.cheaterDuo")}</div><div className="mt-1 text-xl font-semibold text-pc-text">{formatNumber(player.cheaters.length)}</div></div>
       </section>
 
       <section className="rounded-xl border border-orange-400/20 bg-pc-bg-elevated p-4">
         <h2 className="mb-3 text-sm font-semibold text-pc-text">{t("moderation.cheaterDuo")}</h2>
         <div className="flex flex-wrap gap-2">
           {player.cheaters.map((cheater) => (
-            <Link key={cheater.id} href={`/players/${cheater.id}`} className="rounded-md border border-red-500/20 bg-[var(--pc-bg-secondary)] px-2.5 py-2 text-xs text-red-200 transition-colors hover:border-red-400/40 hover:text-white">
+            <Link key={cheater.id} href={`/players/${cheater.id}`} className="text-xs text-red-200 transition-colors hover:text-white hover:underline">
               <span className="font-semibold">{cheater.name}</span>
               <span className="ml-1 text-red-200/70">· {formatNumber(cheater.matchCount)}</span>
             </Link>
@@ -104,13 +93,13 @@ export default function BoostedPlayerDetailPage() {
 
       <section>
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-          <h2 className="pc-card-title shadow-sm">{t("generated.players.observedMatches")}</h2>
+          <h2 className="pc-card-title shadow-sm">{t("generated.players.matches")}</h2>
           <span className="text-xs text-pc-text-muted">{formatNumber(matches.length)} {t("generated.players.matches.9f3e924")}</span>
         </div>
         {matches.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-pc-border p-8 text-center text-sm text-pc-text-muted">{t("generated.players.noLinkedObservations")}</div>
+          <div className="rounded-xl border border-dashed border-pc-border p-8 text-center text-sm text-pc-text-muted">{t("generated.matches.noMatchingGames")}</div>
         ) : (
-          <div className="pc-card">
+          <div>
             <div className="space-y-2 lg:hidden">
               {matches.map((match) => (
                 <div key={match.matchId} className="pc-mobile-panel flex min-w-0 items-center gap-3 p-3">
@@ -131,7 +120,7 @@ export default function BoostedPlayerDetailPage() {
                 </div>
               ))}
             </div>
-            <div className="hidden overflow-x-auto lg:block">
+            <div className="pc-card-flush hidden overflow-x-auto lg:block">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-pc-border text-left text-xs text-pc-text-muted">
@@ -179,9 +168,6 @@ export default function BoostedPlayerDetailPage() {
         )}
       </section>
 
-      <section className="rounded-xl border border-pc-border bg-pc-bg-elevated p-4">
-        <div className="flex items-center gap-2 text-xs text-pc-text-muted"><CalendarClock className="h-4 w-4" />{t("generated.players.firstObserved")} {observedAt(player.firstSeen)} · {t("generated.players.lastObserved")} {observedAt(player.lastSeen)}</div>
-      </section>
     </div>
   );
 }

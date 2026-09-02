@@ -28,7 +28,7 @@ import { getServerLocalization } from "@/lib/server-localization";
 
 /**
  * Handles the exported route operation using its declared request and response contract.
- * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ * Returns: `Promise<Metadata>`
  */
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getServerLocalization();
@@ -75,7 +75,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-/** Render the site shell with localized metadata, nonce-aware security data, and shared providers. */
+/** Render the site shell with localized metadata, nonce-aware security data, and shared providers.  Returns: `Promise<React.JSX.Element>`. */
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { locale, messages, t } = await getServerLocalization();
   const nonce = (await headers()).get("x-nonce") ?? undefined;
@@ -133,7 +133,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang={locale} className={cn("dark", "font-sans")}>
-      <head></head>
+      <head>
+        {/* Catppuccin palette (preview) — loaded via <link> because the
+            bundler's PostCSS transform hoists external @import url() past
+            all rules, which is invalid CSS. */}
+        <link
+          href="https://cdn.jsdelivr.net/npm/@catppuccin/palette/css/catppuccin.css"
+          rel="stylesheet"
+        />
+      </head>
       <body className="min-h-screen bg-pc-bg text-pc-text flex flex-col">
         <CoreUiDragGuard />
         <ImageAssetFallback />

@@ -23,6 +23,7 @@ function serverApiBase(): string {
 
 /**
  * Fetches JSON from the backend with server-side caching, revalidation, and error handling.
+ * Returns: `Promise<T>`
  */
 export async function fetchServerJson<T>(path: string, options: ServerFetchOptions = {}): Promise<T> {
   const { timeoutMs = 10_000, ...requestOptions } = options;

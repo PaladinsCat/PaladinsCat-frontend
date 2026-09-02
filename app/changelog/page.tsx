@@ -330,7 +330,7 @@ function Pagination({ page, totalPages, onChange }: { page: number; totalPages: 
 
 /**
  * Handles the exported route operation using its declared request and response contract.
- * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ * Returns: `React.JSX.Element`
  */
 export default function ChangelogPage() {
   const { t } = useLocalization();
@@ -356,7 +356,7 @@ export default function ChangelogPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="space-y-1">
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.changelog.changelog")}</h1>
+        <h1 className="pc-heading pc-heading-lg">{t("generated.changelog.changelog")}</h1>
         <p className="text-sm text-pc-text-muted">
           {t(totalEntries === 1 ? "common.count.deploymentRecordedOne" : "common.count.deploymentRecordedMany", { count: totalEntries })}</p>
       </div>

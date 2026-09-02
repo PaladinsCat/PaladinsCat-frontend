@@ -17,7 +17,7 @@ const projectComponents = ["Frontend", "Backend", "Discord Bot", "Wiki", "Locali
 
 /**
  * Handles the exported route operation using its declared request and response contract.
- * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ * Returns: `React.JSX.Element`
  */
 export default function ProjectsPage() {
   const { user, isLoading } = useAuth();
@@ -50,7 +50,7 @@ export default function ProjectsPage() {
 
   const columnLabel:Record<Column,string>={Backlog:t("generated.operations.projectsBacklog"),Building:t("generated.operations.projectsBuilding"),Review:t("generated.operations.projectsReview"),Done:t("generated.operations.projectsDone")};
   return <div className="space-y-5">
-    <header className="flex items-center justify-between border-b border-pc-border pb-5"><h1 className="pc-heading pc-heading-lg text-pc-accent">{t("generated.operations.projects")}</h1><button type="button" onClick={addWorkItem} className="pc-btn-primary inline-flex items-center gap-2 text-sm"><Plus className="h-4 w-4" /> {t("generated.operations.projectsAddTask")}</button></header>
+    <header className="flex items-center justify-between border-b border-pc-border pb-5"><h1 className="pc-heading pc-heading-lg">{t("generated.operations.projects")}</h1><button type="button" onClick={addWorkItem} className="pc-btn-primary inline-flex items-center gap-2 text-sm"><Plus className="h-4 w-4" /> {t("generated.operations.projectsAddTask")}</button></header>
     <section className="overflow-x-auto pb-3"><div className="grid min-w-[940px] grid-cols-4 gap-4">{columns.map((column) => {const value=column.toLowerCase() as WorkItem["column_name"];return <div key={column} className="rounded-xl border border-pc-border bg-pc-bg/55 p-3"><div className="mb-3 flex items-center justify-between"><h2 className="text-sm font-bold text-pc-text">{columnLabel[column]}</h2><span className="rounded-full bg-pc-bg-elevated px-2 py-0.5 text-xs text-pc-text-muted">{items.filter((item) => item.column_name === value).length}</span></div><div className="space-y-3">{items.filter((item) => item.column_name === value).map((item) => <WorkCard key={item.id} item={item} onClick={() => setSelected(item)} />)}{items.every((item) => item.column_name !== value) && <div className="rounded-lg border border-dashed border-pc-border/70 p-4 text-center text-xs text-pc-text-muted">{t("generated.operations.projectsNoTasks")}</div>}</div></div>})}</div>{error&&<p className="mt-3 text-sm text-rose-200">{error}</p>}</section>
     {selected && <TaskDialog item={selected} onClose={() => setSelected(null)} onSave={save} />}
   </div>;

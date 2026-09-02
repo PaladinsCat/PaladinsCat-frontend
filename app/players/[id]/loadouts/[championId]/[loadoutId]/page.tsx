@@ -6,11 +6,11 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
 import { useParams } from "next/navigation";
 import SmartImage from "@/components/SmartImage";
 import { ErrorState, LoadingPanel } from "@/components/async-state";
 import LoadoutExportButton from "@/components/loadout-export-button";
+import PlayersPageHeader from "@/components/ui/players-page-header";
 import { fetchPlayerLoadoutDeck, fetchPlayerProfile, type PlayerLoadout, type PlayerLoadoutFreshness } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { loadBuildCardReferences, type BuildCardReference } from "@/lib/build-reference";
@@ -19,7 +19,7 @@ import { useLocalization } from "@/lib/localization-context";
 import styles from "./page.module.css";
 
 function cardDescription(description: string | null | undefined, level: number, formatValue: (value: number) => string) {
-  if (!description) return "Card description is not available in the local reference yet.";
+  if (!description) return "";
   const safeLevel = Math.max(1, Math.min(5, Math.floor(Number(level) || 1)));
   return description.replace(/\{(?:scale=)?(-?[\d,]+(?:\.\d+)?)\|(-?[\d,]+(?:\.\d+)?)}/gi, (_match, baseText: string, stepText: string) => {
     const base = Number(baseText.replaceAll(",", ""));
@@ -48,7 +48,7 @@ function championBanner(name: string) {
 
 /**
  * Render the PlayerLoadoutDetailPage view for the player id loadouts championId loadoutId page route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `React.JSX.Element`
  */
 export default function PlayerLoadoutDetailPage() {
   const { t, formatNumber } = useLocalization();
@@ -87,28 +87,29 @@ export default function PlayerLoadoutDetailPage() {
   if (!championName || !loadout) return <ErrorState title={t("generated.players.loadoutUnavailable")} message={t("generated.players.thisSavedDeckIsNoLongerInThePlayerS")} />;
 
   const entries = loadout.cardIds.slice(0, 5).map((cardId, index) => ({ cardId, level: Math.max(1, loadout.cardLevels[index] ?? 1), card: cardsById.get(cardId) }));
-  return <div className="space-y-4">
-    <div className="flex items-center justify-between gap-3">
-      <Link href={`/players/${playerId}/loadouts/${championId}`} className="inline-block text-xs text-pc-accent hover:underline">← {championName} {t("generated.players.savedDecks")}</Link>
-      <LoadoutExportButton championName={championName} loadoutId={loadoutId} target={loadoutRef} />
-    </div>
+  return <div className="space-y-6">
+    <PlayersPageHeader
+      title={loadout.loadoutName || t("generated.matches.loadout")}
+      actions={<LoadoutExportButton championName={championName} loadoutId={loadoutId} target={loadoutRef} />}
+    />
     <section ref={loadoutRef} className={styles.detail} aria-label={t("generated.players.fiveCardSavedDeck")}>
       <SmartImage src={championBanner(championName)} onError={(event) => { event.currentTarget.src = getChampionIconSafe(championName); }} alt="" aria-hidden="true" className={styles.background} />
       <header className={styles.header}>
         <div className={styles.identity}>
           <div className={styles.brand}><SmartImage src="/images/icons/paladinscat.png" alt="" /><span>{t("generated.common.paladinscat")}</span><span className={styles.tag}>{t("generated.matches.loadout")}</span></div>
-          <h1>{playerName}</h1>
+          <div className={styles.playerName}>{playerName}</div>
           <div className={styles.context}><span>{championName}</span><span>{loadout.loadoutName || "Unnamed Loadout"}</span></div>
         </div>
       </header>
       <section className={styles.cards} aria-label={t("generated.players.deckCards")}>
         {entries.map(({ cardId, level, card }) => {
           const name = card?.name || t("generated.players.cardValue1", { value1: cardId });
+          const description = cardDescription(card?.description, level, formatCardValue);
           return <article key={cardId} className={styles.card} aria-label={t("common.match.cardLevel", { level })}>
             <SmartImage src={card?.iconUrl || "/images/icons/Player_Loadouts_Icon.png"} alt="" className={styles.cardArt} />
             <SmartImage src={loadoutFrame(level)} alt="" className={styles.cardFrame} />
             <h2 className={name.length >= 22 ? styles.extraLongCardName : name.length >= 20 ? styles.longCardName : undefined}>{name}</h2>
-            <p>{cardDescription(card?.description, level, formatCardValue)}</p>
+            {description && <p>{description}</p>}
             <span className={styles.level}>{level}</span>
           </article>;
         })}

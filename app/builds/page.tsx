@@ -12,12 +12,12 @@ import { formatLocalDateTime } from "@/lib/time-format";
 import { EmptyState, ErrorState } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { useLocalization } from "@/lib/localization-context";
-import { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 
 /**
  * Render the BuildsPage view for builds page.
  * Return the React tree for the declared inputs and page data.
+ * Returns: `React.JSX.Element`
  */
 export default function BuildsPage() {
   const { t , formatDateTime} = useLocalization();
@@ -55,7 +55,7 @@ export default function BuildsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-pc-accent">
+        <h2 className="pc-card-title">
           <ScrambleText text={t("generated.builds.builds")} speed={30} iterations={15} delayFromCenter={false} />
         </h2>
         <Link

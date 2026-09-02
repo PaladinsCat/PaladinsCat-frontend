@@ -7,7 +7,7 @@ import PerformanceDiffDirectory from "@/components/performance-diff-directory";
 
 /**
  * Render the SupportDiffPage view for the player support-diff page route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `React.JSX.Element`
  */
 export default function SupportDiffPage() {
   return <PerformanceDiffDirectory metric="support-diff" />;

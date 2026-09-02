@@ -6,7 +6,7 @@ import { createLocalizedMetadata } from "@/lib/server-localization";
 
 /**
  * Renders the exported statistics view with its route data.
- * Returns the declared route value; network, cache, and navigation effects follow the implementation.
+ * Returns: `Promise<Metadata>`
  */
 export async function generateMetadata() {
   return createLocalizedMetadata("seo.stats.talents.title", {
@@ -17,7 +17,7 @@ export async function generateMetadata() {
 
 /**
  * Renders the exported statistics view with its route data.
- * Returns the declared route value; network, cache, and navigation effects follow the implementation.
+ * Returns: `React.JSX.Element`
  */
 export default function TalentsLayout({ children }: { children: React.ReactNode }) {
   return children;

@@ -31,7 +31,7 @@ import { useLocalization } from "@/lib/localization-context";
 
 /**
  * Handles the exported route operation using its declared request and response contract.
- * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ * Returns: `React.JSX.Element`
  */
 export default function AccountPage() {
   const { t, formatDate } = useLocalization();
@@ -231,7 +231,7 @@ export default function AccountPage() {
             <UserRoundCog className="h-7 w-7" aria-hidden="true" />
           </span>
           <div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-pc-text sm:text-4xl">{t("generated.account.accountSettings")}</h1>
+            <h1 className="pc-heading pc-heading-lg">{t("generated.account.accountSettings")}</h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-pc-text-secondary sm:text-base">
               {t("generated.account.manageYourProfileLinkYourPaladinsPlayerAndChangeYour")}</p>
           </div>

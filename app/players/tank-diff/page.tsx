@@ -7,7 +7,7 @@ import PerformanceDiffDirectory from "@/components/performance-diff-directory";
 
 /**
  * Render the TankDiffPage view for the player tank-diff page route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `React.JSX.Element`
  */
 export default function TankDiffPage() {
   return <PerformanceDiffDirectory metric="tank-diff" />;
