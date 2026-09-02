@@ -7,7 +7,7 @@ import CommunityVoteLeaderboard from "@/components/CommunityVoteLeaderboard";
 
 /**
  * Render the WeirdosPage view for the player weirdos page route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `React.JSX.Element`
  */
 export default function WeirdosPage() {
   return <CommunityVoteLeaderboard kind="weirdo" />;

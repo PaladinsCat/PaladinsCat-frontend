@@ -58,6 +58,7 @@ export async function getServerLocalization() {
 
 /**
  * Builds page metadata from localized messages and the requested locale.
+ * Returns: `Promise<Metadata>`
  */
 export async function createLocalizedMetadata(
   titleKey: TranslationKey,

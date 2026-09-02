@@ -7,7 +7,7 @@ import { createLocalizedMetadata } from "@/lib/server-localization";
 
 /**
  * Build SEO metadata for the player parties layout route.
- * Returns the Next.js metadata object consumed by this route without mutating application data.
+ * Returns: `Promise<Metadata>`
  */
 export async function generateMetadata() {
   return createLocalizedMetadata("seo.players.parties.title", {
@@ -18,7 +18,7 @@ export async function generateMetadata() {
 
 /**
  * Render the layout for the player parties layout route.
- * Returns the route shell around child content using the declared props.
+ * Returns: `React.JSX.Element`
  */
 export default function RankedPartiesLayout({ children }: { children: React.ReactNode }) {
   return children;

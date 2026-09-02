@@ -20,7 +20,7 @@ type SortDir = "asc" | "desc";
 
 /**
  * Renders the exported statistics view with its route data.
- * Returns the declared route value; network, cache, and navigation effects follow the implementation.
+ * Returns: `React.JSX.Element`
  */
 export default function LoadoutsPage() {
   const { t , formatPercent, formatNumber} = useLocalization();

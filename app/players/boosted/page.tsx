@@ -64,7 +64,7 @@ async function fetchAllBoostedPlayers(name: string): Promise<BoostedPlayer[]> {
 
 /**
  * Render the BoostedPlayersPage view for the player boosted page route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `React.JSX.Element`
  */
 export default function BoostedPlayersPage() {
   const { t , formatNumber} = useLocalization();

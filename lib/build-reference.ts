@@ -184,6 +184,7 @@ async function buildItems(): Promise<BuildItemReference[]> {
 
 /** itemDescriptionAtLevel applies the module-specific transformation to its declared inputs.
  * Contract: validates its inputs and returns the existing module result without mutating caller state.
+ * Returns: `string | null`
  */
 export function itemDescriptionAtLevel(
   item: Pick<BuildItemReference, "description" | "tiers"> | null | undefined,
@@ -262,6 +263,7 @@ async function buildTalents(championId: number, champion?: ChampionData): Promis
 
 /** loadBuildReferenceData applies the module-specific transformation to its declared inputs.
  * Contract: validates its inputs and returns the existing module result without mutating caller state.
+ * Returns: `Promise<BuildReferenceData>`
  */
 export async function loadBuildReferenceData(championId: number, championSlug: string): Promise<BuildReferenceData> {
   const champion = championSlug ? await getChampionData(championSlug).catch(() => undefined) : undefined;
@@ -282,6 +284,7 @@ export async function loadBuildCardReferences(championId: number, championSlug: 
 
 /** groupByCategory applies the module-specific transformation to its declared inputs.
  * Contract: validates its inputs and returns the existing module result without mutating caller state.
+ * Returns: `Array<[string, T[]]>`
  */
 export function groupByCategory<T extends { category: string }>(rows: T[]): Array<[string, T[]]> {
   const grouped = new Map<string, T[]>();

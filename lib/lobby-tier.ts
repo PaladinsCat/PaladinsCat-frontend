@@ -22,6 +22,7 @@ export type LobbyTierDefinition = {
 
 /**
  * Defines the  l o b b y_ t i e r_ f i l t e r s contract used by this module.
+ * Returns: `Record<LobbyTierFilter, LobbyTierDefinition>`
  */
 export const LOBBY_TIER_FILTERS: Record<LobbyTierFilter, LobbyTierDefinition> = {
   all: {
@@ -70,6 +71,7 @@ export function isLobbyTierFilter(value: unknown): value is LobbyTierFilter {
 
 /**
  * Reads stored lobby tier filter from the module's configured source.
+ * Returns: `string`
  */
 export function getStoredLobbyTierFilter(): LobbyTierFilter {
   if (typeof window === "undefined") return "all";
@@ -98,6 +100,7 @@ const UNSCOPED_STAT_PATHS = [
 
 /**
  * Defines the with stored lobby tier contract used by this module.
+ * Returns: `string`
  */
 export function withStoredLobbyTier(path: string): string {
   if (typeof window === "undefined") return path;

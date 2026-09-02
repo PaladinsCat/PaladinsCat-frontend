@@ -28,7 +28,7 @@ import { getServerLocalization } from "@/lib/server-localization";
 
 /**
  * Handles the exported route operation using its declared request and response contract.
- * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ * Returns: `Promise<Metadata>`
  */
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getServerLocalization();
@@ -75,7 +75,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-/** Render the site shell with localized metadata, nonce-aware security data, and shared providers. */
+/** Render the site shell with localized metadata, nonce-aware security data, and shared providers.  Returns: `Promise<React.JSX.Element>`. */
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { locale, messages, t } = await getServerLocalization();
   const nonce = (await headers()).get("x-nonce") ?? undefined;

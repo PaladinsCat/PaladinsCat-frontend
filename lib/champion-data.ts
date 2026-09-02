@@ -80,6 +80,7 @@ async function loadChampionDataMap(): Promise<ChampionDataMap> {
 
 /** Use getChampionData to apply the module-specific champion data or asset behavior.
  * Contract: accepts its declared inputs and returns the documented value without changing caller-side state.
+ * Returns: `Promise<ChampionData | undefined>`
  */
 export async function getChampionData(slug: string): Promise<ChampionData | undefined> {
   const data = await loadChampionDataMap();

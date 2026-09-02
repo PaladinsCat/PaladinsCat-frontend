@@ -187,7 +187,7 @@ function TeamSummary({ label, won, team, teamNumber }: { label: string; won: boo
   );
 }
 
-/** Present match players and derived score metrics using localized, linkable team rows. */
+/** Present match players and derived score metrics using localized, linkable team rows.  Returns: `React.JSX.Element`. */
 export default function BrowserScoreboard({ match, queueLabel, team1, team2, bans }: BrowserScoreboardProps) {
   const { formatNumber, locale, t } = useLocalization();
   const formatMatchDuration = (seconds: number) => {

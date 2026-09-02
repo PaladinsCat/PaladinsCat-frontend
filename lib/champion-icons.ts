@@ -34,6 +34,7 @@ function normalizeChampionName(name: string): string {
 
 /**
  * Return the generic champion icon path.
+ * Returns: `string`
  */
 export function getGenericChampionIcon(): string {
   return GENERIC_ICON;
@@ -45,6 +46,7 @@ export function getGenericChampionIcon(): string {
  *
  * Handles case and punctuation variations in champion names from different sources
  * (database, API responses, static data).
+ * Returns: `string`
  */
 export function getChampionIconSafe(name: string | null | undefined): string {
   if (!name) return GENERIC_ICON;

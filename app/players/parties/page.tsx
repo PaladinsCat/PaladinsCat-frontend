@@ -31,7 +31,7 @@ function MatchCount({ count, href }: { count: number; href: string }) {
 
 /**
  * Render the RankedPartiesPage view for the player parties page route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `React.JSX.Element`
  */
 export default function RankedPartiesPage() {
   const { t, formatNumber } = useLocalization();

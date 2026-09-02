@@ -97,7 +97,7 @@ export const PLAYER_PROFILE_ERROR_KEYS = {
 
 /**
  * Render the PlayerProfileClient view for the player id player-profile-client route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `React.JSX.Element`
  */
 export default function PlayerProfileClient({
   id,

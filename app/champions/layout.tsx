@@ -7,6 +7,7 @@ import { createLocalizedMetadata } from "@/lib/server-localization";
 /**
  * Build SEO metadata for champions layout.
  * Return the Next.js metadata object used by the page without mutating application data.
+ * Returns: `Promise<Metadata>`
  */
 export async function generateMetadata() {
   return createLocalizedMetadata("seo.champions.title", {
@@ -17,6 +18,7 @@ export async function generateMetadata() {
 
 /**
  * Render the ChampionsLayout view for champions layout.
+ * Returns: `React.JSX.Element`
  * Return the React tree for the declared inputs and page data.
  */
 export default function ChampionsLayout({ children }: { children: React.ReactNode }) {

@@ -8,7 +8,7 @@ import { oidcBffServiceHeaders } from "@/lib/oidc-bff-service";
 
 /**
  * Selects the Node.js runtime required by this server handler.
- * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ * Returns: `string`
  */
 export const runtime = "nodejs";
 function backend() {
@@ -21,7 +21,7 @@ function backend() {
 // revocation route. It is never a browser-facing page and returns no user data.
 /**
  * Handles the exported route operation using its declared request and response contract.
- * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ * Returns: `Promise<Response>`
  */
 export async function POST(request: NextRequest) {
   const issuer = normalizedHttpsIssuer(process.env.OIDC_ISSUER);

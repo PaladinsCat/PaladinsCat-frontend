@@ -17,7 +17,7 @@ import {
 import HomePageClient from "./home-page-client";
 import { getServerLocalization } from "@/lib/server-localization";
 
-/** Keep the homepage canonical URL stable for crawlers. */
+/** Keep the homepage canonical URL stable for crawlers.  Returns: `Promise<React.JSX.Element>`. */
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };

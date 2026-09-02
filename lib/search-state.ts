@@ -10,12 +10,14 @@ import type {
 
 /**
  * Transforms or validates normalize according to this module's data contract.
+ * Returns: `String`
  */
 export function normalize(value: unknown) {
   return String(value ?? "").trim().toLowerCase();
 }
 
 /**
+ * Returns: `Array`
  * Defines the type sort contract used by this module.
  */
 export function typeSort(type: UniversalSearchType) {

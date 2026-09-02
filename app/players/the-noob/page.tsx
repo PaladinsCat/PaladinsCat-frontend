@@ -7,7 +7,7 @@ import PerformanceDiffDirectory from "@/components/performance-diff-directory";
 
 /**
  * Render the TheNoobPage view for the player the-noob page route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `React.JSX.Element`
  */
 export default function TheNoobPage() {
   return <PerformanceDiffDirectory metric="the-noob" />;

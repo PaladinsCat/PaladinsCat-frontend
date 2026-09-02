@@ -8,6 +8,7 @@ import { useSearchParams } from "next/navigation";
 
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ * Returns: `string | null`
  */
 export function safeInternalReturnTo(value: string | null | undefined): string | null {
   if (!value || !value.startsWith("/") || value.startsWith("//")) return null;
@@ -16,6 +17,7 @@ export function safeInternalReturnTo(value: string | null | undefined): string |
 
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ * Returns: `React.JSX.Element`
  */
 export default function ContextBackLink({ fallbackHref, label = "Back" }: { fallbackHref: string; label?: string }) {
   const searchParams = useSearchParams();

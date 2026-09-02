@@ -23,6 +23,7 @@ function readPage(param: string, storageKey: string) {
 
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ * Returns: `Array`
  */
 export function usePersistentDirectoryPage(param = "page") {
   const pathname = usePathname();
@@ -67,6 +68,7 @@ interface Props {
 }
 
 /** Provide this exported item.
+ * Returns: `React.JSX.Element`
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
  */
 export default function PlayerDirectoryPagination({ page, totalPages, onPageChange, embedded = false, className }: Props) {

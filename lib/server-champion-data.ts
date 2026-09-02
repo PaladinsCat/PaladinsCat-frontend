@@ -23,6 +23,7 @@ function loadChampionDataMap(): Promise<ChampionDataMap> {
 
 /**
  * Loads one champion's catalog data for server-rendered champion pages.
+ * Returns: `Promise<ChampionData | undefined>`
  */
 export async function getServerChampionData(slug: string): Promise<ChampionData | undefined> {
   const data = await loadChampionDataMap();

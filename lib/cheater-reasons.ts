@@ -5,6 +5,7 @@ const IMPORTED_ALLEGATIONS_PATTERN = /Imported from supplied confirmed-cheater l
 
 /** Apply getCoreCheaterReason to the declared input values.
  * Contract: returns the module-specific validated, stored, formatted, or resolved value without external side effects.
+ * Returns: `string`
  */
 export function getCoreCheaterReason(reason: string | null | undefined): string {
   const value = reason?.trim() ?? "";

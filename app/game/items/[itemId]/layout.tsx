@@ -12,6 +12,7 @@ type Props = {
 /**
  * Build SEO metadata for game items itemId layout.
  * Return the Next.js metadata object used by the page without mutating application data.
+ * Returns: `Promise<Metadata>`
  */
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { itemId } = await params;
@@ -24,6 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 /**
  * Render the ItemDetailLayout view for game items itemId layout.
  * Return the React tree for the declared inputs and page data.
+ * Returns: `React.JSX.Element`
  */
 export default function ItemDetailLayout({ children }: Props) {
   return children;

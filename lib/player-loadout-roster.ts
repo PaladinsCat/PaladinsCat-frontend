@@ -12,6 +12,7 @@ let rosterPromise: Promise<PlayerLoadoutChampion[]> | null = null;
  * Saved decks use Hi-Rez champion IDs, not the compact display-order IDs in
  * static-champions.ts. Use the database catalog for links and filters so deck
  * rows, card references, and player loadouts share one identity.
+ * Returns: `Promise<PlayerLoadoutChampion[]>`
  */
 export function getPlayerLoadoutChampionRoster(): Promise<PlayerLoadoutChampion[]> {
   if (!rosterPromise) {

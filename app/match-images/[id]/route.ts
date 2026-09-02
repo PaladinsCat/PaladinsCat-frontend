@@ -17,6 +17,7 @@ function rendererUrl() {
 /**
  * Handle the GET HTTP request for match-images id route.
  * Validate the request and return the handler response with its declared status behavior.
+ * Returns: `Promise<Response>`
  */
 export async function GET(_request: NextRequest, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;

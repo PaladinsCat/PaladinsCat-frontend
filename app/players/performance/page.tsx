@@ -32,7 +32,7 @@ type PerformanceMode = "match" | "account" | "champion";
 
 /**
  * Render the PerformanceLeaderboardPage view for the player performance page route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `React.JSX.Element`
  */
 export default function PerformanceLeaderboardPage({ mode = "match" }: { mode?: PerformanceMode }) {
   const { t , formatNumber} = useLocalization();

@@ -56,7 +56,7 @@ function RankBadge({ rank }: { rank: number }) {
 
 /**
  * Render the ChampionEloPage view for the player elo page route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `React.JSX.Element`
  */
 export default function ChampionEloPage({ mode }: { mode?: ELOMode }) {
   return (

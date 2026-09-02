@@ -35,7 +35,7 @@ function tpDelta(value: number | null) {
 
 /**
  * Render the PrivateAccountDetailPage view for the player private-accounts id page route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `React.JSX.Element`
  */
 export default function PrivateAccountDetailPage() {
   const { t, formatDateTime, formatNumber } = useLocalization();

@@ -1,5 +1,6 @@
 /** Bounds response-body reads before JSON parsing.
  * This helper limits response-body reads before JSON decoding.
+ * Returns: `Promise<Uint8Array | null>`
  */
 /** readBodyWithinLimit applies the module-specific transformation to its declared inputs.
  * Contract: validates its inputs and returns the existing module result without mutating caller state.

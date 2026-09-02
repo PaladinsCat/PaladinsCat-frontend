@@ -7,7 +7,7 @@ import CommunityVoteLeaderboard from "@/components/CommunityVoteLeaderboard";
 
 /**
  * Render the HallOfFamePage view for the player hall-of-fame page route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `React.JSX.Element`
  */
 export default function HallOfFamePage() {
   return <CommunityVoteLeaderboard kind="hall_of_fame" />;

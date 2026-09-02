@@ -10,7 +10,7 @@ interface SmartImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, "src
   src: string;
 }
 
-/** Uses AVIF for local artwork and retries the matching PNG on failure. */
+/** Uses AVIF for local artwork and retries the matching PNG on failure.  Returns: `React.JSX.Element`. */
 export default function SmartImage({ src, onError, ...props }: SmartImageProps) {
   const sources = localImageSources(src);
   const [currentSrc, setCurrentSrc] = useState(sources.preferred);

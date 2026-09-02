@@ -13,6 +13,7 @@ type Props = {
 /**
  * Build SEO metadata for game maps mapName layout.
  * Return the Next.js metadata object used by the page without mutating application data.
+ * Returns: `Promise<Metadata>`
  */
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { mapName } = await params;
@@ -31,6 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 /**
  * Render the MapDetailLayout view for game maps mapName layout.
  * Return the React tree for the declared inputs and page data.
+ * Returns: `React.JSX.Element`
  */
 export default function MapDetailLayout({ children }: Props) {
   return children;

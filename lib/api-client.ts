@@ -794,6 +794,10 @@ export interface PlayerLevelLeaderboardEntry {
   championName: string | null;
   level: number;
   xp: number;
+  wins: number;
+  losses: number;
+  winRate: number | null;
+  kda: number | null;
   region: string | null;
   platform: string | null;
 }
@@ -810,26 +814,35 @@ export async function fetchPlayerLevelLeaderboard(mode: 'account' | 'champion', 
   if (filters.playerId != null) query.set('playerId', String(filters.playerId));
   if (filters.role != null) query.set('role', filters.role);
   if (filters.championId != null) query.set('championId', String(filters.championId));
-  const raw = await fetchJson<Array<{
-    rank: number; class_rank: number | null; champion_rank: number | null; class_name: string | null;
-    player_id: number; player_name: string;
-    champion_id: number | null; champion_name: string | null;
-    level: number | string; xp: number | string; region: string | null; platform: string | null;
-  }>>(`/players/leaderboard/levels?${query.toString()}`);
-  return raw.map((row) => ({
-    rank: Number(row.rank),
-    classRank: row.class_rank == null ? null : Number(row.class_rank),
-    championRank: row.champion_rank == null ? null : Number(row.champion_rank),
-    className: row.class_name ?? null,
-    playerId: Number(row.player_id),
-    playerName: String(row.player_name),
-    championId: row.champion_id == null ? null : Number(row.champion_id),
-    championName: row.champion_name ?? null,
-    level: Number(row.level),
-    xp: Number(row.xp),
-    region: row.region ?? null,
-    platform: row.platform ?? null,
-  }));
+  try {
+    const raw = await fetchJson<Array<{
+      rank: number; class_rank: number | null; champion_rank: number | null; class_name: string | null;
+      player_id: number; player_name: string;
+      champion_id: number | null; champion_name: string | null;
+      level: number | string; xp: number | string; wins: number | string; losses: number | string;
+      win_rate: number | string | null; kda: number | string | null; region: string | null; platform: string | null;
+    }>>(`/players/leaderboard/levels?${query.toString()}`);
+    return raw.map((row) => ({
+      rank: Number(row.rank),
+      classRank: row.class_rank == null ? null : Number(row.class_rank),
+      championRank: row.champion_rank == null ? null : Number(row.champion_rank),
+      className: row.class_name ?? null,
+      playerId: Number(row.player_id),
+      playerName: String(row.player_name),
+      championId: row.champion_id == null ? null : Number(row.champion_id),
+      championName: row.champion_name ?? null,
+      level: Number(row.level),
+      xp: Number(row.xp),
+      wins: Number(row.wins),
+      losses: Number(row.losses),
+      winRate: row.win_rate == null ? null : Number(row.win_rate),
+      kda: row.kda == null ? null : Number(row.kda),
+      region: row.region ?? null,
+      platform: row.platform ?? null,
+    }));
+  } catch {
+    return [];
+  }
 }
 
 export interface PerformanceMetricSummary {
@@ -1512,6 +1525,7 @@ function mapPartyPair(row: any): PartyPairSummary {
  * Fetch private accounts directory data for client consumers.
  *
  * Accepts params; returns fetchPrivateAccountsDirectory data after a backend request, using shared authentication and cache behavior.
+ * Returns: `Promise<object>`
  */
 export async function fetchPrivateAccountsDirectory(params: { page?: number; pageSize?: number; query?: string; cheater?: boolean; suspicious?: boolean } = {}): Promise<PlayerDirectoryPage<PrivateAccountSummary>> {
   const page = Math.max(1, params.page ?? 1);
@@ -1528,6 +1542,7 @@ export async function fetchPrivateAccountsDirectory(params: { page?: number; pag
 /**
  * Fetch private account detail data for client consumers.
  *
+ * Returns: `Promise<object>`
  * Accepts privateId; returns fetchPrivateAccountDetail data after a backend request, using shared authentication and cache behavior.
  */
 export async function fetchPrivateAccountDetail(privateId: number): Promise<PrivateAccountDetail> {
@@ -1561,6 +1576,7 @@ export async function fetchPrivateAccountDetail(privateId: number): Promise<Priv
 
 /**
  * Fetch party pairs directory data for client consumers.
+ * Returns: `Promise<object>`
  *
  * Accepts params; returns fetchPartyPairsDirectory data after a backend request, using shared authentication and cache behavior.
  */
@@ -1575,6 +1591,7 @@ export async function fetchPartyPairsDirectory(params: { page?: number; pageSize
 }
 
 /**
+ * Returns: `Promise<object>`
  * Fetch party stacks directory data for client consumers.
  *
  * Accepts params; returns fetchPartyStacksDirectory data after a backend request, using shared authentication and cache behavior.

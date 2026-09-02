@@ -25,6 +25,7 @@ export type EcpmActivityLabelKey =
 
 /**
  * Defines the ecpm activity level contract used by this module.
+ * Returns: `string`
  */
 export function ecpmActivityLevel(value: number): EcpmActivityLevel {
   if (value >= ECPM_ACTIVITY_THRESHOLDS.engaged) return "engaged";
@@ -36,6 +37,7 @@ export function ecpmActivityLevel(value: number): EcpmActivityLevel {
 
 /**
  * Defines the ecpm activity text class contract used by this module.
+ * Returns: `string`
  */
 export function ecpmActivityTextClass(value: number | null | undefined): string {
   if (value == null || !Number.isFinite(value)) return "text-pc-text-muted";
@@ -49,6 +51,7 @@ export function ecpmActivityTextClass(value: number | null | undefined): string 
 }
 
 /**
+ * Returns: `null`
  * Defines the ecpm activity label key contract used by this module.
  */
 export function ecpmActivityLabelKey(value: number | null | undefined): EcpmActivityLabelKey | null {
@@ -69,6 +72,7 @@ export function isAutomaticAfkFlag(value: number | null | undefined): boolean {
 
 /**
  * Defines the ecpm activity scale max contract used by this module.
+ * Returns: `number`
  */
 export function ecpmActivityScaleMax(values: number[]): number {
   const largest = Math.max(ECPM_ACTIVITY_THRESHOLDS.engaged, ...values.filter(Number.isFinite));

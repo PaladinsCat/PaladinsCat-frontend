@@ -77,6 +77,7 @@ const iconMap: Record<string, React.ReactNode> = {
 
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ * Returns: `React.JSX.Element`
  */
 export default function Badge({ variant = "default", children, className = "" }: BadgeProps) {
   const style = variantStyles[variant];

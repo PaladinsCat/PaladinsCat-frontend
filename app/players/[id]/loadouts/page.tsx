@@ -26,7 +26,7 @@ function formatCooldown(seconds: number) {
 
 /**
  * Render the PlayerLoadoutsPage view for the player id loadouts page route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `React.JSX.Element`
  */
 export default function PlayerLoadoutsPage() {
   const { t } = useLocalization();

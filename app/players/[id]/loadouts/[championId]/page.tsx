@@ -20,7 +20,7 @@ import { useLocalization } from "@/lib/localization-context";
 
 /**
  * Render the ChampionLoadoutsPage view for the player id loadouts championId page route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `React.JSX.Element`
  */
 export default function ChampionLoadoutsPage() {
   const { t } = useLocalization();

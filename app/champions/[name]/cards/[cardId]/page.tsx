@@ -40,6 +40,7 @@ function statNameKey(value: string | null | undefined): string {
 /**
  * Render the ChampionCardDetailPage view for champions name cards cardId page.
  * Return the React tree for the declared inputs and page data.
+ * Returns: `React.JSX.Element`
  */
 export default function ChampionCardDetailPage() {
   const { t, formatNumber, formatPercent: formatPct } = useLocalization();

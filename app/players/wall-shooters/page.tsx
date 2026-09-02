@@ -7,7 +7,7 @@ import WallShooterDirectory from "@/components/wall-shooter-directory";
 
 /**
  * Render the WallShootersPage view for the player wall-shooters page route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `React.JSX.Element`
  */
 export default function WallShootersPage() {
   return <WallShooterDirectory />;

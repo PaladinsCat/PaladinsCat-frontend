@@ -6,14 +6,13 @@ import Image from "next/image";
 import { ArrowDown, ArrowUp, Search, X } from "lucide-react";
 import { fetchPlayerLevelLeaderboard, fetchPlayerSearch, type PlayerLevelLeaderboardEntry, type PlayerSearchResult } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
-import { useChampions } from "@/lib/champion-names";
 import { STATIC_CHAMPIONS } from "@/lib/static-champions";
-import { ErrorState } from "@/components/async-state";
-import { DataTableSkeleton } from "@/components/route-skeleton";
+import { LoadingPanel } from "@/components/async-state";
 import PlayerName from "@/components/player-name";
 import TablePagination, { type TablePageSize } from "@/components/table-pagination";
 import { usePersistentDirectoryPage } from "@/components/player-directory-pagination";
 import { useLocalization } from "@/lib/localization-context";
+import { getStatQuality } from "@/lib/stat-quality";
 import PlayersPageHeader from "@/components/ui/players-page-header";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { useAuth } from "@/lib/auth-context";
@@ -30,20 +29,15 @@ const CHAMPION_CLASSES: Array<{ value: ChampionClass; icon: string }> = [
 ];
 
 export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
-  const { t, formatNumber } = useLocalization();
+  const { t, formatNumber, formatPercent } = useLocalization();
   const { user, isLoading: authLoading } = useAuth();
-  const { champions: referenceChampions } = useChampions();
   const [rows, setRows] = useState<PlayerLevelLeaderboardEntry[]>([]);
   const [loadedLeaderboardScopeKey, setLoadedLeaderboardScopeKey] = useState<string | null>(null);
-  const [leaderboardErrorKey, setLeaderboardErrorKey] = useState<string | null>(null);
-  const [leaderboardRequestVersion, setLeaderboardRequestVersion] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<PlayerSearchResult[]>([]);
   const [selectedPlayerId, setSelectedPlayerId] = useState<number | null>(null);
   const [positionRows, setPositionRows] = useState<PlayerLevelLeaderboardEntry[]>([]);
   const [positionKey, setPositionKey] = useState<string | null>(null);
-  const [positionErrorKey, setPositionErrorKey] = useState<string | null>(null);
-  const [positionRequestVersion, setPositionRequestVersion] = useState(0);
   const [page, setPage] = usePersistentDirectoryPage(`playerLevelLeaderboard:${mode}`);
   const [pageSize, setPageSize] = useState<TablePageSize>(25);
   const [championClass, setChampionClass] = useState<ChampionClass | "all">("all");
@@ -62,13 +56,11 @@ export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
     authLoading || linkedPlayerId === null || !Number.isSafeInteger(linkedPlayerId) ? null : linkedPlayerId
   );
   const leaderboardScopeKey = `${mode}:${leaderboardFilters.role ?? "all"}:${leaderboardFilters.championId ?? "all"}`;
-  const leaderboardError = leaderboardErrorKey === leaderboardScopeKey;
-  const loading = !leaderboardError && loadedLeaderboardScopeKey !== leaderboardScopeKey;
+  const loading = loadedLeaderboardScopeKey !== leaderboardScopeKey;
   const currentPositionKey = lookupPlayerId === null ? null : `${leaderboardScopeKey}:${lookupPlayerId}`;
   const searchActive = selectedPlayerId === null && searchQuery.trim().length >= 2 && !/^\d+$/.test(searchQuery.trim());
-  const positionError = positionErrorKey === currentPositionKey;
   const positionFetchReady = lookupPlayerId !== null && (selectedPlayerId !== null || !loading);
-  const positionLoading = positionFetchReady && !positionError && positionKey !== currentPositionKey;
+  const positionLoading = positionFetchReady && positionKey !== currentPositionKey;
   const title = [t(mode === "account" ? "generated.players.account" : "generated.players.champion"), t("common.playerChampions.level", { level: "" }).trim()].join(" ");
   const championClassLabel = (value: ChampionClass) => t(value === "Frontline"
     ? "common.roles.frontline"
@@ -77,16 +69,9 @@ export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
       : value === "Flank"
         ? "common.roles.flank"
         : "common.roles.support");
-  const resolvedChampions = useMemo(() => {
-    const idsByName = new Map((referenceChampions ?? []).map((champion) => [champion.name.toLocaleLowerCase(), champion.id]));
-    return STATIC_CHAMPIONS.flatMap((champion) => {
-      const id = idsByName.get(champion.name.toLocaleLowerCase());
-      return id == null ? [] : [{ ...champion, id }];
-    });
-  }, [referenceChampions]);
   const availableChampions = useMemo(
-    () => resolvedChampions.filter((champion) => championClass === "all" || champion.roles.includes(championClass)),
-    [championClass, resolvedChampions],
+    () => STATIC_CHAMPIONS.filter((champion) => championClass === "all" || champion.roles.includes(championClass)),
+    [championClass],
   );
   const sortedRows = useMemo(() => {
     const direction = sortDirection === "asc" ? 1 : -1;
@@ -120,10 +105,9 @@ export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
   useEffect(() => {
     let active = true;
     fetchPlayerLevelLeaderboard(mode, 100, leaderboardFilters)
-      .then((data) => { if (active) { setRows(data); setLoadedLeaderboardScopeKey(leaderboardScopeKey); } })
-      .catch(() => { if (active) setLeaderboardErrorKey(leaderboardScopeKey); });
+      .then((data) => { if (active) { setRows(data); setLoadedLeaderboardScopeKey(leaderboardScopeKey); } });
     return () => { active = false; };
-  }, [leaderboardFilters, leaderboardRequestVersion, leaderboardScopeKey, mode]);
+  }, [leaderboardFilters, leaderboardScopeKey, mode]);
 
   useEffect(() => {
     const query = searchQuery.trim();
@@ -140,11 +124,11 @@ export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
   useEffect(() => {
     if (!positionFetchReady || lookupPlayerId == null) return;
     let active = true;
-    fetchPlayerLevelLeaderboard(mode, mode === "champion" && championId === null ? 100 : 1, { ...leaderboardFilters, playerId: lookupPlayerId })
+    fetchPlayerLevelLeaderboard(mode, 100, { ...leaderboardFilters, playerId: lookupPlayerId })
       .then((result) => { if (active) { setPositionRows(result.filter((row) => row.playerId === lookupPlayerId)); setPositionKey(currentPositionKey); } })
-      .catch(() => { if (active) setPositionErrorKey(currentPositionKey); });
+      .catch(() => { if (active) { setPositionRows([]); setPositionKey(currentPositionKey); } });
     return () => { active = false; };
-  }, [championId, currentPositionKey, leaderboardFilters, lookupPlayerId, mode, positionFetchReady, positionRequestVersion]);
+  }, [currentPositionKey, leaderboardFilters, lookupPlayerId, mode, positionFetchReady]);
 
   const selectPlayer = (player: PlayerSearchResult) => {
     setSelectedPlayerId(Number(player.id));
@@ -180,21 +164,23 @@ export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
 
   return <div className="space-y-6">
     <PlayersPageHeader title={title} />
-    {lookupPlayerId !== null && (positionLoading || positionRow || positionError) && <section aria-label={t("generated.players.rank")} className="mx-auto w-full max-w-5xl">
-      {positionError ? <ErrorState onRetry={() => { setPositionErrorKey(null); setPositionRequestVersion((version) => version + 1); }} /> : <div className="pc-card-flush overflow-hidden px-4 py-3 sm:px-5">
-        {positionLoading ? <dl aria-busy="true" aria-label={t("async.loading")} className={`grid gap-x-5 gap-y-3 ${mode === "champion" ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-6" : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"}`}>
-          {Array.from({ length: mode === "champion" ? 6 : 5 }, (_, index) => <div key={index}><span className="pc-skeleton block h-3 w-16 rounded" /><span className="pc-skeleton mt-2 block h-5 w-24 rounded" /></div>)}
-        </dl> : positionRow && <dl className={`grid gap-x-5 gap-y-3 ${mode === "champion" ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-6" : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"}`}>
+    {lookupPlayerId !== null && (positionLoading || positionRow) && <section aria-label={t("generated.players.rank")} className="w-full max-w-5xl">
+      <div className="pc-card-flush overflow-hidden px-4 py-3 sm:px-5">
+        {positionLoading ? <div className="text-sm text-pc-text-muted">{t("async.loading")}</div> : positionRow && <dl className="grid grid-cols-2 gap-x-5 gap-y-3 sm:grid-cols-3 lg:grid-cols-5">
           <div><dt className="pc-label">{t("generated.players.rank")}</dt><dd className="mt-1 font-bold tabular-nums text-pc-accent">{positionRow.rank}</dd></div>
           <div className="min-w-0"><dt className="pc-label">{t("generated.players.player")}</dt><dd className="mt-1 truncate font-medium text-pc-text"><Link href={`/players/${positionRow.playerId}`} className="hover:text-pc-accent"><PlayerName playerId={positionRow.playerId}>{positionRow.playerName}</PlayerName></Link></dd></div>
           {mode === "champion" && <div className="min-w-0"><dt className="pc-label">{t("generated.players.champion")}</dt><dd className="mt-1 truncate text-pc-text-secondary">{positionRow.championName ?? "—"}</dd></div>}
           <div><dt className="pc-label">{t("generated.players.level")}</dt><dd className="mt-1 font-bold tabular-nums text-pc-text">{formatNumber(positionRow.level)}</dd></div>
           <div><dt className="pc-label">{mode === "account" ? t("generated.players.totalXp") : t("generated.players.championXp")}</dt><dd className="mt-1 tabular-nums text-pc-text-secondary">{formatNumber(positionRow.xp)}</dd></div>
+          <div><dt className="pc-label">{t("generated.players.wins")}</dt><dd className="mt-1 tabular-nums text-pc-text-secondary">{formatNumber(positionRow.wins)}</dd></div>
+          <div><dt className="pc-label">{t("generated.players.losses")}</dt><dd className="mt-1 tabular-nums text-pc-text-secondary">{formatNumber(positionRow.losses)}</dd></div>
+          <div><dt className="pc-label">{t("generated.players.winRate")}</dt><dd className="mt-1 font-semibold tabular-nums" style={positionRow.winRate == null ? undefined : { color: getStatQuality(positionRow.winRate, 1, 1).color }}>{formatPercent(positionRow.winRate)}</dd></div>
+          <div><dt className="pc-label">{t("generated.players.kda")}</dt><dd className="mt-1 tabular-nums text-pc-text-secondary">{formatNumber(positionRow.kda, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</dd></div>
           <div><dt className="pc-label">{t("generated.players.region")}</dt><dd className="mt-1 text-pc-text-muted">{positionRow.region ?? "—"}</dd></div>
         </dl>}
-      </div>}
+      </div>
     </section>}
-    <form onSubmit={submitSearch} className="mx-auto flex w-full max-w-5xl flex-wrap items-end gap-3">
+    <form onSubmit={submitSearch} className="flex w-full max-w-5xl flex-wrap items-end gap-3">
       <label className="relative min-w-60 flex-1">
         <span className="pc-label">{t("generated.players.player")}</span>
         <input
@@ -216,8 +202,8 @@ export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
         <X aria-hidden="true" className="h-4 w-4" />
       </button>}
     </form>
-    {lookupPlayerId !== null && positionKey === currentPositionKey && !positionLoading && !positionError && !positionRow && <p className="mx-auto w-full max-w-5xl text-sm text-pc-text-muted">{t("performance.noData", { mode: title })}</p>}
-    {mode === "champion" && <div className="mx-auto flex w-full max-w-5xl flex-wrap items-end gap-4">
+    {lookupPlayerId !== null && positionKey === currentPositionKey && !positionLoading && !positionRow && <p className="max-w-5xl text-sm text-pc-text-muted">{t("generated.players.noRankedData")}</p>}
+    {mode === "champion" && <div className="flex w-full max-w-5xl flex-wrap items-end gap-4">
       <div>
         <span className="pc-label">{t("generated.players.class")}</span>
         <SegmentedControl
@@ -226,7 +212,7 @@ export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
           onChange={(value) => {
             const nextClass = value as ChampionClass | "all";
             setChampionClass(nextClass);
-            if (nextClass !== "all" && championId !== null && !resolvedChampions.find((champion) => champion.id === championId)?.roles.includes(nextClass)) setChampionId(null);
+            if (nextClass !== "all" && championId !== null && !STATIC_CHAMPIONS.find((champion) => champion.id === championId)?.roles.includes(nextClass)) setChampionId(null);
             setPage(1);
           }}
           items={[
@@ -258,9 +244,9 @@ export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
         {sortDirection === "asc" ? <ArrowUp aria-hidden="true" className="h-4 w-4" /> : <ArrowDown aria-hidden="true" className="h-4 w-4" />}
       </button>
     </div>}
-    {leaderboardError ? <ErrorState className="mx-auto w-full max-w-5xl" onRetry={() => { setLeaderboardErrorKey(null); setLeaderboardRequestVersion((version) => version + 1); }} /> : loading ? <DataTableSkeleton rows={pageSize} className="mx-auto w-full max-w-5xl" /> : <div className="pc-card-flush mx-auto w-full max-w-5xl overflow-hidden">
+    {loading ? <LoadingPanel /> : <div className="pc-card-flush w-full max-w-5xl overflow-hidden">
       <div className="overflow-x-auto">
-        <table className={`w-full text-sm ${mode === "champion" ? "min-w-[940px]" : "min-w-[680px]"}`}>
+        <table className={`w-full text-sm ${mode === "champion" ? "min-w-[1280px]" : "min-w-[1040px]"}`}>
           <thead>
             <tr className="border-b border-pc-border bg-pc-bg-secondary text-left text-xs uppercase text-pc-text-muted">
               <th className="px-4 py-3">{t("generated.players.rank")}</th>
@@ -269,6 +255,10 @@ export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
               {mode === "champion" && <th className="px-3 py-3">{t("generated.players.champion")}</th>}
               <th className="px-3 py-3 text-right">{t("generated.players.level")}</th>
               <th className="px-3 py-3 text-right">{mode === "account" ? t("generated.players.totalXp") : t("generated.players.championXp")}</th>
+              <th className="px-3 py-3 text-right">{t("generated.players.wins")}</th>
+              <th className="px-3 py-3 text-right">{t("generated.players.losses")}</th>
+              <th className="px-3 py-3 text-right">{t("generated.players.winRate")}</th>
+              <th className="px-3 py-3 text-right">{t("generated.players.kda")}</th>
               <th className="px-4 py-3">{t("generated.players.region")}</th>
             </tr>
           </thead>
@@ -279,6 +269,10 @@ export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
             {mode === "champion" && <td className="px-3 py-3">{row.championName && <span className="inline-flex items-center gap-2 text-pc-text-secondary"><Image src={getChampionIconSafe(row.championName)} alt="" width={24} height={24} className="h-6 w-6 rounded object-contain" />{row.championName}</span>}</td>}
             <td className="px-3 py-3 text-right font-bold tabular-nums text-pc-accent">{formatNumber(row.level)}</td>
             <td className="px-3 py-3 text-right tabular-nums text-pc-text-secondary">{formatNumber(row.xp)}</td>
+            <td className="px-3 py-3 text-right tabular-nums text-pc-text-secondary">{formatNumber(row.wins)}</td>
+            <td className="px-3 py-3 text-right tabular-nums text-pc-text-secondary">{formatNumber(row.losses)}</td>
+            <td className="px-3 py-3 text-right font-semibold tabular-nums" style={row.winRate == null ? undefined : { color: getStatQuality(row.winRate, 1, 1).color }}>{formatPercent(row.winRate)}</td>
+            <td className="px-3 py-3 text-right tabular-nums text-pc-text-secondary">{formatNumber(row.kda, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
             <td className="px-4 py-3 text-pc-text-muted">{row.region ?? "—"}</td>
           </tr>)}</tbody>
         </table>

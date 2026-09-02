@@ -66,7 +66,7 @@ function RankBadge({ rank }: { rank: number }) {
 
 /**
  * Render the ClassEloPage view for the player class role page route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `React.JSX.Element`
  */
 export default function ClassEloPage() {
   const { t , formatNumber, formatPercent} = useLocalization();
