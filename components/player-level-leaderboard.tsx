@@ -6,6 +6,7 @@ import Image from "next/image";
 import { ArrowDown, ArrowUp, Search, X } from "lucide-react";
 import { fetchPlayerLevelLeaderboard, fetchPlayerSearch, type PlayerLevelLeaderboardEntry, type PlayerSearchResult } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
+import { useChampions } from "@/lib/champion-names";
 import { STATIC_CHAMPIONS } from "@/lib/static-champions";
 import { ErrorState } from "@/components/async-state";
 import { DataTableSkeleton } from "@/components/route-skeleton";
@@ -31,6 +32,7 @@ const CHAMPION_CLASSES: Array<{ value: ChampionClass; icon: string }> = [
 export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
   const { t, formatNumber } = useLocalization();
   const { user, isLoading: authLoading } = useAuth();
+  const { champions: referenceChampions } = useChampions();
   const [rows, setRows] = useState<PlayerLevelLeaderboardEntry[]>([]);
   const [loadedLeaderboardScopeKey, setLoadedLeaderboardScopeKey] = useState<string | null>(null);
   const [leaderboardErrorKey, setLeaderboardErrorKey] = useState<string | null>(null);
@@ -75,9 +77,16 @@ export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
       : value === "Flank"
         ? "common.roles.flank"
         : "common.roles.support");
+  const resolvedChampions = useMemo(() => {
+    const idsByName = new Map((referenceChampions ?? []).map((champion) => [champion.name.toLocaleLowerCase(), champion.id]));
+    return STATIC_CHAMPIONS.flatMap((champion) => {
+      const id = idsByName.get(champion.name.toLocaleLowerCase());
+      return id == null ? [] : [{ ...champion, id }];
+    });
+  }, [referenceChampions]);
   const availableChampions = useMemo(
-    () => STATIC_CHAMPIONS.filter((champion) => championClass === "all" || champion.roles.includes(championClass)),
-    [championClass],
+    () => resolvedChampions.filter((champion) => championClass === "all" || champion.roles.includes(championClass)),
+    [championClass, resolvedChampions],
   );
   const sortedRows = useMemo(() => {
     const direction = sortDirection === "asc" ? 1 : -1;
@@ -217,7 +226,7 @@ export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
           onChange={(value) => {
             const nextClass = value as ChampionClass | "all";
             setChampionClass(nextClass);
-            if (nextClass !== "all" && championId !== null && !STATIC_CHAMPIONS.find((champion) => champion.id === championId)?.roles.includes(nextClass)) setChampionId(null);
+            if (nextClass !== "all" && championId !== null && !resolvedChampions.find((champion) => champion.id === championId)?.roles.includes(nextClass)) setChampionId(null);
             setPage(1);
           }}
           items={[
