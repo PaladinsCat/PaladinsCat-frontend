@@ -181,6 +181,7 @@ export async function fetchPlayerModerationBatch(playerIds: Array<string | numbe
 /**
  * Read moderation for canonical private identities without mixing their serial
  * IDs into the public Hi-Rez player-ID cache.
+ * Returns: `Promise<Map<number, PlayerModeration>>`
  */
 export async function fetchPrivateAccountModerationBatch(
   privateIds: Array<string | number>,

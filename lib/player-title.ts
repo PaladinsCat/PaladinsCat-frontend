@@ -37,6 +37,7 @@ const COLOR_ATTRIBUTE_PATTERN = /color\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i
 // preserving ordinary angle brackets such as "2 < 3".
 /** Apply stripPlayerTitleMarkup to the declared player or request input.
  * Contract: enforces title sanitation and returns plain text without markup.
+ * Returns: `string`
  */
 export function stripPlayerTitleMarkup(raw: string): string {
   let text = "";

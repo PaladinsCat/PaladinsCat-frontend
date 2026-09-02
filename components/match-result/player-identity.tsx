@@ -11,6 +11,7 @@ import { useLocalization } from "@/lib/localization-context";
 
 /** Render trackedPrivateId from its declared props and match data.
  * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
+ * Returns: `number | null`
  */
 export function trackedPrivateId(player: MatchPlayerDetail): number | null {
   const privateId = Number(player.private_player_id ?? 0);
@@ -19,6 +20,7 @@ export function trackedPrivateId(player: MatchPlayerDetail): number | null {
 
 /** Render matchPlayerKey from its declared props and match data.
  * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
+ * Returns: `string`
  */
 export function matchPlayerKey(player: MatchPlayerDetail): string {
   const privateId = trackedPrivateId(player);
@@ -28,6 +30,7 @@ export function matchPlayerKey(player: MatchPlayerDetail): string {
 
 /** Render matchPlayerHref from its declared props and match data.
  * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
+ * Returns: `string | null`
  */
 export function matchPlayerHref(player: MatchPlayerDetail): string | null {
   const privateId = trackedPrivateId(player);
@@ -38,6 +41,7 @@ export function matchPlayerHref(player: MatchPlayerDetail): string | null {
 
 /** Render privateAccountCode from its declared props and match data.
  * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
+ * Returns: `string | null`
  */
 export function privateAccountCode(player: MatchPlayerDetail): string | null {
   const privateId = trackedPrivateId(player);

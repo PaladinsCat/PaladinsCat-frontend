@@ -20,6 +20,7 @@ const getCachedChampionPageData = unstable_cache(
 
 /**
  * Builds the initial champion page payload from server-side catalog data.
+ * Returns: `Promise<ChampionPagePayload>`
  */
 export function getInitialChampionPageData(name: string): Promise<ChampionPagePayload> {
   return getCachedChampionPageData(championSlug(name));

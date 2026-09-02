@@ -6,6 +6,7 @@ import { readFileSync } from "node:fs";
 
 /** Apply oidcClientSecret to the declared request or domain inputs.
  * Contract: validates inputs, preserves the existing security or mapping rules, and returns the documented result.
+ * Returns: `string | null`
  */
 export function oidcClientSecret(): string | null {
   const file = process.env.OIDC_CLIENT_SECRET_FILE;

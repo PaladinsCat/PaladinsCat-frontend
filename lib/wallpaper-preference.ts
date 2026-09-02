@@ -157,6 +157,7 @@ function createWallpaperId(): string {
 
 /**
  * Reads wallpaper enabled from the module's configured source.
+ * Returns: `boolean`
  */
 export function getWallpaperEnabled(): boolean {
   if (typeof window === "undefined") return true;
@@ -170,6 +171,7 @@ export function getWallpaperEnabled(): boolean {
 
 /**
  * Updates wallpaper enabled using the module's persistence or validation rules.
+ * Returns: `void`
  */
 export function setWallpaperEnabled(enabled: boolean): void {
   try {

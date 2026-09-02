@@ -264,6 +264,7 @@ export async function extractWallpaperAccents(source: string): Promise<Wallpaper
  * Extract one readable accent color from a wallpaper source URL.
  *
  * Accepts source; returns a color or null after browser image decoding, without authentication or persistence effects.
+ * Returns: `Promise<string | null>`
  */
 export async function extractWallpaperAccent(source: string): Promise<string | null> {
   return (await extractWallpaperAccents(source)).primary;

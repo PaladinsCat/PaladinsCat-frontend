@@ -25,6 +25,7 @@ export function parseBackendDate(value: string | null | undefined): Date | null 
 
 /**
  * Transforms or validates format local date time according to this module's data contract.
+ * Returns: `string`
  */
 export function formatLocalDateTime(value: string | null | undefined, locale?: string): string {
   const date = parseBackendDate(value);
@@ -38,6 +39,7 @@ export function formatLocalDateTime(value: string | null | undefined, locale?: s
 
 /**
  * Transforms or validates format local date according to this module's data contract.
+ * Returns: `string`
  */
 export function formatLocalDate(value: string | null | undefined, locale?: string): string {
   const date = parseBackendDate(value);
@@ -50,6 +52,7 @@ export function formatLocalDate(value: string | null | undefined, locale?: strin
 
 /**
  * Transforms or validates format local month day according to this module's data contract.
+ * Returns: `string`
  */
 export function formatLocalMonthDay(value: string | null | undefined, locale?: string): string {
   const date = parseBackendDate(value);
@@ -63,6 +66,7 @@ export function formatLocalMonthDay(value: string | null | undefined, locale?: s
 
 /**
  * Transforms or validates format local hour from utc bucket according to this module's data contract.
+ * Returns: `string`
  */
 export function formatLocalHourFromUtcBucket(date: string | null | undefined, hour: number | null | undefined, locale?: string): string {
   if (!date || hour == null || !Number.isFinite(hour)) return "-";
@@ -82,6 +86,7 @@ const DAY = 24 * HOUR;
 
 /**
  * Transforms or validates format relative time according to this module's data contract.
+ * Returns: `string`
  */
 export function formatRelativeTime(value: string | null | undefined, locale?: string): string {
   const date = parseBackendDate(value);
@@ -106,6 +111,7 @@ export function formatRelativeTime(value: string | null | undefined, locale?: st
 
 /**
  * Transforms or validates format local time according to this module's data contract.
+ * Returns: `string`
  */
 export function formatLocalTime(value: string | null | undefined, locale?: string): string {
   const date = parseBackendDate(value);

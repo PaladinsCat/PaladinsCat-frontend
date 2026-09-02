@@ -91,6 +91,7 @@ function numericMatch(text: string, patterns: RegExp[]): number | null {
 
 /**
  * Transforms or validates resolve scaled description according to this module's data contract.
+ * Returns: `string`
  */
 export function resolveScaledDescription(description: string | null | undefined, level: number): string {
   if (!description) return "";
@@ -498,6 +499,7 @@ export function calculateAdditiveValue(values: number[]): DiminishedValue {
 
 /**
  * Transforms or validates extract weapon damage override according to this module's data contract.
+ * Returns: `number | null`
  */
 export function extractWeaponDamageOverride(description: string | null | undefined): number | null {
   const weaponTagged = /^\s*\[Weapon\]/i.test(description ?? "");

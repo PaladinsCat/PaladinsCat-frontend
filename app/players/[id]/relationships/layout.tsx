@@ -9,6 +9,7 @@ import { getServerLocalization } from "@/lib/server-localization";
 /**
  * Build SEO metadata for the player id relationships layout route.
  * Returns the Next.js metadata object consumed by this route without mutating application data.
+ * Returns: `Promise<Metadata>`
  */
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;

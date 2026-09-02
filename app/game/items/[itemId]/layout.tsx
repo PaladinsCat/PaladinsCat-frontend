@@ -12,6 +12,7 @@ type Props = {
 /**
  * Build SEO metadata for game items itemId layout.
  * Return the Next.js metadata object used by the page without mutating application data.
+ * Returns: `Promise<Metadata>`
  */
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { itemId } = await params;

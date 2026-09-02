@@ -20,6 +20,7 @@ const TIER_TONES: Record<TierName, string> = {
 
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ * Returns: `string`
  */
 export function tierTone(tier: TierName): string {
   return TIER_TONES[tier];

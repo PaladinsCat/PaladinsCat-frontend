@@ -87,6 +87,7 @@ function mapLookupKey(value: string): string {
 
 /** Apply mapImagePath to the declared request or domain inputs.
  * Contract: validates inputs, preserves the existing security or mapping rules, and returns the documented result.
+ * Returns: `string`
  */
 export function mapImagePath(mapName: string): string {
   const lookupKey = mapLookupKey(mapName.trim().replace(/^ranked\s+/i, ""));
@@ -99,6 +100,7 @@ export function mapImagePath(mapName: string): string {
 
 /** Apply matchMapImagePath to the declared request or domain inputs.
  * Contract: validates inputs, preserves the existing security or mapping rules, and returns the documented result.
+ * Returns: `string`
  */
 export function matchMapImagePath(mapName: string): string {
   const lookupKey = mapLookupKey(mapName.trim().replace(/^ranked\s+/i, ""));

@@ -7,6 +7,7 @@ export type LoadingFrameAsset = (typeof manifest.frames)[number];
 
 /** Apply normalizeLoadingFrameName to the declared input values.
  * Contract: returns the module-specific validated, stored, formatted, or resolved value without external side effects.
+ * Returns: `string`
  */
 export function normalizeLoadingFrameName(value: string): string {
   return value

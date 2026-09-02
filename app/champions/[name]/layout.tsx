@@ -29,6 +29,7 @@ const ROLE_KEYS: Record<string, TranslationKey> = {
 /**
  * Build SEO metadata for champions name layout.
  * Return the Next.js metadata object used by the page without mutating application data.
+ * Returns: `Promise<Metadata>`
  */
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { name } = await params;

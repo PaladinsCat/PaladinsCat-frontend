@@ -36,6 +36,7 @@ export function ecpmActivityLevel(value: number): EcpmActivityLevel {
 
 /**
  * Defines the ecpm activity text class contract used by this module.
+ * Returns: `string`
  */
 export function ecpmActivityTextClass(value: number | null | undefined): string {
   if (value == null || !Number.isFinite(value)) return "text-pc-text-muted";
@@ -69,6 +70,7 @@ export function isAutomaticAfkFlag(value: number | null | undefined): boolean {
 
 /**
  * Defines the ecpm activity scale max contract used by this module.
+ * Returns: `number`
  */
 export function ecpmActivityScaleMax(values: number[]): number {
   const largest = Math.max(ECPM_ACTIVITY_THRESHOLDS.engaged, ...values.filter(Number.isFinite));

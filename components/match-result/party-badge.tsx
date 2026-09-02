@@ -12,6 +12,7 @@ type PartyPlayer = Pick<MatchPlayerDetail, "party" | "party_number">;
 
 /** Render getPartyNumber from its declared props and match data.
  * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
+ * Returns: `number | null`
  */
 export function getPartyNumber(player: PartyPlayer): number | null {
   const value = Number(player.party ?? player.party_number ?? 0);

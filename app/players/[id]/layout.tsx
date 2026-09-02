@@ -17,6 +17,7 @@ type Props = {
 /**
  * Build SEO metadata for the player id layout route.
  * Returns the Next.js metadata object consumed by this route without mutating application data.
+ * Returns: `Promise<Metadata>`
  */
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
