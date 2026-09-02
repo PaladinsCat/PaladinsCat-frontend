@@ -32,6 +32,7 @@ export function useLobbyTier(): LobbyTierContextValue {
 
 /** Apply LobbyTierProvider to lobby-tier or localization inputs.
  * Contract: returns the normalized route, context state, or message value while preserving existing browser behavior.
+ * Returns: `React.JSX.Element`
  */
 export function LobbyTierProvider({ children }: { children: ReactNode }) {
   const [filter, setFilterState] = useState<LobbyTierFilter>("all");

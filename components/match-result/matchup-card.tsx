@@ -34,6 +34,7 @@ function RecordSummary({ label, wins, total, tone, eloLabel, elo }: { label: str
 
 /** Render MatchupCard from its declared props and match data.
  * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
+ * Returns: `React.JSX.Element`
  */
 export default function MatchupCard({ player }: { player: MatchResultPlayer }) {
   const { t , formatNumber} = useLocalization();

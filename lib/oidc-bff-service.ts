@@ -126,6 +126,7 @@ async function serviceToken(): Promise<string> {
 // Server-only: this credential is minted at runtime and is never available to browser JS.
 /** Apply oidcBffServiceHeaders to the declared request or domain inputs.
  * Contract: validates inputs, preserves the existing security or mapping rules, and returns the documented result.
+ * Returns: `Promise<HeadersInit>`
  */
 export async function oidcBffServiceHeaders(): Promise<HeadersInit> {
   return { authorization: `Bearer ${await serviceToken()}` };

@@ -55,7 +55,7 @@ const EMPTY_COUNTS: PlayersOverview["communityCounts"] = {
 
 /**
  * Render the PlayersPageClient view for the player players-page-client route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `React.JSX.Element`
  */
 export default function PlayersPageClient({ initialOverview }: { initialOverview: PlayersOverview | null }) {
   const { t, formatNumber } = useLocalization();

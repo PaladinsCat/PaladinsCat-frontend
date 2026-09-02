@@ -12,6 +12,7 @@ import PlayerName from "@/components/player-name";
 import TablePagination, { type TablePageSize } from "@/components/table-pagination";
 import { usePersistentDirectoryPage } from "@/components/player-directory-pagination";
 import { useLocalization } from "@/lib/localization-context";
+import { getStatQuality } from "@/lib/stat-quality";
 import PlayersPageHeader from "@/components/ui/players-page-header";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { useAuth } from "@/lib/auth-context";
@@ -28,8 +29,8 @@ const CHAMPION_CLASSES: Array<{ value: ChampionClass; icon: string }> = [
 ];
 
 export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
-  const { t, formatNumber } = useLocalization();
-  const { user } = useAuth();
+  const { t, formatNumber, formatPercent } = useLocalization();
+  const { user, isLoading: authLoading } = useAuth();
   const [rows, setRows] = useState<PlayerLevelLeaderboardEntry[]>([]);
   const [loadedLeaderboardScopeKey, setLoadedLeaderboardScopeKey] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -50,12 +51,13 @@ export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
     } : {},
     [championClass, championId, mode],
   );
-  const lookupPlayerId = selectedPlayerId ?? user?.linkedPlayerId ?? null;
+  const lookupPlayerId = selectedPlayerId ?? (authLoading ? null : user?.linkedPlayerId ?? null);
   const leaderboardScopeKey = `${mode}:${leaderboardFilters.role ?? "all"}:${leaderboardFilters.championId ?? "all"}`;
   const loading = loadedLeaderboardScopeKey !== leaderboardScopeKey;
   const currentPositionKey = lookupPlayerId === null ? null : `${leaderboardScopeKey}:${lookupPlayerId}`;
   const searchActive = selectedPlayerId === null && searchQuery.trim().length >= 2 && !/^\d+$/.test(searchQuery.trim());
-  const positionLoading = lookupPlayerId !== null && positionKey !== currentPositionKey;
+  const positionFetchReady = lookupPlayerId !== null && (selectedPlayerId !== null || !loading);
+  const positionLoading = positionFetchReady && positionKey !== currentPositionKey;
   const title = [t(mode === "account" ? "generated.players.account" : "generated.players.champion"), t("common.playerChampions.level", { level: "" }).trim()].join(" ");
   const championClassLabel = (value: ChampionClass) => t(value === "Frontline"
     ? "common.roles.frontline"
@@ -85,10 +87,16 @@ export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
   const visibleRows = sortedRows.slice((page - 1) * pageSize, page * pageSize);
   const positionRow = useMemo(() => {
     if (positionKey !== currentPositionKey) return null;
-    if (mode === "champion" && championId !== null) {
+    if (mode !== "champion") return positionRows[0] ?? null;
+    if (championId !== null) {
       return positionRows.find((row) => row.championId === championId) ?? null;
     }
-    return positionRows[0] ?? null;
+    return positionRows.reduce<PlayerLevelLeaderboardEntry | null>((highest, row) => {
+      if (highest === null) return row;
+      if (row.level !== highest.level) return row.level > highest.level ? row : highest;
+      if (row.xp !== highest.xp) return row.xp > highest.xp ? row : highest;
+      return row.rank < highest.rank ? row : highest;
+    }, null);
   }, [championId, currentPositionKey, mode, positionKey, positionRows]);
 
   useEffect(() => {
@@ -111,13 +119,13 @@ export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
   }, [searchQuery, selectedPlayerId]);
 
   useEffect(() => {
-    if (lookupPlayerId == null) return;
+    if (!positionFetchReady || lookupPlayerId == null) return;
     let active = true;
     fetchPlayerLevelLeaderboard(mode, 100, { ...leaderboardFilters, playerId: lookupPlayerId })
       .then((result) => { if (active) { setPositionRows(result.filter((row) => row.playerId === lookupPlayerId)); setPositionKey(currentPositionKey); } })
       .catch(() => { if (active) { setPositionRows([]); setPositionKey(currentPositionKey); } });
     return () => { active = false; };
-  }, [currentPositionKey, leaderboardFilters, lookupPlayerId, mode]);
+  }, [currentPositionKey, leaderboardFilters, lookupPlayerId, mode, positionFetchReady]);
 
   const selectPlayer = (player: PlayerSearchResult) => {
     setSelectedPlayerId(Number(player.id));
@@ -155,12 +163,16 @@ export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
     <PlayersPageHeader title={title} />
     {lookupPlayerId !== null && (positionLoading || positionRow) && <section aria-label={t("generated.players.rank")} className="w-full max-w-5xl">
       <div className="pc-card-flush overflow-hidden px-4 py-3 sm:px-5">
-        {positionLoading ? <div className="text-sm text-pc-text-muted">{t("async.loading")}</div> : positionRow && <dl className={`grid gap-x-5 gap-y-3 ${mode === "champion" ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-6" : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"}`}>
+        {positionLoading ? <div className="text-sm text-pc-text-muted">{t("async.loading")}</div> : positionRow && <dl className="grid grid-cols-2 gap-x-5 gap-y-3 sm:grid-cols-3 lg:grid-cols-5">
           <div><dt className="pc-label">{t("generated.players.rank")}</dt><dd className="mt-1 font-bold tabular-nums text-pc-accent">{positionRow.rank}</dd></div>
           <div className="min-w-0"><dt className="pc-label">{t("generated.players.player")}</dt><dd className="mt-1 truncate font-medium text-pc-text"><Link href={`/players/${positionRow.playerId}`} className="hover:text-pc-accent"><PlayerName playerId={positionRow.playerId}>{positionRow.playerName}</PlayerName></Link></dd></div>
           {mode === "champion" && <div className="min-w-0"><dt className="pc-label">{t("generated.players.champion")}</dt><dd className="mt-1 truncate text-pc-text-secondary">{positionRow.championName ?? "—"}</dd></div>}
           <div><dt className="pc-label">{t("generated.players.level")}</dt><dd className="mt-1 font-bold tabular-nums text-pc-text">{formatNumber(positionRow.level)}</dd></div>
           <div><dt className="pc-label">{mode === "account" ? t("generated.players.totalXp") : t("generated.players.championXp")}</dt><dd className="mt-1 tabular-nums text-pc-text-secondary">{formatNumber(positionRow.xp)}</dd></div>
+          <div><dt className="pc-label">{t("generated.players.wins")}</dt><dd className="mt-1 tabular-nums text-pc-text-secondary">{formatNumber(positionRow.wins)}</dd></div>
+          <div><dt className="pc-label">{t("generated.players.losses")}</dt><dd className="mt-1 tabular-nums text-pc-text-secondary">{formatNumber(positionRow.losses)}</dd></div>
+          <div><dt className="pc-label">{t("generated.players.winRate")}</dt><dd className="mt-1 font-semibold tabular-nums" style={positionRow.winRate == null ? undefined : { color: getStatQuality(positionRow.winRate, 1, 1).color }}>{formatPercent(positionRow.winRate)}</dd></div>
+          <div><dt className="pc-label">{t("generated.players.kda")}</dt><dd className="mt-1 tabular-nums text-pc-text-secondary">{formatNumber(positionRow.kda, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</dd></div>
           <div><dt className="pc-label">{t("generated.players.region")}</dt><dd className="mt-1 text-pc-text-muted">{positionRow.region ?? "—"}</dd></div>
         </dl>}
       </div>
@@ -231,7 +243,7 @@ export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
     </div>}
     {loading ? <LoadingPanel /> : <div className="pc-card-flush w-full max-w-5xl overflow-hidden">
       <div className="overflow-x-auto">
-        <table className={`w-full text-sm ${mode === "champion" ? "min-w-[940px]" : "min-w-[680px]"}`}>
+        <table className={`w-full text-sm ${mode === "champion" ? "min-w-[1280px]" : "min-w-[1040px]"}`}>
           <thead>
             <tr className="border-b border-pc-border bg-pc-bg-secondary text-left text-xs uppercase text-pc-text-muted">
               <th className="px-4 py-3">{t("generated.players.rank")}</th>
@@ -240,6 +252,10 @@ export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
               {mode === "champion" && <th className="px-3 py-3">{t("generated.players.champion")}</th>}
               <th className="px-3 py-3 text-right">{t("generated.players.level")}</th>
               <th className="px-3 py-3 text-right">{mode === "account" ? t("generated.players.totalXp") : t("generated.players.championXp")}</th>
+              <th className="px-3 py-3 text-right">{t("generated.players.wins")}</th>
+              <th className="px-3 py-3 text-right">{t("generated.players.losses")}</th>
+              <th className="px-3 py-3 text-right">{t("generated.players.winRate")}</th>
+              <th className="px-3 py-3 text-right">{t("generated.players.kda")}</th>
               <th className="px-4 py-3">{t("generated.players.region")}</th>
             </tr>
           </thead>
@@ -250,6 +266,10 @@ export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
             {mode === "champion" && <td className="px-3 py-3">{row.championName && <span className="inline-flex items-center gap-2 text-pc-text-secondary"><Image src={getChampionIconSafe(row.championName)} alt="" width={24} height={24} className="h-6 w-6 rounded object-contain" />{row.championName}</span>}</td>}
             <td className="px-3 py-3 text-right font-bold tabular-nums text-pc-accent">{formatNumber(row.level)}</td>
             <td className="px-3 py-3 text-right tabular-nums text-pc-text-secondary">{formatNumber(row.xp)}</td>
+            <td className="px-3 py-3 text-right tabular-nums text-pc-text-secondary">{formatNumber(row.wins)}</td>
+            <td className="px-3 py-3 text-right tabular-nums text-pc-text-secondary">{formatNumber(row.losses)}</td>
+            <td className="px-3 py-3 text-right font-semibold tabular-nums" style={row.winRate == null ? undefined : { color: getStatQuality(row.winRate, 1, 1).color }}>{formatPercent(row.winRate)}</td>
+            <td className="px-3 py-3 text-right tabular-nums text-pc-text-secondary">{formatNumber(row.kda, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
             <td className="px-4 py-3 text-pc-text-muted">{row.region ?? "—"}</td>
           </tr>)}</tbody>
         </table>

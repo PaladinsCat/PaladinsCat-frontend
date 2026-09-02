@@ -60,7 +60,7 @@ function RankBadge({ rank }: { rank: number }) {
 
 /**
  * Render the LeaderboardPage view for the player leaderboard page route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `React.JSX.Element`
  */
 export default function LeaderboardPage() {
   const { t , formatNumber, formatPercent} = useLocalization();

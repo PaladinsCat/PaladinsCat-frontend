@@ -444,7 +444,7 @@ function PlayerBuildRow({
   </div>;
 }
 
-/** Group player loadouts by team, loading item details and honoring lobby-tier filters. */
+/** Group player loadouts by team, loading item details and honoring lobby-tier filters.  Returns: `React.JSX.Element`. */
 export default function ItemsLoadoutsSection({ team1Players, team2Players, team1Wins, team2Wins, factMap }: Props) {
   const { t } = useLocalization();
   const { filter: lobbyScope, definition: lobbyTier, ready: lobbyTierReady } = useLobbyTier();

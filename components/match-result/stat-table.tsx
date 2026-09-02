@@ -25,6 +25,7 @@ interface StatTableRowProps {
 
 /** Render StatTable from its declared props and match data.
  * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
+ * Returns: `React.JSX.Element`
  */
 export default function StatTable({ player, fact, wins }: StatTableRowProps) {
   const { t, formatNumber, formatPercent } = useLocalization();

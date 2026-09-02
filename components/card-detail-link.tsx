@@ -6,6 +6,7 @@ import { ArrowUpRight } from "lucide-react";
 
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ * Returns: `React.JSX.Element`
  */
 export default function CardDetailLink({
   href,

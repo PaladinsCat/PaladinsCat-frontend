@@ -45,7 +45,7 @@ function syncWallpaperModeDom(phase: WallpaperModePhase) {
   else delete root.dataset.homeWallpaperMode;
 }
 
-/** Render the interactive homepage shell around server-rendered discovery content. */
+/** Render the interactive homepage shell around server-rendered discovery content.  Returns: `React.JSX.Element`. */
 export default function HomePage({ children }: { children?: ReactNode }) {
   const { t } = useLocalization();
   const reduceMotion = useReducedMotion();

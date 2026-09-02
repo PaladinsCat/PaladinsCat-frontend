@@ -19,7 +19,7 @@ function titleCaseRole(role: string) {
 
 /**
  * Build SEO metadata for the player class role layout route.
- * Returns the Next.js metadata object consumed by this route without mutating application data.
+ * Returns: `Promise<Metadata>`
  */
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { role } = await params;
@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 /**
  * Render the layout for the player class role layout route.
- * Returns the route shell around child content using the declared props.
+ * Returns: `React.JSX.Element`
  */
 export default function PlayerClassLayout({ children }: Props) {
   return children;

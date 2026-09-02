@@ -20,6 +20,7 @@ function numericMetric(value: unknown): number | null {
 
 /** Apply estimateLiveTeamWinChance to the declared input values.
  * Contract: returns the module-specific validated, stored, formatted, or resolved value without external side effects.
+ * Returns: `null`
  */
 export function estimateLiveTeamWinChance(
   players: readonly LiveTeamEstimatePlayer[],

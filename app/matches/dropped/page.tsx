@@ -37,6 +37,7 @@ function reasonLabel(value: string): string {
 /**
  * Render the DroppedMatchesPage view for matches dropped page.
  * Return the React tree for the declared inputs and page data.
+ * Returns: `React.JSX.Element`
  */
 export default function DroppedMatchesPage() {
   const { t } = useLocalization();

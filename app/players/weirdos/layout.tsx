@@ -6,11 +6,11 @@
 import { createCanonicalMetadata } from "@/lib/canonical-metadata";
 /**
  * Build SEO metadata for the player weirdos layout route.
- * Returns the Next.js metadata object consumed by this route without mutating application data.
+ * Returns: `Metadata`
  */
 export const metadata = createCanonicalMetadata("/players/weirdos");
 /**
  * Render the layout for the player weirdos layout route.
- * Returns the route shell around child content using the declared props.
+ * Returns: `React.JSX.Element`
  */
 export default function Layout({ children }: { children: React.ReactNode }) { return children; }

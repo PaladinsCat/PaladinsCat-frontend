@@ -24,7 +24,7 @@ const PAGE_SIZE = 24;
 
 /**
  * Render the AltAccountsPage view for the player alt-accounts page route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `React.JSX.Element`
  */
 export default function AltAccountsPage() {
   const { t , formatNumber} = useLocalization();

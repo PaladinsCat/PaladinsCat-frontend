@@ -22,7 +22,7 @@ import {
 import ScrambleText from "@/components/ScrambleText";
 import { getServerLocalization } from "@/lib/server-localization";
 
-/** Render the localized About page and its data-focused project principles. */
+/** Render the localized About page and its data-focused project principles.  Returns: `Promise<React.JSX.Element>`. */
 export default async function AboutPage() {
   const { t } = await getServerLocalization();
   const principles = [

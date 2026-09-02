@@ -7,7 +7,7 @@ import PlayerModerationDirectory from "@/components/player-moderation-directory"
 
 /**
  * Render the AfkWintradePage view for the player afk-wintrade page route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `React.JSX.Element`
  */
 export default function AfkWintradePage() {
   return <PlayerModerationDirectory titleKey="moderation.afkWintradeTitle" noticeKey="moderation.afkWintradeThresholdNotice" emptyKey="moderation.noAfkWintrade" filter="afkWintradeOnly" accentClass="bg-sky-400" borderClass="border-sky-400/30" noticeClass="border-sky-400/30 bg-sky-400/10 text-sky-50" voteClass="text-sky-200" />;

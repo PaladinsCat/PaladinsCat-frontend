@@ -7,6 +7,7 @@ import { getRankIconPath, getTierColor, resolveEffectiveTier } from "@/lib/tier-
 /**
  * Render the player metadata used by universal search with the same rank
  * naming and iconography as the player profile header.
+ * Returns: `React.JSX.Element`
  */
 export function PlayerSearchSubtitle({ result }: { result: UniversalSearchResult }) {
   if (result.type !== "player") return <>{result.subtitle}</>;

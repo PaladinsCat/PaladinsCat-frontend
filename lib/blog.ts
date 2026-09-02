@@ -247,6 +247,7 @@ async function loadCachedPosts(): Promise<BlogPost[]> {
 
 /**
  * Reads all posts from the module's configured source.
+ * Returns: `Promise<BlogPost[]>`
  */
 export async function getAllPosts(): Promise<BlogPost[]> {
   try {
@@ -264,6 +265,7 @@ export async function getAllPosts(): Promise<BlogPost[]> {
 
 /**
  * Reads post by slug from the module's configured source.
+ * Returns: `Promise<BlogPost | null>`
  */
 export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
   const normalizedSlug = normalizeSlug(slug);
@@ -280,6 +282,7 @@ export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
 
 /**
  * Reads post link from the module's configured source.
+ * Returns: `string`
  */
 export function getPostLink(slug: string): string {
   const normalizedSlug = normalizeSlug(slug);

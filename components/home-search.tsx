@@ -25,7 +25,7 @@ type HomeSearchProps = {
   onSearchActiveChange?: (active: boolean) => void;
 };
 
-/** Search across public entities and route submitted blank queries to the search page. */
+/** Search across public entities and route submitted blank queries to the search page.  Returns: `React.JSX.Element`. */
 export default function HomeSearch({ onSearchActiveChange }: HomeSearchProps) {
   const { t } = useLocalization();
   const router = useRouter();

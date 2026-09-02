@@ -15,6 +15,7 @@ function isRouteOrDescendant(pathname: string, root: string): boolean {
 
 /** Apply routeUsesLobbyTierSelector to lobby-tier or localization inputs.
  * Contract: returns the normalized route, context state, or message value while preserving existing browser behavior.
+ * Returns: `boolean`
  */
 export function routeUsesLobbyTierSelector(pathname: string): boolean {
   if (LOBBY_TIER_EXCLUDED_STATS_ROUTES.some(

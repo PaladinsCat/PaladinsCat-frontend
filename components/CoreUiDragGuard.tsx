@@ -13,7 +13,7 @@ const ALLOWED_DRAG_TARGETS = [
   "[contenteditable='true']",
 ].join(",");
 
-/** Prevent accidental native dragging of application chrome and UI artwork. */
+/** Prevent accidental native dragging of application chrome and UI artwork.  Returns: `React.JSX.Element`. */
 export default function CoreUiDragGuard() {
   useEffect(() => {
     const preventCoreUiDrag = (event: DragEvent) => {

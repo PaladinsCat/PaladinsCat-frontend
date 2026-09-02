@@ -31,7 +31,7 @@ import { useLocalization } from "@/lib/localization-context";
 
 /**
  * Handles the exported route operation using its declared request and response contract.
- * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ * Returns: `React.JSX.Element`
  */
 export default function AccountPage() {
   const { t, formatDate } = useLocalization();

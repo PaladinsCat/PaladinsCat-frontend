@@ -7,7 +7,7 @@ import PerformanceDiffDirectory from "@/components/performance-diff-directory";
 
 /**
  * Render the HypercarryPage view for the player hypercarry page route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `React.JSX.Element`
  */
 export default function HypercarryPage() {
   return <PerformanceDiffDirectory metric="hypercarry" />;

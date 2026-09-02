@@ -37,7 +37,7 @@ function displayMatchMap(mapName: string | null, queueId: number) {
 
 /**
  * Render the BoostedPlayerDetailPage view for the player boosted id page route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `React.JSX.Element`
  */
 export default function BoostedPlayerDetailPage() {
   const { t, formatDateTime, formatNumber } = useLocalization();

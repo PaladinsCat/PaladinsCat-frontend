@@ -183,6 +183,7 @@ function storedProfileForMatch(player: MatchPlayerDetail): PlayerProfileData | n
 /**
  * Render the MatchDetailPage view for matches id match-detail-client.
  * Return the React tree for the declared inputs and page data.
+ * Returns: `React.JSX.Element`
  */
 export default function MatchDetailPage({ initialMatch = null }: { initialMatch?: MatchDetailWithBans | null }) {
   const { t } = useLocalization();

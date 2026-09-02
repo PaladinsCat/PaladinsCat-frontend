@@ -9,7 +9,7 @@ import { oidcClientSecret } from "@/lib/oidc-client-secret";
 
 /**
  * Selects the Node.js runtime required by this server handler.
- * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ * Returns: `string`
  */
 export const runtime = "nodejs";
 const TX_COOKIE = "__Host-pc_oidc_txn";

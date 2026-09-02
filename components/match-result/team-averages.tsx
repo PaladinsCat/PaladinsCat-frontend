@@ -7,6 +7,7 @@ import { LocalizedText } from "@/lib/localization-context";
 
 /** Render TeamAverages from its declared props and match data.
  * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
+ * Returns: `React.JSX.Element`
  */
 export default function TeamAverages({ averages }: { averages: TeamAverages }) {
   return (
