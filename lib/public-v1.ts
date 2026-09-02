@@ -1,4 +1,4 @@
-/** Build a same-origin URL for a staged public v1 backend route. */
+/** Build a same-origin URL for a staged public v1 backend route. · refs: none */
 export function publicV1Path(path: string): string {
   const value = path.trim();
   if (/^(?:[a-z][a-z\d+.-]*:|\/\/)/i.test(value)) {

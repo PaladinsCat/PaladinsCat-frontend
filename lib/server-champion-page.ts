@@ -1,6 +1,7 @@
 /**
  * Keeps server champion page server-side and aligned with its data source.
  * Preserve its server boundary and caller-facing data contracts.
+ * refs: none
  */
 import "server-only";
 
@@ -21,6 +22,7 @@ const getCachedChampionPageData = unstable_cache(
 /**
  * Builds the initial champion page payload from server-side catalog data.
  * Returns: `Promise<ChampionPagePayload>`
+ * refs: none
  */
 export function getInitialChampionPageData(name: string): Promise<ChampionPagePayload> {
   return getCachedChampionPageData(championSlug(name));

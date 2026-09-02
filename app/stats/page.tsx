@@ -1,6 +1,7 @@
 /**
  * Define the top-level statistics page route.
  * Loads summary statistics and renders the localized stats navigation view.
+ * refs: none
  */
 "use client";
 import { useEffect, useState } from "react";
@@ -91,6 +92,7 @@ function mapMapStats(maps: Array<{ name: string; totalMatches: number; distribut
 /**
  * Renders the exported statistics view with its route data.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function StatsPage() {
   const { t , formatPercent, formatNumber} = useLocalization();

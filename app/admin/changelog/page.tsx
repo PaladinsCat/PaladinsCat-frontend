@@ -1,6 +1,7 @@
 /**
  * Define the admin changelog page responsibility boundary.
  * Coordinates admin changelog page data loading, authorization, and presentation.
+ * refs: none
  */
 "use client";
 import { useEffect, useState } from 'react';
@@ -18,6 +19,7 @@ import { useLocalization } from "@/lib/localization-context";
 /**
  * Handles the exported route operation using its declared request and response contract.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function AdminChangelogPage() {
   const { t , formatDateTime} = useLocalization();

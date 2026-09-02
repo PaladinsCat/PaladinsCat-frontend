@@ -1,4 +1,4 @@
-/** Define the typed API contract consumed by player profile server and client views. */
+/** Define the typed API contract consumed by player profile server and client views. · refs: none */
 interface PlayerData {
   id: string;
   name: string;

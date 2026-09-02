@@ -1,4 +1,4 @@
-/** Combine operating-system motion preference with the site's lite-mode setting. */
+/** Combine operating-system motion preference with the site's lite-mode setting. · refs: none */
 "use client";
 
 import { useSyncExternalStore } from "react";
@@ -20,7 +20,7 @@ function snapshot() {
   return getLiteMode() || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
-/** Subscribe React components to the shared reduced-motion signal. */
+/** Subscribe React components to the shared reduced-motion signal. · refs: none */
 export function useReducedMotion(): boolean {
   return useSyncExternalStore(subscribe, snapshot, () => false);
 }

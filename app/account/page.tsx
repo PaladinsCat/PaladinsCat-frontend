@@ -1,6 +1,7 @@
 /**
  * Define the account page responsibility boundary.
  * Coordinates account page data loading, authorization, and presentation.
+ * refs: none
  */
 "use client";
 import { useState, useEffect, useCallback } from "react";
@@ -32,6 +33,7 @@ import { useLocalization } from "@/lib/localization-context";
 /**
  * Handles the exported route operation using its declared request and response contract.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function AccountPage() {
   const { t, formatDate } = useLocalization();

@@ -1,4 +1,4 @@
-/** Player relationship rows with role composition and expandable champion detail. */
+/** Player relationship rows with role composition and expandable champion detail. · refs: none */
 "use client";
 
 import { useState } from "react";

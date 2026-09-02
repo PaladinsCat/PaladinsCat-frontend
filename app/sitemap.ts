@@ -1,6 +1,7 @@
 /**
  * Define the sitemap responsibility boundary.
  * Coordinates sitemap data loading, authorization, and presentation.
+ * refs: none
  */
 import type { MetadataRoute } from "next";
 import { unstable_cache } from "next/cache";
@@ -83,7 +84,7 @@ const getCachedBlogPosts = unstable_cache(getAllPosts, ["sitemap-blog-posts"], {
   revalidate: 3600,
 });
 
-/** Build the crawlable sitemap from canonical static and content routes.  Returns: `Promise<React.JSX.Element>`. */
+/** Build the crawlable sitemap from canonical static and content routes.  Returns: `Promise<React.JSX.Element>`. · refs: none */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticEntries = staticRoutes.map((route) => ({
     url: `${SITE_URL}${route.path}`,

@@ -1,12 +1,14 @@
 /**
  * Define the operations paladinscat bot layout responsibility boundary.
  * Coordinates operations paladinscat bot layout data loading, authorization, and presentation.
+ * refs: none
  */
 import { createLocalizedMetadata } from "@/lib/server-localization";
 
 /**
  * Handles the exported route operation using its declared request and response contract.
  * Returns: `Promise<Metadata>`
+ * refs: none
  */
 export async function generateMetadata() {
   return createLocalizedMetadata("seo.paladinsCatBot.title", {
@@ -18,6 +20,7 @@ export async function generateMetadata() {
 /**
  * Handles the exported route operation using its declared request and response contract.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function PaladinsCatBotLayout({ children }: { children: React.ReactNode }) {
   return children;

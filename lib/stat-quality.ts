@@ -1,6 +1,7 @@
 /**
  * Keeps stat quality server-side and aligned with its data source.
  * Preserve its server boundary and caller-facing data contracts.
+ * refs: none
  */
 export interface StatQuality {
   score: number;
@@ -36,6 +37,7 @@ function colorForScore(score: number): string {
 
 /**
  * Classifies stat confidence from win rate and pick-rate coverage.
+ * refs: none
  */
 export function getStatQuality(winRate: number | null | undefined, pickRate: number | null | undefined, maxPickRate = 100): StatQuality {
   const wr = Number(winRate ?? 0);

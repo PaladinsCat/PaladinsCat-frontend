@@ -2,6 +2,7 @@
  * Define the player route surface for parties page and its local data boundary.
  * This file owns the page, layout, loading state, or route handler named by its path.
  * It does not own unrelated player sections or shared library policy.
+ * refs: none
  */
 "use client";
 
@@ -32,6 +33,7 @@ function MatchCount({ count, href }: { count: number; href: string }) {
 /**
  * Render the RankedPartiesPage view for the player parties page route.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function RankedPartiesPage() {
   const { t, formatNumber } = useLocalization();

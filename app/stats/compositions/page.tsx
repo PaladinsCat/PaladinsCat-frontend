@@ -1,6 +1,7 @@
 /**
  * Define the stats compositions page route boundary.
  * Coordinates this module's route data flow and rendered output.
+ * refs: none
  */
 "use client";
 import { useEffect, useMemo, useState } from "react";
@@ -26,6 +27,7 @@ const CLASS_COLUMNS = [
 /**
  * Renders the exported statistics view with its route data.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function CompositionStatsPage() {
   const { t, formatNumber, formatPercent, formatRecord } = useLocalization();

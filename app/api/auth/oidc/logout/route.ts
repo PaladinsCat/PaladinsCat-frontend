@@ -1,6 +1,7 @@
 /**
  * Define the api auth oidc logout route responsibility boundary.
  * Coordinates api auth oidc logout route data loading, authorization, and presentation.
+ * refs: none
  */
 import { NextRequest, NextResponse } from "next/server";
 import { buildRpLogoutUrl, normalizedHttpsIssuer, requireSameOrigin, resolveInternalIssuer } from "@/lib/oidc-security";
@@ -9,6 +10,7 @@ import { oidcClientSecret } from "@/lib/oidc-client-secret";
 /**
  * Selects the Node.js runtime required by this server handler.
  * Returns: `string`
+ * refs: none
  */
 export const runtime = "nodejs";
 const SESSION_COOKIE = "__Host-pc_session";
@@ -21,6 +23,7 @@ function backend() {
 /**
  * Handles the exported route operation using its declared request and response contract.
  * Returns: `Promise<Response>`
+ * refs: none
  */
 export async function POST(request: NextRequest) {
   if (!requireSameOrigin(request.headers.get("origin"), origin())) return new NextResponse("Forbidden", { status: 403 });

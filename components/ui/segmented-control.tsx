@@ -1,4 +1,4 @@
-/** Canonical unboxed segmented controls for local state and route navigation. */
+/** Canonical unboxed segmented controls for local state and route navigation. · refs: none */
 import type { ReactNode } from "react";
 import Link from "next/link";
 

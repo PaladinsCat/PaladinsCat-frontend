@@ -1,6 +1,7 @@
 /**
  * Renders team matchup data for match-result views.
  * Keeps the component's interaction and accessibility behavior intact.
+ * refs: none
  */
 "use client";
 
@@ -18,6 +19,7 @@ interface TeamMatchupProps {
 /** Render TeamMatchup from its declared props and match data.
  * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function TeamMatchup({ players, label, averages }: TeamMatchupProps) {
   const { t } = useLocalization();

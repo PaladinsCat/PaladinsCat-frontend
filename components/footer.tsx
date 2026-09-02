@@ -1,5 +1,6 @@
 /** footer component/module.
  * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ * refs: none
  */
 "use client";
 
@@ -8,6 +9,7 @@
  * Pattern source: Paladins.guru (footer on every page with links, social, copyright)
  * Structure: 3 columns (Links | Social | Copyright) on desktop, stacked on mobile
  * Hi-Rez Studios data attribution required per Paladins.guru footer pattern
+ * refs: none
  */
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
@@ -20,6 +22,7 @@ const VERSION_REFRESH_MIN_GAP_MS = 15 * 1000;
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function Footer() {
   const { t } = useLocalization();

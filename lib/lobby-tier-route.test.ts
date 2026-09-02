@@ -1,5 +1,6 @@
 /** Tests lobby-tier URL parsing and query synchronization.
  * The module owns the existing URL, context, or locale-message boundary.
+ * refs: none
  */
 import assert from "node:assert/strict";
 import { test } from "node:test";

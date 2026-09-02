@@ -1,5 +1,6 @@
 /** Loads and filters active item data for the build UI.
  * This module filters active item data for build and loadout displays.
+ * refs: none
  */
 import activeItemData from "../public/data/paladins-active-items.json" with { type: "json" };
 
@@ -30,19 +31,23 @@ const auditedData = activeItemData as unknown as ActiveItemDataFile;
 
 /** ACTIVE_ITEM_DATA_AUDITED_AT applies the module-specific transformation to its declared inputs.
  * Contract: validates its inputs and returns the existing module result without mutating caller state.
+ * refs: none
  */
 export const ACTIVE_ITEM_DATA_AUDITED_AT = auditedData.auditedAt;
 /** ACTIVE_ITEM_DATA_SOURCE applies the module-specific transformation to its declared inputs.
  * Contract: validates its inputs and returns the existing module result without mutating caller state.
+ * refs: none
  */
 export const ACTIVE_ITEM_DATA_SOURCE = auditedData.source;
 /** ACTIVE_ITEMS applies the module-specific transformation to its declared inputs.
  * Contract: validates its inputs and returns the existing module result without mutating caller state.
+ * refs: none
  */
 export const ACTIVE_ITEMS = auditedData.items;
 
 /** activeItemTierAtLevel applies the module-specific transformation to its declared inputs.
  * Contract: validates its inputs and returns the existing module result without mutating caller state.
+ * refs: none
  */
 export function activeItemTierAtLevel(
   tiers: readonly ActiveItemTier[] | null | undefined,

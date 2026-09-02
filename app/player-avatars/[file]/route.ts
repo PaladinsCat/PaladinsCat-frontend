@@ -1,6 +1,7 @@
 /**
  * Handle HTTP requests for player-avatars file route.
  * Validate inputs and return the response assembled by this handler.
+ * refs: none
  */
 import { NextResponse } from "next/server";
 import {
@@ -28,6 +29,7 @@ function errorResponse(status: number): NextResponse {
 /**
  * Handle the GET HTTP request for player-avatars file route.
  * Validate the request and return the handler response with its declared status behavior.
+ * refs: none
  */
 export async function GET(
   _request: Request,

@@ -1,5 +1,6 @@
 /** Calculates champion mastery display values.
  * The module preserves canonical data, asset, or metadata behavior used by existing callers.
+ * refs: none
  */
 const LEVEL_50_XP = 25_500_000;
 const XP_PER_LEVEL_AFTER_50 = 1_000_000;
@@ -9,6 +10,7 @@ const XP_PER_LEVEL_AFTER_50 = 1_000_000;
  * The curve is L × (L + 1) × 10,000 through level 49, then 1,000,000 XP
  * for each level beginning at level 50.
  * Returns: `number`
+ * refs: none
  */
 export function championMasteryLevelFromXp(xp: number): number {
   const totalXp = Math.max(0, Number.isFinite(xp) ? xp : 0);

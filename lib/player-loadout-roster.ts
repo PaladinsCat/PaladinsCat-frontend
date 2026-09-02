@@ -1,5 +1,6 @@
 /** Builds player loadout roster display data.
  * The module owns its existing image, OIDC, proxy, roster, or moderation boundary.
+ * refs: none
  */
 import { fetchChampions } from "@/lib/api-client";
 import { STATIC_CHAMPIONS } from "@/lib/static-champions";
@@ -13,6 +14,7 @@ let rosterPromise: Promise<PlayerLoadoutChampion[]> | null = null;
  * static-champions.ts. Use the database catalog for links and filters so deck
  * rows, card references, and player loadouts share one identity.
  * Returns: `Promise<PlayerLoadoutChampion[]>`
+ * refs: none
  */
 export function getPlayerLoadoutChampionRoster(): Promise<PlayerLoadoutChampion[]> {
   if (!rosterPromise) {

@@ -1,6 +1,7 @@
 /**
  * Define the operations projects page responsibility boundary.
  * Coordinates operations projects page data loading, authorization, and presentation.
+ * refs: none
  */
 "use client";
 import Link from "next/link";
@@ -18,6 +19,7 @@ const projectComponents = ["Frontend", "Backend", "Discord Bot", "Wiki", "Locali
 /**
  * Handles the exported route operation using its declared request and response contract.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function ProjectsPage() {
   const { user, isLoading } = useAuth();

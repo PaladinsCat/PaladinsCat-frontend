@@ -1,4 +1,4 @@
-/** Render item and talent loadout details for both teams with expandable stat views. */
+/** Render item and talent loadout details for both teams with expandable stat views. · refs: none */
 "use client";
 
 import { useEffect, useId, useState, type ReactNode } from "react";
@@ -444,7 +444,7 @@ function PlayerBuildRow({
   </div>;
 }
 
-/** Group player loadouts by team, loading item details and honoring lobby-tier filters.  Returns: `React.JSX.Element`. */
+/** Group player loadouts by team, loading item details and honoring lobby-tier filters.  Returns: `React.JSX.Element`. · refs: none */
 export default function ItemsLoadoutsSection({ team1Players, team2Players, team1Wins, team2Wins, factMap }: Props) {
   const { t } = useLocalization();
   const { filter: lobbyScope, definition: lobbyTier, ready: lobbyTierReady } = useLobbyTier();

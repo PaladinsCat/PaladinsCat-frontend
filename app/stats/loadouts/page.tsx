@@ -1,6 +1,7 @@
 /**
  * Define the stats loadouts page route boundary.
  * Coordinates this module's route data flow and rendered output.
+ * refs: none
  */
 "use client";
 import { useEffect, useState } from "react";
@@ -21,6 +22,7 @@ type SortDir = "asc" | "desc";
 /**
  * Renders the exported statistics view with its route data.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function LoadoutsPage() {
   const { t , formatPercent, formatNumber} = useLocalization();

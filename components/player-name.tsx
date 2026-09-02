@@ -1,5 +1,6 @@
 /** player-name component/module.
  * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ * refs: none
  */
 "use client";
 
@@ -45,6 +46,7 @@ const AUTOMATIC_TAG_ACCENT: Record<NonNullable<PlayerModerationTagProps["automat
 
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ * refs: none
  */
 export function VerifiedPlayerBadge({ className = "", iconClassName = "h-3.5 w-3.5" }: { className?: string; iconClassName?: string }) {
   const { t } = useLocalization();
@@ -84,6 +86,7 @@ export type PlayerModerationTagProps = {
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export function PlayerModerationTag({
   playerId,
@@ -175,7 +178,7 @@ export function PlayerModerationTag({
   </span>;
 }
 
-/** A player name with its confirmed-cheater or suspicious-player label. */
+/** A player name with its confirmed-cheater or suspicious-player label. · refs: none */
 export default function PlayerName({
   playerId,
   children,

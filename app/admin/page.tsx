@@ -1,6 +1,7 @@
 /**
  * Define the admin page responsibility boundary.
  * Coordinates admin page data loading, authorization, and presentation.
+ * refs: none
  */
 "use client";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -26,6 +27,7 @@ const PREVIEW_DASHBOARD: AdminDashboard = {
 /**
  * Handles the exported route operation using its declared request and response contract.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function AdminDashboardPage({ mode = "admin" }: { mode?: "admin" | "developer" }) {
   const { t, formatNumber , formatDateTime} = useLocalization();

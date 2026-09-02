@@ -1,6 +1,7 @@
 /**
  * Define the stats activity page route boundary.
  * Coordinates this module's route data flow and rendered output.
+ * refs: none
  */
 import { unstable_cache } from "next/cache";
 import PlayerActivityPanel, { type PlayerActivityInitialData } from "@/components/player-activity-panel";
@@ -40,10 +41,11 @@ const getInitialActivityData = unstable_cache(
 /**
  * Selects request-fresh rendering for statistics data.
  * Returns: `Promise<React.JSX.Element>`
+ * refs: none
  */
 export const dynamic = "force-dynamic";
 
-/** Render player activity statistics, seeding the client view with server data when available. */
+/** Render player activity statistics, seeding the client view with server data when available. · refs: none */
 export default async function PlayerActivityPage() {
   const initialData = await getInitialActivityData().catch(() => null);
   return (

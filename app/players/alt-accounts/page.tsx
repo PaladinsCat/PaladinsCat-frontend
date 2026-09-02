@@ -2,6 +2,7 @@
  * Define the player route surface for alt-accounts page and its local data boundary.
  * This file owns the page, layout, loading state, or route handler named by its path.
  * It does not own unrelated player sections or shared library policy.
+ * refs: none
  */
 "use client";
 
@@ -25,6 +26,7 @@ const PAGE_SIZE = 24;
 /**
  * Render the AltAccountsPage view for the player alt-accounts page route.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function AltAccountsPage() {
   const { t , formatNumber} = useLocalization();

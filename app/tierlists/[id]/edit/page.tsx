@@ -1,6 +1,7 @@
 /**
  * Define the tierlists edit page responsibility boundary.
  * Coordinates tierlists edit page data loading, authorization, and presentation.
+ * refs: none
  */
 "use client";
 import { useEffect, useState } from "react";
@@ -14,6 +15,7 @@ import { useAuth } from "@/lib/auth-context";
 /**
  * Handles the exported route operation using its declared request and response contract.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function EditTierListPage({ params }: { params: Promise<{ id: string }> }) {
   const { t } = useLocalization();

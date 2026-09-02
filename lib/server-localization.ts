@@ -1,6 +1,7 @@
 /**
  * Keeps server localization server-side and aligned with its data source.
  * Preserve its server boundary and caller-facing data contracts.
+ * refs: none
  */
 import "server-only";
 
@@ -36,6 +37,7 @@ async function readLocaleMessages(locale: Locale): Promise<LocaleMessages> {
 
 /**
  * Loads locale messages and metadata for server-rendered localization.
+ * refs: none
  */
 export async function getServerLocalization() {
   const cookieStore = await cookies();
@@ -59,6 +61,7 @@ export async function getServerLocalization() {
 /**
  * Builds page metadata from localized messages and the requested locale.
  * Returns: `Promise<Metadata>`
+ * refs: none
  */
 export async function createLocalizedMetadata(
   titleKey: TranslationKey,

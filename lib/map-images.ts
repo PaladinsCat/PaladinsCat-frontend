@@ -1,5 +1,6 @@
 /** Resolves map image assets with safe fallbacks.
  * The module owns its existing image, OIDC, proxy, roster, or moderation boundary.
+ * refs: none
  */
 const DEFAULT_MAP_ARTWORK = "Test_Maps_Loading";
 const DEFAULT_MATCH_MAP_ARTWORK = "Match_Test_Maps";
@@ -88,6 +89,7 @@ function mapLookupKey(value: string): string {
 /** Apply mapImagePath to the declared request or domain inputs.
  * Contract: validates inputs, preserves the existing security or mapping rules, and returns the documented result.
  * Returns: `string`
+ * refs: none
  */
 export function mapImagePath(mapName: string): string {
   const lookupKey = mapLookupKey(mapName.trim().replace(/^ranked\s+/i, ""));
@@ -101,6 +103,7 @@ export function mapImagePath(mapName: string): string {
 /** Apply matchMapImagePath to the declared request or domain inputs.
  * Contract: validates inputs, preserves the existing security or mapping rules, and returns the documented result.
  * Returns: `string`
+ * refs: none
  */
 export function matchMapImagePath(mapName: string): string {
   const lookupKey = mapLookupKey(mapName.trim().replace(/^ranked\s+/i, ""));
@@ -111,6 +114,7 @@ export function matchMapImagePath(mapName: string): string {
 /** Apply matchMapImageSources to the declared request or domain inputs.
  * Contract: validates inputs, preserves the existing security or mapping rules, and returns the documented result.
  * Returns: `object`
+ * refs: none
  */
 export function matchMapImageSources(mapName: string): { avif: string; png: string } {
   const png = matchMapImagePath(mapName);

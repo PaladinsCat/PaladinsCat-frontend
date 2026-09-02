@@ -1,5 +1,6 @@
 /** Loads and normalizes champion data for pages.
  * The module preserves canonical data, asset, or metadata behavior used by existing callers.
+ * refs: none
  */
 import { championSlug } from "@/lib/utils";
 import { getCanonicalTalentImageUrl } from "@/lib/image-assets";
@@ -81,6 +82,7 @@ async function loadChampionDataMap(): Promise<ChampionDataMap> {
 /** Use getChampionData to apply the module-specific champion data or asset behavior.
  * Contract: accepts its declared inputs and returns the documented value without changing caller-side state.
  * Returns: `Promise<ChampionData | undefined>`
+ * refs: none
  */
 export async function getChampionData(slug: string): Promise<ChampionData | undefined> {
   const data = await loadChampionDataMap();
@@ -104,6 +106,7 @@ async function loadCanonicalTalentImages(): Promise<Map<number, string>> {
 }
 
 /** Resolve talent artwork only by the stable game ID. Display names are never
+ * refs: none
  * used as asset keys, so API punctuation and localization cannot change URLs. */
 export async function getCanonicalTalentIconPath(talentId: number): Promise<string | null> {
   if (!Number.isInteger(talentId) || talentId <= 0) return null;

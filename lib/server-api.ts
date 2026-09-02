@@ -1,6 +1,7 @@
 /**
  * Keeps server api server-side and aligned with its data source.
  * Preserve its server boundary and caller-facing data contracts.
+ * refs: none
  */
 import "server-only";
 
@@ -24,6 +25,7 @@ function serverApiBase(): string {
 /**
  * Fetches JSON from the backend with server-side caching, revalidation, and error handling.
  * Returns: `Promise<T>`
+ * refs: none
  */
 export async function fetchServerJson<T>(path: string, options: ServerFetchOptions = {}): Promise<T> {
   const { timeoutMs = 10_000, ...requestOptions } = options;

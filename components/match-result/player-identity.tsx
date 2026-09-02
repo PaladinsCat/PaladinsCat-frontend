@@ -1,6 +1,7 @@
 /**
  * Renders player identity data for match-result views.
  * Keeps the component's interaction and accessibility behavior intact.
+ * refs: none
  */
 "use client";
 
@@ -12,6 +13,7 @@ import { useLocalization } from "@/lib/localization-context";
 /** Render trackedPrivateId from its declared props and match data.
  * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
  * Returns: `number | null`
+ * refs: none
  */
 export function trackedPrivateId(player: MatchPlayerDetail): number | null {
   const privateId = Number(player.private_player_id ?? 0);
@@ -21,6 +23,7 @@ export function trackedPrivateId(player: MatchPlayerDetail): number | null {
 /** Render matchPlayerKey from its declared props and match data.
  * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
  * Returns: `string`
+ * refs: none
  */
 export function matchPlayerKey(player: MatchPlayerDetail): string {
   const privateId = trackedPrivateId(player);
@@ -31,6 +34,7 @@ export function matchPlayerKey(player: MatchPlayerDetail): string {
 /** Render matchPlayerHref from its declared props and match data.
  * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
  * Returns: `string | null`
+ * refs: none
  */
 export function matchPlayerHref(player: MatchPlayerDetail): string | null {
   const privateId = trackedPrivateId(player);
@@ -42,6 +46,7 @@ export function matchPlayerHref(player: MatchPlayerDetail): string | null {
 /** Render privateAccountCode from its declared props and match data.
  * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
  * Returns: `string | null`
+ * refs: none
  */
 export function privateAccountCode(player: MatchPlayerDetail): string | null {
   const privateId = trackedPrivateId(player);
@@ -53,6 +58,7 @@ export function privateAccountCode(player: MatchPlayerDetail): string | null {
 
 /** Render MatchPlayerLink from its declared props and match data.
  * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
+ * refs: none
  */
 export function MatchPlayerLink({ player, className = "" }: { player: MatchPlayerDetail; className?: string }) {
   const { t } = useLocalization();
@@ -89,6 +95,7 @@ export function MatchPlayerLink({ player, className = "" }: { player: MatchPlaye
 /** Render MatchPlayerReference from its declared props and match data.
  * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export function MatchPlayerReference({ player, className = "" }: { player: MatchPlayerDetail; className?: string }) {
   const { t } = useLocalization();

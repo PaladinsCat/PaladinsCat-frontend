@@ -2,12 +2,13 @@
  * Derive readable Cat-themed accent colors from wallpaper pixels.
  *
  * This module owns color bucketing and browser image extraction; it does not fetch or persist wallpaper data.
+ * refs: none
  */
-/** CSS custom property carrying the primary Cat accent; reading it has no side effects. */
+/** CSS custom property carrying the primary Cat accent; reading it has no side effects. · refs: none */
 export const HOME_CAT_ACCENT_PROPERTY = "--pc-home-cat-accent";
-/** CSS custom property carrying the secondary platform accent; reading it has no side effects. */
+/** CSS custom property carrying the secondary platform accent; reading it has no side effects. · refs: none */
 export const HOME_PLATFORM_ACCENT_PROPERTY = "--pc-home-platform-accent";
-/** CSS custom property carrying the tertiary wallpaper accent; reading it has no side effects. */
+/** CSS custom property carrying the tertiary wallpaper accent; reading it has no side effects. · refs: none */
 export const HOME_THIRD_ACCENT_PROPERTY = "--pc-home-third-accent";
 
 const SAMPLE_SIZE = 48;
@@ -139,6 +140,7 @@ function hueBucketDistance(left: number, right: number): number {
  * Finds a dominant accent and a second readable color. It prefers another hue,
  * falls back to a representative shade, then derives contrast for flat images.
  * Returns: `object`
+ * refs: none
  */
 export function pickWallpaperAccents(pixels: Uint8ClampedArray): WallpaperAccents {
   const buckets: ColorBucket[] = Array.from({ length: HUE_BUCKETS }, createColorBucket);
@@ -235,12 +237,12 @@ export function pickWallpaperAccents(pixels: Uint8ClampedArray): WallpaperAccent
   };
 }
 
-/** Backward-compatible shortcut for consumers that only need the main accent. */
+/** Backward-compatible shortcut for consumers that only need the main accent. · refs: none */
 export function pickWallpaperAccent(pixels: Uint8ClampedArray): string | null {
   return pickWallpaperAccents(pixels).primary;
 }
 
-/** Samples an image in a tiny canvas. Cross-origin images safely fall back. */
+/** Samples an image in a tiny canvas. Cross-origin images safely fall back. · refs: none */
 export async function extractWallpaperAccents(source: string): Promise<WallpaperAccents> {
   try {
     const image = new Image();
@@ -266,6 +268,7 @@ export async function extractWallpaperAccents(source: string): Promise<Wallpaper
  *
  * Accepts source; returns a color or null after browser image decoding, without authentication or persistence effects.
  * Returns: `Promise<string | null>`
+ * refs: none
  */
 export async function extractWallpaperAccent(source: string): Promise<string | null> {
   return (await extractWallpaperAccents(source)).primary;

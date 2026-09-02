@@ -1,6 +1,7 @@
 /**
  * Define the stats talents page route boundary.
  * Coordinates this module's route data flow and rendered output.
+ * refs: none
  */
 "use client";
 import { useEffect, useState } from "react";
@@ -17,6 +18,7 @@ import { useRouteSettledLoading } from "@/lib/route-transition-context";
 /**
  * Renders the exported statistics view with its route data.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function TalentsPage() {
   const { t , formatNumber, formatPercent} = useLocalization();

@@ -2,6 +2,7 @@
  * Define the player route surface for players-page-client and its local data boundary.
  * This file owns the page, layout, loading state, or route handler named by its path.
  * It does not own unrelated player sections or shared library policy.
+ * refs: none
  */
 "use client";
 
@@ -56,6 +57,7 @@ const EMPTY_COUNTS: PlayersOverview["communityCounts"] = {
 /**
  * Render the PlayersPageClient view for the player players-page-client route.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function PlayersPageClient({ initialOverview }: { initialOverview: PlayersOverview | null }) {
   const { t, formatNumber } = useLocalization();

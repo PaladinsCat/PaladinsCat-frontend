@@ -3,6 +3,7 @@
  * name details (for example, "Honed Sense" vs "Honed Senses"). Use this key
  * only as a fallback after exact ID/name matching so canonical IDs remain the
  * primary identity and display text is never rewritten.
+ * refs: none
  */
 export function canonicalCardNameKey(value: string | null | undefined): string {
   return String(value ?? "")

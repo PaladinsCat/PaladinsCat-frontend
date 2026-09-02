@@ -1,5 +1,6 @@
 /** player-directory-grid component/module.
  * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ * refs: none
  */
 "use client";
 
@@ -9,11 +10,13 @@ import PlayerDirectoryPagination, { usePersistentDirectoryPage } from "@/compone
 const PLAYER_DIRECTORY_PAGE_SIZE = 32;
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ * refs: none
  */
 export const PLAYER_DIRECTORY_CARD_CLASS = "flex h-16 min-h-16 min-w-0 overflow-hidden rounded-xl border bg-pc-bg-elevated px-3 py-2 transition-colors";
 
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ * refs: none
  */
 export default function PlayerDirectoryGrid<T>({
   items,

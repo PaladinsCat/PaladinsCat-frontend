@@ -1,5 +1,6 @@
 /** Tests champion page data assembly.
  * The module preserves canonical data, asset, or metadata behavior used by existing callers.
+ * refs: none
  */
 import assert from "node:assert/strict";
 import test from "node:test";

@@ -1,5 +1,6 @@
 /** Chart component/module.
  * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ * refs: none
  */
 "use client";
 
@@ -34,6 +35,7 @@ export interface ChartProps {
 
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ * refs: none
  */
 export function LineChartComponent({
   data,
@@ -101,6 +103,7 @@ export function LineChartComponent({
 
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ * refs: none
  */
 export function BarChartComponent({
   data,

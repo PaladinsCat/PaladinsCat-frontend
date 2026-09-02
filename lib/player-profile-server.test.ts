@@ -1,4 +1,4 @@
-/** Verify the public player identifier guard used before server-side profile requests. */
+/** Verify the public player identifier guard used before server-side profile requests. · refs: none */
 import assert from "node:assert/strict";
 import test from "node:test";
 import { isPublicPlayerId } from "./seo.ts";

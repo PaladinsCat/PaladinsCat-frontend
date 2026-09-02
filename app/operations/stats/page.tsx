@@ -1,6 +1,7 @@
 /**
  * Define the operations stats page responsibility boundary.
  * Coordinates operations stats page data loading, authorization, and presentation.
+ * refs: none
  */
 "use client";
 import { useEffect, useState } from "react";
@@ -20,6 +21,7 @@ function MetricCard({ label, value, companionValue, detail }: { label: string; v
 /**
  * Handles the exported route operation using its declared request and response contract.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function OperationsStatsPage() {
   const { t, formatDateTime, formatPercent } = useLocalization();

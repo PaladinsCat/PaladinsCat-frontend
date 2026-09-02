@@ -1,6 +1,7 @@
 /**
  * Compose metadata and child content for matches id layout.
  * Keep SEO and nesting behavior local to this layout.
+ * refs: none
  */
 import type { Metadata } from "next";
 import { getServerLocalization } from "@/lib/server-localization";
@@ -14,6 +15,7 @@ type Props = {
  * Build SEO metadata for matches id layout.
  * Return the Next.js metadata object used by the page without mutating application data.
  * Returns: `Promise<Metadata>`
+ * refs: none
  */
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
@@ -32,6 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
  * Render the MatchDetailLayout view for matches id layout.
  * Return the React tree for the declared inputs and page data.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function MatchDetailLayout({ children }: Props) {
   return children;

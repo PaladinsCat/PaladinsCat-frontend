@@ -1,6 +1,7 @@
 /**
  * Define the community page responsibility boundary.
  * Coordinates community page data loading, authorization, and presentation.
+ * refs: none
  */
 "use client";
 import { useEffect, useState } from "react";
@@ -18,6 +19,7 @@ const HIDDEN_TWITCH_CHANNEL_LOGINS = new Set(["paladins2ttv"]);
 /**
  * Handles the exported route operation using its declared request and response contract.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function CommunityPage() {
   const { t , formatNumber, formatDateTime} = useLocalization();

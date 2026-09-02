@@ -1,5 +1,6 @@
 /** Tests bounded response-body parsing behavior.
  * These tests verify response-body size limits before parsing.
+ * refs: none
  */
 import assert from "node:assert/strict";
 import test from "node:test";

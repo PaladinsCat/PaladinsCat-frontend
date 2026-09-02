@@ -1,6 +1,7 @@
 /**
  * Compose metadata and child content for game items itemId layout.
  * Keep SEO and nesting behavior local to this layout.
+ * refs: none
  */
 import type { Metadata } from "next";
 
@@ -13,6 +14,7 @@ type Props = {
  * Build SEO metadata for game items itemId layout.
  * Return the Next.js metadata object used by the page without mutating application data.
  * Returns: `Promise<Metadata>`
+ * refs: none
  */
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { itemId } = await params;
@@ -26,6 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
  * Render the ItemDetailLayout view for game items itemId layout.
  * Return the React tree for the declared inputs and page data.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function ItemDetailLayout({ children }: Props) {
   return children;

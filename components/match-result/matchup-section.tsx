@@ -1,6 +1,7 @@
 /**
  * Renders matchup section data for match-result views.
  * Keeps the component's interaction and accessibility behavior intact.
+ * refs: none
  */
 "use client";
 
@@ -22,6 +23,7 @@ interface MatchupSectionProps {
 /** Render MatchupSection from its declared props and match data.
  * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function MatchupSection({
   team1, team2, team1Wins, team2Wins, team1Label, team2Label,

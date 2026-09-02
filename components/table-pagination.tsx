@@ -1,5 +1,6 @@
 /** table-pagination component/module.
  * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ * refs: none
  */
 "use client";
 
@@ -7,6 +8,7 @@ import { useLocalization } from "@/lib/localization-context";
 
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ * refs: none
  */
 export const TABLE_PAGE_SIZES = [10, 25, 50, 100] as const;
 export type TablePageSize = (typeof TABLE_PAGE_SIZES)[number];
@@ -22,6 +24,7 @@ interface TablePaginationProps {
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function TablePagination({
   page,

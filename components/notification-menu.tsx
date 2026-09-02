@@ -1,5 +1,6 @@
 /** notification-menu component/module.
  * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ * refs: none
  */
 "use client";
 
@@ -42,6 +43,7 @@ function notificationDot(importance: number) {
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function NotificationMenu() {
   const { user, isLoading: authLoading } = useAuth();
@@ -60,7 +62,7 @@ export default function NotificationMenu() {
     // render pass can read it without touching the ref during render).
     const [portalEl, setPortalEl] = useState<HTMLDivElement | null>(null);
 
-    /** Position portal: centered on button, clamped to viewport edges */
+/** Position portal: centered on button, clamped to viewport edges · refs: none */
   function positionPortal(btn: HTMLButtonElement, portal: HTMLDivElement) {
     const rect = btn.getBoundingClientRect();
     // Hidden button → hide portal

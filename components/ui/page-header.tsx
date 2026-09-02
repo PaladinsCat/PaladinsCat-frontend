@@ -1,4 +1,4 @@
-/** Canonical page header: parent context, neutral title, optional useful context and actions. */
+/** Canonical page header: parent context, neutral title, optional useful context and actions. · refs: none */
 import type { ReactNode } from "react";
 import ContextBackLink from "@/components/context-back-link";
 

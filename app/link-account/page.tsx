@@ -1,6 +1,7 @@
 /**
  * Render the link-account page and its data composition.
  * Assemble the page content exposed at this location.
+ * refs: none
  */
 "use client";
 
@@ -15,6 +16,7 @@ import PlayerLinkCard from "@/components/player-link-card";
  * Render the LinkAccountPage view for link-account page.
  * Return the React tree for the declared inputs and page data.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function LinkAccountPage() {
   const { user, refresh } = useAuth();

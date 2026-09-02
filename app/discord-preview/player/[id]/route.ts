@@ -1,12 +1,14 @@
 /**
  * Define the discord preview player route responsibility boundary.
  * Coordinates discord preview player route data loading, authorization, and presentation.
+ * refs: none
  */
 import { NextRequest } from "next/server";
 
 /**
  * Selects request-fresh rendering for this data-dependent page.
  * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ * refs: none
  */
 export const dynamic = "force-dynamic";
 
@@ -17,6 +19,7 @@ function rendererUrl() {
 /**
  * Handles the exported route operation using its declared request and response contract.
  * Returns: `Promise<Response>`
+ * refs: none
  */
 export async function GET(_request: NextRequest, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;

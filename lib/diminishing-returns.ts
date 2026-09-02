@@ -1,6 +1,7 @@
 /**
  * Defines diminishing-returns's shared contracts and runtime helpers.
  * Keep behavior aligned with its callers and browser/server boundary.
+ * refs: none
  */
 export type EffectKey =
   | "movement-speed"
@@ -23,19 +24,23 @@ export type EffectKey =
 
 /**
  * Defines the  effect source type contract used by this module.
+ * refs: none
  */
 export type EffectSourceType = "talent" | "card" | "item";
 /**
  * Defines the  effect direction contract used by this module.
+ * refs: none
  */
 export type EffectDirection = "increase" | "decrease";
 /**
  * Defines the  effect target contract used by this module.
+ * refs: none
  */
 export type EffectTarget = "self" | "enemy" | "ally" | "unknown";
 
 /**
  * Transforms or validates  detected effect according to this module's data contract.
+ * refs: none
  */
 export interface DetectedEffect {
   key: EffectKey;
@@ -50,6 +55,7 @@ export interface DetectedEffect {
 
 /**
  * Defines the  directional diminished value contract used by this module.
+ * refs: none
  */
 export interface DirectionalDiminishedValue {
   additive: number;
@@ -63,6 +69,7 @@ export interface DirectionalDiminishedValue {
 
 /**
  * Defines the  diminished value contract used by this module.
+ * refs: none
  */
 export interface DiminishedValue {
   additive: number;
@@ -92,6 +99,7 @@ function numericMatch(text: string, patterns: RegExp[]): number | null {
 /**
  * Transforms or validates resolve scaled description according to this module's data contract.
  * Returns: `string`
+ * refs: none
  */
 export function resolveScaledDescription(description: string | null | undefined, level: number): string {
   if (!description) return "";
@@ -140,6 +148,7 @@ const ALL_WEAPON_DAMAGE_SCENARIOS: WeaponDamageScenario[] = ["players", "deploya
  * incompatible grammar. Keep their scope keyed to stable game IDs so a broad
  * text match cannot turn ability damage, maximum-Health damage, or flat damage
  * procs into a misleading weapon percentage.
+ * refs: none
  */
 const TALENT_WEAPON_DAMAGE_RULES: Record<number, TalentWeaponDamageRule> = {
   16370: { patterns: [new RegExp(`damage you deal with your weapon shots[^.]*?by\\s+${NUMBER}%`, "i")], scenarios: ALL_WEAPON_DAMAGE_SCENARIOS }, // Over the Moon
@@ -208,6 +217,7 @@ function detectTalentWeaponDamage(
  * retained because many Paladins bonuses are conditional and should be read as
  * a simultaneous best-case estimate, not as permanent uptime.
  * Returns: `Array`
+ * refs: none
  */
 export function detectDescriptionEffects(input: {
   id: number;
@@ -413,6 +423,7 @@ function emptyDirectionalValue(): DirectionalDiminishedValue {
 
 /**
  * Transforms or validates calculate directional diminished value according to this module's data contract.
+ * refs: none
  */
 export function calculateDirectionalDiminishedValue(values: number[], movement = false): DirectionalDiminishedValue {
   const bonuses = values.filter((value) => Number.isFinite(value) && value > 0);
@@ -450,6 +461,7 @@ export function calculateDirectionalDiminishedValue(values: number[], movement =
 
 /**
  * Transforms or validates calculate diminished value according to this module's data contract.
+ * refs: none
  */
 export function calculateDiminishedValue(values: number[], options?: { movement?: boolean; reload?: boolean }): DiminishedValue {
   const finiteValues = values.filter(Number.isFinite);
@@ -479,6 +491,7 @@ export function calculateDiminishedValue(values: number[], options?: { movement?
 
 /**
  * Transforms or validates calculate additive value according to this module's data contract.
+ * refs: none
  */
 export function calculateAdditiveValue(values: number[]): DiminishedValue {
   const finiteValues = values.filter(Number.isFinite);
@@ -501,6 +514,7 @@ export function calculateAdditiveValue(values: number[]): DiminishedValue {
 /**
  * Transforms or validates extract weapon damage override according to this module's data contract.
  * Returns: `number | null`
+ * refs: none
  */
 export function extractWeaponDamageOverride(description: string | null | undefined): number | null {
   const weaponTagged = /^\s*\[Weapon\]/i.test(description ?? "");

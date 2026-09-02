@@ -1,6 +1,7 @@
 /**
  * Keeps server platforms server-side and aligned with its data source.
  * Preserve its server boundary and caller-facing data contracts.
+ * refs: none
  */
 import "server-only";
 
@@ -51,6 +52,7 @@ const getCachedPlatforms = unstable_cache(
 /**
  * Loads platform statistics for the initial server-rendered view.
  * Returns: `Promise<PlatformStat[]>`
+ * refs: none
  */
 export function getInitialPlatforms(): Promise<PlatformStat[]> {
   return getCachedPlatforms();

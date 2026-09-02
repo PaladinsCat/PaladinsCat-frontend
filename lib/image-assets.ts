@@ -4,6 +4,7 @@
  * are therefore published without commas; normalize legacy reference data at
  * the rendering boundary as well.
  * Returns: `string`
+ * refs: none
  */
 export function canonicalLocalImageUrl(src: string): string {
   return src.startsWith("/images/") ? src.replace(/,/g, "") : src;
@@ -18,6 +19,7 @@ export type LocalImageSources = {
  * Resolve local artwork to an AVIF-first source with a PNG compatibility
  * fallback. Remote, data, and blob URLs are left untouched because the site
  * does not own an alternate representation for them.
+ * refs: none
  */
 export function localImageSources(src: string): LocalImageSources {
   const canonical = canonicalLocalImageUrl(src);
@@ -40,6 +42,7 @@ export function localImageSources(src: string): LocalImageSources {
 /** Apply preferredLocalImageUrl to the declared input values.
  * Contract: returns the module-specific validated, stored, formatted, or resolved value without external side effects.
  * Returns: `string`
+ * refs: none
  */
 export function preferredLocalImageUrl(src: string): string {
   return localImageSources(src).preferred;
@@ -48,6 +51,7 @@ export function preferredLocalImageUrl(src: string): string {
 /** Apply fallbackLocalImageUrl to the declared input values.
  * Contract: returns the module-specific validated, stored, formatted, or resolved value without external side effects.
  * Returns: `string`
+ * refs: none
  */
 export function fallbackLocalImageUrl(src: string): string {
   return localImageSources(src).fallback;
@@ -55,6 +59,7 @@ export function fallbackLocalImageUrl(src: string): string {
 
 /** Champion data owns exact talent asset URLs. Never reconstruct a filename
  * Returns: `string | null`
+ * refs: none
  * from API display text; punctuation, localization, and historic names differ. */
 export function getCanonicalTalentImageUrl(source: string | null | undefined): string | null {
   return source?.startsWith("/images/") ? preferredLocalImageUrl(source) : null;

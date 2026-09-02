@@ -1,7 +1,7 @@
-/** Frame the public build browser with localized SEO metadata and heading copy. */
+/** Frame the public build browser with localized SEO metadata and heading copy. · refs: none */
 import { createLocalizedMetadata, getServerLocalization } from "@/lib/server-localization";
 
-/** Generate canonical metadata for the build directory.  Returns: `Promise<Metadata>`. */
+/** Generate canonical metadata for the build directory.  Returns: `Promise<Metadata>`. · refs: none */
 export async function generateMetadata() {
   return createLocalizedMetadata("seo.builds.title", {
     descriptionKey: "seo.builds.description",
@@ -9,7 +9,7 @@ export async function generateMetadata() {
   });
 }
 
-/** Render the build directory heading around its route content.  Returns: `Promise<React.JSX.Element>`. */
+/** Render the build directory heading around its route content.  Returns: `Promise<React.JSX.Element>`. · refs: none */
 export default async function BuildsLayout({ children }: { children: React.ReactNode }) {
   const { t } = await getServerLocalization();
   return (

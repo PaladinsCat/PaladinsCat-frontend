@@ -1,4 +1,4 @@
-/** Shared responsive match-list surface used by match and evidence directories. */
+/** Shared responsive match-list surface used by match and evidence directories. · refs: none */
 "use client";
 
 import type { ReactNode } from "react";

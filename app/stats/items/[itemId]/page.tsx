@@ -1,6 +1,7 @@
 /**
  * Define the stats items page route boundary.
  * Coordinates this module's route data flow and rendered output.
+ * refs: none
  */
 "use client";
 import { useParams } from "next/navigation";
@@ -35,6 +36,7 @@ const CHAMPION_ROLES = [
 /**
  * Renders the exported statistics view with its route data.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function ItemDetailPage() {
   const { t, formatNumber, formatPercent: percent, formatRecord, formatSignedPercent: signedPercent } = useLocalization();

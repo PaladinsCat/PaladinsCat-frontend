@@ -1,5 +1,6 @@
 /** Loads locale messages and provides localization state to the UI.
  * The module owns the existing URL, context, or locale-message boundary.
+ * refs: none
  */
 "use client";
 
@@ -77,6 +78,7 @@ function getCachedLocaleMessages(locale: Locale): LocaleMessages {
 
 /** Apply LocalizationProvider to lobby-tier or localization inputs.
  * Contract: returns the normalized route, context state, or message value while preserving existing browser behavior.
+ * refs: none
  */
 export function LocalizationProvider({
   children,
@@ -215,6 +217,7 @@ export function LocalizationProvider({
 
 /** Apply useLocalization to lobby-tier or localization inputs.
  * Contract: returns the normalized route, context state, or message value while preserving existing browser behavior.
+ * refs: none
  */
 export function useLocalization() {
   const context = useContext(LocalizationContext);
@@ -225,6 +228,7 @@ export function useLocalization() {
 /** Apply LocalizedText to lobby-tier or localization inputs.
  * Contract: returns the normalized route, context state, or message value while preserving existing browser behavior.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export function LocalizedText({
   id,

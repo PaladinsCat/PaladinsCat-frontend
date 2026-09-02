@@ -1,6 +1,7 @@
 /**
  * Manage interactive state for the matches id match-detail-client client view.
  * Coordinate local events and consume the declared component inputs.
+ * refs: none
  */
 "use client";
 
@@ -18,6 +19,7 @@
  *   snapshot fallback when no canonical player row exists.
  *
  * @see C:\PaladinsCat\docs\frontend\match-detail.md
+ * refs: GET /api/matches/:id
  */
 "use client";
 
@@ -59,7 +61,7 @@ const MATCH_UI_CACHE_TTL_MS = 30 * 60 * 1000;
 
 type CachedMatchResult = {
   match: MatchDetailWithBans | null;
-  /** Legacy cache fields are accepted while old tabs/session entries expire. */
+/** Legacy cache fields are accepted while old tabs/session entries expire. · refs: none */
   fact?: MatchFact | null;
   snapshots?: RatingSnapshot[];
 };
@@ -184,6 +186,7 @@ function storedProfileForMatch(player: MatchPlayerDetail): PlayerProfileData | n
  * Render the MatchDetailPage view for matches id match-detail-client.
  * Return the React tree for the declared inputs and page data.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function MatchDetailPage({ initialMatch = null }: { initialMatch?: MatchDetailWithBans | null }) {
   const { t } = useLocalization();

@@ -2,6 +2,7 @@
  * Define the player route surface for id loadouts page and its local data boundary.
  * This file owns the page, layout, loading state, or route handler named by its path.
  * It does not own unrelated player sections or shared library policy.
+ * refs: none
  */
 "use client";
 
@@ -27,6 +28,7 @@ function formatCooldown(seconds: number) {
 /**
  * Render the PlayerLoadoutsPage view for the player id loadouts page route.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function PlayerLoadoutsPage() {
   const { t } = useLocalization();

@@ -1,6 +1,7 @@
 /**
  * Define the api auth oidc callback route responsibility boundary.
  * Coordinates api auth oidc callback route data loading, authorization, and presentation.
+ * refs: none
  */
 import { NextRequest, NextResponse } from "next/server";
 import { newCsrfToken, normalizedHttpsIssuer, safeReturnPath, parseTransaction, resolveInternalIssuer, stateMatches, validateIdToken } from "@/lib/oidc-security";
@@ -10,6 +11,7 @@ import { oidcClientSecret } from "@/lib/oidc-client-secret";
 /**
  * Selects the Node.js runtime required by this server handler.
  * Returns: `string`
+ * refs: none
  */
 export const runtime = "nodejs";
 const TX_COOKIE = "__Host-pc_oidc_txn";
@@ -29,6 +31,7 @@ function one(url: URL, name: string): string | null {
 /**
  * Handles the exported route operation using its declared request and response contract.
  * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ * refs: none
  */
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);

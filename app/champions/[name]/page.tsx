@@ -1,6 +1,7 @@
 /**
  * Render the champions name page and its data composition.
  * Assemble the page content exposed at this location.
+ * refs: none
  */
 import { notFound } from "next/navigation";
 import { STATIC_CHAMPIONS } from "@/lib/static-champions";
@@ -12,6 +13,7 @@ import ChampionDetailPageClient from "./champion-detail-client";
 /**
  * Select dynamic rendering for champions name page.
  * Return the framework rendering mode constant used by this page.
+ * refs: none
  */
 export const dynamic = "force-dynamic";
 
@@ -19,6 +21,7 @@ export const dynamic = "force-dynamic";
  * Render the ChampionDetailPage view for champions name page.
  * Return the React tree for the declared inputs and page data.
  * Returns: `Promise<React.JSX.Element>`
+ * refs: none
  */
 export default async function ChampionDetailPage({
   params,

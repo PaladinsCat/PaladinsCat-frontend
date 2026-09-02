@@ -1,4 +1,4 @@
-/** Rotate the configured homepage wallpapers and synchronize their extracted accents. */
+/** Rotate the configured homepage wallpapers and synchronize their extracted accents. · refs: none */
 "use client";
 
 import { useState, useEffect, useMemo, useRef } from "react";
@@ -28,6 +28,7 @@ const INTERVAL_MS = 10_000;
  * Starts with a deterministic first map to avoid SSR hydration mismatch,
  * then shuffles order client-side after mount.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function MapSlideshow() {
   const [wallpaperEnabled, setWallpaperEnabled] = useState(true);

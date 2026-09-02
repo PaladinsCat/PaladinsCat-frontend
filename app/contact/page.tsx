@@ -1,6 +1,7 @@
 /**
  * Define the contact page responsibility boundary.
  * Coordinates contact page data loading, authorization, and presentation.
+ * refs: none
  */
 "use client";
 import ScrambleText from "@/components/ScrambleText";
@@ -9,6 +10,7 @@ import { useLocalization } from "@/lib/localization-context";
 /**
  * Handles the exported route operation using its declared request and response contract.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function ContactPage() {
   const { t } = useLocalization();

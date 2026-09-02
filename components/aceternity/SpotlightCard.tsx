@@ -1,10 +1,10 @@
-/** Render a pointer-tracking spotlight surface behind arbitrary card content. */
+/** Render a pointer-tracking spotlight surface behind arbitrary card content. · refs: none */
 "use client";
 
 import { useReducedMotion } from "@/lib/reduced-motion";
 import { useState } from "react";
 
-/** Track pointer position over the card and expose the highlight without changing child content. */
+/** Track pointer position over the card and expose the highlight without changing child content. · refs: none */
 export function SpotlightCard({
   children,
   className = "",

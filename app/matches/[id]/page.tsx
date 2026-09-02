@@ -1,6 +1,7 @@
 /**
  * Render the matches id page and its data composition.
  * Assemble the page content exposed at this location.
+ * refs: none
  */
 import { notFound } from "next/navigation";
 import { deriveMissingMatchCreditRates, type MatchDetailWithBans } from "@/lib/api-client";
@@ -21,6 +22,7 @@ type MatchResponse = {
 /**
  * Select dynamic rendering for matches id page.
  * Return the framework rendering mode constant used by this page.
+ * refs: none
  */
 export const dynamic = "force-dynamic";
 
@@ -28,6 +30,7 @@ export const dynamic = "force-dynamic";
  * Render the MatchDetailPage view for matches id page.
  * Return the React tree for the declared inputs and page data.
  * Returns: `Promise<React.JSX.Element>`
+ * refs: none
  */
 export default async function MatchDetailPage({
   params,

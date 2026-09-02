@@ -1,6 +1,7 @@
 /**
  * Define the stats metrics page route boundary.
  * Coordinates this module's route data flow and rendered output.
+ * refs: none
  */
 "use client";
 import { useEffect, useMemo, useState, Suspense } from "react";
@@ -427,6 +428,7 @@ function MetricsPageClient() {
 /**
  * Renders the exported statistics view with its route data.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function MetricsPage() {
   return (

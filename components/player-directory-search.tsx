@@ -1,4 +1,4 @@
-/** Canonical labelled search field for player directories. */
+/** Canonical labelled search field for player directories. · refs: none */
 import { Search } from "lucide-react";
 
 export default function PlayerDirectorySearch({ label, value, onChange, className = "sm:max-w-sm" }: {
