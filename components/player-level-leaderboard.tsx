@@ -51,7 +51,10 @@ export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
     } : {},
     [championClass, championId, mode],
   );
-  const lookupPlayerId = selectedPlayerId ?? (authLoading ? null : user?.linkedPlayerId ?? null);
+  const linkedPlayerId = user?.linkedPlayerId == null ? null : Number(user.linkedPlayerId);
+  const lookupPlayerId = selectedPlayerId ?? (
+    authLoading || linkedPlayerId === null || !Number.isSafeInteger(linkedPlayerId) ? null : linkedPlayerId
+  );
   const leaderboardScopeKey = `${mode}:${leaderboardFilters.role ?? "all"}:${leaderboardFilters.championId ?? "all"}`;
   const loading = loadedLeaderboardScopeKey !== leaderboardScopeKey;
   const currentPositionKey = lookupPlayerId === null ? null : `${leaderboardScopeKey}:${lookupPlayerId}`;
