@@ -810,30 +810,26 @@ export async function fetchPlayerLevelLeaderboard(mode: 'account' | 'champion', 
   if (filters.playerId != null) query.set('playerId', String(filters.playerId));
   if (filters.role != null) query.set('role', filters.role);
   if (filters.championId != null) query.set('championId', String(filters.championId));
-  try {
-    const raw = await fetchJson<Array<{
-      rank: number; class_rank: number | null; champion_rank: number | null; class_name: string | null;
-      player_id: number; player_name: string;
-      champion_id: number | null; champion_name: string | null;
-      level: number | string; xp: number | string; region: string | null; platform: string | null;
-    }>>(`/players/leaderboard/levels?${query.toString()}`);
-    return raw.map((row) => ({
-      rank: Number(row.rank),
-      classRank: row.class_rank == null ? null : Number(row.class_rank),
-      championRank: row.champion_rank == null ? null : Number(row.champion_rank),
-      className: row.class_name ?? null,
-      playerId: Number(row.player_id),
-      playerName: String(row.player_name),
-      championId: row.champion_id == null ? null : Number(row.champion_id),
-      championName: row.champion_name ?? null,
-      level: Number(row.level),
-      xp: Number(row.xp),
-      region: row.region ?? null,
-      platform: row.platform ?? null,
-    }));
-  } catch {
-    return [];
-  }
+  const raw = await fetchJson<Array<{
+    rank: number; class_rank: number | null; champion_rank: number | null; class_name: string | null;
+    player_id: number; player_name: string;
+    champion_id: number | null; champion_name: string | null;
+    level: number | string; xp: number | string; region: string | null; platform: string | null;
+  }>>(`/players/leaderboard/levels?${query.toString()}`);
+  return raw.map((row) => ({
+    rank: Number(row.rank),
+    classRank: row.class_rank == null ? null : Number(row.class_rank),
+    championRank: row.champion_rank == null ? null : Number(row.champion_rank),
+    className: row.class_name ?? null,
+    playerId: Number(row.player_id),
+    playerName: String(row.player_name),
+    championId: row.champion_id == null ? null : Number(row.champion_id),
+    championName: row.champion_name ?? null,
+    level: Number(row.level),
+    xp: Number(row.xp),
+    region: row.region ?? null,
+    platform: row.platform ?? null,
+  }));
 }
 
 export interface PerformanceMetricSummary {
