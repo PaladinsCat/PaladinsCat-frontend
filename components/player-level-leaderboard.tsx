@@ -30,7 +30,7 @@ const CHAMPION_CLASSES: Array<{ value: ChampionClass; icon: string }> = [
 
 export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
   const { t, formatNumber, formatPercent } = useLocalization();
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const [rows, setRows] = useState<PlayerLevelLeaderboardEntry[]>([]);
   const [loadedLeaderboardScopeKey, setLoadedLeaderboardScopeKey] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -51,12 +51,13 @@ export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
     } : {},
     [championClass, championId, mode],
   );
-  const lookupPlayerId = selectedPlayerId ?? user?.linkedPlayerId ?? null;
+  const lookupPlayerId = selectedPlayerId ?? (authLoading ? null : user?.linkedPlayerId ?? null);
   const leaderboardScopeKey = `${mode}:${leaderboardFilters.role ?? "all"}:${leaderboardFilters.championId ?? "all"}`;
   const loading = loadedLeaderboardScopeKey !== leaderboardScopeKey;
   const currentPositionKey = lookupPlayerId === null ? null : `${leaderboardScopeKey}:${lookupPlayerId}`;
   const searchActive = selectedPlayerId === null && searchQuery.trim().length >= 2 && !/^\d+$/.test(searchQuery.trim());
-  const positionLoading = lookupPlayerId !== null && positionKey !== currentPositionKey;
+  const positionFetchReady = lookupPlayerId !== null && (selectedPlayerId !== null || !loading);
+  const positionLoading = positionFetchReady && positionKey !== currentPositionKey;
   const title = [t(mode === "account" ? "generated.players.account" : "generated.players.champion"), t("common.playerChampions.level", { level: "" }).trim()].join(" ");
   const championClassLabel = (value: ChampionClass) => t(value === "Frontline"
     ? "common.roles.frontline"
@@ -118,13 +119,13 @@ export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
   }, [searchQuery, selectedPlayerId]);
 
   useEffect(() => {
-    if (lookupPlayerId == null) return;
+    if (!positionFetchReady || lookupPlayerId == null) return;
     let active = true;
     fetchPlayerLevelLeaderboard(mode, 100, { ...leaderboardFilters, playerId: lookupPlayerId })
       .then((result) => { if (active) { setPositionRows(result.filter((row) => row.playerId === lookupPlayerId)); setPositionKey(currentPositionKey); } })
       .catch(() => { if (active) { setPositionRows([]); setPositionKey(currentPositionKey); } });
     return () => { active = false; };
-  }, [currentPositionKey, leaderboardFilters, lookupPlayerId, mode]);
+  }, [currentPositionKey, leaderboardFilters, lookupPlayerId, mode, positionFetchReady]);
 
   const selectPlayer = (player: PlayerSearchResult) => {
     setSelectedPlayerId(Number(player.id));
