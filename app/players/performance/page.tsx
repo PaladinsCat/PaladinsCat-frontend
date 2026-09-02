@@ -28,13 +28,17 @@ const METRICS = [
 ] as const satisfies ReadonlyArray<{ key: "gpm" | "hpm" | "dpm" | "mpm"; labelKey: TranslationKey; color: string; role?: "Support" | "Damage" | "Frontline" }>;
 
 type PerformanceScope = "ranked" | "casual";
+type PerformanceMode = "match" | "account" | "champion";
 
 /**
  * Render the PerformanceLeaderboardPage view for the player performance page route.
  * Returns the React tree for the route and its declared inputs.
  */
-export default function PerformanceLeaderboardPage() {
+export default function PerformanceLeaderboardPage({ mode = "match" }: { mode?: PerformanceMode }) {
   const { t , formatNumber} = useLocalization();
+  const leaderboardTitle = mode === "match"
+    ? t("menu.performanceLeaderboard")
+    : t("stats.scope.performance", { mode: t(mode === "account" ? "generated.players.account" : "generated.players.champion") });
   const [scope, setScope] = useState<PerformanceScope>("ranked");
   const [metric, setMetric] = useState<(typeof METRICS)[number]["key"]>("gpm");
   const [result, setResult] = useState<{
@@ -45,7 +49,7 @@ export default function PerformanceLeaderboardPage() {
   const [page, setPage] = usePersistentDirectoryPage();
   const [pageSize, setPageSize] = useState<TablePageSize>(25);
   const config = METRICS.find((entry) => entry.key === metric)!;
-  const requestKey = `${scope}:${metric}:${config.role ?? "Global"}`;
+  const requestKey = `${mode}:${scope}:${metric}:${config.role ?? "Global"}`;
   const loading = result.key !== requestKey;
   const rows = loading ? [] : result.rows;
   const summary = loading ? null : result.summary;
@@ -57,6 +61,7 @@ export default function PerformanceLeaderboardPage() {
         metric,
         limit: 100,
         scope,
+        mode,
         queueId: scope === "ranked" ? 486 : undefined,
         role: config.role,
       }),
@@ -76,13 +81,13 @@ export default function PerformanceLeaderboardPage() {
         });
       });
     return () => { active = false; };
-  }, [config.role, metric, requestKey, scope]);
+  }, [config.role, metric, mode, requestKey, scope]);
 
   const visibleRows = rows.slice((page - 1) * pageSize, page * pageSize);
   const scopeLabel = t(scope === "ranked" ? "stats.scope.ranked" : "stats.scope.casual");
 
   return <div className="space-y-6">
-    <PlayersPageHeader title={t("menu.performanceLeaderboard")} />
+    <PlayersPageHeader title={leaderboardTitle} />
 
     <SegmentedControl
       label={t("performance.modeLabel")}
@@ -91,7 +96,7 @@ export default function PerformanceLeaderboardPage() {
       onChange={(value) => { setScope(value); setPage(1); }}
     />
 
-    {summary && summary.sampleSize > 0 && <PerformanceRangeBellCurve
+    {mode === "match" && summary && summary.sampleSize > 0 && <PerformanceRangeBellCurve
       metricLabel={config.role ? t("performance.roleMetric", { role: t(config.role === "Support" ? "common.roles.support" : config.role === "Damage" ? "common.roles.damage" : "common.roles.frontline"), metric: t(config.labelKey) }) : t(config.labelKey)}
       summary={summary}
       formatValue={(value) => formatNumber(Math.round(value))}
@@ -117,8 +122,9 @@ export default function PerformanceLeaderboardPage() {
               <th className="px-4 py-3">#</th>
               <th className="px-3 py-3">{t("generated.players.player")}</th>
               <th className="px-3 py-3">{t("generated.stats.champion")}</th>
-              <th className="px-3 py-3">{t("generated.matches.matchId")}</th>
+              {mode === "match" && <th className="px-3 py-3">{t("generated.matches.matchId")}</th>}
               <th className="px-3 py-3 text-right">{t(config.labelKey)}</th>
+              {mode !== "match" && <th className="px-3 py-3 text-right">{t("generated.players.matches")}</th>}
               <th className="px-4 py-3">{t("generated.matches.region")}</th>
             </tr>
           </thead>
@@ -126,8 +132,9 @@ export default function PerformanceLeaderboardPage() {
             <td className="px-4 py-3 font-bold text-pc-text-muted">{row.rank}</td>
             <td className="px-3 py-3"><Link href={`/players/${row.playerId}`} className="font-medium text-pc-text hover:text-pc-accent"><PlayerName playerId={row.playerId}>{row.playerName}</PlayerName></Link></td>
             <td className="px-3 py-3">{row.championName ? <span className="inline-flex items-center gap-2 text-pc-text-secondary"><img src={getChampionIconSafe(row.championName)} alt="" className="h-6 w-6 rounded object-contain" />{row.championName}</span> : <span className="text-pc-text-muted">{row.className ?? "—"}</span>}</td>
-            <td className="px-3 py-3 font-mono text-pc-text-secondary"><Link href={`/matches/${row.matchId}`} className="hover:text-pc-accent hover:underline">{row.matchId}</Link></td>
+            {mode === "match" && row.matchId && <td className="px-3 py-3 font-mono text-pc-text-secondary"><Link href={`/matches/${row.matchId}`} className="hover:text-pc-accent hover:underline">{row.matchId}</Link></td>}
             <td className={`px-3 py-3 text-right font-bold tabular-nums ${config.color}`}>{formatNumber(Math.round(row.value))}</td>
+            {mode !== "match" && <td className="px-3 py-3 text-right tabular-nums text-pc-text-secondary">{row.totalMatches == null ? "—" : formatNumber(row.totalMatches)}</td>}
             <td className="px-4 py-3 text-pc-text-muted">{row.region ?? "—"}</td>
           </tr>)}</tbody>
         </table>

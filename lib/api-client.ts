@@ -724,7 +724,7 @@ export async function fetchChampionElo(params: {
 
 export interface PerformanceLeaderboardEntry {
   rank: number;
-  matchId: string;
+  matchId: string | null;
   playerId: number;
   playerName: string;
   championName: string | null;
@@ -733,6 +733,7 @@ export interface PerformanceLeaderboardEntry {
   value: number;
   region: string | null;
   platform: string | null;
+  totalMatches: number | null;
 }
 
 /**
@@ -747,6 +748,7 @@ export async function fetchPerformanceLeaderboard(params: {
   region?: string;
   queueId?: number;
   scope?: 'ranked' | 'casual';
+  mode?: 'match' | 'account' | 'champion';
 }): Promise<PerformanceLeaderboardEntry[]> {
   const query = new URLSearchParams();
   query.set('metric', params.metric);
@@ -755,15 +757,17 @@ export async function fetchPerformanceLeaderboard(params: {
   if (params.region) query.set('region', params.region);
   if (params.queueId != null) query.set('queueId', String(params.queueId));
   if (params.scope) query.set('scope', params.scope);
+  if (params.mode) query.set('mode', params.mode);
   try {
-    const raw = await fetchJson<Array<{
-      rank: number; match_id: number | string; player_id: number; player_name: string;
+    const response = await fetchJson<{ mode?: string; data: Array<{
+      rank: number; match_id: number | string | null; player_id: number; player_name: string;
       champion_name: string | null; champion_id: number | null; class_name: string | null;
-      value: number | string; region: string | null; platform: string | null;
-    }>>(`/players/leaderboard/performance?${query.toString()}`);
-    return raw.map((r) => ({
+      value: number | string; region: string | null; platform: string | null; total_matches?: number | string | null;
+    }>}>(`/players/leaderboard/performance?${query.toString()}`, { unwrapData: false });
+    if (params.mode && response.mode !== params.mode) return [];
+    return (response.data ?? []).map((r) => ({
       rank: Number(r.rank),
-      matchId: String(r.match_id),
+      matchId: r.match_id == null ? null : String(r.match_id),
       playerId: Number(r.player_id),
       playerName: r.player_name,
       championName: r.champion_name ?? null,
@@ -772,6 +776,44 @@ export async function fetchPerformanceLeaderboard(params: {
       value: typeof r.value === 'string' ? Number(r.value) : r.value,
       region: r.region ?? null,
       platform: r.platform ?? null,
+      totalMatches: r.total_matches == null ? null : Number(r.total_matches),
+    }));
+  } catch {
+    return [];
+  }
+}
+
+export interface PlayerLevelLeaderboardEntry {
+  rank: number;
+  playerId: number;
+  playerName: string;
+  championId: number | null;
+  championName: string | null;
+  level: number;
+  xp: number;
+  region: string | null;
+  platform: string | null;
+}
+
+/** Fetch account-level or champion-mastery-level leaderboard rows. */
+export async function fetchPlayerLevelLeaderboard(mode: 'account' | 'champion', limit = 100): Promise<PlayerLevelLeaderboardEntry[]> {
+  const query = new URLSearchParams({ mode, limit: String(limit) });
+  try {
+    const raw = await fetchJson<Array<{
+      rank: number; player_id: number; player_name: string;
+      champion_id: number | null; champion_name: string | null;
+      level: number | string; xp: number | string; region: string | null; platform: string | null;
+    }>>(`/players/leaderboard/levels?${query.toString()}`);
+    return raw.map((row) => ({
+      rank: Number(row.rank),
+      playerId: Number(row.player_id),
+      playerName: String(row.player_name),
+      championId: row.champion_id == null ? null : Number(row.champion_id),
+      championName: row.champion_name ?? null,
+      level: Number(row.level),
+      xp: Number(row.xp),
+      region: row.region ?? null,
+      platform: row.platform ?? null,
     }));
   } catch {
     return [];
@@ -1606,10 +1648,10 @@ export function mapPlayersOverviewResponse(raw: any): PlayersOverview {
     total_wins: Number(row.total_wins), win_rate: row.win_rate == null ? null : Number(row.win_rate), region: row.region ?? null,
   });
   const mapPerformance = (row: any): PerformanceLeaderboardEntry => ({
-    rank: Number(row.rank), matchId: String(row.match_id), playerId: Number(row.player_id), playerName: row.player_name,
+    rank: Number(row.rank), matchId: row.match_id == null ? null : String(row.match_id), playerId: Number(row.player_id), playerName: row.player_name,
     championName: row.champion_name ?? null, championId: row.champion_id == null ? null : Number(row.champion_id),
     className: row.class_name ?? null, value: Number(row.value),
-    region: row.region ?? null, platform: row.platform ?? null,
+    region: row.region ?? null, platform: row.platform ?? null, totalMatches: row.total_matches == null ? null : Number(row.total_matches),
   });
   const mapRanked = (row: any): RankedPlayer => ({
     rank: Number(row.rank), player_id: String(row.player_id), name: row.name, tier: Number(row.tier), points: Number(row.points),

@@ -58,20 +58,20 @@ function RankBadge({ rank }: { rank: number }) {
  * Render the ChampionEloPage view for the player elo page route.
  * Returns the React tree for the route and its declared inputs.
  */
-export default function ChampionEloPage() {
+export default function ChampionEloPage({ mode }: { mode?: ELOMode }) {
   return (
     <Suspense fallback={<LoadingPanel />}>
-      <ChampionEloContent />
+      <ChampionEloContent fixedMode={mode} />
     </Suspense>
   );
 }
 
-function ChampionEloContent() {
+function ChampionEloContent({ fixedMode }: { fixedMode?: ELOMode }) {
   const { t , formatNumber, formatPercent} = useLocalization();
   const searchParams = useSearchParams();
-  const initialMode = (searchParams.get("mode") === "account" || searchParams.get("mode") === "champion") 
-    ? searchParams.get("mode") as ELOMode 
-    : "champion";
+  const initialMode = fixedMode ?? ((searchParams.get("mode") === "account" || searchParams.get("mode") === "champion")
+    ? searchParams.get("mode") as ELOMode
+    : "champion");
   const [eloMode, setEloMode] = useState<ELOMode>(initialMode);
   const [activeTab, setActiveTab] = useState<TabKey>("global");
   const [players, setPlayers] = useState<ChampionEloEntry[]>([]);
@@ -143,6 +143,7 @@ function ChampionEloContent() {
 
   // Fetch data when tab or champion changes
   useEffect(() => {
+    if (eloMode !== "champion") return;
     let cancelled = false;
     setLoading(true);
 
@@ -175,7 +176,7 @@ function ChampionEloContent() {
     return () => {
       cancelled = true;
     };
-  }, [activeTab, selectedChampionId, activeRole]);
+  }, [activeTab, eloMode, selectedChampionId, activeRole]);
 
   // Fetch account-level ELO when in account mode
   useEffect(() => {
@@ -230,11 +231,10 @@ function ChampionEloContent() {
     <div className="space-y-6">
       <PlayersPageHeader title={eloMode === "champion" ? t("generated.players.championElo") : t("generated.players.accountElo")} />
 
-      {/* Mode toggle: Champion vs Account */}
-      <SegmentedControl label={t("generated.players.elo")} items={[
+      {!fixedMode && <SegmentedControl label={t("generated.players.elo")} items={[
         { value: "champion" as const, label: t("generated.players.championElo") },
         { value: "account" as const, label: t("generated.players.accountElo") },
-      ]} value={eloMode} onChange={setEloMode} />
+      ]} value={eloMode} onChange={setEloMode} />}
 
       {/* Tabs + Champion Dropdown + Search */}
       {eloMode === "champion" && (

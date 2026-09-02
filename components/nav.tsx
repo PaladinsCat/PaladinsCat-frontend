@@ -93,6 +93,18 @@ export default function Nav() {
   const canAccessAdmin = user?.isAdmin === true;
   const projectsHref = "/operations/projects";
   const developerHref = "/operations/developer";
+  const levelAbbreviation = t("common.playerChampions.level", { level: "" }).trim();
+  const accountLevelLabel = [t("generated.players.account"), levelAbbreviation].join(" ");
+  const championLevelLabel = [t("generated.players.champion"), levelAbbreviation].join(" ");
+  const leaderboardLinks = [
+    { href: "/players/leaderboard", label: t("generated.players.ranked") },
+    { href: "/players/elo/account", label: t("generated.players.accountElo") },
+    { href: "/players/elo/champion", label: t("generated.players.championElo") },
+    { href: "/players/performance/account", label: t("stats.scope.performance", { mode: t("generated.players.account") }) },
+    { href: "/players/performance/champion", label: t("stats.scope.performance", { mode: t("generated.players.champion") }) },
+    { href: "/players/levels/account", label: accountLevelLabel },
+    { href: "/players/levels/champion", label: championLevelLabel },
+  ];
 
   const headerGroups = [
     {
@@ -109,9 +121,6 @@ export default function Nav() {
       title: t("nav.players"),
       links: [
         { href: "/players", label: t("menu.playerHub") },
-        { href: "/players/leaderboard", label: t("menu.rankedLeaderboard") },
-        { href: "/players/elo", label: t("menu.eloLeaderboard") },
-        { href: "/players/performance", label: t("menu.performanceLeaderboard") },
       ],
     },
     {
@@ -187,7 +196,7 @@ export default function Nav() {
     },
     {
       title: t("menu.leaderboards"),
-      links: headerGroups[1].links.slice(1),
+      links: leaderboardLinks,
     },
     {
       title: t("generated.players.moderation"),
@@ -335,6 +344,9 @@ export default function Nav() {
             <div className="flex min-w-0 items-center justify-center gap-2 xl:gap-4 xl:px-4 2xl:gap-7 2xl:px-8">
               {headerGroups.map((group) => {
                 const groupActive = group.links.some((link) => isActive(link.href));
+                if (group.links.length === 1) {
+                  return <Link key={group.title} href={group.links[0].href} className={`pc-nav-link ${groupActive ? "pc-nav-link-active" : ""}`}>{group.title}</Link>;
+                }
                 return (
                   <div key={group.title} className="group relative flex items-center">
                     <span className={`pc-nav-link inline-flex items-center gap-1 ${groupActive ? "pc-nav-link-active" : ""}`}>
