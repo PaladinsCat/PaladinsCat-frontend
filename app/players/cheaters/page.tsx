@@ -53,7 +53,7 @@ async function fetchAllCheaterPrivateAccounts(name: string): Promise<PrivateAcco
 
 /**
  * Render the CheatersPage view for the player cheaters page route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `React.JSX.Element`
  */
 export default function CheatersPage() {
   const { t, formatNumber } = useLocalization();

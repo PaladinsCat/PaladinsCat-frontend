@@ -32,6 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 /**
  * Render the MapDetailLayout view for game maps mapName layout.
  * Return the React tree for the declared inputs and page data.
+ * Returns: `React.JSX.Element`
  */
 export default function MapDetailLayout({ children }: Props) {
   return children;

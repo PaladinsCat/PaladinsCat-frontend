@@ -207,6 +207,7 @@ function detectTalentWeaponDamage(
  * Extract only explicit, calculator-safe stat changes. The full source text is
  * retained because many Paladins bonuses are conditional and should be read as
  * a simultaneous best-case estimate, not as permanent uptime.
+ * Returns: `Array`
  */
 export function detectDescriptionEffects(input: {
   id: number;

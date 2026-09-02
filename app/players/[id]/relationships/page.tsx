@@ -20,7 +20,7 @@ type Mode = "teammates" | "opponents" | "party";
 
 /**
  * Render the PlayerRelationshipsPage view for the player id relationships page route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `React.JSX.Element`
  */
 export default function PlayerRelationshipsPage() {
   const { t, formatNumber, formatPercent } = useLocalization();

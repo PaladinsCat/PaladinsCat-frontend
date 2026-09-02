@@ -8,6 +8,7 @@ type CacheEnvelope<T> = {
 
 /** readBrowserResult applies the module-specific transformation to its declared inputs.
  * Contract: validates its inputs and returns the existing module result without mutating caller state.
+ * Returns: `null`
  */
 export function readBrowserResult<T>(key: string): T | null {
   if (typeof window === "undefined") return null;

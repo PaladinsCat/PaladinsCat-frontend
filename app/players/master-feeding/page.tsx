@@ -7,7 +7,7 @@ import MasterFeedingDirectory from "@/components/master-feeding-directory";
 
 /**
  * Render the MasterFeedingPage view for the player master-feeding page route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `React.JSX.Element`
  */
 export default function MasterFeedingPage() {
   return <MasterFeedingDirectory />;

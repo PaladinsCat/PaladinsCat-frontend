@@ -48,7 +48,7 @@ function championBanner(name: string) {
 
 /**
  * Render the PlayerLoadoutDetailPage view for the player id loadouts championId loadoutId page route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `React.JSX.Element`
  */
 export default function PlayerLoadoutDetailPage() {
   const { t, formatNumber } = useLocalization();

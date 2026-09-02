@@ -55,6 +55,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 /**
  * Render the ChampionDetailLayout view for champions name layout.
  * Return the React tree for the declared inputs and page data.
+ * Returns: `Promise<React.JSX.Element>`
  */
 export default async function ChampionDetailLayout({ children, params }: Props) {
   const { name } = await params;

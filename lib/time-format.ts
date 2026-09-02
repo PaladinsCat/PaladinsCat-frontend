@@ -9,6 +9,7 @@ const SQL_TIMESTAMP = /^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?
 
 /**
  * Transforms or validates parse backend date according to this module's data contract.
+ * Returns: `null`
  */
 export function parseBackendDate(value: string | null | undefined): Date | null {
   if (!value) return null;

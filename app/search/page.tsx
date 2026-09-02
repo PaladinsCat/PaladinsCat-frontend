@@ -527,6 +527,7 @@ function SearchPageBody() {
 /**
  * Render the SearchPage view for search page.
  * Return the React tree for the declared inputs and page data.
+ * Returns: `React.JSX.Element`
  */
 export default function SearchPage() {
   return (

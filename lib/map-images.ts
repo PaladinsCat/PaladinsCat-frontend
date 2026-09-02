@@ -110,6 +110,7 @@ export function matchMapImagePath(mapName: string): string {
 
 /** Apply matchMapImageSources to the declared request or domain inputs.
  * Contract: validates inputs, preserves the existing security or mapping rules, and returns the documented result.
+ * Returns: `object`
  */
 export function matchMapImageSources(mapName: string): { avif: string; png: string } {
   const png = matchMapImagePath(mapName);

@@ -14,6 +14,7 @@ export const dynamic = "force-dynamic";
 /**
  * Render the ChampionsPage view for champions page.
  * Return the React tree for the declared inputs and page data.
+ * Returns: `Promise<React.JSX.Element>`
  */
 export default async function ChampionsPage() {
   const initialChampions = await getInitialRankedChampions().catch((error) => {

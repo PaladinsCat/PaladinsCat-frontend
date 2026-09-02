@@ -27,6 +27,7 @@ export const dynamic = "force-dynamic";
 /**
  * Render the MatchDetailPage view for matches id page.
  * Return the React tree for the declared inputs and page data.
+ * Returns: `Promise<React.JSX.Element>`
  */
 export default async function MatchDetailPage({
   params,

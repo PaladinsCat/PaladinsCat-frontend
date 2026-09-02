@@ -71,6 +71,7 @@ function mergeChampionStats(rows: Champion[]): Champion[] {
 
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ * Returns: `React.JSX.Element`
  */
 export default function ChampionTable({ initialChampions = null }: { initialChampions?: Champion[] | null }) {
   const { t , formatNumber} = useLocalization();

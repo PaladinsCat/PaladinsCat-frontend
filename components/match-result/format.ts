@@ -51,6 +51,7 @@ export function computeDamageStats(p: MatchPlayerDetail) {
 
 /**
  * Get champion-specific stats from player profile, or null if not found.
+ * Returns: `null`
  */
 export function getChampionStats(
   profile: PlayerProfileData | null | undefined,

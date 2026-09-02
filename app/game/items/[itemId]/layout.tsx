@@ -25,6 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 /**
  * Render the ItemDetailLayout view for game items itemId layout.
  * Return the React tree for the declared inputs and page data.
+ * Returns: `React.JSX.Element`
  */
 export default function ItemDetailLayout({ children }: Props) {
   return children;

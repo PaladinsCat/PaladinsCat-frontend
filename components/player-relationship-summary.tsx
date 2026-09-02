@@ -12,6 +12,7 @@ import { useLocalization } from "@/lib/localization-context";
 
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ * Returns: `React.JSX.Element`
  */
 export default function PlayerRelationshipSummaryCard({ playerId }: { playerId: string }) {
   const { t, formatNumber, formatPercent } = useLocalization();

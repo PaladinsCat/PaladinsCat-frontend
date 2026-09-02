@@ -71,6 +71,7 @@ export function isLobbyTierFilter(value: unknown): value is LobbyTierFilter {
 
 /**
  * Reads stored lobby tier filter from the module's configured source.
+ * Returns: `string`
  */
 export function getStoredLobbyTierFilter(): LobbyTierFilter {
   if (typeof window === "undefined") return "all";

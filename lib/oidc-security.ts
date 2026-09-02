@@ -49,6 +49,7 @@ export function safeReturnPath(value: string | null | undefined): string {
 
 /**
  * Performs the create transaction operation with this module's boundary checks.
+ * Returns: `object`
  */
 export function createTransaction(returnPath: string): OidcTransaction {
   return { state: random(), nonce: random(), verifier: random(48), returnPath: safeReturnPath(returnPath), issuedAt: Date.now() };
@@ -63,6 +64,7 @@ export function stateMatches(cookieState: string | undefined, callbackState: str
 }
 
 /**
+ * Returns: `null`
  * Transforms or validates parse transaction according to this module's data contract.
  */
 export function parseTransaction(value: unknown): OidcTransaction | null {

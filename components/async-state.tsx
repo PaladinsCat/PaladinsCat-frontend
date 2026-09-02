@@ -81,6 +81,7 @@ export function LoadingIndicator({ className }: { className?: string }) {
 
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ * Returns: `null`
  */
 export function LoadingOverlay({ visible }: { visible: boolean }) {
   if (!visible) return null;

@@ -123,6 +123,7 @@ export function useChampionName(id: number): { name: string | null; loading: boo
 
 /**
  * React hook that loads the full champion list (for dropdowns / select inputs).
+ * Returns: `object`
  */
 export function useChampions(): { champions: Array<{ id: number; name: string }> | null; loading: boolean } {
   const [champions, setChampions] = useState<Array<{ id: number; name: string }> | null>(null);

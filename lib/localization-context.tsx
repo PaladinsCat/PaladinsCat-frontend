@@ -224,6 +224,7 @@ export function useLocalization() {
 
 /** Apply LocalizedText to lobby-tier or localization inputs.
  * Contract: returns the normalized route, context state, or message value while preserving existing browser behavior.
+ * Returns: `React.JSX.Element`
  */
 export function LocalizedText({
   id,

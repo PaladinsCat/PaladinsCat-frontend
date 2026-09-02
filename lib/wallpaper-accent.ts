@@ -138,6 +138,7 @@ function hueBucketDistance(left: number, right: number): number {
 /**
  * Finds a dominant accent and a second readable color. It prefers another hue,
  * falls back to a representative shade, then derives contrast for flat images.
+ * Returns: `object`
  */
 export function pickWallpaperAccents(pixels: Uint8ClampedArray): WallpaperAccents {
   const buckets: ColorBucket[] = Array.from({ length: HUE_BUCKETS }, createColorBucket);

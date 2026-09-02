@@ -17,7 +17,7 @@ const HIDDEN_TWITCH_CHANNEL_LOGINS = new Set(["paladins2ttv"]);
 
 /**
  * Handles the exported route operation using its declared request and response contract.
- * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ * Returns: `React.JSX.Element`
  */
 export default function CommunityPage() {
   const { t , formatNumber, formatDateTime} = useLocalization();

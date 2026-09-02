@@ -19,7 +19,7 @@ import { getServerLocalization } from "@/lib/server-localization";
 
 const POLICY_DATE = new Date(Date.UTC(2026, 6, 22));
 
-/** Render the localized privacy policy with its dated policy sections. */
+/** Render the localized privacy policy with its dated policy sections.  Returns: `Promise<React.JSX.Element>`. */
 export default async function PrivacyPage() {
   const { locale, t } = await getServerLocalization();
   const sections: PublicPolicySection[] = [

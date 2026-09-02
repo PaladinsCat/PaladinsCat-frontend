@@ -28,7 +28,7 @@ type SortKey = "level" | "kda" | "winRate" | "playTime" | "rating";
 
 /**
  * Render the PlayerChampionStatsPage view for the player id champions page route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `React.JSX.Element`
  */
 export default function PlayerChampionStatsPage() {
   const { formatDuration, formatNumber, t } = useLocalization();

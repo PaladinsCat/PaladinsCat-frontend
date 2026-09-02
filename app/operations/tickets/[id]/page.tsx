@@ -13,7 +13,7 @@ import { useLocalization } from "@/lib/localization-context";
 import { commentTicket, deleteTicket, getTicket, updateTicket, type TicketStatus } from "@/lib/operations-api";
 /**
  * Handles the exported route operation using its declared request and response contract.
- * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ * Returns: `React.JSX.Element`
  */
 export default function TicketDetailPage() {
   const { user,isLoading }=useAuth(); const { t }=useLocalization(); const params=useParams<{id:string}>(); const router=useRouter(); const id=String(params.id??"");

@@ -183,7 +183,7 @@ export function setWallpaperEnabled(enabled: boolean): void {
   notifyWallpaperChange();
 }
 
-/** Returns the small local-storage references for this browser's custom wallpapers. */
+/** Returns the small local-storage references for this browser's custom wallpapers.  Returns: `Array`. */
 export function getCustomWallpapers(): CustomWallpaper[] {
   if (typeof window === "undefined") return [];
 

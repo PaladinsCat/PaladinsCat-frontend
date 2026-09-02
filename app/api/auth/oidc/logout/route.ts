@@ -8,7 +8,7 @@ import { oidcBffServiceHeaders } from "@/lib/oidc-bff-service";
 import { oidcClientSecret } from "@/lib/oidc-client-secret";
 /**
  * Selects the Node.js runtime required by this server handler.
- * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ * Returns: `string`
  */
 export const runtime = "nodejs";
 const SESSION_COOKIE = "__Host-pc_session";
@@ -20,7 +20,7 @@ function backend() {
 }
 /**
  * Handles the exported route operation using its declared request and response contract.
- * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ * Returns: `Promise<Response>`
  */
 export async function POST(request: NextRequest) {
   if (!requireSameOrigin(request.headers.get("origin"), origin())) return new NextResponse("Forbidden", { status: 403 });

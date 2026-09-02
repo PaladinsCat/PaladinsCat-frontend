@@ -1525,6 +1525,7 @@ function mapPartyPair(row: any): PartyPairSummary {
  * Fetch private accounts directory data for client consumers.
  *
  * Accepts params; returns fetchPrivateAccountsDirectory data after a backend request, using shared authentication and cache behavior.
+ * Returns: `Promise<object>`
  */
 export async function fetchPrivateAccountsDirectory(params: { page?: number; pageSize?: number; query?: string; cheater?: boolean; suspicious?: boolean } = {}): Promise<PlayerDirectoryPage<PrivateAccountSummary>> {
   const page = Math.max(1, params.page ?? 1);
@@ -1541,6 +1542,7 @@ export async function fetchPrivateAccountsDirectory(params: { page?: number; pag
 /**
  * Fetch private account detail data for client consumers.
  *
+ * Returns: `Promise<object>`
  * Accepts privateId; returns fetchPrivateAccountDetail data after a backend request, using shared authentication and cache behavior.
  */
 export async function fetchPrivateAccountDetail(privateId: number): Promise<PrivateAccountDetail> {
@@ -1574,6 +1576,7 @@ export async function fetchPrivateAccountDetail(privateId: number): Promise<Priv
 
 /**
  * Fetch party pairs directory data for client consumers.
+ * Returns: `Promise<object>`
  *
  * Accepts params; returns fetchPartyPairsDirectory data after a backend request, using shared authentication and cache behavior.
  */
@@ -1588,6 +1591,7 @@ export async function fetchPartyPairsDirectory(params: { page?: number; pageSize
 }
 
 /**
+ * Returns: `Promise<object>`
  * Fetch party stacks directory data for client consumers.
  *
  * Accepts params; returns fetchPartyStacksDirectory data after a backend request, using shared authentication and cache behavior.

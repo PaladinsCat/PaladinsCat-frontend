@@ -23,6 +23,7 @@ const RANKED_QUEUE_ID = "486";
 /**
  * Render the MatchesPage view for matches page.
  * Return the React tree for the declared inputs and page data.
+ * Returns: `React.JSX.Element`
  */
 export default function MatchesPage() {
   const { t , formatNumber} = useLocalization();

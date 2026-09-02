@@ -88,6 +88,7 @@ export function MatchPlayerLink({ player, className = "" }: { player: MatchPlaye
 
 /** Render MatchPlayerReference from its declared props and match data.
  * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
+ * Returns: `React.JSX.Element`
  */
 export function MatchPlayerReference({ player, className = "" }: { player: MatchPlayerDetail; className?: string }) {
   const { t } = useLocalization();

@@ -22,7 +22,7 @@ const PAGE_SIZE = 24;
 
 /**
  * Render the PrivateAccountsPage view for the player private-accounts page route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `React.JSX.Element`
  */
 export default function PrivateAccountsPage() {
   const { t, formatNumber } = useLocalization();

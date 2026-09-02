@@ -17,7 +17,7 @@ export function AceternityLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** Group section content with the shared Aceternity spacing and surface treatment. */
+/** Group section content with the shared Aceternity spacing and surface treatment.  Returns: `React.JSX.Element`. */
 export function AceternitySection({
   children,
   className = "",
@@ -28,7 +28,7 @@ export function AceternitySection({
   return <MovingBorderCard className={className}>{children}</MovingBorderCard>;
 }
 
-/** Render a bordered content card using the moving-border visual treatment. */
+/** Render a bordered content card using the moving-border visual treatment.  Returns: `React.JSX.Element`. */
 export function AceternityCard({
   children,
   className = "",

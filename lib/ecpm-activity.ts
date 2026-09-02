@@ -25,6 +25,7 @@ export type EcpmActivityLabelKey =
 
 /**
  * Defines the ecpm activity level contract used by this module.
+ * Returns: `string`
  */
 export function ecpmActivityLevel(value: number): EcpmActivityLevel {
   if (value >= ECPM_ACTIVITY_THRESHOLDS.engaged) return "engaged";
@@ -50,6 +51,7 @@ export function ecpmActivityTextClass(value: number | null | undefined): string 
 }
 
 /**
+ * Returns: `null`
  * Defines the ecpm activity label key contract used by this module.
  */
 export function ecpmActivityLabelKey(value: number | null | undefined): EcpmActivityLabelKey | null {

@@ -10,7 +10,7 @@ import { isIP } from "node:net";
 
 /**
  * Selects the Node.js runtime required by this server handler.
- * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ * Returns: `string`
  */
 export const runtime = "nodejs";
 const TX_COOKIE = "__Host-pc_oidc_txn";
@@ -70,7 +70,7 @@ async function startOidc(intent: "login" | "create", returnPath: string, clientI
 
 /**
  * Handles the exported route operation using its declared request and response contract.
- * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ * Returns: `Promise<Response>`
  */
 export async function POST(request: NextRequest) {
   if (!requireSameOrigin(request.headers.get("origin"), origin())) return new NextResponse("Forbidden", { status: 403 });

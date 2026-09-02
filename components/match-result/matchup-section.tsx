@@ -21,6 +21,7 @@ interface MatchupSectionProps {
 
 /** Render MatchupSection from its declared props and match data.
  * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
+ * Returns: `React.JSX.Element`
  */
 export default function MatchupSection({
   team1, team2, team1Wins, team2Wins, team1Label, team2Label,

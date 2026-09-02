@@ -33,7 +33,7 @@ export async function generateStaticParams() {
   return posts.map((post) => ({ slug: post.slug.split("/") }));
 }
 
-/** Render one localized blog post selected by its catch-all slug parameters. */
+/** Render one localized blog post selected by its catch-all slug parameters.  Returns: `Promise<React.JSX.Element>`. */
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const { t } = await getServerLocalization();
   const { slug } = await params;
@@ -120,7 +120,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
 /**
  * Handles the exported route operation using its declared request and response contract.
- * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ * Returns: `Promise<Metadata>`
  */
 export async function generateMetadata({ params }: BlogPostPageProps) {
   const { t } = await getServerLocalization();

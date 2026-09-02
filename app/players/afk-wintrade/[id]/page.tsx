@@ -34,7 +34,7 @@ function displayMatchMap(mapName: string | null, queueId: number) {
 
 /**
  * Render the AutomaticAfkPlayerDetailPage view for the player afk-wintrade id page route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `React.JSX.Element`
  */
 export default function AutomaticAfkPlayerDetailPage() {
   const { t, formatDateTime, formatNumber } = useLocalization();

@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
 
 /**
  * Render the PlayerProfilePage view for the player id page route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `Promise<React.JSX.Element>`
  */
 export default async function PlayerProfilePage({
   params,

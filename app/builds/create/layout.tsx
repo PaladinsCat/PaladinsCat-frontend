@@ -7,6 +7,7 @@ import type { Metadata } from "next";
 /**
  * Build SEO metadata for builds create layout.
  * Return the Next.js metadata object used by the page without mutating application data.
+ * Returns: `Metadata`
  */
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -14,6 +15,7 @@ export const metadata: Metadata = {
 
 /**
  * Render the CreateBuildLayout view for builds create layout.
+ * Returns: `React.JSX.Element`
  * Return the React tree for the declared inputs and page data.
  */
 export default function CreateBuildLayout({ children }: { children: React.ReactNode }) {

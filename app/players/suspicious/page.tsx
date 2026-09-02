@@ -49,7 +49,7 @@ async function fetchAllSuspiciousPrivateAccounts(name: string): Promise<PrivateA
 
 /**
  * Render the SuspiciousPage view for the player suspicious page route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `React.JSX.Element`
  */
 export default function SuspiciousPage() {
   const { t , formatNumber} = useLocalization();

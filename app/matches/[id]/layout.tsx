@@ -31,6 +31,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 /**
  * Render the MatchDetailLayout view for matches id layout.
  * Return the React tree for the declared inputs and page data.
+ * Returns: `React.JSX.Element`
  */
 export default function MatchDetailLayout({ children }: Props) {
   return children;

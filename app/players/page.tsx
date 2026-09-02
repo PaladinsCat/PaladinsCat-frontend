@@ -13,7 +13,7 @@ import PlayersPageClient from "./players-page-client";
 
 /**
  * Build SEO metadata for the player page route.
- * Returns the Next.js metadata object consumed by this route without mutating application data.
+ * Returns: `Metadata`
  */
 export const metadata: Metadata = {
   alternates: { canonical: "/players" },
@@ -71,7 +71,7 @@ export const dynamic = "force-dynamic";
 
 /**
  * Render the PlayersPage view for the player page route.
- * Returns the React tree for the route and its declared inputs.
+ * Returns: `Promise<React.JSX.Element>`
  */
 export default async function PlayersPage() {
   let initialOverview: PlayersOverview | null = null;
