@@ -1,6 +1,7 @@
 /**
  * Render the matches dropped page and its data composition.
  * Assemble the page content exposed at this location.
+ * refs: none
  */
 "use client";
 
@@ -38,6 +39,7 @@ function reasonLabel(value: string): string {
  * Render the DroppedMatchesPage view for matches dropped page.
  * Return the React tree for the declared inputs and page data.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function DroppedMatchesPage() {
   const { t } = useLocalization();

@@ -1,6 +1,7 @@
 /**
  * Render the builds page and its data composition.
  * Assemble the page content exposed at this location.
+ * refs: none
  */
 "use client";
 
@@ -18,6 +19,7 @@ import { useLocalization } from "@/lib/localization-context";
  * Render the BuildsPage view for builds page.
  * Return the React tree for the declared inputs and page data.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function BuildsPage() {
   const { t , formatDateTime} = useLocalization();

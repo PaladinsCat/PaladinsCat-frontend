@@ -1,5 +1,6 @@
 /** canonical-talent-image component/module.
  * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ * refs: none
  */
 "use client";
 
@@ -23,6 +24,7 @@ type CanonicalTalentImageProps = {
  * several champion talents have punctuation or historic filenames that only
  * the champion reference correctly resolves.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function CanonicalTalentImage({
   talentId,

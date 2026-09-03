@@ -1,5 +1,6 @@
 /** Tests OIDC security validation and rejection behavior.
  * The module owns its existing image, OIDC, proxy, roster, or moderation boundary.
+ * refs: none
  */
 import test from "node:test";
 import assert from "node:assert/strict";

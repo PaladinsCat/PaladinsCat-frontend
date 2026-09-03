@@ -1,6 +1,7 @@
 /**
  * Manage interactive state for the champions name champion-detail-client client view.
  * Coordinate local events and consume the declared component inputs.
+ * refs: none
  */
 "use client";
 
@@ -204,6 +205,7 @@ function RankedPerformanceCard({
  * Render the ChampionDetailPage view for champions name champion-detail-client.
  * Return the React tree for the declared inputs and page data.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function ChampionDetailPage({
   initialChampionData = null,

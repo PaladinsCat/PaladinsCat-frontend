@@ -1,6 +1,7 @@
 /**
  * Team averages — extracted from team-matchup for standalone use.
  * Computed averages are in format.ts → computeTeamAverages.
+ * refs: none
  */
 import type { MatchResultPlayer, TeamAverages } from "./types";
 import { LocalizedText } from "@/lib/localization-context";
@@ -8,6 +9,7 @@ import { LocalizedText } from "@/lib/localization-context";
 /** Render TeamAverages from its declared props and match data.
  * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function TeamAverages({ averages }: { averages: TeamAverages }) {
   return (

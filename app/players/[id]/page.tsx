@@ -1,6 +1,7 @@
 /**
  * Define the player route surface for profile data and rendering.
  * The route delegates typed server loading to the shared profile boundary.
+ * refs: none
  */
 import { getServerPlayerProfile } from "@/lib/player-profile-server";
 import type { PlayerResponse } from "@/lib/player-profile-types";
@@ -9,12 +10,14 @@ import PlayerProfileClient from "./player-profile-client";
 /**
  * Select dynamic rendering for the player id page route.
  * Returns the framework rendering mode constant used by this route.
+ * refs: none
  */
 export const dynamic = "force-dynamic";
 
 /**
  * Render the PlayerProfilePage view for the player id page route.
  * Returns: `Promise<React.JSX.Element>`
+ * refs: none
  */
 export default async function PlayerProfilePage({
   params,

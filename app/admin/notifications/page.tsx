@@ -1,6 +1,7 @@
 /**
  * Define the admin notifications page responsibility boundary.
  * Coordinates admin notifications page data loading, authorization, and presentation.
+ * refs: none
  */
 "use client";
 import { useEffect, useState } from "react";
@@ -67,6 +68,7 @@ function toInput(draft: Draft): NotificationInput {
 /**
  * Handles the exported route operation using its declared request and response contract.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function AdminNotificationsPage() {
   const { t , formatDateTime} = useLocalization();

@@ -1,5 +1,6 @@
 /** Tests player-title normalization and sanitation.
  * The module owns the existing validation, policy, label, title, or preference behavior.
+ * refs: none
  */
 import assert from "node:assert/strict";
 import { test } from "node:test";

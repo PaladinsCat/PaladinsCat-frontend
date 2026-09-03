@@ -1,5 +1,6 @@
 /** Calls administrative dashboard endpoints and maps their responses.
  * This client reads administrative dashboard summaries from backend endpoints.
+ * refs: none
  */
 import { accountAuthHeaders, fetchJson } from "./api-client";
 
@@ -41,6 +42,7 @@ const numberValue = (value: unknown) => Number(value ?? 0) || 0;
 // User-facing error keys — resolved at the UI layer via t()
 /** ADMIN_ERROR_KEYS applies the module-specific transformation to its declared inputs.
  * Contract: validates its inputs and returns the existing module result without mutating caller state.
+ * refs: none
  */
 export const ADMIN_ERROR_KEYS = {
   sessionRequired: "generated.admin.sessionRequired",
@@ -50,6 +52,7 @@ export const ADMIN_ERROR_KEYS = {
 /** fetchAdminDashboard applies the module-specific transformation to its declared inputs.
  * Contract: validates its inputs and returns the existing module result without mutating caller state.
  * Returns: `Promise<AdminDashboard>`
+ * refs: none
  */
 export async function fetchAdminDashboard(mode: "admin" | "developer" = "admin"): Promise<AdminDashboard> {
   const response = await fetch(mode === "developer" ? "/api/developer/dashboard" : "/api/admin/dashboard", {
@@ -113,10 +116,12 @@ export type ManagedAccount = { id: number; username: string; email: string; role
 /** searchManagedAccounts applies the module-specific transformation to its declared inputs.
  * Contract: validates its inputs and returns the existing module result without mutating caller state.
  * Returns: `Promise<ManagedAccount[]>`
+ * refs: none
  */
 export async function searchManagedAccounts(query: string): Promise<ManagedAccount[]> { return fetchJson<ManagedAccount[]>(`/admin/accounts?q=${encodeURIComponent(query)}`,{headers:accountAuthHeaders()}); }
 /** updateManagedAccountRole applies the module-specific transformation to its declared inputs.
  * Contract: validates its inputs and returns the existing module result without mutating caller state.
  * Returns: `Promise<void>`
+ * refs: none
  */
 export async function updateManagedAccountRole(id:number,role:ManagedAccount["role"]):Promise<void>{await fetchJson(`/admin/accounts/${id}/role`,{method:"PUT",headers:{"Content-Type":"application/json",...accountAuthHeaders()},body:JSON.stringify({role}),retries:0});}

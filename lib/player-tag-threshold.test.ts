@@ -1,5 +1,6 @@
 /** Tests player-tag threshold classification and boundary cases.
  * The module owns the existing validation, policy, label, title, or preference behavior.
+ * refs: none
  */
 import assert from "node:assert/strict";
 import test from "node:test";

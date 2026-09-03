@@ -1,6 +1,7 @@
 /**
  * Define the operations tickets page responsibility boundary.
  * Coordinates operations tickets page data loading, authorization, and presentation.
+ * refs: none
  */
 "use client";
 import Link from "next/link";
@@ -14,6 +15,7 @@ const PAGE_SIZE = 20;
 /**
  * Handles the exported route operation using its declared request and response contract.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function TicketsPage() {
   const { user,isLoading }=useAuth(); const { t }=useLocalization(); const [tickets,setTickets]=useState<Ticket[]>([]); const [page,setPage]=useState(1); const [pages,setPages]=useState(1); const [type,setType]=useState<TicketType>("bug"); const [sent,setSent]=useState(false); const [error,setError]=useState<string|null>(null); const [submitting,setSubmitting]=useState(false);

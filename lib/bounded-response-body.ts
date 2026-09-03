@@ -1,9 +1,11 @@
 /** Bounds response-body reads before JSON parsing.
  * This helper limits response-body reads before JSON decoding.
  * Returns: `Promise<Uint8Array | null>`
+ * refs: none
  */
 /** readBodyWithinLimit applies the module-specific transformation to its declared inputs.
  * Contract: validates its inputs and returns the existing module result without mutating caller state.
+ * refs: none
  */
 export async function readBodyWithinLimit(
   body: ReadableStream<Uint8Array> | null,

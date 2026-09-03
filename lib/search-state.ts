@@ -1,6 +1,7 @@
 /**
  * Defines search-state's shared contracts and runtime helpers.
  * Keep behavior aligned with its callers and browser/server boundary.
+ * refs: none
  */
 import type {
   UniversalSearchResult,
@@ -11,6 +12,7 @@ import type {
 /**
  * Transforms or validates normalize according to this module's data contract.
  * Returns: `String`
+ * refs: none
  */
 export function normalize(value: unknown) {
   return String(value ?? "").trim().toLowerCase();
@@ -19,6 +21,7 @@ export function normalize(value: unknown) {
 /**
  * Returns: `Array`
  * Defines the type sort contract used by this module.
+ * refs: none
  */
 export function typeSort(type: UniversalSearchType) {
   return ["player", "match", "champion", "talent", "card", "item"].indexOf(type);
@@ -26,6 +29,7 @@ export function typeSort(type: UniversalSearchType) {
 
 /**
  * Transforms or validates merge results according to this module's data contract.
+ * refs: none
  */
 export function mergeResults(results: UniversalSearchResult[]) {
   const seen = new Set<string>();
@@ -41,6 +45,7 @@ export function mergeResults(results: UniversalSearchResult[]) {
 
 /**
  * Defines the  search state contract used by this module.
+ * refs: none
  */
 export type SearchState = {
   query: string;
@@ -54,12 +59,14 @@ export type SearchState = {
    * Monotonic guard. Bumped on every query change, clear, or empty search so a
    * stale async response (results, loading, notices, errors) from an earlier
    * query is discarded instead of overwriting the current one.
+   * refs: none
    */
   generation: number;
 };
 
 /**
  * Defines the  search action contract used by this module.
+ * refs: none
  */
 export type SearchAction =
   | { type: "set-query"; query: string }
@@ -74,6 +81,7 @@ export type SearchAction =
 
 /**
  * Performs the create initial search state operation with this module's boundary checks.
+ * refs: none
  */
 export function createInitialSearchState(initialQuery: string): SearchState {
   const hasInitialQuery = initialQuery.trim().length > 0;
@@ -91,6 +99,7 @@ export function createInitialSearchState(initialQuery: string): SearchState {
 
 /**
  * Defines the search reducer contract used by this module.
+ * refs: none
  */
 export function searchReducer(state: SearchState, action: SearchAction): SearchState {
   switch (action.type) {

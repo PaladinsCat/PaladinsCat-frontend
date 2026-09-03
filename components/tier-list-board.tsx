@@ -1,11 +1,13 @@
 /** tier-list-board component/module.
  * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ * refs: none
  */
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import type { TierListEntry, TierName } from "@/lib/tierlists-api";
 
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ * refs: none
  */
 export const TIER_ORDER: TierName[] = ["S", "A", "B", "C", "D", "F"];
 
@@ -21,6 +23,7 @@ const TIER_TONES: Record<TierName, string> = {
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
  * Returns: `string`
+ * refs: none
  */
 export function tierTone(tier: TierName): string {
   return TIER_TONES[tier];
@@ -29,6 +32,7 @@ export function tierTone(tier: TierName): string {
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function TierListBoard({ entries, compact = false }: { entries: TierListEntry[]; compact?: boolean }) {
   return <div className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-secondary/50">

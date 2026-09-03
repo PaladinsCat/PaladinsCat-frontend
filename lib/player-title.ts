@@ -7,22 +7,24 @@
  * render the color as a CSS style. Never render the raw string as HTML
  * (dangerouslySetInnerHTML): titles are user-settable in-game and would be an
  * XSS vector.
+ * refs: none
  */
 
 /** Describe the parsed player-title markup returned to UI callers.
  * Contract: carries the sanitized title text and optional color metadata.
+ * refs: none
  */
 export interface ParsedPlayerTitle {
-  /** Title text with the markup stripped. */
+/** Title text with the markup stripped. · refs: none */
   text: string;
-  /** Hex color from the markup, or `null` when the title has no color. */
+/** Hex color from the markup, or `null` when the title has no color. · refs: none */
   color: string | null;
 }
 
 export interface PlayerTitleSegment {
-  /** Segment text with the markup stripped. */
+/** Segment text with the markup stripped. · refs: none */
   text: string;
-  /** Hex color for this segment, or `null` when it has no color. */
+/** Hex color for this segment, or `null` when it has no color. · refs: none */
   color: string | null;
 }
 
@@ -38,6 +40,7 @@ const COLOR_ATTRIBUTE_PATTERN = /color\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i
 /** Apply stripPlayerTitleMarkup to the declared player or request input.
  * Contract: enforces title sanitation and returns plain text without markup.
  * Returns: `string`
+ * refs: none
  */
 export function stripPlayerTitleMarkup(raw: string): string {
   let text = "";
@@ -67,6 +70,7 @@ export function stripPlayerTitleMarkup(raw: string): string {
  * Returns one segment per `<font color="...">text</font>` tag when the whole
  * string is a well-formed concatenation of such tags, or `null` when the
  * string is not (in which case it must be rendered as plain text).
+ * refs: none
  */
 export function parsePlayerTitleSegments(raw: string): PlayerTitleSegment[] | null {
   const trimmed = raw.trim();
@@ -121,6 +125,7 @@ export function parsePlayerTitleSegments(raw: string): PlayerTitleSegment[] | nu
  * - Anything that is not a well-formed font-tag concatenation is returned as
  *   plain text (markup stripped) so no raw HTML can ever reach the page.
  * Returns: `object`
+ * refs: none
  */
 export function parsePlayerTitle(raw: string): ParsedPlayerTitle {
   const segments = parsePlayerTitleSegments(raw);

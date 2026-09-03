@@ -1,6 +1,7 @@
 /**
  * Define the community create page responsibility boundary.
  * Coordinates community create page data loading, authorization, and presentation.
+ * refs: none
  */
 "use client";
 import { useState } from "react";
@@ -13,6 +14,7 @@ import { useLocalization } from "@/lib/localization-context";
 /**
  * Handles the exported route operation using its declared request and response contract.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function CreatePostPage() {
   const { t } = useLocalization();

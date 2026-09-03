@@ -1,5 +1,6 @@
 /** tailwind.config component/module.
  * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ * refs: none
  */
 import type { Config } from "tailwindcss";
 // @ts-expect-error - daisyui has no types
@@ -37,5 +38,6 @@ const config: Config = {
 
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ * refs: none
  */
 export default config;

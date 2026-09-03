@@ -3,6 +3,7 @@
  *
  * This module owns endpoint adapters, authentication headers, and local auth/cache helpers;
  * it does not own route rendering or backend request handlers.
+ * refs: none
  */
 import { identityCutoverEnabled } from "./identity-cutover";
 import { hasPlayerTag } from "./player-tag-threshold";
@@ -135,6 +136,7 @@ export interface RankedPlayer {
  * Fetch ranked leaderboard data for client consumers.
  *
  * Accepts query filters; returns fetchRankedLeaderboard data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchRankedLeaderboard(params?: { tier?: string; top?: number }): Promise<RankedPlayer[]> {
   const query = new URLSearchParams();
@@ -343,6 +345,7 @@ export interface ExploiterEvidenceDetail {
 /**
  * Fetch filtered moderation-directory players from the backend.
  * Accepts typed query filters and returns normalized player summaries.
+ * refs: none
  */
 export async function fetchCheaterPlayers(params?: { name?: string; cheater?: boolean; exploiter?: boolean; susOnly?: boolean; weirdoOnly?: boolean; hallOfFameOnly?: boolean; dropperOnly?: boolean; afkWintradeOnly?: boolean; altAccountOnly?: boolean; limit?: number; offset?: number }): Promise<CheaterPlayer[]> {
   const query = new URLSearchParams();
@@ -422,6 +425,7 @@ function mapAutomaticAfkPlayer(row: any): AutomaticAfkPlayer {
  * Fetch automatic afk players data for client consumers.
  *
  * Accepts name, limit, offset; returns fetchAutomaticAfkPlayers data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchAutomaticAfkPlayers({
   name,
@@ -479,6 +483,7 @@ function mapAutomaticWallShooterPlayer(row: any): AutomaticWallShooterPlayer {
  * Fetch wall shooter players data for client consumers.
  *
  * Accepts name, limit, offset; returns fetchWallShooterPlayers data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchWallShooterPlayers({
   name,
@@ -514,6 +519,7 @@ function mapAutomaticMasterFeedingPlayer(row: any): AutomaticMasterFeedingPlayer
  * Fetch master feeding players data for client consumers.
  *
  * Accepts name, limit, offset; returns fetchMasterFeedingPlayers data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchMasterFeedingPlayers({
   name,
@@ -549,6 +555,7 @@ function mapAutomaticPerformanceDiffPlayer(row: any): AutomaticPerformanceDiffPl
  * Fetch performance diff players data for client consumers.
  *
  * Accepts metric, PerformanceDiffMetric, name, limit, offset; returns fetchPerformanceDiffPlayers data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchPerformanceDiffPlayers(metric: PerformanceDiffMetric, {
   name,
@@ -575,6 +582,7 @@ export async function fetchPerformanceDiffPlayers(metric: PerformanceDiffMetric,
  * Fetch automatic afk player detail data for client consumers.
  *
  * Accepts playerId; returns fetchAutomaticAfkPlayerDetail data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchAutomaticAfkPlayerDetail(playerId: string): Promise<AutomaticAfkPlayerDetail> {
   const raw = await fetchJson<any>(`/players/automatic-afk/${encodeURIComponent(playerId)}`);
@@ -631,6 +639,7 @@ export interface ClassLeaderboardEntry {
  * Fetch class leaderboard data for client consumers.
  *
  * Accepts params, role; returns fetchClassLeaderboard data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchClassLeaderboard(params: { role: string; limit?: number; queueId?: number; mode?: 'account' | 'champion' }): Promise<ClassLeaderboardEntry[]> {
   const query = new URLSearchParams();
@@ -684,6 +693,7 @@ export interface ChampionEloEntry {
  * Fetch champion elo data for client consumers.
  *
  * Accepts params; returns fetchChampionElo data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchChampionElo(params: {
   role?: string;
@@ -740,6 +750,7 @@ export interface PerformanceLeaderboardEntry {
  * Fetch performance leaderboard data for client consumers.
  *
  * Accepts params, metric; returns fetchPerformanceLeaderboard data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchPerformanceLeaderboard(params: {
   metric: 'dpm' | 'hpm' | 'gpm' | 'mpm';
@@ -808,7 +819,7 @@ export interface PlayerLevelLeaderboardFilters {
   championId?: number;
 }
 
-/** Fetch account-level or champion-mastery-level leaderboard rows. */
+/** Fetch account-level or champion-mastery-level leaderboard rows. · refs: none */
 export async function fetchPlayerLevelLeaderboard(mode: 'account' | 'champion', limit = 100, filters: PlayerLevelLeaderboardFilters = {}): Promise<PlayerLevelLeaderboardEntry[]> {
   const query = new URLSearchParams({ mode, limit: String(limit) });
   if (filters.playerId != null) query.set('playerId', String(filters.playerId));
@@ -881,6 +892,7 @@ function mapMetricSummary(raw: any): PerformanceMetricSummary {
  * Fetch performance metrics data for client consumers.
  *
  * Accepts query filters; returns fetchPerformanceMetrics data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchPerformanceMetrics(params?: {
   metric?: PerformanceMetricKey;
@@ -910,6 +922,7 @@ export async function fetchPerformanceMetrics(params?: {
 /**
  * Fetch the global and each class's summary in one cacheable API response.
  * The metrics page used to make five nearly identical requests per tab.
+ * refs: none
  */
 export async function fetchPerformanceMetricDashboard(metric: PerformanceMetricKey): Promise<{
   summary: PerformanceMetricSummary;
@@ -948,6 +961,7 @@ export interface ChampionPerformanceDistribution {
  * Fetch champion performance distributions data for client consumers.
  *
  * Accepts params, metric; returns fetchChampionPerformanceDistributions data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchChampionPerformanceDistributions(params: {
   metric: PerformanceMetricKey;
@@ -1011,6 +1025,7 @@ export interface BaselineEntry {
  * Fetch baselines data for client consumers.
  *
  * Accepts query filters; returns fetchBaselines data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchBaselines(params?: { role?: string; queueId?: number; tierMin?: number; tierMax?: number }): Promise<BaselineEntry[]> {
   const query = new URLSearchParams();
@@ -1177,6 +1192,7 @@ function mapBoostedPlayer(row: any): BoostedPlayer {
  * Fetch boosted players data for client consumers.
  *
  * Accepts name, limit, offset; returns fetchBoostedPlayers data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchBoostedPlayers({ name, limit = 100, offset = 0 }: { name?: string; limit?: number; offset?: number } = {}): Promise<BoostedPlayer[]> {
   const query = new URLSearchParams({
@@ -1290,6 +1306,7 @@ function mapRelationshipRow(row: RawRelationshipRow): PlayerRelationshipRow {
  * Fetch player relationship summary data for client consumers.
  *
  * Accepts playerId, limit; returns fetchPlayerRelationshipSummary data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchPlayerRelationshipSummary(playerId: string | number, limit = 6): Promise<PlayerRelationshipSummary> {
   const raw = await fetchJson<RawRelationshipSummary>(`/coplay/summary/${encodeURIComponent(String(playerId))}?limit=${Math.min(Math.max(limit, 1), 50)}&contract=metrics-v3`);
@@ -1317,6 +1334,7 @@ export async function fetchPlayerRelationshipSummary(playerId: string | number, 
  * Fetch boosted player detail data for client consumers.
  *
  * Accepts playerId; returns fetchBoostedPlayerDetail data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchBoostedPlayerDetail(playerId: string): Promise<BoostedPlayerDetail> {
   const raw = await fetchJson<any>(`/players/boosted/${encodeURIComponent(playerId)}`);
@@ -1349,7 +1367,7 @@ export async function fetchBoostedPlayerDetail(playerId: string): Promise<Booste
   };
 }
 
-/** Fetch the stored talent facts supporting an administrator-confirmed exploiter tag. */
+/** Fetch the stored talent facts supporting an administrator-confirmed exploiter tag. · refs: none */
 export async function fetchExploiterEvidence(playerId: string): Promise<ExploiterEvidenceDetail> {
   const raw = await fetchJson<any>(`/players/exploiters/${encodeURIComponent(playerId)}`);
   return {
@@ -1526,6 +1544,7 @@ function mapPartyPair(row: any): PartyPairSummary {
  *
  * Accepts params; returns fetchPrivateAccountsDirectory data after a backend request, using shared authentication and cache behavior.
  * Returns: `Promise<object>`
+ * refs: none
  */
 export async function fetchPrivateAccountsDirectory(params: { page?: number; pageSize?: number; query?: string; cheater?: boolean; suspicious?: boolean } = {}): Promise<PlayerDirectoryPage<PrivateAccountSummary>> {
   const page = Math.max(1, params.page ?? 1);
@@ -1544,6 +1563,7 @@ export async function fetchPrivateAccountsDirectory(params: { page?: number; pag
  *
  * Returns: `Promise<object>`
  * Accepts privateId; returns fetchPrivateAccountDetail data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchPrivateAccountDetail(privateId: number): Promise<PrivateAccountDetail> {
   const raw = await fetchJson<any>(`/player-ext/private/${privateId}`);
@@ -1579,6 +1599,7 @@ export async function fetchPrivateAccountDetail(privateId: number): Promise<Priv
  * Returns: `Promise<object>`
  *
  * Accepts params; returns fetchPartyPairsDirectory data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchPartyPairsDirectory(params: { page?: number; pageSize?: number; query?: string } = {}): Promise<PlayerDirectoryPage<PartyPairSummary>> {
   const page = Math.max(1, params.page ?? 1);
@@ -1595,6 +1616,7 @@ export async function fetchPartyPairsDirectory(params: { page?: number; pageSize
  * Fetch party stacks directory data for client consumers.
  *
  * Accepts params; returns fetchPartyStacksDirectory data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchPartyStacksDirectory(params: { page?: number; pageSize?: number; query?: string; size?: number | null } = {}): Promise<PlayerDirectoryPage<PartyStackSummary>> {
   const page = Math.max(1, params.page ?? 1);
@@ -1668,7 +1690,7 @@ export async function fetchPartyDetail(
 let playersOverviewCache: { value: PlayersOverview; expiresAt: number } | null = null;
 let playersOverviewInFlight: Promise<PlayersOverview> | null = null;
 
-/** Normalize the backend overview payload for both server and browser renders. */
+/** Normalize the backend overview payload for both server and browser renders. · refs: none */
 export function mapPlayersOverviewResponse(raw: any): PlayersOverview {
   const mapChampionElo = (row: any): ChampionEloEntry => ({
     rank: Number(row.rank), player_id: Number(row.player_id), player_name: String(row.player_name),
@@ -1779,6 +1801,7 @@ export function mapPlayersOverviewResponse(raw: any): PlayersOverview {
  * Fetch the directory landing-page data in one request. The short module cache
  * prevents navigation between top-level pages from immediately refetching the
  * same mostly-static leaderboard cards.
+ * refs: none
  */
 export async function fetchPlayersOverview(): Promise<PlayersOverview> {
   if (playersOverviewCache && playersOverviewCache.expiresAt > Date.now()) {
@@ -1905,6 +1928,7 @@ function mapAltRelationPlayer(row: any, prefix = ''): AltAccountRelationPlayer {
  * Fetch alt account relations directory data for client consumers.
  *
  * Accepts params; returns fetchAltAccountRelationsDirectory data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchAltAccountRelationsDirectory(params: { page?: number; pageSize?: number; query?: string } = {}): Promise<PlayerDirectoryPage<AltAccountDirectoryGroup>> {
   const page = Math.max(1, params.page ?? 1);
@@ -1940,6 +1964,7 @@ export async function fetchAltAccountRelationsDirectory(params: { page?: number;
  * Fetch my alt account relations data for client consumers.
  *
  * Accepts playerId; returns fetchMyAltAccountRelations data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchMyAltAccountRelations(playerId: string | number): Promise<MyAltAccountRelation[]> {
   const token = getAuthToken();
@@ -1963,6 +1988,7 @@ export async function fetchMyAltAccountRelations(playerId: string | number): Pro
  * Record the alt account relation choice for the player relation.
  *
  * Accepts playerId, otherPlayerId, otherRole; returns voteAltAccountRelation data through a backend request, carrying authentication headers and applying the operation server-side.
+ * refs: none
  */
 export async function voteAltAccountRelation(playerId: string | number, otherPlayerId: string | number, otherRole: 'main' | 'alt'): Promise<{ success: boolean; replaced: boolean }> {
   const token = getAuthToken();
@@ -1978,6 +2004,7 @@ export async function voteAltAccountRelation(playerId: string | number, otherPla
  * Clear my alt account relation from the account state.
  *
  * Accepts playerId, otherPlayerId; returns clearMyAltAccountRelation data while reading or changing local auth state without a backend request.
+ * refs: none
  */
 export async function clearMyAltAccountRelation(playerId: string | number, otherPlayerId: string | number): Promise<{ success: boolean; removed: boolean }> {
   const token = getAuthToken();
@@ -2170,6 +2197,7 @@ export interface TierSummary {
  * frontend to wait indefinitely — especially bad on mobile/slow networks.
  * Most reads use 10 seconds; operations that intentionally wait for durable
  * pipeline completion can opt into a longer request-scoped timeout.
+ * refs: none
  */
 const FETCH_TIMEOUT_MS = 10000;
 
@@ -2179,6 +2207,7 @@ const FETCH_TIMEOUT_MS = 10000;
  * Name the shared api error keys value used by API-client callers.
  *
  * Exposes a typed constant with no network, authentication, cache, or persistence side effects.
+ * refs: none
  */
 export const API_ERROR_KEYS = {
   genericFailure: "generated.api.genericFailure",
@@ -2193,6 +2222,7 @@ export type ApiErrorKey = (typeof API_ERROR_KEYS)[keyof typeof API_ERROR_KEYS];
  * IsApiErrorKey for the API-client data path.
  *
  * Accepts value; returns isApiErrorKey data from local computation without network, authentication, cache, or persistence effects.
+ * refs: none
  */
 export function isApiErrorKey(value: unknown): value is ApiErrorKey {
   return typeof value === "string"
@@ -2203,6 +2233,7 @@ export function isApiErrorKey(value: unknown): value is ApiErrorKey {
  * Fetch json data for client consumers.
  *
  * Accepts path; returns fetchJson data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchJson<T>(path: string, options?: RequestInit & { retries?: number; unwrapData?: boolean; timeoutMs?: number }): Promise<T> {
   const retries = options?.retries ?? 2;
@@ -2280,6 +2311,7 @@ function splitRoles(roles: unknown): string[] | null {
  * Fetch database stats data for client consumers.
  *
  * Accepts no arguments; returns fetchDatabaseStats data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchDatabaseStats(): Promise<DatabaseStats | null> {
   try {
@@ -2303,6 +2335,7 @@ export async function fetchDatabaseStats(): Promise<DatabaseStats | null> {
  * Fetch system status data for client consumers.
  *
  * Accepts no arguments; returns fetchSystemStatus data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchSystemStatus(): Promise<SystemStatus | null> {
   try {
@@ -2329,6 +2362,7 @@ export async function fetchSystemStatus(): Promise<SystemStatus | null> {
  * Fetch hirez service status data for client consumers.
  *
  * Accepts no arguments; returns fetchHirezServiceStatus data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchHirezServiceStatus(): Promise<HirezServiceStatus | null> {
   try {
@@ -2374,6 +2408,7 @@ class ApiRequestError extends Error {
  * IsAuthenticationRejection for the API-client data path.
  *
  * Accepts error; returns isAuthenticationRejection data from local computation without network, authentication, cache, or persistence effects.
+ * refs: none
  */
 export function isAuthenticationRejection(error: unknown): boolean {
   return error instanceof ApiRequestError && (error.status === 401 || error.status === 403);
@@ -2385,6 +2420,7 @@ export function isAuthenticationRejection(error: unknown): boolean {
  * Fetch notifications data for client consumers.
  *
  * Accepts query filters; returns fetchNotifications data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchNotifications(params?: { limit?: number }): Promise<Notification[]> {
   const query = new URLSearchParams();
@@ -2401,6 +2437,7 @@ export async function fetchNotifications(params?: { limit?: number }): Promise<N
  * Fetch activity banner data for client consumers.
  *
  * Accepts no arguments; returns fetchActivityBanner data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchActivityBanner(): Promise<ActivityBanner | null> {
   try {
@@ -2415,6 +2452,7 @@ export async function fetchActivityBanner(): Promise<ActivityBanner | null> {
  * Fetch account site notifications data for client consumers.
  *
  * Accepts query filters; returns fetchAccountSiteNotifications data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchAccountSiteNotifications(params?: { limit?: number }): Promise<Notification[]> {
   const token = getAuthToken();
@@ -2432,6 +2470,7 @@ export async function fetchAccountSiteNotifications(params?: { limit?: number })
  * Mark site notification read in the notification API.
  *
  * Accepts notificationId; returns markSiteNotificationRead data through a backend request, carrying authentication headers and applying the operation server-side.
+ * refs: none
  */
 export async function markSiteNotificationRead(notificationId: number): Promise<void> {
   const token = getAuthToken();
@@ -2446,6 +2485,7 @@ export async function markSiteNotificationRead(notificationId: number): Promise<
  * Mark all site notifications read in the notification API.
  *
  * Accepts no arguments; returns markAllSiteNotificationsRead data through a backend request, carrying authentication headers and applying the operation server-side.
+ * refs: none
  */
 export async function markAllSiteNotificationsRead(): Promise<void> {
   const token = getAuthToken();
@@ -2460,6 +2500,7 @@ export async function markAllSiteNotificationsRead(): Promise<void> {
  * Fetch admin notifications data for client consumers.
  *
  * Accepts no arguments; returns fetchAdminNotifications data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchAdminNotifications(): Promise<Notification[]> {
   const token = getAuthToken();
@@ -2475,6 +2516,7 @@ export async function fetchAdminNotifications(): Promise<Notification[]> {
  * Create admin notification through the community API.
  *
  * Accepts input; returns createAdminNotification data through a backend request, carrying authentication headers and applying the operation server-side.
+ * refs: none
  */
 export async function createAdminNotification(input: NotificationInput): Promise<Notification> {
   const token = getAuthToken();
@@ -2491,6 +2533,7 @@ export async function createAdminNotification(input: NotificationInput): Promise
  * Update admin notification through the account or community API.
  *
  * Accepts id, input; returns updateAdminNotification data through a backend request, carrying authentication headers and applying the operation server-side.
+ * refs: none
  */
 export async function updateAdminNotification(id: number, input: Partial<NotificationInput>): Promise<Notification> {
   const token = getAuthToken();
@@ -2507,6 +2550,7 @@ export async function updateAdminNotification(id: number, input: Partial<Notific
  * Delete admin notification through the account or community API.
  *
  * Accepts id; returns deleteAdminNotification data through a backend request, carrying authentication headers and applying the operation server-side.
+ * refs: none
  */
 export async function deleteAdminNotification(id: number): Promise<void> {
   const token = getAuthToken();
@@ -2521,6 +2565,7 @@ export async function deleteAdminNotification(id: number): Promise<void> {
  * Fetch admin activity banner data for client consumers.
  *
  * Accepts no arguments; returns fetchAdminActivityBanner data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchAdminActivityBanner(): Promise<ActivityBanner> {
   const token = getAuthToken();
@@ -2536,6 +2581,7 @@ export async function fetchAdminActivityBanner(): Promise<ActivityBanner> {
  * Update admin activity banner through the account or community API.
  *
  * Accepts input; returns updateAdminActivityBanner data through a backend request, carrying authentication headers and applying the operation server-side.
+ * refs: none
  */
 export async function updateAdminActivityBanner(input: ActivityBanner): Promise<ActivityBanner> {
   const token = getAuthToken();
@@ -2555,6 +2601,7 @@ export async function updateAdminActivityBanner(input: ActivityBanner): Promise<
  * Fetch changelog preview data for client consumers.
  *
  * Accepts no arguments; returns fetchChangelogPreview data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchChangelogPreview(): Promise<ChangelogEntry | null> {
   try {
@@ -2569,6 +2616,7 @@ export async function fetchChangelogPreview(): Promise<ChangelogEntry | null> {
  * Fetch changelog data for client consumers.
  *
  * Accepts query filters; returns fetchChangelog data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchChangelog(params?: { page?: number; perPage?: number }): Promise<ChangelogPage> {
   const query = new URLSearchParams();
@@ -2592,6 +2640,7 @@ export async function fetchChangelog(params?: { page?: number; perPage?: number 
  * Fetch admin changelog data for client consumers.
  *
  * Accepts no arguments; returns fetchAdminChangelog data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchAdminChangelog(): Promise<ChangelogEntry[]> {
   const token = getAuthToken();
@@ -2606,6 +2655,7 @@ export async function fetchAdminChangelog(): Promise<ChangelogEntry[]> {
  * Update admin changelog through the account or community API.
  *
  * Accepts id, input; returns updateAdminChangelog data through a backend request, carrying authentication headers and applying the operation server-side.
+ * refs: none
  */
 export async function updateAdminChangelog(id: number, input: AdminChangelogInput): Promise<ChangelogEntry> {
   const token = getAuthToken();
@@ -2669,6 +2719,7 @@ function mapSiteVersionComponent(raw: any): SiteVersionComponent {
  * Fetch site version data for client consumers.
  *
  * Accepts no arguments; returns fetchSiteVersion data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchSiteVersion(): Promise<SiteVersion | null> {
   try {
@@ -2701,6 +2752,7 @@ let championsOverviewInFlight: { key: string; promise: Promise<Champion[]> } | n
  * MapChampionsOverview for the API-client data path.
  *
  * Accepts raw; returns mapChampionsOverview data from local computation without network, authentication, cache, or persistence effects.
+ * refs: none
  */
 export function mapChampionsOverview(raw: ChampionOverviewRaw): Champion[] {
   const catalog = raw.champions ?? [];
@@ -2748,6 +2800,7 @@ export type PublicStatsScope =
  * Fetch champions data for client consumers.
  *
  * Accepts query filters; returns fetchChampions data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchChampions(params?: {
   limit?: string;
@@ -2779,6 +2832,7 @@ export async function fetchChampions(params?: {
  * Fetch top winrate data for client consumers.
  *
  * Accepts no arguments; returns fetchTopWinrate data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchTopWinrate(): Promise<TopWinrateEntry[]> {
   const res = await fetch(`${API_BASE}${withStoredLobbyTier('/champions/top-winrate')}`);
@@ -2791,6 +2845,7 @@ export async function fetchTopWinrate(): Promise<TopWinrateEntry[]> {
  * Fetch champion detail data for client consumers.
  *
  * Accepts id; returns fetchChampionDetail data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchChampionDetail(id: number): Promise<ChampionDetail> {
   const raw = await fetchJson<{
@@ -2837,6 +2892,7 @@ export async function fetchChampionDetail(id: number): Promise<ChampionDetail> {
  * Fetch champion tier stats data for client consumers.
  *
  * Accepts id; returns fetchChampionTierStats data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchChampionTierStats(id: number): Promise<TierStats[]> {
   const raw = await fetchJson<Array<{
@@ -2858,6 +2914,7 @@ export async function fetchChampionTierStats(id: number): Promise<TierStats[]> {
  * Fetch champion patch trends data for client consumers.
  *
  * Accepts id; returns fetchChampionPatchTrends data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchChampionPatchTrends(id: number): Promise<PatchTrend[]> {
   const raw = await fetchJson<Array<{
@@ -2877,6 +2934,7 @@ export async function fetchChampionPatchTrends(id: number): Promise<PatchTrend[]
  * Fetch champion counters data for client consumers.
  *
  * Accepts id; returns fetchChampionCounters data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchChampionCounters(id: number): Promise<CounterStats> {
   const raw = await fetchJson<{
@@ -2907,6 +2965,7 @@ export async function fetchChampionCounters(id: number): Promise<CounterStats> {
 /**
  * Fetch a player profile with optional queue and champion rating context.
  * Accepts string and numeric identifiers and returns normalized profile data.
+ * refs: none
  */
 export async function fetchPlayerProfile(id: string, queueId?: number, championId?: number): Promise<PlayerProfile & { level?: number | null; kbmRank?: number | null; queueElo?: number | null; championElo?: number | null; globalWins?: number | null; globalLosses?: number | null; globalWinRate?: number | null; cheater?: boolean; exploiter?: boolean; susCount?: number }> {
   type RawChampion = { champion_name: string; champion_id: number; wins: number; total_plays?: number; matches_played?: number; losses?: number; win_rate?: number | null; mu?: number | string | null };
@@ -3005,6 +3064,7 @@ export interface PlayerChampionStat {
  * Fetch player champion stats data for client consumers.
  *
  * Accepts playerId; returns fetchPlayerChampionStats data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchPlayerChampionStats(playerId: string | number): Promise<PlayerChampionStat[]> {
   type RawStat = {
@@ -3071,6 +3131,7 @@ export interface PlayerChampionStatsRefreshResponse {
  * Refresh player champion stats from the backend.
  *
  * Accepts playerId; returns refreshPlayerChampionStats data through a backend request, carrying authentication headers and applying the operation server-side.
+ * refs: none
  */
 export async function refreshPlayerChampionStats(playerId: string | number): Promise<PlayerChampionStatsRefreshResponse> {
   return fetchJson<PlayerChampionStatsRefreshResponse>(`/players/${playerId}/champions/refresh`, { method: "POST" });
@@ -3103,6 +3164,7 @@ export interface ItemDetailStats {
  * Fetch player search data for client consumers.
  *
  * Accepts query; returns fetchPlayerSearch data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchPlayerSearch(query: string): Promise<PlayerSearchResult[]> {
   const raw = await fetchJson<Array<{
@@ -3154,6 +3216,7 @@ export interface UniversalSearchResponse {
  * Fetch universal search data for client consumers.
  *
  * Accepts queryText, limit; returns fetchUniversalSearch data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchUniversalSearch(
   queryText: string,
@@ -3174,6 +3237,7 @@ export async function fetchUniversalSearch(
  * Fetch player matches data for client consumers.
  *
  * Accepts id; returns fetchPlayerMatches data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchPlayerMatches(id: string, params?: { limit?: string; offset?: string }): Promise<MatchRecord[]> {
   const query = new URLSearchParams();
@@ -3288,6 +3352,7 @@ function mapPlayerLoadout(raw: any): PlayerLoadout {
  * Fetch player loadouts data for client consumers.
  *
  * Accepts playerId; returns fetchPlayerLoadouts data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchPlayerLoadouts(playerId: string | number): Promise<PlayerLoadoutsResponse> {
   const raw = await fetchJson<any>(`/players/${playerId}/loadouts`);
@@ -3303,6 +3368,7 @@ export async function fetchPlayerLoadouts(playerId: string | number): Promise<Pl
  * Refresh player loadouts from the backend.
  *
  * Accepts playerId; returns refreshPlayerLoadouts data through a backend request, carrying authentication headers and applying the operation server-side.
+ * refs: none
  */
 export async function refreshPlayerLoadouts(playerId: string | number): Promise<PlayerLoadoutsResponse> {
   const raw = await fetchJson<any>(`/players/${playerId}/loadouts/refresh`, { method: "POST" });
@@ -3318,6 +3384,7 @@ export async function refreshPlayerLoadouts(playerId: string | number): Promise<
  * Fetch player loadout deck data for client consumers.
  *
  * Accepts playerId, loadoutId; returns fetchPlayerLoadoutDeck data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchPlayerLoadoutDeck(playerId: string | number, loadoutId: string | number): Promise<{ loadout: PlayerLoadout; freshness: PlayerLoadoutFreshness }> {
   const raw = await fetchJson<any>(`/players/${playerId}/loadouts/decks/${loadoutId}`);
@@ -3330,6 +3397,7 @@ export async function fetchPlayerLoadoutDeck(playerId: string | number, loadoutI
  * Fetch leaderboard data for client consumers.
  *
  * Accepts query filters; returns fetchLeaderboard data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchLeaderboard(params?: { tier?: string; region?: string }): Promise<LeaderboardEntry[]> {
   const query = new URLSearchParams();
@@ -3361,6 +3429,7 @@ export async function fetchLeaderboard(params?: { tier?: string; region?: string
  * Fetch patch trends data for client consumers.
  *
  * Accepts query filters; returns fetchPatchTrends data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchPatchTrends(params?: { champion_id?: string }): Promise<PatchTrendEntry[]> {
   const query = new URLSearchParams();
@@ -3436,6 +3505,7 @@ function mapStatsChampionRows(raw: Array<{
  * Fetch stats champions data for client consumers.
  *
  * Accepts query filters; returns fetchStatsChampions data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchStatsChampions(params?: { sort?: string; limit?: number; scope?: PublicStatsScope; queueId?: number }): Promise<StatsChampion[]> {
   const query = new URLSearchParams();
@@ -3462,6 +3532,7 @@ export async function fetchStatsChampions(params?: { sort?: string; limit?: numb
  * Fetch regions data for client consumers.
  *
  * Accepts no arguments; returns fetchRegions data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchRegions(): Promise<RegionStat[]> {
   const raw = await fetchJson<Array<{
@@ -3491,6 +3562,7 @@ export async function fetchRegions(): Promise<RegionStat[]> {
  * Fetch platforms data for client consumers.
  *
  * Accepts query filters; returns fetchPlatforms data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchPlatforms(options?: { timeoutMs?: number }): Promise<Array<{
   platform: string;
@@ -3526,6 +3598,7 @@ export async function fetchPlatforms(options?: { timeoutMs?: number }): Promise<
  * Fetch loadouts data for client consumers.
  *
  * Accepts query filters; returns fetchLoadouts data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchLoadouts(params?: {
   championId?: string;
@@ -3593,6 +3666,7 @@ export async function fetchLoadouts(params?: {
  * Fetch items data for client consumers.
  *
  * Accepts query filters; returns fetchItems data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchItems(params?: { mode?: 'ranked' | 'casual'; limit?: number; championId?: number; role?: 'Frontline' | 'Damage' | 'Flank' | 'Support'; summary?: boolean; tierMin?: number; tierMax?: number; scope?: string; queueId?: number }): Promise<ItemStat[]> {
   const query = new URLSearchParams();
@@ -3642,6 +3716,7 @@ export async function fetchItems(params?: { mode?: 'ranked' | 'casual'; limit?: 
  * Fetch item detail data for client consumers.
  *
  * Accepts itemId, mode; returns fetchItemDetail data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchItemDetail(itemId: number, mode: 'ranked' = 'ranked', params?: { championId?: number; role?: 'Frontline' | 'Damage' | 'Flank' | 'Support'; tierMin?: number; tierMax?: number }): Promise<ItemDetailStats | null> {
   try {
@@ -3681,6 +3756,7 @@ export async function fetchItemDetail(itemId: number, mode: 'ranked' = 'ranked',
  * Fetch map stats data for client consumers.
  *
  * Accepts PublicStatsScope; returns fetchMapStats data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchMapStats(params?: { queueId?: number; limit?: number; scope?: PublicStatsScope }): Promise<MapStat[]> {
   const query = new URLSearchParams();
@@ -3709,6 +3785,7 @@ export async function fetchMapStats(params?: { queueId?: number; limit?: number;
  * Fetch champion map stats data for client consumers.
  *
  * Accepts championId; returns fetchChampionMapStats data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchChampionMapStats(championId: number, params?: { scope?: PublicStatsScope; queueId?: number }): Promise<ChampionMapStat[]> {
   try {
@@ -3740,6 +3817,7 @@ export async function fetchChampionMapStats(championId: number, params?: { scope
  * Fetch map detail data for client consumers.
  *
  * Accepts mapName, PublicStatsScope; returns fetchMapDetail data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchMapDetail(mapName: string, params?: { scope?: PublicStatsScope }): Promise<MapDetailStats | null> {
   try {
@@ -3764,6 +3842,7 @@ export async function fetchMapDetail(mapName: string, params?: { scope?: PublicS
  * Fetch map category comparison data for client consumers.
  *
  * Accepts mapName, section, MapComparisonSection; returns fetchMapCategoryComparison data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchMapCategoryComparison(
   mapName: string,
@@ -3798,6 +3877,7 @@ export interface SkinStat {
  * Fetch skin stats data for client consumers.
  *
  * Accepts query filters; returns fetchSkinStats data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchSkinStats(params?: { championId?: number; tierMin?: number; tierMax?: number; limit?: number; scope?: PublicStatsScope; queueId?: number }): Promise<SkinStat[]> {
   const query = new URLSearchParams();
@@ -3840,6 +3920,7 @@ export interface BrokenSkinStat {
  * Fetch broken skin stats data for client consumers.
  *
  * Accepts query filters; returns fetchBrokenSkinStats data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchBrokenSkinStats(params?: { championId?: number; tierMin?: number; tierMax?: number; scope?: PublicStatsScope; queueId?: number }): Promise<BrokenSkinStat[]> {
   const query = new URLSearchParams();
@@ -3882,6 +3963,7 @@ export interface MatchCompositionStat {
  * Fetch match compositions data for client consumers.
  *
  * Accepts query filters; returns fetchMatchCompositions data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchMatchCompositions(params?: { tierMin?: number; tierMax?: number; limit?: number; sortBy?: 'count' | 'winrate' | 'wins' | 'frontline' | 'damage' | 'flank' | 'support'; order?: 'asc' | 'desc' }): Promise<MatchCompositionStat[]> {
   const query = new URLSearchParams();
@@ -3923,6 +4005,7 @@ export interface ChampionLeaderboardEntry {
  * Fetch champion leaderboard data for client consumers.
  *
  * Accepts championId, limit; returns fetchChampionLeaderboard data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchChampionLeaderboard(championId: number, limit = 25): Promise<ChampionLeaderboardEntry[]> {
   const query = new URLSearchParams({ championId: String(championId), limit: String(limit) });
@@ -3962,6 +4045,7 @@ export interface ChampionTalentStatsResponse {
  * NormalizeChampionTalentStatsResponse for the API-client data path.
  *
  * Accepts raw; returns normalizeChampionTalentStatsResponse data from local computation without network, authentication, cache, or persistence effects.
+ * refs: none
  */
 export function normalizeChampionTalentStatsResponse(raw: any): ChampionTalentStatsResponse {
   return {
@@ -3987,6 +4071,7 @@ export function normalizeChampionTalentStatsResponse(raw: any): ChampionTalentSt
  * Fetch champion talent stats data for client consumers.
  *
  * Accepts championId, mode; returns fetchChampionTalentStats data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchChampionTalentStats(
   championId: number,
@@ -4055,6 +4140,7 @@ function statNameKeyForCards(value: string | null | undefined): string {
  * NormalizeChampionCardStatsResponse for the API-client data path.
  *
  * Accepts raw; returns normalizeChampionCardStatsResponse data from local computation without network, authentication, cache, or persistence effects.
+ * refs: none
  */
 export function normalizeChampionCardStatsResponse(raw: any): ChampionCardStatsResponse {
   const mappedCards = (Array.isArray(raw?.cards) ? raw.cards : []).map((card: any) => ({
@@ -4114,6 +4200,7 @@ export interface ChampionCardDetailResponse {
  * Fetch champion card detail data for client consumers.
  *
  * Accepts championId, cardId, mode; returns fetchChampionCardDetail data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchChampionCardDetail(
   championId: number,
@@ -4157,6 +4244,7 @@ export async function fetchChampionCardDetail(
  * Fetch champion card stats data for client consumers.
  *
  * Accepts championId, mode; returns fetchChampionCardStats data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchChampionCardStats(
   championId: number,
@@ -4196,6 +4284,7 @@ export async function fetchChampionCardStats(
  * Fetch hourly match counts data for client consumers.
  *
  * Accepts query filters; returns fetchHourlyMatchCounts data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchHourlyMatchCounts(params?: { date?: string; hour?: number; queueId?: number }): Promise<HourlyMatchCount[]> {
   const query = new URLSearchParams();
@@ -4243,6 +4332,7 @@ export async function fetchHourlyMatchCounts(params?: { date?: string; hour?: nu
  * Fetch tiers data for client consumers.
  *
  * Accepts query filters; returns fetchTiers data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchTiers(params?: { source?: 'profiles' | 'matches' }): Promise<TierStat[]> {
   const query = new URLSearchParams();
@@ -4328,6 +4418,7 @@ export interface StatsPageData {
  * Fetch stats page data data for client consumers.
  *
  * Accepts query filters; returns fetchStatsPageData data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchStatsPageData(params?: { tierMin?: number; tierMax?: number }): Promise<StatsPageData> {
   const query = new URLSearchParams();
@@ -4355,6 +4446,7 @@ export async function fetchStatsPageData(params?: { tierMin?: number; tierMax?: 
  * Fetch stats overview data for client consumers.
  *
  * Accepts no arguments; returns fetchStatsOverview data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchStatsOverview(): Promise<StatsOverview> {
   const cacheKey = getStoredLobbyTierFilter();
@@ -4402,6 +4494,7 @@ export async function fetchStatsOverview(): Promise<StatsOverview> {
  * Fetch tier summary data for client consumers.
  *
  * Accepts no arguments; returns fetchTierSummary data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchTierSummary(): Promise<TierSummary> {
   const raw = await fetchJson<{
@@ -4431,6 +4524,7 @@ export async function fetchTierSummary(): Promise<TierSummary> {
  * Fetch talents data for client consumers.
  *
  * Accepts no arguments; returns fetchTalents data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchTalents(): Promise<Array<{
   talentId: number;
@@ -4494,6 +4588,7 @@ const USER_KEY = "pc_auth_user";
  * Read or change the local auth token state.
  *
  * Accepts no arguments; returns getAuthToken data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export function getAuthToken(): string | null {
   if (typeof window === "undefined") return null;
@@ -4507,6 +4602,7 @@ export function getAuthToken(): string | null {
  * Read or change the local has cookie auth session state.
  *
  * Accepts no arguments; returns hasCookieAuthSession data through a backend request, carrying authentication headers and applying the operation server-side.
+ * refs: none
  */
 export function hasCookieAuthSession(): boolean {
   return typeof document !== "undefined"
@@ -4517,6 +4613,7 @@ export function hasCookieAuthSession(): boolean {
  * Read or change the local auth user state.
  *
  * Accepts no arguments; returns getAuthUser data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export function getAuthUser(): AuthUser | null {
   if (typeof window === "undefined") return null;
@@ -4537,6 +4634,7 @@ export function getAuthUser(): AuthUser | null {
  * CacheAuthUser for the client authentication state.
  *
  * Accepts user; returns cacheAuthUser data while reading or changing local auth state without a backend request.
+ * refs: none
  */
 export function cacheAuthUser(user: AuthUser): void {
   if (typeof window !== "undefined") localStorage.setItem(USER_KEY, JSON.stringify(user));
@@ -4553,6 +4651,7 @@ function setAuthSession(session: AuthSession) {
  * Read or change the local auth state.
  *
  * Accepts no arguments; returns clearAuth data while reading or changing local auth state without a backend request.
+ * refs: none
  */
 export function clearAuth() {
   if (typeof window !== "undefined") {
@@ -4567,6 +4666,7 @@ export function clearAuth() {
  * Register a new account with the identity service.
  *
  * Accepts username, email, password; returns register data through a backend request, carrying authentication headers and applying the operation server-side.
+ * refs: none
  */
 export async function register(username: string, email: string, password: string): Promise<AuthSession> {
   const raw = await fetchJson<{ user: { id: number; username: string; email?: string | null; avatar_url?: string | null; bio?: string | null; is_admin?: boolean; is_approved?: boolean; created_at?: string; last_login?: string | null; time_zone?: string | null }; token: string; expires_at?: string }>("/auth/register", {
@@ -4587,6 +4687,7 @@ export async function register(username: string, email: string, password: string
  * Authenticate account credentials and establish a client session.
  *
  * Accepts username, password; returns login data through a backend request, carrying authentication headers and applying the operation server-side.
+ * refs: none
  */
 export async function login(username: string, password: string): Promise<AuthSession> {
   const raw = await fetchJson<{ user: { id: number; username: string; email?: string | null; avatar_url?: string | null; bio?: string | null; is_admin?: boolean; is_approved?: boolean; created_at?: string; last_login?: string | null; time_zone?: string | null; linked_player_id?: number | null; linked_player_name?: string | null }; token: string; expires_at?: string }>("/auth/login", {
@@ -4616,6 +4717,7 @@ function submitOidcLogout(): void {
  * End the current account session with the identity service.
  *
  * Accepts no arguments; returns logout data through a backend request, carrying authentication headers and applying the operation server-side.
+ * refs: none
  */
 export async function logout(): Promise<void> {
   const hasOidcCookieSession = typeof document !== "undefined"
@@ -4651,6 +4753,7 @@ export async function logout(): Promise<void> {
  * Fetch me data for client consumers.
  *
  * Accepts the requested identifier; returns getMe data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function getMe(_userId?: number): Promise<AuthUser> {
   const token = getAuthToken();
@@ -4694,6 +4797,7 @@ export async function getMe(_userId?: number): Promise<AuthUser> {
  * Fetch user profile data for client consumers.
  *
  * Accepts userId; returns getUserProfile data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function getUserProfile(userId: number): Promise<AuthUser> {
   const raw = await fetchJson<{
@@ -4730,6 +4834,7 @@ export async function getUserProfile(userId: number): Promise<AuthUser> {
  * Read or change the local account auth headers state.
  *
  * Accepts token; returns accountAuthHeaders data while reading or changing local auth state without a backend request.
+ * refs: none
  */
 export function accountAuthHeaders(token: string | null = getAuthToken()): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {};
@@ -4765,6 +4870,7 @@ export interface AccountNotification {
  * Fetch account notifications data for client consumers.
  *
  * Accepts limit; returns getAccountNotifications data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function getAccountNotifications(limit = 25): Promise<AccountNotification[]> {
   const rows = await fetchJson<Array<{
@@ -4789,6 +4895,7 @@ export async function getAccountNotifications(limit = 25): Promise<AccountNotifi
  * Mark account notification read in the notification API.
  *
  * Accepts notificationId; returns markAccountNotificationRead data through a backend request, carrying authentication headers and applying the operation server-side.
+ * refs: none
  */
 export async function markAccountNotificationRead(notificationId: number): Promise<void> {
   await fetchJson(`/auth/account/notifications/${notificationId}/read`, {
@@ -4801,6 +4908,7 @@ export async function markAccountNotificationRead(notificationId: number): Promi
  * Fetch account details data for client consumers.
  *
  * Accepts no arguments; returns getAccountDetails data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function getAccountDetails(): Promise<AccountDetails> {
   const raw = await fetchJson<{
@@ -4833,6 +4941,7 @@ export async function getAccountDetails(): Promise<AccountDetails> {
  * Link player id to the authenticated account.
  *
  * Accepts playerId; returns linkPlayerId data through a backend request, carrying authentication headers and applying the operation server-side.
+ * refs: none
  */
 export async function linkPlayerId(playerId: number): Promise<{ message: string; player: { id: number; name: string } }> {
   return fetchJson<{ message: string; player: { id: number; name: string } }>("/auth/account/player-link", {
@@ -4852,6 +4961,7 @@ export interface PlayerLinkVerification {
  * Fetch player link verification data for client consumers.
  *
  * Accepts no arguments; returns getPlayerLinkVerification data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function getPlayerLinkVerification(): Promise<PlayerLinkVerification | null> {
   const raw = await fetchJson<{ verification: PlayerLinkVerification | null }>("/auth/account/player-link/verification", {
@@ -4864,6 +4974,7 @@ export async function getPlayerLinkVerification(): Promise<PlayerLinkVerificatio
  * Start player link verification verification for the authenticated account.
  *
  * Accepts playerId; returns startPlayerLinkVerification data through a backend request, carrying authentication headers and applying the operation server-side.
+ * refs: none
  */
 export async function startPlayerLinkVerification(playerId: number): Promise<PlayerLinkVerification> {
   const raw = await fetchJson<{ verification: PlayerLinkVerification }>("/auth/account/player-link/verification", {
@@ -4878,6 +4989,7 @@ export async function startPlayerLinkVerification(playerId: number): Promise<Pla
  * Verify player link for the authenticated account.
  *
  * Accepts no arguments; returns verifyPlayerLink data through a backend request, carrying authentication headers and applying the operation server-side.
+ * refs: none
  */
 export async function verifyPlayerLink(): Promise<{ message: string; player: { id: number; name: string } }> {
   return fetchJson<{ message: string; player: { id: number; name: string } }>("/auth/account/player-link/verification/check", {
@@ -4891,6 +5003,7 @@ export async function verifyPlayerLink(): Promise<{ message: string; player: { i
  * Cancel player link verification verification for the authenticated account.
  *
  * Accepts no arguments; returns cancelPlayerLinkVerification data through a backend request, carrying authentication headers and applying the operation server-side.
+ * refs: none
  */
 export async function cancelPlayerLinkVerification(): Promise<void> {
   await fetchJson<{ message: string }>("/auth/account/player-link/verification", {
@@ -4903,6 +5016,7 @@ export async function cancelPlayerLinkVerification(): Promise<void> {
  * Unlink player from the authenticated account.
  *
  * Accepts no arguments; returns unlinkPlayer data through a backend request, carrying authentication headers and applying the operation server-side.
+ * refs: none
  */
 export async function unlinkPlayer(): Promise<{ message: string }> {
   return fetchJson<{ message: string }>("/auth/account/player-link", {
@@ -4916,6 +5030,7 @@ export async function unlinkPlayer(): Promise<{ message: string }> {
  * Update profile through the account or community API.
  *
  * Accepts data; returns updateProfile data through a backend request, carrying authentication headers and applying the operation server-side.
+ * refs: none
  */
 export async function updateProfile(data: { avatar_url?: string | null; bio?: string | null; time_zone?: string }): Promise<{ message: string }> {
   return fetchJson<{ message: string }>("/auth/profile", {
@@ -4938,6 +5053,7 @@ export interface ReportOptions {
  * Report player to the moderation API.
  *
  * Accepts playerId, opts; returns reportPlayer data through a backend request, carrying authentication headers and applying the operation server-side.
+ * refs: none
  */
 export async function reportPlayer(playerId: string | number, opts: ReportOptions): Promise<{ success: boolean; message: string }> {
   const token = getAuthToken();
@@ -4956,6 +5072,7 @@ export async function reportPlayer(playerId: string | number, opts: ReportOption
  * Report private account to the moderation API.
  *
  * Accepts privateId, opts; returns reportPrivateAccount data through a backend request, carrying authentication headers and applying the operation server-side.
+ * refs: none
  */
 export async function reportPrivateAccount(privateId: string | number, opts: ReportOptions): Promise<{ success: boolean; message: string }> {
   if (opts.type !== 'suspicious' && opts.type !== 'cheater') {
@@ -4978,6 +5095,7 @@ export type ClearablePlayerTag = 'cheater' | 'exploiter' | 'suspicious' | 'dropp
  * Clear player tag from the account state.
  *
  * Accepts playerId, tag; returns clearPlayerTag data while reading or changing local auth state without a backend request.
+ * refs: none
  */
 export async function clearPlayerTag(playerId: string | number, tag: ClearablePlayerTag): Promise<{ success: boolean; message: string; cleared: boolean }> {
   const token = getAuthToken();
@@ -5097,6 +5215,7 @@ function mapComment(raw: RawComment): Comment {
  * Fetch posts data for client consumers.
  *
  * Accepts query filters; returns fetchPosts data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchPosts(params?: { userId?: string; buildId?: string; limit?: string; offset?: string }): Promise<Post[]> {
   const query = new URLSearchParams();
@@ -5115,6 +5234,7 @@ export async function fetchPosts(params?: { userId?: string; buildId?: string; l
  * Fetch twitch streams data for client consumers.
  *
  * Accepts no arguments; returns fetchTwitchStreams data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchTwitchStreams(): Promise<TwitchStreamsResponse> {
   const raw = await fetchJson<{
@@ -5144,6 +5264,7 @@ export async function fetchTwitchStreams(): Promise<TwitchStreamsResponse> {
  * Create post through the community API.
  *
  * Accepts userId, title, content, buildId, token; returns createPost data through a backend request, carrying authentication headers and applying the operation server-side.
+ * refs: none
  */
 export async function createPost(userId: number, title: string, content: string, buildId: number | null, token: string | null): Promise<Post> {
   const raw = await fetchJson<RawPost>(`/community/posts`, {
@@ -5159,6 +5280,7 @@ export async function createPost(userId: number, title: string, content: string,
  * Fetch post detail data for client consumers.
  *
  * Accepts postId; returns getPostDetail data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function getPostDetail(postId: number): Promise<PostDetail> {
   const raw = await fetchJson<{
@@ -5176,6 +5298,7 @@ export async function getPostDetail(postId: number): Promise<PostDetail> {
  * Update post through the account or community API.
  *
  * Accepts postId, title, content, token; returns updatePost data through a backend request, carrying authentication headers and applying the operation server-side.
+ * refs: none
  */
 export async function updatePost(postId: number, title: string, content: string, token: string | null): Promise<Post> {
   const raw = await fetchJson<RawPost>(`/community/posts/${postId}`, {
@@ -5191,6 +5314,7 @@ export async function updatePost(postId: number, title: string, content: string,
  * Delete post through the account or community API.
  *
  * Accepts postId, token; returns deletePost data through a backend request, carrying authentication headers and applying the operation server-side.
+ * refs: none
  */
 export async function deletePost(postId: number, token: string | null): Promise<void> {
   await fetchJson<{ deleted: boolean; id: number }>(`/community/posts/${postId}`, {
@@ -5203,6 +5327,7 @@ export async function deletePost(postId: number, token: string | null): Promise<
  * Add a reply to a community post.
  *
  * Accepts postId, userId, content, parentId, token; returns addComment data through a backend request, carrying authentication headers and applying the operation server-side.
+ * refs: none
  */
 export async function addComment(postId: number, userId: number, content: string, parentId: number | null, token: string | null): Promise<Comment> {
   const raw = await fetchJson<RawComment>(`/community/posts/${postId}/comments`, {
@@ -5218,6 +5343,7 @@ export async function addComment(postId: number, userId: number, content: string
  * Update comment through the account or community API.
  *
  * Accepts commentId, content, token; returns updateComment data through a backend request, carrying authentication headers and applying the operation server-side.
+ * refs: none
  */
 export async function updateComment(commentId: number, content: string, token: string | null): Promise<Comment> {
   const raw = await fetchJson<RawComment>(`/community/comments/${commentId}`, {
@@ -5233,6 +5359,7 @@ export async function updateComment(commentId: number, content: string, token: s
  * Delete comment through the account or community API.
  *
  * Accepts commentId, token; returns deleteComment data through a backend request, carrying authentication headers and applying the operation server-side.
+ * refs: none
  */
 export async function deleteComment(commentId: number, token: string | null): Promise<void> {
   await fetchJson<{ deleted: boolean; id: number }>(`/community/comments/${commentId}`, {
@@ -5245,6 +5372,7 @@ export async function deleteComment(commentId: number, token: string | null): Pr
  * Toggle post like for the selected content item.
  *
  * Accepts postId, userId, token; returns togglePostLike data through a backend request, carrying authentication headers and applying the operation server-side.
+ * refs: none
  */
 export async function togglePostLike(postId: number, userId: number, token: string | null): Promise<number> {
   const raw = await fetchJson<{ likes: number }>(`/community/posts/${postId}/like`, {
@@ -5342,6 +5470,7 @@ function mapBuild(raw: RawBuild): Build {
  * Fetch builds data for client consumers.
  *
  * Accepts query filters; returns fetchBuilds data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchBuilds(params?: { championId?: string; visibility?: string; limit?: string; offset?: string }): Promise<Build[]> {
   const query = new URLSearchParams();
@@ -5360,6 +5489,7 @@ export async function fetchBuilds(params?: { championId?: string; visibility?: s
  * Create build through the community API.
  *
  * Accepts userId, championId, name, items, cards, talents, notes, visibility; returns createBuild data through a backend request, carrying authentication headers and applying the operation server-side.
+ * refs: none
  */
 export async function createBuild(
   userId: number,
@@ -5395,6 +5525,7 @@ export async function createBuild(
  * Fetch build detail data for client consumers.
  *
  * Accepts buildId; returns getBuildDetail data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function getBuildDetail(buildId: number): Promise<Build> {
   const raw = await fetchJson<RawBuild>(`/builds/${buildId}`);
@@ -5405,6 +5536,7 @@ export async function getBuildDetail(buildId: number): Promise<Build> {
  * Toggle build like for the selected content item.
  *
  * Accepts buildId, userId, token; returns toggleBuildLike data through a backend request, carrying authentication headers and applying the operation server-side.
+ * refs: none
  */
 export async function toggleBuildLike(buildId: number, userId: number, token: string | null): Promise<number> {
   void userId;
@@ -5461,6 +5593,7 @@ function playerChartPath(playerId: string, days: number, limit: number) {
  * Fetch kda history data for client consumers.
  *
  * Accepts playerId, days, limit; returns fetchKdaHistory data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchKdaHistory(playerId: string, days: number = 30, limit: number = 50): Promise<KdaHistoryEntry[]> {
   const raw = await fetchJson<PlayerChartRow[]>(playerChartPath(playerId, days, limit));
@@ -5477,6 +5610,7 @@ export async function fetchKdaHistory(playerId: string, days: number = 30, limit
  * Fetch dpm history data for client consumers.
  *
  * Accepts playerId, days, limit; returns fetchDpmHistory data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchDpmHistory(playerId: string, days: number = 30, limit: number = 50): Promise<DpmHistoryEntry[]> {
   const raw = await fetchJson<PlayerChartRow[]>(playerChartPath(playerId, days, limit));
@@ -5494,6 +5628,7 @@ export async function fetchDpmHistory(playerId: string, days: number = 30, limit
  * Fetch glicko history data for client consumers.
  *
  * Accepts playerId, days, limit; returns fetchGlickoHistory data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchGlickoHistory(playerId: string, days: number = 30, limit: number = 50): Promise<GlickoHistoryEntry[]> {
   const raw = await fetchJson<PlayerChartRow[]>(playerChartPath(playerId, days, limit));
@@ -5512,6 +5647,7 @@ export async function fetchGlickoHistory(playerId: string, days: number = 30, li
  * MatchPlayerDetail — local type for match player data from the API.
  * Renamed from MatchPlayer to avoid collision with the imported MatchPlayer
  * from types.gen.ts, which has a different shape (id, name vs player_id, player_name).
+ * refs: none
  */
 export interface MatchPlayerDetail {
   player_id: number;
@@ -5568,7 +5704,7 @@ export interface MatchPlayerDetail {
   source?: string | null;
   party_id?: number | null;
   party?: number | null;
-  /** Legacy alias retained for older API payloads. */
+/** Legacy alias retained for older API payloads. · refs: none */
   party_number?: number | null;
   final_match_level?: number | null;
   kda: number;
@@ -5635,6 +5771,7 @@ export interface MatchData {
  * MatchDetail with bans — local type that includes the bans array.
  * The imported MatchDetail from types.gen.ts lacks 'bans', so we use
  * this local type for match detail pages that need ban data.
+ * refs: none
  */
 export interface MatchDetailWithBans {
   match: MatchData;
@@ -5644,6 +5781,7 @@ export interface MatchDetailWithBans {
    * Complete match reads carry player loadouts in the same response as the
    * normalized match rows. These remain optional for compatibility with
    * older cached responses and limited historical matches.
+   * refs: none
    */
   fact?: MatchFact | null;
   facts?: MatchFactPlayer[];
@@ -5651,7 +5789,7 @@ export interface MatchDetailWithBans {
   rating_snapshots?: RatingSnapshot[];
   ratingSnapshots?: RatingSnapshot[];
   loadouts?: MatchFact | MatchFactPlayer[];
-  /** Storage tier selected by the Rust API for this read. */
+/** Storage tier selected by the Rust API for this read. · refs: none */
   storageStatus?: MatchStorageStatus;
   storage_status?: MatchStorageStatus;
   dataStatus?: MatchDataStatus;
@@ -5673,6 +5811,7 @@ export interface MatchDataStatus {
  * DeriveMissingMatchCreditRates for the API-client data path.
  *
  * Accepts detail; returns deriveMissingMatchCreditRates data from local computation without network, authentication, cache, or persistence effects.
+ * refs: none
  */
 export function deriveMissingMatchCreditRates(detail: MatchDetailWithBans): MatchDetailWithBans {
   return {
@@ -5796,6 +5935,7 @@ export interface MatchQueueActivity {
  * Fetch match hourly stats data for client consumers.
  *
  * Accepts no arguments; returns fetchMatchHourlyStats data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchMatchHourlyStats(): Promise<MatchHourlyStats> {
   return fetchJson<MatchHourlyStats>('/matches/hourly-stats');
@@ -5857,6 +5997,7 @@ export interface PresenceHourlyStats {
  * Fetch presence stats data for client consumers.
  *
  * Accepts no arguments; returns fetchPresenceStats data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchPresenceStats(): Promise<PresenceStats> {
   // Version the activity view so a deployment cannot briefly receive the
@@ -5868,6 +6009,7 @@ export async function fetchPresenceStats(): Promise<PresenceStats> {
  * Fetch presence hourly stats data for client consumers.
  *
  * Accepts query filters; returns fetchPresenceHourlyStats data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchPresenceHourlyStats(queueId?: number): Promise<PresenceHourlyStats> {
   const query = new URLSearchParams({ view: 'activity-v3' });
@@ -5900,6 +6042,7 @@ export interface PresenceMatchIdsResponse {
  * Fetch presence match ids data for client consumers.
  *
  * Accepts options; returns fetchPresenceMatchIds data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchPresenceMatchIds(options: {
   queueId?: number;
@@ -5948,6 +6091,7 @@ export interface PresencePlayersResponse {
  * Fetch presence players data for client consumers.
  *
  * Accepts options; returns fetchPresencePlayers data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchPresencePlayers(options: {
   queueId?: number;
@@ -6006,6 +6150,7 @@ export interface PresenceDetailsResponse {
  * Fetch presence details data for client consumers.
  *
  * Accepts options; returns fetchPresenceDetails data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchPresenceDetails(options: {
   queueId?: number;
@@ -6046,6 +6191,7 @@ export interface DroppedMatchSummaryResponse {
  * Fetch dropped match summary data for client consumers.
  *
  * Accepts params, date; returns fetchDroppedMatchSummary data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchDroppedMatchSummary(params: { date: string; queueId?: number; refresh?: boolean }): Promise<DroppedMatchSummaryResponse> {
   const query = new URLSearchParams({
@@ -6085,6 +6231,7 @@ export interface DroppedMatchListResponse {
  * Fetch dropped matches data for client consumers.
  *
  * Accepts params, date; returns fetchDroppedMatches data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchDroppedMatches(params: {
   date: string;
@@ -6142,6 +6289,7 @@ export interface NonrankedDroppedMatchResponse {
  * Fetch nonranked dropped matches data for client consumers.
  *
  * Accepts query filters; returns fetchNonrankedDroppedMatches data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchNonrankedDroppedMatches(params?: {
   date?: string;
@@ -6163,6 +6311,7 @@ export async function fetchNonrankedDroppedMatches(params?: {
  * Fetch match detail data for client consumers.
  *
  * Accepts matchId; returns fetchMatchDetail data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchMatchDetail(matchId: number): Promise<MatchDetailWithBans | null> {
   const raw = await fetchJson<{
@@ -6187,7 +6336,7 @@ export async function fetchMatchDetail(matchId: number): Promise<MatchDetailWith
   });
 }
 
-/** @deprecated Complete match reads include facts; retained for non-page callers. */
+/** @deprecated Complete match reads include facts; retained for non-page callers. · refs: none */
 export async function fetchMatchFact(matchId: number): Promise<MatchFact | null> {
   try {
     return await fetchJson<MatchFact>(`/matches/fact/${matchId}`);
@@ -6196,7 +6345,7 @@ export async function fetchMatchFact(matchId: number): Promise<MatchFact | null>
   }
 }
 
-/** @deprecated Complete match reads include rating snapshots; retained for non-page callers. */
+/** @deprecated Complete match reads include rating snapshots; retained for non-page callers. · refs: none */
 export async function fetchMatchSnapshots(matchId: number): Promise<RatingSnapshot[]> {
   const raw = await fetchJson<Array<{
     player_id: number | string;
@@ -6247,6 +6396,7 @@ export async function fetchMatchSnapshots(matchId: number): Promise<RatingSnapsh
  * Fetch recent matches data for client consumers.
  *
  * Accepts query filters; returns fetchRecentMatches data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchRecentMatches(limit?: number): Promise<MatchData[]> {
   const raw = await fetchJson<MatchData[]>(`/matches/recent${limit ? `?limit=${limit}` : ''}`);
@@ -6267,6 +6417,7 @@ const matchesOverviewInFlight = new Map<string, Promise<MatchesOverview>>();
  * Fetch matches overview data for client consumers.
  *
  * Accepts query filters; returns fetchMatchesOverview data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchMatchesOverview(params?: {
   tierMin?: number;
@@ -6304,6 +6455,7 @@ export async function fetchMatchesOverview(params?: {
  * Fetch match search data for client consumers.
  *
  * Accepts query filters; returns fetchMatchSearch data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchMatchSearch(params?: {
   championId?: string;
@@ -6351,6 +6503,7 @@ export async function fetchMatchSearch(params?: {
  * Fetch reference items data for client consumers.
  *
  * Accepts no arguments; returns fetchReferenceItems data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchReferenceItems(): Promise<Array<{ item_id: number; name: string; description?: string }>> {
   const raw = await fetchJson<any[]>(`/reference/items`);
@@ -6361,6 +6514,7 @@ export async function fetchReferenceItems(): Promise<Array<{ item_id: number; na
  * Fetch reference talents data for client consumers.
  *
  * Accepts no arguments; returns fetchReferenceTalents data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchReferenceTalents(): Promise<Array<{ talent_id: number; name: string; champion_id: number }>> {
   const raw = await fetchJson<any[]>(`/reference/talents`);
@@ -6371,6 +6525,7 @@ export async function fetchReferenceTalents(): Promise<Array<{ talent_id: number
  * Fetch reference cards data for client consumers.
  *
  * Accepts no arguments; returns fetchReferenceCards data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchReferenceCards(): Promise<Array<{ card_id: number; name: string }>> {
   const raw = await fetchJson<any[]>(`/reference/cards`);
@@ -6381,6 +6536,7 @@ export async function fetchReferenceCards(): Promise<Array<{ card_id: number; na
  * Fetch reference queues data for client consumers.
  *
  * Accepts no arguments; returns fetchReferenceQueues data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchReferenceQueues(): Promise<Array<{ queue_id: number; name: string }>> {
   const raw = await fetchJson<any[]>(`/reference/queues`);
@@ -6391,6 +6547,7 @@ export async function fetchReferenceQueues(): Promise<Array<{ queue_id: number; 
  * Fetch reference regions data for client consumers.
  *
  * Accepts no arguments; returns fetchReferenceRegions data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchReferenceRegions(): Promise<Array<{ region?: string; region_code?: string; name?: string; region_name?: string }>> {
   const raw = await fetchJson<any[]>(`/reference/regions`);
@@ -6401,6 +6558,7 @@ export async function fetchReferenceRegions(): Promise<Array<{ region?: string; 
  * Fetch reference maps data for client consumers.
  *
  * Accepts no arguments; returns fetchReferenceMaps data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchReferenceMaps(): Promise<Array<{ map_id: number; name: string }>> {
   const raw = await fetchJson<any[]>(`/reference/maps`);
@@ -6411,6 +6569,7 @@ export async function fetchReferenceMaps(): Promise<Array<{ map_id: number; name
  * Fetch reference champions data for client consumers.
  *
  * Accepts no arguments; returns fetchReferenceChampions data after a backend request, using shared authentication and cache behavior.
+ * refs: none
  */
 export async function fetchReferenceChampions(): Promise<Array<{ id: number; name: string }>> {
   const raw = await fetchJson<any[]>(`/reference/champions`);

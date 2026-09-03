@@ -1,6 +1,7 @@
 /**
  * Renders party badge data for match-result views.
  * Keeps the component's interaction and accessibility behavior intact.
+ * refs: none
  */
 "use client";
 
@@ -13,6 +14,7 @@ type PartyPlayer = Pick<MatchPlayerDetail, "party" | "party_number">;
 /** Render getPartyNumber from its declared props and match data.
  * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
  * Returns: `number | null`
+ * refs: none
  */
 export function getPartyNumber(player: PartyPlayer): number | null {
   const value = Number(player.party ?? player.party_number ?? 0);
@@ -22,6 +24,7 @@ export function getPartyNumber(player: PartyPlayer): number | null {
 /** Render PartyBadge from its declared props and match data.
  * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function PartyBadge({
   player,

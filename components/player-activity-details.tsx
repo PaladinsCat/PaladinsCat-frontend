@@ -1,5 +1,6 @@
 /** player-activity-details component/module.
  * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ * refs: none
  */
 "use client";
 
@@ -26,6 +27,7 @@ type EvidenceTab = "matches" | "players";
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function PlayerActivityDetails() {
   const { t, formatNumber } = useLocalization();

@@ -1,5 +1,6 @@
 /** Builds server-side OIDC BFF requests and responses.
  * The module owns its existing image, OIDC, proxy, roster, or moderation boundary.
+ * refs: none
  */
 import "server-only";
 import { createPrivateKey, createSign, randomUUID } from "node:crypto";
@@ -127,6 +128,7 @@ async function serviceToken(): Promise<string> {
 /** Apply oidcBffServiceHeaders to the declared request or domain inputs.
  * Contract: validates inputs, preserves the existing security or mapping rules, and returns the documented result.
  * Returns: `Promise<HeadersInit>`
+ * refs: none
  */
 export async function oidcBffServiceHeaders(): Promise<HeadersInit> {
   return { authorization: `Bearer ${await serviceToken()}` };

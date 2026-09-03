@@ -1,6 +1,7 @@
 /**
  * Define the changelog page responsibility boundary.
  * Coordinates changelog page data loading, authorization, and presentation.
+ * refs: none
  */
 "use client";
 import { useEffect, useMemo, useState } from "react";
@@ -331,6 +332,7 @@ function Pagination({ page, totalPages, onChange }: { page: number; totalPages: 
 /**
  * Handles the exported route operation using its declared request and response contract.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function ChangelogPage() {
   const { t } = useLocalization();

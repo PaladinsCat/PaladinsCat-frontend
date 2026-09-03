@@ -1,5 +1,6 @@
 /** CoreUiDragGuard component/module.
  * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ * refs: none
  */
 "use client";
 
@@ -13,7 +14,7 @@ const ALLOWED_DRAG_TARGETS = [
   "[contenteditable='true']",
 ].join(",");
 
-/** Prevent accidental native dragging of application chrome and UI artwork.  Returns: `React.JSX.Element`. */
+/** Prevent accidental native dragging of application chrome and UI artwork.  Returns: `React.JSX.Element`. · refs: none */
 export default function CoreUiDragGuard() {
   useEffect(() => {
     const preventCoreUiDrag = (event: DragEvent) => {

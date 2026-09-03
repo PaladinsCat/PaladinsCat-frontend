@@ -1,4 +1,4 @@
-/** Provide the homepage search control and lightweight result overlay. */
+/** Provide the homepage search control and lightweight result overlay. · refs: none */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -25,7 +25,7 @@ type HomeSearchProps = {
   onSearchActiveChange?: (active: boolean) => void;
 };
 
-/** Search across public entities and route submitted blank queries to the search page.  Returns: `React.JSX.Element`. */
+/** Search across public entities and route submitted blank queries to the search page.  Returns: `React.JSX.Element`. · refs: none */
 export default function HomeSearch({ onSearchActiveChange }: HomeSearchProps) {
   const { t } = useLocalization();
   const router = useRouter();

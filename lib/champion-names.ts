@@ -12,6 +12,7 @@
  *
  * Failure recovery: if the fetch fails, the cache clears so the next call
  * retries automatically. No manual refresh needed.
+ * refs: none
  */
 
 import { fetchReferenceChampions } from "./api-client";
@@ -24,6 +25,7 @@ let loadingPromise: Promise<void> | null = null;
 /**
  * Fetch and cache the champion ID→name map.
  * On failure, clears the promise so the next call retries.
+ * refs: none
  */
 async function loadChampionMap(): Promise<void> {
   // If already cached, short-circuit
@@ -54,6 +56,7 @@ async function loadChampionMap(): Promise<void> {
 /**
  * Resolve a champion ID to its name. Returns the ID as a string fallback if
  * the map hasn't loaded or the champion isn't found.
+ * refs: none
  */
 export async function getChampionName(id: number): Promise<string> {
   await loadChampionMap();
@@ -63,6 +66,7 @@ export async function getChampionName(id: number): Promise<string> {
 /**
  * Force-refresh the map (useful for after backend reseed).
  * Returns: `Promise<void>`
+ * refs: none
  */
 export function refreshChampionMap(): Promise<void> {
   championMap = null;
@@ -72,6 +76,7 @@ export function refreshChampionMap(): Promise<void> {
 /**
  * Get all available champions as { id, name } pairs.
  * Returns: `Array<{ id: number; name: string }> | null`
+ * refs: none
  */
 export function getChampions(): Array<{ id: number; name: string }> | null {
   if (!championMap) return null;
@@ -88,6 +93,7 @@ import { useEffect, useState } from "react";
  * Returns `{ name: string | null, loading: boolean }`.
  * `name` is `null` while the reference list is being fetched.
  * When the API resolves, the component re-renders automatically.
+ * refs: none
  */
 export function useChampionName(id: number): { name: string | null; loading: boolean } {
   const [name, setName] = useState<string | null>(null);
@@ -124,6 +130,7 @@ export function useChampionName(id: number): { name: string | null; loading: boo
 /**
  * React hook that loads the full champion list (for dropdowns / select inputs).
  * Returns: `object`
+ * refs: none
  */
 export function useChampions(): { champions: Array<{ id: number; name: string }> | null; loading: boolean } {
   const [champions, setChampions] = useState<Array<{ id: number; name: string }> | null>(null);

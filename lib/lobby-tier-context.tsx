@@ -1,5 +1,6 @@
 /** Provides lobby-tier filter state and persistence for page contexts.
  * The module owns the existing URL, context, or locale-message boundary.
+ * refs: none
  */
 "use client";
 
@@ -23,6 +24,7 @@ const LobbyTierContext = createContext<LobbyTierContextValue | null>(null);
 
 /** Apply useLobbyTier to lobby-tier or localization inputs.
  * Contract: returns the normalized route, context state, or message value while preserving existing browser behavior.
+ * refs: none
  */
 export function useLobbyTier(): LobbyTierContextValue {
   const context = useContext(LobbyTierContext);
@@ -33,6 +35,7 @@ export function useLobbyTier(): LobbyTierContextValue {
 /** Apply LobbyTierProvider to lobby-tier or localization inputs.
  * Contract: returns the normalized route, context state, or message value while preserving existing browser behavior.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export function LobbyTierProvider({ children }: { children: ReactNode }) {
   const [filter, setFilterState] = useState<LobbyTierFilter>("all");

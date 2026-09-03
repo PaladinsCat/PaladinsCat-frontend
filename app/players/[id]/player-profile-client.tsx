@@ -2,6 +2,7 @@
  * Define the player route surface for id player-profile-client and its local data boundary.
  * This file owns the page, layout, loading state, or route handler named by its path.
  * It does not own unrelated player sections or shared library policy.
+ * refs: none
  */
 "use client";
 
@@ -88,6 +89,7 @@ function StatGrid({ children }: { children: React.ReactNode }) {
 /**
  * Define translation keys for failures in the player id player-profile-client view.
  * Returns the stable key map consumed by localized error messages.
+ * refs: none
  */
 export const PLAYER_PROFILE_ERROR_KEYS = {
   failedToLoadProfile: "generated.players.failedToLoadProfile",
@@ -98,6 +100,7 @@ export const PLAYER_PROFILE_ERROR_KEYS = {
 /**
  * Render the PlayerProfileClient view for the player id player-profile-client route.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function PlayerProfileClient({
   id,

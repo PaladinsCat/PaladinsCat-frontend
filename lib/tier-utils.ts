@@ -1,4 +1,4 @@
-/** Tier / rank display logic — shared between profile and leaderboards. */
+/** Tier / rank display logic — shared between profile and leaderboards. · refs: none */
 
 export const TIER_NAMES: Record<number, string> = {
   0: "Unranked", 1: "Bronze V", 2: "Bronze IV", 3: "Bronze III", 4: "Bronze II", 5: "Bronze I",
@@ -14,13 +14,14 @@ export const TIER_NAMES: Record<number, string> = {
  *
  * Exposes display constants only; reading it has no network, authentication, cache, or persistence effects.
  * Returns: `Record<number, string>`
+ * refs: none
  */
 export const TIER_COLORS: Record<number, string> = {
   0: "text-pc-text-muted", 1: "text-amber-700", 6: "text-gray-300", 11: "text-yellow-400",
   16: "text-sky-400", 21: "text-violet-400", 26: "text-emerald-400", 27: "text-rose-400",
 };
 
-/** Get the Tailwind text color class for a tier. */
+/** Get the Tailwind text color class for a tier. · refs: none */
 export function getTierColor(tier: number): string {
   if (tier >= 27) return TIER_COLORS[27];
   if (tier >= 26) return TIER_COLORS[26];
@@ -38,6 +39,7 @@ export function getTierColor(tier: number): string {
  * Grandmaster logic: top 100 Masters (rank 1-100) display as Grandmaster.
  * Masters ranked 101+ are offset by 100 and display as Master with the
  * adjusted rank (e.g. rank 101 → Master #1).
+ * refs: none
  */
 export function resolveEffectiveTier(kbmTier: number, kbmRank: number): {
   displayTier: number;
@@ -85,6 +87,7 @@ export function resolveEffectiveTier(kbmTier: number, kbmRank: number): {
  *   rank-tiers/master/RankIcon_Master.avif            — tier 26
  *   rank-tiers/grandmaster/RankIcon_Grandmaster.avif  — tier 27
  * Returns: `string`
+ * refs: none
  */
 export function getRankIconPath(kbmTier: number, kbmRank: number): string {
   const { displayTier } = resolveEffectiveTier(kbmTier, kbmRank);

@@ -1,6 +1,7 @@
 /**
  * Renders score block data for match-result views.
  * Keeps the component's interaction and accessibility behavior intact.
+ * refs: none
  */
 import type { ScoreBlockData } from "./types";
 import { LocalizedText } from "@/lib/localization-context";
@@ -8,6 +9,7 @@ import { LocalizedText } from "@/lib/localization-context";
 /** Render ScoreBlock from its declared props and match data.
  * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function ScoreBlock({ data }: { data: ScoreBlockData }) {
   return (

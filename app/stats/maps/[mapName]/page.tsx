@@ -1,6 +1,7 @@
 /**
  * Define the stats maps page route boundary.
  * Coordinates this module's route data flow and rendered output.
+ * refs: none
  */
 "use client";
 import Link from "next/link";
@@ -152,6 +153,7 @@ const STATS_SCOPE_LABEL_KEYS = {
 /**
  * Renders the exported statistics view with its route data.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function MapDetailPage() {
   const { formatDuration, formatNumber, formatPercent, formatRecord, t } = useLocalization();

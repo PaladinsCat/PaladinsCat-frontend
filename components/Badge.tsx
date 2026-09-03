@@ -8,6 +8,7 @@
  *   - mode: neutral, for match mode labels (Ranked/Unranked)
  *   - default: inherits from parent, no icon
  * Usage: <Badge variant="verified">{t("generated.badge.verified")}</Badge>
+ * refs: none
  */
 
 export type BadgeVariant = "verified" | "supporter" | "ranked" | "mode" | "default";
@@ -78,6 +79,7 @@ const iconMap: Record<string, React.ReactNode> = {
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function Badge({ variant = "default", children, className = "" }: BadgeProps) {
   const style = variantStyles[variant];

@@ -1,6 +1,7 @@
 /**
  * Define the stats player charts page route boundary.
  * Coordinates this module's route data flow and rendered output.
+ * refs: none
  */
 "use client";
 import { useEffect, useState, useCallback } from "react";
@@ -15,6 +16,7 @@ import { ContentFade } from "@/components/async-state";
 /**
  * Renders the exported statistics view with its route data.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function PlayerChartsPage({ params }: { params: Promise<{ id: string }> }) {
   const { t , formatMonthDay} = useLocalization();

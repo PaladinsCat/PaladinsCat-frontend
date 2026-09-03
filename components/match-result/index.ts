@@ -1,4 +1,4 @@
-/** Re-export match-result types, formatters, and section components from one public entry point. */
+/** Re-export match-result types, formatters, and section components from one public entry point. · refs: none */
 export * from "./types";
 export * from "./format";
 

@@ -1,5 +1,6 @@
 /** proxy component/module.
  * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ * refs: none
  */
 import { NextRequest, NextResponse } from "next/server";
 
@@ -20,6 +21,7 @@ import { NextRequest, NextResponse } from "next/server";
  *
  * NOTE: This file was `middleware.ts` until the Next.js 16 rename to the
  * `proxy` file convention (https://nextjs.org/docs/messages/middleware-to-proxy).
+ * refs: none
  */
 export function proxy(request: NextRequest) {
   // The production nonce policy makes Next's development runtime defer client
@@ -65,6 +67,7 @@ export function proxy(request: NextRequest) {
 
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ * refs: none
  */
 export const config = {
   // Apply only to page (HTML) document navigations; skip proxied API traffic,

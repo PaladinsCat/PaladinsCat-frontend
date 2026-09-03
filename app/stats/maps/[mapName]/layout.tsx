@@ -1,6 +1,7 @@
 /**
  * Define the stats maps layout route boundary.
  * Coordinates this module's route data flow and rendered output.
+ * refs: none
  */
 import type { Metadata } from "next";
 import { getServerLocalization } from "@/lib/server-localization";
@@ -13,6 +14,7 @@ type Props = {
 /**
  * Renders the exported statistics view with its route data.
  * Returns: `Promise<Metadata>`
+ * refs: none
  */
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { mapName } = await params;
@@ -30,6 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 /**
  * Renders the exported statistics view with its route data.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function MapDetailLayout({ children }: Props) {
   return children;

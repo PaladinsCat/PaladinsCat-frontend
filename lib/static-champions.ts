@@ -3,6 +3,7 @@
  *
  * This module supplies identity and role metadata only; it does not synthesize
  * live statistics or leaderboard records.
+ * refs: none
  */
 export interface StaticChampion {
   id: number;
@@ -17,6 +18,7 @@ export interface StaticChampion {
  * List the canonical champion IDs, names, and roles available to local UI filters.
  *
  * Returns static metadata without network, authentication, cache, or persistence effects.
+ * refs: none
  */
 export const STATIC_CHAMPIONS: StaticChampion[] = [
   {

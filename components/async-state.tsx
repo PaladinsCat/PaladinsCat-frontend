@@ -1,5 +1,6 @@
 /** async-state component/module.
  * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ * refs: none
  */
 "use client";
 
@@ -10,6 +11,7 @@ import { useLocalization } from "@/lib/localization-context";
 
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ * refs: none
  */
 export function ContentFade({ children, className }: { children: ReactNode; className?: string }) {
   return (
@@ -21,6 +23,7 @@ export function ContentFade({ children, className }: { children: ReactNode; clas
 
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ * refs: none
  */
 export function StableMetricValue({
   value,
@@ -45,6 +48,7 @@ export function StableMetricValue({
 
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ * refs: none
  */
 export function LoadingPanel({
   compact = false,
@@ -68,6 +72,7 @@ export function LoadingPanel({
 
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ * refs: none
  */
 export function LoadingIndicator({ className }: { className?: string }) {
   const { t } = useLocalization();
@@ -82,6 +87,7 @@ export function LoadingIndicator({ className }: { className?: string }) {
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
  * Returns: `null`
+ * refs: none
  */
 export function LoadingOverlay({ visible }: { visible: boolean }) {
   if (!visible) return null;
@@ -94,6 +100,7 @@ export function LoadingOverlay({ visible }: { visible: boolean }) {
 
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ * refs: none
  */
 export function EmptyState({
   title,
@@ -118,6 +125,7 @@ export function EmptyState({
 
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ * refs: none
  */
 export function ErrorState({
   title,
@@ -153,6 +161,7 @@ interface AsyncButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ * refs: none
  */
 export function AsyncButton({ loading = false, children, className, disabled, ...props }: AsyncButtonProps) {
   const { t } = useLocalization();

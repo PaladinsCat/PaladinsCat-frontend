@@ -1,5 +1,6 @@
 /** route-skeleton component/module.
  * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ * refs: none
  */
 import { cn } from "@/lib/utils";
 import { LoadingIndicator } from "@/components/async-state";
@@ -8,6 +9,7 @@ type RouteSkeletonVariant = "dashboard" | "list" | "profile" | "match" | "detail
 
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ * refs: none
  */
 export function DataCardSkeleton({
   rows = 5,
@@ -37,6 +39,7 @@ export function DataCardSkeleton({
 
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ * refs: none
  */
 export function ChartCardSkeleton({ className }: { className?: string }) {
   return (
@@ -48,6 +51,7 @@ export function ChartCardSkeleton({ className }: { className?: string }) {
 
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ * refs: none
  */
 export function DataTableSkeleton({ rows = 7, className }: { rows?: number; className?: string }) {
   return (
@@ -62,6 +66,7 @@ export function DataTableSkeleton({ rows = 7, className }: { rows?: number; clas
 
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ * refs: none
  */
 export function RouteSkeleton({ variant = "dashboard" }: { variant?: RouteSkeletonVariant }) {
   if (variant === "profile") {

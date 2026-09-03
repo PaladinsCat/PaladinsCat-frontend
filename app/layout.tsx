@@ -1,6 +1,7 @@
 /**
  * Define the layout responsibility boundary.
  * Coordinates layout data loading, authorization, and presentation.
+ * refs: none
  */
 import type { Metadata } from "next";
 import "./globals.css";
@@ -29,6 +30,7 @@ import { getServerLocalization } from "@/lib/server-localization";
 /**
  * Handles the exported route operation using its declared request and response contract.
  * Returns: `Promise<Metadata>`
+ * refs: none
  */
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getServerLocalization();
@@ -75,7 +77,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-/** Render the site shell with localized metadata, nonce-aware security data, and shared providers.  Returns: `Promise<React.JSX.Element>`. */
+/** Render the site shell with localized metadata, nonce-aware security data, and shared providers.  Returns: `Promise<React.JSX.Element>`. · refs: none */
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { locale, messages, t } = await getServerLocalization();
   const nonce = (await headers()).get("x-nonce") ?? undefined;

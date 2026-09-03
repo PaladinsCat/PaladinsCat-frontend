@@ -1,6 +1,7 @@
 /**
  * Define the community diminishing returns page responsibility boundary.
  * Coordinates community diminishing returns page data loading, authorization, and presentation.
+ * refs: none
  */
 "use client";
 import { useEffect, useMemo, useState } from "react";
@@ -183,6 +184,7 @@ function parseNumber(value: string | null | undefined) {
 /**
  * Handles the exported route operation using its declared request and response contract.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function DiminishingReturnsPage() {
   const { t, formatNumber } = useLocalization();

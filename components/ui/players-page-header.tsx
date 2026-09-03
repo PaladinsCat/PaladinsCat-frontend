@@ -1,4 +1,4 @@
-/** Canonical Players-family back link and page header. */
+/** Canonical Players-family back link and page header. · refs: none */
 "use client";
 
 import type { ComponentProps } from "react";

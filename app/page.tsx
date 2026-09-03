@@ -1,4 +1,4 @@
-/** Assemble localized homepage metadata and discovery links for server rendering. */
+/** Assemble localized homepage metadata and discovery links for server rendering. · refs: none */
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -17,12 +17,12 @@ import {
 import HomePageClient from "./home-page-client";
 import { getServerLocalization } from "@/lib/server-localization";
 
-/** Keep the homepage canonical URL stable for crawlers.  Returns: `Promise<React.JSX.Element>`. */
+/** Keep the homepage canonical URL stable for crawlers.  Returns: `Promise<React.JSX.Element>`. · refs: none */
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
 
-/** Render the localized homepage content around the interactive hero. */
+/** Render the localized homepage content around the interactive hero. · refs: none */
 export default async function HomePage() {
   const { t } = await getServerLocalization();
   const topics = [

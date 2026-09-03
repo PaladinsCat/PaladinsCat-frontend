@@ -1,6 +1,7 @@
 /**
  * Define the api auth oidc login route responsibility boundary.
  * Coordinates api auth oidc login route data loading, authorization, and presentation.
+ * refs: none
  */
 import { NextRequest, NextResponse } from "next/server";
 import { buildParAuthorizationUrl, buildPushedAuthorizationRequest, createTransaction, normalizedHttpsIssuer, parsePushedAuthorizationResponse, requireSameOrigin, resolveInternalIssuer, safeReturnPath } from "@/lib/oidc-security";
@@ -11,6 +12,7 @@ import { isIP } from "node:net";
 /**
  * Selects the Node.js runtime required by this server handler.
  * Returns: `string`
+ * refs: none
  */
 export const runtime = "nodejs";
 const TX_COOKIE = "__Host-pc_oidc_txn";
@@ -71,6 +73,7 @@ async function startOidc(intent: "login" | "create", returnPath: string, clientI
 /**
  * Handles the exported route operation using its declared request and response contract.
  * Returns: `Promise<Response>`
+ * refs: none
  */
 export async function POST(request: NextRequest) {
   if (!requireSameOrigin(request.headers.get("origin"), origin())) return new NextResponse("Forbidden", { status: 403 });
@@ -87,6 +90,7 @@ export async function POST(request: NextRequest) {
 /**
  * Handles the exported route operation using its declared request and response contract.
  * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ * refs: none
  */
 export async function GET(request: NextRequest) {
   const entries = [...request.nextUrl.searchParams.entries()];

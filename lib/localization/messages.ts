@@ -1,5 +1,6 @@
 /** Defines localized message payloads and message lookup types.
  * The module owns the existing URL, context, or locale-message boundary.
+ * refs: none
  */
 import asyncMessages from "./catalog/ui/async.json";
 import footerMessages from "./catalog/ui/footer.json";
@@ -20,6 +21,7 @@ import championMessages from "./catalog/game/champions.json";
 
 /** Apply EN_MESSAGES to lobby-tier or localization inputs.
  * Contract: returns the normalized route, context state, or message value while preserving existing browser behavior.
+ * refs: none
  */
 export const EN_MESSAGES = {
   // Generated strings are a fallback-only catalog. Keep them first so curated
@@ -48,6 +50,7 @@ export type LocaleMessages = Partial<Record<TranslationKey, string>>;
 /** Apply sanitizeLocaleMessages to lobby-tier or localization inputs.
  * Contract: returns the normalized route, context state, or message value while preserving existing browser behavior.
  * Returns: `object`
+ * refs: none
  */
 export function sanitizeLocaleMessages(payload: unknown): LocaleMessages {
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) return {};
@@ -63,6 +66,7 @@ export function sanitizeLocaleMessages(payload: unknown): LocaleMessages {
 
 /** Apply formatMessage to lobby-tier or localization inputs.
  * Contract: returns the normalized route, context state, or message value while preserving existing browser behavior.
+ * refs: none
  */
 export function formatMessage(
   message: string,
@@ -76,6 +80,7 @@ export function formatMessage(
 
 /** Apply translate to lobby-tier or localization inputs.
  * Contract: returns the normalized route, context state, or message value while preserving existing browser behavior.
+ * refs: none
  */
 export function translate(
   messages: LocaleMessages,

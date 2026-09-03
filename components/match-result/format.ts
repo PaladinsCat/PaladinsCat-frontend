@@ -1,6 +1,7 @@
 /**
  * Formatting helpers for match-result components.
  * Centralized stat math, number formatting, and team average computation.
+ * refs: none
  */
 
 import type { MatchPlayerDetail, MatchFactPlayer } from "@/lib/api-client";
@@ -52,6 +53,7 @@ export function computeDamageStats(p: MatchPlayerDetail) {
 /**
  * Get champion-specific stats from player profile, or null if not found.
  * Returns: `null`
+ * refs: none
  */
 export function getChampionStats(
   profile: PlayerProfileData | null | undefined,
@@ -72,6 +74,7 @@ export function getChampionStats(
 
 /**
  * Format KBM tier label for display.
+ * refs: none
  */
 /* ── Team averages ── */
 

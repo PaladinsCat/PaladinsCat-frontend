@@ -1,5 +1,6 @@
 /** Formats live team estimates for display.
  * The module preserves the existing validation, storage, formatting, or asset boundary.
+ * refs: none
  */
 export interface LiveTeamEstimatePlayer {
   task_force?: unknown;
@@ -21,6 +22,7 @@ function numericMetric(value: unknown): number | null {
 /** Apply estimateLiveTeamWinChance to the declared input values.
  * Contract: returns the module-specific validated, stored, formatted, or resolved value without external side effects.
  * Returns: `null`
+ * refs: none
  */
 export function estimateLiveTeamWinChance(
   players: readonly LiveTeamEstimatePlayer[],

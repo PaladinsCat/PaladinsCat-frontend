@@ -1,5 +1,6 @@
 /** player-directory-pagination component/module.
  * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ * refs: none
  */
 "use client";
 
@@ -24,6 +25,7 @@ function readPage(param: string, storageKey: string) {
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
  * Returns: `Array`
+ * refs: none
  */
 export function usePersistentDirectoryPage(param = "page") {
   const pathname = usePathname();
@@ -70,6 +72,7 @@ interface Props {
 /** Provide this exported item.
  * Returns: `React.JSX.Element`
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+ * refs: none
  */
 export default function PlayerDirectoryPagination({ page, totalPages, onPageChange, embedded = false, className }: Props) {
   const { t , formatNumber} = useLocalization();

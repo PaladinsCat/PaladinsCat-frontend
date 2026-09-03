@@ -1,6 +1,7 @@
 /**
  * Define the tierlists page responsibility boundary.
  * Coordinates tierlists page data loading, authorization, and presentation.
+ * refs: none
  */
 "use client";
 import { useEffect, useState } from "react";
@@ -16,6 +17,7 @@ import { useLocalization } from "@/lib/localization-context";
 /**
  * Handles the exported route operation using its declared request and response contract.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function TierListsPage() {
   const { t , formatDateTime} = useLocalization();

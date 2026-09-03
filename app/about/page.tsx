@@ -1,6 +1,7 @@
 /**
  * Define the about page responsibility boundary.
  * Coordinates about page data loading, authorization, and presentation.
+ * refs: none
  */
 import Image from "next/image";
 import Link from "next/link";
@@ -22,7 +23,7 @@ import {
 import ScrambleText from "@/components/ScrambleText";
 import { getServerLocalization } from "@/lib/server-localization";
 
-/** Render the localized About page and its data-focused project principles.  Returns: `Promise<React.JSX.Element>`. */
+/** Render the localized About page and its data-focused project principles.  Returns: `Promise<React.JSX.Element>`. · refs: none */
 export default async function AboutPage() {
   const { t } = await getServerLocalization();
   const principles = [

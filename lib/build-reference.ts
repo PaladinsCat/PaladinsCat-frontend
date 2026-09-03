@@ -1,5 +1,6 @@
 /** Loads build-reference data and resolves champion metadata.
  * This module resolves build references and related champion metadata.
+ * refs: none
  */
 import { fetchReferenceCards, fetchReferenceItems, fetchReferenceTalents } from "@/lib/api-client";
 import { getChampionData, type ChampionData } from "@/lib/champion-data";
@@ -185,6 +186,7 @@ async function buildItems(): Promise<BuildItemReference[]> {
 /** itemDescriptionAtLevel applies the module-specific transformation to its declared inputs.
  * Contract: validates its inputs and returns the existing module result without mutating caller state.
  * Returns: `string | null`
+ * refs: none
  */
 export function itemDescriptionAtLevel(
   item: Pick<BuildItemReference, "description" | "tiers"> | null | undefined,
@@ -264,6 +266,7 @@ async function buildTalents(championId: number, champion?: ChampionData): Promis
 /** loadBuildReferenceData applies the module-specific transformation to its declared inputs.
  * Contract: validates its inputs and returns the existing module result without mutating caller state.
  * Returns: `Promise<BuildReferenceData>`
+ * refs: none
  */
 export async function loadBuildReferenceData(championId: number, championSlug: string): Promise<BuildReferenceData> {
   const champion = championSlug ? await getChampionData(championSlug).catch(() => undefined) : undefined;
@@ -276,6 +279,7 @@ export async function loadBuildReferenceData(championId: number, championSlug: s
 }
 
 /** Load only the card data needed by saved-deck views. This avoids fetching
+ * refs: none
  * item and talent references on a route that never renders either dataset. */
 export async function loadBuildCardReferences(championId: number, championSlug: string): Promise<BuildCardReference[]> {
   const champion = championSlug ? await getChampionData(championSlug).catch(() => undefined) : undefined;
@@ -285,6 +289,7 @@ export async function loadBuildCardReferences(championId: number, championSlug: 
 /** groupByCategory applies the module-specific transformation to its declared inputs.
  * Contract: validates its inputs and returns the existing module result without mutating caller state.
  * Returns: `Array<[string, T[]]>`
+ * refs: none
  */
 export function groupByCategory<T extends { category: string }>(rows: T[]): Array<[string, T[]]> {
   const grouped = new Map<string, T[]>();

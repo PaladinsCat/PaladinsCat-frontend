@@ -1,6 +1,7 @@
 /**
  * Define the stats platforms page route boundary.
  * Coordinates this module's route data flow and rendered output.
+ * refs: none
  */
 import { getInitialPlatforms } from "@/lib/server-platforms";
 import PlatformsClient from "./platforms-client";
@@ -8,10 +9,11 @@ import PlatformsClient from "./platforms-client";
 /**
  * Selects request-fresh rendering for statistics data.
  * Returns: `Promise<React.JSX.Element>`
+ * refs: none
  */
 export const dynamic = "force-dynamic";
 
-/** Render platform statistics, falling back to the browser when server loading fails. */
+/** Render platform statistics, falling back to the browser when server loading fails. · refs: none */
 export default async function PlatformsPage() {
   const initialPlatforms = await getInitialPlatforms().catch((error) => {
     console.error("[stats/platforms] Server platform fetch failed; using browser fallback", error);

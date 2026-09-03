@@ -1,5 +1,6 @@
 /** Maintains browser authentication state and refreshes the current session.
  * This context tracks the signed-in browser session and refresh state.
+ * refs: none
  */
 "use client";
 
@@ -21,6 +22,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 /** useAuth applies the module-specific transformation to its declared inputs.
  * Contract: validates its inputs and returns the existing module result without mutating caller state.
+ * refs: none
  */
 export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext);
@@ -30,6 +32,7 @@ export function useAuth(): AuthContextValue {
 
 /** AuthProvider applies the module-specific transformation to its declared inputs.
  * Contract: validates its inputs and returns the existing module result without mutating caller state.
+ * refs: none
  */
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(() => getAuthUser());

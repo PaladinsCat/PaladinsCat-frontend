@@ -1,11 +1,13 @@
 /**
  * Defines locales's shared contracts and runtime helpers.
  * Keep behavior aligned with its callers and browser/server boundary.
+ * refs: none
  */
 // This is the public, selectable locale list. Do not advertise a translation
 // until its locale files exist in the community locale repository.
 /**
  * Defines the  s u p p o r t e d_ l o c a l e s contract used by this module.
+ * refs: none
  */
 export const SUPPORTED_LOCALES = [
   { code: "en", nativeName: "English" },
@@ -27,6 +29,7 @@ export const SUPPORTED_LOCALES = [
 // visible in the site header.
 /**
  * Defines the  c o n t r i b u t o r_ l o c a l e s contract used by this module.
+ * refs: none
  */
 export const CONTRIBUTOR_LOCALES = [
   { code: "de", nativeName: "Deutsch" },
@@ -44,19 +47,23 @@ export const CONTRIBUTOR_LOCALES = [
 
 /**
  * Defines the  locale contract used by this module.
+ * refs: none
  */
 export type Locale = (typeof SUPPORTED_LOCALES)[number]["code"];
 /**
  * Defines the  contributor locale contract used by this module.
+ * refs: none
  */
 export type ContributorLocale = (typeof CONTRIBUTOR_LOCALES)[number]["code"];
 /**
  * Defines the  l o c a l e_ m o d u l e s contract used by this module.
+ * refs: none
  */
 export const LOCALE_MODULES = localeModules;
 
 /**
  * Defines the  c o m m u n i t y_ l o c a l e_ b a s e_ u r l contract used by this module.
+ * refs: none
  */
 export const COMMUNITY_LOCALE_BASE_URL = (
   process.env.NEXT_PUBLIC_LOCALE_BASE_URL
@@ -65,6 +72,7 @@ export const COMMUNITY_LOCALE_BASE_URL = (
 
 /**
  * Transforms or validates is supported locale according to this module's data contract.
+ * refs: none
  */
 export function isSupportedLocale(value: string | null | undefined): value is Locale {
   return SUPPORTED_LOCALES.some(({ code }) => code === value);
@@ -72,6 +80,7 @@ export function isSupportedLocale(value: string | null | undefined): value is Lo
 
 /**
  * Defines the community locale url contract used by this module.
+ * refs: none
  */
 export function communityLocaleUrl(locale: Locale, module: string) {
   return `${COMMUNITY_LOCALE_BASE_URL}/${encodeURIComponent(locale)}/${module}.json`;

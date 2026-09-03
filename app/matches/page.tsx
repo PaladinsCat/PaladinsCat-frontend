@@ -1,6 +1,7 @@
 /**
  * Render the matches page and its data composition.
  * Assemble the page content exposed at this location.
+ * refs: none
  */
 "use client";
 
@@ -24,6 +25,7 @@ const RANKED_QUEUE_ID = "486";
  * Render the MatchesPage view for matches page.
  * Return the React tree for the declared inputs and page data.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function MatchesPage() {
   const { t , formatNumber} = useLocalization();

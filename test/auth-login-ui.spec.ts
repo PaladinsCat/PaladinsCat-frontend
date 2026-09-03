@@ -1,5 +1,6 @@
 /** auth-login-ui.spec component/module.
  * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ * refs: none
  */
 import { expect, test, type Page } from "@playwright/test";
 

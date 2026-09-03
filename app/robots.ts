@@ -1,6 +1,7 @@
 /**
  * Define the robots responsibility boundary.
  * Coordinates robots data loading, authorization, and presentation.
+ * refs: none
  */
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/seo";
@@ -8,6 +9,7 @@ import { SITE_URL } from "@/lib/seo";
 /**
  * Handles the exported route operation using its declared request and response contract.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function robots(): MetadataRoute.Robots {
   return {

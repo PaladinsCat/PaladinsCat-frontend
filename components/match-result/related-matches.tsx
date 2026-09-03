@@ -1,6 +1,7 @@
 /**
  * Renders related matches data for match-result views.
  * Keeps the component's interaction and accessibility behavior intact.
+ * refs: none
  */
 "use client";
 
@@ -8,7 +9,7 @@ import Link from "next/link";
 import type { MatchSearchResult } from "@/lib/api-client";
 import { useLocalization } from "@/lib/localization-context";
 
-/** Format duration seconds → "mm:ss" */
+/** Format duration seconds → "mm:ss" · refs: none */
 function formatDuration(seconds: number): string {
   if (!Number.isFinite(seconds) || seconds < 0) return "—";
   const m = Math.floor(seconds / 60);
@@ -19,6 +20,7 @@ function formatDuration(seconds: number): string {
 /** Render RelatedMatches from its declared props and match data.
  * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function RelatedMatches({ related, matchId, loading }: { related: MatchSearchResult[]; matchId: number; loading: boolean }) {
   const { t } = useLocalization();

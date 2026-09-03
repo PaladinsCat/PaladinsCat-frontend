@@ -1,6 +1,7 @@
 /**
  * Render the builds create page and its data composition.
  * Assemble the page content exposed at this location.
+ * refs: none
  */
 "use client";
 
@@ -187,6 +188,7 @@ function CardTile({ card, selection, disabled, onToggle, onLevelChange }: {
  * Render the CreateBuildPage view for builds create page.
  * Return the React tree for the declared inputs and page data.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function CreateBuildPage() {
   const { t } = useLocalization();

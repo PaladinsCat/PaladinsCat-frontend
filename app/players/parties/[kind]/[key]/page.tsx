@@ -1,4 +1,4 @@
-/** Party evidence detail route for exact stacks and canonical pairs. */
+/** Party evidence detail route for exact stacks and canonical pairs. · refs: none */
 "use client";
 
 import { useCallback, useEffect, useState } from "react";

@@ -1,5 +1,6 @@
 /** Tests active-item filtering and cache-backed item selection.
  * These tests verify active-item filtering and selection behavior.
+ * refs: none
  */
 import test from "node:test";
 import assert from "node:assert/strict";

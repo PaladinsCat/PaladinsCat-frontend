@@ -1,5 +1,6 @@
 /** champion-table component/module.
  * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+ * refs: none
  */
 "use client";
 
@@ -35,7 +36,7 @@ const STAT_SCOPES = [
   { value: "bot", labelKey: "stats.scope.bot" },
 ] as const;
 
-/** Build the guaranteed base list: all 59 champions, no stats. */
+/** Build the guaranteed base list: all 59 champions, no stats. · refs: none */
 function buildStaticBase(): Champion[] {
   return STATIC_CHAMPIONS.map((c) => ({
     id: c.id,
@@ -72,6 +73,7 @@ function mergeChampionStats(rows: Champion[]): Champion[] {
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function ChampionTable({ initialChampions = null }: { initialChampions?: Champion[] | null }) {
   const { t , formatNumber} = useLocalization();

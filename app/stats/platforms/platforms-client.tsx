@@ -1,6 +1,7 @@
 /**
  * Define the stats platforms platforms client route boundary.
  * Coordinates this module's route data flow and rendered output.
+ * refs: none
  */
 "use client";
 import { useEffect, useState } from "react";
@@ -15,6 +16,7 @@ import { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation } from "@/
 /**
  * Describe PlatformStat.
  * Returns the declared route value; network, cache, and navigation effects follow the implementation.
+ * refs: none
  */
 export type PlatformStat = {
   platform: string;
@@ -29,6 +31,7 @@ export type PlatformStat = {
 /**
  * Renders the exported statistics view with its route data.
  * Returns: `React.JSX.Element`
+ * refs: none
  */
 export default function PlatformsPage({ initialPlatforms = null }: { initialPlatforms?: PlatformStat[] | null }) {
   const { t } = useLocalization();

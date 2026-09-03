@@ -1,6 +1,7 @@
 /**
  * Define the blog page responsibility boundary.
  * Coordinates blog page data loading, authorization, and presentation.
+ * refs: none
  */
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -15,6 +16,7 @@ import remarkGfm from "remark-gfm";
 /**
  * Handles the exported route operation using its declared request and response contract.
  * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ * refs: none
  */
 export const revalidate = 300;
 
@@ -27,13 +29,14 @@ function joinSlug(slug: string[]): string {
 /**
  * Handles the exported route operation using its declared request and response contract.
  * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ * refs: none
  */
 export async function generateStaticParams() {
   const posts = await getAllPosts();
   return posts.map((post) => ({ slug: post.slug.split("/") }));
 }
 
-/** Render one localized blog post selected by its catch-all slug parameters.  Returns: `Promise<React.JSX.Element>`. */
+/** Render one localized blog post selected by its catch-all slug parameters.  Returns: `Promise<React.JSX.Element>`. · refs: none */
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const { t } = await getServerLocalization();
   const { slug } = await params;
@@ -121,6 +124,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 /**
  * Handles the exported route operation using its declared request and response contract.
  * Returns: `Promise<Metadata>`
+ * refs: none
  */
 export async function generateMetadata({ params }: BlogPostPageProps) {
   const { t } = await getServerLocalization();

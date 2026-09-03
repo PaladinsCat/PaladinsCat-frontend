@@ -2,6 +2,7 @@
  * Catalog the built-in full-scene wallpapers and their AVIF/PNG variants.
  *
  * This module exposes local asset paths only; it does not include tactical maps or perform network work.
+ * refs: none
  */
 export type BuiltInWallpaper = { avif: string; png: string };
 
@@ -33,6 +34,7 @@ const WALLPAPER_IDS = [
  * Build the default wallpaper asset list from the checked-in artwork IDs.
  *
  * Returns local AVIF and PNG paths without network, authentication, cache, or persistence effects.
+ * refs: none
  */
 export const DEFAULT_WALLPAPERS: BuiltInWallpaper[] = WALLPAPER_IDS.map((id) => ({
   avif: `/images/wallpapers/${id}.avif`,

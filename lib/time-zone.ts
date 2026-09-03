@@ -1,11 +1,13 @@
 /**
  * Defines time-zone's shared contracts and runtime helpers.
  * Keep behavior aligned with its callers and browser/server boundary.
+ * refs: none
  */
 "use client";
 
 /**
  * Defines the  t i m e_ z o n e_ s t o r a g e_ k e y contract used by this module.
+ * refs: none
  */
 export const TIME_ZONE_STORAGE_KEY = "pc_time_zone";
 const FALLBACK_TIME_ZONE = "UTC";
@@ -19,6 +21,7 @@ const FIXED_UTC_OFFSET_MINUTES = [
 /**
  * Transforms or validates is valid time zone according to this module's data contract.
  * Returns: `value is string`
+ * refs: none
  */
 export function isValidTimeZone(value: string | null | undefined): value is string {
   if (!value || value.length > 64) return false;
@@ -38,6 +41,7 @@ function browserTimeZone(): string {
 /**
  * Reads preferred time zone from the module's configured source.
  * Returns: `string`
+ * refs: none
  */
 export function getPreferredTimeZone(): string {
   if (typeof window === "undefined") return FALLBACK_TIME_ZONE;
@@ -48,6 +52,7 @@ export function getPreferredTimeZone(): string {
 /**
  * Updates preferred time zone using the module's persistence or validation rules.
  * Returns: `void`
+ * refs: none
  */
 export function savePreferredTimeZone(timeZone: string): void {
   if (typeof window !== "undefined" && isValidTimeZone(timeZone)) {
@@ -58,6 +63,7 @@ export function savePreferredTimeZone(timeZone: string): void {
 /**
  * Reads supported time zones from the module's configured source.
  * Returns: `string[]`
+ * refs: none
  */
 export function getSupportedTimeZones(): string[] {
   const supported = typeof Intl.supportedValuesOf === "function"
@@ -69,6 +75,7 @@ export function getSupportedTimeZones(): string[] {
 /**
  * Reads fixed utc offset options from the module's configured source.
  * Returns: `Array<{ value: string; label: string }>`
+ * refs: none
  */
 export function getFixedUtcOffsetOptions(): Array<{ value: string; label: string }> {
   return FIXED_UTC_OFFSET_MINUTES.map((minutes) => ({
@@ -80,6 +87,7 @@ export function getFixedUtcOffsetOptions(): Array<{ value: string; label: string
 /**
  * Defines the fixed utc offset to time zone contract used by this module.
  * Returns: `string`
+ * refs: none
  */
 export function fixedUtcOffsetToTimeZone(minutes: number): string {
   if (minutes === 0) return "UTC";
@@ -98,6 +106,7 @@ function formatUtcOffset(minutes: number): string {
 /**
  * Defines the fixed utc offset from time zone contract used by this module.
  * Returns: `string`
+ * refs: none
  */
 export function fixedUtcOffsetFromTimeZone(timeZone: string): string {
   if (timeZone === "UTC") return "0";

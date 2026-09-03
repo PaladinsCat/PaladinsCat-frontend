@@ -2,6 +2,7 @@
  * Define the player route surface for page and its local data boundary.
  * This file owns the page, layout, loading state, or route handler named by its path.
  * It does not own unrelated player sections or shared library policy.
+ * refs: none
  */
 import { unstable_cache } from "next/cache";
 import type { Metadata } from "next";
@@ -14,6 +15,7 @@ import PlayersPageClient from "./players-page-client";
 /**
  * Build SEO metadata for the player page route.
  * Returns: `Metadata`
+ * refs: none
  */
 export const metadata: Metadata = {
   alternates: { canonical: "/players" },
@@ -24,6 +26,7 @@ export const metadata: Metadata = {
 /**
  * Define translation keys for failures in the player page view.
  * Returns the stable key map consumed by localized error messages.
+ * refs: none
  */
 export const PLAYERS_ERROR_KEYS = {
   overviewConfigUnavailable: "generated.players.overviewConfigUnavailable",
@@ -66,12 +69,14 @@ const getCachedPlayersOverview = unstable_cache(
 /**
  * Select dynamic rendering for the player page route.
  * Returns the framework rendering mode constant used by this route.
+ * refs: none
  */
 export const dynamic = "force-dynamic";
 
 /**
  * Render the PlayersPage view for the player page route.
  * Returns: `Promise<React.JSX.Element>`
+ * refs: none
  */
 export default async function PlayersPage() {
   let initialOverview: PlayersOverview | null = null;
