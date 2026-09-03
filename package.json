@@ -68,12 +68,15 @@
     "typescript": "^5.6"
   },
   "overrides": {
+    "browserslist": "4.28.8",
+    "fast-uri": "3.1.6",
     "gray-matter": {
       "js-yaml": "3.15.1"
     },
     "next": {
       "postcss": "8.5.26",
       "sharp": "0.35.3"
-    }
+    },
+    "postcss-selector-parser": "7.1.3"
   }
 }
