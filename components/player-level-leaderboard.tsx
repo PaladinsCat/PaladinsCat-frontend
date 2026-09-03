@@ -164,7 +164,7 @@ export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
 
   return <div className="space-y-6">
     <PlayersPageHeader title={title} />
-    {lookupPlayerId !== null && (positionLoading || positionRow) && <section aria-label={t("generated.players.rank")} className="w-full max-w-5xl">
+    {lookupPlayerId !== null && (positionLoading || positionRow) && <section aria-label={t("generated.players.rank")} className="mx-auto w-full max-w-5xl">
       <div className="pc-card-flush overflow-hidden px-4 py-3 sm:px-5">
         {positionLoading ? <div className="text-sm text-pc-text-muted">{t("async.loading")}</div> : positionRow && <dl className="grid grid-cols-2 gap-x-5 gap-y-3 sm:grid-cols-3 lg:grid-cols-5">
           <div><dt className="pc-label">{t("generated.players.rank")}</dt><dd className="mt-1 font-bold tabular-nums text-pc-accent">{positionRow.rank}</dd></div>
@@ -180,7 +180,7 @@ export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
         </dl>}
       </div>
     </section>}
-    <form onSubmit={submitSearch} className="flex w-full max-w-5xl flex-wrap items-end gap-3">
+    <form onSubmit={submitSearch} className="mx-auto flex w-full max-w-5xl flex-wrap items-end gap-3">
       <label className="relative min-w-60 flex-1">
         <span className="pc-label">{t("generated.players.player")}</span>
         <input
@@ -202,8 +202,8 @@ export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
         <X aria-hidden="true" className="h-4 w-4" />
       </button>}
     </form>
-    {lookupPlayerId !== null && positionKey === currentPositionKey && !positionLoading && !positionRow && <p className="max-w-5xl text-sm text-pc-text-muted">{t("generated.players.noRankedData")}</p>}
-    {mode === "champion" && <div className="flex w-full max-w-5xl flex-wrap items-end gap-4">
+    {lookupPlayerId !== null && positionKey === currentPositionKey && !positionLoading && !positionRow && <p className="mx-auto max-w-5xl text-sm text-pc-text-muted">{t("generated.players.noRankedData")}</p>}
+    {mode === "champion" && <div className="mx-auto flex w-full max-w-5xl flex-wrap items-end gap-4">
       <div>
         <span className="pc-label">{t("generated.players.class")}</span>
         <SegmentedControl
@@ -244,7 +244,7 @@ export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
         {sortDirection === "asc" ? <ArrowUp aria-hidden="true" className="h-4 w-4" /> : <ArrowDown aria-hidden="true" className="h-4 w-4" />}
       </button>
     </div>}
-    {loading ? <LoadingPanel /> : <div className="pc-card-flush w-full max-w-5xl overflow-hidden">
+    {loading ? <LoadingPanel /> : <div className="pc-card-flush mx-auto w-full max-w-5xl overflow-hidden">
       <div className="overflow-x-auto">
         <table className={`w-full text-sm ${mode === "champion" ? "min-w-[1280px]" : "min-w-[1040px]"}`}>
           <thead>
