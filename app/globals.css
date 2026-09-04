@@ -1452,6 +1452,25 @@ main :where(a, button, input, select, textarea):focus-visible {
 .pc-animate-stagger > *:nth-child(12) { animation-delay: 550ms; }
 .pc-animate-stagger > *:nth-child(n+13) { animation-delay: 600ms; }
 
+/* Synced data reveal — champion sub-page. The layout is pre-drawn (headers,
+   profile, card shells); only the data sections fade in, and every section
+   shares the SAME duration/delay so cards and charts appear as one surface
+   instead of spawning one by one as each fetch resolves. */
+@keyframes pc-data-sync-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.pc-data-sync {
+  animation: pc-data-sync-in 320ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pc-data-sync {
+    animation-duration: 1ms;
+  }
+}
+
 @theme inline {
   --font-heading: var(--font-sans);
   --font-sans: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;

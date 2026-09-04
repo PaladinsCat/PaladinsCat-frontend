@@ -238,6 +238,14 @@ export default function ChampionDetailPage({
   const [patchTrends, setPatchTrends] = useState<PatchTrend[]>([]);
   const [loading, setLoading] = useState(!initialPageData);
 
+  // Synced data reveal: the layout is pre-drawn (headers, profile, card
+  // shells). The data sections are gated behind `loading`, so they mount
+  // together when the fetch settles, and every section shares the same
+  // reveal key (name + scope) so they fade in as one surface instead of
+  // spawning one by one as each fetch resolves. Changing the scope or
+  // champion changes the key, remounting the sections and replaying the fade.
+  const revealKey = `${name}::${statsScope}`;
+
   // Static champion reference metadata lets direct /champions/[name] routes
   // resolve icons/roles before DB-backed stats load. It must never provide
   // synthetic match or performance numbers.
@@ -420,9 +428,10 @@ export default function ChampionDetailPage({
 
         {/* Right column — talent summaries (~3/4) */}
         <div className="lg:col-span-3 space-y-6">
-          {loading && (
+          {loading ? (
             <LoadingPanel compact />
-          )}
+          ) : (
+            <div key={`reveal-${revealKey}`} className="pc-data-sync space-y-6">
           {/* Compact ranked summary leads the analysis column. */}
           <section className="space-y-2">
             <h2 className="pc-card-title shadow-sm">
@@ -509,7 +518,8 @@ export default function ChampionDetailPage({
               )}
             </div>
           </section>}
-
+            </div>
+          )}
         </div>
       </div>
 
@@ -594,7 +604,7 @@ export default function ChampionDetailPage({
         ) : championMaps.length === 0 ? (
           <div className="pc-card text-sm text-pc-text-muted">{statsScope === "ranked" ? t("generated.champions.noRankedMapStatisticsAreAvailableYet") : t("stats.scope.noMapStats", { mode: t(STATS_SCOPE_LABEL_KEYS[statsScope]) })}</div>
         ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div key={`maps-${revealKey}`} className="pc-data-sync grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {championMaps.map((map) => {
               const quality = getStatQuality(map.winRate, map.pickRate, maxMapPickRate);
               return (
