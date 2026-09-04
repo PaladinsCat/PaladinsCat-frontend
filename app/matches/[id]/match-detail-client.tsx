@@ -212,6 +212,14 @@ export default function MatchDetailPage({ initialMatch = null }: { initialMatch?
         setFact(embeddedFact(initialMatch));
         setSnapshots(embeddedSnapshots(initialMatch));
         setLoading(false);
+        // Overlay current moderation so freshly-flagged players show
+        // immediately on direct navigations (RSC payload has the
+        // ingest-time snapshot, which may predate the flag).
+        void withCurrentStoredModeration(initialMatch)
+          .then((currentMatch) => {
+            if (!cancelled) setMatch(currentMatch);
+          })
+          .catch(() => undefined);
         return;
       }
       setLoading(true);
@@ -257,6 +265,14 @@ export default function MatchDetailPage({ initialMatch = null }: { initialMatch?
           fact: factResult,
           snapshots: snapResult,
         }, MATCH_RESULT_CACHE_TTL_MS);
+
+        // Overlay current moderation so freshly-flagged players show
+        // immediately on fresh fetches (payload snapshot may predate the flag).
+        void withCurrentStoredModeration(detailResult)
+          .then((currentMatch) => {
+            if (!cancelled) setMatch(currentMatch);
+          })
+          .catch(() => undefined);
 
       } catch (err: any) {
         if (!cancelled) setError(err.message || t("generated.matches.[id].page.failedtoloadmatch"));
