@@ -7,7 +7,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { fetchPosts, fetchTwitchStreams, type Post, type TwitchStream } from "@/lib/api-client";
-import ScrambleText from "@/components/ScrambleText";
 import { EmptyState, ErrorState } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { LoadingPanel } from "@/components/async-state";
@@ -56,7 +55,7 @@ export default function CommunityPage() {
     <div className="space-y-6">
       <div className="pc-section-heading">
         <h1 className="pc-heading pc-heading-lg">
-          <ScrambleText text={t("generated.community.community")} speed={30} iterations={15} delayFromCenter={false} />
+          {t("generated.community.community")}
         </h1>
         <div className="flex flex-wrap gap-2">
           <Link

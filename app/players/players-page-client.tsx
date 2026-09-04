@@ -28,7 +28,6 @@ import {
   UsersRound,
 } from "lucide-react";
 import { fetchPlayersOverview, type PlayersOverview } from "@/lib/api-client";
-import ScrambleText from "@/components/ScrambleText";
 import { useLocalization } from "@/lib/localization-context";
 import type { TranslationKey } from "@/lib/localization/messages";
 
@@ -148,7 +147,7 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
     <div className="space-y-8">
       <div>
         <h1 className="pc-heading pc-heading-lg text-pc-accent">
-          <ScrambleText text={t("generated.players.players.392feef")} speed={30} iterations={15} delayFromCenter={false} />
+          {t("generated.players.players.392feef")}
         </h1>
       </div>
 

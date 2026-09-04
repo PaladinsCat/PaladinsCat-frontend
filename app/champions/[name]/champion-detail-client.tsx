@@ -10,7 +10,6 @@ import Link from "next/link";
 import { useParams, useSearchParams, notFound } from "next/navigation";
 import { STATIC_CHAMPIONS } from "@/lib/static-champions";
 import { getChampionIconSafe } from "@/lib/champion-icons";
-import ScrambleText from "@/components/ScrambleText";
 import { LoadingPanel } from "@/components/async-state";
 import SmartImage from "@/components/SmartImage";
 import CanonicalTalentImage from "@/components/canonical-talent-image";
@@ -374,7 +373,7 @@ export default function ChampionDetailPage({
         <Link href="/champions" className="text-pc-text-secondary hover:text-pc-accent transition-colors">
           {t("generated.champions.backToChampions")}</Link>
         <h1 className="pc-heading pc-heading-lg text-pc-accent">
-          <ScrambleText text={championData?.name ?? staticChampion?.name ?? name} speed={30} iterations={15} delayFromCenter={false} />
+          {championData?.name ?? staticChampion?.name ?? name}
         </h1>
       </div>
 

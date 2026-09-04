@@ -21,7 +21,6 @@ import { getChampionIconSafe } from "@/lib/champion-icons";
 import { AsyncButton, EmptyState, ErrorState, LoadingPanel } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { PlayerSearchSubtitle } from "@/components/player-search-result";
-import ScrambleText from "@/components/ScrambleText";
 import { useLocalization } from "@/lib/localization-context";
 import {
   createInitialSearchState,
@@ -419,7 +418,7 @@ function SearchPageBody() {
     <div className="mx-auto w-full max-w-4xl space-y-8 py-2 sm:py-6">
       <section className="px-4 py-6 text-center sm:px-8 sm:py-8">
         <h1 className="pc-heading pc-heading-lg drop-shadow-[0_3px_10px_rgba(0,0,0,0.9)]">
-          <ScrambleText text={t("generated.search.search")} speed={30} iterations={15} delayFromCenter={false} />
+          {t("generated.search.search")}
         </h1>
         <form onSubmit={submit} className="mx-auto mt-6 flex max-w-2xl gap-2">
           <div className="relative flex-1">

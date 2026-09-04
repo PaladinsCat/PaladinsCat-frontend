@@ -8,7 +8,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { fetchBuilds, type Build } from "@/lib/api-client";
-import ScrambleText from "@/components/ScrambleText";
 import { formatLocalDateTime } from "@/lib/time-format";
 import { EmptyState, ErrorState } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
@@ -58,7 +57,7 @@ export default function BuildsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="pc-card-title">
-          <ScrambleText text={t("generated.builds.builds")} speed={30} iterations={15} delayFromCenter={false} />
+          {t("generated.builds.builds")}
         </h2>
         <Link
           href="/builds/create"

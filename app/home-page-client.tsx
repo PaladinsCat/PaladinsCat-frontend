@@ -18,7 +18,6 @@ import {
   type SiteVersion,
 } from "@/lib/api-client";
 import HomeSearch from "@/components/home-search";
-import ScrambleText from "@/components/ScrambleText";
 import { useLocalization } from "@/lib/localization-context";
 import { DEFAULT_WALLPAPERS } from "@/lib/wallpaper-images";
 
@@ -357,28 +356,9 @@ export default function HomePage({ children }: { children?: ReactNode }) {
               />
             </motion.button>
           </motion.div>
-          <motion.h1
-            variants={{
-              hidden: { opacity: 0, y: 8 },
-              visible: { opacity: 1, y: 0 },
-            }}
-            transition={{ duration: 0.42, ease: "easeOut" }}
-            className="relative inline-block text-4xl font-semibold tracking-wide drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)]"
-          >
-            <ScrambleText
-              text={t("home.brandLead")}
-              speed={30}
-              iterations={15}
-              delayFromCenter={false}
-              className="text-pc-text"
-            />
-            <ScrambleText
-              text={t("home.brandAccent")}
-              speed={30}
-              iterations={15}
-              delayFromCenter={false}
-              className="pc-home-cat-accent"
-            />
+          <h1 className="relative inline-block text-4xl font-semibold tracking-wide drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)]">
+            <span className="text-pc-text">{t("home.brandLead")}</span>
+            <span className="pc-home-cat-accent">{t("home.brandAccent")}</span>
             <AnimatePresence mode="wait" initial={false}>
               {siteVersion?.version ? (
                 <MotionLink
@@ -405,7 +385,7 @@ export default function HomePage({ children }: { children?: ReactNode }) {
                 />
               )}
             </AnimatePresence>
-          </motion.h1>
+          </h1>
           <motion.p
             variants={{
               hidden: { opacity: 0, y: 7 },

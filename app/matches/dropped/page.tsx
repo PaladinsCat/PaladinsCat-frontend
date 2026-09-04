@@ -7,7 +7,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import ScrambleText from "@/components/ScrambleText";
 import { EmptyState, ErrorState, LoadingPanel } from "@/components/async-state";
 import {
   fetchNonrankedDroppedMatches,
@@ -80,7 +79,7 @@ export default function DroppedMatchesPage() {
   return <div className="space-y-6">
     <header>
       <h1 className="pc-heading pc-heading-lg">
-        <ScrambleText text={t("matches.dropped.title")} speed={30} iterations={15} delayFromCenter={false} />
+        {t("matches.dropped.title")}
       </h1>
       <p className="mt-1 text-sm text-pc-text-secondary">
         {t("matches.dropped.description")}

@@ -20,7 +20,6 @@ import {
   Trophy,
   Users,
 } from "lucide-react";
-import ScrambleText from "@/components/ScrambleText";
 import { getServerLocalization } from "@/lib/server-localization";
 
 /** Render the localized About page and its data-focused project principles.  Returns: `Promise<React.JSX.Element>`. · refs: none */
@@ -59,7 +58,7 @@ export default async function AboutPage() {
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-pc-accent">{t("generated.about.eyebrow")}</p>
             <h1 className="mt-4 text-4xl font-extrabold tracking-tight text-pc-text sm:text-5xl lg:text-6xl">
-              <ScrambleText text={t("generated.about.paladinscat")} speed={30} iterations={15} delayFromCenter={false} />
+              {t("generated.about.paladinscat")}
             </h1>
             <p className="mt-5 max-w-2xl text-lg leading-8 text-pc-text-secondary">{t("generated.about.theCompetitiveStatsPlatformForPaladinsPlayersWhoWantTo")}</p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
