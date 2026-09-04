@@ -8,6 +8,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { fetchChampions, type Champion, type PublicStatsScope } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
+import { getStatQuality } from "@/lib/stat-quality";
 import { championSlug } from "@/lib/utils";
 import { useLocalization } from "@/lib/localization-context";
 import { getStoredLobbyTierFilter } from "@/lib/lobby-tier";
@@ -128,6 +129,10 @@ function pctDiff(value: number, base: number): number {
   return base !== 0 ? ((value - base) / base) * 100 : 0;
 }
 
+function metricColor(config: RateMetricConfig, value: number): string {
+  return config.key === "winRate" ? getStatQuality(value, 1, 1).color : config.stroke;
+}
+
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
  * Returns: `React.JSX.Element`
@@ -233,7 +238,7 @@ export default function ChampionRateDetailPage({
           <div className="flex min-w-0 flex-1 items-center gap-4">
             <div className="shrink-0">
               <div className="mb-1 text-xs uppercase tracking-wider text-pc-text-muted">{t("generated.champions.globalAvg")}</div>
-              <div className="text-xl font-bold" style={{ color: config.stroke }}>{formatRate(globalAverage)}</div>
+              <div className="text-xl font-bold" style={{ color: metricColor(config, globalAverage) }}>{formatRate(globalAverage)}</div>
             </div>
             <div className="relative h-2 min-w-0 flex-1 overflow-hidden rounded-full bg-pc-bg">
               <div className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${Math.min(100, Math.max(0, globalAverage))}%`, background: config.fill }} />
@@ -268,7 +273,7 @@ export default function ChampionRateDetailPage({
                   </div>
                   <div className="shrink-0 text-right">
                     <div className="text-xs text-pc-text-muted uppercase tracking-wider">{t("generated.champions.classAvg")}</div>
-                    <div className="font-bold" style={{ color: config.stroke }}>{formatRate(section.average)}</div>
+                    <div className="font-bold" style={{ color: metricColor(config, section.average) }}>{formatRate(section.average)}</div>
                   </div>
                   <div className="shrink-0 text-right text-xs">
                     <div className="text-pc-text-muted uppercase tracking-wider">{t("generated.champions.vsGlobal")}</div>
@@ -295,7 +300,7 @@ export default function ChampionRateDetailPage({
                   return <Link key={champion.id} href={`/champions/${championSlug(champion.name)}?scope=${statsScope}`} className="flex min-w-0 items-center gap-3 p-3 transition-colors hover:bg-pc-bg/50">
                     <img src={getChampionIconSafe(champion.name)} alt="" className="h-9 w-9 shrink-0 rounded-lg object-contain" />
                     <div className="min-w-0 flex-1"><div className="truncate text-sm font-semibold text-pc-text">{champion.name}</div><div className="mt-0.5 flex flex-wrap gap-x-2 text-xs"><span className={rowVsClassPct >= 0 ? "text-emerald-400" : "text-red-400"}>{formatSignedPercent(rowVsClassPct)} {t("generated.champions.class")}</span><span className={rowVsGlobalPct >= 0 ? "text-emerald-400" : "text-red-400"}>{formatSignedPercent(rowVsGlobalPct)} {t("generated.champions.global.9027cc5")}</span><span className="text-pc-text-muted">{formatNumber(champion.matches)} {t("generated.champions.matches.9f3e924")}</span></div></div>
-                    <span className="shrink-0 text-right font-mono text-sm font-bold" style={{ color: config.stroke }}>{formatRate(champion.value)}{config.key === "banRate" && <span className="block text-xs font-normal text-pc-text-muted">{formatNumber(champion.bans)} {t("generated.stats.bans")}</span>}</span>
+                    <span className="shrink-0 text-right font-mono text-sm font-bold" style={{ color: metricColor(config, champion.value) }}>{formatRate(champion.value)}{config.key === "banRate" && <span className="block text-xs font-normal text-pc-text-muted">{formatNumber(champion.bans)} {t("generated.stats.bans")}</span>}</span>
                   </Link>;
                 })}
                 {section.champions.length === 0 && <div className="px-3 py-6 text-center text-sm text-pc-text-muted">{t("generated.champions.noChampionData")}</div>}
@@ -329,7 +334,7 @@ export default function ChampionRateDetailPage({
                           </td>
                           <td className="px-2.5 py-1.5 text-pc-text-muted">#{index + 1}</td>
                           <td className="px-2.5 py-1.5 text-pc-text-muted">#{globalRank.get(champion.name) ?? "-"}</td>
-                          <td className="px-2.5 py-1.5 text-right font-semibold" style={{ color: config.stroke }}>{formatRate(champion.value)}{config.key === "banRate" && <div className="text-xs font-normal text-pc-text-muted">{formatNumber(champion.bans)} {t("generated.stats.bans")}</div>}</td>
+                          <td className="px-2.5 py-1.5 text-right font-semibold" style={{ color: metricColor(config, champion.value) }}>{formatRate(champion.value)}{config.key === "banRate" && <div className="text-xs font-normal text-pc-text-muted">{formatNumber(champion.bans)} {t("generated.stats.bans")}</div>}</td>
                           <td className="px-2.5 py-1.5 text-right">
                             <span className={rowVsClassPct >= 0 ? "text-emerald-400" : "text-red-400"}>
                               {formatSignedPercent(rowVsClassPct)}
