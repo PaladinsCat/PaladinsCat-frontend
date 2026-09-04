@@ -596,6 +596,11 @@ html[data-home-wallpaper-phase="returning"] .pc-home-explore * {
   transition: color 1.5s ease;
 }
 
+.pc-home-third-accent {
+  color: var(--pc-accent-third);
+  transition: color 1.5s ease;
+}
+
 .pc-home-root[data-search-active="true"] .pc-home-brand,
 .pc-home-root[data-search-active="true"] .pc-home-explore {
   pointer-events: none;

@@ -497,7 +497,7 @@ export default function HomePage({ children }: { children?: ReactNode }) {
           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
           className="mx-auto mt-28 max-w-2xl text-center text-3xl font-bold tracking-tight text-pc-text drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)] sm:mt-32 sm:text-4xl"
         >
-          <span className="pc-home-platform-accent block">{t("home.communityTitleLead")}</span>
+          <span className="pc-home-third-accent block">{t("home.communityTitleLead")}</span>
           <span className="mt-1 block">{t("home.communityTitleRest")}</span>
         </motion.h2>
 
