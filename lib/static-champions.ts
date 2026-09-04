@@ -20,415 +20,414 @@ export interface StaticChampion {
  * Returns static metadata without network, authentication, cache, or persistence effects.
  * refs: none
  */
-export const STATIC_CHAMPIONS: StaticChampion[] = [
-  {
-    "id": 1,
+export const STATIC_CHAMPIONS: StaticChampion[] = [  {
+    "id": 2404,
     "name": "Ash",
     "roles": [
       "Frontline"
     ]
   },
   {
-    "id": 2,
+    "id": 2512,
     "name": "Atlas",
     "roles": [
       "Frontline"
     ]
   },
   {
-    "id": 3,
+    "id": 2548,
     "name": "Azaan",
     "roles": [
       "Frontline"
     ]
   },
   {
-    "id": 4,
+    "id": 2073,
     "name": "Barik",
     "roles": [
       "Frontline"
     ]
   },
   {
-    "id": 5,
+    "id": 2071,
     "name": "Fernando",
     "roles": [
       "Frontline"
     ]
   },
   {
-    "id": 6,
+    "id": 2348,
     "name": "Inara",
     "roles": [
       "Frontline"
     ]
   },
   {
-    "id": 7,
+    "id": 2479,
     "name": "Khan",
     "roles": [
       "Frontline"
     ]
   },
   {
-    "id": 8,
+    "id": 2288,
     "name": "Makoa",
     "roles": [
       "Frontline"
     ]
   },
   {
-    "id": 9,
+    "id": 2560,
     "name": "Nyx",
     "roles": [
       "Frontline"
     ]
   },
   {
-    "id": 10,
+    "id": 2528,
     "name": "Raum",
     "roles": [
       "Frontline"
     ]
   },
   {
-    "id": 11,
+    "id": 2149,
     "name": "Ruckus",
     "roles": [
       "Frontline"
     ]
   },
   {
-    "id": 12,
+    "id": 2477,
     "name": "Terminus",
     "roles": [
       "Frontline"
     ]
   },
   {
-    "id": 13,
+    "id": 2322,
     "name": "Torvald",
     "roles": [
       "Frontline"
     ]
   },
   {
-    "id": 14,
+    "id": 2538,
     "name": "Yagorath",
     "roles": [
       "Frontline"
     ]
   },
   {
-    "id": 15,
+    "id": 2550,
     "name": "Betty La Bomba",
     "roles": [
       "Damage"
     ]
   },
   {
-    "id": 16,
+    "id": 2281,
     "name": "Bomb King",
     "roles": [
       "Damage"
     ]
   },
   {
-    "id": 17,
+    "id": 2092,
     "name": "Cassie",
     "roles": [
       "Damage"
     ]
   },
   {
-    "id": 18,
+    "id": 2495,
     "name": "Dredge",
     "roles": [
       "Damage"
     ]
   },
   {
-    "id": 19,
+    "id": 2277,
     "name": "Drogoz",
     "roles": [
       "Damage"
     ]
   },
   {
-    "id": 20,
+    "id": 2509,
     "name": "Imani",
     "roles": [
       "Damage"
     ]
   },
   {
-    "id": 21,
+    "id": 2249,
     "name": "Kinessa",
     "roles": [
       "Damage"
     ]
   },
   {
-    "id": 22,
+    "id": 2417,
     "name": "Lian",
     "roles": [
       "Damage"
     ]
   },
   {
-    "id": 23,
+    "id": 2540,
     "name": "Octavia",
     "roles": [
       "Damage"
     ]
   },
   {
-    "id": 24,
+    "id": 2566,
     "name": "Omen",
     "roles": [
       "Damage"
     ]
   },
   {
-    "id": 25,
+    "id": 2543,
     "name": "Saati",
     "roles": [
       "Damage"
     ]
   },
   {
-    "id": 26,
+    "id": 2307,
     "name": "Sha Lin",
     "roles": [
       "Damage"
     ]
   },
   {
-    "id": 27,
+    "id": 2438,
     "name": "Strix",
     "roles": [
       "Damage"
     ]
   },
   {
-    "id": 28,
+    "id": 2529,
     "name": "Tiberius",
     "roles": [
       "Damage"
     ]
   },
   {
-    "id": 29,
+    "id": 2314,
     "name": "Tyra",
     "roles": [
       "Damage"
     ]
   },
   {
-    "id": 30,
+    "id": 2285,
     "name": "Viktor",
     "roles": [
       "Damage"
     ]
   },
   {
-    "id": 31,
+    "id": 2480,
     "name": "Vivian",
     "roles": [
       "Damage"
     ]
   },
   {
-    "id": 32,
+    "id": 2393,
     "name": "Willo",
     "roles": [
       "Damage"
     ]
   },
   {
-    "id": 33,
+    "id": 2205,
     "name": "Androxus",
     "roles": [
       "Flank"
     ]
   },
   {
-    "id": 34,
+    "id": 2147,
     "name": "Buck",
     "roles": [
       "Flank"
     ]
   },
   {
-    "id": 35,
+    "id": 2554,
     "name": "Caspian",
     "roles": [
       "Flank"
     ]
   },
   {
-    "id": 36,
+    "id": 2094,
     "name": "Evie",
     "roles": [
       "Flank"
     ]
   },
   {
-    "id": 37,
+    "id": 2555,
     "name": "Kasumi",
     "roles": [
       "Flank"
     ]
   },
   {
-    "id": 38,
+    "id": 2493,
     "name": "Koga",
     "roles": [
       "Flank"
     ]
   },
   {
-    "id": 39,
+    "id": 2362,
     "name": "Lex",
     "roles": [
       "Flank"
     ]
   },
   {
-    "id": 40,
+    "id": 2338,
     "name": "Maeve",
     "roles": [
       "Flank"
     ]
   },
   {
-    "id": 41,
+    "id": 2057,
     "name": "Skye",
     "roles": [
       "Flank"
     ]
   },
   {
-    "id": 42,
+    "id": 2472,
     "name": "Talus",
     "roles": [
       "Flank"
     ]
   },
   {
-    "id": 43,
+    "id": 2541,
     "name": "Vatu",
     "roles": [
       "Flank"
     ]
   },
   {
-    "id": 44,
+    "id": 2549,
     "name": "VII",
     "roles": [
       "Flank"
     ]
   },
   {
-    "id": 45,
+    "id": 2536,
     "name": "Vora",
     "roles": [
       "Flank"
     ]
   },
   {
-    "id": 46,
+    "id": 2420,
     "name": "Zhin",
     "roles": [
       "Flank"
     ]
   },
   {
-    "id": 47,
+    "id": 2533,
     "name": "Corvus",
     "roles": [
       "Support"
     ]
   },
   {
-    "id": 48,
+    "id": 2491,
     "name": "Furia",
     "roles": [
       "Support"
     ]
   },
   {
-    "id": 49,
+    "id": 2093,
     "name": "Grohk",
     "roles": [
       "Support"
     ]
   },
   {
-    "id": 50,
+    "id": 2254,
     "name": "Grover",
     "roles": [
       "Support"
     ]
   },
   {
-    "id": 51,
+    "id": 2517,
     "name": "Io",
     "roles": [
       "Support"
     ]
   },
   {
-    "id": 52,
+    "id": 2431,
     "name": "Jenos",
     "roles": [
       "Support"
     ]
   },
   {
-    "id": 53,
+    "id": 2551,
     "name": "Lillith",
     "roles": [
       "Support"
     ]
   },
   {
-    "id": 54,
+    "id": 2303,
     "name": "Mal Damba",
     "roles": [
       "Support"
     ]
   },
   {
-    "id": 55,
+    "id": 2481,
     "name": "Moji",
     "roles": [
       "Support"
     ]
   },
   {
-    "id": 56,
+    "id": 2056,
     "name": "Pip",
     "roles": [
       "Support"
     ]
   },
   {
-    "id": 57,
+    "id": 2542,
     "name": "Rei",
     "roles": [
       "Support"
     ]
   },
   {
-    "id": 58,
+    "id": 2372,
     "name": "Seris",
     "roles": [
       "Support"
     ]
   },
   {
-    "id": 59,
+    "id": 2267,
     "name": "Ying",
     "roles": [
       "Support"
