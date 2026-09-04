@@ -12,7 +12,7 @@ import PlayerName from "@/components/player-name";
 import TablePagination, { type TablePageSize } from "@/components/table-pagination";
 import { usePersistentDirectoryPage } from "@/components/player-directory-pagination";
 import { useLocalization } from "@/lib/localization-context";
-import { getStatQuality } from "@/lib/stat-quality";
+import { getPercentageColor } from "@/lib/stat-quality";
 import PlayersPageHeader from "@/components/ui/players-page-header";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { useAuth } from "@/lib/auth-context";
@@ -174,7 +174,7 @@ export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
           <div><dt className="pc-label">{mode === "account" ? t("generated.players.totalXp") : t("generated.players.championXp")}</dt><dd className="mt-1 tabular-nums text-pc-text-secondary">{formatNumber(positionRow.xp)}</dd></div>
           <div><dt className="pc-label">{t("generated.players.wins")}</dt><dd className="mt-1 tabular-nums text-pc-text-secondary">{formatNumber(positionRow.wins)}</dd></div>
           <div><dt className="pc-label">{t("generated.players.losses")}</dt><dd className="mt-1 tabular-nums text-pc-text-secondary">{formatNumber(positionRow.losses)}</dd></div>
-          <div><dt className="pc-label">{t("generated.players.winRate")}</dt><dd className="mt-1 font-semibold tabular-nums" style={positionRow.winRate == null ? undefined : { color: getStatQuality(positionRow.winRate, 1, 1).color }}>{formatPercent(positionRow.winRate)}</dd></div>
+          <div><dt className="pc-label">{t("generated.players.winRate")}</dt><dd className="mt-1 font-semibold tabular-nums" style={positionRow.winRate == null ? undefined : { color: getPercentageColor(positionRow.winRate) }}>{formatPercent(positionRow.winRate)}</dd></div>
           <div><dt className="pc-label">{t("generated.players.kda")}</dt><dd className="mt-1 tabular-nums text-pc-text-secondary">{formatNumber(positionRow.kda, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</dd></div>
           <div><dt className="pc-label">{t("generated.players.region")}</dt><dd className="mt-1 text-pc-text-muted">{positionRow.region ?? "—"}</dd></div>
         </dl>}
@@ -271,7 +271,7 @@ export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
             <td className="px-3 py-3 text-right tabular-nums text-pc-text-secondary">{formatNumber(row.xp)}</td>
             <td className="px-3 py-3 text-right tabular-nums text-pc-text-secondary">{formatNumber(row.wins)}</td>
             <td className="px-3 py-3 text-right tabular-nums text-pc-text-secondary">{formatNumber(row.losses)}</td>
-            <td className="px-3 py-3 text-right font-semibold tabular-nums" style={row.winRate == null ? undefined : { color: getStatQuality(row.winRate, 1, 1).color }}>{formatPercent(row.winRate)}</td>
+            <td className="px-3 py-3 text-right font-semibold tabular-nums" style={row.winRate == null ? undefined : { color: getPercentageColor(row.winRate) }}>{formatPercent(row.winRate)}</td>
             <td className="px-3 py-3 text-right tabular-nums text-pc-text-secondary">{formatNumber(row.kda, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
             <td className="px-4 py-3 text-pc-text-muted">{row.region ?? "—"}</td>
           </tr>)}</tbody>

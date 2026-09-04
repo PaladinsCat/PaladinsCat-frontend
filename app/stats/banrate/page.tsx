@@ -9,8 +9,6 @@ import { getInitialRankedChampions } from "@/lib/server-champions";
 const CONFIG = {
   key: "banRate" as const,
   labelKey: "common.metrics.banRate",
-  stroke: "var(--pc-chart-red)",
-  fill: "rgba(251,113,133,0.16)",
 } as const;
 
 /**

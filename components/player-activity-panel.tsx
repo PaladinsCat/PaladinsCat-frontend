@@ -10,6 +10,7 @@ import { fetchMatchesOverview, fetchPresenceHourlyStats, fetchPresenceStats, typ
 import { LoadingPanel } from "@/components/async-state";
 import CardDetailLink from "@/components/card-detail-link";
 import { useLocalization } from "@/lib/localization-context";
+import { getPercentageColor } from "@/lib/stat-quality";
 
 const REGION_COLORS: Record<string, string> = {
   NA: "bg-emerald-500",
@@ -782,7 +783,7 @@ function PlayerPresenceBreakdown({
       <div className="p-4">
         <div className="flex items-start justify-between gap-3">
           <h2 className="text-sm font-bold text-pc-text">{platformTitle}</h2>
-          <span className="font-mono text-xs text-pc-text-muted">{coverageLabel}: {coveragePercent}%</span>
+          <span className="font-mono text-xs" style={{ color: getPercentageColor(coveragePercent) }}>{coverageLabel}: {coveragePercent}%</span>
         </div>
         <div className={`mt-4 ${showStatements ? "space-y-1" : "space-y-3"}`}>
           {platforms.length > 0 && <ActivityChartStatement className="text-right" />}

@@ -6,6 +6,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { fetchPlatforms } from "@/lib/api-client";
+import { getPercentageColor } from "@/lib/stat-quality";
 import { BarChartComponent } from "@/components/Chart";
 import { ContentFade, EmptyState, ErrorState } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
@@ -97,9 +98,9 @@ export default function PlatformsPage({ initialPlatforms = null }: { initialPlat
           yKeys={["winRate"]}
           yLabel={t("generated.stats.platforms.page.winrate")}
           title={selectedPlatform ? t("generated.stats.value1TopChampions", { value1: selectedPlatform }) : t("generated.stats.topChampionsAllPlatforms")}
-          height={400}
-          colors={["var(--pc-chart-green)"]}
-          showLegend={false}
+         height={400}
+          barColors={{ winRate: chartData.map((row) => getPercentageColor(row.winRate)) }}
+         showLegend={false}
           showXAxis={false}
         /></ContentFade>
       )}

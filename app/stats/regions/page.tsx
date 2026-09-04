@@ -10,6 +10,7 @@ import { fetchRegions, type RegionStat } from "@/lib/api-client";
 import { ContentFade, EmptyState, ErrorState } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { useLocalization } from "@/lib/localization-context";
+import { getPercentageColor } from "@/lib/stat-quality";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
 
 /**
@@ -50,7 +51,7 @@ export default function RegionsPage() {
                 {r.topChampions.slice(0, 5).map((c) => (
                   <div key={c.championId} className="flex items-center justify-between text-sm">
                     <span className="text-pc-text">{c.championName}</span>
-                    <span className="pc-badge">{formatPercent(c.winRate)}</span>
+                    <span className="pc-badge" style={{ color: getPercentageColor(c.winRate) }}>{formatPercent(c.winRate)}</span>
                   </div>
                 ))}
               </div>

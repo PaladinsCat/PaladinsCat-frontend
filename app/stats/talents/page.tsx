@@ -11,6 +11,7 @@ import { DataTableSkeleton } from "@/components/route-skeleton";
 import Link from "next/link";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
+import { getPercentageColor } from "@/lib/stat-quality";
 import { useLocalization } from "@/lib/localization-context";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
 
@@ -75,7 +76,7 @@ export default function TalentsPage() {
           {filtered.slice(0, 20).map((talent) => <Link key={`${talent.championId}-${talent.talentId}`} href={`/champions/${championSlug(talent.championName)}/talents/${talent.talentId}`} className="pc-mobile-panel flex min-w-0 items-center gap-3 p-3">
             <img src={getChampionIconSafe(talent.championName)} alt="" className="h-10 w-10 shrink-0 rounded-lg object-contain" />
             <div className="min-w-0 flex-1"><div className="truncate text-sm font-semibold text-pc-text">{talent.talentName}</div><div className="text-xs text-pc-text-muted">{talent.championName} · {formatNumber(talent.totalPlays)} {t("generated.stats.plays.0effba4")}</div></div>
-            <span className={talent.winRate >= 50 ? "shrink-0 font-bold text-emerald-400" : "shrink-0 font-bold text-rose-400"}>{formatPercent(talent.winRate)}</span>
+            <span className="shrink-0 font-bold" style={{ color: getPercentageColor(talent.winRate) }}>{formatPercent(talent.winRate)}</span>
           </Link>)}
         </div>
       )}
@@ -96,7 +97,7 @@ export default function TalentsPage() {
                   <td className="px-4 py-2 text-pc-text">{t.championName}</td>
                   <td className="px-4 py-2 text-pc-text">{t.talentName}</td>
                   <td className="px-4 py-2 text-pc-text">{t.totalPlays}</td>
-                  <td className="px-4 py-2 text-pc-text">{formatPercent(t.winRate)}</td>
+                  <td className="px-4 py-2 font-semibold" style={{ color: getPercentageColor(t.winRate) }}>{formatPercent(t.winRate)}</td>
                 </tr>
               ))}
             </tbody>

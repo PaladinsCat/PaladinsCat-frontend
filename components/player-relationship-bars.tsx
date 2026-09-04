@@ -8,7 +8,7 @@ import PlayerName from "@/components/player-name";
 import type { PlayerRelationshipRow } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { useLocalization } from "@/lib/localization-context";
-import { getStatQuality } from "@/lib/stat-quality";
+import { getPercentageColor } from "@/lib/stat-quality";
 import { STATIC_CHAMPIONS } from "@/lib/static-champions";
 
 const CLASS_ORDER = ["Frontline", "Damage", "Flank", "Support", "Unknown"];
@@ -48,7 +48,7 @@ export default function PlayerRelationshipBars({ rows, tone = "cyan", limit, sho
     const championGroups = championsByClass(row.partnerChampionCounts);
     const canExpand = championGroups.length > 0;
     const expanded = expandedId === row.otherPlayerId;
-    const winRateQuality = row.winRate == null ? null : getStatQuality(row.winRate, 1, 1);
+    const winRateQuality = row.winRate == null ? null : { color: getPercentageColor(row.winRate) };
     return <div key={row.otherPlayerId} className="min-w-0 rounded-lg border border-pc-border/50 bg-pc-bg-secondary/20 p-2.5">
       <div className="flex min-w-0 items-center gap-2"><div className="min-w-0 flex-1"><div className="flex min-w-0 items-center justify-between gap-3 text-xs"><Link href={`/players/${row.otherPlayerId}`} className="min-w-0 truncate font-semibold text-pc-text hover:text-pc-accent"><PlayerName playerId={row.otherPlayerId}>{row.otherPlayerName}</PlayerName></Link><div className="flex shrink-0 items-center gap-2 font-mono text-pc-text-secondary"><span>{formatNumber(row.matchCount)}</span><span style={winRateQuality ? { color: winRateQuality.color } : undefined}>{formatPercent(row.winRate)}</span></div></div><div className="mt-1.5 h-2 overflow-hidden rounded-full bg-pc-bg-secondary" aria-label={t("generated.players.matches")}><div className={`h-full rounded-full ${barClass}`} style={{ width: `${Math.max(3, (row.matchCount / maximum) * 100)}%` }} /></div></div>{canExpand && <button type="button" aria-label={t("generated.matches.details")} aria-expanded={expanded} onClick={() => setExpandedId(expanded ? null : row.otherPlayerId)} className="shrink-0 rounded-md p-1 text-pc-text-muted transition-colors hover:bg-pc-bg-secondary hover:text-pc-text"><ChevronDown className={`h-4 w-4 transition-transform ${expanded ? "rotate-180" : ""}`} /></button>}</div>
       {roles.length > 0 && <div className="mt-2 border-t border-pc-border/40 pt-2"><div className="h-2 overflow-hidden rounded-full bg-pc-bg" aria-label={t("generated.champions.class")}>{roles.map(([role, count]) => <span key={role} title={formatNumber(count)} className={`inline-block h-full ${CLASS_TONES[role] ?? CLASS_TONES.Unknown}`} style={{ width: `${(count / roleTotal) * 100}%` }} />)}</div></div>}

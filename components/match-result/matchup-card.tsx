@@ -13,14 +13,15 @@ import { getChampionStats } from "./format";
 import { getRankIconPath, resolveEffectiveTier } from "@/lib/tier-utils";
 import PartyBadge from "./party-badge";
 import { MatchPlayerLink } from "./player-identity";
+import { getPercentageColor } from "@/lib/stat-quality";
 import { useLocalization } from "@/lib/localization-context";
 
-function RecordBar({ wins, total, tone }: { wins: number; total: number; tone: "teal" | "green" }) {
+function RecordBar({ wins, total }: { wins: number; total: number }) {
   const percent = total > 0 ? Math.max(0, Math.min(100, (wins / total) * 100)) : 50;
-  return <div className="h-1.5 overflow-hidden rounded-full bg-pc-bg-secondary"><div className={`h-full rounded-full ${tone === "green" ? "bg-emerald-400" : "bg-pc-accent"}`} style={{ width: `${percent}%` }} /></div>;
+  return <div className="h-1.5 overflow-hidden rounded-full bg-pc-bg-secondary"><div className="h-full rounded-full" style={{ width: `${percent}%`, background: getPercentageColor(percent) }} /></div>;
 }
 
-function RecordSummary({ label, wins, total, tone, eloLabel, elo }: { label: string; wins: number; total: number; tone: "teal" | "green"; eloLabel: string; elo: number | null | undefined }) {
+function RecordSummary({ label, wins, total, eloLabel, elo }: { label: string; wins: number; total: number; eloLabel: string; elo: number | null | undefined }) {
   const { formatNumber, formatPercent, formatRecord, t } = useLocalization();
   const losses = Math.max(0, total - wins);
   return <div>
@@ -28,7 +29,7 @@ function RecordSummary({ label, wins, total, tone, eloLabel, elo }: { label: str
       <span>{label}</span>
       <span className="shrink-0 tabular-nums">{total ? formatRecord(wins, losses) : "—"}</span>
     </div>
-    <div className="flex items-center gap-2"><div className="min-w-0 flex-1"><RecordBar wins={wins} total={total} tone={tone} /></div><span className="shrink-0 text-xs tabular-nums text-pc-text-secondary">{total > 0 ? t("common.summary.valueMetric", { value: formatPercent((wins / total) * 100), metric: t("generated.matches.wr") }) : "—"}</span></div>
+    <div className="flex items-center gap-2"><div className="min-w-0 flex-1"><RecordBar wins={wins} total={total} /></div><span className="shrink-0 text-xs tabular-nums" style={total > 0 ? { color: getPercentageColor((wins / total) * 100) } : undefined}>{total > 0 ? t("common.summary.valueMetric", { value: formatPercent((wins / total) * 100), metric: t("generated.matches.wr") }) : "—"}</span></div>
     <div className="mt-1 text-right text-xs text-pc-text-secondary"><span className="text-pc-text-muted">{eloLabel} </span>{elo != null ? formatNumber(elo) : "—"}</div>
   </div>;
 }
@@ -73,8 +74,8 @@ export default function MatchupCard({ player }: { player: MatchResultPlayer }) {
       </div>
 
       <div className="relative space-y-3 pt-3 text-xs">
-        <RecordSummary label={t("generated.matches.champion")} wins={championWins} total={championGames} tone="teal" eloLabel={t("common.metrics.championElo")} elo={profile?.championElo} />
-        <RecordSummary label={t("generated.matches.global")} wins={globalWins} total={globalGames} tone="green" eloLabel={t("common.metrics.playerElo")} elo={profile?.queueElo} />
+        <RecordSummary label={t("generated.matches.champion")} wins={championWins} total={championGames} eloLabel={t("common.metrics.championElo")} elo={profile?.championElo} />
+        <RecordSummary label={t("generated.matches.global")} wins={globalWins} total={globalGames} eloLabel={t("common.metrics.playerElo")} elo={profile?.queueElo} />
       </div>
     </article>
   );

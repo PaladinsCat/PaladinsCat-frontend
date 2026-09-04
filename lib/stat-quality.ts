@@ -36,6 +36,20 @@ function colorForScore(score: number): string {
 }
 
 /**
+ * Maps a bounded 0–100 percentage to the canonical red-orange-green spectrum.
+ * Use low-is-good for rates where a larger percentage is worse, such as leave
+ * rate. Signed or unbounded deltas must keep their directional colors instead.
+ * refs: colors.md#bounded-percentage-spectrum
+ */
+export function getPercentageColor(
+  value: number | null | undefined,
+  direction: "high-is-good" | "low-is-good" = "high-is-good",
+): string {
+  const normalized = clamp01(Number(value ?? 0) / 100);
+  return colorForScore(direction === "low-is-good" ? 1 - normalized : normalized);
+}
+
+/**
  * Classifies stat confidence from win rate and pick-rate coverage.
  * refs: none
  */

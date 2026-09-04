@@ -12,6 +12,7 @@ import { useAuth } from "@/lib/auth-context";
 import { fetchAdminDashboard, searchManagedAccounts, updateManagedAccountRole, type AdminDashboard, type ManagedAccount } from "@/lib/admin-dashboard-api";
 import { ContentFade, ErrorState, LoadingPanel } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
+import { getPercentageColor } from "@/lib/stat-quality";
 import { formatLocalDateTime } from "@/lib/time-format";
 import { useLocalization } from "@/lib/localization-context";
 
@@ -148,8 +149,8 @@ export default function AdminDashboardPage({ mode = "admin" }: { mode?: "admin" 
             {dashboard.hirez.keys.map((key, idx) => <ApiKeyCard key={key.devId} apiKey={key} index={idx} showKeyId={showKeyIds} />)}
           </div>
           <div className="mt-5">
-            <div className="mb-1.5 flex justify-between text-xs text-pc-text-muted"><span>{t("generated.admin.combinedDailyBudget")}</span><span>{formatNumber(budgetPercent, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}{t("generated.admin.used")}</span></div>
-            <div className="h-2 overflow-hidden rounded-full bg-pc-bg"><div className="h-full rounded-full bg-pc-accent transition-all duration-500" style={{ width: `${budgetPercent}%` }} /></div>
+            <div className="mb-1.5 flex justify-between text-xs text-pc-text-muted"><span>{t("generated.admin.combinedDailyBudget")}</span><span style={{ color: getPercentageColor(budgetPercent, "low-is-good") }}>{formatNumber(budgetPercent, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}{t("generated.admin.used")}</span></div>
+            <div className="h-2 overflow-hidden rounded-full bg-pc-bg"><div className="h-full rounded-full transition-all duration-500" style={{ width: `${budgetPercent}%`, background: getPercentageColor(budgetPercent, "low-is-good") }} /></div>
           </div>
         </div>
         <div className="pc-card">
@@ -171,7 +172,7 @@ export default function AdminDashboardPage({ mode = "admin" }: { mode?: "admin" 
         <div className="pc-card">
           <SectionTitle icon={Activity} title={t("generated.operations.adminIngestCoverage")} subtitle="" />
           <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <SmallStat label={t("generated.operations.adminCoverage")} value={`${formatNumber(ingestCoverage, { maximumFractionDigits: 1 })}%`} />
+            <SmallStat label={t("generated.operations.adminCoverage")} value={`${formatNumber(ingestCoverage, { maximumFractionDigits: 1 })}%`} valueColor={getPercentageColor(ingestCoverage)} />
             <SmallStat label={t("generated.operations.adminDirect")} value={formatNumber(totals.directMatches)} />
             <SmallStat label={t("generated.operations.adminRecovered")} value={formatNumber(totals.recoveredMatches)} />
             <SmallStat label={t("generated.operations.adminIncomplete")} value={formatNumber(totals.incompleteMatches)} tone={totals.incompleteMatches > 0 ? "warn" : "normal"} />
@@ -240,7 +241,7 @@ function TrafficChart({ dashboard }: { dashboard: AdminDashboard }) {
 function ApiKeyCard({ apiKey, index, showKeyId }: { apiKey: AdminDashboard["hirez"]["keys"][number]; index: number; showKeyId: boolean }) {
   const { t, formatNumber, formatDateTime } = useLocalization();
   const percent = apiKey.dailyLimit > 0 ? Math.min(100, (apiKey.used / apiKey.dailyLimit) * 100) : 0;
-  const color = percent >= 90 ? "bg-rose-400" : percent >= 75 ? "bg-amber-400" : "bg-pc-accent";
+  const color = getPercentageColor(percent, "low-is-good");
   const statusLabel = apiKey.status === "healthy"
     ? t("common.status.healthy")
     : apiKey.status === "limited"
@@ -253,7 +254,7 @@ function ApiKeyCard({ apiKey, index, showKeyId }: { apiKey: AdminDashboard["hire
     : apiKey.status === "unhealthy"
       ? "bg-rose-400/15 text-rose-300"
       : "bg-amber-400/15 text-amber-300";
-  return <div className="rounded-xl border border-pc-border bg-pc-bg/35 p-3"><div className="flex items-center justify-between"><span className="font-mono text-xs font-bold text-pc-text">{t("generated.admin.key")}{" "}{showKeyId ? apiKey.devId : keyLetter(index)}</span><span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${statusColor}`}>{statusLabel}</span></div><div className="mt-3 flex items-end justify-between"><div><div className="text-lg font-bold tabular-nums text-pc-text">{formatNumber(apiKey.remaining)}</div><div className="text-xs text-pc-text-muted">{t("generated.admin.remaining")}</div></div><div className="text-right text-xs text-pc-text-secondary">{formatNumber(apiKey.used)} / {formatNumber(apiKey.dailyLimit)}</div></div><div className="mt-2 h-1.5 overflow-hidden rounded-full bg-pc-bg"><div className={`h-full rounded-full ${color}`} style={{ width: `${percent}%` }} /></div><div className="mt-2 truncate text-xs text-pc-text-muted">{t("generated.admin.synced")}{" "}{apiKey.lastSyncAt ? formatDateTime(apiKey.lastSyncAt) : t("generated.admin.never")}</div></div>;
+  return <div className="rounded-xl border border-pc-border bg-pc-bg/35 p-3"><div className="flex items-center justify-between"><span className="font-mono text-xs font-bold text-pc-text">{t("generated.admin.key")}{" "}{showKeyId ? apiKey.devId : keyLetter(index)}</span><span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${statusColor}`}>{statusLabel}</span></div><div className="mt-3 flex items-end justify-between"><div><div className="text-lg font-bold tabular-nums text-pc-text">{formatNumber(apiKey.remaining)}</div><div className="text-xs text-pc-text-muted">{t("generated.admin.remaining")}</div></div><div className="text-right text-xs text-pc-text-secondary">{formatNumber(apiKey.used)} / {formatNumber(apiKey.dailyLimit)}</div></div><div className="mt-2 h-1.5 overflow-hidden rounded-full bg-pc-bg"><div className="h-full rounded-full" style={{ width: `${percent}%`, background: color }} /></div><div className="mt-2 truncate text-xs text-pc-text-muted">{t("generated.admin.synced")}{" "}{apiKey.lastSyncAt ? formatDateTime(apiKey.lastSyncAt) : t("generated.admin.never")}</div></div>;
 }
 
 function HourlyBars({ rows }: { rows: Array<{ hour: string; calls: number }> }) {
@@ -262,7 +263,7 @@ function HourlyBars({ rows }: { rows: Array<{ hour: string; calls: number }> }) 
   return <div className="mt-5 flex h-40 items-end gap-1">{rows.map((row, index) => <div key={row.hour} className="group flex h-full min-w-0 flex-1 items-end"><div className="relative w-full rounded-t bg-pc-accent-mid/70 transition-colors group-hover:bg-pc-accent" style={{ height: `${Math.max(2, (row.calls / max) * 100)}%` }} title={t("generated.admin.value1Value2Calls", { value1: formatDateTime(row.hour), value2: row.calls })}><span className="absolute -top-4 left-1/2 -translate-x-1/2 text-xs text-pc-text-muted opacity-0 group-hover:opacity-100">{row.calls}</span></div>{index % 6 === 0 && <span className="absolute text-xs text-pc-text-muted" />}</div>)}</div>;
 }
 
-function SmallStat({ label, value, tone = "normal" }: { label: string; value: string; tone?: "normal" | "warn" | "bad" }) {
-  const color = tone === "bad" ? "text-rose-400" : tone === "warn" ? "text-amber-300" : "text-pc-text";
-  return <div className="rounded-lg border border-pc-border/60 bg-pc-bg/35 p-3"><div className="text-xs text-pc-text-muted">{label}</div><div className={`mt-1 text-lg font-bold tabular-nums ${color}`}>{value}</div></div>;
+function SmallStat({ label, value, tone = "normal", valueColor }: { label: string; value: string; tone?: "normal" | "warn" | "bad"; valueColor?: string }) {
+ const color = tone === "bad" ? "text-rose-400" : tone === "warn" ? "text-amber-300" : "text-pc-text";
+  return <div className="rounded-lg border border-pc-border/60 bg-pc-bg/35 p-3"><div className="text-xs text-pc-text-muted">{label}</div><div className={`mt-1 text-lg font-bold tabular-nums ${color}`} style={valueColor ? { color: valueColor } : undefined}>{value}</div></div>;
 }

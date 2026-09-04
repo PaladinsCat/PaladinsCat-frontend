@@ -27,7 +27,7 @@ import { championSlug } from "@/lib/utils";
 import { canonicalLocalImageUrl } from "@/lib/image-assets";
 import { canonicalCardNameKey } from "@/lib/card-name";
 import { useLobbyTier } from "@/lib/lobby-tier-context";
-import { getStatQuality } from "@/lib/stat-quality";
+import { getPercentageColor, getStatQuality } from "@/lib/stat-quality";
 import { readBrowserResult, writeBrowserResult } from "@/lib/browser-result-cache";
 import { LoadingIndicator } from "@/components/async-state";
 import { MatchPlayerLink, matchPlayerKey } from "./player-identity";
@@ -216,8 +216,8 @@ function DetailEntry({
       <p className="mt-1 text-xs leading-5 text-pc-text-secondary">{description}</p>
       {showMetrics && <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs tabular-nums">
         {metric ? <>
-          <span className="rounded-md border px-1.5 py-0.5 font-semibold" style={{ color: quality?.color, borderColor: quality?.borderColor, background: quality?.background }}>{t("generated.matches.wr")}{" "}{formatPercent(metric.winRate)}</span>
-          <span className="rounded-md border border-pc-border bg-pc-bg px-1.5 py-0.5 text-pc-text-secondary">{t("generated.matches.pr")}{" "}{formatPercent(metric.pickRate)}</span>
+          <span className="rounded-md border px-1.5 py-0.5 font-semibold" style={{ color: getPercentageColor(metric.winRate), borderColor: quality?.borderColor, background: quality?.background }}>{t("generated.matches.wr")}{" "}{formatPercent(metric.winRate)}</span>
+          <span className="rounded-md border border-pc-border bg-pc-bg px-1.5 py-0.5" style={{ color: getPercentageColor(metric.pickRate) }}>{t("generated.matches.pr")}{" "}{formatPercent(metric.pickRate)}</span>
           <span className="text-pc-text-muted">{formatNumber(metric.plays)} {playsLabel ?? t("generated.stats.plays.0effba4")}</span>
         </> : metricsLoaded ? <span className="text-pc-text-muted">{t("generated.matches.noRankedSampleInThisLobbyScope")}</span> : <LoadingIndicator className="gap-1.5 text-xs" />}
       </div>}

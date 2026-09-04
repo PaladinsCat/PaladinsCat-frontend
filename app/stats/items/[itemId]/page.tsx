@@ -9,7 +9,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ExternalLink } from "lucide-react";
 import { fetchItemDetail, fetchItems, type ItemDetailStats, type ItemStat } from "@/lib/api-client";
 import { loadBuildReferenceData, type BuildItemCategory, type BuildItemReference } from "@/lib/build-reference";
-import { getStatQuality } from "@/lib/stat-quality";
+import { getPercentageColor, getStatQuality } from "@/lib/stat-quality";
 import ContextBackLink from "@/components/context-back-link";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { useLocalization } from "@/lib/localization-context";
@@ -89,7 +89,6 @@ export default function ItemDetailPage() {
   const currentCategory = currentReference?.category ?? "Utility";
 
   if (!detail) return displayLoading ? <RouteSkeleton variant="detail" /> : <div className="pc-card py-12 text-center text-sm text-pc-text-secondary">{t("generated.stats.noItemStatisticsAreAvailableForThisQueue")}</div>;
-  const overallQuality = getStatQuality(detail.winRate, 1, 1);
   const chartSlots = [...detail.slots].sort((a, b) => Number(a.slot) - Number(b.slot));
   const chartLevels = [...detail.levels].sort((a, b) => Number(b.level) - Number(a.level));
   const maxCellUses = Math.max(1, ...detail.breakdown.map((cell) => cell.totalUses));
@@ -100,7 +99,7 @@ export default function ItemDetailPage() {
   return <div className="space-y-6">
     <div><ContextBackLink fallbackHref="/game/items" label={t("menu.items")} /></div>
     <section className="rounded-xl border border-pc-border bg-pc-bg-elevated/90 p-5">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center"><img src={currentReference?.iconUrl ?? itemIcon(detail.itemName)} alt="" className="h-16 w-16 rounded-lg object-contain" /><div className="min-w-0 flex-1"><p className="text-xs font-bold uppercase tracking-[0.18em] text-pc-text-muted">{currentCategory}</p><h1 className="mt-1 pc-heading pc-heading-lg">{detail.itemName}</h1></div><div className="grid w-full grid-cols-2 gap-3 text-left tabular-nums sm:w-auto sm:grid-cols-3 sm:gap-5 sm:text-right"><div><div className="text-xs uppercase text-pc-text-muted">{t("generated.stats.winRate")}</div><div className="text-xl font-bold" style={{ color: overallQuality.color }}>{percent(detail.winRate)}</div><div className="mt-1 flex flex-wrap gap-x-2 text-xs sm:justify-end"><span className={vsClass != null && vsClass >= 0 ? "text-emerald-400" : "text-red-400"}>{signedPercent(vsClass)} {t("generated.stats.vsClass")} <span className="text-pc-text-muted">({currentCategory})</span></span><span className={vsGlobal != null && vsGlobal >= 0 ? "text-emerald-400" : "text-red-400"}>{signedPercent(vsGlobal)} {t("generated.stats.vsGlobal")}</span></div></div><div><div className="text-xs uppercase text-pc-text-muted">{t("generated.stats.purchases")}</div><div className="text-xl font-bold text-pc-text">{formatNumber(detail.totalUses)}</div></div><div className="col-span-2 sm:col-span-1"><div className="text-xs uppercase text-pc-text-muted">{t("generated.stats.record")}</div><div className="text-sm font-semibold text-pc-text">{formatRecord(detail.wins, detail.losses)}</div></div></div></div>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center"><img src={currentReference?.iconUrl ?? itemIcon(detail.itemName)} alt="" className="h-16 w-16 rounded-lg object-contain" /><div className="min-w-0 flex-1"><p className="text-xs font-bold uppercase tracking-[0.18em] text-pc-text-muted">{currentCategory}</p><h1 className="mt-1 pc-heading pc-heading-lg">{detail.itemName}</h1></div><div className="grid w-full grid-cols-2 gap-3 text-left tabular-nums sm:w-auto sm:grid-cols-3 sm:gap-5 sm:text-right"><div><div className="text-xs uppercase text-pc-text-muted">{t("generated.stats.winRate")}</div><div className="text-xl font-bold" style={{ color: getPercentageColor(detail.winRate) }}>{percent(detail.winRate)}</div><div className="mt-1 flex flex-wrap gap-x-2 text-xs sm:justify-end"><span className={vsClass != null && vsClass >= 0 ? "text-emerald-400" : "text-red-400"}>{signedPercent(vsClass)} {t("generated.stats.vsClass")} <span className="text-pc-text-muted">({currentCategory})</span></span><span className={vsGlobal != null && vsGlobal >= 0 ? "text-emerald-400" : "text-red-400"}>{signedPercent(vsGlobal)} {t("generated.stats.vsGlobal")}</span></div></div><div><div className="text-xs uppercase text-pc-text-muted">{t("generated.stats.purchases")}</div><div className="text-xl font-bold text-pc-text">{formatNumber(detail.totalUses)}</div></div><div className="col-span-2 sm:col-span-1"><div className="text-xs uppercase text-pc-text-muted">{t("generated.stats.record")}</div><div className="text-sm font-semibold text-pc-text">{formatRecord(detail.wins, detail.losses)}</div></div></div></div>
     </section>
     {currentReference?.tiers.length ? <section>
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
@@ -142,7 +141,7 @@ export default function ItemDetailPage() {
               <div key={level.level} className="contents">
                 <div className="flex min-w-0 flex-col items-end justify-center pr-1 text-right text-xs sm:pr-2">
                   <span className="font-semibold text-pc-text-secondary">{t("generated.stats.levelValue1", { value1: Number(level.level) + 1 })}</span>
-                  <span className="font-mono font-bold" style={{ color: getStatQuality(level.winRate, 1, 1).color }}>{percent(level.winRate)}</span>
+                  <span className="font-mono font-bold" style={{ color: getPercentageColor(level.winRate) }}>{percent(level.winRate)}</span>
                   <span className="text-pc-text-muted">{formatCount(level.totalUses)}</span>
                 </div>
                 {chartSlots.map((slot) => {
@@ -151,7 +150,7 @@ export default function ItemDetailPage() {
                   const quality = getStatQuality(cell.winRate, 1, 1);
                   return (
                     <div key={slot.slot} className="min-h-20 min-w-0 rounded-lg border bg-pc-bg-secondary/50 p-1 text-center sm:p-2.5" style={{ borderColor: quality.borderColor }}>
-                      <div className="font-mono text-sm font-bold" style={{ color: quality.color }}>{percent(cell.winRate)}</div>
+                      <div className="font-mono text-sm font-bold" style={{ color: getPercentageColor(cell.winRate) }}>{percent(cell.winRate)}</div>
                       <div className="mx-auto mt-2 h-1.5 w-full max-w-32 overflow-hidden rounded-full bg-pc-bg-elevated">
                         <div className="h-full rounded-full" style={{ width: `${Math.max(8, cell.totalUses / maxCellUses * 100)}%`, background: quality.track }} />
                       </div>
@@ -165,7 +164,7 @@ export default function ItemDetailPage() {
             {chartSlots.map((slot) => (
               <div key={slot.slot} className="min-w-0 pt-1 text-center text-xs">
                 <div className="font-semibold text-pc-text-secondary">{t("generated.stats.slotValue1", { value1: slot.slot ?? "" })}</div>
-                <div className="font-mono font-bold" style={{ color: getStatQuality(slot.winRate, 1, 1).color }}>{percent(slot.winRate)}</div>
+                <div className="font-mono font-bold" style={{ color: getPercentageColor(slot.winRate) }}>{percent(slot.winRate)}</div>
                 <div className="text-pc-text-muted">{formatCount(slot.totalUses)}</div>
               </div>
             ))}

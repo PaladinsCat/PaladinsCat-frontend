@@ -9,6 +9,7 @@ import type { MatchResultPlayer, TeamAverages } from "./types";
 import MatchupCard from "./matchup-card";
 import { matchPlayerKey } from "./player-identity";
 import { useLocalization } from "@/lib/localization-context";
+import { getPercentageColor } from "@/lib/stat-quality";
 
 interface TeamMatchupProps {
   players: MatchResultPlayer[];
@@ -44,7 +45,7 @@ export default function TeamMatchup({ players, label, averages }: TeamMatchupPro
           </div>
           <div>
             <div className="text-xs text-pc-text-muted">{t("generated.matches.avgWr")}</div>
-            <div className="text-sm font-semibold text-pc-text">{averages.avgWinRate}</div>
+            <div className="text-sm font-semibold" style={averages.avgWinRateValue == null ? undefined : { color: getPercentageColor(averages.avgWinRateValue) }}>{averages.avgWinRate}</div>
           </div>
           <div>
             <div className="text-xs text-pc-text-muted">{t("generated.matches.avgPlayerElo")}</div>

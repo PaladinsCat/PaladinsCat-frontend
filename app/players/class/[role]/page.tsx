@@ -15,6 +15,7 @@ import PlayerName from "@/components/player-name";
 import { useLocalization } from "@/lib/localization-context";
 import PlayersPageHeader from "@/components/ui/players-page-header";
 import { SegmentedRouteLinks } from "@/components/ui/segmented-control";
+import { getPercentageColor } from "@/lib/stat-quality";
 
 
 const VALID_ROLES = ["Frontline", "Damage", "Flank", "Support"] as const;
@@ -211,15 +212,7 @@ export default function ClassEloPage() {
                         </span>
                       </td>
                       <td className="py-2.5 px-4 text-right">
-                        <span
-                          className={
-                            p.winRate >= 55
-                              ? "text-emerald-400 font-medium"
-                              : p.winRate >= 50
-                              ? "text-emerald-300"
-                              : "text-red-400"
-                          }
-                        >
+                        <span className="font-medium" style={{ color: getPercentageColor(p.winRate) }}>
                           {formatPercent(p.winRate)}
                         </span>
                       </td>

@@ -16,6 +16,7 @@ import PartyBadge, { getPartyNumber } from "./party-badge";
 import { MatchPlayerLink } from "./player-identity";
 import CanonicalTalentImage from "@/components/canonical-talent-image";
 import { useLocalization } from "@/lib/localization-context";
+import { getPercentageColor } from "@/lib/stat-quality";
 import { ecpmActivityLabelKey, ecpmActivityTextClass } from "@/lib/ecpm-activity";
 
 interface StatTableRowProps {
@@ -227,7 +228,7 @@ export default function StatTable({ player, fact, wins }: StatTableRowProps) {
               </div>
               <div className="bg-pc-bg-secondary/50 rounded px-2 py-1">
                 <div className="text-xs text-pc-text-muted">{t("generated.matches.split")}</div>
-                <div className="text-sm font-medium text-pc-text">{formatPercent(damageStats.weaponShare)}</div>
+                <div className="text-sm font-medium" style={{ color: getPercentageColor(damageStats.weaponShare) }}>{formatPercent(damageStats.weaponShare)}</div>
               </div>
 
               {/* Healing breakdown */}

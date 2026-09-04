@@ -30,6 +30,7 @@ import { parsePlayerTitle, parsePlayerTitleSegments } from "@/lib/player-title";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
 import { csrfHeader } from "@/lib/csrf";
 import { playerAvatarProxyPath } from "@/lib/player-avatar-proxy";
+import { getPercentageColor } from "@/lib/stat-quality";
 import type { PlayerResponse } from "@/lib/player-profile-types";
 import PlayerRelationshipSummaryCard from "@/components/player-relationship-summary";
 
@@ -70,11 +71,11 @@ function trendColor(trend: number): string {
 }
 
 // Inline stat row: label + value
-function StatRow({ label, value, color }: { label: string; value: string; color?: string }) {
+function StatRow({ label, value, color, style }: { label: string; value: string; color?: string; style?: React.CSSProperties }) {
   return (
     <div className="flex min-w-0 items-start justify-between gap-3">
       <span className="min-w-0 break-words text-xs text-pc-text-muted">{label}</span>
-      <span className={`min-w-0 break-words text-right text-xs font-mono font-medium ${color || "text-pc-text"}`}>{value}</span>
+      <span className={`min-w-0 break-words text-right text-xs font-mono font-medium ${color || "text-pc-text"}`} style={style}>{value}</span>
     </div>
   );
 }
@@ -722,7 +723,7 @@ export default function PlayerProfileClient({
                     <StatRow label={t("generated.players.casualDeserted")} value={formatNumber(player.leaves)} />
                     <StatRow label={t("generated.players.totalWins")} value={formatNumber(globalWins)} color="text-emerald-400" />
                     <StatRow label={t("generated.players.totalLosses")} value={formatNumber(globalLosses)} color="text-rose-400" />
-                    <StatRow label={t("generated.players.winRate")} value={formatPercent(winRate)} color={winRate >= 50 ? "text-emerald-400" : "text-rose-400"} />
+                    <StatRow label={t("generated.players.winRate")} value={formatPercent(winRate)} style={{ color: getPercentageColor(winRate) }} />
                   </div>
                 </div>
               </div>
@@ -861,7 +862,7 @@ export default function PlayerProfileClient({
                 </div>
                 <div>
                   <div className="text-xs text-pc-text-muted">{t("generated.players.winRate")}</div>
-                  <div className="font-mono text-xs text-pc-text">{kbmWr}%</div>
+                  <div className="font-mono text-xs" style={kbmWr !== "—" ? { color: getPercentageColor(Number(kbmWr)) } : undefined}>{kbmWr}%</div>
                 </div>
               </div>
             </div>
@@ -996,7 +997,7 @@ export default function PlayerProfileClient({
                             <span>{t("generated.players.team")}{" "}{taskForce}</span>
                             <div className="flex flex-wrap items-center justify-end gap-2">
                               {currentMatchWinChance && (
-                                <span className={`rounded-full border px-2 py-1 text-xs font-semibold ${taskForce === 1 ? 'border-sky-400/25 bg-sky-400/10 text-sky-200' : 'border-rose-400/25 bg-rose-400/10 text-rose-200'}`}>
+                                <span className={`rounded-full border px-2 py-1 text-xs font-semibold ${taskForce === 1 ? 'border-sky-400/25 bg-sky-400/10' : 'border-rose-400/25 bg-rose-400/10'}`} style={{ color: getPercentageColor(taskForce === 1 ? currentMatchWinChance.teamOne : currentMatchWinChance.teamTwo) }}>
                                   {t("liveMatch.estimatedWinChance", {
                                     percent: formatNumber(taskForce === 1 ? currentMatchWinChance.teamOne : currentMatchWinChance.teamTwo),
                                   })}
@@ -1067,7 +1068,7 @@ export default function PlayerProfileClient({
                                     <div className="font-mono text-sm text-pc-accent">
                                       {p.queue_elo != null ? t("generated.players.value1Elo", { value1: Math.round(Number(p.queue_elo)) }) : p.has_profile ? t("generated.players.localProfile") : t("generated.players.noRating")}
                                     </div>
-                                    <div className="font-medium text-pc-text-secondary">{tierName} · {winRate}</div>
+                                    <div className="font-medium text-pc-text-secondary">{tierName} · <span style={Number.isFinite(storedWinRate) ? { color: getPercentageColor(storedWinRate) } : undefined}>{winRate}</span></div>
                                     <div className="text-pc-text-muted">{performanceSummary}</div>
                                   </div>
                                 </div>

@@ -15,6 +15,7 @@ import { fetchPlayerChampionStats, refreshPlayerChampionStats, type PlayerChampi
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championMasteryLevelFromXp } from "@/lib/champion-mastery";
 import { calculateKda, formatKda } from "@/lib/kda";
+import { getPercentageColor } from "@/lib/stat-quality";
 import { useLocalization } from "@/lib/localization-context";
 
 
@@ -159,9 +160,9 @@ export default function PlayerChampionStatsPage() {
                   <span className="truncate">{champion.championName}</span>
                 </div>
                 <div className="h-2.5 overflow-hidden rounded-full bg-pc-bg-secondary" aria-hidden="true">
-                  <div className="h-full rounded-full bg-pc-accent" style={{ width: `${Math.max(0, Math.min(100, champion.winRate ?? 0))}%` }} />
+                  <div className="h-full rounded-full" style={{ width: `${Math.max(0, Math.min(100, champion.winRate ?? 0))}%`, background: getPercentageColor(champion.winRate) }} />
                 </div>
-                <div className="min-w-16 text-right font-mono text-pc-text-secondary">{formatNumber(champion.winRate ?? 0, { maximumFractionDigits: 1 })}% · {formatNumber(champion.matchesPlayed)}</div>
+                <div className="min-w-16 text-right font-mono" style={{ color: getPercentageColor(champion.winRate) }}>{formatNumber(champion.winRate ?? 0, { maximumFractionDigits: 1 })}% · {formatNumber(champion.matchesPlayed)}</div>
               </div>
             ))}
           </div>
@@ -246,7 +247,7 @@ export default function PlayerChampionStatsPage() {
                   <td className="px-1.5 py-1.5 font-mono text-xs text-pc-text-secondary">{formatNumber(champion.wins)}</td>
                   <td className="px-1.5 py-1.5 font-mono text-xs text-pc-text-secondary">{formatNumber(champion.losses)}</td>
                   <td className="px-1.5 py-1.5 font-mono text-xs">{champion.winRate != null ? (
-                    <span className={champion.winRate >= 55 ? "text-emerald-400 font-medium" : champion.winRate >= 50 ? "text-emerald-300" : "text-rose-400"}>{t("common.playerChampions.winPercentage", { value: formatNumber(champion.winRate) })}</span>
+                    <span className="font-medium" style={{ color: getPercentageColor(champion.winRate) }}>{t("common.playerChampions.winPercentage", { value: formatNumber(champion.winRate) })}</span>
                   ) : "—"}</td>
                   <td className="px-1.5 py-1.5 font-mono text-xs text-pc-text-secondary">{champion.rating != null ? formatNumber(champion.rating) : "—"}</td>
                   <td className="px-1.5 py-1.5 font-mono text-xs text-pc-text-secondary">{champion.ratingDeviation != null ? formatNumber(champion.ratingDeviation) : "—"}</td>

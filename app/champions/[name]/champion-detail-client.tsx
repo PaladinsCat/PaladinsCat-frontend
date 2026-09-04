@@ -15,7 +15,7 @@ import { LoadingPanel } from "@/components/async-state";
 import SmartImage from "@/components/SmartImage";
 import CanonicalTalentImage from "@/components/canonical-talent-image";
 import { championSlug } from "@/lib/utils";
-import { getStatQuality } from "@/lib/stat-quality";
+import { getPercentageColor, getStatQuality } from "@/lib/stat-quality";
 import { matchMapImagePath } from "@/lib/map-images";
 import {
   getChampionData,
@@ -170,7 +170,7 @@ function RankedPerformanceCard({
         </div>}
         <div className="flex min-h-14 flex-wrap items-center justify-center gap-x-4 gap-y-2 px-2 py-2 sm:flex-nowrap sm:gap-x-5">
           <div className="flex items-baseline gap-2">
-            <span className="font-mono text-lg text-pc-accent">{stats.avgWinRate == null ? "—" : formatPercent(stats.avgWinRate)}</span>
+            <span className="font-mono text-lg" style={stats.avgWinRate == null ? undefined : { color: getPercentageColor(stats.avgWinRate) }}>{stats.avgWinRate == null ? "—" : formatPercent(stats.avgWinRate)}</span>
             <span className="text-xs text-pc-text-muted">{t("common.sort.winRate")}</span>
           </div>
           <div className="flex items-baseline gap-2">
@@ -504,9 +504,9 @@ export default function ChampionDetailPage({
                               <img src={itemIcon(item.itemName)} alt="" className="mb-1 h-12 w-12 rounded-md object-contain" />
                               <div className="w-full truncate text-xs font-medium leading-tight text-pc-text group-hover:text-pc-accent">{item.itemName}</div>
                               <div className="mt-0.5 flex items-center gap-1 text-xs">
-                                <span style={{ color: quality.color }}>{t("generated.champions.wr")}{" "}{formatPercent(item.winRate)}</span>
+                                <span style={{ color: getPercentageColor(item.winRate) }}>{t("generated.champions.wr")}{" "}{formatPercent(item.winRate)}</span>
                                 <span className="text-pc-text-muted">·</span>
-                                <span style={{ color: quality.color }}>{t("generated.champions.pr")}{" "}{formatPercent((item.pickRate ?? 0))}</span>
+                                <span style={{ color: getPercentageColor(item.pickRate) }}>{t("generated.champions.pr")}{" "}{formatPercent((item.pickRate ?? 0))}</span>
                               </div>
                             </Link>
                           );
@@ -540,13 +540,13 @@ export default function ChampionDetailPage({
                   <div className="grid grid-cols-3 gap-2 text-center">
                     <div>
                       <div className="text-xs text-pc-text-muted">{t("generated.champions.wr")}</div>
-                      <div className={`text-sm font-mono ${quality.textClass}`} style={{ color: quality.color }}>
+                      <div className="text-sm font-mono" style={{ color: getPercentageColor(tierStat.winRate) }}>
                         {formatPercent(tierStat.winRate)}
                       </div>
                     </div>
                     <div>
                       <div className="text-xs text-pc-text-muted">{t("generated.champions.pr")}</div>
-                      <div className="text-sm font-mono" style={{ color: quality.color }}>{formatPercent(tierStat.pickRate)}</div>
+                      <div className="text-sm font-mono" style={{ color: getPercentageColor(tierStat.pickRate) }}>{formatPercent(tierStat.pickRate)}</div>
                     </div>
                     <div>
                       <div className="text-xs text-pc-text-muted">{t("generated.champions.plays")}</div>
@@ -579,7 +579,7 @@ export default function ChampionDetailPage({
                   return (
                     <tr key={t.trendWeek}>
                       <td className="text-pc-text text-sm">{t.trendWeek}</td>
-                      <td className={`font-mono text-sm ${quality.textClass}`} style={{ color: quality.color }}>
+                      <td className="font-mono text-sm" style={{ color: getPercentageColor(t.weeklyWinRate) }}>
                         {formatPercent(t.weeklyWinRate)}
                       </td>
                       <td className="text-pc-text-muted text-sm">{formatNumber(t.weeklyPlays)}</td>
@@ -624,11 +624,11 @@ export default function ChampionDetailPage({
                   <div className="grid grid-cols-3 gap-2 p-3 text-center text-xs">
                     <div>
                       <div className="text-xs uppercase text-pc-text-muted">{t("generated.champions.winRate")}</div>
-                      <div className="font-bold" style={{ color: quality.color }}>{formatPercent(map.winRate)}</div>
+                      <div className="font-bold" style={{ color: getPercentageColor(map.winRate) }}>{formatPercent(map.winRate)}</div>
                     </div>
                     <div>
                       <div className="text-xs uppercase text-pc-text-muted">{t("generated.champions.pickRate")}</div>
-                      <div className="font-medium text-pc-accent">{formatPercent(map.pickRate)}</div>
+                      <div className="font-medium" style={{ color: getPercentageColor(map.pickRate) }}>{formatPercent(map.pickRate)}</div>
                     </div>
                     <div>
                       <div className="text-xs uppercase text-pc-text-muted">{t("generated.champions.plays")}</div>
@@ -782,14 +782,14 @@ function TalentCard({
         )}
         {stat && stat.totalPlays > 0 && (
           <div className="flex items-center gap-2 mt-2 text-xs flex-wrap">
-            <span className={quality?.textClass ?? winRateColor(stat.winRate)} style={quality ? { color: quality.color } : undefined}>
+            <span className={quality?.textClass ?? "text-pc-text"} style={{ color: quality?.color ?? getPercentageColor(stat.winRate) }}>
               <span className="text-pc-text-muted mr-1">{t("generated.champions.wr")}</span>
               {formatPercent(stat.winRate)}
             </span>
             <span className="text-pc-border">|</span>
             <span className="text-pc-text-muted">
               <span className="mr-1">{t("generated.champions.pr")}</span>
-              <span style={quality ? { color: quality.color } : undefined}>{formatPercent(pickRate)}</span>
+              <span style={{ color: getPercentageColor(pickRate) }}>{formatPercent(pickRate)}</span>
             </span>
             <span className="text-pc-border">|</span>
             <span className="text-pc-text-muted overflow-wrap break-word">
@@ -815,11 +815,3 @@ function TalentCard({
     </div>
   );
 }
-
-function winRateColor(wr: number): string {
-  if (wr >= 55) return "text-emerald-400";
-  if (wr >= 50) return "text-pc-text";
-  if (wr >= 45) return "text-amber-400";
-  return "text-rose-400";
-}
-

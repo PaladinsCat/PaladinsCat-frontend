@@ -9,6 +9,7 @@ import Link from "next/link";
 import { UsersRound } from "lucide-react";
 import PlayerRelationshipBars from "@/components/player-relationship-bars";
 import { fetchPlayerRelationshipSummary, type PlayerRelationshipSummary } from "@/lib/api-client";
+import { getPercentageColor } from "@/lib/stat-quality";
 import { useLocalization } from "@/lib/localization-context";
 
 /** Provide this exported item.
@@ -55,7 +56,7 @@ export default function PlayerRelationshipSummaryCard({ playerId }: { playerId: 
               <div><span className="text-pc-text-muted">{t("common.relationships.opponents")}</span><div className="font-mono text-violet-300">{summary ? formatNumber(opponentMatches) : "—"}</div></div>
               <div><span className="text-pc-text-muted">{t("common.relationships.partyPartners")}</span><div className="font-mono text-amber-300">{summary ? formatNumber(summary.totals.partyPartners) : "—"}</div></div>
             </div>
-            <div className="mt-2 text-xs"><span className="text-pc-text-muted">{t("generated.players.winRate")}: </span><span className="font-mono text-emerald-300">{formatPercent(partyWinRate)}</span>{partyWinRate != null && partyMetricMatches !== partyMatches && <span className="ml-2 text-pc-text-muted">({formatNumber(partyMetricMatches)}/{formatNumber(partyMatches)} {t("generated.players.matches")})</span>}</div>
+            <div className="mt-2 text-xs"><span className="text-pc-text-muted">{t("generated.players.winRate")}: </span><span className="font-mono" style={partyWinRate == null ? undefined : { color: getPercentageColor(partyWinRate) }}>{formatPercent(partyWinRate)}</span>{partyWinRate != null && partyMetricMatches !== partyMatches && <span className="ml-2 text-pc-text-muted">({formatNumber(partyMetricMatches)}/{formatNumber(partyMatches)} {t("generated.players.matches")})</span>}</div>
           </div>
         </div>
         {summary && summary.partyPartners.length > 0 && <div className="mt-4 border-t border-pc-border/50 pt-3"><PlayerRelationshipBars rows={summary.partyPartners} limit={3} tone="amber" showDetails /></div>}

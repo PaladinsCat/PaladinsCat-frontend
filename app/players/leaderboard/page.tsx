@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { fetchRankedLeaderboard, type RankedPlayer } from "@/lib/api-client";
 import { resolveEffectiveTier, getRankIconPath } from "@/lib/tier-utils";
+import { getPercentageColor } from "@/lib/stat-quality";
 import { LoadingPanel } from "@/components/async-state";
 import PlayerName from "@/components/player-name";
 import { useLocalization } from "@/lib/localization-context";
@@ -351,7 +352,7 @@ export default function LeaderboardPage() {
                       <div className="truncate text-sm font-semibold text-pc-text"><PlayerName playerId={player.player_id}>{player.name}</PlayerName></div>
                       <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-pc-text-muted">
                         <span>{effective.displayName}</span>
-                        {player.winRate != null && <span className={player.winRate >= 50 ? "text-emerald-400" : "text-red-400"}>{formatNumber(player.winRate, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}{t("generated.players.wr")}</span>}
+                        {player.winRate != null && <span style={{ color: getPercentageColor(player.winRate) }}>{formatNumber(player.winRate, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}{t("generated.players.wr")}</span>}
                       </div>
                     </div>
                     <div className="shrink-0 text-right">
@@ -418,7 +419,7 @@ export default function LeaderboardPage() {
                             </td>
                             <td className="py-2.5 px-4 text-right text-xs hidden md:table-cell">
                             {winRate != null ? (
-                              <span className={winRate >= 50 ? "text-emerald-400 font-medium" : "text-red-400"}>
+                              <span className="font-medium" style={{ color: getPercentageColor(winRate) }}>
                                 {formatPercent(winRate)}
                               </span>
                             ) : (
@@ -436,7 +437,7 @@ export default function LeaderboardPage() {
                           </td>
                           <td className="py-2.5 px-4 text-right text-xs hidden lg:table-cell">
                             {leaveRate != null ? (
-                              <span className={leaveRate > 5 ? "text-red-400" : leaveRate > 2 ? "text-yellow-400" : "text-pc-text-secondary"}>
+                              <span style={{ color: getPercentageColor(leaveRate, "low-is-good") }}>
                                 {formatPercent(leaveRate)}
                               </span>
                             ) : (

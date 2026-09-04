@@ -8,7 +8,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { fetchChampions, type Champion, type PublicStatsScope } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
-import { getStatQuality } from "@/lib/stat-quality";
+import { getPercentageColor } from "@/lib/stat-quality";
 import { championSlug } from "@/lib/utils";
 import { useLocalization } from "@/lib/localization-context";
 import { getStoredLobbyTierFilter } from "@/lib/lobby-tier";
@@ -22,8 +22,6 @@ type RateMetricKey = "winRate" | "banRate";
 interface RateMetricConfig {
   key: RateMetricKey;
   labelKey: TranslationKey;
-  stroke: string;
-  fill: string;
 }
 
 const CLASS_ORDER = ["Frontline", "Damage", "Flank", "Support"] as const;
@@ -130,7 +128,7 @@ function pctDiff(value: number, base: number): number {
 }
 
 function metricColor(config: RateMetricConfig, value: number): string {
-  return config.key === "winRate" ? getStatQuality(value, 1, 1).color : config.stroke;
+  return getPercentageColor(value);
 }
 
 /** Provide this exported item.
@@ -241,8 +239,8 @@ export default function ChampionRateDetailPage({
               <div className="text-xl font-bold" style={{ color: metricColor(config, globalAverage) }}>{formatRate(globalAverage)}</div>
             </div>
             <div className="relative h-2 min-w-0 flex-1 overflow-hidden rounded-full bg-pc-bg">
-              <div className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${Math.min(100, Math.max(0, globalAverage))}%`, background: config.fill }} />
-              <div className="absolute top-1/2 h-4 w-1 -translate-y-1/2 rounded-full" style={{ left: `${Math.min(100, Math.max(0, globalAverage))}%`, background: config.stroke }} />
+              <div className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${Math.min(100, Math.max(0, globalAverage))}%`, background: metricColor(config, globalAverage) }} />
+              <div className="absolute top-1/2 h-4 w-1 -translate-y-1/2 rounded-full" style={{ left: `${Math.min(100, Math.max(0, globalAverage))}%`, background: metricColor(config, globalAverage) }} />
             </div>
           </div>
           <div className="flex self-end shrink-0 items-center gap-6 text-right sm:self-auto">

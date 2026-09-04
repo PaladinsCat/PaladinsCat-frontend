@@ -6,18 +6,11 @@ import Link from "next/link";
 import SmartImage from "@/components/SmartImage";
 import type { ChampionLoadout } from "@/lib/champion-data";
 import type { ChampionCardStat, ChampionCardStatsResponse } from "@/lib/api-client";
-import { getStatQuality } from "@/lib/stat-quality";
+import { getPercentageColor, getStatQuality } from "@/lib/stat-quality";
 import { useLocalization } from "@/lib/localization-context";
 
 function statNameKey(value: string | null | undefined): string {
   return String(value ?? "").normalize("NFKD").toLowerCase().replace(/[^a-z0-9]/g, "");
-}
-
-function winRateColor(winRate: number): string {
-  if (winRate >= 55) return "text-emerald-400";
-  if (winRate >= 50) return "text-pc-text";
-  if (winRate >= 45) return "text-amber-400";
-  return "text-rose-400";
 }
 
 /** Provide this exported item.
@@ -88,11 +81,11 @@ export default function ChampionLoadoutGrid({
                     {stat && stat.totalPlays > 0 && (
                       <div className="mt-2 space-y-1.5">
                         <div className="flex flex-wrap items-center gap-2 text-xs">
-                          <span className={quality?.textClass ?? winRateColor(stat.winRate)} style={quality ? { color: quality.color } : undefined}>
+                          <span className="min-w-0 whitespace-nowrap" style={{ color: getPercentageColor(stat.winRate) }}>
                             <span className="mr-1 text-pc-text-muted">{t("generated.champions.wr")}</span>{formatPercent(stat.winRate)}
                           </span>
                           <span className="text-pc-border">|</span>
-                          <span className="text-pc-text-muted"><span className="mr-1">{t("generated.champions.pr")}</span><span style={quality ? { color: quality.color } : undefined}>{formatPercent(pickRate)}</span></span>
+                          <span className="text-pc-text-muted"><span className="mr-1">{t("generated.champions.pr")}</span><span style={{ color: getPercentageColor(pickRate) }}>{formatPercent(pickRate)}</span></span>
                           <span className="text-pc-border">|</span>
                           <span className="break-words text-pc-text-muted"><span className="mr-1">{t("generated.champions.picks")}</span><span style={quality ? { color: quality.color } : undefined}>{formatPlays(stat.totalPlays)}</span></span>
                           <span className="text-pc-border">|</span>

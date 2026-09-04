@@ -88,6 +88,7 @@ export function computeTeamAverages(
       avgLevel: "—",
       avgEloPlus: "—",
       avgWinRate: "—",
+      avgWinRateValue: null,
       avgKDA: "—",
     };
   }
@@ -131,6 +132,7 @@ export function computeTeamAverages(
     })(),
     // globalWinRate is already expressed in percentage points (0–100).
     avgWinRate: winRateCount > 0 ? formatPercent(winRateSum / winRateCount) : "—",
+    avgWinRateValue: winRateCount > 0 ? winRateSum / winRateCount : null,
     avgKDA: kdaCount > 0 ? formatNumber(kdaSum / kdaCount, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "—",
   };
 }

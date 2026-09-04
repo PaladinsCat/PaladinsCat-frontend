@@ -19,7 +19,7 @@ import {
   type ChampionCardLevelStat,
 } from "@/lib/api-client";
 import { championSlug } from "@/lib/utils";
-import { getStatQuality } from "@/lib/stat-quality";
+import { getPercentageColor, getStatQuality } from "@/lib/stat-quality";
 import { ErrorState } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { useLocalization } from "@/lib/localization-context";
@@ -167,8 +167,6 @@ export default function ChampionCardDetailPage() {
   }
 
   const championDisplayName = championData?.name ?? detail.championName ?? name;
-  const headlineQuality = getStatQuality(detail.winRate, detail.totalPlays, Math.max(detail.totalPlays, 1));
-
   return (
     <div className="space-y-6">
       <header><ContextBackLink fallbackHref={`/champions/${name}`} label={championDisplayName} /><h1 className="mt-2 pc-heading pc-heading-lg">{detail.cardName}</h1></header>
@@ -194,7 +192,7 @@ export default function ChampionCardDetailPage() {
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <SummaryTile label={selectedTalent ? t("generated.champions.talentPlays") : t("common.sort.totalPlays")} value={formatPlays(detail.totalPlays)} />
-              <SummaryTile label={t("generated.champions.winRate")} value={formatPct(detail.winRate)} color={headlineQuality.color} />
+              <SummaryTile label={t("generated.champions.winRate")} value={formatPct(detail.winRate)} color={getPercentageColor(detail.winRate)} />
               <SummaryTile label={t("generated.champions.wins")} value={formatNumber(detail.wins)} />
               <SummaryTile label={t("generated.champions.losses")} value={formatNumber(detail.losses)} />
             </div>
@@ -285,7 +283,7 @@ function TalentPairingCard({
         <div className="min-w-0 flex-1">
           <div className="text-sm font-medium text-pc-accent truncate">{talent.talentName}</div>
           <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
-            <span style={{ color: quality.color }}><span className="text-pc-text-muted mr-1">{t("generated.champions.wr")}</span>{formatPct(talent.winRate)}</span>
+            <span style={{ color: getPercentageColor(talent.winRate) }}><span className="text-pc-text-muted mr-1">{t("generated.champions.wr")}</span>{formatPct(talent.winRate)}</span>
             <span className="text-pc-border">|</span>
             <span className="text-pc-text-muted"><span className="mr-1">{t("generated.champions.picks")}</span><span style={{ color: quality.color }}>{formatPlays(talent.totalPlays)}</span></span>
             <span className="text-pc-border">|</span>
@@ -310,7 +308,7 @@ function LevelCard({ level, maxLevelPlays }: { level: ChampionCardLevelStat; max
     <div className="pc-surface-light rounded-lg p-4 border transition-colors" style={{ borderColor: quality.borderColor }}>
       <div className="flex items-center justify-between gap-3 mb-3">
         <div className="text-sm font-semibold text-pc-text">{t("common.format.levelShort", { level: level.level })}</div>
-        <div className="text-xs font-mono" style={{ color: quality.color }}>{formatPct(level.winRate)}</div>
+        <div className="text-xs font-mono" style={{ color: getPercentageColor(level.winRate) }}>{formatPct(level.winRate)}</div>
       </div>
       <div className="h-2 rounded-full bg-pc-bg-elevated overflow-hidden mb-2">
         <div className="h-full rounded-full" style={{ width: `${width}%`, background: quality.track }} />

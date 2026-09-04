@@ -7,6 +7,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { fetchTierSummary, fetchTiers, type TierStat, type TierSummary } from "@/lib/api-client";
 import { getRankIconPath, TIER_NAMES } from "@/lib/tier-utils";
+import { getPercentageColor } from "@/lib/stat-quality";
 import { EmptyState, ErrorState } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { useLocalization } from "@/lib/localization-context";
@@ -120,7 +121,7 @@ function DistributionChart({
                 className="flex flex-col items-center justify-end gap-1 min-w-6 h-full group"
               >
                 <div className="text-xs text-pc-text-muted tabular-nums opacity-0 group-hover:opacity-100 transition-opacity">
-                  {formatPercent(share)}
+                  <span style={{ color: getPercentageColor(share) }}>{formatPercent(share)}</span>
                 </div>
                 <div
                   className="w-3 rounded-t-sm bg-pc-accent-mid group-hover:bg-pc-accent transition-colors"

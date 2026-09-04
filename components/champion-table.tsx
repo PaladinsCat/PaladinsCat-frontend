@@ -12,7 +12,7 @@ import { STATIC_CHAMPIONS } from "@/lib/static-champions";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
 import { getRankIconPath } from "@/lib/tier-utils";
-import { getStatQuality } from "@/lib/stat-quality";
+import { getPercentageColor, getStatQuality } from "@/lib/stat-quality";
 import { useLocalization } from "@/lib/localization-context";
 import { getStoredLobbyTierFilter } from "@/lib/lobby-tier";
 import { ArrowDown, ArrowUp, ChevronRight, Palette, ShieldAlert, Trophy } from "lucide-react";
@@ -360,12 +360,12 @@ export default function ChampionTable({ initialChampions = null }: { initialCham
 
                     {/* Row 2: reserve three stable metric columns while DB stats resolve. */}
                     <div className={`grid grid-cols-[auto_auto_minmax(0,1fr)] items-center gap-1 text-xs tabular-nums transition-opacity duration-200 motion-reduce:transition-none ${dbAvailable === null ? "opacity-50" : "opacity-100"}`}>
-                      <span className={`min-w-0 whitespace-nowrap ${quality?.textClass ?? "text-pc-text-muted"}`} style={quality ? { color: quality.color } : undefined}>
+                      <span className="min-w-0 whitespace-nowrap" style={c.winRate != null ? { color: getPercentageColor(c.winRate) } : undefined}>
                         <span className="text-pc-text-muted">{t("generated.champions.wr")}</span>
                         {c.winRate != null ? t("generated.champions.value1", { value1: c.winRate }) : "—"}
                       </span>
                       {statsScope === "ranked" ? (
-                        <span className={`ml-0.5 min-w-0 whitespace-nowrap ${c.banRate != null ? "text-rose-400" : "text-pc-text-muted"}`}>
+                        <span className={`ml-0.5 min-w-0 whitespace-nowrap ${c.banRate != null ? "text-pc-text" : "text-pc-text-muted"}`} style={c.banRate != null ? { color: getPercentageColor(c.banRate) } : undefined}>
                           <span className="text-pc-text-muted">{t("generated.champions.br")}</span>
                           {c.banRate != null ? t("generated.champions.value1", { value1: c.banRate }) : "—"}
                         </span>

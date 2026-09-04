@@ -25,6 +25,7 @@ import { useSearchParams } from "next/navigation";
 import { useLocalization } from "@/lib/localization-context";
 import PlayersPageHeader from "@/components/ui/players-page-header";
 import { SegmentedControl } from "@/components/ui/segmented-control";
+import { getPercentageColor } from "@/lib/stat-quality";
 
 type ELOMode = "champion" | "account";
 
@@ -402,7 +403,7 @@ function ChampionEloContent({ fixedMode }: { fixedMode?: ELOMode }) {
                       </td>
                       <td className="py-2.5 px-4 text-right">
                         {p.win_rate != null ? (
-                          <span className={p.win_rate >= 50 ? "text-emerald-400 font-medium" : "text-red-400"}>
+                          <span className="font-medium" style={{ color: getPercentageColor(p.win_rate) }}>
                             {formatPercent(p.win_rate)}
                           </span>
                         ) : (
@@ -473,7 +474,7 @@ function ChampionEloContent({ fixedMode }: { fixedMode?: ELOMode }) {
                       </td>
                       <td className="py-2.5 px-4 text-right">
                         {p.winRate != null ? (
-                          <span className={p.winRate >= 50 ? "text-emerald-400 font-medium" : "text-red-400"}>
+                          <span className="font-medium" style={{ color: getPercentageColor(p.winRate) }}>
                             {formatPercent(p.winRate)}
                           </span>
                         ) : (

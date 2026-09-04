@@ -6,6 +6,7 @@ import Link from "next/link";
 import PlayerName from "@/components/player-name";
 import { useLocalization } from "@/lib/localization-context";
 import type { TranslationKey } from "@/lib/localization/messages";
+import { getPercentageColor } from "@/lib/stat-quality";
 
 const CLASS_ICONS: Record<string, string> = {
   Frontline: "/images/icons/Class_Front_Line_Icon.avif",
@@ -47,7 +48,7 @@ export default function PlayerModerationCards({ players, showSeverity = false }:
           [t("common.metrics.dpm"), value(player.avgDpm ?? player.dpm)], [t("common.metrics.hpm"), value(player.avgHpm ?? player.hpm)],
           [t("common.metrics.cpm"), value(player.avgCpm ?? player.gpm)], [t("common.metrics.spm"), value(player.avgSpm ?? player.mpm)],
           [t("common.metrics.kda"), value(player.kda)], [t("common.metrics.winRate"), player.winRate == null ? "—" : formatPercent(player.winRate)],
-        ].map(([label, metric]) => <div key={label} className="bg-pc-bg-elevated px-2 py-2 text-center"><dt className="text-xs uppercase tracking-wide text-pc-text-muted">{label}</dt><dd className="mt-0.5 truncate font-mono text-xs font-semibold text-pc-text-secondary">{metric}</dd></div>)}
+        ].map(([label, metric]) => <div key={label} className="bg-pc-bg-elevated px-2 py-2 text-center"><dt className="text-xs uppercase tracking-wide text-pc-text-muted">{label}</dt><dd className="mt-0.5 truncate font-mono text-xs font-semibold text-pc-text-secondary" style={label === t("common.metrics.winRate") && player.winRate != null ? { color: getPercentageColor(player.winRate) } : undefined}>{metric}</dd></div>)}
       </dl>
       {player.reason && <p className="break-words px-3 py-2 text-xs leading-relaxed text-pc-text-muted [overflow-wrap:anywhere]">{player.reason}</p>}
     </article>)}

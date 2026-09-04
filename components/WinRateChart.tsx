@@ -33,7 +33,7 @@ export default function WinRateChart({ data, championName }: WinRateChartProps) 
       yLabel={t("generated.leaderboard.winRate")}
       title={t("generated.components.value1WinRateOverTime", { value1: championName })}
       height={250}
-      colors={["var(--pc-chart-green)"]}
+      percentageScale
       showLegend={false}
     />
   );

@@ -22,7 +22,7 @@ import {
   type ChampionCardStatsResponse,
   type ChampionTalentStat,
 } from "@/lib/api-client";
-import { getStatQuality } from "@/lib/stat-quality";
+import { getPercentageColor } from "@/lib/stat-quality";
 import { withStoredLobbyTier } from "@/lib/lobby-tier";
 import { championSlug } from "@/lib/utils";
 import { useLocalization } from "@/lib/localization-context";
@@ -174,7 +174,6 @@ export default function ChampionTalentDetailPage() {
   }
 
   const pickRate = totalMatches > 0 ? (talentStat.totalPlays / totalMatches) * 100 : 0;
-  const quality = getStatQuality(talentStat.winRate, pickRate, 100);
   return (
     <div className="space-y-6">
       <header><ContextBackLink fallbackHref={`/champions/${name}`} label={championData.name} /><h1 className="mt-2 pc-heading pc-heading-lg">{talentStat.talentName}</h1></header>
@@ -194,8 +193,8 @@ export default function ChampionTalentDetailPage() {
             </div>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <SummaryTile label={t("generated.champions.talentPlays")} value={formatPlays(talentStat.totalPlays)} />
-              <SummaryTile label={t("generated.champions.pickRate")} value={formatPercent(pickRate)} color={quality.color} />
-              <SummaryTile label={t("generated.champions.winRate")} value={formatPercent(talentStat.winRate)} color={quality.color} />
+              <SummaryTile label={t("generated.champions.pickRate")} value={formatPercent(pickRate)} color={getPercentageColor(pickRate)} />
+              <SummaryTile label={t("generated.champions.winRate")} value={formatPercent(talentStat.winRate)} color={getPercentageColor(talentStat.winRate)} />
               <SummaryTile label={t("generated.champions.record")} value={formatRecord(talentStat.wins, talentStat.losses)} />
             </div>
           </div>

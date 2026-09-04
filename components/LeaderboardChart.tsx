@@ -6,6 +6,7 @@
 
 import { BarChartComponent } from "./Chart";
 import type { LeaderboardEntry } from "@/lib/api-client";
+import { getPercentageColor } from "@/lib/stat-quality";
 import { useLocalization } from "@/lib/localization-context";
 
 export interface LeaderboardChartProps {
@@ -41,9 +42,9 @@ export default function LeaderboardChart({
       yKeys={["winRate"]}
       yLabel={t("generated.leaderboard.winRate")}
       title={resolvedTitle}
-      height={400}
-      colors={["var(--pc-chart-green)"]}
-      showLegend={false}
+     height={400}
+      barColors={{ winRate: chartData.map((row) => getPercentageColor(row.winRate)) }}
+     showLegend={false}
       showXAxis={false}
     />
   );

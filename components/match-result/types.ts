@@ -74,6 +74,7 @@ export interface TeamAverages {
   avgLevel: string;
   avgEloPlus: string;
   avgWinRate: string;
+  avgWinRateValue: number | null;
   avgKDA: string;
 }
 

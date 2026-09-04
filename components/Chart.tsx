@@ -14,9 +14,11 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
+  Cell,
   ResponsiveContainer,
 } from "recharts";
 import { chartColors, chartText, chartTextSecondary, chartGrid } from "@/lib/chart-colors";
+import { getPercentageColor } from "@/lib/stat-quality";
 
 export interface ChartProps {
   data: Array<Record<string, unknown>>;
@@ -26,6 +28,8 @@ export interface ChartProps {
   title?: string;
   height?: number;
   colors?: string[];
+  barColors?: Record<string, string[]>;
+  percentageScale?: boolean;
   showLegend?: boolean;
   showGrid?: boolean;
   showTooltip?: boolean;
@@ -45,6 +49,7 @@ export function LineChartComponent({
   title,
   height = 300,
   colors = chartColors,
+  percentageScale = false,
   showLegend = true,
   showGrid = true,
   showTooltip = true,
@@ -56,6 +61,15 @@ export function LineChartComponent({
       {title && <h3 className="text-lg font-semibold mb-2 text-pc-text">{title}</h3>}
       <ResponsiveContainer width="100%" height={height}>
         <LineChart data={data} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
+          {percentageScale && (
+            <defs>
+              <linearGradient id="bounded-percentage-spectrum" x1="0" y1="1" x2="0" y2="0">
+                <stop offset="0%" stopColor={getPercentageColor(0)} />
+                <stop offset="50%" stopColor={getPercentageColor(50)} />
+                <stop offset="100%" stopColor={getPercentageColor(100)} />
+              </linearGradient>
+            </defs>
+          )}
           {showGrid && <CartesianGrid strokeDasharray="3 3" stroke={chartGrid} />}
           {showXAxis && (
             <XAxis
@@ -70,6 +84,7 @@ export function LineChartComponent({
               stroke={chartTextSecondary}
               fontSize={12}
               tick={{ fill: chartTextSecondary }}
+              domain={percentageScale ? [0, 100] : undefined}
               label={{ value: yLabel, angle: -90, position: "insideLeft" }}
             />
           )}
@@ -90,7 +105,7 @@ export function LineChartComponent({
               key={key}
               type="monotone"
               dataKey={key}
-              stroke={colors[index % colors.length]}
+              stroke={percentageScale ? "url(#bounded-percentage-spectrum)" : colors[index % colors.length]}
               strokeWidth={2}
               dot={{ r: 3 }}
             />
@@ -113,6 +128,7 @@ export function BarChartComponent({
   title,
   height = 300,
   colors = chartColors,
+  barColors,
   showLegend = true,
   showGrid = true,
   showTooltip = true,
@@ -159,7 +175,9 @@ export function BarChartComponent({
               dataKey={key}
               fill={colors[index % colors.length]}
               radius={[4, 4, 0, 0]}
-            />
+            >
+              {barColors?.[key]?.map((color, cellIndex) => <Cell key={`${key}-${cellIndex}`} fill={color} />)}
+            </Bar>
           ))}
         </BarChart>
       </ResponsiveContainer>

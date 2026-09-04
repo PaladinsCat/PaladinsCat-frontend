@@ -12,7 +12,7 @@ import {
   type BuildItemCategory,
   type BuildItemReference,
 } from "@/lib/build-reference";
-import { getStatQuality } from "@/lib/stat-quality";
+import { getPercentageColor, getStatQuality } from "@/lib/stat-quality";
 import { useLocalization } from "@/lib/localization-context";
 import { ContentFade, EmptyState, ErrorState } from "@/components/async-state";
 import { Skeleton, SkeletonLine } from "@/components/ui/skeleton";
@@ -144,8 +144,8 @@ export default function ItemsPage() {
                 <h3 className="min-w-0 text-sm font-semibold text-pc-text transition-colors group-hover:text-pc-accent">{item.itemName}</h3>
               </div>
               <div className="mt-3 grid grid-cols-3 gap-1 text-xs tabular-nums">
-                <span><span className="block text-pc-text-muted">{t("generated.stats.wr")}</span><strong style={{ color: quality.color }}>{formatPercent(item.winRate)}</strong></span>
-                <span><span className="block text-pc-text-muted">{t("generated.stats.pr")}</span><strong style={{ color: quality.color }}>{formatPercent(pickRate)}</strong></span>
+                <span><span className="block text-pc-text-muted">{t("generated.stats.wr")}</span><strong style={{ color: getPercentageColor(item.winRate) }}>{formatPercent(item.winRate)}</strong></span>
+                <span><span className="block text-pc-text-muted">{t("generated.stats.pr")}</span><strong style={{ color: getPercentageColor(pickRate) }}>{formatPercent(pickRate)}</strong></span>
                 <span><span className="block text-pc-text-muted">{t("generated.stats.purchases")}</span><strong style={{ color: quality.color }}>{formatCount(item.totalUsage)}</strong></span>
               </div>
             </Link>;

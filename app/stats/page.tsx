@@ -18,7 +18,7 @@ import {
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
 import { getRankIconPath } from "@/lib/tier-utils";
-import { getStatQuality } from "@/lib/stat-quality";
+import { getPercentageColor, getStatQuality } from "@/lib/stat-quality";
 import { PerformanceOverviewCard } from "@/components/PerformanceOverviewCard";
 import { useLobbyTier } from "@/lib/lobby-tier-context";
 import { ContentFade } from "@/components/async-state";
@@ -300,8 +300,8 @@ export default function StatsPage() {
                 const rankIcon = getRankIconPath(tier.tierSort, tier.tierSort === 26 ? 101 : tier.tierSort === 27 ? 1 : 0);
                 return (
                   <div key={tier.tierSort} className="group flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1">
-                    <div className="text-xs text-pc-text-muted tabular-nums opacity-0 group-hover:opacity-100 transition-opacity">{formatPercent(tier.percentage)}</div>
-                    <div className="w-5 rounded-t-sm bg-pc-accent-mid group-hover:bg-pc-accent transition-colors" style={{ height }} title={t("generated.stats.value1Value2Value3", { value1: tier.tier, value2: formatNumber(tier.totalPlays), value3: formatNumber(tier.percentage, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) })} />
+                    <div className="text-xs tabular-nums opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: getPercentageColor(tier.percentage) }}>{formatPercent(tier.percentage)}</div>
+                    <div className="w-5 rounded-t-sm transition-colors" style={{ height, background: getPercentageColor(tier.percentage) }} title={t("generated.stats.value1Value2Value3", { value1: tier.tier, value2: formatNumber(tier.totalPlays), value3: formatNumber(tier.percentage, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) })} />
                     <img src={rankIcon} alt={tier.tier} title={tier.tier} className="h-5 w-5 object-contain drop-shadow" loading="lazy" />
                     <div className="text-xs text-pc-text-secondary tabular-nums leading-none">{formatNumber(tier.totalPlays)}</div>
                   </div>
@@ -352,7 +352,7 @@ export default function StatsPage() {
                         <span className="text-pc-text text-xs font-semibold truncate group-hover:text-pc-accent transition-colors">
                           {c.name}
                         </span>
-                        <span className="ml-auto text-sm font-bold tabular-nums" style={{ color: quality.color }}>
+                        <span className="ml-auto text-sm font-bold tabular-nums" style={{ color: getPercentageColor(c.winRate!) }}>
                           {formatPercent(c.winRate!)}
                         </span>
                       </Link>
@@ -383,7 +383,7 @@ export default function StatsPage() {
                       <span className="text-pc-text text-xs font-semibold truncate group-hover:text-pc-accent transition-colors">
                         {c.name}
                       </span>
-                      <span className="ml-auto text-sm font-bold text-rose-400 tabular-nums">
+                      <span className="ml-auto text-sm font-bold tabular-nums" style={{ color: getPercentageColor(c.banRate) }}>
                         {formatPercent(c.banRate!)}
                       </span>
                     </Link>
@@ -452,11 +452,11 @@ export default function StatsPage() {
                         )}
                         <div className="text-pc-text font-medium text-xs leading-tight truncate w-full">{item.name}</div>
                         <div className="flex items-center gap-1 text-xs mt-0.5">
-                          <span style={{ color: quality.color }}>
+                          <span style={{ color: getPercentageColor(item.winRate) }}>
                             {t("generated.stats.wr")}{" "}{item.winRate}%
                           </span>
                           <span className="text-pc-text-muted">·</span>
-                          <span style={{ color: quality.color }}>{t("generated.stats.pr")}{" "}{item.pickRate}%</span>
+                          <span style={{ color: getPercentageColor(item.pickRate) }}>{t("generated.stats.pr")}{" "}{item.pickRate}%</span>
                         </div>
                       </Link>
                       );
@@ -490,7 +490,7 @@ export default function StatsPage() {
                 {sortedMaps.map((map) => (
                   <tr key={map.name} className="border-b border-pc-border/50 hover:bg-pc-bg/50 transition-colors">
                     <td className="px-3 py-2 text-pc-text font-medium text-xs">{map.name}</td>
-                    <td className="px-2 py-2 text-xs text-right font-semibold text-pc-accent">{formatPercent(map.distributionRate)}</td>
+                    <td className="px-2 py-2 text-xs text-right font-semibold" style={{ color: getPercentageColor(map.distributionRate) }}>{formatPercent(map.distributionRate)}</td>
                     <td className="px-3 py-2 text-pc-text text-xs text-right">{formatNumber(map.matches)}</td>
                   </tr>
                 ))}
@@ -518,7 +518,7 @@ export default function StatsPage() {
                   <Link key={`${skin.championId}-${skin.skinId}`} href={`/stats/skins?champion=${skin.championId}`} className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-pc-bg-secondary/60">
                     <img src={getChampionIconSafe(skin.championName)} alt="" className="h-7 w-7 rounded object-contain" />
                     <div className="min-w-0 flex-1"><div className="truncate text-xs font-medium text-pc-text">{skin.skinName}</div><div className="text-xs text-pc-text-muted">{skin.championName} · {formatNumber(skin.totalPlays)} {t("generated.stats.plays.0effba4")}</div></div>
-                    <span className="text-xs font-bold text-emerald-400">{formatPercent(skin.winRate)}</span>
+                    <span className="text-xs font-bold" style={{ color: getPercentageColor(skin.winRate) }}>{formatPercent(skin.winRate)}</span>
                   </Link>
                 ))}
               </div>
@@ -541,7 +541,7 @@ export default function StatsPage() {
                   <Link key={composition.composition} href="/game/compositions" className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-pc-bg-secondary/60">
                     <div className="w-20 font-mono text-xs font-semibold text-pc-text">{composition.composition}</div>
                     <div className="min-w-0 flex-1 text-xs text-pc-text-muted">{formatNumber(composition.totalMatches)} {t("generated.stats.rankedMatches")}</div>
-                    <span className={composition.winRate >= 50 ? "text-xs font-bold text-emerald-400" : "text-xs font-bold text-rose-400"}>{formatPercent(composition.winRate)}</span>
+                    <span className="text-xs font-bold" style={{ color: getPercentageColor(composition.winRate) }}>{formatPercent(composition.winRate)}</span>
                   </Link>
                 ))}
               </div>
@@ -569,8 +569,8 @@ export default function StatsPage() {
                       <div className="text-xs text-pc-text-muted">{skin.championName} · {formatNumber(skin.totalPlays)} {t("generated.stats.plays.0effba4")}</div>
                     </div>
                     <div className="text-right">
-                      <span className="text-xs font-bold text-rose-400">{formatNumber(skin.usageShare, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}{t("generated.stats.share.b95bb2e")}</span>
-                      <div className="text-xs text-pc-text-muted">{t("generated.stats.wr")}{" "}{formatPercent(skin.winRate)}</div>
+                      <span className="text-xs font-bold" style={{ color: getPercentageColor(skin.usageShare) }}>{formatNumber(skin.usageShare, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}{t("generated.stats.share.b95bb2e")}</span>
+                      <div className="text-xs" style={{ color: getPercentageColor(skin.winRate) }}>{t("generated.stats.wr")}{" "}{formatPercent(skin.winRate)}</div>
                     </div>
                   </div>
                 ))}
