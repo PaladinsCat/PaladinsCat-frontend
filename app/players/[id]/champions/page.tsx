@@ -256,14 +256,14 @@ export default function PlayerChampionStatsPage() {
                   </tr>
                   <tr className="border-b border-pc-border/50 last:border-0">
                     <td colSpan={12} className="px-1.5 pb-2 pt-0.5">
-                      <div className="grid grid-cols-4 gap-x-2 gap-y-0.5 pl-8 text-[10px] leading-4 text-pc-text-muted sm:grid-cols-8">
+                      <div className="grid grid-cols-4 gap-x-2 gap-y-0.5 pl-8 text-xs leading-4 text-pc-text-muted sm:grid-cols-8">
                         {CHAMPION_METRICS.map((metric) => (
                           <span key={metric.key} className="whitespace-nowrap">
                             <span className="font-semibold text-pc-text-secondary">{metric.label}</span> {champion.cumulativeMetrics[metric.key] == null ? "—" : formatNumber(champion.cumulativeMetrics[metric.key] ?? 0, { maximumFractionDigits: 0 })}
                           </span>
                         ))}
                       </div>
-                      <div className="mt-0.5 grid grid-cols-4 gap-x-2 gap-y-0.5 pl-8 text-[10px] leading-4 text-pc-text-muted sm:grid-cols-8" title={t("generated.stats.vsGlobal")}>
+                      <div className="mt-0.5 grid grid-cols-4 gap-x-2 gap-y-0.5 pl-8 text-xs leading-4 text-pc-text-muted sm:grid-cols-8" title={t("generated.stats.vsGlobal")}>
                         {CHAMPION_METRICS.map((metric) => {
                           const comparison = metricComparison(champion.cumulativeMetrics[metric.key], champion.globalMetrics[metric.key]);
                           return (
