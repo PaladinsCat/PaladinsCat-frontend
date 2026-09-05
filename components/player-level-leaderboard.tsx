@@ -263,8 +263,8 @@ export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
           </thead>
           <tbody>{visibleRows.map((row) => <tr key={`${row.playerId}-${row.championId ?? "account"}`} className="border-b border-pc-border/50 last:border-b-0 hover:bg-pc-bg-secondary/50">
             <td className="px-4 py-3 tabular-nums">
-              <span className="font-bold text-pc-text-muted">{row.rank}</span>
-              {mode === "champion" && (row.classRank != null || row.championRank != null) && <span className="mt-0.5 block text-xs text-pc-text-muted/80">{row.classRank == null ? "—" : formatNumber(row.classRank)}/{row.championRank == null ? "—" : formatNumber(row.championRank)}</span>}
+              <span className="font-bold text-pc-text">{row.rank}</span>
+              {mode === "champion" && (row.classRank != null || row.championRank != null) && <><span className="mt-0.5 block text-xs text-pc-text-secondary">{t("generated.players.class")} {row.classRank == null ? "—" : formatNumber(row.classRank)}</span><span className="block text-xs text-pc-text-secondary">{t("generated.players.champ")} {row.championRank == null ? "—" : formatNumber(row.championRank)}</span></>}
             </td>
             <td className="px-3 py-3"><Link href={`/players/${row.playerId}`} className="font-medium text-pc-text hover:text-pc-accent"><PlayerName playerId={row.playerId}>{row.playerName}</PlayerName></Link></td>
             {mode === "champion" && <td className="px-3 py-3">{row.championName && <span className="inline-flex items-center gap-2 text-pc-text-secondary"><Image src={getChampionIconSafe(row.championName)} alt="" width={24} height={24} className="h-6 w-6 rounded object-contain" />{row.championName}</span>}</td>}
