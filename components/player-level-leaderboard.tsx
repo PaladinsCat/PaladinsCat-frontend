@@ -171,7 +171,7 @@ export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
           <div className="min-w-0"><dt className="pc-label">{t("generated.players.player")}</dt><dd className="mt-1 truncate font-medium text-pc-text"><Link href={`/players/${positionRow.playerId}`} className="hover:text-pc-accent"><PlayerName playerId={positionRow.playerId}>{positionRow.playerName}</PlayerName></Link></dd></div>
           {mode === "champion" && <div className="min-w-0"><dt className="pc-label">{t("generated.players.champion")}</dt><dd className="mt-1 truncate text-pc-text-secondary">{positionRow.championName ?? "—"}</dd></div>}
           <div><dt className="pc-label">{t("generated.players.level")}</dt><dd className="mt-1 font-bold tabular-nums text-pc-text">{formatNumber(positionRow.level)}</dd></div>
-          <div><dt className="pc-label">{mode === "account" ? t("generated.players.totalXp") : t("generated.players.championXp")}</dt><dd className="mt-1 tabular-nums text-pc-text-secondary">{formatNumber(positionRow.xp)}</dd></div>
+          <div><dt className="pc-label">{t("generated.players.championXp")}</dt><dd className="mt-1 tabular-nums text-pc-text-secondary">{formatNumber(positionRow.xp)}</dd></div>
           <div><dt className="pc-label">{t("generated.players.wins")}</dt><dd className="mt-1 tabular-nums text-pc-text-secondary">{formatNumber(positionRow.wins)}</dd></div>
           <div><dt className="pc-label">{t("generated.players.losses")}</dt><dd className="mt-1 tabular-nums text-pc-text-secondary">{formatNumber(positionRow.losses)}</dd></div>
           <div><dt className="pc-label">{t("generated.players.winRate")}</dt><dd className="mt-1 font-semibold tabular-nums" style={positionRow.winRate == null ? undefined : { color: getPercentageColor(positionRow.winRate) }}>{formatPercent(positionRow.winRate)}</dd></div>
@@ -253,7 +253,7 @@ export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
               <th className="px-3 py-3">{t("generated.players.player")}</th>
               {mode === "champion" && <th className="px-3 py-3">{t("generated.players.champion")}</th>}
               <th className="px-3 py-3 text-right">{t("generated.players.level")}</th>
-              <th className="px-3 py-3 text-right">{mode === "account" ? t("generated.players.totalXp") : t("generated.players.championXp")}</th>
+              <th className="px-3 py-3 text-right">{t("generated.players.championXp")}</th>
               <th className="px-3 py-3 text-right">{t("generated.players.wins")}</th>
               <th className="px-3 py-3 text-right">{t("generated.players.losses")}</th>
               <th className="px-3 py-3 text-right">{t("generated.players.winRate")}</th>
