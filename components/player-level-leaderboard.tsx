@@ -246,11 +246,10 @@ export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
     </div>}
     {loading ? <LoadingPanel /> : <div className="pc-card-flush mx-auto w-full max-w-5xl overflow-hidden">
       <div className="overflow-x-auto">
-        <table className={`w-full text-sm ${mode === "champion" ? "min-w-[1280px]" : "min-w-[1040px]"}`}>
+        <table className="w-full min-w-[1040px] text-sm">
           <thead>
             <tr className="border-b border-pc-border bg-pc-bg-secondary text-left text-xs uppercase text-pc-text-muted">
               <th className="px-4 py-3">{t("generated.players.rank")}</th>
-              {mode === "champion" && <><th className="px-3 py-3 text-right">{t("generated.players.class")} {t("generated.players.rank")}</th><th className="px-3 py-3 text-right">{t("generated.players.champion")} {t("generated.players.rank")}</th></>}
               <th className="px-3 py-3">{t("generated.players.player")}</th>
               {mode === "champion" && <th className="px-3 py-3">{t("generated.players.champion")}</th>}
               <th className="px-3 py-3 text-right">{t("generated.players.level")}</th>
@@ -263,8 +262,10 @@ export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
             </tr>
           </thead>
           <tbody>{visibleRows.map((row) => <tr key={`${row.playerId}-${row.championId ?? "account"}`} className="border-b border-pc-border/50 last:border-b-0 hover:bg-pc-bg-secondary/50">
-            <td className="px-4 py-3 font-bold tabular-nums text-pc-text-muted">{row.rank}</td>
-            {mode === "champion" && <><td className="px-3 py-3 text-right tabular-nums text-pc-text-muted">{row.classRank == null ? "—" : formatNumber(row.classRank)}</td><td className="px-3 py-3 text-right tabular-nums text-pc-text-muted">{row.championRank == null ? "—" : formatNumber(row.championRank)}</td></>}
+            <td className="px-4 py-3 tabular-nums">
+              <span className="font-bold text-pc-text-muted">{row.rank}</span>
+              {mode === "champion" && (row.classRank != null || row.championRank != null) && <span className="mt-0.5 block text-xs text-pc-text-muted/80">{row.classRank == null ? "—" : formatNumber(row.classRank)}/{row.championRank == null ? "—" : formatNumber(row.championRank)}</span>}
+            </td>
             <td className="px-3 py-3"><Link href={`/players/${row.playerId}`} className="font-medium text-pc-text hover:text-pc-accent"><PlayerName playerId={row.playerId}>{row.playerName}</PlayerName></Link></td>
             {mode === "champion" && <td className="px-3 py-3">{row.championName && <span className="inline-flex items-center gap-2 text-pc-text-secondary"><Image src={getChampionIconSafe(row.championName)} alt="" width={24} height={24} className="h-6 w-6 rounded object-contain" />{row.championName}</span>}</td>}
             <td className="px-3 py-3 text-right font-bold tabular-nums text-pc-accent">{formatNumber(row.level)}</td>
