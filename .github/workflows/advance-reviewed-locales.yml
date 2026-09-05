@@ -1,0 +1,131 @@
+name: Advance reviewed locale pin
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 * * * *"
+
+concurrency:
+  group: advance-reviewed-locales
+  cancel-in-progress: false
+
+permissions:
+  actions: write
+  contents: write
+  pull-requests: write
+
+jobs:
+  advance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout frontend and pinned locales
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Detect a newer reviewed locale revision
+        id: locale
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          current="$(git ls-tree HEAD locales | awk '{print $3}')"
+          git -C locales fetch --no-tags origin main
+          candidate="$(git -C locales rev-parse FETCH_HEAD)"
+          git -C locales merge-base --is-ancestor "$current" "$candidate" || {
+            echo "Locale main is not a fast-forward of the pinned revision." >&2
+            exit 1
+          }
+          echo "current=$current" >> "$GITHUB_OUTPUT"
+          echo "candidate=$candidate" >> "$GITHUB_OUTPUT"
+          if [[ "$current" == "$candidate" ]]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Locale pin is already current."
+          else
+            existing="$(gh pr list --state open --json headRefName,url --jq '[.[] | select(.headRefName | startswith("automation/locales-"))][0].url // empty')"
+            if [[ -n "$existing" ]]; then
+              echo "An automated locale-pin pull request is already open: $existing"
+              echo "changed=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout reviewed locale candidate
+        if: steps.locale.outputs.changed == 'true'
+        shell: bash
+        run: git -C locales checkout --detach "${{ steps.locale.outputs.candidate }}"
+
+      - name: Setup Node.js
+        if: steps.locale.outputs.changed == 'true'
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            locales/package-lock.json
+
+      - name: Validate reviewed locale repository
+        if: steps.locale.outputs.changed == 'true'
+        shell: bash
+        run: |
+          npm --prefix locales ci --ignore-scripts
+          npm --prefix locales run validate
+
+      - name: Install frontend dependencies
+        if: steps.locale.outputs.changed == 'true'
+        run: npm ci
+
+      - name: Validate and compile frontend with candidate locales
+        if: steps.locale.outputs.changed == 'true'
+        shell: bash
+        run: |
+          npm run check-localization-source
+          npm run lint
+          npx tsc --noEmit
+          npm run test:operations
+          npm run test:champion-page
+          npm run build
+
+      - name: Verify the candidate is the only source change
+        if: steps.locale.outputs.changed == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          changed="$(git diff --name-only)"
+          [[ "$changed" == "locales" ]] || {
+            echo "Unexpected tracked changes after validation:" >&2
+            printf '%s\n' "$changed" >&2
+            exit 1
+          }
+
+      - name: Push candidate and open pull request
+        if: steps.locale.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CANDIDATE: ${{ steps.locale.outputs.candidate }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          short="${CANDIDATE:0:12}"
+          branch="automation/locales-$short"
+          git switch -c "$branch"
+          git add locales
+          git -c user.name='paladinscat-automation[bot]' \
+              -c user.email='paladinscat-automation[bot]@users.noreply.github.com' \
+              commit -m "chore(locales): pin reviewed translations $short"
+          git push --set-upstream origin "$branch"
+          pr="$(gh pr list --state open --head "$branch" --json url --jq '.[0].url // empty')"
+          if [[ -z "$pr" ]]; then
+            pr="$(gh pr create \
+              --base main \
+              --head "$branch" \
+              --title "chore(locales): pin reviewed translations $short" \
+              --body "Pins the reviewed PaladinsCat-locales main revision \`$CANDIDATE\`. Locale validation, frontend lint, type checking, tests, and a production build passed before this branch was pushed. Normal protected-branch review still applies.")"
+          fi
+          echo "Pull request: $pr"
+          gh workflow run ci.yml --ref "$branch"
+          gh workflow run codeql.yml --ref "$branch"
