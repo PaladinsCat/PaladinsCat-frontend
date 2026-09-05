@@ -27,15 +27,15 @@ const ROLES = [
 ] as const;
 
 const CHAMPION_METRICS = [
-  { key: "dpm", label: "DPM" },
-  { key: "wpm", label: "WPM" },
-  { key: "apm", label: "APM" },
-  { key: "hpm", label: "HPM" },
-  { key: "shpm", label: "SHPM" },
-  { key: "spm", label: "SPM" },
-  { key: "gpm", label: "GPM" },
-  { key: "egpm", label: "EGPM" },
-] as const satisfies ReadonlyArray<{ key: keyof PlayerChampionCumulativeMetrics; label: string }>;
+  { key: "dpm", labelKey: "common.metrics.dpm" },
+  { key: "wpm", labelKey: "common.metrics.wpm" },
+  { key: "apm", labelKey: "common.metrics.apm" },
+  { key: "hpm", labelKey: "common.metrics.hpm" },
+  { key: "shpm", labelKey: "common.metrics.shpm" },
+  { key: "spm", labelKey: "common.metrics.spm" },
+  { key: "gpm", labelKey: "common.metrics.gpm" },
+  { key: "egpm", labelKey: "common.metrics.egpm" },
+] as const satisfies ReadonlyArray<{ key: keyof PlayerChampionCumulativeMetrics; labelKey: string }>;
 
 type SortKey = "level" | "kda" | "winRate" | "playTime" | "rating";
 
@@ -259,7 +259,7 @@ export default function PlayerChampionStatsPage() {
                       <div className="grid grid-cols-4 gap-x-2 gap-y-0.5 pl-8 text-xs leading-4 text-pc-text-muted sm:grid-cols-8">
                         {CHAMPION_METRICS.map((metric) => (
                           <span key={metric.key} className="whitespace-nowrap">
-                            <span className="font-semibold text-pc-text-secondary">{metric.label}</span> {champion.cumulativeMetrics[metric.key] == null ? "—" : formatNumber(champion.cumulativeMetrics[metric.key] ?? 0, { maximumFractionDigits: 0 })}
+                            <span className="font-semibold text-pc-text-secondary">{t(metric.labelKey)}</span> {champion.cumulativeMetrics[metric.key] == null ? "—" : formatNumber(champion.cumulativeMetrics[metric.key] ?? 0, { maximumFractionDigits: 0 })}
                           </span>
                         ))}
                       </div>
@@ -268,7 +268,7 @@ export default function PlayerChampionStatsPage() {
                           const comparison = metricComparison(champion.cumulativeMetrics[metric.key], champion.globalMetrics[metric.key]);
                           return (
                             <span key={metric.key} className="whitespace-nowrap" style={{ color: metricComparisonColor(comparison) }}>
-                              <span className="font-semibold text-pc-text-secondary">{metric.label}</span> {formatSignedPercent(comparison, { maximumFractionDigits: 0 })}
+                              <span className="font-semibold text-pc-text-secondary">{t(metric.labelKey)}</span> {formatSignedPercent(comparison, { maximumFractionDigits: 0 })}
                             </span>
                           );
                         })}
