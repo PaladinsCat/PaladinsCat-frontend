@@ -3039,6 +3039,17 @@ export async function fetchPlayerProfile(id: string, queueId?: number, championI
   };
 }
 
+export interface PlayerChampionCumulativeMetrics {
+  dpm: number | null;
+  wpm: number | null;
+  apm: number | null;
+  hpm: number | null;
+  shpm: number | null;
+  spm: number | null;
+  gpm: number | null;
+  egpm: number | null;
+}
+
 export interface PlayerChampionStat {
   championId: number;
   championName: string;
@@ -3053,6 +3064,12 @@ export interface PlayerChampionStat {
   minutesPlayed: number;
   matchesPlayed: number;
   winRate: number | null;
+  rankedWins: number;
+  rankedLosses: number;
+  rankedMatchesPlayed: number;
+  rankedWinRate: number | null;
+  cumulativeMetrics: PlayerChampionCumulativeMetrics;
+  globalMetrics: PlayerChampionCumulativeMetrics;
   rating: number | null;
   ratingDeviation: number | null;
   volatility: number | null;
@@ -3067,6 +3084,16 @@ export interface PlayerChampionStat {
  * refs: none
  */
 export async function fetchPlayerChampionStats(playerId: string | number): Promise<PlayerChampionStat[]> {
+  type RawCumulativeMetrics = {
+    dpm?: number | string | null;
+    wpm?: number | string | null;
+    apm?: number | string | null;
+    hpm?: number | string | null;
+    shpm?: number | string | null;
+    spm?: number | string | null;
+    gpm?: number | string | null;
+    egpm?: number | string | null;
+  };
   type RawStat = {
     champion_id: number | string;
     champion_name: string;
@@ -3081,6 +3108,20 @@ export async function fetchPlayerChampionStats(playerId: string | number): Promi
     minutes_played?: number | string | null;
     matches_played?: number | string | null;
     win_rate?: number | string | null;
+    ranked_wins?: number | string | null;
+    ranked_losses?: number | string | null;
+    ranked_matches_played?: number | string | null;
+    ranked_win_rate?: number | string | null;
+    cumulative_metrics?: RawCumulativeMetrics | null;
+    global_metrics?: RawCumulativeMetrics | null;
+    avg_dpm?: number | string | null;
+    avg_wpm?: number | string | null;
+    avg_apm?: number | string | null;
+    avg_hpm?: number | string | null;
+    avg_shpm?: number | string | null;
+    avg_spm?: number | string | null;
+    avg_gpm?: number | string | null;
+    avg_egpm?: number | string | null;
     rating?: number | string | null;
     rating_deviation?: number | string | null;
     volatility?: number | string | null;
@@ -3098,26 +3139,54 @@ export async function fetchPlayerChampionStats(playerId: string | number): Promi
     return Number.isFinite(parsed) ? parsed : null;
   };
 
-  return raw.map((stat) => ({
-    championId: numberOrZero(stat.champion_id),
-    championName: stat.champion_name,
-    role: stat.role,
-    xp: numberOrZero(stat.xp),
-    ownershipType: stat.ownership_type ?? "",
-    wins: numberOrZero(stat.wins),
-    losses: numberOrZero(stat.losses),
-    kills: numberOrZero(stat.kills),
-    deaths: numberOrZero(stat.deaths),
-    assists: numberOrZero(stat.assists),
-    minutesPlayed: numberOrZero(stat.minutes_played),
-    matchesPlayed: numberOrZero(stat.matches_played),
-    winRate: numberOrNull(stat.win_rate),
-    rating: numberOrNull(stat.rating),
-    ratingDeviation: numberOrNull(stat.rating_deviation),
-    volatility: numberOrNull(stat.volatility),
-    ratingMatches: numberOrZero(stat.rating_matches),
-    lastUpdated: stat.last_updated ?? null,
-  }));
+  return raw.map((stat) => {
+    const metrics = stat.cumulative_metrics ?? {};
+    const globalMetrics = stat.global_metrics ?? {};
+    return {
+      championId: numberOrZero(stat.champion_id),
+      championName: stat.champion_name,
+      role: stat.role,
+      xp: numberOrZero(stat.xp),
+      ownershipType: stat.ownership_type ?? "",
+      wins: numberOrZero(stat.wins),
+      losses: numberOrZero(stat.losses),
+      kills: numberOrZero(stat.kills),
+      deaths: numberOrZero(stat.deaths),
+      assists: numberOrZero(stat.assists),
+      minutesPlayed: numberOrZero(stat.minutes_played),
+      matchesPlayed: numberOrZero(stat.matches_played),
+      winRate: numberOrNull(stat.win_rate),
+      rankedWins: numberOrZero(stat.ranked_wins),
+      rankedLosses: numberOrZero(stat.ranked_losses),
+      rankedMatchesPlayed: numberOrZero(stat.ranked_matches_played),
+      rankedWinRate: numberOrNull(stat.ranked_win_rate),
+      cumulativeMetrics: {
+        dpm: numberOrNull(metrics.dpm ?? stat.avg_dpm),
+        wpm: numberOrNull(metrics.wpm ?? stat.avg_wpm),
+        apm: numberOrNull(metrics.apm ?? stat.avg_apm),
+        hpm: numberOrNull(metrics.hpm ?? stat.avg_hpm),
+        shpm: numberOrNull(metrics.shpm ?? stat.avg_shpm),
+        spm: numberOrNull(metrics.spm ?? stat.avg_spm),
+        gpm: numberOrNull(metrics.gpm ?? stat.avg_gpm),
+        egpm: numberOrNull(metrics.egpm ?? stat.avg_egpm),
+      },
+      globalMetrics: {
+        dpm: numberOrNull(globalMetrics.dpm),
+        wpm: numberOrNull(globalMetrics.wpm),
+        apm: numberOrNull(globalMetrics.apm),
+        hpm: numberOrNull(globalMetrics.hpm),
+        shpm: numberOrNull(globalMetrics.shpm),
+        spm: numberOrNull(globalMetrics.spm),
+        gpm: numberOrNull(globalMetrics.gpm),
+        egpm: numberOrNull(globalMetrics.egpm),
+      },
+      rating: numberOrNull(stat.rating),
+      ratingDeviation: numberOrNull(stat.rating_deviation),
+      volatility: numberOrNull(stat.volatility),
+      ratingMatches: numberOrZero(stat.rating_matches),
+      lastUpdated: stat.last_updated ?? null,
+    };
+  });
 }
 
 export interface PlayerChampionStatsRefreshResponse {

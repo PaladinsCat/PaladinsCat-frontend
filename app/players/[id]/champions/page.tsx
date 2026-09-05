@@ -6,12 +6,12 @@
  */
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { EmptyState, ErrorState, LoadingIndicator, LoadingPanel } from "@/components/async-state";
 import PlayersPageHeader from "@/components/ui/players-page-header";
-import { fetchPlayerChampionStats, refreshPlayerChampionStats, type PlayerChampionStat } from "@/lib/api-client";
+import { fetchPlayerChampionStats, refreshPlayerChampionStats, type PlayerChampionCumulativeMetrics, type PlayerChampionStat } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championMasteryLevelFromXp } from "@/lib/champion-mastery";
 import { calculateKda, formatKda } from "@/lib/kda";
@@ -26,7 +26,29 @@ const ROLES = [
   { value: "Support", labelKey: "common.roles.support", icon: "/images/icons/Class_Support_Icon.avif" },
 ] as const;
 
+const CHAMPION_METRICS = [
+  { key: "dpm", label: "DPM" },
+  { key: "wpm", label: "WPM" },
+  { key: "apm", label: "APM" },
+  { key: "hpm", label: "HPM" },
+  { key: "shpm", label: "SHPM" },
+  { key: "spm", label: "SPM" },
+  { key: "gpm", label: "GPM" },
+  { key: "egpm", label: "EGPM" },
+] as const satisfies ReadonlyArray<{ key: keyof PlayerChampionCumulativeMetrics; label: string }>;
+
 type SortKey = "level" | "kda" | "winRate" | "playTime" | "rating";
+
+function metricComparison(value: number | null, global: number | null): number | null {
+  if (value == null || global == null || global <= 0) return null;
+  return ((value - global) / global) * 100;
+}
+
+function metricComparisonColor(value: number | null): string | undefined {
+  if (value == null) return undefined;
+  const bounded = Math.max(-100, Math.min(100, value));
+  return getPercentageColor((bounded + 100) / 2);
+}
 
 /**
  * Render the PlayerChampionStatsPage view for the player id champions page route.
@@ -34,7 +56,7 @@ type SortKey = "level" | "kda" | "winRate" | "playTime" | "rating";
  * refs: none
  */
 export default function PlayerChampionStatsPage() {
-  const { formatDuration, formatNumber, t } = useLocalization();
+  const { formatDuration, formatNumber, formatSignedPercent, t } = useLocalization();
   const params = useParams<{ id: string }>();
   const playerId = String(params.id ?? "");
   const [stats, setStats] = useState<PlayerChampionStat[] | null>(null);
@@ -115,10 +137,6 @@ export default function PlayerChampionStatsPage() {
     };
   }, [stats]);
 
-  const performanceChart = useMemo(() => [...summary.active]
-    .sort((a, b) => b.matchesPlayed - a.matchesPlayed)
-    .slice(0, 10), [summary.active]);
-
   const ratingChart = useMemo(() => [...summary.active]
     .filter((champion) => champion.rating != null && champion.ratingDeviation != null)
     .sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
@@ -148,26 +166,7 @@ export default function PlayerChampionStatsPage() {
         ))}
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-2">
-        <section className="pc-glass rounded-xl p-4">
-          <h2 className="pc-card-title">{t("generated.players.rankedPerformance")}</h2>
-          <p className="mt-1 text-xs text-pc-text-muted">{t("common.metrics.winRate")} · {t("generated.players.matches")}</p>
-          <div className="mt-4 space-y-3">
-            {performanceChart.map((champion) => (
-              <div key={champion.championId} className="grid grid-cols-[minmax(7rem,1fr)_3fr_auto] items-center gap-3 text-xs">
-                <div className="flex min-w-0 items-center gap-2 text-pc-text">
-                  <img src={getChampionIconSafe(champion.championName)} alt="" className="h-6 w-6 shrink-0 rounded object-contain" />
-                  <span className="truncate">{champion.championName}</span>
-                </div>
-                <div className="h-2.5 overflow-hidden rounded-full bg-pc-bg-secondary" aria-hidden="true">
-                  <div className="h-full rounded-full" style={{ width: `${Math.max(0, Math.min(100, champion.winRate ?? 0))}%`, background: getPercentageColor(champion.winRate) }} />
-                </div>
-                <div className="min-w-16 text-right font-mono" style={{ color: getPercentageColor(champion.winRate) }}>{formatNumber(champion.winRate ?? 0, { maximumFractionDigits: 1 })}% · {formatNumber(champion.matchesPlayed)}</div>
-              </div>
-            ))}
-          </div>
-        </section>
-
+      <div className="grid gap-4">
         <section className="pc-glass rounded-xl p-4">
           <h2 className="pc-card-title">{t("generated.players.championRatings")}</h2>
           <p className="mt-1 text-xs text-pc-text-muted">{t("generated.players.rating")} · {t("generated.players.deviation")} · {t("generated.players.volatility")}</p>
@@ -233,27 +232,50 @@ export default function PlayerChampionStatsPage() {
             </thead>
             <tbody>
               {champions.map((champion) => (
-                <tr key={champion.championId} className="border-b border-pc-border/50 last:border-0 hover:bg-pc-bg-secondary">
-                  <td className="px-1.5 py-1.5">
-                    <div className="flex items-center gap-1.5">
-                      <img src={getChampionIconSafe(champion.championName)} alt="" className="h-5 w-5 shrink-0 rounded object-contain" />
-                      <span className="font-medium text-pc-text">{champion.championName}</span>
-                    </div>
-                  </td>
-                  <td className="px-1.5 py-1.5 font-mono text-xs text-pc-accent">{championMasteryLevelFromXp(champion.xp)}</td>
-                  <td className="px-1.5 py-1.5 font-mono text-xs text-pc-text-secondary">{formatNumber(champion.xp)}</td>
-                  <td className="px-1.5 py-1.5 font-mono text-xs text-pc-text-secondary">{formatNumber(champion.kills)}/{formatNumber(champion.deaths)}/{formatNumber(champion.assists)}</td>
-                  <td className="px-1.5 py-1.5 font-mono text-xs text-pc-text-secondary">{formatKda(champion.kills, champion.deaths, champion.assists)}</td>
-                  <td className="px-1.5 py-1.5 font-mono text-xs text-pc-text-secondary">{formatNumber(champion.wins)}</td>
-                  <td className="px-1.5 py-1.5 font-mono text-xs text-pc-text-secondary">{formatNumber(champion.losses)}</td>
-                  <td className="px-1.5 py-1.5 font-mono text-xs">{champion.winRate != null ? (
-                    <span className="font-medium" style={{ color: getPercentageColor(champion.winRate) }}>{t("common.playerChampions.winPercentage", { value: formatNumber(champion.winRate) })}</span>
-                  ) : "—"}</td>
-                  <td className="px-1.5 py-1.5 font-mono text-xs text-pc-text-secondary">{champion.rating != null ? formatNumber(champion.rating) : "—"}</td>
-                  <td className="px-1.5 py-1.5 font-mono text-xs text-pc-text-secondary">{champion.ratingDeviation != null ? formatNumber(champion.ratingDeviation) : "—"}</td>
-                  <td className="px-1.5 py-1.5 font-mono text-xs text-pc-text-secondary">{champion.volatility != null ? formatNumber(champion.volatility, { maximumFractionDigits: 4 }) : "—"}</td>
-                  <td className="px-1.5 py-1.5 font-mono text-xs text-pc-text-secondary">{t("common.format.minutesShort", { minutes: formatNumber(champion.minutesPlayed) })}</td>
-                </tr>
+                <Fragment key={champion.championId}>
+                  <tr className="hover:bg-pc-bg-secondary">
+                    <td className="px-1.5 py-1.5">
+                      <div className="flex items-center gap-1.5">
+                        <img src={getChampionIconSafe(champion.championName)} alt="" className="h-5 w-5 shrink-0 rounded object-contain" />
+                        <span className="font-medium text-pc-text">{champion.championName}</span>
+                      </div>
+                    </td>
+                    <td className="px-1.5 py-1.5 font-mono text-xs text-pc-accent">{championMasteryLevelFromXp(champion.xp)}</td>
+                    <td className="px-1.5 py-1.5 font-mono text-xs text-pc-text-secondary">{formatNumber(champion.xp)}</td>
+                    <td className="px-1.5 py-1.5 font-mono text-xs text-pc-text-secondary">{formatNumber(champion.kills)}/{formatNumber(champion.deaths)}/{formatNumber(champion.assists)}</td>
+                    <td className="px-1.5 py-1.5 font-mono text-xs text-pc-text-secondary">{formatKda(champion.kills, champion.deaths, champion.assists)}</td>
+                    <td className="px-1.5 py-1.5 font-mono text-xs text-pc-text-secondary">{formatNumber(champion.wins)}</td>
+                    <td className="px-1.5 py-1.5 font-mono text-xs text-pc-text-secondary">{formatNumber(champion.losses)}</td>
+                    <td className="px-1.5 py-1.5 font-mono text-xs">{champion.winRate != null ? (
+                      <span className="font-medium" style={{ color: getPercentageColor(champion.winRate) }}>{t("common.playerChampions.winPercentage", { value: formatNumber(champion.winRate) })}</span>
+                    ) : "—"}</td>
+                    <td className="px-1.5 py-1.5 font-mono text-xs text-pc-text-secondary">{champion.rating != null ? formatNumber(champion.rating) : "—"}</td>
+                    <td className="px-1.5 py-1.5 font-mono text-xs text-pc-text-secondary">{champion.ratingDeviation != null ? formatNumber(champion.ratingDeviation) : "—"}</td>
+                    <td className="px-1.5 py-1.5 font-mono text-xs text-pc-text-secondary">{champion.volatility != null ? formatNumber(champion.volatility, { maximumFractionDigits: 4 }) : "—"}</td>
+                    <td className="px-1.5 py-1.5 font-mono text-xs text-pc-text-secondary">{t("common.format.minutesShort", { minutes: formatNumber(champion.minutesPlayed) })}</td>
+                  </tr>
+                  <tr className="border-b border-pc-border/50 last:border-0">
+                    <td colSpan={12} className="px-1.5 pb-2 pt-0.5">
+                      <div className="grid grid-cols-4 gap-x-2 gap-y-0.5 pl-8 text-[10px] leading-4 text-pc-text-muted sm:grid-cols-8">
+                        {CHAMPION_METRICS.map((metric) => (
+                          <span key={metric.key} className="whitespace-nowrap">
+                            <span className="font-semibold text-pc-text-secondary">{metric.label}</span> {champion.cumulativeMetrics[metric.key] == null ? "—" : formatNumber(champion.cumulativeMetrics[metric.key] ?? 0, { maximumFractionDigits: 0 })}
+                          </span>
+                        ))}
+                      </div>
+                      <div className="mt-0.5 grid grid-cols-4 gap-x-2 gap-y-0.5 pl-8 text-[10px] leading-4 text-pc-text-muted sm:grid-cols-8" title={t("generated.stats.vsGlobal")}>
+                        {CHAMPION_METRICS.map((metric) => {
+                          const comparison = metricComparison(champion.cumulativeMetrics[metric.key], champion.globalMetrics[metric.key]);
+                          return (
+                            <span key={metric.key} className="whitespace-nowrap" style={{ color: metricComparisonColor(comparison) }}>
+                              <span className="font-semibold text-pc-text-secondary">{metric.label}</span> {formatSignedPercent(comparison, { maximumFractionDigits: 0 })}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </td>
+                  </tr>
+                </Fragment>
               ))}
             </tbody>
           </table>
