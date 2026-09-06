@@ -94,9 +94,7 @@ export default async function FeaturesPage() {
       <article className="rounded-2xl border border-pc-border bg-pc-bg-elevated/95 p-5 shadow-2xl backdrop-blur-sm sm:p-8 lg:p-10">
         <div className="flex flex-wrap items-start justify-between gap-5 border-b border-pc-border pb-8">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-pc-accent">{t("home.newFeaturesEyebrow")}</p>
             <h1 className="mt-3 text-4xl font-bold tracking-tight text-pc-text">{document?.title || t("home.newFeatures")}</h1>
-            {document?.updatedAt && <p className="mt-3 text-sm text-pc-text-muted">{document.updatedAt}</p>}
           </div>
           <a href={sourceUrl} target="_blank" rel="noopener noreferrer" className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-pc-border px-3 py-2 text-sm font-semibold text-pc-text-secondary transition-colors hover:border-pc-accent-mid hover:text-pc-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent">
             <GitBranch className="h-4 w-4" aria-hidden="true" />
