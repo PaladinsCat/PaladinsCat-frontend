@@ -5,7 +5,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { preload } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useReducedMotion } from "@/lib/reduced-motion";
 import {
   ArrowRight,
@@ -22,6 +22,8 @@ import HomeSearch from "@/components/home-search";
 import { useLocalization } from "@/lib/localization-context";
 import { DEFAULT_WALLPAPERS } from "@/lib/wallpaper-images";
 
+
+const MotionLink = motion.create(Link);
 const WALLPAPER_BRAND_OUT_MS = 420;
 const WALLPAPER_BRAND_IN_MS = 480;
 const WALLPAPER_PHASE_FALLBACK_BUFFER_MS = 140;
@@ -47,6 +49,11 @@ function syncWallpaperModeDom(phase: WallpaperModePhase) {
 export default function HomePage({ children }: { children?: ReactNode }) {
   const { t } = useLocalization();
   const reduceMotion = useReducedMotion();
+  // Keep primary content visible on embedded surfaces that cannot advance
+  // Framer Motion's entrance animation; normal browsers retain the fade.
+  const animateHome = typeof window !== "undefined"
+    && !reduceMotion
+    && typeof window.requestAnimationFrame === "function";
   const [siteVersion, setSiteVersion] = useState<SiteVersion | null>(null);
   const [searchActive, setSearchActive] = useState(false);
   const [wallpaperModePhase, setWallpaperModePhase] = useState<WallpaperModePhase>("idle");
@@ -207,19 +214,27 @@ export default function HomePage({ children }: { children?: ReactNode }) {
   const brandIsFadingOut = wallpaperModePhase === "fading" || wallpaperModePhase === "returning";
   const brandIsFadingIn = wallpaperModePhase === "arriving" || wallpaperModePhase === "settling";
   const brandAnimation = reduceMotion
-    ? { opacity: 1 }
+    ? { opacity: 1, y: 0, scaleX: 1, scaleY: 1 }
     : brandIsFadingOut
-      ? { opacity: [1, 0] }
+      ? {
+          opacity: [1, 1, 1, 0.65, 0],
+          y: [0, -18, 5, -7, 8],
+          scaleX: [1, 0.94, 1.06, 0.98, 1.04],
+          scaleY: [1, 1.1, 0.94, 1.04, 0.92],
+        }
       : brandIsFadingIn
-        ? { opacity: [0, 1] }
-        : { opacity: 1 };
-  const brandTransition = reduceMotion
-    ? { duration: 0 }
-    : brandIsFadingOut
-      ? { duration: WALLPAPER_BRAND_OUT_MS / 1000, ease: "easeInOut" as const }
-      : brandIsFadingIn
-        ? { duration: WALLPAPER_BRAND_IN_MS / 1000, ease: [0.22, 1, 0.36, 1] as const }
-        : { duration: 0 };
+        ? {
+            opacity: [0, 0.72, 1, 1, 1],
+            y: [8, -18, 6, -6, 0],
+            scaleX: [1.04, 0.94, 1.06, 0.98, 1],
+            scaleY: [0.92, 1.1, 0.94, 1.04, 1],
+          }
+        : { opacity: 1, y: 0, scaleX: 1, scaleY: 1 };
+  const brandTransition = brandIsFadingOut
+    ? { duration: WALLPAPER_BRAND_OUT_MS / 1000, times: [0, 0.34, 0.58, 0.78, 1], ease: "easeInOut" as const }
+    : brandIsFadingIn
+      ? { duration: WALLPAPER_BRAND_IN_MS / 1000, times: [0, 0.3, 0.56, 0.78, 1], ease: [0.22, 1, 0.36, 1] as const }
+      : { duration: 0 };
 
   // The home page's LCP is the first slideshow wallpaper (a CSS background
   // image, which browsers discover late and fetch at low priority). Preload it
@@ -304,59 +319,97 @@ export default function HomePage({ children }: { children?: ReactNode }) {
         />
       </div>
       <section className="pc-home-primary-section py-8 sm:py-12">
-        <div className="pc-home-brand mb-12 text-center">
+        <motion.div
+          initial={animateHome ? "hidden" : false}
+          animate="visible"
+          variants={{
+            hidden: {},
+            visible: { transition: { staggerChildren: 0.1, delayChildren: 0.06 } },
+          }}
+          className="pc-home-brand mb-12 text-center"
+        >
           <motion.div
             animate={brandAnimation}
             transition={brandTransition}
             onAnimationComplete={advanceWallpaperBrandAnimation}
           >
-            <div className="relative mx-auto mb-2 w-fit">
-              <span
+          <motion.div
+            variants={{
+              hidden: { opacity: 0, y: -12, scale: 0.86 },
+              visible: { opacity: 1, y: 0, scale: 1 },
+            }}
+            transition={{ type: "spring", stiffness: 210, damping: 18 }}
+            className="relative mx-auto mb-2 w-fit"
+          >
+            {!reduceMotion && (
+              <motion.span
                 aria-hidden="true"
                 className="absolute inset-2 -z-10 rounded-full bg-pc-accent/20 blur-xl"
+                animate={{ opacity: [0.28, 0.55, 0.28], scale: [0.88, 1.12, 0.88] }}
+                transition={{ duration: 3.8, ease: "easeInOut", repeat: Infinity }}
               />
-              <button
+            )}
+            <motion.button
               type="button"
               aria-label={t("home.logoAlt")}
               aria-pressed={wallpaperModeEnabled}
               onClick={toggleWallpaperMode}
+              whileTap={reduceMotion ? undefined : { scale: 0.92 }}
               className="pc-home-wallpaper-toggle block rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent focus-visible:ring-offset-4 focus-visible:ring-offset-transparent"
-              >
-                <Image
-                  src="/images/icons/paladinscat.avif"
-                  alt=""
-                  width={80}
-                  height={80}
-                  unoptimized
-                  priority
-                  className="opacity-90 drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]"
-                />
-              </button>
-            </div>
-            <h1 className="relative inline-block text-4xl font-semibold tracking-wide drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)]">
-              <span className="text-pc-text">{t("home.brandLead")}</span>
-              <span className="pc-home-cat-accent">{t("home.brandAccent")}</span>
+            >
+              <Image
+                src="/images/icons/paladinscat.avif"
+                alt=""
+                width={80}
+                height={80}
+                unoptimized
+                priority
+                className="opacity-90 drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]"
+              />
+            </motion.button>
+          </motion.div>
+          <h1 className="relative inline-block text-4xl font-semibold tracking-wide drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)]">
+            <span className="text-pc-text">{t("home.brandLead")}</span>
+            <span className="pc-home-cat-accent">{t("home.brandAccent")}</span>
+            <AnimatePresence mode="wait" initial={false}>
               {siteVersion?.version ? (
-                <Link
+                <MotionLink
+                  key="version"
                   href="/changelog"
                   aria-label={t("menu.changelog")}
                   title={t("menu.changelog")}
+                  initial={animateHome ? { opacity: 0, x: -4 } : false}
+                  animate={{ opacity: 1, x: 0 }}
+                  whileHover={reduceMotion ? undefined : { y: -1, scale: 1.04 }}
+                  whileTap={reduceMotion ? undefined : { scale: 0.96 }}
                   className="pc-home-version absolute left-full top-0 ml-1.5 whitespace-nowrap rounded-sm font-mono text-sm font-medium leading-none tracking-normal text-pc-text-muted drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] transition-colors hover:text-pc-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent"
                 >
                   {siteVersion.version}
-                </Link>
+                </MotionLink>
               ) : (
-                <span
+                <motion.span
+                  key="version-loading"
                   aria-hidden="true"
+                  initial={animateHome ? { opacity: 0 } : false}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
                   className="pc-home-version pc-skeleton absolute left-full top-0 ml-1.5 h-3 w-10 rounded-full"
                 />
               )}
-            </h1>
-            <p className="pc-home-tagline mt-1 text-sm text-pc-text-secondary drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]">
-              {t("home.tagline")}
-            </p>
+            </AnimatePresence>
+          </h1>
+          <motion.p
+            variants={{
+              hidden: { opacity: 0, y: 7 },
+              visible: { opacity: 1, y: 0 },
+            }}
+            transition={{ duration: 0.38, ease: "easeOut" }}
+            className="pc-home-tagline mt-1 text-sm text-pc-text-secondary drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]"
+          >
+            {t("home.tagline")}
+          </motion.p>
           </motion.div>
-        </div>
+        </motion.div>
 
         <div className="pc-home-search">
           <HomeSearch onSearchActiveChange={setSearchActive} />
@@ -366,8 +419,13 @@ export default function HomePage({ children }: { children?: ReactNode }) {
       <section
         className="pc-home-explore mx-auto max-w-4xl px-1 py-14 sm:px-4 sm:py-20"
       >
-        <div className="mb-12">
-          <Link
+        <motion.div
+          initial={animateHome ? { opacity: 0, y: 12 } : false}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
+          className="mb-12"
+        >
+          <MotionLink
             href="/features"
             aria-label={`${t("home.newFeatures")}: ${t("home.exploreNewFeatures")}`}
             className="pc-glass group relative flex items-center gap-4 overflow-hidden rounded-2xl border border-pc-accent/30 bg-gradient-to-r from-pc-accent/15 via-pc-bg-elevated/80 to-pc-accent-alt/10 px-4 py-4 shadow-lg transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-0.5 hover:border-pc-accent/60 hover:shadow-pc-card-hover sm:px-5"
@@ -383,10 +441,16 @@ export default function HomePage({ children }: { children?: ReactNode }) {
               </span>
             </span>
             <ArrowRight className="relative h-5 w-5 shrink-0 text-pc-text-muted transition-transform duration-300 group-hover:translate-x-1 group-hover:text-pc-accent" aria-hidden="true" />
-          </Link>
-        </div>
+          </MotionLink>
+        </motion.div>
 
-        <h2 className="mx-auto max-w-2xl text-center text-3xl font-bold tracking-tight text-pc-text drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)] sm:text-4xl">
+        <motion.h2
+          initial={animateHome ? { opacity: 0, y: 18 } : false}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.6 }}
+          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          className="mx-auto max-w-2xl text-center text-3xl font-bold tracking-tight text-pc-text drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)] sm:text-4xl"
+        >
           <span className="block">
             {exploreTitleLead.slice(0, exploreTitleAccentStart)}
             <span className="pc-home-platform-accent">
@@ -394,45 +458,90 @@ export default function HomePage({ children }: { children?: ReactNode }) {
             </span>
           </span>
           <span className="mt-1 block">{t("home.exploreTitleRest")}</span>
-        </h2>
+        </motion.h2>
 
-        <div className="mt-10 grid gap-4 sm:mt-12 md:grid-cols-3">
+        <motion.div
+          initial={animateHome ? "hidden" : false}
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.25 }}
+          variants={{
+            hidden: {},
+            visible: { transition: { staggerChildren: 0.11 } },
+          }}
+          className="mt-10 grid gap-4 sm:mt-12 md:grid-cols-3"
+        >
           {exploreCards.map(({ href, icon: Icon, title, description }, index) => (
-            <Link
+            <motion.div
               key={href}
-              href={href}
-              data-card-accent={index === 0 ? "primary" : index === 1 ? "secondary" : "tertiary"}
-              className="pc-glass pc-home-feature-card group relative flex min-h-44 flex-col items-center justify-center overflow-hidden rounded-2xl border border-white/5 p-6 text-center shadow-lg transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-pc-card-hover"
+              variants={{
+                hidden: { opacity: 0, y: 22, scale: 0.97 },
+                visible: { opacity: 1, y: 0, scale: 1 },
+              }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             >
+              <MotionLink
+                href={href}
+                data-card-accent={index === 0 ? "primary" : index === 1 ? "secondary" : "tertiary"}
+                whileHover={reduceMotion ? undefined : { y: -6, scale: 1.012 }}
+                whileTap={reduceMotion ? undefined : { scale: 0.985 }}
+                className="pc-glass pc-home-feature-card group relative flex min-h-44 flex-col items-center justify-center overflow-hidden rounded-2xl border border-white/5 p-6 text-center shadow-lg transition-shadow duration-300 group-hover:shadow-pc-card-hover"
+              >
               <span
                 aria-hidden="true"
-                className="pc-home-card-aura absolute -left-20 -top-24 h-52 w-52 rounded-full opacity-35 blur-3xl transition-[transform,opacity] duration-300 group-hover:translate-x-10 group-hover:translate-y-8 group-hover:opacity-60"
+                className="pc-home-card-aura absolute -left-20 -top-24 h-52 w-52 rounded-full opacity-35 blur-3xl transition-all duration-500 group-hover:translate-x-10 group-hover:translate-y-8 group-hover:opacity-60"
               />
-              <ArrowRight className="pc-home-card-arrow absolute right-5 top-5 h-4 w-4 text-pc-text-muted transition-[transform,color] duration-200 group-hover:translate-x-1" aria-hidden="true" />
-              <span className="pc-home-card-icon relative flex h-11 w-11 items-center justify-center rounded-xl border transition-shadow duration-300">
+              <ArrowRight className="pc-home-card-arrow absolute right-5 top-5 h-4 w-4 text-pc-text-muted transition-all duration-300 group-hover:translate-x-1" aria-hidden="true" />
+              <motion.span
+                whileHover={reduceMotion ? undefined : { rotate: -4, scale: 1.08 }}
+                transition={{ type: "spring", stiffness: 300, damping: 16 }}
+                className="pc-home-card-icon relative flex h-11 w-11 items-center justify-center rounded-xl border transition-shadow duration-300"
+              >
                 <Icon className="h-5 w-5" aria-hidden="true" />
-              </span>
+              </motion.span>
               <h3 className="relative mt-4 text-lg font-bold text-pc-text">{title}</h3>
               <p className="relative mt-2 max-w-[15rem] text-sm leading-5 text-pc-text-secondary">{description}</p>
               <span className="pc-home-card-rule absolute inset-x-8 bottom-0 h-px origin-center scale-x-0 transition-transform duration-500 group-hover:scale-x-100" aria-hidden="true" />
-            </Link>
+                </MotionLink>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
         {children}
 
-        <h2 className="mx-auto mt-28 max-w-2xl text-center text-3xl font-bold tracking-tight text-pc-text drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)] sm:mt-32 sm:text-4xl">
+        <motion.h2
+          initial={animateHome ? { opacity: 0, y: 18 } : false}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.6 }}
+          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          className="mx-auto mt-28 max-w-2xl text-center text-3xl font-bold tracking-tight text-pc-text drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)] sm:mt-32 sm:text-4xl"
+        >
           <span className="pc-home-third-accent block">{t("home.communityTitleLead")}</span>
           <span className="mt-1 block">{t("home.communityTitleRest")}</span>
-        </h2>
+        </motion.h2>
 
-        <div className="mt-10 grid gap-3 sm:mt-12 sm:grid-cols-2 lg:grid-cols-5">
+        <motion.div
+          initial={animateHome ? "hidden" : false}
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.25 }}
+          variants={{
+            hidden: {},
+            visible: { transition: { staggerChildren: 0.11 } },
+          }}
+          className="mt-10 grid gap-3 sm:mt-12 sm:grid-cols-2 lg:grid-cols-5"
+        >
           {communityCards.map(({ href, image, imageAlt, title, description }) => (
-            <a
+            <motion.a
               key={href}
               href={href}
               target="_blank"
               rel="noopener noreferrer"
-              className="pc-glass pc-home-feature-card group relative flex min-h-36 flex-col items-center justify-center rounded-2xl border border-white/5 p-4 text-center shadow-lg transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-pc-card-hover"
+              variants={{
+                hidden: { opacity: 0, y: 18 },
+                visible: { opacity: 1, y: 0 },
+              }}
+              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+              whileHover={reduceMotion ? undefined : { y: -4 }}
+              whileTap={reduceMotion ? undefined : { scale: 0.985 }}
+              className="pc-glass pc-home-feature-card group relative flex min-h-36 flex-col items-center justify-center rounded-2xl border border-white/5 p-4 text-center shadow-lg transition-shadow duration-300 hover:shadow-pc-card-hover"
             >
               <Image
                 src={image}
@@ -443,9 +552,9 @@ export default function HomePage({ children }: { children?: ReactNode }) {
               />
               <h3 className="mt-3 text-sm font-bold text-pc-text">{title}</h3>
               <p className="mt-1.5 max-w-[12rem] text-xs leading-5 text-pc-text-secondary">{description}</p>
-            </a>
+            </motion.a>
           ))}
-        </div>
+        </motion.div>
       </section>
 
     </div>

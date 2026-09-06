@@ -48,7 +48,7 @@ export default async function HomePage() {
           <div className="mt-5">
             <nav aria-label={t("seo.home.hub.title")} className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
               {topics.map(({ href, icon: Icon, title, description }, index) => (
-                <Link key={href} href={href} data-card-accent={index % 3 === 0 ? "primary" : index % 3 === 1 ? "secondary" : "tertiary"} className="pc-glass pc-home-feature-card relative flex min-h-28 items-center gap-4 rounded-2xl border border-white/5 p-5 pr-11 shadow-md transition-[transform,background-color,border-color,box-shadow] duration-300 hover:-translate-y-1 hover:bg-pc-bg-elevated/95 hover:shadow-pc-card-hover">
+                <Link key={href} href={href} data-card-accent={index % 3 === 0 ? "primary" : index % 3 === 1 ? "secondary" : "tertiary"} className="pc-glass pc-home-feature-card relative flex min-h-28 items-center gap-4 rounded-2xl border border-white/5 p-5 pr-11 shadow-md transition-all duration-300 hover:-translate-y-1 hover:bg-pc-bg-elevated/95 hover:shadow-pc-card-hover">
                   <span className="pc-home-card-icon flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border">
                     <Icon className="h-5 w-5" aria-hidden="true" />
                   </span>
