@@ -420,9 +420,9 @@ export default function HomePage({ children }: { children?: ReactNode }) {
         className="pc-home-explore mx-auto max-w-4xl px-1 py-14 sm:px-4 sm:py-20"
       >
         <motion.div
-          initial={animateHome ? { opacity: 0, y: 12 } : false}
+          initial={animateHome ? { opacity: 0, y: 8 } : false}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}
           className="mb-12"
         >
           <MotionLink
