@@ -96,7 +96,6 @@ export default async function FeaturesPage() {
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-pc-accent">{t("home.newFeaturesEyebrow")}</p>
             <h1 className="mt-3 text-4xl font-bold tracking-tight text-pc-text">{document?.title || t("home.newFeatures")}</h1>
-            <p className="mt-4 max-w-3xl text-lg leading-8 text-pc-text-secondary">{document?.description || t("home.newFeaturesIntro")}</p>
             {document?.updatedAt && <p className="mt-3 text-sm text-pc-text-muted">{document.updatedAt}</p>}
           </div>
           <a href={sourceUrl} target="_blank" rel="noopener noreferrer" className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-pc-border px-3 py-2 text-sm font-semibold text-pc-text-secondary transition-colors hover:border-pc-accent-mid hover:text-pc-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent">
@@ -111,9 +110,7 @@ export default async function FeaturesPage() {
               {document.content}
             </ReactMarkdown>
           </div>
-        ) : (
-          <p className="pt-8 text-pc-text-secondary">{t("home.newFeaturesIntro")}</p>
-        )}
+        ) : null}
       </article>
     </div>
   );
