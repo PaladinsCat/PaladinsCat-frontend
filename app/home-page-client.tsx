@@ -49,6 +49,11 @@ function syncWallpaperModeDom(phase: WallpaperModePhase) {
 export default function HomePage({ children }: { children?: ReactNode }) {
   const { t } = useLocalization();
   const reduceMotion = useReducedMotion();
+  // Keep primary content visible on embedded surfaces that cannot advance
+  // Framer Motion's entrance animation; normal browsers retain the fade.
+  const animateHome = typeof window !== "undefined"
+    && !reduceMotion
+    && typeof window.requestAnimationFrame === "function";
   const [siteVersion, setSiteVersion] = useState<SiteVersion | null>(null);
   const [searchActive, setSearchActive] = useState(false);
   const [wallpaperModePhase, setWallpaperModePhase] = useState<WallpaperModePhase>("idle");
@@ -70,6 +75,12 @@ export default function HomePage({ children }: { children?: ReactNode }) {
 
   useEffect(() => {
     let animationFrame = 0;
+    const requestFrame = typeof window.requestAnimationFrame === "function"
+      ? window.requestAnimationFrame.bind(window)
+      : (callback: FrameRequestCallback) => window.setTimeout(() => callback(0), 0);
+    const cancelFrame = typeof window.cancelAnimationFrame === "function"
+      ? window.cancelAnimationFrame.bind(window)
+      : window.clearTimeout;
     const syncHomeScrollbar = () => {
       animationFrame = 0;
       const viewportHeight = window.innerHeight;
@@ -90,7 +101,7 @@ export default function HomePage({ children }: { children?: ReactNode }) {
     };
     const scheduleHomeScrollbarSync = () => {
       if (animationFrame) return;
-      animationFrame = window.requestAnimationFrame(syncHomeScrollbar);
+      animationFrame = requestFrame(syncHomeScrollbar);
     };
     const resizeObserver = new ResizeObserver(scheduleHomeScrollbarSync);
 
@@ -99,7 +110,7 @@ export default function HomePage({ children }: { children?: ReactNode }) {
     window.addEventListener("resize", scheduleHomeScrollbarSync);
     resizeObserver.observe(document.body);
     return () => {
-      if (animationFrame) window.cancelAnimationFrame(animationFrame);
+      if (animationFrame) cancelFrame(animationFrame);
       window.removeEventListener("scroll", scheduleHomeScrollbarSync);
       window.removeEventListener("resize", scheduleHomeScrollbarSync);
       resizeObserver.disconnect();
@@ -309,7 +320,7 @@ export default function HomePage({ children }: { children?: ReactNode }) {
       </div>
       <section className="pc-home-primary-section py-8 sm:py-12">
         <motion.div
-          initial={reduceMotion ? false : "hidden"}
+          initial={animateHome ? "hidden" : false}
           animate="visible"
           variants={{
             hidden: {},
@@ -367,7 +378,7 @@ export default function HomePage({ children }: { children?: ReactNode }) {
                   href="/changelog"
                   aria-label={t("menu.changelog")}
                   title={t("menu.changelog")}
-                  initial={reduceMotion ? false : { opacity: 0, x: -4 }}
+                  initial={animateHome ? { opacity: 0, x: -4 } : false}
                   animate={{ opacity: 1, x: 0 }}
                   whileHover={reduceMotion ? undefined : { y: -1, scale: 1.04 }}
                   whileTap={reduceMotion ? undefined : { scale: 0.96 }}
@@ -379,7 +390,7 @@ export default function HomePage({ children }: { children?: ReactNode }) {
                 <motion.span
                   key="version-loading"
                   aria-hidden="true"
-                  initial={{ opacity: 0 }}
+                  initial={animateHome ? { opacity: 0 } : false}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   className="pc-home-version pc-skeleton absolute left-full top-0 ml-1.5 h-3 w-10 rounded-full"
@@ -409,7 +420,7 @@ export default function HomePage({ children }: { children?: ReactNode }) {
         className="pc-home-explore mx-auto max-w-4xl px-1 py-14 sm:px-4 sm:py-20"
       >
         <motion.div
-          initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+          initial={animateHome ? { opacity: 0, y: 12 } : false}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
           className="mb-12"
@@ -434,7 +445,7 @@ export default function HomePage({ children }: { children?: ReactNode }) {
         </motion.div>
 
         <motion.h2
-          initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+          initial={animateHome ? { opacity: 0, y: 18 } : false}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.6 }}
           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
@@ -450,7 +461,7 @@ export default function HomePage({ children }: { children?: ReactNode }) {
         </motion.h2>
 
         <motion.div
-          initial={reduceMotion ? false : "hidden"}
+          initial={animateHome ? "hidden" : false}
           whileInView="visible"
           viewport={{ once: true, amount: 0.25 }}
           variants={{
@@ -497,7 +508,7 @@ export default function HomePage({ children }: { children?: ReactNode }) {
         {children}
 
         <motion.h2
-          initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+          initial={animateHome ? { opacity: 0, y: 18 } : false}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.6 }}
           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
@@ -508,7 +519,7 @@ export default function HomePage({ children }: { children?: ReactNode }) {
         </motion.h2>
 
         <motion.div
-          initial={reduceMotion ? false : "hidden"}
+          initial={animateHome ? "hidden" : false}
           whileInView="visible"
           viewport={{ once: true, amount: 0.25 }}
           variants={{
