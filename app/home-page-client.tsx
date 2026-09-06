@@ -243,6 +243,12 @@ export default function HomePage({ children }: { children?: ReactNode }) {
 
   const exploreCards = [
     {
+      href: "/features",
+      icon: Sparkles,
+      title: t("home.newFeatures"),
+      description: t("home.exploreNewFeatures"),
+    },
+    {
       href: "/players",
       icon: UsersRound,
       title: t("menu.playerHub"),
@@ -419,29 +425,6 @@ export default function HomePage({ children }: { children?: ReactNode }) {
       <section
         className="pc-home-explore mx-auto max-w-4xl px-1 py-14 sm:px-4 sm:py-20"
       >
-        <div className="mb-12">
-          <MotionLink
-            href="/features"
-            data-card-accent="primary"
-            aria-label={`${t("home.newFeatures")}: ${t("home.exploreNewFeatures")}`}
-            whileHover={reduceMotion ? undefined : { y: -6, scale: 1.012 }}
-            whileTap={reduceMotion ? undefined : { scale: 0.985 }}
-            className="pc-glass pc-home-feature-card group relative flex items-center gap-4 overflow-hidden rounded-2xl border border-white/5 px-4 py-4 shadow-lg transition-shadow duration-300 group-hover:shadow-pc-card-hover sm:px-5"
-          >
-            <span aria-hidden="true" className="pc-home-card-aura absolute -left-12 -top-16 h-36 w-36 rounded-full opacity-35 blur-3xl transition-all duration-500 group-hover:translate-x-8 group-hover:translate-y-6 group-hover:opacity-60" />
-            <span className="pc-home-card-icon relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border">
-              <Sparkles className="h-5 w-5" aria-hidden="true" />
-            </span>
-            <span className="relative min-w-0 flex-1">
-              <span className="text-sm font-bold text-pc-text">{t("home.newFeatures")}</span>
-              <span className="mt-1 block line-clamp-2 text-xs leading-5 text-pc-text-secondary">
-                {t("home.exploreNewFeatures")}
-              </span>
-            </span>
-            <ArrowRight className="pc-home-card-arrow relative h-5 w-5 shrink-0 text-pc-text-muted transition-all duration-300 group-hover:translate-x-1" aria-hidden="true" />
-          </MotionLink>
-        </div>
-
         <motion.h2
           initial={animateHome ? { opacity: 0, y: 18 } : false}
           whileInView={{ opacity: 1, y: 0 }}
@@ -466,7 +449,7 @@ export default function HomePage({ children }: { children?: ReactNode }) {
             hidden: {},
             visible: { transition: { staggerChildren: 0.11 } },
           }}
-          className="mt-10 grid gap-4 sm:mt-12 md:grid-cols-3"
+          className="mt-10 grid gap-4 sm:mt-12 md:grid-cols-2 lg:grid-cols-4"
         >
           {exploreCards.map(({ href, icon: Icon, title, description }, index) => (
             <motion.div
@@ -479,7 +462,7 @@ export default function HomePage({ children }: { children?: ReactNode }) {
             >
               <MotionLink
                 href={href}
-                data-card-accent={index === 0 ? "primary" : index === 1 ? "secondary" : "tertiary"}
+                data-card-accent={index % 3 === 0 ? "primary" : index % 3 === 1 ? "secondary" : "tertiary"}
                 whileHover={reduceMotion ? undefined : { y: -6, scale: 1.012 }}
                 whileTap={reduceMotion ? undefined : { scale: 0.985 }}
                 className="pc-glass pc-home-feature-card group relative flex min-h-44 flex-col items-center justify-center overflow-hidden rounded-2xl border border-white/5 p-6 text-center shadow-lg transition-shadow duration-300 group-hover:shadow-pc-card-hover"
