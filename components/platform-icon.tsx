@@ -12,7 +12,7 @@ type PlatformAsset = {
 
 const PLATFORM_ASSETS: Record<string, PlatformAsset> = {
   steam: { label: "Steam", avif: "/images/icons/platform/Platform_Steam.avif", png: "/images/icons/platform/Platform_Steam.png" },
-  epic: { label: "Epic Games", avif: "/images/icons/platform/Platform_Epic_Games.avif?v=3", png: "/images/icons/platform/Platform_Epic_Games.png?v=3" },
+  epic: { label: "Epic Games", avif: "/images/icons/platform/Platform_Epic_Games.avif?v=4", png: "/images/icons/platform/Platform_Epic_Games.png?v=4" },
   playstation: { label: "PlayStation", avif: "/images/icons/platform/Platform_PlayStation.avif", png: "/images/icons/platform/Platform_PlayStation.png" },
   xbox: { label: "Xbox", avif: "/images/icons/platform/Platform_Xbox.avif", png: "/images/icons/platform/Platform_Xbox.png" },
   hirez: { label: "Hi-Rez / PC", avif: "/images/icons/platform/Platform_HiRez_PC.avif", png: "/images/icons/platform/Platform_HiRez_PC.png" },
