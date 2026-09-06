@@ -419,19 +419,17 @@ export default function HomePage({ children }: { children?: ReactNode }) {
       <section
         className="pc-home-explore mx-auto max-w-4xl px-1 py-14 sm:px-4 sm:py-20"
       >
-        <motion.div
-          initial={animateHome ? { opacity: 0, y: 8 } : false}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2, ease: [0.2, 0, 0, 1] }}
-          className="mb-12"
-        >
+        <div className="mb-12">
           <MotionLink
             href="/features"
+            data-card-accent="primary"
             aria-label={`${t("home.newFeatures")}: ${t("home.exploreNewFeatures")}`}
-            className="pc-glass group relative flex items-center gap-4 overflow-hidden rounded-2xl border border-pc-accent/30 bg-gradient-to-r from-pc-accent/15 via-pc-bg-elevated/80 to-pc-accent-alt/10 px-4 py-4 shadow-lg transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-0.5 hover:border-pc-accent/60 hover:shadow-pc-card-hover sm:px-5"
+            whileHover={reduceMotion ? undefined : { y: -6, scale: 1.012 }}
+            whileTap={reduceMotion ? undefined : { scale: 0.985 }}
+            className="pc-glass pc-home-feature-card group relative flex items-center gap-4 overflow-hidden rounded-2xl border border-white/5 px-4 py-4 shadow-lg transition-shadow duration-300 group-hover:shadow-pc-card-hover sm:px-5"
           >
-            <span aria-hidden="true" className="absolute -left-12 -top-16 h-36 w-36 rounded-full bg-pc-accent/20 blur-3xl transition-transform duration-500 group-hover:translate-x-8 group-hover:translate-y-6" />
-            <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-pc-accent/30 bg-pc-accent/10 text-pc-accent">
+            <span aria-hidden="true" className="pc-home-card-aura absolute -left-12 -top-16 h-36 w-36 rounded-full opacity-35 blur-3xl transition-all duration-500 group-hover:translate-x-8 group-hover:translate-y-6 group-hover:opacity-60" />
+            <span className="pc-home-card-icon relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border">
               <Sparkles className="h-5 w-5" aria-hidden="true" />
             </span>
             <span className="relative min-w-0 flex-1">
@@ -440,9 +438,9 @@ export default function HomePage({ children }: { children?: ReactNode }) {
                 {t("home.exploreNewFeatures")}
               </span>
             </span>
-            <ArrowRight className="relative h-5 w-5 shrink-0 text-pc-text-muted transition-transform duration-300 group-hover:translate-x-1 group-hover:text-pc-accent" aria-hidden="true" />
+            <ArrowRight className="pc-home-card-arrow relative h-5 w-5 shrink-0 text-pc-text-muted transition-all duration-300 group-hover:translate-x-1" aria-hidden="true" />
           </MotionLink>
-        </motion.div>
+        </div>
 
         <motion.h2
           initial={animateHome ? { opacity: 0, y: 18 } : false}
