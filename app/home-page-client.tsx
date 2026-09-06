@@ -16,8 +16,6 @@ import {
 } from "lucide-react";
 import {
   fetchSiteVersion,
-  fetchChangelogPreview,
-  type ChangelogEntry,
   type SiteVersion,
 } from "@/lib/api-client";
 import HomeSearch from "@/components/home-search";
@@ -52,7 +50,6 @@ export default function HomePage({ children }: { children?: ReactNode }) {
   const { t } = useLocalization();
   const reduceMotion = useReducedMotion();
   const [siteVersion, setSiteVersion] = useState<SiteVersion | null>(null);
-  const [changelogPreview, setChangelogPreview] = useState<ChangelogEntry | null>(null);
   const [searchActive, setSearchActive] = useState(false);
   const [wallpaperModePhase, setWallpaperModePhase] = useState<WallpaperModePhase>("idle");
   const [homeScrollbar, setHomeScrollbar] = useState<HomeScrollbarState>({ top: 4, height: 0, visible: false });
@@ -65,16 +62,9 @@ export default function HomePage({ children }: { children?: ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
-    const load = async () => {
-      const [version, preview] = await Promise.all([
-        fetchSiteVersion(),
-        fetchChangelogPreview(),
-      ]);
-      if (cancelled) return;
-      setSiteVersion(version);
-      setChangelogPreview(preview);
-    };
-    void load();
+    fetchSiteVersion().then((version) => {
+      if (!cancelled) setSiteVersion(version);
+    });
     return () => { cancelled = true; };
   }, []);
 
@@ -425,25 +415,18 @@ export default function HomePage({ children }: { children?: ReactNode }) {
           className="mb-12"
         >
           <MotionLink
-            href="/changelog"
-            aria-label={`${t("home.latestChanges")}: ${t("home.viewAllChanges")}`}
-            className="pc-glass group relative flex items-center gap-4 overflow-hidden rounded-2xl border border-pc-accent/30 bg-gradient-to-r from-pc-accent/15 via-pc-bg-elevated/80 to-pc-accent-alt/10 px-4 py-4 shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:border-pc-accent/60 hover:shadow-pc-card-hover sm:px-5"
+            href="/features"
+            aria-label={`${t("home.newFeatures")}: ${t("home.exploreNewFeatures")}`}
+            className="pc-glass group relative flex items-center gap-4 overflow-hidden rounded-2xl border border-pc-accent/30 bg-gradient-to-r from-pc-accent/15 via-pc-bg-elevated/80 to-pc-accent-alt/10 px-4 py-4 shadow-lg transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-0.5 hover:border-pc-accent/60 hover:shadow-pc-card-hover sm:px-5"
           >
             <span aria-hidden="true" className="absolute -left-12 -top-16 h-36 w-36 rounded-full bg-pc-accent/20 blur-3xl transition-transform duration-500 group-hover:translate-x-8 group-hover:translate-y-6" />
             <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-pc-accent/30 bg-pc-accent/10 text-pc-accent">
               <Sparkles className="h-5 w-5" aria-hidden="true" />
             </span>
             <span className="relative min-w-0 flex-1">
-              <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                <span className="text-sm font-bold text-pc-text">{t("home.latestChanges")}</span>
-                {changelogPreview?.version && (
-                  <span className="rounded-full border border-pc-accent/30 bg-pc-accent/10 px-2 py-0.5 font-mono text-[0.65rem] font-semibold text-pc-accent">
-                    {changelogPreview.version}
-                  </span>
-                )}
-              </span>
+              <span className="text-sm font-bold text-pc-text">{t("home.newFeatures")}</span>
               <span className="mt-1 block line-clamp-2 text-xs leading-5 text-pc-text-secondary">
-                {changelogPreview?.changelog?.trim() || t("home.viewAllChanges")}
+                {t("home.exploreNewFeatures")}
               </span>
             </span>
             <ArrowRight className="relative h-5 w-5 shrink-0 text-pc-text-muted transition-transform duration-300 group-hover:translate-x-1 group-hover:text-pc-accent" aria-hidden="true" />

@@ -70,6 +70,7 @@ const staticRoutes: Array<{
   { path: "/community/diminishing-returns", changeFrequency: "weekly", priority: 0.8 },
   { path: "/tierlists", changeFrequency: "daily", priority: 0.8 },
   { path: "/blog", changeFrequency: "daily", priority: 0.8 },
+  { path: "/features", changeFrequency: "monthly", priority: 0.75 },
   { path: "/changelog", changeFrequency: "daily", priority: 0.8 },
   { path: "/operations/stats", changeFrequency: "hourly", priority: 0.8 },
   { path: "/operations/paladinscat-bot", changeFrequency: "monthly", priority: 0.75 },
