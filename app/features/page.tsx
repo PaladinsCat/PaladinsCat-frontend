@@ -1,140 +1,120 @@
 /**
- * Define the features landing-page responsibility boundary.
- * Coordinates localized feature discovery and public destination links.
+ * Render the repository-owned New Features document as an editorial route.
+ * The page owns the presentation shell while GitHub owns the Markdown content.
+ * refs: documents/06-reference/frontend-design-system.md#editorial-or-marketing
+ */
+import type { Components } from "react-markdown";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import Link from "next/link";
+import { ArrowLeft, GitBranch } from "lucide-react";
+import { getServerLocalization } from "@/lib/server-localization";
+import { getFeatureDocument, getFeatureSourceUrl, resolveFeatureAssetUrl, resolveFeatureLink } from "@/lib/feature-document";
+
+/**
+ * Refresh the GitHub-backed document route without making every render a permanent build artifact.
+ * refs: documents/06-reference/frontend-async-ui.md#state-selection
+ */
+export const dynamic = "force-dynamic";
+/** The route shell renders per request while the document loader owns its 300-second content cache. · refs: none */
+export const revalidate = 0;
+
+/**
+ * Build metadata from the current repository document, with localized fallback copy when GitHub is unavailable.
+ * Returns: `Promise<Metadata>`; no write, auth, or persistence side effect occurs.
  * refs: documents/06-reference/frontend-design-system.md#page-anatomy
  */
-import Link from "next/link";
-import {
-  ArrowLeft,
-  ArrowRight,
-  BarChart3,
-  Bot,
-  ChartNoAxesCombined,
-  Layers3,
-  Sparkles,
-  Trophy,
-  UsersRound,
-} from "lucide-react";
-import { createLocalizedMetadata, getServerLocalization } from "@/lib/server-localization";
-
 export async function generateMetadata() {
-  return createLocalizedMetadata("home.newFeatures", {
-    descriptionKey: "home.newFeaturesIntro",
-    metadata: { alternates: { canonical: "/features" } },
-  });
+  const { t } = await getServerLocalization();
+  const document = await getFeatureDocument();
+  const title = document?.title || t("home.newFeatures");
+  const description = document?.description || t("home.newFeaturesIntro");
+  return {
+    title,
+    description,
+    alternates: { canonical: "/features" },
+    openGraph: { title, description, type: "article" as const, url: "/features" },
+  };
 }
 
-/** Render the localized New Features landing page.  Returns: `Promise<React.JSX.Element>`. · refs: none */
+/** Render the GitHub-backed New Features document.  Returns: `Promise<React.JSX.Element>`. · refs: none */
 export default async function FeaturesPage() {
   const { t } = await getServerLocalization();
-  const features = [
-    {
-      href: "/champions",
-      icon: BarChart3,
-      title: t("generated.about.championAnalytics"),
-      description: t("generated.about.championAnalyticsDesc"),
+  const document = await getFeatureDocument();
+  const sourceUrl = document?.sourceUrl || getFeatureSourceUrl();
+  const components: Components = {
+    h1: ({ children, ...props }) => <h1 {...props} className="mb-4 mt-10 text-3xl font-bold leading-tight tracking-tight text-pc-text">{children}</h1>,
+    h2: ({ children, ...props }) => <h2 {...props} className="mb-3 mt-10 text-2xl font-bold leading-tight tracking-tight text-pc-text">{children}</h2>,
+    h3: ({ children, ...props }) => <h3 {...props} className="mb-3 mt-8 text-xl font-bold leading-tight text-pc-text">{children}</h3>,
+    h4: ({ children, ...props }) => <h4 {...props} className="mb-2 mt-7 text-base font-bold leading-tight text-pc-text">{children}</h4>,
+    p: ({ children, ...props }) => <p {...props} className="my-4 leading-8 text-pc-text-secondary">{children}</p>,
+    strong: ({ children, ...props }) => <strong {...props} className="font-bold text-pc-text">{children}</strong>,
+    ul: ({ children, ...props }) => <ul {...props} className="my-4 list-disc space-y-1.5 pl-6 text-pc-text-secondary">{children}</ul>,
+    ol: ({ children, ...props }) => <ol {...props} className="my-4 list-decimal space-y-1.5 pl-6 text-pc-text-secondary">{children}</ol>,
+    blockquote: ({ children, ...props }) => <blockquote {...props} className="my-5 rounded-r-xl border-l-4 border-pc-accent bg-pc-accent/10 px-4 py-2 text-pc-text [&>p]:my-1 [&>p]:text-pc-text">{children}</blockquote>,
+    hr: (props) => <hr {...props} className="my-8 border-0 border-t border-pc-border" />,
+    pre: ({ children, ...props }) => <pre {...props} className="my-5 max-w-full overflow-x-auto rounded-xl border border-pc-border bg-pc-bg-secondary p-4 text-sm leading-6 text-pc-text [&_code]:border-0 [&_code]:bg-transparent [&_code]:p-0 [&_code]:text-pc-text">{children}</pre>,
+    code: ({ className, children, ...props }) => <code {...props} className={`rounded border border-pc-border bg-pc-bg-secondary px-1.5 py-0.5 text-[0.9em] text-pc-accent-light ${className || ""}`}>{children}</code>,
+    table: ({ children, ...props }) => <div className="my-5 max-w-full overflow-x-auto rounded-lg border border-pc-border"><table {...props} className="w-full min-w-max border-collapse text-sm">{children}</table></div>,
+    th: ({ children, ...props }) => <th {...props} className="border-b border-r border-pc-border bg-pc-bg-secondary px-3 py-2 text-left font-semibold text-pc-text last:border-r-0">{children}</th>,
+    td: ({ children, ...props }) => <td {...props} className="border-b border-r border-pc-border px-3 py-2 text-left text-pc-text-secondary last:border-r-0">{children}</td>,
+    a: ({ href, className, children, ...props }) => {
+      const resolvedHref = resolveFeatureLink(href);
+      const isExternal = resolvedHref?.startsWith("http") || resolvedHref?.startsWith("//");
+      return (
+        <a
+          {...props}
+          href={resolvedHref}
+          target={isExternal ? "_blank" : undefined}
+          rel={isExternal ? "noopener noreferrer" : undefined}
+          className={`text-pc-accent hover:underline ${className || ""}`}
+        >
+          {children}
+        </a>
+      );
     },
-    {
-      href: "/players",
-      icon: UsersRound,
-      title: t("generated.about.playerProfiles"),
-      description: t("generated.about.playerProfilesDesc"),
-    },
-    {
-      href: "/players/leaderboard",
-      icon: Trophy,
-      title: t("generated.about.rankedLeaderboards"),
-      description: t("generated.about.leaderboardsDesc"),
-    },
-    {
-      href: "/stats/performance",
-      icon: ChartNoAxesCombined,
-      title: t("generated.about.performanceBenchmarks"),
-      description: t("generated.about.statsCompareBody"),
-    },
-    {
-      href: "/builds",
-      icon: Layers3,
-      title: t("generated.about.metaTrends"),
-      description: t("generated.about.metaTrendsDesc"),
-    },
-    {
-      href: "/operations/paladinscat-bot",
-      icon: Bot,
-      title: t("generated.about.discordCompanion"),
-      description: t("generated.about.discordCompanionBody"),
-    },
-  ];
-  const spotlight = [
-    { icon: BarChart3, label: t("generated.about.championStats") },
-    { icon: Trophy, label: t("generated.about.rankedTracking") },
-    { icon: Layers3, label: t("generated.about.metaAnalysis") },
-  ];
+    img: ({ src, alt, className, ...props }) => (
+      <img
+        {...props}
+        src={resolveFeatureAssetUrl(typeof src === "string" ? src : undefined)}
+        alt={alt}
+        loading="lazy"
+        className={`my-6 h-auto max-w-full rounded-xl border border-pc-border shadow-md ${className || ""}`}
+      />
+    ),
+  };
 
   return (
-    <div className="mx-auto max-w-6xl overflow-hidden rounded-2xl border border-pc-border bg-pc-bg-elevated/95">
-      <section className="relative overflow-hidden border-b border-pc-border px-5 py-12 sm:px-10 sm:py-16 lg:px-16 lg:py-20">
-        <div className="pointer-events-none absolute -right-28 -top-36 h-96 w-96 rounded-full bg-pc-accent/20 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-48 left-1/4 h-80 w-80 rounded-full bg-pc-accent-alt/15 blur-3xl" />
-        <div className="relative grid items-center gap-12 lg:grid-cols-[1.08fr_0.92fr] lg:gap-16">
+    <div className="max-w-5xl mx-auto px-4 py-8">
+      <Link href="/" className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-pc-text-secondary transition-colors hover:text-pc-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent">
+        <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+        {t("home.backToHome")}
+      </Link>
+
+      <article className="rounded-2xl border border-pc-border bg-pc-bg-elevated/95 p-5 shadow-2xl backdrop-blur-sm sm:p-8 lg:p-10">
+        <div className="flex flex-wrap items-start justify-between gap-5 border-b border-pc-border pb-8">
           <div>
-            <Link href="/" className="inline-flex items-center gap-2 text-sm font-semibold text-pc-text-secondary transition-colors hover:text-pc-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent">
-              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-              {t("home.backToHome")}
-            </Link>
-            <p className="mt-8 text-xs font-bold uppercase tracking-[0.2em] text-pc-accent">{t("home.newFeaturesEyebrow")}</p>
-            <h1 className="mt-4 text-4xl font-extrabold tracking-tight text-pc-text sm:text-5xl lg:text-6xl">{t("home.newFeatures")}</h1>
-            <p className="mt-5 max-w-2xl text-lg leading-8 text-pc-text-secondary">{t("home.newFeaturesIntro")}</p>
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-pc-accent">{t("home.newFeaturesEyebrow")}</p>
+            <h1 className="mt-3 text-4xl font-bold tracking-tight text-pc-text">{document?.title || t("home.newFeatures")}</h1>
+            <p className="mt-4 max-w-3xl text-lg leading-8 text-pc-text-secondary">{document?.description || t("home.newFeaturesIntro")}</p>
+            {document?.updatedAt && <p className="mt-3 text-sm text-pc-text-muted">{document.updatedAt}</p>}
           </div>
+          <a href={sourceUrl} target="_blank" rel="noopener noreferrer" className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-pc-border px-3 py-2 text-sm font-semibold text-pc-text-secondary transition-colors hover:border-pc-accent-mid hover:text-pc-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent">
+            <GitBranch className="h-4 w-4" aria-hidden="true" />
+            GitHub
+          </a>
+        </div>
 
-          <div className="relative mx-auto w-full max-w-md">
-            <div className="absolute -inset-6 rounded-3xl bg-gradient-to-br from-pc-accent/20 to-pc-accent-alt/15 blur-2xl" />
-            <div className="relative rounded-3xl border border-pc-accent/25 bg-pc-bg/65 p-6 shadow-lg sm:p-8">
-              <div className="flex items-center gap-4 border-b border-pc-border pb-6">
-                <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-pc-accent/30 bg-pc-accent/10 text-pc-accent">
-                  <Sparkles className="h-7 w-7" aria-hidden="true" />
-                </span>
-                <div>
-                  <div className="text-xl font-bold text-pc-text">{t("home.newFeatures")}</div>
-                  <div className="mt-1 text-sm text-pc-accent">{t("home.exploreNewFeatures")}</div>
-                </div>
-              </div>
-              <div className="mt-6 grid gap-3 sm:grid-cols-3">
-                {spotlight.map(({ icon: Icon, label }) => (
-                  <div key={label} className="rounded-xl border border-pc-border bg-pc-bg-elevated/70 p-4 text-center">
-                    <Icon className="mx-auto h-5 w-5 text-pc-accent" aria-hidden="true" />
-                    <div className="mt-3 text-xs font-semibold text-pc-text-secondary">{label}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
+        {document ? (
+          <div data-allow-native-drag="true" className="blog-markdown pt-4 text-base leading-8 text-pc-text-secondary [overflow-wrap:anywhere]">
+            <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+              {document.content}
+            </ReactMarkdown>
           </div>
-        </div>
-      </section>
-
-      <section className="px-5 py-14 sm:px-10 sm:py-20 lg:px-16">
-        <p className="text-xs font-bold uppercase tracking-[0.18em] text-pc-accent-alt">{t("home.featureHighlights")}</p>
-        <h2 className="mt-3 max-w-2xl text-3xl font-bold tracking-tight text-pc-text sm:text-4xl">{t("home.featureHighlightsTitle")}</h2>
-        <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {features.map(({ href, icon: Icon, title, description }) => (
-            <Link
-              key={href}
-              href={href}
-              className="group rounded-2xl border border-pc-border bg-pc-bg-elevated/70 p-6 transition-[transform,border-color,box-shadow] duration-300 hover:-translate-y-1 hover:border-pc-accent-mid hover:shadow-pc-card-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent"
-            >
-              <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-pc-accent/20 bg-pc-accent/10 text-pc-accent">
-                <Icon className="h-5 w-5" aria-hidden="true" />
-              </span>
-              <h3 className="mt-5 text-lg font-bold text-pc-text">{title}</h3>
-              <p className="mt-2 text-sm leading-6 text-pc-text-secondary">{description}</p>
-              <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-pc-accent">
-                {t("home.exploreFeature")}
-                <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" aria-hidden="true" />
-              </span>
-            </Link>
-          ))}
-        </div>
-      </section>
+        ) : (
+          <p className="pt-8 text-pc-text-secondary">{t("home.newFeaturesIntro")}</p>
+        )}
+      </article>
     </div>
   );
 }
