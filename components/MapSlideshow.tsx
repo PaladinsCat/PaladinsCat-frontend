@@ -15,6 +15,7 @@ import {
   HOME_CAT_ACCENT_PROPERTY,
   HOME_PLATFORM_ACCENT_PROPERTY,
   HOME_THIRD_ACCENT_PROPERTY,
+  HOME_FOURTH_ACCENT_PROPERTY,
 } from "@/lib/wallpaper-accent";
 
 type WallpaperSlide = BuiltInWallpaper | string;
@@ -121,10 +122,11 @@ export default function MapSlideshow() {
       document.documentElement.style.removeProperty(HOME_CAT_ACCENT_PROPERTY);
       document.documentElement.style.removeProperty(HOME_PLATFORM_ACCENT_PROPERTY);
       document.documentElement.style.removeProperty(HOME_THIRD_ACCENT_PROPERTY);
+      document.documentElement.style.removeProperty(HOME_FOURTH_ACCENT_PROPERTY);
       return () => { active = false; };
     }
 
-    void extractWallpaperAccents(currentWallpaperAccentSource).then(({ primary, secondary, tertiary }) => {
+    void extractWallpaperAccents(currentWallpaperAccentSource).then(({ primary, secondary, tertiary, fourth }) => {
       if (!active) return;
       if (primary) document.documentElement.style.setProperty(HOME_CAT_ACCENT_PROPERTY, primary);
       else document.documentElement.style.removeProperty(HOME_CAT_ACCENT_PROPERTY);
@@ -132,6 +134,8 @@ export default function MapSlideshow() {
       else document.documentElement.style.removeProperty(HOME_PLATFORM_ACCENT_PROPERTY);
       if (tertiary) document.documentElement.style.setProperty(HOME_THIRD_ACCENT_PROPERTY, tertiary);
       else document.documentElement.style.removeProperty(HOME_THIRD_ACCENT_PROPERTY);
+      if (fourth) document.documentElement.style.setProperty(HOME_FOURTH_ACCENT_PROPERTY, fourth);
+      else document.documentElement.style.removeProperty(HOME_FOURTH_ACCENT_PROPERTY);
     });
     return () => { active = false; };
   }, [currentWallpaperAccentSource, wallpaperActive]);
@@ -140,6 +144,7 @@ export default function MapSlideshow() {
     document.documentElement.style.removeProperty(HOME_CAT_ACCENT_PROPERTY);
     document.documentElement.style.removeProperty(HOME_PLATFORM_ACCENT_PROPERTY);
     document.documentElement.style.removeProperty(HOME_THIRD_ACCENT_PROPERTY);
+    document.documentElement.style.removeProperty(HOME_FOURTH_ACCENT_PROPERTY);
   }, []);
 
   if (!wallpaperActive) {

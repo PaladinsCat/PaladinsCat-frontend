@@ -462,7 +462,7 @@ export default function HomePage({ children }: { children?: ReactNode }) {
             >
               <MotionLink
                 href={href}
-                data-card-accent={index % 3 === 0 ? "primary" : index % 3 === 1 ? "secondary" : "tertiary"}
+                data-card-accent={index % 4 === 0 ? "primary" : index % 4 === 1 ? "secondary" : index % 4 === 2 ? "tertiary" : "fourth"}
                 whileHover={reduceMotion ? undefined : { y: -6, scale: 1.012 }}
                 whileTap={reduceMotion ? undefined : { scale: 0.985 }}
                 className="pc-glass pc-home-feature-card group relative flex min-h-44 flex-col items-center justify-center overflow-hidden rounded-2xl border border-white/5 p-6 text-center shadow-lg transition-shadow duration-300 group-hover:shadow-pc-card-hover"

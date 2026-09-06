@@ -66,6 +66,7 @@
   --color-pc-accent-light: var(--pc-accent-light);
   --color-pc-accent-alt: var(--pc-accent-alt);
   --color-pc-accent-third: var(--pc-accent-third);
+  --color-pc-accent-fourth: var(--pc-accent-fourth);
   --color-pc-border: #3c3f44;
   --color-pc-text: #dfdfd6;
   --color-pc-text-secondary: #98989f;
@@ -121,6 +122,7 @@
   --pc-accent-light: color-mix(in oklch, var(--pc-accent) 62%, white);
   --pc-accent-alt: var(--pc-home-platform-accent, oklch(0.700 0.110 295));
   --pc-accent-third: var(--pc-home-third-accent, oklch(0.760 0.120 75));
+  --pc-accent-fourth: var(--pc-home-fourth-accent, oklch(0.720 0.110 25));
   --pc-accent-glow-subtle: color-mix(in srgb, var(--pc-accent) 8%, transparent);
   --pc-accent-glow-soft: color-mix(in srgb, var(--pc-accent) 14%, transparent);
   --pc-accent-glow: color-mix(in srgb, var(--pc-accent) 18%, transparent);
@@ -338,9 +340,11 @@ html.pc-lite {
   --pc-accent-light: oklch(0.90 0 0);
   --pc-accent-alt: oklch(0.80 0 0);
   --pc-accent-third: oklch(0.78 0 0);
+  --pc-accent-fourth: oklch(0.76 0 0);
   --pc-home-cat-accent: oklch(0.85 0 0);
   --pc-home-platform-accent: oklch(0.80 0 0);
   --pc-home-third-accent: oklch(0.78 0 0);
+  --pc-home-fourth-accent: oklch(0.76 0 0);
   --pc-accent-glow-subtle: oklch(0.85 0 0 / 0.08);
   --pc-accent-glow-soft: oklch(0.85 0 0 / 0.14);
   --pc-accent-glow: oklch(0.85 0 0 / 0.18);
@@ -635,6 +639,10 @@ html[data-home-wallpaper-phase="returning"] .pc-home-explore * {
 
 .pc-home-feature-card[data-card-accent="tertiary"] {
   --pc-card-accent: var(--pc-accent-third);
+}
+
+.pc-home-feature-card[data-card-accent="fourth"] {
+  --pc-card-accent: var(--pc-accent-fourth);
 }
 
 

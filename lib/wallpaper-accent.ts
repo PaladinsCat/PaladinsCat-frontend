@@ -10,6 +10,8 @@ export const HOME_CAT_ACCENT_PROPERTY = "--pc-home-cat-accent";
 export const HOME_PLATFORM_ACCENT_PROPERTY = "--pc-home-platform-accent";
 /** CSS custom property carrying the tertiary wallpaper accent; reading it has no side effects. · refs: none */
 export const HOME_THIRD_ACCENT_PROPERTY = "--pc-home-third-accent";
+/** CSS custom property carrying the fourth wallpaper accent; reading it has no side effects. · refs: none */
+export const HOME_FOURTH_ACCENT_PROPERTY = "--pc-home-fourth-accent";
 
 const SAMPLE_SIZE = 48;
 const HUE_BUCKETS = 24;
@@ -21,6 +23,7 @@ export type WallpaperAccents = {
   primary: string | null;
   secondary: string | null;
   tertiary: string | null;
+  fourth: string | null;
 };
 
 type ColorBucket = {
@@ -131,6 +134,22 @@ function tertiaryHueOffset(primaryHue: number, secondaryHue: number): number {
     .sort((left, right) => right.score - left.score)[0].offset;
 }
 
+function fourthHueOffset(primaryHue: number, secondaryHue: number, tertiaryHue: number): number {
+  return [30, 90, 150, 210, 270, 330]
+    .map((offset) => {
+      const hue = (primaryHue + offset) % 360;
+      return {
+        offset,
+        score: Math.min(
+          hueDistanceDegrees(hue, primaryHue),
+          hueDistanceDegrees(hue, secondaryHue),
+          hueDistanceDegrees(hue, tertiaryHue),
+        ),
+      };
+    })
+    .sort((left, right) => right.score - left.score)[0].offset;
+}
+
 function hueBucketDistance(left: number, right: number): number {
   const distance = Math.abs(left - right);
   return Math.min(distance, HUE_BUCKETS - distance);
@@ -181,10 +200,10 @@ export function pickWallpaperAccents(pixels: Uint8ClampedArray): WallpaperAccent
     .filter(({ bucket }) => bucket.samples >= MIN_BUCKET_SAMPLES && bucket.weight > 0)
     .sort((left, right) => right.bucket.weight - left.bucket.weight);
   const primary = ranked[0];
-  if (!primary) return { primary: null, secondary: null, tertiary: null };
+  if (!primary) return { primary: null, secondary: null, tertiary: null, fourth: null };
 
   const primaryColor = bucketColor(primary.bucket);
-  if (!primaryColor) return { primary: null, secondary: null, tertiary: null };
+  if (!primaryColor) return { primary: null, secondary: null, tertiary: null, fourth: null };
 
   const distinctCandidates = ranked
     .slice(1)
@@ -193,6 +212,11 @@ export function pickWallpaperAccents(pixels: Uint8ClampedArray): WallpaperAccent
   const tertiaryCandidate = distinctCandidates.find(({ index }) => (
     secondaryCandidate !== null
     && hueBucketDistance(index, secondaryCandidate.index) >= 3
+  )) ?? null;
+  const selectedHueIndexes = [primary.index, secondaryCandidate?.index, tertiaryCandidate?.index]
+    .filter((index): index is number => index !== undefined);
+  const fourthCandidate = distinctCandidates.find(({ index }) => (
+    selectedHueIndexes.every((selectedIndex) => hueBucketDistance(index, selectedIndex) >= 3)
   )) ?? null;
 
   const minimumToneSamples = Math.max(MIN_BUCKET_SAMPLES, Math.ceil(tonalSampleCount * 0.01));
@@ -224,6 +248,9 @@ export function pickWallpaperAccents(pixels: Uint8ClampedArray): WallpaperAccent
       : deriveContrastingAccent(primaryColor);
   const secondaryHue = secondaryColor?.h
     ?? (tonalSecondary ? tonalSecondary.color.h : (primaryColor.h + 150) % 360);
+  const tertiaryColor = tertiaryCandidate ? bucketColor(tertiaryCandidate.bucket) : null;
+  const tertiaryHue = tertiaryColor?.h
+    ?? (primaryColor.h + tertiaryHueOffset(primaryColor.h, secondaryHue)) % 360;
 
   return {
     primary: formatBucketColor(primary.bucket),
@@ -233,6 +260,12 @@ export function pickWallpaperAccents(pixels: Uint8ClampedArray): WallpaperAccent
       : deriveContrastingAccent(
         primaryColor,
         tertiaryHueOffset(primaryColor.h, secondaryHue),
+      ),
+    fourth: fourthCandidate
+      ? formatBucketColor(fourthCandidate.bucket)
+      : deriveContrastingAccent(
+        primaryColor,
+        fourthHueOffset(primaryColor.h, secondaryHue, tertiaryHue),
       ),
   };
 }
@@ -255,11 +288,11 @@ export async function extractWallpaperAccents(source: string): Promise<Wallpaper
     canvas.width = SAMPLE_SIZE;
     canvas.height = SAMPLE_SIZE;
     const context = canvas.getContext("2d", { willReadFrequently: true });
-    if (!context) return { primary: null, secondary: null, tertiary: null };
+    if (!context) return { primary: null, secondary: null, tertiary: null, fourth: null };
     context.drawImage(image, 0, 0, SAMPLE_SIZE, SAMPLE_SIZE);
     return pickWallpaperAccents(context.getImageData(0, 0, SAMPLE_SIZE, SAMPLE_SIZE).data);
   } catch {
-    return { primary: null, secondary: null, tertiary: null };
+    return { primary: null, secondary: null, tertiary: null, fourth: null };
   }
 }
 

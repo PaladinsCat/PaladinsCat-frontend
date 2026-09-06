@@ -22,6 +22,7 @@ test("returns no accent for a grayscale wallpaper", () => {
     primary: null,
     secondary: null,
     tertiary: null,
+    fourth: null,
   });
 });
 
@@ -34,8 +35,12 @@ test("selects distinct primary and secondary colorful families", () => {
   assert.match(accents.primary ?? "", /^hsl\(21\d /);
   assert.match(accents.secondary ?? "", /^hsl\([0-9] /);
   assert.ok(accents.tertiary);
+  assert.ok(accents.fourth);
   assert.notEqual(accents.tertiary, accents.primary);
   assert.notEqual(accents.tertiary, accents.secondary);
+  assert.notEqual(accents.fourth, accents.primary);
+  assert.notEqual(accents.fourth, accents.secondary);
+  assert.notEqual(accents.fourth, accents.tertiary);
 });
 
 test("raises dark scene colors into a readable Cat accent", () => {
@@ -47,6 +52,7 @@ test("derives a contrasting hue for a completely flat monochromatic wallpaper", 
     primary: "hsl(213 69% 58%)",
     secondary: "hsl(3 59% 68%)",
     tertiary: "hsl(93 59% 68%)",
+    fourth: "hsl(303 59% 68%)",
   });
 });
 
@@ -60,19 +66,25 @@ test("uses a source shade when a monochromatic wallpaper has tonal highlights", 
   assert.match(accents.primary ?? "", /^hsl\(35[0-9] /);
   assert.match(accents.secondary ?? "", /^hsl\(35[0-9] /);
   assert.ok(accents.tertiary);
+  assert.ok(accents.fourth);
   assert.notEqual(accents.secondary, accents.primary);
   assert.notEqual(accents.tertiary, accents.primary);
   assert.notEqual(accents.tertiary, accents.secondary);
+  assert.notEqual(accents.fourth, accents.primary);
+  assert.notEqual(accents.fourth, accents.secondary);
+  assert.notEqual(accents.fourth, accents.tertiary);
 });
 
-test("selects three distinct source color families when available", () => {
+test("selects four distinct source color families when available", () => {
   const accents = pickWallpaperAccents(pixels([
     ...Array.from({ length: 50 }, () => [45, 100, 205] as [number, number, number]),
     ...Array.from({ length: 36 }, () => [210, 55, 65] as [number, number, number]),
     ...Array.from({ length: 28 }, () => [45, 170, 95] as [number, number, number]),
+    ...Array.from({ length: 20 }, () => [210, 150, 45] as [number, number, number]),
   ]));
   assert.ok(accents.primary);
   assert.ok(accents.secondary);
   assert.ok(accents.tertiary);
-  assert.equal(new Set([accents.primary, accents.secondary, accents.tertiary]).size, 3);
+  assert.ok(accents.fourth);
+  assert.equal(new Set([accents.primary, accents.secondary, accents.tertiary, accents.fourth]).size, 4);
 });
