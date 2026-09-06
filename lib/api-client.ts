@@ -194,6 +194,56 @@ export interface CheaterPlayer {
   topReasons: Array<{ reason: string; count: number }>;
 }
 
+export interface CheaterPortalEntry {
+  kind: "player" | "private";
+  subjectId: string;
+  playerId: number | null;
+  name: string;
+  platform: string | null;
+  lastSeen: string | null;
+  reason: string | null;
+  level: number | null;
+  wins: number | null;
+  losses: number | null;
+  winRate: number | null;
+  leaveRate: number | null;
+}
+
+export interface CheaterPortal {
+  activeCount: number;
+  inactiveCount: number;
+  evidenceCount: number;
+  latest: CheaterPortalEntry[];
+}
+
+export interface InactiveCheaterPage {
+  items: CheaterPortalEntry[];
+  total: number;
+}
+
+export interface ActiveCheaterPage {
+  items: CheaterPortalEntry[];
+  total: number;
+}
+
+export interface CheaterEvidence {
+  id: string;
+  playerId: number | null;
+  subjectName: string;
+  title: string;
+  description: string;
+  sourceUrl: string | null;
+  provider: "youtube" | "twitch" | null;
+  embedUrl: string | null;
+  imageUrl: string | null;
+  createdAt: string;
+}
+
+export interface CheaterEvidencePage {
+  items: CheaterEvidence[];
+  total: number;
+}
+
 export interface AutomaticAfkPlayer extends CheaterPlayer {
   automaticMatchCount: number;
   firstSeen: string | null;
@@ -388,6 +438,113 @@ export async function fetchCheaterPlayers(params?: { name?: string; cheater?: bo
   } catch {
     return [];
   }
+}
+
+function normalizeNullableNumber(value: unknown): number | null {
+  if (value == null || value === "") return null;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+
+function normalizeCheaterPortalEntry(row: any): CheaterPortalEntry {
+  const wins = normalizeNullableNumber(row.wins ?? row.totalWins ?? row.total_wins ?? row.globalWins ?? row.global_wins);
+  const losses = normalizeNullableNumber(row.losses ?? row.totalLosses ?? row.total_losses ?? row.globalLosses ?? row.global_losses);
+  const matches = normalizeNullableNumber(row.matches ?? row.totalMatches ?? row.total_matches);
+  const leaves = normalizeNullableNumber(row.leaves ?? row.totalLeaves ?? row.total_leaves);
+  const totalMatches = matches ?? (wins != null && losses != null ? wins + losses : null);
+  const computedWinRate = wins != null && losses != null && wins + losses > 0
+    ? (wins / (wins + losses)) * 100
+    : null;
+  const computedLeaveRate = leaves != null && totalMatches != null && totalMatches > 0
+    ? (leaves / totalMatches) * 100
+    : null;
+  return {
+    kind: row.kind === "private" ? "private" : "player",
+    subjectId: String(row.subjectId ?? row.subject_id ?? ""),
+    playerId: row.playerId == null && row.player_id == null ? null : Number(row.playerId ?? row.player_id),
+    name: String(row.name ?? "Unknown subject"),
+    platform: row.platform ?? row.platform_name ?? null,
+    lastSeen: row.lastSeen ?? row.last_seen ?? null,
+    reason: row.reason ?? null,
+    level: normalizeNullableNumber(row.level ?? row.accountLevel ?? row.account_level ?? row.profileLevel ?? row.profile_level),
+    wins,
+    losses,
+    winRate: normalizeNullableNumber(row.winRate ?? row.win_rate ?? row.winrate) ?? computedWinRate,
+    leaveRate: normalizeNullableNumber(row.leaveRate ?? row.leave_rate ?? row.leaverate) ?? computedLeaveRate,
+  };
+}
+
+/** Fetch the single cached read used by the Cheater Portal landing page. */
+export async function fetchCheaterPortal(): Promise<CheaterPortal> {
+  const raw = await fetchJson<any>("/cheaters/portal");
+  return {
+    activeCount: Number(raw.activeCount ?? raw.active_count ?? 0),
+    inactiveCount: Number(raw.inactiveCount ?? raw.inactive_count ?? 0),
+    evidenceCount: Number(raw.evidenceCount ?? raw.evidence_count ?? 0),
+    latest: Array.isArray(raw.latest)
+      ? raw.latest.map(normalizeCheaterPortalEntry)
+      : Array.isArray(raw.active) ? raw.active.map(normalizeCheaterPortalEntry) : [],
+  };
+}
+
+/** Fetch paginated historical cheaters without scanning the legacy directory client-side. */
+export async function fetchInactiveCheaters(params: { q?: string; limit?: number; offset?: number } = {}): Promise<InactiveCheaterPage> {
+  const query = new URLSearchParams();
+  if (params.q?.trim()) query.set("q", params.q.trim());
+  query.set("limit", String(params.limit ?? 20));
+  query.set("offset", String(params.offset ?? 0));
+  const raw = await fetchJson<{ items?: any[]; total?: number | string }>(`/cheaters/inactive?${query.toString()}`);
+  return {
+    items: (raw.items ?? []).map(normalizeCheaterPortalEntry),
+    total: Number(raw.total ?? 0),
+  };
+}
+
+/** Fetch paginated recent cheaters without expanding the landing-page preview. */
+export async function fetchActiveCheaters(params: { q?: string; limit?: number; offset?: number } = {}): Promise<ActiveCheaterPage> {
+  const query = new URLSearchParams();
+  if (params.q?.trim()) query.set("q", params.q.trim());
+  query.set("limit", String(params.limit ?? 20));
+  query.set("offset", String(params.offset ?? 0));
+  const raw = await fetchJson<{ items?: any[]; total?: number | string }>(`/cheaters/active?${query.toString()}`);
+  return {
+    items: (raw.items ?? []).map(normalizeCheaterPortalEntry),
+    total: Number(raw.total ?? 0),
+  };
+}
+
+/** Fetch the newest published evidence records, including provider-safe embed URLs. */
+export async function fetchCheaterEvidence(params: { limit?: number; offset?: number } = {}): Promise<CheaterEvidencePage> {
+  const query = new URLSearchParams({
+    limit: String(params.limit ?? 20),
+    offset: String(params.offset ?? 0),
+  });
+  const raw = await fetchJson<{ items?: any[]; total?: number | string }>(`/cheaters/evidence?${query.toString()}`);
+  return {
+    items: (raw.items ?? []).map((row) => ({
+      id: String(row.id),
+      playerId: row.playerId == null ? null : Number(row.playerId),
+      subjectName: String(row.subjectName ?? "Unknown subject"),
+      title: String(row.title ?? "Evidence"),
+      description: String(row.description ?? ""),
+      sourceUrl: row.sourceUrl ?? null,
+      provider: row.provider === "youtube" || row.provider === "twitch" ? row.provider : null,
+      embedUrl: row.embedUrl ?? null,
+      imageUrl: row.imageUrl ?? null,
+      createdAt: String(row.createdAt ?? ""),
+    } satisfies CheaterEvidence)),
+    total: Number(raw.total ?? 0),
+  };
+}
+
+/** Submit an evidence multipart form; retries stay disabled so a timeout cannot duplicate a submission. */
+export async function submitCheaterEvidence(form: FormData): Promise<{ evidence: { id: string; createdAt: string } }> {
+  return fetchJson<{ evidence: { id: string; createdAt: string } }>("/cheaters/evidence", {
+    method: "POST",
+    body: form,
+    headers: accountAuthHeaders(),
+    retries: 0,
+  });
 }
 
 function mapAutomaticAfkPlayer(row: any): AutomaticAfkPlayer {

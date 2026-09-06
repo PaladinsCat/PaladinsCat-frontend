@@ -1,157 +1,193 @@
-/**
- * Define the player route surface for cheaters page and its local data boundary.
- * This file owns the page, layout, loading state, or route handler named by its path.
- * It does not own unrelated player sections or shared library policy.
- * refs: none
- */
+/** Dedicated Cheater Portal landing page. */
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import {
-  fetchCheaterPlayers,
-  fetchPrivateAccountsDirectory,
-  type CheaterPlayer,
-  type PrivateAccountSummary,
-} from "@/lib/api-client";
+import { ArrowRight, FileImage, History, ShieldAlert } from "lucide-react";
 import { LoadingPanel } from "@/components/async-state";
-import PlayerName from "@/components/player-name";
-import PlayerDirectoryGrid, { PLAYER_DIRECTORY_CARD_CLASS } from "@/components/player-directory-grid";
-import { getCoreCheaterReason } from "@/lib/cheater-reasons";
-import { useLocalization } from "@/lib/localization-context";
+import PlatformIcon from "@/components/platform-icon";
 import PlayersPageHeader from "@/components/ui/players-page-header";
-import PlayerDirectorySearch from "@/components/player-directory-search";
+import { fetchCheaterPortal, type CheaterPortal, type CheaterPortalEntry } from "@/lib/api-client";
+import { useLocalization } from "@/lib/localization-context";
+import { getPercentageColor } from "@/lib/stat-quality";
 
+const EMPTY_PORTAL: CheaterPortal = { activeCount: 0, inactiveCount: 0, evidenceCount: 0, latest: [] };
+const USE_CHEATER_PORTAL_MOCK = process.env.NODE_ENV === "development";
+const MOCK_PLATFORMS = ["Steam", "Epic Games", "PlayStation", "Xbox", "Hi-Rez"] as const;
+const MOCK_CHEATER_POOL: CheaterPortalEntry[] = [
+  ["AetherFox", "Aim review"], ["CobaltPaw", "Input pattern review"], ["DuskVandal", "Movement review"],
+  ["EmberNyx", "Match replay review"], ["FrostByte", "Tracking review"], ["GloomRunner", "Fire-rate review"],
+  ["HexaVee", "Community evidence review"], ["IronSundae", "Aim review"], ["JadeRecoil", "Input pattern review"],
+  ["KineticMochi", "Movement review"], ["LunarRook", "Match replay review"], ["MauveQuasar", "Tracking review"],
+  ["NeonBastion", "Fire-rate review"], ["ObsidianKit", "Community evidence review"], ["PixelSovereign", "Aim review"],
+  ["QuietCatalyst", "Input pattern review"], ["RiftNomad", "Movement review"], ["SolarMarten", "Match replay review"],
+  ["TacticalPanda", "Tracking review"], ["UmbraCircuit", "Fire-rate review"], ["VelvetRaptor", "Community evidence review"],
+  ["WinterSyntax", "Aim review"], ["XenoPounce", "Input pattern review"], ["YoruByte", "Movement review"],
+].map(([name, reason], index) => {
+  const wins = 80 + index * 23;
+  const losses = 35 + index * 17;
+  return {
+    kind: "player" as const,
+    subjectId: `mock-${index + 1}`,
+    playerId: 900000 + index + 1,
+    name,
+    platform: MOCK_PLATFORMS[index % MOCK_PLATFORMS.length],
+    lastSeen: "2026-09-05T12:00:00Z",
+    reason: `[mock] ${reason}`,
+    level: 20 + ((index * 7) % 96),
+    wins,
+    losses,
+    winRate: (wins / (wins + losses)) * 100,
+    leaveRate: 1.2 + (index % 7) * 0.6,
+  };
+});
 
-const FETCH_PAGE_SIZE = 100;
-const DISPLAY_PAGE_SIZE = 32;
-
-async function fetchAllCheaterPlayers(name: string): Promise<CheaterPlayer[]> {
-  const players: CheaterPlayer[] = [];
-  const seenPlayerIds = new Set<string>();
-  for (let offset = 0; ; offset += FETCH_PAGE_SIZE) {
-    const page = await fetchCheaterPlayers({ name: name || undefined, cheater: true, limit: FETCH_PAGE_SIZE, offset });
-    const newPlayers = page.filter((player) => player.cheater && !seenPlayerIds.has(String(player.id)));
-    newPlayers.forEach((player) => seenPlayerIds.add(String(player.id)));
-    players.push(...newPlayers);
-    if (page.length < FETCH_PAGE_SIZE || newPlayers.length === 0) return players;
+function createMockCheaterPortal(): CheaterPortal {
+  const latest = [...MOCK_CHEATER_POOL];
+  for (let index = latest.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [latest[index], latest[swapIndex]] = [latest[swapIndex], latest[index]];
   }
+  return { activeCount: 37, inactiveCount: 126, evidenceCount: 84, latest: latest.slice(0, 20) };
 }
 
-async function fetchAllCheaterPrivateAccounts(name: string): Promise<PrivateAccountSummary[]> {
-  const accounts: PrivateAccountSummary[] = [];
-  for (let page = 1; ; page += 1) {
-    const result = await fetchPrivateAccountsDirectory({
-      cheater: true,
-      page,
-      pageSize: FETCH_PAGE_SIZE,
-      query: name || undefined,
-    });
-    accounts.push(...result.items.filter((account) => account.cheater));
-    if (page >= result.totalPages || result.items.length < FETCH_PAGE_SIZE) return accounts;
-  }
+const MOCK_CHEATER_PORTAL: CheaterPortal = { activeCount: 37, inactiveCount: 126, evidenceCount: 84, latest: MOCK_CHEATER_POOL.slice(0, 20) };
+
+function entryHref(entry: CheaterPortalEntry): string {
+  return entry.kind === "private" ? `/players/private-accounts/${entry.subjectId}` : `/players/${entry.playerId ?? entry.subjectId}`;
 }
 
-/**
- * Render the CheatersPage view for the player cheaters page route.
- * Returns: `React.JSX.Element`
- * refs: none
- */
+type NumberFormatter = (value: number | null | undefined, options?: Intl.NumberFormatOptions) => string;
+
+function MetricCell({ label, title, value, style }: { label: string; title: string; value: string; style?: { color: string } }) {
+  return (
+    <span className="inline-flex shrink-0 items-baseline gap-0.5 whitespace-nowrap" title={title} aria-label={`${title}: ${value}`}>
+      <span className="text-xs tracking-[0.04em] text-pc-text-muted">{label}</span>
+      <span className="text-xs font-mono font-medium tabular-nums text-pc-text" style={style}>{value}</span>
+    </span>
+  );
+}
+
+function LatestEntry({
+  entry,
+  formatNumber,
+  formatPercent,
+  labels,
+}: {
+  entry: CheaterPortalEntry;
+  formatNumber: NumberFormatter;
+  formatPercent: NumberFormatter;
+  labels: { level: string; wins: string; losses: string; winRate: string };
+}) {
+  return (
+    <Link href={entryHref(entry)} className="group flex items-start justify-between gap-3 rounded-lg border border-pc-border bg-pc-bg/45 px-3 py-2.5 transition-colors hover:border-red-400/50 hover:bg-red-500/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent">
+      <span className="min-w-0 flex-1">
+        <span className="flex min-w-0 items-center gap-2">
+          <span className="min-w-0 shrink truncate text-sm font-semibold text-pc-text group-hover:text-red-200">{entry.name}</span>
+          {entry.playerId != null && (
+            <span className="inline-flex shrink-0 items-baseline gap-0.5 whitespace-nowrap text-xs" title={`Player ID: ${entry.playerId}`} aria-label={`Player ID: ${entry.playerId}`}>
+              <span className="text-pc-text-muted">ID</span>
+              <span className="font-mono tabular-nums text-pc-text">{entry.playerId}</span>
+            </span>
+          )}
+          <span className="shrink-0 border-l border-pc-border/50 pl-3">
+            <MetricCell label={labels.level} title={labels.level} value={formatNumber(entry.level)} />
+          </span>
+          <span className="flex min-w-0 flex-1 items-center justify-end gap-x-3" aria-label="Player statistics">
+            <PlatformIcon platform={entry.platform} />
+            <span className="inline-flex shrink-0 items-center gap-x-2" aria-label={`${labels.wins}, ${labels.losses}, ${labels.winRate}`}>
+              <MetricCell label="W" title={labels.wins} value={formatNumber(entry.wins)} />
+              <MetricCell label="L" title={labels.losses} value={formatNumber(entry.losses)} />
+              <MetricCell label="WR" title={labels.winRate} value={formatPercent(entry.winRate, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} style={entry.winRate == null ? undefined : { color: getPercentageColor(entry.winRate) }} />
+            </span>
+          </span>
+        </span>
+        <span className="mt-0.5 block truncate text-xs text-pc-text-muted">{entry.reason || "Confirmed cheater"}</span>
+      </span>
+      <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-pc-text-muted transition-[transform,color] duration-[120ms] group-hover:translate-x-1 group-hover:text-red-200" aria-hidden="true" />
+    </Link>
+  );
+}
+
 export default function CheatersPage() {
-  const { t, formatNumber } = useLocalization();
-  const [data, setData] = useState<CheaterPlayer[]>([]);
-  const [privateData, setPrivateData] = useState<PrivateAccountSummary[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [query, setQuery] = useState("");
+  const { formatNumber, formatPercent, t } = useLocalization();
+  const statLabels = {
+    level: t("generated.players.level"),
+    wins: t("generated.players.wins"),
+    losses: t("generated.players.losses"),
+    winRate: t("generated.players.winRate"),
+  };
+  const [portal, setPortal] = useState<CheaterPortal>(USE_CHEATER_PORTAL_MOCK ? MOCK_CHEATER_PORTAL : EMPTY_PORTAL);
+  const [loading, setLoading] = useState(!USE_CHEATER_PORTAL_MOCK);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     let active = true;
-    const timer = window.setTimeout(() => {
-      setLoading(true);
-      const normalizedQuery = query.trim();
-      Promise.all([
-        fetchAllCheaterPlayers(normalizedQuery),
-        fetchAllCheaterPrivateAccounts(normalizedQuery),
-      ])
-        .then(([cheaters, privateAccounts]) => {
-          if (!active) return;
-          setData(cheaters);
-          setPrivateData(privateAccounts);
-        })
-        .catch(() => {
-          if (!active) return;
-          setData([]);
-          setPrivateData([]);
-        })
-        .finally(() => {
-          if (active) setLoading(false);
-        });
-    }, 250);
-    return () => {
-      active = false;
-      window.clearTimeout(timer);
-    };
-  }, [query]);
-
-  const entries = useMemo(() => [
-    ...data.map((player) => ({ kind: "player" as const, id: player.id, player })),
-    ...privateData.map((account) => ({ kind: "private" as const, id: account.id, account })),
-  ], [data, privateData]);
+    if (USE_CHEATER_PORTAL_MOCK) {
+      void Promise.resolve().then(() => { if (active) setPortal(createMockCheaterPortal()); });
+      return () => { active = false; };
+    }
+    fetchCheaterPortal().then((value) => { if (active) setPortal(value); }).catch(() => { if (active) setError(true); }).finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, []);
 
   return (
     <div className="space-y-6">
-      <PlayersPageHeader title={t("generated.players.confirmedCheaters")} />
-      <div className="rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm font-medium text-red-50" role="note">
-        {t("moderation.cheaterAssignmentNotice")}
+      <PlayersPageHeader title="Cheater Portal" />
+      <div className="rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm leading-6 text-red-50" role="note">
+        Active means a confirmed cheater was observed within the last 30 days. Historical records remain available in the inactive database.
+      </div>
+      {error && <div className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-300">The portal could not be loaded.</div>}
+
+      <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-3">
+        <Link href="/players/cheaters/active" data-card-accent="red" aria-label="Open active cheater directory" className="pc-glass pc-home-feature-card group relative flex h-full min-h-64 flex-col items-center justify-center overflow-hidden rounded-2xl border border-white/5 p-6 text-center shadow-lg transition-[transform,border-color] duration-[280ms] hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent">
+            <ArrowRight className="pc-home-card-arrow absolute right-5 top-5 h-4 w-4 text-pc-text-muted transition-[transform,color] duration-[120ms] group-hover:translate-x-1 group-hover:text-red-200" aria-hidden="true" />
+            <span className="pc-card-icon pc-home-card-icon flex h-12 w-12 items-center justify-center rounded-xl border">
+              <ShieldAlert className="h-6 w-6" aria-hidden="true" />
+            </span>
+            <div className="relative mt-5">
+              <h2 className="text-xl font-bold tracking-tight text-pc-text group-hover:text-red-100">Active cheaters</h2>
+              <p className="mt-6 text-2xl font-bold tabular-nums text-pc-text">{formatNumber(portal.activeCount)}</p>
+              <p className="text-xs text-pc-text-muted">records</p>
+            </div>
+        </Link>
+
+        <Link href="/players/cheaters/inactive" data-card-accent="secondary" className="pc-glass pc-home-feature-card group relative flex h-full min-h-64 flex-col items-center justify-center overflow-hidden rounded-2xl border border-white/5 p-6 text-center shadow-lg transition-[transform,border-color] duration-[280ms] hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent">
+          <ArrowRight className="pc-home-card-arrow absolute right-5 top-5 h-4 w-4 text-pc-text-muted transition-[transform,color] duration-[120ms] group-hover:translate-x-1 group-hover:text-violet-200" aria-hidden="true" />
+          <span className="pc-home-card-icon flex h-12 w-12 items-center justify-center rounded-xl border">
+            <History className="h-6 w-6" aria-hidden="true" />
+          </span>
+          <div className="relative mt-5">
+            <h2 className="text-xl font-bold tracking-tight text-pc-text group-hover:text-violet-100">Inactive cheater database</h2>
+            <p className="mt-6 text-2xl font-bold tabular-nums text-pc-text">{formatNumber(portal.inactiveCount)}</p>
+            <p className="text-xs text-pc-text-muted">records · open database</p>
+          </div>
+        </Link>
+
+        <Link href="/players/cheaters/evidence" data-card-accent="tertiary" title="View or submit evidence" aria-label="View or submit evidence" className="pc-glass pc-home-feature-card group relative flex h-full min-h-64 flex-col items-center justify-center overflow-hidden rounded-2xl border border-white/5 p-6 text-center shadow-lg transition-[transform,border-color] duration-[280ms] hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent">
+          <ArrowRight className="pc-home-card-arrow absolute right-5 top-5 h-4 w-4 text-pc-text-muted transition-[transform,color] duration-[120ms] group-hover:translate-x-1 group-hover:text-amber-200" aria-hidden="true" />
+          <span className="pc-home-card-icon flex h-12 w-12 items-center justify-center rounded-xl border">
+            <FileImage className="h-6 w-6" aria-hidden="true" />
+          </span>
+          <div className="relative mt-5">
+            <h2 className="text-xl font-bold tracking-tight text-pc-text group-hover:text-amber-100">Evidence portal</h2>
+            <p className="mt-6 text-2xl font-bold tabular-nums text-pc-text">{formatNumber(portal.evidenceCount)}</p>
+            <p className="text-xs text-pc-text-muted">published evidence items</p>
+          </div>
+        </Link>
       </div>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <PlayerDirectorySearch label={t("generated.players.searchByInGameNameOrPlayerId")} value={query} onChange={setQuery} />
-        <span className="flex items-center gap-2 text-xs text-pc-text-muted">
-          <span className="h-2 w-2 rounded-full bg-red-500" />
-          {formatNumber(data.length + privateData.length)} {t("generated.players.confirmed")}
-        </span>
-      </div>
-
-      {loading ? (
-        <LoadingPanel compact />
-      ) : data.length + privateData.length === 0 ? (
-        <div className="text-center py-12 text-pc-text-secondary text-sm">{t("generated.players.noConfirmedCheatersFound")}</div>
-      ) : (
-        <PlayerDirectoryGrid
-          items={entries}
-          getKey={(entry) => `${entry.kind}:${entry.id}`}
-          loading={loading}
-          pageSize={DISPLAY_PAGE_SIZE}
-          gridClassName="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-        >
-          {(entry) => {
-            const isPrivate = entry.kind === "private";
-            const reason = getCoreCheaterReason(isPrivate ? entry.account.cheaterReason : entry.player.topReasons[0]?.reason);
-            return (
-              <Link
-                href={isPrivate ? `/players/private-accounts/${entry.account.id}` : `/players/${entry.player.id}`}
-                className={`${PLAYER_DIRECTORY_CARD_CLASS} flex-col justify-center gap-1 border-red-500/20 hover:border-red-400/40 hover:bg-red-500/[0.04]`}
-              >
-                <div className="min-w-0 truncate text-sm font-semibold text-pc-text">
-                  {isPrivate ? (
-                    <PlayerName playerId={0} cheater={true} susCount={entry.account.susCount} verified={false}>{entry.account.displayName}</PlayerName>
-                  ) : (
-                    <PlayerName playerId={entry.player.id} cheater={entry.player.cheater} susCount={entry.player.susCount}>{entry.player.name}</PlayerName>
-                  )}
-                </div>
-                <div className="min-w-0">
-                  {reason ? (
-                    <span className="block max-w-full truncate rounded-md border border-pc-border bg-pc-bg px-2 py-0.5 text-xs leading-tight text-pc-text-secondary" title={reason}>{reason}</span>
-                  ) : (
-                    <span className="text-xs text-pc-text-muted">{t("generated.players.noReasonRecorded")}</span>
-                  )}
-                </div>
-              </Link>
-            );
-          }}
-        </PlayerDirectoryGrid>
-      )}
+      <section className="pc-card" aria-labelledby="latest-cheaters-preview-title">
+        <h2 id="latest-cheaters-preview-title" className="text-lg font-semibold text-pc-text">Latest cheaters</h2>
+        {loading ? <LoadingPanel compact className="py-8" /> : portal.latest.length === 0 ? (
+          <p className="py-8 text-center text-sm text-pc-text-muted">No confirmed cheaters yet.</p>
+        ) : (
+          <div className="mt-4 grid grid-cols-1 gap-2 lg:grid-cols-2 lg:gap-4">
+            <div className="space-y-2">{portal.latest.slice(0, 10).map((entry) => <LatestEntry key={`${entry.kind}:${entry.subjectId}`} entry={entry} formatNumber={formatNumber} formatPercent={formatPercent} labels={statLabels} />)}</div>
+            <div className="space-y-2">{portal.latest.slice(10, 20).map((entry) => <LatestEntry key={`${entry.kind}:${entry.subjectId}`} entry={entry} formatNumber={formatNumber} formatPercent={formatPercent} labels={statLabels} />)}</div>
+          </div>
+        )}
+      </section>
     </div>
   );
 }
