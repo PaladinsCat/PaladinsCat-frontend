@@ -118,11 +118,11 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
   const accountLevelLabel = [t("generated.players.account"), levelAbbreviation].join(" ");
   const championLevelLabel = [t("generated.players.champion"), levelAbbreviation].join(" ");
   const leaderboardCards = useMemo<DirectoryCard[]>(() => [
-    { href: "/players/leaderboard", titleKey: "generated.players.ranked", icon: Trophy, accent: "amber" },
-    { href: "/players/elo/account", titleKey: "generated.players.accountElo", icon: Award, accent: "cyan" },
-    { href: "/players/elo/champion", titleKey: "generated.players.championElo", icon: Award, accent: "cyan" },
-    { href: "/players/performance/account", title: t("stats.scope.performance", { mode: t("generated.players.account") }), icon: Crosshair, accent: "rose" },
-    { href: "/players/performance/champion", title: t("stats.scope.performance", { mode: t("generated.players.champion") }), icon: Crosshair, accent: "rose" },
+    { href: "/players/leaderboard", titleKey: "generated.players.ranked", descriptionKey: "seo.players.leaderboard.description", icon: Trophy, accent: "amber" },
+    { href: "/players/elo/account", titleKey: "generated.players.accountElo", descriptionKey: "seo.players.elo.description", icon: Award, accent: "cyan" },
+    { href: "/players/elo/champion", titleKey: "generated.players.championElo", descriptionKey: "seo.players.elo.description", icon: Award, accent: "cyan" },
+    { href: "/players/performance/account", title: t("stats.scope.performance", { mode: t("generated.players.account") }), descriptionKey: "seo.players.performance.description", icon: Crosshair, accent: "rose" },
+    { href: "/players/performance/champion", title: t("stats.scope.performance", { mode: t("generated.players.champion") }), descriptionKey: "seo.players.performance.description", icon: Crosshair, accent: "rose" },
     { href: "/players/levels/account", title: accountLevelLabel, icon: UsersRound, accent: "emerald" },
     { href: "/players/levels/champion", title: championLevelLabel, icon: Swords, accent: "violet" },
   ], [accountLevelLabel, championLevelLabel, t]);
@@ -145,19 +145,6 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">
-          {t("generated.players.players.392feef")}
-        </h1>
-      </div>
-
-      <div
-        className="mx-auto grid w-full max-w-7xl gap-3"
-        style={{ gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 13.5rem), 1fr))" }}
-      >
-        {cards.map(renderCard)}
-      </div>
-
       <section aria-labelledby="leaderboards-heading" className="space-y-3">
         <h2 id="leaderboards-heading" className="pc-heading text-xl">{t("menu.leaderboards")}</h2>
         <div
@@ -167,6 +154,13 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
           {leaderboardCards.map(renderCard)}
         </div>
       </section>
+
+      <div
+        className="mx-auto grid w-full max-w-7xl gap-3"
+        style={{ gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 13.5rem), 1fr))" }}
+      >
+        {cards.map(renderCard)}
+      </div>
     </div>
   );
 }

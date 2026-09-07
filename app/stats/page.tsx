@@ -23,6 +23,7 @@ import { PerformanceOverviewCard } from "@/components/PerformanceOverviewCard";
 import { useLobbyTier } from "@/lib/lobby-tier-context";
 import { ContentFade } from "@/components/async-state";
 import { ChartCardSkeleton, DataCardSkeleton } from "@/components/route-skeleton";
+import DetailLink from "@/components/detail-link";
 import { useLocalization } from "@/lib/localization-context";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
 
@@ -97,6 +98,45 @@ function mapMapStats(maps: Array<{ name: string; totalMatches: number; distribut
 export default function StatsPage() {
   const { t , formatPercent, formatNumber} = useLocalization();
   const { definition: lobbyTier, ready: lobbyTierReady } = useLobbyTier();
+  const statsNavigation = [
+    {
+      title: t("nav.champions"),
+      links: [
+        { href: "/stats/performance", label: t("menu.performanceOverview") },
+        { href: "/stats/winrate", label: t("menu.championWinRates") },
+        { href: "/stats/banrate", label: t("menu.championBanRates") },
+        { href: "/stats/tiers", label: t("menu.rankedDistribution") },
+      ],
+    },
+    {
+      title: t("nav.game"),
+      links: [
+        { href: "/stats/items", label: t("menu.itemMeta") },
+        { href: "/stats/maps", label: t("menu.mapStats") },
+        { href: "/stats/compositions", label: t("menu.compositionStats") },
+        { href: "/stats/talents", label: t("menu.talentPerformance") },
+        { href: "/stats/loadouts", label: t("menu.loadoutMeta") },
+        { href: "/stats/skins", label: t("menu.skinStats") },
+      ],
+    },
+    {
+      title: t("menu.leaderboards"),
+      links: [
+        { href: "/players/leaderboard", label: t("menu.rankedLeaderboard") },
+        { href: "/players/elo", label: t("menu.eloLeaderboard") },
+        { href: "/players/performance", label: t("menu.performanceLeaderboard") },
+      ],
+    },
+    {
+      title: t("menu.playerActivity"),
+      links: [
+        { href: "/stats/activity", label: t("menu.playerActivity") },
+        { href: "/stats/platforms", label: t("menu.platforms") },
+        { href: "/stats/regions", label: t("menu.regions") },
+        { href: "/stats/ecpm", label: t("menu.effectiveCredits") },
+      ],
+    },
+  ];
   const [itemSort, setItemSort] = useState<SortKey>("pickRate");
   const [itemSortDir, setItemSortDir] = useState<"asc" | "desc">("desc");
   const [expandedBannedId, setExpandedBannedId] = useState<number | null>(null);
@@ -219,18 +259,28 @@ export default function StatsPage() {
 
   return (
     <div className="space-y-8">
-      {/* ── Header ── */}
-      <div>
-        <h1 className="pc-heading pc-heading-lg">{t("generated.stats.globalStats.bd3846d")}</h1>
-      </div>
+      <section aria-label={t("nav.stats")} className="space-y-5">
+        {statsNavigation.map((group) => (
+          <div key={group.title} className="space-y-3">
+            <h2 className="pc-heading text-xl">{group.title}</h2>
+            <div className="grid gap-3" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 13.5rem), 1fr))" }}>
+              {group.links.map((link) => (
+                <Link key={link.href} href={link.href} className="pc-home-feature-card group flex min-h-20 min-w-0 items-center justify-between gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-4 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary">
+                  <span className="text-sm font-semibold text-pc-text group-hover:text-pc-accent">{link.label}</span>
+                  <span aria-hidden className="shrink-0 text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent">→</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        ))}
+      </section>
 
       {/* ── Performance, eCPM, and ranked-player distribution ── */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="flex h-full flex-col">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-bold text-pc-text">{t("generated.stats.performanceOverview")}</h2>
-            <Link href="/stats/performance" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">
-              {t("generated.stats.detail")}</Link>
+            <DetailLink href="/stats/performance" label={t("generated.matches.details")} />
           </div>
         {overviewPending ? (
           <DataCardSkeleton rows={5} />
@@ -270,7 +320,7 @@ export default function StatsPage() {
         <div className="flex h-full flex-col">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-bold text-pc-text">{t("generated.stats.ecpmByRole")}</h2>
-            <Link href="/stats/ecpm" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">{t("generated.stats.detail")}</Link>
+            <DetailLink href="/stats/ecpm" label={t("generated.matches.details")} />
           </div>
           {egpmPending ? <DataCardSkeleton rows={5} /> : (
             <ContentFade className="flex-1">
@@ -291,7 +341,7 @@ export default function StatsPage() {
         <div className="flex h-full flex-col">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-bold text-pc-text">{t("generated.stats.rankedPlayerDistribution")}</h2>
-            <Link href="/stats/tiers" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">{t("generated.stats.detail")}</Link>
+            <DetailLink href="/stats/tiers" label={t("generated.matches.details")} />
           </div>
           {overviewPending ? <ChartCardSkeleton /> : <ContentFade className="flex-1 bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
             <div className="flex h-full min-h-48 items-end justify-center gap-1.5 pb-2">
@@ -318,8 +368,8 @@ export default function StatsPage() {
         <div className="pc-section-heading mb-3 px-1 sm:px-2">
           <h2 className="text-sm font-bold text-pc-text">{t("generated.stats.topChampions")}</h2>
           <div className="flex flex-wrap gap-x-3 gap-y-1">
-            <Link href="/stats/winrate" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">{t("generated.stats.winRateDetail")}</Link>
-            <Link href="/stats/banrate" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">{t("generated.stats.banRateDetail")}</Link>
+            <DetailLink href="/stats/winrate" label={t("generated.matches.details")} />
+            <DetailLink href="/stats/banrate" label={t("generated.matches.details")} />
           </div>
         </div>
         {overviewPending ? <DataCardSkeleton rows={10} columns={2} /> : <ContentFade className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
@@ -415,8 +465,7 @@ export default function StatsPage() {
                   {itemSort === key && (itemSortDir === "desc" ? " ↓" : " ↑")}
                 </button>
               ))}
-              <Link href="/game/items" className="ml-1 text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">
-                {t("generated.stats.detail")}</Link>
+              <DetailLink href="/game/items" label={t("generated.matches.details")} />
             </div>
           </div>
           {overviewPending ? <DataCardSkeleton rows={4} columns={2} /> : <ContentFade className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 space-y-4">
@@ -472,7 +521,7 @@ export default function StatsPage() {
         <section className="lg:col-span-2 lg:order-2">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-bold text-pc-text">{t("generated.stats.mapStats")}</h2>
-            <Link href="/game/maps" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">{t("generated.stats.detail")}</Link>
+            <DetailLink href="/game/maps" label={t("generated.matches.details")} />
           </div>
           {overviewPending ? <DataCardSkeleton rows={8} /> : <ContentFade className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
             {sortedMaps.length === 0 ? (
@@ -509,7 +558,7 @@ export default function StatsPage() {
               <h2 className="text-sm font-bold text-pc-text">{t("generated.stats.skinStats")}</h2>
               <p className="text-xs text-pc-text-muted">{t("generated.stats.rankedCosmeticsIncludingRecoveredSkinIds")}</p>
             </div>
-            <Link href="/stats/skins" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">{t("generated.stats.detail")}</Link>
+            <DetailLink href="/stats/skins" label={t("generated.matches.details")} />
           </div>
           {skinsPending ? <DataCardSkeleton rows={5} /> : <ContentFade className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated">
             {skinStats.length === 0 ? <div className="p-4 text-sm text-pc-text-muted">{t("generated.stats.skinStatsUnavailable")}</div> : (
@@ -532,7 +581,7 @@ export default function StatsPage() {
               <h2 className="text-sm font-bold text-pc-text">{t("generated.stats.compositionStats")}</h2>
               <p className="text-xs text-pc-text-muted">{t("generated.stats.teamShapeFrontlineDamageFlankSupport")}</p>
             </div>
-            <Link href="/game/compositions" className="text-xs text-pc-text-secondary hover:text-pc-accent transition-colors">{t("generated.stats.detail")}</Link>
+            <DetailLink href="/game/compositions" label={t("generated.matches.details")} />
           </div>
           {compositionsPending ? <DataCardSkeleton rows={5} /> : <ContentFade className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated">
             {compositions.length === 0 ? <div className="p-4 text-sm text-pc-text-muted">{t("generated.stats.compositionStatsUnavailable")}</div> : (

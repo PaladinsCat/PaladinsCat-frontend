@@ -85,6 +85,16 @@
   --pc-chart-green: hsl(120 55% 64%);  /* picker-band 2026-08-31 */
   --pc-chart-violet: hsl(265 62% 70%); /* picker-band 2026-08-31 */
   --pc-chart-sky: hsl(205 70% 68%);    /* picker-band 2026-08-31 */
+  --pc-series-emerald: hsl(152 78% 64%);
+  --pc-series-sky: hsl(205 82% 68%);
+  --pc-series-violet: hsl(265 78% 70%);
+  --pc-series-fuchsia: hsl(300 78% 70%);
+  --pc-series-indigo: hsl(248 76% 70%);
+  --pc-series-amber: hsl(45 82% 68%);
+  --pc-series-cyan: hsl(187 80% 66%);
+  --pc-series-orange: hsl(24 82% 68%);
+  --pc-series-red: hsl(0 78% 68%);
+  --pc-series-slate: hsl(225 72% 70%);
   --pc-chart-text: #F9FAFB;
   --pc-chart-text-secondary: #9CA3AF;
   --pc-chart-grid: #1F2937;

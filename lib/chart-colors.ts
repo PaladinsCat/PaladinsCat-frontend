@@ -30,6 +30,20 @@ export const chartSky = "var(--pc-chart-sky)";           // #06b6d4
 /** Default color palette for multi-series charts · refs: none */
 export const chartColors = [chartGreen, chartAmber, chartRed, chartViolet, chartSky];
 
+/** Vivid stationary palette for categorical chart series. */
+export const stationaryChartSeries = {
+  emerald: "var(--pc-series-emerald)",
+  sky: "var(--pc-series-sky)",
+  violet: "var(--pc-series-violet)",
+  fuchsia: "var(--pc-series-fuchsia)",
+  indigo: "var(--pc-series-indigo)",
+  amber: "var(--pc-series-amber)",
+  cyan: "var(--pc-series-cyan)",
+  orange: "var(--pc-series-orange)",
+  red: "var(--pc-series-red)",
+  slate: "var(--pc-series-slate)",
+} as const;
+
 /** Role colors · refs: none */
 export const roleSentinel = "var(--pc-role-sentinel)";    // #34d399
 /**

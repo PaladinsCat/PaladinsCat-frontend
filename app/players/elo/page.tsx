@@ -187,6 +187,10 @@ function ChampionEloContent({ fixedMode }: { fixedMode?: ELOMode }) {
     let cancelled = false;
     setLoading(true);
 
+    // Account ELO is global: the backend /players/leaderboard/class account
+    // query ignores the role param (it ranks every account by mu), and account
+    // mode renders no class tabs. The role value is therefore a required
+    // placeholder, not a filter — changing it would not change the result.
     fetchClassLeaderboard({ role: "Frontline", limit: 100, queueId: 486, mode: "account" })
       .then((result) => {
         if (cancelled) return;

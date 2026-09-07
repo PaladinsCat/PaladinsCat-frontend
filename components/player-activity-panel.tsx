@@ -4,34 +4,36 @@
  */
 "use client";
 
-import { createContext, Fragment, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, Fragment, useContext, useEffect, useId, useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
+import { Info } from "lucide-react";
 import { fetchMatchesOverview, fetchPresenceHourlyStats, fetchPresenceStats, type MatchHourlyStats, type MatchQueueActivity, type MatchesOverview, type PresenceHourlyStats, type PresenceStats } from "@/lib/api-client";
 import { LoadingPanel } from "@/components/async-state";
-import CardDetailLink from "@/components/card-detail-link";
+import DetailLink from "@/components/detail-link";
+import { stationaryChartSeries } from "@/lib/chart-colors";
 import { useLocalization } from "@/lib/localization-context";
 import { getPercentageColor } from "@/lib/stat-quality";
 
 const REGION_COLORS: Record<string, string> = {
-  NA: "bg-emerald-500",
-  EU: "bg-sky-500",
-  SEA: "bg-violet-500",
-  JPN: "bg-fuchsia-500",
-  RUS: "bg-indigo-500",
-  BR: "bg-amber-500",
-  OCE: "bg-cyan-500",
-  LATAM: "bg-orange-500",
-  Unknown: "bg-slate-500",
+  NA: stationaryChartSeries.emerald,
+  EU: stationaryChartSeries.sky,
+  SEA: stationaryChartSeries.violet,
+  JPN: stationaryChartSeries.fuchsia,
+  RUS: stationaryChartSeries.indigo,
+  BR: stationaryChartSeries.amber,
+  OCE: stationaryChartSeries.cyan,
+  LATAM: stationaryChartSeries.orange,
+  Unknown: stationaryChartSeries.slate,
 };
 
 const PLATFORM_COLORS: Record<string, string> = {
-  Steam: "bg-sky-500",
-  PSN: "bg-indigo-500",
-  "Epic Games": "bg-violet-500",
-  XboxLive: "bg-emerald-500",
-  Hirez: "bg-amber-500",
-  Nintendo: "bg-red-500",
-  Unknown: "bg-slate-500",
+  Steam: stationaryChartSeries.sky,
+  PSN: stationaryChartSeries.indigo,
+  "Epic Games": stationaryChartSeries.violet,
+  XboxLive: stationaryChartSeries.emerald,
+  Hirez: stationaryChartSeries.amber,
+  Nintendo: stationaryChartSeries.red,
+  Unknown: stationaryChartSeries.slate,
 };
 
 const PALADINS_2_STATEMENT = "PaladinsCat does not support Paladins 2 Project";
@@ -243,16 +245,14 @@ export default function PlayerActivityPanel({
   return (
     <ActivityStatementContext.Provider value={showStatements}>
     <div className="mx-auto w-full max-w-6xl space-y-5">
-      <header>
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("menu.playerActivity")}</h1>
-        <p className="mt-1 text-sm text-pc-text-secondary">{t("playerActivity.description")}</p>
-      </header>
-
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       <section className="pc-card min-w-0 p-3 sm:p-4">
         <HourlyCardHeader
           title={t("playerActivity.matches24h")}
-          subtitle={t("playerActivity.queueAndRegion")}
+          helpText={<>
+            <p>{t("playerActivity.queueAndRegion")}</p>
+            <p className="mt-2"><span className="font-medium text-pc-text">{t("generated.matches.discoveryRunsHourlyAtHh30")}</span> {t("playerActivity.discoveryDescription")}</p>
+          </>}
           queueLabel={t("playerActivity.queue")}
           allQueuesLabel={t("playerActivity.allQueues")}
           queues={queues}
@@ -264,7 +264,7 @@ export default function PlayerActivityPanel({
 
         {displayLoading ? <LoadingPanel compact className="min-h-[30rem]" /> : activityUnavailable && !hourlyStats ? <div role="status" className="flex min-h-[30rem] items-center justify-center text-center text-sm text-pc-text-muted">{t("playerActivity.retrying")}</div> : <div>
           <div className="mb-3 flex flex-wrap gap-x-3 gap-y-1">
-            {activeRegions.map(region => <span key={region.region} className="inline-flex items-center gap-1.5 text-xs text-pc-text-muted"><span className={`h-2 w-2 rounded-full ${REGION_COLORS[region.region] ?? REGION_COLORS.Unknown}`} />{region.region} · {formatNumber(region.total24h)}</span>)}
+            {activeRegions.map(region => <span key={region.region} className="inline-flex items-center gap-1.5 text-xs text-pc-text-muted"><span className="h-2 w-2 rounded-full" style={{ backgroundColor: REGION_COLORS[region.region] ?? REGION_COLORS.Unknown }} />{region.region} · {formatNumber(region.total24h)}</span>)}
             {activeRegions.length === 0 && !activityUnavailable && <span className="text-xs text-pc-text-muted">{t("playerActivity.noMatches")}</span>}
             {activityUnavailable && hourlyStats && <span role="status" className="text-xs text-amber-300">{t("playerActivity.showingConfirmedWhileRetrying")}</span>}
           </div>
@@ -299,6 +299,7 @@ export default function PlayerActivityPanel({
         regionOrder={activeRegions.map(region => region.region)}
         regionStackOrder={matchRegionStackOrder}
         title={t("playerActivity.players24h")}
+        helpText={t("seo.stats.activity.description")}
         regionModeLabel={t("playerActivity.playersByRegion")}
         platformModeLabel={t("playerActivity.playersByPlatform")}
         queueLabel={t("playerActivity.queue")}
@@ -322,27 +323,22 @@ export default function PlayerActivityPanel({
         formatNumber={formatNumber}
       />
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <section className="pc-card p-3 sm:p-4">
-          <div className="flex min-w-0 items-center justify-between gap-3">
-            <h2 className="shrink-0 text-sm font-bold text-pc-text">{t("playerActivity.regions24h")}</h2>
-            <ActivityChartStatement className="min-w-0 text-right" />
-          </div>
-          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
-            {display.regions.map((region, index) => <Fragment key={region.region}>
-              <div className="pc-surface-light rounded-lg border border-pc-border/50 p-3 text-center"><div className="text-xs uppercase text-pc-text-muted">{region.region}</div><div className="font-mono text-xl font-bold text-pc-accent">{formatNumber(region.total24h)}</div><div className="text-xs text-pc-text-muted">{formatNumber(region.matchesPerHour)}{t("generated.matches.hr")}</div></div>
-              {index % 2 === 1 && index < display.regions.length - 1 && <ActivityChartStatement className="col-span-full text-center sm:hidden" />}
-              {index % 3 === 2 && index < display.regions.length - 1 && <ActivityChartStatement className="col-span-full hidden text-center sm:block" />}
-            </Fragment>)}
-            {display.regions.length > 0 && <ActivityChartStatement className="col-span-full text-center" />}
-          </div>
-        </section>
+      <section className="pc-card p-3 sm:p-4">
+        <div className="flex min-w-0 items-center justify-between gap-3">
+          <h2 className="shrink-0 text-sm font-bold text-pc-text">{t("playerActivity.regions24h")}</h2>
+          <ActivityChartStatement className="min-w-0 text-right" />
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {display.regions.map((region, index) => <Fragment key={region.region}>
+            <div className="pc-surface-light rounded-lg border border-pc-border/50 p-3 text-center"><div className="text-xs uppercase text-pc-text-muted">{region.region}</div><div className="font-mono text-xl font-bold text-pc-accent">{formatNumber(region.total24h)}</div><div className="text-xs text-pc-text-muted">{formatNumber(region.matchesPerHour)}{t("generated.matches.hr")}</div></div>
+            {index % 2 === 1 && index < display.regions.length - 1 && <ActivityChartStatement className="col-span-full text-center sm:hidden" />}
+            {index % 3 === 2 && index < display.regions.length - 1 && <ActivityChartStatement className="col-span-full hidden text-center sm:block" />}
+          </Fragment>)}
+          {display.regions.length > 0 && <ActivityChartStatement className="col-span-full text-center" />}
+        </div>
+      </section>
 
-        <aside className="space-y-3">
-          {showRankedHealth && droppedRows.length > 0 && <section className="pc-card p-3 sm:p-4"><div className="mb-2 flex items-center justify-between"><h2 className="text-xs font-bold uppercase tracking-wider text-amber-300">{t("generated.matches.trueDropped")}</h2><span className="text-xs text-pc-text-muted">{droppedRows.reduce((sum: number, row: any) => sum + row.droppedIds.length, 0)} {t("generated.matches.ids")}</span></div><div className="space-y-2">{droppedRows.map((row: any) => <div key={`${row.date}|${row.hour}`} className="flex gap-2 text-xs"><span suppressHydrationWarning className="w-10 shrink-0 text-right font-mono text-pc-text-muted">{formatHourFromUtcBucket(row.date, row.hour)}</span><div className="flex flex-wrap gap-1">{row.droppedIds.map((id: string) => <Link key={id} href={`/matches/${id}`} className="font-mono text-amber-200 hover:text-pc-accent">#{id}</Link>)}</div></div>)}</div></section>}
-          <section className="pc-card p-3 text-xs leading-relaxed text-pc-text-secondary sm:p-4"><span className="font-medium text-pc-text">{t("generated.matches.discoveryRunsHourlyAtHh30")}</span> {t("playerActivity.discoveryDescription")}</section>
-        </aside>
-      </div>
+      {showRankedHealth && droppedRows.length > 0 && <section className="pc-card p-3 sm:p-4"><div className="mb-2 flex items-center justify-between"><h2 className="text-xs font-bold uppercase tracking-wider text-amber-300">{t("generated.matches.trueDropped")}</h2><span className="text-xs text-pc-text-muted">{droppedRows.reduce((sum: number, row: any) => sum + row.droppedIds.length, 0)} {t("generated.matches.ids")}</span></div><div className="space-y-2">{droppedRows.map((row: any) => <div key={`${row.date}|${row.hour}`} className="flex gap-2 text-xs"><span suppressHydrationWarning className="w-10 shrink-0 text-right font-mono text-pc-text-muted">{formatHourFromUtcBucket(row.date, row.hour)}</span><div className="flex flex-wrap gap-1">{row.droppedIds.map((id: string) => <Link key={id} href={`/matches/${id}`} className="font-mono text-amber-200 hover:text-pc-accent">#{id}</Link>)}</div></div>)}</div></section>}
 
       {!displayLoading && presence && <PlayerPresenceBreakdown
         presence={presence}
@@ -358,7 +354,7 @@ export default function PlayerActivityPanel({
         possibleTotalLabel={t("playerActivity.possiblePlayerTotal")}
         coverageLabel={t("playerActivity.platformCoverage")}
         overlapNote={t("playerActivity.queueOverlapNote")}
-        detailsLabel={t("playerActivity.viewDetails")}
+        detailsLabel={t("generated.matches.details")}
       />}
     </div>
     </ActivityStatementContext.Provider>
@@ -387,10 +383,10 @@ function ActivityBar({
     <div className="flex h-full rounded-full" style={{ width: `${(entry.total / max) * 100}%` }}>
       {parts.map(([region, value], index) => <span
         key={region}
-        className={`group relative h-full ${colors[region] ?? colors.Unknown ?? REGION_COLORS.Unknown} ${
+        className={`group relative h-full ${
           index === 0 ? "rounded-l-full" : ""
         } ${index === parts.length - 1 ? "rounded-r-full" : ""}`}
-        style={{ width: `${(value / entry.total) * 100}%` }}
+        style={{ width: `${(value / entry.total) * 100}%`, backgroundColor: colors[region] ?? colors.Unknown ?? REGION_COLORS.Unknown }}
       >
         <span className="pointer-events-none invisible absolute bottom-full left-1/2 z-30 mb-2 -translate-x-1/2 whitespace-nowrap rounded-md border border-pc-border bg-pc-bg-secondary px-2 py-1 font-mono text-xs font-semibold text-pc-text opacity-0 shadow-lg transition-[opacity,transform] duration-150 group-hover:visible group-hover:-translate-y-0.5 group-hover:opacity-100">
           {region} · {formatNumber(value)}
@@ -400,9 +396,20 @@ function ActivityBar({
   </div>;
 }
 
+function ChartHelp({ title, text }: { title: string; text: ReactNode }) {
+  const tooltipId = useId();
+  return <span className="group relative inline-flex shrink-0">
+    <button type="button" aria-label={`About ${title}`} aria-describedby={tooltipId} className="inline-flex cursor-help text-pc-text-muted hover:text-pc-text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent">
+      <Info aria-hidden="true" className="h-3.5 w-3.5" />
+    </button>
+    <span id={tooltipId} role="tooltip" className="pc-surface pointer-events-none absolute left-0 top-full z-20 mt-2 w-72 translate-y-1 rounded-lg border border-pc-border px-3 py-2 text-xs font-normal leading-5 text-pc-text opacity-0 transition-[opacity,transform] duration-200 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100 motion-reduce:transition-none">{text}</span>
+  </span>;
+}
+
 function HourlyCardHeader({
   title,
   subtitle,
+  helpText,
   queueLabel,
   allQueuesLabel,
   queues,
@@ -412,7 +419,8 @@ function HourlyCardHeader({
   formatNumber,
 }: {
   title: string;
-  subtitle: ReactNode;
+  subtitle?: ReactNode;
+  helpText?: ReactNode;
   queueLabel: string;
   allQueuesLabel: string;
   queues: MatchQueueActivity[];
@@ -423,8 +431,11 @@ function HourlyCardHeader({
 }) {
   return <div className="mb-3 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-b border-pc-border/50 pb-3 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
     <div className="col-span-2 min-w-0 sm:col-span-1">
-      <h2 className="truncate text-sm font-bold text-pc-text">{title}</h2>
-      <div className="mt-0.5 truncate text-xs text-pc-text-muted">{subtitle}</div>
+      <div className="flex items-center gap-1">
+        <h2 className="truncate text-sm font-bold text-pc-text">{title}</h2>
+        {helpText && <ChartHelp title={title} text={helpText} />}
+      </div>
+      {subtitle && <div className="mt-0.5 truncate text-xs text-pc-text-muted">{subtitle}</div>}
     </div>
     <label className="flex shrink-0 items-center gap-2 text-xs text-pc-text-secondary">
       {queueLabel}
@@ -449,6 +460,7 @@ function PlayerHourlyRegionCard({
   regionOrder,
   regionStackOrder,
   title,
+  helpText,
   regionModeLabel,
   platformModeLabel,
   queueLabel,
@@ -469,6 +481,7 @@ function PlayerHourlyRegionCard({
   regionOrder: string[];
   regionStackOrder: string[];
   title: string;
+  helpText: string;
   regionModeLabel: string;
   platformModeLabel: string;
   queueLabel: string;
@@ -494,6 +507,7 @@ function PlayerHourlyRegionCard({
   return <section className="pc-card min-w-0 p-3 sm:p-4">
     <HourlyCardHeader
       title={title}
+      helpText={helpText}
       subtitle={<span role="group" aria-label={title} className="inline-flex items-center gap-1 whitespace-nowrap tracking-tight">
         <button type="button" aria-pressed={breakdown === "region"} onClick={() => onBreakdownChange("region")} className={breakdown === "region" ? "font-semibold text-pc-accent" : "hover:text-pc-text"}>{regionModeLabel}</button>
         <span aria-hidden="true" className="text-pc-border">·</span>
@@ -746,7 +760,7 @@ function PlayerPresenceBreakdown({
         </div>
       </div>
       <div className="flex flex-col items-end gap-3">
-        <CardDetailLink href="/stats/activity/details" label={detailsLabel} />
+        <DetailLink href="/stats/activity/details" label={detailsLabel} />
         <div className="flex flex-wrap justify-end gap-2 text-xs">
           <span className="rounded-full border border-violet-400/30 bg-violet-400/10 px-2.5 py-1 text-violet-200">
             {privateLabel}: {formatNumber(presence.private_players)}
@@ -762,9 +776,11 @@ function PlayerPresenceBreakdown({
     </div>
     <div className="grid grid-cols-1 divide-y divide-pc-border/50 lg:grid-cols-2 lg:divide-x lg:divide-y-0">
       <div className="p-4">
-        <h2 className="text-sm font-bold text-pc-text">{queueTitle}</h2>
-        <p className="mt-1 text-xs text-pc-text-muted">{overlapNote}</p>
-        <div className={`mt-4 ${showStatements ? "space-y-1" : "space-y-3"}`}>
+        <div className="flex items-center gap-1">
+          <h2 className="text-sm font-bold text-pc-text">{queueTitle}</h2>
+          <ChartHelp title={queueTitle} text={overlapNote} />
+        </div>
+        <div className={`mt-3 ${showStatements ? "space-y-1" : "space-y-3"}`}>
           {queues.length > 0 && <ActivityChartStatement className="text-right" />}
           {queues.map((queue, index) => <Fragment key={queue.queue_id}>
             <MetricBar

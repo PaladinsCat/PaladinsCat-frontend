@@ -69,6 +69,15 @@ type ClassMetricData = {
   champions: ChampionMetricRow[];
 };
 
+export type MetricsInitialData = {
+  metric: PerformanceMetricKey;
+  dashboard: {
+    summary: PerformanceMetricSummary;
+    roles: Record<string, PerformanceMetricSummary>;
+  };
+  rows: ChampionPerformanceDistribution[];
+};
+
 function emptySummary(): PerformanceMetricSummary {
   return {
     min: 0, max: 0, mean: 0, median: 0, mode: 0,
@@ -172,11 +181,14 @@ function TabBar({
 
 /* ── Metric panel (same as MetricDetailPage content) ── */
 
-function MetricPanel({ config }: { config: MetricConfig }) {
+function MetricPanel({ config, initialData }: { config: MetricConfig; initialData?: MetricsInitialData | null }) {
   const { t , formatNumber, formatPercent} = useLocalization();
-  const [metricSummary, setMetricSummary] = useState<PerformanceMetricSummary>(() => emptySummary());
-  const [classData, setClassData] = useState<ClassMetricData[]>(() => buildClassData([], {}));
-  const [loading, setLoading] = useState(true);
+  const initialForConfig = initialData?.metric === config.key ? initialData : undefined;
+  const [metricSummary, setMetricSummary] = useState<PerformanceMetricSummary>(() => initialForConfig?.dashboard.summary ?? emptySummary());
+  const [classData, setClassData] = useState<ClassMetricData[]>(() => initialForConfig
+    ? buildClassData(initialForConfig.rows, initialForConfig.dashboard.roles)
+    : buildClassData([], {}));
+  const [loading, setLoading] = useState(!initialForConfig);
   const displayLoading = useRouteSettledLoading(loading);
 
   useEffect(() => {
@@ -189,7 +201,7 @@ function MetricPanel({ config }: { config: MetricConfig }) {
     }
 
     let cancelled = false;
-    setLoading(true);
+    setLoading(!initialForConfig);
 
     async function load() {
       const [dashboard, championRows] = await Promise.all([
@@ -208,8 +220,10 @@ function MetricPanel({ config }: { config: MetricConfig }) {
 
     load().catch(() => {
       if (!cancelled) {
-        setMetricSummary(emptySummary());
-        setClassData(buildClassData([], {}));
+        if (!initialForConfig) {
+          setMetricSummary(emptySummary());
+          setClassData(buildClassData([], {}));
+        }
         setLoading(false);
       }
     });
@@ -217,7 +231,7 @@ function MetricPanel({ config }: { config: MetricConfig }) {
     return () => {
       cancelled = true;
     };
-  }, [config.key]);
+  }, [config.key, initialForConfig]);
 
   const formatVal = (value: number) => config.isDecimal ? formatNumber(value, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : formatNumber(Math.round(value));
   const formatSigned = (value: number) => {
@@ -393,7 +407,7 @@ function MetricPanel({ config }: { config: MetricConfig }) {
 
 /* ── Client page wrapper (reads search params) ── */
 
-function MetricsPageClient() {
+function MetricsPageClient({ initialData }: { initialData?: MetricsInitialData | null }) {
   const { t } = useLocalization();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -416,11 +430,12 @@ function MetricsPageClient() {
         <Link href="/stats/performance" className="text-pc-accent text-xs hover:underline mb-2 inline-block">
           {t("generated.stats.backToGlobalStats")}</Link>
         <h1 className="pc-heading pc-heading-lg">{t("generated.stats.performanceMetrics")}</h1>
+        <p className="mt-2 max-w-3xl text-sm leading-6 text-pc-text-secondary">{t("seo.stats.metrics.description")}</p>
       </div>
 
       <TabBar configs={METRIC_CONFIGS} activeKey={activeConfig.key} onChange={handleTabChange} />
 
-      <MetricPanel config={activeConfig} />
+      <MetricPanel config={activeConfig} initialData={initialData} />
     </div>
   );
 }
@@ -430,10 +445,10 @@ function MetricsPageClient() {
  * Returns: `React.JSX.Element`
  * refs: none
  */
-export default function MetricsPage() {
+export default function MetricsPage({ initialData }: { initialData?: MetricsInitialData | null }) {
   return (
     <Suspense fallback={<RouteSkeleton variant="dashboard" />}>
-      <MetricsPageClient />
+      <MetricsPageClient initialData={initialData} />
     </Suspense>
   );
 }

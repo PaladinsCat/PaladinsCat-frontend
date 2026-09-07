@@ -26,7 +26,6 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
-      { source: "/stats", destination: "/stats/performance", permanent: true },
       { source: "/stats/metrics", destination: "/stats/performance", permanent: true },
       { source: "/stats/egpm", destination: "/stats/ecpm", permanent: true },
       { source: "/stats/items/:path*", destination: "/game/items/:path*", permanent: true },

@@ -5,8 +5,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { UsersRound } from "lucide-react";
+import DetailLink from "@/components/detail-link";
 import PlayerRelationshipBars from "@/components/player-relationship-bars";
 import { fetchPlayerRelationshipSummary, type PlayerRelationshipSummary } from "@/lib/api-client";
 import { getPercentageColor } from "@/lib/stat-quality";
@@ -60,9 +60,7 @@ export default function PlayerRelationshipSummaryCard({ playerId }: { playerId: 
           </div>
         </div>
         {summary && summary.partyPartners.length > 0 && <div className="mt-4 border-t border-pc-border/50 pt-3"><PlayerRelationshipBars rows={summary.partyPartners} limit={3} tone="amber" showDetails /></div>}
-        <Link href={`/players/${playerId}/relationships`} className="mt-4 flex items-center justify-between rounded-lg border border-pc-border bg-pc-bg-secondary/60 px-3 py-2 text-xs font-semibold text-pc-text transition-colors hover:border-pc-accent-mid hover:text-pc-accent">
-          {t("common.relationships.viewDetails")}<span aria-hidden="true">→</span>
-        </Link>
+        <DetailLink href={`/players/${playerId}/relationships`} label={t("generated.matches.details")} className="mt-4 w-full justify-between" />
       </div>
     </section>
   );
