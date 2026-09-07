@@ -5,6 +5,10 @@
  * refs: none
  */
 import { createLocalizedMetadata } from "@/lib/server-localization";
+import { getInitialGrandmasterLeaderboard } from "@/lib/server-leaderboard";
+import { InitialLeaderboardProvider } from "./initial-data";
+
+export const dynamic = "force-dynamic";
 
 /**
  * Build SEO metadata for the player leaderboard layout route.
@@ -23,6 +27,11 @@ export async function generateMetadata() {
  * Returns: `React.JSX.Element`
  * refs: none
  */
-export default function PlayerLeaderboardLayout({ children }: { children: React.ReactNode }) {
-  return children;
+export default async function PlayerLeaderboardLayout({ children }: { children: React.ReactNode }) {
+  const players = await getInitialGrandmasterLeaderboard().catch((error) => {
+    console.error("[players/leaderboard] Server leaderboard fetch failed; using browser fallback", error);
+    return null;
+  });
+
+  return <InitialLeaderboardProvider players={players}>{children}</InitialLeaderboardProvider>;
 }

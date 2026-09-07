@@ -6,7 +6,7 @@
  */
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { fetchRankedLeaderboard, type RankedPlayer } from "@/lib/api-client";
 import { resolveEffectiveTier, getRankIconPath } from "@/lib/tier-utils";
@@ -16,6 +16,7 @@ import PlayerName from "@/components/player-name";
 import { useLocalization } from "@/lib/localization-context";
 import type { TranslationKey } from "@/lib/localization/messages";
 import PlayersPageHeader from "@/components/ui/players-page-header";
+import { useInitialLeaderboard } from "./initial-data";
 
 const TIER_GROUPS: ReadonlyArray<{
   group: string;
@@ -67,10 +68,13 @@ function RankBadge({ rank }: { rank: number }) {
  */
 export default function LeaderboardPage() {
   const { t , formatNumber, formatPercent} = useLocalization();
+  const initialPlayers = useInitialLeaderboard();
   const [tier, setTier] = useState(26);
   const [masterSubTab, setMasterSubTab] = useState<"gm" | "master">("gm");
-  const [players, setPlayers] = useState<RankedPlayer[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [players, setPlayers] = useState<RankedPlayer[]>(initialPlayers ?? []);
+  const [loading, setLoading] = useState(initialPlayers === null);
+  const initialPlayersRef = useRef(initialPlayers);
+  const hasUsedInitialPlayers = useRef(false);
   const [error, setError] = useState<string | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>("rank");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
@@ -87,7 +91,13 @@ export default function LeaderboardPage() {
   };
 
   useEffect(() => {
+    if (!hasUsedInitialPlayers.current && tier === 26 && masterSubTab === "gm" && initialPlayersRef.current !== null) {
+      hasUsedInitialPlayers.current = true;
+      return;
+    }
+
     let cancelled = false;
+    hasUsedInitialPlayers.current = true;
     async function load() {
       setLoading(true);
       setError(null);
