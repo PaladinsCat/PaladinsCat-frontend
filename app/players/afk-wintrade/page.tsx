@@ -12,5 +12,5 @@ import PlayerModerationDirectory from "@/components/player-moderation-directory"
  * refs: none
  */
 export default function AfkWintradePage() {
-  return <PlayerModerationDirectory titleKey="moderation.afkWintradeTitle" noticeKey="moderation.afkWintradeThresholdNotice" emptyKey="moderation.noAfkWintrade" filter="afkWintradeOnly" accentClass="bg-sky-400" borderClass="border-sky-400/30" noticeClass="border-sky-400/30 bg-sky-400/10 text-sky-50" voteClass="text-sky-200" />;
+  return <PlayerModerationDirectory titleKey="moderation.afkWintradeTitle" descriptionKey="moderation.afkWintradeDescription" criteriaKey="moderation.afkWintradeThresholdNotice" emptyKey="moderation.noAfkWintrade" filter="afkWintradeOnly" accentClass="bg-sky-400" borderClass="border-sky-400/30" voteClass="text-sky-200" />;
 }

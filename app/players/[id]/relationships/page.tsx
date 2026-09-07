@@ -58,7 +58,7 @@ export default function PlayerRelationshipsPage() {
 
   return (
     <div className="space-y-6">
-      <PlayersPageHeader title={t("common.relationships.title")} />
+      <PlayersPageHeader title={t("common.relationships.rankedTitle")} />
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         {[
@@ -77,7 +77,6 @@ export default function PlayerRelationshipsPage() {
         </div>
         {rows.length === 0 ? <EmptyState title={t("common.relationships.empty")} /> : <PlayerRelationshipBars rows={rows} tone={mode === "opponents" ? "violet" : mode === "party" ? "amber" : "cyan"} showDetails />}
       </section>
-      <p className="text-xs text-pc-text-muted">{t("common.relationships.rankedOnly")}</p>
     </div>
   );
 }

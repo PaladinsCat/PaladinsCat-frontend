@@ -20,6 +20,7 @@ import { useLocalization } from "@/lib/localization-context";
 import type { TranslationKey } from "@/lib/localization/messages";
 import PlayersPageHeader from "@/components/ui/players-page-header";
 import PlayerDirectorySearch from "@/components/player-directory-search";
+import TagCriteriaTip from "@/components/tag-criteria-tip";
 
 type ModerationFilter = "dropperOnly" | "afkWintradeOnly" | "altAccountOnly";
 const AUTOMATIC_AFK_PAGE_SIZE = 32;
@@ -50,28 +51,30 @@ function communityVoteCount(player: CheaterPlayer, filter: ModerationFilter): nu
       : Number(player.altAccountVoteCount ?? 0);
 }
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
- * Returns: `React.JSX.Element`
- * refs: none
+/**
+ * Render one community moderation directory with optional automatic AFK results.
+ *
+ * I/O types: input directory translation keys and `filter: ModerationFilter` → output `React.JSX.Element`; fetches matching player records.
+ *
+ * refs: doc: documents/06-reference/frontend-design-system.md
  */
 export default function PlayerModerationDirectory({
   titleKey,
-  noticeKey,
+  descriptionKey,
+  criteriaKey,
   emptyKey,
   filter,
   accentClass,
   borderClass,
-  noticeClass,
   voteClass,
 }: {
   titleKey: TranslationKey;
-  noticeKey: TranslationKey;
+  descriptionKey: TranslationKey;
+  criteriaKey: TranslationKey;
   emptyKey: TranslationKey;
   filter: ModerationFilter;
   accentClass: string;
   borderClass: string;
-  noticeClass: string;
   voteClass: string;
 }) {
   const { t, formatNumber } = useLocalization();
@@ -165,10 +168,8 @@ export default function PlayerModerationDirectory({
 
   return (
     <div className="space-y-6">
-      <PlayersPageHeader title={t(titleKey)} />
-      <div className={`rounded-xl border px-4 py-3 text-sm font-medium ${noticeClass}`} role="note">
-        {t(noticeKey)}
-      </div>
+      <PlayersPageHeader title={t(titleKey)} description={t(descriptionKey)} />
+      <TagCriteriaTip criteriaKey={criteriaKey} />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <PlayerDirectorySearch label={t("generated.players.searchByInGameNameOrPlayerId")} value={query} onChange={(value) => { setQuery(value); setAutomaticPage(1); }} />
@@ -197,7 +198,8 @@ export default function PlayerModerationDirectory({
         <div className="space-y-8">
           <section>
             <h2 className="text-sm font-bold text-pc-text">{t("moderation.automaticallyFlaggedPlayers")}</h2>
-            <p className="mt-1 mb-3 text-xs text-pc-text-muted">{t("moderation.automaticAfkDescription")}</p>
+            <p className="mt-1 mb-3 text-sm leading-6 text-pc-text-secondary">{t("moderation.automaticAfkDescription")}</p>
+            <div className="mb-3"><TagCriteriaTip criteriaKey="moderation.automaticAfkCriteria" /></div>
             {automaticLoading && automaticPlayers.length === 0 ? (
               <LoadingPanel compact />
             ) : automaticPlayers.length === 0 ? (
@@ -225,7 +227,7 @@ export default function PlayerModerationDirectory({
 
           <section>
             <h2 className="text-sm font-bold text-pc-text">{t("moderation.communityMarkedAccountsTitle")}</h2>
-            <p className="mt-1 mb-3 text-xs text-pc-text-muted">{t("moderation.communityMarkedAfkDescription")}</p>
+            <p className="mt-1 mb-3 text-sm leading-6 text-pc-text-secondary">{t("moderation.communityMarkedAfkDescription")}</p>
             {communityDirectory}
           </section>
         </div>

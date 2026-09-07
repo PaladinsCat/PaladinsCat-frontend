@@ -14,7 +14,7 @@ import { useLocalization } from "@/lib/localization-context";
 const PAGE_SIZE = 24;
 
 function entryHref(entry: CheaterPortalEntry): string {
-  return entry.kind === "private" ? `/players/private-accounts/${entry.subjectId}` : `/players/${entry.playerId ?? entry.subjectId}`;
+  return entry.kind === "private" ? `/players/private-accounts/${entry.subjectId}` : `/players/cheaters/${entry.playerId ?? entry.subjectId}`;
 }
 
 export default function ActiveCheatersPage() {
@@ -54,7 +54,7 @@ export default function ActiveCheatersPage() {
 
   return (
     <div className="space-y-6">
-      <PlayersPageHeader title="Active cheaters" description="Confirmed cheaters with activity in the last 30 days." />
+      <PlayersPageHeader title="Active cheaters" />
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <PlayerDirectorySearch label="Search by name or player ID" value={query} onChange={(value) => { setQuery(value); setPage(1); }} />
         <span className="text-xs text-pc-text-muted">{formatNumber(total)} active records</span>

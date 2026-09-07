@@ -1160,6 +1160,7 @@
   "generated.players.privateAccountDetailsCouldNotBeLoaded": "Private account details could not be loaded.",
   "generated.players.privateAccounts": "Private Accounts",
   "generated.players.privateAccounts.a28b00d": "← Private accounts",
+  "generated.players.privateAccountsDescription": "Private accounts and their recorded match activity.",
   "generated.players.privateAccountsCouldNotBeLoaded": "Private accounts could not be loaded.",
   "generated.players.privateProfile": "Private profile #",
   "generated.players.profileCanNowBeRefreshed": "Profile can now be refreshed.",

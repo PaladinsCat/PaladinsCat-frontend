@@ -15,6 +15,7 @@ import { useLocalization } from "@/lib/localization-context";
 import { hasPlayerTag } from "@/lib/player-tag-threshold";
 import PlayersPageHeader from "@/components/ui/players-page-header";
 import PlayerDirectorySearch from "@/components/player-directory-search";
+import TagCriteriaTip from "@/components/tag-criteria-tip";
 
 const PAGE_SIZE = 32;
 
@@ -64,10 +65,8 @@ export default function MasterFeedingDirectory() {
 
   return (
     <div className="space-y-6">
-      <PlayersPageHeader title={t("moderation.masterFeedingTitle")} />
-      <div className="rounded-xl border border-rose-400/30 bg-rose-400/10 px-4 py-3 text-sm font-medium text-rose-50" role="note">
-        {t("moderation.masterFeedingNotice")}
-      </div>
+      <PlayersPageHeader title={t("moderation.masterFeedingTitle")} description={t("moderation.masterFeedingDescription")} />
+      <TagCriteriaTip criteriaKey="moderation.masterFeedingNotice" />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <PlayerDirectorySearch label={t("generated.players.searchByInGameNameOrPlayerId")} value={query} onChange={(value) => { setQuery(value); setPage(1); }} />

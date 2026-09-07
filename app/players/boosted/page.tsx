@@ -15,6 +15,7 @@ import PlayerDirectoryGrid, { PLAYER_DIRECTORY_CARD_CLASS } from "@/components/p
 import { useLocalization } from "@/lib/localization-context";
 import PlayersPageHeader from "@/components/ui/players-page-header";
 import PlayerDirectorySearch from "@/components/player-directory-search";
+import TagCriteriaTip from "@/components/tag-criteria-tip";
 
 const FETCH_PAGE_SIZE = 100;
 
@@ -97,10 +98,8 @@ export default function BoostedPlayersPage() {
 
   return (
     <div className="space-y-6">
-      <PlayersPageHeader title={t("moderation.boostedPlayers")} />
-      <div className="rounded-xl border border-orange-400/30 bg-orange-400/10 px-4 py-3 text-sm font-medium text-orange-50" role="note">
-        {t("moderation.boostedThresholdNotice")}
-      </div>
+      <PlayersPageHeader title={t("moderation.boostedPlayers")} description={t("moderation.boostedDescription")} />
+      <TagCriteriaTip criteriaKey="moderation.boostedThresholdNotice" />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <PlayerDirectorySearch label={t("generated.players.searchByInGameNameOrPlayerId")} value={query} onChange={setQuery} />

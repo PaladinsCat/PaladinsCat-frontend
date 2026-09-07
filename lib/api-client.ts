@@ -66,13 +66,6 @@ export interface ChampionNameOnly {
   name: string;
 }
 
-export interface TierStats {
-  tier: string;
-  winRate: number;
-  pickRate: number;
-  totalPlays: number;
-}
-
 export interface PatchTrend {
   trendWeek: string;
   weeklyWinRate: number;
@@ -201,6 +194,7 @@ export interface CheaterPortalEntry {
   name: string;
   platform: string | null;
   lastSeen: string | null;
+  markedAt: string | null;
   reason: string | null;
   level: number | null;
   wins: number | null;
@@ -232,16 +226,31 @@ export interface CheaterEvidence {
   subjectName: string;
   title: string;
   description: string;
+  matchId: string | null;
   sourceUrl: string | null;
-  provider: "youtube" | "twitch" | null;
+  provider: "youtube" | "medal" | "twitch" | "discord" | null;
   embedUrl: string | null;
   imageUrl: string | null;
+  imageUrls: string[];
   createdAt: string;
 }
 
 export interface CheaterEvidencePage {
   items: CheaterEvidence[];
   total: number;
+}
+
+/** Pending administrator-review evidence metadata. · refs: GET /cheaters/evidence/review */
+export interface CheaterEvidenceReviewItem extends CheaterEvidence {
+  imageCount: number;
+  submittedBy: string;
+}
+
+/** Published cheater detail with evidence posts and supporting match rows. · refs: GET /cheaters/{id} */
+export interface CheaterDetail {
+  player: { id: string; name: string; platform: string | null; lastSeen: string | null; markedAt: string | null };
+  evidence: CheaterEvidence[];
+  supportingMatches: Array<{ matchId: string; map: string | null; region: string | null; durationSeconds: number | null; entryDatetime: string | null }>;
 }
 
 export interface AutomaticAfkPlayer extends CheaterPlayer {
@@ -465,6 +474,7 @@ function normalizeCheaterPortalEntry(row: any): CheaterPortalEntry {
     name: String(row.name ?? "Unknown subject"),
     platform: row.platform ?? row.platform_name ?? null,
     lastSeen: row.lastSeen ?? row.last_seen ?? null,
+    markedAt: row.markedAt ?? row.marked_at ?? row.cheaterMarkedAt ?? row.cheater_marked_at ?? null,
     reason: row.reason ?? null,
     level: normalizeNullableNumber(row.level ?? row.accountLevel ?? row.account_level ?? row.profileLevel ?? row.profile_level),
     wins,
@@ -513,7 +523,33 @@ export async function fetchActiveCheaters(params: { q?: string; limit?: number; 
   };
 }
 
-/** Fetch the newest published evidence records, including provider-safe embed URLs. */
+function evidenceApiUrl(url: string): string {
+  return url.startsWith("/") ? `${API_BASE}${url}` : url;
+}
+
+function normalizeCheaterEvidence(row: any): CheaterEvidence {
+  const imageUrls = Array.isArray(row.imageUrls)
+    ? row.imageUrls.filter((url: unknown): url is string => typeof url === "string").map(evidenceApiUrl)
+    : Array.isArray(row.images)
+      ? row.images.map((image: { url?: unknown }) => image.url).filter((url: unknown): url is string => typeof url === "string").map(evidenceApiUrl)
+      : typeof row.imageUrl === "string" ? [evidenceApiUrl(row.imageUrl)] : [];
+  return {
+    id: String(row.id),
+    playerId: row.playerId == null ? null : Number(row.playerId),
+    subjectName: String(row.subjectName ?? "Unknown subject"),
+    title: String(row.title ?? "Evidence"),
+    description: String(row.description ?? ""),
+    matchId: row.matchId == null ? null : String(row.matchId),
+    sourceUrl: row.sourceUrl ?? null,
+    provider: row.provider === "youtube" || row.provider === "medal" || row.provider === "twitch" || row.provider === "discord" ? row.provider : null,
+    embedUrl: row.embedUrl ?? null,
+    imageUrl: imageUrls[0] ?? null,
+    imageUrls,
+    createdAt: String(row.createdAt ?? ""),
+  };
+}
+
+/** Fetch the newest approved evidence records, including provider-safe embed URLs. */
 export async function fetchCheaterEvidence(params: { limit?: number; offset?: number } = {}): Promise<CheaterEvidencePage> {
   const query = new URLSearchParams({
     limit: String(params.limit ?? 20),
@@ -521,30 +557,88 @@ export async function fetchCheaterEvidence(params: { limit?: number; offset?: nu
   });
   const raw = await fetchJson<{ items?: any[]; total?: number | string }>(`/cheaters/evidence?${query.toString()}`);
   return {
-    items: (raw.items ?? []).map((row) => ({
-      id: String(row.id),
-      playerId: row.playerId == null ? null : Number(row.playerId),
-      subjectName: String(row.subjectName ?? "Unknown subject"),
-      title: String(row.title ?? "Evidence"),
-      description: String(row.description ?? ""),
-      sourceUrl: row.sourceUrl ?? null,
-      provider: row.provider === "youtube" || row.provider === "twitch" ? row.provider : null,
-      embedUrl: row.embedUrl ?? null,
-      imageUrl: row.imageUrl ?? null,
-      createdAt: String(row.createdAt ?? ""),
-    } satisfies CheaterEvidence)),
+    items: (raw.items ?? []).map(normalizeCheaterEvidence),
     total: Number(raw.total ?? 0),
   };
 }
 
-/** Submit an evidence multipart form; retries stay disabled so a timeout cannot duplicate a submission. */
+/**
+ * Submit an evidence multipart form.
+ *
+ * Evidence uploads may synchronously generate up to five lossless-quality AVIF
+ * derivatives on the external storage host, so this one write receives a
+ * request-scoped deadline. Retries remain disabled: a timeout must never
+ * create a duplicate moderation report.
+ *
+ * refs: POST /cheaters/evidence · migrations: 166
+ */
 export async function submitCheaterEvidence(form: FormData): Promise<{ evidence: { id: string; createdAt: string } }> {
   return fetchJson<{ evidence: { id: string; createdAt: string } }>("/cheaters/evidence", {
     method: "POST",
     body: form,
     headers: accountAuthHeaders(),
     retries: 0,
+    timeoutMs: 180_000,
   });
+}
+
+/** Fetch one approved evidence post for the SNS-style detail view. */
+export async function fetchCheaterEvidenceDetail(id: string): Promise<CheaterEvidence> {
+  const raw = await fetchJson<{ evidence: any }>(`/cheaters/evidence/${encodeURIComponent(id)}`);
+  return normalizeCheaterEvidence(raw.evidence);
+}
+
+/** Fetch pending evidence reserved for administrator review. */
+export async function fetchCheaterEvidenceReview(params: { limit?: number; offset?: number } = {}): Promise<{ items: CheaterEvidenceReviewItem[]; total: number }> {
+  const query = new URLSearchParams({ limit: String(params.limit ?? 20), offset: String(params.offset ?? 0) });
+  const raw = await fetchJson<{ items?: any[]; total?: number | string }>(`/cheaters/evidence/review?${query.toString()}`, { headers: accountAuthHeaders() });
+  return {
+    items: (raw.items ?? []).map((row) => ({ ...normalizeCheaterEvidence(row), imageCount: Number(row.imageCount ?? 0), submittedBy: String(row.submittedBy ?? "Unknown") })),
+    total: Number(raw.total ?? 0),
+  };
+}
+
+/**
+ * Fetch one pending image through the authenticated review route as an AVIF
+ * object URLs. The caller owns revoking both returned URLs after unmount.
+ *
+ * refs: migrations: 166 · endpoint: GET /cheaters/evidence/{id}/media/{position}
+ */
+export async function fetchCheaterEvidenceReviewImage(id: string, position: number): Promise<{ avifUrl: string; originalUrl: string }> {
+  const baseUrl = `${API_BASE}/cheaters/evidence/${encodeURIComponent(id)}/media/${position}`;
+  const headers = accountAuthHeaders();
+  const [avif, original] = await Promise.all([
+    fetch(`${baseUrl}?format=avif`, { headers }),
+    fetch(`${baseUrl}?format=original`, { headers }),
+  ]);
+  if (!avif.ok || !original.ok) throw new Error("Evidence image could not be loaded.");
+  return { avifUrl: URL.createObjectURL(await avif.blob()), originalUrl: URL.createObjectURL(await original.blob()) };
+}
+
+/** Apply an administrator's evidence review decision without retrying a state transition. */
+export async function reviewCheaterEvidence(id: string, decision: "approve" | "deny", note = ""): Promise<void> {
+  await fetchJson(`/cheaters/evidence/${encodeURIComponent(id)}/review`, {
+    method: "POST",
+    headers: { ...accountAuthHeaders(), "Content-Type": "application/json" },
+    body: JSON.stringify({ decision, note }),
+    retries: 0,
+  });
+}
+
+/** Fetch the confirmed-cheater detail feed and its evidence-linked match rows. */
+export async function fetchCheaterDetail(id: string): Promise<CheaterDetail> {
+  const raw = await fetchJson<{ player: any; evidence?: any[]; supportingMatches?: any[] }>(`/cheaters/${encodeURIComponent(id)}`);
+  return {
+    player: {
+      id: String(raw.player.id), name: String(raw.player.name ?? "Unknown"), platform: raw.player.platform ?? null,
+      lastSeen: raw.player.lastSeen ?? null, markedAt: raw.player.markedAt ?? null,
+    },
+    evidence: (raw.evidence ?? []).map(normalizeCheaterEvidence),
+    supportingMatches: (raw.supportingMatches ?? []).map((match) => ({
+      matchId: String(match.matchId), map: match.map ?? null, region: match.region ?? null,
+      durationSeconds: match.durationSeconds == null ? null : Number(match.durationSeconds), entryDatetime: match.entryDatetime ?? null,
+    })),
+  };
 }
 
 function mapAutomaticAfkPlayer(row: any): AutomaticAfkPlayer {
@@ -1228,15 +1322,6 @@ export async function fetchBaselines(params?: { role?: string; queueId?: number;
   } catch {
     return [];
   }
-}
-
-export interface PatchTrendEntry {
-  trendWeek: string;
-  patchVersion: string;
-  championId: number;
-  championName: string;
-  weeklyWinRate: number;
-  weeklyPlays: number;
 }
 
 export interface RegionStat {
@@ -2417,7 +2502,21 @@ export async function fetchJson<T>(path: string, options?: RequestInit & { retri
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
     const scopedPath = withStoredLobbyTier(path);
-    const res = await fetch(`${API_BASE}${scopedPath}`, { ...fetchOptions, signal: controller.signal });
+    let res: Response;
+    try {
+      res = await fetch(`${API_BASE}${scopedPath}`, { ...fetchOptions, signal: controller.signal });
+    } catch (error) {
+      // A network failure or a timeout abort is transient: retry it with the
+      // same backoff as 5xx responses instead of surfacing it immediately.
+      // (Only our own timeout can abort here — the caller signal is replaced
+      // by controller.signal above.)
+      clearTimeout(timeoutId);
+      if (attempt < retries) {
+        await new Promise((r) => setTimeout(r, 500 * (attempt + 1)));
+        continue;
+      }
+      throw error;
+    }
     clearTimeout(timeoutId);
     if (!res.ok) {
       if (res.status >= 500 && attempt < retries) {
@@ -2999,95 +3098,6 @@ export async function fetchTopWinrate(): Promise<TopWinrateEntry[]> {
 }
 
 /**
- * Fetch champion detail data for client consumers.
- *
- * Accepts id; returns fetchChampionDetail data after a backend request, using shared authentication and cache behavior.
- * refs: none
- */
-export async function fetchChampionDetail(id: number): Promise<ChampionDetail> {
-  const raw = await fetchJson<{
-    id: number;
-    name: string;
-    class: string | null;
-    cost: number | null;
-    description: string | null;
-    stats: Record<string, unknown> | null;
-    ratings: { rating: number; deviation: number; volatility: number } | null;
-    total_plays: number | null;
-    total_matches: number | null;
-    wins: number | null;
-    tier_stats: Array<{ tier: string; win_rate: number; pick_rate: number; total_plays: number }>;
-    patch_trends: Array<{ trend_week: string; weekly_win_rate: number; weekly_plays: number }>;
-  }>(`/champions/${id}`);
-
-  return {
-    id: raw.id,
-    name: raw.name,
-    class: raw.class,
-    cost: raw.cost,
-    description: raw.description,
-    stats: raw.stats,
-    ratings: raw.ratings,
-    totalPlays: raw.total_plays ?? null,
-    totalMatches: raw.total_matches ?? null,
-    wins: raw.wins ?? null,
-    tierStats: raw.tier_stats.map((t) => ({
-      tier: t.tier,
-      winRate: t.win_rate,
-      pickRate: t.pick_rate,
-      totalPlays: t.total_plays,
-    })),
-    patchTrends: raw.patch_trends.map((t) => ({
-      trendWeek: t.trend_week,
-      weeklyWinRate: t.weekly_win_rate,
-      weeklyPlays: t.weekly_plays,
-    })),
-  };
-}
-
-/**
- * Fetch champion tier stats data for client consumers.
- *
- * Accepts id; returns fetchChampionTierStats data after a backend request, using shared authentication and cache behavior.
- * refs: none
- */
-export async function fetchChampionTierStats(id: number): Promise<TierStats[]> {
-  const raw = await fetchJson<Array<{
-    tier: string;
-    win_rate: number;
-    pick_rate: number;
-    total_plays: number;
-  }>>(`/champions/${id}/tier-stats`);
-
-  return raw.map((r) => ({
-    tier: r.tier,
-    winRate: r.win_rate,
-    pickRate: r.pick_rate,
-    totalPlays: r.total_plays,
-  }));
-}
-
-/**
- * Fetch champion patch trends data for client consumers.
- *
- * Accepts id; returns fetchChampionPatchTrends data after a backend request, using shared authentication and cache behavior.
- * refs: none
- */
-export async function fetchChampionPatchTrends(id: number): Promise<PatchTrend[]> {
-  const raw = await fetchJson<Array<{
-    trend_week: string;
-    weekly_win_rate: number;
-    weekly_plays: number;
-  }>>(`/champions/${id}/patch-trends`);
-
-  return raw.map((r) => ({
-    trendWeek: r.trend_week,
-    weeklyWinRate: r.weekly_win_rate,
-    weeklyPlays: r.weekly_plays,
-  }));
-}
-
-/**
  * Fetch champion counters data for client consumers.
  *
  * Accepts id; returns fetchChampionCounters data after a backend request, using shared authentication and cache behavior.
@@ -3648,40 +3658,6 @@ export async function fetchLeaderboard(params?: { tier?: string; region?: string
     winRate: r.winRate,
     totalPlays: typeof r.totalPlays === 'string' ? Number(r.totalPlays) : (r.totalPlays ?? 0),
     rating: null,
-  }));
-}
-
-/**
- * Fetch patch trends data for client consumers.
- *
- * Accepts query filters; returns fetchPatchTrends data after a backend request, using shared authentication and cache behavior.
- * refs: none
- */
-export async function fetchPatchTrends(params?: { champion_id?: string }): Promise<PatchTrendEntry[]> {
-  const query = new URLSearchParams();
-  if (params) {
-    for (const [key, value] of Object.entries(params)) {
-      if (value !== undefined && value !== null) {
-        query.set(key, String(value));
-      }
-    }
-  }
-  const raw = await fetchJson<Array<{
-    trend_week: string;
-    patch_version: string;
-    champion_id: number;
-    champion_name: string;
-    weekly_win_rate: number;
-    weekly_plays: number;
-  }>>(`/stats/patch-trends${query.toString() ? `?${query.toString()}` : ''}`);
-
-  return raw.map((r) => ({
-    trendWeek: r.trend_week,
-    patchVersion: r.patch_version,
-    championId: r.champion_id,
-    championName: r.champion_name,
-    weeklyWinRate: r.weekly_win_rate,
-    weeklyPlays: r.weekly_plays,
   }));
 }
 

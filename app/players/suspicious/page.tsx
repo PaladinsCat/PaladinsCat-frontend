@@ -16,6 +16,7 @@ import { useLocalization } from "@/lib/localization-context";
 import { hasPlayerTag } from "@/lib/player-tag-threshold";
 import PlayersPageHeader from "@/components/ui/players-page-header";
 import PlayerDirectorySearch from "@/components/player-directory-search";
+import TagCriteriaTip from "@/components/tag-criteria-tip";
 
 const FETCH_PAGE_SIZE = 100;
 const DISPLAY_PAGE_SIZE = 32;
@@ -100,10 +101,8 @@ export default function SuspiciousPage() {
 
   return (
     <div className="space-y-6">
-      <PlayersPageHeader title={t("generated.players.suspiciousPlayers")} />
-      <div className="rounded-xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-sm font-medium text-amber-50" role="note">
-        {t("moderation.suspiciousThresholdNotice")}
-      </div>
+      <PlayersPageHeader title={t("generated.players.suspiciousPlayers")} description={t("moderation.suspiciousDescription")} />
+      <TagCriteriaTip criteriaKey="moderation.suspiciousThresholdNotice" />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <PlayerDirectorySearch label={t("generated.players.searchByInGameNameOrPlayerId")} value={query} onChange={setQuery} />

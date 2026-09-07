@@ -8,7 +8,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Info } from "lucide-react";
 import { LoadingPanel } from "@/components/async-state";
 import PlayerDirectoryPagination, { usePersistentDirectoryPage } from "@/components/player-directory-pagination";
 import { fetchPrivateAccountsDirectory, type PrivateAccountSummary } from "@/lib/api-client";
@@ -64,17 +63,7 @@ export default function PrivateAccountsPage() {
 
   return (
     <div className="space-y-6">
-      <PlayersPageHeader title={t("generated.players.privateAccounts")} />
-
-      <section className="rounded-xl border border-pc-border bg-pc-bg-elevated p-4">
-        <div className="flex items-start gap-3">
-          <Info aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0 text-violet-300" />
-          <div className="min-w-0">
-            <h2 className="text-sm font-semibold text-pc-text">{t("generated.players.howPrivateAccountTrackingWorks")}</h2>
-            <p className="mt-1 text-sm leading-6 text-pc-text-secondary">{t("generated.players.paladinsHidesThePlayerIdAndNameButCompletedMatches")}</p>
-          </div>
-        </div>
-      </section>
+      <PlayersPageHeader title={t("generated.players.privateAccounts")} description={t("generated.players.privateAccountsDescription")} />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <PlayerDirectorySearch label={t("generated.players.searchPrivateAlias")} value={query} onChange={(value) => { setQuery(value); setPage(1); }} />

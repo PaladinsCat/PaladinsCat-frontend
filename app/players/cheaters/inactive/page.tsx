@@ -14,7 +14,7 @@ import { useLocalization } from "@/lib/localization-context";
 const PAGE_SIZE = 24;
 
 function entryHref(entry: CheaterPortalEntry): string {
-  return entry.kind === "private" ? `/players/private-accounts/${entry.subjectId}` : `/players/${entry.playerId ?? entry.subjectId}`;
+  return entry.kind === "private" ? `/players/private-accounts/${entry.subjectId}` : `/players/cheaters/${entry.playerId ?? entry.subjectId}`;
 }
 
 export default function InactiveCheatersPage() {

@@ -47,6 +47,8 @@ export function proxy(request: NextRequest) {
     "font-src 'self' data:",
     // Same-origin /api is the proxied backend; api.github.com powers the blog feed.
     "connect-src 'self' https://api.github.com",
+    "media-src 'self' https://medal.tv https://cdn.medal.tv https://cdn.discordapp.com https://media.discordapp.net",
+    "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://clips.twitch.tv",
     "frame-ancestors 'self'",
     "form-action 'self'",
     "base-uri 'self'",

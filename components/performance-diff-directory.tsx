@@ -16,15 +16,16 @@ import type { TranslationKey } from "@/lib/localization/messages";
 import { hasPlayerTag } from "@/lib/player-tag-threshold";
 import PlayersPageHeader from "@/components/ui/players-page-header";
 import PlayerDirectorySearch from "@/components/player-directory-search";
+import TagCriteriaTip from "@/components/tag-criteria-tip";
 
 const PAGE_SIZE = 32;
 
 type MetricConfig = {
   titleKey: TranslationKey;
-  noticeKey: TranslationKey;
+  descriptionKey: TranslationKey;
+  criteriaKey: TranslationKey;
   emptyKey: TranslationKey;
   tag: "TANK" | "SUP" | "DPS" | "FLANK" | "NOOB" | "CARRY";
-  noticeClass: string;
   dotClass: string;
   cardClass: string;
   badgeClass: string;
@@ -38,70 +39,72 @@ type MetricConfig = {
 export const PERFORMANCE_DIFF_METRICS: Record<PerformanceDiffMetric, MetricConfig> = {
   "tank-diff": {
     titleKey: "moderation.tankDiffTitle",
-    noticeKey: "moderation.tankDiffNotice",
+    descriptionKey: "moderation.tankDiffDescription",
+    criteriaKey: "moderation.tankDiffNotice",
     emptyKey: "moderation.noTankDiff",
     tag: "TANK",
-    noticeClass: "border-sky-400/30 bg-sky-400/10 text-sky-50",
     dotClass: "bg-sky-400",
     cardClass: "border-sky-400/20 hover:border-sky-400/40",
     badgeClass: "text-sky-100",
   },
   "support-diff": {
     titleKey: "moderation.supportDiffTitle",
-    noticeKey: "moderation.supportDiffNotice",
+    descriptionKey: "moderation.supportDiffDescription",
+    criteriaKey: "moderation.supportDiffNotice",
     emptyKey: "moderation.noSupportDiff",
     tag: "SUP",
-    noticeClass: "border-emerald-400/30 bg-emerald-400/10 text-emerald-50",
     dotClass: "bg-emerald-400",
     cardClass: "border-emerald-400/20 hover:border-emerald-400/40",
     badgeClass: "text-emerald-100",
   },
   "dps-diff": {
     titleKey: "moderation.dpsDiffTitle",
-    noticeKey: "moderation.dpsDiffNotice",
+    descriptionKey: "moderation.dpsDiffDescription",
+    criteriaKey: "moderation.dpsDiffNotice",
     emptyKey: "moderation.noDpsDiff",
     tag: "DPS",
-    noticeClass: "border-orange-400/30 bg-orange-400/10 text-orange-50",
     dotClass: "bg-orange-400",
     cardClass: "border-orange-400/20 hover:border-orange-400/40",
     badgeClass: "text-orange-100",
   },
   "flank-diff": {
     titleKey: "moderation.flankDiffTitle",
-    noticeKey: "moderation.flankDiffNotice",
+    descriptionKey: "moderation.flankDiffDescription",
+    criteriaKey: "moderation.flankDiffNotice",
     emptyKey: "moderation.noFlankDiff",
     tag: "FLANK",
-    noticeClass: "border-violet-400/30 bg-violet-400/10 text-violet-50",
     dotClass: "bg-violet-400",
     cardClass: "border-violet-400/20 hover:border-violet-400/40",
     badgeClass: "text-violet-100",
   },
   "the-noob": {
     titleKey: "moderation.noobTitle",
-    noticeKey: "moderation.noobNotice",
+    descriptionKey: "moderation.noobDescription",
+    criteriaKey: "moderation.noobNotice",
     emptyKey: "moderation.noNoobs",
     tag: "NOOB",
-    noticeClass: "border-amber-400/30 bg-amber-400/10 text-amber-50",
     dotClass: "bg-amber-400",
     cardClass: "border-amber-400/20 hover:border-amber-400/40",
     badgeClass: "text-amber-100",
   },
   hypercarry: {
     titleKey: "moderation.hypercarryTitle",
-    noticeKey: "moderation.hypercarryNotice",
+    descriptionKey: "moderation.hypercarryDescription",
+    criteriaKey: "moderation.hypercarryNotice",
     emptyKey: "moderation.noHypercarries",
     tag: "CARRY",
-    noticeClass: "border-cyan-400/30 bg-cyan-400/10 text-cyan-50",
     dotClass: "bg-cyan-400",
     cardClass: "border-cyan-400/20 hover:border-cyan-400/40",
     badgeClass: "text-cyan-100",
   },
 };
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
- * Returns: `React.JSX.Element`
- * refs: none
+/**
+ * Render one automatic performance-tag directory.
+ *
+ * I/O types: input `metric: PerformanceDiffMetric` → output `React.JSX.Element`; fetches the matching player directory.
+ *
+ * refs: doc: documents/06-reference/frontend-design-system.md
  */
 export default function PerformanceDiffDirectory({ metric }: { metric: PerformanceDiffMetric }) {
   const { t, formatNumber } = useLocalization();
@@ -145,10 +148,8 @@ export default function PerformanceDiffDirectory({ metric }: { metric: Performan
 
   return (
     <div className="space-y-6">
-      <PlayersPageHeader title={t(config.titleKey)} />
-      <div className={`rounded-xl border px-4 py-3 text-sm font-medium ${config.noticeClass}`} role="note">
-        {t(config.noticeKey)}
-      </div>
+      <PlayersPageHeader title={t(config.titleKey)} description={t(config.descriptionKey)} />
+      <TagCriteriaTip criteriaKey={config.criteriaKey} />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <PlayerDirectorySearch label={t("generated.players.searchByInGameNameOrPlayerId")} value={query} onChange={(value) => { setQuery(value); setPage(1); }} />

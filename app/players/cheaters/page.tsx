@@ -33,6 +33,7 @@ const MOCK_CHEATER_POOL: CheaterPortalEntry[] = [
     name,
     platform: MOCK_PLATFORMS[index % MOCK_PLATFORMS.length],
     lastSeen: "2026-09-05T12:00:00Z",
+    markedAt: `2026-09-${String(5 - (index % 5)).padStart(2, "0")}T${String(8 + (index % 10)).padStart(2, "0")}:15:00Z`,
     reason: `[mock] ${reason}`,
     level: 20 + ((index * 7) % 96),
     wins,
@@ -54,7 +55,7 @@ function createMockCheaterPortal(): CheaterPortal {
 const MOCK_CHEATER_PORTAL: CheaterPortal = { activeCount: 37, inactiveCount: 126, evidenceCount: 84, latest: MOCK_CHEATER_POOL.slice(0, 20) };
 
 function entryHref(entry: CheaterPortalEntry): string {
-  return entry.kind === "private" ? `/players/private-accounts/${entry.subjectId}` : `/players/${entry.playerId ?? entry.subjectId}`;
+  return entry.kind === "private" ? `/players/private-accounts/${entry.subjectId}` : `/players/cheaters/${entry.playerId ?? entry.subjectId}`;
 }
 
 type NumberFormatter = (value: number | null | undefined, options?: Intl.NumberFormatOptions) => string;
@@ -72,11 +73,13 @@ function LatestEntry({
   entry,
   formatNumber,
   formatPercent,
+  formatDateTime,
   labels,
 }: {
   entry: CheaterPortalEntry;
   formatNumber: NumberFormatter;
   formatPercent: NumberFormatter;
+  formatDateTime: (value: string | null | undefined) => string;
   labels: { level: string; wins: string; losses: string; winRate: string };
 }) {
   return (
@@ -102,7 +105,10 @@ function LatestEntry({
             </span>
           </span>
         </span>
-        <span className="mt-0.5 block truncate text-xs text-pc-text-muted">{entry.reason || "Confirmed cheater"}</span>
+        <span className="mt-0.5 flex min-w-0 items-center gap-2 text-xs text-pc-text-muted">
+          <span className="min-w-0 flex-1 truncate">{entry.reason || "Confirmed cheater"}</span>
+          {entry.markedAt && <time className="shrink-0 font-mono tabular-nums" dateTime={entry.markedAt}>{formatDateTime(entry.markedAt)}</time>}
+        </span>
       </span>
       <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-pc-text-muted transition-[transform,color] duration-[120ms] group-hover:translate-x-1 group-hover:text-red-200" aria-hidden="true" />
     </Link>
@@ -110,7 +116,7 @@ function LatestEntry({
 }
 
 export default function CheatersPage() {
-  const { formatNumber, formatPercent, t } = useLocalization();
+  const { formatDateTime, formatNumber, formatPercent, t } = useLocalization();
   const statLabels = {
     level: t("generated.players.level"),
     wins: t("generated.players.wins"),
@@ -133,10 +139,7 @@ export default function CheatersPage() {
 
   return (
     <div className="space-y-6">
-      <PlayersPageHeader title="Cheater Portal" />
-      <div className="rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm leading-6 text-red-50" role="note">
-        Active means a confirmed cheater was observed within the last 30 days. Historical records remain available in the inactive database.
-      </div>
+      <PlayersPageHeader title="Cheater Portal" description="Browse confirmed cheaters and their evidence, or submit evidence for review." />
       {error && <div className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-300">The portal could not be loaded.</div>}
 
       <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-3">
@@ -160,7 +163,7 @@ export default function CheatersPage() {
           <div className="relative mt-5">
             <h2 className="text-xl font-bold tracking-tight text-pc-text group-hover:text-violet-100">Inactive cheater database</h2>
             <p className="mt-6 text-2xl font-bold tabular-nums text-pc-text">{formatNumber(portal.inactiveCount)}</p>
-            <p className="text-xs text-pc-text-muted">records · open database</p>
+            <p className="text-xs text-pc-text-muted">records</p>
           </div>
         </Link>
 
@@ -172,7 +175,7 @@ export default function CheatersPage() {
           <div className="relative mt-5">
             <h2 className="text-xl font-bold tracking-tight text-pc-text group-hover:text-amber-100">Evidence portal</h2>
             <p className="mt-6 text-2xl font-bold tabular-nums text-pc-text">{formatNumber(portal.evidenceCount)}</p>
-            <p className="text-xs text-pc-text-muted">published evidence items</p>
+            <p className="text-xs text-pc-text-muted">evidence</p>
           </div>
         </Link>
       </div>
@@ -183,8 +186,8 @@ export default function CheatersPage() {
           <p className="py-8 text-center text-sm text-pc-text-muted">No confirmed cheaters yet.</p>
         ) : (
           <div className="mt-4 grid grid-cols-1 gap-2 lg:grid-cols-2 lg:gap-4">
-            <div className="space-y-2">{portal.latest.slice(0, 10).map((entry) => <LatestEntry key={`${entry.kind}:${entry.subjectId}`} entry={entry} formatNumber={formatNumber} formatPercent={formatPercent} labels={statLabels} />)}</div>
-            <div className="space-y-2">{portal.latest.slice(10, 20).map((entry) => <LatestEntry key={`${entry.kind}:${entry.subjectId}`} entry={entry} formatNumber={formatNumber} formatPercent={formatPercent} labels={statLabels} />)}</div>
+            <div className="space-y-2">{portal.latest.slice(0, 10).map((entry) => <LatestEntry key={`${entry.kind}:${entry.subjectId}`} entry={entry} formatNumber={formatNumber} formatPercent={formatPercent} formatDateTime={formatDateTime} labels={statLabels} />)}</div>
+            <div className="space-y-2">{portal.latest.slice(10, 20).map((entry) => <LatestEntry key={`${entry.kind}:${entry.subjectId}`} entry={entry} formatNumber={formatNumber} formatPercent={formatPercent} formatDateTime={formatDateTime} labels={statLabels} />)}</div>
           </div>
         )}
       </section>

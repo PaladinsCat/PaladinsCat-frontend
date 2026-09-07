@@ -35,7 +35,11 @@ export function useAuth(): AuthContextValue {
  * refs: none
  */
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(() => getAuthUser());
+  // SSR-safe: start unauthenticated on the server and on the first client render
+  // so the hydration tree matches. Reading localStorage here (as getAuthUser does
+  // on the client but not on the server) produced a React hydration mismatch
+  // (error #418). The cached session is restored after mount instead.
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const refresh = useCallback(async () => {
@@ -57,6 +61,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    // Restore the cached session after mount so the nav shows the signed-in
+    // user immediately (client-only; safe because this runs after hydration).
+    // The async refresh below then confirms or clears it against the server.
+    setUser(getAuthUser());
     void refresh();
     const syncSession = () => void refresh();
     const syncVisibleSession = () => {
