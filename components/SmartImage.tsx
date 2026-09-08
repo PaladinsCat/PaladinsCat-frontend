@@ -1,5 +1,5 @@
-/** SmartImage component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * Uses AVIF for local artwork and retries the matching PNG on failure.  Returns: `React.JSX.Element`. · refs: none
  * refs: none
  */
 "use client";
@@ -11,7 +11,10 @@ interface SmartImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, "src
   src: string;
 }
 
-/** Uses AVIF for local artwork and retries the matching PNG on failure.  Returns: `React.JSX.Element`. · refs: none */
+/**
+ * Uses AVIF for local artwork and retries the matching PNG on failure.  Returns: `React.JSX.Element`. · refs: none
+ * I/O types: `{ src, onError, ...props }: SmartImageProps -> JSX.Element`.
+ */
 export default function SmartImage({ src, onError, ...props }: SmartImageProps) {
   const sources = localImageSources(src);
   const [currentSrc, setCurrentSrc] = useState(sources.preferred);

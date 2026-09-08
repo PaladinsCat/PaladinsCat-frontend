@@ -1,10 +1,15 @@
-/** Loads and normalizes champion data for pages.
- * The module preserves canonical data, asset, or metadata behavior used by existing callers.
+/**
+ * Load the cached champion data map and look up the normalized champion slug. Return undefined for an unknown champion; loading failures reject the promise.
+ * Loads and normalizes champion data for pages.
  * refs: none
  */
 import { championSlug } from "@/lib/utils";
 import { getCanonicalTalentImageUrl } from "@/lib/image-assets";
 
+/**
+ * Describe champion skill with name, key, iconUrl (optional), iconUrl2 (optional), iconUrl3 (optional), damage (optional), healing (optional).
+ * refs: none
+ */
 export interface ChampionSkill {
   name: string;
   key: string;
@@ -17,6 +22,10 @@ export interface ChampionSkill {
   description?: string;
 }
 
+/**
+ * Describe champion talent with id, name, description, category, iconUrl (optional).
+ * refs: none
+ */
 export interface ChampionTalent {
   id: number;
   name: string;
@@ -25,6 +34,10 @@ export interface ChampionTalent {
   iconUrl?: string | null;
 }
 
+/**
+ * Describe champion loadout with id, name, description, category, iconUrl (optional), cooldown (optional), values (optional).
+ * refs: none
+ */
 export interface ChampionLoadout {
   id: number;
   name: string;
@@ -37,6 +50,10 @@ export interface ChampionLoadout {
   winRate?: number;
 }
 
+/**
+ * Describe champion stats with health, speed, speedUnits, range.
+ * refs: none
+ */
 export interface ChampionStats {
   health: string;
   speed: string;
@@ -44,6 +61,10 @@ export interface ChampionStats {
   range: string;
 }
 
+/**
+ * Describe champion data with name, roles, stats, skills, talents, loadouts (optional), cards (optional).
+ * refs: none
+ */
 export interface ChampionData {
   name: string;
   roles: string[];
@@ -79,10 +100,10 @@ async function loadChampionDataMap(): Promise<ChampionDataMap> {
   return championDataPromise;
 }
 
-/** Use getChampionData to apply the module-specific champion data or asset behavior.
- * Contract: accepts its declared inputs and returns the documented value without changing caller-side state.
- * Returns: `Promise<ChampionData | undefined>`
+/**
+ * Load the cached champion data map and look up the normalized champion slug. Return undefined for an unknown champion; loading failures reject the promise.
  * refs: none
+ * I/O types: `slug: string -> Promise<ChampionData | undefined>`.
  */
 export async function getChampionData(slug: string): Promise<ChampionData | undefined> {
   const data = await loadChampionDataMap();
@@ -105,9 +126,12 @@ async function loadCanonicalTalentImages(): Promise<Map<number, string>> {
   return canonicalTalentImagesPromise;
 }
 
-/** Resolve talent artwork only by the stable game ID. Display names are never
+/**
+ * Resolve talent artwork only by the stable game ID. Display names are never
  * refs: none
- * used as asset keys, so API punctuation and localization cannot change URLs. */
+ * used as asset keys, so API punctuation and localization cannot change URLs.
+ * I/O types: `talentId: number -> Promise<string | null>`.
+ */
 export async function getCanonicalTalentIconPath(talentId: number): Promise<string | null> {
   if (!Number.isInteger(talentId) || talentId <= 0) return null;
   const images = await loadCanonicalTalentImages();

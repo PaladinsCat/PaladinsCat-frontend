@@ -13,8 +13,16 @@ import {
   type ActiveItemTier,
 } from "@/lib/active-items";
 
+/**
+ * Define build item category as `ActiveItemCategory`.
+ * refs: none
+ */
 export type BuildItemCategory = ActiveItemCategory;
 
+/**
+ * Describe build item reference with id, name, category, description (optional), descriptionKey (optional), iconUrl (optional), tiers.
+ * refs: none
+ */
 export interface BuildItemReference {
   id: number;
   name: string;
@@ -26,6 +34,10 @@ export interface BuildItemReference {
   sourceUrl: string;
 }
 
+/**
+ * Describe build card reference with id, name, category, description (optional), iconUrl (optional).
+ * refs: none
+ */
 export interface BuildCardReference {
   id: number;
   name: string;
@@ -34,6 +46,10 @@ export interface BuildCardReference {
   iconUrl?: string | null;
 }
 
+/**
+ * Describe build talent reference with id, name, category, description (optional), iconUrl (optional).
+ * refs: none
+ */
 export interface BuildTalentReference {
   id: number;
   name: string;
@@ -42,6 +58,10 @@ export interface BuildTalentReference {
   iconUrl?: string | null;
 }
 
+/**
+ * Describe build reference data with championId, champion (optional), items, cards, talents.
+ * refs: none
+ */
 export interface BuildReferenceData {
   championId: number;
   champion?: ChampionData;
@@ -183,10 +203,10 @@ async function buildItems(): Promise<BuildItemReference[]> {
   });
 }
 
-/** itemDescriptionAtLevel applies the module-specific transformation to its declared inputs.
- * Contract: validates its inputs and returns the existing module result without mutating caller state.
- * Returns: `string | null`
+/**
+ * Return the normalized item-tier description, falling back to the base item description or null when neither is available.
  * refs: none
+ * I/O types: `item: Pick<BuildItemReference, "description" | "tiers"> | null | undefined; level: number -> string | null`.
  */
 export function itemDescriptionAtLevel(
   item: Pick<BuildItemReference, "description" | "tiers"> | null | undefined,
@@ -263,10 +283,10 @@ async function buildTalents(championId: number, champion?: ChampionData): Promis
   });
 }
 
-/** loadBuildReferenceData applies the module-specific transformation to its declared inputs.
- * Contract: validates its inputs and returns the existing module result without mutating caller state.
- * Returns: `Promise<BuildReferenceData>`
+/**
+ * Load optional champion data and the item/card/talent references concurrently. Suppress champion-data loading failure, retain the requested champion ID, and propagate uncaught reference-loader failures.
  * refs: none
+ * I/O types: `championId: number; championSlug: string -> Promise<BuildReferenceData>`.
  */
 export async function loadBuildReferenceData(championId: number, championSlug: string): Promise<BuildReferenceData> {
   const champion = championSlug ? await getChampionData(championSlug).catch(() => undefined) : undefined;
@@ -278,18 +298,21 @@ export async function loadBuildReferenceData(championId: number, championSlug: s
   return { championId, champion, items, cards, talents };
 }
 
-/** Load only the card data needed by saved-deck views. This avoids fetching
+/**
+ * Load only the card data needed by saved-deck views. This avoids fetching
  * refs: none
- * item and talent references on a route that never renders either dataset. */
+ * item and talent references on a route that never renders either dataset.
+ * I/O types: `championId: number; championSlug: string -> Promise<BuildCardReference[]>`.
+ */
 export async function loadBuildCardReferences(championId: number, championSlug: string): Promise<BuildCardReference[]> {
   const champion = championSlug ? await getChampionData(championSlug).catch(() => undefined) : undefined;
   return buildCards(championId, champion);
 }
 
-/** groupByCategory applies the module-specific transformation to its declared inputs.
- * Contract: validates its inputs and returns the existing module result without mutating caller state.
- * Returns: `Array<[string, T[]]>`
+/**
+ * Group rows by category in first-seen order, using General for an empty category. Allocate new grouping arrays without altering the input rows.
  * refs: none
+ * I/O types: `rows: T[] -> Array<[string, T[]]>`.
  */
 export function groupByCategory<T extends { category: string }>(rows: T[]): Array<[string, T[]]> {
   const grouped = new Map<string, T[]>();

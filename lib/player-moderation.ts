@@ -1,5 +1,10 @@
-/** Calls player moderation APIs and maps review data.
- * The module owns its existing image, OIDC, proxy, roster, or moderation boundary.
+/**
+ * Keep fields already supplied by a canonical page payload over a fallback lookup. · refs: none
+ * Calls player moderation APIs and maps review data.
+ * refs: none
+ */
+/**
+ * Define player moderation as `{ cheater: boolean; exploiter: boolean; susCount: number; dropper: boolean; dropperVoteCount: number; afkWintrade: boolean; afkWintradeVoteCount: number; boosted: boolean; boostedMatchCount: number; altAccount: boolean; altAccountVoteCount: number; automaticAfk: boolean; automaticAfkCount: number; wallShooterCount: number; masterFeedingCount: number; tankDiffCount: number; supportDiffCount: number; dpsDiffCount: number; flankDiffCount: number; noobCount: number; hypercarryCount: number; verified: boolean; }`.
  * refs: none
  */
 export type PlayerModeration = {
@@ -58,8 +63,8 @@ let timer: ReturnType<typeof setTimeout> | null = null;
 
 
 // User-facing error keys — resolved at the UI layer via t()
-/** Apply MODERATION_ERROR_KEYS to the declared request or domain inputs.
- * Contract: validates inputs, preserves the existing security or mapping rules, and returns the documented result.
+/**
+ * Expose the localization keys for public and private moderation-badge loading failures.
  * refs: none
  */
 export const MODERATION_ERROR_KEYS = {
@@ -67,7 +72,10 @@ export const MODERATION_ERROR_KEYS = {
   unableToLoadPrivateBadges: "generated.moderation.unableToLoadPrivateBadges",
 } as const;
 
-/** Keep fields already supplied by a canonical page payload over a fallback lookup. · refs: none */
+/**
+ * Keep fields already supplied by a canonical page payload over a fallback lookup. · refs: none
+ * I/O types: `fallback: PlayerModeration; supplied: Partial<PlayerModeration> -> PlayerModeration`.
+ */
 export function mergePlayerModeration(
   fallback: PlayerModeration,
   supplied: Partial<PlayerModeration>,
@@ -155,7 +163,10 @@ function moderationFromRow(player: BulkPlayer): PlayerModeration {
   };
 }
 
-/** One database-only moderation read for data surfaces that already have player profiles. · refs: none */
+/**
+ * One database-only moderation read for data surfaces that already have player profiles. · refs: none
+ * I/O types: `playerIds: Array<string | number> -> Promise<Map<number, PlayerModeration>>`.
+ */
 export async function fetchPlayerModerationBatch(playerIds: Array<string | number>): Promise<Map<number, PlayerModeration>> {
   const ids = [...new Set(playerIds
     .map(Number)
@@ -183,8 +194,8 @@ export async function fetchPlayerModerationBatch(playerIds: Array<string | numbe
 /**
  * Read moderation for canonical private identities without mixing their serial
  * IDs into the public Hi-Rez player-ID cache.
- * Returns: `Promise<Map<number, PlayerModeration>>`
  * refs: none
+ * I/O types: `privateIds: Array<string | number> -> Promise<Map<number, PlayerModeration>>`.
  */
 export async function fetchPrivateAccountModerationBatch(
   privateIds: Array<string | number>,
@@ -258,7 +269,10 @@ async function flush() {
   if (pending.size > 0) timer = setTimeout(() => void flush(), 0);
 }
 
-/** Batches visible player-name status lookups and retains each result for five minutes. · refs: none */
+/**
+ * Batches visible player-name status lookups and retains each result for five minutes. · refs: none
+ * I/O types: `playerId: string | number -> Promise<PlayerModeration>`.
+ */
 export function fetchPlayerModeration(playerId: string | number): Promise<PlayerModeration> {
   const id = Number(playerId);
   if (!Number.isSafeInteger(id) || id <= 0) return Promise.resolve(EMPTY);

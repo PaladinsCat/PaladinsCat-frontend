@@ -525,10 +525,10 @@ function SearchPageBody() {
 }
 
 /**
+ * Render /search using `Suspense`, `RouteSkeleton`, `SearchPageBody`.
  * Render the SearchPage view for search page.
- * Return the React tree for the declared inputs and page data.
- * Returns: `React.JSX.Element`
  * refs: none
+ * I/O types: `none -> JSX.Element`.
  */
 export default function SearchPage() {
   return (

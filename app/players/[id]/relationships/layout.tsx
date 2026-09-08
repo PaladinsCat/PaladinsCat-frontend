@@ -1,5 +1,5 @@
 /**
- * Define the player route surface for id relationships layout and its local data boundary.
+ * Render the layout for the player id relationships layout route.
  * This file owns the page, layout, loading state, or route handler named by its path.
  * It does not own unrelated player sections or shared library policy.
  * refs: none
@@ -9,8 +9,8 @@ import { getServerLocalization } from "@/lib/server-localization";
 
 /**
  * Build SEO metadata for the player id relationships layout route.
- * Returns: `Promise<Metadata>`
  * refs: none
+ * I/O types: `{ params }: { params: Promise<{ id: string }> } -> Promise<Metadata>`.
  */
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
@@ -24,8 +24,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 /**
  * Render the layout for the player id relationships layout route.
- * Returns: `React.JSX.Element`
  * refs: none
+ * I/O types: `{ children }: { children: React.ReactNode } -> ReactNode`.
  */
 export default function PlayerRelationshipsLayout({ children }: { children: React.ReactNode }) {
   return children;

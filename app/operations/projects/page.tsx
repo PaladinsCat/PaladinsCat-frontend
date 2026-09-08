@@ -1,6 +1,5 @@
 /**
- * Define the operations projects page responsibility boundary.
- * Coordinates operations projects page data loading, authorization, and presentation.
+ * Render the /operations/projects route with `AccessWall`, `Plus`, `TaskDialog`.
  * refs: none
  */
 "use client";
@@ -17,9 +16,9 @@ const columns: Column[] = ["Backlog", "Building", "Review", "Done"];
 const projectComponents = ["Frontend", "Backend", "Discord Bot", "Wiki", "Localization", "WatchCat", "Operations"] as const;
 
 /**
- * Handles the exported route operation using its declared request and response contract.
- * Returns: `React.JSX.Element`
+ * Render the /operations/projects route with `AccessWall`, `Plus`, `TaskDialog`.
  * refs: none
+ * I/O types: `none -> JSX.Element`.
  */
 export default function ProjectsPage() {
   const { user, isLoading } = useAuth();

@@ -1,11 +1,14 @@
 <#
 .SYNOPSIS
 Starts the local Next development server with its same-origin API proxy.
+refs: documents/06-reference/frontend-design-system.md
 #>
 [CmdletBinding()]
 param(
   [int]$Port = 3000,
   [string]$TargetApi = 'https://paladinscat.com/api',
+  [ValidatePattern('^\.next[-a-zA-Z0-9]*$')]
+  [string]$DistDir = '.next-dev-proxy',
   [switch]$OpenBrowser
 )
 
@@ -28,11 +31,11 @@ $startInfo.UseShellExecute = $false
 $startInfo.CreateNoWindow = $true
 $startInfo.Environment['NEXT_PUBLIC_API_URL'] = '/api'
 $startInfo.Environment['NEXT_SERVER_API_URL'] = $TargetApi.TrimEnd('/')
-$startInfo.Environment['NEXT_DIST_DIR'] = '.next-dev-proxy'
+$startInfo.Environment['NEXT_DIST_DIR'] = $DistDir
 $startInfo.Environment['BROWSER'] = 'none'
 
 $process = [System.Diagnostics.Process]::Start($startInfo)
 Write-Output "DEV_PROXY_PID=$($process.Id)"
-Write-Output "DEV_PROXY_URL=http://127.0.0.1:$Port"
+Write-Output "DEV_PROXY_URL=http://localhost:$Port"
 Write-Output "DEV_PROXY_API=$($startInfo.Environment['NEXT_SERVER_API_URL'])"
-if ($OpenBrowser) { Start-Process "http://127.0.0.1:$Port" }
+if ($OpenBrowser) { Start-Process "http://localhost:$Port" }

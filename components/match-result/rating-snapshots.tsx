@@ -9,10 +9,11 @@ import type { RatingSnapshot } from "@/lib/api-client";
 import PlayerName from "@/components/player-name";
 import { useLocalization } from "@/lib/localization-context";
 
-/** Render RatingSnapshots from its declared props and match data.
+/**
+ * Render RatingSnapshots from its declared props and match data.
  * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
- * Returns: `React.JSX.Element`
  * refs: none
+ * I/O types: `{ snapshots }: { snapshots: RatingSnapshot[] } -> JSX.Element | null`.
  */
 export default function RatingSnapshots({ snapshots }: { snapshots: RatingSnapshot[] }) {
   const { t , formatNumber} = useLocalization();

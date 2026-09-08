@@ -1,6 +1,5 @@
 /**
- * Define the blog page responsibility boundary.
- * Coordinates blog page data loading, authorization, and presentation.
+ * Render one localized blog post selected by its catch-all slug parameters.  Returns: `Promise<React.JSX.Element>`. · refs: none
  * refs: none
  */
 import { notFound } from "next/navigation";
@@ -14,8 +13,7 @@ import remarkGfm from "remark-gfm";
 // Blog content changes only with the public repository. Generate the known
 // routes into the image and retain ISR for newly published posts.
 /**
- * Handles the exported route operation using its declared request and response contract.
- * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ * Set the declared Next route revalidation interval in seconds, or disable timed revalidation when false.
  * refs: none
  */
 export const revalidate = 300;
@@ -27,16 +25,19 @@ function joinSlug(slug: string[]): string {
 }
 
 /**
- * Handles the exported route operation using its declared request and response contract.
- * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ * Read published blog posts and split each slash-separated slug into route segments for static generation.
  * refs: none
+ * I/O types: `none -> Promise<{ slug: string[]; }[]>`.
  */
 export async function generateStaticParams() {
   const posts = await getAllPosts();
   return posts.map((post) => ({ slug: post.slug.split("/") }));
 }
 
-/** Render one localized blog post selected by its catch-all slug parameters.  Returns: `Promise<React.JSX.Element>`. · refs: none */
+/**
+ * Render one localized blog post selected by its catch-all slug parameters.  Returns: `Promise<React.JSX.Element>`. · refs: none
+ * I/O types: `{ params }: BlogPostPageProps -> Promise<JSX.Element>`.
+ */
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const { t } = await getServerLocalization();
   const { slug } = await params;
@@ -122,9 +123,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 }
 
 /**
- * Handles the exported route operation using its declared request and response contract.
- * Returns: `Promise<Metadata>`
+ * Build localized metadata for /blog/[...slug], including the title and any canonical, description, and crawler directives configured for this route.
  * refs: none
+ * I/O types: `{ params }: BlogPostPageProps -> Promise<{ title: string; description: string; alternates?: undefined; openGraph?: undefined; } | { title: string; description: string; alternates: { canonical: string; }; openGraph: { title: string; description: string; type: "article"; url: string; }; }>`.
  */
 export async function generateMetadata({ params }: BlogPostPageProps) {
   const { t } = await getServerLocalization();

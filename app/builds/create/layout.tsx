@@ -16,10 +16,10 @@ export const metadata: Metadata = {
 };
 
 /**
+ * Pass the /builds/create layout children through unchanged.
  * Render the CreateBuildLayout view for builds create layout.
- * Returns: `React.JSX.Element`
- * Return the React tree for the declared inputs and page data.
  * refs: none
+ * I/O types: `{ children }: { children: React.ReactNode } -> ReactNode`.
  */
 export default function CreateBuildLayout({ children }: { children: React.ReactNode }) {
   return children;

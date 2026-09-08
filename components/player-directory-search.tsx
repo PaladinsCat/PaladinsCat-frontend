@@ -1,6 +1,11 @@
 /** Canonical labelled search field for player directories. · refs: none */
 import { Search } from "lucide-react";
 
+/**
+ * Render a labeled controlled search input; forward text changes through onChange and apply the optional container classes.
+ * I/O types: `{ label, value, onChange, className = "sm:max-w-sm" }: { label: string; value: string; onChange: (value: string) => void; className?: string; } -> JSX.Element`.
+ * refs: none
+ */
 export default function PlayerDirectorySearch({ label, value, onChange, className = "sm:max-w-sm" }: {
   label: string;
   value: string;

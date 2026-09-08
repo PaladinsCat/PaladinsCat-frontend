@@ -1,5 +1,5 @@
 /**
- * Define the player route surface for elo page and its local data boundary.
+ * Render the ChampionEloPage view for the player elo page route.
  * This file owns the page, layout, loading state, or route handler named by its path.
  * It does not own unrelated player sections or shared library policy.
  * refs: none
@@ -58,8 +58,8 @@ function RankBadge({ rank }: { rank: number }) {
 
 /**
  * Render the ChampionEloPage view for the player elo page route.
- * Returns: `React.JSX.Element`
  * refs: none
+ * I/O types: `{ mode }: { mode?: ELOMode } -> JSX.Element`.
  */
 export default function ChampionEloPage({ mode }: { mode?: ELOMode }) {
   return (

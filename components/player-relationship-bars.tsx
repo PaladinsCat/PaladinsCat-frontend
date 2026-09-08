@@ -35,6 +35,11 @@ function championsByClass(counts: Record<string, number>) {
   return [...groups.entries()].sort(([left], [right]) => CLASS_ORDER.indexOf(left) - CLASS_ORDER.indexOf(right)).map(([role, champions]) => [role, champions.sort(([, left], [, right]) => right - left)] as const);
 }
 
+/**
+ * Render up to limit co-play partners with match-count bars normalized to the visible maximum, win records, and role distribution. Track the expanded partner locally and reveal champion details only when showDetails is enabled.
+ * I/O types: `{ rows, tone = "cyan", limit, showDetails = false }: { rows: PlayerRelationshipRow[]; tone?: "cyan" | "violet" | "amber"; limit?: number; showDetails?: boolean } -> JSX.Element`.
+ * refs: none
+ */
 export default function PlayerRelationshipBars({ rows, tone = "cyan", limit, showDetails = false }: { rows: PlayerRelationshipRow[]; tone?: "cyan" | "violet" | "amber"; limit?: number; showDetails?: boolean }) {
   const { formatNumber, formatPercent, formatRecord, t } = useLocalization();
   const [expandedId, setExpandedId] = useState<string | null>(null);

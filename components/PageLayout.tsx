@@ -1,5 +1,5 @@
-/** PageLayout component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * Render page layout with `RouteSettledProvider`.
  * refs: documents/06-reference/frontend-design-system.md#title-motion
  */
 "use client";
@@ -7,10 +7,11 @@
 import { usePathname } from "next/navigation";
 import { RouteSettledProvider } from "@/lib/route-transition-context";
 
-/** Provide this exported item.
+/**
+ * Render page layout with `RouteSettledProvider`.
  * Contract: wraps every route, including the root route, in the shared entry-fade stage.
- * Returns: `React.JSX.Element`
  * refs: documents/06-reference/frontend-design-system.md#title-motion
+ * I/O types: `{ children }: { children: React.ReactNode } -> JSX.Element`.
  */
 export default function PageLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();

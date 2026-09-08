@@ -1,8 +1,7 @@
 /**
  * Published cheater evidence viewer and approved-submitter form.
  *
- * refs:
- *   doc: documents/05-operations/cheater-evidence-portal-test-status.md
+ * refs: *   doc: documents/05-operations/records/cheater-evidence-portal-test-status.md
  *   endpoints: GET /cheaters/evidence, POST /cheaters/evidence, GET /cheaters/evidence/{id}/file
  */
 "use client";
@@ -26,11 +25,12 @@ const PAGE_SIZE = 12;
  * Contract: no input → output `JSX.Element`; reads auth/API state and submits
  * approved multipart evidence through the evidence API.
  *
- * refs: GET /cheaters/evidence · POST /cheaters/evidence
+ * refs: endpoints: GET /cheaters/evidence · endpoints: POST /cheaters/evidence
+ * I/O types: `none -> JSX.Element`.
  */
 export default function CheaterEvidencePage() {
   const { isAdmin } = useAuth();
-  const { formatDateTime, formatNumber } = useLocalization();
+  const { formatDateTime, formatNumber, t } = useLocalization();
   const [page, setPage] = usePersistentDirectoryPage();
   const [items, setItems] = useState<CheaterEvidence[]>([]);
   const [total, setTotal] = useState(0);
@@ -52,26 +52,26 @@ export default function CheaterEvidencePage() {
         setError(null);
       })
       .catch(() => {
-        if (active) setError("The evidence portal could not be loaded.");
+        if (active) setError(t("moderation.evidencePortalLoadFailed"));
       })
       .finally(() => {
         if (active) setLoading(false);
       });
     return () => { active = false; };
-  }, [loadEvidence]);
+  }, [loadEvidence, t]);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   return (
     <div className="space-y-6">
-      <PlayersPageHeader title="Evidence portal" actions={<><Link href="/players/cheaters/evidence/submit" className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-pc-accent px-4 py-2 text-sm font-semibold text-black"><Plus className="h-4 w-4" aria-hidden="true" />Submit evidence</Link>{isAdmin && <Link href="/players/cheaters/evidence/review" className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-pc-border px-4 py-2 text-sm font-semibold text-pc-text"><ShieldCheck className="h-4 w-4" aria-hidden="true" />Review queue</Link>}</>} />
+      <PlayersPageHeader title={t("moderation.evidencePortal")} actions={<><Link href="/players/cheaters/evidence/submit" className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-pc-accent px-4 py-2 text-sm font-semibold text-black"><Plus className="h-4 w-4" aria-hidden="true" />{t("moderation.submitEvidence")}</Link>{isAdmin && <Link href="/players/cheaters/evidence/review" className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-pc-border px-4 py-2 text-sm font-semibold text-pc-text"><ShieldCheck className="h-4 w-4" aria-hidden="true" />{t("moderation.reviewQueue")}</Link>}</>} />
       {error && <div className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-300">{error}</div>}
 
       <div className="flex items-center justify-between gap-3 text-xs text-pc-text-muted">
-        <span className="inline-flex items-center gap-1.5"><FileImage className="h-4 w-4" aria-hidden="true" />{formatNumber(total)} evidence</span>
+        <span className="inline-flex items-center gap-1.5"><FileImage className="h-4 w-4" aria-hidden="true" />{t("moderation.evidenceCount", { value1: formatNumber(total) })}</span>
       </div>
       {loading && items.length === 0 ? <LoadingPanel compact /> : items.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-pc-border bg-pc-bg-elevated px-4 py-12 text-center text-sm text-pc-text-muted">No evidence yet.</div>
+        <div className="rounded-xl border border-dashed border-pc-border bg-pc-bg-elevated px-4 py-12 text-center text-sm text-pc-text-muted">{t("moderation.noEvidenceYet")}</div>
       ) : (
         <div className={`grid grid-cols-1 gap-4 lg:grid-cols-2 ${loading ? "opacity-60" : ""}`}>
           {items.map((item) => <CheaterEvidencePost key={item.id} item={item} formatDateTime={formatDateTime} />)}

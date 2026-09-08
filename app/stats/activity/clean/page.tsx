@@ -1,14 +1,13 @@
 /**
- * Define the stats activity clean page route boundary.
- * Coordinates this module's route data flow and rendered output.
+ * Render /stats/activity/clean.
  * refs: none
  */
 import { permanentRedirect } from "next/navigation";
 
 /**
- * Renders the exported statistics view with its route data.
- * Returns: `React.JSX.Element`
+ * Render /stats/activity/clean.
  * refs: none
+ * I/O types: `none -> void`.
  */
 export default function CleanPlayerActivityPage() {
   permanentRedirect("/stats/activity");

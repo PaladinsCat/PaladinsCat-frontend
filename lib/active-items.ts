@@ -4,15 +4,31 @@
  */
 import activeItemData from "../public/data/paladins-active-items.json" with { type: "json" };
 
+/**
+ * Define active item category as `"Offense" | "Defense" | "Healing" | "Utility"`.
+ * refs: none
+ */
 export type ActiveItemCategory = "Offense" | "Defense" | "Healing" | "Utility";
+/**
+ * Define active item level as `1 | 2 | 3`.
+ * refs: none
+ */
 export type ActiveItemLevel = 1 | 2 | 3;
 
+/**
+ * Describe active item tier with level, cost, description.
+ * refs: none
+ */
 export interface ActiveItemTier {
   level: ActiveItemLevel;
   cost: number;
   description: string;
 }
 
+/**
+ * Describe active item definition with name, category, fallbackId, wikiSlug, tiers.
+ * refs: none
+ */
 export interface ActiveItemDefinition {
   name: string;
   category: ActiveItemCategory;
@@ -29,25 +45,26 @@ interface ActiveItemDataFile {
 
 const auditedData = activeItemData as unknown as ActiveItemDataFile;
 
-/** ACTIVE_ITEM_DATA_AUDITED_AT applies the module-specific transformation to its declared inputs.
- * Contract: validates its inputs and returns the existing module result without mutating caller state.
+/**
+ * Expose the audit timestamp stored in the checked-in active-item data.
  * refs: none
  */
 export const ACTIVE_ITEM_DATA_AUDITED_AT = auditedData.auditedAt;
-/** ACTIVE_ITEM_DATA_SOURCE applies the module-specific transformation to its declared inputs.
- * Contract: validates its inputs and returns the existing module result without mutating caller state.
+/**
+ * Expose the provenance source stored in the checked-in active-item data.
  * refs: none
  */
 export const ACTIVE_ITEM_DATA_SOURCE = auditedData.source;
-/** ACTIVE_ITEMS applies the module-specific transformation to its declared inputs.
- * Contract: validates its inputs and returns the existing module result without mutating caller state.
+/**
+ * Expose the checked-in active-item definitions and their three purchase tiers.
  * refs: none
  */
 export const ACTIVE_ITEMS = auditedData.items;
 
-/** activeItemTierAtLevel applies the module-specific transformation to its declared inputs.
- * Contract: validates its inputs and returns the existing module result without mutating caller state.
+/**
+ * Round the requested item level and clamp it to 1-3, using one for a falsy numeric conversion. Return the matching tier or null when tiers are absent or do not contain that level.
  * refs: none
+ * I/O types: `tiers: readonly ActiveItemTier[] | null | undefined; level: number -> ActiveItemTier | null`.
  */
 export function activeItemTierAtLevel(
   tiers: readonly ActiveItemTier[] | null | undefined,

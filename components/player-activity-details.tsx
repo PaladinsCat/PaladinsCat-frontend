@@ -1,5 +1,5 @@
-/** player-activity-details component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * Render player activity details with `LoadingPanel`.
  * refs: none
  */
 "use client";
@@ -24,10 +24,10 @@ const METHODOLOGY_URL =
 
 type EvidenceTab = "matches" | "players";
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
- * Returns: `React.JSX.Element`
+/**
+ * Render player activity details with `LoadingPanel`.
  * refs: none
+ * I/O types: `none -> JSX.Element`.
  */
 export default function PlayerActivityDetails() {
   const { t, formatNumber } = useLocalization();

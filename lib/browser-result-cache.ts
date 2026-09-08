@@ -7,10 +7,10 @@ type CacheEnvelope<T> = {
   value: T;
 };
 
-/** readBrowserResult applies the module-specific transformation to its declared inputs.
- * Contract: validates its inputs and returns the existing module result without mutating caller state.
- * Returns: `null`
+/**
+ * Read and JSON-decode a sessionStorage cache envelope. Return null during SSR, for missing data, on storage/parse errors, or after deleting an expired entry; return its stored value otherwise. This does not validate the value against T.
  * refs: none
+ * I/O types: `key: string -> T | null`.
  */
 export function readBrowserResult<T>(key: string): T | null {
   if (typeof window === "undefined") return null;
@@ -28,9 +28,10 @@ export function readBrowserResult<T>(key: string): T | null {
   }
 }
 
-/** writeBrowserResult applies the module-specific transformation to its declared inputs.
- * Contract: validates its inputs and returns the existing module result without mutating caller state.
+/**
+ * Write a JSON sessionStorage envelope expiring after ttlMs and return the supplied value. During SSR or storage/serialization failure, return the value without persistence.
  * refs: none
+ * I/O types: `key: string; value: T; ttlMs: number -> T`.
  */
 export function writeBrowserResult<T>(key: string, value: T, ttlMs: number): T {
   if (typeof window === "undefined") return value;
@@ -43,10 +44,10 @@ export function writeBrowserResult<T>(key: string, value: T, ttlMs: number): T {
   return value;
 }
 
-/** removeBrowserResult applies the module-specific transformation to its declared inputs.
- * Contract: validates its inputs and returns the existing module result without mutating caller state.
- * Returns: `void`
+/**
+ * Remove the sessionStorage entry at key; do nothing during SSR and suppress storage errors.
  * refs: none
+ * I/O types: `key: string -> void`.
  */
 export function removeBrowserResult(key: string): void {
   if (typeof window === "undefined") return;

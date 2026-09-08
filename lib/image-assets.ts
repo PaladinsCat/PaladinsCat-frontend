@@ -6,10 +6,19 @@
  * Returns: `string`
  * refs: none
  */
+/**
+ * Remove commas from local /images/ asset paths to match published filenames; leave other sources unchanged.
+ * I/O types: `src: string -> string`.
+ * refs: none
+ */
 export function canonicalLocalImageUrl(src: string): string {
   return src.startsWith("/images/") ? src.replace(/,/g, "") : src;
 }
 
+/**
+ * Define local image sources as `{ preferred: string; fallback: string; }`.
+ * refs: none
+ */
 export type LocalImageSources = {
   preferred: string;
   fallback: string;
@@ -20,6 +29,7 @@ export type LocalImageSources = {
  * fallback. Remote, data, and blob URLs are left untouched because the site
  * does not own an alternate representation for them.
  * refs: none
+ * I/O types: `src: string -> LocalImageSources`.
  */
 export function localImageSources(src: string): LocalImageSources {
   const canonical = canonicalLocalImageUrl(src);
@@ -39,28 +49,30 @@ export function localImageSources(src: string): LocalImageSources {
   };
 }
 
-/** Apply preferredLocalImageUrl to the declared input values.
- * Contract: returns the module-specific validated, stored, formatted, or resolved value without external side effects.
- * Returns: `string`
+/**
+ * Return the AVIF-first local image source selected by localImageSources; external and unsupported sources pass through unchanged.
  * refs: none
+ * I/O types: `src: string -> string`.
  */
 export function preferredLocalImageUrl(src: string): string {
   return localImageSources(src).preferred;
 }
 
-/** Apply fallbackLocalImageUrl to the declared input values.
- * Contract: returns the module-specific validated, stored, formatted, or resolved value without external side effects.
- * Returns: `string`
+/**
+ * Return the PNG fallback selected by localImageSources; external and unsupported sources pass through unchanged.
  * refs: none
+ * I/O types: `src: string -> string`.
  */
 export function fallbackLocalImageUrl(src: string): string {
   return localImageSources(src).fallback;
 }
 
-/** Champion data owns exact talent asset URLs. Never reconstruct a filename
- * Returns: `string | null`
+/**
+ * Champion data owns exact talent asset URLs. Never reconstruct a filename
  * refs: none
- * from API display text; punctuation, localization, and historic names differ. */
+ * from API display text; punctuation, localization, and historic names differ.
+ * I/O types: `source: string | null | undefined -> string | null`.
+ */
 export function getCanonicalTalentImageUrl(source: string | null | undefined): string | null {
   return source?.startsWith("/images/") ? preferredLocalImageUrl(source) : null;
 }

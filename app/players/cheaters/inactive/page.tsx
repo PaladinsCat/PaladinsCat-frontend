@@ -1,4 +1,6 @@
-/** Historical confirmed-cheater directory. */
+/** Historical confirmed-cheater directory.
+ * refs: none
+ */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -17,8 +19,13 @@ function entryHref(entry: CheaterPortalEntry): string {
   return entry.kind === "private" ? `/players/private-accounts/${entry.subjectId}` : `/players/cheaters/${entry.playerId ?? entry.subjectId}`;
 }
 
+/**
+ * Render historical cheater records with a 250 ms debounced name/ID search and persisted directory pagination. Fetch each search/page result, ignore responses after cleanup, and display loading, empty, and request-error states.
+ * I/O types: `none -> JSX.Element`.
+ * refs: none
+ */
 export default function InactiveCheatersPage() {
-  const { formatDateTime, formatNumber } = useLocalization();
+  const { formatDateTime, formatNumber, t } = useLocalization();
   const [page, setPage] = usePersistentDirectoryPage();
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -54,14 +61,14 @@ export default function InactiveCheatersPage() {
 
   return (
     <div className="space-y-6">
-      <PlayersPageHeader title="Inactive cheater database" />
+      <PlayersPageHeader title={t("moderation.inactiveCheaterDatabase")} />
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <PlayerDirectorySearch label="Search by name or player ID" value={query} onChange={(value) => { setQuery(value); setPage(1); }} />
-        <span className="text-xs text-pc-text-muted">{formatNumber(total)} historical records</span>
+        <PlayerDirectorySearch label={t("moderation.searchPlayerNameOrId")} value={query} onChange={(value) => { setQuery(value); setPage(1); }} />
+        <span className="text-xs text-pc-text-muted">{t("moderation.historicalRecords", { value1: formatNumber(total) })}</span>
       </div>
-      {error && <div className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-300">The inactive database could not be loaded.</div>}
+      {error && <div className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-300">{t("moderation.inactiveDirectoryLoadFailed")}</div>}
       {loading && items.length === 0 ? <LoadingPanel compact /> : items.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-pc-border bg-pc-bg-elevated px-4 py-12 text-center text-sm text-pc-text-muted">No inactive cheaters match this search.</div>
+        <div className="rounded-xl border border-dashed border-pc-border bg-pc-bg-elevated px-4 py-12 text-center text-sm text-pc-text-muted">{t("moderation.noInactiveCheaters")}</div>
       ) : (
         <div className={`grid grid-cols-1 gap-3 md:grid-cols-2 ${loading ? "opacity-60" : ""}`}>
           {items.map((entry) => (
@@ -71,10 +78,10 @@ export default function InactiveCheatersPage() {
                   <History className="h-4 w-4 shrink-0 text-violet-300" aria-hidden="true" />
                   <h2 className="truncate text-sm font-semibold text-pc-text group-hover:text-violet-100">{entry.name}</h2>
                 </div>
-                <span className="shrink-0 text-xs text-pc-text-muted">Historical</span>
+                <span className="shrink-0 text-xs text-pc-text-muted">{t("moderation.historical")}</span>
               </div>
-              <p className="mt-3 truncate text-xs text-pc-text-secondary">{entry.reason || "Confirmed cheater"}</p>
-              <p className="mt-2 text-xs text-pc-text-muted">Last observed {formatDateTime(entry.lastSeen)}</p>
+              <p className="mt-3 truncate text-xs text-pc-text-secondary">{entry.reason || t("moderation.confirmedCheater")}</p>
+              <p className="mt-2 text-xs text-pc-text-muted">{t("moderation.lastObserved", { value1: formatDateTime(entry.lastSeen) })}</p>
             </Link>
           ))}
         </div>

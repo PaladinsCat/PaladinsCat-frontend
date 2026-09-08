@@ -1,6 +1,5 @@
 /**
- * Define the account layout responsibility boundary.
- * Coordinates account layout data loading, authorization, and presentation.
+ * Pass the /account layout children through unchanged; route metadata is configured separately.
  * refs: none
  */
 import type { Metadata } from "next";
@@ -15,9 +14,9 @@ export const metadata: Metadata = {
 };
 
 /**
- * Handles the exported route operation using its declared request and response contract.
- * Returns: `React.JSX.Element`
+ * Pass the /account layout children through unchanged; route metadata is configured separately.
  * refs: none
+ * I/O types: `{ children }: { children: React.ReactNode } -> ReactNode`.
  */
 export default function AccountLayout({ children }: { children: React.ReactNode }) {
   return children;

@@ -9,9 +9,9 @@ const HAS_EXPLICIT_TIME_ZONE = /(?:Z|[+-]\d{2}:?\d{2})$/i;
 const SQL_TIMESTAMP = /^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?)$/;
 
 /**
- * Transforms or validates parse backend date according to this module's data contract.
- * Returns: `null`
+ * Return null for blank or invalid dates. Treat SQL-format timestamps without an explicit zone as UTC by replacing the space with T and appending Z, then parse other date strings as supplied.
  * refs: none
+ * I/O types: `value: string | null | undefined -> Date | null`.
  */
 export function parseBackendDate(value: string | null | undefined): Date | null {
   if (!value) return null;
@@ -27,9 +27,9 @@ export function parseBackendDate(value: string | null | undefined): Date | null 
 }
 
 /**
- * Transforms or validates format local date time according to this module's data contract.
- * Returns: `string`
+ * Format a valid backend timestamp with medium date and short time in the preferred time zone; return a hyphen for invalid input.
  * refs: none
+ * I/O types: `value: string | null | undefined; locale?: string -> string`.
  */
 export function formatLocalDateTime(value: string | null | undefined, locale?: string): string {
   const date = parseBackendDate(value);
@@ -42,9 +42,9 @@ export function formatLocalDateTime(value: string | null | undefined, locale?: s
 }
 
 /**
- * Transforms or validates format local date according to this module's data contract.
- * Returns: `string`
+ * Format a valid backend timestamp as a medium date in the preferred time zone; return a hyphen for invalid input.
  * refs: none
+ * I/O types: `value: string | null | undefined; locale?: string -> string`.
  */
 export function formatLocalDate(value: string | null | undefined, locale?: string): string {
   const date = parseBackendDate(value);
@@ -56,9 +56,9 @@ export function formatLocalDate(value: string | null | undefined, locale?: strin
 }
 
 /**
- * Transforms or validates format local month day according to this module's data contract.
- * Returns: `string`
+ * Format a valid backend timestamp as short month and numeric day in the preferred time zone; return a hyphen for invalid input.
  * refs: none
+ * I/O types: `value: string | null | undefined; locale?: string -> string`.
  */
 export function formatLocalMonthDay(value: string | null | undefined, locale?: string): string {
   const date = parseBackendDate(value);
@@ -71,9 +71,9 @@ export function formatLocalMonthDay(value: string | null | undefined, locale?: s
 }
 
 /**
- * Transforms or validates format local hour from utc bucket according to this module's data contract.
- * Returns: `string`
+ * Build a UTC date from the date fields and floored finite hour, then format its hour/minute in the preferred time zone. Return a hyphen when date/hour fields are missing or invalid.
  * refs: none
+ * I/O types: `date: string | null | undefined; hour: number | null | undefined; locale?: string -> string`.
  */
 export function formatLocalHourFromUtcBucket(date: string | null | undefined, hour: number | null | undefined, locale?: string): string {
   if (!date || hour == null || !Number.isFinite(hour)) return "-";
@@ -92,9 +92,9 @@ const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 
 /**
- * Transforms or validates format relative time according to this module's data contract.
- * Returns: `string`
+ * Format valid timestamps less than seven days away using relative seconds/minutes/hours/days; use a preferred-zone calendar date for older or more distant values. Return a hyphen for invalid input.
  * refs: none
+ * I/O types: `value: string | null | undefined; locale?: string -> string`.
  */
 export function formatRelativeTime(value: string | null | undefined, locale?: string): string {
   const date = parseBackendDate(value);
@@ -118,9 +118,9 @@ export function formatRelativeTime(value: string | null | undefined, locale?: st
 }
 
 /**
- * Transforms or validates format local time according to this module's data contract.
- * Returns: `string`
+ * Format a valid backend timestamp as preferred-zone hour/minute plus time-zone name; return a hyphen for invalid input.
  * refs: none
+ * I/O types: `value: string | null | undefined; locale?: string -> string`.
  */
 export function formatLocalTime(value: string | null | undefined, locale?: string): string {
   const date = parseBackendDate(value);

@@ -1,6 +1,5 @@
 /**
- * Define the tierlists edit page responsibility boundary.
- * Coordinates tierlists edit page data loading, authorization, and presentation.
+ * Render the /tierlists/[id]/edit route with `LoadingPanel`, `TierListEditor`.
  * refs: none
  */
 "use client";
@@ -13,9 +12,9 @@ import { useLocalization } from "@/lib/localization-context";
 import { useAuth } from "@/lib/auth-context";
 
 /**
- * Handles the exported route operation using its declared request and response contract.
- * Returns: `React.JSX.Element`
+ * Render the /tierlists/[id]/edit route with `LoadingPanel`, `TierListEditor`.
  * refs: none
+ * I/O types: `{ params }: { params: Promise<{ id: string }> } -> JSX.Element`.
  */
 export default function EditTierListPage({ params }: { params: Promise<{ id: string }> }) {
   const { t } = useLocalization();

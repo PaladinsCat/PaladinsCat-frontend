@@ -17,10 +17,11 @@ interface TeamMatchupProps {
   averages: TeamAverages;
 }
 
-/** Render TeamMatchup from its declared props and match data.
+/**
+ * Render TeamMatchup from its declared props and match data.
  * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
- * Returns: `React.JSX.Element`
  * refs: none
+ * I/O types: `{ players, label, averages }: TeamMatchupProps -> JSX.Element`.
  */
 export default function TeamMatchup({ players, label, averages }: TeamMatchupProps) {
   const { t } = useLocalization();

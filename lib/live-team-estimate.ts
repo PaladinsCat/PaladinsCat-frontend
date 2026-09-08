@@ -1,5 +1,10 @@
-/** Formats live team estimates for display.
- * The module preserves the existing validation, storage, formatting, or asset boundary.
+/**
+ * Estimate team-one and team-two percentages from valid queue Elo and profile win rates. Require min(3, team size) Elo observations per team or return null; blend 85% Elo with 15% win-rate probability, clamp to 15-85%, and round complementary percentages.
+ * Formats live team estimates for display.
+ * refs: none
+ */
+/**
+ * Describe live team estimate player with task_force (optional), queue_elo (optional), profile_win_rate (optional).
  * refs: none
  */
 export interface LiveTeamEstimatePlayer {
@@ -8,6 +13,10 @@ export interface LiveTeamEstimatePlayer {
   profile_win_rate?: unknown;
 }
 
+/**
+ * Describe live team win chance with teamOne, teamTwo.
+ * refs: none
+ */
 export interface LiveTeamWinChance {
   teamOne: number;
   teamTwo: number;
@@ -19,10 +28,10 @@ function numericMetric(value: unknown): number | null {
   return Number.isFinite(numeric) ? numeric : null;
 }
 
-/** Apply estimateLiveTeamWinChance to the declared input values.
- * Contract: returns the module-specific validated, stored, formatted, or resolved value without external side effects.
- * Returns: `null`
+/**
+ * Estimate team-one and team-two percentages from valid queue Elo and profile win rates. Require min(3, team size) Elo observations per team or return null; blend 85% Elo with 15% win-rate probability, clamp to 15-85%, and round complementary percentages.
  * refs: none
+ * I/O types: `players: readonly LiveTeamEstimatePlayer[] -> LiveTeamWinChance | null`.
  */
 export function estimateLiveTeamWinChance(
   players: readonly LiveTeamEstimatePlayer[],

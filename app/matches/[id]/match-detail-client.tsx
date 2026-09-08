@@ -14,12 +14,11 @@
  * page wires together without request-time fanout.
  *
  * Data sources:
- *   GET /api/matches/:id          → complete match payload + storage status
+ *   GET /matches/{id}            → complete match payload + storage status
  *   The match response embeds the stored canonical profile, with an ingest
  *   snapshot fallback when no canonical player row exists.
  *
- * @see C:\PaladinsCat\docs\frontend\match-detail.md
- * refs: GET /api/matches/:id
+ * refs: endpoints: GET /matches/{id} · doc: documents/06-reference/routes/frontend-match-detail.md
  */
 "use client";
 
@@ -183,10 +182,10 @@ function storedProfileForMatch(player: MatchPlayerDetail): PlayerProfileData | n
 /* ── Page component ── */
 
 /**
+ * Render /matches/[id]/match-detail-client.tsx using `RouteSkeleton`, `ErrorState`, `LocalizedText`, `BrowserScoreboard`.
  * Render the MatchDetailPage view for matches id match-detail-client.
- * Return the React tree for the declared inputs and page data.
- * Returns: `React.JSX.Element`
  * refs: none
+ * I/O types: `{ initialMatch = null }: { initialMatch?: MatchDetailWithBans | null } -> JSX.Element | null`.
  */
 export default function MatchDetailPage({ initialMatch = null }: { initialMatch?: MatchDetailWithBans | null }) {
   const { t } = useLocalization();

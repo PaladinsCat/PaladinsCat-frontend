@@ -3,6 +3,10 @@
  * Keep behavior aligned with its callers and browser/server boundary.
  * refs: none
  */
+/**
+ * Publish the wallpaper storage key configuration as `"paladinscat-wallpaper-enabled"`.
+ * refs: none
+ */
 export const WALLPAPER_STORAGE_KEY = "paladinscat-wallpaper-enabled";
 /**
  * Defines the  c u s t o m_ w a l l p a p e r_ s t o r a g e_ k e y contract used by this module.
@@ -39,7 +43,7 @@ export type CustomWallpaper =
   | { type: "upload"; id: string };
 
 /**
- * Transforms or validates  resolved custom wallpaper according to this module's data contract.
+ * Pair a resolved wallpaper source with its stored wallpaper record and whether the caller must revoke the generated object URL.
  * refs: none
  */
 export type ResolvedCustomWallpaper = {
@@ -163,9 +167,9 @@ function createWallpaperId(): string {
 }
 
 /**
- * Reads wallpaper enabled from the module's configured source.
- * Returns: `boolean`
+ * Read the wallpaper localStorage preference; default to enabled during SSR, storage failure, or any value other than false.
  * refs: none
+ * I/O types: `none -> boolean`.
  */
 export function getWallpaperEnabled(): boolean {
   if (typeof window === "undefined") return true;
@@ -179,8 +183,8 @@ export function getWallpaperEnabled(): boolean {
 
 /**
  * Updates wallpaper enabled using the module's persistence or validation rules.
- * Returns: `void`
  * refs: none
+ * I/O types: `enabled: boolean -> void`.
  */
 export function setWallpaperEnabled(enabled: boolean): void {
   try {
@@ -192,7 +196,10 @@ export function setWallpaperEnabled(enabled: boolean): void {
   notifyWallpaperChange();
 }
 
-/** Returns the small local-storage references for this browser's custom wallpapers.  Returns: `Array`. · refs: none */
+/**
+ * Returns the small local-storage references for this browser's custom wallpapers.  Returns: `Array`. · refs: none
+ * I/O types: `none -> CustomWallpaper[]`.
+ */
 export function getCustomWallpapers(): CustomWallpaper[] {
   if (typeof window === "undefined") return [];
 
@@ -214,12 +221,18 @@ export function getCustomWallpapers(): CustomWallpaper[] {
   }
 }
 
-/** Returns the first wallpaper for compatibility with single-wallpaper consumers. · refs: none */
+/**
+ * Returns the first wallpaper for compatibility with single-wallpaper consumers. · refs: none
+ * I/O types: `none -> CustomWallpaper | null`.
+ */
 export function getCustomWallpaper(): CustomWallpaper | null {
   return getCustomWallpapers()[0] ?? null;
 }
 
-/** Resolves local references into URLs that can be used by CSS backgrounds. · refs: none */
+/**
+ * Resolves local references into URLs that can be used by CSS backgrounds. · refs: none
+ * I/O types: `none -> Promise<ResolvedCustomWallpaper[]>`.
+ */
 export async function resolveCustomWallpapers(): Promise<ResolvedCustomWallpaper[]> {
   const wallpapers = getCustomWallpapers();
   const resolved = await Promise.all(wallpapers.map(async (wallpaper): Promise<ResolvedCustomWallpaper | null> => {
@@ -233,7 +246,10 @@ export async function resolveCustomWallpapers(): Promise<ResolvedCustomWallpaper
   return resolved.filter((wallpaper): wallpaper is ResolvedCustomWallpaper => wallpaper !== null);
 }
 
-/** Resolves the first custom wallpaper for compatibility with single-wallpaper consumers. · refs: none */
+/**
+ * Resolves the first custom wallpaper for compatibility with single-wallpaper consumers. · refs: none
+ * I/O types: `none -> Promise<ResolvedCustomWallpaper | null>`.
+ */
 export async function resolveCustomWallpaper(): Promise<ResolvedCustomWallpaper | null> {
   return (await resolveCustomWallpapers())[0] ?? null;
 }
@@ -255,7 +271,10 @@ function validateWallpaperFile(file: File): void {
   }
 }
 
-/** Adds an external wallpaper URL to the saved collection. · refs: none */
+/**
+ * Adds an external wallpaper URL to the saved collection. · refs: none
+ * I/O types: `source: string -> Promise<void>`.
+ */
 export async function addCustomWallpaperUrl(source: string): Promise<void> {
   if (typeof window === "undefined") return;
 
@@ -268,7 +287,10 @@ export async function addCustomWallpaperUrl(source: string): Promise<void> {
   notifyWallpaperChange();
 }
 
-/** Adds uploaded images to IndexedDB and their references to the saved collection. · refs: none */
+/**
+ * Adds uploaded images to IndexedDB and their references to the saved collection. · refs: none
+ * I/O types: `files: File[] -> Promise<void>`.
+ */
 export async function addCustomWallpaperFiles(files: File[]): Promise<void> {
   if (typeof window === "undefined" || files.length === 0) return;
   files.forEach(validateWallpaperFile);
@@ -289,7 +311,10 @@ export async function addCustomWallpaperFiles(files: File[]): Promise<void> {
   notifyWallpaperChange();
 }
 
-/** Replaces the collection with one external wallpaper URL. · refs: none */
+/**
+ * Replaces the collection with one external wallpaper URL. · refs: none
+ * I/O types: `source: string -> Promise<void>`.
+ */
 export async function setCustomWallpaperUrl(source: string): Promise<void> {
   if (typeof window === "undefined") return;
 
@@ -300,7 +325,10 @@ export async function setCustomWallpaperUrl(source: string): Promise<void> {
   notifyWallpaperChange();
 }
 
-/** Replaces the collection with one uploaded image. · refs: none */
+/**
+ * Replaces the collection with one uploaded image. · refs: none
+ * I/O types: `file: File -> Promise<void>`.
+ */
 export async function setCustomWallpaperFile(file: File): Promise<void> {
   if (typeof window === "undefined") return;
   validateWallpaperFile(file);
@@ -318,7 +346,10 @@ export async function setCustomWallpaperFile(file: File): Promise<void> {
   notifyWallpaperChange();
 }
 
-/** Removes one wallpaper from the saved collection. · refs: none */
+/**
+ * Removes one wallpaper from the saved collection. · refs: none
+ * I/O types: `target: CustomWallpaper -> Promise<void>`.
+ */
 export async function removeCustomWallpaper(target: CustomWallpaper): Promise<void> {
   if (typeof window === "undefined") return;
 
@@ -331,7 +362,10 @@ export async function removeCustomWallpaper(target: CustomWallpaper): Promise<vo
   notifyWallpaperChange();
 }
 
-/** Removes all references and uploaded images from this browser. · refs: none */
+/**
+ * Removes all references and uploaded images from this browser. · refs: none
+ * I/O types: `none -> Promise<void>`.
+ */
 export async function clearCustomWallpaper(): Promise<void> {
   if (typeof window === "undefined") return;
 

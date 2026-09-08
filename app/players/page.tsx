@@ -1,5 +1,5 @@
 /**
- * Define the player route surface for page and its local data boundary.
+ * Render the PlayersPage view for the player page route.
  * This file owns the page, layout, loading state, or route handler named by its path.
  * It does not own unrelated player sections or shared library policy.
  * refs: none
@@ -75,8 +75,8 @@ export const dynamic = "force-dynamic";
 
 /**
  * Render the PlayersPage view for the player page route.
- * Returns: `Promise<React.JSX.Element>`
  * refs: none
+ * I/O types: `none -> Promise<JSX.Element>`.
  */
 export default async function PlayersPage() {
   let initialOverview: PlayersOverview | null = null;

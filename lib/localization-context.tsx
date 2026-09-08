@@ -76,9 +76,11 @@ function getCachedLocaleMessages(locale: Locale): LocaleMessages {
   return cached ? parseLocaleMessages(cached) ?? {} : {};
 }
 
-/** Apply LocalizationProvider to lobby-tier or localization inputs.
+/**
+ * Apply LocalizationProvider to lobby-tier or localization inputs.
  * Contract: returns the normalized route, context state, or message value while preserving existing browser behavior.
  * refs: none
+ * I/O types: `{ children, initialLocale = "en", initialMessages = EMPTY_MESSAGES, }: { children: React.ReactNode; initialLocale?: Locale; initialMessages?: LocaleMessages; } -> JSX.Element`.
  */
 export function LocalizationProvider({
   children,
@@ -215,9 +217,11 @@ export function LocalizationProvider({
   return <LocalizationContext.Provider value={value}>{children}</LocalizationContext.Provider>;
 }
 
-/** Apply useLocalization to lobby-tier or localization inputs.
+/**
+ * Apply useLocalization to lobby-tier or localization inputs.
  * Contract: returns the normalized route, context state, or message value while preserving existing browser behavior.
  * refs: none
+ * I/O types: `none -> LocalizationContextValue`.
  */
 export function useLocalization() {
   const context = useContext(LocalizationContext);
@@ -225,10 +229,11 @@ export function useLocalization() {
   return context;
 }
 
-/** Apply LocalizedText to lobby-tier or localization inputs.
+/**
+ * Apply LocalizedText to lobby-tier or localization inputs.
  * Contract: returns the normalized route, context state, or message value while preserving existing browser behavior.
- * Returns: `React.JSX.Element`
  * refs: none
+ * I/O types: `{ id, values, }: { id: TranslationKey; values?: TranslationValues; } -> JSX.Element`.
  */
 export function LocalizedText({
   id,

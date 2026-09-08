@@ -1,5 +1,5 @@
-/** canonical-talent-image component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * Talent artwork must always come from the canonical champion-data route.
  * refs: none
  */
 "use client";
@@ -23,8 +23,8 @@ type CanonicalTalentImageProps = {
  * Match payload icon URLs are useful metadata, but they are not authoritative:
  * several champion talents have punctuation or historic filenames that only
  * the champion reference correctly resolves.
- * Returns: `React.JSX.Element`
  * refs: none
+ * I/O types: `{ talentId, talentName, alt, className, loading = "lazy", fallbackClassName, }: CanonicalTalentImageProps -> JSX.Element`.
  */
 export default function CanonicalTalentImage({
   talentId,

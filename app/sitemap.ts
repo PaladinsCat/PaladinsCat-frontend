@@ -1,6 +1,5 @@
 /**
- * Define the sitemap responsibility boundary.
- * Coordinates sitemap data loading, authorization, and presentation.
+ * Build the crawlable sitemap from canonical static and content routes.  Returns: `Promise<React.JSX.Element>`. · refs: none
  * refs: none
  */
 import type { MetadataRoute } from "next";
@@ -42,8 +41,7 @@ const staticRoutes: Array<{
   { path: "/players/leaderboard", changeFrequency: "hourly", priority: 0.85 },
   { path: "/players/elo", changeFrequency: "hourly", priority: 0.85 },
   { path: "/players/performance", changeFrequency: "hourly", priority: 0.85 },
-  { path: "/stats/winrate", changeFrequency: "hourly", priority: 0.85 },
-  { path: "/stats/banrate", changeFrequency: "hourly", priority: 0.85 },
+  { path: "/stats", changeFrequency: "weekly", priority: 0.9 },
   { path: "/stats/skins", changeFrequency: "daily", priority: 0.8 },
   { path: "/stats/performance", changeFrequency: "hourly", priority: 0.9 },
   { path: "/stats/ecpm", changeFrequency: "hourly", priority: 0.85 },
@@ -52,8 +50,6 @@ const staticRoutes: Array<{
   { path: "/stats/tiers", changeFrequency: "hourly", priority: 0.8 },
   { path: "/stats/talents", changeFrequency: "daily", priority: 0.75 },
   { path: "/stats/loadouts", changeFrequency: "daily", priority: 0.75 },
-  { path: "/stats/regions", changeFrequency: "daily", priority: 0.7 },
-  { path: "/stats/platforms", changeFrequency: "daily", priority: 0.7 },
   { path: "/builds", changeFrequency: "daily", priority: 0.8 },
   { path: "/community", changeFrequency: "daily", priority: 0.8 },
   { path: "/community/diminishing-returns", changeFrequency: "weekly", priority: 0.8 },
@@ -67,7 +63,10 @@ const getCachedBlogPosts = unstable_cache(getAllPosts, ["sitemap-blog-posts"], {
   revalidate: 3600,
 });
 
-/** Build the crawlable sitemap from canonical static and content routes.  Returns: `Promise<React.JSX.Element>`. · refs: none */
+/**
+ * Build the crawlable sitemap from canonical static and content routes.  Returns: `Promise<React.JSX.Element>`. · refs: none
+ * I/O types: `none -> Promise<MetadataRoute.Sitemap>`.
+ */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticEntries = staticRoutes.map((route) => ({
     url: `${SITE_URL}${route.path}`,

@@ -1,6 +1,5 @@
 /**
- * Define the stats banrate page route boundary.
- * Coordinates this module's route data flow and rendered output.
+ * Render champion ban-rate statistics with a server-fetched initial champion set. · refs: none
  * refs: none
  */
 import ChampionRateDetailPage from "@/components/ChampionRateDetailPage";
@@ -18,7 +17,10 @@ const CONFIG = {
  */
 export const dynamic = "force-dynamic";
 
-/** Render champion ban-rate statistics with a server-fetched initial champion set. · refs: none */
+/**
+ * Render champion ban-rate statistics with a server-fetched initial champion set. · refs: none
+ * I/O types: `none -> Promise<JSX.Element>`.
+ */
 export default async function BanRatePage() {
   const initialChampions = await getInitialRankedChampions().catch((error) => {
     console.error("[stats/banrate] Server champion fetch failed; using browser fallback", error);

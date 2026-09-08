@@ -44,10 +44,10 @@ function parsePositiveInteger(value: string | string[] | null | undefined): numb
 }
 
 /**
+ * Render /champions/[name]/talents/[talentId] using `RouteSkeleton`, `ErrorState`, `SummaryTile`, `ChampionLoadoutGrid`.
  * Render the ChampionTalentDetailPage view for champions name talents talentId page.
- * Return the React tree for the declared inputs and page data.
- * Returns: `React.JSX.Element`
  * refs: none
+ * I/O types: `none -> JSX.Element`.
  */
 export default function ChampionTalentDetailPage() {
   const { t, formatNumber, formatPercent, formatRecord } = useLocalization();

@@ -1,32 +1,33 @@
-/** Validates and resolves player avatar proxy requests.
- * The module owns its existing image, OIDC, proxy, roster, or moderation boundary.
+/**
+ * Return the numeric ID from a PNG filename containing 1-10 digits with a nonzero first digit; return null for every other filename.
+ * Validates and resolves player avatar proxy requests.
  * refs: none
  */
 const HI_REZ_AVATAR_ORIGIN = "https://hirez-api.onrender.com";
 const AVATAR_FILE_PATTERN = /^(?<id>[1-9]\d{0,9})\.png$/;
 
-/** Apply parsePlayerAvatarFile to the declared request or domain inputs.
- * Contract: validates inputs, preserves the existing security or mapping rules, and returns the documented result.
- * Returns: `string | null`
+/**
+ * Return the numeric ID from a PNG filename containing 1-10 digits with a nonzero first digit; return null for every other filename.
  * refs: none
+ * I/O types: `file: string -> string | null`.
  */
 export function parsePlayerAvatarFile(file: string): string | null {
   return AVATAR_FILE_PATTERN.exec(file)?.groups?.id ?? null;
 }
 
-/** Apply playerAvatarUpstreamUrl to the declared request or domain inputs.
- * Contract: validates inputs, preserves the existing security or mapping rules, and returns the documented result.
- * Returns: `string`
+/**
+ * Build the fixed Hi-Rez avatar URL for the supplied ID; this builder does not validate the ID.
  * refs: none
+ * I/O types: `avatarId: string -> string`.
  */
 export function playerAvatarUpstreamUrl(avatarId: string): string {
   return `${HI_REZ_AVATAR_ORIGIN}/paladins/avatar/${avatarId}`;
 }
 
-/** Apply playerAvatarProxyPath to the declared request or domain inputs.
- * Contract: validates inputs, preserves the existing security or mapping rules, and returns the documented result.
- * Returns: `string | null`
+/**
+ * Return the local PNG proxy path only for a positive safe integer ID of at most ten digits and an exact trusted upstream URL. Reject credentials, query, fragment, mismatched paths/origins, and malformed URLs with null.
  * refs: none
+ * I/O types: `avatarId: number; sourceUrl: string | null | undefined -> string | null`.
  */
 export function playerAvatarProxyPath(
   avatarId: number,

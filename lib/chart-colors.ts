@@ -5,6 +5,10 @@
  * Chart series colors
  * refs: none
  */
+/**
+ * Publish the chart green configuration as `"var(--pc-chart-green)"`.
+ * refs: none
+ */
 export const chartGreen = "var(--pc-chart-green)";       // #4ade80
 /**
  * Defines the chart amber contract used by this module.
@@ -27,10 +31,15 @@ export const chartViolet = "var(--pc-chart-violet)";     // #8b5cf6
  */
 export const chartSky = "var(--pc-chart-sky)";           // #06b6d4
 
-/** Default color palette for multi-series charts · refs: none */
+/**
+ * Default color palette for multi-series charts · refs: none
+ */
 export const chartColors = [chartGreen, chartAmber, chartRed, chartViolet, chartSky];
 
-/** Vivid stationary palette for categorical chart series. */
+/**
+ * Vivid stationary palette for categorical chart series.
+ * refs: none
+ */
 export const stationaryChartSeries = {
   emerald: "var(--pc-series-emerald)",
   sky: "var(--pc-series-sky)",
@@ -44,7 +53,9 @@ export const stationaryChartSeries = {
   slate: "var(--pc-series-slate)",
 } as const;
 
-/** Role colors · refs: none */
+/**
+ * Role colors · refs: none
+ */
 export const roleSentinel = "var(--pc-role-sentinel)";    // #34d399
 /**
  * Defines the role support contract used by this module.
@@ -57,7 +68,9 @@ export const roleSupport = "var(--pc-role-support)";     // #60a5fa
  */
 export const roleFlank = "var(--pc-role-flank)";          // #c084fc
 
-/** Chart UI colors · refs: none */
+/**
+ * Chart UI colors · refs: none
+ */
 export const chartText = "var(--pc-chart-text)";         // #F9FAFB
 /**
  * Defines the chart text secondary contract used by this module.
@@ -70,7 +83,9 @@ export const chartTextSecondary = "var(--pc-chart-text-secondary)"; // #9CA3AF
  */
 export const chartGrid = "var(--pc-chart-grid)";          // #1F2937
 
-/** Chart fill helpers (opacity variants for fills/backgrounds) · refs: none */
+/**
+ * Chart fill helpers (opacity variants for fills/backgrounds) · refs: none
+ */
 export const chartFillGreen = "color-mix(in srgb, var(--pc-chart-green) 15%, transparent)";
 /**
  * Defines the chart fill red contract used by this module.
@@ -93,7 +108,9 @@ export const chartFillViolet = "color-mix(in srgb, var(--pc-chart-violet) 15%, t
  */
 export const chartFillSky = "color-mix(in srgb, var(--pc-chart-sky) 15%, transparent)";
 
-/** Role fill helpers · refs: none */
+/**
+ * Role fill helpers · refs: none
+ */
 export const roleFillSentinel = "color-mix(in srgb, var(--pc-role-sentinel) 15%, transparent)";
 /**
  * Defines the role fill support contract used by this module.

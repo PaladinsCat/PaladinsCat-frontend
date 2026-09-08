@@ -1,6 +1,5 @@
 /**
- * Define the account page responsibility boundary.
- * Coordinates account page data loading, authorization, and presentation.
+ * Render the /account route with `LoadingPanel`, `UserRoundCog`, `Clock3`, `LoadingIndicator`, `UserRound`.
  * refs: none
  */
 "use client";
@@ -31,9 +30,9 @@ import {
 import { useLocalization } from "@/lib/localization-context";
 
 /**
- * Handles the exported route operation using its declared request and response contract.
- * Returns: `React.JSX.Element`
+ * Render the /account route with `LoadingPanel`, `UserRoundCog`, `Clock3`, `LoadingIndicator`, `UserRound`.
  * refs: none
+ * I/O types: `none -> JSX.Element`.
  */
 export default function AccountPage() {
   const { t, formatDate } = useLocalization();

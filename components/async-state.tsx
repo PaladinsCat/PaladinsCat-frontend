@@ -1,5 +1,5 @@
-/** async-state component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * Wrap children in the shared content-fade container, merging optional classes.
  * refs: none
  */
 "use client";
@@ -9,9 +9,10 @@ import { AlertTriangle, Inbox, LoaderCircle, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLocalization } from "@/lib/localization-context";
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
- * refs: none
+/**
+ * Wrap children in the shared content-fade container, merging optional classes.
+ * refs: doc: documents/06-reference/design/frontend-async-ui.md
+ * I/O types: `{ children, className }: { children: ReactNode; className?: string } -> JSX.Element`.
  */
 export function ContentFade({ children, className }: { children: ReactNode; className?: string }) {
   return (
@@ -21,9 +22,10 @@ export function ContentFade({ children, className }: { children: ReactNode; clas
   );
 }
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
- * refs: none
+/**
+ * Render a tabular metric with a minimum character width and a value-keyed fade transition to keep layout stable as the value changes.
+ * refs: doc: documents/06-reference/design/frontend-async-ui.md
+ * I/O types: `{ value, className, minWidthCh = 4, }: { value: string | number; className?: string; minWidthCh?: number; } -> JSX.Element`.
  */
 export function StableMetricValue({
   value,
@@ -46,9 +48,10 @@ export function StableMetricValue({
   );
 }
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
- * refs: none
+/**
+ * Render the shared loading indicator inside a faded panel, selecting compact padding or the normal minimum height.
+ * refs: doc: documents/06-reference/design/frontend-async-ui.md
+ * I/O types: `{ compact = false, className, }: { compact?: boolean; className?: string; } -> JSX.Element`.
  */
 export function LoadingPanel({
   compact = false,
@@ -70,9 +73,10 @@ export function LoadingPanel({
   );
 }
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
- * refs: none
+/**
+ * Render a spinner and localized loading text in a polite live status region.
+ * refs: doc: documents/06-reference/design/frontend-async-ui.md
+ * I/O types: `{ className }: { className?: string } -> JSX.Element`.
  */
 export function LoadingIndicator({ className }: { className?: string }) {
   const { t } = useLocalization();
@@ -84,10 +88,10 @@ export function LoadingIndicator({ className }: { className?: string }) {
   );
 }
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
- * Returns: `null`
- * refs: none
+/**
+ * Return null when hidden; otherwise render an absolute loading overlay with aria-busy and a polite live region.
+ * refs: doc: documents/06-reference/design/frontend-async-ui.md
+ * I/O types: `{ visible }: { visible: boolean } -> JSX.Element | null`.
  */
 export function LoadingOverlay({ visible }: { visible: boolean }) {
   if (!visible) return null;
@@ -98,9 +102,10 @@ export function LoadingOverlay({ visible }: { visible: boolean }) {
   );
 }
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
- * refs: none
+/**
+ * Render an empty-data card with title, optional description, and optional caller-provided action.
+ * refs: doc: documents/06-reference/design/frontend-async-ui.md
+ * I/O types: `{ title, description, action, className, }: { title: string; description?: string; action?: ReactNode; className?: string; } -> JSX.Element`.
  */
 export function EmptyState({
   title,
@@ -123,9 +128,10 @@ export function EmptyState({
   );
 }
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
- * refs: none
+/**
+ * Render a localized error card with optional message; show a retry button invoking onRetry only when supplied.
+ * refs: doc: documents/06-reference/design/frontend-async-ui.md
+ * I/O types: `{ title, message, onRetry, className, }: { title?: string; message?: string; onRetry?: () => void; className?: string; } -> JSX.Element`.
  */
 export function ErrorState({
   title,
@@ -159,9 +165,10 @@ interface AsyncButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
 }
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
- * refs: none
+/**
+ * Render a native button, forwarding its attributes and callbacks. Disable it while loading or explicitly disabled, set aria-busy, and replace children with localized loading text and a spinner during work.
+ * refs: doc: documents/06-reference/design/frontend-async-ui.md
+ * I/O types: `{ loading = false, children, className, disabled, ...props }: AsyncButtonProps -> JSX.Element`.
  */
 export function AsyncButton({ loading = false, children, className, disabled, ...props }: AsyncButtonProps) {
   const { t } = useLocalization();

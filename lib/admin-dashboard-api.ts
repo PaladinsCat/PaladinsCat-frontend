@@ -4,7 +4,15 @@
  */
 import { accountAuthHeaders, fetchJson } from "./api-client";
 
+/**
+ * Define admin daily traffic as `{ date: string; visitors: number; pageViews: number; matches: number }`.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export type AdminDailyTraffic = { date: string; visitors: number; pageViews: number; matches: number };
+/**
+ * Define admin api key as `{ devId: string; status: string; used: number; dailyLimit: number; remaining: number; callsTotal: number; consecutiveFailures: number; lastUsed: string | null; lastSyncAt: string | null; lastSyncError: string | null; }`.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export type AdminApiKey = {
   devId: string;
   status: string;
@@ -18,6 +26,10 @@ export type AdminApiKey = {
   lastSyncError: string | null;
 };
 
+/**
+ * Define admin dashboard as `{ generatedAt: string; traffic: { summary: { activeUsers: number; activeWindowSeconds: number; heartbeatSeconds: number; visitorsToday: number; viewsToday: number; visitorsYesterday: number; visitorDays7d: number; views7d: number }; daily: AdminDailyTraffic[]; topPages: Array<{ path: string; pageViews: number }>; }; site: { totals: { matches: number; rankedMatches: number; casualMatches: number; directMatches: number; recoveredMatches: number; incompleteMatches: number; players: number; registeredUsers: number; verifiedAccounts: number; communityBuilds: number; databaseBytes: number }; pipeline: { bufferPending: number; bufferProjectionPending: number; bufferProcessing: number; bufferFailed: number; bufferProcessed: number }; }; hirez: { keys: AdminApiKey[]; hourly: Array<{ hour: string; calls: number }>; endpoints: Array<{ consumer: string; endpoint: string; calls: number; avgResponseMs: number }>; }; }`.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export type AdminDashboard = {
   generatedAt: string;
   traffic: {
@@ -40,8 +52,8 @@ const numberValue = (value: unknown) => Number(value ?? 0) || 0;
 
 
 // User-facing error keys — resolved at the UI layer via t()
-/** ADMIN_ERROR_KEYS applies the module-specific transformation to its declared inputs.
- * Contract: validates its inputs and returns the existing module result without mutating caller state.
+/**
+ * Expose localization keys for administrator dashboard and account-management errors.
  * refs: none
  */
 export const ADMIN_ERROR_KEYS = {
@@ -49,10 +61,10 @@ export const ADMIN_ERROR_KEYS = {
   dashboardRequestFailed: "generated.admin.dashboardRequestFailed",
 } as const;
 
-/** fetchAdminDashboard applies the module-specific transformation to its declared inputs.
- * Contract: validates its inputs and returns the existing module result without mutating caller state.
- * Returns: `Promise<AdminDashboard>`
+/**
+ * Fetch the admin or developer dashboard without caching and with same-origin account credentials. Unwrap the optional data envelope and normalize traffic, pipeline, and Hi-Rez metrics; reject transport failures and non-success HTTP responses.
  * refs: none
+ * I/O types: `mode: "admin" | "developer" -> Promise<AdminDashboard>`.
  */
 export async function fetchAdminDashboard(mode: "admin" | "developer" = "admin"): Promise<AdminDashboard> {
   const response = await fetch(mode === "developer" ? "/api/developer/dashboard" : "/api/admin/dashboard", {
@@ -112,16 +124,20 @@ export async function fetchAdminDashboard(mode: "admin" | "developer" = "admin")
   };
 }
 
+/**
+ * Define managed account as `{ id: number; username: string; email: string; role: "user" | "moderator" | "developer" | "admin" }`.
+ * refs: doc: documents/02-technical/security/auth.md
+ */
 export type ManagedAccount = { id: number; username: string; email: string; role: "user" | "moderator" | "developer" | "admin" };
-/** searchManagedAccounts applies the module-specific transformation to its declared inputs.
- * Contract: validates its inputs and returns the existing module result without mutating caller state.
- * Returns: `Promise<ManagedAccount[]>`
+/**
+ * Fetch administrator account-search results with the URL-encoded query and current account headers; network/API failures reject the promise.
  * refs: none
+ * I/O types: `query: string -> Promise<ManagedAccount[]>`.
  */
 export async function searchManagedAccounts(query: string): Promise<ManagedAccount[]> { return fetchJson<ManagedAccount[]>(`/admin/accounts?q=${encodeURIComponent(query)}`,{headers:accountAuthHeaders()}); }
-/** updateManagedAccountRole applies the module-specific transformation to its declared inputs.
- * Contract: validates its inputs and returns the existing module result without mutating caller state.
- * Returns: `Promise<void>`
+/**
+ * PUT the requested role to the selected administrator account endpoint with account headers and a JSON body. Disable retries and reject network/API failures.
  * refs: none
+ * I/O types: `id: number; role: ManagedAccount["role"] -> Promise<void>`.
  */
 export async function updateManagedAccountRole(id:number,role:ManagedAccount["role"]):Promise<void>{await fetchJson(`/admin/accounts/${id}/role`,{method:"PUT",headers:{"Content-Type":"application/json",...accountAuthHeaders()},body:JSON.stringify({role}),retries:0});}

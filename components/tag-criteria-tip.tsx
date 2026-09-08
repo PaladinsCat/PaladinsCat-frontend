@@ -3,7 +3,7 @@
  *
  * Keeps tag boundaries beneath the page header without defining the page itself.
  *
- * refs: doc: documents/06-reference/frontend-design-system.md
+ * refs: doc: documents/06-reference/design/frontend-design-system.md
  */
 "use client";
 
@@ -16,7 +16,7 @@ import type { TranslationKey } from "@/lib/localization/messages";
  *
  * I/O types: input `criteriaKey: TranslationKey` → output `React.JSX.Element`; no network or storage side effects.
  *
- * refs: doc: documents/06-reference/frontend-design-system.md
+ * refs: doc: documents/06-reference/design/frontend-design-system.md
  */
 export default function TagCriteriaTip({ criteriaKey }: { criteriaKey: TranslationKey }) {
   const { t } = useLocalization();

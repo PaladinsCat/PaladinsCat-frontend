@@ -204,5 +204,15 @@
   "common.bestDuo.title": "Best Duo",
   "common.bestDuo.description": "The most-played confirmed ranked party pair.",
   "common.bestDuo.matchesPerWeek": "{count} matches per week",
-  "common.bestDuo.observedDays": "{count} observed days"
+  "common.bestDuo.observedDays": "{count} observed days",
+  "common.about": "About {title}",
+  "common.github": "GitHub",
+  "common.platform.steam": "Steam",
+  "common.platform.epic": "Epic Games",
+  "common.platform.playstation": "PlayStation",
+  "common.platform.xbox": "Xbox",
+  "common.platform.hirez": "Hi-Rez / PC",
+  "common.prototype.local": "Local prototype",
+  "common.prototype.scoreboardPlatformIcons": "Scoreboard platform icons",
+  "common.prototype.scoreboardPlatformDescription": "Review the monochrome platform marks in the real scoreboard layout. Hover an icon in a player row for its accessible label."
 }

@@ -1,11 +1,11 @@
-/** LobbyTierBanner component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * Render lobby tier banner with `LoadingIndicator`.
  * refs: none
  */
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { useLobbyTier } from "@/lib/lobby-tier-context";
 import { LOBBY_TIER_OPTIONS, type LobbyTierFilter } from "@/lib/lobby-tier";
@@ -13,18 +13,19 @@ import { LoadingIndicator } from "@/components/async-state";
 import { useLocalization } from "@/lib/localization-context";
 import { routeUsesLobbyTierSelector } from "@/lib/lobby-tier-route";
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
- * Returns: `React.JSX.Element`
+/**
+ * Render lobby tier banner with `LoadingIndicator`.
  * refs: none
+ * I/O types: `none -> JSX.Element | null`.
  */
 export default function LobbyTierBanner() {
   const { t } = useLocalization();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { isLoggedIn, isLoading: authLoading } = useAuth();
   const { filter, definition, ready, setFilter } = useLobbyTier();
 
-  if (authLoading || !isLoggedIn || !routeUsesLobbyTierSelector(pathname)) return null;
+  if (authLoading || !isLoggedIn || !routeUsesLobbyTierSelector(pathname, searchParams.get("scope"))) return null;
 
   const changeScope = (next: LobbyTierFilter) => {
     if (next === filter) return;

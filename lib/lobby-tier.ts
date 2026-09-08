@@ -69,17 +69,18 @@ export const LOBBY_TIER_OPTIONS = Object.values(LOBBY_TIER_FILTERS);
 export const LOBBY_TIER_STORAGE_KEY = "pc_lobby_tier_filter";
 
 /**
- * Transforms or validates is lobby tier filter according to this module's data contract.
+ * Narrow the value to a lobby-tier filter only when it is a string key present in LOBBY_TIER_FILTERS.
  * refs: none
+ * I/O types: `value: unknown -> value is LobbyTierFilter`.
  */
 export function isLobbyTierFilter(value: unknown): value is LobbyTierFilter {
   return typeof value === "string" && value in LOBBY_TIER_FILTERS;
 }
 
 /**
- * Reads stored lobby tier filter from the module's configured source.
- * Returns: `string`
+ * Read a valid lobby-tier filter from localStorage; return all during SSR or for an unrecognized stored value. Browser storage access errors propagate.
  * refs: none
+ * I/O types: `none -> LobbyTierFilter`.
  */
 export function getStoredLobbyTierFilter(): LobbyTierFilter {
   if (typeof window === "undefined") return "all";
@@ -107,19 +108,20 @@ const UNSCOPED_STAT_PATHS = [
 ];
 
 /**
- * Defines the with stored lobby tier contract used by this module.
- * Returns: `string`
+ * Append stored tier bounds only to eligible global-stat paths lacking explicit tier bounds. Preserve SSR paths, casual scope, excluded paths, and all-tier preferences unchanged; reading browser storage can throw.
  * refs: none
+ * I/O types: `path: string -> string`.
  */
 export function withStoredLobbyTier(path: string): string {
   if (typeof window === "undefined") return path;
+  const existing = new URLSearchParams(path.includes("?") ? path.slice(path.indexOf("?") + 1) : "");
+  if (existing.get("scope") === "casual") return path;
   const pathname = path.split("?", 1)[0];
   if (!GLOBAL_STAT_PATHS.some((prefix) => pathname.startsWith(prefix))) return path;
   if (UNSCOPED_STAT_PATHS.some((prefix) => pathname.startsWith(prefix))) return path;
 
   const definition = LOBBY_TIER_FILTERS[getStoredLobbyTierFilter()];
   if (definition.tierMin == null && definition.tierMax == null) return path;
-  const existing = new URLSearchParams(path.includes("?") ? path.slice(path.indexOf("?") + 1) : "");
   if (existing.has("tierMin") || existing.has("tierMax")) return path;
   const separator = path.includes("?") ? "&" : "?";
   const params = new URLSearchParams();

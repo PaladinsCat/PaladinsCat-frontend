@@ -1,5 +1,5 @@
-/** HirezOutageBanner component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * Render hirez outage banner with `AlertTriangle`, `Clock`, `RefreshCw`.
  * refs: none
  */
 "use client";
@@ -12,10 +12,10 @@ import { useLocalization } from "@/lib/localization-context";
 
 const REFRESH_MS = 60_000;
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
- * Returns: `React.JSX.Element`
+/**
+ * Render hirez outage banner with `AlertTriangle`, `Clock`, `RefreshCw`.
  * refs: none
+ * I/O types: `none -> JSX.Element | null`.
  */
 export default function HirezOutageBanner() {
   const { t , formatTime} = useLocalization();

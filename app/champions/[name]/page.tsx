@@ -18,10 +18,10 @@ import ChampionDetailPageClient from "./champion-detail-client";
 export const dynamic = "force-dynamic";
 
 /**
+ * Render /champions/[name] using `ChampionDetailPageClient`.
  * Render the ChampionDetailPage view for champions name page.
- * Return the React tree for the declared inputs and page data.
- * Returns: `Promise<React.JSX.Element>`
  * refs: none
+ * I/O types: `{ params, }: { params: Promise<{ name: string }>; } -> Promise<JSX.Element>`.
  */
 export default async function ChampionDetailPage({
   params,

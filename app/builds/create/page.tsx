@@ -185,10 +185,10 @@ function CardTile({ card, selection, disabled, onToggle, onLevelChange }: {
   );
 }
 /**
+ * Render /builds/create using `LoadingPanel`, `AsyncButton`.
  * Render the CreateBuildPage view for builds create page.
- * Return the React tree for the declared inputs and page data.
- * Returns: `React.JSX.Element`
  * refs: none
+ * I/O types: `none -> JSX.Element`.
  */
 export default function CreateBuildPage() {
   const { t } = useLocalization();

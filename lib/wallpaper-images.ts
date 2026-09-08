@@ -4,6 +4,10 @@
  * This module exposes local asset paths only; it does not include tactical maps or perform network work.
  * refs: none
  */
+/**
+ * Define built in wallpaper as `{ avif: string; png: string }`.
+ * refs: none
+ */
 export type BuiltInWallpaper = { avif: string; png: string };
 
 const WALLPAPER_IDS = [

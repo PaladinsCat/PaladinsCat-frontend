@@ -1,5 +1,5 @@
-/** ReportModal component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * Render report modal.
  * refs: none
  */
 "use client";
@@ -105,10 +105,10 @@ interface ReportModalProps {
   submitReport?: (targetId: string | number, options: ReportOptions) => Promise<{ success: boolean; message: string }>;
 }
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
- * Returns: `React.JSX.Element`
+/**
+ * Render report modal.
  * refs: none
+ * I/O types: `{ playerId, type, onClose, onSuccess, submitReport = reportPlayer }: ReportModalProps -> JSX.Element`.
  */
 export default function ReportModal({ playerId, type, onClose, onSuccess, submitReport = reportPlayer }: ReportModalProps) {
   const { t } = useLocalization();

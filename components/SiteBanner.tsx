@@ -1,5 +1,5 @@
-/** SiteBanner component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * Render site banner with `X`.
  * refs: none
  */
 "use client";
@@ -21,10 +21,10 @@ function readDismissedBanner(): string | null | undefined {
   }
 }
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
- * Returns: `React.JSX.Element`
+/**
+ * Render site banner with `X`.
  * refs: none
+ * I/O types: `none -> JSX.Element | null`.
  */
 export default function SiteBanner() {
   const { t } = useLocalization();

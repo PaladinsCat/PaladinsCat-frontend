@@ -33,7 +33,10 @@ interface BansSectionProps {
   }>;
 }
 
-/** Display both teams' ban choices, returning no section when the match has no bans.  Returns: `React.JSX.Element`. · refs: none */
+/**
+ * Display both teams' ban choices, returning no section when the match has no bans.  Returns: `React.JSX.Element`. · refs: none
+ * I/O types: `{ bans }: BansSectionProps -> JSX.Element | null`.
+ */
 export default function BansSection({ bans }: BansSectionProps) {
   const { t } = useLocalization();
   if (bans.length === 0) return null;

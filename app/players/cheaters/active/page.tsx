@@ -1,4 +1,6 @@
-/** Recent confirmed-cheater directory. */
+/** Recent confirmed-cheater directory.
+ * refs: none
+ */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -17,8 +19,13 @@ function entryHref(entry: CheaterPortalEntry): string {
   return entry.kind === "private" ? `/players/private-accounts/${entry.subjectId}` : `/players/cheaters/${entry.playerId ?? entry.subjectId}`;
 }
 
+/**
+ * Render active cheater records with a 250 ms debounced name/ID search and persisted directory pagination. Fetch each search/page result, ignore responses after cleanup, and display loading, empty, and request-error states.
+ * I/O types: `none -> JSX.Element`.
+ * refs: none
+ */
 export default function ActiveCheatersPage() {
-  const { formatNumber } = useLocalization();
+  const { formatNumber, t } = useLocalization();
   const [page, setPage] = usePersistentDirectoryPage();
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -54,14 +61,14 @@ export default function ActiveCheatersPage() {
 
   return (
     <div className="space-y-6">
-      <PlayersPageHeader title="Active cheaters" />
+      <PlayersPageHeader title={t("moderation.activeCheaters")} />
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <PlayerDirectorySearch label="Search by name or player ID" value={query} onChange={(value) => { setQuery(value); setPage(1); }} />
-        <span className="text-xs text-pc-text-muted">{formatNumber(total)} active records</span>
+        <PlayerDirectorySearch label={t("moderation.searchPlayerNameOrId")} value={query} onChange={(value) => { setQuery(value); setPage(1); }} />
+        <span className="text-xs text-pc-text-muted">{t("moderation.activeRecords", { value1: formatNumber(total) })}</span>
       </div>
-      {error && <div className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-300">The active cheater directory could not be loaded.</div>}
+      {error && <div className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-300">{t("moderation.activeDirectoryLoadFailed")}</div>}
       {loading && items.length === 0 ? <LoadingPanel compact /> : items.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-pc-border bg-pc-bg-elevated px-4 py-12 text-center text-sm text-pc-text-muted">No active cheaters in the last 30 days.</div>
+        <div className="rounded-xl border border-dashed border-pc-border bg-pc-bg-elevated px-4 py-12 text-center text-sm text-pc-text-muted">{t("moderation.noRecentActiveCheaters")}</div>
       ) : (
         <div className={`grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 ${loading ? "opacity-60" : ""}`}>
           {items.map((entry) => (
@@ -70,7 +77,7 @@ export default function ActiveCheatersPage() {
                 <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-red-300" aria-hidden="true" />
                 <div className="min-w-0">
                   <h2 className="truncate text-sm font-semibold text-pc-text group-hover:text-red-100">{entry.name}</h2>
-                  <p className="mt-1 truncate text-xs text-pc-text-secondary">{entry.reason || "Confirmed cheater"}</p>
+                  <p className="mt-1 truncate text-xs text-pc-text-secondary">{entry.reason || t("moderation.confirmedCheater")}</p>
                 </div>
               </div>
               <ArrowRight className="h-4 w-4 shrink-0 text-pc-text-muted transition-[transform,color] duration-[120ms] group-hover:translate-x-1 group-hover:text-red-200" aria-hidden="true" />

@@ -17,10 +17,11 @@ function formatDuration(seconds: number): string {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
-/** Render RelatedMatches from its declared props and match data.
+/**
+ * Render RelatedMatches from its declared props and match data.
  * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
- * Returns: `React.JSX.Element`
  * refs: none
+ * I/O types: `{ related, matchId, loading }: { related: MatchSearchResult[]; matchId: number; loading: boolean } -> JSX.Element | null`.
  */
 export default function RelatedMatches({ related, matchId, loading }: { related: MatchSearchResult[]; matchId: number; loading: boolean }) {
   const { t } = useLocalization();

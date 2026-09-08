@@ -7,6 +7,11 @@ import type { MatchSearchResult } from "@/lib/api-client";
 import { formatLocalDateTime } from "@/lib/time-format";
 import { useLocalization } from "@/lib/localization-context";
 
+/**
+ * Render match rows using responsive mobile and desktop presentations and their corresponding optional footer content.
+ * I/O types: `{ matches, mobileFooter, desktopFooter, }: { matches: MatchSearchResult[]; mobileFooter?: ReactNode; desktopFooter?: ReactNode; } -> JSX.Element`.
+ * refs: none
+ */
 export default function MatchDirectoryList({
   matches,
   mobileFooter,

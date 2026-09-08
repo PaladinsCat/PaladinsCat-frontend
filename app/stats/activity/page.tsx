@@ -1,9 +1,10 @@
 /**
- * Define the stats activity page route boundary.
- * Coordinates this module's route data flow and rendered output.
+ * Render player activity statistics, seeding the client view with server data when available. · refs: none
  * refs: none
  */
 import { unstable_cache } from "next/cache";
+import PageHeader from "@/components/ui/page-header";
+import { getServerLocalization } from "@/lib/server-localization";
 import PlayerActivityPanel, { type PlayerActivityInitialData } from "@/components/player-activity-panel";
 
 const getInitialActivityData = unstable_cache(
@@ -45,11 +46,16 @@ const getInitialActivityData = unstable_cache(
  */
 export const dynamic = "force-dynamic";
 
-/** Render player activity statistics, seeding the client view with server data when available. · refs: none */
+/**
+ * Render player activity statistics, seeding the client view with server data when available. · refs: none
+ * I/O types: `none -> Promise<JSX.Element>`.
+ */
 export default async function PlayerActivityPage() {
+  const { t } = await getServerLocalization();
   const initialData = await getInitialActivityData().catch(() => null);
   return (
-    <div className="pc-player-activity-page">
+    <div className="pc-player-activity-page space-y-6">
+      <PageHeader parentHref="/stats" parentLabel={t("menu.globalStats")} title={t("menu.playerActivity")} description={t("stats.portal.activityDescription")} />
       <PlayerActivityPanel showStatements={false} initialData={initialData} />
     </div>
   );

@@ -36,7 +36,13 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     ".next-dev-proxy/types/**/*.ts",
-    ".next-dev-proxy/dev/types/**/*.ts"
+    ".next-dev-proxy/dev/types/**/*.ts",
+    ".next-profile-statistics/types/**/*.ts",
+    ".next-profile-statistics/dev/types/**/*.ts",
+    ".next-dev-e2e/types/**/*.ts",
+    ".next-dev-e2e/dev/types/**/*.ts",
+    ".next-e2e/types/**/*.ts",
+    ".next-e2e/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"

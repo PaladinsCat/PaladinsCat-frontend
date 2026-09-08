@@ -1,10 +1,9 @@
 /**
- * Define the stats egpm page route boundary.
- * Coordinates this module's route data flow and rendered output.
+ * Render /stats/egpm using `PageHeader`, `RouteSkeleton`, `ContentFade`, `EmptyState`.
  * refs: none
  */
 "use client";
-import Link from "next/link";
+import PageHeader from "@/components/ui/page-header";
 import { useEffect, useMemo, useState } from "react";
 import { PerformanceOverviewCard } from "@/components/PerformanceOverviewCard";
 import { ContentFade, EmptyState } from "@/components/async-state";
@@ -34,9 +33,9 @@ const SORT_OPTIONS = [
 ] as const;
 
 /**
- * Renders the exported statistics view with its route data.
- * Returns: `React.JSX.Element`
+ * Render /stats/egpm using `PageHeader`, `RouteSkeleton`, `ContentFade`, `EmptyState`.
  * refs: none
+ * I/O types: `none -> JSX.Element`.
  */
 export default function EgpmDetailPage() {
   const { t, formatNumber } = useLocalization();
@@ -63,19 +62,11 @@ export default function EgpmDetailPage() {
   }), [rows, sort]);
   const global = rows.find((row) => row.role === "Global") ?? null;
 
-  if (displayLoading) return <RouteSkeleton variant="dashboard" />;
+  if (displayLoading) return <div className="space-y-6"><PageHeader parentHref="/stats" parentLabel={t("menu.globalStats")} title={t("generated.stats.effectiveCreditsPerMinute")} description={t("stats.portal.ecpmDescription")} /><RouteSkeleton variant="dashboard" /></div>;
 
   return (
     <ContentFade className="space-y-7">
-      <header>
-        <Link href="/stats/performance" className="text-sm text-pc-text-secondary transition-colors hover:text-pc-accent">{t("generated.stats.globalStats")}</Link>
-        <div className="mt-3">
-          <div>
-            <h1 className="pc-heading pc-heading-lg">{t("generated.stats.effectiveCreditsPerMinute")}</h1>
-            <p className="mt-1 max-w-3xl text-sm text-pc-text-secondary">{t("generated.stats.ecpmMeasuresCreditsEarnedThroughParticipationAfterRemovingThe500")}</p>
-          </div>
-        </div>
-      </header>
+      <PageHeader parentHref="/stats" parentLabel={t("menu.globalStats")} title={t("generated.stats.effectiveCreditsPerMinute")} description={t("stats.portal.ecpmDescription")} />
 
       {rows.length === 0 ? <EmptyState title={t("generated.stats.noEcpmBaselines")} description={t("ecpm.noDataDescription")} /> : <>
         <section>

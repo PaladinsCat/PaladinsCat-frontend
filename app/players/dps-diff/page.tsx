@@ -1,5 +1,5 @@
 /**
- * Define the player route surface for dps-diff page and its local data boundary.
+ * Render the DpsDiffPage view for the player dps-diff page route.
  * This file owns the page, layout, loading state, or route handler named by its path.
  * It does not own unrelated player sections or shared library policy.
  * refs: none
@@ -8,8 +8,8 @@ import PerformanceDiffDirectory from "@/components/performance-diff-directory";
 
 /**
  * Render the DpsDiffPage view for the player dps-diff page route.
- * Returns: `React.JSX.Element`
  * refs: none
+ * I/O types: `none -> JSX.Element`.
  */
 export default function DpsDiffPage() {
   return <PerformanceDiffDirectory metric="dps-diff" />;

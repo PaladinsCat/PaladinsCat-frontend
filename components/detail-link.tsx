@@ -1,6 +1,13 @@
-/** Shared internal detail-route link. */
+/** Shared internal detail-route link.
+ * refs: none
+ */
 import Link from "next/link";
 
+/**
+ * Render an accessible detail navigation link with the supplied destination, label, and optional classes.
+ * I/O types: `{ href, label, className = "", }: { href: string; label: string; className?: string; } -> JSX.Element`.
+ * refs: none
+ */
 export default function DetailLink({
   href,
   label,

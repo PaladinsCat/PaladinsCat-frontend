@@ -1,6 +1,5 @@
 /**
- * Define the stats items page route boundary.
- * Coordinates this module's route data flow and rendered output.
+ * Render /stats/items using `ItemsSkeleton`, `ErrorState`, `EmptyState`, `ContentFade`.
  * refs: none
  */
 "use client";
@@ -26,9 +25,9 @@ function categoryColor(category: BuildItemCategory) {
 }
 
 /**
- * Renders the exported statistics view with its route data.
- * Returns: `React.JSX.Element`
+ * Render /stats/items using `ItemsSkeleton`, `ErrorState`, `EmptyState`, `ContentFade`.
  * refs: none
+ * I/O types: `none -> JSX.Element`.
  */
 export default function ItemsPage() {
   const { t, formatNumber, formatPercent } = useLocalization();

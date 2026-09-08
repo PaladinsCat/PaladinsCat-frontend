@@ -1,6 +1,5 @@
 /**
- * Define the admin changelog page responsibility boundary.
- * Coordinates admin changelog page data loading, authorization, and presentation.
+ * Render the /admin/changelog route with `LoadingPanel`, `RefreshCw`.
  * refs: none
  */
 "use client";
@@ -17,9 +16,9 @@ import { formatLocalDateTime } from '@/lib/time-format';
 import { useLocalization } from "@/lib/localization-context";
 
 /**
- * Handles the exported route operation using its declared request and response contract.
- * Returns: `React.JSX.Element`
+ * Render the /admin/changelog route with `LoadingPanel`, `RefreshCw`.
  * refs: none
+ * I/O types: `none -> JSX.Element`.
  */
 export default function AdminChangelogPage() {
   const { t , formatDateTime} = useLocalization();

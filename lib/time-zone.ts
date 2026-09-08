@@ -19,9 +19,9 @@ const FIXED_UTC_OFFSET_MINUTES = [
 ];
 
 /**
- * Transforms or validates is valid time zone according to this module's data contract.
- * Returns: `value is string`
+ * Accept a nonempty time-zone name of at most 64 characters only when Intl.DateTimeFormat accepts it; return false on validation errors.
  * refs: none
+ * I/O types: `value: string | null | undefined -> value is string`.
  */
 export function isValidTimeZone(value: string | null | undefined): value is string {
   if (!value || value.length > 64) return false;
@@ -39,9 +39,9 @@ function browserTimeZone(): string {
 }
 
 /**
- * Reads preferred time zone from the module's configured source.
- * Returns: `string`
+ * Return the SSR fallback zone, otherwise use a valid localStorage preference or the browser zone. Browser storage access errors propagate.
  * refs: none
+ * I/O types: `none -> string`.
  */
 export function getPreferredTimeZone(): string {
   if (typeof window === "undefined") return FALLBACK_TIME_ZONE;
@@ -51,8 +51,8 @@ export function getPreferredTimeZone(): string {
 
 /**
  * Updates preferred time zone using the module's persistence or validation rules.
- * Returns: `void`
  * refs: none
+ * I/O types: `timeZone: string -> void`.
  */
 export function savePreferredTimeZone(timeZone: string): void {
   if (typeof window !== "undefined" && isValidTimeZone(timeZone)) {
@@ -61,9 +61,9 @@ export function savePreferredTimeZone(timeZone: string): void {
 }
 
 /**
- * Reads supported time zones from the module's configured source.
- * Returns: `string[]`
+ * Return sorted unique Intl-supported time zones including UTC, or the configured fallback zone list when supportedValuesOf is unavailable.
  * refs: none
+ * I/O types: `none -> string[]`.
  */
 export function getSupportedTimeZones(): string[] {
   const supported = typeof Intl.supportedValuesOf === "function"
@@ -73,9 +73,9 @@ export function getSupportedTimeZones(): string[] {
 }
 
 /**
- * Reads fixed utc offset options from the module's configured source.
- * Returns: `Array<{ value: string; label: string }>`
+ * Map supported fixed-offset minutes to string values and formatted UTC labels for selection controls.
  * refs: none
+ * I/O types: `none -> Array<{ value: string; label: string }>`.
  */
 export function getFixedUtcOffsetOptions(): Array<{ value: string; label: string }> {
   return FIXED_UTC_OFFSET_MINUTES.map((minutes) => ({
@@ -85,9 +85,9 @@ export function getFixedUtcOffsetOptions(): Array<{ value: string; label: string
 }
 
 /**
- * Defines the fixed utc offset to time zone contract used by this module.
- * Returns: `string`
+ * Format zero minutes as UTC and other signed minute offsets as plus/minus HH:MM; the caller supplies a valid minute offset.
  * refs: none
+ * I/O types: `minutes: number -> string`.
  */
 export function fixedUtcOffsetToTimeZone(minutes: number): string {
   if (minutes === 0) return "UTC";
@@ -104,9 +104,9 @@ function formatUtcOffset(minutes: number): string {
 }
 
 /**
- * Defines the fixed utc offset from time zone contract used by this module.
- * Returns: `string`
+ * Convert UTC to string zero or a signed HH:MM offset to signed minutes; return an empty string when the value does not match that format.
  * refs: none
+ * I/O types: `timeZone: string -> string`.
  */
 export function fixedUtcOffsetFromTimeZone(timeZone: string): string {
   if (timeZone === "UTC") return "0";

@@ -1,5 +1,5 @@
-/** player-directory-grid component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * Render player directory grid with `PlayerDirectoryPagination`.
  * refs: none
  */
 "use client";
@@ -8,15 +8,16 @@ import { useEffect, useMemo, type ReactNode } from "react";
 import PlayerDirectoryPagination, { usePersistentDirectoryPage } from "@/components/player-directory-pagination";
 
 const PLAYER_DIRECTORY_PAGE_SIZE = 32;
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+/**
+ * Share the fixed 4rem player-directory card dimensions, truncation, surface, and hover transition classes.
  * refs: none
  */
 export const PLAYER_DIRECTORY_CARD_CLASS = "flex h-16 min-h-16 min-w-0 overflow-hidden rounded-xl border bg-pc-bg-elevated px-3 py-2 transition-colors";
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+/**
+ * Render player directory grid with `PlayerDirectoryPagination`.
  * refs: none
+ * I/O types: `{ items, getKey, children, loading = false, pageSize = PLAYER_DIRECTORY_PAGE_SIZE, gridClassName = "grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4", }: { items: T[]; getKey: (item: T) => string; children: (item: T, index: number) => ReactNode; loading?: boolean; pageSize?: number; gridClassName?: string; } -> JSX.Element`.
  */
 export default function PlayerDirectoryGrid<T>({
   items,

@@ -1,5 +1,5 @@
-/** player-moderation-directory component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * Render one community moderation directory with optional automatic AFK results.
  * refs: none
  */
 "use client";
@@ -54,9 +54,9 @@ function communityVoteCount(player: CheaterPlayer, filter: ModerationFilter): nu
 /**
  * Render one community moderation directory with optional automatic AFK results.
  *
- * I/O types: input directory translation keys and `filter: ModerationFilter` → output `React.JSX.Element`; fetches matching player records.
+ * I/O types: `{ titleKey: TranslationKey; descriptionKey: TranslationKey; criteriaKey: TranslationKey; emptyKey: TranslationKey; filter: ModerationFilter; accentClass: string; borderClass: string; voteClass: string }` -> `React.JSX.Element`; fetches matching player records.
  *
- * refs: doc: documents/06-reference/frontend-design-system.md
+ * refs: doc: documents/06-reference/design/frontend-design-system.md
  */
 export default function PlayerModerationDirectory({
   titleKey,

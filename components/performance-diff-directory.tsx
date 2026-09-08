@@ -1,5 +1,5 @@
-/** performance-diff-directory component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * Render one automatic performance-tag directory.
  * refs: none
  */
 "use client";
@@ -31,9 +31,8 @@ type MetricConfig = {
   badgeClass: string;
 };
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
- * Returns: `Record<PerformanceDiffMetric, MetricConfig>`
+/**
+ * Map automatic performance-difference metric keys to the titles and display configuration used by player directories.
  * refs: none
  */
 export const PERFORMANCE_DIFF_METRICS: Record<PerformanceDiffMetric, MetricConfig> = {
@@ -104,7 +103,7 @@ export const PERFORMANCE_DIFF_METRICS: Record<PerformanceDiffMetric, MetricConfi
  *
  * I/O types: input `metric: PerformanceDiffMetric` → output `React.JSX.Element`; fetches the matching player directory.
  *
- * refs: doc: documents/06-reference/frontend-design-system.md
+ * refs: doc: documents/06-reference/design/frontend-design-system.md
  */
 export default function PerformanceDiffDirectory({ metric }: { metric: PerformanceDiffMetric }) {
   const { t, formatNumber } = useLocalization();

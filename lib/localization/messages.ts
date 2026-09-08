@@ -7,6 +7,10 @@ import footerMessages from "./catalog/ui/footer.json";
 import navigationMessages from "./catalog/ui/navigation.json";
 import commonMessages from "./catalog/ui/common.json";
 import moderationMessages from "./catalog/ui/moderation.json";
+import communityMessages from "./catalog/pages/community.json";
+import playerFriendsMessages from "./catalog/pages/player-friends.json";
+import championMatchupsMessages from "./catalog/pages/champion-matchups.json";
+import playerTrendsMessages from "./catalog/pages/player-trends.json";
 import itemMessages from "./catalog/game/items.json";
 import mapMessages from "./catalog/game/maps.json";
 import talentMessages from "./catalog/game/talents.json";
@@ -19,7 +23,8 @@ import generatedUiMessages from "./catalog/generated/ui.json";
 import seoMessages from "./catalog/seo/metadata.json";
 import championMessages from "./catalog/game/champions.json";
 
-/** Apply EN_MESSAGES to lobby-tier or localization inputs.
+/**
+ * Apply EN_MESSAGES to lobby-tier or localization inputs.
  * Contract: returns the normalized route, context state, or message value while preserving existing browser behavior.
  * refs: none
  */
@@ -30,6 +35,10 @@ export const EN_MESSAGES = {
   ...navigationMessages,
   ...commonMessages,
   ...moderationMessages,
+  ...communityMessages,
+  ...playerFriendsMessages,
+  ...championMatchupsMessages,
+  ...playerTrendsMessages,
   ...footerMessages,
   ...asyncMessages,
   ...homeMessages,
@@ -43,14 +52,27 @@ export const EN_MESSAGES = {
   ...seoMessages,
   ...championMessages,
 };
+/**
+ * Define translation key as `keyof typeof EN_MESSAGES`.
+ * refs: none
+ */
 export type TranslationKey = keyof typeof EN_MESSAGES;
+/**
+ * Define translation values as `Record<string, string | number>`.
+ * refs: none
+ */
 export type TranslationValues = Record<string, string | number>;
+/**
+ * Define locale messages as `Partial<Record<TranslationKey, string>>`.
+ * refs: none
+ */
 export type LocaleMessages = Partial<Record<TranslationKey, string>>;
 
-/** Apply sanitizeLocaleMessages to lobby-tier or localization inputs.
+/**
+ * Apply sanitizeLocaleMessages to lobby-tier or localization inputs.
  * Contract: returns the normalized route, context state, or message value while preserving existing browser behavior.
- * Returns: `object`
  * refs: none
+ * I/O types: `payload: unknown -> LocaleMessages`.
  */
 export function sanitizeLocaleMessages(payload: unknown): LocaleMessages {
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) return {};
@@ -64,9 +86,11 @@ export function sanitizeLocaleMessages(payload: unknown): LocaleMessages {
   return messages;
 }
 
-/** Apply formatMessage to lobby-tier or localization inputs.
+/**
+ * Apply formatMessage to lobby-tier or localization inputs.
  * Contract: returns the normalized route, context state, or message value while preserving existing browser behavior.
  * refs: none
+ * I/O types: `message: string; values?: TranslationValues -> string`.
  */
 export function formatMessage(
   message: string,
@@ -78,9 +102,11 @@ export function formatMessage(
   ));
 }
 
-/** Apply translate to lobby-tier or localization inputs.
+/**
+ * Apply translate to lobby-tier or localization inputs.
  * Contract: returns the normalized route, context state, or message value while preserving existing browser behavior.
  * refs: none
+ * I/O types: `messages: LocaleMessages; key: TranslationKey; values?: TranslationValues -> string`.
  */
 export function translate(
   messages: LocaleMessages,

@@ -1,6 +1,5 @@
 /**
- * Define the about page responsibility boundary.
- * Coordinates about page data loading, authorization, and presentation.
+ * Render the localized About page and its data-focused project principles.  Returns: `Promise<React.JSX.Element>`. · refs: none
  * refs: none
  */
 import Image from "next/image";
@@ -22,7 +21,10 @@ import {
 } from "lucide-react";
 import { getServerLocalization } from "@/lib/server-localization";
 
-/** Render the localized About page and its data-focused project principles.  Returns: `Promise<React.JSX.Element>`. · refs: none */
+/**
+ * Render the localized About page and its data-focused project principles.  Returns: `Promise<React.JSX.Element>`. · refs: none
+ * I/O types: `none -> Promise<JSX.Element>`.
+ */
 export default async function AboutPage() {
   const { t } = await getServerLocalization();
   const principles = [

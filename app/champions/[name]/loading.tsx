@@ -8,8 +8,8 @@ import { RouteSkeleton } from "@/components/route-skeleton";
 /**
  * Render the loading fallback for champions name loading.
  * Return the temporary React tree shown while page content resolves.
- * Returns: `React.JSX.Element`
  * refs: none
+ * I/O types: `none -> JSX.Element`.
  */
 export default function Loading() {
   return <RouteSkeleton variant="detail" />;

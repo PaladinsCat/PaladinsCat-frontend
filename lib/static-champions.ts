@@ -5,6 +5,10 @@
  * live statistics or leaderboard records.
  * refs: none
  */
+/**
+ * Describe static champion with id, name, roles.
+ * refs: none
+ */
 export interface StaticChampion {
   id: number;
   name: string;

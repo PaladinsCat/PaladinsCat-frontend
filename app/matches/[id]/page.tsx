@@ -27,10 +27,10 @@ type MatchResponse = {
 export const dynamic = "force-dynamic";
 
 /**
+ * Render /matches/[id] using `MatchDetailClient`.
  * Render the MatchDetailPage view for matches id page.
- * Return the React tree for the declared inputs and page data.
- * Returns: `Promise<React.JSX.Element>`
  * refs: none
+ * I/O types: `{ params, }: { params: Promise<{ id: string }>; } -> Promise<JSX.Element>`.
  */
 export default async function MatchDetailPage({
   params,

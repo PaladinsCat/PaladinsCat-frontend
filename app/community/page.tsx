@@ -1,6 +1,5 @@
 /**
- * Define the community page responsibility boundary.
- * Coordinates community page data loading, authorization, and presentation.
+ * Render the /community route with `RouteSkeleton`, `ErrorState`, `CommunityChat`, `EmptyState`, `LoadingPanel`.
  * refs: none
  */
 "use client";
@@ -12,13 +11,14 @@ import { RouteSkeleton } from "@/components/route-skeleton";
 import { LoadingPanel } from "@/components/async-state";
 import { VerifiedPlayerBadge } from "@/components/player-name";
 import { useLocalization } from "@/lib/localization-context";
+import CommunityChat from "@/components/community-chat";
 
 const HIDDEN_TWITCH_CHANNEL_LOGINS = new Set(["paladins2ttv"]);
 
 /**
- * Handles the exported route operation using its declared request and response contract.
- * Returns: `React.JSX.Element`
+ * Render the /community route with `RouteSkeleton`, `ErrorState`, `CommunityChat`, `EmptyState`, `LoadingPanel`.
  * refs: none
+ * I/O types: `none -> JSX.Element`.
  */
 export default function CommunityPage() {
   const { t , formatNumber, formatDateTime} = useLocalization();
@@ -66,6 +66,7 @@ export default function CommunityPage() {
         </div>
       </div>
 
+      <CommunityChat />
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(17rem,1fr)]">
         <section className="min-w-0">
           {posts.length === 0 ? (

@@ -12,12 +12,16 @@ import { twMerge } from "tailwind-merge"
  *
  * Accepts inputs; returns a normalized class string with no network, authentication, cache, or persistence effects.
  * refs: none
+ * I/O types: `inputs: ClassValue[] -> string`.
  */
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-/** Convert champion name to URL-safe slug: lowercase, no spaces/special chars  Returns: `string`. · refs: none */
+/**
+ * Convert champion name to URL-safe slug: lowercase, no spaces/special chars  Returns: `string`. · refs: none
+ * I/O types: `name: string | null | undefined -> string`.
+ */
 export function championSlug(name: string | null | undefined): string {
   if (!name) return "";
   return name.toLowerCase().replace(/[^a-z0-9]/g, "");

@@ -1,6 +1,5 @@
 /**
- * Define the api auth oidc logout route responsibility boundary.
- * Coordinates api auth oidc logout route data loading, authorization, and presentation.
+ * Reject cross-origin requests with 403; otherwise read the opaque session cookie and attempt backend and upstream logout. Clear session and CSRF cookies and return a 303 to the validated provider logout URL or home, even when revocation requests fail.
  * refs: none
  */
 import { NextRequest, NextResponse } from "next/server";
@@ -21,9 +20,9 @@ function backend() {
   return base.endsWith("/v1") ? base : `${base}/v1`;
 }
 /**
- * Handles the exported route operation using its declared request and response contract.
- * Returns: `Promise<Response>`
- * refs: none
+ * Reject cross-origin requests with 403; otherwise read the opaque session cookie and attempt backend and upstream logout. Clear session and CSRF cookies and return a 303 to the validated provider logout URL or home, even when revocation requests fail.
+ * refs: doc: documents/02-technical/security/auth.md
+ * I/O types: `request: NextRequest -> Promise<NextResponse<unknown>>`.
  */
 export async function POST(request: NextRequest) {
   if (!requireSameOrigin(request.headers.get("origin"), origin())) return new NextResponse("Forbidden", { status: 403 });

@@ -30,8 +30,8 @@ const ROLE_KEYS: Record<string, TranslationKey> = {
 /**
  * Build SEO metadata for champions name layout.
  * Return the Next.js metadata object used by the page without mutating application data.
- * Returns: `Promise<Metadata>`
  * refs: none
+ * I/O types: `{ params }: Props -> Promise<Metadata>`.
  */
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { name } = await params;
@@ -55,10 +55,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 /**
+ * Pass the /champions/[name] layout children through unchanged.
  * Render the ChampionDetailLayout view for champions name layout.
- * Return the React tree for the declared inputs and page data.
- * Returns: `Promise<React.JSX.Element>`
  * refs: none
+ * I/O types: `{ children, params }: Props -> Promise<ReactElement<unknown, string | JSXElementConstructor<any>> | Iterable<ReactNode> | AwaitedReactNode>`.
  */
 export default async function ChampionDetailLayout({ children, params }: Props) {
   const { name } = await params;

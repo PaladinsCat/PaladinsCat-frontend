@@ -13,6 +13,11 @@ import { useLocalization } from "@/lib/localization-context";
 
 const PAGE_SIZE = 20;
 
+/**
+ * Render the /players/parties/[kind]/[key] route with `ErrorState`, `LoadingPanel`, `EmptyState`, `PlayersPageHeader`, `MatchDirectoryList`.
+ * I/O types: `none -> JSX.Element`.
+ * refs: none
+ */
 export default function PartyDetailPage() {
   const { t, formatNumber } = useLocalization();
   const params = useParams<{ kind: string; key: string }>();

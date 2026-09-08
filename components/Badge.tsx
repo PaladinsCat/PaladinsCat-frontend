@@ -1,18 +1,23 @@
 /**
- * Badge component — reusable status/role badges
- * Pattern source: Paladins.guru (Verified/Supporter badges on user content)
- * Variants:
- *   - verified: green accent, checkmark icon, for verified players
- *   - supporter: gold accent, star icon, for supporting members
- *   - ranked: teal accent, trophy icon, for ranked matches/content
- *   - mode: neutral, for match mode labels (Ranked/Unranked)
- *   - default: inherits from parent, no icon
+ * Badge component — reusable status/role badges Pattern source: Paladins.guru (Verified/Supporter badges on user content) Variants: - verified: green accent, checkmark icon, for verified players
+ * - supporter: gold accent, star icon, for supporting members
+ * - ranked: teal accent, trophy icon, for ranked matches/content
+ * - mode: neutral, for match mode labels (Ranked/Unranked)
+ * - default: inherits from parent, no icon
  * Usage: <Badge variant="verified">{t("generated.badge.verified")}</Badge>
  * refs: none
  */
 
+/**
+ * Define badge variant as `"verified" | "supporter" | "ranked" | "mode" | "default"`.
+ * refs: none
+ */
 export type BadgeVariant = "verified" | "supporter" | "ranked" | "mode" | "default";
 
+/**
+ * Describe badge props with variant (optional), children, className (optional).
+ * refs: none
+ */
 export interface BadgeProps {
   variant?: BadgeVariant;
   children: React.ReactNode;
@@ -76,10 +81,10 @@ const iconMap: Record<string, React.ReactNode> = {
   ranked: <TrophyIcon />,
 };
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
- * Returns: `React.JSX.Element`
+/**
+ * Render badge.
  * refs: none
+ * I/O types: `{ variant = "default", children, className = "" }: BadgeProps -> JSX.Element`.
  */
 export default function Badge({ variant = "default", children, className = "" }: BadgeProps) {
   const style = variantStyles[variant];

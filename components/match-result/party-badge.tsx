@@ -11,20 +11,22 @@ import { useLocalization } from "@/lib/localization-context";
 
 type PartyPlayer = Pick<MatchPlayerDetail, "party" | "party_number">;
 
-/** Render getPartyNumber from its declared props and match data.
+/**
+ * Render getPartyNumber from its declared props and match data.
  * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
- * Returns: `number | null`
  * refs: none
+ * I/O types: `player: PartyPlayer -> number | null`.
  */
 export function getPartyNumber(player: PartyPlayer): number | null {
   const value = Number(player.party ?? player.party_number ?? 0);
   return Number.isFinite(value) && value > 0 ? Math.trunc(value) : null;
 }
 
-/** Render PartyBadge from its declared props and match data.
+/**
+ * Render PartyBadge from its declared props and match data.
  * Contract: consumes the declared props, preserves event and accessibility behavior, and returns the corresponding UI element.
- * Returns: `React.JSX.Element`
  * refs: none
+ * I/O types: `{ player, className = "", }: { player: PartyPlayer; className?: string; } -> JSX.Element | null`.
  */
 export default function PartyBadge({
   player,

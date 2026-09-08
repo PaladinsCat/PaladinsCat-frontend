@@ -1,5 +1,5 @@
-/** CommunityVoteLeaderboard component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * Render community vote leaderboard with `PlayersPageHeader`, `LoadingPanel`, `PlayerDirectoryGrid`.
  * refs: none
  */
 "use client";
@@ -32,10 +32,10 @@ const CONFIG = {
   },
 } as const;
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
- * Returns: `React.JSX.Element`
+/**
+ * Render community vote leaderboard with `PlayersPageHeader`, `LoadingPanel`, `PlayerDirectoryGrid`.
  * refs: none
+ * I/O types: `{ kind }: { kind: VoteKind } -> JSX.Element`.
  */
 export default function CommunityVoteLeaderboard({ kind }: { kind: VoteKind }) {
   const { t } = useLocalization();

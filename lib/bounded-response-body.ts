@@ -3,9 +3,10 @@
  * Returns: `Promise<Uint8Array | null>`
  * refs: none
  */
-/** readBodyWithinLimit applies the module-specific transformation to its declared inputs.
- * Contract: validates its inputs and returns the existing module result without mutating caller state.
+/**
+ * Read stream chunks into one byte array without exceeding maxBytes. Return null for absent streams, invalid limits, empty bodies, or over-limit bodies; cancel an oversized stream, release the reader lock in finally, and propagate read failures.
  * refs: none
+ * I/O types: `body: ReadableStream<Uint8Array> | null; maxBytes: number -> Promise<Uint8Array | null>`.
  */
 export async function readBodyWithinLimit(
   body: ReadableStream<Uint8Array> | null,

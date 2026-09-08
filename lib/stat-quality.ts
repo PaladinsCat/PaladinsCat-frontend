@@ -1,6 +1,10 @@
 /**
+ * Maps a bounded 0–100 percentage to the canonical red-orange-green spectrum.
  * Keeps stat quality server-side and aligned with its data source.
- * Preserve its server boundary and caller-facing data contracts.
+ * refs: none
+ */
+/**
+ * Describe stat quality with score, color, softColor, borderColor, background, track, textClass.
  * refs: none
  */
 export interface StatQuality {
@@ -40,6 +44,7 @@ function colorForScore(score: number): string {
  * Use low-is-good for rates where a larger percentage is worse, such as leave
  * rate. Signed or unbounded deltas must keep their directional colors instead.
  * refs: colors.md#bounded-percentage-spectrum
+ * I/O types: `value: number | null | undefined; direction: "high-is-good" | "low-is-good" -> string`.
  */
 export function getPercentageColor(
   value: number | null | undefined,
@@ -52,6 +57,7 @@ export function getPercentageColor(
 /**
  * Classifies stat confidence from win rate and pick-rate coverage.
  * refs: none
+ * I/O types: `winRate: number | null | undefined; pickRate: number | null | undefined; maxPickRate: number -> StatQuality`.
  */
 export function getStatQuality(winRate: number | null | undefined, pickRate: number | null | undefined, maxPickRate = 100): StatQuality {
   const wr = Number(winRate ?? 0);

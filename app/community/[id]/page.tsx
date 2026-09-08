@@ -1,10 +1,9 @@
 /**
- * Define the community page responsibility boundary.
- * Coordinates community page data loading, authorization, and presentation.
+ * Render the /community/[id] route with `LoadingPanel`, `LoadingIndicator`, `VerifiedPlayerBadge`, `CommunityRichContent`.
  * refs: none
  */
 "use client";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -22,21 +21,33 @@ import {
   type Comment,
   type PostDetail,
 } from "@/lib/api-client";
-import { formatLocalDateTime } from "@/lib/time-format";
 import CommunityRichContent from "@/components/CommunityRichContent";
+import { orderReplies } from "@/lib/community-replies";
 import { LoadingIndicator, LoadingPanel } from "@/components/async-state";
 import { VerifiedPlayerBadge } from "@/components/player-name";
 import { useLocalization } from "@/lib/localization-context";
 
 /**
- * Handles the exported route operation using its declared request and response contract.
- * Returns: `React.JSX.Element`
+ * Render the /community/[id] route with `LoadingPanel`, `LoadingIndicator`, `VerifiedPlayerBadge`, `CommunityRichContent`.
  * refs: none
+ * I/O types: `{ params }: { params: Promise<{ id: string }> } -> JSX.Element`.
  */
 export default function PostDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { t , formatDateTime} = useLocalization();
   const router = useRouter();
+  const [replyTo, setReplyTo] = useState<Comment | null>(null);
+  const composerRef = useRef<HTMLInputElement>(null);
   const [detail, setDetail] = useState<PostDetail | null>(null);
+  useEffect(() => {
+    const scrollToComment = () => {
+      if (detail?.post.id && /^#comment-\d+$/.test(window.location.hash)) {
+        document.getElementById(window.location.hash.slice(1))?.scrollIntoView({ block: "center" });
+      }
+    };
+    scrollToComment();
+    window.addEventListener("hashchange", scrollToComment);
+    return () => window.removeEventListener("hashchange", scrollToComment);
+  }, [detail?.post.id]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -68,7 +79,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, t]);
 
   useEffect(() => {
     loadPost();
@@ -78,7 +89,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
     const token = getAuthToken();
     const user = getAuthUser();
     if ((!token && !hasCookieAuthSession()) || !user) {
-      window.location.href = "/auth/login";
+      router.push("/auth/login");
       return null;
     }
     return { token, user };
@@ -146,12 +157,13 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
 
     setCommenting(true);
     try {
-      const comment = await addComment(detail.post.id, auth.user.id, newComment.trim(), null, auth.token);
+      const comment = await addComment(detail.post.id, auth.user.id, newComment.trim(), replyTo?.id ?? null, auth.token);
       setDetail((prev) => prev ? {
         ...prev,
         comments: [...prev.comments, comment],
       } : null);
       setNewComment("");
+      setReplyTo(null);
     } catch (err) {
       setActionError(err instanceof Error ? err.message : t("generated.community.[id].page.failedtoaddcomment"));
     } finally {
@@ -196,9 +208,10 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
     setBusyCommentId(commentId);
     try {
       await deleteComment(commentId, auth.token);
+      if (replyTo?.id === commentId) setReplyTo(null);
       setDetail((prev) => prev ? {
         ...prev,
-        comments: prev.comments.filter((comment) => comment.id !== commentId),
+        comments: prev.comments.filter((comment) => comment.id !== commentId).map((comment) => comment.parentId === commentId ? { ...comment, parentId: null } : comment),
       } : null);
     } catch (err) {
       setActionError(err instanceof Error ? err.message : t("generated.community.[id].page.failedtodeletecomment"));
@@ -308,9 +321,15 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
           {t("generated.community.comments")}{comments.length})
         </h2>
 
+        {replyTo && <div className="mb-2 flex items-center justify-between gap-3 text-sm text-pc-text-secondary">
+          <span>{t("community.replyingTo", { name: replyTo.username })}</span>
+          <button type="button" onClick={() => setReplyTo(null)}>{t("generated.community.cancel")}</button>
+        </div>}
         <form onSubmit={handleComment} className="mb-6 flex gap-3">
           <input
             type="text"
+            ref={composerRef}
+            aria-label={t("generated.community.addAComment")}
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             placeholder={t("generated.community.addAComment")}
@@ -329,13 +348,14 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
           <p className="text-pc-text-muted text-center py-4">{t("generated.community.noCommentsYet")}</p>
         ) : (
           <div className="space-y-3">
-            {comments.map((comment) => {
+            {orderReplies(comments).map((comment) => {
               const canEditComment = currentUser ? currentUser.id === comment.userId || currentUser.isAdmin : false;
               const isEditing = editingCommentId === comment.id;
               const isBusy = busyCommentId === comment.id;
 
               return (
-                <div key={comment.id} className="bg-pc-bg-secondary rounded-lg p-4">
+                <div key={comment.id} id={`comment-${comment.id}`} className={`scroll-mt-24 bg-pc-bg-secondary rounded-lg p-4 ${comment.parentId ? "ml-4 border-l-2 border-pc-accent/40 sm:ml-8" : ""}`}>
+                  {comment.parentId && <a href={`#comment-${comment.parentId}`} className="mb-2 block truncate text-sm text-pc-text-secondary">{t("community.replyingTo", { name: comments.find((parent) => parent.id === comment.parentId)?.username ?? "…" })}</a>}
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-2 text-sm">
                       <span className="inline-flex items-center gap-1 text-pc-text font-medium">{comment.username}{comment.linkedPlayerId != null && <VerifiedPlayerBadge />}</span>
@@ -360,6 +380,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                       </div>
                     )}
                   </div>
+                  {!isEditing && <button type="button" onClick={() => { setReplyTo(comment); composerRef.current?.focus(); composerRef.current?.scrollIntoView({ block: "center", behavior: "smooth" }); }} className="mt-2 text-sm text-pc-accent">{t("community.reply")}</button>}
                   {isEditing ? (
                     <div className="mt-3 space-y-3">
                       <textarea

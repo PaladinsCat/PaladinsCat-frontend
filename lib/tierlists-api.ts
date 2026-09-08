@@ -9,8 +9,16 @@ import { csrfHeader } from "./csrf";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api";
 
+/**
+ * Define tier name as `"S" | "A" | "B" | "C" | "D" | "F"`.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export type TierName = "S" | "A" | "B" | "C" | "D" | "F";
 
+/**
+ * Describe tier list entry with championId, championName, tier, position.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface TierListEntry {
   championId: number;
   championName: string;
@@ -18,6 +26,10 @@ export interface TierListEntry {
   position: number;
 }
 
+/**
+ * Describe tier list summary with id, userId, username, linkedPlayerId, title, description, likes.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface TierListSummary {
   id: number;
   userId: number;
@@ -85,8 +97,8 @@ function mapTierList(raw: RawTierList): TierListSummary {
  * Fetch the newest tier lists for the public listing.
  *
  * Accepts limit; returns tier-list summaries after an API request using account-aware headers.
- * Returns: `Promise<TierListSummary[]>`
  * refs: none
+ * I/O types: `limit: number -> Promise<TierListSummary[]>`.
  */
 export async function fetchTierLists(limit = 30): Promise<TierListSummary[]> {
   const rows = await requestJson<RawTierList[]>(`/tierlists?limit=${Math.max(1, Math.min(limit, 100))}`);
@@ -97,8 +109,8 @@ export async function fetchTierLists(limit = 30): Promise<TierListSummary[]> {
  * Fetch one tier list and its champion placements by post ID.
  *
  * Accepts postId; returns a tier-list summary after an authenticated-capable API request.
- * Returns: `Promise<TierListSummary>`
  * refs: none
+ * I/O types: `postId: number -> Promise<TierListSummary>`.
  */
 export async function fetchTierList(postId: number): Promise<TierListSummary> {
   return mapTierList(await requestJson<RawTierList>(`/tierlists/${postId}`, { cache: "no-store" }));
@@ -108,8 +120,8 @@ export async function fetchTierList(postId: number): Promise<TierListSummary> {
  * Create a tier list from its title, description, and ordered entries.
  *
  * Accepts input; returns the created summary after an authenticated state-changing API request.
- * Returns: `Promise<{ postId: number }>`
  * refs: none
+ * I/O types: `input: { title: string; description: string; entries: Array<{ championId: number; tier: TierName; position: number }>; token: string | null; } -> Promise<{ postId: number }>`.
  */
 export async function createTierList(input: {
   title: string;
@@ -128,8 +140,8 @@ export async function createTierList(input: {
  * Replace the editable fields and entries of an existing tier list.
  *
  * Accepts postId and input; returns the updated summary after an authenticated API mutation.
- * Returns: `Promise<{ postId: number }>`
  * refs: none
+ * I/O types: `postId: number; input: { title: string; description: string; entries: Array<{ championId: number; tier: TierName; position: number }>; token: string | null; } -> Promise<{ postId: number }>`.
  */
 export async function updateTierList(postId: number, input: {
   title: string;

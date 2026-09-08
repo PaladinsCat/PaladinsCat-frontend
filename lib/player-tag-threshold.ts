@@ -2,15 +2,16 @@
  * The module owns the existing validation, policy, label, title, or preference behavior.
  * refs: none
  */
-/** Apply PLAYER_TAG_MINIMUM_COUNT to the declared player or request input.
- * Contract: enforces the module rule and returns the documented value without changing unrelated state.
+/**
+ * Require five observations before showing a count-based player tag.
  * refs: none
  */
 export const PLAYER_TAG_MINIMUM_COUNT = 5;
 
-/** Apply hasPlayerTag to the declared player or request input.
- * Contract: enforces the module rule and returns the documented value without changing unrelated state.
+/**
+ * Coerce the count to a number and return true only when it is finite and at least PLAYER_TAG_MINIMUM_COUNT (five).
  * refs: none
+ * I/O types: `count: unknown -> boolean`.
  */
 export function hasPlayerTag(count: unknown): boolean {
   const value = Number(count);

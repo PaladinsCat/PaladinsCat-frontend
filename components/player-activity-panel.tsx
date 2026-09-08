@@ -1,5 +1,5 @@
-/** player-activity-panel component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * Render player activity panel with `ActivityStatementContext.Provider`, `HourlyCardHeader`, `LoadingPanel`, `ActivityChartStatement`, `PlayerHourlyRegionCard`.
  * refs: none
  */
 "use client";
@@ -45,6 +45,10 @@ type DisplayActivity = {
   hourly: Array<{ hour: number; date: string; total: number; regions: Record<string, number> }>;
 };
 
+/**
+ * Define player activity initial data as `{ overview: MatchesOverview | null; presence: PresenceStats | null; presenceHourly: PresenceHourlyStats | null; }`.
+ * refs: none
+ */
 export type PlayerActivityInitialData = {
   overview: MatchesOverview | null;
   presence: PresenceStats | null;
@@ -107,10 +111,10 @@ function aggregateQueues(queues: MatchQueueActivity[]): DisplayActivity {
   };
 }
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
- * Returns: `React.JSX.Element`
+/**
+ * Render player activity panel with `ActivityStatementContext.Provider`, `HourlyCardHeader`, `LoadingPanel`, `ActivityChartStatement`, `PlayerHourlyRegionCard`.
  * refs: none
+ * I/O types: `{ showStatements = true, initialData = null, }: { showStatements?: boolean; initialData?: PlayerActivityInitialData | null; } -> JSX.Element`.
  */
 export default function PlayerActivityPanel({
   showStatements = true,
@@ -244,7 +248,7 @@ export default function PlayerActivityPanel({
 
   return (
     <ActivityStatementContext.Provider value={showStatements}>
-    <div className="mx-auto w-full max-w-6xl space-y-5">
+    <div className="w-full min-w-0 space-y-6">
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       <section className="pc-card min-w-0 p-3 sm:p-4">
         <HourlyCardHeader
@@ -397,9 +401,10 @@ function ActivityBar({
 }
 
 function ChartHelp({ title, text }: { title: string; text: ReactNode }) {
+  const { t } = useLocalization();
   const tooltipId = useId();
   return <span className="group relative inline-flex shrink-0">
-    <button type="button" aria-label={`About ${title}`} aria-describedby={tooltipId} className="inline-flex cursor-help text-pc-text-muted hover:text-pc-text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent">
+    <button type="button" aria-label={t("common.about", { title })} aria-describedby={tooltipId} className="inline-flex cursor-help text-pc-text-muted hover:text-pc-text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent">
       <Info aria-hidden="true" className="h-3.5 w-3.5" />
     </button>
     <span id={tooltipId} role="tooltip" className="pc-surface pointer-events-none absolute left-0 top-full z-20 mt-2 w-72 translate-y-1 rounded-lg border border-pc-border px-3 py-2 text-xs font-normal leading-5 text-pc-text opacity-0 transition-[opacity,transform] duration-200 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100 motion-reduce:transition-none">{text}</span>
@@ -796,7 +801,7 @@ function PlayerPresenceBreakdown({
           {queues.length === 0 && <span className="text-xs text-pc-text-muted">—</span>}
         </div>
       </div>
-      <div className="p-4">
+      <div id="platforms" className="scroll-mt-24 p-4">
         <div className="flex items-start justify-between gap-3">
           <h2 className="text-sm font-bold text-pc-text">{platformTitle}</h2>
           <span className="font-mono text-xs" style={{ color: getPercentageColor(coveragePercent) }}>{coverageLabel}: {coveragePercent}%</span>
@@ -816,7 +821,7 @@ function PlayerPresenceBreakdown({
           {platforms.length > 0 && <ActivityChartStatement className="text-right" />}
           {platforms.length === 0 && <span className="text-xs text-pc-text-muted">—</span>}
         </div>
-        <div className="mt-6 border-t border-pc-border/50 pt-4">
+        <div id="regions" className="mt-6 scroll-mt-24 border-t border-pc-border/50 pt-4">
           <h2 className="text-sm font-bold text-pc-text">{regionTitle}</h2>
           <div className={`mt-4 ${showStatements ? "space-y-1" : "space-y-3"}`}>
             {regions.length > 0 && <ActivityChartStatement className="text-right" />}

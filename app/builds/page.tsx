@@ -15,10 +15,10 @@ import { useLocalization } from "@/lib/localization-context";
 
 
 /**
+ * Render /builds using `RouteSkeleton`, `ErrorState`, `EmptyState`.
  * Render the BuildsPage view for builds page.
- * Return the React tree for the declared inputs and page data.
- * Returns: `React.JSX.Element`
  * refs: none
+ * I/O types: `none -> JSX.Element`.
  */
 export default function BuildsPage() {
   const { t , formatDateTime} = useLocalization();

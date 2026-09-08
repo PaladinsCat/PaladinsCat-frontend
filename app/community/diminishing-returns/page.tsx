@@ -1,6 +1,5 @@
 /**
- * Define the community diminishing returns page responsibility boundary.
- * Coordinates community diminishing returns page data loading, authorization, and presentation.
+ * Render the /community/diminishing-returns route with `AlertTriangle`, `Calculator`, `Download`, `LoadingPanel`, `Info`.
  * refs: none
  */
 "use client";
@@ -182,9 +181,9 @@ function parseNumber(value: string | null | undefined) {
 }
 
 /**
- * Handles the exported route operation using its declared request and response contract.
- * Returns: `React.JSX.Element`
+ * Render the /community/diminishing-returns route with `AlertTriangle`, `Calculator`, `Download`, `LoadingPanel`, `Info`.
  * refs: none
+ * I/O types: `none -> JSX.Element`.
  */
 export default function DiminishingReturnsPage() {
   const { t, formatNumber } = useLocalization();

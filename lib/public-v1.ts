@@ -1,4 +1,9 @@
 /** Build a same-origin URL for a staged public v1 backend route. · refs: none */
+/**
+ * Compute public v1 path and return ``${resolved.pathname}${resolved.search}${resolved.hash}``.
+ * I/O types: `path: string -> string`.
+ * refs: none
+ */
 export function publicV1Path(path: string): string {
   const value = path.trim();
   if (/^(?:[a-z][a-z\d+.-]*:|\/\/)/i.test(value)) {

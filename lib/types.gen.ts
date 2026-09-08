@@ -68,7 +68,12 @@ export type Player = {
   kbm_points?: number | null;
 };
 
+/** Describe normalized player profile data, including nullable observed rates.
+ * I/O: normalized API object -> PlayerProfile.
+ * refs: endpoints: GET /players/{id}; see: lib/api-client.ts
+ */
 export type PlayerProfile = {
+  derivedRates?: { kpm: number | null; deathsPerMinute: number | null };
   id: string;
   name: string;
   platform?: string | null;

@@ -1,6 +1,5 @@
 /**
- * Define the contact layout responsibility boundary.
- * Coordinates contact layout data loading, authorization, and presentation.
+ * Pass the /contact layout children through unchanged; route metadata is configured separately.
  * refs: none
  */
 import { createCanonicalMetadata } from "@/lib/canonical-metadata";
@@ -12,8 +11,8 @@ import { createCanonicalMetadata } from "@/lib/canonical-metadata";
  */
 export const metadata = createCanonicalMetadata("/contact");
 /**
- * Handles the exported route operation using its declared request and response contract.
- * Returns: `React.JSX.Element`
+ * Pass the /contact layout children through unchanged; route metadata is configured separately.
  * refs: none
+ * I/O types: `{ children }: { children: React.ReactNode } -> ReactNode`.
  */
 export default function ContactLayout({ children }: { children: React.ReactNode }) { return children; }

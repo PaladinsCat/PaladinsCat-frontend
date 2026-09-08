@@ -1,5 +1,5 @@
-/** WinRateChart component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * Render win rate chart with `LineChartComponent`.
  * refs: none
  */
 "use client";
@@ -8,15 +8,19 @@ import { LineChartComponent } from "./Chart";
 import type { PatchTrend } from "@/lib/api-client";
 import { useLocalization } from "@/lib/localization-context";
 
+/**
+ * Describe win rate chart props with data, championName.
+ * refs: none
+ */
 export interface WinRateChartProps {
   data: PatchTrend[];
   championName: string;
 }
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
- * Returns: `React.JSX.Element`
+/**
+ * Render win rate chart with `LineChartComponent`.
  * refs: none
+ * I/O types: `{ data, championName }: WinRateChartProps -> JSX.Element`.
  */
 export default function WinRateChart({ data, championName }: WinRateChartProps) {
   const { t } = useLocalization();

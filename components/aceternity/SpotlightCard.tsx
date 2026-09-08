@@ -4,7 +4,10 @@
 import { useReducedMotion } from "@/lib/reduced-motion";
 import { useState } from "react";
 
-/** Track pointer position over the card and expose the highlight without changing child content. · refs: none */
+/**
+ * Track pointer position over the card and expose the highlight without changing child content. · refs: none
+ * I/O types: `{ children, className = "", }: { children: React.ReactNode; className?: string; } -> JSX.Element`.
+ */
 export function SpotlightCard({
   children,
   className = "",

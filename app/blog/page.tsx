@@ -1,6 +1,5 @@
 /**
- * Define the blog page responsibility boundary.
- * Coordinates blog page data loading, authorization, and presentation.
+ * Render the localized blog index, filtering posts by the requested category. · refs: none
  * refs: none
  */
 import { BLOG_CATEGORIES, getAllPosts, getPostLink, isBlogCategory, type BlogCategory } from "@/lib/blog";
@@ -11,14 +10,12 @@ import Link from "next/link";
 // Blog content is owned by GitHub. Always render against its current contents
 // while keeping this public route at /blog.
 /**
- * Selects request-fresh rendering for this data-dependent page.
- * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ * Select the declared Next route rendering mode.
  * refs: none
  */
 export const dynamic = "force-dynamic";
 /**
- * Handles the exported route operation using its declared request and response contract.
- * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ * Set the declared Next route revalidation interval in seconds, or disable timed revalidation when false.
  * refs: none
  */
 export const revalidate = 0;
@@ -36,9 +33,9 @@ type BlogPageProps = {
 type BlogCategoryFilter = BlogCategory | "all";
 
 /**
- * Handles the exported route operation using its declared request and response contract.
- * Returns: `Promise<Metadata>`
+ * Build localized metadata for /blog, including the title and any canonical, description, and crawler directives configured for this route.
  * refs: none
+ * I/O types: `none -> Promise<{ title: string; description: string; alternates: { canonical: string; }; openGraph: { title: string; description: string; type: "website"; url: string; }; }>`.
  */
 export async function generateMetadata() {
   const { t } = await getServerLocalization();
@@ -52,7 +49,10 @@ export async function generateMetadata() {
   };
 }
 
-/** Render the localized blog index, filtering posts by the requested category. · refs: none */
+/**
+ * Render the localized blog index, filtering posts by the requested category. · refs: none
+ * I/O types: `{ searchParams }: BlogPageProps -> Promise<JSX.Element>`.
+ */
 export default async function BlogPage({ searchParams }: BlogPageProps) {
   const { t } = await getServerLocalization();
   const { category } = await searchParams;

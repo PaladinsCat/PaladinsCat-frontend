@@ -14,8 +14,8 @@ type Props = {
 /**
  * Build SEO metadata for matches id layout.
  * Return the Next.js metadata object used by the page without mutating application data.
- * Returns: `Promise<Metadata>`
  * refs: none
+ * I/O types: `{ params }: Props -> Promise<Metadata>`.
  */
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
@@ -31,10 +31,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 /**
+ * Pass the /matches/[id] layout children through unchanged.
  * Render the MatchDetailLayout view for matches id layout.
- * Return the React tree for the declared inputs and page data.
- * Returns: `React.JSX.Element`
  * refs: none
+ * I/O types: `{ children }: Props -> ReactNode`.
  */
 export default function MatchDetailLayout({ children }: Props) {
   return children;

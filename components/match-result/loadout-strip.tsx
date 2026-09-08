@@ -29,7 +29,10 @@ function MaterialIcon({ src, fallbackSrc, alt, className = "w-8 h-8 object-cover
   );
 }
 
-/** Show the player's loadout icons with localized names and fallback image handling.  Returns: `React.JSX.Element`. · refs: none */
+/**
+ * Show the player's loadout icons with localized names and fallback image handling.  Returns: `React.JSX.Element`. · refs: none
+ * I/O types: `{ fact }: LoadoutStripProps -> JSX.Element | null`.
+ */
 export default function LoadoutStrip({ fact }: LoadoutStripProps) {
   const { t } = useLocalization();
   const allMaterials = [

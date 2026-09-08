@@ -1,14 +1,15 @@
-/** Loads and protects the OIDC client secret boundary.
- * The module owns its existing image, OIDC, proxy, roster, or moderation boundary.
+/**
+ * Read the configured secret file when present, otherwise use OIDC_CLIENT_SECRET; trim whitespace and return null for an empty or missing value. File read errors propagate.
+ * Loads and protects the OIDC client secret boundary.
  * refs: none
  */
 import "server-only";
 import { readFileSync } from "node:fs";
 
-/** Apply oidcClientSecret to the declared request or domain inputs.
- * Contract: validates inputs, preserves the existing security or mapping rules, and returns the documented result.
- * Returns: `string | null`
+/**
+ * Read the configured secret file when present, otherwise use OIDC_CLIENT_SECRET; trim whitespace and return null for an empty or missing value. File read errors propagate.
  * refs: none
+ * I/O types: `none -> string | null`.
  */
 export function oidcClientSecret(): string | null {
   const file = process.env.OIDC_CLIENT_SECRET_FILE;

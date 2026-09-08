@@ -1,5 +1,5 @@
 /**
- * Define the player route surface for performance page and its local data boundary.
+ * Render the PerformanceLeaderboardPage view for the player performance page route.
  * This file owns the page, layout, loading state, or route handler named by its path.
  * It does not own unrelated player sections or shared library policy.
  * refs: none
@@ -33,8 +33,8 @@ type PerformanceMode = "match" | "account" | "champion";
 
 /**
  * Render the PerformanceLeaderboardPage view for the player performance page route.
- * Returns: `React.JSX.Element`
  * refs: none
+ * I/O types: `{ mode = "match" }: { mode?: PerformanceMode } -> JSX.Element`.
  */
 export default function PerformanceLeaderboardPage({ mode = "match" }: { mode?: PerformanceMode }) {
   const { t , formatNumber} = useLocalization();

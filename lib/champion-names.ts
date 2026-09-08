@@ -1,15 +1,8 @@
 /**
- * Champion name resolver — fetches the full champion list from the backend
- * /reference/champions endpoint (backed by the `champions` table).
- *
- * Usage:
- *
- *   // Hook (recommended — reactive, auto-renders when loaded)
- *   const championName = useChampionName(2288); // "Cassie"
- *
- *   // Imperative (server components or one-off lookups)
- *   const name = await getChampionName(2288);
- *
+ * Champion name resolver — fetches the full champion list from the backend /reference/champions endpoint (backed by the `champions` table). Usage: // Hook (recommended — reactive, auto-renders when loaded)
+ * const championName = useChampionName(2288); // "Cassie"
+ * // Imperative (server components or one-off lookups)
+ * const name = await getChampionName(2288);
  * Failure recovery: if the fetch fails, the cache clears so the next call
  * retries automatically. No manual refresh needed.
  * refs: none
@@ -57,6 +50,7 @@ async function loadChampionMap(): Promise<void> {
  * Resolve a champion ID to its name. Returns the ID as a string fallback if
  * the map hasn't loaded or the champion isn't found.
  * refs: none
+ * I/O types: `id: number -> Promise<string>`.
  */
 export async function getChampionName(id: number): Promise<string> {
   await loadChampionMap();
@@ -65,8 +59,8 @@ export async function getChampionName(id: number): Promise<string> {
 
 /**
  * Force-refresh the map (useful for after backend reseed).
- * Returns: `Promise<void>`
  * refs: none
+ * I/O types: `none -> Promise<void>`.
  */
 export function refreshChampionMap(): Promise<void> {
   championMap = null;
@@ -75,8 +69,8 @@ export function refreshChampionMap(): Promise<void> {
 
 /**
  * Get all available champions as { id, name } pairs.
- * Returns: `Array<{ id: number; name: string }> | null`
  * refs: none
+ * I/O types: `none -> Array<{ id: number; name: string }> | null`.
  */
 export function getChampions(): Array<{ id: number; name: string }> | null {
   if (!championMap) return null;
@@ -94,6 +88,7 @@ import { useEffect, useState } from "react";
  * `name` is `null` while the reference list is being fetched.
  * When the API resolves, the component re-renders automatically.
  * refs: none
+ * I/O types: `id: number -> { name: string | null; loading: boolean }`.
  */
 export function useChampionName(id: number): { name: string | null; loading: boolean } {
   const [name, setName] = useState<string | null>(null);
@@ -129,8 +124,8 @@ export function useChampionName(id: number): { name: string | null; loading: boo
 
 /**
  * React hook that loads the full champion list (for dropdowns / select inputs).
- * Returns: `object`
  * refs: none
+ * I/O types: `none -> { champions: Array<{ id: number; name: string }> | null; loading: boolean }`.
  */
 export function useChampions(): { champions: Array<{ id: number; name: string }> | null; loading: boolean } {
   const [champions, setChampions] = useState<Array<{ id: number; name: string }> | null>(null);

@@ -1,10 +1,15 @@
-/** Builds player loadout roster display data.
- * The module owns its existing image, OIDC, proxy, roster, or moderation boundary.
+/**
+ * Saved decks use Hi-Rez champion IDs, not the compact display-order IDs in
+ * Builds player loadout roster display data.
  * refs: none
  */
 import { fetchChampions } from "@/lib/api-client";
 import { STATIC_CHAMPIONS } from "@/lib/static-champions";
 
+/**
+ * Define player loadout champion as `{ id: number; name: string; roles: string[] }`.
+ * refs: none
+ */
 export type PlayerLoadoutChampion = { id: number; name: string; roles: string[] };
 
 let rosterPromise: Promise<PlayerLoadoutChampion[]> | null = null;
@@ -13,8 +18,8 @@ let rosterPromise: Promise<PlayerLoadoutChampion[]> | null = null;
  * Saved decks use Hi-Rez champion IDs, not the compact display-order IDs in
  * static-champions.ts. Use the database catalog for links and filters so deck
  * rows, card references, and player loadouts share one identity.
- * Returns: `Promise<PlayerLoadoutChampion[]>`
  * refs: none
+ * I/O types: `none -> Promise<PlayerLoadoutChampion[]>`.
  */
 export function getPlayerLoadoutChampionRoster(): Promise<PlayerLoadoutChampion[]> {
   if (!rosterPromise) {

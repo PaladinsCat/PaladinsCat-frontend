@@ -25,8 +25,9 @@ export const BLOG_CATEGORIES = ["public-release", "q-and-a", "guide"] as const;
 export type BlogCategory = (typeof BLOG_CATEGORIES)[number];
 
 /**
- * Transforms or validates is blog category according to this module's data contract.
+ * Narrow a string to BlogCategory only when it occurs in BLOG_CATEGORIES.
  * refs: none
+ * I/O types: `value: string | undefined -> value is BlogCategory`.
  */
 export function isBlogCategory(value: string | undefined): value is BlogCategory {
   return BLOG_CATEGORIES.includes(value as BlogCategory);
@@ -251,9 +252,9 @@ async function loadCachedPosts(): Promise<BlogPost[]> {
 }
 
 /**
- * Reads all posts from the module's configured source.
- * Returns: `Promise<BlogPost[]>`
+ * Load cached GitHub blog posts and return a new array sorted newest publication first, breaking ties by slug. Log loading failures and return an empty array so an upstream outage does not fail the blog page.
  * refs: none
+ * I/O types: `none -> Promise<BlogPost[]>`.
  */
 export async function getAllPosts(): Promise<BlogPost[]> {
   try {
@@ -270,9 +271,9 @@ export async function getAllPosts(): Promise<BlogPost[]> {
 }
 
 /**
- * Reads post by slug from the module's configured source.
- * Returns: `Promise<BlogPost | null>`
+ * Normalize the requested slug and find it in cached blog posts. Return null for invalid or missing slugs; log loading failures and return null.
  * refs: none
+ * I/O types: `slug: string -> Promise<BlogPost | null>`.
  */
 export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
   const normalizedSlug = normalizeSlug(slug);
@@ -288,9 +289,9 @@ export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
 }
 
 /**
- * Reads post link from the module's configured source.
- * Returns: `string`
+ * Normalize and path-encode a post slug into /blog/<slug>, falling back to /blog when the slug is invalid.
  * refs: none
+ * I/O types: `slug: string -> string`.
  */
 export function getPostLink(slug: string): string {
   const normalizedSlug = normalizeSlug(slug);
@@ -311,7 +312,10 @@ function resolveSourcePath(reference: string, currentSourcePath: string): string
   }
 }
 
-/** Map any relative Markdown-document reference onto its matching public blog route. · refs: none */
+/**
+ * Map any relative Markdown-document reference onto its matching public blog route. · refs: none
+ * I/O types: `href: string | undefined; currentSourcePath: string -> string | undefined`.
+ */
 export function resolveBlogLink(href: string | undefined, currentSourcePath: string): string | undefined {
   if (!href || href.startsWith("#") || href.startsWith("/") || hasUrlScheme(href)) return href;
   const suffixIndex = href.search(/[?#]/);
@@ -324,7 +328,10 @@ export function resolveBlogLink(href: string | undefined, currentSourcePath: str
   return slug ? `${getPostLink(slug)}${suffix}` : href;
 }
 
-/** Resolve repository-relative images against the public raw-content tree. · refs: none */
+/**
+ * Resolve repository-relative images against the public raw-content tree. · refs: none
+ * I/O types: `src: string | undefined; currentSourcePath: string -> string | undefined`.
+ */
 export function resolveBlogAssetUrl(src: string | undefined, currentSourcePath: string): string | undefined {
   if (!src || src.startsWith("/") || src.startsWith("#") || hasUrlScheme(src)) return src;
   try {

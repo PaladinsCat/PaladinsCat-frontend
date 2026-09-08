@@ -1,11 +1,19 @@
-/** Button component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * Render button.
  * refs: none
  */
 import Link from "next/link";
 
+/**
+ * Define button variant as `"primary" | "secondary" | "ghost"`.
+ * refs: none
+ */
 export type ButtonVariant = "primary" | "secondary" | "ghost";
 
+/**
+ * Describe button props with variant (optional), children, onClick (optional), disabled (optional), className (optional), type (optional).
+ * refs: none
+ */
 export interface ButtonProps {
   variant?: ButtonVariant;
   children: React.ReactNode;
@@ -15,10 +23,10 @@ export interface ButtonProps {
   type?: "button" | "submit";
 }
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
- * Returns: `React.JSX.Element`
+/**
+ * Render button.
  * refs: none
+ * I/O types: `{ variant = "primary", children, onClick, disabled, className = "", type = "button", }: ButtonProps -> JSX.Element`.
  */
 export default function Button({
   variant = "primary",
@@ -46,6 +54,10 @@ export default function Button({
   );
 }
 
+/**
+ * Describe link button props with variant (optional), children, href, className (optional).
+ * refs: none
+ */
 export interface LinkButtonProps {
   variant?: ButtonVariant;
   children: React.ReactNode;
@@ -53,9 +65,10 @@ export interface LinkButtonProps {
   className?: string;
 }
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+/**
+ * Render link button.
  * refs: none
+ * I/O types: `{ variant = "primary", children, href, className = "", }: LinkButtonProps -> JSX.Element`.
  */
 export function LinkButton({
   variant = "primary",

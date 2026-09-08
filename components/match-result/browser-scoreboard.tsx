@@ -188,7 +188,10 @@ function TeamSummary({ label, won, team, teamNumber }: { label: string; won: boo
   );
 }
 
-/** Present match players and derived score metrics using localized, linkable team rows.  Returns: `React.JSX.Element`. · refs: none */
+/**
+ * Present match players and derived score metrics using localized, linkable team rows.  Returns: `React.JSX.Element`. · refs: none
+ * I/O types: `{ match, queueLabel, team1, team2, bans }: BrowserScoreboardProps -> JSX.Element`.
+ */
 export default function BrowserScoreboard({ match, queueLabel, team1, team2, bans }: BrowserScoreboardProps) {
   const { formatNumber, locale, t } = useLocalization();
   const formatMatchDuration = (seconds: number) => {
@@ -245,7 +248,7 @@ export default function BrowserScoreboard({ match, queueLabel, team1, team2, ban
     <section id="browser-scoreboard" data-theme="dark" aria-label={t("generated.matches.matchScoreboardImage")}>
       <div className="mb-2 flex justify-end"><MatchExportButton matchId={match.match_id} target={scoreboardRef} /></div>
       <div ref={previewRef} className="relative w-full overflow-hidden" style={{ height: `${CANVAS_HEIGHT * previewScale}px` }}>
-        <main className="viewport" style={{ width: CANVAS_WIDTH, maxWidth: "none", transform: `scale(${previewScale})`, transformOrigin: "top left" }}>
+        <div className="viewport" style={{ width: CANVAS_WIDTH, maxWidth: "none", transform: `scale(${previewScale})`, transformOrigin: "top left" }}>
           <div className="scoreboard-canvas">
             <section ref={scoreboardRef} className="scoreboard" aria-label={t("generated.matches.paladinsMatchScoreboard")}>
               <img className="scoreboard-map-preview" src={mapImage.avif} alt="" aria-hidden="true" fetchPriority="high" decoding="async" />
@@ -288,7 +291,7 @@ export default function BrowserScoreboard({ match, queueLabel, team1, team2, ban
               <TeamSummary label={t("generated.matches.team2")} won={match.winning_task_force === 2} team={team2} teamNumber={2} />
             </section>
           </div>
-        </main>
+        </div>
       </div>
     </section>
   );

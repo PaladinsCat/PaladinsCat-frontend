@@ -1,5 +1,5 @@
-/** ChampionRateDetailPage component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * Render champion rate detail page with `RouteSkeleton`, `ContentFade`, `LoadingIndicator`.
  * refs: none
  */
 "use client";
@@ -131,10 +131,10 @@ function metricColor(config: RateMetricConfig, value: number): string {
   return getPercentageColor(value);
 }
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
- * Returns: `React.JSX.Element`
+/**
+ * Render champion rate detail page with `RouteSkeleton`, `ContentFade`, `LoadingIndicator`.
  * refs: none
+ * I/O types: `{ config, initialChampions = null, enableScopeSelection = false, }: { config: RateMetricConfig; initialChampions?: Champion[] | null; enableScopeSelection?: boolean; } -> JSX.Element`.
  */
 export default function ChampionRateDetailPage({
   config,

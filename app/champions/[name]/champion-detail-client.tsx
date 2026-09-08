@@ -201,10 +201,10 @@ function RankedPerformanceCard({
 }
 
 /**
+ * Render /champions/[name]/champion-detail-client.tsx using `StatBadge`, `LoadingPanel`, `RankedPerformanceCard`.
  * Render the ChampionDetailPage view for champions name champion-detail-client.
- * Return the React tree for the declared inputs and page data.
- * Returns: `React.JSX.Element`
  * refs: none
+ * I/O types: `{ initialChampionData = null, initialPageData = null, }: { initialChampionData?: ChampionData | null; initialPageData?: ChampionPagePayload | null; } -> JSX.Element`.
  */
 export default function ChampionDetailPage({
   initialChampionData = null,

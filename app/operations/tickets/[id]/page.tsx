@@ -1,6 +1,5 @@
 /**
- * Define the operations tickets page responsibility boundary.
- * Coordinates operations tickets page data loading, authorization, and presentation.
+ * Render the /operations/tickets/[id] route with `OperationsAuthWall`, `ArrowLeft`, `Trash2`.
  * refs: none
  */
 "use client";
@@ -13,9 +12,9 @@ import { useAuth } from "@/lib/auth-context";
 import { useLocalization } from "@/lib/localization-context";
 import { commentTicket, deleteTicket, getTicket, updateTicket, type TicketStatus } from "@/lib/operations-api";
 /**
- * Handles the exported route operation using its declared request and response contract.
- * Returns: `React.JSX.Element`
+ * Render the /operations/tickets/[id] route with `OperationsAuthWall`, `ArrowLeft`, `Trash2`.
  * refs: none
+ * I/O types: `none -> JSX.Element`.
  */
 export default function TicketDetailPage() {
   const { user,isLoading }=useAuth(); const { t }=useLocalization(); const params=useParams<{id:string}>(); const router=useRouter(); const id=String(params.id??"");

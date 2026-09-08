@@ -1,6 +1,5 @@
 /**
- * Define the layout responsibility boundary.
- * Coordinates layout data loading, authorization, and presentation.
+ * Render the site shell with localized metadata, nonce-aware security data, and shared providers.  Returns: `Promise<React.JSX.Element>`. · refs: none
  * refs: none
  */
 import type { Metadata } from "next";
@@ -28,9 +27,9 @@ import { SEO_KEYWORDS, SITE_NAME, SITE_URL, serializeJsonLd } from "@/lib/seo";
 import { getServerLocalization } from "@/lib/server-localization";
 
 /**
- * Handles the exported route operation using its declared request and response contract.
- * Returns: `Promise<Metadata>`
+ * Build localized metadata for /layout, including the title and any canonical, description, and crawler directives configured for this route.
  * refs: none
+ * I/O types: `none -> Promise<Metadata>`.
  */
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getServerLocalization();
@@ -77,7 +76,10 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-/** Render the site shell with localized metadata, nonce-aware security data, and shared providers.  Returns: `Promise<React.JSX.Element>`. · refs: none */
+/**
+ * Render the site shell with localized metadata, nonce-aware security data, and shared providers.  Returns: `Promise<React.JSX.Element>`. · refs: none
+ * I/O types: `{ children }: { children: React.ReactNode } -> Promise<JSX.Element>`.
+ */
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { locale, messages, t } = await getServerLocalization();
   const nonce = (await headers()).get("x-nonce") ?? undefined;

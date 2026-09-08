@@ -1,13 +1,11 @@
 /**
- * Define the discord preview player route responsibility boundary.
- * Coordinates discord preview player route data loading, authorization, and presentation.
+ * Validate the player ID as 1-20 decimal digits, then fetch the Discord renderer preview. Return no-store HTML on success, 400 for invalid IDs, the renderer error status for rejected requests, or 503 when the renderer is unreachable.
  * refs: none
  */
 import { NextRequest } from "next/server";
 
 /**
- * Selects request-fresh rendering for this data-dependent page.
- * Returns the declared route value; request, cache, and navigation effects follow the implementation.
+ * Select the declared Next route rendering mode.
  * refs: none
  */
 export const dynamic = "force-dynamic";
@@ -17,9 +15,9 @@ function rendererUrl() {
 }
 
 /**
- * Handles the exported route operation using its declared request and response contract.
- * Returns: `Promise<Response>`
+ * Validate the player ID as 1-20 decimal digits, then fetch the Discord renderer preview. Return no-store HTML on success, 400 for invalid IDs, the renderer error status for rejected requests, or 503 when the renderer is unreachable.
  * refs: none
+ * I/O types: `_request: NextRequest; context: { params: Promise<{ id: string }> } -> Promise<Response>`.
  */
 export async function GET(_request: NextRequest, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;

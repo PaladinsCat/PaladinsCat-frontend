@@ -1,5 +1,5 @@
 /**
- * Define the player route surface for class role page and its local data boundary.
+ * Render the ClassEloPage view for the player class role page route.
  * This file owns the page, layout, loading state, or route handler named by its path.
  * It does not own unrelated player sections or shared library policy.
  * refs: none
@@ -68,8 +68,8 @@ function RankBadge({ rank }: { rank: number }) {
 
 /**
  * Render the ClassEloPage view for the player class role page route.
- * Returns: `React.JSX.Element`
  * refs: none
+ * I/O types: `none -> JSX.Element | null`.
  */
 export default function ClassEloPage() {
   const { t , formatNumber, formatPercent} = useLocalization();

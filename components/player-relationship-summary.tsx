@@ -1,5 +1,5 @@
-/** player-relationship-summary component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * Render player relationship summary card with `UsersRound`, `PlayerRelationshipBars`.
  * refs: none
  */
 "use client";
@@ -12,10 +12,10 @@ import { fetchPlayerRelationshipSummary, type PlayerRelationshipSummary } from "
 import { getPercentageColor } from "@/lib/stat-quality";
 import { useLocalization } from "@/lib/localization-context";
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
- * Returns: `React.JSX.Element`
+/**
+ * Render player relationship summary card with `UsersRound`, `PlayerRelationshipBars`.
  * refs: none
+ * I/O types: `{ playerId }: { playerId: string } -> JSX.Element`.
  */
 export default function PlayerRelationshipSummaryCard({ playerId }: { playerId: string }) {
   const { t, formatNumber, formatPercent } = useLocalization();

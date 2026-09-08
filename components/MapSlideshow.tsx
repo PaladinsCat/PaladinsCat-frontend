@@ -28,8 +28,8 @@ const INTERVAL_MS = 10_000;
  * Crossfade transition between maps, cycling every 10 seconds.
  * Starts with a deterministic first map to avoid SSR hydration mismatch,
  * then shuffles order client-side after mount.
- * Returns: `React.JSX.Element`
  * refs: none
+ * I/O types: `none -> JSX.Element`.
  */
 export default function MapSlideshow() {
   const [wallpaperEnabled, setWallpaperEnabled] = useState(true);

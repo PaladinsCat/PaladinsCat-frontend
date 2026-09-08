@@ -19,6 +19,7 @@ const FEATURE_FETCH_TIMEOUT_MS = 10_000;
  * Return the editable GitHub source for the New Features document.
  * Returns: `string`; this is a pure URL construction with no network or persistence side effect.
  * refs: none
+ * I/O types: `none -> string`.
  */
 export function getFeatureSourceUrl(): string {
   return FEATURES_GITHUB_SOURCE_URL;
@@ -97,6 +98,7 @@ const getCachedFeatureDocument = unstable_cache(
  * Read the current repository-owned feature document.
  * Returns: `Promise<FeatureDocument | null>`; GitHub failures are converted to an empty document state.
  * refs: none
+ * I/O types: `none -> Promise<FeatureDocument | null>`.
  */
 export async function getFeatureDocument(): Promise<FeatureDocument | null> {
   try {
@@ -111,6 +113,7 @@ export async function getFeatureDocument(): Promise<FeatureDocument | null> {
  * Resolve a Markdown link against the feature document source.
  * Input `href: string | undefined` → output `string | undefined`; only relative Markdown references move to GitHub.
  * refs: none
+ * I/O types: `href: string | undefined -> string | undefined`.
  */
 export function resolveFeatureLink(href: string | undefined): string | undefined {
   if (!href || href.startsWith("#") || href.startsWith("/") || /^[a-z][a-z0-9+.-]*:/i.test(href) || href.startsWith("//")) return href;
@@ -126,6 +129,7 @@ export function resolveFeatureLink(href: string | undefined): string | undefined
  * Resolve a relative Markdown image against the raw repository document.
  * Input `src: string | undefined` → output `string | undefined`; no network or persistence side effect occurs here.
  * refs: none
+ * I/O types: `src: string | undefined -> string | undefined`.
  */
 export function resolveFeatureAssetUrl(src: string | undefined): string | undefined {
   if (!src || src.startsWith("/") || src.startsWith("#") || /^[a-z][a-z0-9+.-]*:/i.test(src) || src.startsWith("//")) return src;

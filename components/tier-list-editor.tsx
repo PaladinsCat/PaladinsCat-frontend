@@ -1,5 +1,5 @@
-/** tier-list-editor component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * Render tier list editor with `LoadingIndicator`.
  * refs: none
  */
 "use client";
@@ -46,10 +46,10 @@ function groupsFromEntries(champions: Champion[], entries: TierListEntry[] = [])
   return groups;
 }
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
- * Returns: `React.JSX.Element`
+/**
+ * Render tier list editor with `LoadingIndicator`.
  * refs: none
+ * I/O types: `{ initialList, }: { initialList?: TierListSummary; } -> JSX.Element`.
  */
 export default function TierListEditor({
   initialList,

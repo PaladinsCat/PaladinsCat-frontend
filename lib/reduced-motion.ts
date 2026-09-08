@@ -20,7 +20,10 @@ function snapshot() {
   return getLiteMode() || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
-/** Subscribe React components to the shared reduced-motion signal. · refs: none */
+/**
+ * Subscribe React components to the shared reduced-motion signal. · refs: none
+ * I/O types: `none -> boolean`.
+ */
 export function useReducedMotion(): boolean {
   return useSyncExternalStore(subscribe, snapshot, () => false);
 }

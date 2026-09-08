@@ -4,12 +4,17 @@
  * Returns: `boolean`
  * refs: none
  */
+/**
+ * Return whether the supplied setting, defaulting to NEXT_PUBLIC_IDENTITY_CUTOVER_ENABLED, is exactly the string true.
+ * I/O types: `value: string | undefined -> boolean`.
+ * refs: none
+ */
 export function isIdentityCutoverEnabled(value = process.env.NEXT_PUBLIC_IDENTITY_CUTOVER_ENABLED): boolean {
   return value === "true";
 }
 
-/** Apply identityCutoverEnabled to the declared input values.
- * Contract: returns the module-specific validated, stored, formatted, or resolved value without external side effects.
+/**
+ * Capture whether the build-time NEXT_PUBLIC_IDENTITY_CUTOVER_ENABLED setting equals true.
  * refs: none
  */
 export const identityCutoverEnabled = isIdentityCutoverEnabled();

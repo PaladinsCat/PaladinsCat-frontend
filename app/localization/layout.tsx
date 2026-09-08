@@ -1,6 +1,5 @@
 /**
- * Define the localization layout responsibility boundary.
- * Coordinates localization layout data loading, authorization, and presentation.
+ * Pass the /localization layout children through unchanged; route metadata is configured separately.
  * refs: none
  */
 import { createCanonicalMetadata } from "@/lib/canonical-metadata";
@@ -12,8 +11,8 @@ import { createCanonicalMetadata } from "@/lib/canonical-metadata";
  */
 export const metadata = createCanonicalMetadata("/localization");
 /**
- * Handles the exported route operation using its declared request and response contract.
- * Returns: `React.JSX.Element`
+ * Pass the /localization layout children through unchanged; route metadata is configured separately.
  * refs: none
+ * I/O types: `{ children }: { children: React.ReactNode } -> ReactNode`.
  */
 export default function LocalizationLayout({ children }: { children: React.ReactNode }) { return children; }

@@ -1,6 +1,5 @@
 /**
- * Define the stats maps page route boundary.
- * Coordinates this module's route data flow and rendered output.
+ * Render /stats/maps using `MapGridSkeleton`, `ErrorState`, `EmptyState`, `ContentFade`.
  * refs: none
  */
 "use client";
@@ -21,9 +20,9 @@ function duration(seconds: number) {
 }
 
 /**
- * Renders the exported statistics view with its route data.
- * Returns: `React.JSX.Element`
+ * Render /stats/maps using `MapGridSkeleton`, `ErrorState`, `EmptyState`, `ContentFade`.
  * refs: none
+ * I/O types: `none -> JSX.Element`.
  */
 export default function MapsPage() {
   const { t , formatPercent, formatNumber} = useLocalization();

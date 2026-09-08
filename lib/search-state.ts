@@ -10,26 +10,27 @@ import type {
 } from "./api-client";
 
 /**
- * Transforms or validates normalize according to this module's data contract.
- * Returns: `String`
+ * Convert a nullish value to an empty string, otherwise stringify it, then trim and lowercase the result for search comparisons.
  * refs: none
+ * I/O types: `value: unknown -> string`.
  */
 export function normalize(value: unknown) {
   return String(value ?? "").trim().toLowerCase();
 }
 
 /**
- * Returns: `Array`
- * Defines the type sort contract used by this module.
+ * Return the search-category index in player, match, champion, talent, card, item order; an unsupported runtime value returns -1.
  * refs: none
+ * I/O types: `type: UniversalSearchType -> number`.
  */
 export function typeSort(type: UniversalSearchType) {
   return ["player", "match", "champion", "talent", "card", "item"].indexOf(type);
 }
 
 /**
- * Transforms or validates merge results according to this module's data contract.
+ * Deduplicate search results by type, normalized title, champion ID, and destination; retain the first duplicate, then sort by descending score, type priority, and title. Return a new result array.
  * refs: none
+ * I/O types: `results: UniversalSearchResult[] -> UniversalSearchResult[]`.
  */
 export function mergeResults(results: UniversalSearchResult[]) {
   const seen = new Set<string>();
@@ -80,8 +81,9 @@ export type SearchAction =
   | { type: "remote-error"; error: string };
 
 /**
- * Performs the create initial search state operation with this module's boundary checks.
+ * Initialize empty search results and generation zero; set loading/searched only when the initial query contains non-whitespace text.
  * refs: none
+ * I/O types: `initialQuery: string -> SearchState`.
  */
 export function createInitialSearchState(initialQuery: string): SearchState {
   const hasInitialQuery = initialQuery.trim().length > 0;
@@ -98,8 +100,9 @@ export function createInitialSearchState(initialQuery: string): SearchState {
 }
 
 /**
- * Defines the search reducer contract used by this module.
+ * Return updated search state for query, local-search, and remote-search actions. Ignore local responses from stale generations, increment generations when resetting the query, and merge/deduplicate remote results to at most 48 entries without mutating the input state.
  * refs: none
+ * I/O types: `state: SearchState; action: SearchAction -> SearchState`.
  */
 export function searchReducer(state: SearchState, action: SearchAction): SearchState {
   switch (action.type) {

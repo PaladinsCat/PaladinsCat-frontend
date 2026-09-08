@@ -1,10 +1,11 @@
-/** notification-menu component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * Render notification menu with `CheckCheck`, `Bell`.
  * refs: none
  */
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Bell, CheckCheck, LoaderCircle } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
@@ -40,12 +41,13 @@ function notificationDot(importance: number) {
   return "bg-pc-text-muted";
 }
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
- * Returns: `React.JSX.Element`
+/**
+ * Render notification menu with `CheckCheck`, `Bell`.
  * refs: none
+ * I/O types: `none -> JSX.Element`.
  */
 export default function NotificationMenu() {
+  const router = useRouter();
   const { user, isLoading: authLoading } = useAuth();
   const { t, formatDateTime } = useLocalization();
   const [open, setOpen] = useState(false);
@@ -173,12 +175,13 @@ export default function NotificationMenu() {
   }, [user]);
 
   const markRead = useCallback(
-    (n: Notification) => {
-      if (n.readAt) return;
-      if (user) {
-        void markSiteNotificationRead(n.id).then(() => publishNotificationSync()).catch(() => {});
-      }
-      setNotifications((r) => r.map((x) => (x.id === n.id ? { ...x, readAt: new Date().toISOString() } : x)));
+    async (n: Notification) => {
+      if (n.readAt || !user) return;
+      try {
+        await markSiteNotificationRead(n.id);
+        setNotifications((r) => r.map((x) => (x.id === n.id ? { ...x, readAt: new Date().toISOString() } : x)));
+        publishNotificationSync();
+      } catch { /* keep the item unread when persistence fails */ }
     },
     [user]
   );
@@ -215,10 +218,11 @@ export default function NotificationMenu() {
             notifications.map((n) => {
               const unread = Boolean(user && !n.readAt);
               return (
-                <button key={n.id} type="button" onClick={() => markRead(n)} className={`flex w-full items-start gap-3 rounded-lg border p-3 text-left transition-colors ${unread ? "border-pc-accent/25 bg-pc-bg-elevated text-pc-text hover:border-pc-accent/45" : "border-transparent hover:bg-pc-bg-elevated/50"}`}>
+                <button key={n.id} type="button" onClick={() => { void markRead(n).finally(() => { if (n.href?.startsWith("/") && !n.href.startsWith("//")) { setOpen(false); router.push(n.href); } }); }} className={`flex w-full items-start gap-3 rounded-lg border p-3 text-left transition-colors ${unread ? "border-pc-accent/25 bg-pc-bg-elevated text-pc-text hover:border-pc-accent/45" : "border-transparent hover:bg-pc-bg-elevated/50"}`}>
                   <span className={`mt-1 h-2 w-2 shrink-0 rounded-full ${unread ? "bg-red-500" : notificationDot(n.importance)}`} aria-hidden="true" />
                   <span className="min-w-0 flex-1">
                     <span className={`block text-sm leading-relaxed ${unread ? "font-medium" : ""}`}>{n.message}</span>
+                    {n.preview && <span className="mt-1 block whitespace-pre-wrap break-words text-sm text-pc-text-secondary [overflow-wrap:anywhere]">{n.preview}</span>}
                     <time className="mt-1 block text-xs text-pc-text-muted">{formatDateTime(n.timestamp)}</time>
                   </span>
                 </button>

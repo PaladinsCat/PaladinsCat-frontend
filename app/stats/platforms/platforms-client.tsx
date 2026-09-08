@@ -1,6 +1,5 @@
 /**
- * Define the stats platforms platforms client route boundary.
- * Coordinates this module's route data flow and rendered output.
+ * Render /stats/platforms/platforms-client.tsx using `RouteSkeleton`, `ErrorState`, `EmptyState`, `ContentFade`.
  * refs: none
  */
 "use client";
@@ -15,8 +14,7 @@ import { useRouteSettledLoading } from "@/lib/route-transition-context";
 import { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation } from "@/components/aceternity";
 
 /**
- * Describe PlatformStat.
- * Returns the declared route value; network, cache, and navigation effects follow the implementation.
+ * Describe one platform/champion aggregate with match count, win rate, and average damage/healing per minute.
  * refs: none
  */
 export type PlatformStat = {
@@ -30,9 +28,9 @@ export type PlatformStat = {
 };
 
 /**
- * Renders the exported statistics view with its route data.
- * Returns: `React.JSX.Element`
+ * Render /stats/platforms/platforms-client.tsx using `RouteSkeleton`, `ErrorState`, `EmptyState`, `ContentFade`.
  * refs: none
+ * I/O types: `{ initialPlatforms = null }: { initialPlatforms?: PlatformStat[] | null } -> JSX.Element`.
  */
 export default function PlatformsPage({ initialPlatforms = null }: { initialPlatforms?: PlatformStat[] | null }) {
   const { t } = useLocalization();

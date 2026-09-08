@@ -1,5 +1,5 @@
 /**
- * Define the player route surface for id champions page and its local data boundary.
+ * Render the PlayerChampionStatsPage view for the player id champions page route.
  * This file owns the page, layout, loading state, or route handler named by its path.
  * It does not own unrelated player sections or shared library policy.
  * refs: none
@@ -11,6 +11,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { EmptyState, ErrorState, LoadingIndicator, LoadingPanel } from "@/components/async-state";
 import PlayersPageHeader from "@/components/ui/players-page-header";
+import PlayerTrendsPanel from "@/components/player-trends";
 import { fetchPlayerChampionStats, refreshPlayerChampionStats, type PlayerChampionCumulativeMetrics, type PlayerChampionStat } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championMasteryLevelFromXp } from "@/lib/champion-mastery";
@@ -35,6 +36,8 @@ const CHAMPION_METRICS = [
   { key: "spm", labelKey: "common.metrics.spm" },
   { key: "gpm", labelKey: "common.metrics.gpm" },
   { key: "egpm", labelKey: "common.metrics.egpm" },
+  { key: "kpm", labelKey: "common.metrics.kpm" },
+  { key: "deaths_per_minute", labelKey: "common.metrics.deathsPerMinute" },
 ] as const satisfies ReadonlyArray<{ key: keyof PlayerChampionCumulativeMetrics; labelKey: string }>;
 
 type SortKey = "level" | "kda" | "winRate" | "playTime" | "rating";
@@ -52,8 +55,8 @@ function metricComparisonColor(value: number | null): string | undefined {
 
 /**
  * Render the PlayerChampionStatsPage view for the player id champions page route.
- * Returns: `React.JSX.Element`
  * refs: none
+ * I/O types: `none -> JSX.Element`.
  */
 export default function PlayerChampionStatsPage() {
   const { formatDuration, formatNumber, formatSignedPercent, t } = useLocalization();
@@ -166,6 +169,8 @@ export default function PlayerChampionStatsPage() {
         ))}
       </div>
 
+      <PlayerTrendsPanel playerId={playerId} champions />
+
       <div className="grid gap-4">
         <section className="pc-glass rounded-xl p-4">
           <h2 className="pc-card-title">{t("generated.players.championRatings")}</h2>
@@ -259,7 +264,7 @@ export default function PlayerChampionStatsPage() {
                       <div className="grid grid-cols-4 gap-x-2 gap-y-0.5 pl-8 text-xs leading-4 text-pc-text-muted sm:grid-cols-8">
                         {CHAMPION_METRICS.map((metric) => (
                           <span key={metric.key} className="whitespace-nowrap">
-                            <span className="font-semibold text-pc-text-secondary">{t(metric.labelKey)}</span> {champion.cumulativeMetrics[metric.key] == null ? "—" : formatNumber(champion.cumulativeMetrics[metric.key] ?? 0, { maximumFractionDigits: 0 })}
+                            <span className="font-semibold text-pc-text-secondary">{t(metric.labelKey)}</span> {champion.cumulativeMetrics[metric.key] == null ? "—" : formatNumber(champion.cumulativeMetrics[metric.key] ?? 0, { maximumFractionDigits: metric.key === "kpm" || metric.key === "deaths_per_minute" ? 2 : 0 })}
                           </span>
                         ))}
                       </div>
@@ -267,7 +272,7 @@ export default function PlayerChampionStatsPage() {
                         {CHAMPION_METRICS.map((metric) => {
                           const comparison = metricComparison(champion.cumulativeMetrics[metric.key], champion.globalMetrics[metric.key]);
                           return (
-                            <span key={metric.key} className="whitespace-nowrap" style={{ color: metricComparisonColor(comparison) }}>
+                            <span key={metric.key} className="whitespace-nowrap" style={{ color: metricComparisonColor(metric.key === "deaths_per_minute" && comparison != null ? -comparison : comparison) }}>
                               <span className="font-semibold text-pc-text-secondary">{t(metric.labelKey)}</span> {formatSignedPercent(comparison, { maximumFractionDigits: 0 })}
                             </span>
                           );

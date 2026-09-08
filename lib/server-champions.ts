@@ -1,6 +1,6 @@
 /**
+ * Loads the ranked champion catalog used to seed server-rendered views.
  * Keeps server champions server-side and aligned with its data source.
- * Preserve its server boundary and caller-facing data contracts.
  * refs: none
  */
 import "server-only";
@@ -24,8 +24,8 @@ const getCachedRankedChampions = unstable_cache(
 
 /**
  * Loads the ranked champion catalog used to seed server-rendered views.
- * Returns: `Promise<Champion[]>`
  * refs: none
+ * I/O types: `none -> Promise<Champion[]>`.
  */
 export async function getInitialRankedChampions(): Promise<Champion[]> {
   return getCachedRankedChampions();

@@ -1,249 +1,135 @@
-/**
- * Define the stats tiers page route boundary.
- * Coordinates this module's route data flow and rendered output.
+/** Ranked distributions keep player counts and match participation in separate, readable panels.
  * refs: none
  */
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { fetchTierSummary, fetchTiers, type TierStat, type TierSummary } from "@/lib/api-client";
 import { getRankIconPath, TIER_NAMES } from "@/lib/tier-utils";
 import { getPercentageColor } from "@/lib/stat-quality";
-import { EmptyState, ErrorState } from "@/components/async-state";
-import { RouteSkeleton } from "@/components/route-skeleton";
+import PageHeader from "@/components/ui/page-header";
+import { SegmentedControl } from "@/components/ui/segmented-control";
+import { LoadingIndicator } from "@/components/async-state";
 import { useLocalization } from "@/lib/localization-context";
-import { useRouteSettledLoading } from "@/lib/route-transition-context";
 
+function rankIcon(tier: number) {
+  return getRankIconPath(tier, tier === 26 ? 101 : tier === 27 ? 1 : 0);
+}
 
-const EMPTY_SUMMARY: TierSummary = {
-  profilePlayers: 0,
-  avgProfileTier: 0,
-  matchPlayerRows: 0,
-  activePlayers: 0,
-  rankedMatches: 0,
-  avgParticipationTier: 0,
-  avgMatchTier: 0,
-  medianMatchTier: 0,
-};
+function AverageRank({ value }: { value: number | undefined }) {
+  const tier = value && Number.isFinite(value) ? Math.max(1, Math.min(27, Math.round(value))) : 0;
+  return tier ? <span className="inline-flex items-center gap-2">
+    <img src={rankIcon(tier)} alt="" className="h-6 w-6 object-contain" />
+    <span>≈ {TIER_NAMES[tier]}</span>
+  </span> : <span>—</span>;
+}
 
-function normalizeTiers(rows: TierStat[], count: number): TierStat[] {
-  return Array.from({ length: count }, (_, index) => {
-    const tierSort = index + 1;
-    const row = rows.find((candidate) => candidate.tierSort === tierSort);
-    return row ? { ...row, tier: TIER_NAMES[tierSort] ?? row.tier } : {
-      tier: TIER_NAMES[tierSort] ?? `Tier ${tierSort}`,
-      tierSort,
-      totalPlays: 0,
-      avgWinRate: 0,
-      percentage: 0,
-    };
+function DistributionPanel({ source, rows, loading, onRetry, detail }: {
+  source: "profiles" | "matches";
+  rows: TierStat[] | null;
+  loading: boolean;
+  onRetry: () => void;
+  detail: "ranks" | "divisions";
+}) {
+  const { t, formatNumber, formatPercent } = useLocalization();
+  // Match facts cannot split the Master/Grandmaster tier. Never invent a tier 27 bucket.
+  const count = source === "profiles" ? 27 : 26;
+  const normalized = Array.from({ length: count }, (_, index) => {
+    const tier = index + 1;
+    return { tier, value: rows?.find(row => row.tierSort === tier)?.totalPlays ?? 0 };
   });
-}
+  const total = normalized.reduce((sum, row) => sum + row.value, 0);
+  const average = total ? normalized.reduce((sum, row) => sum + row.tier * row.value, 0) / total : 0;
+  const displayed = detail === "divisions" ? normalized : normalized.reduce<Array<{ tier: number; value: number }>>((groups, row) => {
+    const tier = row.tier <= 25 ? Math.floor((row.tier - 1) / 5) * 5 + 1 : row.tier;
+    const group = groups.find(candidate => candidate.tier === tier);
+    if (group) group.value += row.value;
+    else groups.push({ tier, value: row.value });
+    return groups;
+  }, []);
+  const title = t(source === "profiles" ? "stats.tiers.profiles" : "stats.tiers.matches");
+  const unit = t(source === "profiles" ? "stats.tiers.players" : "stats.tiers.participations");
 
-function weightedAverage(rows: TierStat[]): number {
-  const total = rows.reduce((sum, row) => sum + row.totalPlays, 0);
-  if (total === 0) return 0;
-  return rows.reduce((sum, row) => sum + row.tierSort * row.totalPlays, 0) / total;
-}
-
-// Compact count for tight bar labels: >=1000 renders as "1k" / "2.5k".
-// Keeps the number short so labels never overlap, without expanding chart width.
-function compactCount(value: number): string {
-  if (!Number.isFinite(value) || value < 0) return String(value || 0);
-  if (value < 1000) return String(Math.round(value));
-  const k = Math.round((value / 1000) * 10) / 10;
-  return `${k % 1 === 0 ? String(Math.round(k)) : k.toFixed(1)}k`;
-}
-
-function rankIconForTier(tierSort: number): string {
-  return getRankIconPath(tierSort, tierSort === 26 ? 101 : tierSort === 27 ? 1 : 0);
-}
-
-function roundedTier(value: number): number {
-  if (!Number.isFinite(value) || value <= 0) return 0;
-  return Math.max(1, Math.min(27, Math.round(value)));
-}
-
-function TierValue({
-  tier,
-  className = "",
-}: {
-  tier: number;
-  className?: string;
-}) {
-  const { t , formatNumber} = useLocalization();
-  const tierSort = roundedTier(tier);
-  if (tierSort === 0) {
-    return <span className={`tabular-nums ${className}`}>0</span>;
-  }
-
-  return (
-    <span className={`inline-flex items-center gap-2 tabular-nums ${className}`}>
-      <img
-        src={rankIconForTier(tierSort)}
-        alt={t("generated.stats.tierValue1", { value1: tierSort })}
-        className="h-6 w-6 object-contain"
-        loading="lazy"
-      />
-      <span>{formatNumber(tier, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-    </span>
-  );
-}
-
-function DistributionChart({
-  title,
-  rows,
-  label,
-}: {
-  title: string;
-  rows: TierStat[];
-  label: string;
-}) {
-  const { t , formatNumber, formatPercent} = useLocalization();
-  const total = rows.reduce((sum, row) => sum + row.totalPlays, 0);
-  const max = Math.max(1, ...rows.map((row) => row.totalPlays));
-
-  return (
-    <section>
-      <div className="mb-3 flex items-center justify-between gap-3 px-1">
-        <h2 className="text-lg font-bold text-pc-text">{title}</h2>
-        <span className="text-xs text-pc-text-secondary tabular-nums">
-          {formatNumber(total)} {label}
-        </span>
-      </div>
-      <div className="rounded-xl border border-pc-border bg-pc-bg-elevated p-3 sm:p-4">
-        <div className="flex items-end justify-center gap-1.5 h-80 overflow-x-auto pb-2">
-          {rows.map((row) => {
-            const height = Math.max(2, Math.round((row.totalPlays / max) * 308));
-            const share = total > 0 ? (row.totalPlays / total) * 100 : 0;
-            return (
-              <div
-                key={row.tierSort}
-                className="flex flex-col items-center justify-end gap-1 min-w-6 h-full group"
-              >
-                <div className="text-xs text-pc-text-muted tabular-nums opacity-0 group-hover:opacity-100 transition-opacity">
-                  <span style={{ color: getPercentageColor(share) }}>{formatPercent(share)}</span>
-                </div>
-                <div
-                  className="w-3 rounded-t-sm bg-pc-accent-mid group-hover:bg-pc-accent transition-colors"
-                  style={{ height }}
-                  title={t("generated.stats.value1Value2Value3", { value1: row.tier, value2: formatNumber(row.totalPlays), value3: formatNumber(share, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) })}
-                />
-                <img
-                  src={rankIconForTier(row.tierSort)}
-                  alt={row.tier}
-                  title={row.tier}
-                  className="h-5 w-5 object-contain drop-shadow"
-                  loading="lazy"
-                />
-                <div
-                  className="text-xs text-pc-text-secondary tabular-nums leading-none whitespace-nowrap px-0.5"
-                  title={t("generated.stats.value1Value2Value3", { value1: row.tier, value2: formatNumber(row.totalPlays), value3: formatNumber(share, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) })}
-                >
-                  {row.totalPlays > 0 ? compactCount(row.totalPlays) : ""}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </section>
-  );
+  return <section className="pc-card-flush min-w-0" aria-labelledby={`tier-${source}`} aria-busy={loading}>
+    <header className="space-y-4 p-4 sm:p-6">
+      <h2 id={`tier-${source}`} className="pc-heading text-xl">{title}</h2>
+      <dl className="grid grid-cols-2 gap-4">
+        <div><dt className="text-xs text-pc-text-secondary">{unit}</dt><dd className="mt-1 text-lg font-semibold tabular-nums text-pc-text">{rows ? formatNumber(total) : "—"}</dd></div>
+        <div><dt className="text-xs text-pc-text-secondary">{t("stats.tiers.average")}</dt><dd className="mt-1 text-sm font-semibold text-pc-text"><AverageRank value={rows ? average : undefined} /></dd></div>
+      </dl>
+    </header>
+    {loading && !rows ? <div className="min-h-96 space-y-4 px-4 pb-6 sm:px-6">
+      <LoadingIndicator />
+      {Array.from({ length: 7 }, (_, i) => <div key={i} className="pc-skeleton h-8 rounded" />)}
+    </div> : !rows ? <div className="min-h-96 space-y-4 px-4 pb-6 sm:px-6" role="alert">
+      <p className="text-sm text-pc-text-secondary">{t("stats.tiers.unavailable")}</p>
+      <button type="button" onClick={onRetry} className="pc-btn-secondary">{t("stats.tiers.retry")}</button>
+    </div> : total === 0 ? <p className="min-h-96 px-4 pb-6 text-sm text-pc-text-secondary sm:px-6" role="status">{t("stats.tiers.empty")}</p> : <table className="w-full table-fixed text-sm">
+      <caption className="sr-only">{title}</caption>
+      <thead className="border-y border-pc-border text-xs text-pc-text-secondary">
+        <tr><th scope="col" className="w-1/2 px-4 py-3 text-left font-medium sm:px-6">{t("stats.tiers.rank")}</th><th scope="col" className="px-2 py-3 text-right font-medium">{t("stats.tiers.count")}</th><th scope="col" className="px-4 py-3 text-right font-medium sm:px-6">{t("stats.tiers.share")}</th></tr>
+      </thead>
+      <tbody className="divide-y divide-pc-border/50">
+        {displayed.map(({ tier, value }) => {
+          const share = total ? value / total * 100 : 0;
+          const name = source === "matches" && tier === 26 ? t("stats.tiers.masterCombined") : detail === "ranks" ? TIER_NAMES[tier].replace(/\s+[IV]+$/, "") : TIER_NAMES[tier];
+          return <tr key={tier}>
+            <th scope="row" className="px-4 py-2 text-left font-medium text-pc-text sm:px-6">
+              <div className="flex items-center gap-2"><img src={rankIcon(tier)} alt="" className="h-7 w-7 shrink-0 object-contain" loading="lazy" /><span className="break-words">{name}</span></div>
+              <div aria-hidden="true" className="mt-1 h-1 overflow-hidden rounded-full bg-pc-border/50"><div className="h-full rounded-full" style={{ width: `${share}%`, backgroundColor: getPercentageColor(share) }} /></div>
+            </th>
+            <td className="px-2 py-2 text-right tabular-nums text-pc-text">{formatNumber(value)}</td>
+            <td className="px-4 py-2 text-right tabular-nums sm:px-6" style={{ color: getPercentageColor(share) }}>{formatPercent(share)}</td>
+          </tr>;
+        })}
+      </tbody>
+    </table>}
+  </section>;
 }
 
 /**
- * Renders the exported statistics view with its route data.
- * Returns: `React.JSX.Element`
+ * Render the /stats/tiers route with `PageHeader`, `SegmentedControl`, `DistributionPanel`, `AverageRank`.
+ * I/O types: `none -> JSX.Element`.
  * refs: none
  */
 export default function TiersPage() {
-  const { t , formatNumber} = useLocalization();
-  const [profileTiers, setProfileTiers] = useState<TierStat[]>([]);
-  const [matchTiers, setMatchTiers] = useState<TierStat[]>([]);
-  const [summary, setSummary] = useState<TierSummary>(EMPTY_SUMMARY);
+  const { t, formatNumber } = useLocalization();
+  const [profiles, setProfiles] = useState<TierStat[] | null>(null);
+  const [matches, setMatches] = useState<TierStat[] | null>(null);
+  const [summary, setSummary] = useState<TierSummary | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const displayLoading = useRouteSettledLoading(loading);
+  const [attempt, setAttempt] = useState(0);
+  const [detail, setDetail] = useState<"ranks" | "divisions">("ranks");
+  const retry = () => setAttempt(value => value + 1);
 
   useEffect(() => {
-    Promise.all([
-      fetchTiers({ source: "profiles" }),
-      fetchTiers({ source: "matches" }),
-      fetchTierSummary(),
-    ])
-      .then(([profiles, matches, nextSummary]) => {
-        setProfileTiers(profiles);
-        setMatchTiers(matches);
-        setSummary(nextSummary);
-      })
-      .catch((err) => setError(err instanceof Error ? err.message : String(err)))
-      .finally(() => setLoading(false));
-  }, []);
+    let cancelled = false;
+    setLoading(true);
+    Promise.allSettled([fetchTiers({ source: "profiles" }), fetchTiers({ source: "matches" }), fetchTierSummary()])
+      .then(([profileResult, matchResult, summaryResult]) => {
+        if (cancelled) return;
+        setProfiles(profileResult.status === "fulfilled" ? profileResult.value : null);
+        setMatches(matchResult.status === "fulfilled" ? matchResult.value : null);
+        setSummary(summaryResult.status === "fulfilled" ? summaryResult.value : null);
+        setLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [attempt]);
 
-  const normalizedProfiles = useMemo(() => normalizeTiers(profileTiers, 27), [profileTiers]);
-  // Match facts only carry Hi-Rez League_Tier values through tier 26. They
-  // cannot distinguish the live top-100 Grandmaster subset, so tier 26 is the
-  // combined Master/Grandmaster activity bucket and no synthetic tier 27 is
-  // rendered here.
-  const normalizedMatches = useMemo(() => normalizeTiers(matchTiers, 26), [matchTiers]);
-  const profileAvg = summary.avgProfileTier || weightedAverage(normalizedProfiles);
-  const activeAvg = summary.avgParticipationTier || weightedAverage(normalizedMatches);
-  const cards: Array<
-    | { label: string; kind: "count"; value: number; suffix: string }
-    | { label: string; kind: "tier"; value: number }
-  > = [
-    { label: t("generated.stats.playerProfiles"), kind: "count", value: summary.profilePlayers, suffix: "players" },
-    { label: t("generated.stats.profileAvgTier"), kind: "tier", value: profileAvg },
-    { label: t("generated.stats.activeAvgTier"), kind: "tier", value: activeAvg },
-    { label: t("generated.stats.avgMatchTier"), kind: "tier", value: summary.avgMatchTier },
-    { label: t("generated.stats.medianMatchTier"), kind: "tier", value: summary.medianMatchTier },
-    { label: t("generated.stats.rankedMatches.0b47f50"), kind: "count", value: summary.rankedMatches, suffix: "matches" },
-    { label: t("generated.stats.matchPlayerRows"), kind: "count", value: summary.matchPlayerRows, suffix: "rows" },
-    { label: t("generated.stats.activePlayers"), kind: "count", value: summary.activePlayers, suffix: "players" },
-  ];
-
-  return (
-    <div className="mx-auto w-full max-w-5xl space-y-6">
-      <div>
-        <h1 className="pc-heading pc-heading-lg">{t("generated.stats.tierDistribution")}</h1>
-      </div>
-
-      {displayLoading ? (
-        <RouteSkeleton variant="dashboard" />
-      ) : error ? (
-        <ErrorState message={error} />
-      ) : profileTiers.length === 0 && matchTiers.length === 0 ? (
-        <EmptyState title={t("generated.stats.noTierStatistics")} description={t("generated.stats.tierDistributionsWillAppearAfterRankedProfilesAndMatchesAre")} />
-      ) : (
-        <>
-          <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {cards.map((item) => (
-              <div key={item.label} className="rounded-xl border border-pc-border bg-pc-bg-elevated p-3">
-                <div className="text-xs text-pc-text-muted">{item.label}</div>
-                <div className="mt-1 text-xl font-semibold text-pc-text">
-                  {item.kind === "tier" ? (
-                    <TierValue tier={item.value} />
-                  ) : (
-                    <span className="tabular-nums">{formatNumber(item.value)}</span>
-                  )}
-                </div>
-                {item.kind === "count" ? <div className="text-xs text-pc-text-secondary">{item.suffix}</div> : null}
-              </div>
-            ))}
-          </section>
-
-          <DistributionChart
-            title={t("generated.stats.playerProfileDistribution")}
-            rows={normalizedProfiles}
-            label={t("generated.stats.players")}
-          />
-
-          <DistributionChart
-            title={t("generated.stats.activeRankedMatchDistribution")}
-            rows={normalizedMatches}
-            label={t("generated.stats.playerRows")}
-          />
-        </>
-      )}
+  return <div className="space-y-6">
+    <PageHeader parentHref="/stats" parentLabel={t("menu.globalStats")} title={t("stats.tiers.title")} description={t("stats.tiers.description")} />
+    <SegmentedControl label={t("stats.tiers.detail")} items={[{ value: "ranks", label: t("stats.tiers.ranks") }, { value: "divisions", label: t("stats.tiers.divisions") }]} value={detail} onChange={setDetail} />
+    <div className="grid items-start gap-4 xl:grid-cols-2">
+      <DistributionPanel source="profiles" rows={profiles} loading={loading} onRetry={retry} detail={detail} />
+      <DistributionPanel source="matches" rows={matches} loading={loading} onRetry={retry} detail={detail} />
     </div>
-  );
+    <section className="pc-card" aria-label={t("stats.tiers.matches")}>
+      <dl className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div><dt className="text-xs text-pc-text-secondary">{t("generated.stats.activePlayers")}</dt><dd className="mt-2 text-lg font-semibold tabular-nums text-pc-text">{summary ? formatNumber(summary.activePlayers) : "—"}</dd></div>
+        <div><dt className="text-xs text-pc-text-secondary">{t("generated.stats.rankedMatches.0b47f50")}</dt><dd className="mt-2 text-lg font-semibold tabular-nums text-pc-text">{summary ? formatNumber(summary.rankedMatches) : "—"}</dd></div>
+        <div><dt className="text-xs text-pc-text-secondary">{t("generated.stats.avgMatchTier")}</dt><dd className="mt-2 text-sm font-semibold text-pc-text"><AverageRank value={summary?.avgMatchTier} /></dd></div>
+        <div><dt className="text-xs text-pc-text-secondary">{t("generated.stats.medianMatchTier")}</dt><dd className="mt-2 text-sm font-semibold text-pc-text"><AverageRank value={summary?.medianMatchTier} /></dd></div>
+      </dl>
+      {!loading && !summary && <div className="mt-4 flex flex-wrap items-center gap-3" role="status"><span className="text-sm text-pc-text-secondary">{t("stats.tiers.unavailable")}</span><button type="button" onClick={retry} className="pc-btn-secondary">{t("stats.tiers.retry")}</button></div>}
+    </section>
+  </div>;
 }

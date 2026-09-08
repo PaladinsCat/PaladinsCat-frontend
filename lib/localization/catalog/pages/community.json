@@ -1,0 +1,19 @@
+{
+  "community.reply": "Reply",
+  "community.replyingTo": "Replying to {name}",
+  "community.globalChat": "# global",
+  "community.chatDescription": "Talk with the community. Everyone shares the same message history.",
+  "community.connecting": "Connecting…",
+  "community.live": "Live",
+  "community.reconnecting": "Reconnecting…",
+  "community.chatError": "Chat could not be loaded.",
+  "community.chatEmpty": "Start the conversation.",
+  "community.olderMessages": "Load older messages",
+  "community.newMessages": "New messages ↓",
+  "community.messagePlaceholder": "Message #global · Shift+Enter for a new line",
+  "community.send": "Send",
+  "community.loginToChat": "Log in to join the conversation",
+  "community.messageDeleted": "Message deleted",
+  "community.deleteMessageConfirm": "Delete this message for everyone?",
+  "community.retry": "Retry"
+}

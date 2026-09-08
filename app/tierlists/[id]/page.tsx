@@ -1,6 +1,5 @@
 /**
- * Define the tierlists page responsibility boundary.
- * Coordinates tierlists page data loading, authorization, and presentation.
+ * Render the /tierlists/[id] route with `LoadingPanel`, `VerifiedPlayerBadge`, `CommunityRichContent`, `TierListBoard`, `LoadingIndicator`.
  * refs: none
  */
 "use client";
@@ -29,9 +28,9 @@ import { formatLocalDateTime } from "@/lib/time-format";
 import { useLocalization } from "@/lib/localization-context";
 
 /**
- * Handles the exported route operation using its declared request and response contract.
- * Returns: `React.JSX.Element`
+ * Render the /tierlists/[id] route with `LoadingPanel`, `VerifiedPlayerBadge`, `CommunityRichContent`, `TierListBoard`, `LoadingIndicator`.
  * refs: none
+ * I/O types: `{ params }: { params: Promise<{ id: string }> } -> JSX.Element`.
  */
 export default function TierListDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { t , formatDateTime} = useLocalization();

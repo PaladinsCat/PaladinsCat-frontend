@@ -1,5 +1,5 @@
 /**
- * Define the player route surface for id player-profile-client and its local data boundary.
+ * Render the PlayerProfileClient view for the player id player-profile-client route.
  * This file owns the page, layout, loading state, or route handler named by its path.
  * It does not own unrelated player sections or shared library policy.
  * refs: none
@@ -8,6 +8,7 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
+import PlatformIcon from "@/components/platform-icon";
 import { useRouter } from "next/navigation";
 import { PlayersBackLink } from "@/components/ui/players-page-header";
 import { getChampionIconSafe } from "@/lib/champion-icons";
@@ -33,6 +34,7 @@ import { playerAvatarProxyPath } from "@/lib/player-avatar-proxy";
 import { getPercentageColor } from "@/lib/stat-quality";
 import type { PlayerResponse } from "@/lib/player-profile-types";
 import PlayerRelationshipSummaryCard from "@/components/player-relationship-summary";
+import PlayerTrendsPanel from "@/components/player-trends";
 
 interface RefreshFeedback {
   kind: 'warning' | 'success' | 'error';
@@ -100,8 +102,8 @@ export const PLAYER_PROFILE_ERROR_KEYS = {
 
 /**
  * Render the PlayerProfileClient view for the player id player-profile-client route.
- * Returns: `React.JSX.Element`
  * refs: none
+ * I/O types: `{ id, initialResponse, }: { id: string; initialResponse: PlayerResponse | null; } -> JSX.Element`.
  */
 export default function PlayerProfileClient({
   id,
@@ -633,6 +635,7 @@ export default function PlayerProfileClient({
           />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
+              <PlatformIcon platform={player.platform} />
               <h1 className="min-w-0 break-words text-2xl font-bold leading-tight text-pc-text sm:text-3xl">
                 {player.name}
               </h1>
@@ -830,6 +833,9 @@ export default function PlayerProfileClient({
             </Link>
           </div>
 
+          <Link href={`/players/${id}/friends`} className="group flex items-center justify-between gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-3 text-sm font-semibold text-pc-text transition-colors hover:border-pc-accent-mid hover:text-pc-accent">
+            <span>{t("playerFriends.title")}</span><span aria-hidden="true">→</span>
+          </Link>
           <PlayerRelationshipSummaryCard playerId={id} />
 
           {/* KBM Ranked */}
@@ -920,6 +926,8 @@ export default function PlayerProfileClient({
               <div className="mb-1.5 text-xs uppercase tracking-wider text-pc-text-muted">{t("generated.players.averages")}</div>
               <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
                 <StatRow label={t("generated.players.damageMin")} value={player.avg_dpm != null ? formatNumber(player.avg_dpm) : "—"} color="text-red-400" />
+                <StatRow label={t("common.metrics.kpm")} value={player.derived_rates?.kpm != null ? formatNumber(Number(player.derived_rates.kpm), { maximumFractionDigits: 2 }) : "—"} />
+                <StatRow label={t("common.metrics.deathsPerMinute")} value={player.derived_rates?.deaths_per_minute != null ? formatNumber(Number(player.derived_rates.deaths_per_minute), { maximumFractionDigits: 2 }) : "—"} />
                 <StatRow label={t("generated.players.healingMin")} value={player.avg_hpm != null ? formatNumber(player.avg_hpm) : "—"} color="text-emerald-400" />
                 <StatRow label={t("generated.players.shieldingMin")} value={player.avg_mpm != null ? formatNumber(player.avg_mpm) : "—"} color="text-sky-400" />
                 <StatRow label={t("generated.players.creditsMin")} value={player.avg_egpm != null ? formatNumber(player.avg_egpm) : "—"} color="text-yellow-400" />
@@ -951,6 +959,8 @@ export default function PlayerProfileClient({
           )}
         </div>
       </div>
+
+      <PlayerTrendsPanel playerId={id} />
 
       {/* ── Current Match Modal ── */}
       {showCurrentMatch && (

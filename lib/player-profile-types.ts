@@ -40,6 +40,7 @@ interface PlayerData {
   avg_hpm: number | null;
   avg_shpm: number | null;
   avg_mpm: number | null;
+  derived_rates?: { kpm: number | null; deaths_per_minute: number | null } | null;
   cheater: boolean;
   exploiter: boolean;
   dropper: boolean;
@@ -76,6 +77,11 @@ interface ChampionRating {
   losses: number;
 }
 
+/**
+ * Describe the raw profile response used by the server and hydrated client.
+ * I/O: API JSON object -> PlayerResponse.
+ * refs: endpoints: GET /players/{id}
+ */
 export interface PlayerResponse {
   player: PlayerData;
   queueRatings: QueueRating[];

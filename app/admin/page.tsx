@@ -1,6 +1,5 @@
 /**
- * Define the admin page responsibility boundary.
- * Coordinates admin page data loading, authorization, and presentation.
+ * Render the /admin route with `RouteSkeleton`, `ErrorState`, `ContentFade`, `KeyRound`, `Bell`.
  * refs: none
  */
 "use client";
@@ -26,9 +25,9 @@ const PREVIEW_DASHBOARD: AdminDashboard = {
 };
 
 /**
- * Handles the exported route operation using its declared request and response contract.
- * Returns: `React.JSX.Element`
+ * Render the /admin route with `RouteSkeleton`, `ErrorState`, `ContentFade`, `KeyRound`, `Bell`.
  * refs: none
+ * I/O types: `{ mode = "admin" }: { mode?: "admin" | "developer" } -> JSX.Element | null`.
  */
 export default function AdminDashboardPage({ mode = "admin" }: { mode?: "admin" | "developer" }) {
   const { t, formatNumber , formatDateTime} = useLocalization();

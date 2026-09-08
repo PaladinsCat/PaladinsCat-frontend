@@ -1,5 +1,5 @@
 /**
- * Define the player route surface for class role layout and its local data boundary.
+ * Render the layout for the player class role layout route.
  * This file owns the page, layout, loading state, or route handler named by its path.
  * It does not own unrelated player sections or shared library policy.
  * refs: none
@@ -20,8 +20,8 @@ function titleCaseRole(role: string) {
 
 /**
  * Build SEO metadata for the player class role layout route.
- * Returns: `Promise<Metadata>`
  * refs: none
+ * I/O types: `{ params }: Props -> Promise<Metadata>`.
  */
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { role } = await params;
@@ -39,8 +39,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 /**
  * Render the layout for the player class role layout route.
- * Returns: `React.JSX.Element`
  * refs: none
+ * I/O types: `{ children }: Props -> ReactNode`.
  */
 export default function PlayerClassLayout({ children }: Props) {
   return children;

@@ -1,3 +1,7 @@
+/**
+ * Render account or champion level rankings with player lookup, optional champion/class filters, client sorting, and pagination. Fetch leaderboard and search data and display loading or empty results.
+ * refs: none
+ */
 "use client";
 
 import { useEffect, useMemo, useState, type FormEvent } from "react";
@@ -28,6 +32,11 @@ const CHAMPION_CLASSES: Array<{ value: ChampionClass; icon: string }> = [
   { value: "Support", icon: "/images/icons/Class_Support_Icon.avif" },
 ];
 
+/**
+ * Render account or champion level rankings with player lookup, optional champion/class filters, client sorting, and pagination. Fetch leaderboard and search data and display loading or empty results.
+ * I/O types: `{ mode }: { mode: LevelMode } -> JSX.Element`.
+ * refs: none
+ */
 export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
   const { t, formatNumber, formatPercent } = useLocalization();
   const { user, isLoading: authLoading } = useAuth();

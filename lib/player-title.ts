@@ -1,7 +1,5 @@
 /**
- * Player title parsing.
- *
- * Hi-Rez player titles are authored as a single `<font color="...">text</font>`
+ * Player title parsing. Hi-Rez player titles are authored as a single `<font color="...">text</font>`
  * markup string (e.g. `<font color="#b52834">never forgives, never forgets</font>`).
  * The backend stores that markup verbatim, so the frontend must parse it and
  * render the color as a CSS style. Never render the raw string as HTML
@@ -10,7 +8,8 @@
  * refs: none
  */
 
-/** Describe the parsed player-title markup returned to UI callers.
+/**
+ * Describe the parsed player-title markup returned to UI callers.
  * Contract: carries the sanitized title text and optional color metadata.
  * refs: none
  */
@@ -21,6 +20,10 @@ export interface ParsedPlayerTitle {
   color: string | null;
 }
 
+/**
+ * Describe player title segment.
+ * refs: none
+ */
 export interface PlayerTitleSegment {
 /** Segment text with the markup stripped. · refs: none */
   text: string;
@@ -37,10 +40,11 @@ const COLOR_ATTRIBUTE_PATTERN = /color\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i
 // around font tags. React renders strings safely, but leaving those tags in the
 // string exposes the markup to users. Strip every tag-shaped token while
 // preserving ordinary angle brackets such as "2 < 3".
-/** Apply stripPlayerTitleMarkup to the declared player or request input.
+/**
+ * Apply stripPlayerTitleMarkup to the declared player or request input.
  * Contract: enforces title sanitation and returns plain text without markup.
- * Returns: `string`
  * refs: none
+ * I/O types: `raw: string -> string`.
  */
 export function stripPlayerTitleMarkup(raw: string): string {
   let text = "";
@@ -71,6 +75,7 @@ export function stripPlayerTitleMarkup(raw: string): string {
  * string is a well-formed concatenation of such tags, or `null` when the
  * string is not (in which case it must be rendered as plain text).
  * refs: none
+ * I/O types: `raw: string -> PlayerTitleSegment[] | null`.
  */
 export function parsePlayerTitleSegments(raw: string): PlayerTitleSegment[] | null {
   const trimmed = raw.trim();
@@ -124,8 +129,8 @@ export function parsePlayerTitleSegments(raw: string): PlayerTitleSegment[] | nu
  * - Plain text titles pass through unchanged with `color: null`.
  * - Anything that is not a well-formed font-tag concatenation is returned as
  *   plain text (markup stripped) so no raw HTML can ever reach the page.
- * Returns: `object`
  * refs: none
+ * I/O types: `raw: string -> ParsedPlayerTitle`.
  */
 export function parsePlayerTitle(raw: string): ParsedPlayerTitle {
   const segments = parsePlayerTitleSegments(raw);

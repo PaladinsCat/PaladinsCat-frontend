@@ -8,6 +8,11 @@ function optionClass(active: boolean) {
   return `inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-semibold transition-colors ${active ? "border-pc-accent bg-pc-accent text-pc-bg" : "pc-surface text-pc-text-secondary hover:border-pc-accent-mid hover:text-pc-text"}`;
 }
 
+/**
+ * Render a labeled group of controlled option buttons; mark the selected value with aria-pressed and call onChange with the clicked item value.
+ * I/O types: `{ label, items, value, onChange }: { label: string; items: Item<T>[]; value: T; onChange: (value: T) => void; } -> JSX.Element`.
+ * refs: none
+ */
 export function SegmentedControl<T extends string>({ label, items, value, onChange }: {
   label: string;
   items: Item<T>[];
@@ -21,6 +26,11 @@ export function SegmentedControl<T extends string>({ label, items, value, onChan
   </div>;
 }
 
+/**
+ * Render labeled route links for each segment; mark the link matching value with aria-current=page.
+ * I/O types: `{ label, items, value }: { label: string; items: Array<Item<T> & { href: string }>; value: T; } -> JSX.Element`.
+ * refs: none
+ */
 export function SegmentedRouteLinks<T extends string>({ label, items, value }: {
   label: string;
   items: Array<Item<T> & { href: string }>;

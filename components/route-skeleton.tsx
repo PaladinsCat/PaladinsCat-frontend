@@ -1,5 +1,5 @@
-/** route-skeleton component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * Render data card skeleton.
  * refs: none
  */
 import { cn } from "@/lib/utils";
@@ -7,9 +7,10 @@ import { LoadingIndicator } from "@/components/async-state";
 
 type RouteSkeletonVariant = "dashboard" | "list" | "profile" | "match" | "detail";
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+/**
+ * Render data card skeleton.
  * refs: none
+ * I/O types: `{ rows = 5, columns = 1, className, }: { rows?: number; columns?: 1 | 2; className?: string; } -> JSX.Element`.
  */
 export function DataCardSkeleton({
   rows = 5,
@@ -37,9 +38,10 @@ export function DataCardSkeleton({
   );
 }
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+/**
+ * Render chart card skeleton.
  * refs: none
+ * I/O types: `{ className }: { className?: string } -> JSX.Element`.
  */
 export function ChartCardSkeleton({ className }: { className?: string }) {
   return (
@@ -49,9 +51,10 @@ export function ChartCardSkeleton({ className }: { className?: string }) {
   );
 }
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+/**
+ * Render data table skeleton.
  * refs: none
+ * I/O types: `{ rows = 7, className }: { rows?: number; className?: string } -> JSX.Element`.
  */
 export function DataTableSkeleton({ rows = 7, className }: { rows?: number; className?: string }) {
   return (
@@ -64,9 +67,10 @@ export function DataTableSkeleton({ rows = 7, className }: { rows?: number; clas
   );
 }
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+/**
+ * Render route skeleton with `LoadingIndicator`, `DataCardSkeleton`, `DataTableSkeleton`.
  * refs: none
+ * I/O types: `{ variant = "dashboard" }: { variant?: RouteSkeletonVariant } -> JSX.Element`.
  */
 export function RouteSkeleton({ variant = "dashboard" }: { variant?: RouteSkeletonVariant }) {
   if (variant === "profile") {

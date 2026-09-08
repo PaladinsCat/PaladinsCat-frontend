@@ -1,10 +1,14 @@
-/** Card component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * Render card.
  * refs: none
  */
 import type { HTMLAttributes, ReactNode } from "react";
 import { StableMetricValue } from "@/components/async-state";
 
+/**
+ * Describe card props with title (optional), children, hover (optional), wide (optional), opaque (optional).
+ * refs: none
+ */
 export interface CardProps extends HTMLAttributes<HTMLDivElement> {
   title?: string;
   children: ReactNode;
@@ -13,10 +17,10 @@ export interface CardProps extends HTMLAttributes<HTMLDivElement> {
   opaque?: boolean;
 }
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
- * Returns: `React.JSX.Element`
+/**
+ * Render card.
  * refs: none
+ * I/O types: `{ title, children, className = "", hover = true, wide, style, opaque = false, onMouseEnter, onMouseLeave, ...props }: CardProps -> JSX.Element`.
  */
 export default function Card({
   title,
@@ -60,14 +64,19 @@ export default function Card({
   );
 }
 
+/**
+ * Describe stats item with value, label.
+ * refs: none
+ */
 export interface StatsItem {
   value: string | number;
   label: string;
 }
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+/**
+ * Render stats grid.
  * refs: none
+ * I/O types: `{ items }: { items: StatsItem[] } -> JSX.Element`.
  */
 export function StatsGrid({ items }: { items: StatsItem[] }) {
   return (

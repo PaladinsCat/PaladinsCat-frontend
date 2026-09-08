@@ -26,7 +26,11 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      { source: "/stats/platforms", destination: "/stats/activity#platforms", permanent: true },
+      { source: "/stats/regions", destination: "/stats/activity#regions", permanent: true },
       { source: "/stats/metrics", destination: "/stats/performance", permanent: true },
+      { source: "/stats/winrate", destination: "/stats/performance#champion-averages", permanent: true },
+      { source: "/stats/banrate", destination: "/stats/performance#champion-averages", permanent: true },
       { source: "/stats/egpm", destination: "/stats/ecpm", permanent: true },
       { source: "/stats/items/:path*", destination: "/game/items/:path*", permanent: true },
       { source: "/stats/maps/:path*", destination: "/game/maps/:path*", permanent: true },

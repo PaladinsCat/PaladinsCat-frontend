@@ -17,12 +17,17 @@ import {
 import HomePageClient from "./home-page-client";
 import { getServerLocalization } from "@/lib/server-localization";
 
-/** Keep the homepage canonical URL stable for crawlers.  Returns: `Promise<React.JSX.Element>`. · refs: none */
+/**
+ * Keep the homepage canonical URL stable for crawlers.  Returns: `Promise<React.JSX.Element>`. · refs: none
+ */
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
 
-/** Render the localized homepage content around the interactive hero. · refs: none */
+/**
+ * Render the localized homepage content around the interactive hero. · refs: none
+ * I/O types: `none -> Promise<JSX.Element>`.
+ */
 export default async function HomePage() {
   const { t } = await getServerLocalization();
   const topics = [

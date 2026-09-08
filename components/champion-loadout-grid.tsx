@@ -1,5 +1,5 @@
-/** champion-loadout-grid component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * Render champion loadout grid.
  * refs: none
  */
 import Link from "next/link";
@@ -13,10 +13,10 @@ function statNameKey(value: string | null | undefined): string {
   return String(value ?? "").normalize("NFKD").toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
- * Returns: `React.JSX.Element`
+/**
+ * Render champion loadout grid.
  * refs: none
+ * I/O types: `{ championSlug, loadouts, cardStats, talentId, returnTo, }: { championSlug: string; loadouts: ChampionLoadout[]; cardStats: ChampionCardStatsResponse; talentId: number; returnTo: string; } -> JSX.Element`.
  */
 export default function ChampionLoadoutGrid({
   championSlug,

@@ -71,16 +71,18 @@ export const COMMUNITY_LOCALE_BASE_URL = (
 ).replace(/\/+$/, "");
 
 /**
- * Transforms or validates is supported locale according to this module's data contract.
+ * Narrow the value to Locale only when its code occurs in SUPPORTED_LOCALES.
  * refs: none
+ * I/O types: `value: string | null | undefined -> value is Locale`.
  */
 export function isSupportedLocale(value: string | null | undefined): value is Locale {
   return SUPPORTED_LOCALES.some(({ code }) => code === value);
 }
 
 /**
- * Defines the community locale url contract used by this module.
+ * Build the community catalog URL from the encoded locale and requested JSON module name.
  * refs: none
+ * I/O types: `locale: Locale; module: string -> string`.
  */
 export function communityLocaleUrl(locale: Locale, module: string) {
   return `${COMMUNITY_LOCALE_BASE_URL}/${encodeURIComponent(locale)}/${module}.json`;

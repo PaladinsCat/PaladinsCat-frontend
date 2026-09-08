@@ -1,5 +1,5 @@
-/** performance-range-bell-curve component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * A compact normal-distribution approximation anchored to the observed P10/P90 range.  Returns: `React.JSX.Element`. · refs: none
  * refs: none
  */
 import type { PerformanceMetricSummary } from "@/lib/api-client";
@@ -33,7 +33,10 @@ function finite(value: number, fallback = 0): number {
   return Number.isFinite(value) ? value : fallback;
 }
 
-/** A compact normal-distribution approximation anchored to the observed P10/P90 range.  Returns: `React.JSX.Element`. · refs: none */
+/**
+ * A compact normal-distribution approximation anchored to the observed P10/P90 range.  Returns: `React.JSX.Element`. · refs: none
+ * I/O types: `{ metricLabel, summary, formatValue, labels }: Props -> JSX.Element`.
+ */
 export default function PerformanceRangeBellCurve({ metricLabel, summary, formatValue, labels }: Props) {
   const p10 = finite(summary.p10);
   const p90 = Math.max(p10, finite(summary.p90));

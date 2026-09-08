@@ -32,6 +32,7 @@ export const RouteSettledProvider = RouteSettledContext.Provider;
 /**
  * Exposes route-settled state to React consumers.
  * refs: none
+ * I/O types: `none -> boolean`.
  */
 export function useRouteSettled() {
   return useContext(RouteSettledContext);
@@ -40,6 +41,7 @@ export function useRouteSettled() {
 /**
  * Exposes route-settled loading state to React consumers.
  * refs: none
+ * I/O types: `loading: boolean -> boolean`.
  */
 export function useRouteSettledLoading(loading: boolean) {
   const routeSettled = useRouteSettled();

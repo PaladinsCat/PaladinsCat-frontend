@@ -1,11 +1,13 @@
-/** Builds CSRF headers for browser API requests.
- * The module preserves the existing validation, storage, formatting, or asset boundary.
+/**
+ * Return the decoded __Host-pc_csrf cookie for unsafe methods; return null for GET/HEAD/OPTIONS/TRACE, a missing token, or invalid percent encoding.
+ * Builds CSRF headers for browser API requests.
  * Returns: `string | null`
  * refs: none
  */
-/** Apply csrfHeader to the declared input values.
- * Contract: returns the module-specific validated, stored, formatted, or resolved value without external side effects.
+/**
+ * Return the decoded __Host-pc_csrf cookie for unsafe methods; return null for GET/HEAD/OPTIONS/TRACE, a missing token, or invalid percent encoding.
  * refs: none
+ * I/O types: `cookie: string; method: string -> string | null`.
  */
 export function csrfHeader(cookie: string, method: string): string | null {
   if (["GET", "HEAD", "OPTIONS", "TRACE"].includes(method.toUpperCase())) return null;

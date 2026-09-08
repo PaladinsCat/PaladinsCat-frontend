@@ -1,10 +1,12 @@
 /**
- * Define the stats performance page route boundary.
- * Coordinates this module's route data flow and rendered output.
+ * Render the /stats/performance route with `MetricsPage`.
  * refs: none
  */
-import type { ChampionPerformanceDistribution, PerformanceMetricSummary } from "@/lib/api-client";
+import type { PerformanceMetricSummary } from "@/lib/api-client";
 import { fetchServerJson } from "@/lib/server-api";
+import type { Metadata } from "next";
+import { getServerLocalization } from "@/lib/server-localization";
+import { performanceSelection, type GamePerformanceMetric, type PerformanceScope } from "@/lib/performance-selection";
 import MetricsPage, { type MetricsInitialData } from "../metrics/page";
 
 type RawRecord = Record<string, unknown>;
@@ -34,43 +36,18 @@ function unwrapRecord(raw: unknown): RawRecord {
     : value;
 }
 
-function unwrapRows(raw: unknown): RawRecord[] {
-  if (Array.isArray(raw)) return raw.filter((row): row is RawRecord => Boolean(row) && typeof row === "object");
-  const data = raw && typeof raw === "object" ? (raw as RawRecord).data : undefined;
-  if (Array.isArray(data)) {
-    return data.filter((row: unknown): row is RawRecord => Boolean(row) && typeof row === "object");
-  }
-  return [];
-}
-
-async function getInitialData(): Promise<MetricsInitialData | null> {
+async function getInitialData(scope: PerformanceScope, metric: GamePerformanceMetric): Promise<MetricsInitialData | null> {
   try {
-    const [dashboardRaw, rowsRaw] = await Promise.all([
-      fetchServerJson<RawRecord>("/stats/performance-metrics?metric=dpm&includeRoles=1", { timeoutMs: 5000 }),
-      fetchServerJson<unknown>("/stats/performance-metrics/by-champion?metric=dpm", { timeoutMs: 5000 }),
-    ]);
+    const dashboardRaw = await fetchServerJson<RawRecord>(`/stats/performance-metrics?metric=${metric}&scope=${scope}&includeRoles=1`, { timeoutMs: 5000 });
     const dashboard = unwrapRecord(dashboardRaw);
+    if (!dashboard[metric] || (dashboard.scope && dashboard.scope !== scope)) return null;
     const roles = dashboard.roles && typeof dashboard.roles === "object" && !Array.isArray(dashboard.roles)
       ? Object.fromEntries(Object.entries(dashboard.roles).map(([role, summary]) => [role, mapSummary(summary)]))
       : {};
-    const rows: ChampionPerformanceDistribution[] = unwrapRows(rowsRaw).map((row) => ({
-      championId: Number(row.champion_id ?? 0),
-      championName: String(row.champion_name ?? ""),
-      className: String(row.class ?? "Unknown"),
-      min: Number(row.min ?? 0),
-      max: Number(row.max ?? 0),
-      mean: Number(row.mean ?? 0),
-      median: Number(row.median ?? 0),
-      mode: Number(row.mode ?? 0),
-      p10: Number(row.p10 ?? 0),
-      p90: Number(row.p90 ?? 0),
-      avgValue: Number(row.avg_value ?? 0),
-      totalMatches: Number(row.total_matches ?? 0),
-    }));
     return {
-      metric: "dpm",
-      dashboard: { summary: mapSummary(dashboard.dpm), roles },
-      rows,
+      scope,
+      metric,
+      dashboard: { summary: mapSummary(dashboard[metric]), roles },
     };
   } catch (error) {
     console.error("[stats/performance] Server metric fetch failed; using browser fallback", error);
@@ -78,8 +55,41 @@ async function getInitialData(): Promise<MetricsInitialData | null> {
   }
 }
 
+/**
+ * Force request-time rendering for this route instead of static caching.
+ * refs: none
+ */
 export const dynamic = "force-dynamic";
 
-export default async function PerformancePage() {
-  return <MetricsPage initialData={await getInitialData()} />;
+type PageProps = { searchParams: Promise<{ scope?: string; metric?: string }> };
+
+/**
+ * Build localized metadata for /stats/performance, including the title and any canonical, description, and crawler directives configured for this route.
+ * I/O types: `{ searchParams }: PageProps -> Promise<Metadata>`.
+ * refs: none
+ */
+export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
+  const { scope } = performanceSelection((await searchParams).scope);
+  const { t } = await getServerLocalization();
+  const title = t(scope === "casual" ? "seo.stats.performance.casualTitle" : "seo.stats.performance.rankedTitle");
+  const description = t(scope === "casual" ? "stats.performance.casualDescription" : "stats.performance.rankedDescription");
+  const canonical = scope === "casual" ? "/stats/performance?scope=casual" : "/stats/performance";
+  const images = ["/images/icons/paladinscat.avif"];
+  return {
+    title, description,
+    alternates: { canonical },
+    openGraph: { title, description, url: canonical, siteName: "PaladinsCat", type: "website", images },
+    twitter: { card: "summary", title, description, images },
+  };
+}
+
+/**
+ * Render the /stats/performance route with `MetricsPage`.
+ * I/O types: `{ searchParams }: PageProps -> Promise<JSX.Element>`.
+ * refs: none
+ */
+export default async function PerformancePage({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const { scope, metric } = performanceSelection(params.scope, params.metric);
+  return <MetricsPage initialData={await getInitialData(scope, metric)} />;
 }

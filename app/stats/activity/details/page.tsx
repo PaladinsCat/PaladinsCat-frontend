@@ -1,15 +1,14 @@
 /**
- * Define the stats activity details page route boundary.
- * Coordinates this module's route data flow and rendered output.
+ * Render /stats/activity/details using `PlayerActivityDetails`.
  * refs: none
  */
 import PlayerActivityDetails from "@/components/player-activity-details";
 import { createLocalizedMetadata } from "@/lib/server-localization";
 
 /**
- * Renders the exported statistics view with its route data.
- * Returns: `Promise<Metadata>`
+ * Render /stats/activity/details.
  * refs: none
+ * I/O types: `none -> Promise<Metadata>`.
  */
 export async function generateMetadata() {
   return createLocalizedMetadata("playerActivity.detailsTitle", {
@@ -19,9 +18,9 @@ export async function generateMetadata() {
 }
 
 /**
- * Renders the exported statistics view with its route data.
- * Returns: `React.JSX.Element`
+ * Render /stats/activity/details using `PlayerActivityDetails`.
  * refs: none
+ * I/O types: `none -> JSX.Element`.
  */
 export default function PlayerActivityDetailsPage() {
   return (

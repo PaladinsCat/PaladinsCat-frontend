@@ -1,5 +1,5 @@
-/** SiteAnalytics component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * Render nothing while registering page-view and heartbeat analytics effects for the current pathname; clean up the effect timers/listeners when the path changes or the component unmounts.
  * refs: none
  */
 "use client";
@@ -30,10 +30,10 @@ function anonymousVisitorId(): string {
   }
 }
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
- * Returns: `React.JSX.Element`
+/**
+ * Render nothing while registering page-view and heartbeat analytics effects for the current pathname; clean up the effect timers/listeners when the path changes or the component unmounts.
  * refs: none
+ * I/O types: `none -> null`.
  */
 export default function SiteAnalytics() {
   const pathname = usePathname();

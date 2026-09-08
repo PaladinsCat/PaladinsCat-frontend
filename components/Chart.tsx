@@ -1,5 +1,5 @@
-/** Chart component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * Render line chart component with `ResponsiveContainer`, `LineChart`, `CartesianGrid`, `XAxis`, `YAxis`.
  * refs: none
  */
 "use client";
@@ -20,13 +20,17 @@ import {
 import { chartColors, chartText, chartTextSecondary, chartGrid } from "@/lib/chart-colors";
 import { getPercentageColor } from "@/lib/stat-quality";
 
+/**
+ * Describe chart props with data, xKey, yKeys, yLabel (optional), title (optional), height (optional), colors (optional).
+ * refs: none
+ */
 export interface ChartProps {
   data: Array<Record<string, unknown>>;
   xKey: string;
   yKeys: string[];
   yLabel?: string;
   title?: string;
-  height?: number;
+  height?: number | `${number}%`;
   colors?: string[];
   barColors?: Record<string, string[]>;
   percentageScale?: boolean;
@@ -37,9 +41,10 @@ export interface ChartProps {
   showYAxis?: boolean;
 }
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+/**
+ * Render line chart component with `ResponsiveContainer`, `LineChart`, `CartesianGrid`, `XAxis`, `YAxis`.
  * refs: none
+ * I/O types: `{ data, xKey, yKeys, yLabel = "", title, height = 300, colors = chartColors, percentageScale = false, showLegend = true, showGrid = true, showTooltip = true, showXAxis = true, showYAxis = true, }: ChartProps -> JSX.Element`.
  */
 export function LineChartComponent({
   data,
@@ -116,9 +121,10 @@ export function LineChartComponent({
   );
 }
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+/**
+ * Render bar chart component with `ResponsiveContainer`, `BarChart`, `CartesianGrid`, `XAxis`, `YAxis`.
  * refs: none
+ * I/O types: `{ data, xKey, yKeys, yLabel = "", title, height = 300, colors = chartColors, barColors, showLegend = true, showGrid = true, showTooltip = true, showXAxis = true, showYAxis = true, }: ChartProps -> JSX.Element`.
  */
 export function BarChartComponent({
   data,
@@ -136,7 +142,7 @@ export function BarChartComponent({
   showYAxis = true,
 }: ChartProps) {
   return (
-    <div className="w-full">
+    <div className={typeof height === "string" ? "h-full w-full" : "w-full"}>
       {title && <h3 className="text-lg font-semibold mb-2 text-pc-text">{title}</h3>}
       <ResponsiveContainer width="100%" height={height}>
         <BarChart data={data} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
@@ -159,6 +165,7 @@ export function BarChartComponent({
           )}
           {showTooltip && (
             <Tooltip
+              isAnimationActive={false}
               contentStyle={{
                 backgroundColor: chartGrid,
                 border: `1px solid ${chartGrid}`,

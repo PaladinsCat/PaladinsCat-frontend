@@ -3,6 +3,10 @@
  * Keep behavior aligned with its callers and browser/server boundary.
  * refs: none
  */
+/**
+ * Define effect key as `| "movement-speed" | "mount-speed" | "damage-reduction-direct" | "damage-reduction-area" | "life-steal" | "healing-received" | "crowd-control-reduction" | "cooldown-reduction" | "reload-speed" | "ultimate-charge" | "maximum-health" | "maximum-ammo" | "shield-health" | "shield-effectiveness" | "weapon-damage" | "weapon-damage-deployables" | "weapon-damage-shields"`.
+ * refs: none
+ */
 export type EffectKey =
   | "movement-speed"
   | "mount-speed"
@@ -39,7 +43,7 @@ export type EffectDirection = "increase" | "decrease";
 export type EffectTarget = "self" | "enemy" | "ally" | "unknown";
 
 /**
- * Transforms or validates  detected effect according to this module's data contract.
+ * Describe one detected effect with its magnitude, direction, target, source identity/type, and source description.
  * refs: none
  */
 export interface DetectedEffect {
@@ -97,9 +101,9 @@ function numericMatch(text: string, patterns: RegExp[]): number | null {
 }
 
 /**
- * Transforms or validates resolve scaled description according to this module's data contract.
- * Returns: `string`
+ * Return an empty string for absent text; otherwise clamp the rounded level to 1-5, remove leading tags, evaluate scale placeholders as base + increase * (level - 1), unwrap numeric placeholders, and collapse whitespace.
  * refs: none
+ * I/O types: `description: string | null | undefined; level: number -> string`.
  */
 export function resolveScaledDescription(description: string | null | undefined, level: number): string {
   if (!description) return "";
@@ -216,8 +220,8 @@ function detectTalentWeaponDamage(
  * Extract only explicit, calculator-safe stat changes. The full source text is
  * retained because many Paladins bonuses are conditional and should be read as
  * a simultaneous best-case estimate, not as permanent uptime.
- * Returns: `Array`
  * refs: none
+ * I/O types: `input: { id: number; name: string; type: EffectSourceType; description?: string | null; level?: number; } -> DetectedEffect[]`.
  */
 export function detectDescriptionEffects(input: {
   id: number;
@@ -422,8 +426,9 @@ function emptyDirectionalValue(): DirectionalDiminishedValue {
 }
 
 /**
- * Transforms or validates calculate directional diminished value according to this module's data contract.
+ * Discard non-finite and non-positive bonuses. Apply the diminishing curve above the shared threshold when multiple bonuses contribute, preserve the highest/threshold base, and cap movement at 150% or other effects at 95%; return additive, diminished, capped, and threshold diagnostics.
  * refs: none
+ * I/O types: `values: number[]; movement: boolean -> DirectionalDiminishedValue`.
  */
 export function calculateDirectionalDiminishedValue(values: number[], movement = false): DirectionalDiminishedValue {
   const bonuses = values.filter((value) => Number.isFinite(value) && value > 0);
@@ -460,8 +465,9 @@ export function calculateDirectionalDiminishedValue(values: number[], movement =
 }
 
 /**
- * Transforms or validates calculate diminished value according to this module's data contract.
+ * Ignore non-finite values. For reload effects, clamp their additive total to -60..60%; otherwise diminish positive and negative magnitudes separately and subtract them. Return the final value, lost magnitude, and both directional diagnostics.
  * refs: none
+ * I/O types: `values: number[]; options?: { movement?: boolean; reload?: boolean } -> DiminishedValue`.
  */
 export function calculateDiminishedValue(values: number[], options?: { movement?: boolean; reload?: boolean }): DiminishedValue {
   const finiteValues = values.filter(Number.isFinite);
@@ -490,8 +496,9 @@ export function calculateDiminishedValue(values: number[], options?: { movement?
 }
 
 /**
- * Transforms or validates calculate additive value according to this module's data contract.
+ * Sum finite signed effect values without diminishing returns or caps, retaining separate positive and negative totals and reporting zero loss.
  * refs: none
+ * I/O types: `values: number[] -> DiminishedValue`.
  */
 export function calculateAdditiveValue(values: number[]): DiminishedValue {
   const finiteValues = values.filter(Number.isFinite);
@@ -512,9 +519,9 @@ export function calculateAdditiveValue(values: number[]): DiminishedValue {
 }
 
 /**
- * Transforms or validates extract weapon damage override according to this module's data contract.
- * Returns: `number | null`
+ * Resolve the level-one description and extract a positive weapon-damage override from supported weapon phrases or a Weapon-tagged description. Return null when no positive supported damage value is found.
  * refs: none
+ * I/O types: `description: string | null | undefined -> number | null`.
  */
 export function extractWeaponDamageOverride(description: string | null | undefined): number | null {
   const weaponTagged = /^\s*\[Weapon\]/i.test(description ?? "");

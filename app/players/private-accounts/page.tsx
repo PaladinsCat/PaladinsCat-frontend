@@ -1,5 +1,5 @@
 /**
- * Define the player route surface for private-accounts page and its local data boundary.
+ * Render the PrivateAccountsPage view for the player private-accounts page route.
  * This file owns the page, layout, loading state, or route handler named by its path.
  * It does not own unrelated player sections or shared library policy.
  * refs: none
@@ -22,8 +22,8 @@ const PAGE_SIZE = 24;
 
 /**
  * Render the PrivateAccountsPage view for the player private-accounts page route.
- * Returns: `React.JSX.Element`
  * refs: none
+ * I/O types: `none -> JSX.Element`.
  */
 export default function PrivateAccountsPage() {
   const { t, formatNumber } = useLocalization();

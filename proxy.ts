@@ -32,6 +32,8 @@ export function proxy(request: NextRequest) {
   }
 
   const nonce = crypto.randomUUID().replaceAll("-", "");
+  const forwardedProtocol = request.headers.get("x-forwarded-proto")
+    ?? request.nextUrl.protocol.replace(":", "");
 
   const csp = [
     "default-src 'self'",
@@ -39,7 +41,7 @@ export function proxy(request: NextRequest) {
     // 'strict-dynamic' ignore it.
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-inline'`,
     // Next.js injects inline styles (Tailwind, PostCSS, next/font) server-side.
-    "style-src 'self' 'unsafe-inline'",
+    "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
     // Player avatars, live-stream previews, and repository-owned blog images
     // are rendered from these fixed upstreams. Keep this an explicit allowlist;
     // do not broaden it to arbitrary HTTPS image hosts.
@@ -53,7 +55,7 @@ export function proxy(request: NextRequest) {
     "form-action 'self'",
     "base-uri 'self'",
     "object-src 'none'",
-    "upgrade-insecure-requests",
+    ...(forwardedProtocol === "https" ? ["upgrade-insecure-requests"] : []),
   ].join("; ");
 
   const requestHeaders = new Headers(request.headers);

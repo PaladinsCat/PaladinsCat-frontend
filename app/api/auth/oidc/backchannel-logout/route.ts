@@ -1,6 +1,5 @@
 /**
- * Define the api auth oidc backchannel logout route responsibility boundary.
- * Coordinates api auth oidc backchannel logout route data loading, authorization, and presentation.
+ * Validate the form logout token against the configured issuer and client before forwarding it to backend session revocation. Return 503 for missing configuration, 400 for malformed or missing form data, 401 for invalid tokens, 204 on successful revocation, or 502 when backend revocation fails.
  * refs: none
  */
 import { NextRequest, NextResponse } from "next/server";
@@ -22,9 +21,9 @@ function backend() {
 // This route verifies the token server-side, then calls the service-token-protected backend
 // revocation route. It is never a browser-facing page and returns no user data.
 /**
- * Handles the exported route operation using its declared request and response contract.
- * Returns: `Promise<Response>`
- * refs: none
+ * Validate the form logout token against the configured issuer and client before forwarding it to backend session revocation. Return 503 for missing configuration, 400 for malformed or missing form data, 401 for invalid tokens, 204 on successful revocation, or 502 when backend revocation fails.
+ * refs: doc: documents/02-technical/security/auth.md
+ * I/O types: `request: NextRequest -> Promise<NextResponse<unknown>>`.
  */
 export async function POST(request: NextRequest) {
   const issuer = normalizedHttpsIssuer(process.env.OIDC_ISSUER);

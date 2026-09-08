@@ -1,6 +1,5 @@
 /**
- * Define the terms page responsibility boundary.
- * Coordinates terms page data loading, authorization, and presentation.
+ * Render the localized terms page with its dated acceptance sections.  Returns: `Promise<React.JSX.Element>`. · refs: none
  * refs: none
  */
 import {
@@ -20,7 +19,10 @@ import { getServerLocalization } from "@/lib/server-localization";
 
 const POLICY_DATE = new Date(Date.UTC(2026, 6, 22));
 
-/** Render the localized terms page with its dated acceptance sections.  Returns: `Promise<React.JSX.Element>`. · refs: none */
+/**
+ * Render the localized terms page with its dated acceptance sections.  Returns: `Promise<React.JSX.Element>`. · refs: none
+ * I/O types: `none -> Promise<JSX.Element>`.
+ */
 export default async function TermsPage() {
   const { locale, t } = await getServerLocalization();
   const sections: PublicPolicySection[] = [

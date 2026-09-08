@@ -30,6 +30,7 @@ function errorResponse(status: number): NextResponse {
  * Handle the GET HTTP request for player-avatars file route.
  * Validate the request and return the handler response with its declared status behavior.
  * refs: none
+ * I/O types: `_request: Request; { params }: { params: Promise<{ file: string }> } -> Promise<NextResponse<unknown>>`.
  */
 export async function GET(
   _request: Request,

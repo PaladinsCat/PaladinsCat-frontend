@@ -1,14 +1,13 @@
 /**
- * Define the stats player layout route boundary.
- * Coordinates this module's route data flow and rendered output.
+ * Pass the /stats/player layout children through unchanged.
  * refs: none
  */
 import { createLocalizedMetadata } from "@/lib/server-localization";
 
 /**
- * Renders the exported statistics view with its route data.
- * Returns: `Promise<Metadata>`
+ * Render /stats/player.
  * refs: none
+ * I/O types: `none -> Promise<Metadata>`.
  */
 export async function generateMetadata() {
   return createLocalizedMetadata("seo.stats.player.title", {
@@ -17,9 +16,9 @@ export async function generateMetadata() {
 }
 
 /**
- * Renders the exported statistics view with its route data.
- * Returns: `React.JSX.Element`
+ * Pass the /stats/player layout children through unchanged.
  * refs: none
+ * I/O types: `{ children }: { children: React.ReactNode } -> ReactNode`.
  */
 export default function PlayerStatsLayout({ children }: { children: React.ReactNode }) {
   return children;

@@ -1,6 +1,5 @@
 /**
- * Define the community create page responsibility boundary.
- * Coordinates community create page data loading, authorization, and presentation.
+ * Render the /community/create route with `AsyncButton`.
  * refs: none
  */
 "use client";
@@ -12,9 +11,9 @@ import { AsyncButton } from "@/components/async-state";
 import { useLocalization } from "@/lib/localization-context";
 
 /**
- * Handles the exported route operation using its declared request and response contract.
- * Returns: `React.JSX.Element`
+ * Render the /community/create route with `AsyncButton`.
  * refs: none
+ * I/O types: `none -> JSX.Element`.
  */
 export default function CreatePostPage() {
   const { t } = useLocalization();

@@ -1,633 +1,101 @@
-/**
- * Define the top-level statistics page route.
- * Loads summary statistics and renders the localized stats navigation view.
+/** Stats directory: server-rendered destinations, localized copy, and matching structured data.
  * refs: none
  */
-"use client";
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import {
-  fetchStatsPageData,
-  type Champion,
-  type MatchCompositionStat,
-  type SkinStat,
-  type BrokenSkinStat,
-  type TierStat,
-  type BaselineEntry,
-} from "@/lib/api-client";
-import { getChampionIconSafe } from "@/lib/champion-icons";
-import { championSlug } from "@/lib/utils";
-import { getRankIconPath } from "@/lib/tier-utils";
-import { getPercentageColor, getStatQuality } from "@/lib/stat-quality";
-import { PerformanceOverviewCard } from "@/components/PerformanceOverviewCard";
-import { useLobbyTier } from "@/lib/lobby-tier-context";
-import { ContentFade } from "@/components/async-state";
-import { ChartCardSkeleton, DataCardSkeleton } from "@/components/route-skeleton";
-import DetailLink from "@/components/detail-link";
-import { useLocalization } from "@/lib/localization-context";
-import { useRouteSettledLoading } from "@/lib/route-transition-context";
+import type { Metadata } from "next";
+import { Activity, ArrowRight, BarChart3, Coins, Trophy } from "lucide-react";
+import PageHeader from "@/components/ui/page-header";
+import { getServerLocalization } from "@/lib/server-localization";
+import { absoluteUrl, serializeJsonLd, SITE_NAME } from "@/lib/seo";
 
-const ROLES = ["Frontline", "Damage", "Flank", "Support"] as const;
+const sections = [
+  {
+    id: "metrics", titleKey: "stats.portal.gameMetrics",
+    cards: [
+      { href: "/stats/performance", titleKey: "generated.stats.performanceMetrics", descriptionKey: "stats.portal.performanceDescription", icon: BarChart3, accent: "cyan" },
+      { href: "/stats/champions", titleKey: "stats.matchups.title", descriptionKey: "stats.matchups.description", icon: Trophy, accent: "violet" },
+      { href: "/stats/ecpm", titleKey: "menu.effectiveCredits", descriptionKey: "stats.portal.ecpmDescription", icon: Coins, accent: "amber" },
+    ],
+  },
+  {
+    id: "activity", titleKey: "stats.portal.activity",
+    cards: [
+      { href: "/stats/tiers", titleKey: "stats.tiers.title", descriptionKey: "stats.portal.tiersDescription", icon: Trophy, accent: "amber" },
+      { href: "/stats/activity", titleKey: "menu.playerActivity", descriptionKey: "stats.portal.activityDescription", icon: Activity, accent: "cyan" },
+    ],
+  },
+] as const;
 
-type SortKey = "pickRate" | "winRate";
-type ItemCategory = "Defense" | "Utility" | "Healing" | "Offense";
-type PageItemStat = { itemId: number; name: string; pickRate: number; winRate: number; category: ItemCategory; icon: string };
-type PageMapStat = { name: string; matches: number; distributionRate: number; avgDurationSeconds: number };
-
-const EMPTY_METRICS = {
-  dpm: { p10: 0, p25: 0, p75: 0, p90: 0, mean: 0, median: 0, mode: 0 },
-  hpm: { p10: 0, p25: 0, p75: 0, p90: 0, mean: 0, median: 0, mode: 0 },
-  gpm: { p10: 0, p25: 0, p75: 0, p90: 0, mean: 0, median: 0, mode: 0 },
-  mpm: { p10: 0, p25: 0, p75: 0, p90: 0, mean: 0, median: 0, mode: 0 },
-  kda: { p10: 0, p25: 0, p75: 0, p90: 0, mean: 0, median: 0, mode: 0 },
-};
-
-const ITEM_CATEGORIES: Record<string, ItemCategory> = {
-  "Blast Shields": "Defense",
-  Guardian: "Defense",
-  Haven: "Defense",
-  Resilience: "Defense",
-  Sentinel: "Defense",
-  Chronos: "Utility",
-  Hoard: "Utility",
-  "Master Riding": "Utility",
-  "Morale Boost": "Utility",
-  Nimble: "Utility",
-  Bloodbath: "Healing",
-  "Life Rip": "Healing",
-  Meditation: "Healing",
-  Rejuvenate: "Healing",
-  Veteran: "Healing",
-  Bulldozer: "Offense",
-  "Deft Hands": "Offense",
-  Lethality: "Offense",
-  "Trigger Scent": "Offense",
-  Wrecker: "Offense",
-};
-
-function itemIcon(name: string) {
-  return `/images/items/${name.replace(/\s+/g, "_")}_Icon.avif`;
-}
-
-function mapItemStats(items: Array<{ itemId: number; itemName: string; totalUsage: number; winRate: number }>): PageItemStat[] {
-  const totalUsage = items.reduce((sum, item) => sum + item.totalUsage, 0);
-  return items.map((item) => ({
-    itemId: item.itemId,
-    name: item.itemName,
-    pickRate: totalUsage > 0 ? Number(((item.totalUsage / totalUsage) * 100).toFixed(1)) : 0,
-    winRate: Number(item.winRate.toFixed(1)),
-    category: ITEM_CATEGORIES[item.itemName] ?? "Utility",
-    icon: itemIcon(item.itemName),
-  }));
-}
-
-function mapMapStats(maps: Array<{ name: string; totalMatches: number; distributionRate: number; avgDurationSeconds: number }>): PageMapStat[] {
-  return maps.map((map) => ({
-    name: map.name,
-    matches: map.totalMatches,
-    distributionRate: map.distributionRate,
-    avgDurationSeconds: map.avgDurationSeconds,
-  }));
+/**
+ * Build localized metadata for /stats, including the title and any canonical, description, and crawler directives configured for this route.
+ * I/O types: `none -> Promise<Metadata>`.
+ * refs: none
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getServerLocalization();
+  const title = t("seo.stats.portal.title");
+  const description = t("seo.stats.portal.description");
+  return {
+    title, description,
+    alternates: { canonical: "/stats" },
+    openGraph: {
+      type: "website", url: absoluteUrl("/stats"), siteName: SITE_NAME,
+      title, description,
+      images: [{ url: "/images/icons/paladinscat.avif", width: 120, height: 120, alt: SITE_NAME }],
+    },
+    twitter: { card: "summary", title, description, images: ["/images/icons/paladinscat.avif"] },
+  };
 }
 
 /**
- * Renders the exported statistics view with its route data.
- * Returns: `React.JSX.Element`
+ * Render the /stats route with `PageHeader`.
+ * I/O types: `none -> Promise<JSX.Element>`.
  * refs: none
  */
-export default function StatsPage() {
-  const { t , formatPercent, formatNumber} = useLocalization();
-  const { definition: lobbyTier, ready: lobbyTierReady } = useLobbyTier();
-  const statsNavigation = [
-    {
-      title: t("nav.champions"),
-      links: [
-        { href: "/stats/performance", label: t("menu.performanceOverview") },
-        { href: "/stats/winrate", label: t("menu.championWinRates") },
-        { href: "/stats/banrate", label: t("menu.championBanRates") },
-        { href: "/stats/tiers", label: t("menu.rankedDistribution") },
-      ],
+export default async function StatsPage() {
+  const { t } = await getServerLocalization();
+  const cards = sections.flatMap((section) => [...section.cards]);
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "@id": absoluteUrl("/stats#directory"),
+    url: absoluteUrl("/stats"),
+    name: t("stats.portal.title"),
+    description: t("stats.portal.description"),
+    about: { "@type": "VideoGame", name: "Paladins: Champions of the Realm" },
+    mainEntity: {
+      "@type": "ItemList",
+      itemListElement: cards.map((card, index) => ({
+        "@type": "ListItem", position: index + 1,
+        name: t(card.titleKey), url: absoluteUrl(card.href),
+      })),
     },
-    {
-      title: t("nav.game"),
-      links: [
-        { href: "/stats/items", label: t("menu.itemMeta") },
-        { href: "/stats/maps", label: t("menu.mapStats") },
-        { href: "/stats/compositions", label: t("menu.compositionStats") },
-        { href: "/stats/talents", label: t("menu.talentPerformance") },
-        { href: "/stats/loadouts", label: t("menu.loadoutMeta") },
-        { href: "/stats/skins", label: t("menu.skinStats") },
-      ],
-    },
-    {
-      title: t("menu.leaderboards"),
-      links: [
-        { href: "/players/leaderboard", label: t("menu.rankedLeaderboard") },
-        { href: "/players/elo", label: t("menu.eloLeaderboard") },
-        { href: "/players/performance", label: t("menu.performanceLeaderboard") },
-      ],
-    },
-    {
-      title: t("menu.playerActivity"),
-      links: [
-        { href: "/stats/activity", label: t("menu.playerActivity") },
-        { href: "/stats/platforms", label: t("menu.platforms") },
-        { href: "/stats/regions", label: t("menu.regions") },
-        { href: "/stats/ecpm", label: t("menu.effectiveCredits") },
-      ],
-    },
-  ];
-  const [itemSort, setItemSort] = useState<SortKey>("pickRate");
-  const [itemSortDir, setItemSortDir] = useState<"asc" | "desc">("desc");
-  const [expandedBannedId, setExpandedBannedId] = useState<number | null>(null);
-  const [metrics, setMetrics] = useState(EMPTY_METRICS);
-  const [champions, setChampions] = useState<Champion[]>([]);
-  const [items, setItems] = useState<PageItemStat[]>([]);
-  const [maps, setMaps] = useState<PageMapStat[]>([]);
-  const [tiers, setTiers] = useState<TierStat[]>([]);
-  const [egpmBaselines, setEgpmBaselines] = useState<BaselineEntry[]>([]);
-  const [skinStats, setSkinStats] = useState<SkinStat[]>([]);
-  const [compositions, setCompositions] = useState<MatchCompositionStat[]>([]);
-  const [overviewLoading, setOverviewLoading] = useState(true);
-  const [egpmLoading, setEgpmLoading] = useState(true);
-  const [skinsLoading, setSkinsLoading] = useState(true);
-  const [compositionsLoading, setCompositionsLoading] = useState(true);
-  const [brokenSkins, setBrokenSkins] = useState<BrokenSkinStat[]>([]);
-  const [brokenSkinsLoading, setBrokenSkinsLoading] = useState(true);
-  const overviewPending = useRouteSettledLoading(overviewLoading);
-  const egpmPending = useRouteSettledLoading(egpmLoading);
-  const skinsPending = useRouteSettledLoading(skinsLoading);
-  const compositionsPending = useRouteSettledLoading(compositionsLoading);
-  const brokenSkinsPending = useRouteSettledLoading(brokenSkinsLoading);
-
-  useEffect(() => {
-    if (!lobbyTierReady) return;
-    let cancelled = false;
-    setOverviewLoading(true);
-    setEgpmLoading(true);
-    setSkinsLoading(true);
-    setCompositionsLoading(true);
-    setBrokenSkinsLoading(true);
-    fetchStatsPageData({ tierMin: lobbyTier.tierMin, tierMax: lobbyTier.tierMax })
-      .then((data) => {
-        if (cancelled) return;
-        const liveMetrics = data.overview.metrics;
-        if (Object.keys(liveMetrics).length > 0) {
-          setMetrics((current) => ({
-            ...current,
-            ...Object.fromEntries(Object.entries(liveMetrics).map(([key, summary]) => [key, {
-              p10: summary?.p10 ?? 0, p25: summary?.p25 ?? 0, p75: summary?.p75 ?? 0, p90: summary?.p90 ?? 0,
-              mean: summary?.mean ?? 0, median: summary?.median ?? 0, mode: summary?.mode ?? 0,
-            }])),
-          }));
-        }
-        setChampions(data.overview.champions);
-        setItems(mapItemStats(data.overview.items));
-        setMaps(mapMapStats(data.overview.maps));
-        setTiers(data.overview.profileTiers);
-        setEgpmBaselines(data.baselines);
-        setSkinStats(data.skins);
-        setCompositions(data.compositions);
-        setBrokenSkins(data.brokenSkins);
-      })
-      .catch(() => {
-        if (cancelled) return;
-        setEgpmBaselines([]);
-        setSkinStats([]);
-        setCompositions([]);
-        setBrokenSkins([]);
-      })
-      .finally(() => {
-        if (cancelled) return;
-        setOverviewLoading(false);
-        setEgpmLoading(false);
-        setSkinsLoading(false);
-        setCompositionsLoading(false);
-        setBrokenSkinsLoading(false);
-      });
-    return () => { cancelled = true; };
-  }, [lobbyTierReady, lobbyTier.tierMax, lobbyTier.tierMin]);
-
-  const toggleItemSort = (key: SortKey) => {
-    if (itemSort === key) {
-      setItemSortDir((d) => (d === "asc" ? "desc" : "asc"));
-    } else {
-      setItemSort(key);
-      setItemSortDir("desc");
-    }
   };
-
-  const sortedItems = [...items].sort((a, b) => {
-    const av = a[itemSort];
-    const bv = b[itemSort];
-    return itemSortDir === "desc" ? bv - av : av - bv;
-  });
-
-  const sortedMaps = maps;
-
-  // Consolidate tier slices into major tiers for display
-  function consolidateTiers(tierData: TierStat[]): TierStat[] {
-    const normalized = Array.from({ length: 27 }, (_, index) => {
-      const tierSort = index + 1;
-      return tierData.find((tier) => tier.tierSort === tierSort) ?? {
-        tier: tierSort === 27 ? t("generated.stats.page.grandmaster") : `Tier ${tierSort}`,
-        tierSort,
-        totalPlays: 0,
-        avgWinRate: 0,
-        percentage: 0,
-      };
-    });
-    function sumSlice(start: number, end: number) {
-      const slice = normalized.slice(start, end);
-      const total = slice.reduce((s, t) => s + t.totalPlays, 0);
-      const pct = slice.reduce((s, t) => s + t.percentage, 0);
-      return { total, pct };
-    }
-    return [
-      { tier: t("generated.stats.page.bronze"), tierSort: 5, totalPlays: sumSlice(0, 5).total, avgWinRate: 0, percentage: sumSlice(0, 5).pct },
-      { tier: t("generated.stats.page.silver"), tierSort: 10, totalPlays: sumSlice(5, 10).total, avgWinRate: 0, percentage: sumSlice(5, 10).pct },
-      { tier: t("generated.stats.page.gold"), tierSort: 15, totalPlays: sumSlice(10, 15).total, avgWinRate: 0, percentage: sumSlice(10, 15).pct },
-      { tier: t("generated.stats.page.platinum"), tierSort: 20, totalPlays: sumSlice(15, 20).total, avgWinRate: 0, percentage: sumSlice(15, 20).pct },
-      { tier: t("generated.stats.page.diamond"), tierSort: 25, totalPlays: sumSlice(20, 25).total, avgWinRate: 0, percentage: sumSlice(20, 25).pct },
-      { tier: t("generated.stats.page.master"), tierSort: 26, totalPlays: sumSlice(25, 27).total, avgWinRate: 0, percentage: sumSlice(25, 27).pct },
-    ];
-  }
-  const displayTiers = consolidateTiers(tiers);
-  const maxTierCount = Math.max(1, ...displayTiers.map((tier) => tier.totalPlays));
-  const baselineOrder = [t("generated.stats.page.global"), "Damage", "Flank", "Support", "Frontline"];
-  const orderedEgpmBaselines = [...egpmBaselines].sort((a, b) => baselineOrder.indexOf(a.role) - baselineOrder.indexOf(b.role));
 
   return (
     <div className="space-y-8">
-      <section aria-label={t("nav.stats")} className="space-y-5">
-        {statsNavigation.map((group) => (
-          <div key={group.title} className="space-y-3">
-            <h2 className="pc-heading text-xl">{group.title}</h2>
-            <div className="grid gap-3" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 13.5rem), 1fr))" }}>
-              {group.links.map((link) => (
-                <Link key={link.href} href={link.href} className="pc-home-feature-card group flex min-h-20 min-w-0 items-center justify-between gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-4 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary">
-                  <span className="text-sm font-semibold text-pc-text group-hover:text-pc-accent">{link.label}</span>
-                  <span aria-hidden className="shrink-0 text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent">→</span>
-                </Link>
-              ))}
-            </div>
-          </div>
-        ))}
-      </section>
-
-      {/* ── Performance, eCPM, and ranked-player distribution ── */}
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="flex h-full flex-col">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-bold text-pc-text">{t("generated.stats.performanceOverview")}</h2>
-            <DetailLink href="/stats/performance" label={t("generated.matches.details")} />
-          </div>
-        {overviewPending ? (
-          <DataCardSkeleton rows={5} />
-        ) : <ContentFade className="flex-1">{(() => {
-          const perfRows = [
-            { key: "dpm", label: t("generated.stats.dpm"), color: "var(--pc-chart-red)" },
-            { key: "hpm", label: t("generated.stats.hpm"), color: "var(--pc-chart-green)" },
-            { key: "gpm", label: t("generated.stats.cpm"), color: "var(--pc-chart-amber)" },
-            { key: "mpm", label: t("generated.stats.spm"), color: "var(--pc-chart-sky)" },
-            { key: "kda", label: t("generated.stats.kda"), color: "var(--pc-accent)" },
-          ].map(({ key, label, color }) => {
-            const d = metrics[key as keyof typeof metrics] as {
-              p10: number;
-              p25: number;
-              p75: number;
-              p90: number;
-              mean: number;
-            };
-            return {
-              key,
-              label,
-              color,
-              p10: d.p10,
-              p25: d.p25,
-              mean: d.mean,
-              p75: d.p75,
-              p90: d.p90,
-            };
-          });
-
-          return (
-            <PerformanceOverviewCard metrics={perfRows} />
-          );
-        })()}</ContentFade>}
-        </div>
-
-        <div className="flex h-full flex-col">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-bold text-pc-text">{t("generated.stats.ecpmByRole")}</h2>
-            <DetailLink href="/stats/ecpm" label={t("generated.matches.details")} />
-          </div>
-          {egpmPending ? <DataCardSkeleton rows={5} /> : (
-            <ContentFade className="flex-1">
-              <PerformanceOverviewCard metrics={orderedEgpmBaselines.map((row) => ({
-                key: `egpm-${row.role}`,
-                label: row.role === "Frontline" ? t("common.roles.frontlineShort") : row.role === "Support" ? t("common.roles.supportShort") : row.role === "Damage" ? t("common.roles.damageShort") : row.role === "Global" ? t("common.roles.global") : t("common.roles.flank"),
-                color: row.role === "Global" ? "var(--pc-chart-amber)" : row.role === "Damage" ? "var(--pc-chart-red)" : row.role === "Flank" ? "var(--pc-role-flank)" : row.role === "Support" ? "var(--pc-chart-green)" : "var(--pc-chart-sky)",
-                p10: row.p10Ecpm,
-                p25: row.p25Ecpm,
-                mean: row.avgEcpm,
-                p75: row.p75Ecpm,
-                p90: row.p90Ecpm,
-              }))} />
-            </ContentFade>
-          )}
-        </div>
-
-        <div className="flex h-full flex-col">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-bold text-pc-text">{t("generated.stats.rankedPlayerDistribution")}</h2>
-            <DetailLink href="/stats/tiers" label={t("generated.matches.details")} />
-          </div>
-          {overviewPending ? <ChartCardSkeleton /> : <ContentFade className="flex-1 bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
-            <div className="flex h-full min-h-48 items-end justify-center gap-1.5 pb-2">
-              {displayTiers.map((tier) => {
-                const height = Math.max(4, Math.round((tier.totalPlays / maxTierCount) * 116));
-                const rankIcon = getRankIconPath(tier.tierSort, tier.tierSort === 26 ? 101 : tier.tierSort === 27 ? 1 : 0);
-                return (
-                  <div key={tier.tierSort} className="group flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1">
-                    <div className="text-xs tabular-nums opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: getPercentageColor(tier.percentage) }}>{formatPercent(tier.percentage)}</div>
-                    <div className="w-5 rounded-t-sm transition-colors" style={{ height, background: getPercentageColor(tier.percentage) }} title={t("generated.stats.value1Value2Value3", { value1: tier.tier, value2: formatNumber(tier.totalPlays), value3: formatNumber(tier.percentage, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) })} />
-                    <img src={rankIcon} alt={tier.tier} title={tier.tier} className="h-5 w-5 object-contain drop-shadow" loading="lazy" />
-                    <div className="text-xs text-pc-text-secondary tabular-nums leading-none">{formatNumber(tier.totalPlays)}</div>
-                  </div>
-                );
-              })}
-            </div>
-          </ContentFade>}
-        </div>
-      </section>
-
-      {/* ── Top Champions (win rate + ban rate, consolidated) ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-      <section className="lg:col-span-3 lg:order-1">
-        <div className="pc-section-heading mb-3 px-1 sm:px-2">
-          <h2 className="text-sm font-bold text-pc-text">{t("generated.stats.topChampions")}</h2>
-          <div className="flex flex-wrap gap-x-3 gap-y-1">
-            <DetailLink href="/stats/winrate" label={t("generated.matches.details")} />
-            <DetailLink href="/stats/banrate" label={t("generated.matches.details")} />
-          </div>
-        </div>
-        {overviewPending ? <DataCardSkeleton rows={10} columns={2} /> : <ContentFade className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 hover:border-pc-accent-mid transition-colors">
-          <div className="grid grid-cols-1 gap-5 min-[480px]:grid-cols-2 min-[480px]:gap-4">
-            {/* Left: Top Win Rate */}
-            <div>
-              <div className="text-xs font-semibold text-pc-text-secondary mb-2 px-2">{t("generated.stats.topWinRate")}</div>
-              <div className="flex flex-col gap-1">
-                {[...champions]
-                  .filter((c) => c.winRate != null && Number.isFinite(c.winRate))
-                  .sort((a, b) => (b.winRate ?? 0) - (a.winRate ?? 0))
-                  .slice(0, 10)
-                  .map((c) => {
-                    // This is a win-rate ranking, so its color must be driven
-                    // by win rate alone; pick-rate confidence would make lower
-                    // win-rate champions appear greener.
-                    const quality = getStatQuality(c.winRate!, 1, 1);
-                    return (
-                      <Link
-                        key={c.id}
-                        href={`/champions/${championSlug(c.name)}`}
-                        className="flex items-center gap-2 px-2 py-1 rounded-lg border border-pc-border/50 bg-pc-card/50 hover:bg-pc-card hover:border-pc-accent-mid transition-all group"
-                        style={{ borderColor: quality.borderColor }}
-                      >
-                        <img
-                          src={getChampionIconSafe(c.name)}
-                          alt={c.name}
-                          className="w-7 h-7 object-contain rounded-full bg-pc-bg/60 shrink-0"
-                        />
-                        <span className="text-pc-text text-xs font-semibold truncate group-hover:text-pc-accent transition-colors">
-                          {c.name}
-                        </span>
-                        <span className="ml-auto text-sm font-bold tabular-nums" style={{ color: getPercentageColor(c.winRate!) }}>
-                          {formatPercent(c.winRate!)}
-                        </span>
-                      </Link>
-                    );
-                  })}
-              </div>
-            </div>
-
-            {/* Right: Most Banned */}
-            <div>
-              <div className="text-xs font-semibold text-pc-text-secondary mb-2 px-2">{t("generated.stats.mostBanned")}</div>
-              <div className="flex flex-col gap-1">
-                {[...champions]
-                  .filter((c) => c.banRate != null && Number.isFinite(c.banRate))
-                  .sort((a, b) => (b.banRate ?? 0) - (a.banRate ?? 0))
-                  .slice(0, 10)
-                  .map((c) => (
-                    <Link
-                      key={c.id}
-                      href={`/champions/${championSlug(c.name)}`}
-                      className="flex items-center gap-2 px-2 py-1 rounded-lg border border-pc-border/50 bg-pc-card/50 hover:bg-pc-card hover:border-pc-accent-mid transition-all group"
-                    >
-                      <img
-                        src={getChampionIconSafe(c.name)}
-                        alt={c.name}
-                        className="w-7 h-7 object-contain rounded-full bg-pc-bg/60 shrink-0"
-                      />
-                      <span className="text-pc-text text-xs font-semibold truncate group-hover:text-pc-accent transition-colors">
-                        {c.name}
-                      </span>
-                      <span className="ml-auto text-sm font-bold tabular-nums" style={{ color: getPercentageColor(c.banRate) }}>
-                        {formatPercent(c.banRate!)}
-                      </span>
-                    </Link>
-                  ))}
-              </div>
-            </div>
-          </div>
-        </ContentFade>}
-      </section>
-
-      {/* ── Item Stats + Map Stats ── */}
-
-        {/* Item Stats (3/5) */}
-        <section className="lg:col-span-5 lg:order-3">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-bold text-pc-text">{t("generated.stats.itemStats")}</h2>
-            <div className="flex items-center gap-2">
-              {(["pickRate", "winRate"] as const).map((key) => (
-                <button
-                  key={key}
-                  onClick={() => toggleItemSort(key)}
-                  className={`text-xs px-2.5 py-1 rounded-lg transition-colors ${
-                    itemSort === key
-                      ? "bg-pc-accent text-pc-bg"
-                      : "bg-pc-card text-pc-muted hover:text-pc-text"
-                  }`}
-                >
-                  {key === "pickRate" ? t("generated.stats.pickRate") : t("generated.stats.winRate.49a3838")}
-                  {itemSort === key && (itemSortDir === "desc" ? " ↓" : " ↑")}
-                </button>
-              ))}
-              <DetailLink href="/game/items" label={t("generated.matches.details")} />
-            </div>
-          </div>
-          {overviewPending ? <DataCardSkeleton rows={4} columns={2} /> : <ContentFade className="bg-pc-bg-elevated border border-pc-border rounded-xl p-4 space-y-4">
-            {sortedItems.length === 0 && (
-              <div className="text-sm text-pc-text-muted">{t("generated.stats.itemStatsUnavailable")}</div>
-            )}
-            {(["Defense", "Utility", "Healing", "Offense"] as const).map((cat) => {
-              const catColor = cat === "Offense" ? "text-red-400" :
-                cat === "Defense" ? "text-blue-400" :
-                cat === "Healing" ? "text-emerald-400" :
-                "text-amber-400";
-              const catItems = sortedItems.filter((i) => i.category === cat);
-              if (catItems.length === 0) return null;
-              return (
-                <div key={cat}>
-                  <span className={`text-xs font-bold uppercase tracking-wider ${catColor} mb-2 block`}>{cat}</span>
-                  <div className="grid grid-cols-5 gap-2">
-                    {catItems.map((item) => {
-                      const quality = getStatQuality(item.winRate, 1, 1);
-                      return (
-                      <Link
-                        key={item.name}
-                        href={`/game/items/${item.itemId}`}
-                        className="flex flex-col items-center text-center py-1 rounded-lg border border-transparent transition-colors"
-                        style={{ borderColor: quality.borderColor }}
-                      >
-                        {item.icon ? (
-                          <img src={item.icon} alt={item.name} className="w-12 h-12 object-contain rounded-md mb-1" />
-                        ) : (
-                          <div className="w-12 h-12 rounded-md bg-pc-bg flex items-center justify-center mb-1">
-                            <span className="text-sm text-pc-text-muted font-bold">{item.name.charAt(0)}</span>
-                          </div>
-                        )}
-                        <div className="text-pc-text font-medium text-xs leading-tight truncate w-full">{item.name}</div>
-                        <div className="flex items-center gap-1 text-xs mt-0.5">
-                          <span style={{ color: getPercentageColor(item.winRate) }}>
-                            {t("generated.stats.wr")}{" "}{item.winRate}%
-                          </span>
-                          <span className="text-pc-text-muted">·</span>
-                          <span style={{ color: getPercentageColor(item.pickRate) }}>{t("generated.stats.pr")}{" "}{item.pickRate}%</span>
-                        </div>
-                      </Link>
-                      );
-                    })}
-                  </div>
+      <PageHeader title={t("stats.portal.title")} description={t("stats.portal.description")} />
+      {sections.map((section) => (
+        <section key={section.id} aria-labelledby={`stats-${section.id}`} className="space-y-4">
+          <h2 id={`stats-${section.id}`} className="pc-heading text-xl">{t(section.titleKey)}</h2>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {section.cards.map(({ href, titleKey, descriptionKey, icon: Icon, accent }) => (
+              <Link key={href} href={href} prefetch={false} data-card-accent={accent}
+                className="pc-card pc-home-feature-card group flex min-w-0 flex-col gap-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-pc-accent">
+                <div className="flex items-center justify-between gap-4">
+                  <Icon aria-hidden="true" className="pc-card-icon h-8 w-8 shrink-0" strokeWidth={1.5} />
+                  <ArrowRight aria-hidden="true" className="h-4 w-4 text-pc-text-muted transition-colors group-hover:text-pc-accent" />
                 </div>
-              );
-            })}
-          </ContentFade>}
+                <div className="min-w-0">
+                  <h3 className="break-words text-base font-semibold text-pc-text">{t(titleKey)}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-pc-text-secondary">{t(descriptionKey)}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
         </section>
-
-        {/* Map Stats (2/5) */}
-        <section className="lg:col-span-2 lg:order-2">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-bold text-pc-text">{t("generated.stats.mapStats")}</h2>
-            <DetailLink href="/game/maps" label={t("generated.matches.details")} />
-          </div>
-          {overviewPending ? <DataCardSkeleton rows={8} /> : <ContentFade className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
-            {sortedMaps.length === 0 ? (
-              <div className="p-4 text-sm text-pc-text-muted">{t("generated.stats.mapStatsUnavailable")}</div>
-            ) : (
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-pc-border text-pc-text-muted text-left text-xs">
-                  <th className="px-3 py-3">{t("generated.stats.map")}</th>
-                  <th className="px-2 py-3 text-right">{t("generated.stats.mapShare")}</th>
-                  <th className="px-3 py-3 text-right">{t("generated.stats.matches")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sortedMaps.map((map) => (
-                  <tr key={map.name} className="border-b border-pc-border/50 hover:bg-pc-bg/50 transition-colors">
-                    <td className="px-3 py-2 text-pc-text font-medium text-xs">{map.name}</td>
-                    <td className="px-2 py-2 text-xs text-right font-semibold" style={{ color: getPercentageColor(map.distributionRate) }}>{formatPercent(map.distributionRate)}</td>
-                    <td className="px-3 py-2 text-pc-text text-xs text-right">{formatNumber(map.matches)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            )}
-          </ContentFade>}
-        </section>
-
-      </div>
-
-      <section className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div>
-          <div className="mb-3 flex items-center justify-between">
-            <div>
-              <h2 className="text-sm font-bold text-pc-text">{t("generated.stats.skinStats")}</h2>
-              <p className="text-xs text-pc-text-muted">{t("generated.stats.rankedCosmeticsIncludingRecoveredSkinIds")}</p>
-            </div>
-            <DetailLink href="/stats/skins" label={t("generated.matches.details")} />
-          </div>
-          {skinsPending ? <DataCardSkeleton rows={5} /> : <ContentFade className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated">
-            {skinStats.length === 0 ? <div className="p-4 text-sm text-pc-text-muted">{t("generated.stats.skinStatsUnavailable")}</div> : (
-              <div className="divide-y divide-pc-border/50">
-                {skinStats.map((skin) => (
-                  <Link key={`${skin.championId}-${skin.skinId}`} href={`/stats/skins?champion=${skin.championId}`} className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-pc-bg-secondary/60">
-                    <img src={getChampionIconSafe(skin.championName)} alt="" className="h-7 w-7 rounded object-contain" />
-                    <div className="min-w-0 flex-1"><div className="truncate text-xs font-medium text-pc-text">{skin.skinName}</div><div className="text-xs text-pc-text-muted">{skin.championName} · {formatNumber(skin.totalPlays)} {t("generated.stats.plays.0effba4")}</div></div>
-                    <span className="text-xs font-bold" style={{ color: getPercentageColor(skin.winRate) }}>{formatPercent(skin.winRate)}</span>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </ContentFade>}
-        </div>
-
-        <div>
-          <div className="mb-3 flex items-center justify-between">
-            <div>
-              <h2 className="text-sm font-bold text-pc-text">{t("generated.stats.compositionStats")}</h2>
-              <p className="text-xs text-pc-text-muted">{t("generated.stats.teamShapeFrontlineDamageFlankSupport")}</p>
-            </div>
-            <DetailLink href="/game/compositions" label={t("generated.matches.details")} />
-          </div>
-          {compositionsPending ? <DataCardSkeleton rows={5} /> : <ContentFade className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated">
-            {compositions.length === 0 ? <div className="p-4 text-sm text-pc-text-muted">{t("generated.stats.compositionStatsUnavailable")}</div> : (
-              <div className="divide-y divide-pc-border/50">
-                {compositions.slice(0, 5).map((composition) => (
-                  <Link key={composition.composition} href="/game/compositions" className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-pc-bg-secondary/60">
-                    <div className="w-20 font-mono text-xs font-semibold text-pc-text">{composition.composition}</div>
-                    <div className="min-w-0 flex-1 text-xs text-pc-text-muted">{formatNumber(composition.totalMatches)} {t("generated.stats.rankedMatches")}</div>
-                    <span className="text-xs font-bold" style={{ color: getPercentageColor(composition.winRate) }}>{formatPercent(composition.winRate)}</span>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </ContentFade>}
-        </div>
-      </section>
-
-      <section className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div>
-          <div className="mb-3 flex items-center justify-between">
-            <div>
-              <h2 className="text-sm font-bold text-pc-text">{t("generated.stats.brokenSkins")}</h2>
-              <p className="text-xs text-pc-text-muted">{t("generated.stats.int16OverflowSkinId32767UsageSharePerChampion")}</p>
-            </div>
-          </div>
-          {brokenSkinsPending ? <DataCardSkeleton rows={5} /> : <ContentFade className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated">
-            {brokenSkins.length === 0 ? <div className="p-4 text-sm text-pc-text-muted">{t("generated.stats.noBrokenSkinData")}</div> : (
-              <div className="divide-y divide-pc-border/50">
-                {brokenSkins.map((skin) => (
-                  <div key={`${skin.championId}-${skin.skinId}`} className="flex items-center gap-3 px-4 py-2.5">
-                    <img src={getChampionIconSafe(skin.championName)} alt="" className="h-7 w-7 rounded object-contain" />
-                    <div className="min-w-0 flex-1">
-                      <div className="truncate text-xs font-medium text-pc-text">{skin.skinName}</div>
-                      <div className="text-xs text-pc-text-muted">{skin.championName} · {formatNumber(skin.totalPlays)} {t("generated.stats.plays.0effba4")}</div>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-xs font-bold" style={{ color: getPercentageColor(skin.usageShare) }}>{formatNumber(skin.usageShare, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}{t("generated.stats.share.b95bb2e")}</span>
-                      <div className="text-xs" style={{ color: getPercentageColor(skin.winRate) }}>{t("generated.stats.wr")}{" "}{formatPercent(skin.winRate)}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </ContentFade>}
-        </div>
-      </section>
+      ))}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(structuredData) }} />
     </div>
   );
 }

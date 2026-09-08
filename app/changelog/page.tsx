@@ -1,6 +1,5 @@
 /**
- * Define the changelog page responsibility boundary.
- * Coordinates changelog page data loading, authorization, and presentation.
+ * Render the /changelog route with `LoadingPanel`, `VersionHistoryGraph`, `Pagination`.
  * refs: none
  */
 "use client";
@@ -330,9 +329,9 @@ function Pagination({ page, totalPages, onChange }: { page: number; totalPages: 
 }
 
 /**
- * Handles the exported route operation using its declared request and response contract.
- * Returns: `React.JSX.Element`
+ * Render the /changelog route with `LoadingPanel`, `VersionHistoryGraph`, `Pagination`.
  * refs: none
+ * I/O types: `none -> JSX.Element`.
  */
 export default function ChangelogPage() {
   const { t } = useLocalization();

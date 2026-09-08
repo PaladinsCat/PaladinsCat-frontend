@@ -7,7 +7,10 @@ import { BackgroundGradientAnimation } from "./BackgroundGradientAnimation";
 
 export { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation };
 
-/** Wrap page children with the animated background and foreground stacking context. · refs: none */
+/**
+ * Wrap page children with the animated background and foreground stacking context. · refs: none
+ * I/O types: `{ children }: { children: React.ReactNode } -> JSX.Element`.
+ */
 export function AceternityLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative overflow-hidden">
@@ -17,7 +20,10 @@ export function AceternityLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** Group section content with the shared Aceternity spacing and surface treatment.  Returns: `React.JSX.Element`. · refs: none */
+/**
+ * Group section content with the shared Aceternity spacing and surface treatment.  Returns: `React.JSX.Element`. · refs: none
+ * I/O types: `{ children, className = "", }: { children: React.ReactNode; className?: string; } -> JSX.Element`.
+ */
 export function AceternitySection({
   children,
   className = "",
@@ -28,7 +34,10 @@ export function AceternitySection({
   return <MovingBorderCard className={className}>{children}</MovingBorderCard>;
 }
 
-/** Render a bordered content card using the moving-border visual treatment.  Returns: `React.JSX.Element`. · refs: none */
+/**
+ * Render a bordered content card using the moving-border visual treatment.  Returns: `React.JSX.Element`. · refs: none
+ * I/O types: `{ children, className = "", }: { children: React.ReactNode; className?: string; } -> JSX.Element`.
+ */
 export function AceternityCard({
   children,
   className = "",

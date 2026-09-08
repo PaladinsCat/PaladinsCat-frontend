@@ -3,6 +3,10 @@
  * Keep behavior aligned with its callers and browser/server boundary.
  * refs: none
  */
+/**
+ * Publish the ecpm activity thresholds configuration as `{ fullAfk: 70, partialAfk: 90, disconnected: 110, engaged: 120, } as const`.
+ * refs: none
+ */
 export const ECPM_ACTIVITY_THRESHOLDS = {
   fullAfk: 70,
   partialAfk: 90,
@@ -27,9 +31,9 @@ export type EcpmActivityLabelKey =
   | "generated.stats.egpm.fullAfk";
 
 /**
- * Defines the ecpm activity level contract used by this module.
- * Returns: `string`
+ * Classify the economy-per-minute value against descending engaged, disconnected, partial-AFK, and full-AFK thresholds; values below every threshold are full-AFK.
  * refs: none
+ * I/O types: `value: number -> EcpmActivityLevel`.
  */
 export function ecpmActivityLevel(value: number): EcpmActivityLevel {
   if (value >= ECPM_ACTIVITY_THRESHOLDS.engaged) return "engaged";
@@ -40,9 +44,9 @@ export function ecpmActivityLevel(value: number): EcpmActivityLevel {
 }
 
 /**
- * Defines the ecpm activity text class contract used by this module.
- * Returns: `string`
+ * Map finite economy-per-minute activity to emerald, yellow, orange, or red text classes; use muted text for missing or non-finite values.
  * refs: none
+ * I/O types: `value: number | null | undefined -> string`.
  */
 export function ecpmActivityTextClass(value: number | null | undefined): string {
   if (value == null || !Number.isFinite(value)) return "text-pc-text-muted";
@@ -56,9 +60,9 @@ export function ecpmActivityTextClass(value: number | null | undefined): string 
 }
 
 /**
- * Returns: `null`
- * Defines the ecpm activity label key contract used by this module.
+ * Return the localization key for a finite economy-per-minute activity classification; return null for missing or non-finite values.
  * refs: none
+ * I/O types: `value: number | null | undefined -> EcpmActivityLabelKey | null`.
  */
 export function ecpmActivityLabelKey(value: number | null | undefined): EcpmActivityLabelKey | null {
   if (value == null || !Number.isFinite(value)) return null;
@@ -71,15 +75,18 @@ export function ecpmActivityLabelKey(value: number | null | undefined): EcpmActi
   }
 }
 
-/** Conservative moderation policy: review 70–119 eCPM, auto-flag only at passive-credit pace or below. · refs: none */
+/**
+ * Conservative moderation policy: review 70–119 eCPM, auto-flag only at passive-credit pace or below. · refs: none
+ * I/O types: `value: number | null | undefined -> boolean`.
+ */
 export function isAutomaticAfkFlag(value: number | null | undefined): boolean {
   return value != null && Number.isFinite(value) && value < ECPM_ACTIVITY_THRESHOLDS.fullAfk;
 }
 
 /**
- * Defines the ecpm activity scale max contract used by this module.
- * Returns: `number`
+ * Choose an activity-chart maximum of at least 160, rounding the largest finite value or engaged threshold up to a multiple of 20.
  * refs: none
+ * I/O types: `values: number[] -> number`.
  */
 export function ecpmActivityScaleMax(values: number[]): number {
   const largest = Math.max(ECPM_ACTIVITY_THRESHOLDS.engaged, ...values.filter(Number.isFinite));

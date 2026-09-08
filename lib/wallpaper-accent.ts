@@ -4,13 +4,21 @@
  * This module owns color bucketing and browser image extraction; it does not fetch or persist wallpaper data.
  * refs: none
  */
-/** CSS custom property carrying the primary Cat accent; reading it has no side effects. · refs: none */
+/**
+ * CSS custom property carrying the primary Cat accent; reading it has no side effects. · refs: none
+ */
 export const HOME_CAT_ACCENT_PROPERTY = "--pc-home-cat-accent";
-/** CSS custom property carrying the secondary platform accent; reading it has no side effects. · refs: none */
+/**
+ * CSS custom property carrying the secondary platform accent; reading it has no side effects. · refs: none
+ */
 export const HOME_PLATFORM_ACCENT_PROPERTY = "--pc-home-platform-accent";
-/** CSS custom property carrying the tertiary wallpaper accent; reading it has no side effects. · refs: none */
+/**
+ * CSS custom property carrying the tertiary wallpaper accent; reading it has no side effects. · refs: none
+ */
 export const HOME_THIRD_ACCENT_PROPERTY = "--pc-home-third-accent";
-/** CSS custom property carrying the fourth wallpaper accent; reading it has no side effects. · refs: none */
+/**
+ * CSS custom property carrying the fourth wallpaper accent; reading it has no side effects. · refs: none
+ */
 export const HOME_FOURTH_ACCENT_PROPERTY = "--pc-home-fourth-accent";
 
 const SAMPLE_SIZE = 48;
@@ -19,6 +27,10 @@ const TONE_BUCKETS = 10;
 const MIN_BUCKET_SAMPLES = 6;
 
 type Hsl = { h: number; s: number; l: number };
+/**
+ * Define wallpaper accents as `{ primary: string | null; secondary: string | null; tertiary: string | null; fourth: string | null; }`.
+ * refs: none
+ */
 export type WallpaperAccents = {
   primary: string | null;
   secondary: string | null;
@@ -158,8 +170,8 @@ function hueBucketDistance(left: number, right: number): number {
 /**
  * Finds a dominant accent and a second readable color. It prefers another hue,
  * falls back to a representative shade, then derives contrast for flat images.
- * Returns: `object`
  * refs: none
+ * I/O types: `pixels: Uint8ClampedArray -> WallpaperAccents`.
  */
 export function pickWallpaperAccents(pixels: Uint8ClampedArray): WallpaperAccents {
   const buckets: ColorBucket[] = Array.from({ length: HUE_BUCKETS }, createColorBucket);
@@ -270,12 +282,18 @@ export function pickWallpaperAccents(pixels: Uint8ClampedArray): WallpaperAccent
   };
 }
 
-/** Backward-compatible shortcut for consumers that only need the main accent. · refs: none */
+/**
+ * Backward-compatible shortcut for consumers that only need the main accent. · refs: none
+ * I/O types: `pixels: Uint8ClampedArray -> string | null`.
+ */
 export function pickWallpaperAccent(pixels: Uint8ClampedArray): string | null {
   return pickWallpaperAccents(pixels).primary;
 }
 
-/** Samples an image in a tiny canvas. Cross-origin images safely fall back. · refs: none */
+/**
+ * Samples an image in a tiny canvas. Cross-origin images safely fall back. · refs: none
+ * I/O types: `source: string -> Promise<WallpaperAccents>`.
+ */
 export async function extractWallpaperAccents(source: string): Promise<WallpaperAccents> {
   try {
     const image = new Image();
@@ -300,8 +318,8 @@ export async function extractWallpaperAccents(source: string): Promise<Wallpaper
  * Extract one readable accent color from a wallpaper source URL.
  *
  * Accepts source; returns a color or null after browser image decoding, without authentication or persistence effects.
- * Returns: `Promise<string | null>`
  * refs: none
+ * I/O types: `source: string -> Promise<string | null>`.
  */
 export async function extractWallpaperAccent(source: string): Promise<string | null> {
   return (await extractWallpaperAccents(source)).primary;

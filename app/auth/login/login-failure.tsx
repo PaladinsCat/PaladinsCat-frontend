@@ -1,15 +1,14 @@
 /**
- * Define the auth login login failure responsibility boundary.
- * Coordinates auth login login failure data loading, authorization, and presentation.
+ * Render the /auth/login/login-failure route.
  * refs: none
  */
 "use client";
 import { useLocalization } from "@/lib/localization-context";
 
 /**
- * Handles the exported route operation using its declared request and response contract.
- * Returns: `React.JSX.Element`
+ * Render the /auth/login/login-failure route.
  * refs: none
+ * I/O types: `{ href }: { href: string } -> JSX.Element`.
  */
 export function LoginFailure({ href }: { href: string }) {
   const { t } = useLocalization();

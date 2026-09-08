@@ -1,15 +1,20 @@
-/** Resolves loading-frame image assets.
- * The module preserves the existing validation, storage, formatting, or asset boundary.
+/**
+ * Strip tags and diacritics, normalize Unicode/case, replace ampersands with and, remove frame labels and non-alphanumerics, and return the loading-frame lookup key.
+ * Resolves loading-frame image assets.
  * refs: none
  */
 import manifest from "@/public/images/loading-frames/manifest.json";
 
+/**
+ * Define loading frame asset as `(typeof manifest.frames)[number]`.
+ * refs: none
+ */
 export type LoadingFrameAsset = (typeof manifest.frames)[number];
 
-/** Apply normalizeLoadingFrameName to the declared input values.
- * Contract: returns the module-specific validated, stored, formatted, or resolved value without external side effects.
- * Returns: `string`
+/**
+ * Strip tags and diacritics, normalize Unicode/case, replace ampersands with and, remove frame labels and non-alphanumerics, and return the loading-frame lookup key.
  * refs: none
+ * I/O types: `value: string -> string`.
  */
 export function normalizeLoadingFrameName(value: string): string {
   return value
@@ -32,9 +37,10 @@ for (const frame of manifest.frames) {
   }
 }
 
-/** Apply resolveLoadingFrameAsset to the declared input values.
- * Contract: returns the module-specific validated, stored, formatted, or resolved value without external side effects.
+/**
+ * Normalize a nonempty loading-frame name and resolve it from the manifest lookup map; return null for empty or unknown names.
  * refs: none
+ * I/O types: `value: string | null | undefined -> LoadingFrameAsset | null`.
  */
 export function resolveLoadingFrameAsset(value: string | null | undefined): LoadingFrameAsset | null {
   const key = normalizeLoadingFrameName(value?.trim() ?? "");

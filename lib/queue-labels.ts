@@ -21,10 +21,10 @@ const QUEUE_LABELS: Record<number, string> = {
   486: "Ranked Siege",
 };
 
-/** Apply getQueueLabel to the declared player or request input.
- * Contract: enforces the module rule and returns the documented value without changing unrelated state.
- * Returns: `string`
+/**
+ * Prefer the trimmed supplied queue name, then the known queue-ID label, then Queue #<id> for unknown IDs.
  * refs: none
+ * I/O types: `queueId: number; queueName?: string | null -> string`.
  */
 export function getQueueLabel(queueId: number, queueName?: string | null): string {
   const storedName = queueName?.trim();

@@ -1,5 +1,5 @@
-/** loadout-export-button component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * Render loadout export button with `LoadingIndicator`.
  * refs: none
  */
 "use client";
@@ -25,10 +25,10 @@ function downloadName(championName: string, loadoutId: number) {
   return `paladinscat-loadout-${champion || "champion"}-${loadoutId}.png`;
 }
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
- * Returns: `React.JSX.Element`
+/**
+ * Render loadout export button with `LoadingIndicator`.
  * refs: none
+ * I/O types: `props: LoadoutExportButtonProps -> JSX.Element`.
  */
 export default function LoadoutExportButton(props: LoadoutExportButtonProps) {
   const { t } = useLocalization();

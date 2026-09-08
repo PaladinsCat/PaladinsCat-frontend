@@ -1,15 +1,14 @@
 /**
- * Define the contact page responsibility boundary.
- * Coordinates contact page data loading, authorization, and presentation.
+ * Render the /contact route.
  * refs: none
  */
 "use client";
 import { useLocalization } from "@/lib/localization-context";
 
 /**
- * Handles the exported route operation using its declared request and response contract.
- * Returns: `React.JSX.Element`
+ * Render the /contact route.
  * refs: none
+ * I/O types: `none -> JSX.Element`.
  */
 export default function ContactPage() {
   const { t } = useLocalization();

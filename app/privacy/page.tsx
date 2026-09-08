@@ -1,6 +1,5 @@
 /**
- * Define the privacy page responsibility boundary.
- * Coordinates privacy page data loading, authorization, and presentation.
+ * Render the localized privacy policy with its dated policy sections.  Returns: `Promise<React.JSX.Element>`. · refs: none
  * refs: none
  */
 import {
@@ -20,7 +19,10 @@ import { getServerLocalization } from "@/lib/server-localization";
 
 const POLICY_DATE = new Date(Date.UTC(2026, 6, 22));
 
-/** Render the localized privacy policy with its dated policy sections.  Returns: `Promise<React.JSX.Element>`. · refs: none */
+/**
+ * Render the localized privacy policy with its dated policy sections.  Returns: `Promise<React.JSX.Element>`. · refs: none
+ * I/O types: `none -> Promise<JSX.Element>`.
+ */
 export default async function PrivacyPage() {
   const { locale, t } = await getServerLocalization();
   const sections: PublicPolicySection[] = [

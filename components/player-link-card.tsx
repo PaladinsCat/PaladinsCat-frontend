@@ -1,5 +1,5 @@
-/** player-link-card component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * Render player link card with `PlayerName`, `LoadingIndicator`.
  * refs: none
  */
 "use client";
@@ -28,10 +28,10 @@ type Props = {
   onChanged: () => Promise<void> | void;
 };
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
- * Returns: `React.JSX.Element`
+/**
+ * Render player link card with `PlayerName`, `LoadingIndicator`.
  * refs: none
+ * I/O types: `{ linkedPlayer, onChanged }: Props -> JSX.Element`.
  */
 export default function PlayerLinkCard({ linkedPlayer, onChanged }: Props) {
   const { t , formatTime} = useLocalization();

@@ -5,6 +5,11 @@
  * primary identity and display text is never rewritten.
  * refs: none
  */
+/**
+ * Compute canonical card name key and return `String(value ?? "") .toLowerCase() .replace(/[’']/g, "") .replace(/[^a-z0-9]+/g, " ") .replace(/\bguerrilla\b/g, "guerilla") .replace(/\b([a-z0-9]{3,})s\b/g, "$1") .replace(/\s+/g, "")`.
+ * I/O types: `value: string | null | undefined -> string`.
+ * refs: none
+ */
 export function canonicalCardNameKey(value: string | null | undefined): string {
   return String(value ?? "")
     .toLowerCase()

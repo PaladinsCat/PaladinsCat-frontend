@@ -1,14 +1,13 @@
 /**
- * Define the auth layout responsibility boundary.
- * Coordinates auth layout data loading, authorization, and presentation.
+ * Pass the /auth layout children through unchanged; route metadata is configured separately.
  * refs: none
  */
 import { createLocalizedMetadata } from "@/lib/server-localization";
 
 /**
- * Handles the exported route operation using its declared request and response contract.
- * Returns: `Promise<Metadata>`
+ * Build localized metadata for /auth, including the title and any canonical, description, and crawler directives configured for this route.
  * refs: none
+ * I/O types: `none -> Promise<Metadata>`.
  */
 export async function generateMetadata() {
   return createLocalizedMetadata("seo.auth.title", {
@@ -17,9 +16,9 @@ export async function generateMetadata() {
 }
 
 /**
- * Handles the exported route operation using its declared request and response contract.
- * Returns: `React.JSX.Element`
+ * Pass the /auth layout children through unchanged; route metadata is configured separately.
  * refs: none
+ * I/O types: `{ children }: { children: React.ReactNode } -> ReactNode`.
  */
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return children;

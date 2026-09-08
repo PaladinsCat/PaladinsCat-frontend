@@ -4,7 +4,10 @@
 import { motion } from "framer-motion";
 import { useReducedMotion } from "@/lib/reduced-motion";
 
-/** Render the non-interactive animated background, or nothing when motion should be reduced.  Returns: `null`. · refs: none */
+/**
+ * Render the non-interactive animated background, or nothing when motion should be reduced.  Returns: `null`. · refs: none
+ * I/O types: `none -> JSX.Element | null`.
+ */
 export function BackgroundGradientAnimation() {
   const shouldReduce = useReducedMotion();
 

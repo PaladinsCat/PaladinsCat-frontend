@@ -1,5 +1,5 @@
-/** bottom-nav component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * Render bottom nav with `Menu`.
  * refs: none
  */
 "use client";
@@ -22,10 +22,10 @@ const items = [
   { href: "/players", labelKey: "nav.players", icon: Users },
 ] as const;
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
- * Returns: `React.JSX.Element`
+/**
+ * Render bottom nav with `Menu`.
  * refs: none
+ * I/O types: `none -> JSX.Element`.
  */
 export default function BottomNav() {
   const pathname = usePathname();

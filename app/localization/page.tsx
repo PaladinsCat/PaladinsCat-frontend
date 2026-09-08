@@ -1,6 +1,5 @@
 /**
- * Define the localization page responsibility boundary.
- * Coordinates localization page data loading, authorization, and presentation.
+ * Render the /localization route with `Languages`, `GitBranch`, `CheckCircle2`, `BookOpen`.
  * refs: none
  */
 "use client";
@@ -11,9 +10,9 @@ const REPOSITORY_URL = "https://github.com/PaladinsCat/PaladinsCat-locales";
 const WEBLATE_URL = "https://translate.paladinscat.com";
 
 /**
- * Handles the exported route operation using its declared request and response contract.
- * Returns: `React.JSX.Element`
+ * Render the /localization route with `Languages`, `GitBranch`, `CheckCircle2`, `BookOpen`.
  * refs: none
+ * I/O types: `none -> JSX.Element`.
  */
 export default function LocalizationPage() {
   const { t } = useLocalization();

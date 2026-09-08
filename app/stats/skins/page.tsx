@@ -1,6 +1,5 @@
 /**
- * Define the stats skins page route boundary.
- * Coordinates this module's route data flow and rendered output.
+ * Render /stats/skins using `LoadingIndicator`.
  * refs: none
  */
 "use client";
@@ -52,9 +51,9 @@ function championRole(champions: Champion[], championId: number): string {
 }
 
 /**
- * Renders the exported statistics view with its route data.
- * Returns: `React.JSX.Element`
+ * Render /stats/skins using `LoadingIndicator`.
  * refs: none
+ * I/O types: `none -> JSX.Element`.
  */
 export default function SkinStatsPage() {
   const { t, formatNumber, formatPercent, formatRecord } = useLocalization();

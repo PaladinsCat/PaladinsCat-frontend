@@ -1,6 +1,5 @@
 /**
- * Define the stats loadouts page route boundary.
- * Coordinates this module's route data flow and rendered output.
+ * Render /stats/loadouts using `DataTableSkeleton`, `ErrorState`, `EmptyState`, `Card`.
  * refs: none
  */
 "use client";
@@ -21,9 +20,9 @@ type SortKey = "championName" | "totalUses" | "winRate" | "avgDpm" | "avgHpm";
 type SortDir = "asc" | "desc";
 
 /**
- * Renders the exported statistics view with its route data.
- * Returns: `React.JSX.Element`
+ * Render /stats/loadouts using `DataTableSkeleton`, `ErrorState`, `EmptyState`, `Card`.
  * refs: none
+ * I/O types: `none -> JSX.Element`.
  */
 export default function LoadoutsPage() {
   const { t , formatPercent, formatNumber} = useLocalization();

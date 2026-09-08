@@ -5,8 +5,8 @@
 // Blog UI copy — stored as translation key constants.
 // Components resolve these via t() from the localization context.
 
-/** BLOG_COPY_KEYS applies the module-specific transformation to its declared inputs.
- * Contract: validates its inputs and returns the existing module result without mutating caller state.
+/**
+ * Centralize localization keys used by blog list, article, and missing-post views.
  * refs: none
  */
 export const BLOG_COPY_KEYS = {

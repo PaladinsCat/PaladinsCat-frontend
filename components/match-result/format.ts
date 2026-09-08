@@ -9,6 +9,11 @@ import type { MatchResultPlayer, PlayerProfileData, TeamAverages } from "./types
 
 /* ── Damage math (preserves recovered-match guard) ── */
 
+/**
+ * Compute total and per-minute damage from one match player. Treat damage_done_physical as the total; expose weapon/ability breakdown only for non-recovered rows with in-hand damage, returning null for unavailable shares or rates and guarding zero duration.
+ * I/O types: `p: MatchPlayerDetail -> { totalDamage: number; weaponDamage: number; nonWeaponDamage: number | null; weaponShare: number | null; weaponPerMinute: number | null; abilityPerMinute: number | null; hasWeaponBreakdown: boolean; }`.
+ * refs: doc: documents/06-reference/routes/frontend-match-detail.md
+ */
 export function computeDamageStats(p: MatchPlayerDetail) {
   // The API's total player damage is stored in the historical
   // `damage_done_physical` field. Magical and in-hand values are optional
@@ -52,8 +57,8 @@ export function computeDamageStats(p: MatchPlayerDetail) {
 
 /**
  * Get champion-specific stats from player profile, or null if not found.
- * Returns: `null`
  * refs: none
+ * I/O types: `profile: PlayerProfileData | null | undefined; championName: string | null | undefined -> { championName: string; wins: number; totalPlays: number; winRate: number; } | null`.
  */
 export function getChampionStats(
   profile: PlayerProfileData | null | undefined,
@@ -73,8 +78,9 @@ export function getChampionStats(
 }
 
 /**
- * Format KBM tier label for display.
- * refs: none
+ * Compute display-ready team averages for profile level, queue Elo, global profile win rate, and match KDA using finite observations and the supplied formatters. Return em-dash placeholders for missing metrics and null for the numeric win-rate mean when unavailable.
+ * refs: doc: documents/06-reference/routes/frontend-match-detail.md
+ * I/O types: `players: MatchResultPlayer[]; formatNumber: (value: number, options?: Intl.NumberFormatOptions) => string; formatPercent: (value: number) => string -> TeamAverages`.
  */
 /* ── Team averages ── */
 

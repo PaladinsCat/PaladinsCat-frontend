@@ -13,10 +13,10 @@ import { LoadingPanel } from "@/components/async-state";
 import PlayerLinkCard from "@/components/player-link-card";
 
 /**
+ * Render /link-account using `LoadingPanel`, `PlayerLinkCard`.
  * Render the LinkAccountPage view for link-account page.
- * Return the React tree for the declared inputs and page data.
- * Returns: `React.JSX.Element`
  * refs: none
+ * I/O types: `none -> JSX.Element`.
  */
 export default function LinkAccountPage() {
   const { user, refresh } = useAuth();

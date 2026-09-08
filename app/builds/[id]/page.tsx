@@ -40,10 +40,10 @@ function AssetRow({ iconUrl, title, subtitle, talentId }: { iconUrl?: string | n
 }
 
 /**
+ * Render /builds/[id] using `LoadingPanel`.
  * Render the BuildDetailPage view for builds id page.
- * Return the React tree for the declared inputs and page data.
- * Returns: `React.JSX.Element`
  * refs: none
+ * I/O types: `{ params }: { params: Promise<{ id: string }> } -> JSX.Element`.
  */
 export default function BuildDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { t , formatDateTime} = useLocalization();

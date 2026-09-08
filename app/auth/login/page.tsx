@@ -1,6 +1,5 @@
 /**
- * Define the auth login page responsibility boundary.
- * Coordinates auth login page data loading, authorization, and presentation.
+ * Render the login entry point with a validated post-authentication return path.  Returns: `Promise<React.JSX.Element>`. · refs: none
  * refs: none
  */
 import { redirect } from "next/navigation";
@@ -12,7 +11,10 @@ function safeReturnPath(value: string | undefined): string {
   return value?.startsWith("/") && !value.startsWith("//") && !value.startsWith("/auth/") && !value.startsWith("/admin") ? value : "/";
 }
 
-/** Render the login entry point with a validated post-authentication return path.  Returns: `Promise<React.JSX.Element>`. · refs: none */
+/**
+ * Render the login entry point with a validated post-authentication return path.  Returns: `Promise<React.JSX.Element>`. · refs: none
+ * I/O types: `{ searchParams }: { searchParams: LoginSearchParams } -> Promise<JSX.Element>`.
+ */
 export default async function LoginPage({ searchParams }: { searchParams: LoginSearchParams }) {
   const params = await searchParams;
   const returnPath = safeReturnPath(params.redirect);

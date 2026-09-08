@@ -11,14 +11,18 @@ import type {
   RatingSnapshot,
 } from "@/lib/api-client";
 
-/** Match player enriched from the canonical stored profile or an ingest snapshot fallback. · refs: none */
+/**
+ * Match player enriched from the canonical stored profile or an ingest snapshot fallback. · refs: none
+ */
 export interface MatchResultPlayer {
   matchData: MatchPlayerDetail;
   factData?: MatchFactPlayer;
   profileData?: PlayerProfileData | null;
 }
 
-/** Slim historical profile shape embedded in GET /api/matches/:id. · refs: none */
+/**
+ * Slim historical profile shape embedded in GET /api/matches/:id. · refs: none
+ */
 export interface PlayerProfileData {
   id: string;
   name: string;
@@ -48,6 +52,10 @@ export interface PlayerProfileData {
   topChampions: TopChampion[];
 }
 
+/**
+ * Describe top champion with championName, championId, wins, totalPlays, winRate.
+ * refs: doc: documents/06-reference/routes/frontend-match-detail.md
+ */
 export interface TopChampion {
   championName: string;
   championId: number;
@@ -56,20 +64,28 @@ export interface TopChampion {
   winRate: number;
 }
 
-/** Map from player_id → profile, keyed by string (API returns string IDs at runtime). · refs: none */
+/**
+ * Map from player_id → profile, keyed by string (API returns string IDs at runtime). · refs: none
+ */
 export type ProfileByPlayerId = Map<string, PlayerProfileData>;
 
-/** Map from player_id → fact data, keyed by string (API returns string IDs at runtime). · refs: none */
+/**
+ * Map from player_id → fact data, keyed by string (API returns string IDs at runtime). · refs: none
+ */
 export type FactByPlayerId = Map<string, MatchFactPlayer>;
 
-/** Team grouping with identity. · refs: none */
+/**
+ * Team grouping with identity. · refs: none
+ */
 export interface MatchTeam {
   label: string;
   players: MatchResultPlayer[];
   wins: boolean;
 }
 
-/** Computed team averages from match + profile data. · refs: none */
+/**
+ * Computed team averages from match + profile data. · refs: none
+ */
 export interface TeamAverages {
   avgLevel: string;
   avgEloPlus: string;
@@ -78,14 +94,18 @@ export interface TeamAverages {
   avgKDA: string;
 }
 
-/** Banned champion with resolved name. · refs: none */
+/**
+ * Banned champion with resolved name. · refs: none
+ */
 export interface ResolvedBan {
   banSlot: number;
   championId: number;
   championName: string | null | undefined;
 }
 
-/** Score block data. · refs: none */
+/**
+ * Score block data. · refs: none
+ */
 export interface ScoreBlockData {
   team1Label: string;
   team1Score: number | null;

@@ -1,5 +1,5 @@
 /**
- * Define the player route surface for id layout and its local data boundary.
+ * Render the layout for the player id layout route.
  * This file owns the page, layout, loading state, or route handler named by its path.
  * It does not own unrelated player sections or shared library policy.
  * refs: none
@@ -17,8 +17,8 @@ type Props = {
 
 /**
  * Build SEO metadata for the player id layout route.
- * Returns: `Promise<Metadata>`
  * refs: none
+ * I/O types: `{ params }: Props -> Promise<Metadata>`.
  */
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
@@ -68,8 +68,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 /**
  * Render the layout for the player id layout route.
- * Returns: `React.JSX.Element`
  * refs: none
+ * I/O types: `{ children }: Props -> ReactNode`.
  */
 export default function PlayerDetailLayout({ children }: Props) {
   return children;

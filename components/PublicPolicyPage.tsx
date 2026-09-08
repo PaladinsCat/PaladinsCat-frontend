@@ -1,10 +1,14 @@
-/** PublicPolicyPage component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * Render public policy page with `ShieldCheck`.
  * refs: none
  */
 import type { LucideIcon } from "lucide-react";
 import { ArrowUpRight, ShieldCheck } from "lucide-react";
 
+/**
+ * Define public policy section as `{ id: string; title: string; body: string; icon: LucideIcon; link?: { href: string; label: string }; }`.
+ * refs: none
+ */
 export type PublicPolicySection = {
   id: string;
   title: string;
@@ -13,10 +17,10 @@ export type PublicPolicySection = {
   link?: { href: string; label: string };
 };
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
- * Returns: `React.JSX.Element`
+/**
+ * Render public policy page with `ShieldCheck`.
  * refs: none
+ * I/O types: `{ eyebrow, title, intro, updatedLabel, updatedDate, badges, sections, notice, }: { eyebrow: string; title: string; intro: string; updatedLabel: string; updatedDate: string; badges: string[]; sections: PublicPolicySection[]; notice: string; } -> JSX.Element`.
  */
 export default function PublicPolicyPage({
   eyebrow,

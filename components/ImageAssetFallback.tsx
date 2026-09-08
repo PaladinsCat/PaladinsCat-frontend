@@ -1,5 +1,5 @@
-/** ImageAssetFallback component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * Raw image elements are used in dense tables and the fixed scoreboard canvas
  * refs: none
  */
 "use client";
@@ -14,8 +14,8 @@ const FALLBACK_MARKER = "pcPngFallback";
  * where an extra wrapper would alter layout. Catch failed local AVIF requests
  * once at the document boundary and retry the matching PNG without changing
  * those elements' geometry.
- * Returns: `React.JSX.Element`
  * refs: none
+ * I/O types: `none -> null`.
  */
 export default function ImageAssetFallback() {
   useEffect(() => {

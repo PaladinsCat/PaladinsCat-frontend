@@ -35,10 +35,10 @@ function reasonLabel(value: string): string {
 }
 
 /**
+ * Render /matches/dropped using `LoadingPanel`, `ErrorState`, `EmptyState`.
  * Render the DroppedMatchesPage view for matches dropped page.
- * Return the React tree for the declared inputs and page data.
- * Returns: `React.JSX.Element`
  * refs: none
+ * I/O types: `none -> JSX.Element`.
  */
 export default function DroppedMatchesPage() {
   const { t } = useLocalization();

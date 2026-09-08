@@ -1,5 +1,5 @@
-/** player-directory-pagination component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * Render player directory pagination with `ChevronLeft`, `ChevronRight`.
  * refs: none
  */
 "use client";
@@ -22,10 +22,10 @@ function readPage(param: string, storageKey: string) {
   }
 }
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
- * Returns: `Array`
+/**
+ * Read the directory page from the URL, falling back to path-scoped sessionStorage or page one. Return the page and setter; synchronize popstate, persist setter changes with history.replaceState, and tolerate unavailable session storage.
  * refs: none
+ * I/O types: `param: string -> readonly [number, (nextPage: SetStateAction<number>) => void]`.
  */
 export function usePersistentDirectoryPage(param = "page") {
   const pathname = usePathname();
@@ -69,10 +69,10 @@ interface Props {
   className?: string;
 }
 
-/** Provide this exported item.
- * Returns: `React.JSX.Element`
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+/**
+ * Render player directory pagination with `ChevronLeft`, `ChevronRight`.
  * refs: none
+ * I/O types: `{ page, totalPages, onPageChange, embedded = false, className }: Props -> JSX.Element | null`.
  */
 export default function PlayerDirectoryPagination({ page, totalPages, onPageChange, embedded = false, className }: Props) {
   const { t , formatNumber} = useLocalization();

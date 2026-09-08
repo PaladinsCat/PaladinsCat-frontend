@@ -1,5 +1,5 @@
-/** player-moderation-cards component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * Render player moderation cards.
  * refs: none
  */
 import Link from "next/link";
@@ -27,10 +27,10 @@ const SEVERITY_LABEL_KEYS: Record<string, TranslationKey> = {
   low: "common.severity.low",
 };
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
- * Returns: `React.JSX.Element`
+/**
+ * Render player moderation cards.
  * refs: none
+ * I/O types: `{ players, showSeverity = false }: { players: any[]; showSeverity?: boolean } -> JSX.Element`.
  */
 export default function PlayerModerationCards({ players, showSeverity = false }: { players: any[]; showSeverity?: boolean }) {
   const { formatNumber, formatPercent, t } = useLocalization();

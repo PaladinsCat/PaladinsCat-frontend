@@ -4,13 +4,14 @@
  * This component owns media capability selection and source links; routes own
  * fetch state, pagination, and moderation actions.
  *
- * refs: GET /cheaters/evidence · GET /cheaters/{id}
+ * refs: endpoints: GET /cheaters/evidence · endpoints: GET /cheaters/{id}
  */
 "use client";
 
 import Link from "next/link";
 import { ExternalLink, FileImage, Link2 } from "lucide-react";
 import type { CheaterEvidence } from "@/lib/api-client";
+import { useLocalization } from "@/lib/localization-context";
 
 function evidenceImageUrl(url: string, format: "avif" | "original") {
   return `${url}${url.includes("?") ? "&" : "?"}format=${format}`;
@@ -29,7 +30,8 @@ function evidenceEmbedUrl(url: string, provider: CheaterEvidence["provider"]) {
  * Contract: inputs `CheaterEvidence` and a `(string) => string` date formatter
  * return `JSX.Element`; no network or storage side effects occur here.
  *
- * refs: GET /cheaters/evidence · GET /cheaters/evidence/{id}/media/{position}
+ * refs: endpoints: GET /cheaters/evidence · endpoints: GET /cheaters/evidence/{id}/media/{position}
+ * I/O types: `{ item, formatDateTime, }: { item: CheaterEvidence; formatDateTime: (value: string | null | undefined) => string; } -> JSX.Element`.
  */
 export default function CheaterEvidencePost({
   item,
@@ -38,16 +40,17 @@ export default function CheaterEvidencePost({
   item: CheaterEvidence;
   formatDateTime: (value: string | null | undefined) => string;
 }) {
+  const { formatNumber, t } = useLocalization();
   const images = item.imageUrls.length > 0 ? item.imageUrls : item.imageUrl ? [item.imageUrl] : [];
   return (
     <article className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated">
       {images.length > 0 && <div className={`grid gap-px bg-pc-border ${images.length > 1 ? "sm:grid-cols-2" : "grid-cols-1"}`}>
-        {images.map((url, index) => <picture key={url} className="block aspect-video bg-pc-bg"><source srcSet={evidenceImageUrl(url, "avif")} type="image/avif" /><img src={evidenceImageUrl(url, "original")} alt={`Evidence image ${index + 1} for ${item.subjectName}`} loading="lazy" decoding="async" className="h-full w-full object-contain" /></picture>)}
+        {images.map((url, index) => <picture key={url} className="block aspect-video bg-pc-bg"><source srcSet={evidenceImageUrl(url, "avif")} type="image/avif" /><img src={evidenceImageUrl(url, "original")} alt={t("moderation.evidenceImageAlt", { value1: formatNumber(index + 1), value2: item.subjectName })} loading="lazy" decoding="async" className="h-full w-full object-contain" /></picture>)}
       </div>}
       {item.embedUrl && (item.provider === "medal" || item.provider === "discord") ? (
-        <div className="aspect-video bg-black"><video controls playsInline preload="metadata" src={item.embedUrl} title={`${item.provider === "discord" ? "Discord" : "Medal"} evidence clip for ${item.subjectName}`} className="h-full w-full object-contain" /></div>
+        <div className="aspect-video bg-black"><video controls playsInline preload="metadata" src={item.embedUrl} title={t("moderation.evidenceClipTitle", { value1: item.provider === "discord" ? "Discord" : "Medal", value2: item.subjectName })} className="h-full w-full object-contain" /></div>
       ) : item.embedUrl ? (
-        <div className="aspect-video bg-black"><iframe src={evidenceEmbedUrl(item.embedUrl, item.provider)} title={`${item.provider || "Video"} evidence for ${item.subjectName}`} className="h-full w-full" allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" /></div>
+        <div className="aspect-video bg-black"><iframe src={evidenceEmbedUrl(item.embedUrl, item.provider)} title={t("moderation.evidenceVideoTitle", { value1: item.provider || "Video", value2: item.subjectName })} className="h-full w-full" allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" /></div>
       ) : null}
       <div className="space-y-3 p-4">
         <div className="flex items-start justify-between gap-3">
@@ -58,9 +61,9 @@ export default function CheaterEvidencePost({
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-pc-border pt-3 text-xs text-pc-text-muted">
           <time dateTime={item.createdAt}>{formatDateTime(item.createdAt)}</time>
           <span className="flex flex-wrap items-center gap-3">
-            {item.matchId && <Link href={`/matches/${encodeURIComponent(item.matchId)}`} className="inline-flex items-center gap-1 font-semibold text-pc-accent hover:text-pc-accent-secondary"><FileImage className="h-3.5 w-3.5" aria-hidden="true" />Match #{item.matchId}</Link>}
-            {item.sourceUrl && <a href={item.sourceUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-semibold text-pc-accent hover:text-pc-accent-secondary"><ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />Open original source</a>}
-            {!item.sourceUrl && <span className="inline-flex items-center gap-1"><Link2 className="h-3.5 w-3.5" aria-hidden="true" />Image evidence</span>}
+            {item.matchId && <Link href={`/matches/${encodeURIComponent(item.matchId)}`} className="inline-flex items-center gap-1 font-semibold text-pc-accent hover:text-pc-accent-secondary"><FileImage className="h-3.5 w-3.5" aria-hidden="true" />{t("moderation.supportingMatchNumber", { value1: item.matchId })}</Link>}
+            {item.sourceUrl && <a href={item.sourceUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-semibold text-pc-accent hover:text-pc-accent-secondary"><ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />{t("moderation.openOriginalSource")}</a>}
+            {!item.sourceUrl && <span className="inline-flex items-center gap-1"><Link2 className="h-3.5 w-3.5" aria-hidden="true" />{t("moderation.imageEvidence")}</span>}
           </span>
         </div>
       </div>

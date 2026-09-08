@@ -14,10 +14,10 @@ import { getInitialRankedChampions } from "@/lib/server-champions";
 export const dynamic = "force-dynamic";
 
 /**
+ * Render /champions using `ChampionTable`.
  * Render the ChampionsPage view for champions page.
- * Return the React tree for the declared inputs and page data.
- * Returns: `Promise<React.JSX.Element>`
  * refs: none
+ * I/O types: `none -> Promise<JSX.Element>`.
  */
 export default async function ChampionsPage() {
   const initialChampions = await getInitialRankedChampions().catch((error) => {

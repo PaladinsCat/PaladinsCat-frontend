@@ -1,6 +1,5 @@
 /**
- * Define the operations tickets page responsibility boundary.
- * Coordinates operations tickets page data loading, authorization, and presentation.
+ * Render the /operations/tickets route with `OperationsAuthWall`, `CheckCircle2`, `Send`.
  * refs: none
  */
 "use client";
@@ -13,9 +12,9 @@ import { useLocalization } from "@/lib/localization-context";
 import { createTicket, listTickets, type Ticket, type TicketType } from "@/lib/operations-api";
 const PAGE_SIZE = 20;
 /**
- * Handles the exported route operation using its declared request and response contract.
- * Returns: `React.JSX.Element`
+ * Render the /operations/tickets route with `OperationsAuthWall`, `CheckCircle2`, `Send`.
  * refs: none
+ * I/O types: `none -> JSX.Element`.
  */
 export default function TicketsPage() {
   const { user,isLoading }=useAuth(); const { t }=useLocalization(); const [tickets,setTickets]=useState<Ticket[]>([]); const [page,setPage]=useState(1); const [pages,setPages]=useState(1); const [type,setType]=useState<TicketType>("bug"); const [sent,setSent]=useState(false); const [error,setError]=useState<string|null>(null); const [submitting,setSubmitting]=useState(false);

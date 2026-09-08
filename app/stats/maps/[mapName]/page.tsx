@@ -1,6 +1,5 @@
 /**
- * Define the stats maps page route boundary.
- * Coordinates this module's route data flow and rendered output.
+ * Render /stats/maps/[mapName] using `RouteSkeleton`.
  * refs: none
  */
 "use client";
@@ -151,9 +150,9 @@ const STATS_SCOPE_LABEL_KEYS = {
 } as const;
 
 /**
- * Renders the exported statistics view with its route data.
- * Returns: `React.JSX.Element`
+ * Render /stats/maps/[mapName] using `RouteSkeleton`.
  * refs: none
+ * I/O types: `none -> JSX.Element`.
  */
 export default function MapDetailPage() {
   const { formatDuration, formatNumber, formatPercent, formatRecord, t } = useLocalization();

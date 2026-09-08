@@ -1,5 +1,9 @@
 /** Tier / rank display logic — shared between profile and leaderboards. · refs: none */
 
+/**
+ * Publish the tier names configuration as `TIER_NAMES: Record<number, string> = { 0: "Unranked", 1: "Bronze V", 2: "Bronze IV", 3: "Bronze III", 4: "Bronze II", 5: "Bronze I", 6: "Silver V", 7: "Silver IV", 8: "Silver III", 9: "Silver II", 10: "Silver I", 11: "Gold V", 12: "Gold IV", 13: "Gold III", 14: "Gold II", 15: "Gold I", 16: "Platinum V", 17: "Platinum IV", 18: "Platinum III", 19: "Platinum II", 20: "Platinum I", 21: "Diamond V", 22: "Diamond IV", 23: "Diamond III", 24: "Diamond II", 25: "Diamond I", 26: "Master", 27: "Grandmaster", }`.
+ * refs: none
+ */
 export const TIER_NAMES: Record<number, string> = {
   0: "Unranked", 1: "Bronze V", 2: "Bronze IV", 3: "Bronze III", 4: "Bronze II", 5: "Bronze I",
   6: "Silver V", 7: "Silver IV", 8: "Silver III", 9: "Silver II", 10: "Silver I",
@@ -21,7 +25,10 @@ export const TIER_COLORS: Record<number, string> = {
   16: "text-sky-400", 21: "text-violet-400", 26: "text-emerald-400", 27: "text-rose-400",
 };
 
-/** Get the Tailwind text color class for a tier. · refs: none */
+/**
+ * Get the Tailwind text color class for a tier. · refs: none
+ * I/O types: `tier: number -> string`.
+ */
 export function getTierColor(tier: number): string {
   if (tier >= 27) return TIER_COLORS[27];
   if (tier >= 26) return TIER_COLORS[26];
@@ -40,6 +47,7 @@ export function getTierColor(tier: number): string {
  * Masters ranked 101+ are offset by 100 and display as Master with the
  * adjusted rank (e.g. rank 101 → Master #1).
  * refs: none
+ * I/O types: `kbmTier: number; kbmRank: number -> { displayTier: number; displayName: string; displayRank: number; isGrandmaster: boolean; }`.
  */
 export function resolveEffectiveTier(kbmTier: number, kbmRank: number): {
   displayTier: number;
@@ -86,8 +94,8 @@ export function resolveEffectiveTier(kbmTier: number, kbmRank: number): {
  *   rank-tiers/diamond/RankIcon_Diamond_1.avif        — tiers 21-25
  *   rank-tiers/master/RankIcon_Master.avif            — tier 26
  *   rank-tiers/grandmaster/RankIcon_Grandmaster.avif  — tier 27
- * Returns: `string`
  * refs: none
+ * I/O types: `kbmTier: number; kbmRank: number -> string`.
  */
 export function getRankIconPath(kbmTier: number, kbmRank: number): string {
   const { displayTier } = resolveEffectiveTier(kbmTier, kbmRank);

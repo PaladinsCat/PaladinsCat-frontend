@@ -1,5 +1,5 @@
-/** LiteModeProvider component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * Lite mode — disables all animations for low-powered devices.
  * refs: none
  */
 "use client";
@@ -12,8 +12,8 @@ import { getLiteMode, LITE_MODE_CHANGE_EVENT } from "@/lib/lite-mode";
  *
  * When enabled it tags <html> with `pc-lite`; shared CSS and the local
  * reduced-motion hook then disable decorative animation.
- * Returns: `React.JSX.Element`
  * refs: none
+ * I/O types: `{ children }: { children: React.ReactNode } -> ReactNode`.
  */
 export default function LiteModeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {

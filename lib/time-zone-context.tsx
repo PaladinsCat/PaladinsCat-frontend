@@ -22,6 +22,7 @@ const TimeZoneContext = createContext<TimeZoneContextValue | null>(null);
  *
  * Returns the provider contract; throws when called outside TimeZoneProvider and performs no network request.
  * refs: none
+ * I/O types: `none -> TimeZoneContextValue`.
  */
 export function useTimeZone(): TimeZoneContextValue {
   const context = useContext(TimeZoneContext);
@@ -34,6 +35,7 @@ export function useTimeZone(): TimeZoneContextValue {
  *
  * Accepts children; returns a context provider and persists valid changes locally without API side effects.
  * refs: none
+ * I/O types: `{ children }: { children: ReactNode } -> JSX.Element`.
  */
 export function TimeZoneProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();

@@ -1,5 +1,5 @@
-/** champion-table component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * Render champion table with `ArrowUp`, `ArrowDown`.
  * refs: none
  */
 "use client";
@@ -15,7 +15,7 @@ import { getRankIconPath } from "@/lib/tier-utils";
 import { getPercentageColor, getStatQuality } from "@/lib/stat-quality";
 import { useLocalization } from "@/lib/localization-context";
 import { getStoredLobbyTierFilter } from "@/lib/lobby-tier";
-import { ArrowDown, ArrowUp, ChevronRight, Palette, ShieldAlert, Trophy } from "lucide-react";
+import { ArrowDown, ArrowUp, ChevronRight, Palette, Trophy } from "lucide-react";
 import { ROUTE_CONTENT_SETTLE_MS } from "@/lib/route-transition-context";
 
 const ROLES = [
@@ -70,10 +70,10 @@ function mergeChampionStats(rows: Champion[]): Champion[] {
   });
 }
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
- * Returns: `React.JSX.Element`
+/**
+ * Render champion table with `ArrowUp`, `ArrowDown`.
  * refs: none
+ * I/O types: `{ initialChampions = null }: { initialChampions?: Champion[] | null } -> JSX.Element`.
  */
 export default function ChampionTable({ initialChampions = null }: { initialChampions?: Champion[] | null }) {
   const { t , formatNumber} = useLocalization();
@@ -196,10 +196,9 @@ export default function ChampionTable({ initialChampions = null }: { initialCham
         <p className="max-w-4xl text-sm leading-6 text-pc-text-secondary">{t("seo.champions.description")}</p>
       </header>
 
-      <nav aria-label={t("menu.globalStats")} className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <nav aria-label={t("menu.globalStats")} className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {[
-            { href: "/stats/winrate", title: t("menu.championWinRates"), description: t("menu.winRateDescription"), icon: Trophy, tone: "text-emerald-300" },
-            { href: "/stats/banrate", title: t("menu.championBanRates"), description: t("menu.banRateDescription"), icon: ShieldAlert, tone: "text-rose-300" },
+            { href: "/stats/performance#champion-averages", title: t("stats.performance.championTitle"), description: t("stats.performance.comparisonLink"), icon: Trophy, tone: "text-emerald-300" },
             { href: "/stats/skins", title: t("menu.skinStats"), description: t("menu.skinStatsDescription"), icon: Palette, tone: "text-violet-300" },
           ].map(({ href, title, description, icon: Icon, tone }) => (
             <Link

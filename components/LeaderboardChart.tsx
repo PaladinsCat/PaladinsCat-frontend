@@ -1,5 +1,5 @@
-/** LeaderboardChart component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * Render leaderboard chart with `BarChartComponent`.
  * refs: none
  */
 "use client";
@@ -9,16 +9,20 @@ import type { LeaderboardEntry } from "@/lib/api-client";
 import { getPercentageColor } from "@/lib/stat-quality";
 import { useLocalization } from "@/lib/localization-context";
 
+/**
+ * Describe leaderboard chart props with data, title (optional), maxRows (optional).
+ * refs: none
+ */
 export interface LeaderboardChartProps {
   data: LeaderboardEntry[];
   title?: string;
   maxRows?: number;
 }
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
- * Returns: `React.JSX.Element`
+/**
+ * Render leaderboard chart with `BarChartComponent`.
  * refs: none
+ * I/O types: `{ data, title, maxRows = 10, }: LeaderboardChartProps -> JSX.Element`.
  */
 export default function LeaderboardChart({
   data,

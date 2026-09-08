@@ -1,5 +1,5 @@
 /**
- * Define the player route surface for leaderboard page and its local data boundary.
+ * Render the LeaderboardPage view for the player leaderboard page route.
  * This file owns the page, layout, loading state, or route handler named by its path.
  * It does not own unrelated player sections or shared library policy.
  * refs: none
@@ -63,8 +63,8 @@ function RankBadge({ rank }: { rank: number }) {
 
 /**
  * Render the LeaderboardPage view for the player leaderboard page route.
- * Returns: `React.JSX.Element`
  * refs: none
+ * I/O types: `none -> JSX.Element`.
  */
 export default function LeaderboardPage() {
   const { t , formatNumber, formatPercent} = useLocalization();

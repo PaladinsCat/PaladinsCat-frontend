@@ -1,4 +1,6 @@
-/** Dedicated Cheater Portal landing page. */
+/** Dedicated Cheater Portal landing page.
+ * refs: none
+ */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -12,47 +14,6 @@ import { useLocalization } from "@/lib/localization-context";
 import { getPercentageColor } from "@/lib/stat-quality";
 
 const EMPTY_PORTAL: CheaterPortal = { activeCount: 0, inactiveCount: 0, evidenceCount: 0, latest: [] };
-const USE_CHEATER_PORTAL_MOCK = process.env.NODE_ENV === "development";
-const MOCK_PLATFORMS = ["Steam", "Epic Games", "PlayStation", "Xbox", "Hi-Rez"] as const;
-const MOCK_CHEATER_POOL: CheaterPortalEntry[] = [
-  ["AetherFox", "Aim review"], ["CobaltPaw", "Input pattern review"], ["DuskVandal", "Movement review"],
-  ["EmberNyx", "Match replay review"], ["FrostByte", "Tracking review"], ["GloomRunner", "Fire-rate review"],
-  ["HexaVee", "Community evidence review"], ["IronSundae", "Aim review"], ["JadeRecoil", "Input pattern review"],
-  ["KineticMochi", "Movement review"], ["LunarRook", "Match replay review"], ["MauveQuasar", "Tracking review"],
-  ["NeonBastion", "Fire-rate review"], ["ObsidianKit", "Community evidence review"], ["PixelSovereign", "Aim review"],
-  ["QuietCatalyst", "Input pattern review"], ["RiftNomad", "Movement review"], ["SolarMarten", "Match replay review"],
-  ["TacticalPanda", "Tracking review"], ["UmbraCircuit", "Fire-rate review"], ["VelvetRaptor", "Community evidence review"],
-  ["WinterSyntax", "Aim review"], ["XenoPounce", "Input pattern review"], ["YoruByte", "Movement review"],
-].map(([name, reason], index) => {
-  const wins = 80 + index * 23;
-  const losses = 35 + index * 17;
-  return {
-    kind: "player" as const,
-    subjectId: `mock-${index + 1}`,
-    playerId: 900000 + index + 1,
-    name,
-    platform: MOCK_PLATFORMS[index % MOCK_PLATFORMS.length],
-    lastSeen: "2026-09-05T12:00:00Z",
-    markedAt: `2026-09-${String(5 - (index % 5)).padStart(2, "0")}T${String(8 + (index % 10)).padStart(2, "0")}:15:00Z`,
-    reason: `[mock] ${reason}`,
-    level: 20 + ((index * 7) % 96),
-    wins,
-    losses,
-    winRate: (wins / (wins + losses)) * 100,
-    leaveRate: 1.2 + (index % 7) * 0.6,
-  };
-});
-
-function createMockCheaterPortal(): CheaterPortal {
-  const latest = [...MOCK_CHEATER_POOL];
-  for (let index = latest.length - 1; index > 0; index -= 1) {
-    const swapIndex = Math.floor(Math.random() * (index + 1));
-    [latest[index], latest[swapIndex]] = [latest[swapIndex], latest[index]];
-  }
-  return { activeCount: 37, inactiveCount: 126, evidenceCount: 84, latest: latest.slice(0, 20) };
-}
-
-const MOCK_CHEATER_PORTAL: CheaterPortal = { activeCount: 37, inactiveCount: 126, evidenceCount: 84, latest: MOCK_CHEATER_POOL.slice(0, 20) };
 
 function entryHref(entry: CheaterPortalEntry): string {
   return entry.kind === "private" ? `/players/private-accounts/${entry.subjectId}` : `/players/cheaters/${entry.playerId ?? entry.subjectId}`;
@@ -62,7 +23,7 @@ type NumberFormatter = (value: number | null | undefined, options?: Intl.NumberF
 
 function MetricCell({ label, title, value, style }: { label: string; title: string; value: string; style?: { color: string } }) {
   return (
-    <span className="inline-flex shrink-0 items-baseline gap-0.5 whitespace-nowrap" title={title} aria-label={`${title}: ${value}`}>
+    <span className="inline-flex shrink-0 items-baseline gap-0.5 whitespace-nowrap" title={title}>
       <span className="text-xs tracking-[0.04em] text-pc-text-muted">{label}</span>
       <span className="text-xs font-mono font-medium tabular-nums text-pc-text" style={style}>{value}</span>
     </span>
@@ -80,7 +41,7 @@ function LatestEntry({
   formatNumber: NumberFormatter;
   formatPercent: NumberFormatter;
   formatDateTime: (value: string | null | undefined) => string;
-  labels: { level: string; wins: string; losses: string; winRate: string };
+  labels: { level: string; wins: string; losses: string; winRate: string; winsShort: string; lossesShort: string; winRateShort: string; playerStatistics: string; confirmedCheater: string; playerId: (id: number) => string };
 }) {
   return (
     <Link href={entryHref(entry)} className="group flex items-start justify-between gap-3 rounded-lg border border-pc-border bg-pc-bg/45 px-3 py-2.5 transition-colors hover:border-red-400/50 hover:bg-red-500/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent">
@@ -88,25 +49,25 @@ function LatestEntry({
         <span className="flex min-w-0 items-center gap-2">
           <span className="min-w-0 shrink truncate text-sm font-semibold text-pc-text group-hover:text-red-200">{entry.name}</span>
           {entry.playerId != null && (
-            <span className="inline-flex shrink-0 items-baseline gap-0.5 whitespace-nowrap text-xs" title={`Player ID: ${entry.playerId}`} aria-label={`Player ID: ${entry.playerId}`}>
-              <span className="text-pc-text-muted">ID</span>
+            <span className="inline-flex shrink-0 items-baseline gap-0.5 whitespace-nowrap text-xs" title={labels.playerId(entry.playerId)} aria-label={labels.playerId(entry.playerId)}>
+              <span className="text-pc-text-muted">{labels.playerId(entry.playerId).split(":")[0]}</span>
               <span className="font-mono tabular-nums text-pc-text">{entry.playerId}</span>
             </span>
           )}
           <span className="shrink-0 border-l border-pc-border/50 pl-3">
             <MetricCell label={labels.level} title={labels.level} value={formatNumber(entry.level)} />
           </span>
-          <span className="flex min-w-0 flex-1 items-center justify-end gap-x-3" aria-label="Player statistics">
+          <span className="flex min-w-0 flex-1 items-center justify-end gap-x-3" aria-label={labels.playerStatistics}>
             <PlatformIcon platform={entry.platform} />
-            <span className="inline-flex shrink-0 items-center gap-x-2" aria-label={`${labels.wins}, ${labels.losses}, ${labels.winRate}`}>
-              <MetricCell label="W" title={labels.wins} value={formatNumber(entry.wins)} />
-              <MetricCell label="L" title={labels.losses} value={formatNumber(entry.losses)} />
-              <MetricCell label="WR" title={labels.winRate} value={formatPercent(entry.winRate, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} style={entry.winRate == null ? undefined : { color: getPercentageColor(entry.winRate) }} />
+            <span className="inline-flex shrink-0 items-center gap-x-2">
+              <MetricCell label={labels.winsShort} title={labels.wins} value={formatNumber(entry.wins)} />
+              <MetricCell label={labels.lossesShort} title={labels.losses} value={formatNumber(entry.losses)} />
+              <MetricCell label={labels.winRateShort} title={labels.winRate} value={formatPercent(entry.winRate, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} style={entry.winRate == null ? undefined : { color: getPercentageColor(entry.winRate) }} />
             </span>
           </span>
         </span>
         <span className="mt-0.5 flex min-w-0 items-center gap-2 text-xs text-pc-text-muted">
-          <span className="min-w-0 flex-1 truncate">{entry.reason || "Confirmed cheater"}</span>
+          <span className="min-w-0 flex-1 truncate">{entry.reason || labels.confirmedCheater}</span>
           {entry.markedAt && <time className="shrink-0 font-mono tabular-nums" dateTime={entry.markedAt}>{formatDateTime(entry.markedAt)}</time>}
         </span>
       </span>
@@ -115,6 +76,11 @@ function LatestEntry({
   );
 }
 
+/**
+ * Render cheater portal totals, latest records, and links to active, inactive, and evidence directories. Load live portal data or the enabled local mock fixture and display a request error when loading fails.
+ * I/O types: `none -> JSX.Element`.
+ * refs: none
+ */
 export default function CheatersPage() {
   const { formatDateTime, formatNumber, formatPercent, t } = useLocalization();
   const statLabels = {
@@ -122,36 +88,38 @@ export default function CheatersPage() {
     wins: t("generated.players.wins"),
     losses: t("generated.players.losses"),
     winRate: t("generated.players.winRate"),
+    winsShort: t("moderation.winsShort"),
+    lossesShort: t("moderation.lossesShort"),
+    winRateShort: t("moderation.winRateShort"),
+    playerStatistics: t("moderation.playerStatistics"),
+    confirmedCheater: t("moderation.confirmedCheater"),
+    playerId: (id: number) => t("moderation.playerId", { value1: formatNumber(id) }),
   };
-  const [portal, setPortal] = useState<CheaterPortal>(USE_CHEATER_PORTAL_MOCK ? MOCK_CHEATER_PORTAL : EMPTY_PORTAL);
-  const [loading, setLoading] = useState(!USE_CHEATER_PORTAL_MOCK);
+  const [portal, setPortal] = useState<CheaterPortal>(EMPTY_PORTAL);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
   useEffect(() => {
     let active = true;
-    if (USE_CHEATER_PORTAL_MOCK) {
-      void Promise.resolve().then(() => { if (active) setPortal(createMockCheaterPortal()); });
-      return () => { active = false; };
-    }
     fetchCheaterPortal().then((value) => { if (active) setPortal(value); }).catch(() => { if (active) setError(true); }).finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, []);
 
   return (
     <div className="space-y-6">
-      <PlayersPageHeader title="Cheater Portal" description="Browse confirmed cheaters and their evidence, or submit evidence for review." />
-      {error && <div className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-300">The portal could not be loaded.</div>}
+      <PlayersPageHeader title={t("moderation.cheaterPortalTitle")} description={t("moderation.cheaterPortalDescription")} />
+      {error && <div className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-300">{t("moderation.cheaterPortalLoadFailed")}</div>}
 
       <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-3">
-        <Link href="/players/cheaters/active" data-card-accent="red" aria-label="Open active cheater directory" className="pc-glass pc-home-feature-card group relative flex h-full min-h-64 flex-col items-center justify-center overflow-hidden rounded-2xl border border-white/5 p-6 text-center shadow-lg transition-[transform,border-color] duration-[280ms] hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent">
+        <Link href="/players/cheaters/active" data-card-accent="red" aria-label={t("moderation.activeDirectoryAria")} className="pc-glass pc-home-feature-card group relative flex h-full min-h-64 flex-col items-center justify-center overflow-hidden rounded-2xl border border-white/5 p-6 text-center shadow-lg transition-[transform,border-color] duration-[280ms] hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent">
             <ArrowRight className="pc-home-card-arrow absolute right-5 top-5 h-4 w-4 text-pc-text-muted transition-[transform,color] duration-[120ms] group-hover:translate-x-1 group-hover:text-red-200" aria-hidden="true" />
             <span className="pc-card-icon pc-home-card-icon flex h-12 w-12 items-center justify-center rounded-xl border">
               <ShieldAlert className="h-6 w-6" aria-hidden="true" />
             </span>
             <div className="relative mt-5">
-              <h2 className="text-xl font-bold tracking-tight text-pc-text group-hover:text-red-100">Active cheaters</h2>
+              <h2 className="text-xl font-bold tracking-tight text-pc-text group-hover:text-red-100">{t("moderation.activeCheaters")}</h2>
               <p className="mt-6 text-2xl font-bold tabular-nums text-pc-text">{formatNumber(portal.activeCount)}</p>
-              <p className="text-xs text-pc-text-muted">records</p>
+              <p className="text-xs text-pc-text-muted">{t("moderation.recordsLabel")}</p>
             </div>
         </Link>
 
@@ -161,29 +129,29 @@ export default function CheatersPage() {
             <History className="h-6 w-6" aria-hidden="true" />
           </span>
           <div className="relative mt-5">
-            <h2 className="text-xl font-bold tracking-tight text-pc-text group-hover:text-violet-100">Inactive cheater database</h2>
+            <h2 className="text-xl font-bold tracking-tight text-pc-text group-hover:text-violet-100">{t("moderation.inactiveCheaterDatabase")}</h2>
             <p className="mt-6 text-2xl font-bold tabular-nums text-pc-text">{formatNumber(portal.inactiveCount)}</p>
-            <p className="text-xs text-pc-text-muted">records</p>
+            <p className="text-xs text-pc-text-muted">{t("moderation.recordsLabel")}</p>
           </div>
         </Link>
 
-        <Link href="/players/cheaters/evidence" data-card-accent="tertiary" title="View or submit evidence" aria-label="View or submit evidence" className="pc-glass pc-home-feature-card group relative flex h-full min-h-64 flex-col items-center justify-center overflow-hidden rounded-2xl border border-white/5 p-6 text-center shadow-lg transition-[transform,border-color] duration-[280ms] hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent">
+        <Link href="/players/cheaters/evidence" data-card-accent="tertiary" title={t("moderation.viewOrSubmitEvidence")} aria-label={t("moderation.viewOrSubmitEvidence")} className="pc-glass pc-home-feature-card group relative flex h-full min-h-64 flex-col items-center justify-center overflow-hidden rounded-2xl border border-white/5 p-6 text-center shadow-lg transition-[transform,border-color] duration-[280ms] hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent">
           <ArrowRight className="pc-home-card-arrow absolute right-5 top-5 h-4 w-4 text-pc-text-muted transition-[transform,color] duration-[120ms] group-hover:translate-x-1 group-hover:text-amber-200" aria-hidden="true" />
           <span className="pc-home-card-icon flex h-12 w-12 items-center justify-center rounded-xl border">
             <FileImage className="h-6 w-6" aria-hidden="true" />
           </span>
           <div className="relative mt-5">
-            <h2 className="text-xl font-bold tracking-tight text-pc-text group-hover:text-amber-100">Evidence portal</h2>
+            <h2 className="text-xl font-bold tracking-tight text-pc-text group-hover:text-amber-100">{t("moderation.evidencePortal")}</h2>
             <p className="mt-6 text-2xl font-bold tabular-nums text-pc-text">{formatNumber(portal.evidenceCount)}</p>
-            <p className="text-xs text-pc-text-muted">evidence</p>
+            <p className="text-xs text-pc-text-muted">{t("moderation.evidence")}</p>
           </div>
         </Link>
       </div>
 
       <section className="pc-card" aria-labelledby="latest-cheaters-preview-title">
-        <h2 id="latest-cheaters-preview-title" className="text-lg font-semibold text-pc-text">Latest cheaters</h2>
+        <h2 id="latest-cheaters-preview-title" className="text-lg font-semibold text-pc-text">{t("moderation.latestCheaters")}</h2>
         {loading ? <LoadingPanel compact className="py-8" /> : portal.latest.length === 0 ? (
-          <p className="py-8 text-center text-sm text-pc-text-muted">No confirmed cheaters yet.</p>
+          <p className="py-8 text-center text-sm text-pc-text-muted">{t("moderation.noConfirmedCheaters")}</p>
         ) : (
           <div className="mt-4 grid grid-cols-1 gap-2 lg:grid-cols-2 lg:gap-4">
             <div className="space-y-2">{portal.latest.slice(0, 10).map((entry) => <LatestEntry key={`${entry.kind}:${entry.subjectId}`} entry={entry} formatNumber={formatNumber} formatPercent={formatPercent} formatDateTime={formatDateTime} labels={statLabels} />)}</div>

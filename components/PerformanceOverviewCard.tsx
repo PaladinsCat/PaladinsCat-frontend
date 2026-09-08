@@ -1,5 +1,5 @@
-/** PerformanceOverviewCard component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * Render performance overview card.
  * refs: none
  */
 "use client";
@@ -22,9 +22,10 @@ interface MetricRow {
   p90: number;
 }
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+/**
+ * Render performance overview card.
  * refs: none
+ * I/O types: `{ metrics, }: { metrics: MetricRow[]; } -> JSX.Element`.
  */
 export function PerformanceOverviewCard({
   metrics,

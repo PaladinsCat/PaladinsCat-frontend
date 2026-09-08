@@ -1,5 +1,6 @@
-/** Resolves map image assets with safe fallbacks.
- * The module owns its existing image, OIDC, proxy, roster, or moderation boundary.
+/**
+ * Normalize the map name and return its local PNG artwork path, using the neutral default for maps without published artwork.
+ * Resolves map image assets with safe fallbacks.
  * refs: none
  */
 const DEFAULT_MAP_ARTWORK = "Test_Maps_Loading";
@@ -86,10 +87,10 @@ function mapLookupKey(value: string): string {
     .toLowerCase();
 }
 
-/** Apply mapImagePath to the declared request or domain inputs.
- * Contract: validates inputs, preserves the existing security or mapping rules, and returns the documented result.
- * Returns: `string`
+/**
+ * Normalize the map name and return its local PNG artwork path, using the neutral default for maps without published artwork.
  * refs: none
+ * I/O types: `mapName: string -> string`.
  */
 export function mapImagePath(mapName: string): string {
   const lookupKey = mapLookupKey(mapName.trim().replace(/^ranked\s+/i, ""));
@@ -100,10 +101,10 @@ export function mapImagePath(mapName: string): string {
   return `/images/maps/${artwork ?? DEFAULT_MAP_ARTWORK}.png`;
 }
 
-/** Apply matchMapImagePath to the declared request or domain inputs.
- * Contract: validates inputs, preserves the existing security or mapping rules, and returns the documented result.
- * Returns: `string`
+/**
+ * Normalize the map name and return its match-specific PNG artwork path, falling back to the default match artwork.
  * refs: none
+ * I/O types: `mapName: string -> string`.
  */
 export function matchMapImagePath(mapName: string): string {
   const lookupKey = mapLookupKey(mapName.trim().replace(/^ranked\s+/i, ""));
@@ -111,10 +112,10 @@ export function matchMapImagePath(mapName: string): string {
   return `/images/maps/${artwork}.png`;
 }
 
-/** Apply matchMapImageSources to the declared request or domain inputs.
- * Contract: validates inputs, preserves the existing security or mapping rules, and returns the documented result.
- * Returns: `object`
+/**
+ * Return matching AVIF and PNG paths for the normalized match map artwork; derive AVIF by replacing the PNG extension.
  * refs: none
+ * I/O types: `mapName: string -> { avif: string; png: string }`.
  */
 export function matchMapImageSources(mapName: string): { avif: string; png: string } {
   const png = matchMapImagePath(mapName);

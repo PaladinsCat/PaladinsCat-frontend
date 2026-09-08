@@ -1,5 +1,5 @@
-/** player-search-result component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * Render the player metadata used by universal search with the same rank
  * refs: none
  */
 import type { UniversalSearchResult } from "@/lib/api-client";
@@ -8,8 +8,8 @@ import { getRankIconPath, getTierColor, resolveEffectiveTier } from "@/lib/tier-
 /**
  * Render the player metadata used by universal search with the same rank
  * naming and iconography as the player profile header.
- * Returns: `React.JSX.Element`
  * refs: none
+ * I/O types: `{ result }: { result: UniversalSearchResult } -> JSX.Element`.
  */
 export function PlayerSearchSubtitle({ result }: { result: UniversalSearchResult }) {
   if (result.type !== "player") return <>{result.subtitle}</>;

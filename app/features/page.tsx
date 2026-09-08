@@ -16,13 +16,16 @@ import { getFeatureDocument, getFeatureSourceUrl, resolveFeatureAssetUrl, resolv
  * refs: documents/06-reference/frontend-async-ui.md#state-selection
  */
 export const dynamic = "force-dynamic";
-/** The route shell renders per request while the document loader owns its 300-second content cache. · refs: none */
+/**
+ * The route shell renders per request while the document loader owns its 300-second content cache. · refs: none
+ */
 export const revalidate = 0;
 
 /**
  * Build metadata from the current repository document, with localized fallback copy when GitHub is unavailable.
  * Returns: `Promise<Metadata>`; no write, auth, or persistence side effect occurs.
  * refs: documents/06-reference/frontend-design-system.md#page-anatomy
+ * I/O types: `none -> Promise<{ title: string; description: string; alternates: { canonical: string; }; openGraph: { title: string; description: string; type: "article"; url: string; }; }>`.
  */
 export async function generateMetadata() {
   const { t } = await getServerLocalization();
@@ -37,7 +40,10 @@ export async function generateMetadata() {
   };
 }
 
-/** Render the GitHub-backed New Features document.  Returns: `Promise<React.JSX.Element>`. · refs: none */
+/**
+ * Render the GitHub-backed New Features document.  Returns: `Promise<React.JSX.Element>`. · refs: none
+ * I/O types: `none -> Promise<JSX.Element>`.
+ */
 export default async function FeaturesPage() {
   const { t } = await getServerLocalization();
   const document = await getFeatureDocument();
@@ -98,7 +104,7 @@ export default async function FeaturesPage() {
           </div>
           <a href={sourceUrl} target="_blank" rel="noopener noreferrer" className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-pc-border px-3 py-2 text-sm font-semibold text-pc-text-secondary transition-colors hover:border-pc-accent-mid hover:text-pc-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent">
             <GitBranch className="h-4 w-4" aria-hidden="true" />
-            GitHub
+            {t("common.github")}
           </a>
         </div>
 

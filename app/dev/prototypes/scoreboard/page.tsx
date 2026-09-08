@@ -1,9 +1,11 @@
 /** Local scoreboard prototype for reviewing the platform marks in context. · refs: none */
+"use client";
 
 import BrowserScoreboard from "@/components/match-result/browser-scoreboard";
 import PlatformIcon from "@/components/platform-icon";
 import type { MatchData, MatchPlayerDetail, MatchBan } from "@/lib/api-client";
 import type { MatchResultPlayer, PlayerProfileData } from "@/components/match-result/types";
+import { useLocalization } from "@/lib/localization-context";
 
 const platformLegend = ["Steam", "Epic Games", "PlayStation", "XboxLive", "Hi-Rez"];
 
@@ -164,18 +166,31 @@ const bans: MatchBan[] = [
   { ban_slot: 4, champion_id: 8, champion_name: "Inara" },
 ];
 
+/**
+ * Render the local scoreboard fixture and platform-icon legend for visual review, including accessible labels on platform marks.
+ * I/O types: `none -> JSX.Element`.
+ * refs: doc: documents/06-reference/routes/frontend-match-detail.md
+ */
 export default function ScoreboardPrototypePage() {
+  const { t } = useLocalization();
+  const platformLabels: Record<string, string> = {
+    Steam: t("common.platform.steam"),
+    "Epic Games": t("common.platform.epic"),
+    PlayStation: t("common.platform.playstation"),
+    XboxLive: t("common.platform.xbox"),
+    "Hi-Rez": t("common.platform.hirez"),
+  };
   return (
     <div className="space-y-5">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-pc-accent">Local prototype</p>
-        <h1 className="pc-heading pc-heading-lg mt-2">Scoreboard platform icons</h1>
-        <p className="mt-2 max-w-2xl text-sm text-pc-text-muted">Review the monochrome platform marks in the real scoreboard layout. Hover an icon in a player row for its accessible label.</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-pc-accent">{t("common.prototype.local")}</p>
+        <h1 className="pc-heading pc-heading-lg mt-2">{t("common.prototype.scoreboardPlatformIcons")}</h1>
+        <p className="mt-2 max-w-2xl text-sm text-pc-text-muted">{t("common.prototype.scoreboardPlatformDescription")}</p>
         <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-pc-text-secondary">
-          {platformLegend.map((platform) => <span key={platform} className="inline-flex items-center gap-2"><PlatformIcon platform={platform} /><span>{platform === "Hi-Rez" ? "Hi-Rez / PC" : platform}</span></span>)}
+          {platformLegend.map((platform) => <span key={platform} className="inline-flex items-center gap-2"><PlatformIcon platform={platform} /><span>{platformLabels[platform]}</span></span>)}
         </div>
       </div>
-      <BrowserScoreboard match={match} queueLabel="Ranked Siege" team1={team1} team2={team2} bans={bans} />
+      <BrowserScoreboard match={match} queueLabel={t("stats.matchups.ranked")} team1={team1} team2={team2} bans={bans} />
     </div>
   );
 }

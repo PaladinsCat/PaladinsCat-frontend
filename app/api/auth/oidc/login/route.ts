@@ -1,6 +1,5 @@
 /**
- * Define the api auth oidc login route responsibility boundary.
- * Coordinates api auth oidc login route data loading, authorization, and presentation.
+ * Start OIDC login or registration from a same-origin form. Return 403 for a foreign origin, 415 for unsupported media, and 400 for malformed forms or unsupported intent; store a transaction and submit PAR before setting the secure transaction cookie on a 303 redirect. Configuration or PAR failures return 503.
  * refs: none
  */
 import { NextRequest, NextResponse } from "next/server";
@@ -71,9 +70,9 @@ async function startOidc(intent: "login" | "create", returnPath: string, clientI
 }
 
 /**
- * Handles the exported route operation using its declared request and response contract.
- * Returns: `Promise<Response>`
- * refs: none
+ * Start OIDC login or registration from a same-origin form. Return 403 for a foreign origin, 415 for unsupported media, and 400 for malformed forms or unsupported intent; store a transaction and submit PAR before setting the secure transaction cookie on a 303 redirect. Configuration or PAR failures return 503.
+ * refs: doc: documents/02-technical/security/auth.md
+ * I/O types: `request: NextRequest -> Promise<NextResponse<unknown>>`.
  */
 export async function POST(request: NextRequest) {
   if (!requireSameOrigin(request.headers.get("origin"), origin())) return new NextResponse("Forbidden", { status: 403 });
@@ -88,9 +87,9 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * Handles the exported route operation using its declared request and response contract.
- * Returns the declared route value; request, cache, and navigation effects follow the implementation.
- * refs: none
+ * Start OIDC login for an empty query, a single safe return path, or intent=create; reject other query shapes with 404. Store a transaction, submit PAR, and set a secure ten-minute transaction cookie on the 303 redirect; configuration or PAR failures return 503.
+ * refs: doc: documents/02-technical/security/auth.md
+ * I/O types: `request: NextRequest -> Promise<NextResponse<unknown>>`.
  */
 export async function GET(request: NextRequest) {
   const entries = [...request.nextUrl.searchParams.entries()];

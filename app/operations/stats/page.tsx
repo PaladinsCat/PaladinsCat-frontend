@@ -1,6 +1,5 @@
 /**
- * Define the operations stats page responsibility boundary.
- * Coordinates operations stats page data loading, authorization, and presentation.
+ * Render the /operations/stats route with `ErrorState`, `RouteSkeleton`, `ContentFade`, `Users`, `MetricCard`.
  * refs: none
  */
 "use client";
@@ -20,9 +19,9 @@ function MetricCard({ label, value, companionValue, detail, detailColor }: { lab
 }
 
 /**
- * Handles the exported route operation using its declared request and response contract.
- * Returns: `React.JSX.Element`
+ * Render the /operations/stats route with `ErrorState`, `RouteSkeleton`, `ContentFade`, `Users`, `MetricCard`.
  * refs: none
+ * I/O types: `none -> JSX.Element`.
  */
 export default function OperationsStatsPage() {
   const { t, formatDateTime, formatPercent } = useLocalization();

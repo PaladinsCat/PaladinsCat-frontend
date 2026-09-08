@@ -1,5 +1,5 @@
-/** master-feeding-directory component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * Render master feeding directory with `PlayersPageHeader`, `TagCriteriaTip`, `PlayerDirectorySearch`, `LoadingPanel`, `PlayerDirectoryPagination`.
  * refs: none
  */
 "use client";
@@ -19,10 +19,10 @@ import TagCriteriaTip from "@/components/tag-criteria-tip";
 
 const PAGE_SIZE = 32;
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
- * Returns: `React.JSX.Element`
+/**
+ * Render master feeding directory with `PlayersPageHeader`, `TagCriteriaTip`, `PlayerDirectorySearch`, `LoadingPanel`, `PlayerDirectoryPagination`.
  * refs: none
+ * I/O types: `none -> JSX.Element`.
  */
 export default function MasterFeedingDirectory() {
   const { t, formatNumber } = useLocalization();

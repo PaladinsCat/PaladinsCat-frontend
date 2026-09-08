@@ -1,6 +1,5 @@
 /**
- * Define the stats player charts page route boundary.
- * Coordinates this module's route data flow and rendered output.
+ * Render /stats/player/[id]/charts using `RouteSkeleton`, `ContentFade`, `ResponsiveContainer`, `LineChart`.
  * refs: none
  */
 "use client";
@@ -14,9 +13,9 @@ import { RouteSkeleton } from "@/components/route-skeleton";
 import { ContentFade } from "@/components/async-state";
 
 /**
- * Renders the exported statistics view with its route data.
- * Returns: `React.JSX.Element`
+ * Render /stats/player/[id]/charts using `RouteSkeleton`, `ContentFade`, `ResponsiveContainer`, `LineChart`.
  * refs: none
+ * I/O types: `{ params }: { params: Promise<{ id: string }> } -> JSX.Element`.
  */
 export default function PlayerChartsPage({ params }: { params: Promise<{ id: string }> }) {
   const { t , formatMonthDay} = useLocalization();

@@ -1,6 +1,6 @@
 /**
+ * Loads one champion's catalog data for server-rendered champion pages.
  * Keeps server champion data server-side and aligned with its data source.
- * Preserve its server boundary and caller-facing data contracts.
  * refs: none
  */
 import "server-only";
@@ -24,8 +24,8 @@ function loadChampionDataMap(): Promise<ChampionDataMap> {
 
 /**
  * Loads one champion's catalog data for server-rendered champion pages.
- * Returns: `Promise<ChampionData | undefined>`
  * refs: none
+ * I/O types: `slug: string -> Promise<ChampionData | undefined>`.
  */
 export async function getServerChampionData(slug: string): Promise<ChampionData | undefined> {
   const data = await loadChampionDataMap();

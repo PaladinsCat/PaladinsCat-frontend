@@ -1,6 +1,5 @@
 /**
- * Define the stats winrate page route boundary.
- * Coordinates this module's route data flow and rendered output.
+ * Render champion win-rate statistics with server-provided initial rankings. · refs: none
  * refs: none
  */
 import ChampionRateDetailPage from "@/components/ChampionRateDetailPage";
@@ -18,7 +17,10 @@ const CONFIG = {
  */
 export const dynamic = "force-dynamic";
 
-/** Render champion win-rate statistics with server-provided initial rankings. · refs: none */
+/**
+ * Render champion win-rate statistics with server-provided initial rankings. · refs: none
+ * I/O types: `none -> Promise<JSX.Element>`.
+ */
 export default async function WinRatePage() {
   const initialChampions = await getInitialRankedChampions().catch((error) => {
     console.error("[stats/winrate] Server champion fetch failed; using browser fallback", error);

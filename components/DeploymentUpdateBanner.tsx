@@ -1,5 +1,5 @@
-/** DeploymentUpdateBanner component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * Render deployment update banner with `RefreshCw`, `Clock`.
  * refs: none
  */
 "use client";
@@ -66,10 +66,10 @@ const PHASE_COPY: Partial<Record<DeploymentPhase, { titleKey: TranslationKey; bo
   failed: { titleKey: "status.updateFailed", bodyKey: "status.updateFailedMessage" },
 };
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
- * Returns: `React.JSX.Element`
+/**
+ * Render deployment update banner with `RefreshCw`, `Clock`.
  * refs: none
+ * I/O types: `none -> JSX.Element | null`.
  */
 export default function DeploymentUpdateBanner() {
   const { t } = useLocalization();

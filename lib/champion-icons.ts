@@ -1,5 +1,6 @@
-/** Resolves champion icon assets with safe fallbacks.
- * The module preserves canonical data, asset, or metadata behavior used by existing callers.
+/**
+ * Return the generic champion icon path.
+ * Resolves champion icon assets with safe fallbacks.
  * refs: none
  */
 // Champion icon paths — auto-resolved from public/images/champions/
@@ -36,8 +37,8 @@ function normalizeChampionName(name: string): string {
 
 /**
  * Return the generic champion icon path.
- * Returns: `string`
  * refs: none
+ * I/O types: `none -> string`.
  */
 export function getGenericChampionIcon(): string {
   return GENERIC_ICON;
@@ -49,8 +50,8 @@ export function getGenericChampionIcon(): string {
  *
  * Handles case and punctuation variations in champion names from different sources
  * (database, API responses, static data).
- * Returns: `string`
  * refs: none
+ * I/O types: `name: string | null | undefined -> string`.
  */
 export function getChampionIconSafe(name: string | null | undefined): string {
   if (!name) return GENERIC_ICON;

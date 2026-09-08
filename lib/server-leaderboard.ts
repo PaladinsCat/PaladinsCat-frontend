@@ -1,4 +1,6 @@
-/** Server-rendered seed data for the public ranked leaderboard. */
+/** Server-rendered seed data for the public ranked leaderboard.
+ * refs: none
+ */
 import "server-only";
 
 import { unstable_cache } from "next/cache";
@@ -50,7 +52,11 @@ const getCachedGrandmasterLeaderboard = unstable_cache(
   { revalidate: 300, tags: ["ranked-leaderboard"] },
 );
 
-/** Loads the default public leaderboard rows for the initial HTML response. */
+/**
+ * Loads the default public leaderboard rows for the initial HTML response.
+ * I/O types: `none -> Promise<RankedPlayer[]>`.
+ * refs: none
+ */
 export async function getInitialGrandmasterLeaderboard(): Promise<RankedPlayer[]> {
   return getCachedGrandmasterLeaderboard();
 }

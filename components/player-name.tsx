@@ -1,5 +1,5 @@
-/** player-name component/module.
- * Owns the UI behavior implemented in this file; data and side effects remain within its existing boundaries.
+/**
+ * A player name with its confirmed-cheater or suspicious-player label. · refs: none
  * refs: none
  */
 "use client";
@@ -44,9 +44,10 @@ const AUTOMATIC_TAG_ACCENT: Record<NonNullable<PlayerModerationTagProps["automat
   CARRY: "text-cyan-300",
 };
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
+/**
+ * Render verified player badge.
  * refs: none
+ * I/O types: `{ className = "", iconClassName = "h-3.5 w-3.5" }: { className?: string; iconClassName?: string } -> JSX.Element`.
  */
 export function VerifiedPlayerBadge({ className = "", iconClassName = "h-3.5 w-3.5" }: { className?: string; iconClassName?: string }) {
   const { t } = useLocalization();
@@ -60,6 +61,10 @@ export function VerifiedPlayerBadge({ className = "", iconClassName = "h-3.5 w-3
   );
 }
 
+/**
+ * Define player moderation tag props as `{ playerId: string | number; cheater?: boolean; exploiter?: boolean; susCount?: number; dropper?: boolean; dropperVoteCount?: number; afkWintrade?: boolean; afkWintradeVoteCount?: number; automaticAfk?: boolean; automaticAfkCount?: number; wallShooter?: boolean; wallShooterCount?: number; masterFeeding?: boolean; masterFeedingCount?: number; automaticTag?: "TANK" | "SUP" | "DPS" | "FLANK" | "NOOB" | "CARRY"; boosted?: boolean; boostedMatchCount?: number; altAccount?: boolean; altAccountVoteCount?: number; verified?: boolean; }`.
+ * refs: none
+ */
 export type PlayerModerationTagProps = {
   playerId: string | number;
   cheater?: boolean;
@@ -83,10 +88,10 @@ export type PlayerModerationTagProps = {
   verified?: boolean;
 };
 
-/** Provide this exported item.
- * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
- * Returns: `React.JSX.Element`
+/**
+ * Render player moderation tag with `VerifiedPlayerBadge`.
  * refs: none
+ * I/O types: `{ playerId, cheater, exploiter, susCount, dropper, dropperVoteCount, afkWintrade, afkWintradeVoteCount, automaticAfk, automaticAfkCount, wallShooter, wallShooterCount, masterFeeding, masterFeedingCount, automaticTag, boosted, boostedMatchCount, altAccount, altAccountVoteCount, verified, }: PlayerModerationTagProps -> JSX.Element`.
  */
 export function PlayerModerationTag({
   playerId,
@@ -178,7 +183,10 @@ export function PlayerModerationTag({
   </span>;
 }
 
-/** A player name with its confirmed-cheater or suspicious-player label. · refs: none */
+/**
+ * A player name with its confirmed-cheater or suspicious-player label. · refs: none
+ * I/O types: `{ playerId, children, className = "", ...moderation }: PlayerModerationTagProps & { children: ReactNode; className?: string; } -> JSX.Element`.
+ */
 export default function PlayerName({
   playerId,
   children,

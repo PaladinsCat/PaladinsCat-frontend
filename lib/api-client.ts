@@ -61,22 +61,38 @@ export type {
   BuildResponse,
 };
 
+/**
+ * Pair a champion numeric ID with its display name.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface ChampionNameOnly {
   id: number;
   name: string;
 }
 
+/**
+ * Record weekly champion win rate and play count.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface PatchTrend {
   trendWeek: string;
   weeklyWinRate: number;
   weeklyPlays: number;
 }
 
+/**
+ * Group favorable and unfavorable champion matchups with wins, plays, and win rates.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface CounterStats {
   strongAgainst: Array<{ opponentChampionName: string; opponentChampionId: number; wins: number; totalMatches: number; winRate: number }>;
   weakAgainst: Array<{ opponentChampionName: string; opponentChampionId: number; wins: number; totalMatches: number; winRate: number }>;
 }
 
+/**
+ * Describe a player match result, combat totals, queue/tier, and source authority.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface MatchRecord {
   matchId: string;
   championName: string;
@@ -94,6 +110,10 @@ export interface MatchRecord {
   authoritative: boolean;
 }
 
+/**
+ * Rank a champion by nullable win rate and play count.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface TopWinrateEntry {
   id: number;
   name: string;
@@ -102,6 +122,10 @@ export interface TopWinrateEntry {
   totalPlays: number | null;
 }
 
+/**
+ * Carry champion leaderboard rank metrics and nullable rating.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface LeaderboardEntry {
   championId: number;
   championName: string;
@@ -110,6 +134,10 @@ export interface LeaderboardEntry {
   rating: number | null;
 }
 
+/**
+ * Carry ranked placement, tier points, movement, and optional win/leave totals.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface RankedPlayer {
   rank: number;
   player_id: string;
@@ -128,8 +156,9 @@ export interface RankedPlayer {
 /**
  * Fetch ranked leaderboard data for client consumers.
  *
- * Accepts query filters; returns fetchRankedLeaderboard data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Fetch GET /stats/ranked-leaderboard with optional tier/top filters, normalize movement and win/leave fields, and return an empty array if the request fails.
+ * I/O types: `params?: { tier?: string; top?: number } -> Promise<RankedPlayer[]>`.
  */
 export async function fetchRankedLeaderboard(params?: { tier?: string; top?: number }): Promise<RankedPlayer[]> {
   const query = new URLSearchParams();
@@ -160,6 +189,10 @@ export async function fetchRankedLeaderboard(params?: { tier?: string; top?: num
   }
 }
 
+/**
+ * Describe a moderated player with community tags, performance totals, and report reasons.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface CheaterPlayer {
   id: string;
   name: string;
@@ -187,6 +220,10 @@ export interface CheaterPlayer {
   topReasons: Array<{ reason: string; count: number }>;
 }
 
+/**
+ * Identify a public or private cheater subject with nullable profile and observation data.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface CheaterPortalEntry {
   kind: "player" | "private";
   subjectId: string;
@@ -203,6 +240,10 @@ export interface CheaterPortalEntry {
   leaveRate: number | null;
 }
 
+/**
+ * Summarize active, inactive, and evidence counts with latest cheater records.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface CheaterPortal {
   activeCount: number;
   inactiveCount: number;
@@ -210,16 +251,28 @@ export interface CheaterPortal {
   latest: CheaterPortalEntry[];
 }
 
+/**
+ * Page historical cheater records with their total count.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface InactiveCheaterPage {
   items: CheaterPortalEntry[];
   total: number;
 }
 
+/**
+ * Page recently active cheater records with their total count.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface ActiveCheaterPage {
   items: CheaterPortalEntry[];
   total: number;
 }
 
+/**
+ * Describe published cheater evidence, its subject, source/embed provider, and image attachments.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface CheaterEvidence {
   id: string;
   playerId: number | null;
@@ -235,24 +288,36 @@ export interface CheaterEvidence {
   createdAt: string;
 }
 
+/**
+ * Page published evidence with its total count.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface CheaterEvidencePage {
   items: CheaterEvidence[];
   total: number;
 }
 
-/** Pending administrator-review evidence metadata. · refs: GET /cheaters/evidence/review */
+/**
+ * Pending administrator-review evidence metadata. · refs: endpoints: GET /cheaters/evidence/review
+ */
 export interface CheaterEvidenceReviewItem extends CheaterEvidence {
   imageCount: number;
   submittedBy: string;
 }
 
-/** Published cheater detail with evidence posts and supporting match rows. · refs: GET /cheaters/{id} */
+/**
+ * Published cheater detail with evidence posts and supporting match rows. · refs: endpoints: GET /cheaters/{id}
+ */
 export interface CheaterDetail {
   player: { id: string; name: string; platform: string | null; lastSeen: string | null; markedAt: string | null };
   evidence: CheaterEvidence[];
   supportingMatches: Array<{ matchId: string; map: string | null; region: string | null; durationSeconds: number | null; entryDatetime: string | null }>;
 }
 
+/**
+ * Extend the moderated player with automatic AFK observation counts and economy-per-minute extrema.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface AutomaticAfkPlayer extends CheaterPlayer {
   automaticMatchCount: number;
   firstSeen: string | null;
@@ -261,46 +326,82 @@ export interface AutomaticAfkPlayer extends CheaterPlayer {
   averageEcpm: number;
 }
 
+/**
+ * Page automatic AFK players with their total count.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface AutomaticAfkPlayerPage {
   players: AutomaticAfkPlayer[];
   totalCount: number;
 }
 
+/**
+ * Extend the moderated player with wall-shooter observation counts and time bounds.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface AutomaticWallShooterPlayer extends CheaterPlayer {
   wallShooterCount: number;
   firstSeen: string | null;
   lastSeen: string | null;
 }
 
+/**
+ * Page automatic wall-shooter players with their total count.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface AutomaticWallShooterPlayerPage {
   players: AutomaticWallShooterPlayer[];
   totalCount: number;
 }
 
+/**
+ * Extend the moderated player with master-feeding observation counts and time bounds.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface AutomaticMasterFeedingPlayer extends CheaterPlayer {
   masterFeedingCount: number;
   firstSeen: string | null;
   lastSeen: string | null;
 }
 
+/**
+ * Page automatic master-feeding players with their total count.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface AutomaticMasterFeedingPlayerPage {
   players: AutomaticMasterFeedingPlayer[];
   totalCount: number;
 }
 
+/**
+ * Select the automatic role-difference or noob/hypercarry metric.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export type PerformanceDiffMetric = "tank-diff" | "support-diff" | "dps-diff" | "flank-diff" | "the-noob" | "hypercarry";
 
+/**
+ * Extend the moderated player with a selected performance-metric count and time bounds.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface AutomaticPerformanceDiffPlayer extends CheaterPlayer {
   metricCount: number;
   firstSeen: string | null;
   lastSeen: string | null;
 }
 
+/**
+ * Page automatic performance-metric players with their total count.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface AutomaticPerformanceDiffPlayerPage {
   players: AutomaticPerformanceDiffPlayer[];
   totalCount: number;
 }
 
+/**
+ * Carry the match context and economy-per-minute evidence behind an automatic AFK observation.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface AutomaticAfkMatchSummary {
   matchId: number;
   entryDatetime: string | null;
@@ -320,6 +421,10 @@ export interface AutomaticAfkMatchSummary {
   ecpm: number;
 }
 
+/**
+ * Combine an automatic AFK player summary with supporting matches.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface AutomaticAfkPlayerDetail {
   player: {
     id: string;
@@ -336,6 +441,10 @@ export interface AutomaticAfkPlayerDetail {
   matches: AutomaticAfkMatchSummary[];
 }
 
+/**
+ * Extend the moderated player with party-match totals and associated cheaters.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface BoostedPlayer extends CheaterPlayer {
   partyMatchCount: number;
   firstSeen: string | null;
@@ -349,6 +458,10 @@ export interface BoostedPlayer extends CheaterPlayer {
   }>;
 }
 
+/**
+ * Carry a boosting-evidence match with scores, player performance, and associated cheaters.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface BoostedMatchSummary {
   matchId: number;
   entryDatetime: string | null;
@@ -371,11 +484,19 @@ export interface BoostedMatchSummary {
   cheaters: Array<{ id: string; name: string }>;
 }
 
+/**
+ * Combine a boosted player summary with supporting matches.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface BoostedPlayerDetail {
   player: BoostedPlayer;
   matches: BoostedMatchSummary[];
 }
 
+/**
+ * Describe an exploiter evidence match, including population, scope, and selected talent.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface ExploiterEvidenceMatch {
   matchId: number;
   entryDatetime: string | null;
@@ -396,6 +517,10 @@ export interface ExploiterEvidenceMatch {
   talentName: string;
 }
 
+/**
+ * Combine exploiter identity and moderation flags with supporting matches.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface ExploiterEvidenceDetail {
   player: Pick<CheaterPlayer, "id" | "name" | "platform" | "region" | "cheater" | "exploiter">;
   matches: ExploiterEvidenceMatch[];
@@ -405,6 +530,7 @@ export interface ExploiterEvidenceDetail {
  * Fetch filtered moderation-directory players from the backend.
  * Accepts typed query filters and returns normalized player summaries.
  * refs: none
+ * I/O types: `params?: { name?: string; cheater?: boolean; exploiter?: boolean; susOnly?: boolean; weirdoOnly?: boolean; hallOfFameOnly?: boolean; dropperOnly?: boolean; afkWintradeOnly?: boolean; altAccountOnly?: boolean; limit?: number; offset?: number } -> Promise<CheaterPlayer[]>`.
  */
 export async function fetchCheaterPlayers(params?: { name?: string; cheater?: boolean; exploiter?: boolean; susOnly?: boolean; weirdoOnly?: boolean; hallOfFameOnly?: boolean; dropperOnly?: boolean; afkWintradeOnly?: boolean; altAccountOnly?: boolean; limit?: number; offset?: number }): Promise<CheaterPlayer[]> {
   const query = new URLSearchParams();
@@ -484,7 +610,11 @@ function normalizeCheaterPortalEntry(row: any): CheaterPortalEntry {
   };
 }
 
-/** Fetch the single cached read used by the Cheater Portal landing page. */
+/**
+ * Fetch the single cached read used by the Cheater Portal landing page.
+ * I/O types: `none -> Promise<CheaterPortal>`.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export async function fetchCheaterPortal(): Promise<CheaterPortal> {
   const raw = await fetchJson<any>("/cheaters/portal");
   return {
@@ -497,7 +627,12 @@ export async function fetchCheaterPortal(): Promise<CheaterPortal> {
   };
 }
 
-/** Fetch paginated historical cheaters without scanning the legacy directory client-side. */
+/**
+ * Fetch the paginated inactive-cheater directory with optional search, limit, and offset filters. Return the backend items and total; network/API failures reject the promise.
+ * Fetch paginated historical cheaters without scanning the legacy directory client-side.
+ * I/O types: `params: { q?: string; limit?: number; offset?: number } -> Promise<InactiveCheaterPage>`.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export async function fetchInactiveCheaters(params: { q?: string; limit?: number; offset?: number } = {}): Promise<InactiveCheaterPage> {
   const query = new URLSearchParams();
   if (params.q?.trim()) query.set("q", params.q.trim());
@@ -510,7 +645,11 @@ export async function fetchInactiveCheaters(params: { q?: string; limit?: number
   };
 }
 
-/** Fetch paginated recent cheaters without expanding the landing-page preview. */
+/**
+ * Fetch paginated recent cheaters without expanding the landing-page preview.
+ * I/O types: `params: { q?: string; limit?: number; offset?: number } -> Promise<ActiveCheaterPage>`.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export async function fetchActiveCheaters(params: { q?: string; limit?: number; offset?: number } = {}): Promise<ActiveCheaterPage> {
   const query = new URLSearchParams();
   if (params.q?.trim()) query.set("q", params.q.trim());
@@ -549,7 +688,11 @@ function normalizeCheaterEvidence(row: any): CheaterEvidence {
   };
 }
 
-/** Fetch the newest approved evidence records, including provider-safe embed URLs. */
+/**
+ * Fetch the newest approved evidence records, including provider-safe embed URLs.
+ * I/O types: `params: { limit?: number; offset?: number } -> Promise<CheaterEvidencePage>`.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export async function fetchCheaterEvidence(params: { limit?: number; offset?: number } = {}): Promise<CheaterEvidencePage> {
   const query = new URLSearchParams({
     limit: String(params.limit ?? 20),
@@ -570,7 +713,8 @@ export async function fetchCheaterEvidence(params: { limit?: number; offset?: nu
  * request-scoped deadline. Retries remain disabled: a timeout must never
  * create a duplicate moderation report.
  *
- * refs: POST /cheaters/evidence · migrations: 166
+ * refs: endpoints: POST /cheaters/evidence · migrations: 166
+ * I/O types: `form: FormData -> Promise<{ evidence: { id: string; createdAt: string } }>`.
  */
 export async function submitCheaterEvidence(form: FormData): Promise<{ evidence: { id: string; createdAt: string } }> {
   return fetchJson<{ evidence: { id: string; createdAt: string } }>("/cheaters/evidence", {
@@ -582,13 +726,21 @@ export async function submitCheaterEvidence(form: FormData): Promise<{ evidence:
   });
 }
 
-/** Fetch one approved evidence post for the SNS-style detail view. */
+/**
+ * Fetch one approved evidence post for the SNS-style detail view.
+ * I/O types: `id: string -> Promise<CheaterEvidence>`.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export async function fetchCheaterEvidenceDetail(id: string): Promise<CheaterEvidence> {
   const raw = await fetchJson<{ evidence: any }>(`/cheaters/evidence/${encodeURIComponent(id)}`);
   return normalizeCheaterEvidence(raw.evidence);
 }
 
-/** Fetch pending evidence reserved for administrator review. */
+/**
+ * Fetch pending evidence reserved for administrator review.
+ * I/O types: `params: { limit?: number; offset?: number } -> Promise<{ items: CheaterEvidenceReviewItem[]; total: number }>`.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export async function fetchCheaterEvidenceReview(params: { limit?: number; offset?: number } = {}): Promise<{ items: CheaterEvidenceReviewItem[]; total: number }> {
   const query = new URLSearchParams({ limit: String(params.limit ?? 20), offset: String(params.offset ?? 0) });
   const raw = await fetchJson<{ items?: any[]; total?: number | string }>(`/cheaters/evidence/review?${query.toString()}`, { headers: accountAuthHeaders() });
@@ -602,7 +754,8 @@ export async function fetchCheaterEvidenceReview(params: { limit?: number; offse
  * Fetch one pending image through the authenticated review route as an AVIF
  * object URLs. The caller owns revoking both returned URLs after unmount.
  *
- * refs: migrations: 166 · endpoint: GET /cheaters/evidence/{id}/media/{position}
+ * refs: migrations: 166 · endpoints: GET /cheaters/evidence/{id}/media/{position}
+ * I/O types: `id: string; position: number -> Promise<{ avifUrl: string; originalUrl: string }>`.
  */
 export async function fetchCheaterEvidenceReviewImage(id: string, position: number): Promise<{ avifUrl: string; originalUrl: string }> {
   const baseUrl = `${API_BASE}/cheaters/evidence/${encodeURIComponent(id)}/media/${position}`;
@@ -615,7 +768,11 @@ export async function fetchCheaterEvidenceReviewImage(id: string, position: numb
   return { avifUrl: URL.createObjectURL(await avif.blob()), originalUrl: URL.createObjectURL(await original.blob()) };
 }
 
-/** Apply an administrator's evidence review decision without retrying a state transition. */
+/**
+ * Apply an administrator's evidence review decision without retrying a state transition.
+ * I/O types: `id: string; decision: "approve" | "deny"; note: string -> Promise<void>`.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export async function reviewCheaterEvidence(id: string, decision: "approve" | "deny", note = ""): Promise<void> {
   await fetchJson(`/cheaters/evidence/${encodeURIComponent(id)}/review`, {
     method: "POST",
@@ -625,7 +782,11 @@ export async function reviewCheaterEvidence(id: string, decision: "approve" | "d
   });
 }
 
-/** Fetch the confirmed-cheater detail feed and its evidence-linked match rows. */
+/**
+ * Fetch the confirmed-cheater detail feed and its evidence-linked match rows.
+ * I/O types: `id: string -> Promise<CheaterDetail>`.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export async function fetchCheaterDetail(id: string): Promise<CheaterDetail> {
   const raw = await fetchJson<{ player: any; evidence?: any[]; supportingMatches?: any[] }>(`/cheaters/${encodeURIComponent(id)}`);
   return {
@@ -675,8 +836,9 @@ function mapAutomaticAfkPlayer(row: any): AutomaticAfkPlayer {
 /**
  * Fetch automatic afk players data for client consumers.
  *
- * Accepts name, limit, offset; returns fetchAutomaticAfkPlayers data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * I/O types: `{ name, limit = 24, offset = 0, }: { name?: string; limit?: number; offset?: number; } -> Promise<AutomaticAfkPlayerPage>`.
+ * Request `GET '/players/automatic-afk?${query.toString()}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
  */
 export async function fetchAutomaticAfkPlayers({
   name,
@@ -733,8 +895,9 @@ function mapAutomaticWallShooterPlayer(row: any): AutomaticWallShooterPlayer {
 /**
  * Fetch wall shooter players data for client consumers.
  *
- * Accepts name, limit, offset; returns fetchWallShooterPlayers data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * I/O types: `{ name, limit = 32, offset = 0, }: { name?: string; limit?: number; offset?: number; } -> Promise<AutomaticWallShooterPlayerPage>`.
+ * Request `GET '/players/wall-shooters?${query.toString()}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
  */
 export async function fetchWallShooterPlayers({
   name,
@@ -769,8 +932,9 @@ function mapAutomaticMasterFeedingPlayer(row: any): AutomaticMasterFeedingPlayer
 /**
  * Fetch master feeding players data for client consumers.
  *
- * Accepts name, limit, offset; returns fetchMasterFeedingPlayers data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * I/O types: `{ name, limit = 32, offset = 0, }: { name?: string; limit?: number; offset?: number; } -> Promise<AutomaticMasterFeedingPlayerPage>`.
+ * Request `GET '/players/master-feeding?${query.toString()}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
  */
 export async function fetchMasterFeedingPlayers({
   name,
@@ -805,8 +969,9 @@ function mapAutomaticPerformanceDiffPlayer(row: any): AutomaticPerformanceDiffPl
 /**
  * Fetch performance diff players data for client consumers.
  *
- * Accepts metric, PerformanceDiffMetric, name, limit, offset; returns fetchPerformanceDiffPlayers data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * I/O types: `metric: PerformanceDiffMetric; { name, limit = 32, offset = 0, }: { name?: string; limit?: number; offset?: number; } -> Promise<AutomaticPerformanceDiffPlayerPage>`.
+ * Request `GET '/players/performance-diff/${metric}?${query.toString()}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
  */
 export async function fetchPerformanceDiffPlayers(metric: PerformanceDiffMetric, {
   name,
@@ -832,8 +997,9 @@ export async function fetchPerformanceDiffPlayers(metric: PerformanceDiffMetric,
 /**
  * Fetch automatic afk player detail data for client consumers.
  *
- * Accepts playerId; returns fetchAutomaticAfkPlayerDetail data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * I/O types: `playerId: string -> Promise<AutomaticAfkPlayerDetail>`.
+ * Request `GET '/players/automatic-afk/${encodeURIComponent(playerId)}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
  */
 export async function fetchAutomaticAfkPlayerDetail(playerId: string): Promise<AutomaticAfkPlayerDetail> {
   const raw = await fetchJson<any>(`/players/automatic-afk/${encodeURIComponent(playerId)}`);
@@ -871,6 +1037,10 @@ export async function fetchAutomaticAfkPlayerDetail(playerId: string): Promise<A
   };
 }
 
+/**
+ * Carry class ranking, rating uncertainty, and player win/match totals.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface ClassLeaderboardEntry {
   rank: number;
   playerId: number;
@@ -889,8 +1059,9 @@ export interface ClassLeaderboardEntry {
 /**
  * Fetch class leaderboard data for client consumers.
  *
- * Accepts params, role; returns fetchClassLeaderboard data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * I/O types: `params: { role: string; limit?: number; queueId?: number; mode?: 'account' | 'champion' } -> Promise<ClassLeaderboardEntry[]>`.
+ * Request `GET '/players/leaderboard/class?${query.toString()}'` through the shared API transport. Return `[]` on a caught request failure.
  */
 export async function fetchClassLeaderboard(params: { role: string; limit?: number; queueId?: number; mode?: 'account' | 'champion' }): Promise<ClassLeaderboardEntry[]> {
   const query = new URLSearchParams();
@@ -925,6 +1096,10 @@ export async function fetchClassLeaderboard(params: { role: string; limit?: numb
   }
 }
 
+/**
+ * Carry champion Elo ranking, class, uncertainty, and match totals.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface ChampionEloEntry {
   rank: number;
   player_id: number;
@@ -943,8 +1118,9 @@ export interface ChampionEloEntry {
 /**
  * Fetch champion elo data for client consumers.
  *
- * Accepts params; returns fetchChampionElo data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * I/O types: `params: { role?: string; championId?: number; limit?: number; queueId?: number; } -> Promise<{ data: ChampionEloEntry[]; total: number }>`.
+ * Request `GET '/players/leaderboard/champion-elo?${query.toString()}'` through the shared API transport. Return `{ data: [], total: 0 }` on a caught request failure.
  */
 export async function fetchChampionElo(params: {
   role?: string;
@@ -983,6 +1159,10 @@ export async function fetchChampionElo(params: {
   }
 }
 
+/**
+ * Rank a player performance value with nullable match, champion, and coverage context.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface PerformanceLeaderboardEntry {
   rank: number;
   matchId: string | null;
@@ -1000,8 +1180,9 @@ export interface PerformanceLeaderboardEntry {
 /**
  * Fetch performance leaderboard data for client consumers.
  *
- * Accepts params, metric; returns fetchPerformanceLeaderboard data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * I/O types: `params: { metric: 'dpm' | 'hpm' | 'gpm' | 'mpm'; limit?: number; role?: string; region?: string; queueId?: number; scope?: 'ranked' | 'casual'; mode?: 'match' | 'account' | 'champion'; } -> Promise<PerformanceLeaderboardEntry[]>`.
+ * Request `GET '/players/leaderboard/performance?${query.toString()}'` through the shared API transport. Return `[]` on a caught request failure.
  */
 export async function fetchPerformanceLeaderboard(params: {
   metric: 'dpm' | 'hpm' | 'gpm' | 'mpm';
@@ -1045,6 +1226,10 @@ export async function fetchPerformanceLeaderboard(params: {
   }
 }
 
+/**
+ * Rank account or champion level and XP with class/champion placements and nullable performance.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface PlayerLevelLeaderboardEntry {
   rank: number;
   classRank: number | null;
@@ -1064,13 +1249,20 @@ export interface PlayerLevelLeaderboardEntry {
   platform: string | null;
 }
 
+/**
+ * Filter level leaderboards by player, role, or champion.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface PlayerLevelLeaderboardFilters {
   playerId?: number;
   role?: 'Frontline' | 'Damage' | 'Flank' | 'Support';
   championId?: number;
 }
 
-/** Fetch account-level or champion-mastery-level leaderboard rows. · refs: none */
+/**
+ * Fetch account-level or champion-mastery-level leaderboard rows. · refs: none
+ * I/O types: `mode: 'account' | 'champion'; limit: number; filters: PlayerLevelLeaderboardFilters -> Promise<PlayerLevelLeaderboardEntry[]>`.
+ */
 export async function fetchPlayerLevelLeaderboard(mode: 'account' | 'champion', limit = 100, filters: PlayerLevelLeaderboardFilters = {}): Promise<PlayerLevelLeaderboardEntry[]> {
   const query = new URLSearchParams({ mode, limit: String(limit) });
   if (filters.playerId != null) query.set('playerId', String(filters.playerId));
@@ -1107,6 +1299,10 @@ export async function fetchPlayerLevelLeaderboard(mode: 'account' | 'champion', 
   }
 }
 
+/**
+ * Summarize a performance metric distribution with extrema and statistical aggregates.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface PerformanceMetricSummary {
   min: number;
   max: number;
@@ -1120,8 +1316,16 @@ export interface PerformanceMetricSummary {
   sampleSize: number;
 }
 
-export type PerformanceMetricKey = 'dpm' | 'wpm' | 'apm' | 'hpm' | 'gpm' | 'egpm' | 'mpm' | 'kda';
+/**
+ * Name a backend-supported performance metric. I/O: string literal -> PerformanceMetricKey.
+ * refs: endpoints: GET /stats/performance-metrics
+ */
+export type PerformanceMetricKey = 'dpm' | 'wpm' | 'apm' | 'hpm' | 'gpm' | 'egpm' | 'mpm' | 'kda' | 'kpm' | 'deaths_per_minute';
 
+/**
+ * Group performance metric summaries returned for the selected population.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export type PerformanceMetricsResponse = Partial<Record<PerformanceMetricKey, PerformanceMetricSummary>>;
 
 function mapMetricSummary(raw: any): PerformanceMetricSummary {
@@ -1142,8 +1346,9 @@ function mapMetricSummary(raw: any): PerformanceMetricSummary {
 /**
  * Fetch performance metrics data for client consumers.
  *
- * Accepts query filters; returns fetchPerformanceMetrics data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/stats/performance-metrics${query.toString() ? '?${query.toString()}' : ''}'` through the shared API transport. Return `{}` on a caught request failure.
+ * I/O types: `params?: { metric?: PerformanceMetricKey; role?: string; queueId?: number; tierMin?: number; tierMax?: number; scope?: 'ranked' | 'casual'; } -> Promise<PerformanceMetricsResponse>`.
  */
 export async function fetchPerformanceMetrics(params?: {
   metric?: PerformanceMetricKey;
@@ -1163,7 +1368,8 @@ export async function fetchPerformanceMetrics(params?: {
   try {
     const raw = await fetchJson<Record<string, any>>(`/stats/performance-metrics${query.toString() ? `?${query.toString()}` : ''}`);
     return Object.fromEntries(
-      Object.entries(raw).map(([metric, summary]) => [metric, mapMetricSummary(summary)])
+      Object.entries(raw).filter(([metric]) => ['dpm', 'wpm', 'apm', 'hpm', 'gpm', 'egpm', 'mpm', 'kda', 'kpm', 'deaths_per_minute'].includes(metric))
+        .map(([metric, summary]) => [metric, mapMetricSummary(summary)])
     ) as PerformanceMetricsResponse;
   } catch {
     return {};
@@ -1174,25 +1380,27 @@ export async function fetchPerformanceMetrics(params?: {
  * Fetch the global and each class's summary in one cacheable API response.
  * The metrics page used to make five nearly identical requests per tab.
  * refs: none
+ * I/O types: `metric: PerformanceMetricKey; scope: 'ranked' | 'casual' -> Promise<{ summary: PerformanceMetricSummary; roles: Record<string, PerformanceMetricSummary>; }>`.
  */
-export async function fetchPerformanceMetricDashboard(metric: PerformanceMetricKey): Promise<{
+export async function fetchPerformanceMetricDashboard(metric: PerformanceMetricKey, scope: 'ranked' | 'casual' = 'ranked'): Promise<{
   summary: PerformanceMetricSummary;
   roles: Record<string, PerformanceMetricSummary>;
 }> {
-  try {
-    const query = new URLSearchParams({ metric, includeRoles: '1' });
-    const raw = await fetchJson<Record<string, any>>(`/stats/performance-metrics?${query.toString()}`);
-    return {
-      summary: mapMetricSummary(raw[metric]),
-      roles: Object.fromEntries(
-        Object.entries(raw.roles ?? {}).map(([role, summary]) => [role, mapMetricSummary(summary)])
-      ),
-    };
-  } catch {
-    return { summary: mapMetricSummary(null), roles: {} };
-  }
+  const query = new URLSearchParams({ metric, includeRoles: '1', scope });
+  const raw = await fetchJson<Record<string, any>>(`/stats/performance-metrics?${query.toString()}`);
+  if (!raw[metric] || (raw.scope && raw.scope !== scope)) throw new Error('Performance population mismatch or missing measure');
+  return {
+    summary: mapMetricSummary(raw[metric]),
+    roles: Object.fromEntries(
+      Object.entries(raw.roles ?? {}).map(([role, summary]) => [role, mapMetricSummary(summary)])
+    ),
+  };
 }
 
+/**
+ * Describe one champion performance distribution and its sample coverage.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface ChampionPerformanceDistribution {
   championId: number;
   championName: string;
@@ -1211,8 +1419,9 @@ export interface ChampionPerformanceDistribution {
 /**
  * Fetch champion performance distributions data for client consumers.
  *
- * Accepts params, metric; returns fetchChampionPerformanceDistributions data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/stats/performance-metrics/by-champion?${query.toString()}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `params: { metric: PerformanceMetricKey; championId?: number; queueId?: number; } -> Promise<ChampionPerformanceDistribution[]>`.
  */
 export async function fetchChampionPerformanceDistributions(params: {
   metric: PerformanceMetricKey;
@@ -1223,32 +1432,32 @@ export async function fetchChampionPerformanceDistributions(params: {
   query.set('metric', params.metric);
   if (params.championId != null) query.set('championId', String(params.championId));
   if (params.queueId != null) query.set('queueId', String(params.queueId));
-  try {
-    const raw = await fetchJson<Array<{
-      champion_id: number; champion_name: string; class: string;
-      min: number | string; max: number | string; mean: number | string;
-      median: number | string; mode: number | string; p10?: number | string; p90?: number | string; avg_value: number | string;
-      total_matches: number;
-    }>>(`/stats/performance-metrics/by-champion?${query.toString()}`);
-    return raw.map((r) => ({
-      championId: r.champion_id,
-      championName: r.champion_name,
-      className: r.class,
-      min: Number(r.min ?? 0),
-      max: Number(r.max ?? 0),
-      mean: Number(r.mean ?? 0),
-      median: Number(r.median ?? 0),
-      mode: Number(r.mode ?? 0),
-      p10: Number(r.p10 ?? 0),
-      p90: Number(r.p90 ?? 0),
-      avgValue: Number(r.avg_value ?? 0),
-      totalMatches: Number(r.total_matches ?? 0),
-    }));
-  } catch {
-    return [];
-  }
+  const raw = await fetchJson<Array<{
+    champion_id: number; champion_name: string; class: string;
+    min: number | string; max: number | string; mean: number | string;
+    median: number | string; mode: number | string; p10?: number | string; p90?: number | string; avg_value: number | string;
+    total_matches: number;
+  }>>(`/stats/performance-metrics/by-champion?${query.toString()}`);
+  return raw.map((r) => ({
+    championId: r.champion_id,
+    championName: r.champion_name,
+    className: r.class,
+    min: Number(r.min ?? 0),
+    max: Number(r.max ?? 0),
+    mean: Number(r.mean ?? 0),
+    median: Number(r.median ?? 0),
+    mode: Number(r.mode ?? 0),
+    p10: Number(r.p10 ?? 0),
+    p90: Number(r.p90 ?? 0),
+    avgValue: Number(r.avg_value ?? 0),
+    totalMatches: Number(r.total_matches ?? 0),
+  }));
 }
 
+/**
+ * Associate a baseline value with its population dimensions.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface BaselineEntry {
   role: string;
   queueId: number;
@@ -1275,8 +1484,9 @@ export interface BaselineEntry {
 /**
  * Fetch baselines data for client consumers.
  *
- * Accepts query filters; returns fetchBaselines data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/stats/baselines${query.toString() ? '?${query.toString()}' : ''}'` through the shared API transport. Return `[]` on a caught request failure.
+ * I/O types: `params?: { role?: string; queueId?: number; tierMin?: number; tierMax?: number } -> Promise<BaselineEntry[]>`.
  */
 export async function fetchBaselines(params?: { role?: string; queueId?: number; tierMin?: number; tierMax?: number }): Promise<BaselineEntry[]> {
   const query = new URLSearchParams();
@@ -1324,6 +1534,10 @@ export async function fetchBaselines(params?: { role?: string; queueId?: number;
   }
 }
 
+/**
+ * Summarize match activity for a region.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface RegionStat {
   regionCode: string;
   regionName: string;
@@ -1332,6 +1546,10 @@ export interface RegionStat {
   topChampions: Array<{ championName: string; championId: number; wins: number; totalPlays: number; winRate: number }>;
 }
 
+/**
+ * Summarize observed champion loadout performance.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface LoadoutStat {
   deckHash: string;
   championId: number;
@@ -1354,6 +1572,10 @@ export interface LoadoutStat {
   lastRefreshed: string;
 }
 
+/**
+ * Summarize an item selection and its match performance.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface ItemStat {
   itemId: number;
   itemName: string;
@@ -1365,6 +1587,10 @@ export interface ItemStat {
   breakdown: ItemDimensionStat[];
 }
 
+/**
+ * Combine player-directory overview totals and featured player groups.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface PlayersOverview {
   championEloPlayers: ChampionEloEntry[];
   performanceLeaderboards: Record<string, PerformanceLeaderboardEntry[]>;
@@ -1433,8 +1659,9 @@ function mapBoostedPlayer(row: any): BoostedPlayer {
 /**
  * Fetch boosted players data for client consumers.
  *
- * Accepts name, limit, offset; returns fetchBoostedPlayers data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/players/boosted?${query.toString()}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `{ name, limit = 100, offset = 0 }: { name?: string; limit?: number; offset?: number } -> Promise<BoostedPlayer[]>`.
  */
 export async function fetchBoostedPlayers({ name, limit = 100, offset = 0 }: { name?: string; limit?: number; offset?: number } = {}): Promise<BoostedPlayer[]> {
   const query = new URLSearchParams({
@@ -1447,6 +1674,10 @@ export async function fetchBoostedPlayers({ name, limit = 100, offset = 0 }: { n
   return raw.map(mapBoostedPlayer);
 }
 
+/**
+ * Summarize a frequent co-play partner and shared match performance.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface BestDuoSummary {
   sourcePlayerId: string;
   sourcePlayerName: string;
@@ -1459,6 +1690,10 @@ export interface BestDuoSummary {
   matchesPerWeek: number;
 }
 
+/**
+ * Describe one co-play partner with match coverage, performance, and role/champion counts.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface PlayerRelationshipRow {
   otherPlayerId: string;
   otherPlayerName: string;
@@ -1477,6 +1712,10 @@ export interface PlayerRelationshipRow {
   sameParty: boolean;
 }
 
+/**
+ * Aggregate a player co-play network and relationship groups.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface PlayerRelationshipSummary {
   playerId: string;
   totals: {
@@ -1547,8 +1786,9 @@ function mapRelationshipRow(row: RawRelationshipRow): PlayerRelationshipRow {
 /**
  * Fetch player relationship summary data for client consumers.
  *
- * Accepts playerId, limit; returns fetchPlayerRelationshipSummary data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/coplay/summary/${encodeURIComponent(String(playerId))}?limit=${Math.min(Math.max(limit, 1), 50)}&contract=metrics-v3'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `playerId: string | number; limit: number -> Promise<PlayerRelationshipSummary>`.
  */
 export async function fetchPlayerRelationshipSummary(playerId: string | number, limit = 6): Promise<PlayerRelationshipSummary> {
   const raw = await fetchJson<RawRelationshipSummary>(`/coplay/summary/${encodeURIComponent(String(playerId))}?limit=${Math.min(Math.max(limit, 1), 50)}&contract=metrics-v3`);
@@ -1575,8 +1815,9 @@ export async function fetchPlayerRelationshipSummary(playerId: string | number, 
 /**
  * Fetch boosted player detail data for client consumers.
  *
- * Accepts playerId; returns fetchBoostedPlayerDetail data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/players/boosted/${encodeURIComponent(playerId)}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `playerId: string -> Promise<BoostedPlayerDetail>`.
  */
 export async function fetchBoostedPlayerDetail(playerId: string): Promise<BoostedPlayerDetail> {
   const raw = await fetchJson<any>(`/players/boosted/${encodeURIComponent(playerId)}`);
@@ -1609,7 +1850,10 @@ export async function fetchBoostedPlayerDetail(playerId: string): Promise<Booste
   };
 }
 
-/** Fetch the stored talent facts supporting an administrator-confirmed exploiter tag. · refs: none */
+/**
+ * Fetch the stored talent facts supporting an administrator-confirmed exploiter tag. · refs: none
+ * I/O types: `playerId: string -> Promise<ExploiterEvidenceDetail>`.
+ */
 export async function fetchExploiterEvidence(playerId: string): Promise<ExploiterEvidenceDetail> {
   const raw = await fetchJson<any>(`/players/exploiters/${encodeURIComponent(playerId)}`);
   return {
@@ -1643,6 +1887,10 @@ export async function fetchExploiterEvidence(playerId: string): Promise<Exploite
   };
 }
 
+/**
+ * Describe an anonymized private subject and its observation coverage.
+ * refs: doc: documents/02-technical/security/auth.md
+ */
 export interface PrivateAccountSummary {
   id: number;
   alias: string | null;
@@ -1666,6 +1914,10 @@ export interface PrivateAccountSummary {
   topReasons: Array<{ reason: string; count: number }>;
 }
 
+/**
+ * Describe one observed private-account match appearance.
+ * refs: doc: documents/02-technical/security/auth.md
+ */
 export interface PrivateAccountObservationSummary {
   matchId: number;
   privateSlot: number;
@@ -1689,11 +1941,19 @@ export interface PrivateAccountObservationSummary {
   durationSeconds: number;
 }
 
+/**
+ * Combine a private-account summary with observed match evidence.
+ * refs: doc: documents/02-technical/security/auth.md
+ */
 export interface PrivateAccountDetail {
   account: PrivateAccountSummary;
   observations: PrivateAccountObservationSummary[];
 }
 
+/**
+ * Summarize a recurring pair of players and their shared matches.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface PartyPairSummary {
   sourcePlayerId: number;
   sourcePlayerName: string;
@@ -1704,6 +1964,10 @@ export interface PartyPairSummary {
   lastSeen: string | null;
 }
 
+/**
+ * Summarize a recurring multi-player stack and its shared matches.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface PartyStackSummary {
   groupKey: string;
   stackSize: number;
@@ -1713,6 +1977,10 @@ export interface PartyStackSummary {
   lastSeen: string | null;
 }
 
+/**
+ * Combine a pair/stack identity, optional party summary, and paginated match history.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface PartyDetail {
   kind: "pairs" | "stacks";
   key: string;
@@ -1727,6 +1995,10 @@ export interface PartyDetail {
   page: { current: number; size: number; totalPages: number };
 }
 
+/**
+ * Page player-directory records with pagination totals.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface PlayerDirectoryPage<T> {
   items: T[];
   total: number;
@@ -1784,9 +2056,9 @@ function mapPartyPair(row: any): PartyPairSummary {
 /**
  * Fetch private accounts directory data for client consumers.
  *
- * Accepts params; returns fetchPrivateAccountsDirectory data after a backend request, using shared authentication and cache behavior.
- * Returns: `Promise<object>`
  * refs: none
+ * Request `GET '/player-ext/private?${query.toString()}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `params: { page?: number; pageSize?: number; query?: string; cheater?: boolean; suspicious?: boolean } -> Promise<PlayerDirectoryPage<PrivateAccountSummary>>`.
  */
 export async function fetchPrivateAccountsDirectory(params: { page?: number; pageSize?: number; query?: string; cheater?: boolean; suspicious?: boolean } = {}): Promise<PlayerDirectoryPage<PrivateAccountSummary>> {
   const page = Math.max(1, params.page ?? 1);
@@ -1803,9 +2075,9 @@ export async function fetchPrivateAccountsDirectory(params: { page?: number; pag
 /**
  * Fetch private account detail data for client consumers.
  *
- * Returns: `Promise<object>`
- * Accepts privateId; returns fetchPrivateAccountDetail data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/player-ext/private/${privateId}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `privateId: number -> Promise<PrivateAccountDetail>`.
  */
 export async function fetchPrivateAccountDetail(privateId: number): Promise<PrivateAccountDetail> {
   const raw = await fetchJson<any>(`/player-ext/private/${privateId}`);
@@ -1838,10 +2110,10 @@ export async function fetchPrivateAccountDetail(privateId: number): Promise<Priv
 
 /**
  * Fetch party pairs directory data for client consumers.
- * Returns: `Promise<object>`
  *
- * Accepts params; returns fetchPartyPairsDirectory data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/coplay/parties?${query.toString()}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `params: { page?: number; pageSize?: number; query?: string } -> Promise<PlayerDirectoryPage<PartyPairSummary>>`.
  */
 export async function fetchPartyPairsDirectory(params: { page?: number; pageSize?: number; query?: string } = {}): Promise<PlayerDirectoryPage<PartyPairSummary>> {
   const page = Math.max(1, params.page ?? 1);
@@ -1854,11 +2126,11 @@ export async function fetchPartyPairsDirectory(params: { page?: number; pageSize
 }
 
 /**
- * Returns: `Promise<object>`
  * Fetch party stacks directory data for client consumers.
  *
- * Accepts params; returns fetchPartyStacksDirectory data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/coplay/parties?${query.toString()}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `params: { page?: number; pageSize?: number; query?: string; size?: number | null } -> Promise<PlayerDirectoryPage<PartyStackSummary>>`.
  */
 export async function fetchPartyStacksDirectory(params: { page?: number; pageSize?: number; query?: string; size?: number | null } = {}): Promise<PlayerDirectoryPage<PartyStackSummary>> {
   const page = Math.max(1, params.page ?? 1);
@@ -1883,6 +2155,11 @@ export async function fetchPartyStacksDirectory(params: { page?: number; pageSiz
   return { items, total, page, pageSize, totalPages: Math.max(1, Math.ceil(total / pageSize)) };
 }
 
+/**
+ * Fetch pair or stack match history with an encoded party key. Clamp the requested page to at least one and page size to 1-100; normalize response IDs and metrics and return null for an absent party. Network/API failures reject the promise.
+ * I/O types: `kind: "pairs" | "stacks"; key: string; params: { page?: number; pageSize?: number } -> Promise<PartyDetail>`.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export async function fetchPartyDetail(
   kind: "pairs" | "stacks",
   key: string,
@@ -1932,7 +2209,10 @@ export async function fetchPartyDetail(
 let playersOverviewCache: { value: PlayersOverview; expiresAt: number } | null = null;
 let playersOverviewInFlight: Promise<PlayersOverview> | null = null;
 
-/** Normalize the backend overview payload for both server and browser renders. · refs: none */
+/**
+ * Normalize the backend overview payload for both server and browser renders. · refs: none
+ * I/O types: `raw: any -> PlayersOverview`.
+ */
 export function mapPlayersOverviewResponse(raw: any): PlayersOverview {
   const mapChampionElo = (row: any): ChampionEloEntry => ({
     rank: Number(row.rank), player_id: Number(row.player_id), player_name: String(row.player_name),
@@ -2044,6 +2324,7 @@ export function mapPlayersOverviewResponse(raw: any): PlayersOverview {
  * prevents navigation between top-level pages from immediately refetching the
  * same mostly-static leaderboard cards.
  * refs: none
+ * I/O types: `none -> Promise<PlayersOverview>`.
  */
 export async function fetchPlayersOverview(): Promise<PlayersOverview> {
   if (playersOverviewCache && playersOverviewCache.expiresAt > Date.now()) {
@@ -2065,6 +2346,10 @@ export async function fetchPlayersOverview(): Promise<PlayersOverview> {
   }
 }
 
+/**
+ * Summarize match counts and performance for a map.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface MapStat {
   name: string;
   totalMatches: number;
@@ -2072,6 +2357,10 @@ export interface MapStat {
   avgDurationSeconds: number;
 }
 
+/**
+ * Summarize champion performance on a map.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface MapChampionStat {
   championId: number;
   championName: string;
@@ -2084,6 +2373,10 @@ export interface MapChampionStat {
   banRate: number;
 }
 
+/**
+ * Summarize a champion performance across maps.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface ChampionMapStat {
   name: string;
   totalPlays: number;
@@ -2093,6 +2386,10 @@ export interface ChampionMapStat {
   pickRate: number;
 }
 
+/**
+ * Summarize talent performance on a map.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface MapTalentStat {
   talentId: number;
   talentName: string;
@@ -2105,6 +2402,10 @@ export interface MapTalentStat {
   pickRate: number;
 }
 
+/**
+ * Summarize item performance on a map.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface MapItemStat {
   itemId: number;
   itemName: string;
@@ -2115,6 +2416,10 @@ export interface MapItemStat {
   pickRate: number;
 }
 
+/**
+ * Combine map totals with champion, talent, and item breakdowns.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface MapDetailStats {
   map: MapStat;
   champions: MapChampionStat[];
@@ -2123,6 +2428,10 @@ export interface MapDetailStats {
   compositions: MatchCompositionStat[];
 }
 
+/**
+ * Describe a player participating in an alternate-account relationship.
+ * refs: doc: documents/02-technical/security/auth.md
+ */
 export interface AltAccountRelationPlayer {
   id: string;
   name: string;
@@ -2135,6 +2444,10 @@ export interface AltAccountRelationPlayer {
   altAccount: boolean;
 }
 
+/**
+ * Group players linked by alternate-account relationships.
+ * refs: doc: documents/02-technical/security/auth.md
+ */
 export interface AltAccountDirectoryGroup {
   main: AltAccountRelationPlayer;
   altAccounts: Array<AltAccountRelationPlayer & { voteCount: number; lastVotedAt: string | null }>;
@@ -2142,6 +2455,10 @@ export interface AltAccountDirectoryGroup {
   lastVotedAt: string | null;
 }
 
+/**
+ * Describe an alternate-account relationship owned by the current user.
+ * refs: doc: documents/02-technical/security/auth.md
+ */
 export interface MyAltAccountRelation {
   id: number;
   mainPlayerId: string;
@@ -2169,8 +2486,9 @@ function mapAltRelationPlayer(row: any, prefix = ''): AltAccountRelationPlayer {
 /**
  * Fetch alt account relations directory data for client consumers.
  *
- * Accepts params; returns fetchAltAccountRelationsDirectory data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/players/alt-account-relations?${query.toString()}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `params: { page?: number; pageSize?: number; query?: string } -> Promise<PlayerDirectoryPage<AltAccountDirectoryGroup>>`.
  */
 export async function fetchAltAccountRelationsDirectory(params: { page?: number; pageSize?: number; query?: string } = {}): Promise<PlayerDirectoryPage<AltAccountDirectoryGroup>> {
   const page = Math.max(1, params.page ?? 1);
@@ -2205,8 +2523,9 @@ export async function fetchAltAccountRelationsDirectory(params: { page?: number;
 /**
  * Fetch my alt account relations data for client consumers.
  *
- * Accepts playerId; returns fetchMyAltAccountRelations data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/players/${playerId}/alt-account-relations/mine'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `playerId: string | number -> Promise<MyAltAccountRelation[]>`.
  */
 export async function fetchMyAltAccountRelations(playerId: string | number): Promise<MyAltAccountRelation[]> {
   const token = getAuthToken();
@@ -2231,6 +2550,7 @@ export async function fetchMyAltAccountRelations(playerId: string | number): Pro
  *
  * Accepts playerId, otherPlayerId, otherRole; returns voteAltAccountRelation data through a backend request, carrying authentication headers and applying the operation server-side.
  * refs: none
+ * I/O types: `playerId: string | number; otherPlayerId: string | number; otherRole: 'main' | 'alt' -> Promise<{ success: boolean; replaced: boolean }>`.
  */
 export async function voteAltAccountRelation(playerId: string | number, otherPlayerId: string | number, otherRole: 'main' | 'alt'): Promise<{ success: boolean; replaced: boolean }> {
   const token = getAuthToken();
@@ -2247,6 +2567,7 @@ export async function voteAltAccountRelation(playerId: string | number, otherPla
  *
  * Accepts playerId, otherPlayerId; returns clearMyAltAccountRelation data while reading or changing local auth state without a backend request.
  * refs: none
+ * I/O types: `playerId: string | number; otherPlayerId: string | number -> Promise<{ success: boolean; removed: boolean }>`.
  */
 export async function clearMyAltAccountRelation(playerId: string | number, otherPlayerId: string | number): Promise<{ success: boolean; removed: boolean }> {
   const token = getAuthToken();
@@ -2257,8 +2578,16 @@ export async function clearMyAltAccountRelation(playerId: string | number, other
   });
 }
 
+/**
+ * Select the map comparison dimension.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export type MapComparisonSection = 'champions' | 'talents' | 'items' | 'compositions';
 
+/**
+ * Compare map performance within a selected category.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface MapCategoryComparisonStat {
   entityKey: string;
   mapName: string;
@@ -2271,6 +2600,10 @@ export interface MapCategoryComparisonStat {
   banRate: number;
 }
 
+/**
+ * Count observed matches in one hourly bucket.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface HourlyMatchCount {
   date: string;
   hour: number;
@@ -2288,11 +2621,19 @@ export interface HourlyMatchCount {
   fetchedAt: string | null;
 }
 
+/**
+ * Describe backend database and stored-record totals.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface DatabaseStats {
   tables: Array<{ name: string; rowCount: number }>;
   timestamp: string;
 }
 
+/**
+ * Describe service status reported by the backend.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface SystemStatus {
   matches: number;
   players: number;
@@ -2301,6 +2642,10 @@ export interface SystemStatus {
   timestamp: string;
 }
 
+/**
+ * Describe one upstream Hi-Rez outage observation.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface HirezOutageItem {
   serviceKey: string;
   status: string;
@@ -2316,6 +2661,10 @@ export interface HirezOutageItem {
   updatedAt: string | null;
 }
 
+/**
+ * Summarize the current upstream outage signal.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface HirezOutageSignal {
   source: string;
   message: string;
@@ -2327,6 +2676,10 @@ export interface HirezOutageSignal {
   publicMessage: string;
 }
 
+/**
+ * Describe Hi-Rez service availability and outage context.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface HirezServiceStatus {
   status: "ok" | "degraded" | "outage";
   outage: boolean;
@@ -2342,20 +2695,34 @@ export interface HirezServiceStatus {
   timestamp: string;
 }
 
+/**
+ * Describe a site notification with its display and lifecycle fields.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface Notification {
   id: number;
   timestamp: string;
   importance: number;
   message: string;
   readAt?: string | null;
+  preview?: string | null;
+  href?: string | null;
 }
 
+/**
+ * Supply editable site-notification fields.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface NotificationInput {
   timestamp?: string;
   importance?: number;
   message: string;
 }
 
+/**
+ * Describe the site activity banner payload.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface ActivityBanner {
   enabled: boolean;
   message: string;
@@ -2363,6 +2730,10 @@ export interface ActivityBanner {
 
 // ── Changelog ──
 
+/**
+ * Describe a published changelog entry and its display metadata.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface ChangelogEntry {
   id: number;
   component: string;
@@ -2379,6 +2750,10 @@ export interface ChangelogEntry {
   releaseType: "major" | "minor" | "patch";
 }
 
+/**
+ * Page changelog entries with pagination metadata.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface ChangelogPage {
   data: ChangelogEntry[];
   total: number;
@@ -2387,10 +2762,18 @@ export interface ChangelogPage {
   totalPages: number;
 }
 
+/**
+ * Supply editable fields for an administrator changelog operation.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface AdminChangelogInput {
   changelog: string;
 }
 
+/**
+ * Identify a component in the site-version payload.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface SiteVersionComponent {
   id: number;
   component: string;
@@ -2407,12 +2790,20 @@ export interface SiteVersionComponent {
   metadata: Record<string, unknown>;
 }
 
+/**
+ * Describe the current frontend-visible site version and components.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface SiteVersion extends SiteVersionComponent {
   timestamp: string | null;
   notes?: string;
   components: SiteVersionComponent[];
 }
 
+/**
+ * Summarize players or activity within one ranked tier.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface TierStat {
   tier: string;
   tierSort: number;
@@ -2421,6 +2812,10 @@ export interface TierStat {
   percentage: number;
 }
 
+/**
+ * Combine ranked-tier distribution summaries.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface TierSummary {
   profilePlayers: number;
   avgProfileTier: number;
@@ -2458,6 +2853,10 @@ export const API_ERROR_KEYS = {
   authenticationRequired: "generated.api.authenticationRequired",
 } as const;
 
+/**
+ * Select a recognized API error message key.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export type ApiErrorKey = (typeof API_ERROR_KEYS)[keyof typeof API_ERROR_KEYS];
 
 /**
@@ -2465,6 +2864,7 @@ export type ApiErrorKey = (typeof API_ERROR_KEYS)[keyof typeof API_ERROR_KEYS];
  *
  * Accepts value; returns isApiErrorKey data from local computation without network, authentication, cache, or persistence effects.
  * refs: none
+ * I/O types: `value: unknown -> value is ApiErrorKey`.
  */
 export function isApiErrorKey(value: unknown): value is ApiErrorKey {
   return typeof value === "string"
@@ -2474,8 +2874,9 @@ export function isApiErrorKey(value: unknown): value is ApiErrorKey {
 /**
  * Fetch json data for client consumers.
  *
- * Accepts path; returns fetchJson data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '${API_BASE}${scopedPath}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `path: string; options?: RequestInit & { retries?: number; unwrapData?: boolean; timeoutMs?: number } -> Promise<T>`.
  */
 export async function fetchJson<T>(path: string, options?: RequestInit & { retries?: number; unwrapData?: boolean; timeoutMs?: number }): Promise<T> {
   const retries = options?.retries ?? 2;
@@ -2496,6 +2897,7 @@ export async function fetchJson<T>(path: string, options?: RequestInit & { retri
   fetchOptions.credentials = "same-origin";
 
   for (let attempt = 0; attempt <= retries; attempt++) {
+    options?.signal?.throwIfAborted();
     // CRITICAL: Add timeout to prevent indefinite hang on stalled backend.
     // AbortSignal.timeout() cancels the fetch if it exceeds the limit.
     // Source: Fault #1 — "No timeout on fetch()"
@@ -2504,26 +2906,27 @@ export async function fetchJson<T>(path: string, options?: RequestInit & { retri
     const scopedPath = withStoredLobbyTier(path);
     let res: Response;
     try {
-      res = await fetch(`${API_BASE}${scopedPath}`, { ...fetchOptions, signal: controller.signal });
+      const signal = options?.signal ? AbortSignal.any([options.signal, controller.signal]) : controller.signal;
+      res = await fetch(`${API_BASE}${scopedPath}`, { ...fetchOptions, signal });
     } catch (error) {
       // A network failure or a timeout abort is transient: retry it with the
       // same backoff as 5xx responses instead of surfacing it immediately.
-      // (Only our own timeout can abort here — the caller signal is replaced
-      // by controller.signal above.)
       clearTimeout(timeoutId);
+      options?.signal?.throwIfAborted();
       if (attempt < retries) {
         await new Promise((r) => setTimeout(r, 500 * (attempt + 1)));
         continue;
       }
       throw error;
     }
-    clearTimeout(timeoutId);
     if (!res.ok) {
       if (res.status >= 500 && attempt < retries) {
+        clearTimeout(timeoutId);
         await new Promise((r) => setTimeout(r, 500 * (attempt + 1)));
         continue;
       }
-      const errBody = await res.json().catch(() => null);
+      const errBody = await res.json().catch(() => null).finally(() => clearTimeout(timeoutId));
+      options?.signal?.throwIfAborted();
       const message = typeof errBody?.error === "string" ? errBody.error : errBody?.error?.message;
       // Expected client errors are intentionally written by the backend for the
       // person making the request (validation, conflicts, rate limits, and so on).
@@ -2533,7 +2936,8 @@ export async function fetchJson<T>(path: string, options?: RequestInit & { retri
       }
       throw new ApiRequestError(API_ERROR_KEYS.genericFailure, res.status);
     }
-    const json = await res.json();
+    const json = await res.json().finally(() => clearTimeout(timeoutId));
+    options?.signal?.throwIfAborted();
     // Handle normalized list envelopes when callers only need the rows.
     if (unwrapData && json && json.data !== undefined) {
       return json.data as T;
@@ -2566,8 +2970,9 @@ function splitRoles(roles: unknown): string[] | null {
 /**
  * Fetch database stats data for client consumers.
  *
- * Accepts no arguments; returns fetchDatabaseStats data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/database'` through the shared API transport. Return `null` on a caught request failure.
+ * I/O types: `none -> Promise<DatabaseStats | null>`.
  */
 export async function fetchDatabaseStats(): Promise<DatabaseStats | null> {
   try {
@@ -2590,8 +2995,9 @@ export async function fetchDatabaseStats(): Promise<DatabaseStats | null> {
 /**
  * Fetch system status data for client consumers.
  *
- * Accepts no arguments; returns fetchSystemStatus data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/status'` through the shared API transport. Return `null` on a caught request failure.
+ * I/O types: `none -> Promise<SystemStatus | null>`.
  */
 export async function fetchSystemStatus(): Promise<SystemStatus | null> {
   try {
@@ -2617,8 +3023,9 @@ export async function fetchSystemStatus(): Promise<SystemStatus | null> {
 /**
  * Fetch hirez service status data for client consumers.
  *
- * Accepts no arguments; returns fetchHirezServiceStatus data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/system/hirez-status'` through the shared API transport. Return `null` on a caught request failure.
+ * I/O types: `none -> Promise<HirezServiceStatus | null>`.
  */
 export async function fetchHirezServiceStatus(): Promise<HirezServiceStatus | null> {
   try {
@@ -2643,6 +3050,8 @@ function mapNotification(raw: {
   importance?: number | string;
   message: string;
   read_at?: string | null;
+  preview?: string | null;
+  href?: string | null;
 }): Notification {
   return {
     id: raw.id,
@@ -2650,6 +3059,8 @@ function mapNotification(raw: {
     importance: Number(raw.importance ?? 0),
     message: raw.message,
     readAt: raw.read_at,
+    preview: raw.preview,
+    href: raw.href,
   };
 }
 
@@ -2665,6 +3076,7 @@ class ApiRequestError extends Error {
  *
  * Accepts error; returns isAuthenticationRejection data from local computation without network, authentication, cache, or persistence effects.
  * refs: none
+ * I/O types: `error: unknown -> boolean`.
  */
 export function isAuthenticationRejection(error: unknown): boolean {
   return error instanceof ApiRequestError && (error.status === 401 || error.status === 403);
@@ -2675,8 +3087,9 @@ export function isAuthenticationRejection(error: unknown): boolean {
 /**
  * Fetch notifications data for client consumers.
  *
- * Accepts query filters; returns fetchNotifications data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/notifications${query.toString() ? '?${query.toString()}' : ''}'` through the shared API transport. Return `[]` on a caught request failure.
+ * I/O types: `params?: { limit?: number } -> Promise<Notification[]>`.
  */
 export async function fetchNotifications(params?: { limit?: number }): Promise<Notification[]> {
   const query = new URLSearchParams();
@@ -2692,8 +3105,9 @@ export async function fetchNotifications(params?: { limit?: number }): Promise<N
 /**
  * Fetch activity banner data for client consumers.
  *
- * Accepts no arguments; returns fetchActivityBanner data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/stats/activity-banner'` through the shared API transport. Return `null` on a caught request failure.
+ * I/O types: `none -> Promise<ActivityBanner | null>`.
  */
 export async function fetchActivityBanner(): Promise<ActivityBanner | null> {
   try {
@@ -2707,8 +3121,9 @@ export async function fetchActivityBanner(): Promise<ActivityBanner | null> {
 /**
  * Fetch account site notifications data for client consumers.
  *
- * Accepts query filters; returns fetchAccountSiteNotifications data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/auth/account/site-notifications?limit=${limit}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `params?: { limit?: number } -> Promise<Notification[]>`.
  */
 export async function fetchAccountSiteNotifications(params?: { limit?: number }): Promise<Notification[]> {
   const token = getAuthToken();
@@ -2716,6 +3131,7 @@ export async function fetchAccountSiteNotifications(params?: { limit?: number })
   const limit = params?.limit ?? 8;
   const rows = await fetchJson<Array<{
     id: number; timestamp?: string; importance?: number | string; message: string; read_at?: string | null;
+    preview?: string | null; href?: string | null;
   }>>(`/auth/account/site-notifications?limit=${limit}`, {
     headers: accountAuthHeaders(token),
   });
@@ -2727,6 +3143,7 @@ export async function fetchAccountSiteNotifications(params?: { limit?: number })
  *
  * Accepts notificationId; returns markSiteNotificationRead data through a backend request, carrying authentication headers and applying the operation server-side.
  * refs: none
+ * I/O types: `notificationId: number -> Promise<void>`.
  */
 export async function markSiteNotificationRead(notificationId: number): Promise<void> {
   const token = getAuthToken();
@@ -2742,6 +3159,7 @@ export async function markSiteNotificationRead(notificationId: number): Promise<
  *
  * Accepts no arguments; returns markAllSiteNotificationsRead data through a backend request, carrying authentication headers and applying the operation server-side.
  * refs: none
+ * I/O types: `none -> Promise<void>`.
  */
 export async function markAllSiteNotificationsRead(): Promise<void> {
   const token = getAuthToken();
@@ -2755,8 +3173,9 @@ export async function markAllSiteNotificationsRead(): Promise<void> {
 /**
  * Fetch admin notifications data for client consumers.
  *
- * Accepts no arguments; returns fetchAdminNotifications data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/admin/notifications'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `none -> Promise<Notification[]>`.
  */
 export async function fetchAdminNotifications(): Promise<Notification[]> {
   const token = getAuthToken();
@@ -2773,6 +3192,7 @@ export async function fetchAdminNotifications(): Promise<Notification[]> {
  *
  * Accepts input; returns createAdminNotification data through a backend request, carrying authentication headers and applying the operation server-side.
  * refs: none
+ * I/O types: `input: NotificationInput -> Promise<Notification>`.
  */
 export async function createAdminNotification(input: NotificationInput): Promise<Notification> {
   const token = getAuthToken();
@@ -2790,6 +3210,7 @@ export async function createAdminNotification(input: NotificationInput): Promise
  *
  * Accepts id, input; returns updateAdminNotification data through a backend request, carrying authentication headers and applying the operation server-side.
  * refs: none
+ * I/O types: `id: number; input: Partial<NotificationInput> -> Promise<Notification>`.
  */
 export async function updateAdminNotification(id: number, input: Partial<NotificationInput>): Promise<Notification> {
   const token = getAuthToken();
@@ -2807,6 +3228,7 @@ export async function updateAdminNotification(id: number, input: Partial<Notific
  *
  * Accepts id; returns deleteAdminNotification data through a backend request, carrying authentication headers and applying the operation server-side.
  * refs: none
+ * I/O types: `id: number -> Promise<void>`.
  */
 export async function deleteAdminNotification(id: number): Promise<void> {
   const token = getAuthToken();
@@ -2820,8 +3242,9 @@ export async function deleteAdminNotification(id: number): Promise<void> {
 /**
  * Fetch admin activity banner data for client consumers.
  *
- * Accepts no arguments; returns fetchAdminActivityBanner data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/admin/activity-banner'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `none -> Promise<ActivityBanner>`.
  */
 export async function fetchAdminActivityBanner(): Promise<ActivityBanner> {
   const token = getAuthToken();
@@ -2838,6 +3261,7 @@ export async function fetchAdminActivityBanner(): Promise<ActivityBanner> {
  *
  * Accepts input; returns updateAdminActivityBanner data through a backend request, carrying authentication headers and applying the operation server-side.
  * refs: none
+ * I/O types: `input: ActivityBanner -> Promise<ActivityBanner>`.
  */
 export async function updateAdminActivityBanner(input: ActivityBanner): Promise<ActivityBanner> {
   const token = getAuthToken();
@@ -2856,8 +3280,9 @@ export async function updateAdminActivityBanner(input: ActivityBanner): Promise<
 /**
  * Fetch changelog preview data for client consumers.
  *
- * Accepts no arguments; returns fetchChangelogPreview data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/meta/changelog?preview=true'` through the shared API transport. Return `null` on a caught request failure.
+ * I/O types: `none -> Promise<ChangelogEntry | null>`.
  */
 export async function fetchChangelogPreview(): Promise<ChangelogEntry | null> {
   try {
@@ -2871,8 +3296,9 @@ export async function fetchChangelogPreview(): Promise<ChangelogEntry | null> {
 /**
  * Fetch changelog data for client consumers.
  *
- * Accepts query filters; returns fetchChangelog data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/meta/changelog${query.toString() ? '?${query.toString()}' : ''}'` through the shared API transport. Return `{ data: [], total: 0, page: 1, perPage: 10, totalPages: 1 }` on a caught request failure.
+ * I/O types: `params?: { page?: number; perPage?: number } -> Promise<ChangelogPage>`.
  */
 export async function fetchChangelog(params?: { page?: number; perPage?: number }): Promise<ChangelogPage> {
   const query = new URLSearchParams();
@@ -2895,8 +3321,9 @@ export async function fetchChangelog(params?: { page?: number; perPage?: number 
 /**
  * Fetch admin changelog data for client consumers.
  *
- * Accepts no arguments; returns fetchAdminChangelog data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/admin/changelog'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `none -> Promise<ChangelogEntry[]>`.
  */
 export async function fetchAdminChangelog(): Promise<ChangelogEntry[]> {
   const token = getAuthToken();
@@ -2912,6 +3339,7 @@ export async function fetchAdminChangelog(): Promise<ChangelogEntry[]> {
  *
  * Accepts id, input; returns updateAdminChangelog data through a backend request, carrying authentication headers and applying the operation server-side.
  * refs: none
+ * I/O types: `id: number; input: AdminChangelogInput -> Promise<ChangelogEntry>`.
  */
 export async function updateAdminChangelog(id: number, input: AdminChangelogInput): Promise<ChangelogEntry> {
   const token = getAuthToken();
@@ -2974,8 +3402,9 @@ function mapSiteVersionComponent(raw: any): SiteVersionComponent {
 /**
  * Fetch site version data for client consumers.
  *
- * Accepts no arguments; returns fetchSiteVersion data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/meta/version'` through the shared API transport. Return `null` on a caught request failure.
+ * I/O types: `none -> Promise<SiteVersion | null>`.
  */
 export async function fetchSiteVersion(): Promise<SiteVersion | null> {
   try {
@@ -2994,6 +3423,10 @@ export async function fetchSiteVersion(): Promise<SiteVersion | null> {
 
 // ── Champions ──
 
+/**
+ * Represent raw champion-overview data before client normalization.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export type ChampionOverviewRaw = {
   champions?: Array<{
     id: number; name: string; roles?: string; title?: string; health?: number; speed?: number; image_path?: string | null;
@@ -3009,6 +3442,7 @@ let championsOverviewInFlight: { key: string; promise: Promise<Champion[]> } | n
  *
  * Accepts raw; returns mapChampionsOverview data from local computation without network, authentication, cache, or persistence effects.
  * refs: none
+ * I/O types: `raw: ChampionOverviewRaw -> Champion[]`.
  */
 export function mapChampionsOverview(raw: ChampionOverviewRaw): Champion[] {
   const catalog = raw.champions ?? [];
@@ -3042,6 +3476,10 @@ export function mapChampionsOverview(raw: ChampionOverviewRaw): Champion[] {
   });
 }
 
+/**
+ * Select the public match population scope.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export type PublicStatsScope =
   | 'ranked'
   | 'casual'
@@ -3055,8 +3493,9 @@ export type PublicStatsScope =
 /**
  * Fetch champions data for client consumers.
  *
- * Accepts query filters; returns fetchChampions data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/champions/overview?scope=${encodeURIComponent(statsScope)}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `params?: { limit?: string; offset?: string; tier?: string; region?: string; patch?: string; scope?: PublicStatsScope; } -> Promise<Champion[]>`.
  */
 export async function fetchChampions(params?: {
   limit?: string;
@@ -3087,8 +3526,9 @@ export async function fetchChampions(params?: {
 /**
  * Fetch top winrate data for client consumers.
  *
- * Accepts no arguments; returns fetchTopWinrate data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '${API_BASE}${withStoredLobbyTier('/champions/top-winrate')}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `none -> Promise<TopWinrateEntry[]>`.
  */
 export async function fetchTopWinrate(): Promise<TopWinrateEntry[]> {
   const res = await fetch(`${API_BASE}${withStoredLobbyTier('/champions/top-winrate')}`);
@@ -3100,8 +3540,9 @@ export async function fetchTopWinrate(): Promise<TopWinrateEntry[]> {
 /**
  * Fetch champion counters data for client consumers.
  *
- * Accepts id; returns fetchChampionCounters data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/champions/${id}/counters'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `id: number -> Promise<CounterStats>`.
  */
 export async function fetchChampionCounters(id: number): Promise<CounterStats> {
   const raw = await fetchJson<{
@@ -3133,6 +3574,7 @@ export async function fetchChampionCounters(id: number): Promise<CounterStats> {
  * Fetch a player profile with optional queue and champion rating context.
  * Accepts string and numeric identifiers and returns normalized profile data.
  * refs: none
+ * I/O types: `id: string; queueId?: number; championId?: number -> Promise<PlayerProfile & { level?: number | null; kbmRank?: number | null; queueElo?: number | null; championElo?: number | null; globalWins?: number | null; globalLosses?: number | null; globalWinRate?: number | null; cheater?: boolean; exploiter?: boolean; susCount?: number }>`.
  */
 export async function fetchPlayerProfile(id: string, queueId?: number, championId?: number): Promise<PlayerProfile & { level?: number | null; kbmRank?: number | null; queueElo?: number | null; championElo?: number | null; globalWins?: number | null; globalLosses?: number | null; globalWinRate?: number | null; cheater?: boolean; exploiter?: boolean; susCount?: number }> {
   type RawChampion = { champion_name: string; champion_id: number; wins: number; total_plays?: number; matches_played?: number; losses?: number; win_rate?: number | null; mu?: number | string | null };
@@ -3144,6 +3586,7 @@ export async function fetchPlayerProfile(id: string, queueId?: number, championI
     cheater?: boolean | null; exploiter?: boolean | null; sus_count?: number | string | null;
     win_rate?: number | string | null; total_plays?: number | string | null;
     top_champions?: RawChampion[] | null;
+    derived_rates?: { kpm?: number | string | null; deaths_per_minute?: number | string | null } | null;
   };
   type QueueRating = { queue_id?: number | string; mu?: number | string | null };
   type ProfileResponse = RawPlayer | { player: RawPlayer; championRatings?: RawChampion[] | null; queueRatings?: QueueRating[] | null };
@@ -3192,6 +3635,10 @@ export async function fetchPlayerProfile(id: string, queueId?: number, championI
     totalWins,
     winRate: reportedWinRate ?? (totalMatches > 0 ? (totalWins / totalMatches) * 100 : null),
     totalPlays: numberOrNull(player.total_plays) ?? totalMatches,
+    derivedRates: {
+      kpm: numberOrNull(player.derived_rates?.kpm),
+      deathsPerMinute: numberOrNull(player.derived_rates?.deaths_per_minute),
+    },
     topChampions: champions.map((c) => {
       const plays = numberOrNull(c.total_plays) ?? numberOrNull(c.matches_played) ?? 0;
       const wins = numberOrNull(c.wins) ?? 0;
@@ -3206,7 +3653,13 @@ export async function fetchPlayerProfile(id: string, queueId?: number, championI
   };
 }
 
+/**
+ * Describe nullable observed performance averages. I/O: metric object -> PlayerChampionCumulativeMetrics.
+ * refs: endpoints: GET /players/{id}/champions
+ */
 export interface PlayerChampionCumulativeMetrics {
+  kpm: number | null;
+  deaths_per_minute: number | null;
   dpm: number | null;
   wpm: number | null;
   apm: number | null;
@@ -3217,6 +3670,10 @@ export interface PlayerChampionCumulativeMetrics {
   egpm: number | null;
 }
 
+/**
+ * Summarize a player champion experience and performance.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface PlayerChampionStat {
   championId: number;
   championName: string;
@@ -3247,11 +3704,14 @@ export interface PlayerChampionStat {
 /**
  * Fetch player champion stats data for client consumers.
  *
- * Accepts playerId; returns fetchPlayerChampionStats data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/players/${playerId}/champions'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `playerId: string | number -> Promise<PlayerChampionStat[]>`.
  */
 export async function fetchPlayerChampionStats(playerId: string | number): Promise<PlayerChampionStat[]> {
   type RawCumulativeMetrics = {
+    kpm?: number | string | null;
+    deaths_per_minute?: number | string | null;
     dpm?: number | string | null;
     wpm?: number | string | null;
     apm?: number | string | null;
@@ -3328,6 +3788,8 @@ export async function fetchPlayerChampionStats(playerId: string | number): Promi
       rankedMatchesPlayed: numberOrZero(stat.ranked_matches_played),
       rankedWinRate: numberOrNull(stat.ranked_win_rate),
       cumulativeMetrics: {
+        kpm: numberOrNull(metrics.kpm),
+        deaths_per_minute: numberOrNull(metrics.deaths_per_minute),
         dpm: numberOrNull(metrics.dpm ?? stat.avg_dpm),
         wpm: numberOrNull(metrics.wpm ?? stat.avg_wpm),
         apm: numberOrNull(metrics.apm ?? stat.avg_apm),
@@ -3338,6 +3800,8 @@ export async function fetchPlayerChampionStats(playerId: string | number): Promi
         egpm: numberOrNull(metrics.egpm ?? stat.avg_egpm),
       },
       globalMetrics: {
+        kpm: numberOrNull(globalMetrics.kpm),
+        deaths_per_minute: numberOrNull(globalMetrics.deaths_per_minute),
         dpm: numberOrNull(globalMetrics.dpm),
         wpm: numberOrNull(globalMetrics.wpm),
         apm: numberOrNull(globalMetrics.apm),
@@ -3356,6 +3820,10 @@ export async function fetchPlayerChampionStats(playerId: string | number): Promi
   });
 }
 
+/**
+ * Describe the outcome of requesting player champion-stat refresh.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface PlayerChampionStatsRefreshResponse {
   refreshed: boolean;
   freshness: {
@@ -3368,11 +3836,16 @@ export interface PlayerChampionStatsRefreshResponse {
  *
  * Accepts playerId; returns refreshPlayerChampionStats data through a backend request, carrying authentication headers and applying the operation server-side.
  * refs: none
+ * I/O types: `playerId: string | number -> Promise<PlayerChampionStatsRefreshResponse>`.
  */
 export async function refreshPlayerChampionStats(playerId: string | number): Promise<PlayerChampionStatsRefreshResponse> {
   return fetchJson<PlayerChampionStatsRefreshResponse>(`/players/${playerId}/champions/refresh`, { method: "POST" });
 }
 
+/**
+ * Summarize item performance for a breakdown dimension.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface ItemDimensionStat {
   slot?: number;
   level?: number;
@@ -3383,6 +3856,10 @@ export interface ItemDimensionStat {
   pickRate?: number;
 }
 
+/**
+ * Combine item totals with dimension breakdowns.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface ItemDetailStats {
   itemId: number;
   itemName: string;
@@ -3399,8 +3876,9 @@ export interface ItemDetailStats {
 /**
  * Fetch player search data for client consumers.
  *
- * Accepts query; returns fetchPlayerSearch data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/players/search?q=${encodeURIComponent(query)}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `query: string -> Promise<PlayerSearchResult[]>`.
  */
 export async function fetchPlayerSearch(query: string): Promise<PlayerSearchResult[]> {
   const raw = await fetchJson<Array<{
@@ -3420,9 +3898,21 @@ export async function fetchPlayerSearch(query: string): Promise<PlayerSearchResu
   }));
 }
 
+/**
+ * Select a universal-search entity category.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export type UniversalSearchType = "player" | "match" | "champion" | "item" | "card" | "talent";
+/**
+ * Describe a remote target eligible for universal search.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export type UniversalSearchRemoteTarget = "player-id" | "player-name" | "match-id";
 
+/**
+ * Describe a navigable universal-search result.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface UniversalSearchResult {
   type: UniversalSearchType;
   id: string;
@@ -3433,6 +3923,10 @@ export interface UniversalSearchResult {
   meta?: Record<string, unknown>;
 }
 
+/**
+ * Group universal-search results and response metadata.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface UniversalSearchResponse {
   query: string;
   total: number;
@@ -3451,8 +3945,9 @@ export interface UniversalSearchResponse {
 /**
  * Fetch universal search data for client consumers.
  *
- * Accepts queryText, limit; returns fetchUniversalSearch data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/search/universal?${query.toString()}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `queryText: string; limit: number; options?: { remote?: boolean; remoteTarget?: UniversalSearchRemoteTarget; refresh?: boolean } -> Promise<UniversalSearchResponse>`.
  */
 export async function fetchUniversalSearch(
   queryText: string,
@@ -3472,8 +3967,9 @@ export async function fetchUniversalSearch(
 /**
  * Fetch player matches data for client consumers.
  *
- * Accepts id; returns fetchPlayerMatches data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/players/${id}/matches${query.toString() ? '?${query.toString()}' : ''}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `id: string; params?: { limit?: string; offset?: string } -> Promise<MatchRecord[]>`.
  */
 export async function fetchPlayerMatches(id: string, params?: { limit?: string; offset?: string }): Promise<MatchRecord[]> {
   const query = new URLSearchParams();
@@ -3525,6 +4021,10 @@ export async function fetchPlayerMatches(id: string, params?: { limit?: string; 
   }));
 }
 
+/**
+ * Describe the freshness and refresh state of player loadout data.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface PlayerLoadoutFreshness {
   ttlSeconds: number;
   refreshedAt: string | null;
@@ -3535,6 +4035,10 @@ export interface PlayerLoadoutFreshness {
   manualRefreshRemainingSeconds: number;
 }
 
+/**
+ * Describe a named player champion loadout and its card selections.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface PlayerLoadout {
   id: number;
   deckId: number | null;
@@ -3549,6 +4053,10 @@ export interface PlayerLoadout {
   updatedAt: string;
 }
 
+/**
+ * Combine player loadouts with their freshness state.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface PlayerLoadoutsResponse {
   loadouts: PlayerLoadout[];
   freshness: PlayerLoadoutFreshness;
@@ -3587,8 +4095,9 @@ function mapPlayerLoadout(raw: any): PlayerLoadout {
 /**
  * Fetch player loadouts data for client consumers.
  *
- * Accepts playerId; returns fetchPlayerLoadouts data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/players/${playerId}/loadouts'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `playerId: string | number -> Promise<PlayerLoadoutsResponse>`.
  */
 export async function fetchPlayerLoadouts(playerId: string | number): Promise<PlayerLoadoutsResponse> {
   const raw = await fetchJson<any>(`/players/${playerId}/loadouts`);
@@ -3605,6 +4114,7 @@ export async function fetchPlayerLoadouts(playerId: string | number): Promise<Pl
  *
  * Accepts playerId; returns refreshPlayerLoadouts data through a backend request, carrying authentication headers and applying the operation server-side.
  * refs: none
+ * I/O types: `playerId: string | number -> Promise<PlayerLoadoutsResponse>`.
  */
 export async function refreshPlayerLoadouts(playerId: string | number): Promise<PlayerLoadoutsResponse> {
   const raw = await fetchJson<any>(`/players/${playerId}/loadouts/refresh`, { method: "POST" });
@@ -3619,8 +4129,9 @@ export async function refreshPlayerLoadouts(playerId: string | number): Promise<
 /**
  * Fetch player loadout deck data for client consumers.
  *
- * Accepts playerId, loadoutId; returns fetchPlayerLoadoutDeck data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/players/${playerId}/loadouts/decks/${loadoutId}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `playerId: string | number; loadoutId: string | number -> Promise<{ loadout: PlayerLoadout; freshness: PlayerLoadoutFreshness }>`.
  */
 export async function fetchPlayerLoadoutDeck(playerId: string | number, loadoutId: string | number): Promise<{ loadout: PlayerLoadout; freshness: PlayerLoadoutFreshness }> {
   const raw = await fetchJson<any>(`/players/${playerId}/loadouts/decks/${loadoutId}`);
@@ -3632,8 +4143,9 @@ export async function fetchPlayerLoadoutDeck(playerId: string | number, loadoutI
 /**
  * Fetch leaderboard data for client consumers.
  *
- * Accepts query filters; returns fetchLeaderboard data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/stats/leaderboard${query.toString() ? '?${query.toString()}' : ''}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `params?: { tier?: string; region?: string } -> Promise<LeaderboardEntry[]>`.
  */
 export async function fetchLeaderboard(params?: { tier?: string; region?: string }): Promise<LeaderboardEntry[]> {
   const query = new URLSearchParams();
@@ -3661,6 +4173,10 @@ export async function fetchLeaderboard(params?: { tier?: string; region?: string
   }));
 }
 
+/**
+ * Describe a champion row used by aggregate statistics.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface StatsChampion {
   championId: number;
   championName: string;
@@ -3706,8 +4222,9 @@ function mapStatsChampionRows(raw: Array<{
 /**
  * Fetch stats champions data for client consumers.
  *
- * Accepts query filters; returns fetchStatsChampions data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/stats/champions${query.toString() ? '?${query.toString()}' : ''}'` through the shared API transport. Return `[]` on a caught request failure.
+ * I/O types: `params?: { sort?: string; limit?: number; scope?: PublicStatsScope; queueId?: number } -> Promise<StatsChampion[]>`.
  */
 export async function fetchStatsChampions(params?: { sort?: string; limit?: number; scope?: PublicStatsScope; queueId?: number }): Promise<StatsChampion[]> {
   const query = new URLSearchParams();
@@ -3733,8 +4250,9 @@ export async function fetchStatsChampions(params?: { sort?: string; limit?: numb
 /**
  * Fetch regions data for client consumers.
  *
- * Accepts no arguments; returns fetchRegions data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/stats/regions'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `none -> Promise<RegionStat[]>`.
  */
 export async function fetchRegions(): Promise<RegionStat[]> {
   const raw = await fetchJson<Array<{
@@ -3763,8 +4281,9 @@ export async function fetchRegions(): Promise<RegionStat[]> {
 /**
  * Fetch platforms data for client consumers.
  *
- * Accepts query filters; returns fetchPlatforms data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/stats/platforms'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `options?: { timeoutMs?: number } -> Promise<Array<{ platform: string; championId: number; championName: string; totalMatches: number; winRate: number; avgDpm: number; avgHpm: number; }>>`.
  */
 export async function fetchPlatforms(options?: { timeoutMs?: number }): Promise<Array<{
   platform: string;
@@ -3799,8 +4318,9 @@ export async function fetchPlatforms(options?: { timeoutMs?: number }): Promise<
 /**
  * Fetch loadouts data for client consumers.
  *
- * Accepts query filters; returns fetchLoadouts data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/stats/loadouts${query.toString() ? '?${query.toString()}' : ''}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `params?: { championId?: string; minPlays?: string; limit?: string; offset?: string; } -> Promise<LoadoutStat[]>`.
  */
 export async function fetchLoadouts(params?: {
   championId?: string;
@@ -3867,8 +4387,9 @@ export async function fetchLoadouts(params?: {
 /**
  * Fetch items data for client consumers.
  *
- * Accepts query filters; returns fetchItems data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/stats/items${query.toString() ? '?${query.toString()}' : ''}'` through the shared API transport. Return `[]` on a caught request failure.
+ * I/O types: `params?: { mode?: 'ranked' | 'casual'; limit?: number; championId?: number; role?: 'Frontline' | 'Damage' | 'Flank' | 'Support'; summary?: boolean; tierMin?: number; tierMax?: number; scope?: string; queueId?: number } -> Promise<ItemStat[]>`.
  */
 export async function fetchItems(params?: { mode?: 'ranked' | 'casual'; limit?: number; championId?: number; role?: 'Frontline' | 'Damage' | 'Flank' | 'Support'; summary?: boolean; tierMin?: number; tierMax?: number; scope?: string; queueId?: number }): Promise<ItemStat[]> {
   const query = new URLSearchParams();
@@ -3917,8 +4438,9 @@ export async function fetchItems(params?: { mode?: 'ranked' | 'casual'; limit?: 
 /**
  * Fetch item detail data for client consumers.
  *
- * Accepts itemId, mode; returns fetchItemDetail data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/stats/items/${itemId}?${query.toString()}'` through the shared API transport. Return `null` on a caught request failure.
+ * I/O types: `itemId: number; mode: 'ranked'; params?: { championId?: number; role?: 'Frontline' | 'Damage' | 'Flank' | 'Support'; tierMin?: number; tierMax?: number } -> Promise<ItemDetailStats | null>`.
  */
 export async function fetchItemDetail(itemId: number, mode: 'ranked' = 'ranked', params?: { championId?: number; role?: 'Frontline' | 'Damage' | 'Flank' | 'Support'; tierMin?: number; tierMax?: number }): Promise<ItemDetailStats | null> {
   try {
@@ -3957,8 +4479,9 @@ export async function fetchItemDetail(itemId: number, mode: 'ranked' = 'ranked',
 /**
  * Fetch map stats data for client consumers.
  *
- * Accepts PublicStatsScope; returns fetchMapStats data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/stats/maps${query.toString() ? '?${query.toString()}' : ''}'` through the shared API transport. Return `[]` on a caught request failure.
+ * I/O types: `params?: { queueId?: number; limit?: number; scope?: PublicStatsScope } -> Promise<MapStat[]>`.
  */
 export async function fetchMapStats(params?: { queueId?: number; limit?: number; scope?: PublicStatsScope }): Promise<MapStat[]> {
   const query = new URLSearchParams();
@@ -3986,8 +4509,9 @@ export async function fetchMapStats(params?: { queueId?: number; limit?: number;
 /**
  * Fetch champion map stats data for client consumers.
  *
- * Accepts championId; returns fetchChampionMapStats data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/stats/champions/${championId}/maps${query.toString() ? '?${query.toString()}' : ''}'` through the shared API transport. Return `[]` on a caught request failure.
+ * I/O types: `championId: number; params?: { scope?: PublicStatsScope; queueId?: number } -> Promise<ChampionMapStat[]>`.
  */
 export async function fetchChampionMapStats(championId: number, params?: { scope?: PublicStatsScope; queueId?: number }): Promise<ChampionMapStat[]> {
   try {
@@ -4018,8 +4542,9 @@ export async function fetchChampionMapStats(championId: number, params?: { scope
 /**
  * Fetch map detail data for client consumers.
  *
- * Accepts mapName, PublicStatsScope; returns fetchMapDetail data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/stats/maps/${encodeURIComponent(mapName)}${query.toString() ? '?${query.toString()}' : ''}'` through the shared API transport. Return `null` on a caught request failure.
+ * I/O types: `mapName: string; params?: { scope?: PublicStatsScope } -> Promise<MapDetailStats | null>`.
  */
 export async function fetchMapDetail(mapName: string, params?: { scope?: PublicStatsScope }): Promise<MapDetailStats | null> {
   try {
@@ -4043,8 +4568,9 @@ export async function fetchMapDetail(mapName: string, params?: { scope?: PublicS
 /**
  * Fetch map category comparison data for client consumers.
  *
- * Accepts mapName, section, MapComparisonSection; returns fetchMapCategoryComparison data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/stats/maps/${encodeURIComponent(mapName)}/comparison?section=${encodeURIComponent(section)}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `mapName: string; section: MapComparisonSection -> Promise<MapCategoryComparisonStat[]>`.
  */
 export async function fetchMapCategoryComparison(
   mapName: string,
@@ -4064,6 +4590,10 @@ export async function fetchMapCategoryComparison(
   }));
 }
 
+/**
+ * Summarize observed skin selection and match performance.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface SkinStat {
   skinId: number;
   skinName: string;
@@ -4078,8 +4608,9 @@ export interface SkinStat {
 /**
  * Fetch skin stats data for client consumers.
  *
- * Accepts query filters; returns fetchSkinStats data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/stats/skins${query.toString() ? '?${query.toString()}' : ''}'` through the shared API transport. Return `[]` on a caught request failure.
+ * I/O types: `params?: { championId?: number; tierMin?: number; tierMax?: number; limit?: number; scope?: PublicStatsScope; queueId?: number } -> Promise<SkinStat[]>`.
  */
 export async function fetchSkinStats(params?: { championId?: number; tierMin?: number; tierMax?: number; limit?: number; scope?: PublicStatsScope; queueId?: number }): Promise<SkinStat[]> {
   const query = new URLSearchParams();
@@ -4106,6 +4637,10 @@ export async function fetchSkinStats(params?: { championId?: number; tierMin?: n
   }
 }
 
+/**
+ * Describe a skin reference requiring repair or missing authoritative detail.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface BrokenSkinStat {
   skinId: number;
   skinName: string;
@@ -4121,8 +4656,9 @@ export interface BrokenSkinStat {
 /**
  * Fetch broken skin stats data for client consumers.
  *
- * Accepts query filters; returns fetchBrokenSkinStats data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/stats/broken-skins${query.toString() ? '?${query.toString()}' : ''}'` through the shared API transport. Return `[]` on a caught request failure.
+ * I/O types: `params?: { championId?: number; tierMin?: number; tierMax?: number; scope?: PublicStatsScope; queueId?: number } -> Promise<BrokenSkinStat[]>`.
  */
 export async function fetchBrokenSkinStats(params?: { championId?: number; tierMin?: number; tierMax?: number; scope?: PublicStatsScope; queueId?: number }): Promise<BrokenSkinStat[]> {
   const query = new URLSearchParams();
@@ -4149,6 +4685,10 @@ export async function fetchBrokenSkinStats(params?: { championId?: number; tierM
   }
 }
 
+/**
+ * Summarize team role composition and win/loss totals.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface MatchCompositionStat {
   composition: string;
   frontline: number;
@@ -4164,8 +4704,9 @@ export interface MatchCompositionStat {
 /**
  * Fetch match compositions data for client consumers.
  *
- * Accepts query filters; returns fetchMatchCompositions data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/matches/compositions${query.toString() ? '?${query.toString()}' : ''}'` through the shared API transport. Return `[]` on a caught request failure.
+ * I/O types: `params?: { tierMin?: number; tierMax?: number; limit?: number; sortBy?: 'count' | 'winrate' | 'wins' | 'frontline' | 'damage' | 'flank' | 'support'; order?: 'asc' | 'desc' } -> Promise<MatchCompositionStat[]>`.
  */
 export async function fetchMatchCompositions(params?: { tierMin?: number; tierMax?: number; limit?: number; sortBy?: 'count' | 'winrate' | 'wins' | 'frontline' | 'damage' | 'flank' | 'support'; order?: 'asc' | 'desc' }): Promise<MatchCompositionStat[]> {
   const query = new URLSearchParams();
@@ -4192,6 +4733,10 @@ export async function fetchMatchCompositions(params?: { tierMin?: number; tierMa
   }
 }
 
+/**
+ * Rank players for one champion using rating and match totals.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface ChampionLeaderboardEntry {
   rank: number;
   playerId: number;
@@ -4206,8 +4751,9 @@ export interface ChampionLeaderboardEntry {
 /**
  * Fetch champion leaderboard data for client consumers.
  *
- * Accepts championId, limit; returns fetchChampionLeaderboard data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/stats/champion-leaderboard?${query.toString()}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `championId: number; limit: number -> Promise<ChampionLeaderboardEntry[]>`.
  */
 export async function fetchChampionLeaderboard(championId: number, limit = 25): Promise<ChampionLeaderboardEntry[]> {
   const query = new URLSearchParams({ championId: String(championId), limit: String(limit) });
@@ -4223,6 +4769,10 @@ export async function fetchChampionLeaderboard(championId: number, limit = 25): 
 
 // ── Champion Talent Stats ──
 
+/**
+ * Summarize one champion talent play count and win/loss record.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface ChampionTalentStat {
   talentId: number;
   talentName: string;
@@ -4232,6 +4782,10 @@ export interface ChampionTalentStat {
   winRate: number;
 }
 
+/**
+ * Combine talent statistics with coverage and disconnected-player counts.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface ChampionTalentStatsResponse {
   totalMatches: number;
   talentCoveredMatches: number;
@@ -4248,6 +4802,7 @@ export interface ChampionTalentStatsResponse {
  *
  * Accepts raw; returns normalizeChampionTalentStatsResponse data from local computation without network, authentication, cache, or persistence effects.
  * refs: none
+ * I/O types: `raw: any -> ChampionTalentStatsResponse`.
  */
 export function normalizeChampionTalentStatsResponse(raw: any): ChampionTalentStatsResponse {
   return {
@@ -4272,8 +4827,9 @@ export function normalizeChampionTalentStatsResponse(raw: any): ChampionTalentSt
 /**
  * Fetch champion talent stats data for client consumers.
  *
- * Accepts championId, mode; returns fetchChampionTalentStats data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/stats/talents/${championId}?${query.toString()}'` through the shared API transport. Return `{ totalMatches: 0, talentCoveredMatches: 0, disconnectedPlayers: 0, disconnectedWins: 0, disconnectedLosses: 0, disconnectedWinRate: null, talentCoverageRate: null, talents: [] }` on a caught request failure.
+ * I/O types: `championId: number; mode: 'ranked'; tier?: { tierMin?: number; tierMax?: number } -> Promise<ChampionTalentStatsResponse>`.
  */
 export async function fetchChampionTalentStats(
   championId: number,
@@ -4310,12 +4866,20 @@ export async function fetchChampionTalentStats(
 
 // ── Champion Card Stats ──
 
+/**
+ * Summarize card selections and win rate at one card level.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface ChampionCardLevelStat {
   level: number;
   plays: number;
   winRate: number;
 }
 
+/**
+ * Summarize card performance with level breakdowns.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface ChampionCardStat {
   cardId: number;
   cardName: string;
@@ -4326,6 +4890,10 @@ export interface ChampionCardStat {
   levels: ChampionCardLevelStat[];
 }
 
+/**
+ * Combine champion card statistics with total match coverage.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface ChampionCardStatsResponse {
   totalMatches: number;
   cards: ChampionCardStat[];
@@ -4343,6 +4911,7 @@ function statNameKeyForCards(value: string | null | undefined): string {
  *
  * Accepts raw; returns normalizeChampionCardStatsResponse data from local computation without network, authentication, cache, or persistence effects.
  * refs: none
+ * I/O types: `raw: any -> ChampionCardStatsResponse`.
  */
 export function normalizeChampionCardStatsResponse(raw: any): ChampionCardStatsResponse {
   const mappedCards = (Array.isArray(raw?.cards) ? raw.cards : []).map((card: any) => ({
@@ -4373,6 +4942,10 @@ export function normalizeChampionCardStatsResponse(raw: any): ChampionCardStatsR
     }),
   };
 }
+/**
+ * Summarize card performance for one selected talent.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface ChampionCardTalentStat {
   talentId: number;
   talentName: string;
@@ -4382,6 +4955,10 @@ export interface ChampionCardTalentStat {
   winRate: number;
 }
 
+/**
+ * Describe ranked card detail with champion, optional talent filter, and level/talent breakdowns.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface ChampionCardDetailResponse {
   cardId: number;
   cardName: string;
@@ -4401,8 +4978,9 @@ export interface ChampionCardDetailResponse {
 /**
  * Fetch champion card detail data for client consumers.
  *
- * Accepts championId, cardId, mode; returns fetchChampionCardDetail data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/stats/cards/${championId}/${cardId}?mode=${mode}${talentId ? '&talentId=${talentId}' : ''}'` through the shared API transport. Return `null` on a caught request failure.
+ * I/O types: `championId: number; cardId: number; mode: 'ranked'; talentId?: number | null -> Promise<ChampionCardDetailResponse | null>`.
  */
 export async function fetchChampionCardDetail(
   championId: number,
@@ -4445,8 +5023,9 @@ export async function fetchChampionCardDetail(
 /**
  * Fetch champion card stats data for client consumers.
  *
- * Accepts championId, mode; returns fetchChampionCardStats data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/stats/cards/${championId}?${query.toString()}'` through the shared API transport. Return `{ totalMatches: 0, cards: [] }` on a caught request failure.
+ * I/O types: `championId: number; mode: 'ranked'; talentId?: number | null; tier?: { tierMin?: number; tierMax?: number } -> Promise<ChampionCardStatsResponse>`.
  */
 export async function fetchChampionCardStats(
   championId: number,
@@ -4485,8 +5064,9 @@ export async function fetchChampionCardStats(
 /**
  * Fetch hourly match counts data for client consumers.
  *
- * Accepts query filters; returns fetchHourlyMatchCounts data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/stats/hourly-match-counts${query.toString() ? '?${query.toString()}' : ''}'` through the shared API transport. Return `[]` on a caught request failure.
+ * I/O types: `params?: { date?: string; hour?: number; queueId?: number } -> Promise<HourlyMatchCount[]>`.
  */
 export async function fetchHourlyMatchCounts(params?: { date?: string; hour?: number; queueId?: number }): Promise<HourlyMatchCount[]> {
   const query = new URLSearchParams();
@@ -4533,8 +5113,9 @@ export async function fetchHourlyMatchCounts(params?: { date?: string; hour?: nu
 /**
  * Fetch tiers data for client consumers.
  *
- * Accepts query filters; returns fetchTiers data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/stats/tiers${query.toString() ? '?${query.toString()}' : ''}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `params?: { source?: 'profiles' | 'matches' } -> Promise<TierStat[]>`.
  */
 export async function fetchTiers(params?: { source?: 'profiles' | 'matches' }): Promise<TierStat[]> {
   const query = new URLSearchParams();
@@ -4556,6 +5137,10 @@ export async function fetchTiers(params?: { source?: 'profiles' | 'matches' }): 
   }));
 }
 
+/**
+ * Combine performance metrics with champion, item, map, and tier statistics.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface StatsOverview {
   metrics: PerformanceMetricsResponse;
   champions: Champion[];
@@ -4608,6 +5193,10 @@ function mapBaselineRows(rows: any[]): BaselineEntry[] {
   }));
 }
 
+/**
+ * Combine the statistics overview with baselines, skins, compositions, and broken-skin records.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface StatsPageData {
   overview: StatsOverview;
   baselines: BaselineEntry[];
@@ -4619,8 +5208,9 @@ export interface StatsPageData {
 /**
  * Fetch stats page data data for client consumers.
  *
- * Accepts query filters; returns fetchStatsPageData data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/stats/page-data${query.toString() ? '?${query.toString()}' : ''}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `params?: { tierMin?: number; tierMax?: number } -> Promise<StatsPageData>`.
  */
 export async function fetchStatsPageData(params?: { tierMin?: number; tierMax?: number }): Promise<StatsPageData> {
   const query = new URLSearchParams();
@@ -4647,8 +5237,9 @@ export async function fetchStatsPageData(params?: { tierMin?: number; tierMax?: 
 /**
  * Fetch stats overview data for client consumers.
  *
- * Accepts no arguments; returns fetchStatsOverview data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/stats/overview'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `none -> Promise<StatsOverview>`.
  */
 export async function fetchStatsOverview(): Promise<StatsOverview> {
   const cacheKey = getStoredLobbyTierFilter();
@@ -4695,8 +5286,9 @@ export async function fetchStatsOverview(): Promise<StatsOverview> {
 /**
  * Fetch tier summary data for client consumers.
  *
- * Accepts no arguments; returns fetchTierSummary data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/stats/tiers/summary'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `none -> Promise<TierSummary>`.
  */
 export async function fetchTierSummary(): Promise<TierSummary> {
   const raw = await fetchJson<{
@@ -4725,8 +5317,9 @@ export async function fetchTierSummary(): Promise<TierSummary> {
 /**
  * Fetch talents data for client consumers.
  *
- * Accepts no arguments; returns fetchTalents data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/stats/talents'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `none -> Promise<Array<{ talentId: number; talentName: string; championId: number; championName: string; totalPlays: number; winRate: number; }>>`.
  */
 export async function fetchTalents(): Promise<Array<{
   talentId: number;
@@ -4759,6 +5352,10 @@ export async function fetchTalents(): Promise<Array<{
 
 // ── Auth Types ──
 
+/**
+ * Describe the signed-in account, access flags, profile, and linked player.
+ * refs: doc: documents/02-technical/security/auth.md
+ */
 export interface AuthUser {
   id: number;
   username: string;
@@ -4775,6 +5372,10 @@ export interface AuthUser {
   linkedPlayerName: string | null;
 }
 
+/**
+ * Pair the signed-in user with its session token and expiry.
+ * refs: doc: documents/02-technical/security/auth.md
+ */
 export interface AuthSession {
   user: AuthUser;
   token: string;
@@ -4789,8 +5390,9 @@ const USER_KEY = "pc_auth_user";
 /**
  * Read or change the local auth token state.
  *
- * Accepts no arguments; returns getAuthToken data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Compute get auth token.
+ * I/O types: `none -> string | null`.
  */
 export function getAuthToken(): string | null {
   if (typeof window === "undefined") return null;
@@ -4805,6 +5407,7 @@ export function getAuthToken(): string | null {
  *
  * Accepts no arguments; returns hasCookieAuthSession data through a backend request, carrying authentication headers and applying the operation server-side.
  * refs: none
+ * I/O types: `none -> boolean`.
  */
 export function hasCookieAuthSession(): boolean {
   return typeof document !== "undefined"
@@ -4814,8 +5417,9 @@ export function hasCookieAuthSession(): boolean {
 /**
  * Read or change the local auth user state.
  *
- * Accepts no arguments; returns getAuthUser data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Compute get auth user.
+ * I/O types: `none -> AuthUser | null`.
  */
 export function getAuthUser(): AuthUser | null {
   if (typeof window === "undefined") return null;
@@ -4837,6 +5441,7 @@ export function getAuthUser(): AuthUser | null {
  *
  * Accepts user; returns cacheAuthUser data while reading or changing local auth state without a backend request.
  * refs: none
+ * I/O types: `user: AuthUser -> void`.
  */
 export function cacheAuthUser(user: AuthUser): void {
   if (typeof window !== "undefined") localStorage.setItem(USER_KEY, JSON.stringify(user));
@@ -4854,6 +5459,7 @@ function setAuthSession(session: AuthSession) {
  *
  * Accepts no arguments; returns clearAuth data while reading or changing local auth state without a backend request.
  * refs: none
+ * I/O types: `none -> void`.
  */
 export function clearAuth() {
   if (typeof window !== "undefined") {
@@ -4869,6 +5475,7 @@ export function clearAuth() {
  *
  * Accepts username, email, password; returns register data through a backend request, carrying authentication headers and applying the operation server-side.
  * refs: none
+ * I/O types: `username: string; email: string; password: string -> Promise<AuthSession>`.
  */
 export async function register(username: string, email: string, password: string): Promise<AuthSession> {
   const raw = await fetchJson<{ user: { id: number; username: string; email?: string | null; avatar_url?: string | null; bio?: string | null; is_admin?: boolean; is_approved?: boolean; created_at?: string; last_login?: string | null; time_zone?: string | null }; token: string; expires_at?: string }>("/auth/register", {
@@ -4890,6 +5497,7 @@ export async function register(username: string, email: string, password: string
  *
  * Accepts username, password; returns login data through a backend request, carrying authentication headers and applying the operation server-side.
  * refs: none
+ * I/O types: `username: string; password: string -> Promise<AuthSession>`.
  */
 export async function login(username: string, password: string): Promise<AuthSession> {
   const raw = await fetchJson<{ user: { id: number; username: string; email?: string | null; avatar_url?: string | null; bio?: string | null; is_admin?: boolean; is_approved?: boolean; created_at?: string; last_login?: string | null; time_zone?: string | null; linked_player_id?: number | null; linked_player_name?: string | null }; token: string; expires_at?: string }>("/auth/login", {
@@ -4920,6 +5528,7 @@ function submitOidcLogout(): void {
  *
  * Accepts no arguments; returns logout data through a backend request, carrying authentication headers and applying the operation server-side.
  * refs: none
+ * I/O types: `none -> Promise<void>`.
  */
 export async function logout(): Promise<void> {
   const hasOidcCookieSession = typeof document !== "undefined"
@@ -4954,8 +5563,9 @@ export async function logout(): Promise<void> {
 /**
  * Fetch me data for client consumers.
  *
- * Accepts the requested identifier; returns getMe data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/auth/me'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `_userId?: number -> Promise<AuthUser>`.
  */
 export async function getMe(_userId?: number): Promise<AuthUser> {
   const token = getAuthToken();
@@ -4998,8 +5608,9 @@ export async function getMe(_userId?: number): Promise<AuthUser> {
 /**
  * Fetch user profile data for client consumers.
  *
- * Accepts userId; returns getUserProfile data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/players/${userId}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `userId: number -> Promise<AuthUser>`.
  */
 export async function getUserProfile(userId: number): Promise<AuthUser> {
   const raw = await fetchJson<{
@@ -5037,11 +5648,16 @@ export async function getUserProfile(userId: number): Promise<AuthUser> {
  *
  * Accepts token; returns accountAuthHeaders data while reading or changing local auth state without a backend request.
  * refs: none
+ * I/O types: `token: string | null -> Record<string, string>`.
  */
 export function accountAuthHeaders(token: string | null = getAuthToken()): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+/**
+ * Combine account profile data with an optional linked-player summary.
+ * refs: doc: documents/02-technical/security/auth.md
+ */
 export interface AccountDetails {
   user: AuthUser & { linked_player_id: number | null };
   linkedPlayer: {
@@ -5056,6 +5672,10 @@ export interface AccountDetails {
   } | null;
 }
 
+/**
+ * Describe a community-comment notification and its read timestamp.
+ * refs: doc: documents/02-technical/security/auth.md
+ */
 export interface AccountNotification {
   id: number;
   type: "community_comment";
@@ -5071,8 +5691,9 @@ export interface AccountNotification {
 /**
  * Fetch account notifications data for client consumers.
  *
- * Accepts limit; returns getAccountNotifications data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/auth/account/notifications?limit=${limit}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `limit: number -> Promise<AccountNotification[]>`.
  */
 export async function getAccountNotifications(limit = 25): Promise<AccountNotification[]> {
   const rows = await fetchJson<Array<{
@@ -5098,6 +5719,7 @@ export async function getAccountNotifications(limit = 25): Promise<AccountNotifi
  *
  * Accepts notificationId; returns markAccountNotificationRead data through a backend request, carrying authentication headers and applying the operation server-side.
  * refs: none
+ * I/O types: `notificationId: number -> Promise<void>`.
  */
 export async function markAccountNotificationRead(notificationId: number): Promise<void> {
   await fetchJson(`/auth/account/notifications/${notificationId}/read`, {
@@ -5109,8 +5731,9 @@ export async function markAccountNotificationRead(notificationId: number): Promi
 /**
  * Fetch account details data for client consumers.
  *
- * Accepts no arguments; returns getAccountDetails data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET "/auth/account"` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `none -> Promise<AccountDetails>`.
  */
 export async function getAccountDetails(): Promise<AccountDetails> {
   const raw = await fetchJson<{
@@ -5144,6 +5767,7 @@ export async function getAccountDetails(): Promise<AccountDetails> {
  *
  * Accepts playerId; returns linkPlayerId data through a backend request, carrying authentication headers and applying the operation server-side.
  * refs: none
+ * I/O types: `playerId: number -> Promise<{ message: string; player: { id: number; name: string } }>`.
  */
 export async function linkPlayerId(playerId: number): Promise<{ message: string; player: { id: number; name: string } }> {
   return fetchJson<{ message: string; player: { id: number; name: string } }>("/auth/account/player-link", {
@@ -5153,6 +5777,10 @@ export async function linkPlayerId(playerId: number): Promise<{ message: string;
   });
 }
 
+/**
+ * Carry the selected player, verification code, and expiry.
+ * refs: doc: documents/02-technical/security/auth.md
+ */
 export interface PlayerLinkVerification {
   player: { id: number; name: string };
   code: string;
@@ -5162,8 +5790,9 @@ export interface PlayerLinkVerification {
 /**
  * Fetch player link verification data for client consumers.
  *
- * Accepts no arguments; returns getPlayerLinkVerification data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET "/auth/account/player-link/verification"` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `none -> Promise<PlayerLinkVerification | null>`.
  */
 export async function getPlayerLinkVerification(): Promise<PlayerLinkVerification | null> {
   const raw = await fetchJson<{ verification: PlayerLinkVerification | null }>("/auth/account/player-link/verification", {
@@ -5177,6 +5806,7 @@ export async function getPlayerLinkVerification(): Promise<PlayerLinkVerificatio
  *
  * Accepts playerId; returns startPlayerLinkVerification data through a backend request, carrying authentication headers and applying the operation server-side.
  * refs: none
+ * I/O types: `playerId: number -> Promise<PlayerLinkVerification>`.
  */
 export async function startPlayerLinkVerification(playerId: number): Promise<PlayerLinkVerification> {
   const raw = await fetchJson<{ verification: PlayerLinkVerification }>("/auth/account/player-link/verification", {
@@ -5192,6 +5822,7 @@ export async function startPlayerLinkVerification(playerId: number): Promise<Pla
  *
  * Accepts no arguments; returns verifyPlayerLink data through a backend request, carrying authentication headers and applying the operation server-side.
  * refs: none
+ * I/O types: `none -> Promise<{ message: string; player: { id: number; name: string } }>`.
  */
 export async function verifyPlayerLink(): Promise<{ message: string; player: { id: number; name: string } }> {
   return fetchJson<{ message: string; player: { id: number; name: string } }>("/auth/account/player-link/verification/check", {
@@ -5206,6 +5837,7 @@ export async function verifyPlayerLink(): Promise<{ message: string; player: { i
  *
  * Accepts no arguments; returns cancelPlayerLinkVerification data through a backend request, carrying authentication headers and applying the operation server-side.
  * refs: none
+ * I/O types: `none -> Promise<void>`.
  */
 export async function cancelPlayerLinkVerification(): Promise<void> {
   await fetchJson<{ message: string }>("/auth/account/player-link/verification", {
@@ -5219,6 +5851,7 @@ export async function cancelPlayerLinkVerification(): Promise<void> {
  *
  * Accepts no arguments; returns unlinkPlayer data through a backend request, carrying authentication headers and applying the operation server-side.
  * refs: none
+ * I/O types: `none -> Promise<{ message: string }>`.
  */
 export async function unlinkPlayer(): Promise<{ message: string }> {
   return fetchJson<{ message: string }>("/auth/account/player-link", {
@@ -5233,6 +5866,7 @@ export async function unlinkPlayer(): Promise<{ message: string }> {
  *
  * Accepts data; returns updateProfile data through a backend request, carrying authentication headers and applying the operation server-side.
  * refs: none
+ * I/O types: `data: { avatar_url?: string | null; bio?: string | null; time_zone?: string } -> Promise<{ message: string }>`.
  */
 export async function updateProfile(data: { avatar_url?: string | null; bio?: string | null; time_zone?: string }): Promise<{ message: string }> {
   return fetchJson<{ message: string }>("/auth/profile", {
@@ -5244,8 +5878,16 @@ export async function updateProfile(data: { avatar_url?: string | null; bio?: st
 
 // ── Player Report ──
 
+/**
+ * Select the supported community player-report action.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export type ReportType = 'suspicious' | 'cheater' | 'exploiter' | 'approve' | 'weirdo' | 'hall_of_fame' | 'dropper' | 'afk_wintrade';
 
+/**
+ * Supply a player-report action and optional reason.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface ReportOptions {
   type: ReportType;
   reason?: string;
@@ -5256,6 +5898,7 @@ export interface ReportOptions {
  *
  * Accepts playerId, opts; returns reportPlayer data through a backend request, carrying authentication headers and applying the operation server-side.
  * refs: none
+ * I/O types: `playerId: string | number; opts: ReportOptions -> Promise<{ success: boolean; message: string }>`.
  */
 export async function reportPlayer(playerId: string | number, opts: ReportOptions): Promise<{ success: boolean; message: string }> {
   const token = getAuthToken();
@@ -5275,6 +5918,7 @@ export async function reportPlayer(playerId: string | number, opts: ReportOption
  *
  * Accepts privateId, opts; returns reportPrivateAccount data through a backend request, carrying authentication headers and applying the operation server-side.
  * refs: none
+ * I/O types: `privateId: string | number; opts: ReportOptions -> Promise<{ success: boolean; message: string }>`.
  */
 export async function reportPrivateAccount(privateId: string | number, opts: ReportOptions): Promise<{ success: boolean; message: string }> {
   if (opts.type !== 'suspicious' && opts.type !== 'cheater') {
@@ -5291,6 +5935,10 @@ export async function reportPrivateAccount(privateId: string | number, opts: Rep
   });
 }
 
+/**
+ * Select a moderation tag that can be cleared.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export type ClearablePlayerTag = 'cheater' | 'exploiter' | 'suspicious' | 'dropper' | 'afk_wintrade' | 'alt_account';
 
 /**
@@ -5298,6 +5946,7 @@ export type ClearablePlayerTag = 'cheater' | 'exploiter' | 'suspicious' | 'dropp
  *
  * Accepts playerId, tag; returns clearPlayerTag data while reading or changing local auth state without a backend request.
  * refs: none
+ * I/O types: `playerId: string | number; tag: ClearablePlayerTag -> Promise<{ success: boolean; message: string; cleared: boolean }>`.
  */
 export async function clearPlayerTag(playerId: string | number, tag: ClearablePlayerTag): Promise<{ success: boolean; message: string; cleared: boolean }> {
   const token = getAuthToken();
@@ -5311,6 +5960,10 @@ export async function clearPlayerTag(playerId: string | number, tag: ClearablePl
 
 // ── Community Types ──
 
+/**
+ * Describe a community post, author, linked build/tier list, and engagement totals.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface Post {
   id: number;
   userId: number;
@@ -5325,6 +5978,10 @@ export interface Post {
   createdAt: string;
 }
 
+/**
+ * Describe a community reply with its author, parent, and creation time.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface Comment {
   id: number;
   postId: number;
@@ -5336,11 +5993,19 @@ export interface Comment {
   createdAt: string;
 }
 
+/**
+ * Combine a community post with its comments.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface PostDetail {
   post: Post;
   comments: Comment[];
 }
 
+/**
+ * Describe a live Twitch channel, viewer count, language, tags, and links.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface TwitchStream {
   userLogin: string;
   userName: string;
@@ -5352,6 +6017,10 @@ export interface TwitchStream {
   url: string;
 }
 
+/**
+ * Pair Twitch configuration availability with live stream results.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface TwitchStreamsResponse {
   configured: boolean;
   streams: TwitchStream[];
@@ -5416,8 +6085,9 @@ function mapComment(raw: RawComment): Comment {
 /**
  * Fetch posts data for client consumers.
  *
- * Accepts query filters; returns fetchPosts data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/community/posts${query.toString() ? '?${query.toString()}' : ''}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `params?: { userId?: string; buildId?: string; limit?: string; offset?: string } -> Promise<Post[]>`.
  */
 export async function fetchPosts(params?: { userId?: string; buildId?: string; limit?: string; offset?: string }): Promise<Post[]> {
   const query = new URLSearchParams();
@@ -5435,8 +6105,9 @@ export async function fetchPosts(params?: { userId?: string; buildId?: string; l
 /**
  * Fetch twitch streams data for client consumers.
  *
- * Accepts no arguments; returns fetchTwitchStreams data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/community/streams'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `none -> Promise<TwitchStreamsResponse>`.
  */
 export async function fetchTwitchStreams(): Promise<TwitchStreamsResponse> {
   const raw = await fetchJson<{
@@ -5467,6 +6138,7 @@ export async function fetchTwitchStreams(): Promise<TwitchStreamsResponse> {
  *
  * Accepts userId, title, content, buildId, token; returns createPost data through a backend request, carrying authentication headers and applying the operation server-side.
  * refs: none
+ * I/O types: `userId: number; title: string; content: string; buildId: number | null; token: string | null -> Promise<Post>`.
  */
 export async function createPost(userId: number, title: string, content: string, buildId: number | null, token: string | null): Promise<Post> {
   const raw = await fetchJson<RawPost>(`/community/posts`, {
@@ -5481,8 +6153,9 @@ export async function createPost(userId: number, title: string, content: string,
 /**
  * Fetch post detail data for client consumers.
  *
- * Accepts postId; returns getPostDetail data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/community/posts/${postId}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `postId: number -> Promise<PostDetail>`.
  */
 export async function getPostDetail(postId: number): Promise<PostDetail> {
   const raw = await fetchJson<{
@@ -5501,6 +6174,7 @@ export async function getPostDetail(postId: number): Promise<PostDetail> {
  *
  * Accepts postId, title, content, token; returns updatePost data through a backend request, carrying authentication headers and applying the operation server-side.
  * refs: none
+ * I/O types: `postId: number; title: string; content: string; token: string | null -> Promise<Post>`.
  */
 export async function updatePost(postId: number, title: string, content: string, token: string | null): Promise<Post> {
   const raw = await fetchJson<RawPost>(`/community/posts/${postId}`, {
@@ -5517,6 +6191,7 @@ export async function updatePost(postId: number, title: string, content: string,
  *
  * Accepts postId, token; returns deletePost data through a backend request, carrying authentication headers and applying the operation server-side.
  * refs: none
+ * I/O types: `postId: number; token: string | null -> Promise<void>`.
  */
 export async function deletePost(postId: number, token: string | null): Promise<void> {
   await fetchJson<{ deleted: boolean; id: number }>(`/community/posts/${postId}`, {
@@ -5530,6 +6205,7 @@ export async function deletePost(postId: number, token: string | null): Promise<
  *
  * Accepts postId, userId, content, parentId, token; returns addComment data through a backend request, carrying authentication headers and applying the operation server-side.
  * refs: none
+ * I/O types: `postId: number; userId: number; content: string; parentId: number | null; token: string | null -> Promise<Comment>`.
  */
 export async function addComment(postId: number, userId: number, content: string, parentId: number | null, token: string | null): Promise<Comment> {
   const raw = await fetchJson<RawComment>(`/community/posts/${postId}/comments`, {
@@ -5546,6 +6222,7 @@ export async function addComment(postId: number, userId: number, content: string
  *
  * Accepts commentId, content, token; returns updateComment data through a backend request, carrying authentication headers and applying the operation server-side.
  * refs: none
+ * I/O types: `commentId: number; content: string; token: string | null -> Promise<Comment>`.
  */
 export async function updateComment(commentId: number, content: string, token: string | null): Promise<Comment> {
   const raw = await fetchJson<RawComment>(`/community/comments/${commentId}`, {
@@ -5562,6 +6239,7 @@ export async function updateComment(commentId: number, content: string, token: s
  *
  * Accepts commentId, token; returns deleteComment data through a backend request, carrying authentication headers and applying the operation server-side.
  * refs: none
+ * I/O types: `commentId: number; token: string | null -> Promise<void>`.
  */
 export async function deleteComment(commentId: number, token: string | null): Promise<void> {
   await fetchJson<{ deleted: boolean; id: number }>(`/community/comments/${commentId}`, {
@@ -5575,6 +6253,7 @@ export async function deleteComment(commentId: number, token: string | null): Pr
  *
  * Accepts postId, userId, token; returns togglePostLike data through a backend request, carrying authentication headers and applying the operation server-side.
  * refs: none
+ * I/O types: `postId: number; userId: number; token: string | null -> Promise<number>`.
  */
 export async function togglePostLike(postId: number, userId: number, token: string | null): Promise<number> {
   const raw = await fetchJson<{ likes: number }>(`/community/posts/${postId}/like`, {
@@ -5587,11 +6266,19 @@ export async function togglePostLike(postId: number, userId: number, token: stri
 }
 // ── Build Types ──
 
+/**
+ * Pair a selected loadout card ID with its level.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface BuildCardSelection {
   cardId: number;
   level: number;
 }
 
+/**
+ * Describe a community champion build with item/card/talent choices and publication metadata.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface Build {
   id: number;
   userId: number;
@@ -5671,8 +6358,9 @@ function mapBuild(raw: RawBuild): Build {
 /**
  * Fetch builds data for client consumers.
  *
- * Accepts query filters; returns fetchBuilds data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/builds${query.toString() ? '?${query.toString()}' : ''}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `params?: { championId?: string; visibility?: string; limit?: string; offset?: string } -> Promise<Build[]>`.
  */
 export async function fetchBuilds(params?: { championId?: string; visibility?: string; limit?: string; offset?: string }): Promise<Build[]> {
   const query = new URLSearchParams();
@@ -5692,6 +6380,7 @@ export async function fetchBuilds(params?: { championId?: string; visibility?: s
  *
  * Accepts userId, championId, name, items, cards, talents, notes, visibility; returns createBuild data through a backend request, carrying authentication headers and applying the operation server-side.
  * refs: none
+ * I/O types: `userId: number; championId: number; name: string; items: number[]; cards: BuildCardSelection[]; talents: number[]; notes: string | null; visibility: string; token: string | null -> Promise<Build>`.
  */
 export async function createBuild(
   userId: number,
@@ -5726,8 +6415,9 @@ export async function createBuild(
 /**
  * Fetch build detail data for client consumers.
  *
- * Accepts buildId; returns getBuildDetail data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/builds/${buildId}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `buildId: number -> Promise<Build>`.
  */
 export async function getBuildDetail(buildId: number): Promise<Build> {
   const raw = await fetchJson<RawBuild>(`/builds/${buildId}`);
@@ -5739,6 +6429,7 @@ export async function getBuildDetail(buildId: number): Promise<Build> {
  *
  * Accepts buildId, userId, token; returns toggleBuildLike data through a backend request, carrying authentication headers and applying the operation server-side.
  * refs: none
+ * I/O types: `buildId: number; userId: number; token: string | null -> Promise<number>`.
  */
 export async function toggleBuildLike(buildId: number, userId: number, token: string | null): Promise<number> {
   void userId;
@@ -5751,6 +6442,10 @@ export async function toggleBuildLike(buildId: number, userId: number, token: st
 }
 // ── Chart Types ──
 
+/**
+ * Record daily kills, deaths, and assists.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface KdaHistoryEntry {
   date: string;
   kills: number;
@@ -5758,12 +6453,20 @@ export interface KdaHistoryEntry {
   assists: number;
 }
 
+/**
+ * Compare a player daily damage-per-minute with the population average.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface DpmHistoryEntry {
   date: string;
   playerDpm: number;
   avgDpm: number;
 }
 
+/**
+ * Record a dated rating value.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface GlickoHistoryEntry {
   date: string;
   rating: number;
@@ -5794,8 +6497,9 @@ function playerChartPath(playerId: string, days: number, limit: number) {
 /**
  * Fetch kda history data for client consumers.
  *
- * Accepts playerId, days, limit; returns fetchKdaHistory data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET playerChartPath(playerId, days, limit)` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `playerId: string; days: number; limit: number -> Promise<KdaHistoryEntry[]>`.
  */
 export async function fetchKdaHistory(playerId: string, days: number = 30, limit: number = 50): Promise<KdaHistoryEntry[]> {
   const raw = await fetchJson<PlayerChartRow[]>(playerChartPath(playerId, days, limit));
@@ -5811,8 +6515,9 @@ export async function fetchKdaHistory(playerId: string, days: number = 30, limit
 /**
  * Fetch dpm history data for client consumers.
  *
- * Accepts playerId, days, limit; returns fetchDpmHistory data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET playerChartPath(playerId, days, limit)` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `playerId: string; days: number; limit: number -> Promise<DpmHistoryEntry[]>`.
  */
 export async function fetchDpmHistory(playerId: string, days: number = 30, limit: number = 50): Promise<DpmHistoryEntry[]> {
   const raw = await fetchJson<PlayerChartRow[]>(playerChartPath(playerId, days, limit));
@@ -5829,8 +6534,9 @@ export async function fetchDpmHistory(playerId: string, days: number = 30, limit
 /**
  * Fetch glicko history data for client consumers.
  *
- * Accepts playerId, days, limit; returns fetchGlickoHistory data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET playerChartPath(playerId, days, limit)` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `playerId: string; days: number; limit: number -> Promise<GlickoHistoryEntry[]>`.
  */
 export async function fetchGlickoHistory(playerId: string, days: number = 30, limit: number = 50): Promise<GlickoHistoryEntry[]> {
   const raw = await fetchJson<PlayerChartRow[]>(playerChartPath(playerId, days, limit));
@@ -5918,6 +6624,10 @@ export interface MatchPlayerDetail {
   profile_snapshot?: MatchPlayerProfileSnapshot | null;
 }
 
+/**
+ * Preserve nullable profile/rating fields and moderation flags captured for a match participant.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface MatchPlayerProfileSnapshot {
   captured_at: string | null;
   source: 'post_match_ingest' | 'match_player' | string;
@@ -5941,12 +6651,20 @@ export interface MatchPlayerProfileSnapshot {
   verified: boolean;
 }
 
+/**
+ * Identify a banned champion and optional ban slot/display name.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface MatchBan {
   ban_slot?: number;
   champion_id: number;
   champion_name?: string;
 }
 
+/**
+ * Describe match identity, queue, scores, storage provenance, and visibility/quality flags.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface MatchData {
   match_id: number;
   entry_datetime: string;
@@ -5999,8 +6717,16 @@ export interface MatchDetailWithBans {
   projectionVersion?: number;
 }
 
+/**
+ * Select hot or cold match storage.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export type MatchStorageStatus = "hot" | "cold";
 
+/**
+ * Describe match storage tier, source, historical state, and optional retrieval time.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface MatchDataStatus {
   tier: MatchStorageStatus;
   source: string;
@@ -6014,6 +6740,7 @@ export interface MatchDataStatus {
  *
  * Accepts detail; returns deriveMissingMatchCreditRates data from local computation without network, authentication, cache, or persistence effects.
  * refs: none
+ * I/O types: `detail: MatchDetailWithBans -> MatchDetailWithBans`.
  */
 export function deriveMissingMatchCreditRates(detail: MatchDetailWithBans): MatchDetailWithBans {
   return {
@@ -6037,6 +6764,10 @@ export function deriveMissingMatchCreditRates(detail: MatchDetailWithBans): Matc
   };
 }
 
+/**
+ * Describe a participant factual item, card, and talent selections with reference assets.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface MatchFactPlayer {
   player_id: number;
   player_name: string;
@@ -6071,11 +6802,19 @@ export interface MatchFactPlayer {
   }>;
 }
 
+/**
+ * Group factual participant selections under one match ID.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface MatchFact {
   match_id: number;
   players: MatchFactPlayer[];
 }
 
+/**
+ * Record player rating and uncertainty before and after one match.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface RatingSnapshot {
   player_id: number;
   player_name: string;
@@ -6088,6 +6827,10 @@ export interface RatingSnapshot {
   mu_change: number | null;
 }
 
+/**
+ * Describe a match-directory result with player combat and queue context.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface MatchSearchResult {
   match_id: number;
   entry_datetime: string;
@@ -6106,6 +6849,10 @@ export interface MatchSearchResult {
 
 // ── Matches ──
 
+/**
+ * Summarize daily/hourly match activity and optional queue/weekly coverage.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface MatchHourlyStats {
   totalToday: number;
   rankedToday: number;
@@ -6124,6 +6871,10 @@ export interface MatchHourlyStats {
   }>;
 }
 
+/**
+ * Summarize 24-hour queue activity with regional and hourly breakdowns.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface MatchQueueActivity {
   queueId: number;
   queueName: string;
@@ -6136,13 +6887,18 @@ export interface MatchQueueActivity {
 /**
  * Fetch match hourly stats data for client consumers.
  *
- * Accepts no arguments; returns fetchMatchHourlyStats data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/matches/hourly-stats'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `none -> Promise<MatchHourlyStats>`.
  */
 export async function fetchMatchHourlyStats(): Promise<MatchHourlyStats> {
   return fetchJson<MatchHourlyStats>('/matches/hourly-stats');
 }
 
+/**
+ * Bound observed public/private player counts and unresolved coverage within a time window.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface PresenceStats {
   window_hours: number;
   observed_at: string;
@@ -6174,6 +6930,10 @@ export interface PresenceStats {
   };
 }
 
+/**
+ * Summarize hourly observed players by region and platform for an optional queue.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface PresenceHourlyStats {
   window_hours: number;
   observed_at: string;
@@ -6198,8 +6958,9 @@ export interface PresenceHourlyStats {
 /**
  * Fetch presence stats data for client consumers.
  *
- * Accepts no arguments; returns fetchPresenceStats data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/stats/presence?view=activity-v4'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `none -> Promise<PresenceStats>`.
  */
 export async function fetchPresenceStats(): Promise<PresenceStats> {
   // Version the activity view so a deployment cannot briefly receive the
@@ -6210,8 +6971,9 @@ export async function fetchPresenceStats(): Promise<PresenceStats> {
 /**
  * Fetch presence hourly stats data for client consumers.
  *
- * Accepts query filters; returns fetchPresenceHourlyStats data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/stats/presence/hourly?${query}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `queueId?: number -> Promise<PresenceHourlyStats>`.
  */
 export async function fetchPresenceHourlyStats(queueId?: number): Promise<PresenceHourlyStats> {
   const query = new URLSearchParams({ view: 'activity-v3' });
@@ -6219,6 +6981,10 @@ export async function fetchPresenceHourlyStats(queueId?: number): Promise<Presen
   return fetchJson<PresenceHourlyStats>(`/stats/presence/hourly?${query}`, { timeoutMs: 35_000, retries: 0 });
 }
 
+/**
+ * Page match identifiers supporting observed player presence.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface PresenceMatchIdsResponse {
   window_hours: number;
   observed_at: string;
@@ -6243,8 +7009,9 @@ export interface PresenceMatchIdsResponse {
 /**
  * Fetch presence match ids data for client consumers.
  *
- * Accepts options; returns fetchPresenceMatchIds data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/stats/presence/match-ids?${params.toString()}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `options: { queueId?: number; page?: number; perPage?: number; } -> Promise<PresenceMatchIdsResponse>`.
  */
 export async function fetchPresenceMatchIds(options: {
   queueId?: number;
@@ -6260,8 +7027,16 @@ export async function fetchPresenceMatchIds(options: {
   return fetchJson<PresenceMatchIdsResponse>(`/stats/presence/match-ids?${params.toString()}`);
 }
 
+/**
+ * Select presence-player ordering by matches or name.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export type PresencePlayerSort = 'matches' | 'alphabetical';
 
+/**
+ * Page observed players with participation coverage and unresolved-player bounds.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface PresencePlayersResponse {
   window_hours: number;
   observed_at: string;
@@ -6292,8 +7067,9 @@ export interface PresencePlayersResponse {
 /**
  * Fetch presence players data for client consumers.
  *
- * Accepts options; returns fetchPresencePlayers data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/stats/presence/players?${params.toString()}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `options: { queueId?: number; page?: number; perPage?: number; sort?: PresencePlayerSort; } -> Promise<PresencePlayersResponse>`.
  */
 export async function fetchPresencePlayers(options: {
   queueId?: number;
@@ -6311,6 +7087,10 @@ export async function fetchPresencePlayers(options: {
   return fetchJson<PresencePlayersResponse>(`/stats/presence/players?${params.toString()}`);
 }
 
+/**
+ * Describe an observed participant identity, platform, kind, and evidence source.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface PresenceDetailPlayer {
   player_id: string;
   player_name: string;
@@ -6319,6 +7099,10 @@ export interface PresenceDetailPlayer {
   source: string;
 }
 
+/**
+ * Describe one presence-supporting match with lifecycle quality and observed participants.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface PresenceDetailMatch {
   match_id: string;
   queue_id: number;
@@ -6333,6 +7117,10 @@ export interface PresenceDetailMatch {
   players: PresenceDetailPlayer[];
 }
 
+/**
+ * Page presence-supporting match details using an optional next cursor.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface PresenceDetailsResponse {
   window_hours: number;
   observed_at: string;
@@ -6351,8 +7139,9 @@ export interface PresenceDetailsResponse {
 /**
  * Fetch presence details data for client consumers.
  *
- * Accepts options; returns fetchPresenceDetails data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/stats/presence/details?${params.toString()}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `options: { queueId?: number; cursor?: string; limit?: number; } -> Promise<PresenceDetailsResponse>`.
  */
 export async function fetchPresenceDetails(options: {
   queueId?: number;
@@ -6365,6 +7154,10 @@ export async function fetchPresenceDetails(options: {
   return fetchJson<PresenceDetailsResponse>(`/stats/presence/details?${params.toString()}`);
 }
 
+/**
+ * Summarize dropped-match lifecycle counts and failure categories for one hour.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface DroppedMatchHourlySummary {
   hour: number;
   tracked: number;
@@ -6382,6 +7175,10 @@ export interface DroppedMatchHourlySummary {
   next_retry_at: string | null;
 }
 
+/**
+ * Group hourly dropped-match summaries for a requested date and queue.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface DroppedMatchSummaryResponse {
   date: string;
   queue_id: number;
@@ -6392,8 +7189,9 @@ export interface DroppedMatchSummaryResponse {
 /**
  * Fetch dropped match summary data for client consumers.
  *
- * Accepts params, date; returns fetchDroppedMatchSummary data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/matches/dropped/summary?${query.toString()}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `params: { date: string; queueId?: number; refresh?: boolean } -> Promise<DroppedMatchSummaryResponse>`.
  */
 export async function fetchDroppedMatchSummary(params: { date: string; queueId?: number; refresh?: boolean }): Promise<DroppedMatchSummaryResponse> {
   const query = new URLSearchParams({
@@ -6404,6 +7202,10 @@ export async function fetchDroppedMatchSummary(params: { date: string; queueId?:
   return fetchJson<DroppedMatchSummaryResponse>(`/matches/dropped/summary?${query.toString()}`);
 }
 
+/**
+ * Describe a dropped match lifecycle status, category, retry count, and observations.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface DroppedMatchRecord {
   match_id: string;
   date: string;
@@ -6417,6 +7219,10 @@ export interface DroppedMatchRecord {
   updated_at: string | null;
 }
 
+/**
+ * Combine filtered dropped-match records and hourly summaries.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface DroppedMatchListResponse {
   date: string;
   queue_id: number;
@@ -6432,8 +7238,9 @@ export interface DroppedMatchListResponse {
 /**
  * Fetch dropped matches data for client consumers.
  *
- * Accepts params, date; returns fetchDroppedMatches data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/matches/dropped?${query.toString()}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `params: { date: string; queueId?: number; status?: 'dropped' | 'open' | 'all' | 'pending' | 'staged' | 'complete' | 'resolved' | 'unrecoverable'; hour?: number; limit?: number; refresh?: boolean; } -> Promise<DroppedMatchListResponse>`.
  */
 export async function fetchDroppedMatches(params: {
   date: string;
@@ -6454,6 +7261,10 @@ export async function fetchDroppedMatches(params: {
   return fetchJson<DroppedMatchListResponse>(`/matches/dropped?${query.toString()}`);
 }
 
+/**
+ * Describe a nonranked dropped-match terminal outcome and recovery coverage.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface NonrankedDroppedMatchRecord {
   match_id: string;
   date: string;
@@ -6471,6 +7282,10 @@ export interface NonrankedDroppedMatchRecord {
   completed_at: string;
 }
 
+/**
+ * Group filtered nonranked dropped matches with hourly scope summaries.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface NonrankedDroppedMatchResponse {
   date: string | null;
   scope: PublicStatsScope | null;
@@ -6490,8 +7305,9 @@ export interface NonrankedDroppedMatchResponse {
 /**
  * Fetch nonranked dropped matches data for client consumers.
  *
- * Accepts query filters; returns fetchNonrankedDroppedMatches data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/matches/dropped/nonranked?${query.toString()}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `params?: { date?: string; scope?: PublicStatsScope; hour?: number; limit?: number; offset?: number; } -> Promise<NonrankedDroppedMatchResponse>`.
  */
 export async function fetchNonrankedDroppedMatches(params?: {
   date?: string;
@@ -6512,8 +7328,9 @@ export async function fetchNonrankedDroppedMatches(params?: {
 /**
  * Fetch match detail data for client consumers.
  *
- * Accepts matchId; returns fetchMatchDetail data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/matches/${matchId}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `matchId: number -> Promise<MatchDetailWithBans | null>`.
  */
 export async function fetchMatchDetail(matchId: number): Promise<MatchDetailWithBans | null> {
   const raw = await fetchJson<{
@@ -6538,7 +7355,11 @@ export async function fetchMatchDetail(matchId: number): Promise<MatchDetailWith
   });
 }
 
-/** @deprecated Complete match reads include facts; retained for non-page callers. · refs: none */
+/**
+ * Request `GET '/matches/fact/${matchId}'` through the shared API transport. Return `null` on a caught request failure.
+ * @deprecated Complete match reads include facts; retained for non-page callers. · refs: none
+ * I/O types: `matchId: number -> Promise<MatchFact | null>`.
+ */
 export async function fetchMatchFact(matchId: number): Promise<MatchFact | null> {
   try {
     return await fetchJson<MatchFact>(`/matches/fact/${matchId}`);
@@ -6547,7 +7368,11 @@ export async function fetchMatchFact(matchId: number): Promise<MatchFact | null>
   }
 }
 
-/** @deprecated Complete match reads include rating snapshots; retained for non-page callers. · refs: none */
+/**
+ * Request `GET '/ratings/snapshots/${matchId}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * @deprecated Complete match reads include rating snapshots; retained for non-page callers. · refs: none
+ * I/O types: `matchId: number -> Promise<RatingSnapshot[]>`.
+ */
 export async function fetchMatchSnapshots(matchId: number): Promise<RatingSnapshot[]> {
   const raw = await fetchJson<Array<{
     player_id: number | string;
@@ -6597,14 +7422,19 @@ export async function fetchMatchSnapshots(matchId: number): Promise<RatingSnapsh
 /**
  * Fetch recent matches data for client consumers.
  *
- * Accepts query filters; returns fetchRecentMatches data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/matches/recent${limit ? '?limit=${limit}' : ''}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `limit?: number -> Promise<MatchData[]>`.
  */
 export async function fetchRecentMatches(limit?: number): Promise<MatchData[]> {
   const raw = await fetchJson<MatchData[]>(`/matches/recent${limit ? `?limit=${limit}` : ''}`);
   return raw;
 }
 
+/**
+ * Combine hourly match activity, recent matches, and dropped-match counts/IDs.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
 export interface MatchesOverview {
   hourly: MatchHourlyStats | null;
   recent: MatchData[];
@@ -6618,8 +7448,9 @@ const matchesOverviewInFlight = new Map<string, Promise<MatchesOverview>>();
 /**
  * Fetch matches overview data for client consumers.
  *
- * Accepts query filters; returns fetchMatchesOverview data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/matches/overview${query.toString() ? '?${query.toString()}' : ''}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `params?: { tierMin?: number; tierMax?: number; view?: 'activity-v2' | 'activity-v3'; } -> Promise<MatchesOverview>`.
  */
 export async function fetchMatchesOverview(params?: {
   tierMin?: number;
@@ -6656,8 +7487,9 @@ export async function fetchMatchesOverview(params?: {
 /**
  * Fetch match search data for client consumers.
  *
- * Accepts query filters; returns fetchMatchSearch data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/matches/search${query.toString() ? '?${query.toString()}' : ''}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `params?: { championId?: string; queueId?: string; region?: string; date?: string; hour?: string; timeZone?: string; from?: string; to?: string; page?: string; perPage?: string; } -> Promise<{ data: MatchSearchResult[]; total: number; page: { current: number; size: number; totalPages: number } }>`.
  */
 export async function fetchMatchSearch(params?: {
   championId?: string;
@@ -6704,8 +7536,9 @@ export async function fetchMatchSearch(params?: {
 /**
  * Fetch reference items data for client consumers.
  *
- * Accepts no arguments; returns fetchReferenceItems data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/reference/items'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `none -> Promise<Array<{ item_id: number; name: string; description?: string }>>`.
  */
 export async function fetchReferenceItems(): Promise<Array<{ item_id: number; name: string; description?: string }>> {
   const raw = await fetchJson<any[]>(`/reference/items`);
@@ -6715,8 +7548,9 @@ export async function fetchReferenceItems(): Promise<Array<{ item_id: number; na
 /**
  * Fetch reference talents data for client consumers.
  *
- * Accepts no arguments; returns fetchReferenceTalents data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/reference/talents'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `none -> Promise<Array<{ talent_id: number; name: string; champion_id: number }>>`.
  */
 export async function fetchReferenceTalents(): Promise<Array<{ talent_id: number; name: string; champion_id: number }>> {
   const raw = await fetchJson<any[]>(`/reference/talents`);
@@ -6726,8 +7560,9 @@ export async function fetchReferenceTalents(): Promise<Array<{ talent_id: number
 /**
  * Fetch reference cards data for client consumers.
  *
- * Accepts no arguments; returns fetchReferenceCards data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/reference/cards'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `none -> Promise<Array<{ card_id: number; name: string }>>`.
  */
 export async function fetchReferenceCards(): Promise<Array<{ card_id: number; name: string }>> {
   const raw = await fetchJson<any[]>(`/reference/cards`);
@@ -6737,8 +7572,9 @@ export async function fetchReferenceCards(): Promise<Array<{ card_id: number; na
 /**
  * Fetch reference queues data for client consumers.
  *
- * Accepts no arguments; returns fetchReferenceQueues data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/reference/queues'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `none -> Promise<Array<{ queue_id: number; name: string }>>`.
  */
 export async function fetchReferenceQueues(): Promise<Array<{ queue_id: number; name: string }>> {
   const raw = await fetchJson<any[]>(`/reference/queues`);
@@ -6748,8 +7584,9 @@ export async function fetchReferenceQueues(): Promise<Array<{ queue_id: number; 
 /**
  * Fetch reference regions data for client consumers.
  *
- * Accepts no arguments; returns fetchReferenceRegions data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/reference/regions'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `none -> Promise<Array<{ region?: string; region_code?: string; name?: string; region_name?: string }>>`.
  */
 export async function fetchReferenceRegions(): Promise<Array<{ region?: string; region_code?: string; name?: string; region_name?: string }>> {
   const raw = await fetchJson<any[]>(`/reference/regions`);
@@ -6759,8 +7596,9 @@ export async function fetchReferenceRegions(): Promise<Array<{ region?: string; 
 /**
  * Fetch reference maps data for client consumers.
  *
- * Accepts no arguments; returns fetchReferenceMaps data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/reference/maps'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `none -> Promise<Array<{ map_id: number; name: string }>>`.
  */
 export async function fetchReferenceMaps(): Promise<Array<{ map_id: number; name: string }>> {
   const raw = await fetchJson<any[]>(`/reference/maps`);
@@ -6770,8 +7608,9 @@ export async function fetchReferenceMaps(): Promise<Array<{ map_id: number; name
 /**
  * Fetch reference champions data for client consumers.
  *
- * Accepts no arguments; returns fetchReferenceChampions data after a backend request, using shared authentication and cache behavior.
  * refs: none
+ * Request `GET '/reference/champions'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `none -> Promise<Array<{ id: number; name: string }>>`.
  */
 export async function fetchReferenceChampions(): Promise<Array<{ id: number; name: string }>> {
   const raw = await fetchJson<any[]>(`/reference/champions`);

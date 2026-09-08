@@ -1,6 +1,5 @@
 /**
- * Define the api auth oidc callback route responsibility boundary.
- * Coordinates api auth oidc callback route data loading, authorization, and presentation.
+ * Exchange a single authorization code after matching the transaction cookie and consuming server-side state. Validate the ID token and nonce, exchange tokens with the backend, and set session and CSRF cookies before redirecting to the safe return path. Validation failures clear the transaction cookie and redirect to the login error page; uncaught transport/JSON errors reject the promise. Provider tokens stay server-side.
  * refs: none
  */
 import { NextRequest, NextResponse } from "next/server";
@@ -29,9 +28,9 @@ function one(url: URL, name: string): string | null {
 }
 
 /**
- * Handles the exported route operation using its declared request and response contract.
- * Returns the declared route value; request, cache, and navigation effects follow the implementation.
- * refs: none
+ * Exchange a single authorization code after matching the transaction cookie and consuming server-side state. Validate the ID token and nonce, exchange tokens with the backend, and set session and CSRF cookies before redirecting to the safe return path. Validation failures clear the transaction cookie and redirect to the login error page; uncaught transport/JSON errors reject the promise. Provider tokens stay server-side.
+ * refs: doc: documents/02-technical/security/auth.md
+ * I/O types: `request: NextRequest -> Promise<NextResponse<unknown>>`.
  */
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);

@@ -2,6 +2,11 @@
 import type { ReactNode } from "react";
 import ContextBackLink from "@/components/context-back-link";
 
+/**
+ * Render a page title, optional description, metadata, and action controls; include contextual back navigation only when both parent destination and label are present.
+ * I/O types: `{ parentHref, parentLabel, title, description, meta, actions, }: { parentHref?: string; parentLabel?: string; title: ReactNode; description?: ReactNode; meta?: ReactNode; actions?: ReactNode; } -> JSX.Element`.
+ * refs: none
+ */
 export default function PageHeader({
   parentHref,
   parentLabel,

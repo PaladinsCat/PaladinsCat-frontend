@@ -20,9 +20,10 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-/** useAuth applies the module-specific transformation to its declared inputs.
- * Contract: validates its inputs and returns the existing module result without mutating caller state.
+/**
+ * Read the authentication context; throw when called outside AuthProvider.
  * refs: none
+ * I/O types: `none -> AuthContextValue`.
  */
 export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext);
@@ -30,9 +31,10 @@ export function useAuth(): AuthContextValue {
   return ctx;
 }
 
-/** AuthProvider applies the module-specific transformation to its declared inputs.
- * Contract: validates its inputs and returns the existing module result without mutating caller state.
+/**
+ * Provide account state and login/logout/refresh actions to descendants. Start unauthenticated for SSR/hydration, restore cached display state after mount, and confirm it with getMe. Refresh on storage, focus, and visibility events; clear rejected sessions and remove listeners on unmount.
  * refs: none
+ * I/O types: `{ children }: { children: ReactNode } -> JSX.Element`.
  */
 export function AuthProvider({ children }: { children: ReactNode }) {
   // SSR-safe: start unauthenticated on the server and on the first client render

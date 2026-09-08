@@ -1,454 +1,164 @@
-/**
- * Define the stats metrics page route boundary.
- * Coordinates this module's route data flow and rendered output.
- * refs: none
+/** Game-wide performance summaries keep ranked and casual populations separate.
+ * refs: endpoints: GET /stats/performance-metrics · migrations: 169
  */
 "use client";
-import { useEffect, useMemo, useState, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { championSlug } from "@/lib/utils";
-import { getChampionIconSafe } from "@/lib/champion-icons";
-import {
-  fetchChampionPerformanceDistributions,
-  fetchPerformanceMetricDashboard,
-  type ChampionPerformanceDistribution,
-  type PerformanceMetricKey,
-  type PerformanceMetricSummary,
-} from "@/lib/api-client";
-import { ContentFade } from "@/components/async-state";
-import { RouteSkeleton } from "@/components/route-skeleton";
+import ChampionPerformanceComparison from "@/components/champion-performance-comparison";
+import PageHeader from "@/components/ui/page-header";
+import { SegmentedRouteLinks } from "@/components/ui/segmented-control";
+import { BarChartComponent } from "@/components/Chart";
+import { EmptyState, ErrorState, LoadingIndicator } from "@/components/async-state";
+import { fetchPerformanceMetricDashboard, type PerformanceMetricSummary } from "@/lib/api-client";
+import { stationaryChartSeries } from "@/lib/chart-colors";
 import { useLocalization } from "@/lib/localization-context";
-import type { TranslationKey } from "@/lib/localization/messages";
-import { useRouteSettledLoading } from "@/lib/route-transition-context";
-import { chartFillRed, chartFillGreen, chartFillAmber, chartFillSky, chartRed, chartGreen, chartAmber, roleSupport, roleSentinel, roleFillSentinel, roleFillSupport } from "@/lib/chart-colors";
+import { useLobbyTier } from "@/lib/lobby-tier-context";
+import { GAME_PERFORMANCE_METRICS, performanceSelection, type GamePerformanceMetric, type PerformanceScope } from "@/lib/performance-selection";
 
+const METRICS = {
+  dpm: { labelKey: "common.metrics.dpm", full: "common.metrics.damagePerMinute" },
+  hpm: { labelKey: "common.metrics.hpm", full: "common.metrics.healingPerMinute" },
+  gpm: { labelKey: "common.metrics.cpm", full: "common.metrics.creditsPerMinute" },
+  mpm: { labelKey: "common.metrics.spm", full: "common.metrics.shieldingPerMinute" },
+  kda: { labelKey: "common.metrics.kda", full: "common.metrics.kdaRatio" },
+  kpm: { labelKey: "common.metrics.kpm", full: "common.metrics.killsAssistsPerMinute" },
+  deaths_per_minute: { labelKey: "common.metrics.deathsPerMinute", full: "common.metrics.deathsPerMinute" },
+} as const;
 
-interface MetricConfig {
-  key: string;
-  labelKey: TranslationKey;
-  fullLabelKey: TranslationKey;
-  color: string;
-  fill: string;
-  isDecimal: boolean;
-}
+const ROLES = [
+  { name: "Frontline", labelKey: "common.roles.frontline", short: "common.roles.frontlineShort", icon: "Class_Front_Line_Icon", color: stationaryChartSeries.sky },
+  { name: "Damage", labelKey: "common.roles.damage", short: "common.roles.damageShort", icon: "Class_Damage_Icon", color: stationaryChartSeries.red },
+  { name: "Flank", labelKey: "common.roles.flank", short: "common.roles.flank", icon: "Class_Flank_Icon", color: stationaryChartSeries.violet },
+  { name: "Support", labelKey: "common.roles.support", short: "common.roles.supportShort", icon: "Class_Support_Icon", color: stationaryChartSeries.emerald },
+] as const;
 
-const METRIC_CONFIGS: MetricConfig[] = [
-  { key: "dpm", labelKey: "common.metrics.dpm", fullLabelKey: "common.metrics.damagePerMinute", color: chartRed, fill: chartFillRed, isDecimal: false },
-  { key: "hpm", labelKey: "common.metrics.hpm", fullLabelKey: "common.metrics.healingPerMinute", color: roleSentinel, fill: roleFillSentinel, isDecimal: false },
-  { key: "gpm", labelKey: "common.metrics.cpm", fullLabelKey: "common.metrics.creditsPerMinute", color: chartAmber, fill: chartFillAmber, isDecimal: false },
-  { key: "mpm", labelKey: "common.metrics.spm", fullLabelKey: "common.metrics.shieldingPerMinute", color: roleSupport, fill: roleFillSupport, isDecimal: false },
-  { key: "kda", labelKey: "common.metrics.kda", fullLabelKey: "common.metrics.kdaRatio", color: "var(--pc-accent)", fill: "color-mix(in srgb, var(--pc-accent) 15%, transparent)", isDecimal: true },
-];
+const COLUMNS = [
+  { key: "mean", labelKey: "generated.stats.average" },
+  { key: "p10", labelKey: "generated.stats.p10" },
+  { key: "p25", labelKey: "generated.stats.p25" },
+  { key: "median", labelKey: "stats.performance.median" },
+  { key: "p75", labelKey: "generated.stats.p75" },
+  { key: "p90", labelKey: "generated.stats.p90" },
+  { key: "max", labelKey: "generated.stats.max" },
+  { key: "sampleSize", labelKey: "generated.stats.samples" },
+] as const;
 
-const CLASS_ICONS: Record<string, string> = {
-  Frontline: "/images/icons/Class_Front_Line_Icon.avif",
-  Damage: "/images/icons/Class_Damage_Icon.avif",
-  Flank: "/images/icons/Class_Flank_Icon.avif",
-  Support: "/images/icons/Class_Support_Icon.avif",
-};
-const CLASS_ORDER = ["Frontline", "Damage", "Flank", "Support"] as const;
-const VALID_METRIC_KEYS = new Set<PerformanceMetricKey>(["dpm", "hpm", "gpm", "mpm", "kda"]);
-
-/* ── Types ── */
-
-type ChampionMetricRow = {
-  name: string;
-  value: number;
-  matches: number;
-  min: number;
-  max: number;
-  median: number;
-  mode: number;
-  className: string;
-};
-
-type ClassMetricData = {
-  className: string;
-  summary: PerformanceMetricSummary;
-  champions: ChampionMetricRow[];
-};
-
+/**
+ * Define metrics initial data as `{ scope: PerformanceScope; metric: GamePerformanceMetric; dashboard: { summary: PerformanceMetricSummary; roles: Record<string, PerformanceMetricSummary> }; }`.
+ * refs: none
+ */
 export type MetricsInitialData = {
-  metric: PerformanceMetricKey;
-  dashboard: {
-    summary: PerformanceMetricSummary;
-    roles: Record<string, PerformanceMetricSummary>;
-  };
-  rows: ChampionPerformanceDistribution[];
+  scope: PerformanceScope;
+  metric: GamePerformanceMetric;
+  dashboard: { summary: PerformanceMetricSummary; roles: Record<string, PerformanceMetricSummary> };
 };
 
-function emptySummary(): PerformanceMetricSummary {
-  return {
-    min: 0, max: 0, mean: 0, median: 0, mode: 0,
-    p10: 0, p25: 0, p75: 0, p90: 0, sampleSize: 0,
-  };
-}
-
-function normalizeSummary(summary?: Partial<PerformanceMetricSummary>): PerformanceMetricSummary {
-  const fallback = emptySummary();
-  return {
-    min: Number(summary?.min ?? fallback.min),
-    max: Number(summary?.max ?? fallback.max),
-    mean: Number(summary?.mean ?? fallback.mean),
-    median: Number(summary?.median ?? summary?.mean ?? fallback.median),
-    mode: Number(summary?.mode ?? summary?.mean ?? fallback.mode),
-    p10: Number(summary?.p10 ?? fallback.p10),
-    p25: Number(summary?.p25 ?? fallback.p25),
-    p75: Number(summary?.p75 ?? fallback.p75),
-    p90: Number(summary?.p90 ?? fallback.p90),
-    sampleSize: Number(summary?.sampleSize ?? fallback.sampleSize),
-  };
-}
-
-function buildClassData(
-  rows: ChampionPerformanceDistribution[],
-  classSummaries: Partial<Record<(typeof CLASS_ORDER)[number], PerformanceMetricSummary>>,
-): ClassMetricData[] {
-  const grouped: Record<string, ChampionMetricRow[]> = {};
-
-  for (const row of rows) {
-    const className = row.className || "Unknown";
-    grouped[className] = grouped[className] || [];
-    grouped[className].push({
-      name: row.championName,
-      value: row.avgValue,
-      matches: row.totalMatches,
-      min: row.min,
-      max: row.max,
-      median: row.median,
-      mode: row.mode,
-      className,
-    });
-  }
-
-  return CLASS_ORDER.map((className) => {
-    const champions = [...(grouped[className] || [])].sort((a, b) => b.value - a.value);
-    const derivedSummary = champions.length > 0
-      ? normalizeSummary({
-          min: Math.min(...champions.map((row) => row.min)),
-          max: Math.max(...champions.map((row) => row.max)),
-          mean: champions.reduce((sum, row) => sum + row.value * row.matches, 0) / Math.max(champions.reduce((sum, row) => sum + row.matches, 0), 1),
-          median: champions.reduce((sum, row) => sum + row.median * row.matches, 0) / Math.max(champions.reduce((sum, row) => sum + row.matches, 0), 1),
-          mode: champions.reduce((sum, row) => sum + row.mode * row.matches, 0) / Math.max(champions.reduce((sum, row) => sum + row.matches, 0), 1),
-          sampleSize: champions.reduce((sum, row) => sum + row.matches, 0),
-        })
-      : emptySummary();
-
-    return {
-      className,
-      summary: normalizeSummary(classSummaries[className] || derivedSummary),
-      champions,
-    };
-  });
-}
-
-function pctDiff(value: number, base: number): number {
-  return base !== 0 ? ((value - base) / base) * 100 : 0;
-}
-
-/* ── Tab bar component ── */
-
-function TabBar({
-  configs,
-  activeKey,
-  onChange,
-}: {
-  configs: MetricConfig[];
-  activeKey: string;
-  onChange: (key: string) => void;
+function PerformanceData({ scope, metric, initialData }: {
+  scope: PerformanceScope;
+  metric: GamePerformanceMetric;
+  initialData?: MetricsInitialData | null;
 }) {
-  const { t } = useLocalization();
-  return (
-    <div className="grid grid-cols-5 gap-1 overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated p-1">
-      {configs.map((cfg) => (
-        <button
-          key={cfg.key}
-          onClick={() => onChange(cfg.key)}
-          className={`pc-touch-target min-w-0 rounded-lg px-1 py-2 text-xs font-bold transition-all sm:px-4 sm:text-sm ${
-            activeKey === cfg.key
-              ? "text-white shadow-sm"
-              : "text-pc-text-secondary hover:text-pc-text"
-          }`}
-          style={activeKey === cfg.key ? { background: cfg.color } : {}}
-        >
-          {t(cfg.labelKey)}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-/* ── Metric panel (same as MetricDetailPage content) ── */
-
-function MetricPanel({ config, initialData }: { config: MetricConfig; initialData?: MetricsInitialData | null }) {
-  const { t , formatNumber, formatPercent} = useLocalization();
-  const initialForConfig = initialData?.metric === config.key ? initialData : undefined;
-  const [metricSummary, setMetricSummary] = useState<PerformanceMetricSummary>(() => initialForConfig?.dashboard.summary ?? emptySummary());
-  const [classData, setClassData] = useState<ClassMetricData[]>(() => initialForConfig
-    ? buildClassData(initialForConfig.rows, initialForConfig.dashboard.roles)
-    : buildClassData([], {}));
-  const [loading, setLoading] = useState(!initialForConfig);
-  const displayLoading = useRouteSettledLoading(loading);
-
+  const { t, formatNumber } = useLocalization();
+  const [fetchedDashboard, setDashboard] = useState<MetricsInitialData["dashboard"] | null>(null);
+  const dashboard = initialData?.dashboard ?? fetchedDashboard;
+  const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   useEffect(() => {
-    const metric = config.key as PerformanceMetricKey;
-    if (!VALID_METRIC_KEYS.has(metric)) {
-      setMetricSummary(emptySummary());
-      setClassData(buildClassData([], {}));
-      setLoading(false);
-      return;
-    }
+    if (initialData && attempt === 0) return;
+    let active = true;
+    fetchPerformanceMetricDashboard(metric, scope).then(data => {
+      if (active) setDashboard(data);
+    }).catch(() => { if (active) setFailed(true); });
+    return () => { active = false; };
+  }, [scope, metric, initialData, attempt]);
 
-    let cancelled = false;
-    setLoading(!initialForConfig);
+  if (failed) return <ErrorState message={t("stats.performance.unavailable")} onRetry={() => { setFailed(false); setAttempt(value => value + 1); }} />;
+  if (!dashboard) return <div className="pc-card min-h-80" role="status"><LoadingIndicator /></div>;
+  if (!dashboard.summary.sampleSize) return <EmptyState title={t("stats.performance.empty")} />;
 
-    async function load() {
-      const [dashboard, championRows] = await Promise.all([
-        fetchPerformanceMetricDashboard(metric),
-        fetchChampionPerformanceDistributions({ metric }),
-      ]);
-
-      if (cancelled) return;
-
-      const classSummaries = dashboard.roles as Partial<Record<(typeof CLASS_ORDER)[number], PerformanceMetricSummary>>;
-
-      setMetricSummary(normalizeSummary(dashboard.summary));
-      setClassData(buildClassData(championRows, classSummaries));
-      setLoading(false);
-    }
-
-    load().catch(() => {
-      if (!cancelled) {
-        if (!initialForConfig) {
-          setMetricSummary(emptySummary());
-          setClassData(buildClassData([], {}));
-        }
-        setLoading(false);
-      }
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [config.key, initialForConfig]);
-
-  const formatVal = (value: number) => config.isDecimal ? formatNumber(value, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : formatNumber(Math.round(value));
-  const formatSigned = (value: number) => {
-    const sign = value >= 0 ? "+" : "";
-    return `${sign}${config.isDecimal ? formatNumber(value, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : formatNumber(Math.round(value))}`;
-  };
-
-  const globalRank = useMemo(() => {
-    const ranked = classData
-      .flatMap((section) => section.champions)
-      .sort((a, b) => b.value - a.value);
-    return new Map(ranked.map((row, index) => [row.name, index + 1]));
-  }, [classData]);
-
-  const globalMean = metricSummary.mean;
-  const globalRange = metricSummary.max - metricSummary.min || 1;
-  const globalMeanPct = Math.max(0, Math.min(100, ((globalMean - metricSummary.min) / globalRange) * 100));
-
-  if (displayLoading) return <RouteSkeleton variant="dashboard" />;
-
-  return (
-    <ContentFade className="space-y-6">
-      {/* Global summary card */}
-      <section className="bg-pc-bg-elevated border border-pc-border rounded-xl p-5">
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-5">
-          {[
-            { label: t("generated.stats.globalAvg"), value: formatVal(metricSummary.mean), accent: true },
-            { label: t("generated.stats.p10"), value: formatVal(metricSummary.p10) },
-            { label: t("generated.stats.p90"), value: formatVal(metricSummary.p90) },
-            { label: t("generated.stats.max"), value: formatVal(metricSummary.max) },
-            { label: t("generated.stats.samples"), value: formatNumber(metricSummary.sampleSize) },
-          ].map((item) => (
-            <div key={item.label} className="min-w-0">
-              <div className="text-pc-text-muted text-xs uppercase tracking-wider mb-1">{item.label}</div>
-              <div className="text-xl font-bold truncate" style={{ color: item.accent ? config.color : undefined }}>
-                {item.value}
-              </div>
-            </div>
-          ))}
+  const decimals = metric === "kda" || metric === "kpm" || metric === "deaths_per_minute" ? 2 : 0;
+  const format = (value: number | undefined) => formatNumber(value, { maximumFractionDigits: decimals });
+  const averageLabel = t("generated.stats.average");
+  const rows = [
+    { name: t("common.roles.global"), icon: undefined, summary: dashboard.summary },
+    ...ROLES.map(role => ({ name: t(role.labelKey), icon: role.icon, summary: dashboard.roles[role.name] })),
+  ];
+  const chartData = ROLES.map(role => ({ name: t(role.short), [averageLabel]: dashboard.roles[role.name]?.sampleSize ? Number(dashboard.roles[role.name].mean.toFixed(decimals)) : null }));
+  return <div className="space-y-6">
+    <section className="pc-card space-y-6" aria-labelledby="performance-overview">
+      <h2 id="performance-overview" className="pc-heading text-xl">{t(METRICS[metric].full)}</h2>
+      <dl className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        {(["mean", "median", "p90", "sampleSize"] as const).map(key => <div key={key}>
+          <dt className="text-xs text-pc-text-secondary">{t(COLUMNS.find(column => column.key === key)!.labelKey)}</dt>
+          <dd className="mt-1 text-2xl font-semibold tabular-nums text-pc-text">{key === "sampleSize" ? formatNumber(dashboard.summary[key]) : format(dashboard.summary[key])}</dd>
+        </div>)}
+      </dl>
+      <div>
+        <h3 className="mb-4 text-sm font-semibold text-pc-text">{t("stats.performance.roleAverages")}</h3>
+        <div className="h-60 sm:h-[300px]">
+          <BarChartComponent data={chartData} xKey="name" yKeys={[averageLabel]} height="100%" showLegend={false} barColors={{ [averageLabel]: ROLES.map(role => role.color) }} />
         </div>
-        <div className="mt-5 relative h-2 rounded-full bg-pc-bg overflow-hidden">
-          <div className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${globalMeanPct}%`, background: config.fill }} />
-          <div className="absolute top-1/2 h-4 w-1 -translate-y-1/2 rounded-full" style={{ left: `${globalMeanPct}%`, background: config.color }} />
-        </div>
-      </section>
-
-      {/* Class tables */}
-      <section className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-        {classData.map((section) => {
-          const classMean = section.summary.mean;
-          const classVsGlobal = classMean - globalMean;
-          const classVsGlobalPct = pctDiff(classMean, globalMean);
-
-          return (
-            <div key={section.className} className="bg-pc-bg-elevated border border-pc-border rounded-xl overflow-hidden">
-              <div className="p-4 border-b border-pc-border">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <img src={CLASS_ICONS[section.className]} alt={section.className} className="w-6 h-6 shrink-0" />
-                    <h2 className="text-pc-text font-semibold truncate">{section.className}</h2>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <div className="text-xs text-pc-text-muted uppercase tracking-wider">{t("generated.stats.classAvg")}</div>
-                    <div className="text-lg font-bold" style={{ color: config.color }}>{formatVal(classMean)}</div>
-                  </div>
-                </div>
-                <div className="mt-4 grid grid-cols-2 gap-3 text-xs sm:grid-cols-4">
-                  <div>
-                    <div className="text-pc-text-muted text-xs uppercase tracking-wider">{t("generated.stats.vsGlobal")}</div>
-                    <div className={classVsGlobal >= 0 ? "text-emerald-400" : "text-red-400"}>
-                      {formatSigned(classVsGlobal)} ({classVsGlobalPct >= 0 ? "+" : ""}{formatPercent(classVsGlobalPct)})
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-pc-text-muted text-xs uppercase tracking-wider">{t("generated.stats.p10")}</div>
-                    <div className="text-pc-text-secondary">{formatVal(section.summary.p10)}</div>
-                  </div>
-                  <div>
-                    <div className="text-pc-text-muted text-xs uppercase tracking-wider">{t("generated.stats.p90")}</div>
-                    <div className="text-pc-text-secondary">{formatVal(section.summary.p90)}</div>
-                  </div>
-                  <div>
-                    <div className="text-pc-text-muted text-xs uppercase tracking-wider">{t("generated.stats.samples")}</div>
-                    <div className="text-pc-text-secondary">{formatNumber(section.summary.sampleSize)}</div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="divide-y divide-pc-border/50 sm:hidden">
-                {section.champions.map((champion, index) => {
-                  const vsClassPct = pctDiff(champion.value, classMean);
-                  const vsGlobalPct = pctDiff(champion.value, globalMean);
-                  return (
-                    <Link key={champion.name} href={`/champions/${championSlug(champion.name)}`} className="flex min-w-0 items-center gap-3 p-3 transition-colors hover:bg-pc-bg/50">
-                      <div className="w-7 shrink-0 text-center text-xs text-pc-text-muted">#{index + 1}</div>
-                      <img src={getChampionIconSafe(champion.name)} alt="" className="h-9 w-9 shrink-0 rounded-lg object-contain" />
-                      <div className="min-w-0 flex-1">
-                        <div className="truncate text-sm font-semibold text-pc-text">{champion.name}</div>
-                        <div className="mt-0.5 flex flex-wrap gap-x-2 text-xs">
-                          <span className={vsClassPct >= 0 ? "text-emerald-400" : "text-red-400"}>{vsClassPct >= 0 ? "+" : ""}{formatNumber(vsClassPct, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}{t("generated.stats.class")}</span>
-                          <span className={vsGlobalPct >= 0 ? "text-emerald-400" : "text-red-400"}>{vsGlobalPct >= 0 ? "+" : ""}{formatNumber(vsGlobalPct, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}{t("generated.stats.global.ac9baca")}</span>
-                          <span className="text-pc-text-muted">{formatNumber(champion.matches)} {t("generated.stats.matches.9f3e924")}</span>
-                        </div>
-                      </div>
-                      <span className="shrink-0 font-mono text-sm font-bold" style={{ color: config.color }}>{formatVal(champion.value)}</span>
-                    </Link>
-                  );
-                })}
-                {section.champions.length === 0 && <div className="px-3 py-6 text-center text-sm text-pc-text-muted">{t("generated.stats.noChampionData")}</div>}
-              </div>
-
-              <div className="hidden overflow-x-auto sm:block">
-                <table className="w-full text-xs">
-                  <thead>
-                    <tr className="text-left text-pc-text-muted border-b border-pc-border/60">
-                      <th className="px-3 py-2 w-12">{t("generated.stats.class.41ff354")}</th>
-                      <th className="px-3 py-2 w-12">{t("generated.stats.global")}</th>
-                      <th className="px-3 py-2">{t("generated.stats.name")}</th>
-                      <th className="px-3 py-2 text-right">{t(config.fullLabelKey)}</th>
-                      <th className="px-3 py-2 text-right">{t("generated.stats.vsClass")}</th>
-                      <th className="px-3 py-2 text-right">{t("generated.stats.vsGlobal")}</th>
-                      <th className="px-3 py-2 text-right">{t("generated.stats.matches")}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {section.champions.map((champion, index) => {
-                      const vsClass = champion.value - classMean;
-                      const vsGlobal = champion.value - globalMean;
-                      const vsClassPct = pctDiff(champion.value, classMean);
-                      const vsGlobalPct = pctDiff(champion.value, globalMean);
-
-                      return (
-                        <tr key={champion.name} className="border-b border-pc-border/40 hover:bg-pc-bg/50 transition-colors">
-                          <td className="px-3 py-2 text-pc-text-muted">#{index + 1}</td>
-                          <td className="px-3 py-2 text-pc-text-muted">#{globalRank.get(champion.name) ?? "-"}</td>
-                          <td className="px-3 py-2">
-                            <Link href={`/champions/${championSlug(champion.name)}`} className="flex items-center gap-2 min-w-0 group">
-                              <img src={getChampionIconSafe(champion.name)} alt={champion.name} className="w-7 h-7 rounded object-contain shrink-0" />
-                              <span className="text-pc-text font-medium truncate group-hover:text-pc-accent transition-colors">{champion.name}</span>
-                            </Link>
-                          </td>
-                          <td className="px-3 py-2 text-right font-semibold" style={{ color: config.color }}>{formatVal(champion.value)}</td>
-                          <td className="px-3 py-2 text-right">
-                            <span className={vsClass >= 0 ? "text-emerald-400" : "text-red-400"}>
-                              {formatSigned(vsClass)} ({vsClassPct >= 0 ? "+" : ""}{formatPercent(vsClassPct)})
-                            </span>
-                          </td>
-                          <td className="px-3 py-2 text-right">
-                            <span className={vsGlobal >= 0 ? "text-emerald-400" : "text-red-400"}>
-                              {formatSigned(vsGlobal)} ({vsGlobalPct >= 0 ? "+" : ""}{formatPercent(vsGlobalPct)})
-                            </span>
-                          </td>
-                          <td className="px-3 py-2 text-right text-pc-text-secondary">{formatNumber(champion.matches)}</td>
-                        </tr>
-                      );
-                    })}
-                    {section.champions.length === 0 && (
-                      <tr>
-                        <td colSpan={7} className="px-3 py-6 text-center text-pc-text-muted">
-                          {t("generated.stats.noChampionData")}</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          );
-        })}
-      </section>
-    </ContentFade>
-  );
+      </div>
+    </section>
+    <section className="pc-card-flush min-w-0" aria-labelledby="performance-distribution">
+      <header className="space-y-2 p-4 sm:p-6">
+        <h2 id="performance-distribution" className="pc-heading text-xl">{t("stats.performance.distribution")}</h2>
+        <p className="text-sm text-pc-text-secondary">{t("stats.performance.percentileHelp")}</p>
+      </header>
+      <div className="overflow-x-auto" role="region" aria-label={t("stats.performance.distribution")} tabIndex={0}>
+        <table className="w-full whitespace-nowrap text-sm">
+          <caption className="sr-only">{t(METRICS[metric].full)} · {t(scope === "ranked" ? "stats.performance.ranked" : "stats.performance.casual")}</caption>
+          <thead><tr className="border-b border-pc-border text-xs text-pc-text-secondary">
+            <th scope="col" className="px-4 py-3 text-left sm:pl-6">{t("stats.performance.role")}</th>
+            {COLUMNS.map(column => <th key={column.key} scope="col" className="px-4 py-3 text-right font-medium">{t(column.labelKey)}</th>)}
+          </tr></thead>
+          <tbody>{rows.map(row => <tr key={row.name} className="border-b border-pc-border last:border-0">
+            <th scope="row" className="px-4 py-4 text-left font-medium text-pc-text sm:pl-6"><span className="inline-flex items-center gap-2">
+              {row.icon && <img src={`/images/icons/${row.icon}.avif`} alt="" className="h-5 w-5 object-contain" />}{row.name}
+            </span></th>
+            {COLUMNS.map(column => <td key={column.key} className="px-4 py-4 text-right tabular-nums text-pc-text-secondary">
+              {column.key === "sampleSize" ? formatNumber(row.summary?.sampleSize) : format(row.summary?.sampleSize ? row.summary[column.key] : undefined)}
+            </td>)}
+          </tr>)}</tbody>
+        </table>
+      </div>
+      <p className="p-4 text-xs text-pc-text-secondary sm:p-6">{t("stats.performance.sampleHelp")}</p>
+    </section>
+  </div>;
 }
 
-/* ── Client page wrapper (reads search params) ── */
-
-function MetricsPageClient({ initialData }: { initialData?: MetricsInitialData | null }) {
+function MetricsContent({ initialData }: { initialData?: MetricsInitialData | null }) {
   const { t } = useLocalization();
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const tab = searchParams.get("tab") || "dpm";
-
-  const activeConfig = useMemo(
-    () => METRIC_CONFIGS.find((c) => c.key === tab) || METRIC_CONFIGS[0],
-    [tab],
-  );
-
-  const handleTabChange = (key: string) => {
-    const params = new URLSearchParams(searchParams);
-    params.set("tab", key);
-    router.replace(`/stats/performance?${params.toString()}`, { scroll: false });
+  const params = useSearchParams();
+  const { filter, ready } = useLobbyTier();
+  const { scope, metric } = performanceSelection(params.get("scope"), params.get("metric"));
+  const href = (nextScope: PerformanceScope, nextMetric: GamePerformanceMetric) => {
+    const selection = performanceSelection(nextScope, nextMetric);
+    return `/stats/performance?scope=${selection.scope}&metric=${selection.metric}`;
   };
-
-  return (
-    <div className="space-y-6">
-      <div>
-        <Link href="/stats/performance" className="text-pc-accent text-xs hover:underline mb-2 inline-block">
-          {t("generated.stats.backToGlobalStats")}</Link>
-        <h1 className="pc-heading pc-heading-lg">{t("generated.stats.performanceMetrics")}</h1>
-        <p className="mt-2 max-w-3xl text-sm leading-6 text-pc-text-secondary">{t("seo.stats.metrics.description")}</p>
-      </div>
-
-      <TabBar configs={METRIC_CONFIGS} activeKey={activeConfig.key} onChange={handleTabChange} />
-
-      <MetricPanel config={activeConfig} initialData={initialData} />
+  const seed = initialData?.scope === scope && initialData.metric === metric && (scope === "casual" || filter === "all") ? initialData : null;
+  return <div className="space-y-6">
+    <PageHeader parentHref="/stats" parentLabel={t("stats.portal.title")} title={t(scope === "ranked" ? "stats.performance.rankedTitle" : "stats.performance.casualTitle")} description={t(scope === "ranked" ? "stats.performance.rankedDescription" : "stats.performance.casualDescription")} />
+    <div className="space-y-4">
+      <SegmentedRouteLinks label={t("performance.modeLabel")} value={scope} items={(["ranked", "casual"] as const).map(value => ({ value, label: t(value === "ranked" ? "stats.performance.ranked" : "stats.performance.casual"), href: href(value, metric) }))} />
+      <SegmentedRouteLinks label={t("menu.performanceMetrics")} value={metric} items={GAME_PERFORMANCE_METRICS.filter(value => scope === "ranked" || value !== "kda").map(value => ({ value, label: t(METRICS[value].labelKey), href: href(scope, value) }))} />
     </div>
-  );
+    {scope === "casual" || ready ? <PerformanceData key={`${scope}:${metric}:${scope === "ranked" ? filter : "all"}`} scope={scope} metric={metric} initialData={seed} /> : <div className="pc-card min-h-80"><LoadingIndicator /></div>}
+    {scope === "ranked" ? ready && <ChampionPerformanceComparison key={filter} /> : <section className="pc-card space-y-3">
+      <h2 className="pc-heading text-xl">{t("stats.performance.championTitle")}</h2>
+      <p className="text-sm text-pc-text-secondary">{t("stats.performance.championRankedOnly")}</p>
+      <Link href={href("ranked", metric)} className="pc-btn-secondary inline-flex">{t("stats.performance.ranked")}</Link>
+    </section>}
+  </div>;
 }
 
 /**
- * Renders the exported statistics view with its route data.
- * Returns: `React.JSX.Element`
+ * Render the /stats/metrics route with `Suspense`, `LoadingIndicator`, `MetricsContent`.
+ * I/O types: `{ initialData }: { initialData?: MetricsInitialData | null } -> JSX.Element`.
  * refs: none
  */
 export default function MetricsPage({ initialData }: { initialData?: MetricsInitialData | null }) {
-  return (
-    <Suspense fallback={<RouteSkeleton variant="dashboard" />}>
-      <MetricsPageClient initialData={initialData} />
-    </Suspense>
-  );
+  return <Suspense fallback={<LoadingIndicator />}><MetricsContent initialData={initialData} /></Suspense>;
 }

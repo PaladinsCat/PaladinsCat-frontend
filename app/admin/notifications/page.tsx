@@ -1,6 +1,5 @@
 /**
- * Define the admin notifications page responsibility boundary.
- * Coordinates admin notifications page data loading, authorization, and presentation.
+ * Render the /admin/notifications route with `LoadingPanel`, `NotificationEditor`.
  * refs: none
  */
 "use client";
@@ -66,9 +65,9 @@ function toInput(draft: Draft): NotificationInput {
 }
 
 /**
- * Handles the exported route operation using its declared request and response contract.
- * Returns: `React.JSX.Element`
+ * Render the /admin/notifications route with `LoadingPanel`, `NotificationEditor`.
  * refs: none
+ * I/O types: `none -> JSX.Element`.
  */
 export default function AdminNotificationsPage() {
   const { t , formatDateTime} = useLocalization();

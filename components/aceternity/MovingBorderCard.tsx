@@ -4,7 +4,10 @@
 import { motion } from "framer-motion";
 import { useReducedMotion } from "@/lib/reduced-motion";
 
-/** Wrap children in the animated border surface, disabling animation for reduced-motion users. · refs: none */
+/**
+ * Wrap children in the animated border surface, disabling animation for reduced-motion users. · refs: none
+ * I/O types: `{ children, className = "", }: { children: React.ReactNode; className?: string; } -> JSX.Element`.
+ */
 export function MovingBorderCard({
   children,
   className = "",

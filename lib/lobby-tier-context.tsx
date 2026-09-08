@@ -22,9 +22,11 @@ type LobbyTierContextValue = {
 
 const LobbyTierContext = createContext<LobbyTierContextValue | null>(null);
 
-/** Apply useLobbyTier to lobby-tier or localization inputs.
+/**
+ * Apply useLobbyTier to lobby-tier or localization inputs.
  * Contract: returns the normalized route, context state, or message value while preserving existing browser behavior.
  * refs: none
+ * I/O types: `none -> LobbyTierContextValue`.
  */
 export function useLobbyTier(): LobbyTierContextValue {
   const context = useContext(LobbyTierContext);
@@ -32,10 +34,11 @@ export function useLobbyTier(): LobbyTierContextValue {
   return context;
 }
 
-/** Apply LobbyTierProvider to lobby-tier or localization inputs.
+/**
+ * Apply LobbyTierProvider to lobby-tier or localization inputs.
  * Contract: returns the normalized route, context state, or message value while preserving existing browser behavior.
- * Returns: `React.JSX.Element`
  * refs: none
+ * I/O types: `{ children }: { children: ReactNode } -> JSX.Element`.
  */
 export function LobbyTierProvider({ children }: { children: ReactNode }) {
   const [filter, setFilterState] = useState<LobbyTierFilter>("all");

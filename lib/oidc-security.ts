@@ -31,8 +31,9 @@ export interface OidcTransaction {
 function b64(bytes: Buffer) { return bytes.toString("base64url"); }
 function random(size = 32) { return b64(randomBytes(size)); }
 /**
- * Defines the new csrf token contract used by this module.
+ * Generate a cryptographically random base64url CSRF token.
  * refs: none
+ * I/O types: `none -> string`.
  */
 export function newCsrfToken() { return random(); }
 function equal(left: string, right: string): boolean {
@@ -42,9 +43,9 @@ function equal(left: string, right: string): boolean {
 }
 
 /**
- * Defines the safe return path contract used by this module.
- * Returns: `string`
+ * Retain a leading-slash path only when it matches an allowed route or its subpath. Reject missing paths, protocol-relative // paths, and backslashes with /; preserve query text on an allowed destination.
  * refs: none
+ * I/O types: `value: string | null | undefined -> string`.
  */
 export function safeReturnPath(value: string | null | undefined): string {
   if (!value || !value.startsWith("/") || value.startsWith("//") || value.includes("\\")) return "/";
@@ -53,27 +54,27 @@ export function safeReturnPath(value: string | null | undefined): string {
 }
 
 /**
- * Performs the create transaction operation with this module's boundary checks.
- * Returns: `object`
+ * Generate independent random state, nonce, and a 48-byte PKCE verifier; sanitize the return path and record the current millisecond timestamp.
  * refs: none
+ * I/O types: `returnPath: string -> OidcTransaction`.
  */
 export function createTransaction(returnPath: string): OidcTransaction {
   return { state: random(), nonce: random(), verifier: random(48), returnPath: safeReturnPath(returnPath), issuedAt: Date.now() };
 }
 
 /**
- * Defines the state matches contract used by this module.
- * Returns: `boolean`
+ * Return false for missing state values or different byte lengths; otherwise compare the cookie and callback state using timingSafeEqual.
  * refs: none
+ * I/O types: `cookieState: string | undefined; callbackState: string | null -> boolean`.
  */
 export function stateMatches(cookieState: string | undefined, callbackState: string | null): boolean {
   return !!cookieState && !!callbackState && equal(cookieState, callbackState);
 }
 
 /**
- * Returns: `null`
- * Transforms or validates parse transaction according to this module's data contract.
+ * Validate transaction state (32-128 characters), nonce (at least 32), verifier (43-128), and a string return path. Accept camelCase or snake_case return paths, sanitize the path, set issuedAt to zero, and return null for malformed data.
  * refs: none
+ * I/O types: `value: unknown -> OidcTransaction | null`.
  */
 export function parseTransaction(value: unknown): OidcTransaction | null {
   const tx = value as Partial<OidcTransaction> & { return_path?: unknown };
@@ -83,27 +84,27 @@ export function parseTransaction(value: unknown): OidcTransaction | null {
 }
 
 /**
- * Performs the require same origin operation with this module's boundary checks.
- * Returns: `boolean`
+ * Return whether the Origin string exactly equals the configured public-origin string; perform no URL normalization.
  * refs: none
+ * I/O types: `origin: string | null; publicOrigin: string -> boolean`.
  */
 export function requireSameOrigin(origin: string | null, publicOrigin: string): boolean {
   return origin === publicOrigin;
 }
 
 /**
- * Performs the code challenge operation with this module's boundary checks.
- * Returns: `string`
+ * Hash the verifier with SHA-256 and encode the digest as base64url for a PKCE S256 challenge.
  * refs: none
+ * I/O types: `verifier: string -> string`.
  */
 export function codeChallenge(verifier: string): string {
   return createHash("sha256").update(verifier).digest("base64url");
 }
 
 /**
- * Transforms or validates normalized https issuer according to this module's data contract.
- * Returns: `string | null`
+ * Parse an issuer URL and require HTTPS, a non-root realm path, and no credentials/query/fragment. Remove its trailing slash or return null for absent or invalid input.
  * refs: none
+ * I/O types: `issuer: string | undefined -> string | null`.
  */
 export function normalizedHttpsIssuer(issuer: string | undefined): string | null {
   if (!issuer) return null;
@@ -116,8 +117,9 @@ export function normalizedHttpsIssuer(issuer: string | undefined): string | null
 
 // The destination is derived solely from the configured realm issuer.
 /**
- * Defines the keycloak account url contract used by this module.
+ * Build the account-console URL beneath a validated HTTPS realm issuer; return null for absent or invalid issuer configuration.
  * refs: none
+ * I/O types: `issuer: string | undefined -> URL | null`.
  */
 export function keycloakAccountUrl(issuer: string | undefined): URL | null {
   const normalized = normalizedHttpsIssuer(issuer);
@@ -125,9 +127,9 @@ export function keycloakAccountUrl(issuer: string | undefined): URL | null {
 }
 
 /**
- * Transforms or validates resolve internal issuer according to this module's data contract.
- * Returns: `string`
+ * Use an override only when it exactly matches http://keycloak:8080 plus the external issuer pathname; otherwise retain the external issuer. An invalid external issuer throws during URL parsing.
  * refs: none
+ * I/O types: `issuer: string; override: string | undefined -> string`.
  */
 export function resolveInternalIssuer(issuer: string, override: string | undefined): string {
   const external = new URL(issuer);
@@ -140,8 +142,9 @@ export function resolveInternalIssuer(issuer: string, override: string | undefin
 }
 
 /**
- * Performs the build pushed authorization request operation with this module's boundary checks.
+ * Build the Keycloak PAR endpoint and form containing client ID, code response type, openid/profile/email scopes, redirect URI, state, nonce, and the S256 PKCE challenge. Perform no HTTP request; invalid URL construction throws.
  * refs: none
+ * I/O types: `serverIssuer: string; clientId: string; redirectUri: string; transaction: OidcTransaction -> { endpoint: URL; form: URLSearchParams }`.
  */
 export function buildPushedAuthorizationRequest(serverIssuer: string, clientId: string, redirectUri: string, transaction: OidcTransaction): { endpoint: URL; form: URLSearchParams } {
   const endpoint = new URL(`${serverIssuer.replace(/\/$/, "")}/protocol/openid-connect/ext/par/request`);
@@ -158,8 +161,9 @@ export function buildPushedAuthorizationRequest(serverIssuer: string, clientId: 
 }
 
 /**
- * Performs the build par authorization url operation with this module's boundary checks.
+ * Build the realm authorization URL with only client_id and the accepted PAR request_uri; perform no HTTP request and propagate invalid URL errors.
  * refs: none
+ * I/O types: `issuer: string; clientId: string; requestUri: string -> URL`.
  */
 export function buildParAuthorizationUrl(issuer: string, clientId: string, requestUri: string): URL {
   const authorization = new URL(`${issuer.replace(/\/$/, "")}/protocol/openid-connect/auth`);
@@ -169,8 +173,9 @@ export function buildParAuthorizationUrl(issuer: string, clientId: string, reque
 }
 
 /**
- * Transforms or validates parse pushed authorization response according to this module's data contract.
+ * Accept an OAuth request_uri URN with the supported safe suffix and a safe-integer expiry from 1 to 600 seconds; normalize field names or return null.
  * refs: none
+ * I/O types: `value: unknown -> { requestUri: string; expiresIn: number } | null`.
  */
 export function parsePushedAuthorizationResponse(value: unknown): { requestUri: string; expiresIn: number } | null {
   const response = value as { request_uri?: unknown; expires_in?: unknown };
@@ -180,8 +185,9 @@ export function parsePushedAuthorizationResponse(value: unknown): { requestUri: 
 }
 
 /**
- * Performs the build rp logout url operation with this module's boundary checks.
+ * Build the realm logout URL only with configured issuer/client/redirect, an HTTPS issuer, and a redirect origin matching publicOrigin. Add client_id and post_logout_redirect_uri plus a nonempty ID-token hint of at most 16,384 characters; return null for invalid configuration or URL parsing.
  * refs: none
+ * I/O types: `issuer: string | undefined; clientId: string | undefined; postLogoutRedirectUri: string | undefined; publicOrigin: string; idTokenHint?: string | null -> URL | null`.
  */
 export function buildRpLogoutUrl(issuer: string | undefined, clientId: string | undefined, postLogoutRedirectUri: string | undefined, publicOrigin: string, idTokenHint?: string | null): URL | null {
   if (!issuer || !clientId || !postLogoutRedirectUri) return null;
@@ -200,9 +206,9 @@ export function buildRpLogoutUrl(issuer: string | undefined, clientId: string | 
 }
 
 /**
- * Transforms or validates valid id token header according to this module's data contract.
- * Returns: `boolean`
+ * Require RS256 and a string kid, with typ absent, ID, or JWT.
  * refs: none
+ * I/O types: `header: Record<string, unknown> -> boolean`.
  */
 export function validIdTokenHeader(header: Record<string, unknown>): boolean {
   return header.alg === "RS256" && typeof header.kid === "string" && (header.typ === undefined || header.typ === "ID" || header.typ === "JWT");
@@ -256,21 +262,23 @@ async function getJwk(issuer: string, kid: string): Promise<Record<string, unkno
 }
 
 /**
- * Defines the reset jwks cache for test contract used by this module.
+ * Clear the in-memory JWKS cache so a subsequent lookup fetches keys again.
  * refs: none
+ * I/O types: `none -> void`.
  */
 export function resetJwksCacheForTest() { jwksCache.clear(); }
 /**
- * Reads jwk for test from the module's configured source.
+ * Resolve an RSA signing JWK by issuer and kid through the normal cache/refresh path, returning null when no matching key can be obtained.
  * refs: none
+ * I/O types: `issuer: string; kid: string -> Promise<Record<string, unknown> | null>`.
  */
 export async function getJwkForTest(issuer: string, kid: string) { return getJwk(issuer, kid); }
 
 // The issuer is configuration, never read from a token. This intentionally supports only Keycloak's RS256 default.
 /**
- * Transforms or validates validate id token according to this module's data contract.
- * Returns: `Promise<IdTokenClaims | null>`
+ * Verify a three-part ID token with RS256 and the kid-selected JWKS key (fetching/caching keys through getJwk). Require exact issuer, client audience, matching azp for multiple audiences, unexpired exp, iat no more than 60 seconds in the future, and constant-time nonce equality. Return validated claims or null on missing input, failed validation, parsing/crypto errors, or JWKS failure.
  * refs: none
+ * I/O types: `idToken: string | undefined; issuer: string; clientId: string; nonce: string; jwksIssuer: string -> Promise<IdTokenClaims | null>`.
  */
 export async function validateIdToken(idToken: string | undefined, issuer: string, clientId: string, nonce: string, jwksIssuer = issuer): Promise<IdTokenClaims | null> {
   if (!idToken) return null;
@@ -295,18 +303,18 @@ export async function validateIdToken(idToken: string | undefined, issuer: strin
  */
 export interface LogoutTokenClaims { jti: string; sid: string | null; }
 /**
- * Transforms or validates valid logout token header according to this module's data contract.
- * Returns: `boolean`
+ * Require RS256, a string kid, and Logout or logout+jwt typ for a backchannel logout token.
  * refs: none
+ * I/O types: `header: Record<string, unknown> -> boolean`.
  */
 export function validLogoutTokenHeader(header: Record<string, unknown>): boolean {
   return header.alg === "RS256" && typeof header.kid === "string" && (header.typ === "Logout" || header.typ === "logout+jwt");
 }
 
 /**
- * Transforms or validates validate logout token according to this module's data contract.
- * Returns: `Promise<LogoutTokenClaims | null>`
+ * Verify the three-part logout token with its RS256 kid-selected JWKS key. Require issuer/client audience, unexpired exp, iat at most 60 seconds ahead, the supported backchannel-logout event, and nonempty jti; return jti plus an optional nonempty sid or null on validation, parse, crypto, or JWKS failure.
  * refs: none
+ * I/O types: `logoutToken: string; issuer: string; clientId: string; jwksIssuer: string -> Promise<LogoutTokenClaims | null>`.
  */
 export async function validateLogoutToken(logoutToken: string, issuer: string, clientId: string, jwksIssuer = issuer): Promise<LogoutTokenClaims | null> {
   const parts = logoutToken.split(".");

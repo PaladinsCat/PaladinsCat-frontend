@@ -1,14 +1,13 @@
 /**
- * Define the tierlists create page responsibility boundary.
- * Coordinates tierlists create page data loading, authorization, and presentation.
+ * Render the /tierlists/create route with `TierListEditor`.
  * refs: none
  */
 import TierListEditor from "@/components/tier-list-editor";
 
 /**
- * Handles the exported route operation using its declared request and response contract.
- * Returns: `React.JSX.Element`
+ * Render the /tierlists/create route with `TierListEditor`.
  * refs: none
+ * I/O types: `none -> JSX.Element`.
  */
 export default function CreateTierListPage() {
   return <TierListEditor />;
