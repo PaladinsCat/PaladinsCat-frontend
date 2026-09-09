@@ -107,7 +107,7 @@ function getScopedItemDetail(itemId: number, championId: number, scope: string, 
 }
 
 function getScopedLoadoutMetrics(championId: number, talentId: number | null, scope: string, tierMin?: number, tierMax?: number) {
-  const key = `${championId}:${talentId ?? "all"}:${scope}`;
+  const key = `${championId}:${talentId ?? "all"}:${scope}:${tierMin ?? "all"}:${tierMax ?? "all"}`;
   let promise = loadoutMetricsByChampionTalentScope.get(key);
   if (!promise) {
     const tier = { tierMin, tierMax };
@@ -119,6 +119,7 @@ function getScopedLoadoutMetrics(championId: number, talentId: number | null, sc
           fetchChampionTalentStats(championId, "ranked", tier),
           fetchChampionCardStats(championId, "ranked", talentId, tier),
         ]).then(([talents, cards]) => writeBrowserResult(cacheKey, { talents, cards }, METRIC_CACHE_TTL_MS));
+    promise = promise.catch((error) => { loadoutMetricsByChampionTalentScope.delete(key); throw error; });
     loadoutMetricsByChampionTalentScope.set(key, promise);
   }
   return promise;
@@ -313,7 +314,8 @@ function PlayerBuildRow({
     let cancelled = false;
     setLoadoutMetrics(null);
     getScopedLoadoutMetrics(player.champion_id, selectedTalent?.talent_id ?? null, lobbyScope, lobbyTierMin, lobbyTierMax)
-      .then((metrics) => { if (!cancelled) setLoadoutMetrics(metrics); });
+      .then((metrics) => { if (!cancelled) setLoadoutMetrics(metrics); })
+      .catch(() => { if (!cancelled) setLoadoutMetrics(null); });
     return () => { cancelled = true; };
   }, [expanded, lobbyScope, lobbyTierMax, lobbyTierMin, lobbyTierReady, player.champion_id, selectedTalent?.talent_id]);
   const findReference = (kind: "items" | "cards" | "talents", id: number, name: string | null | undefined) => (

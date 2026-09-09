@@ -15,6 +15,18 @@ const exported: { fetchJson?: (path:string,options?:RequestInit & {timeoutMs?:nu
 new Function("exports","API_BASE","FETCH_TIMEOUT_MS","csrfHeader","withStoredLobbyTier","API_ERROR_KEYS","ApiRequestError",compiled)(exported,"/api",10000,()=>null,(path:string)=>path,{genericFailure:"failed"},Error);
 const fetchJson=exported.fetchJson!;
 
+test("talent statistics preserve request failures instead of inventing zeros", async () => {
+  const talent = source.statements.find(node => ts.isFunctionDeclaration(node) && node.name?.text === "fetchChampionTalentStats");
+  assert.ok(talent);
+  const code = ts.transpileModule(talent.getText(source), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
+  const api: { fetchChampionTalentStats?: (id: number) => Promise<unknown> } = {};
+  const failure = new Error("upstream unavailable");
+  new Function("exports", "fetchJson", "normalizeChampionTalentStatsResponse", code)(
+    api, async () => { throw failure; }, () => { throw new Error("must not normalize failure"); },
+  );
+  await assert.rejects(api.fetchChampionTalentStats!(1), failure);
+});
+
 test("shared fetch propagates cancellation and bounds stalled response bodies", async () => {
   const original = globalThis.fetch;
   let calls = 0;

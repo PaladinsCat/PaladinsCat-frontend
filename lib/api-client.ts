@@ -4834,7 +4834,7 @@ export function normalizeChampionTalentStatsResponse(raw: any): ChampionTalentSt
  * Fetch champion talent stats data for client consumers.
  *
  * refs: none
- * Request `GET '/stats/talents/${championId}?${query.toString()}'` through the shared API transport. Return `{ totalMatches: 0, talentCoveredMatches: 0, disconnectedPlayers: 0, disconnectedWins: 0, disconnectedLosses: 0, disconnectedWinRate: null, talentCoverageRate: null, talents: [] }` on a caught request failure.
+ * Request `GET '/stats/talents/${championId}?${query.toString()}'` through the shared API transport. Propagate transport/provider failures; an unavailable response is never fabricated as zero samples.
  * I/O types: `championId: number; mode: 'ranked'; tier?: { tierMin?: number; tierMax?: number } -> Promise<ChampionTalentStatsResponse>`.
  */
 export async function fetchChampionTalentStats(
@@ -4842,32 +4842,28 @@ export async function fetchChampionTalentStats(
   mode: 'ranked' = 'ranked',
   tier?: { tierMin?: number; tierMax?: number }
 ): Promise<ChampionTalentStatsResponse> {
-  try {
-    const query = new URLSearchParams({ mode });
-    if (tier?.tierMin != null) query.set('tierMin', String(tier.tierMin));
-    if (tier?.tierMax != null) query.set('tierMax', String(tier.tierMax));
-    const raw = await fetchJson<{
-      totalMatches: number | string;
-      talentCoveredMatches?: number | string;
-      disconnectedPlayers?: number | string;
-      disconnectedWins?: number | string;
-      disconnectedLosses?: number | string;
-      disconnectedWinRate?: number | string | null;
-      talentCoverageRate?: number | string | null;
-      talents: Array<{
-        talentId: number | string;
-        talentName: string;
-        totalPlays: number | string;
-        wins: number | string;
-        losses: number | string;
-        winRate: number | string;
-      }>;
-    }>(`/stats/talents/${championId}?${query.toString()}`);
+  const query = new URLSearchParams({ mode });
+  if (tier?.tierMin != null) query.set('tierMin', String(tier.tierMin));
+  if (tier?.tierMax != null) query.set('tierMax', String(tier.tierMax));
+  const raw = await fetchJson<{
+    totalMatches: number | string;
+    talentCoveredMatches?: number | string;
+    disconnectedPlayers?: number | string;
+    disconnectedWins?: number | string;
+    disconnectedLosses?: number | string;
+    disconnectedWinRate?: number | string | null;
+    talentCoverageRate?: number | string | null;
+    talents: Array<{
+      talentId: number | string;
+      talentName: string;
+      totalPlays: number | string;
+      wins: number | string;
+      losses: number | string;
+      winRate: number | string;
+    }>;
+  }>(`/stats/talents/${championId}?${query.toString()}`);
 
-    return normalizeChampionTalentStatsResponse(raw);
-  } catch {
-    return { totalMatches: 0, talentCoveredMatches: 0, disconnectedPlayers: 0, disconnectedWins: 0, disconnectedLosses: 0, disconnectedWinRate: null, talentCoverageRate: null, talents: [] };
-  }
+  return normalizeChampionTalentStatsResponse(raw);
 }
 
 // ── Champion Card Stats ──
