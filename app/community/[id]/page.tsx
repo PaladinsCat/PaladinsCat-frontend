@@ -22,6 +22,7 @@ import {
   type PostDetail,
 } from "@/lib/api-client";
 import CommunityRichContent from "@/components/CommunityRichContent";
+import CommunityPostMedia from "@/components/community-post-media";
 import { orderReplies } from "@/lib/community-replies";
 import { LoadingIndicator, LoadingPanel } from "@/components/async-state";
 import { VerifiedPlayerBadge } from "@/components/player-name";
@@ -303,6 +304,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
               <span>👁 {post.viewCount}</span>
             </div>
             <div className="mt-4"><CommunityRichContent content={post.content} /></div>
+            <CommunityPostMedia post={post} />
           </>
         )}
         <div className="flex items-center gap-4 mt-4 pt-4 border-t border-pc-border">

@@ -15,5 +15,9 @@
   "community.loginToChat": "Log in to join the conversation",
   "community.messageDeleted": "Message deleted",
   "community.deleteMessageConfirm": "Delete this message for everyone?",
-  "community.retry": "Retry"
+  "community.retry": "Retry",
+  "community.postImageAlt": "Post image {value1} of {value2}",
+  "community.postVideoTitle": "{value1} video from {value2}",
+  "community.postClipTitle": "{value1} clip from {value2}",
+  "community.openSource": "Open source"
 }

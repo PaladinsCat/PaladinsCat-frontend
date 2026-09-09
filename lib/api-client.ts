@@ -662,16 +662,16 @@ export async function fetchActiveCheaters(params: { q?: string; limit?: number; 
   };
 }
 
-function evidenceApiUrl(url: string): string {
+function mediaApiUrl(url: string): string {
   return url.startsWith("/") ? `${API_BASE}${url}` : url;
 }
 
 function normalizeCheaterEvidence(row: any): CheaterEvidence {
   const imageUrls = Array.isArray(row.imageUrls)
-    ? row.imageUrls.filter((url: unknown): url is string => typeof url === "string").map(evidenceApiUrl)
+    ? row.imageUrls.filter((url: unknown): url is string => typeof url === "string").map(mediaApiUrl)
     : Array.isArray(row.images)
-      ? row.images.map((image: { url?: unknown }) => image.url).filter((url: unknown): url is string => typeof url === "string").map(evidenceApiUrl)
-      : typeof row.imageUrl === "string" ? [evidenceApiUrl(row.imageUrl)] : [];
+      ? row.images.map((image: { url?: unknown }) => image.url).filter((url: unknown): url is string => typeof url === "string").map(mediaApiUrl)
+      : typeof row.imageUrl === "string" ? [mediaApiUrl(row.imageUrl)] : [];
   return {
     id: String(row.id),
     playerId: row.playerId == null ? null : Number(row.playerId),
@@ -5973,6 +5973,10 @@ export interface Post {
   content: string;
   buildId: number | null;
   tierListId: number | null;
+  sourceUrl: string | null;
+  provider: "youtube" | "medal" | "twitch" | "discord" | null;
+  embedUrl: string | null;
+  imageUrls: string[];
   likes: number;
   viewCount: number;
   createdAt: string;
@@ -6035,6 +6039,10 @@ type RawPost = {
   content: string;
   build_id: number | null;
   tier_list_id?: number | null;
+  source_url?: string | null;
+  provider?: string | null;
+  embed_url?: string | null;
+  image_urls?: unknown;
   likes: number;
   view_count: number;
   created_at: string;
@@ -6061,6 +6069,10 @@ function mapPost(raw: RawPost): Post {
     content: raw.content,
     buildId: raw.build_id,
     tierListId: raw.tier_list_id ?? null,
+    sourceUrl: raw.source_url ?? null,
+    provider: raw.provider === "youtube" || raw.provider === "medal" || raw.provider === "twitch" || raw.provider === "discord" ? raw.provider : null,
+    embedUrl: raw.embed_url ?? null,
+    imageUrls: Array.isArray(raw.image_urls) ? raw.image_urls.filter((url): url is string => typeof url === "string").map(mediaApiUrl) : [],
     likes: raw.likes,
     viewCount: raw.view_count,
     createdAt: raw.created_at,
@@ -6136,15 +6148,17 @@ export async function fetchTwitchStreams(): Promise<TwitchStreamsResponse> {
 /**
  * Create post through the community API.
  *
- * Accepts userId, title, content, buildId, token; returns createPost data through a backend request, carrying authentication headers and applying the operation server-side.
+ * Accepts a multipart post form and token; returns createPost data through a backend request, carrying authentication headers and applying the operation server-side.
  * refs: none
- * I/O types: `userId: number; title: string; content: string; buildId: number | null; token: string | null -> Promise<Post>`.
+ * I/O types: `form: FormData; token: string | null -> Promise<Post>`.
  */
-export async function createPost(userId: number, title: string, content: string, buildId: number | null, token: string | null): Promise<Post> {
+export async function createPost(form: FormData, token: string | null): Promise<Post> {
   const raw = await fetchJson<RawPost>(`/community/posts`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", ...accountAuthHeaders(token) },
-    body: JSON.stringify({ title, content, build_id: buildId }),
+    headers: accountAuthHeaders(token),
+    body: form,
+    retries: 0,
+    timeoutMs: 180_000,
   });
 
   return mapPost(raw);

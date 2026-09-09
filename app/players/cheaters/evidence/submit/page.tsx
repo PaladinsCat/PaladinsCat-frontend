@@ -15,6 +15,7 @@ import PlayersPageHeader from "@/components/ui/players-page-header";
 import { fetchPlayerSearch, submitCheaterEvidence, type PlayerSearchResult } from "@/lib/api-client";
 import { useAuth } from "@/lib/auth-context";
 import { useLocalization } from "@/lib/localization-context";
+import SubmissionMediaFields from "@/components/submission-media-fields";
 
 /**
  * Render the authenticated, player-linked evidence submission form.
@@ -28,7 +29,7 @@ import { useLocalization } from "@/lib/localization-context";
  */
 export default function SubmitCheaterEvidencePage() {
   const { isLoggedIn } = useAuth();
-  const { formatNumber, t } = useLocalization();
+  const { t } = useLocalization();
   const canPreview = isLoggedIn || process.env.NODE_ENV === "development";
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<PlayerSearchResult[]>([]);
@@ -111,16 +112,13 @@ export default function SubmitCheaterEvidencePage() {
         <label className="block space-y-1 text-xs font-semibold text-pc-text-secondary">{t("moderation.explanation")}
           <textarea required value={description} onChange={(event) => setDescription(event.target.value)} maxLength={4_000} rows={6} className="mt-1 w-full rounded-lg border border-pc-border bg-pc-bg px-3 py-2 text-sm font-normal leading-6 text-pc-text outline-none focus:border-pc-accent-mid" />
         </label>
-        <div className="grid gap-3 md:grid-cols-2">
-          <label className="space-y-1 text-xs font-semibold text-pc-text-secondary">{t("moderation.imagesUpToFive")}
-            <input type="file" accept="image/png,image/jpeg,image/webp" multiple onChange={(event) => { const next = Array.from(event.target.files ?? []); if (next.length > 5) { setError(t("moderation.chooseAtMostFiveImages")); return; } setFiles(next); setError(null); }} className="mt-1 block w-full rounded-lg border border-pc-border bg-pc-bg px-3 py-1.5 text-sm font-normal text-pc-text file:mr-3 file:rounded file:border-0 file:bg-pc-bg-secondary file:px-2 file:py-1 file:text-xs file:text-pc-text" />
-            <span className="block font-normal text-pc-text-muted">{t("moderation.imageFormats")}</span>
-          </label>
-          <label className="space-y-1 text-xs font-semibold text-pc-text-secondary">{t("moderation.sourceLink")}
-            <input type="url" value={sourceUrl} onChange={(event) => setSourceUrl(event.target.value)} placeholder={t("moderation.sourceLinkPlaceholder")} className="mt-1 w-full rounded-lg border border-pc-border bg-pc-bg px-3 py-2 text-sm font-normal text-pc-text outline-none focus:border-pc-accent-mid" />
-          </label>
-        </div>
-        {files.length > 0 && <p className="text-xs text-pc-text-muted">{files.length === 1 ? t("moderation.selectedImage") : t("moderation.selectedImages", { value1: formatNumber(files.length) })}</p>}
+        <SubmissionMediaFields
+          files={files}
+          sourceUrl={sourceUrl}
+          onFilesChange={(next) => { setFiles(next); setError(null); }}
+          onSourceUrlChange={setSourceUrl}
+          onValidationError={setError}
+        />
         <button type="submit" disabled={!isLoggedIn || submitting} className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-pc-accent px-4 py-2 text-sm font-semibold text-black disabled:cursor-not-allowed disabled:opacity-50"><Send className="h-4 w-4" aria-hidden="true" />{submitting ? t("moderation.submitting") : t("moderation.submitForReview")}</button>
       </form>
     </div>
