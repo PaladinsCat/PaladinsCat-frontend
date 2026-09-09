@@ -7,6 +7,7 @@
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import SmartImage from "@/components/SmartImage";
+import TagCriteriaTip from "@/components/tag-criteria-tip";
 import { fetchChampions, type Champion, type PublicStatsScope } from "@/lib/api-client";
 import { STATIC_CHAMPIONS } from "@/lib/static-champions";
 import { getChampionIconSafe } from "@/lib/champion-icons";
@@ -15,6 +16,7 @@ import { getRankIconPath } from "@/lib/tier-utils";
 import { getPercentageColor, getStatQuality } from "@/lib/stat-quality";
 import { useLocalization } from "@/lib/localization-context";
 import { getStoredLobbyTierFilter } from "@/lib/lobby-tier";
+import { fetchChampionMatchupPreviews, type ChampionRelationship } from "@/lib/champion-matchups-api";
 import { ArrowDown, ArrowUp, ChevronRight, Palette, Trophy } from "lucide-react";
 import { ROUTE_CONTENT_SETTLE_MS } from "@/lib/route-transition-context";
 
@@ -35,6 +37,13 @@ const STAT_SCOPES = [
   { value: "newcomer", labelKey: "stats.scope.newcomer" },
   { value: "bot", labelKey: "stats.scope.bot" },
 ] as const;
+
+type MatchupPreview = {
+  strong: ChampionRelationship[];
+  weak: ChampionRelationship[];
+};
+
+const MATCHUP_PREVIEW_EXCLUSIONS = new Set(["cassie", "kasumi"]);
 
 /** Build the guaranteed base list: all 59 champions, no stats. · refs: none */
 function buildStaticBase(): Champion[] {
@@ -75,13 +84,23 @@ function mergeChampionStats(rows: Champion[]): Champion[] {
  * refs: none
  * I/O types: `{ initialChampions = null }: { initialChampions?: Champion[] | null } -> JSX.Element`.
  */
-export default function ChampionTable({ initialChampions = null }: { initialChampions?: Champion[] | null }) {
+export default function ChampionTable({
+  initialChampions = null,
+  relationshipDirectory = false,
+}: {
+  initialChampions?: Champion[] | null;
+  relationshipDirectory?: boolean;
+}) {
   const { t , formatNumber} = useLocalization();
   const hasInitialChampions = Boolean(initialChampions?.length);
   const [champions, setChampions] = useState<Champion[]>(() => (
     hasInitialChampions ? mergeChampionStats(initialChampions ?? []) : buildStaticBase()
   ));
-  const [dbAvailable, setDbAvailable] = useState<boolean | null>(hasInitialChampions ? true : null); // null = checking
+  const [dbAvailable, setDbAvailable] = useState<boolean | null>(relationshipDirectory || hasInitialChampions ? true : null); // null = checking
+  const [matchupPreviewState, setMatchupPreviewState] = useState<{
+    scope: string;
+    previews: Map<number, MatchupPreview>;
+  }>({ scope: "", previews: new Map() });
   const [filterRole, setFilterRole] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<"name" | "winRate" | "banRate" | "popularity">("name");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
@@ -92,6 +111,7 @@ export default function ChampionTable({ initialChampions = null }: { initialCham
 
   // Try to fetch DB stats in the background and merge them in
   useEffect(() => {
+    if (relationshipDirectory) return;
     if (hasInitialChampions && statsScope === "ranked" && getStoredLobbyTierFilter() === "all") return;
 
     let cancelled = false;
@@ -162,14 +182,42 @@ export default function ChampionTable({ initialChampions = null }: { initialCham
       cancelled = true;
       if (revealTimer !== undefined) window.clearTimeout(revealTimer);
     };
-  }, [hasInitialChampions, statsScope]);
+  }, [hasInitialChampions, relationshipDirectory, statsScope]);
+
+  const previewScope = "all";
+  useEffect(() => {
+    if (!relationshipDirectory) return;
+    const controller = new AbortController();
+    const load = async () => {
+      const previews = new Map<number, MatchupPreview>();
+      const response = await fetchChampionMatchupPreviews(controller.signal);
+      if (controller.signal.aborted) return;
+      for (const row of response.champions) {
+        const visible = (relationships: ChampionRelationship[]) => relationships
+          .filter((relationship) => !MATCHUP_PREVIEW_EXCLUSIONS.has(championSlug(relationship.opponentChampionName)));
+        previews.set(row.championId, {
+          strong: visible(row.strong),
+          weak: visible(row.weak),
+        });
+      }
+      setMatchupPreviewState({ scope: previewScope, previews });
+    };
+    void load().catch(() => {
+      if (!controller.signal.aborted) {
+        setMatchupPreviewState({ scope: previewScope, previews: new Map() });
+      }
+    });
+    return () => controller.abort();
+  }, [previewScope, relationshipDirectory]);
 
   const filtered = useMemo(() => champions
     .filter((c) => {
       const matchesRole = !deferredFilterRole || (c.roles && c.roles.includes(deferredFilterRole));
-      return matchesRole;
+      const isVisibleMatchup = !relationshipDirectory || !MATCHUP_PREVIEW_EXCLUSIONS.has(championSlug(c.name));
+      return matchesRole && isVisibleMatchup;
     })
     .sort((a, b) => {
+      if (relationshipDirectory) return a.name.localeCompare(b.name);
       // Nulls sink to the bottom for stat sorts.
       const nullsLast = (av: number | null | undefined, bv: number | null | undefined) => {
         if (av == null && bv == null) return 0;
@@ -183,7 +231,7 @@ export default function ChampionTable({ initialChampions = null }: { initialCham
         case "popularity": return nullsLast(a.totalPlays, b.totalPlays);
         default:           return deferredSortDir === "asc" ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
       }
-    }), [champions, deferredFilterRole, deferredSortBy, deferredSortDir]);
+    }), [champions, deferredFilterRole, deferredSortBy, deferredSortDir, relationshipDirectory]);
   const maxChampionPickRate = useMemo(
     () => Math.max(1, ...champions.map((champion) => champion.pickRate ?? 0)),
     [champions],
@@ -192,11 +240,16 @@ export default function ChampionTable({ initialChampions = null }: { initialCham
   return (
     <div className="space-y-6">
       <header className="space-y-2">
-        <h1 className="pc-heading pc-heading-lg">{t("generated.champions.champions")}</h1>
-        <p className="max-w-4xl text-sm leading-6 text-pc-text-secondary">{t("seo.champions.description")}</p>
+        <h1 className="pc-heading pc-heading-lg">{relationshipDirectory ? t("stats.matchups.title") : t("generated.champions.champions")}</h1>
+        <p className="max-w-4xl text-sm leading-6 text-pc-text-secondary">{relationshipDirectory ? t("stats.matchups.directoryDescription") : t("seo.champions.description")}</p>
       </header>
 
-      <nav aria-label={t("menu.globalStats")} className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      {relationshipDirectory && <TagCriteriaTip
+        labelKey="stats.matchups.previewNote"
+        criteriaKey="stats.matchups.previewExclusions"
+      />}
+
+      {!relationshipDirectory && <nav aria-label={t("menu.globalStats")} className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {[
             { href: "/stats/performance#champion-averages", title: t("stats.performance.championTitle"), description: t("stats.performance.comparisonLink"), icon: Trophy, tone: "text-emerald-300" },
             { href: "/stats/skins", title: t("menu.skinStats"), description: t("menu.skinStatsDescription"), icon: Palette, tone: "text-violet-300" },
@@ -214,7 +267,7 @@ export default function ChampionTable({ initialChampions = null }: { initialCham
               <ChevronRight aria-hidden="true" className="h-4 w-4 shrink-0 text-pc-text-muted transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-pc-accent motion-reduce:transform-none motion-reduce:transition-none" />
             </Link>
           ))}
-      </nav>
+      </nav>}
 
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <span id="champion-class-filter-label" className="sr-only">{t("generated.champions.class.41ff354")}</span>
@@ -248,7 +301,7 @@ export default function ChampionTable({ initialChampions = null }: { initialCham
             ))}
         </div>
 
-        <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {!relationshipDirectory && <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <select
             value={statsScope}
             onChange={(event) => {
@@ -281,11 +334,11 @@ export default function ChampionTable({ initialChampions = null }: { initialCham
           >
             {sortDir === "asc" ? <ArrowUp aria-hidden="true" className="h-4 w-4" /> : <ArrowDown aria-hidden="true" className="h-4 w-4" />}
           </button>
-        </div>
+        </div>}
       </div>
 
       {/* DB status indicator */}
-      {dbAvailable === false && (
+      {!relationshipDirectory && dbAvailable === false && (
         <div className="text-pc-muted text-sm italic">
           {t("generated.champions.statsUnavailableShowingChampionListOnlyWinPickBanRates")}</div>
       )}
@@ -297,10 +350,50 @@ export default function ChampionTable({ initialChampions = null }: { initialCham
         </div>
       ) : (
         <div
-          className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
+          className={relationshipDirectory
+            ? "grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3"
+            : "grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"}
           aria-busy={dbAvailable === null}
         >
           {filtered.map((c) => {
+            if (relationshipDirectory) {
+              const preview = matchupPreviewState.scope === previewScope
+                ? matchupPreviewState.previews.get(Number(c.id))
+                : undefined;
+              return <Link
+                key={c.id}
+                href={`/stats/champions/${championSlug(c.name)}`}
+                className="group rounded-2xl border border-pc-border bg-pc-bg-elevated p-4 transition-[border-color,background-color,transform] duration-200 hover:-translate-y-0.5 hover:border-pc-accent-mid hover:bg-pc-bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent motion-reduce:transform-none motion-reduce:transition-none"
+              >
+                <div className="mb-4 flex items-center gap-3">
+                  <SmartImage src={c.imagePath || getChampionIconSafe(c.name)} alt="" width={48} height={48} loading="lazy" decoding="async" className="h-12 w-12 rounded-xl object-contain" />
+                  <div className="min-w-0">
+                    <h2 className="truncate text-base font-bold text-pc-text transition-colors group-hover:text-pc-accent">{c.name}</h2>
+                    <p className="text-xs text-pc-text-muted">{c.roles?.[0]}</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4 border-t border-pc-border/70 pt-3">
+                  {([
+                    ["stats.matchups.strong", preview?.strong, "border-emerald-400/50"],
+                    ["stats.matchups.weak", preview?.weak, "border-rose-400/50"],
+                  ] as const).map(([label, rows, tone]) => <section key={label}>
+                    <h3 className="mb-2 text-xs font-bold uppercase tracking-[0.12em] text-pc-text-muted">{t(label)}</h3>
+                    <div className="grid min-h-8 grid-cols-5 gap-1.5">
+                      {rows?.map((row) => <SmartImage
+                        key={row.opponentChampionId}
+                        src={getChampionIconSafe(row.opponentChampionName)}
+                        alt={row.opponentChampionName}
+                        title={row.opponentChampionName}
+                        width={40}
+                        height={40}
+                        loading="lazy"
+                        className={`aspect-square h-auto w-full rounded-lg border-2 ${tone} bg-pc-bg object-cover`}
+                      />)}
+                    </div>
+                  </section>)}
+                </div>
+              </Link>;
+            }
             const roleIcon = c.roles && c.roles.length > 0
               ? ROLES.find(r => r.value === c.roles![0])?.icon
               : undefined;

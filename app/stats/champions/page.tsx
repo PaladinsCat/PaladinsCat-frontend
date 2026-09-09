@@ -1,9 +1,11 @@
-/** Render the champion matchup directory within the statistics family.
- * refs: see: components/champion-matchups.tsx · endpoints: GET /stats/champions/{champion_id}/matchups
+/** Render the full champion matchup directory within the statistics family.
+ * refs: see: components/champion-table.tsx · endpoints: GET /champions/{id}/counters
  */
-import ChampionMatchups from "@/components/champion-matchups";
+import ChampionTable from "@/components/champion-table";
+
 /**
- * Render the roster and matchup browser.
- * I/O types: `()` -> `React.JSX.Element`; refs: see: components/champion-matchups.tsx
+ * Render all 59 champions and route selections to matchup detail pages.
  */
-export default function Page(): React.JSX.Element { return <ChampionMatchups />; }
+export default function Page(): React.JSX.Element {
+  return <ChampionTable relationshipDirectory />;
+}

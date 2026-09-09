@@ -103,6 +103,7 @@ const UNSCOPED_STAT_PATHS = [
   "/stats/ranked-leaderboard",
   "/stats/leaderboard-log",
   "/stats/champion-leaderboard",
+  "/stats/champions/",
   "/stats/player/",
   "/champions/tiers",
 ];
