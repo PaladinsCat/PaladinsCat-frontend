@@ -76,7 +76,7 @@ function getBuildReference(championId: number, championName: string) {
 }
 
 function getScopedItemMetrics(championId: number, scope: string, tierMin?: number, tierMax?: number) {
-  const key = `${championId}:${scope}`;
+  const key = `${championId}:${scope}:${tierMin ?? "all"}:${tierMax ?? "all"}`;
   let promise = itemMetricsByChampionScope.get(key);
   if (!promise) {
     const cacheKey = `${RESULT_CACHE_PREFIX}:items:${key}`;
@@ -92,7 +92,7 @@ function getScopedItemMetrics(championId: number, scope: string, tierMin?: numbe
 }
 
 function getScopedItemDetail(itemId: number, championId: number, scope: string, tierMin?: number, tierMax?: number) {
-  const key = `${itemId}:${championId}:${scope}`;
+  const key = `${itemId}:${championId}:${scope}:${tierMin ?? "all"}:${tierMax ?? "all"}`;
   let promise = itemDetailByChampionScope.get(key);
   if (!promise) {
     const cacheKey = `${RESULT_CACHE_PREFIX}:item-detail:${key}`;
