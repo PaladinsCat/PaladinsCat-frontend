@@ -7,10 +7,10 @@
 import type { MatchPlayerDetail, MatchFactPlayer } from "@/lib/api-client";
 import type { MatchResultPlayer, PlayerProfileData, TeamAverages } from "./types";
 
-/* ── Damage math (preserves recovered-match guard) ── */
+/* ── Damage math ── */
 
 /**
- * Compute total and per-minute damage from one match player. Treat damage_done_physical as the total; expose weapon/ability breakdown only for non-recovered rows with in-hand damage, returning null for unavailable shares or rates and guarding zero duration.
+ * Compute total and per-minute damage from one match player. Treat damage_done_physical as the total; expose weapon/ability breakdown only when the canonical availability tag confirms that Hi-Rez supplied it, returning null for unavailable shares or rates and guarding zero duration.
  * I/O types: `p: MatchPlayerDetail -> { totalDamage: number; weaponDamage: number; nonWeaponDamage: number | null; weaponShare: number | null; weaponPerMinute: number | null; abilityPerMinute: number | null; hasWeaponBreakdown: boolean; }`.
  * refs: doc: documents/06-reference/routes/frontend-match-detail.md
  */
@@ -19,14 +19,11 @@ export function computeDamageStats(p: MatchPlayerDetail) {
   // `damage_done_physical` field. Magical and in-hand values are optional
   // breakdown fields already included in that total.
   const totalDamage = p.damage_done_physical;
-  const weaponDamage = p.damage_done_in_hand ?? 0;
+  const weaponDamage = p.damage_done_in_hand ?? totalDamage;
 
-  // Recovered matches can be reconstructed from player history / recovery
-  // endpoints that do not include `Damage_Done_In_Hand`. In that case total
-  // damage is still useful for DPM and rankings, but the weapon-vs-ability
-  // split is unknown. No partial recovered field can make that split
-  // trustworthy, so recovered rows report total damage/DPM only.
-  const hasWeaponBreakdown = p.source !== "recovered" && p.damage_done_in_hand != null;
+  // Explicit zero is valid. The separate tag prevents a missing provider
+  // field from being mistaken for zero weapon damage and all skill damage.
+  const hasWeaponBreakdown = p.damage_breakdown_available === true;
   const nonWeaponDamage = hasWeaponBreakdown
     ? Math.max(totalDamage - weaponDamage, 0)
     : null;

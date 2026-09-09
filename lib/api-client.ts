@@ -6593,6 +6593,7 @@ export interface MatchPlayerDetail {
   damage_done_physical: number;
   damage_done_magical: number;
   damage_done_in_hand?: number;
+  damage_breakdown_available?: boolean;
   damage_taken?: number;
   damage_mitigated?: number;
   mitigation_per_minute?: number;
