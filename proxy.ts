@@ -3,6 +3,8 @@
  * refs: none
  */
 import { NextRequest, NextResponse } from "next/server";
+import { readFileSync } from "node:fs";
+import { GUEST_COOKIE, GUEST_TTL_SECONDS, issueGuest, validGuest, safeWebsiteRequest, websiteApiPath } from "./lib/website-gate";
 
 /**
  * Content-Security-Policy with a per-request nonce.
@@ -29,6 +31,48 @@ export function proxy(request: NextRequest) {
   // handle its local assets and HMR without injecting production headers.
   if (process.env.NODE_ENV === "development") {
     return NextResponse.next();
+  }
+
+  const path = request.nextUrl.pathname;
+  // Do not let percent-encoded namespace aliases reach a rewrite without admission.
+  try {
+    const decoded = decodeURIComponent(path);
+    if (websiteApiPath(decoded) && !websiteApiPath(path)) {
+      return NextResponse.json({ error: { code: "NON_CANONICAL_API_PATH" } }, { status: 400, headers: { "Cache-Control": "private, no-store" } });
+    }
+  } catch {
+    return NextResponse.json({ error: { code: "INVALID_PATH" } }, { status: 400 });
+  }
+  const api = websiteApiPath(path);
+  // Developer routes authenticate in Rust; Next-owned OIDC endpoints retain
+  // their state/CSRF/signature checks, including provider callbacks without a guest cookie.
+  const oidcEndpoint = ["login", "callback", "logout", "account", "backchannel-logout"]
+    .some((name) => path === `/api/auth/oidc/${name}`);
+  if (path === "/api/v1" || path.startsWith("/api/v1/") || oidcEndpoint) {
+    const response = NextResponse.next();
+    response.headers.set("Cache-Control", "private, no-store");
+    return response;
+  }
+  const origin = process.env.PALADINSCAT_PUBLIC_ORIGIN || "https://paladinscat.com";
+  let secret: string;
+  try {
+    secret = readFileSync(process.env.PALADINSCAT_WEBSITE_GATE_SECRET_FILE || "", "utf8").trim();
+    if (!/^[a-f0-9]{64}$/i.test(secret)) throw new Error("Invalid website gate secret");
+  } catch {
+    return NextResponse.json({ error: { code: "WEBSITE_GATE_UNAVAILABLE" } }, {
+      status: 503, headers: { "Cache-Control": "private, no-store" },
+    });
+  }
+  const admitted = validGuest(request.cookies.get(GUEST_COOKIE)?.value, secret, origin);
+  if (api) {
+    if (!admitted || !safeWebsiteRequest(request.headers, origin)) {
+      return NextResponse.json({ error: { code: "WEBSITE_SESSION_REQUIRED", message: "Open the website to establish a guest session. External clients must use /api/v1 with a registered API key." } }, {
+        status: 403, headers: { "Cache-Control": "private, no-store" },
+      });
+    }
+    const response = NextResponse.next();
+    response.headers.set("Cache-Control", "private, no-store");
+    return response;
   }
 
   const nonce = crypto.randomUUID().replaceAll("-", "");
@@ -66,6 +110,13 @@ export function proxy(request: NextRequest) {
     request: { headers: requestHeaders },
   });
   response.headers.set("Content-Security-Policy", csp);
+  response.headers.set("Cache-Control", "private, no-store");
+  if (!admitted && request.method === "GET" && request.headers.get("accept")?.includes("text/html")) {
+    response.cookies.set(GUEST_COOKIE, issueGuest(secret, origin), {
+      httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: GUEST_TTL_SECONDS,
+    });
+    response.headers.set("Cache-Control", "private, no-store");
+  }
   return response;
 }
 
@@ -74,9 +125,8 @@ export function proxy(request: NextRequest) {
  * refs: none
  */
 export const config = {
-  // Apply only to page (HTML) document navigations; skip proxied API traffic,
-  // Next static chunks, images, and other asset files.
+  // Cover both API aliases as well as documents; static assets need no guest cookie.
   matcher: [
-    "/((?!_next/static|_next/image|_next/webpack-hmr|api|images/favicon|robots.txt|sitemap\\.xml|manifest\\.webmanifest).*)",
+    "/((?!_next/static|_next/image|_next/webpack-hmr|images/|fonts/|locales/|robots.txt|sitemap\\.xml|manifest\\.webmanifest).*)",
   ],
 };

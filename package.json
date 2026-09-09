@@ -17,6 +17,8 @@
     "test:champion-page": "node --experimental-strip-types --test lib/champion-page-data.test.ts",
     "test:oidc": "node --experimental-strip-types --test lib/oidc-security.test.ts",
     "test:public-v1": "node --experimental-strip-types --test lib/public-v1.test.ts",
+    "test:website-gate": "node --experimental-strip-types --test lib/website-gate.test.ts lib/website-proxy.test.mjs",
+    "test:deployment-polling": "node --test lib/deployment-polling.test.mjs",
     "test:ui:auth": "playwright test test/auth-login-ui.spec.ts",
     "test:operations": "node --test lib/operations-security.test.mjs",
     "generate-types": "npx openapi-typescript http://localhost:3005/openapi.json -o lib/types.gen.ts",

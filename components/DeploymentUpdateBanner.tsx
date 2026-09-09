@@ -20,6 +20,7 @@ interface DeploymentState {
 }
 
 const POLL_MS = 3_000;
+const IDLE_POLL_MS = 30_000;
 const PENDING_KEY = "paladinscat:deployment:pending";
 const RELOADED_KEY = "paladinscat:deployment:last-reloaded";
 const BLOCKING_PHASES = new Set<DeploymentPhase>(["draining", "switching", "warming"]);
@@ -78,32 +79,48 @@ export default function DeploymentUpdateBanner() {
   useEffect(() => {
     installFetchGate();
     let cancelled = false;
+    let activeDeployment = false;
+    let inFlight = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let controller: AbortController | undefined;
+
+    function schedule() {
+      if (!cancelled && document.visibilityState === "visible") {
+        timer = setTimeout(() => void poll(), activeDeployment ? POLL_MS : IDLE_POLL_MS);
+      }
+    }
 
     async function poll() {
+      if (cancelled || inFlight || document.visibilityState !== "visible") return;
+      inFlight = true;
+      controller = new AbortController();
+      const timeout = setTimeout(() => controller?.abort(), 8_000);
       try {
         const response = await deploymentFetch("/api/deployment/status", {
           cache: "no-store",
           headers: { Accept: "application/json" },
+          signal: controller.signal,
         });
         if (!response.ok) return;
         const next = await response.json() as DeploymentState;
         if (cancelled) return;
 
         const blocking = BLOCKING_PHASES.has(next.phase);
+        activeDeployment = next.phase === "announced" || blocking;
         clientRequestsBlocked = blocking;
         setState(next);
 
         if (next.id && (next.phase === "announced" || blocking)) {
-          window.localStorage.setItem(PENDING_KEY, next.id);
+          window.sessionStorage.setItem(PENDING_KEY, next.id);
         }
 
         if (next.phase === "complete" || next.phase === "idle") {
-          const pendingId = window.localStorage.getItem(PENDING_KEY);
-          const reloadedId = window.localStorage.getItem(RELOADED_KEY);
+          const pendingId = window.sessionStorage.getItem(PENDING_KEY);
+          const reloadedId = window.sessionStorage.getItem(RELOADED_KEY);
           const completedId = next.phase === "complete" ? next.id : pendingId;
           if (completedId && pendingId === completedId && reloadedId !== completedId) {
-            window.localStorage.setItem(RELOADED_KEY, completedId);
-            window.localStorage.removeItem(PENDING_KEY);
+            window.sessionStorage.setItem(RELOADED_KEY, completedId);
+            window.sessionStorage.removeItem(PENDING_KEY);
             window.location.reload();
             return;
           }
@@ -111,19 +128,30 @@ export default function DeploymentUpdateBanner() {
 
         if (next.phase === "failed" || next.phase === "idle") {
           clientRequestsBlocked = false;
-          window.localStorage.removeItem(PENDING_KEY);
+          window.sessionStorage.removeItem(PENDING_KEY);
         }
       } catch {
         // Keep the last known blocking state while the frontend/backend swaps.
         // The next poll will reconcile it once the new containers are ready.
+      } finally {
+        clearTimeout(timeout);
+        inFlight = false;
+        schedule();
       }
     }
 
+    function onVisibilityChange() {
+      clearTimeout(timer);
+      // Reconcile before resuming a tab; hidden tabs do not poll indefinitely.
+      void poll();
+    }
     void poll();
-    const timer = window.setInterval(() => void poll(), POLL_MS);
+    document.addEventListener("visibilitychange", onVisibilityChange);
     return () => {
       cancelled = true;
-      window.clearInterval(timer);
+      clearTimeout(timer);
+      controller?.abort();
+      document.removeEventListener("visibilitychange", onVisibilityChange);
     };
   }, []);
 
