@@ -17,7 +17,7 @@ const BLOG_FETCH_TIMEOUT_MS = 10_000;
  * Defines the  b l o g_ c a t e g o r i e s contract used by this module.
  * refs: none
  */
-export const BLOG_CATEGORIES = ["public-release", "q-and-a", "guide"] as const;
+export const BLOG_CATEGORIES = ["public-release", "q-and-a", "guide", "operational-report"] as const;
 /**
  * Defines the  blog category contract used by this module.
  * refs: none

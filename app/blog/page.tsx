@@ -24,7 +24,10 @@ const CATEGORY_LABEL_KEYS = {
   "public-release": BLOG_COPY_KEYS.categoryPublicRelease,
   "q-and-a": BLOG_COPY_KEYS.categoryQuestionAndAnswer,
   "guide": BLOG_COPY_KEYS.categoryGuide,
-} as const satisfies Record<BlogCategory, string>;
+  "operational-report": null,
+} as const satisfies Record<BlogCategory, string | null>;
+
+const OPERATIONAL_REPORT_CATEGORY_LABEL = "Operational Report";
 
 type BlogPageProps = {
   searchParams: Promise<{ category?: string }>;
@@ -94,7 +97,9 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                 : "pc-surface text-pc-muted hover:text-pc-text"
             }`}
           >
-            {t(CATEGORY_LABEL_KEYS[categoryId])}
+            {CATEGORY_LABEL_KEYS[categoryId]
+              ? t(CATEGORY_LABEL_KEYS[categoryId])
+              : OPERATIONAL_REPORT_CATEGORY_LABEL}
           </Link>
         ))}
       </nav>
