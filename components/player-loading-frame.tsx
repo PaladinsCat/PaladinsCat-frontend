@@ -4,7 +4,7 @@
  */
 "use client";
 
-import { resolveLoadingFrameAsset } from "@/lib/loading-frame-assets";
+import { DEFAULT_ALLY_TEAM_FRAME, displayLoadingFrameName, resolveLoadingFrameAsset } from "@/lib/loading-frame-assets";
 
 interface PlayerLoadingFrameProps {
   loadingFrame: string | null | undefined;
@@ -24,7 +24,8 @@ function Avatar({
       alt={avatarAlt}
       width={96}
       height={96}
-      className="h-full w-full object-cover"
+      className="block object-cover"
+      style={{ width: "100%", height: "100%" }}
       draggable={false}
       decoding="async"
       fetchPriority="high"
@@ -37,7 +38,8 @@ function Avatar({
       alt={avatarAlt}
       width={96}
       height={96}
-      className="h-full w-full object-cover"
+      className="block object-cover"
+      style={{ width: "100%", height: "100%" }}
       draggable={false}
       decoding="async"
       fetchPriority="high"
@@ -57,7 +59,8 @@ export default function PlayerLoadingFrame({
   avatarAlt,
   onAvatarError,
 }: PlayerLoadingFrameProps) {
-  const frame = resolveLoadingFrameAsset(loadingFrame);
+  const frame = resolveLoadingFrameAsset(displayLoadingFrameName(loadingFrame))
+    ?? resolveLoadingFrameAsset(DEFAULT_ALLY_TEAM_FRAME);
 
   if (!frame) {
     return (

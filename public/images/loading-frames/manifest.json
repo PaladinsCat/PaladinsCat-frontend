@@ -3,11 +3,11 @@
   "sourcePage": "https://paladins.fandom.com/wiki/Loading_Frames",
   "sourceRevisionId": 314005,
   "sourceRevisionTimestamp": "2024-10-16T15:22:10Z",
-  "frameCount": 66,
-  "animatedFrameCount": 66,
+  "frameCount": 72,
+  "animatedFrameCount": 67,
   "totals": {
-    "webpBytes": 9335754,
-    "gifBytes": 22355818
+    "webpBytes": 9504606,
+    "gifBytes": 23709172
   },
   "frames": [
     {
@@ -1859,6 +1859,174 @@
       "bytes": {
         "webp": 23574,
         "gif": 37337
+      }
+    },
+    {
+      "name": "Season 6 Commendation",
+      "slug": "season-6-commendation",
+      "aliases": [
+        "Season 6 Commendation",
+        "Season 6 Commendation Frame"
+      ],
+      "sourceFile": "LobbyUI_SF.upk:loadingframe_season6_commendation",
+      "sourceUrl": "file:///C:/Paladins/Season 8.1/ChaosGame/CookedPCConsole/LobbyUI_SF.upk",
+      "descriptionUrl": "https://paladins.fandom.com/wiki/Loading_Frames",
+      "sha1": "abeb37eb46fad3228e16e4bf1fb80c06d9af29de",
+      "width": 332,
+      "height": 448,
+      "frameCount": 2,
+      "durationMs": 3840,
+      "animated": true,
+      "optimizedFrameCount": 2,
+      "optimizedDurationMs": 3840,
+      "preferredFormat": "webp",
+      "assets": {
+        "webp": "/images/loading-frames/season-6-commendation.webp",
+        "gif": "/images/loading-frames/season-6-commendation.gif"
+      },
+      "bytes": {
+        "webp": 61870,
+        "gif": 41711
+      }
+    },
+    {
+      "name": "Season 6 Diamond",
+      "slug": "season-6-diamond",
+      "aliases": [
+        "Season 6 Diamond",
+        "Season 6 Diamond Frame"
+      ],
+      "sourceFile": "reddit:t3_194ccco:4rzdpj80kvbc1.png",
+      "sourceUrl": "https://i.redd.it/4rzdpj80kvbc1.png",
+      "descriptionUrl": "https://www.reddit.com/r/Paladins/comments/194ccco/season_6_ranked_frames/",
+      "sha1": "3541c4180b806758d05da2b9b2611432cbcef6d8",
+      "width": 660,
+      "height": 890,
+      "frameCount": 1,
+      "durationMs": 0,
+      "animated": false,
+      "optimizedFrameCount": 1,
+      "optimizedDurationMs": 0,
+      "preferredFormat": "webp",
+      "assets": {
+        "webp": "/images/loading-frames/season-6-diamond.webp",
+        "gif": "/images/loading-frames/season-6-diamond.png"
+      },
+      "bytes": {
+        "webp": 22844,
+        "gif": 246641
+      }
+    },
+    {
+      "name": "Season 6 Grandmaster",
+      "slug": "season-6-grandmaster",
+      "aliases": [
+        "Season 6 Grandmaster",
+        "Season 6 Grandmaster Frame"
+      ],
+      "sourceFile": "reddit:t3_194ccco:206f8301kvbc1.png",
+      "sourceUrl": "https://i.redd.it/206f8301kvbc1.png",
+      "descriptionUrl": "https://www.reddit.com/r/Paladins/comments/194ccco/season_6_ranked_frames/",
+      "sha1": "3d5f6e33b332d58e27617498f7282da3533c3082",
+      "width": 660,
+      "height": 890,
+      "frameCount": 1,
+      "durationMs": 0,
+      "animated": false,
+      "optimizedFrameCount": 1,
+      "optimizedDurationMs": 0,
+      "preferredFormat": "webp",
+      "assets": {
+        "webp": "/images/loading-frames/season-6-grandmaster.webp",
+        "gif": "/images/loading-frames/season-6-grandmaster.png"
+      },
+      "bytes": {
+        "webp": 25356,
+        "gif": 324420
+      }
+    },
+    {
+      "name": "Season 6 Gold",
+      "slug": "season-6-gold",
+      "aliases": [
+        "Season 6 Gold",
+        "Season 6 Gold Frame"
+      ],
+      "sourceFile": "reddit:t3_194ccco:bsdy6k2zjvbc1.png",
+      "sourceUrl": "https://i.redd.it/bsdy6k2zjvbc1.png",
+      "descriptionUrl": "https://www.reddit.com/r/Paladins/comments/194ccco/season_6_ranked_frames/",
+      "sha1": "21d3ae5511ed77c5b29bdf42fb9a7642d432af07",
+      "width": 660,
+      "height": 890,
+      "frameCount": 1,
+      "durationMs": 0,
+      "animated": false,
+      "optimizedFrameCount": 1,
+      "optimizedDurationMs": 0,
+      "preferredFormat": "webp",
+      "assets": {
+        "webp": "/images/loading-frames/season-6-gold.webp",
+        "gif": "/images/loading-frames/season-6-gold.png"
+      },
+      "bytes": {
+        "webp": 17108,
+        "gif": 242861
+      }
+    },
+    {
+      "name": "Season 6 Master",
+      "slug": "season-6-master",
+      "aliases": [
+        "Season 6 Master",
+        "Season 6 Master Frame"
+      ],
+      "sourceFile": "reddit:t3_194ccco:rt7i9on0kvbc1.png",
+      "sourceUrl": "https://i.redd.it/rt7i9on0kvbc1.png",
+      "descriptionUrl": "https://www.reddit.com/r/Paladins/comments/194ccco/season_6_ranked_frames/",
+      "sha1": "beca2a1e2a479f031825933849750a1e31492b75",
+      "width": 660,
+      "height": 890,
+      "frameCount": 1,
+      "durationMs": 0,
+      "animated": false,
+      "optimizedFrameCount": 1,
+      "optimizedDurationMs": 0,
+      "preferredFormat": "webp",
+      "assets": {
+        "webp": "/images/loading-frames/season-6-master.webp",
+        "gif": "/images/loading-frames/season-6-master.png"
+      },
+      "bytes": {
+        "webp": 23526,
+        "gif": 278760
+      }
+    },
+    {
+      "name": "Season 6 Platinum",
+      "slug": "season-6-platinum",
+      "aliases": [
+        "Season 6 Platinum",
+        "Season 6 Platinum Frame"
+      ],
+      "sourceFile": "reddit:t3_194ccco:gnqyywpzjvbc1.png",
+      "sourceUrl": "https://i.redd.it/gnqyywpzjvbc1.png",
+      "descriptionUrl": "https://www.reddit.com/r/Paladins/comments/194ccco/season_6_ranked_frames/",
+      "sha1": "3a32ae6af4cee02f8e5f9b4c5032493a1f9d5497",
+      "width": 660,
+      "height": 890,
+      "frameCount": 1,
+      "durationMs": 0,
+      "animated": false,
+      "optimizedFrameCount": 1,
+      "optimizedDurationMs": 0,
+      "preferredFormat": "webp",
+      "assets": {
+        "webp": "/images/loading-frames/season-6-platinum.webp",
+        "gif": "/images/loading-frames/season-6-platinum.png"
+      },
+      "bytes": {
+        "webp": 18148,
+        "gif": 218961
       }
     }
   ]

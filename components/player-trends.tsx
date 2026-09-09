@@ -34,7 +34,7 @@ const emptyTotal = (championId:number):PlayerTrendTotals=>({championId,matches:0
  * refs: endpoints: GET /players/{id}/trends · see: lib/player-trends-api.ts
  * I/O types: `{ playerId, champions = false }: { playerId: string; champions?: boolean } -> JSX.Element`.
  */
-export default function PlayerTrendsPanel({ playerId, champions = false }: { playerId: string; champions?: boolean }) {
+export default function PlayerTrendsPanel({ playerId, champions = false, showTitle = true }: { playerId: string; champions?: boolean; showTitle?: boolean }) {
   const { t, formatNumber, formatDate, locale } = useLocalization();
   const searchParams = useSearchParams();
   const titleId = useId();
@@ -99,8 +99,8 @@ export default function PlayerTrendsPanel({ playerId, champions = false }: { pla
   },[data,selected,metric,mode,t,locale]);
   const queues = [...new Set([486,424,452,469,queue,...(data?.queueIds??[])])];
   const hasData = chart.some(row=>Object.entries(row).some(([key,value])=>key!=="date" && value!=null));
-  return <section className="pc-card space-y-4" aria-labelledby={titleId}>
-    <h2 id={titleId} className="pc-heading text-xl">{t(champions?"playerTrends.championTitle":"playerTrends.title")}</h2>
+  return <section className="pc-card space-y-4" aria-labelledby={showTitle ? titleId : undefined} aria-label={showTitle ? undefined : t(champions?"playerTrends.championTitle":"playerTrends.title")}>
+    {showTitle && <h2 id={titleId} className="pc-heading text-xl">{t(champions?"playerTrends.championTitle":"playerTrends.title")}</h2>}
     <div className="flex flex-wrap items-end gap-3">
       <label className="grid gap-1 text-xs text-pc-text-secondary">{t("playerTrends.metric")}<select className={control} value={metric} onChange={event=>updateUrl({trendMetric:event.target.value})}>
         {(Object.keys(LABELS) as Metric[]).filter(key=>queue===486 || key!=="elo").map(key=><option key={key} value={key}>{t(LABELS[key])}</option>)}

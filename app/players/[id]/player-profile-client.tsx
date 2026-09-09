@@ -20,10 +20,10 @@ import AltAccountRelationModal from "@/components/alt-account-relation-modal";
 import { formatLocalDate, formatLocalDateTime } from "@/lib/time-format";
 import { ErrorState, LoadingIndicator, LoadingOverlay, LoadingPanel } from "@/components/async-state";
 import { DataTableSkeleton, RouteSkeleton } from "@/components/route-skeleton";
-import SmartImage from "@/components/SmartImage";
 import { formatKda } from "@/lib/kda";
 import PlayerName, { PlayerModerationTag } from "@/components/player-name";
 import PlayerLoadingFrame from "@/components/player-loading-frame";
+import { displayLoadingFrameName } from "@/lib/loading-frame-assets";
 import { fetchPlayerModeration } from "@/lib/player-moderation";
 import { useLocalization } from "@/lib/localization-context";
 import { estimateLiveTeamWinChance } from "@/lib/live-team-estimate";
@@ -479,6 +479,7 @@ export default function PlayerProfileClient({
   const avatarUrl = !avatarLoadFailed
     ? playerAvatarProxyPath(player.avatar_id, player.avatar_url)
     : null;
+  const loadingFrameName = displayLoadingFrameName(player.loading_frame);
   // Hi-Rez titles arrive as `<font color="...">text</font>` markup (possibly
     // several concatenated tags for multi-color titles). Parse it so each
     // segment's color is applied as a style and only plain text is rendered.
@@ -492,7 +493,7 @@ export default function PlayerProfileClient({
       {/* ── Header ── */}
       <div className="grid items-start grid-cols-1 gap-5 lg:grid-cols-3">
       <div className="space-y-5 lg:col-span-2">
-      <div className={`relative self-start ${actionMenuOpen ? 'z-40' : 'z-10'}`}>
+      <div className={`pc-card relative self-start ${actionMenuOpen ? 'z-40' : 'z-10'}`}>
         <LoadingOverlay visible={refreshing} />
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
         {/* Keep live/refresh controls visible; consolidate voting and moderation. */}
@@ -626,7 +627,7 @@ export default function PlayerProfileClient({
         </div>
 
         <div className="order-1 min-w-0 flex-1">
-        <div className="flex flex-col items-start gap-4 min-[420px]:flex-row">
+        <div className="flex flex-col items-start gap-4 min-[420px]:flex-row min-[420px]:items-center">
           <PlayerLoadingFrame
             loadingFrame={player.loading_frame}
             avatarUrl={avatarUrl}
@@ -667,9 +668,7 @@ export default function PlayerProfileClient({
                                   : parsedTitle.text}
                               </span>
                             )}
-              {player.loading_frame && (
-                <span className="text-sm font-medium text-pc-accent/80 sm:text-base">▸ {player.loading_frame}</span>
-              )}
+              <span className="text-sm font-medium text-pc-accent/80 sm:text-base">▸ {loadingFrameName}</span>
             </div>
           </div>
         </div>
@@ -680,7 +679,6 @@ export default function PlayerProfileClient({
         <div className="space-y-5">
           {/* Account Overview */}
           <div>
-            <h2 className="pc-card-title shadow-sm">{t("generated.players.account")}</h2>
             <div className="pc-card">
               <div className="grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(12rem,0.65fr)]">
                 <div className="min-w-0">
@@ -735,9 +733,6 @@ export default function PlayerProfileClient({
 
           {/* Recent Matches */}
           <div>
-            <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-              <h2 className="pc-card-title shadow-sm">{t("generated.players.recentMatches")}</h2>
-            </div>
             <div>
               {matchesLoading ? (
                 <DataTableSkeleton rows={6} className="border-0" />
@@ -816,31 +811,29 @@ export default function PlayerProfileClient({
 
       {/* Sidebar cards and player ratings form an independent right stack. */}
       <div className="self-start space-y-5 lg:col-span-1">
-          <div>
-            <h2 className="pc-card-title shadow-sm">{t("generated.players.loadouts")}</h2>
-            <Link href={`/players/${id}/loadouts`} className="group flex items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-3 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary">
-              <SmartImage src="/images/icons/Player_Loadouts_Icon.png" alt="" className="h-11 w-11 shrink-0 object-contain" />
-              <div className="min-w-0 flex-1 text-sm font-semibold text-pc-text group-hover:text-pc-accent">{t("generated.players.playerLoadouts")}</div>
-              <span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent">→</span>
-            </Link>
-          </div>
-          <div>
-            <h2 className="pc-card-title shadow-sm">{t("common.playerChampions.title")}</h2>
-            <Link href={`/players/${id}/champions`} className="group flex items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-3 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center"><SmartImage src="/images/icons/GUI_End_of_Match_Player_Accolades_Icon.png" alt="" className="h-9 w-9 object-contain" /></span>
-              <div className="min-w-0 flex-1 text-sm font-semibold text-pc-text group-hover:text-pc-accent">{t("common.playerChampions.title")}</div>
-              <span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent">→</span>
-            </Link>
-          </div>
+          <Link href={`/players/${id}/loadouts`} className="group flex items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-3 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary">
+            {/* Flaticon UIcons regular rounded `fi-rr-cards-blank`: https://www.flaticon.com/free-icon-font/cards-blank_16769328 */}
+            <i aria-hidden="true" className="fi-rr-cards-blank block w-11 shrink-0 pl-3 text-[1.575rem] leading-none text-[var(--pc-title)]" />
+            <div className="min-w-0 flex-1 text-sm font-semibold text-pc-text group-hover:text-pc-accent">{t("generated.players.playerLoadouts")}</div>
+            <span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent" aria-hidden="true">→</span>
+          </Link>
+          <Link href={`/players/${id}/champions`} className="group flex items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-3 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary">
+            {/* Flaticon UIcons solid `fi-ss-transporter-1`: https://www.flaticon.com/free-icon-font/transporter-1_10461911 */}
+            <i aria-hidden="true" className="fi-ss-transporter-1 block w-11 shrink-0 pl-3 text-[1.575rem] leading-none text-[var(--pc-title)]" />
+            <div className="min-w-0 flex-1 text-sm font-semibold text-pc-text group-hover:text-pc-accent">{t("common.playerChampions.title")}</div>
+            <span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent" aria-hidden="true">→</span>
+          </Link>
 
-          <Link href={`/players/${id}/friends`} className="group flex items-center justify-between gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-3 text-sm font-semibold text-pc-text transition-colors hover:border-pc-accent-mid hover:text-pc-accent">
-            <span>{t("playerFriends.title")}</span><span aria-hidden="true">→</span>
+          <Link href={`/players/${id}/friends`} className="group flex items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-3 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary">
+            {/* Flaticon UIcons solid `fi-ss-user-add`: https://www.flaticon.com/free-icon-font/user-add_3917698 */}
+            <i aria-hidden="true" className="fi-ss-user-add block w-11 shrink-0 pl-3 text-[1.575rem] leading-none text-[var(--pc-title)]" />
+            <div className="min-w-0 flex-1 text-sm font-semibold text-pc-text group-hover:text-pc-accent">{t("playerFriends.title")}</div>
+            <span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent" aria-hidden="true">→</span>
           </Link>
           <PlayerRelationshipSummaryCard playerId={id} />
 
           {/* KBM Ranked */}
           <div>
-            <h2 className="pc-card-title shadow-sm">{t("generated.players.ranked")}</h2>
             <div className="pc-card p-3">
               <div className="flex min-w-0 items-center gap-3">
                 <div className="w-14 shrink-0 text-center">
@@ -876,7 +869,6 @@ export default function PlayerProfileClient({
 
           {/* Glicko Rating */}
           <div>
-            <h2 className="pc-card-title shadow-sm">{t("generated.players.rating")}</h2>
             <div className="pc-card">
               {kbmRating ? (
                 <div className="space-y-3">
@@ -921,7 +913,6 @@ export default function PlayerProfileClient({
 
           {/* Consolidated performance summary */}
           <div>
-            <h2 className="pc-card-title shadow-sm">{t("generated.players.rankedPerformance")}</h2>
             <div className="pc-card p-3">
               <div className="mb-1.5 text-xs uppercase tracking-wider text-pc-text-muted">{t("generated.players.averages")}</div>
               <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
@@ -941,7 +932,6 @@ export default function PlayerProfileClient({
           {/* Queue Ratings (if multiple queues) */}
           {queueRatings.length > 1 && (
             <div>
-              <h2 className="pc-card-title shadow-sm">{t("generated.players.queueRatings")}</h2>
               <div className="pc-card">
                 <div className="space-y-2">
                   {queueRatings.map((qr) => (
@@ -960,7 +950,7 @@ export default function PlayerProfileClient({
         </div>
       </div>
 
-      <PlayerTrendsPanel playerId={id} />
+      <PlayerTrendsPanel playerId={id} showTitle={false} />
 
       {/* ── Current Match Modal ── */}
       {showCurrentMatch && (

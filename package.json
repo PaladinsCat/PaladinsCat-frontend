@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
+    "@flaticon/flaticon-uicons": "^3.3.1",
     "@heroui/react": "^3.2.4",
     "@heroui/system": "^2.4.28",
     "@heroui/theme": "^2.4.26",
