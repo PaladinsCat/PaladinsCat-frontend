@@ -3,11 +3,11 @@
  */
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { Tooltip } from "@base-ui/react/tooltip";
-import { fetchChampionPerformanceDistributions, fetchChampions } from "@/lib/api-client";
+import { fetchChampionPerformanceDistributions, fetchChampions, fetchStatsChampions, fetchPerformanceMetrics, type StatsChampion, type ChampionPerformanceDistribution, type PerformanceMetricKey, type PerformanceMetricsResponse } from "@/lib/api-client";
 import { getPercentageColor } from "@/lib/stat-quality";
 import { STATIC_CHAMPIONS } from "@/lib/static-champions";
 import { getChampionIconSafe } from "@/lib/champion-icons";
@@ -17,8 +17,24 @@ import { useLocalization } from "@/lib/localization-context";
 import { ErrorState, LoadingIndicator } from "@/components/async-state";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 
-const LABELS = { winRate: "common.sort.winRate", banRate: "common.metrics.banRate", dpm: "common.metrics.dpm", hpm: "common.metrics.hpm", gpm: "common.metrics.cpm", mpm: "common.metrics.spm", kda: "common.metrics.kda", kpm: "common.metrics.kpm", deaths_per_minute: "common.metrics.deathsPerMinute" } as const;
+import { getRankIconPath, getTierColor, resolveEffectiveTier } from "@/lib/tier-utils";
+
+function ComparisonTooltip({ description, children, className = "" }: { description: string; children: ReactNode; className?: string }) {
+  return <Tooltip.Root>
+    <Tooltip.Trigger type="button" delay={0} aria-label={description} className={`cursor-help rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent ${className}`}>
+      {children}
+    </Tooltip.Trigger>
+    <Tooltip.Portal>
+      <Tooltip.Positioner sideOffset={8} className="z-50">
+        <Tooltip.Popup className="pc-surface max-w-72 rounded-lg border border-pc-border px-3 py-2 text-xs leading-5 text-pc-text shadow-lg">{description}</Tooltip.Popup>
+      </Tooltip.Positioner>
+    </Tooltip.Portal>
+  </Tooltip.Root>;
+}
+
+const LABELS = { gpm: "common.metrics.cpm", wpm: "common.metrics.wpm", apm: "common.metrics.apm", winRate: "common.sort.winRate", banRate: "common.metrics.banRate", dpm: "common.metrics.dpm", hpm: "common.metrics.hpm", egpm: "common.metrics.ecpm", shpm: "common.metrics.shpm", mpm: "common.metrics.spm", kda: "common.metrics.kda", kpm: "common.metrics.kpm", deaths_per_minute: "common.metrics.deathsPerMinute" } as const;
 const COLUMNS = ["winRate", "banRate", ...GAME_PERFORMANCE_METRICS] as const;
+const METRIC_COLORS: Partial<Record<PerformanceMetricKey, string>> = { dpm: "text-red-400", wpm: "text-orange-400", apm: "text-fuchsia-400", egpm: "text-yellow-400", shpm: "text-teal-400", hpm: "text-emerald-400", mpm: "text-blue-400", kda: "text-violet-400", kpm: "text-cyan-400", deaths_per_minute: "text-rose-400" };
 type ComparisonMetric = (typeof COLUMNS)[number];
 const CLASSES = [
   { value: "Frontline", labelKey: "common.roles.frontline", icon: "Class_Front_Line_Icon" },
@@ -36,9 +52,13 @@ type SortKey = "name" | ComparisonMetric;
  * I/O types: `none -> JSX.Element`.
  * refs: none
  */
-export default function ChampionPerformanceComparison() {
+export default function ChampionPerformanceComparison({ scope = "ranked", queueId = 486 }: { scope?: "ranked" | "casual"; queueId?: number }) {
+  const columns = COLUMNS.filter(metric => scope === "casual" ? metric !== "winRate" && metric !== "banRate" : metric !== "gpm");
   const { t, formatNumber, formatPercent, locale } = useLocalization();
   const [averages, setAverages] = useState<Averages | null>(null);
+  const [details, setDetails] = useState<StatsChampion[]>([]);
+  const [distributions, setDistributions] = useState<Map<number, Partial<Record<PerformanceMetricKey, ChampionPerformanceDistribution>>>>(new Map());
+  const [global, setGlobal] = useState<PerformanceMetricsResponse>({});
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const [championClass, setChampionClass] = useState<ChampionClass>("all");
@@ -46,10 +66,13 @@ export default function ChampionPerformanceComparison() {
   useEffect(() => {
     let active = true;
     Promise.all([
-      fetchChampions({ scope: "ranked" }),
-      Promise.all(GAME_PERFORMANCE_METRICS.map(async metric => ({ metric, rows: await fetchChampionPerformanceDistributions({ metric, queueId: 486 }) }))),
-    ]).then(([champions, results]) => {
+      scope === "ranked" ? fetchChampions({ scope: "ranked" }) : Promise.resolve([]),
+      Promise.all([...new Set<PerformanceMetricKey>([...GAME_PERFORMANCE_METRICS, "wpm", "apm"])].map(async metric => ({ metric, rows: await fetchChampionPerformanceDistributions({ metric, queueId, scope }).catch(error => { if (scope === "ranked" && metric === "shpm") return []; throw error; }) }))),
+      scope === "ranked" ? fetchStatsChampions({ scope: "ranked", limit: 100 }) : Promise.resolve([]),
+      fetchPerformanceMetrics({ scope, queueId }),
+    ]).then(([champions, results, summary, globalMetrics]) => {
       const next: Averages = new Map();
+      const full = new Map<number, Partial<Record<PerformanceMetricKey, ChampionPerformanceDistribution>>>();
       for (const champion of champions) {
         const rates: ChampionMeasures = {};
         const matches = champion.totalMatches ?? champion.totalPlays;
@@ -62,15 +85,16 @@ export default function ChampionPerformanceComparison() {
         next.set(champion.id, rates);
       }
       for (const { metric, rows } of results) for (const row of rows) {
+        full.set(row.championId, { ...full.get(row.championId), [metric]: row });
         if (!row.totalMatches || !Number.isFinite(row.mean)) continue;
         const champion = next.get(row.championId) ?? {};
-        champion[metric] = row.mean;
+        if (COLUMNS.includes(metric as ComparisonMetric)) champion[metric as ComparisonMetric] = row.mean;
         next.set(row.championId, champion);
       }
-      if (active) setAverages(next);
+      if (active) { setAverages(next); setDetails(summary); setDistributions(full); setGlobal(globalMetrics); }
     }).catch(() => { if (active) setFailed(true); });
     return () => { active = false; };
-  }, [attempt]);
+  }, [attempt, scope, queueId]);
 
   const rows = STATIC_CHAMPIONS.filter(champion => championClass === "all" || champion.roles.includes(championClass)).sort((a, b) => {
     const byName = a.name.localeCompare(b.name, locale);
@@ -91,9 +115,7 @@ export default function ChampionPerformanceComparison() {
   return <section className="pc-card-flush min-w-0" aria-labelledby="champion-averages" aria-busy={!averages}>
     <header className="space-y-2 p-4 sm:p-6">
       <h2 id="champion-averages" className="pc-heading scroll-mt-24 text-xl">{t("stats.performance.championTitle")}</h2>
-      <p className="text-sm text-pc-text-secondary">{t("stats.performance.championDescription", { count: rows.length })}</p>
       <div className="pt-2">
-        <span className="pc-label">{t("generated.players.class")}</span>
         <SegmentedControl<ChampionClass> label={t("generated.players.class")} value={championClass} onChange={setChampionClass} items={[
           { value: "all", label: t("generated.players.all") },
           ...CLASSES.map(role => ({ value: role.value, label: t(role.labelKey), icon: <img src={`/images/icons/${role.icon}.avif`} alt="" width={20} height={20} className="h-5 w-5 shrink-0 object-contain" /> })),
@@ -103,40 +125,58 @@ export default function ChampionPerformanceComparison() {
     {!averages && <div className="px-4 pb-4 sm:px-6"><LoadingIndicator /></div>}
     <div className="overflow-x-auto" role="region" aria-label={t("stats.performance.championTitle")} tabIndex={0}>
       <table className="w-full text-sm">
-        <caption className="sr-only">{t("stats.performance.championDescription", { count: rows.length })}</caption>
+        <caption className="sr-only">{t("stats.performance.championTitle")}</caption>
         <thead><tr className="border-b border-pc-border text-xs">
           {sortHeading("name", t("stats.performance.champion"))}
-          {COLUMNS.map(metric => sortHeading(metric, t(LABELS[metric])))}
+          {columns.map(metric => sortHeading(metric, t(LABELS[metric])))}
         </tr></thead>
         <tbody>{rows.map(champion => <tr key={champion.id} className="border-b border-pc-border last:border-0">
           <th scope="row" className="px-4 py-3 text-left font-medium sm:pl-6">
-            <Link href={`/champions/${championSlug(champion.name)}`} className="flex min-w-36 items-center gap-3 text-pc-text hover:text-pc-accent">
+            <div className="flex min-w-36 items-center gap-3"><Link href={`/champions/${championSlug(champion.name)}`} className="flex items-center gap-3 text-pc-text hover:text-pc-accent">
               <img src={getChampionIconSafe(champion.name)} alt="" width={32} height={32} loading="lazy" className="h-8 w-8 shrink-0 rounded-md object-cover" />
-              <span>{champion.name}</span>
-            </Link>
+              <span>{champion.name}</span></Link>
+              {(() => {
+                const average = details.find(item => item.championId === champion.id)?.avgLeagueTier;
+                if (average == null) return null;
+                const tier = Math.round(average);
+                const rank = resolveEffectiveTier(tier, 0);
+                return <ComparisonTooltip className={`ml-auto flex items-center gap-1 whitespace-nowrap text-xs ${getTierColor(rank.displayTier)}`} description={`${t("common.metricHelp.tier")} ${t("generated.champions.avgTier")}: ${rank.displayName} (${formatNumber(average, { maximumFractionDigits: 1 })})`}>
+                  <img src={getRankIconPath(tier, 0)} alt={rank.displayName} width={24} height={24} className="h-6 w-6 object-contain" />
+                  {formatNumber(average, { maximumFractionDigits: 1 })}
+                </ComparisonTooltip>;
+              })()}
+            </div>
           </th>
-          {COLUMNS.map(metric => {
+          {columns.map(metric => {
             const value = averages?.get(champion.id)?.[metric];
             const percentage = metric === "winRate" || metric === "banRate";
+            const key = metric as PerformanceMetricKey;
+            const baseline = global[key]?.mean;
+            const distribution = distributions.get(champion.id)?.[key];
+            const delta = value != null && baseline != null && baseline !== 0 ? (value - baseline) / baseline * 100 : null;
+            const decimals = ["kda", "kpm", "deaths_per_minute"].includes(metric) ? 2 : 0;
+            const range = distribution ? `${t("performance.p10p90")}: ${formatNumber(distribution.p10, { maximumFractionDigits: decimals })}–${formatNumber(distribution.p90, { maximumFractionDigits: decimals })}` : undefined;
             const count = averages?.get(champion.id)?.[metric === "winRate" ? "matches" : "bans"];
-            const countDescription = count == null ? t("stats.performance.countUnavailable") : t(metric === "winRate" ? "stats.performance.winCountHelp" : "stats.performance.banCountHelp", { count: formatNumber(count), champion: champion.name });
-            return <td key={metric} className="whitespace-nowrap px-4 py-3 text-right tabular-nums text-pc-text" style={percentage && value != null ? { color: getPercentageColor(value) } : undefined}>
-              {averages ? percentage ? <Tooltip.Root>
-                <Tooltip.Trigger type="button" delay={0} aria-label={countDescription} aria-describedby={`rate-count-${champion.id}-${metric}`} className="ml-auto flex cursor-help flex-col items-end gap-1 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent">
+            const baseCountDescription = count == null ? t("stats.performance.countUnavailable") : t(metric === "winRate" ? "stats.performance.winCountHelp" : "stats.performance.banCountHelp", { count: formatNumber(count), champion: champion.name });
+            const summary = details.find(item => item.championId === champion.id);
+            const countDescription = metric === "winRate" && summary?.wins != null
+              ? `${baseCountDescription} ${t("generated.players.wins")}: ${formatNumber(summary.wins)} · ${t("generated.players.losses")}: ${formatNumber(Math.max(0, summary.totalPlays - summary.wins))}`
+              : baseCountDescription;
+            return <td key={metric} className="whitespace-nowrap px-3 py-3 text-right align-top tabular-nums text-pc-text" style={percentage && value != null ? { color: getPercentageColor(value) } : undefined}>
+              {averages ? <ComparisonTooltip className="ml-auto flex flex-col items-end" description={percentage ? `${t(`common.metricHelp.${metric}`)} ${countDescription}` : `${t(`common.metricHelp.${metric}`)} ${t(LABELS[metric])}: ${formatNumber(value, { maximumFractionDigits: decimals })}. ${range ?? t("stats.performance.countUnavailable")}. ${t("generated.champions.global")}: ${formatNumber(baseline, { maximumFractionDigits: decimals })} (${formatPercent(delta, { signDisplay: "always", maximumFractionDigits: 1 })})`}>
+                {percentage ? <>
                   <span>{formatPercent(value, { maximumFractionDigits: 2 })}</span>
-                  <span className="text-xs text-pc-text-secondary">{formatNumber(count)}</span>
-                </Tooltip.Trigger>
-                <Tooltip.Portal>
-                  <Tooltip.Positioner sideOffset={8} className="z-50">
-                    <Tooltip.Popup id={`rate-count-${champion.id}-${metric}`} role="tooltip" className="pc-surface max-w-72 rounded-lg border border-pc-border px-3 py-2 text-xs leading-5 text-pc-text shadow-lg">{countDescription}</Tooltip.Popup>
-                  </Tooltip.Positioner>
-                </Tooltip.Portal>
-              </Tooltip.Root> : formatNumber(value, { maximumFractionDigits: metric === "kda" || metric === "kpm" || metric === "deaths_per_minute" ? 2 : 0 }) : <span className="pc-skeleton ml-auto block h-4 w-12 rounded" />}
+                  <span className="mt-1 text-xs text-pc-text-secondary">{formatNumber(count)}</span>
+                </> : <>
+                  <span className={METRIC_COLORS[key]}>{formatNumber(value, { maximumFractionDigits: decimals })}</span>
+                  <span className="mt-1 text-xs text-pc-text-muted">{t("generated.champions.global")} {formatNumber(baseline, { maximumFractionDigits: decimals })}</span>
+                  <span className={`text-xs ${delta == null ? "text-pc-text-muted" : (metric === "deaths_per_minute" ? delta <= 0 : delta >= 0) ? "text-emerald-400" : "text-rose-400"}`}>{formatPercent(delta, { signDisplay: "always", maximumFractionDigits: 1 })}</span>
+                </>}
+              </ComparisonTooltip> : <span className="pc-skeleton ml-auto block h-4 w-12 rounded" />}
             </td>;
           })}
         </tr>)}</tbody>
       </table>
     </div>
-    <p className="p-4 text-xs text-pc-text-secondary sm:p-6">{t("stats.performance.championNote")}</p>
   </section>;
 }

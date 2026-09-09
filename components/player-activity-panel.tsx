@@ -9,6 +9,7 @@ import Link from "next/link";
 import { Info } from "lucide-react";
 import { fetchMatchesOverview, fetchPresenceHourlyStats, fetchPresenceStats, type MatchHourlyStats, type MatchQueueActivity, type MatchesOverview, type PresenceHourlyStats, type PresenceStats } from "@/lib/api-client";
 import { LoadingPanel } from "@/components/async-state";
+import { LineChartComponent } from "@/components/Chart";
 import DetailLink from "@/components/detail-link";
 import { stationaryChartSeries } from "@/lib/chart-colors";
 import { useLocalization } from "@/lib/localization-context";
@@ -327,21 +328,6 @@ export default function PlayerActivityPanel({
         formatNumber={formatNumber}
       />
 
-      <section className="pc-card p-3 sm:p-4">
-        <div className="flex min-w-0 items-center justify-between gap-3">
-          <h2 className="shrink-0 text-sm font-bold text-pc-text">{t("playerActivity.regions24h")}</h2>
-          <ActivityChartStatement className="min-w-0 text-right" />
-        </div>
-        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
-          {display.regions.map((region, index) => <Fragment key={region.region}>
-            <div className="pc-surface-light rounded-lg border border-pc-border/50 p-3 text-center"><div className="text-xs uppercase text-pc-text-muted">{region.region}</div><div className="font-mono text-xl font-bold text-pc-accent">{formatNumber(region.total24h)}</div><div className="text-xs text-pc-text-muted">{formatNumber(region.matchesPerHour)}{t("generated.matches.hr")}</div></div>
-            {index % 2 === 1 && index < display.regions.length - 1 && <ActivityChartStatement className="col-span-full text-center sm:hidden" />}
-            {index % 3 === 2 && index < display.regions.length - 1 && <ActivityChartStatement className="col-span-full hidden text-center sm:block" />}
-          </Fragment>)}
-          {display.regions.length > 0 && <ActivityChartStatement className="col-span-full text-center" />}
-        </div>
-      </section>
-
       {showRankedHealth && droppedRows.length > 0 && <section className="pc-card p-3 sm:p-4"><div className="mb-2 flex items-center justify-between"><h2 className="text-xs font-bold uppercase tracking-wider text-amber-300">{t("generated.matches.trueDropped")}</h2><span className="text-xs text-pc-text-muted">{droppedRows.reduce((sum: number, row: any) => sum + row.droppedIds.length, 0)} {t("generated.matches.ids")}</span></div><div className="space-y-2">{droppedRows.map((row: any) => <div key={`${row.date}|${row.hour}`} className="flex gap-2 text-xs"><span suppressHydrationWarning className="w-10 shrink-0 text-right font-mono text-pc-text-muted">{formatHourFromUtcBucket(row.date, row.hour)}</span><div className="flex flex-wrap gap-1">{row.droppedIds.map((id: string) => <Link key={id} href={`/matches/${id}`} className="font-mono text-amber-200 hover:text-pc-accent">#{id}</Link>)}</div></div>)}</div></section>}
 
       {!displayLoading && presence && <PlayerPresenceBreakdown
@@ -574,7 +560,7 @@ function WeeklyTrend({
       <h2 className="text-sm font-bold text-pc-text">{title}</h2>
       <p className="mt-0.5 text-xs text-pc-text-muted">{subtitle}</p>
     </div>
-    {loading ? <LoadingPanel compact className="min-h-[30rem]" /> : <div className="flex min-h-[30rem] flex-col">
+    {loading ? <LoadingPanel compact className="min-h-[30rem]" /> : <div className="flex min-h-[30rem] flex-col lg:min-h-0 lg:flex-row lg:gap-6">
       {days.length > 0 ? <>
         <WeeklySeriesChart
           days={days}
@@ -583,7 +569,7 @@ function WeeklyTrend({
           formatNumber={formatNumber}
           tone="matches"
         />
-        <div className="my-4 border-t border-pc-border/60" />
+        <div className="my-4 border-t border-pc-border/60 lg:my-0 lg:border-l lg:border-t-0" />
         <WeeklySeriesChart
           days={days}
           label={playersLabel}
@@ -609,85 +595,26 @@ function WeeklySeriesChart({
   formatNumber: (value: number) => string;
   tone: "matches" | "players";
 }) {
-  const max = Math.max(...days.map(getValue), 1);
   const isPlayers = tone === "players";
-  const showStatements = useContext(ActivityStatementContext);
-
-  if (!showStatements) {
-    return <div className="flex min-h-0 flex-1 flex-col pt-4">
-      <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-pc-text-muted">
-        <span className={`h-2 w-2 rounded-full ${isPlayers ? "bg-violet-400" : "bg-pc-accent"}`} />
-        {label}
-      </div>
-      <div className="mt-3 grid min-h-[8rem] flex-1 grid-cols-7 items-end gap-2 border-b border-pc-border/50 px-1">
-        {days.map(day => {
-          const value = getValue(day);
-          const height = value > 0 ? Math.max(5, (value / max) * 100) : 1;
-          return <div key={day.date} className="group flex h-full min-w-0 flex-col text-center">
-            <div className={`mb-2 truncate font-mono text-xs font-semibold transition-colors ${
-              isPlayers ? "text-violet-300 group-hover:text-violet-200" : "text-pc-text group-hover:text-pc-accent"
-            }`}>
-              {formatNumber(value)}
-            </div>
-            <div className="flex min-h-0 flex-1 items-end justify-center">
-              <div
-                className={`h-full w-4 max-w-[50%] min-h-px rounded-t-md transition-[height,filter] duration-500 ease-out group-hover:brightness-125 ${
-                  isPlayers
-                    ? "bg-gradient-to-t from-violet-500 to-violet-400"
-                    : "bg-gradient-to-t from-pc-accent/45 to-pc-accent"
-                }`}
-                style={{ height: `${height}%` }}
-              />
-            </div>
-          </div>;
-        })}
-      </div>
-      <div className="grid grid-cols-7 gap-2 px-1 pt-2">
-        {days.map(day => <div key={day.date} className="truncate text-center text-xs text-pc-text-muted">
-          {new Date(`${day.date}T00:00:00Z`).toLocaleDateString(undefined, { weekday: "short", timeZone: "UTC" })}
-        </div>)}
-      </div>
-    </div>;
-  }
-
   return <div className="flex min-h-0 flex-1 flex-col pt-4">
     <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-pc-text-muted">
       <span className={`h-2 w-2 rounded-full ${isPlayers ? "bg-violet-400" : "bg-pc-accent"}`} />
       {label}
     </div>
-    <div className="mt-3 grid grid-cols-7 gap-2 px-1">
-      {days.map(day => {
-        const value = getValue(day);
-        return <div key={day.date} className={`truncate text-center font-mono text-xs font-semibold ${
-          isPlayers ? "text-violet-300" : "text-pc-text"
-        }`}>
-          {formatNumber(value)}
-        </div>;
-      })}
-    </div>
-    <ActivityChartStatement className="my-2 text-center" />
-    <div className="grid min-h-[6rem] flex-1 grid-cols-7 items-end gap-2 border-b border-pc-border/50 px-1">
-      {days.map(day => {
-        const value = getValue(day);
-        const height = value > 0 ? Math.max(5, (value / max) * 100) : 1;
-        return <div key={day.date} className="group flex h-full min-w-0 items-end justify-center text-center">
-          <div
-            className={`h-full w-4 max-w-[50%] min-h-px rounded-t-md transition-[height,filter] duration-500 ease-out group-hover:brightness-125 ${
-              isPlayers
-                ? "bg-gradient-to-t from-violet-500 to-violet-400"
-                : "bg-gradient-to-t from-pc-accent/45 to-pc-accent"
-            }`}
-            style={{ height: `${height}%` }}
-          />
-        </div>;
-      })}
-    </div>
-    <div className="grid grid-cols-7 gap-2 px-1 pt-2">
-      {days.map(day => <div key={day.date} className="truncate text-center text-xs text-pc-text-muted">
-        {new Date(`${day.date}T00:00:00Z`).toLocaleDateString(undefined, { weekday: "short", timeZone: "UTC" })}
-      </div>
-      )}
-    </div>
+    <LineChartComponent
+      data={days.map(day => ({
+        day: new Date(`${day.date}T00:00:00Z`).toLocaleDateString(undefined, { weekday: "short", timeZone: "UTC" }),
+        [label]: getValue(day),
+      }))}
+      xKey="day"
+      yKeys={[label]}
+      height={190}
+      colors={[isPlayers ? stationaryChartSeries.violet : stationaryChartSeries.sky]}
+      showLegend={false}
+      showTooltip={false}
+      showValueLabels
+      valueLabelFormatter={value => formatNumber(Number(value))}
+    />
   </div>;
 }
 

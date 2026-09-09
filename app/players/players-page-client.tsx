@@ -96,7 +96,6 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
     { href: "/players/private-accounts", titleKey: "generated.players.privateAccounts", count: directoryCounts.privateAccounts, icon: LockKeyhole, accent: "slate" },
     { href: "/players/parties", titleKey: "generated.players.rankedParties", count: directoryCounts.parties, icon: UsersRound, accent: "cyan" },
     { href: "/players/cheaters", titleKey: "generated.players.cheaters", count: communityCounts.cheaters, icon: ShieldAlert, accent: "red" },
-    { href: "/players/exploiters", titleKey: "moderation.exploiterTitle", count: communityCounts.exploiters, icon: ShieldAlert, accent: "orange" },
     { href: "/players/boosted", titleKey: "moderation.boostedPlayers", count: communityCounts.boosted, icon: Award, accent: "orange" },
     { href: "/players/suspicious", titleKey: "generated.players.suspiciousPlayers", count: communityCounts.suspicious, icon: BadgeAlert, accent: "amber" },
     { href: "/players/weirdos", titleKey: "moderation.weirdoTitle", count: communityCounts.weirdos, icon: Sparkles, accent: "violet" },

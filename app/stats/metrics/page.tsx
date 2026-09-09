@@ -5,7 +5,6 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import Link from "next/link";
 import ChampionPerformanceComparison from "@/components/champion-performance-comparison";
 import PageHeader from "@/components/ui/page-header";
 import { SegmentedRouteLinks } from "@/components/ui/segmented-control";
@@ -15,12 +14,16 @@ import { fetchPerformanceMetricDashboard, type PerformanceMetricSummary } from "
 import { stationaryChartSeries } from "@/lib/chart-colors";
 import { useLocalization } from "@/lib/localization-context";
 import { useLobbyTier } from "@/lib/lobby-tier-context";
-import { GAME_PERFORMANCE_METRICS, performanceSelection, type GamePerformanceMetric, type PerformanceScope } from "@/lib/performance-selection";
+import { CASUAL_PERFORMANCE_MODES, GAME_PERFORMANCE_METRICS, performanceSelection, performanceMetricName, type GamePerformanceMetric, type PerformanceScope } from "@/lib/performance-selection";
 
 const METRICS = {
   dpm: { labelKey: "common.metrics.dpm", full: "common.metrics.damagePerMinute" },
   hpm: { labelKey: "common.metrics.hpm", full: "common.metrics.healingPerMinute" },
+  wpm: { labelKey: "common.metrics.wpm", full: "common.metrics.weaponPerMinute" },
+  apm: { labelKey: "common.metrics.apm", full: "common.metrics.abilityPerMinute" },
+  shpm: { labelKey: "common.metrics.shpm", full: "common.metrics.selfHealingPerMinute" },
   gpm: { labelKey: "common.metrics.cpm", full: "common.metrics.creditsPerMinute" },
+  egpm: { labelKey: "common.metrics.ecpm", full: "common.metrics.effectiveCreditsPerMinute" },
   mpm: { labelKey: "common.metrics.spm", full: "common.metrics.shieldingPerMinute" },
   kda: { labelKey: "common.metrics.kda", full: "common.metrics.kdaRatio" },
   kpm: { labelKey: "common.metrics.kpm", full: "common.metrics.killsAssistsPerMinute" },
@@ -51,12 +54,14 @@ const COLUMNS = [
  */
 export type MetricsInitialData = {
   scope: PerformanceScope;
+  queueId: number;
   metric: GamePerformanceMetric;
   dashboard: { summary: PerformanceMetricSummary; roles: Record<string, PerformanceMetricSummary> };
 };
 
-function PerformanceData({ scope, metric, initialData }: {
+function PerformanceData({ scope, metric, queueId, initialData }: {
   scope: PerformanceScope;
+  queueId: number;
   metric: GamePerformanceMetric;
   initialData?: MetricsInitialData | null;
 }) {
@@ -68,11 +73,11 @@ function PerformanceData({ scope, metric, initialData }: {
   useEffect(() => {
     if (initialData && attempt === 0) return;
     let active = true;
-    fetchPerformanceMetricDashboard(metric, scope).then(data => {
+    fetchPerformanceMetricDashboard(metric, scope, queueId).then(data => {
       if (active) setDashboard(data);
     }).catch(() => { if (active) setFailed(true); });
     return () => { active = false; };
-  }, [scope, metric, initialData, attempt]);
+  }, [scope, metric, queueId, initialData, attempt]);
 
   if (failed) return <ErrorState message={t("stats.performance.unavailable")} onRetry={() => { setFailed(false); setAttempt(value => value + 1); }} />;
   if (!dashboard) return <div className="pc-card min-h-80" role="status"><LoadingIndicator /></div>;
@@ -85,7 +90,7 @@ function PerformanceData({ scope, metric, initialData }: {
     { name: t("common.roles.global"), icon: undefined, summary: dashboard.summary },
     ...ROLES.map(role => ({ name: t(role.labelKey), icon: role.icon, summary: dashboard.roles[role.name] })),
   ];
-  const chartData = ROLES.map(role => ({ name: t(role.short), [averageLabel]: dashboard.roles[role.name]?.sampleSize ? Number(dashboard.roles[role.name].mean.toFixed(decimals)) : null }));
+  const chartData = ROLES.map(role => ({ name: t(role.labelKey), [averageLabel]: dashboard.roles[role.name]?.sampleSize ? Number(dashboard.roles[role.name].mean.toFixed(decimals)) : null }));
   return <div className="space-y-6">
     <section className="pc-card space-y-6" aria-labelledby="performance-overview">
       <h2 id="performance-overview" className="pc-heading text-xl">{t(METRICS[metric].full)}</h2>
@@ -98,14 +103,13 @@ function PerformanceData({ scope, metric, initialData }: {
       <div>
         <h3 className="mb-4 text-sm font-semibold text-pc-text">{t("stats.performance.roleAverages")}</h3>
         <div className="h-60 sm:h-[300px]">
-          <BarChartComponent data={chartData} xKey="name" yKeys={[averageLabel]} height="100%" showLegend={false} barColors={{ [averageLabel]: ROLES.map(role => role.color) }} />
+          <BarChartComponent data={chartData} xKey="name" yKeys={[averageLabel]} height="100%" showLegend={false} showTooltip={false} xAxisIcons={Object.fromEntries(ROLES.map(role => [t(role.labelKey), `/images/icons/${role.icon}.avif`]))} showValueLabels valueLabelFormatter={value => formatNumber(Number(value), { maximumFractionDigits: decimals })} barColors={{ [averageLabel]: ROLES.map(role => role.color) }} />
         </div>
       </div>
     </section>
     <section className="pc-card-flush min-w-0" aria-labelledby="performance-distribution">
       <header className="space-y-2 p-4 sm:p-6">
         <h2 id="performance-distribution" className="pc-heading text-xl">{t("stats.performance.distribution")}</h2>
-        <p className="text-sm text-pc-text-secondary">{t("stats.performance.percentileHelp")}</p>
       </header>
       <div className="overflow-x-auto" role="region" aria-label={t("stats.performance.distribution")} tabIndex={0}>
         <table className="w-full whitespace-nowrap text-sm">
@@ -124,7 +128,6 @@ function PerformanceData({ scope, metric, initialData }: {
           </tr>)}</tbody>
         </table>
       </div>
-      <p className="p-4 text-xs text-pc-text-secondary sm:p-6">{t("stats.performance.sampleHelp")}</p>
     </section>
   </div>;
 }
@@ -133,24 +136,21 @@ function MetricsContent({ initialData }: { initialData?: MetricsInitialData | nu
   const { t } = useLocalization();
   const params = useSearchParams();
   const { filter, ready } = useLobbyTier();
-  const { scope, metric } = performanceSelection(params.get("scope"), params.get("metric"));
-  const href = (nextScope: PerformanceScope, nextMetric: GamePerformanceMetric) => {
-    const selection = performanceSelection(nextScope, nextMetric);
-    return `/stats/performance?scope=${selection.scope}&metric=${selection.metric}`;
+  const { scope, metric, queueId } = performanceSelection(params.get("scope"), params.get("metric"), params.get("queueId"));
+  const href = (nextScope: PerformanceScope, nextMetric: GamePerformanceMetric, nextQueue = queueId) => {
+    const selection = performanceSelection(nextScope, nextMetric, String(nextQueue));
+    return `/stats/performance?scope=${selection.scope}&metric=${performanceMetricName(selection.metric)}&queueId=${selection.queueId}`;
   };
-  const seed = initialData?.scope === scope && initialData.metric === metric && (scope === "casual" || filter === "all") ? initialData : null;
+  const seed = initialData?.scope === scope && initialData.queueId === queueId && initialData.metric === metric && (scope === "casual" || filter === "all") ? initialData : null;
   return <div className="space-y-6">
-    <PageHeader parentHref="/stats" parentLabel={t("stats.portal.title")} title={t(scope === "ranked" ? "stats.performance.rankedTitle" : "stats.performance.casualTitle")} description={t(scope === "ranked" ? "stats.performance.rankedDescription" : "stats.performance.casualDescription")} />
+    <PageHeader parentHref="/stats" parentLabel={t("stats.portal.title")} title={t(scope === "ranked" ? "stats.performance.rankedTitle" : "stats.performance.casualTitle")} />
     <div className="space-y-4">
       <SegmentedRouteLinks label={t("performance.modeLabel")} value={scope} items={(["ranked", "casual"] as const).map(value => ({ value, label: t(value === "ranked" ? "stats.performance.ranked" : "stats.performance.casual"), href: href(value, metric) }))} />
-      <SegmentedRouteLinks label={t("menu.performanceMetrics")} value={metric} items={GAME_PERFORMANCE_METRICS.filter(value => scope === "ranked" || value !== "kda").map(value => ({ value, label: t(METRICS[value].labelKey), href: href(scope, value) }))} />
+      {scope === "casual" && <SegmentedRouteLinks label={t("performance.modeLabel")} value={String(queueId)} items={CASUAL_PERFORMANCE_MODES.map(mode => ({ value: String(mode.queueId), label: t(mode.labelKey), href: href(scope, metric, mode.queueId) }))} />}
+      <SegmentedRouteLinks label={t("menu.performanceMetrics")} value={metric} items={GAME_PERFORMANCE_METRICS.filter(value => scope === "casual" || value !== "gpm").map(value => ({ value, label: t(METRICS[value].labelKey), href: href(scope, value) }))} />
     </div>
-    {scope === "casual" || ready ? <PerformanceData key={`${scope}:${metric}:${scope === "ranked" ? filter : "all"}`} scope={scope} metric={metric} initialData={seed} /> : <div className="pc-card min-h-80"><LoadingIndicator /></div>}
-    {scope === "ranked" ? ready && <ChampionPerformanceComparison key={filter} /> : <section className="pc-card space-y-3">
-      <h2 className="pc-heading text-xl">{t("stats.performance.championTitle")}</h2>
-      <p className="text-sm text-pc-text-secondary">{t("stats.performance.championRankedOnly")}</p>
-      <Link href={href("ranked", metric)} className="pc-btn-secondary inline-flex">{t("stats.performance.ranked")}</Link>
-    </section>}
+    {scope === "casual" || ready ? <PerformanceData key={`${scope}:${queueId}:${metric}:${scope === "ranked" ? filter : "all"}`} scope={scope} queueId={queueId} metric={metric} initialData={seed} /> : <div className="pc-card min-h-80"><LoadingIndicator /></div>}
+    {(scope === "casual" || ready) && <ChampionPerformanceComparison key={`${scope}:${queueId}:${filter}`} scope={scope} queueId={queueId} />}
   </div>;
 }
 

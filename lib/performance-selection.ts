@@ -9,11 +9,11 @@ export type PerformanceScope = "ranked" | "casual";
  * Name selectable metrics, preserving damage DPM and explicit deaths/min.
  * I/O: type only; refs: migrations: 169
  */
-export type GamePerformanceMetric = "dpm" | "hpm" | "gpm" | "mpm" | "kda" | "kpm" | "deaths_per_minute";
+export type GamePerformanceMetric = "dpm" | "wpm" | "apm" | "hpm" | "shpm" | "gpm" | "egpm" | "mpm" | "kda" | "kpm" | "deaths_per_minute";
 /**
  * List stable metric query keys. I/O: readonly string tuple; refs: endpoints: GET /stats/performance-metrics
  */
-export const GAME_PERFORMANCE_METRICS = ["dpm", "hpm", "gpm", "mpm", "kda", "kpm", "deaths_per_minute"] as const;
+export const GAME_PERFORMANCE_METRICS = ["dpm", "wpm", "apm", "hpm", "shpm", "gpm", "egpm", "mpm", "kda", "kpm", "deaths_per_minute"] as const;
 
 /**
  * Normalize URL selectors to a supported scope/metric pair without side effects.
@@ -21,9 +21,18 @@ export const GAME_PERFORMANCE_METRICS = ["dpm", "hpm", "gpm", "mpm", "kda", "kpm
  * refs: endpoints: GET /stats/performance-metrics
  * I/O types: `scope?: string | null; metric?: string | null -> { scope: PerformanceScope; metric: GamePerformanceMetric; }`.
  */
-export function performanceSelection(scope?: string | null, metric?: string | null) {
+export function performanceSelection(scope?: string | null, metric?: string | null, queue?: string | null) {
+  const aliases: Record<string, string> = { wdpm: "wpm", sdpm: "apm", ecpm: "egpm", cpm: "gpm", depm: "deaths_per_minute" };
+  metric = metric ? aliases[metric.toLowerCase()] ?? metric : metric;
   const selectedScope: PerformanceScope = scope === "casual" ? "casual" : "ranked";
   const selectedMetric: GamePerformanceMetric = GAME_PERFORMANCE_METRICS.includes(metric as GamePerformanceMetric)
-    && !(selectedScope === "casual" && metric === "kda") ? metric as GamePerformanceMetric : "dpm";
-  return { scope: selectedScope, metric: selectedMetric };
+ ? metric as GamePerformanceMetric : "dpm";
+  const queueId = selectedScope === "ranked" ? 486 : [424, 452, 469].includes(Number(queue)) ? Number(queue) : 424;
+  return { scope: selectedScope, metric: selectedMetric, queueId };
 }
+
+export function performanceMetricName(metric: GamePerformanceMetric): string {
+  return ({ gpm: "cpm", wpm: "wdpm", apm: "sdpm", egpm: "ecpm", deaths_per_minute: "depm" } as Partial<Record<GamePerformanceMetric, string>>)[metric] ?? metric;
+}
+
+export const CASUAL_PERFORMANCE_MODES = [{ queueId: 424, labelKey: "stats.performance.siege" }, { queueId: 452, labelKey: "stats.performance.onslaught" }, { queueId: 469, labelKey: "stats.performance.tdm" }] as const;

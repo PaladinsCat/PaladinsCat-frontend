@@ -616,7 +616,8 @@ function normalizeCheaterPortalEntry(row: any): CheaterPortalEntry {
  * refs: doc: documents/02-technical/api/api-server.md
  */
 export async function fetchCheaterPortal(): Promise<CheaterPortal> {
-  const raw = await fetchJson<any>("/cheaters/portal");
+  const response = await fetchJson<any>("/cheaters/portal");
+  const raw = response.portal ?? response;
   return {
     activeCount: Number(raw.activeCount ?? raw.active_count ?? 0),
     inactiveCount: Number(raw.inactiveCount ?? raw.inactive_count ?? 0),
@@ -1320,7 +1321,7 @@ export interface PerformanceMetricSummary {
  * Name a backend-supported performance metric. I/O: string literal -> PerformanceMetricKey.
  * refs: endpoints: GET /stats/performance-metrics
  */
-export type PerformanceMetricKey = 'dpm' | 'wpm' | 'apm' | 'hpm' | 'gpm' | 'egpm' | 'mpm' | 'kda' | 'kpm' | 'deaths_per_minute';
+export type PerformanceMetricKey = 'dpm' | 'wpm' | 'apm' | 'hpm' | 'shpm' | 'gpm' | 'egpm' | 'mpm' | 'kda' | 'kpm' | 'deaths_per_minute';
 
 /**
  * Group performance metric summaries returned for the selected population.
@@ -1368,7 +1369,7 @@ export async function fetchPerformanceMetrics(params?: {
   try {
     const raw = await fetchJson<Record<string, any>>(`/stats/performance-metrics${query.toString() ? `?${query.toString()}` : ''}`);
     return Object.fromEntries(
-      Object.entries(raw).filter(([metric]) => ['dpm', 'wpm', 'apm', 'hpm', 'gpm', 'egpm', 'mpm', 'kda', 'kpm', 'deaths_per_minute'].includes(metric))
+      Object.entries(raw).filter(([metric]) => ['dpm', 'wpm', 'apm', 'hpm', 'shpm', 'gpm', 'egpm', 'mpm', 'kda', 'kpm', 'deaths_per_minute'].includes(metric))
         .map(([metric, summary]) => [metric, mapMetricSummary(summary)])
     ) as PerformanceMetricsResponse;
   } catch {
@@ -1382,13 +1383,13 @@ export async function fetchPerformanceMetrics(params?: {
  * refs: none
  * I/O types: `metric: PerformanceMetricKey; scope: 'ranked' | 'casual' -> Promise<{ summary: PerformanceMetricSummary; roles: Record<string, PerformanceMetricSummary>; }>`.
  */
-export async function fetchPerformanceMetricDashboard(metric: PerformanceMetricKey, scope: 'ranked' | 'casual' = 'ranked'): Promise<{
+export async function fetchPerformanceMetricDashboard(metric: PerformanceMetricKey, scope: 'ranked' | 'casual' = 'ranked', queueId: number = scope === 'ranked' ? 486 : 424): Promise<{
   summary: PerformanceMetricSummary;
   roles: Record<string, PerformanceMetricSummary>;
 }> {
-  const query = new URLSearchParams({ metric, includeRoles: '1', scope });
+  const query = new URLSearchParams({ metric, includeRoles: '1', scope, queueId: String(queueId) });
   const raw = await fetchJson<Record<string, any>>(`/stats/performance-metrics?${query.toString()}`);
-  if (!raw[metric] || (raw.scope && raw.scope !== scope)) throw new Error('Performance population mismatch or missing measure');
+  if (!raw[metric] || (raw.scope && raw.scope !== scope) || (scope === 'casual' && (raw.queue_ids?.length !== 1 || raw.queue_ids[0] !== queueId))) throw new Error('Performance population mismatch or missing measure');
   return {
     summary: mapMetricSummary(raw[metric]),
     roles: Object.fromEntries(
@@ -1427,8 +1428,10 @@ export async function fetchChampionPerformanceDistributions(params: {
   metric: PerformanceMetricKey;
   championId?: number;
   queueId?: number;
+  scope?: 'ranked' | 'casual';
 }): Promise<ChampionPerformanceDistribution[]> {
   const query = new URLSearchParams();
+  if (params.scope) query.set('scope', params.scope);
   query.set('metric', params.metric);
   if (params.championId != null) query.set('championId', String(params.championId));
   if (params.queueId != null) query.set('queueId', String(params.queueId));
@@ -4178,6 +4181,7 @@ export async function fetchLeaderboard(params?: { tier?: string; region?: string
  * refs: doc: documents/02-technical/api/api-server.md
  */
 export interface StatsChampion {
+  wins?: number;
   championId: number;
   championName: string;
   winRate: number;
@@ -4194,6 +4198,7 @@ export interface StatsChampion {
 }
 
 function mapStatsChampionRows(raw: Array<{
+  wins?: number | string;
   champion_id: number; champion_name: string;
   win_rate: number | string; total_matches?: number | string; total_plays?: number | string;
   ban_rate?: number | string; ban_total?: number | string; pick_rate?: number | string; kda?: number | string;
@@ -4204,6 +4209,7 @@ function mapStatsChampionRows(raw: Array<{
   const num = (v: number | string | undefined) => v != null ? (typeof v === 'string' ? Number(v) : v) : undefined;
   return raw.map((r) => ({
     championId: r.champion_id,
+    wins: num(r.wins),
     championName: r.champion_name,
     winRate: toDisplayPercent(r.win_rate) ?? 0,
     totalPlays: num(r.total_matches) ?? num(r.total_plays) ?? 0,
@@ -5201,6 +5207,7 @@ export interface StatsPageData {
   overview: StatsOverview;
   baselines: BaselineEntry[];
   skins: SkinStat[];
+  skinSort?: string;
   compositions: MatchCompositionStat[];
   brokenSkins: BrokenSkinStat[];
 }
@@ -5222,13 +5229,14 @@ export async function fetchStatsPageData(params?: { tierMin?: number; tierMax?: 
     totalPlays: Number(row.total_plays ?? 0), wins: Number(row.wins ?? 0), losses: Number(row.losses ?? 0), winRate: Number(row.win_rate ?? 0),
   }));
   const compositions = (rows: any[]): MatchCompositionStat[] => rows.map((row) => ({
-    composition: String(row.comp_id), frontline: Number(row.frontline ?? 0), damage: Number(row.damage ?? 0), flank: Number(row.flank ?? 0), support: Number(row.support ?? 0),
-    totalMatches: Number(row.count ?? 0), wins: Number(row.wins ?? 0), losses: Number(row.losses ?? 0), winRate: Number(row.winrate ?? 0),
+    composition: String(row.comp_id ?? `${row.frontline_count}-${row.damage_count}-${row.flank_count}-${row.support_count}`), frontline: Number(row.frontline ?? row.frontline_count ?? 0), damage: Number(row.damage ?? row.damage_count ?? 0), flank: Number(row.flank ?? row.flank_count ?? 0), support: Number(row.support ?? row.support_count ?? 0),
+    totalMatches: Number(row.count ?? row.total_matches ?? 0), wins: Number(row.wins ?? 0), losses: Number(row.losses ?? 0), winRate: Number(row.winrate ?? row.win_rate ?? 0),
   }));
   return {
     overview: mapStatsOverview(raw.overview ?? {}),
     baselines: mapBaselineRows(raw.baselines ?? []),
     skins: skinRows(raw.skins ?? []),
+    skinSort: raw.skin_sort,
     compositions: compositions(raw.compositions ?? []),
     brokenSkins: (raw.broken_skins ?? []).map((row: any) => ({ ...skinRows([row])[0], usageShare: Number(row.usage_share ?? 0) })),
   };

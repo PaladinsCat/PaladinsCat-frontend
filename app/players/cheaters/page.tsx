@@ -9,14 +9,14 @@ import { ArrowRight, FileImage, History, ShieldAlert } from "lucide-react";
 import { LoadingPanel } from "@/components/async-state";
 import PlatformIcon from "@/components/platform-icon";
 import PlayersPageHeader from "@/components/ui/players-page-header";
-import { fetchCheaterPortal, type CheaterPortal, type CheaterPortalEntry } from "@/lib/api-client";
+import { fetchCheaterPortal, fetchPlayersOverview, type CheaterPortal, type CheaterPortalEntry } from "@/lib/api-client";
 import { useLocalization } from "@/lib/localization-context";
 import { getPercentageColor } from "@/lib/stat-quality";
 
 const EMPTY_PORTAL: CheaterPortal = { activeCount: 0, inactiveCount: 0, evidenceCount: 0, latest: [] };
 
 function entryHref(entry: CheaterPortalEntry): string {
-  return entry.kind === "private" ? `/players/private-accounts/${entry.subjectId}` : `/players/cheaters/${entry.playerId ?? entry.subjectId}`;
+  return entry.kind === "private" ? `/players/private-accounts/${entry.subjectId}` : `/players/${entry.playerId ?? entry.subjectId}`;
 }
 
 type NumberFormatter = (value: number | null | undefined, options?: Intl.NumberFormatOptions) => string;
@@ -98,10 +98,12 @@ export default function CheatersPage() {
   const [portal, setPortal] = useState<CheaterPortal>(EMPTY_PORTAL);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [exploiterCount, setExploiterCount] = useState<number | null>(null);
 
   useEffect(() => {
     let active = true;
     fetchCheaterPortal().then((value) => { if (active) setPortal(value); }).catch(() => { if (active) setError(true); }).finally(() => { if (active) setLoading(false); });
+    fetchPlayersOverview().then((value) => { if (active) setExploiterCount(value.communityCounts.exploiters); }).catch(() => { if (active) setError(true); });
     return () => { active = false; };
   }, []);
 
@@ -110,39 +112,48 @@ export default function CheatersPage() {
       <PlayersPageHeader title={t("moderation.cheaterPortalTitle")} description={t("moderation.cheaterPortalDescription")} />
       {error && <div className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-300">{t("moderation.cheaterPortalLoadFailed")}</div>}
 
-      <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <Link href="/players/exploiters" data-card-accent="orange" className="pc-glass pc-home-feature-card group relative flex h-full min-h-64 flex-col items-center justify-center overflow-hidden rounded-2xl border border-white/5 p-6 text-center shadow-lg transition-[transform,border-color] duration-[280ms] hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent">
+          <ArrowRight className="pc-home-card-arrow absolute right-5 top-5 h-4 w-4 text-pc-text-muted" aria-hidden="true" />
+          <span className="pc-card-icon flex h-12 w-12 items-center justify-center">
+            <ShieldAlert className="h-6 w-6" aria-hidden="true" />
+          </span>
+          <h2 className="mt-5 text-xl font-bold tracking-tight text-pc-text">{t("moderation.exploiterTitle")}</h2>
+          <p className="mt-6 text-2xl font-bold tabular-nums text-pc-text">{exploiterCount === null ? "—" : formatNumber(exploiterCount)}</p>
+          <p className="text-xs text-pc-text-muted">{t("moderation.recordsLabel")}</p>
+        </Link>
         <Link href="/players/cheaters/active" data-card-accent="red" aria-label={t("moderation.activeDirectoryAria")} className="pc-glass pc-home-feature-card group relative flex h-full min-h-64 flex-col items-center justify-center overflow-hidden rounded-2xl border border-white/5 p-6 text-center shadow-lg transition-[transform,border-color] duration-[280ms] hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent">
             <ArrowRight className="pc-home-card-arrow absolute right-5 top-5 h-4 w-4 text-pc-text-muted transition-[transform,color] duration-[120ms] group-hover:translate-x-1 group-hover:text-red-200" aria-hidden="true" />
-            <span className="pc-card-icon pc-home-card-icon flex h-12 w-12 items-center justify-center rounded-xl border">
+            <span className="pc-card-icon flex h-12 w-12 items-center justify-center">
               <ShieldAlert className="h-6 w-6" aria-hidden="true" />
             </span>
             <div className="relative mt-5">
               <h2 className="text-xl font-bold tracking-tight text-pc-text group-hover:text-red-100">{t("moderation.activeCheaters")}</h2>
-              <p className="mt-6 text-2xl font-bold tabular-nums text-pc-text">{formatNumber(portal.activeCount)}</p>
+              <p className="mt-6 text-2xl font-bold tabular-nums text-pc-text">{loading || error ? "—" : formatNumber(portal.activeCount)}</p>
               <p className="text-xs text-pc-text-muted">{t("moderation.recordsLabel")}</p>
             </div>
         </Link>
 
         <Link href="/players/cheaters/inactive" data-card-accent="secondary" className="pc-glass pc-home-feature-card group relative flex h-full min-h-64 flex-col items-center justify-center overflow-hidden rounded-2xl border border-white/5 p-6 text-center shadow-lg transition-[transform,border-color] duration-[280ms] hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent">
           <ArrowRight className="pc-home-card-arrow absolute right-5 top-5 h-4 w-4 text-pc-text-muted transition-[transform,color] duration-[120ms] group-hover:translate-x-1 group-hover:text-violet-200" aria-hidden="true" />
-          <span className="pc-home-card-icon flex h-12 w-12 items-center justify-center rounded-xl border">
+          <span className="pc-card-icon flex h-12 w-12 items-center justify-center">
             <History className="h-6 w-6" aria-hidden="true" />
           </span>
           <div className="relative mt-5">
             <h2 className="text-xl font-bold tracking-tight text-pc-text group-hover:text-violet-100">{t("moderation.inactiveCheaterDatabase")}</h2>
-            <p className="mt-6 text-2xl font-bold tabular-nums text-pc-text">{formatNumber(portal.inactiveCount)}</p>
+            <p className="mt-6 text-2xl font-bold tabular-nums text-pc-text">{loading || error ? "—" : formatNumber(portal.inactiveCount)}</p>
             <p className="text-xs text-pc-text-muted">{t("moderation.recordsLabel")}</p>
           </div>
         </Link>
 
         <Link href="/players/cheaters/evidence" data-card-accent="tertiary" title={t("moderation.viewOrSubmitEvidence")} aria-label={t("moderation.viewOrSubmitEvidence")} className="pc-glass pc-home-feature-card group relative flex h-full min-h-64 flex-col items-center justify-center overflow-hidden rounded-2xl border border-white/5 p-6 text-center shadow-lg transition-[transform,border-color] duration-[280ms] hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent">
           <ArrowRight className="pc-home-card-arrow absolute right-5 top-5 h-4 w-4 text-pc-text-muted transition-[transform,color] duration-[120ms] group-hover:translate-x-1 group-hover:text-amber-200" aria-hidden="true" />
-          <span className="pc-home-card-icon flex h-12 w-12 items-center justify-center rounded-xl border">
+          <span className="pc-card-icon flex h-12 w-12 items-center justify-center">
             <FileImage className="h-6 w-6" aria-hidden="true" />
           </span>
           <div className="relative mt-5">
             <h2 className="text-xl font-bold tracking-tight text-pc-text group-hover:text-amber-100">{t("moderation.evidencePortal")}</h2>
-            <p className="mt-6 text-2xl font-bold tabular-nums text-pc-text">{formatNumber(portal.evidenceCount)}</p>
+            <p className="mt-6 text-2xl font-bold tabular-nums text-pc-text">{loading || error ? "—" : formatNumber(portal.evidenceCount)}</p>
             <p className="text-xs text-pc-text-muted">{t("moderation.evidence")}</p>
           </div>
         </Link>

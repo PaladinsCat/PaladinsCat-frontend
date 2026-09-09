@@ -45,16 +45,16 @@ export function PerformanceOverviewCard({
     ? ecpmActivityScaleMax(metrics.flatMap(({ p90, mean }) => [p90, mean]))
     : null;
   const ecpmLegend = [
-    { value: 120, labelKey: "generated.stats.egpm.engaged" as EcpmActivityLabelKey, color: "bg-emerald-400" },
-    { value: 115, labelKey: "common.activity.possibleDisconnect" as EcpmActivityLabelKey, color: "bg-yellow-300" },
-    { value: 100, labelKey: "generated.stats.egpm.disconnected" as EcpmActivityLabelKey, color: "bg-yellow-400" },
-    { value: 80, labelKey: "generated.stats.egpm.partialAfk" as EcpmActivityLabelKey, color: "bg-orange-400" },
     { value: 60, labelKey: "generated.stats.egpm.fullAfk" as EcpmActivityLabelKey, color: "bg-red-400" },
+    { value: 80, labelKey: "generated.stats.egpm.partialAfk" as EcpmActivityLabelKey, color: "bg-orange-400" },
+    { value: 100, labelKey: "generated.stats.egpm.disconnected" as EcpmActivityLabelKey, color: "bg-yellow-400" },
+    { value: 115, labelKey: "common.activity.possibleDisconnect" as EcpmActivityLabelKey, color: "bg-yellow-300" },
+    { value: 120, labelKey: "generated.stats.egpm.engaged" as EcpmActivityLabelKey, color: "bg-emerald-400" },
   ];
   return (
     <div className="h-full bg-pc-bg-elevated border border-pc-border rounded-xl p-4">
       {isEcpmDistribution && <div className="mb-3 flex flex-wrap gap-x-3 gap-y-1 border-b border-pc-border/50 pb-2">
-        {ecpmLegend.map(({ value, labelKey, color }) => {
+        {ecpmLegend.map(({ labelKey, color }) => {
           return <span key={labelKey} className="inline-flex items-center gap-1 text-xs text-pc-text-muted">
             <span className={`h-1.5 w-1.5 rounded-full ${color}`} />
             <span>{t(labelKey)}</span>

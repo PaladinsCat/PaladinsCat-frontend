@@ -114,9 +114,6 @@ export default function Nav() {
       links: [
         { href: "/champions", label: t("nav.champions") },
         { href: "/matches", label: t("nav.matches") },
-        { href: "/game/items", label: t("menu.items") },
-        { href: "/game/maps", label: t("menu.maps") },
-        { href: "/game/compositions", label: t("menu.teamCompositions") },
       ],
     },
     {

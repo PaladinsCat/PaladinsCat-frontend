@@ -36,16 +36,17 @@ function unwrapRecord(raw: unknown): RawRecord {
     : value;
 }
 
-async function getInitialData(scope: PerformanceScope, metric: GamePerformanceMetric): Promise<MetricsInitialData | null> {
+async function getInitialData(scope: PerformanceScope, metric: GamePerformanceMetric, queueId: number): Promise<MetricsInitialData | null> {
   try {
-    const dashboardRaw = await fetchServerJson<RawRecord>(`/stats/performance-metrics?metric=${metric}&scope=${scope}&includeRoles=1`, { timeoutMs: 5000 });
+    const dashboardRaw = await fetchServerJson<RawRecord>(`/stats/performance-metrics?metric=${metric}&scope=${scope}&includeRoles=1&queueId=${queueId}`, { timeoutMs: 5000 });
     const dashboard = unwrapRecord(dashboardRaw);
-    if (!dashboard[metric] || (dashboard.scope && dashboard.scope !== scope)) return null;
+    if (!dashboard[metric] || (dashboard.scope && dashboard.scope !== scope) || (scope === "casual" && (!Array.isArray(dashboard.queue_ids) || dashboard.queue_ids.length !== 1 || dashboard.queue_ids[0] !== queueId))) return null;
     const roles = dashboard.roles && typeof dashboard.roles === "object" && !Array.isArray(dashboard.roles)
       ? Object.fromEntries(Object.entries(dashboard.roles).map(([role, summary]) => [role, mapSummary(summary)]))
       : {};
     return {
       scope,
+      queueId,
       metric,
       dashboard: { summary: mapSummary(dashboard[metric]), roles },
     };
@@ -61,7 +62,7 @@ async function getInitialData(scope: PerformanceScope, metric: GamePerformanceMe
  */
 export const dynamic = "force-dynamic";
 
-type PageProps = { searchParams: Promise<{ scope?: string; metric?: string }> };
+type PageProps = { searchParams: Promise<{ scope?: string; metric?: string; queueId?: string }> };
 
 /**
  * Build localized metadata for /stats/performance, including the title and any canonical, description, and crawler directives configured for this route.
@@ -90,6 +91,6 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
  */
 export default async function PerformancePage({ searchParams }: PageProps) {
   const params = await searchParams;
-  const { scope, metric } = performanceSelection(params.scope, params.metric);
-  return <MetricsPage initialData={await getInitialData(scope, metric)} />;
+  const { scope, metric, queueId } = performanceSelection(params.scope, params.metric, params.queueId);
+  return <MetricsPage initialData={await getInitialData(scope, metric, queueId)} />;
 }

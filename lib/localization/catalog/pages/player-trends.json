@@ -26,5 +26,5 @@
   "playerTrends.deathsHelp": "Deaths per minute · lower is better",
   "common.metrics.kpm": "KPM",
   "common.metrics.killsAssistsPerMinute": "Kills + half assists per minute",
-  "common.metrics.deathsPerMinute": "Deaths/min"
+  "common.metrics.deathsPerMinute": "DEPM"
 }

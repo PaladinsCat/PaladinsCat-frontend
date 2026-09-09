@@ -1,0 +1,351 @@
+/** Live data previews for the global statistics directory. */
+"use client";
+
+import Link from "next/link";
+import Image from "next/image";
+import { useEffect, useId, useMemo, useState, type ReactNode } from "react";
+import { matchMapImagePath } from "@/lib/map-images";
+import { STATIC_CHAMPIONS } from "@/lib/static-champions";
+import { fetchChampionMatchupPreviews, type ChampionMatchupPreviews } from "@/lib/champion-matchups-api";
+import { PerformanceOverviewCard } from "@/components/PerformanceOverviewCard";
+import {
+  fetchMatchHourlyStats,
+  fetchPresenceHourlyStats,
+  fetchPresenceStats,
+  fetchStatsPageData,
+  type MatchHourlyStats,
+  type PresenceHourlyStats,
+  type PresenceStats,
+  type StatsPageData,
+} from "@/lib/api-client";
+import { stationaryChartSeries } from "@/lib/chart-colors";
+import { getChampionIconSafe } from "@/lib/champion-icons";
+import { useLobbyTier } from "@/lib/lobby-tier-context";
+import { useLocalization } from "@/lib/localization-context";
+import { getRankIconPath } from "@/lib/tier-utils";
+
+type Accent = "cyan" | "violet" | "amber" | "emerald" | "sky";
+
+function DashboardCard({
+  href,
+  title,
+  accent,
+  className = "",
+  children,
+}: {
+  href: string;
+  title: string;
+  accent: Accent;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <Link
+      href={href}
+      prefetch={false}
+      data-card-accent={accent}
+      className={`pc-card pc-home-feature-card group flex min-h-56 min-w-0 flex-col overflow-hidden focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-pc-accent ${className}`}
+    >
+      <div className="mb-5 flex items-center gap-3">
+        <h2 className="min-w-0 flex-1 text-lg font-bold text-pc-text">{title}</h2>
+        <span aria-hidden="true" className="text-lg leading-none text-pc-text-muted transition-colors group-hover:text-pc-accent">→</span>
+      </div>
+      <div className="flex flex-1 flex-col">{children}</div>
+    </Link>
+  );
+}
+
+function LoadingPreview() {
+  return (
+    <div aria-hidden="true" className="flex flex-1 flex-col justify-end gap-3">
+      <span className="pc-skeleton h-8 w-2/5 rounded" />
+      <span className="pc-skeleton h-3 w-full rounded" />
+      <span className="pc-skeleton h-3 w-4/5 rounded" />
+      <span className="pc-skeleton h-3 w-3/5 rounded" />
+    </div>
+  );
+}
+
+function EmptyPreview() {
+  return <div className="flex flex-1 items-center text-sm text-pc-text-muted">Live preview unavailable</div>;
+}
+
+function TrendSparkline({ values, color, label }: { values: number[]; color: string; label: string }) {
+  const gradientId = `stats-trend-${useId().replace(/:/g, "")}`;
+  if (values.length < 2) {
+    return <div className="mt-3 h-14 rounded-md border border-pc-border/40 bg-pc-bg/25" />;
+  }
+  const width = 240;
+  const height = 56;
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = Math.max(1, max - min);
+  const points = values.map((value, index) => ({
+    x: index / (values.length - 1) * width,
+    y: height - 4 - ((value - min) / range) * (height - 10),
+  }));
+  const line = points.map(({ x, y }) => `${x},${y}`).join(" ");
+  const area = `M 0 ${height} L ${points.map(({ x, y }) => `${x} ${y}`).join(" L ")} L ${width} ${height} Z`;
+  return (
+    <svg role="img" aria-label={label} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" className="mt-3 h-14 w-full overflow-visible">
+      <defs>
+        <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity="0.28" />
+          <stop offset="100%" stopColor={color} stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path d={area} fill={`url(#${gradientId})`} />
+      <line x1="0" y1={height - 1} x2={width} y2={height - 1} stroke="var(--pc-border)" strokeOpacity="0.55" />
+      <polyline points={line} fill="none" stroke={color} strokeWidth="2.5" vectorEffect="non-scaling-stroke" strokeLinejoin="round" strokeLinecap="round" />
+      <circle cx={points.at(-1)?.x} cy={points.at(-1)?.y} r="3" fill={color} />
+    </svg>
+  );
+}
+
+/** Render a compact dashboard whose cards preview their destination's live data. */
+export default function StatsPortalDashboard() {
+  const { t, formatNumber, formatPercent } = useLocalization();
+  const { definition: lobbyTier, ready: lobbyTierReady } = useLobbyTier();
+  const [data, setData] = useState<StatsPageData | null>(null);
+  const [activity, setActivity] = useState<MatchHourlyStats | null>(null);
+  const [presence, setPresence] = useState<PresenceStats | null>(null);
+  const [presenceHourly, setPresenceHourly] = useState<PresenceHourlyStats | null>(null);
+  const [matchupData, setMatchupData] = useState<ChampionMatchupPreviews | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!lobbyTierReady) return;
+    let cancelled = false;
+    const controller = new AbortController();
+    Promise.allSettled([
+      fetchStatsPageData({ tierMin: lobbyTier.tierMin, tierMax: lobbyTier.tierMax }),
+      fetchMatchHourlyStats(),
+      fetchPresenceStats(),
+      fetchPresenceHourlyStats(),
+      fetchChampionMatchupPreviews(controller.signal),
+    ]).then(([statsResult, activityResult, presenceResult, presenceHourlyResult, matchupResult]) => {
+      if (cancelled) return;
+      setData(statsResult.status === "fulfilled" ? statsResult.value : null);
+      setActivity(activityResult.status === "fulfilled" ? activityResult.value : null);
+      setPresence(presenceResult.status === "fulfilled" ? presenceResult.value : null);
+      setPresenceHourly(presenceHourlyResult.status === "fulfilled" ? presenceHourlyResult.value : null);
+      setMatchupData(matchupResult.status === "fulfilled" ? matchupResult.value : null);
+      setLoading(false);
+    });
+    return () => { cancelled = true; controller.abort(); };
+  }, [lobbyTierReady, lobbyTier.tierMax, lobbyTier.tierMin]);
+
+  const skins = data?.skinSort === "plays" ? data.skins.slice(0, 5) : [];
+  const matchupRows = useMemo(() => {
+    const seen = new Set<string>();
+    return (matchupData?.champions ?? []).flatMap(champion => [...champion.strong, ...champion.weak].map(opponent => ({
+      ...opponent, championId: champion.championId,
+      championName: STATIC_CHAMPIONS.find(row => row.id === champion.championId)?.name ?? "",
+    }))).filter(row => row.championName && row.encounters > 0)
+      .sort((a,b) => b.encounters-a.encounters)
+      .filter(row => { const key=[row.championId,row.opponentChampionId].sort((a,b)=>a-b).join(":"); if(seen.has(key)) return false; seen.add(key); return true; }).slice(0,5);
+  }, [matchupData]);
+  const metrics = [
+    { label: "DPM", key: "dpm", color: "text-red-400" },
+    { label: "WDPM", key: "wpm", color: "text-orange-400" },
+    { label: "SDPM", key: "apm", color: "text-fuchsia-400" },
+    { label: "HPM", key: "hpm", color: "text-emerald-400" },
+    { label: "SHPM", key: "shpm", color: "text-teal-400" },
+    { label: "ECPM", key: "egpm", color: "text-yellow-400" },
+    { label: "SPM", key: "mpm", color: "text-blue-400" },
+    { label: "KDA", key: "kda", color: "text-violet-400" },
+    { label: "KPM", key: "kpm", color: "text-cyan-400" },
+    { label: "DEPM", key: "deaths_per_minute", color: "text-rose-400" },
+  ].map(metric => ({ ...metric, summary: data?.overview.metrics[metric.key as keyof typeof data.overview.metrics], decimals: ["kda","kpm","deaths_per_minute"].includes(metric.key) ? 2 : 0 }));
+  const baselineOrder = ["Global", "Damage", "Flank", "Support", "Frontline"];
+  const baselines = [...(data?.baselines ?? [])]
+    .filter((row) => row.avgEcpm > 0)
+    .sort((a, b) => baselineOrder.indexOf(a.role) - baselineOrder.indexOf(b.role))
+    .slice(0, 5);
+  const ecpmMetrics = baselines.map((row) => ({
+    key: `egpm-${row.role}`,
+    label: row.role === "Frontline" ? t("common.roles.frontlineShort")
+      : row.role === "Support" ? t("common.roles.supportShort")
+      : row.role === "Damage" ? t("common.roles.damageShort")
+      : row.role === "Global" ? t("common.roles.global")
+      : t("common.roles.flank"),
+    color: row.role === "Global" ? "var(--pc-chart-amber)"
+      : row.role === "Damage" ? "var(--pc-chart-red)"
+      : row.role === "Flank" ? "var(--pc-role-flank)"
+      : row.role === "Support" ? "var(--pc-chart-green)"
+      : "var(--pc-chart-sky)",
+    p10: row.p10Ecpm,
+    p25: row.p25Ecpm,
+    mean: row.avgEcpm,
+    p75: row.p75Ecpm,
+    p90: row.p90Ecpm,
+  }));
+  const tierRows = data?.overview.profileTiers ?? [];
+  const tierTotal = tierRows.reduce((sum, tier) => sum + tier.totalPlays, 0);
+  const majorTiers = [
+    { key: "bronze", label: t("common.tiers.bronze"), min: 1, max: 5, iconTier: 5 },
+    { key: "silver", label: t("common.tiers.silver"), min: 6, max: 10, iconTier: 10 },
+    { key: "gold", label: t("common.tiers.gold"), min: 11, max: 15, iconTier: 15 },
+    { key: "platinum", label: t("common.tiers.platinum"), min: 16, max: 20, iconTier: 20 },
+    { key: "diamond", label: t("common.tiers.diamond"), min: 21, max: 25, iconTier: 25 },
+    { key: "master", label: t("common.tiers.master"), min: 26, max: 26, iconTier: 26 },
+    { key: "grandmaster", label: t("common.tiers.grandmaster"), min: 27, max: 27, iconTier: 27 },
+  ].map((rank) => ({
+    ...rank,
+    totalPlays: tierRows
+      .filter((tier) => tier.tierSort >= rank.min && tier.tierSort <= rank.max)
+      .reduce((sum, tier) => sum + tier.totalPlays, 0),
+  }));
+  const activityTotal = activity?.allQueuesTotal24h ?? activity?.totalToday ?? 0;
+  const playerTotal = presence?.public_players ?? 0;
+  const matchTrend = useMemo(() => {
+    if (activity?.queues?.length) {
+      const hourly = new Map<string, number>();
+      for (const queue of activity.queues) {
+        for (const row of queue.hourly) {
+          const key = `${row.date}|${String(row.hour).padStart(2, "0")}`;
+          hourly.set(key, (hourly.get(key) ?? 0) + row.total);
+        }
+      }
+      return [...hourly.entries()].sort(([left], [right]) => left.localeCompare(right)).slice(-24).map(([, total]) => total);
+    }
+    return (activity?.hourly ?? []).slice(-24).map((row) => row.total);
+  }, [activity]);
+  const playerTrend = useMemo(() => (presenceHourly?.hourly_by_region ?? [])
+    .slice(-24)
+    .map((row) => row.total), [presenceHourly]);
+
+  return (
+    <div className="space-y-5" aria-busy={loading}>
+      <section aria-label={t("stats.portal.gameMetrics")} className="grid grid-cols-1 gap-5 lg:grid-cols-12">
+        <DashboardCard href="/stats/performance" title={t("generated.stats.performanceMetrics")} accent="cyan" className="lg:col-span-7">
+          {loading ? <LoadingPreview /> : !data ? <EmptyPreview /> : (
+            <div className="grid flex-1 grid-cols-2 gap-x-5 gap-y-5 sm:grid-cols-3 xl:grid-cols-5">
+              {metrics.map(({ label, summary, color, decimals }) => (
+                <div key={label} className="flex min-w-0 flex-col justify-center">
+                  <span className="text-xs font-semibold text-pc-text-muted">{label}</span>
+                  <span className={`mt-1 text-2xl font-bold tabular-nums ${color}`}>
+                    {summary?.sampleSize ? formatNumber(summary.mean, { maximumFractionDigits: decimals }) : "—"}
+                  </span>
+                  <span className="mt-2 text-xs tabular-nums text-pc-text-muted">P10 {summary?.sampleSize ? formatNumber(summary.p10, {maximumFractionDigits: decimals}) : "—"}</span>
+                  <span className="text-xs tabular-nums text-pc-text-muted">P90 {summary?.sampleSize ? formatNumber(summary.p90, {maximumFractionDigits: decimals}) : "—"}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </DashboardCard>
+
+        <DashboardCard href="/stats/champions" title={t("stats.matchups.title")} accent="violet" className="lg:col-span-5">
+          {loading ? <LoadingPreview /> : matchupRows.length === 0 ? <EmptyPreview /> : (
+            <div className="space-y-4">
+              {matchupRows.map(row => <div key={`${row.championId}:${row.opponentChampionId}`} className="flex min-w-0 items-center gap-2 text-sm">
+                <Image src={getChampionIconSafe(row.championName)} alt="" width={28} height={28} className="h-7 w-7 shrink-0 rounded-full" />
+                <span className="min-w-0 flex-1 truncate">{row.championName} vs {row.opponentChampionName}</span>
+                <Image src={getChampionIconSafe(row.opponentChampionName)} alt="" width={28} height={28} className="h-7 w-7 shrink-0 rounded-full" />
+                <div className="text-right tabular-nums">
+                  <div className="font-semibold text-pc-accent">{formatPercent(row.wins / row.encounters * 100)}</div>
+                  <div className="text-xs text-pc-text-muted">{formatNumber(row.encounters)}</div>
+                </div>
+              </div>)}
+            </div>
+          )}
+        </DashboardCard>
+
+      </section>
+
+      <section aria-label={t("nav.game")} className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+        <DashboardCard href="/stats/items" title={t("menu.items")} accent="amber">
+          {loading ? <LoadingPreview /> : !data?.overview.items.length ? <EmptyPreview /> : <div className="space-y-4">
+            {[...data.overview.items].sort((a,b)=>b.totalUsage-a.totalUsage).slice(0,3).map(item => <div key={item.itemId} className="flex min-w-0 items-center gap-3">
+              <Image src={`/images/items/${item.itemName.replace(/\s+/g, "_")}_Icon.avif`} alt="" width={36} height={36} className="h-9 w-9 shrink-0 object-contain" />
+              <span className="min-w-0 flex-1 truncate text-sm font-semibold">{item.itemName}</span>
+              <span className="text-sm tabular-nums text-pc-accent">{formatNumber(item.totalUsage)}</span>
+            </div>)}
+          </div>}
+        </DashboardCard>
+        <DashboardCard href="/stats/maps" title={t("menu.maps")} accent="sky">
+          {loading ? <LoadingPreview /> : !data?.overview.maps.length ? <EmptyPreview /> : <div className="space-y-4">
+            {[...data.overview.maps].sort((a,b)=>b.totalMatches-a.totalMatches).slice(0,3).map(map => <div key={map.name} className="flex min-w-0 items-center gap-3">
+              <Image src={matchMapImagePath(map.name)} alt="" width={64} height={36} className="h-9 w-16 shrink-0 rounded object-cover" />
+              <span className="min-w-0 flex-1 truncate text-sm font-semibold">{map.name}</span>
+              <span className="text-sm tabular-nums text-pc-accent">{formatNumber(map.totalMatches)}</span>
+            </div>)}
+          </div>}
+        </DashboardCard>
+        <DashboardCard href="/stats/compositions" title={t("menu.teamCompositions")} accent="emerald">
+          {loading ? <LoadingPreview /> : !data?.compositions.length ? <EmptyPreview /> : <div className="space-y-4">
+            {[...data.compositions].sort((a,b)=>b.totalMatches-a.totalMatches).slice(0,3).map(comp => <div key={comp.composition} className="flex items-center justify-between gap-3">
+              <div className="flex gap-3">{([
+                ["frontline", "Class_Front_Line_Icon"], ["damage", "Class_Damage_Icon"], ["flank", "Class_Flank_Icon"], ["support", "Class_Support_Icon"],
+              ] as const).map(([role,icon]) => <span key={role} className="inline-flex items-center gap-1 text-sm tabular-nums">
+                <Image src={`/images/icons/${icon}.avif`} alt={t(`common.roles.${role}`)} width={20} height={20} className="h-5 w-5 object-contain" />{comp[role]}
+              </span>)}</div>
+              <span className="text-sm tabular-nums text-pc-accent">{formatNumber(comp.totalMatches)}</span>
+            </div>)}
+          </div>}
+        </DashboardCard>
+      </section>
+
+      <section aria-label={t("stats.portal.activity")} className="grid grid-cols-1 gap-5 md:grid-cols-2">
+        <DashboardCard href="/stats/skins" title={t("menu.skinStats")} accent="violet">
+          {loading ? <LoadingPreview /> : skins.length === 0 ? <EmptyPreview /> : (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between text-xs text-pc-text-muted">
+                <span>{t("common.sort.totalPlays")}</span>
+
+              </div>
+              {skins.map(skin => (
+                <div key={`${skin.championId}:${skin.skinId}`} className="flex min-w-0 items-center gap-3">
+                  <Image src={getChampionIconSafe(skin.championName)} alt="" width={36} height={36} className="h-9 w-9 shrink-0 rounded-full object-contain" />
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-semibold text-pc-text">{skin.skinName}</div>
+                    <div className="truncate text-xs text-pc-text-muted">{skin.championName}</div>
+                  </div>
+                  <span className="text-sm font-semibold tabular-nums text-pc-accent">{formatNumber(skin.totalPlays)}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </DashboardCard>
+
+        <DashboardCard href="/stats/ecpm" title={t("menu.effectiveCredits")} accent="amber">
+          {loading ? <LoadingPreview /> : baselines.length === 0 ? <EmptyPreview /> : (
+            <PerformanceOverviewCard metrics={ecpmMetrics} />
+          )}
+        </DashboardCard>
+
+        <DashboardCard href="/stats/tiers" title={t("stats.tiers.title")} accent="emerald" className="md:col-span-2">
+          {loading ? <LoadingPreview /> : tierTotal === 0 ? <EmptyPreview /> : (
+            <div className="flex flex-1 items-center gap-5 overflow-x-auto pb-2">
+              {majorTiers.map(tier => <div key={tier.key} className="flex min-w-24 flex-1 flex-col items-center gap-2 text-center">
+                <Image src={getRankIconPath(tier.iconTier, tier.iconTier === 26 ? 101 : tier.iconTier === 27 ? 1 : 0)} alt="" width={48} height={48} className="h-12 w-12 object-contain" />
+                <span className="text-xs font-semibold text-pc-text-secondary">{tier.label}</span>
+                <span className="text-xl font-bold tabular-nums text-pc-text">{formatNumber(tier.totalPlays)}</span>
+                <span className="text-xs text-pc-text-muted">{t("stats.tiers.players")} · {formatPercent(tier.totalPlays / tierTotal * 100)}</span>
+              </div>)}
+            </div>
+          )}
+        </DashboardCard>
+
+        <DashboardCard href="/stats/activity" title={t("menu.playerActivity")} accent="sky" className="md:col-span-2">
+          {loading ? <LoadingPreview /> : !activity && !presence ? <EmptyPreview /> : (
+            <>
+              <div className="grid gap-5 md:grid-cols-2">
+                <div className="min-w-0">
+                  <div className="text-2xl font-bold tabular-nums text-pc-text">{activity ? formatNumber(activityTotal) : "—"}</div>
+                  <div className="mt-1 text-xs leading-tight text-pc-text-muted">{t("playerActivity.trackedMatches24h")}</div>
+                  <TrendSparkline values={matchTrend} color={stationaryChartSeries.sky} label={t("playerActivity.trackedMatches24h")} />
+                </div>
+                <div className="min-w-0 border-t border-pc-border pt-5 md:border-l md:border-t-0 md:pl-5 md:pt-0">
+                  <div className="text-2xl font-bold tabular-nums text-pc-text">{presence ? formatNumber(playerTotal) : "—"}</div>
+                  <div className="mt-1 text-xs leading-tight text-pc-text-muted">{t("playerActivity.publicPlayers24h")}</div>
+                  <TrendSparkline values={playerTrend} color={stationaryChartSeries.violet} label={t("playerActivity.publicPlayers24h")} />
+                </div>
+              </div>
+            </>
+          )}
+        </DashboardCard>
+      </section>
+    </div>
+  );
+}

@@ -39,6 +39,9 @@ export interface ChartProps {
   showTooltip?: boolean;
   showXAxis?: boolean;
   showYAxis?: boolean;
+  showValueLabels?: boolean;
+  valueLabelFormatter?: (value: unknown) => string;
+  xAxisIcons?: Record<string, string>;
 }
 
 /**
@@ -60,12 +63,14 @@ export function LineChartComponent({
   showTooltip = true,
   showXAxis = true,
   showYAxis = true,
+  showValueLabels = false,
+  valueLabelFormatter,
 }: ChartProps) {
   return (
     <div className="w-full">
       {title && <h3 className="text-lg font-semibold mb-2 text-pc-text">{title}</h3>}
       <ResponsiveContainer width="100%" height={height}>
-        <LineChart data={data} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
+        <LineChart data={data} margin={{ top: showValueLabels ? 24 : 5, right: 20, left: 20, bottom: 5 }}>
           {percentageScale && (
             <defs>
               <linearGradient id="bounded-percentage-spectrum" x1="0" y1="1" x2="0" y2="0">
@@ -113,6 +118,12 @@ export function LineChartComponent({
               stroke={percentageScale ? "url(#bounded-percentage-spectrum)" : colors[index % colors.length]}
               strokeWidth={2}
               dot={{ r: 3 }}
+              label={showValueLabels ? {
+                position: "top",
+                fill: chartText,
+                fontSize: 12,
+                formatter: valueLabelFormatter,
+              } : undefined}
             />
           ))}
         </LineChart>
@@ -135,24 +146,32 @@ export function BarChartComponent({
   height = 300,
   colors = chartColors,
   barColors,
+  xAxisIcons,
   showLegend = true,
   showGrid = true,
   showTooltip = true,
   showXAxis = true,
   showYAxis = true,
+  showValueLabels = false,
+  valueLabelFormatter,
 }: ChartProps) {
   return (
     <div className={typeof height === "string" ? "h-full w-full" : "w-full"}>
       {title && <h3 className="text-lg font-semibold mb-2 text-pc-text">{title}</h3>}
       <ResponsiveContainer width="100%" height={height}>
-        <BarChart data={data} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
+        <BarChart data={data} margin={{ top: showValueLabels ? 24 : 5, right: 20, left: 20, bottom: 5 }}>
           {showGrid && <CartesianGrid strokeDasharray="3 3" stroke={chartGrid} />}
           {showXAxis && (
             <XAxis
               dataKey={xKey}
               stroke={chartTextSecondary}
               fontSize={12}
-              tick={{ fill: chartTextSecondary }}
+              height={xAxisIcons ? 52 : undefined}
+              interval={xAxisIcons ? 0 : undefined}
+              tick={xAxisIcons ? ({ x, y, payload }) => <g transform={`translate(${x},${y})`}>
+                <image href={xAxisIcons[String(payload.value)]} x={-10} y={4} width={20} height={20} aria-hidden="true" />
+                <text x={0} y={40} textAnchor="middle" fill={chartTextSecondary} fontSize={12}>{payload.value}</text>
+              </g> : { fill: chartTextSecondary }}
             />
           )}
           {showYAxis && (
@@ -182,6 +201,8 @@ export function BarChartComponent({
               dataKey={key}
               fill={colors[index % colors.length]}
               radius={[4, 4, 0, 0]}
+              activeBar={false}
+              label={showValueLabels ? { position: "top", fill: chartText, fontSize: 12, formatter: valueLabelFormatter } : false}
             >
               {barColors?.[key]?.map((color, cellIndex) => <Cell key={`${key}-${cellIndex}`} fill={color} />)}
             </Bar>

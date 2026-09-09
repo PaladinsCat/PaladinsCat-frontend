@@ -15,7 +15,6 @@ import SmartImage from "@/components/SmartImage";
 import CanonicalTalentImage from "@/components/canonical-talent-image";
 import { championSlug } from "@/lib/utils";
 import { getPercentageColor, getStatQuality } from "@/lib/stat-quality";
-import { matchMapImagePath } from "@/lib/map-images";
 import {
   getChampionData,
   type ChampionData,
@@ -27,16 +26,8 @@ import {
   type ChampionTalentStatsResponse,
   type ChampionTalentStat,
   type ItemStat,
-  type PerformanceMetricsResponse,
-  type PerformanceMetricKey,
-  type PerformanceMetricSummary,
-  type ChampionPerformanceDistribution,
-  type ChampionMapStat,
-  fetchStatsChampions,
-  fetchChampionMapStats,
   type PublicStatsScope,
 } from "@/lib/api-client";
-import { getRankIconPath, getTierColor, resolveEffectiveTier } from "@/lib/tier-utils";
 import { getStoredLobbyTierFilter, withStoredLobbyTier } from "@/lib/lobby-tier";
 import { useLocalization } from "@/lib/localization-context";
 import { EN_MESSAGES, type TranslationKey } from "@/lib/localization/messages";
@@ -56,16 +47,6 @@ function championDescriptionKey(
   return candidate in EN_MESSAGES ? candidate as TranslationKey : null;
 }
 
-const CHAMPION_METRICS = [
-  { key: "dpm", labelKey: "common.metrics.damagePerMinute", shortLabelKey: "common.metrics.dpm", colorClass: "text-red-400" },
-  { key: "wpm", labelKey: "common.metrics.weaponPerMinute", shortLabelKey: "common.metrics.wpm", colorClass: "text-orange-400" },
-  { key: "apm", labelKey: "common.metrics.abilityPerMinute", shortLabelKey: "common.metrics.apm", colorClass: "text-fuchsia-400" },
-  { key: "gpm", labelKey: "common.metrics.creditsPerMinute", shortLabelKey: "common.metrics.cpm", colorClass: "text-yellow-400" },
-  { key: "hpm", labelKey: "common.metrics.healingPerMinute", shortLabelKey: "common.metrics.hpm", colorClass: "text-emerald-400" },
-  { key: "mpm", labelKey: "common.metrics.shieldingPerMinute", shortLabelKey: "common.metrics.spm", colorClass: "text-blue-400" },
-  { key: "kda", labelKey: "common.metrics.kda", shortLabelKey: "common.metrics.kda", colorClass: "text-violet-400" },
-] as const satisfies ReadonlyArray<{ key: PerformanceMetricKey; labelKey: string; shortLabelKey: string; colorClass: string }>;
-
 const ITEM_CATEGORY_BY_NAME: Record<string, string> = {
   "Blast Shields": "Defense", Guardian: "Defense", Haven: "Defense", Illuminate: "Defense", Resilience: "Defense", Sentinel: "Defense",
   Chronos: "Utility", Hoard: "Utility", "Master Riding": "Utility", "Morale Boost": "Utility", Nimble: "Utility",
@@ -74,41 +55,12 @@ const ITEM_CATEGORY_BY_NAME: Record<string, string> = {
 };
 
 const ITEM_CATEGORIES = ["Defense", "Utility", "Healing", "Offense"] as const;
-const STATS_SCOPE_LABEL_KEYS = {
-  ranked: "stats.scope.ranked",
-  casual: "stats.scope.casual",
-  bot: "stats.scope.bot",
-  team_deathmatch: "stats.scope.teamDeathmatch",
-  arcade: "stats.scope.arcade",
-  wave_defense: "stats.scope.waveDefense",
-  experiment: "stats.scope.experiment",
-  newcomer: "stats.scope.newcomer",
-} as const;
 
 function itemIcon(name: string) {
   return `/images/items/${name.replace(/\s+/g, "_")}_Icon.avif`;
 }
 function itemCategoryColor(category: string) {
   return category === "Offense" ? "text-red-400" : category === "Defense" ? "text-blue-400" : category === "Healing" ? "text-emerald-400" : "text-amber-400";
-}
-
-interface ChampionStats {
-  avgRating: number | null;
-  avgWinRate: number | null;
-  totalPlays: number | null;
-  totalMatches: number | null;
-  totalWins: number | null;
-}
-
-function statsFromPageData(data: ChampionPagePayload | null): ChampionStats | null {
-  const stats = data?.stats;
-  return stats ? {
-    avgRating: stats.avg_league_tier != null ? Number(stats.avg_league_tier) : null,
-    avgWinRate: stats.win_rate != null ? Number(stats.win_rate) : null,
-    totalPlays: stats.total_matches != null ? Number(stats.total_matches) : null,
-    totalMatches: stats.total_matches != null ? Number(stats.total_matches) : null,
-    totalWins: stats.wins != null ? Number(stats.wins) : null,
-  } : null;
 }
 
 // Tier/trend types from existing API
@@ -132,76 +84,8 @@ const ROLE_ICONS: Record<string, string> = {
   Support: "/images/icons/Class_Support_Icon.avif",
 };
 
-function RankedPerformanceCard({
-  stats,
-  championPerformance,
-  globalPerformance,
-  isRanked,
-}: {
-  stats: ChampionStats;
-  championPerformance: Partial<Record<PerformanceMetricKey, ChampionPerformanceDistribution>>;
-  globalPerformance: PerformanceMetricsResponse;
-  isRanked: boolean;
-}) {
-  const { t, formatNumber, formatPercent } = useLocalization();
-  const tier = stats.avgRating == null ? null : Math.round(stats.avgRating);
-  const effective = tier == null ? null : resolveEffectiveTier(tier, 0);
-  const iconPath = tier == null ? null : getRankIconPath(tier, 0);
-  const color = effective == null ? "text-pc-text" : getTierColor(effective.displayTier);
-  const totalLosses = stats.totalPlays == null || stats.totalWins == null
-    ? null
-    : Math.max(stats.totalPlays - stats.totalWins, 0);
-
-  return (
-    <div>
-      <div className={`grid gap-4 ${isRanked ? "sm:grid-cols-[minmax(0,1fr)_minmax(0,3fr)]" : ""}`}>
-        {isRanked && <div className="min-w-0 text-center sm:border-r sm:border-pc-border sm:pr-4">
-          <div className="mb-1 text-xs text-pc-text-muted">{t("generated.champions.avgTier")}</div>
-          {effective && iconPath ? (
-            <div className="flex items-center justify-center gap-2">
-              <img src={iconPath} alt={effective.displayName} className="h-9 w-9 shrink-0 object-contain" />
-              <div className="min-w-0 text-left">
-                <div className={`truncate text-xs font-semibold ${color}`}>{effective.displayName}</div>
-                <div className="font-mono text-xs text-pc-text-muted">{formatNumber(stats.avgRating, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</div>
-              </div>
-            </div>
-          ) : <div className="font-mono text-lg text-pc-text">—</div>}
-        </div>}
-        <div className="flex min-h-14 flex-wrap items-center justify-center gap-x-4 gap-y-2 px-2 py-2 sm:flex-nowrap sm:gap-x-5">
-          <div className="flex items-baseline gap-2">
-            <span className="font-mono text-lg" style={stats.avgWinRate == null ? undefined : { color: getPercentageColor(stats.avgWinRate) }}>{stats.avgWinRate == null ? "—" : formatPercent(stats.avgWinRate)}</span>
-            <span className="text-xs text-pc-text-muted">{t("common.sort.winRate")}</span>
-          </div>
-          <div className="flex items-baseline gap-2">
-            <span className="font-mono text-lg text-pc-text">{stats.totalWins == null ? "—" : formatNumber(stats.totalWins)}</span>
-            <span className="text-xs text-pc-text-muted">{t("generated.players.wins")}</span>
-          </div>
-          <div className="flex items-baseline gap-2">
-            <span className="font-mono text-lg text-pc-text">{totalLosses == null ? "—" : formatNumber(totalLosses)}</span>
-            <span className="text-xs text-pc-text-muted">{t("generated.players.losses")}</span>
-          </div>
-          <div className="flex items-baseline gap-2">
-            <span className="font-mono text-lg text-pc-text">{stats.totalPlays == null ? "—" : formatNumber(stats.totalPlays)}</span>
-            <span className="text-xs text-pc-text-muted">{t("common.sort.totalPlays")}</span>
-          </div>
-        </div>
-      </div>
-      {isRanked && <div className="mt-4 grid grid-cols-2 border-t border-pc-border pt-4 sm:grid-cols-4 lg:grid-cols-7 lg:divide-x lg:divide-pc-border">
-        {CHAMPION_METRICS.map((metric) => (
-          <ChampionMetricCell
-            key={metric.key}
-            metric={metric}
-            champion={championPerformance[metric.key]}
-            global={globalPerformance[metric.key]}
-          />
-        ))}
-      </div>}
-    </div>
-  );
-}
-
 /**
- * Render /champions/[name]/champion-detail-client.tsx using `StatBadge`, `LoadingPanel`, `RankedPerformanceCard`.
+ * Render /champions/[name]/champion-detail-client.tsx using `StatBadge`, `LoadingPanel`.
  * Render the ChampionDetailPage view for champions name champion-detail-client.
  * refs: none
  * I/O types: `{ initialChampionData = null, initialPageData = null, }: { initialChampionData?: ChampionData | null; initialPageData?: ChampionPagePayload | null; } -> JSX.Element`.
@@ -225,14 +109,10 @@ export default function ChampionDetailPage({
 
   const [championData, setChampionData] = useState<ChampionData | null>(initialChampionData);
   const [dataLoaded, setDataLoaded] = useState(Boolean(initialChampionData));
-  const [stats, setStats] = useState<ChampionStats | null>(() => statsFromPageData(initialPageData));
   const [talentStats, setTalentStats] = useState<ChampionTalentStatsResponse | null>(() => (
     initialPageData?.talentStats ? normalizeChampionTalentStatsResponse(initialPageData.talentStats) : null
   ));
   const [championItems, setChampionItems] = useState<ItemStat[]>(initialPageData?.items ?? []);
-  const [championMaps, setChampionMaps] = useState<ChampionMapStat[]>(initialPageData?.maps ?? []);
-  const [globalPerformance, setGlobalPerformance] = useState<PerformanceMetricsResponse>(initialPageData?.performance ?? {});
-  const [championPerformance, setChampionPerformance] = useState<Partial<Record<PerformanceMetricKey, ChampionPerformanceDistribution>>>(initialPageData?.championPerformance ?? {});
   const [tierStats, setTierStats] = useState<TierStat[]>([]);
   const [patchTrends, setPatchTrends] = useState<PatchTrend[]>([]);
   const [loading, setLoading] = useState(!initialPageData);
@@ -285,45 +165,23 @@ export default function ChampionDetailPage({
       return;
     }
     const applyPageData = (data: ChampionPagePayload) => {
-      setStats(statsFromPageData(data));
       setTalentStats(data.talentStats ? normalizeChampionTalentStatsResponse(data.talentStats) : null);
       setChampionItems(data.items);
-      setChampionMaps(data.maps);
-      setGlobalPerformance(data.performance);
-      setChampionPerformance(data.championPerformance);
     };
 
     const preserveInitialRankedData = statsScope === "ranked" && initialPageData != null;
     if (preserveInitialRankedData && getStoredLobbyTierFilter() === "all") return;
     if (!preserveInitialRankedData) {
       setLoading(true);
-      setStats(null);
       setTalentStats(null);
       setChampionItems([]);
-      setChampionMaps([]);
-      setGlobalPerformance({});
-      setChampionPerformance({});
       setTierStats([]);
       setPatchTrends([]);
     }
 
     if (statsScope !== "ranked") {
-      fetchStatsChampions({ scope: statsScope, limit: 200 }).then(async (champions) => {
-        const row = champions.find((entry) => championSlug(entry.championName) === championSlug(staticChampion.name));
-        const maps = row ? await fetchChampionMapStats(row.championId, { scope: statsScope }) : [];
-        setStats(row ? {
-          avgRating: null,
-          avgWinRate: row.winRate,
-          totalPlays: row.totalPlays,
-          totalMatches: row.totalPlays,
-          totalWins: row.totalPlays == null ? null : Math.round(row.totalPlays * row.winRate / 100),
-        } : null);
-        setChampionMaps(maps);
-        setTalentStats(null);
-      }).catch(() => {
-        setStats(null);
-        setChampionMaps([]);
-      }).finally(() => setLoading(false));
+      setTalentStats(null);
+      setLoading(false);
       return;
     }
 
@@ -340,12 +198,8 @@ export default function ChampionDetailPage({
       .then(applyPageData)
       .catch(() => {
         if (!preserveInitialRankedData) {
-          setStats(null);
           setTalentStats(null);
           setChampionItems([]);
-          setChampionMaps([]);
-          setGlobalPerformance({});
-          setChampionPerformance({});
         }
       })
       .finally(() => setLoading(false));
@@ -363,7 +217,6 @@ export default function ChampionDetailPage({
   }, [talentStats]);
   const maxTierPickRate = useMemo(() => Math.max(1, ...tierStats.map((tier) => tier.pickRate)), [tierStats]);
   const maxTrendPlays = useMemo(() => Math.max(1, ...patchTrends.map((trend) => trend.weeklyPlays)), [patchTrends]);
-  const maxMapPickRate = useMemo(() => Math.max(1, ...championMaps.map((map) => map.pickRate)), [championMaps]);
   if (dataLoaded && !championData && !staticChampion) return notFound();
 
   return (
@@ -431,23 +284,6 @@ export default function ChampionDetailPage({
             <LoadingPanel compact />
           ) : (
             <div key={`reveal-${revealKey}`} className="pc-data-sync space-y-6">
-          {/* Compact ranked summary leads the analysis column. */}
-          <section className="space-y-2">
-            <h2 className="pc-card-title shadow-sm">
-              {statsScope === "ranked" ? t("generated.champions.rankedPerformance") : t("stats.scope.performance", { mode: t(STATS_SCOPE_LABEL_KEYS[statsScope]) })}
-            </h2>
-            <div className="pc-card p-4">
-              {stats && (
-                <RankedPerformanceCard
-                  stats={stats}
-                  championPerformance={championPerformance}
-                  globalPerformance={globalPerformance}
-                  isRanked={statsScope === "ranked"}
-                />
-              )}
-            </div>
-          </section>
-
           {/* Talents */}
           {championData?.talents && championData.talents.length > 0 && (
             <>
@@ -591,91 +427,6 @@ export default function ChampionDetailPage({
         </div>
       )}
 
-      {/* Champion-relative ranked map distribution. */}
-      <section className="space-y-3">
-        <div>
-          <h2 className="pc-card-title">{t("generated.champions.mapStats")}</h2>
-          <p className="mt-1 text-xs text-pc-text-secondary">
-            {statsScope === "ranked" ? t("generated.champions.rankedPerformanceByMapPickRateIsEachMapS") : t("stats.scope.performanceByMap", { mode: t(STATS_SCOPE_LABEL_KEYS[statsScope]) })}</p>
-        </div>
-        {loading ? (
-          <LoadingPanel />
-        ) : championMaps.length === 0 ? (
-          <div className="pc-card text-sm text-pc-text-muted">{statsScope === "ranked" ? t("generated.champions.noRankedMapStatisticsAreAvailableYet") : t("stats.scope.noMapStats", { mode: t(STATS_SCOPE_LABEL_KEYS[statsScope]) })}</div>
-        ) : (
-          <div key={`maps-${revealKey}`} className="pc-data-sync grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {championMaps.map((map) => {
-              const quality = getStatQuality(map.winRate, map.pickRate, maxMapPickRate);
-              return (
-                <Link
-                  key={map.name}
-                  href={`/game/maps/${encodeURIComponent(map.name)}`}
-                  className="group overflow-hidden rounded-xl border bg-pc-bg-elevated transition-colors hover:border-pc-accent-mid"
-                  style={{ borderColor: quality.borderColor }}
-                >
-                  <div className="relative h-36 overflow-hidden bg-pc-bg">
-                    <SmartImage src={matchMapImagePath(map.name)} alt="" className="h-full w-full object-cover opacity-75 transition-transform duration-300 group-hover:scale-105" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-pc-bg-elevated via-pc-bg-elevated/10 to-transparent" />
-                    <h3 className="absolute bottom-3 left-4 right-4 truncate text-base font-bold text-pc-text group-hover:text-pc-accent">
-                      {map.name.replace(/^Ranked\s+/, "")}
-                    </h3>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2 p-3 text-center text-xs">
-                    <div>
-                      <div className="text-xs uppercase text-pc-text-muted">{t("generated.champions.winRate")}</div>
-                      <div className="font-bold" style={{ color: getPercentageColor(map.winRate) }}>{formatPercent(map.winRate)}</div>
-                    </div>
-                    <div>
-                      <div className="text-xs uppercase text-pc-text-muted">{t("generated.champions.pickRate")}</div>
-                      <div className="font-medium" style={{ color: getPercentageColor(map.pickRate) }}>{formatPercent(map.pickRate)}</div>
-                    </div>
-                    <div>
-                      <div className="text-xs uppercase text-pc-text-muted">{t("generated.champions.plays")}</div>
-                      <div className="font-medium text-pc-text">{formatNumber(map.totalPlays)}</div>
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        )}
-      </section>
-    </div>
-  );
-}
-
-function ChampionMetricCell({
-  metric,
-  champion,
-  global,
-}: {
-  metric: (typeof CHAMPION_METRICS)[number];
-  champion?: ChampionPerformanceDistribution;
-  global?: PerformanceMetricSummary;
-}) {
-  const { t , formatNumber, formatPercent} = useLocalization();
-  const isDecimal = metric.key === "kda";
-  const formatMetric = (value: number | null | undefined) => {
-    const numeric = Number(value ?? 0);
-    return isDecimal ? formatNumber(numeric, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : formatNumber(Math.round(numeric));
-  };
-  const championMean = champion?.avgValue ?? champion?.mean ?? 0;
-  const globalMean = global?.mean ?? 0;
-  const deltaPct = globalMean !== 0 ? ((championMean - globalMean) / globalMean) * 100 : 0;
-  const p10 = champion?.p10 && champion.p10 > 0 ? champion.p10 : champion?.min ?? 0;
-  const p90 = champion?.p90 && champion.p90 > 0 ? champion.p90 : champion?.max ?? 0;
-  const deltaClass = deltaPct >= 0 ? "text-emerald-400" : "text-rose-400";
-
-  return (
-    <div className="min-w-0 px-2 py-1 text-center" title={t(metric.labelKey)}>
-      <div className="text-xs uppercase tracking-wider text-pc-text-muted">{t(metric.shortLabelKey)}</div>
-      <div className={`text-lg font-bold ${metric.colorClass}`}>{formatMetric(championMean)}</div>
-      <div className="mt-1 text-xs text-pc-text-muted">{t("performance.p10p90")}</div>
-      <div className="whitespace-nowrap font-mono text-xs text-pc-text-secondary">{formatMetric(p10)}–{formatMetric(p90)}</div>
-      <div className="mt-1 flex flex-wrap items-center justify-center gap-x-1 text-xs">
-        <span className="text-pc-text-muted">{t("generated.champions.global")} {formatMetric(globalMean)}</span>
-        <span className={deltaClass}>{formatPercent(deltaPct, { signDisplay: "always", minimumFractionDigits: 1, maximumFractionDigits: 1 })}</span>
-      </div>
     </div>
   );
 }
