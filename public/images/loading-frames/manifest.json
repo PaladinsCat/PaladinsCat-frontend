@@ -1,2033 +1,3155 @@
 {
-  "schemaVersion": 1,
-  "sourcePage": "https://paladins.fandom.com/wiki/Loading_Frames",
-  "sourceRevisionId": 314005,
-  "sourceRevisionTimestamp": "2024-10-16T15:22:10Z",
-  "frameCount": 72,
-  "animatedFrameCount": 67,
-  "totals": {
-    "webpBytes": 9504606,
-    "gifBytes": 23709172
-  },
+  "animatedFrameCount": 81,
+  "frameCount": 82,
   "frames": [
     {
-      "name": "Default Ally Team",
-      "slug": "default-ally-team",
       "aliases": [
         "Default Ally Team",
         "Default Team",
         "Default Team Frame"
       ],
-      "sourceFile": "Default Team Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/3/30/Default_Team_Frame.gif/revision/latest?cb=20220123092543",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Default_Team_Frame.gif",
-      "sha1": "05ad04713db1315d117a3d5acf55997ffb53759e",
-      "width": 335,
-      "height": 450,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/default-ally-team.webp",
-        "gif": "/images/loading-frames/default-ally-team.gif"
+        "png": "/images/loading-frames/default-ally-team.png?v=9678b9935db0",
+        "webp": "/images/loading-frames/default-ally-team.webp?v=268bf49120ba"
       },
       "bytes": {
-        "webp": 7274,
-        "gif": 26373
-      }
+        "png": 99018,
+        "webp": 70472
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Default Ally Team",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "default-ally-team",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_Default",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Default Enemy Team",
-      "slug": "default-enemy-team",
       "aliases": [
         "Default Enemy Team",
         "Default Enemy",
         "Default Enemy Frame"
       ],
-      "sourceFile": "Default Enemy Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/0/0e/Default_Enemy_Frame.gif/revision/latest?cb=20220123092731",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Default_Enemy_Frame.gif",
-      "sha1": "fca76fdc2315e8dd29b0ef7dcfce96a391eec9dc",
-      "width": 335,
-      "height": 450,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/default-enemy-team.webp",
-        "gif": "/images/loading-frames/default-enemy-team.gif"
+        "png": "/images/loading-frames/default-enemy-team.png?v=ad5079f83b52",
+        "webp": "/images/loading-frames/default-enemy-team.webp?v=95448c6af128"
       },
       "bytes": {
-        "webp": 7030,
-        "gif": 27120
-      }
+        "png": 100323,
+        "webp": 70292
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Default Enemy Team",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "default-enemy-team",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_Default_Enemy",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Ascension",
-      "slug": "ascension",
       "aliases": [
         "Ascension",
         "Ascension Frame"
       ],
-      "sourceFile": "Ascension Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/c/ca/Ascension_Frame.gif/revision/latest?cb=20220123091211",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Ascension_Frame.gif",
-      "sha1": "be89eef69a0ea5284fadb25daa5232fc60afd373",
-      "width": 335,
-      "height": 450,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/ascension.webp",
-        "gif": "/images/loading-frames/ascension.gif"
+        "png": "/images/loading-frames/ascension.png?v=6cf958dd97f3",
+        "webp": "/images/loading-frames/ascension.webp?v=f8d1f6ee6d04"
       },
       "bytes": {
-        "webp": 28116,
-        "gif": 83015
-      }
+        "png": 204768,
+        "webp": 150686
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Ascension",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "ascension",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_Ascension",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Full Metal",
-      "slug": "full-metal",
       "aliases": [
         "Full Metal",
         "Full Metal Frame"
       ],
-      "sourceFile": "Full Metal Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/b/b9/Full_Metal_Frame.gif/revision/latest?cb=20220123105201",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Full_Metal_Frame.gif",
-      "sha1": "8a43ae4ad171b820562f1a2ebe5c0396f5001e98",
-      "width": 335,
-      "height": 450,
-      "frameCount": 48,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 48,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink-with-motion-sample",
       "assets": {
-        "webp": "/images/loading-frames/full-metal.webp",
-        "gif": "/images/loading-frames/full-metal.gif"
+        "png": "/images/loading-frames/full-metal.png?v=4aba8baa8cd8",
+        "webp": "/images/loading-frames/full-metal.webp?v=801e0a2a98f3"
       },
       "bytes": {
-        "webp": 371294,
-        "gif": 1450625
-      }
+        "png": 140247,
+        "webp": 4522482
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 92,
+      "fullMasterFrames": 448,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Full Metal",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3839.0,
+      "optimizedFrameCount": 92,
+      "preferredFormat": "webp",
+      "slug": "full-metal",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_FullMetal",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Forsaken",
-      "slug": "forsaken",
       "aliases": [
         "Forsaken",
         "Forsaken Frame"
       ],
-      "sourceFile": "Forsaken Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/f/f6/Forsaken_Frame.gif/revision/latest?cb=20220122190245",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Forsaken_Frame.gif",
-      "sha1": "5e6946311989763af8c2eaad72100ff041cdf2d2",
-      "width": 335,
-      "height": 450,
-      "frameCount": 48,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 48,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink-with-motion-sample",
       "assets": {
-        "webp": "/images/loading-frames/forsaken.webp",
-        "gif": "/images/loading-frames/forsaken.gif"
+        "png": "/images/loading-frames/forsaken.png?v=cc9de4286096",
+        "webp": "/images/loading-frames/forsaken.webp?v=7b209a35f197"
       },
       "bytes": {
-        "webp": 840414,
-        "gif": 1869907
-      }
+        "png": 178265,
+        "webp": 9077728
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 92,
+      "fullMasterFrames": 1200,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Forsaken",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3839.0,
+      "optimizedFrameCount": 92,
+      "preferredFormat": "webp",
+      "slug": "forsaken",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_Forsaken",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Shogunate",
-      "slug": "shogunate",
       "aliases": [
         "Shogunate",
         "Shogunate Frame"
       ],
-      "sourceFile": "Shogunate Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/e/e5/Shogunate_Frame.gif/revision/latest?cb=20220123114212",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Shogunate_Frame.gif",
-      "sha1": "126516d50e99196b4414e52a3913052edc8f427a",
-      "width": 335,
-      "height": 450,
-      "frameCount": 48,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 48,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink-with-motion-sample",
       "assets": {
-        "webp": "/images/loading-frames/shogunate.webp",
-        "gif": "/images/loading-frames/shogunate.gif"
+        "png": "/images/loading-frames/shogunate.png?v=de9c8e3d2ce6",
+        "webp": "/images/loading-frames/shogunate.webp?v=bdd39ae5b961"
       },
       "bytes": {
-        "webp": 697698,
-        "gif": 1954293
-      }
+        "png": 177484,
+        "webp": 4204486
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 92,
+      "fullMasterFrames": 603,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Shogunate",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 92,
+      "preferredFormat": "webp",
+      "slug": "shogunate",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_Ninja",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Warder",
-      "slug": "warder",
       "aliases": [
         "Warder",
         "Warder Frame"
       ],
-      "sourceFile": "Warder Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/7/7b/Warder_Frame.gif/revision/latest?cb=20220123115334",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Warder_Frame.gif",
-      "sha1": "2bbb96b5c598778d80a2b52f0230988f3f276423",
-      "width": 335,
-      "height": 450,
-      "frameCount": 48,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 48,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink-with-motion-sample",
       "assets": {
-        "webp": "/images/loading-frames/warder.webp",
-        "gif": "/images/loading-frames/warder.gif"
+        "png": "/images/loading-frames/warder.png?v=460e2526cdf0",
+        "webp": "/images/loading-frames/warder.webp?v=4d56f970edbc"
       },
       "bytes": {
-        "webp": 411578,
-        "gif": 495690
-      }
+        "png": 166245,
+        "webp": 5242706
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 92,
+      "fullMasterFrames": 180,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Warder",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3839.0,
+      "optimizedFrameCount": 86,
+      "preferredFormat": "webp",
+      "slug": "warder",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_Summer",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Kraken's",
-      "slug": "krakens",
       "aliases": [
         "Kraken's",
         "Kraken's Frame"
       ],
-      "sourceFile": "Kraken's Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/d/d3/Kraken%27s_Frame.gif/revision/latest?cb=20220123110030",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Kraken%27s_Frame.gif",
-      "sha1": "9e65bfc80ce115353a0af790ecea422eb2a9a58f",
-      "width": 335,
-      "height": 450,
-      "frameCount": 48,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 40,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink-with-motion-sample",
       "assets": {
-        "webp": "/images/loading-frames/krakens.webp",
-        "gif": "/images/loading-frames/krakens.gif"
+        "png": "/images/loading-frames/krakens.png?v=cb5aa67e1791",
+        "webp": "/images/loading-frames/krakens.webp?v=ffb1f8ed5471"
       },
       "bytes": {
-        "webp": 221080,
-        "gif": 258728
-      }
+        "png": 220298,
+        "webp": 174522
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 92,
+      "fullMasterFrames": 201,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Kraken's",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3839.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "krakens",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_Halloween",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Equalizer",
-      "slug": "equalizer",
       "aliases": [
         "Equalizer",
         "Equalizer Frame"
       ],
-      "sourceFile": "Equalizer Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/5/5e/Equalizer_Frame.gif/revision/latest?cb=20220123104823",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Equalizer_Frame.gif",
-      "sha1": "f4bc2c6bf99c84aac3b372b48772d5f833fde24f",
-      "width": 335,
-      "height": 450,
-      "frameCount": 48,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 44,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink-with-motion-sample",
       "assets": {
-        "webp": "/images/loading-frames/equalizer.webp",
-        "gif": "/images/loading-frames/equalizer.gif"
+        "png": "/images/loading-frames/equalizer.png?v=b4613f9fe9c8",
+        "webp": "/images/loading-frames/equalizer.webp?v=f08d76424a08"
       },
       "bytes": {
-        "webp": 616032,
-        "gif": 1042075
-      }
+        "png": 122361,
+        "webp": 5448670
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 92,
+      "fullMasterFrames": 24,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Equalizer",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 48,
+      "preferredFormat": "webp",
+      "slug": "equalizer",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_EDM",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Ice Palace",
-      "slug": "ice-palace",
       "aliases": [
         "Ice Palace",
         "Ice Palace Frame"
       ],
-      "sourceFile": "Ice Palace Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/d/d0/Ice_Palace_Frame.gif/revision/latest?cb=20220123105648",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Ice_Palace_Frame.gif",
-      "sha1": "1b3cdc2871885110d59344762e75e1c4561b7b6b",
-      "width": 335,
-      "height": 450,
-      "frameCount": 48,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 48,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink-with-motion-sample",
       "assets": {
-        "webp": "/images/loading-frames/ice-palace.webp",
-        "gif": "/images/loading-frames/ice-palace.gif"
+        "png": "/images/loading-frames/ice-palace.png?v=3cd5a106da29",
+        "webp": "/images/loading-frames/ice-palace.webp?v=6af7c6c34fb6"
       },
       "bytes": {
-        "webp": 109142,
-        "gif": 142271
-      }
+        "png": 225836,
+        "webp": 1458458
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 92,
+      "fullMasterFrames": 24,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Ice Palace",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 48,
+      "preferredFormat": "webp",
+      "slug": "ice-palace",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_Winter",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Paladanium",
-      "slug": "paladanium",
       "aliases": [
         "Paladanium",
         "Paladanium Frame"
       ],
-      "sourceFile": "Paladanium Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/9/9b/Paladanium_Frame.gif/revision/latest?cb=20220123111256",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Paladanium_Frame.gif",
-      "sha1": "0cbd51170838ef3e9f4f4126912283ed1e512adc",
-      "width": 335,
-      "height": 450,
-      "frameCount": 48,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 48,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink-with-motion-sample",
       "assets": {
-        "webp": "/images/loading-frames/paladanium.webp",
-        "gif": "/images/loading-frames/paladanium.gif"
+        "png": "/images/loading-frames/paladanium.png?v=00e002cbc3c8",
+        "webp": "/images/loading-frames/paladanium.webp?v=e580b9094051"
       },
       "bytes": {
-        "webp": 517902,
-        "gif": 702060
-      }
+        "png": 131816,
+        "webp": 9010856
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 92,
+      "fullMasterFrames": 48,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Paladanium",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3839.0,
+      "optimizedFrameCount": 92,
+      "preferredFormat": "webp",
+      "slug": "paladanium",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_Mecha",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Omega",
-      "slug": "omega",
       "aliases": [
         "Omega",
         "Omega Frame"
       ],
-      "sourceFile": "Omega Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/4/4c/Omega_Frame.gif/revision/latest?cb=20220123110942",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Omega_Frame.gif",
-      "sha1": "044894950b83abc0b9b3c1290803f5d8d32845e8",
-      "width": 335,
-      "height": 450,
-      "frameCount": 48,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 48,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink-with-motion-sample",
       "assets": {
-        "webp": "/images/loading-frames/omega.webp",
-        "gif": "/images/loading-frames/omega.gif"
+        "png": "/images/loading-frames/omega.png?v=6f6a0cb644aa",
+        "webp": "/images/loading-frames/omega.webp?v=a1c779165baa"
       },
       "bytes": {
-        "webp": 108188,
-        "gif": 150823
-      }
+        "png": 126122,
+        "webp": 1007254
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 92,
+      "fullMasterFrames": 24,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Omega",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 48,
+      "preferredFormat": "webp",
+      "slug": "omega",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_EndTimes",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Retrocate",
-      "slug": "retrocate",
       "aliases": [
         "Retrocate",
-        "Retrocate Frame"
+        "Retrocate Frame",
+        "Retrocade"
       ],
-      "sourceFile": "Retrocate Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/c/c0/Retrocate_Frame.gif/revision/latest?cb=20220123111617",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Retrocate_Frame.gif",
-      "sha1": "0f4f9363af538197febd48804969757654dd8917",
-      "width": 335,
-      "height": 450,
-      "frameCount": 48,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 48,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink-with-motion-sample",
       "assets": {
-        "webp": "/images/loading-frames/retrocate.webp",
-        "gif": "/images/loading-frames/retrocate.gif"
+        "png": "/images/loading-frames/retrocate.png?v=b727412129d0",
+        "webp": "/images/loading-frames/retrocate.webp?v=66c95029a2e9"
       },
       "bytes": {
-        "webp": 422146,
-        "gif": 706256
-      }
+        "png": 90984,
+        "webp": 7465860
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 92,
+      "fullMasterFrames": 24,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Retrocade",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 92,
+      "preferredFormat": "webp",
+      "slug": "retrocate",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_BattleByte",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Street",
-      "slug": "street",
       "aliases": [
         "Street",
         "Street Frame"
       ],
-      "sourceFile": "Street Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/f/f5/Street_Frame.gif/revision/latest?cb=20220123114947",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Street_Frame.gif",
-      "sha1": "799da6f6d6dc2eaf11e2025f423dcff00d7bdb7e",
-      "width": 335,
-      "height": 450,
-      "frameCount": 48,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 8,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink-with-motion-sample",
       "assets": {
-        "webp": "/images/loading-frames/street.webp",
-        "gif": "/images/loading-frames/street.gif"
+        "png": "/images/loading-frames/street.png?v=17aa72b02fa2",
+        "webp": "/images/loading-frames/street.webp?v=5f1722115ec4"
       },
       "bytes": {
-        "webp": 48218,
-        "gif": 52676
-      }
+        "png": 145923,
+        "webp": 339902
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 92,
+      "fullMasterFrames": 24,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Street",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 9,
+      "preferredFormat": "webp",
+      "slug": "street",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_KStreet",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Dragon's Keep",
-      "slug": "dragons-keep",
       "aliases": [
         "Dragon's Keep",
         "Dragon's Keep Frame"
       ],
-      "sourceFile": "Dragon's Keep Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/0/0d/Dragon%27s_Keep_Frame.gif/revision/latest?cb=20220123104350",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Dragon%27s_Keep_Frame.gif",
-      "sha1": "a02f9767eba7cad58e908f4efcc15b11a4a0d40a",
-      "width": 335,
-      "height": 450,
-      "frameCount": 48,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 48,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink-with-motion-sample",
       "assets": {
-        "webp": "/images/loading-frames/dragons-keep.webp",
-        "gif": "/images/loading-frames/dragons-keep.gif"
+        "png": "/images/loading-frames/dragons-keep.png?v=7143a9b98082",
+        "webp": "/images/loading-frames/dragons-keep.webp?v=7b124043962c"
       },
       "bytes": {
-        "webp": 225044,
-        "gif": 663459
-      }
+        "png": 147237,
+        "webp": 4627374
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 92,
+      "fullMasterFrames": 48,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Dragon's Keep",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3839.0,
+      "optimizedFrameCount": 91,
+      "preferredFormat": "webp",
+      "slug": "dragons-keep",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_SteelForged",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Beach Bash",
-      "slug": "beach-bash",
       "aliases": [
         "Beach Bash",
         "Beach Bash Frame"
       ],
-      "sourceFile": "Beach Bash Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/6/6b/Beach_Bash_Frame.gif/revision/latest?cb=20220123091908",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Beach_Bash_Frame.gif",
-      "sha1": "052d8dcf5acd3fd09a57fdbbd1d9069b6a22e4d9",
-      "width": 335,
-      "height": 450,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/beach-bash.webp",
-        "gif": "/images/loading-frames/beach-bash.gif"
+        "png": "/images/loading-frames/beach-bash.png?v=d8f779040b3f",
+        "webp": "/images/loading-frames/beach-bash.webp?v=f13fb08d060d"
       },
       "bytes": {
-        "webp": 28718,
-        "gif": 43008
-      }
+        "png": 206569,
+        "webp": 163798
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Beach Bash",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "beach-bash",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_ShorePatrol",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Deep Sea",
-      "slug": "deep-sea",
       "aliases": [
         "Deep Sea",
         "Deep Sea Frame"
       ],
-      "sourceFile": "Deep Sea Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/2/2f/Deep_Sea_Frame.gif/revision/latest?cb=20220123104252",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Deep_Sea_Frame.gif",
-      "sha1": "f65caa0f9e140801d0088518af9a1d51522b9b78",
-      "width": 335,
-      "height": 450,
-      "frameCount": 48,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 25,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink-with-motion-sample",
       "assets": {
-        "webp": "/images/loading-frames/deep-sea.webp",
-        "gif": "/images/loading-frames/deep-sea.gif"
+        "png": "/images/loading-frames/deep-sea.png?v=af815f192cf3",
+        "webp": "/images/loading-frames/deep-sea.webp?v=3f5406c49c46"
       },
       "bytes": {
-        "webp": 457544,
-        "gif": 841858
-      }
+        "png": 178721,
+        "webp": 5302390
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 92,
+      "fullMasterFrames": 72,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Deep Sea",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 32,
+      "preferredFormat": "webp",
+      "slug": "deep-sea",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_Pirates",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Rough and Tumble",
-      "slug": "rough-and-tumble",
       "aliases": [
         "Rough and Tumble",
         "Rough and Tumble Frame"
       ],
-      "sourceFile": "Rough and Tumble Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/e/ed/Rough_and_Tumble_Frame.gif/revision/latest?cb=20220123111940",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Rough_and_Tumble_Frame.gif",
-      "sha1": "625808a5c30ad3e74b8b694f39c0f03d8ee788cf",
-      "width": 335,
-      "height": 450,
-      "frameCount": 48,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 48,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink-with-motion-sample",
       "assets": {
-        "webp": "/images/loading-frames/rough-and-tumble.webp",
-        "gif": "/images/loading-frames/rough-and-tumble.gif"
+        "png": "/images/loading-frames/rough-and-tumble.png?v=4e4a14b187f3",
+        "webp": "/images/loading-frames/rough-and-tumble.webp?v=d70effc403f6"
       },
       "bytes": {
-        "webp": 221708,
-        "gif": 1967850
-      }
+        "png": 190445,
+        "webp": 2176158
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 92,
+      "fullMasterFrames": 14112,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Rough and Tumble",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 91,
+      "preferredFormat": "webp",
+      "slug": "rough-and-tumble",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_BP6_RoughandTumble",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Mystic Grove",
-      "slug": "mystic-grove",
       "aliases": [
         "Mystic Grove",
         "Mystic Grove Frame"
       ],
-      "sourceFile": "Mystic Grove Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/6/6c/Mystic_Grove_Frame.gif/revision/latest?cb=20220123110445",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Mystic_Grove_Frame.gif",
-      "sha1": "48b2fc61608651b8e5ab0819861abd302ec2c69c",
-      "width": 335,
-      "height": 450,
-      "frameCount": 48,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 48,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink-with-motion-sample",
       "assets": {
-        "webp": "/images/loading-frames/mystic-grove.webp",
-        "gif": "/images/loading-frames/mystic-grove.gif"
+        "png": "/images/loading-frames/mystic-grove.png?v=649131a8a4cc",
+        "webp": "/images/loading-frames/mystic-grove.webp?v=2b9cafb77a1d"
       },
       "bytes": {
-        "webp": 1033890,
-        "gif": 1847560
-      }
+        "png": 234635,
+        "webp": 12762138
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 92,
+      "fullMasterFrames": 6384,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Mystic Grove",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 92,
+      "preferredFormat": "webp",
+      "slug": "mystic-grove",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_MysticGrove",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Sands of Myth",
-      "slug": "sands-of-myth",
       "aliases": [
         "Sands of Myth",
         "Sands of Myth Frame"
       ],
-      "sourceFile": "Sands of Myth Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/b/be/Sands_of_Myth_Frame.gif/revision/latest?cb=20220123113825",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Sands_of_Myth_Frame.gif",
-      "sha1": "110254cad62f716a1b1d3505dd6d5ae5180e4ad6",
-      "width": 335,
-      "height": 450,
-      "frameCount": 48,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 48,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink-with-motion-sample",
       "assets": {
-        "webp": "/images/loading-frames/sands-of-myth.webp",
-        "gif": "/images/loading-frames/sands-of-myth.gif"
+        "png": "/images/loading-frames/sands-of-myth.png?v=5956a2638245",
+        "webp": "/images/loading-frames/sands-of-myth.webp?v=2e700d9870c1"
       },
       "bytes": {
-        "webp": 485102,
-        "gif": 792516
-      }
+        "png": 150653,
+        "webp": 5443436
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 92,
+      "fullMasterFrames": 112200,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Sands of Myth",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 54,
+      "preferredFormat": "webp",
+      "slug": "sands-of-myth",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_SandsofMyth",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Steel Maw",
-      "slug": "steel-maw",
       "aliases": [
         "Steel Maw",
         "Steel Maw Frame"
       ],
-      "sourceFile": "Steel Maw Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/a/a0/Steel_Maw_Frame.gif/revision/latest?cb=20220123101618",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Steel_Maw_Frame.gif",
-      "sha1": "0faac56528cdd07566316c7abac488626b8af775",
-      "width": 335,
-      "height": 450,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/steel-maw.webp",
-        "gif": "/images/loading-frames/steel-maw.gif"
+        "png": "/images/loading-frames/steel-maw.png?v=0f52ec8ddeac",
+        "webp": "/images/loading-frames/steel-maw.webp?v=cdbff8260c3c"
       },
       "bytes": {
-        "webp": 14782,
-        "gif": 42641
-      }
+        "png": 162294,
+        "webp": 120930
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Steel Maw",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "steel-maw",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_BP12_DragonTrap",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Stellar",
-      "slug": "stellar",
       "aliases": [
         "Stellar",
         "Stellar Frame"
       ],
-      "sourceFile": "Stellar Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/6/6e/Stellar_Frame.gif/revision/latest?cb=20220123101635",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Stellar_Frame.gif",
-      "sha1": "eb309d0a4e297d4328bfc8b3c53e1425eb7ff864",
-      "width": 335,
-      "height": 450,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/stellar.webp",
-        "gif": "/images/loading-frames/stellar.gif"
+        "png": "/images/loading-frames/stellar.png?v=90142f99c0b2",
+        "webp": "/images/loading-frames/stellar.webp?v=f89f19855c08"
       },
       "bytes": {
-        "webp": 23800,
-        "gif": 43300
-      }
+        "png": 182179,
+        "webp": 149160
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Stellar",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "stellar",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_RadientStarsBP",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Toil and Trouble",
-      "slug": "toil-and-trouble",
       "aliases": [
         "Toil and Trouble",
         "Toil and Trouble Frame"
       ],
-      "sourceFile": "Toil and Trouble Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/0/04/Toil_and_Trouble_Frame.gif/revision/latest?cb=20220123104237",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Toil_and_Trouble_Frame.gif",
-      "sha1": "292e26b0c834794ae1e9a0ea0a38cf6899a352dd",
-      "width": 335,
-      "height": 450,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/toil-and-trouble.webp",
-        "gif": "/images/loading-frames/toil-and-trouble.gif"
+        "png": "/images/loading-frames/toil-and-trouble.png?v=41b1015f30a8",
+        "webp": "/images/loading-frames/toil-and-trouble.webp?v=234fd7a94f19"
       },
       "bytes": {
-        "webp": 21584,
-        "gif": 45927
-      }
+        "png": 184234,
+        "webp": 143132
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Toil and Trouble",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "toil-and-trouble",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_WitchesandWizardsBP",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Heavenly Gate",
-      "slug": "heavenly-gate",
       "aliases": [
         "Heavenly Gate",
         "Heavenly Gate Frame"
       ],
-      "sourceFile": "Heavenly Gate Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/5/52/Heavenly_Gate_Frame.gif/revision/latest?cb=20220123093018",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Heavenly_Gate_Frame.gif",
-      "sha1": "9ccbd2c9e5c665652dc37a47fcaf42d2cbadaa99",
-      "width": 335,
-      "height": 450,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/heavenly-gate.webp",
-        "gif": "/images/loading-frames/heavenly-gate.gif"
+        "png": "/images/loading-frames/heavenly-gate.png?v=07ba079c36ba",
+        "webp": "/images/loading-frames/heavenly-gate.webp?v=80c8ac4199db"
       },
       "bytes": {
-        "webp": 34482,
-        "gif": 59713
-      }
+        "png": 195759,
+        "webp": 202404
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Heavenly Gate",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "heavenly-gate",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_EternalPyreBP",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Season 3 Commendation",
-      "slug": "season-3-commendation",
       "aliases": [
         "Season 3 Commendation",
-        "Season 3 Commendation Frame"
+        "Season 3 Commendation Frame",
+        "Commendation Loading Frame"
       ],
-      "sourceFile": "Season 3 Commendation Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/4/46/Season_3_Commendation_Frame.gif/revision/latest?cb=20220123092159",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Season_3_Commendation_Frame.gif",
-      "sha1": "d01e34ac27f4199a5fa59d1f234dd5deb50eb399",
-      "width": 335,
-      "height": 450,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/season-3-commendation.webp",
-        "gif": "/images/loading-frames/season-3-commendation.gif"
+        "png": "/images/loading-frames/season-3-commendation.png?v=7ce7351ebaeb",
+        "webp": "/images/loading-frames/season-3-commendation.webp?v=96fcc7eb1f05"
       },
       "bytes": {
-        "webp": 23464,
-        "gif": 73262
-      }
+        "png": 176946,
+        "webp": 138946
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Season 3 Commendation",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "season-3-commendation",
+      "sourceFps": 30,
+      "sourceObject": "LoadingFrame_Season3_Commendation",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Let's Play!",
-      "slug": "lets-play",
       "aliases": [
         "Let's Play!",
         "Let's Play! Frame"
       ],
-      "sourceFile": "Let's Play! Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/c/cc/Let%27s_Play%21_Frame.gif/revision/latest?cb=20220123093307",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Let%27s_Play!_Frame.gif",
-      "sha1": "f74fa151744addb1498471a95e759afe564d82f8",
-      "width": 335,
-      "height": 450,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/lets-play.webp",
-        "gif": "/images/loading-frames/lets-play.gif"
+        "png": "/images/loading-frames/lets-play.png?v=ed4df222877c",
+        "webp": "/images/loading-frames/lets-play.webp?v=a81db60b3bad"
       },
       "bytes": {
-        "webp": 17972,
-        "gif": 34311
-      }
+        "png": 140145,
+        "webp": 110318
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Let's Play!",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "lets-play",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_Digitized",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Uptime",
-      "slug": "uptime",
       "aliases": [
         "Uptime",
         "Uptime Frame"
       ],
-      "sourceFile": "Uptime Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/7/7c/Uptime_Frame.gif/revision/latest?cb=20220123114935",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Uptime_Frame.gif",
-      "sha1": "45a7d2957c288f033010d22384047f43886e1c3f",
-      "width": 335,
-      "height": 450,
-      "frameCount": 48,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 36,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink-with-motion-sample",
       "assets": {
-        "webp": "/images/loading-frames/uptime.webp",
-        "gif": "/images/loading-frames/uptime.gif"
+        "png": "/images/loading-frames/uptime.png?v=c9804d51647b",
+        "webp": "/images/loading-frames/uptime.webp?v=a27a4e532851"
       },
       "bytes": {
-        "webp": 211966,
-        "gif": 402338
-      }
+        "png": 128969,
+        "webp": 1942510
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 92,
+      "fullMasterFrames": 12,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Uptime",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3839.0,
+      "optimizedFrameCount": 32,
+      "preferredFormat": "webp",
+      "slug": "uptime",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_GenLock",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Azure Depths",
-      "slug": "azure-depths",
       "aliases": [
         "Azure Depths",
         "Azure Depths Frame"
       ],
-      "sourceFile": "Azure Depths Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/d/db/Azure_Depths_Frame.gif/revision/latest?cb=20220123091642",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Azure_Depths_Frame.gif",
-      "sha1": "f0018141f4578814f4a30f7153e5780f81ff9ef5",
-      "width": 335,
-      "height": 450,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/azure-depths.webp",
-        "gif": "/images/loading-frames/azure-depths.gif"
+        "png": "/images/loading-frames/azure-depths.png?v=f28857f62250",
+        "webp": "/images/loading-frames/azure-depths.webp?v=f6622a7fefc2"
       },
       "bytes": {
-        "webp": 25060,
-        "gif": 39092
-      }
+        "png": 180071,
+        "webp": 142152
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Azure Depths",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "azure-depths",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_Aquatic2021",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Abyss Hunter Academy",
-      "slug": "abyss-hunter-academy",
       "aliases": [
         "Abyss Hunter Academy",
-        "Abyss Hunter Academy Frame"
+        "Abyss Hunter Academy Frame",
+        "Abyss Hunter Academy Student"
       ],
-      "sourceFile": "Abyss Hunter Academy Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/b/b4/Abyss_Hunter_Academy_Frame.gif/revision/latest?cb=20220123090437",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Abyss_Hunter_Academy_Frame.gif",
-      "sha1": "772b10da597a1dfa75693da8c54e319545a94f87",
-      "width": 335,
-      "height": 450,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/abyss-hunter-academy.webp",
-        "gif": "/images/loading-frames/abyss-hunter-academy.gif"
+        "png": "/images/loading-frames/abyss-hunter-academy.png?v=d30e567d9913",
+        "webp": "/images/loading-frames/abyss-hunter-academy.webp?v=0e517533da3a"
       },
       "bytes": {
-        "webp": 11120,
-        "gif": 32022
-      }
+        "png": 112466,
+        "webp": 108112
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Abyss Hunter Academy",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "abyss-hunter-academy",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_DHA",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Soultree",
-      "slug": "soultree",
       "aliases": [
         "Soultree",
         "Season 4 Commendation",
-        "Season 4 Commendation Frame"
+        "Season 4 Commendation Frame",
+        "Commendation Loading Frame 2021"
       ],
-      "sourceFile": "Season 4 Commendation Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/1/19/Season_4_Commendation_Frame.gif/revision/latest?cb=20220123101543",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Season_4_Commendation_Frame.gif",
-      "sha1": "650eaa433254f5c234b659329b7db72c058f768e",
-      "width": 335,
-      "height": 450,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/soultree.webp",
-        "gif": "/images/loading-frames/soultree.gif"
+        "png": "/images/loading-frames/soultree.png?v=6483e60753ca",
+        "webp": "/images/loading-frames/soultree.webp?v=cefa5b523aab"
       },
       "bytes": {
-        "webp": 15302,
-        "gif": 42919
-      }
+        "png": 169285,
+        "webp": 124580
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Soultree",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "soultree",
+      "sourceFps": 30,
+      "sourceObject": "LoadingFrame_Season4_Commendation",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Bass Drop",
-      "slug": "bass-drop",
       "aliases": [
         "Bass Drop",
         "Bass Drop Frame"
       ],
-      "sourceFile": "Bass Drop Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/c/cb/Bass_Drop_Frame.gif/revision/latest?cb=20220225225203",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Bass_Drop_Frame.gif",
-      "sha1": "78e3cb2d6e090901ce714cab6f8abb03a765dcb0",
-      "width": 335,
-      "height": 450,
-      "frameCount": 48,
-      "durationMs": 0,
       "animated": true,
-      "optimizedFrameCount": 12,
-      "optimizedDurationMs": 4800,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink-with-motion-sample",
       "assets": {
-        "webp": "/images/loading-frames/bass-drop.webp",
-        "gif": "/images/loading-frames/bass-drop.gif"
+        "png": "/images/loading-frames/bass-drop.png?v=933bd092daf9",
+        "webp": "/images/loading-frames/bass-drop.webp?v=01335d237451"
       },
       "bytes": {
-        "webp": 139780,
-        "gif": 177657
-      }
+        "png": 185410,
+        "webp": 1344258
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 92,
+      "fullMasterFrames": 528,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Bass Drop",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 19,
+      "preferredFormat": "webp",
+      "slug": "bass-drop",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_Monstercat",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "The Maw Hungers",
-      "slug": "the-maw-hungers",
       "aliases": [
         "The Maw Hungers",
         "The Maw Hungers Frame"
       ],
-      "sourceFile": "The Maw Hungers Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/a/ac/The_Maw_Hungers_Frame.gif/revision/latest?cb=20220418130832",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:The_Maw_Hungers_Frame.gif",
-      "sha1": "6f01546fa0a93aa403e4e8b2c209c1714b7da9b6",
-      "width": 335,
-      "height": 450,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/the-maw-hungers.webp",
-        "gif": "/images/loading-frames/the-maw-hungers.gif"
+        "png": "/images/loading-frames/the-maw-hungers.png?v=157fdb956aca",
+        "webp": "/images/loading-frames/the-maw-hungers.webp?v=0054a39d4239"
       },
       "bytes": {
-        "webp": 31636,
-        "gif": 50194
-      }
+        "png": 256851,
+        "webp": 205202
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "The Maw Hungers",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "the-maw-hungers",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_Corrupted",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Over the Threshold",
-      "slug": "over-the-threshold",
       "aliases": [
         "Over the Threshold",
         "Over the Threshold Frame"
       ],
-      "sourceFile": "Over the Threshold Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/6/6b/Over_the_Threshold_Frame.gif/revision/latest?cb=20220610094436",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Over_the_Threshold_Frame.gif",
-      "sha1": "c32ad634eb617fdd76dfa130d0bba0ca9bf666f2",
-      "width": 335,
-      "height": 450,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/over-the-threshold.webp",
-        "gif": "/images/loading-frames/over-the-threshold.gif"
+        "png": "/images/loading-frames/over-the-threshold.png?v=6ccc9a9a79d4",
+        "webp": "/images/loading-frames/over-the-threshold.webp?v=d5f980d1fad0"
       },
       "bytes": {
-        "webp": 11896,
-        "gif": 30447
-      }
+        "png": 141631,
+        "webp": 106286
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Over the Threshold",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "over-the-threshold",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_RWBY_Threshold",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Cosmic Forces",
-      "slug": "cosmic-forces",
       "aliases": [
         "Cosmic Forces",
         "Cosmic Forces Frame"
       ],
-      "sourceFile": "Cosmic Forces Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/6/6d/Cosmic_Forces_Frame.gif/revision/latest?cb=20220731112016",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Cosmic_Forces_Frame.gif",
-      "sha1": "eed032071794df54c0ab856850dd333ded1cf6c2",
-      "width": 335,
-      "height": 450,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/cosmic-forces.webp",
-        "gif": "/images/loading-frames/cosmic-forces.gif"
+        "png": "/images/loading-frames/cosmic-forces.png?v=a49510a0e869",
+        "webp": "/images/loading-frames/cosmic-forces.webp?v=82e0aaf71457"
       },
       "bytes": {
-        "webp": 31314,
-        "gif": 50992
-      }
+        "png": 231769,
+        "webp": 221782
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Cosmic Forces",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "cosmic-forces",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_CosmicGods",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Big Smile",
-      "slug": "big-smile",
       "aliases": [
         "Big Smile",
         "Big Smile Frame"
       ],
-      "sourceFile": "Big Smile Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/7/7f/Big_Smile_Frame.gif/revision/latest?cb=20220731112018",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Big_Smile_Frame.gif",
-      "sha1": "109d0da328898639dc7e9a8743b968b34e838f5b",
-      "width": 335,
-      "height": 450,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink-with-motion-sample",
       "assets": {
-        "webp": "/images/loading-frames/big-smile.webp",
-        "gif": "/images/loading-frames/big-smile.gif"
+        "png": "/images/loading-frames/big-smile.png?v=bb8bfe39b9c4",
+        "webp": "/images/loading-frames/big-smile.webp?v=01c54436f79e"
       },
       "bytes": {
-        "webp": 25320,
-        "gif": 50250
-      }
+        "png": 225986,
+        "webp": 649238
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 92,
+      "fullMasterFrames": 96,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Big Smile",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3839.0,
+      "optimizedFrameCount": 13,
+      "preferredFormat": "webp",
+      "slug": "big-smile",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_CuddlyYago",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Voracious",
-      "slug": "voracious",
       "aliases": [
         "Voracious",
         "Voracious Frame"
       ],
-      "sourceFile": "Voracious Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/5/54/Voracious_Frame.gif/revision/latest?cb=20221015100738",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Voracious_Frame.gif",
-      "sha1": "da6e3335f8cb657fd805e08cc24dc2627cd3f0b3",
-      "width": 335,
-      "height": 450,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/voracious.webp",
-        "gif": "/images/loading-frames/voracious.gif"
+        "png": "/images/loading-frames/voracious.png?v=751c394026df",
+        "webp": "/images/loading-frames/voracious.webp?v=a5b6d5fa4b8e"
       },
       "bytes": {
-        "webp": 19922,
-        "gif": 42351
-      }
+        "png": 220949,
+        "webp": 171926
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Voracious",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "voracious",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_DemonHunt",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Ivory Visage",
-      "slug": "ivory-visage",
       "aliases": [
         "Ivory Visage",
         "Ivory Visage Frame"
       ],
-      "sourceFile": "Ivory Visage Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/0/0c/Ivory_Visage_Frame.gif/revision/latest?cb=20221029191542",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Ivory_Visage_Frame.gif",
-      "sha1": "a36531fc8c41b18ca4312606fd32ba3035c2aba1",
-      "width": 335,
-      "height": 450,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/ivory-visage.webp",
-        "gif": "/images/loading-frames/ivory-visage.gif"
+        "png": "/images/loading-frames/ivory-visage.png?v=d33333f4946f",
+        "webp": "/images/loading-frames/ivory-visage.webp?v=67641956922a"
       },
       "bytes": {
-        "webp": 54496,
-        "gif": 101899
-      }
+        "png": 235051,
+        "webp": 327628
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Ivory Visage",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "ivory-visage",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_PrimeFantasy",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Season 5 Commendation",
-      "slug": "season-5-commendation",
       "aliases": [
         "Season 5 Commendation",
-        "Season 5 Commendation Frame"
+        "Season 5 Commendation Frame",
+        "Commendation Loading Frame 2022"
       ],
-      "sourceFile": "Season 5 Commendation Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/7/79/Season_5_Commendation_Frame.gif/revision/latest?cb=20230202013835",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Season_5_Commendation_Frame.gif",
-      "sha1": "ef3855b4ac7660815900783bff8b83f9f851c792",
-      "width": 332,
-      "height": 448,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/season-5-commendation.webp",
-        "gif": "/images/loading-frames/season-5-commendation.gif"
+        "png": "/images/loading-frames/season-5-commendation.png?v=05cd45a08dc2",
+        "webp": "/images/loading-frames/season-5-commendation.webp?v=78e1950688ce"
       },
       "bytes": {
-        "webp": 19906,
-        "gif": 30899
-      }
+        "png": 154186,
+        "webp": 117236
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Season 5 Commendation",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "season-5-commendation",
+      "sourceFps": 30,
+      "sourceObject": "LoadingFrame_Season5_Commendation",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Skeletal",
-      "slug": "skeletal",
       "aliases": [
         "Skeletal",
         "Skeletal Frame"
       ],
-      "sourceFile": "Skeletal Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/b/b6/Skeletal_Frame.gif/revision/latest?cb=20230202013836",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Skeletal_Frame.gif",
-      "sha1": "f02658fdf68ef350935f04e4550edcf07d932af0",
-      "width": 332,
-      "height": 448,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/skeletal.webp",
-        "gif": "/images/loading-frames/skeletal.gif"
+        "png": "/images/loading-frames/skeletal.png?v=130b5d3bec5d",
+        "webp": "/images/loading-frames/skeletal.webp?v=ada46a6b511a"
       },
       "bytes": {
-        "webp": 39876,
-        "gif": 53332
-      }
+        "png": 251578,
+        "webp": 193472
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Skeletal",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "skeletal",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_NyxUpdate",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Season 1 Bronze",
-      "slug": "season-1-bronze",
       "aliases": [
         "Season 1 Bronze",
         "Season 1 Bronze Frame"
       ],
-      "sourceFile": "Season 1 Bronze Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/5/5d/Season_1_Bronze_Frame.gif/revision/latest?cb=20220123094019",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Season_1_Bronze_Frame.gif",
-      "sha1": "8331dadf0656e8dbdf404ce1d345cb9057f143f9",
-      "width": 335,
-      "height": 450,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/season-1-bronze.webp",
-        "gif": "/images/loading-frames/season-1-bronze.gif"
+        "png": "/images/loading-frames/season-1-bronze.png?v=844e4c9354ce",
+        "webp": "/images/loading-frames/season-1-bronze.webp?v=10f6e8a84f5e"
       },
       "bytes": {
-        "webp": 9492,
-        "gif": 18313
-      }
+        "png": 77420,
+        "webp": 59554
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Season 1 Bronze",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "season-1-bronze",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_Season1_Bronze",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Season 1 Silver",
-      "slug": "season-1-silver",
       "aliases": [
         "Season 1 Silver",
         "Season 1 Silver Frame"
       ],
-      "sourceFile": "Season 1 Silver Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/b/b9/Season_1_Silver_Frame.gif/revision/latest?cb=20220123094542",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Season_1_Silver_Frame.gif",
-      "sha1": "e8772a18ae17934c29ac7ade3a936e601b8f08b8",
-      "width": 335,
-      "height": 450,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/season-1-silver.webp",
-        "gif": "/images/loading-frames/season-1-silver.gif"
+        "png": "/images/loading-frames/season-1-silver.png?v=f3193d6243c8",
+        "webp": "/images/loading-frames/season-1-silver.webp?v=3481f06b6b11"
       },
       "bytes": {
-        "webp": 13608,
-        "gif": 27588
-      }
+        "png": 113318,
+        "webp": 81696
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Season 1 Silver",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "season-1-silver",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_Season1_Silver",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Season 1 Gold",
-      "slug": "season-1-gold",
       "aliases": [
         "Season 1 Gold",
         "Season 1 Gold Frame"
       ],
-      "sourceFile": "Season 1 Gold Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/1/1e/Season_1_Gold_Frame.gif/revision/latest?cb=20220123094018",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Season_1_Gold_Frame.gif",
-      "sha1": "ada26585d44eb9a8d24432b3f86cce9bd327dc72",
-      "width": 335,
-      "height": 450,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/season-1-gold.webp",
-        "gif": "/images/loading-frames/season-1-gold.gif"
+        "png": "/images/loading-frames/season-1-gold.png?v=0f59c1e66590",
+        "webp": "/images/loading-frames/season-1-gold.webp?v=61db2b37d2df"
       },
       "bytes": {
-        "webp": 17544,
-        "gif": 28250
-      }
+        "png": 140826,
+        "webp": 112178
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Season 1 Gold",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "season-1-gold",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_Season1_Gold",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Season 1 Platinum",
-      "slug": "season-1-platinum",
       "aliases": [
         "Season 1 Platinum",
         "Season 1 Platinum Frame"
       ],
-      "sourceFile": "Season 1 Platinum Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/0/08/Season_1_Platinum_Frame.gif/revision/latest?cb=20220123120720",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Season_1_Platinum_Frame.gif",
-      "sha1": "ba85bb959e307d20dbe2bb514ab0ebfd4cd069e8",
-      "width": 335,
-      "height": 450,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/season-1-platinum.webp",
-        "gif": "/images/loading-frames/season-1-platinum.gif"
+        "png": "/images/loading-frames/season-1-platinum.png?v=39b10786a72a",
+        "webp": "/images/loading-frames/season-1-platinum.webp?v=44cde7b14f06"
       },
       "bytes": {
-        "webp": 26512,
-        "gif": 86011
-      }
+        "png": 205836,
+        "webp": 159668
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Season 1 Platinum",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "season-1-platinum",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_Season1_Platinum",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Season 1 Diamond",
-      "slug": "season-1-diamond",
       "aliases": [
         "Season 1 Diamond",
         "Season 1 Diamond Frame"
       ],
-      "sourceFile": "Season 1 Diamond Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/a/a1/Season_1_Diamond_Frame.gif/revision/latest?cb=20220123094017",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Season_1_Diamond_Frame.gif",
-      "sha1": "9378dd2d15f89015a2b1fc4b2b002f52e9c30183",
-      "width": 335,
-      "height": 450,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/season-1-diamond.webp",
-        "gif": "/images/loading-frames/season-1-diamond.gif"
+        "png": "/images/loading-frames/season-1-diamond.png?v=6a7439209878",
+        "webp": "/images/loading-frames/season-1-diamond.webp?v=cefa65562595"
       },
       "bytes": {
-        "webp": 29514,
-        "gif": 46423
-      }
+        "png": 221731,
+        "webp": 205242
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Season 1 Diamond",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "season-1-diamond",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_Season1_Diamond",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Season 1 Master",
-      "slug": "season-1-master",
       "aliases": [
         "Season 1 Master",
-        "Season 1 Master Frame"
+        "Season 1 Master Frame",
+        "Season 1 Masters"
       ],
-      "sourceFile": "Season 1 Master Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/3/31/Season_1_Master_Frame.gif/revision/latest?cb=20220123112817",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Season_1_Master_Frame.gif",
-      "sha1": "828b58d4fc53e694d1d18e2465005c490cdd7f21",
-      "width": 335,
-      "height": 450,
-      "frameCount": 48,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 48,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink-with-motion-sample",
       "assets": {
-        "webp": "/images/loading-frames/season-1-master.webp",
-        "gif": "/images/loading-frames/season-1-master.gif"
+        "png": "/images/loading-frames/season-1-master.png?v=b14be95123e0",
+        "webp": "/images/loading-frames/season-1-master.webp?v=6b6b7b7fb416"
       },
       "bytes": {
-        "webp": 119358,
-        "gif": 158331
-      }
+        "png": 205989,
+        "webp": 2323698
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 116,
+      "fullMasterFrames": 36,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Season 1 Master",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 40,
+      "preferredFormat": "webp",
+      "slug": "season-1-master",
+      "sourceFps": 30,
+      "sourceObject": "LoadingFrame_Season1_Master",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Season 1 Grandmaster",
-      "slug": "season-1-grandmaster",
       "aliases": [
         "Season 1 Grandmaster",
-        "Season 1 Grandmaster Frame"
+        "Season 1 Grandmaster Frame",
+        "Season 1 Grandmasters"
       ],
-      "sourceFile": "Season 1 Grandmaster Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/a/a9/Season_1_Grandmaster_Frame.gif/revision/latest?cb=20220123112517",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Season_1_Grandmaster_Frame.gif",
-      "sha1": "d36f0687fb605da8797f636260e48d0f091de559",
-      "width": 335,
-      "height": 450,
-      "frameCount": 48,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 48,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink-with-motion-sample",
       "assets": {
-        "webp": "/images/loading-frames/season-1-grandmaster.webp",
-        "gif": "/images/loading-frames/season-1-grandmaster.gif"
+        "png": "/images/loading-frames/season-1-grandmaster.png?v=eed3593a71cd",
+        "webp": "/images/loading-frames/season-1-grandmaster.webp?v=fd9caa19b446"
       },
       "bytes": {
-        "webp": 211312,
-        "gif": 260846
-      }
+        "png": 237163,
+        "webp": 3890808
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 116,
+      "fullMasterFrames": 36,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Season 1 Grandmaster",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3839.0,
+      "optimizedFrameCount": 40,
+      "preferredFormat": "webp",
+      "slug": "season-1-grandmaster",
+      "sourceFps": 30,
+      "sourceObject": "LoadingFrame_Season1_GM",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Season 2 Gold",
-      "slug": "season-2-gold",
       "aliases": [
         "Season 2 Gold",
         "Season 2 Gold Frame"
       ],
-      "sourceFile": "Season 2 Gold Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/6/6f/Season_2_Gold_Frame.gif/revision/latest?cb=20220123095222",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Season_2_Gold_Frame.gif",
-      "sha1": "4f11cd0052493b2905546350771e17ca55b57a4a",
-      "width": 335,
-      "height": 450,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/season-2-gold.webp",
-        "gif": "/images/loading-frames/season-2-gold.gif"
+        "png": "/images/loading-frames/season-2-gold.png?v=7aaec7d568e0",
+        "webp": "/images/loading-frames/season-2-gold.webp?v=7b71705af8a1"
       },
       "bytes": {
-        "webp": 19916,
-        "gif": 33677
-      }
+        "png": 148604,
+        "webp": 118100
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Season 2 Gold",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "season-2-gold",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_Season2_Gold",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Season 2 Platinum",
-      "slug": "season-2-platinum",
       "aliases": [
         "Season 2 Platinum",
         "Season 2 Platinum Frame"
       ],
-      "sourceFile": "Season 2 Platinum Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/6/6f/Season_2_Platinum_Frame.gif/revision/latest?cb=20220123095223",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Season_2_Platinum_Frame.gif",
-      "sha1": "f7d335761d3b95da4983839b9e22a7e60a82bc6a",
-      "width": 335,
-      "height": 450,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/season-2-platinum.webp",
-        "gif": "/images/loading-frames/season-2-platinum.gif"
+        "png": "/images/loading-frames/season-2-platinum.png?v=96d0f4d878f5",
+        "webp": "/images/loading-frames/season-2-platinum.webp?v=720ce0700499"
       },
       "bytes": {
-        "webp": 24972,
-        "gif": 38781
-      }
+        "png": 163582,
+        "webp": 138848
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Season 2 Platinum",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "season-2-platinum",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_Season2_Platinum",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Season 2 Diamond",
-      "slug": "season-2-diamond",
       "aliases": [
         "Season 2 Diamond",
         "Season 2 Diamond Frame"
       ],
-      "sourceFile": "Season 2 Diamond Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/3/3c/Season_2_Diamond_Frame.gif/revision/latest?cb=20220123095221",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Season_2_Diamond_Frame.gif",
-      "sha1": "1b24a9e50ce0904d2d1d4c4e899118815080cae6",
-      "width": 335,
-      "height": 450,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/season-2-diamond.webp",
-        "gif": "/images/loading-frames/season-2-diamond.gif"
+        "png": "/images/loading-frames/season-2-diamond.png?v=eb5d67520dad",
+        "webp": "/images/loading-frames/season-2-diamond.webp?v=13c7de42c576"
       },
       "bytes": {
-        "webp": 33064,
-        "gif": 45136
-      }
+        "png": 199351,
+        "webp": 190970
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Season 2 Diamond",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "season-2-diamond",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_Season2_Diamond",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Season 2 Master",
-      "slug": "season-2-master",
       "aliases": [
         "Season 2 Master",
-        "Season 2 Master Frame"
+        "Season 2 Master Frame",
+        "Season 2 Masters"
       ],
-      "sourceFile": "Season 2 Master Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/b/b9/Season_2_Master_Frame.gif/revision/latest?cb=20220123113511",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Season_2_Master_Frame.gif",
-      "sha1": "bab1c3d23fd1834f5417add1d6f81f07615fe030",
-      "width": 335,
-      "height": 450,
-      "frameCount": 48,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 48,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink-with-motion-sample",
       "assets": {
-        "webp": "/images/loading-frames/season-2-master.webp",
-        "gif": "/images/loading-frames/season-2-master.gif"
+        "png": "/images/loading-frames/season-2-master.png?v=629a653501a2",
+        "webp": "/images/loading-frames/season-2-master.webp?v=2ba7bcbbed70"
       },
       "bytes": {
-        "webp": 353462,
-        "gif": 2208900
-      }
+        "png": 229457,
+        "webp": 5517452
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 116,
+      "fullMasterFrames": 1800,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Season 2 Master",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 116,
+      "preferredFormat": "webp",
+      "slug": "season-2-master",
+      "sourceFps": 30,
+      "sourceObject": "LoadingFrame_Season2_Master",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Season 2 Grandmaster",
-      "slug": "season-2-grandmaster",
       "aliases": [
         "Season 2 Grandmaster",
-        "Season 2 Grandmaster Frame"
+        "Season 2 Grandmaster Frame",
+        "Season 2 Grandmasters"
       ],
-      "sourceFile": "Season 2 Grandmaster Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/0/00/Season_2_Grandmaster_Frame.gif/revision/latest?cb=20220123113213",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Season_2_Grandmaster_Frame.gif",
-      "sha1": "31bb8f50f2c39a23a55fbad5022aa65c3c830877",
-      "width": 335,
-      "height": 450,
-      "frameCount": 48,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 48,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink-with-motion-sample",
       "assets": {
-        "webp": "/images/loading-frames/season-2-grandmaster.webp",
-        "gif": "/images/loading-frames/season-2-grandmaster.gif"
+        "png": "/images/loading-frames/season-2-grandmaster.png?v=58521e436520",
+        "webp": "/images/loading-frames/season-2-grandmaster.webp?v=8039e8299406"
       },
       "bytes": {
-        "webp": 522404,
-        "gif": 2314942
-      }
+        "png": 268643,
+        "webp": 7468798
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 116,
+      "fullMasterFrames": 1800,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Season 2 Grandmaster",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3839.0,
+      "optimizedFrameCount": 116,
+      "preferredFormat": "webp",
+      "slug": "season-2-grandmaster",
+      "sourceFps": 30,
+      "sourceObject": "LoadingFrame_Season2_GM",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Season 3 Gold",
-      "slug": "season-3-gold",
       "aliases": [
         "Season 3 Gold",
         "Season 3 Gold Frame"
       ],
-      "sourceFile": "Season 3 Gold Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/e/e3/Season_3_Gold_Frame.gif/revision/latest?cb=20220123100208",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Season_3_Gold_Frame.gif",
-      "sha1": "72eea8573c87afed0dfc6c83668f62aa2976593d",
-      "width": 335,
-      "height": 450,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/season-3-gold.webp",
-        "gif": "/images/loading-frames/season-3-gold.gif"
+        "png": "/images/loading-frames/season-3-gold.png?v=a339337148f6",
+        "webp": "/images/loading-frames/season-3-gold.webp?v=12ed46a96816"
       },
       "bytes": {
-        "webp": 16498,
-        "gif": 30928
-      }
+        "png": 126700,
+        "webp": 95724
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Season 3 Gold",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "season-3-gold",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_Season3_Gold",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Season 3 Platinum",
-      "slug": "season-3-platinum",
       "aliases": [
         "Season 3 Platinum",
         "Season 3 Platinum Frame"
       ],
-      "sourceFile": "Season 3 Platinum Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/d/d7/Season_3_Platinum_Frame.gif/revision/latest?cb=20220123100131",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Season_3_Platinum_Frame.gif",
-      "sha1": "b0bb07b8345cfbadf162407445f2b64402efbe6a",
-      "width": 335,
-      "height": 450,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/season-3-platinum.webp",
-        "gif": "/images/loading-frames/season-3-platinum.gif"
+        "png": "/images/loading-frames/season-3-platinum.png?v=4f372fc4c50d",
+        "webp": "/images/loading-frames/season-3-platinum.webp?v=4e3f62c13973"
       },
       "bytes": {
-        "webp": 18992,
-        "gif": 33692
-      }
+        "png": 156550,
+        "webp": 120588
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Season 3 Platinum",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "season-3-platinum",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_Season3_Platinum",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Season 3 Diamond",
-      "slug": "season-3-diamond",
       "aliases": [
         "Season 3 Diamond",
         "Season 3 Diamond Frame"
       ],
-      "sourceFile": "Season 3 Diamond Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/8/89/Season_3_Diamond_Frame.gif/revision/latest?cb=20220123100157",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Season_3_Diamond_Frame.gif",
-      "sha1": "cf74aabcc68fe3460278a0c9a08702a52734ca0e",
-      "width": 335,
-      "height": 450,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/season-3-diamond.webp",
-        "gif": "/images/loading-frames/season-3-diamond.gif"
+        "png": "/images/loading-frames/season-3-diamond.png?v=8471c9a0e0f1",
+        "webp": "/images/loading-frames/season-3-diamond.webp?v=483c834a8172"
       },
       "bytes": {
-        "webp": 21502,
-        "gif": 38178
-      }
+        "png": 176867,
+        "webp": 132904
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Season 3 Diamond",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "season-3-diamond",
+      "sourceFps": 30,
+      "sourceObject": "LoadingFrame_Season3_Diamond",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Season 3 Master",
-      "slug": "season-3-master",
       "aliases": [
         "Season 3 Master",
-        "Season 3 Master Frame"
+        "Season 3 Master Frame",
+        "Season 3 Masters"
       ],
-      "sourceFile": "Season 3 Master Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/9/9b/Season_3_Master_Frame.gif/revision/latest?cb=20220123100228",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Season_3_Master_Frame.gif",
-      "sha1": "57af41c15e5e9a0bd0e4005e1da82bebb169a5ad",
-      "width": 335,
-      "height": 450,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/season-3-master.webp",
-        "gif": "/images/loading-frames/season-3-master.gif"
+        "png": "/images/loading-frames/season-3-master.png?v=207847a11957",
+        "webp": "/images/loading-frames/season-3-master.webp?v=61b53e997cec"
       },
       "bytes": {
-        "webp": 26426,
-        "gif": 42858
-      }
+        "png": 206605,
+        "webp": 159936
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Season 3 Master",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "season-3-master",
+      "sourceFps": 30,
+      "sourceObject": "LoadingFrame_Season3_Master",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Season 3 Grandmaster",
-      "slug": "season-3-grandmaster",
       "aliases": [
         "Season 3 Grandmaster",
-        "Season 3 Grandmaster Frame"
+        "Season 3 Grandmaster Frame",
+        "Season 3 Grandmasters",
+        "Ranked Frame - S3 - Reached Grandmasters"
       ],
-      "sourceFile": "Season 3 Grandmaster Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/e/eb/Season_3_Grandmaster_Frame.gif/revision/latest?cb=20220123100219",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Season_3_Grandmaster_Frame.gif",
-      "sha1": "ece02d1c9b31619439dde124689c6fa1f7a05a3c",
-      "width": 335,
-      "height": 450,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/season-3-grandmaster.webp",
-        "gif": "/images/loading-frames/season-3-grandmaster.gif"
+        "png": "/images/loading-frames/season-3-grandmaster.png?v=f2c2490f2197",
+        "webp": "/images/loading-frames/season-3-grandmaster.webp?v=9e0158f4450a"
       },
       "bytes": {
-        "webp": 33584,
-        "gif": 53999
-      }
+        "png": 259556,
+        "webp": 203116
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Season 3 Grandmaster",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "season-3-grandmaster",
+      "sourceFps": 30,
+      "sourceObject": "LoadingFrame_Season3_GM",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Season 4 Gold",
-      "slug": "season-4-gold",
       "aliases": [
         "Season 4 Gold",
         "Season 4 Gold Frame"
       ],
-      "sourceFile": "Season 4 Gold Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/a/ae/Season_4_Gold_Frame.gif/revision/latest?cb=20220123101730",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Season_4_Gold_Frame.gif",
-      "sha1": "b09caecb2f7d917b66044a237006deb161219442",
-      "width": 335,
-      "height": 450,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/season-4-gold.webp",
-        "gif": "/images/loading-frames/season-4-gold.gif"
+        "png": "/images/loading-frames/season-4-gold.png?v=5dca6eefcb43",
+        "webp": "/images/loading-frames/season-4-gold.webp?v=88b8772af6ee"
       },
       "bytes": {
-        "webp": 20718,
-        "gif": 39588
-      }
+        "png": 149912,
+        "webp": 116634
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Season 4 Gold",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "season-4-gold",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_Season4_Gold",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Season 4 Platinum",
-      "slug": "season-4-platinum",
       "aliases": [
         "Season 4 Platinum",
         "Season 4 Platinum Frame"
       ],
-      "sourceFile": "Season 4 Platinum Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/e/ea/Season_4_Platinum_Frame.gif/revision/latest?cb=20220123101756",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Season_4_Platinum_Frame.gif",
-      "sha1": "5a032b42041ae6f056e7520f53b0f9b83b494750",
-      "width": 335,
-      "height": 450,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/season-4-platinum.webp",
-        "gif": "/images/loading-frames/season-4-platinum.gif"
+        "png": "/images/loading-frames/season-4-platinum.png?v=2547434a442e",
+        "webp": "/images/loading-frames/season-4-platinum.webp?v=7599544265ed"
       },
       "bytes": {
-        "webp": 23952,
-        "gif": 40825
-      }
+        "png": 173579,
+        "webp": 136262
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Season 4 Platinum",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "season-4-platinum",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_Season4_Platinum",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Season 4 Diamond",
-      "slug": "season-4-diamond",
       "aliases": [
         "Season 4 Diamond",
         "Season 4 Diamond Frame"
       ],
-      "sourceFile": "Season 4 Diamond Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/7/77/Season_4_Diamond_Frame.gif/revision/latest?cb=20220123101720",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Season_4_Diamond_Frame.gif",
-      "sha1": "893149f4ff3eda0bdcf8e310c939ab6b11a0d0ff",
-      "width": 335,
-      "height": 450,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/season-4-diamond.webp",
-        "gif": "/images/loading-frames/season-4-diamond.gif"
+        "png": "/images/loading-frames/season-4-diamond.png?v=96503fdec9f5",
+        "webp": "/images/loading-frames/season-4-diamond.webp?v=d6b09755bf24"
       },
       "bytes": {
-        "webp": 18628,
-        "gif": 32690
-      }
+        "png": 157280,
+        "webp": 124830
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Season 4 Diamond",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "season-4-diamond",
+      "sourceFps": 30,
+      "sourceObject": "LoadingFrame_Season4_Diamond",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Season 4 Master",
-      "slug": "season-4-master",
       "aliases": [
         "Season 4 Master",
-        "Season 4 Master Frame"
+        "Season 4 Master Frame",
+        "Season 4 Masters"
       ],
-      "sourceFile": "Season 4 Master Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/1/1f/Season_4_Master_Frame.gif/revision/latest?cb=20220123101748",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Season_4_Master_Frame.gif",
-      "sha1": "1292d4706833abe4f008a41c75897c34dd95618e",
-      "width": 335,
-      "height": 450,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/season-4-master.webp",
-        "gif": "/images/loading-frames/season-4-master.gif"
+        "png": "/images/loading-frames/season-4-master.png?v=814a9a713963",
+        "webp": "/images/loading-frames/season-4-master.webp?v=1b62187e5605"
       },
       "bytes": {
-        "webp": 19944,
-        "gif": 35094
-      }
+        "png": 167774,
+        "webp": 155018
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Season 4 Master",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "season-4-master",
+      "sourceFps": 30,
+      "sourceObject": "LoadingFrame_Season4_Master",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Season 4 Grandmaster",
-      "slug": "season-4-grandmaster",
       "aliases": [
         "Season 4 Grandmaster",
-        "Season 4 Grandmaster Frame"
+        "Season 4 Grandmaster Frame",
+        "Season 4 Grandmasters"
       ],
-      "sourceFile": "Season 4 Grandmaster Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/1/13/Season_4_Grandmaster_Frame.gif/revision/latest?cb=20220123101739",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Season_4_Grandmaster_Frame.gif",
-      "sha1": "2a86c383d1c0e08a5d17c6be07b4ae93e752e9e7",
-      "width": 335,
-      "height": 450,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/season-4-grandmaster.webp",
-        "gif": "/images/loading-frames/season-4-grandmaster.gif"
+        "png": "/images/loading-frames/season-4-grandmaster.png?v=44b72681a177",
+        "webp": "/images/loading-frames/season-4-grandmaster.webp?v=cffacd6ba21c"
       },
       "bytes": {
-        "webp": 23760,
-        "gif": 38910
-      }
+        "png": 192729,
+        "webp": 151958
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Season 4 Grandmaster",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "season-4-grandmaster",
+      "sourceFps": 30,
+      "sourceObject": "LoadingFrame_Season4_GM",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Season 5 Gold",
-      "slug": "season-5-gold",
       "aliases": [
         "Season 5 Gold",
         "Season 5 Gold Frame"
       ],
-      "sourceFile": "Season 5 Gold Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/3/37/Season_5_Gold_Frame.gif/revision/latest?cb=20230202013839",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Season_5_Gold_Frame.gif",
-      "sha1": "2d20f44c1ffef5308e33c10431781553bbe3c222",
-      "width": 332,
-      "height": 448,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/season-5-gold.webp",
-        "gif": "/images/loading-frames/season-5-gold.gif"
+        "png": "/images/loading-frames/season-5-gold.png?v=6d2f04198dd3",
+        "webp": "/images/loading-frames/season-5-gold.webp?v=91e86387305e"
       },
       "bytes": {
-        "webp": 15304,
-        "gif": 27203
-      }
+        "png": 107599,
+        "webp": 101264
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Season 5 Gold",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "season-5-gold",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_Season5_Gold",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Season 5 Platinum",
-      "slug": "season-5-platinum",
       "aliases": [
         "Season 5 Platinum",
         "Season 5 Platinum Frame"
       ],
-      "sourceFile": "Season 5 Platinum Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/2/2a/Season_5_Platinum_Frame.gif/revision/latest?cb=20230202013837",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Season_5_Platinum_Frame.gif",
-      "sha1": "5a161034b2a4dcfd0872d50e0dbfef1cd0fb8cf5",
-      "width": 332,
-      "height": 448,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/season-5-platinum.webp",
-        "gif": "/images/loading-frames/season-5-platinum.gif"
+        "png": "/images/loading-frames/season-5-platinum.png?v=aa60162373fd",
+        "webp": "/images/loading-frames/season-5-platinum.webp?v=af5596c98bc3"
       },
       "bytes": {
-        "webp": 21260,
-        "gif": 52710
-      }
+        "png": 121739,
+        "webp": 110396
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Season 5 Platinum",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "season-5-platinum",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_Season5_Platinum",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Season 5 Diamond",
-      "slug": "season-5-diamond",
       "aliases": [
         "Season 5 Diamond",
         "Season 5 Diamond Frame"
       ],
-      "sourceFile": "Season 5 Diamond Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/e/e5/Season_5_Diamond_Frame.gif/revision/latest?cb=20230202013834",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Season_5_Diamond_Frame.gif",
-      "sha1": "9c29b8b044a4aa5c7715d36b5a7d97c534e847b4",
-      "width": 332,
-      "height": 448,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/season-5-diamond.webp",
-        "gif": "/images/loading-frames/season-5-diamond.gif"
+        "png": "/images/loading-frames/season-5-diamond.png?v=beb97cf63aec",
+        "webp": "/images/loading-frames/season-5-diamond.webp?v=a6bfb9d7237a"
       },
       "bytes": {
-        "webp": 18810,
-        "gif": 30916
-      }
+        "png": 123982,
+        "webp": 130732
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Season 5 Diamond",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "season-5-diamond",
+      "sourceFps": 30,
+      "sourceObject": "LoadingFrame_Season5_Diamond",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Season 5 Master",
-      "slug": "season-5-master",
       "aliases": [
         "Season 5 Master",
-        "Season 5 Master Frame"
+        "Season 5 Master Frame",
+        "Season 5 Masters"
       ],
-      "sourceFile": "Season 5 Master Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/e/e3/Season_5_Master_Frame.gif/revision/latest?cb=20230202013838",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Season_5_Master_Frame.gif",
-      "sha1": "fc8457ac8a759c96b052b2e2a5a7083241cedaf7",
-      "width": 332,
-      "height": 448,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/season-5-master.webp",
-        "gif": "/images/loading-frames/season-5-master.gif"
+        "png": "/images/loading-frames/season-5-master.png?v=b6b650787f5c",
+        "webp": "/images/loading-frames/season-5-master.webp?v=04f793116312"
       },
       "bytes": {
-        "webp": 19848,
-        "gif": 31983
-      }
+        "png": 149049,
+        "webp": 145644
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Season 5 Master",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "season-5-master",
+      "sourceFps": 30,
+      "sourceObject": "LoadingFrame_Season5_Master",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Season 5 Grandmaster",
-      "slug": "season-5-grandmaster",
       "aliases": [
         "Season 5 Grandmaster",
-        "Season 5 Grandmaster Frame"
+        "Season 5 Grandmaster Frame",
+        "Season 5 Grandmasters"
       ],
-      "sourceFile": "Season 5 Grandmaster Frame.gif",
-      "sourceUrl": "https://static.wikia.nocookie.net/paladins_gamepedia/images/6/69/Season_5_Grandmaster_Frame.gif/revision/latest?cb=20230202013840",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/File:Season_5_Grandmaster_Frame.gif",
-      "sha1": "b1ab07476559c4c09f443ea0866b869a31d0520c",
-      "width": 332,
-      "height": 448,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/season-5-grandmaster.webp",
-        "gif": "/images/loading-frames/season-5-grandmaster.gif"
+        "png": "/images/loading-frames/season-5-grandmaster.png?v=9945b8599eae",
+        "webp": "/images/loading-frames/season-5-grandmaster.webp?v=dd04e95c1ab5"
       },
       "bytes": {
-        "webp": 23574,
-        "gif": 37337
-      }
+        "png": 163331,
+        "webp": 150706
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Season 5 Grandmaster",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "season-5-grandmaster",
+      "sourceFps": 30,
+      "sourceObject": "LoadingFrame_Season5_GM",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Season 6 Commendation",
-      "slug": "season-6-commendation",
       "aliases": [
         "Season 6 Commendation",
         "Season 6 Commendation Frame"
       ],
-      "sourceFile": "LobbyUI_SF.upk:loadingframe_season6_commendation",
-      "sourceUrl": "file:///C:/Paladins/Season 8.1/ChaosGame/CookedPCConsole/LobbyUI_SF.upk",
-      "descriptionUrl": "https://paladins.fandom.com/wiki/Loading_Frames",
-      "sha1": "abeb37eb46fad3228e16e4bf1fb80c06d9af29de",
-      "width": 332,
-      "height": 448,
-      "frameCount": 2,
-      "durationMs": 3840,
       "animated": true,
-      "optimizedFrameCount": 2,
-      "optimizedDurationMs": 3840,
-      "preferredFormat": "webp",
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/season-6-commendation.webp",
-        "gif": "/images/loading-frames/season-6-commendation.gif"
+        "png": "/images/loading-frames/season-6-commendation.png?v=7ce7351ebaeb",
+        "webp": "/images/loading-frames/season-6-commendation.webp?v=96fcc7eb1f05"
       },
       "bytes": {
-        "webp": 61870,
-        "gif": 41711
-      }
+        "png": 176946,
+        "webp": 138946
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Season 6 Commendation",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "season-6-commendation",
+      "sourceFps": 30,
+      "sourceObject": "LoadingFrame_Season6_Commendation",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Season 6 Diamond",
-      "slug": "season-6-diamond",
       "aliases": [
         "Season 6 Diamond",
         "Season 6 Diamond Frame"
       ],
-      "sourceFile": "reddit:t3_194ccco:4rzdpj80kvbc1.png",
-      "sourceUrl": "https://i.redd.it/4rzdpj80kvbc1.png",
-      "descriptionUrl": "https://www.reddit.com/r/Paladins/comments/194ccco/season_6_ranked_frames/",
-      "sha1": "3541c4180b806758d05da2b9b2611432cbcef6d8",
-      "width": 660,
-      "height": 890,
-      "frameCount": 1,
-      "durationMs": 0,
-      "animated": false,
-      "optimizedFrameCount": 1,
-      "optimizedDurationMs": 0,
-      "preferredFormat": "webp",
+      "animated": true,
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/season-6-diamond.webp",
-        "gif": "/images/loading-frames/season-6-diamond.png"
+        "png": "/images/loading-frames/season-6-diamond.png?v=dfce1fdec8e5",
+        "webp": "/images/loading-frames/season-6-diamond.webp?v=0bc15ade0c1b"
       },
       "bytes": {
-        "webp": 22844,
-        "gif": 246641
-      }
+        "png": 117248,
+        "webp": 110618
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Season 6 Diamond",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "season-6-diamond",
+      "sourceFps": 30,
+      "sourceObject": "LoadingFrame_Season6_Diamond",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Season 6 Grandmaster",
-      "slug": "season-6-grandmaster",
       "aliases": [
         "Season 6 Grandmaster",
-        "Season 6 Grandmaster Frame"
+        "Season 6 Grandmaster Frame",
+        "Season 6 Grandmasters"
       ],
-      "sourceFile": "reddit:t3_194ccco:206f8301kvbc1.png",
-      "sourceUrl": "https://i.redd.it/206f8301kvbc1.png",
-      "descriptionUrl": "https://www.reddit.com/r/Paladins/comments/194ccco/season_6_ranked_frames/",
-      "sha1": "3d5f6e33b332d58e27617498f7282da3533c3082",
-      "width": 660,
-      "height": 890,
-      "frameCount": 1,
-      "durationMs": 0,
-      "animated": false,
-      "optimizedFrameCount": 1,
-      "optimizedDurationMs": 0,
-      "preferredFormat": "webp",
+      "animated": true,
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/season-6-grandmaster.webp",
-        "gif": "/images/loading-frames/season-6-grandmaster.png"
+        "png": "/images/loading-frames/season-6-grandmaster.png?v=38cb6835e246",
+        "webp": "/images/loading-frames/season-6-grandmaster.webp?v=a4bceccad5f5"
       },
       "bytes": {
-        "webp": 25356,
-        "gif": 324420
-      }
+        "png": 139339,
+        "webp": 134886
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Season 6 Grandmaster",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "season-6-grandmaster",
+      "sourceFps": 30,
+      "sourceObject": "LoadingFrame_Season6_GM",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Season 6 Gold",
-      "slug": "season-6-gold",
       "aliases": [
         "Season 6 Gold",
         "Season 6 Gold Frame"
       ],
-      "sourceFile": "reddit:t3_194ccco:bsdy6k2zjvbc1.png",
-      "sourceUrl": "https://i.redd.it/bsdy6k2zjvbc1.png",
-      "descriptionUrl": "https://www.reddit.com/r/Paladins/comments/194ccco/season_6_ranked_frames/",
-      "sha1": "21d3ae5511ed77c5b29bdf42fb9a7642d432af07",
-      "width": 660,
-      "height": 890,
-      "frameCount": 1,
-      "durationMs": 0,
-      "animated": false,
-      "optimizedFrameCount": 1,
-      "optimizedDurationMs": 0,
-      "preferredFormat": "webp",
+      "animated": true,
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/season-6-gold.webp",
-        "gif": "/images/loading-frames/season-6-gold.png"
+        "png": "/images/loading-frames/season-6-gold.png?v=20e4301665d3",
+        "webp": "/images/loading-frames/season-6-gold.webp?v=fe0560c89cab"
       },
       "bytes": {
-        "webp": 17108,
-        "gif": 242861
-      }
+        "png": 99005,
+        "webp": 96786
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Season 6 Gold",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "season-6-gold",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_Season6_Gold",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Season 6 Master",
-      "slug": "season-6-master",
       "aliases": [
         "Season 6 Master",
-        "Season 6 Master Frame"
+        "Season 6 Master Frame",
+        "Season 6 Masters"
       ],
-      "sourceFile": "reddit:t3_194ccco:rt7i9on0kvbc1.png",
-      "sourceUrl": "https://i.redd.it/rt7i9on0kvbc1.png",
-      "descriptionUrl": "https://www.reddit.com/r/Paladins/comments/194ccco/season_6_ranked_frames/",
-      "sha1": "beca2a1e2a479f031825933849750a1e31492b75",
-      "width": 660,
-      "height": 890,
-      "frameCount": 1,
-      "durationMs": 0,
-      "animated": false,
-      "optimizedFrameCount": 1,
-      "optimizedDurationMs": 0,
-      "preferredFormat": "webp",
+      "animated": true,
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/season-6-master.webp",
-        "gif": "/images/loading-frames/season-6-master.png"
+        "png": "/images/loading-frames/season-6-master.png?v=86cc807981eb",
+        "webp": "/images/loading-frames/season-6-master.webp?v=bf58832f77a8"
       },
       "bytes": {
-        "webp": 23526,
-        "gif": 278760
-      }
+        "png": 134411,
+        "webp": 125808
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Season 6 Master",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "season-6-master",
+      "sourceFps": 30,
+      "sourceObject": "LoadingFrame_Season6_Master",
+      "webpEncoding": "lossless",
+      "width": 380
     },
     {
-      "name": "Season 6 Platinum",
-      "slug": "season-6-platinum",
       "aliases": [
         "Season 6 Platinum",
         "Season 6 Platinum Frame"
       ],
-      "sourceFile": "reddit:t3_194ccco:gnqyywpzjvbc1.png",
-      "sourceUrl": "https://i.redd.it/gnqyywpzjvbc1.png",
-      "descriptionUrl": "https://www.reddit.com/r/Paladins/comments/194ccco/season_6_ranked_frames/",
-      "sha1": "3a32ae6af4cee02f8e5f9b4c5032493a1f9d5497",
-      "width": 660,
-      "height": 890,
-      "frameCount": 1,
-      "durationMs": 0,
-      "animated": false,
-      "optimizedFrameCount": 1,
-      "optimizedDurationMs": 0,
-      "preferredFormat": "webp",
+      "animated": true,
+      "animationKind": "authored-loading-blink",
       "assets": {
-        "webp": "/images/loading-frames/season-6-platinum.webp",
-        "gif": "/images/loading-frames/season-6-platinum.png"
+        "png": "/images/loading-frames/season-6-platinum.png?v=5107d1933aa8",
+        "webp": "/images/loading-frames/season-6-platinum.webp?v=da050b32ac54"
       },
       "bytes": {
-        "webp": 18148,
-        "gif": 218961
-      }
+        "png": 101598,
+        "webp": 101620
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Season 6 Platinum",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "season-6-platinum",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_Season6_Platinum",
+      "webpEncoding": "lossless",
+      "width": 380
+    },
+    {
+      "additionalGameAsset": true,
+      "aliases": [
+        "LoadingFrame_Anniversary5"
+      ],
+      "animated": true,
+      "animationKind": "authored-loading-blink",
+      "assets": {
+        "png": "/images/loading-frames/anniversary5.png?v=ab130361e02b",
+        "webp": "/images/loading-frames/anniversary5.webp?v=c13862362c32"
+      },
+      "bytes": {
+        "png": 204674,
+        "webp": 153458
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "LoadingFrame_Anniversary5",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "anniversary5",
+      "sourceFps": 30,
+      "sourceObject": "LoadingFrame_Anniversary5",
+      "webpEncoding": "lossless",
+      "width": 380
+    },
+    {
+      "additionalGameAsset": true,
+      "aliases": [
+        "LoadingFrame_DarkFantasy"
+      ],
+      "animated": true,
+      "animationKind": "authored-loading-blink",
+      "assets": {
+        "png": "/images/loading-frames/darkfantasy.png?v=d4ad0ae61a58",
+        "webp": "/images/loading-frames/darkfantasy.webp?v=e9394d832ea0"
+      },
+      "bytes": {
+        "png": 172999,
+        "webp": 151460
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "LoadingFrame_DarkFantasy",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "darkfantasy",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_DarkFantasy",
+      "webpEncoding": "lossless",
+      "width": 380
+    },
+    {
+      "additionalGameAsset": true,
+      "aliases": [
+        "LoadingFrame_Dragons",
+        "Adventurer's Hoard"
+      ],
+      "animated": true,
+      "animationKind": "authored-loading-blink",
+      "assets": {
+        "png": "/images/loading-frames/dragons.png?v=d3df20eea366",
+        "webp": "/images/loading-frames/dragons.webp?v=c6d7d8dfaa67"
+      },
+      "bytes": {
+        "png": 216828,
+        "webp": 174850
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Adventurer's Hoard",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "dragons",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_Dragons",
+      "webpEncoding": "lossless",
+      "width": 380
+    },
+    {
+      "additionalGameAsset": true,
+      "aliases": [
+        "LoadingFrame_FeudalFables",
+        "Ichi No Torii"
+      ],
+      "animated": true,
+      "animationKind": "authored-loading-blink",
+      "assets": {
+        "png": "/images/loading-frames/feudalfables.png?v=b9f9bda95fcf",
+        "webp": "/images/loading-frames/feudalfables.webp?v=bbac9da85106"
+      },
+      "bytes": {
+        "png": 229622,
+        "webp": 190420
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Ichi No Torii",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "feudalfables",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_FeudalFables",
+      "webpEncoding": "lossless",
+      "width": 380
+    },
+    {
+      "additionalGameAsset": true,
+      "aliases": [
+        "LoadingFrame_Masquerade",
+        "Garden of Death"
+      ],
+      "animated": true,
+      "animationKind": "authored-loading-blink-with-motion-sample",
+      "assets": {
+        "png": "/images/loading-frames/masquerade.png?v=ea3b3fd141d2",
+        "webp": "/images/loading-frames/masquerade.webp?v=6586c9ec0cc5"
+      },
+      "bytes": {
+        "png": 164159,
+        "webp": 275016
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 92,
+      "fullMasterFrames": 96,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Garden of Death",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 13,
+      "preferredFormat": "webp",
+      "slug": "masquerade",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_Masquerade",
+      "webpEncoding": "lossless",
+      "width": 380
+    },
+    {
+      "additionalGameAsset": true,
+      "aliases": [
+        "LoadingFrame_MasqueradeCurtains",
+        "Center Stage"
+      ],
+      "animated": true,
+      "animationKind": "authored-loading-blink",
+      "assets": {
+        "png": "/images/loading-frames/masqueradecurtains.png?v=88b2e6fff801",
+        "webp": "/images/loading-frames/masqueradecurtains.webp?v=73458bb6d4f8"
+      },
+      "bytes": {
+        "png": 207920,
+        "webp": 182830
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Center Stage",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "masqueradecurtains",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_MasqueradeCurtains",
+      "webpEncoding": "lossless",
+      "width": 380
+    },
+    {
+      "additionalGameAsset": true,
+      "aliases": [
+        "LoadingFrame_SOM2_Gator",
+        "Gator’s Gaze"
+      ],
+      "animated": true,
+      "animationKind": "authored-loading-blink",
+      "assets": {
+        "png": "/images/loading-frames/som2-gator.png?v=02709db896e6",
+        "webp": "/images/loading-frames/som2-gator.webp?v=808718e060ce"
+      },
+      "bytes": {
+        "png": 182299,
+        "webp": 152682
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Gator’s Gaze",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "som2-gator",
+      "sourceFps": 30,
+      "sourceObject": "LoadingFrame_SOM2_Gator",
+      "webpEncoding": "lossless",
+      "width": 380
+    },
+    {
+      "additionalGameAsset": true,
+      "aliases": [
+        "LoadingFrame_SOM2_Scarab",
+        "Pharaoh's Welcome"
+      ],
+      "animated": true,
+      "animationKind": "authored-loading-blink",
+      "assets": {
+        "png": "/images/loading-frames/som2-scarab.png?v=c508784b04e3",
+        "webp": "/images/loading-frames/som2-scarab.webp?v=ca3db630b509"
+      },
+      "bytes": {
+        "png": 219615,
+        "webp": 224042
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "Pharaoh's Welcome",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "som2-scarab",
+      "sourceFps": 30,
+      "sourceObject": "LoadingFrame_SOM2_Scarab",
+      "webpEncoding": "lossless",
+      "width": 380
+    },
+    {
+      "additionalGameAsset": true,
+      "aliases": [
+        "LoadingFrame_StreetStyle2"
+      ],
+      "animated": true,
+      "animationKind": "authored-loading-blink",
+      "assets": {
+        "png": "/images/loading-frames/streetstyle2.png?v=7e695c8f2d92",
+        "webp": "/images/loading-frames/streetstyle2.webp?v=cc61ba0ca7d7"
+      },
+      "bytes": {
+        "png": 193282,
+        "webp": 160866
+      },
+      "durationMs": 3840,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "on",
+      "frameCount": 2,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": true,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "LoadingFrame_StreetStyle2",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 3840.0,
+      "optimizedFrameCount": 2,
+      "preferredFormat": "webp",
+      "slug": "streetstyle2",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_StreetStyle2",
+      "webpEncoding": "lossless",
+      "width": 380
+    },
+    {
+      "additionalGameAsset": true,
+      "aliases": [
+        "LoadingFrame_Unknown"
+      ],
+      "animated": false,
+      "animationKind": "static-no-visible-loading-indicator",
+      "assets": {
+        "png": "/images/loading-frames/unknown.png?v=27c861bb9f90",
+        "webp": "/images/loading-frames/unknown.webp?v=7e226ab28265"
+      },
+      "bytes": {
+        "png": 60162,
+        "webp": 40746
+      },
+      "durationMs": 0,
+      "fallbackAnimated": false,
+      "fallbackFormat": "png",
+      "fallbackLoadingIndicator": "no-visible-indicator-in-source",
+      "frameCount": 1,
+      "fullMasterFrames": 1,
+      "height": 512,
+      "loadingBlinkApplied": false,
+      "loadingBlinkHalfPeriodMs": 1920,
+      "name": "LoadingFrame_Unknown",
+      "nativeCaptureSize": [
+        760,
+        1024
+      ],
+      "optimizedDurationMs": 0.0,
+      "optimizedFrameCount": 1,
+      "preferredFormat": "webp",
+      "slug": "unknown",
+      "sourceFps": 24,
+      "sourceObject": "LoadingFrame_Unknown",
+      "webpEncoding": "lossless",
+      "width": 380
     }
-  ]
+  ],
+  "schemaVersion": 2,
+  "source": "Native GFx captures from Season 8.1 UPKs",
+  "totals": {
+    "pngBytes": 14038988,
+    "webpBytes": 109956698
+  }
 }

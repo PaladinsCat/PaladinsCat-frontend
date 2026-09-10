@@ -84,7 +84,7 @@ export default function PlayerLoadingFrame({
       <picture>
         {frame.preferredFormat === "webp" && <source srcSet={frame.assets.webp} type="image/webp" />}
         <img
-          src={frame.assets.gif}
+          src={frame.assets.png}
           alt=""
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 h-full w-full object-contain"

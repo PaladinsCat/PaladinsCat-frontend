@@ -3,7 +3,7 @@ import { readdir, stat } from "node:fs/promises";
 import { extname, relative, resolve } from "node:path";
 
 const root = resolve(process.cwd(), "public", "images");
-const assetExtensions = new Set([".avif", ".png"]);
+const assetExtensions = new Set([".avif", ".png", ".webp"]);
 const assets = new Map();
 
 async function walk(directory) {
@@ -17,6 +17,7 @@ async function walk(directory) {
 
     const extension = extname(entry.name).toLowerCase();
     if (!assetExtensions.has(extension)) return;
+    if (extension === ".webp" && !relative(root, path).replaceAll("\\", "/").startsWith("loading-frames/")) return;
 
     const base = path.slice(0, -extension.length);
     const record = assets.get(base) ?? {};
@@ -33,6 +34,7 @@ let avifBytes = 0;
 let pngBytes = 0;
 let avifSmaller = 0;
 let pngSmaller = 0;
+let loadingFramePairs = 0;
 
 // Windows resolves paths case-insensitively, so the filesystem walk alone
 // cannot detect PNG/AVIF pairs whose casing differs in Git. Linux deploys see
@@ -66,6 +68,13 @@ try {
 
 for (const [base, pair] of assets) {
   const label = relative(root, base).replaceAll("\\", "/");
+  // Loading frames preserve motion in WebP and soft alpha in the stationary PNG.
+  if (label.startsWith("loading-frames/")) {
+    if (!pair.webp) missing.push(`${label}.webp`);
+    if (!pair.png) missing.push(`${label}.png`);
+    if (pair.webp && pair.png) loadingFramePairs += 1;
+    continue;
+  }
   if (!pair.avif) missing.push(`${label}.avif`);
   if (!pair.png) missing.push(`${label}.png`);
   if (!pair.avif || !pair.png) continue;
@@ -89,7 +98,7 @@ if (missing.length > 0 || caseMismatches.length > 0) {
 } else {
   const savings = pngBytes > 0 ? ((1 - avifBytes / pngBytes) * 100).toFixed(1) : "0.0";
   console.log(
-    `Image asset audit passed: ${assets.size} AVIF/PNG pairs; `
+    `Image asset audit passed: ${assets.size - loadingFramePairs} AVIF/PNG pairs, ${loadingFramePairs} animated WebP/static PNG loading-frame pairs; `
     + `AVIF total ${savings}% smaller (${avifSmaller} AVIF-smaller, ${pngSmaller} PNG-smaller).`,
   );
 }

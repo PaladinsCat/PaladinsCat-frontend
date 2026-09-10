@@ -9,7 +9,8 @@ param(
   [string]$TargetApi = 'https://paladinscat.com/api',
   [ValidatePattern('^\.next[-a-zA-Z0-9]*$')]
   [string]$DistDir = '.next-dev-proxy',
-  [switch]$OpenBrowser
+  [switch]$OpenBrowser,
+  [switch]$LocalAuthBypass
 )
 
 $ErrorActionPreference = 'Stop'
@@ -26,6 +27,7 @@ $npm = (Get-Command npm.cmd -ErrorAction Stop).Source
 $startInfo = [System.Diagnostics.ProcessStartInfo]::new()
 $startInfo.FileName = $npm
 $startInfo.Arguments = "run dev -- --port $Port"
+if ($LocalAuthBypass) { $startInfo.Arguments += " --hostname 127.0.0.1" }
 $startInfo.WorkingDirectory = $frontendRoot
 $startInfo.UseShellExecute = $false
 $startInfo.CreateNoWindow = $true
@@ -33,6 +35,7 @@ $startInfo.Environment['NEXT_PUBLIC_API_URL'] = '/api'
 $startInfo.Environment['NEXT_SERVER_API_URL'] = $TargetApi.TrimEnd('/')
 $startInfo.Environment['NEXT_DIST_DIR'] = $DistDir
 $startInfo.Environment['BROWSER'] = 'none'
+$startInfo.Environment['NEXT_PUBLIC_LOCAL_AUTH_BYPASS'] = $(if ($LocalAuthBypass) { '1' } else { '0' })
 
 $process = [System.Diagnostics.Process]::Start($startInfo)
 Write-Output "DEV_PROXY_PID=$($process.Id)"

@@ -1,0 +1,22 @@
+/** Loopback-only inspection of the actual player-frame component and full asset catalog. */
+import { headers } from "next/headers";
+import { notFound } from "next/navigation";
+import PlayerLoadingFrame from "@/components/player-loading-frame";
+import { localPreviewAccessAllowed } from "@/lib/local-preview-access";
+import manifest from "@/public/images/loading-frames/manifest.json";
+
+export default async function LoadingFramePreview() {
+  const host = (await headers()).get("host") ?? "";
+  let hostname = "";
+  try { hostname = new URL(`http://${host}`).hostname; } catch { notFound(); }
+  if (!localPreviewAccessAllowed(process.env.NODE_ENV, process.env.NEXT_PUBLIC_LOCAL_AUTH_BYPASS, hostname)) notFound();
+  return <main className="p-6">
+    <h1>Local player-frame verification</h1>
+    <div className="grid grid-cols-4 gap-6">
+      {manifest.frames.map(frame => <article key={frame.slug} data-frame-slug={frame.slug}>
+        <h2>{frame.name}</h2>
+        <PlayerLoadingFrame loadingFrame={frame.name} avatarUrl={null} avatarAlt="Preview avatar" />
+      </article>)}
+    </div>
+  </main>;
+}
