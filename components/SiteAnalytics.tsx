@@ -66,7 +66,10 @@ export default function SiteAnalytics() {
       // Session storage can be disabled. The backend still stores only a hash.
     }
 
-    if (recordPageView) post("visit", { path: pathname });
+    const playerMatch = pathname.match(/^\/players\/(\d+)/);
+    const visitBody: Record<string, string> = { path: pathname };
+    if (playerMatch) visitBody.playerId = playerMatch[1];
+    if (recordPageView) post("visit", visitBody);
     else post("heartbeat", {});
 
     const heartbeat = () => {
