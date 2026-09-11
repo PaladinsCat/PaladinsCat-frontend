@@ -3181,6 +3181,22 @@ export async function markSiteNotificationRead(notificationId: number): Promise<
 }
 
 /**
+ * Dismiss one site notification for the authenticated account.
+ *
+ * Accepts notificationId; returns dismissSiteNotification data through a backend request, carrying authentication headers and applying the operation server-side.
+ * refs: none
+ * I/O types: `notificationId: number -> Promise<void>`.
+ */
+export async function dismissSiteNotification(notificationId: number): Promise<void> {
+  const token = getAuthToken();
+  if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.notAuthenticated);
+  await fetchJson(`/auth/account/site-notifications/${notificationId}/dismiss`, {
+    method: "POST",
+    headers: accountAuthHeaders(token),
+  });
+}
+
+/**
  * Mark all site notifications read in the notification API.
  *
  * Accepts no arguments; returns markAllSiteNotificationsRead data through a backend request, carrying authentication headers and applying the operation server-side.

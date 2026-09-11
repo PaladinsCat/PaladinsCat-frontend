@@ -6,13 +6,14 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Bell, CheckCheck, LoaderCircle } from "lucide-react";
+import { Bell, CheckCheck, LoaderCircle, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import { useAuth } from "@/lib/auth-context";
 import {
   fetchAccountSiteNotifications,
   fetchNotifications,
+  dismissSiteNotification,
   markAllSiteNotificationsRead,
   markSiteNotificationRead,
   type Notification,
@@ -21,6 +22,28 @@ import { useLocalization } from "@/lib/localization-context";
 
 const NOTIFICATION_SYNC_KEY = "pc_notification_sync";
 const NOTIFICATION_SYNC_EVENT = "pc-notification-sync";
+const DISMISSED_NOTIFICATION_KEY = "pc_dismissed_notifications";
+
+function readGuestDismissedNotifications(): Set<string> {
+  try {
+    const value: unknown = JSON.parse(localStorage.getItem(DISMISSED_NOTIFICATION_KEY) ?? "[]");
+    return new Set(
+      Array.isArray(value)
+        ? value.filter((id) => typeof id === "string" || typeof id === "number").map(String)
+        : []
+    );
+  } catch {
+    return new Set();
+  }
+}
+
+function writeGuestDismissedNotifications(ids: Set<string>) {
+  try {
+    localStorage.setItem(DISMISSED_NOTIFICATION_KEY, JSON.stringify([...ids]));
+  } catch {
+    /* local storage may be unavailable; the in-memory removal still applies */
+  }
+}
 
 function createPortalContainer(): HTMLDivElement {
   const el = document.createElement("div");
@@ -32,7 +55,11 @@ function createPortalContainer(): HTMLDivElement {
 
 function publishNotificationSync() {
   window.dispatchEvent(new Event(NOTIFICATION_SYNC_EVENT));
-  localStorage.setItem(NOTIFICATION_SYNC_KEY, String(Date.now()));
+  try {
+    localStorage.setItem(NOTIFICATION_SYNC_KEY, String(Date.now()));
+  } catch {
+    /* local storage may be unavailable */
+  }
 }
 
 function notificationDot(importance: number) {
@@ -143,7 +170,12 @@ export default function NotificationMenu() {
         ? await fetchAccountSiteNotifications({ limit: 8 })
         : await fetchNotifications({ limit: 8 });
       if (id !== requestSequenceRef.current) return;
-      setNotifications(rows);
+      const dismissed = signedIn ? null : readGuestDismissedNotifications();
+      setNotifications(
+        signedIn
+          ? rows
+          : rows.filter((notification) => !dismissed?.has(String(notification.id)))
+      );
     } catch {
       /* preserve state */
     } finally {
@@ -197,6 +229,27 @@ export default function NotificationMenu() {
     [user]
   );
 
+  const dismissNotification = useCallback(
+    async (notification: Notification) => {
+      if (!user) {
+        const dismissed = readGuestDismissedNotifications();
+        dismissed.add(String(notification.id));
+        writeGuestDismissedNotifications(dismissed);
+        setNotifications((rows) => rows.filter((row) => row.id !== notification.id));
+        publishNotificationSync();
+        return;
+      }
+      try {
+        await dismissSiteNotification(notification.id);
+        setNotifications((rows) => rows.filter((row) => row.id !== notification.id));
+        publishNotificationSync();
+      } catch {
+        /* keep the item visible when persistence fails */
+      }
+    },
+    [user]
+  );
+
   const unreadCount = notifications.filter((n) => user && !n.readAt).length;
   const buttonLabel =
     unreadCount > 0
@@ -229,14 +282,28 @@ export default function NotificationMenu() {
             notifications.map((n) => {
               const unread = Boolean(user && !n.readAt);
               return (
-                <button key={n.id} type="button" onClick={() => { void markRead(n).finally(() => { if (n.href?.startsWith("/") && !n.href.startsWith("//")) { setOpen(false); router.push(n.href); } }); }} className={`flex w-full items-start gap-3 rounded-lg border p-3 text-left transition-colors ${unread ? "border-pc-accent/25 bg-pc-bg-elevated text-pc-text hover:border-pc-accent/45" : "border-transparent hover:bg-pc-bg-elevated/50"}`}>
-                  <span className={`mt-1 h-2 w-2 shrink-0 rounded-full ${unread ? "bg-red-500" : notificationDot(n.importance)}`} aria-hidden="true" />
-                  <span className="min-w-0 flex-1">
-                    <span className={`block text-sm leading-relaxed ${unread ? "font-medium" : ""}`}>{n.message}</span>
-                    {n.preview && <span className="mt-1 block whitespace-pre-wrap break-words text-sm text-pc-text-secondary [overflow-wrap:anywhere]">{n.preview}</span>}
-                    <time className="mt-1 block text-xs text-pc-text-muted">{formatDateTime(n.timestamp)}</time>
-                  </span>
-                </button>
+                <div key={n.id} className="relative">
+                  <button type="button" onClick={() => { void markRead(n).finally(() => { if (n.href?.startsWith("/") && !n.href.startsWith("//")) { setOpen(false); router.push(n.href); } }); }} className={`flex w-full items-start gap-3 rounded-lg border p-3 pr-10 text-left transition-colors ${unread ? "border-pc-accent/25 bg-pc-bg-elevated text-pc-text hover:border-pc-accent/45" : "border-transparent hover:bg-pc-bg-elevated/50"}`}>
+                    <span className={`mt-1 h-2 w-2 shrink-0 rounded-full ${unread ? "bg-red-500" : notificationDot(n.importance)}`} aria-hidden="true" />
+                    <span className="min-w-0 flex-1">
+                      <span className={`block text-sm leading-relaxed ${unread ? "font-medium" : ""}`}>{n.message}</span>
+                      {n.preview && <span className="mt-1 block whitespace-pre-wrap break-words text-sm text-pc-text-secondary [overflow-wrap:anywhere]">{n.preview}</span>}
+                      <time className="mt-1 block text-xs text-pc-text-muted">{formatDateTime(n.timestamp)}</time>
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      void dismissNotification(n);
+                    }}
+                    className="absolute right-2 top-2 rounded-md p-1 text-pc-text-muted transition-colors hover:bg-pc-bg-elevated hover:text-pc-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent"
+                    aria-label={t("notifications.remove")}
+                    title={t("notifications.remove")}
+                  >
+                    <X className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                </div>
               );
             })
           ) : (
