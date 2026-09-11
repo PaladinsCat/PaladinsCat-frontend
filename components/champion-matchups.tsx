@@ -8,28 +8,21 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import SmartImage from "@/components/SmartImage";
 import CanonicalTalentImage from "@/components/canonical-talent-image";
-import { LoadingIndicator } from "@/components/async-state";
 import PageHeader from "@/components/ui/page-header";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { fetchChampions, type Champion } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
-import { getChampionData } from "@/lib/champion-data";
+import { getChampionData, type ChampionTalent } from "@/lib/champion-data";
 import { getPercentageColor } from "@/lib/stat-quality";
 import { useLocalization } from "@/lib/localization-context";
 import {
   fetchChampionTalentMatchups,
   type ChampionRelationship,
+  type ChampionTalentMatchupRow,
 } from "@/lib/champion-matchups-api";
 
-type TalentRelationship = {
-  talentId: number;
-  talentName: string;
-  wins: number;
-  losses: number;
-  encounters: number;
-  winRate: number | null;
-};
+type TalentMatchups = { talent: ChampionTalent; rows: ChampionTalentMatchupRow[] };
 
 const ROLES = [
   { value: "Frontline", labelKey: "common.roles.frontline", icon: "/images/icons/Class_Front_Line_Icon.avif" },
@@ -45,13 +38,12 @@ export default function ChampionMatchups({ initialSlug }: { initialSlug?: string
   const [roster, setRoster] = useState<Champion[]>([]);
   const [champion, setChampion] = useState(0);
   const [relationships, setRelationships] = useState<ChampionRelationship[]>([]);
-  const [talentRelationships, setTalentRelationships] = useState<Map<number, TalentRelationship[]>>(new Map());
+  const [opponentTalents, setOpponentTalents] = useState<Map<number, ChampionTalent[]>>(new Map());
+  const [talentMatchups, setTalentMatchups] = useState<TalentMatchups[]>([]);
   const [search, setSearch] = useState("");
   const [filterRole, setFilterRole] = useState<string | null>(null);
   const [globalError, setGlobalError] = useState(false);
-  const [talentError, setTalentError] = useState(false);
   const [globalLoading, setGlobalLoading] = useState(true);
-  const [talentLoading, setTalentLoading] = useState(true);
   const [retry, setRetry] = useState(0);
 
   useEffect(() => {
@@ -78,32 +70,23 @@ export default function ChampionMatchups({ initialSlug }: { initialSlug?: string
   useEffect(() => {
     if (!champion) return;
     const controller = new AbortController();
-    Promise.all([
-      fetchChampionTalentMatchups(champion, 0, controller.signal),
-      Promise.all(roster.filter((row) => Number(row.id) !== champion).map(async (opponent) => ({
-        opponent,
-        current: await getChampionData(championSlug(opponent.name)),
-      }))),
-    ])
-      .then(([matchupData, opponents]) => {
+    Promise.all(roster.map(async (entry) => ({
+      entry,
+      current: await getChampionData(championSlug(entry.name)),
+    })))
+      .then(async (champions) => {
+        const selected = champions.find(({ entry }) => Number(entry.id) === champion)?.current;
+        if (!selected?.talents.length) throw new Error("Champion talents are unavailable");
+        const matchups = await Promise.all(selected.talents.map(async (talent) => ({
+          talent,
+          rows: (await fetchChampionTalentMatchups(champion, Number(talent.id), controller.signal)).rows,
+        })));
         if (controller.signal.aborted) return;
-        const observed = new Map<string, TalentRelationship>();
+        const opponents = champions.filter(({ entry }) => Number(entry.id) !== champion);
+        const byOpponent = new Map(opponents.map(({ entry, current }) => [Number(entry.id), current?.talents ?? []]));
         const globals = new Map<number, ChampionRelationship>();
-        for (const row of matchupData.rows) {
-          const key = `${row.opponentChampionId}:${row.opponentTalentId}`;
-          const current = observed.get(key) ?? {
-            talentId: row.opponentTalentId,
-            talentName: row.opponentTalentName,
-            wins: 0,
-            losses: 0,
-            encounters: 0,
-            winRate: null,
-          };
-          current.wins += row.wins;
-          current.losses += row.losses;
-          current.encounters += row.encounters;
-          current.winRate = current.encounters > 0 ? (100 * current.wins) / current.encounters : null;
-          observed.set(key, current);
+        for (const { rows } of matchups) for (const row of rows) {
+          if (!byOpponent.get(row.opponentChampionId)?.some((talent) => Number(talent.id) === row.opponentTalentId)) continue;
           const global = globals.get(row.opponentChampionId) ?? {
             opponentChampionId: row.opponentChampionId,
             opponentChampionName: row.opponentChampionName,
@@ -118,32 +101,21 @@ export default function ChampionMatchups({ initialSlug }: { initialSlug?: string
           global.winRate = global.encounters > 0 ? (100 * global.wins) / global.encounters : null;
           globals.set(row.opponentChampionId, global);
         }
-        const byOpponent = new Map<number, TalentRelationship[]>();
-        for (const { opponent, current } of opponents) {
-          const opponentId = Number(opponent.id);
-          byOpponent.set(opponentId, (current?.talents ?? []).map((activeTalent) =>
-            observed.get(`${opponentId}:${activeTalent.id}`) ?? {
-              talentId: Number(activeTalent.id),
-              talentName: activeTalent.name,
-              wins: 0,
-              losses: 0,
-              encounters: 0,
-              winRate: null,
-            }));
-        }
-        setRelationships([...globals.values()].sort((left, right) => (right.winRate ?? 0) - (left.winRate ?? 0)));
-        setTalentRelationships(byOpponent);
+        setRelationships(opponents.map(({ entry }) => globals.get(Number(entry.id)) ?? {
+          opponentChampionId: Number(entry.id), opponentChampionName: entry.name,
+          wins: 0, losses: 0, encounters: 0, winRate: null,
+        }).sort((left, right) => (right.winRate ?? -1) - (left.winRate ?? -1)));
+        setOpponentTalents(byOpponent);
+        setTalentMatchups(matchups);
       })
       .catch(() => {
         if (!controller.signal.aborted) {
           setGlobalError(true);
-          setTalentError(true);
         }
       })
       .finally(() => {
         if (!controller.signal.aborted) {
           setGlobalLoading(false);
-          setTalentLoading(false);
         }
       });
     return () => controller.abort();
@@ -161,11 +133,10 @@ export default function ChampionMatchups({ initialSlug }: { initialSlug?: string
   function selectChampion(championId: number) {
     setChampion(championId);
     setRelationships([]);
-    setTalentRelationships(new Map());
+    setOpponentTalents(new Map());
+    setTalentMatchups([]);
     setGlobalLoading(true);
-    setTalentLoading(true);
     setGlobalError(false);
-    setTalentError(false);
     const selected = roster.find((row) => Number(row.id) === championId);
     router.push(`/stats/champions/${championSlug(selected?.name ?? "")}`, { scroll: false });
   }
@@ -212,8 +183,6 @@ export default function ChampionMatchups({ initialSlug }: { initialSlug?: string
       <button className="pc-button" onClick={() => {
         setGlobalLoading(true);
         setGlobalError(false);
-        setTalentLoading(true);
-        setTalentError(false);
         setRetry((value) => value + 1);
       }}>
         {t("stats.matchups.retry")}
@@ -222,48 +191,42 @@ export default function ChampionMatchups({ initialSlug }: { initialSlug?: string
     {!loading && !error && visibleRelationships.length === 0 && <p className="pc-card p-4 text-sm text-pc-text-secondary">{t("stats.matchups.empty")}</p>}
     {!loading && !error && visibleRelationships.length > 0 && <div className="grid gap-3 lg:grid-cols-2">
       {visibleRelationships.map((row) => {
-        const talentRows = talentRelationships.get(row.opponentChampionId) ?? [];
-        const enemyRate = row.encounters > 0 ? (100 * row.losses) / row.encounters : null;
+        const talents = opponentTalents.get(row.opponentChampionId) ?? [];
         return <article key={row.opponentChampionId} className="rounded-lg border border-pc-border bg-pc-bg-elevated p-3">
           <Link href={`/stats/champions/${championSlug(row.opponentChampionName)}`} className="flex items-center gap-2.5">
             <SmartImage src={getChampionIconSafe(row.opponentChampionName)} alt="" width={40} height={40} className="h-10 w-10 rounded-md object-contain" />
             <div className="min-w-0 flex-1">
               <h2 className="truncate text-sm font-semibold text-pc-text hover:text-pc-accent">{row.opponentChampionName}</h2>
-              <p className="text-xs uppercase tracking-wide text-pc-text-muted">{t("stats.matchups.global")}</p>
+              <p className="text-xs text-pc-text-muted">{t("stats.matchups.rate")}</p>
             </div>
             {row.encounters < 30 && <span className="text-xs text-pc-text-muted">{t("stats.matchups.lowSample")}</span>}
           </Link>
-          <div className="mt-3 grid gap-3 border-t border-pc-border/60 pt-3 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-            <section className="space-y-2" aria-label={t("stats.matchups.global")}>
-              <dl className="grid grid-cols-2 gap-x-3 gap-y-2 text-xs tabular-nums">
-                <div><dt className="text-pc-text-muted">{t("stats.matchups.samples")}</dt><dd className="font-semibold text-pc-text-secondary">{formatNumber(row.encounters)}</dd></div>
-                <div><dt className="text-pc-text-muted">{t("stats.matchups.wins")}</dt><dd className="font-semibold text-pc-text-secondary">{formatNumber(row.wins)}</dd></div>
-                <div><dt className="text-pc-text-muted">{t("generated.champions.losses")}</dt><dd className="font-semibold text-pc-text-secondary">{formatNumber(row.losses)}</dd></div>
-                <div><dt className="text-pc-text-muted">{t("stats.matchups.rate")}</dt><dd className="font-semibold" style={row.winRate == null ? undefined : { color: getPercentageColor(row.winRate) }}>{formatPercent(row.winRate, { maximumFractionDigits: 1 })}</dd></div>
-                <div><dt className="text-pc-text-muted">{t("stats.matchups.enemyRate")}</dt><dd className="font-semibold" style={enemyRate == null ? undefined : { color: getPercentageColor(enemyRate) }}>{formatPercent(enemyRate, { maximumFractionDigits: 1 })}</dd></div>
-              </dl>
-            </section>
-            <section className="border-t border-pc-border/60 pt-3 lg:border-t-0 lg:border-l lg:pl-3 lg:pt-0">
-              <h3 className="mb-2 text-xs font-medium uppercase tracking-wide text-pc-text-muted">{t("stats.matchups.talents")}</h3>
-              {talentLoading ? <LoadingIndicator /> : talentError ? <p className="text-xs text-rose-300">{t("stats.matchups.error")}</p> : (
-              <div className="divide-y divide-pc-border/50">
-                {talentRows.map((talentRow) => {
-                  const against = talentRow.encounters > 0 ? (100 * talentRow.losses) / talentRow.encounters : null;
-                  return <div key={talentRow.talentId} className="flex items-center gap-2 px-2.5 py-2">
-                    <CanonicalTalentImage talentId={talentRow.talentId} talentName={talentRow.talentName} alt="" className="h-8 w-8 shrink-0 rounded object-cover" fallbackClassName="h-8 w-8 shrink-0 rounded" />
-                    <div className="min-w-0 flex-1">
-                      <div className="truncate text-xs font-medium text-pc-text-secondary">{talentRow.talentName}</div>
-                      <div className="mt-0.5 flex flex-wrap gap-x-3 text-xs text-pc-text-muted">
-                        <span>{t("stats.matchups.rate")} <strong style={talentRow.winRate == null ? undefined : { color: getPercentageColor(talentRow.winRate) }}>{formatPercent(talentRow.winRate, { maximumFractionDigits: 1 })}</strong></span>
-                        <span>{t("stats.matchups.enemyRate")} <strong style={against == null ? undefined : { color: getPercentageColor(against) }}>{formatPercent(against, { maximumFractionDigits: 1 })}</strong></span>
-                        <span>{formatNumber(talentRow.wins)}W/{formatNumber(talentRow.losses)}L · {formatNumber(talentRow.encounters)}</span>
-                      </div>
-                    </div>
-                  </div>;
+          <div className="mt-3 overflow-x-auto border-t border-pc-border/60 pt-3">
+            <table className="w-full min-w-[28rem] table-fixed text-xs tabular-nums">
+              <caption className="sr-only">{t("stats.matchups.rate")} {row.opponentChampionName}</caption>
+              <thead><tr>
+                <th scope="col" className="p-2 text-left font-medium text-pc-text-muted">{roster.find((entry) => Number(entry.id) === champion)?.name}</th>
+                {talents.map((talent) => <th scope="col" key={talent.id} className="p-2 align-top font-medium text-pc-text-secondary">
+                  <CanonicalTalentImage talentId={Number(talent.id)} talentName={talent.name} alt="" className="mx-auto mb-1 h-8 w-8 rounded object-cover" fallbackClassName="mx-auto mb-1 h-8 w-8 rounded" />
+                  {talent.name}
+                </th>)}
+              </tr></thead>
+              <tbody>{talentMatchups.map(({ talent, rows }) => <tr key={talent.id} className="border-t border-pc-border/50">
+                <th scope="row" className="p-2 text-left font-medium text-pc-text-secondary">
+                  <CanonicalTalentImage talentId={Number(talent.id)} talentName={talent.name} alt="" className="mb-1 h-8 w-8 rounded object-cover" fallbackClassName="mb-1 h-8 w-8 rounded" />
+                  {talent.name}
+                </th>
+                {talents.map((opponentTalent) => {
+                  const cell = rows.find((entry) => entry.opponentChampionId === row.opponentChampionId && entry.opponentTalentId === Number(opponentTalent.id));
+                  const encounters = cell?.encounters ?? 0;
+                  const winRate = cell && encounters > 0 ? 100 * cell.wins / encounters : null;
+                  return <td key={opponentTalent.id} className="p-2 text-center">
+                    <strong className="text-sm" style={winRate == null ? undefined : { color: getPercentageColor(winRate) }}>{formatPercent(winRate, { maximumFractionDigits: 1 })}</strong>
+                    <div className="mt-1 text-pc-text-muted">{formatNumber(encounters)} {t("stats.matchups.samples")}</div>
+                  </td>;
                 })}
-              </div>
-            )}
-            </section>
+              </tr>)}</tbody>
+            </table>
           </div>
         </article>;
       })}
