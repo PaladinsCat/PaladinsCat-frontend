@@ -10,5 +10,6 @@
 /secrets/
 /local/
 *.log
+__pycache__/
 /test-results/
 /playwright-report/

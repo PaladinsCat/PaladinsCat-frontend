@@ -1,7 +1,4 @@
 {
-  "stats.performance.siege": "Siege",
-  "stats.performance.onslaught": "Onslaught",
-  "stats.performance.tdm": "Team Deathmatch",
   "nav.champions": "Champions",
   "nav.players": "Players",
   "nav.matches": "Matches",
@@ -333,5 +330,10 @@
   "stats.performance.banCountHelp": "{champion} was banned {count} times in Ranked Siege.",
   "stats.performance.countUnavailable": "No sample count is available for this selection.",
   "stats.performance.championNote": "DPM: damage, HPM: healing, CPM: credits, SPM: shielding per minute. A dash means no samples are available for this selection.",
-  "stats.performance.championRankedOnly": "Champion averages are currently available for Ranked Siege. Switch to Ranked to compare all champions."
+  "stats.performance.championRankedOnly": "Champion averages are currently available for Ranked Siege. Switch to Ranked to compare all champions.",
+  "stats.performance.siege": "Siege",
+  "stats.performance.onslaught": "Onslaught",
+  "stats.performance.tdm": "Team Deathmatch",
+  "operations.anonymousTraffic": "Anonymous aggregate page views only; PaladinsCat does not measure unique visitors or live users.",
+  "stats.loadouts.title": "Champion Loadouts"
 }

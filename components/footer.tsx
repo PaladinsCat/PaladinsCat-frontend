@@ -88,8 +88,8 @@ export default function Footer() {
   }, [siteVersion, t]);
 
   return (
-    // Footer: sticky bottom layout, secondary bg, top border separation
-    <footer className="bg-pc-bg-secondary border-t border-pc-border mt-auto">
+    // Footer: sticky bottom layout, shared glass surface, top border separation
+    <footer className="pc-glass mt-auto border-t border-pc-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 
@@ -145,6 +145,7 @@ export default function Footer() {
             <p className="text-pc-text-muted text-xs">
               {t("generated.common.paladinscat.edf580c")}{" "}{new Date().getFullYear()}<br />
               {t("footer.dataProvidedBy")}<br />
+              {t("footer.hirezTrademarkNotice")}<br />
               {t("footer.allRightsReserved")}
             </p>
           </div>

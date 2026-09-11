@@ -10,6 +10,7 @@ import { absoluteUrl, serializeJsonLd, SITE_NAME } from "@/lib/seo";
 const destinations = [
   ["/stats/performance", "generated.stats.performanceMetrics"],
   ["/stats/champions", "stats.matchups.title"],
+  ["/stats/loadouts", "stats.loadouts.title"],
   ["/stats/skins", "menu.skinStats"],
   ["/stats/items", "menu.items"],
   ["/stats/maps", "menu.maps"],

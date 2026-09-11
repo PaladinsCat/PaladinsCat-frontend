@@ -8,6 +8,7 @@ import type { ChampionLoadout } from "@/lib/champion-data";
 import type { ChampionCardStat, ChampionCardStatsResponse } from "@/lib/api-client";
 import { getPercentageColor, getStatQuality } from "@/lib/stat-quality";
 import { useLocalization } from "@/lib/localization-context";
+import { formatScalingDescription } from "@/lib/scaling-description";
 
 function statNameKey(value: string | null | undefined): string {
   return String(value ?? "").normalize("NFKD").toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -16,7 +17,7 @@ function statNameKey(value: string | null | undefined): string {
 /**
  * Render champion loadout grid.
  * refs: none
- * I/O types: `{ championSlug, loadouts, cardStats, talentId, returnTo, }: { championSlug: string; loadouts: ChampionLoadout[]; cardStats: ChampionCardStatsResponse; talentId: number; returnTo: string; } -> JSX.Element`.
+ * I/O types: champion reference cards with optional ranked statistics and detail navigation.
  */
 export default function ChampionLoadoutGrid({
   championSlug,
@@ -24,23 +25,25 @@ export default function ChampionLoadoutGrid({
   cardStats,
   talentId,
   returnTo,
+  detailBasePath,
 }: {
   championSlug: string;
   loadouts: ChampionLoadout[];
-  cardStats: ChampionCardStatsResponse;
-  talentId: number;
-  returnTo: string;
+  cardStats?: ChampionCardStatsResponse;
+  talentId?: number | null;
+  returnTo?: string;
+  detailBasePath?: string;
 }) {
   const { formatNumber, formatPercent, formatRecord, t } = useLocalization();
   const formatPlays = (value: number) => formatNumber(value, {
     notation: "compact",
     maximumFractionDigits: 1,
   });
-  const statsById = new Map(cardStats.cards.map((stat) => [stat.cardId, stat]));
-  const statsByName = new Map(cardStats.cards.map((stat) => [statNameKey(stat.cardName), stat]));
+  const statsById = new Map((cardStats?.cards ?? []).map((stat) => [stat.cardId, stat]));
+  const statsByName = new Map((cardStats?.cards ?? []).map((stat) => [statNameKey(stat.cardName), stat]));
   const maxCardPickRate = Math.max(
     1,
-    ...cardStats.cards.map((stat) => (stat.totalPlays / Math.max(1, cardStats.totalMatches)) * 100),
+    ...(cardStats?.cards ?? []).map((stat) => (stat.totalPlays / Math.max(1, cardStats?.totalMatches ?? 0)) * 100),
   );
   const byCategory: Record<string, ChampionLoadout[]> = {};
   for (const loadout of loadouts) {
@@ -57,15 +60,19 @@ export default function ChampionLoadoutGrid({
             {cards.map((card) => {
               const stat: ChampionCardStat | undefined = statsById.get(card.id)
                 ?? statsByName.get(statNameKey(card.name));
-              const pickRate = stat ? (stat.totalPlays / Math.max(1, cardStats.totalMatches)) * 100 : 0;
+              const pickRate = stat ? (stat.totalPlays / Math.max(1, cardStats?.totalMatches ?? 0)) * 100 : 0;
               const quality = stat ? getStatQuality(stat.winRate, pickRate, maxCardPickRate) : null;
               const maxLevelPlays = stat ? Math.max(1, ...stat.levels.map((level) => level.plays)) : 1;
               const maxLevelPickRate = stat
                 ? Math.max(1, ...stat.levels.map((level) => (level.plays / Math.max(1, stat.totalPlays)) * 100))
                 : 1;
-              const params = new URLSearchParams({ talentId: String(talentId), returnTo });
-              const href = stat ? `/champions/${championSlug}/cards/${stat.cardId}?${params.toString()}` : null;
-              const className = "pc-surface-light block rounded-lg border p-3 text-left transition-colors hover:border-pc-accent-mid";
+              const params = new URLSearchParams();
+              if (talentId) params.set("talentId", String(talentId));
+              if (returnTo) params.set("returnTo", returnTo);
+              const detailPath = detailBasePath ?? `/stats/loadouts/${championSlug}/cards`;
+              const detailCardId = stat?.cardId ?? card.id;
+              const href = cardStats ? `${detailPath}/${detailCardId}${params.size > 0 ? `?${params.toString()}` : ""}` : null;
+              const className = `pc-surface-light block rounded-lg border p-3 text-left ${href ? "transition-colors hover:border-pc-accent-mid" : ""}`;
               const content = (
                 <div className="flex items-start gap-3">
                   {card.iconUrl ? (
@@ -77,7 +84,9 @@ export default function ChampionLoadoutGrid({
                   )}
                   <div className="min-w-0 flex-1">
                     <div className="mb-0.5 text-xs font-medium text-pc-accent">{card.name}</div>
-                    <p className="text-xs leading-relaxed text-pc-text-secondary">{card.description}</p>
+                    <p className="text-xs leading-relaxed text-pc-text-secondary">
+                      {formatScalingDescription(card.description, 1, formatNumber)}
+                    </p>
                     {stat && stat.totalPlays > 0 && (
                       <div className="mt-2 space-y-1.5">
                         <div className="flex flex-wrap items-center gap-2 text-xs">

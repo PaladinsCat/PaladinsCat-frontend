@@ -9,7 +9,8 @@ type ServerFetchOptions = Omit<RequestInit, "signal"> & {
   timeoutMs?: number;
 };
 
-function serverApiBase(): string {
+/** Resolve the absolute internal backend origin used by server-owned requests. */
+export function serverApiBase(): string {
   const value = (
     process.env.NEXT_SERVER_API_URL
     || process.env.NEXT_PUBLIC_API_URL

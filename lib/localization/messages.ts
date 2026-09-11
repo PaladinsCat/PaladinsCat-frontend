@@ -10,11 +10,13 @@ import moderationMessages from "./catalog/ui/moderation.json";
 import communityMessages from "./catalog/pages/community.json";
 import playerFriendsMessages from "./catalog/pages/player-friends.json";
 import championMatchupsMessages from "./catalog/pages/champion-matchups.json";
+import matchMessages from "./catalog/pages/matches.json";
 import playerTrendsMessages from "./catalog/pages/player-trends.json";
 import itemMessages from "./catalog/game/items.json";
 import mapMessages from "./catalog/game/maps.json";
 import talentMessages from "./catalog/game/talents.json";
 import homeMessages from "./catalog/pages/home.json";
+import featureMessages from "./catalog/pages/features.json";
 import localizationMessages from "./catalog/pages/localization.json";
 import diminishingReturnsMessages from "./catalog/pages/diminishing-returns.json";
 import paladinsCatBotMessages from "./catalog/pages/paladinscat-bot.json";
@@ -38,10 +40,12 @@ export const EN_MESSAGES = {
   ...communityMessages,
   ...playerFriendsMessages,
   ...championMatchupsMessages,
+  ...matchMessages,
   ...playerTrendsMessages,
   ...footerMessages,
   ...asyncMessages,
   ...homeMessages,
+  ...featureMessages,
   ...localizationMessages,
   ...diminishingReturnsMessages,
   ...paladinsCatBotMessages,

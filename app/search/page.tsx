@@ -146,7 +146,7 @@ function staticReferenceResults(q: string, index: StaticReferenceIndex): Univers
         id: String(row.id),
         title: row.name,
         subtitle: champ ? `${champ} loadout card` : "Loadout card",
-        href: champ ? `/champions/${slug(champ)}` : "/stats/loadouts",
+        href: champ ? `/stats/loadouts/${slug(champ)}/cards/${row.id}` : "/stats/loadouts",
         score: rankStaticName(row.name, q, 78),
         meta: { championId: row.championId, championName: champ },
       };
@@ -162,7 +162,7 @@ function staticReferenceResults(q: string, index: StaticReferenceIndex): Univers
         id: String(row.id),
         title: row.name,
         subtitle: champ ? `${champ} talent` : "Champion talent",
-        href: champ ? `/champions/${slug(champ)}` : "/stats/talents",
+        href: champ ? `/stats/loadouts/${slug(champ)}?talentId=${row.id}` : "/stats/loadouts",
         score: rankStaticName(row.name, q, 80),
         meta: { championId: row.championId, championName: champ },
       };

@@ -18,6 +18,7 @@ test("Inter is self-hosted rather than fetched from a third party", () => {
 test("rejects open redirects", () => {
   for (const path of ["https://evil.example", "//evil.example", "/%5c%5cevil.example", "/admin", "/auth/login"]) assert.equal(safeReturnPath(path), "/");
   assert.equal(safeReturnPath("/players/42?tab=builds"), "/players/42?tab=builds");
+  assert.equal(safeReturnPath("/stats/performance?scope=casual"), "/stats/performance?scope=casual");
 });
 test("state transaction binds callback and rejects replay after cookie clear", () => {
   const transaction = createTransaction("/account");

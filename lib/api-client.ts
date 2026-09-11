@@ -40,6 +40,7 @@ import { championSlug } from "./utils";
 import { getChampionIconSafe } from "./champion-icons";
 import { getStoredLobbyTierFilter, withStoredLobbyTier } from "./lobby-tier";
 import { csrfHeader } from "./csrf";
+import type { MatchAccessTier } from "./match-access";
 
 export type {
   Champion,
@@ -518,12 +519,27 @@ export interface ExploiterEvidenceMatch {
 }
 
 /**
+ * Describe a temporally impossible or exclusive cosmetic observed on an
+ * exploiter account (e.g. a ranked frame from a season that ended before the
+ * account existed).
+ * refs: doc: documents/04-game-data/ranked-seasons.md
+ */
+export interface CosmeticEvidence {
+  kind: string;
+  name: string;
+  reason: string;
+  accountCreatedDate: string | null;
+  observedDate: string | null;
+}
+
+/**
  * Combine exploiter identity and moderation flags with supporting matches.
  * refs: doc: documents/02-technical/api/api-server.md
  */
 export interface ExploiterEvidenceDetail {
   player: Pick<CheaterPlayer, "id" | "name" | "platform" | "region" | "cheater" | "exploiter">;
   matches: ExploiterEvidenceMatch[];
+  cosmeticEvidence: CosmeticEvidence[];
 }
 
 /**
@@ -1886,6 +1902,13 @@ export async function fetchExploiterEvidence(playerId: string): Promise<Exploite
       assists: Number(row.assists ?? 0),
       talentId: Number(row.talent_id),
       talentName: String(row.talent_name ?? `Talent ${row.talent_id}`),
+    })),
+    cosmeticEvidence: (raw.cosmeticEvidence ?? []).map((row: any) => ({
+      kind: String(row.kind ?? "unknown"),
+      name: String(row.name ?? ""),
+      reason: String(row.reason ?? ""),
+      accountCreatedDate: row.accountCreatedDate ?? null,
+      observedDate: row.observedDate ?? null,
     })),
   };
 }
@@ -4616,9 +4639,9 @@ export interface SkinStat {
  *
  * refs: none
  * Request `GET '/stats/skins${query.toString() ? '?${query.toString()}' : ''}'` through the shared API transport. Return `[]` on a caught request failure.
- * I/O types: `params?: { championId?: number; tierMin?: number; tierMax?: number; limit?: number; scope?: PublicStatsScope; queueId?: number } -> Promise<SkinStat[]>`.
+ * I/O types: `params?: { championId?: number; tierMin?: number; tierMax?: number; limit?: number; scope?: PublicStatsScope; queueId?: number; sort?: 'plays' | 'winRate' } -> Promise<SkinStat[]>`.
  */
-export async function fetchSkinStats(params?: { championId?: number; tierMin?: number; tierMax?: number; limit?: number; scope?: PublicStatsScope; queueId?: number }): Promise<SkinStat[]> {
+export async function fetchSkinStats(params?: { championId?: number; tierMin?: number; tierMax?: number; limit?: number; scope?: PublicStatsScope; queueId?: number; sort?: 'plays' | 'winRate' }): Promise<SkinStat[]> {
   const query = new URLSearchParams();
   if (params?.championId != null) query.set('championId', String(params.championId));
   if (params?.tierMin != null) query.set('tierMin', String(params.tierMin));
@@ -4626,6 +4649,7 @@ export async function fetchSkinStats(params?: { championId?: number; tierMin?: n
   if (params?.limit != null) query.set('limit', String(params.limit));
   if (params?.scope) query.set('scope', params.scope);
   if (params?.queueId != null) query.set('queueId', String(params.queueId));
+  if (params?.sort) query.set('sort', params.sort);
   try {
     const raw = await fetchJson<any[]>(`/stats/skins${query.toString() ? `?${query.toString()}` : ''}`);
     return raw.map((row) => ({
@@ -4982,17 +5006,22 @@ export interface ChampionCardDetailResponse {
  *
  * refs: none
  * Request `GET '/stats/cards/${championId}/${cardId}?mode=${mode}${talentId ? '&talentId=${talentId}' : ''}'` through the shared API transport. Return `null` on a caught request failure.
- * I/O types: `championId: number; cardId: number; mode: 'ranked'; talentId?: number | null -> Promise<ChampionCardDetailResponse | null>`.
+ * I/O types: champion/card IDs, optional talent and tier bounds -> ranked card detail.
  */
 export async function fetchChampionCardDetail(
   championId: number,
   cardId: number,
   mode: 'ranked' = 'ranked',
-  talentId?: number | null
+  talentId?: number | null,
+  tier?: { tierMin?: number; tierMax?: number },
 ): Promise<ChampionCardDetailResponse | null> {
   try {
+    const query = new URLSearchParams({ mode });
+    if (talentId) query.set('talentId', String(talentId));
+    if (tier?.tierMin != null) query.set('tierMin', String(tier.tierMin));
+    if (tier?.tierMax != null) query.set('tierMax', String(tier.tierMax));
     const raw = await fetchJson<ChampionCardDetailResponse>(
-      `/stats/cards/${championId}/${cardId}?mode=${mode}${talentId ? `&talentId=${talentId}` : ''}`
+      `/stats/cards/${championId}/${cardId}?${query.toString()}`
     );
 
     return {
@@ -5216,7 +5245,7 @@ export interface StatsPageData {
  * I/O types: `params?: { tierMin?: number; tierMax?: number } -> Promise<StatsPageData>`.
  */
 export async function fetchStatsPageData(params?: { tierMin?: number; tierMax?: number }): Promise<StatsPageData> {
-  const query = new URLSearchParams();
+  const query = new URLSearchParams({ view: 'portal-v2' });
   if (params?.tierMin != null) query.set('tierMin', String(params.tierMin));
   if (params?.tierMax != null) query.set('tierMax', String(params.tierMax));
   const raw = await fetchJson<any>(`/stats/page-data${query.toString() ? `?${query.toString()}` : ''}`, { unwrapData: false });
@@ -5323,9 +5352,9 @@ export async function fetchTierSummary(): Promise<TierSummary> {
  *
  * refs: none
  * Request `GET '/stats/talents'` through the shared API transport. Uncaught network/API errors reject the returned promise.
- * I/O types: `none -> Promise<Array<{ talentId: number; talentName: string; championId: number; championName: string; totalPlays: number; winRate: number; }>>`.
+ * I/O types: optional ranked tier bounds -> champion talent rows.
  */
-export async function fetchTalents(): Promise<Array<{
+export async function fetchTalents(tier?: { tierMin?: number; tierMax?: number }): Promise<Array<{
   talentId: number;
   talentName: string;
   championId: number;
@@ -5333,6 +5362,9 @@ export async function fetchTalents(): Promise<Array<{
   totalPlays: number;
   winRate: number;
 }>> {
+  const query = new URLSearchParams({ mode: "ranked", limit: "200" });
+  if (tier?.tierMin != null) query.set("tierMin", String(tier.tierMin));
+  if (tier?.tierMax != null) query.set("tierMax", String(tier.tierMax));
   const raw = await fetchJson<Array<{
     talent_id: number | string;
     name?: string;
@@ -5342,7 +5374,7 @@ export async function fetchTalents(): Promise<Array<{
     total_plays?: number | string;
     total_uses?: number | string;
     win_rate: number | string;
-  }>>(`/stats/talents`);
+  }>>(`/stats/talents?${query.toString()}`);
 
   return raw.map((r) => ({
     talentId: numberOrNull(r.talent_id) ?? 0,
@@ -6734,6 +6766,15 @@ export interface MatchDetailWithBans {
   dataStatus?: MatchDataStatus;
   dataHash?: string;
   projectionVersion?: number;
+  access?: MatchDetailAccess;
+}
+
+/** Describe the server-enforced match-detail tier and remaining daily quota. */
+export interface MatchDetailAccess {
+  tier: MatchAccessTier;
+  limit: number | null;
+  remaining: number | null;
+  resetAtMs: number | null;
 }
 
 /**
@@ -7360,6 +7401,7 @@ export async function fetchMatchDetail(matchId: number): Promise<MatchDetailWith
     storage_status?: MatchStorageStatus;
     dataStatus?: MatchDataStatus;
     dataHash?: string;
+    access?: MatchDetailAccess;
   }>(
     `/matches/${matchId}`,
     { timeoutMs: 130_000, retries: 0 },
@@ -7371,6 +7413,7 @@ export async function fetchMatchDetail(matchId: number): Promise<MatchDetailWith
     storageStatus: detail.storageStatus ?? raw.storageStatus ?? raw.storage_status,
     dataStatus: detail.dataStatus ?? raw.dataStatus,
     dataHash: detail.dataHash ?? raw.dataHash,
+    access: detail.access ?? raw.access,
   });
 }
 

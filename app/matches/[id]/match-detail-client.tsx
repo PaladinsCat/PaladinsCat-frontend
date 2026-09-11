@@ -33,7 +33,6 @@ import {
   type MatchPlayerDetail,
   type RatingSnapshot,
 } from "@/lib/api-client";
-import { championSlug } from "@/lib/utils";
 import {
   MatchResultPlayer,
   type PlayerProfileData,
@@ -48,7 +47,8 @@ import { RouteSkeleton } from "@/components/route-skeleton";
 import { readBrowserResult, removeBrowserResult, writeBrowserResult } from "@/lib/browser-result-cache";
 import { getQueueLabel } from "@/lib/queue-labels";
 import { LocalizedText, useLocalization } from "@/lib/localization-context";
-import { SpotlightCard, MovingBorderCard, BackgroundGradientAnimation } from "@/components/aceternity";
+import { useAuth } from "@/lib/auth-context";
+import { matchDetailSections } from "@/lib/match-access";
 
 import {
   fetchPlayerModerationBatch,
@@ -189,6 +189,7 @@ function storedProfileForMatch(player: MatchPlayerDetail): PlayerProfileData | n
  */
 export default function MatchDetailPage({ initialMatch = null }: { initialMatch?: MatchDetailWithBans | null }) {
   const { t } = useLocalization();
+  const { user, isLoading: authLoading } = useAuth();
   const params = useParams();
   const matchId = String(params.id || "");
 
@@ -198,15 +199,17 @@ export default function MatchDetailPage({ initialMatch = null }: { initialMatch?
   const [loading, setLoading] = useState(initialMatch == null);
   const [error, setError] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
+  const accessScope = user?.linkedPlayerId != null ? "verified" : user ? "account" : "guest";
 
   useEffect(() => {
     let cancelled = false;
 
     const numericMatchId = parseInt(matchId, 10);
     async function load() {
+      if (authLoading) return;
       // Direct navigations receive the complete public payload in the RSC
       // response. Do not immediately issue the same browser request again.
-      if (reloadKey === 0 && initialMatch) {
+      if (reloadKey === 0 && initialMatch?.access?.tier === accessScope) {
         setMatch(initialMatch);
         setFact(embeddedFact(initialMatch));
         setSnapshots(embeddedSnapshots(initialMatch));
@@ -224,7 +227,7 @@ export default function MatchDetailPage({ initialMatch = null }: { initialMatch?
       setLoading(true);
       setError(null);
       // v11 invalidates cached rows from the pre-complete-payload fanout path.
-      const cacheKey = `paladinscat:match-result:v11:${numericMatchId}`;
+      const cacheKey = `paladinscat:match-result:v12:${accessScope}:${numericMatchId}`;
       try {
         const cached = reloadKey === 0 ? readBrowserResult<CachedMatchResult>(cacheKey) : null;
         if (cached) {
@@ -273,8 +276,10 @@ export default function MatchDetailPage({ initialMatch = null }: { initialMatch?
           })
           .catch(() => undefined);
 
-      } catch (err: any) {
-        if (!cancelled) setError(err.message || t("generated.matches.[id].page.failedtoloadmatch"));
+      } catch (err: unknown) {
+        if (!cancelled) setError(err instanceof Error && err.message
+          ? err.message
+          : t("generated.matches.[id].page.failedtoloadmatch"));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -282,7 +287,7 @@ export default function MatchDetailPage({ initialMatch = null }: { initialMatch?
 
     load();
     return () => { cancelled = true; };
-  }, [initialMatch, matchId, reloadKey]);
+  }, [accessScope, authLoading, initialMatch, matchId, reloadKey, t]);
 
   useEffect(() => {
     if (loading || !match) return;
@@ -374,6 +379,9 @@ export default function MatchDetailPage({ initialMatch = null }: { initialMatch?
 
   if (!match) return null;
 
+  const accessTier = match.access?.tier ?? accessScope;
+  const { loadouts: showLoadouts, fullDetails: showFullDetails } = matchDetailSections(accessTier);
+
   return (
     <div className="max-w-7xl mx-auto py-8 space-y-6">
       <BrowserScoreboard
@@ -385,16 +393,16 @@ export default function MatchDetailPage({ initialMatch = null }: { initialMatch?
       />
 
       {/* Loadouts — talent, cards, and purchased items */}
-      <ItemsLoadoutsSection
+      {showLoadouts && <ItemsLoadoutsSection
         team1Players={team1}
         team2Players={team2}
         team1Wins={team1Wins}
         team2Wins={team2Wins}
         factMap={factMap}
-      />
+      />}
 
       {/* Match Stats — in-match performance */}
-      <MatchStatsSection
+      {showFullDetails && <MatchStatsSection
         team1Players={team1}
         team2Players={team2}
         team1Wins={team1Wins}
@@ -402,20 +410,26 @@ export default function MatchDetailPage({ initialMatch = null }: { initialMatch?
         team1Label={t("generated.matches.[id].page.team1")}
         team2Label={t("generated.matches.[id].page.team2")}
         factMap={factMap}
-      />
+      />}
 
       {/* Player Matchup — pre-match view */}
-      <MatchupSection
+      {showFullDetails && <MatchupSection
         team1={team1Players}
         team2={team2Players}
         team1Wins={team1Wins}
         team2Wins={team2Wins}
         team1Label={t("generated.matches.team1")}
         team2Label={t("generated.matches.team2")}
-      />
+      />}
 
       {/* Rating Snapshots */}
-      {snapshots.length > 0 && <RatingSnapshots snapshots={snapshots} />}
+      {showFullDetails && snapshots.length > 0 && <RatingSnapshots snapshots={snapshots} />}
+
+      {match.access?.remaining != null && (
+        <p className="text-center text-sm text-pc-text-secondary" role="status">
+          {t("matches.freeLookupsRemaining", { count: match.access.remaining })}
+        </p>
+      )}
 
     </div>
   );

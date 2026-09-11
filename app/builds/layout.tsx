@@ -1,5 +1,6 @@
 /** Frame the public build browser with localized SEO metadata and heading copy. · refs: none */
 import { createLocalizedMetadata, getServerLocalization } from "@/lib/server-localization";
+import { AccountAccess } from "@/components/account-access";
 
 /**
  * Generate canonical metadata for the build directory.  Returns: `Promise<Metadata>`. · refs: none
@@ -19,12 +20,14 @@ export async function generateMetadata() {
 export default async function BuildsLayout({ children }: { children: React.ReactNode }) {
   const { t } = await getServerLocalization();
   return (
-    <div className="space-y-6">
-      <header>
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("seo.builds.heading")}</h1>
-        <p className="mt-2 max-w-3xl text-sm leading-6 text-pc-text-secondary">{t("seo.builds.description")}</p>
-      </header>
-      {children}
-    </div>
+    <AccountAccess>
+      <div className="space-y-6">
+        <header>
+          <h1 className="pc-heading pc-heading-lg text-pc-accent">{t("seo.builds.heading")}</h1>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-pc-text-secondary">{t("seo.builds.description")}</p>
+        </header>
+        {children}
+      </div>
+    </AccountAccess>
   );
 }

@@ -1414,5 +1414,13 @@
   "champions.zhin.loadouts.perfectblock.description": "Heal for {100|100} after successfully Countering an attack.",
   "champions.zhin.loadouts.upinsmoke.description": "Increase your Movement Speed by {11|11}% while Billow is active.",
   "champions.zhin.loadouts.viciousness.description": "Reduce the Cooldown of Counter by {15|15}% after successfully hitting an enemy with Counter.",
-  "champions.zhin.loadouts.wildfire.description": "Reduce the Cooldown of Whirl by {0.5|0.5}s for each enemy it hits."
+  "champions.zhin.loadouts.wildfire.description": "Reduce the Cooldown of Whirl by {0.5|0.5}s for each enemy it hits.",
+  "champions.changelog.title": "Changelog",
+  "champions.changelog.source": "Official Paladins Wiki",
+  "champions.changelog.categories.general": "General",
+  "champions.changelog.categories.weapon": "Weapon",
+  "champions.changelog.categories.abilities": "Abilities",
+  "champions.changelog.categories.talents": "Talents",
+  "champions.changelog.categories.cards": "Cards",
+  "champions.changelog.categories.fixes": "Fixes"
 }

@@ -6,30 +6,14 @@
  */
 "use client";
 
-import { useEffect, useMemo, useState, type ComponentType } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import {
-  Award,
-  BadgeAlert,
-  BrickWall,
-  CircleSlash2,
-  Clock3,
-  Crosshair,
-  Copy,
-  CircleHelp,
-  HeartPulse,
-  LockKeyhole,
-  Shield,
-  ShieldAlert,
-  Skull,
-  Sparkles,
-  Swords,
-  Trophy,
-  UsersRound,
-} from "lucide-react";
+import CardIcon, { type CardIconName } from "@/components/card-icon";
 import { fetchPlayersOverview, type PlayersOverview } from "@/lib/api-client";
+import { useAuth } from "@/lib/auth-context";
 import { useLocalization } from "@/lib/localization-context";
 import type { TranslationKey } from "@/lib/localization/messages";
+import { verifiedDestination } from "@/lib/verified-access";
 import PageHeader from "@/components/ui/page-header";
 
 type DirectoryCard = {
@@ -37,7 +21,7 @@ type DirectoryCard = {
   titleKey?: TranslationKey;
   title?: string;
   count?: number;
-  icon: ComponentType<{ className?: string; strokeWidth?: number; "aria-hidden"?: boolean }>;
+  icon: CardIconName;
   accent: "slate" | "cyan" | "red" | "orange" | "amber" | "violet" | "emerald" | "sky" | "rose" | "fuchsia";
 };
 
@@ -60,6 +44,7 @@ const EMPTY_COUNTS: PlayersOverview["communityCounts"] = {
  */
 export default function PlayersPageClient({ initialOverview }: { initialOverview: PlayersOverview | null }) {
   const { t, formatNumber } = useLocalization();
+  const { user, isLoading: authLoading } = useAuth();
   const [communityCounts, setCommunityCounts] = useState(initialOverview?.communityCounts ?? EMPTY_COUNTS);
   const [directoryCounts, setDirectoryCounts] = useState<PlayersOverview["directoryCounts"]>(initialOverview?.directoryCounts ?? {
     privateAccounts: 0,
@@ -93,51 +78,51 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
 
   // Card accents mirror the dominant semantic family used by each destination route.
   const cards = useMemo<DirectoryCard[]>(() => [
-    { href: "/players/private-accounts", titleKey: "generated.players.privateAccounts", count: directoryCounts.privateAccounts, icon: LockKeyhole, accent: "slate" },
-    { href: "/players/parties", titleKey: "generated.players.rankedParties", count: directoryCounts.parties, icon: UsersRound, accent: "cyan" },
-    { href: "/players/cheaters", titleKey: "generated.players.cheaters", count: communityCounts.cheaters, icon: ShieldAlert, accent: "red" },
-    { href: "/players/boosted", titleKey: "moderation.boostedPlayers", count: communityCounts.boosted, icon: Award, accent: "orange" },
-    { href: "/players/suspicious", titleKey: "generated.players.suspiciousPlayers", count: communityCounts.suspicious, icon: BadgeAlert, accent: "amber" },
-    { href: "/players/weirdos", titleKey: "moderation.weirdoTitle", count: communityCounts.weirdos, icon: Sparkles, accent: "violet" },
-    { href: "/players/hall-of-fame", titleKey: "moderation.hallOfFameTitle", count: communityCounts.hallOfFame, icon: Award, accent: "emerald" },
-    { href: "/players/droppers", titleKey: "moderation.droppersTitle", count: communityCounts.droppers, icon: CircleSlash2, accent: "rose" },
-    { href: "/players/afk-wintrade", titleKey: "moderation.afkWintradeTitle", count: communityCounts.afkWintrade, icon: Clock3, accent: "sky" },
-    { href: "/players/wall-shooters", titleKey: "moderation.wallShooterTitle", count: directoryCounts.wallShooters, icon: BrickWall, accent: "cyan" },
-    { href: "/players/master-feeding", titleKey: "moderation.masterFeedingTitle", count: directoryCounts.masterFeeding, icon: Skull, accent: "rose" },
-    { href: "/players/tank-diff", titleKey: "moderation.tankDiffTitle", count: directoryCounts.tankDiff, icon: Shield, accent: "sky" },
-    { href: "/players/support-diff", titleKey: "moderation.supportDiffTitle", count: directoryCounts.supportDiff, icon: HeartPulse, accent: "emerald" },
-    { href: "/players/dps-diff", titleKey: "moderation.dpsDiffTitle", count: directoryCounts.dpsDiff, icon: Crosshair, accent: "orange" },
-    { href: "/players/flank-diff", titleKey: "moderation.flankDiffTitle", count: directoryCounts.flankDiff, icon: Swords, accent: "violet" },
-    { href: "/players/the-noob", titleKey: "moderation.noobTitle", count: directoryCounts.noob, icon: CircleHelp, accent: "amber" },
-    { href: "/players/hypercarry", titleKey: "moderation.hypercarryTitle", count: directoryCounts.hypercarry, icon: Trophy, accent: "cyan" },
-    { href: "/players/alt-accounts", titleKey: "moderation.altAccountsTitle", count: communityCounts.altAccounts, icon: Copy, accent: "fuchsia" },
+    { href: "/players/private-accounts", titleKey: "generated.players.privateAccounts", count: directoryCounts.privateAccounts, icon: "lock", accent: "slate" },
+    { href: "/players/parties", titleKey: "generated.players.rankedParties", count: directoryCounts.parties, icon: "users-alt", accent: "cyan" },
+    { href: "/players/cheaters", titleKey: "generated.players.cheaters", count: communityCounts.cheaters, icon: "shield-exclamation", accent: "red" },
+    { href: "/players/boosted", titleKey: "moderation.boostedPlayers", count: communityCounts.boosted, icon: "rocket", accent: "orange" },
+    { href: "/players/suspicious", titleKey: "generated.players.suspiciousPlayers", count: communityCounts.suspicious, icon: "search-alt", accent: "amber" },
+    { href: "/players/weirdos", titleKey: "moderation.weirdoTitle", count: communityCounts.weirdos, icon: "alien", accent: "violet" },
+    { href: "/players/hall-of-fame", titleKey: "moderation.hallOfFameTitle", count: communityCounts.hallOfFame, icon: "crown", accent: "emerald" },
+    { href: "/players/droppers", titleKey: "moderation.droppersTitle", count: communityCounts.droppers, icon: "ban", accent: "rose" },
+    { href: "/players/afk-wintrade", titleKey: "moderation.afkWintradeTitle", count: communityCounts.afkWintrade, icon: "clock", accent: "sky" },
+    { href: "/players/wall-shooters", titleKey: "moderation.wallShooterTitle", count: directoryCounts.wallShooters, icon: "block-brick", accent: "cyan" },
+    { href: "/players/master-feeding", titleKey: "moderation.masterFeedingTitle", count: directoryCounts.masterFeeding, icon: "skull", accent: "rose" },
+    { href: "/players/tank-diff", titleKey: "moderation.tankDiffTitle", count: directoryCounts.tankDiff, icon: "shield", accent: "sky" },
+    { href: "/players/support-diff", titleKey: "moderation.supportDiffTitle", count: directoryCounts.supportDiff, icon: "heart-rate", accent: "emerald" },
+    { href: "/players/dps-diff", titleKey: "moderation.dpsDiffTitle", count: directoryCounts.dpsDiff, icon: "target", accent: "orange" },
+    { href: "/players/flank-diff", titleKey: "moderation.flankDiffTitle", count: directoryCounts.flankDiff, icon: "sword", accent: "violet" },
+    { href: "/players/the-noob", titleKey: "moderation.noobTitle", count: directoryCounts.noob, icon: "interrogation", accent: "amber" },
+    { href: "/players/hypercarry", titleKey: "moderation.hypercarryTitle", count: directoryCounts.hypercarry, icon: "bolt", accent: "cyan" },
+    { href: "/players/alt-accounts", titleKey: "moderation.altAccountsTitle", count: communityCounts.altAccounts, icon: "copy", accent: "fuchsia" },
   ], [communityCounts, directoryCounts]);
 
   const levelAbbreviation = t("common.playerChampions.level", { level: "" }).trim();
   const accountLevelLabel = [t("generated.players.account"), levelAbbreviation].join(" ");
   const championLevelLabel = [t("generated.players.champion"), levelAbbreviation].join(" ");
   const leaderboardCards = useMemo<DirectoryCard[]>(() => [
-    { href: "/players/leaderboard", titleKey: "generated.players.ranked", icon: Trophy, accent: "amber" },
-    { href: "/players/elo/account", titleKey: "generated.players.accountElo", icon: Award, accent: "cyan" },
-    { href: "/players/elo/champion", titleKey: "generated.players.championElo", icon: Award, accent: "cyan" },
-    { href: "/players/performance/account", title: t("stats.scope.performance", { mode: t("generated.players.account") }), icon: Crosshair, accent: "rose" },
-    { href: "/players/performance/champion", title: t("stats.scope.performance", { mode: t("generated.players.champion") }), icon: Crosshair, accent: "rose" },
-    { href: "/players/levels/account", title: accountLevelLabel, icon: UsersRound, accent: "emerald" },
-    { href: "/players/levels/champion", title: championLevelLabel, icon: Swords, accent: "violet" },
+    { href: "/players/leaderboard", titleKey: "generated.players.ranked", icon: "trophy", accent: "amber" },
+    { href: "/players/elo/account", titleKey: "generated.players.accountElo", icon: "ranking-star", accent: "cyan" },
+    { href: "/players/elo/champion", titleKey: "generated.players.championElo", icon: "badge", accent: "cyan" },
+    { href: "/players/performance/account", title: t("stats.scope.performance", { mode: t("generated.players.account") }), icon: "chart-user", accent: "rose" },
+    { href: "/players/performance/champion", title: t("stats.scope.performance", { mode: t("generated.players.champion") }), icon: "chart-line-up", accent: "rose" },
+    { href: "/players/levels/account", title: accountLevelLabel, icon: "user-graduate", accent: "emerald" },
+    { href: "/players/levels/champion", title: championLevelLabel, icon: "stairs", accent: "violet" },
   ], [accountLevelLabel, championLevelLabel, t]);
 
   const renderCard = (card: DirectoryCard) => {
-    const Icon = card.icon;
+    const gatedHref = verifiedDestination(card.href, user, authLoading);
     return (
-      <Link key={card.href} href={card.href} data-card-accent={card.accent} className="pc-home-feature-card group flex min-h-20 min-w-0 items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-4 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary">
-        <Icon aria-hidden={true} className="pc-card-icon h-9 w-9 shrink-0" strokeWidth={1.5} />
+      <Link key={card.href} href={gatedHref ?? card.href} aria-disabled={authLoading} onClick={authLoading ? (event) => event.preventDefault() : undefined} data-card-accent={card.accent} className="pc-home-feature-card group flex min-h-20 min-w-0 items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-4 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary">
+        <CardIcon name={card.icon} className="pc-card-icon h-8 w-8 shrink-0" />
         <div className="min-w-0 flex-1">
           <h2 className="line-clamp-2 text-sm font-semibold leading-5 text-pc-text group-hover:text-pc-accent">{card.title ?? t(card.titleKey!)}</h2>
         </div>
         {card.count != null && <span className="shrink-0 tabular-nums text-sm font-semibold text-pc-text-secondary">
           {overviewLoading ? "…" : formatNumber(card.count)}
         </span>}
-        <span className="shrink-0 text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent">→</span>
+        <CardIcon name="arrow-right" size={16} className="shrink-0 text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent" />
       </Link>
     );
   };

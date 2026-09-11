@@ -7,13 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { useReducedMotion } from "@/lib/reduced-motion";
-import {
-  ArrowRight,
-  BarChart3,
-  Bot,
-  Sparkles,
-  UsersRound,
-} from "lucide-react";
+import CardIcon, { type CardIconName } from "@/components/card-icon";
 import {
   fetchSiteVersion,
   type SiteVersion,
@@ -247,27 +241,27 @@ export default function HomePage({ children }: { children?: ReactNode }) {
   const exploreCards = [
     {
       href: "/features",
-      icon: Sparkles,
+      icon: "sparkles" as CardIconName,
       title: t("home.newFeatures"),
       description: t("home.exploreNewFeatures"),
     },
     {
       href: "/players",
-      icon: UsersRound,
+      icon: "users" as CardIconName,
       title: t("menu.playerHub"),
       description: t("home.explorePlayersTitle"),
     },
     {
-      href: "/champions",
-      icon: BarChart3,
-      title: t("nav.champions"),
-      description: t("home.exploreMetaTitle"),
+      href: "/stats",
+      icon: "chart-histogram" as CardIconName,
+      title: t("nav.stats"),
+      description: t("seo.home.topic.stats.description"),
     },
     {
-      href: "/operations/paladinscat-bot",
-      icon: Bot,
-      title: t("menu.paladinsCatBot"),
-      description: t("home.exploreBotTitle"),
+      href: "/community",
+      icon: "comments" as CardIconName,
+      title: t("nav.community"),
+      description: t("seo.home.topic.community.description"),
     },
   ];
   const communityCards = [
@@ -452,9 +446,9 @@ export default function HomePage({ children }: { children?: ReactNode }) {
             hidden: {},
             visible: { transition: { staggerChildren: 0.11 } },
           }}
-          className="mt-10 grid gap-4 sm:mt-12 md:grid-cols-2 lg:grid-cols-4"
+          className="mt-10 grid auto-rows-fr gap-4 sm:mt-12 md:grid-cols-2 lg:grid-cols-4"
         >
-          {exploreCards.map(({ href, icon: Icon, title, description }, index) => (
+          {exploreCards.map(({ href, icon, title, description }, index) => (
             <motion.div
               key={href}
               variants={{
@@ -462,25 +456,26 @@ export default function HomePage({ children }: { children?: ReactNode }) {
                 visible: { opacity: 1, y: 0, scale: 1 },
               }}
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              className="h-full"
             >
               <MotionLink
                 href={href}
                 data-card-accent={index % 4 === 0 ? "primary" : index % 4 === 1 ? "secondary" : index % 4 === 2 ? "tertiary" : "fourth"}
                 whileHover={reduceMotion ? undefined : { y: -6, scale: 1.012 }}
                 whileTap={reduceMotion ? undefined : { scale: 0.985 }}
-                className="pc-glass pc-home-feature-card group relative flex min-h-44 flex-col items-center justify-center overflow-hidden rounded-2xl border border-white/5 p-6 text-center shadow-lg transition-shadow duration-300 group-hover:shadow-pc-card-hover"
+                className="pc-glass pc-home-feature-card group relative flex h-full min-h-44 flex-col items-center justify-center overflow-hidden rounded-2xl border border-white/5 p-6 text-center shadow-lg transition-shadow duration-300 group-hover:shadow-pc-card-hover"
               >
               <span
                 aria-hidden="true"
                 className="pc-home-card-aura absolute -left-20 -top-24 h-52 w-52 rounded-full opacity-35 blur-3xl transition-all duration-500 group-hover:translate-x-10 group-hover:translate-y-8 group-hover:opacity-60"
               />
-              <ArrowRight className="pc-home-card-arrow absolute right-5 top-5 h-4 w-4 text-pc-text-muted transition-all duration-300 group-hover:translate-x-1" aria-hidden="true" />
+              <CardIcon name="arrow-right" size={16} className="pc-home-card-arrow absolute right-5 top-5 h-4 w-4 text-pc-text-muted transition-all duration-300 group-hover:translate-x-1" />
               <motion.span
                 whileHover={reduceMotion ? undefined : { rotate: -4, scale: 1.08 }}
                 transition={{ type: "spring", stiffness: 300, damping: 16 }}
-                className="pc-home-card-icon relative flex h-11 w-11 items-center justify-center rounded-xl border transition-shadow duration-300"
+                className="pc-home-card-icon relative flex h-11 w-11 items-center justify-center"
               >
-                <Icon className="h-5 w-5" aria-hidden="true" />
+                <CardIcon name={icon} className="h-8 w-8" />
               </motion.span>
               <h3 className="relative mt-4 text-lg font-bold text-pc-text">{title}</h3>
               <p className="relative mt-2 max-w-[15rem] text-sm leading-5 text-pc-text-secondary">{description}</p>

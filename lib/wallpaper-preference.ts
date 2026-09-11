@@ -14,6 +14,11 @@ export const WALLPAPER_STORAGE_KEY = "paladinscat-wallpaper-enabled";
  */
 export const CUSTOM_WALLPAPER_STORAGE_KEY = "paladinscat-custom-wallpaper";
 /**
+ * Publish the browser-local custom wallpaper rotation storage key.
+ * refs: none
+ */
+export const CUSTOM_WALLPAPER_ROTATION_STORAGE_KEY = "paladinscat-custom-wallpaper-rotation-ms";
+/**
  * Defines the  w a l l p a p e r_ c h a n g e_ e v e n t contract used by this module.
  * refs: none
  */
@@ -26,6 +31,28 @@ const WALLPAPER_OBJECT_STORE = "images";
  * refs: none
  */
 export const MAX_CUSTOM_WALLPAPER_BYTES = 25 * 1024 * 1024;
+/**
+ * Publish the supported custom-wallpaper rotation presets and their localization keys.
+ * refs: none
+ */
+export const CUSTOM_WALLPAPER_ROTATION_OPTIONS = [
+  { intervalMs: 10_000, labelKey: "generated.account.wallpaperRotation10Seconds" },
+  { intervalMs: 30_000, labelKey: "generated.account.wallpaperRotation30Seconds" },
+  { intervalMs: 60_000, labelKey: "generated.account.wallpaperRotation1Minute" },
+  { intervalMs: 5 * 60_000, labelKey: "generated.account.wallpaperRotation5Minutes" },
+  { intervalMs: 15 * 60_000, labelKey: "generated.account.wallpaperRotation15Minutes" },
+  { intervalMs: 60 * 60_000, labelKey: "generated.account.wallpaperRotation1Hour" },
+] as const;
+/**
+ * Define an allowed custom-wallpaper rotation duration in milliseconds.
+ * refs: none
+ */
+export type CustomWallpaperRotationMs = (typeof CUSTOM_WALLPAPER_ROTATION_OPTIONS)[number]["intervalMs"];
+/**
+ * Publish the previous 10-second custom-wallpaper rotation as the default.
+ * refs: none
+ */
+export const DEFAULT_CUSTOM_WALLPAPER_ROTATION_MS: CustomWallpaperRotationMs = 10_000;
 const SUPPORTED_IMAGE_TYPES = new Set([
   "image/avif",
   "image/gif",
@@ -191,6 +218,41 @@ export function setWallpaperEnabled(enabled: boolean): void {
     window.localStorage.setItem(WALLPAPER_STORAGE_KEY, String(enabled));
   } catch {
     // Keep the preference working for the current page when storage is unavailable.
+  }
+
+  notifyWallpaperChange();
+}
+
+/**
+ * Read the browser-local custom-wallpaper rotation duration, defaulting to 10 seconds.
+ * refs: none
+ * I/O types: `none -> CustomWallpaperRotationMs`.
+ */
+export function getCustomWallpaperRotationMs(): CustomWallpaperRotationMs {
+  if (typeof window === "undefined") return DEFAULT_CUSTOM_WALLPAPER_ROTATION_MS;
+
+  try {
+    const stored = Number(window.localStorage.getItem(CUSTOM_WALLPAPER_ROTATION_STORAGE_KEY));
+    return CUSTOM_WALLPAPER_ROTATION_OPTIONS.some(({ intervalMs }) => intervalMs === stored)
+      ? stored as CustomWallpaperRotationMs
+      : DEFAULT_CUSTOM_WALLPAPER_ROTATION_MS;
+  } catch {
+    return DEFAULT_CUSTOM_WALLPAPER_ROTATION_MS;
+  }
+}
+
+/**
+ * Save an allowed custom-wallpaper rotation duration and notify active views.
+ * refs: none
+ * I/O types: `intervalMs: CustomWallpaperRotationMs -> void`.
+ */
+export function setCustomWallpaperRotationMs(intervalMs: CustomWallpaperRotationMs): void {
+  if (!CUSTOM_WALLPAPER_ROTATION_OPTIONS.some((option) => option.intervalMs === intervalMs)) return;
+
+  try {
+    window.localStorage.setItem(CUSTOM_WALLPAPER_ROTATION_STORAGE_KEY, String(intervalMs));
+  } catch {
+    // Storage failure leaves the previous persisted duration unchanged.
   }
 
   notifyWallpaperChange();

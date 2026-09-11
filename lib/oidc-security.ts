@@ -10,7 +10,7 @@ import { createHash, createPublicKey, randomBytes, timingSafeEqual, verify, type
  * refs: none
  */
 export const OIDC_TRANSACTION_TTL_MS = 10 * 60 * 1000;
-const RETURN_PATHS = ["/", "/account", "/link-account", "/community", "/builds", "/tierlists", "/players"];
+const RETURN_PATHS = ["/", "/account", "/link-account", "/community", "/builds", "/tierlists", "/players", "/stats", "/game/items", "/game/maps", "/game/compositions"];
 const JWKS_TTL_MS = 5 * 60 * 1000;
 const JWKS_REFRESH_COOLDOWN_MS = 30 * 1000;
 const JWKS_MAX_BYTES = 128 * 1024;

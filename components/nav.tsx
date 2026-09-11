@@ -292,8 +292,8 @@ export default function Nav() {
 
   return (
     <>
-      {/* Nav: sticky top, secondary bg, subtle bottom border, shadow for depth */}
-      <nav className="sticky top-0 z-50 bg-pc-bg-secondary border-b border-pc-border shadow-sm">
+      {/* Nav: sticky top, shared glass surface, subtle bottom border, shadow for depth */}
+      <nav className="pc-glass sticky top-0 z-50 border-b border-pc-border shadow-sm">
         <div className="mx-auto max-w-[1536px] px-4 sm:px-6 lg:px-8">
           {/* ── Desktop Layout: equal side tracks keep the destinations centered ── */}
           <div className="hidden grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center min-[1180px]:grid" style={{ height: 64 }}>

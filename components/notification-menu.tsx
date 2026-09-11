@@ -122,6 +122,17 @@ export default function NotificationMenu() {
     }
   }, [open]);
 
+  useEffect(() => {
+    if (!open) return;
+    const closeOnPointerDown = (event: PointerEvent) => {
+      const target = event.target as Node;
+      if (buttonRef.current?.contains(target) || portalRef.current?.contains(target)) return;
+      setOpen(false);
+    };
+    document.addEventListener("pointerdown", closeOnPointerDown);
+    return () => document.removeEventListener("pointerdown", closeOnPointerDown);
+  }, [open]);
+
   useEffect(() => setMounted(true), []);
 
   const loadNotifications = useCallback(async () => {

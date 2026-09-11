@@ -3,6 +3,7 @@
  * refs: none
  */
 import { createLocalizedMetadata } from "@/lib/server-localization";
+import { VerifiedAccess } from "@/components/verified-access";
 
 /**
  * Render /stats.
@@ -22,5 +23,5 @@ export async function generateMetadata() {
  * I/O types: `{ children }: { children: React.ReactNode } -> ReactNode`.
  */
 export default function StatsLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return <VerifiedAccess>{children}</VerifiedAccess>;
 }

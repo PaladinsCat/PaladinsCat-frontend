@@ -8,5 +8,6 @@
   "footer.branch": "Branch: {branch}",
   "footer.dirtyWorktree": "Dirty worktree at deploy",
   "footer.databaseSchema": "DB schema: {version}",
-  "footer.deployed": "Deployed: {date}"
+  "footer.deployed": "Deployed: {date}",
+  "footer.hirezTrademarkNotice": "PALADINS® is a trademark or registered trademark of Hi-Rez Studios, Inc. in the United States and other countries."
 }

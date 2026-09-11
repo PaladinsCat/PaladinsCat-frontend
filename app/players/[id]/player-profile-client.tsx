@@ -9,6 +9,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import PlatformIcon from "@/components/platform-icon";
+import CardIcon from "@/components/card-icon";
 import { useRouter } from "next/navigation";
 import { PlayersBackLink } from "@/components/ui/players-page-header";
 import { getChampionIconSafe } from "@/lib/champion-icons";
@@ -812,21 +813,18 @@ export default function PlayerProfileClient({
       {/* Sidebar cards and player ratings form an independent right stack. */}
       <div className="self-start space-y-5 lg:col-span-1">
           <Link href={`/players/${id}/loadouts`} className="group flex items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-3 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary">
-            {/* Flaticon UIcons regular rounded `fi-rr-cards-blank`: https://www.flaticon.com/free-icon-font/cards-blank_16769328 */}
-            <i aria-hidden="true" className="fi-rr-cards-blank block w-11 shrink-0 pl-3 text-[1.575rem] leading-none text-[var(--pc-title)]" />
+            <CardIcon name="loadouts" className="ml-3 text-[var(--pc-title)]" />
             <div className="min-w-0 flex-1 text-sm font-semibold text-pc-text group-hover:text-pc-accent">{t("generated.players.playerLoadouts")}</div>
             <span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent" aria-hidden="true">→</span>
           </Link>
           <Link href={`/players/${id}/champions`} className="group flex items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-3 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary">
-            {/* Flaticon UIcons solid `fi-ss-transporter-1`: https://www.flaticon.com/free-icon-font/transporter-1_10461911 */}
-            <i aria-hidden="true" className="fi-ss-transporter-1 block w-11 shrink-0 pl-3 text-[1.575rem] leading-none text-[var(--pc-title)]" />
+            <CardIcon name="champion-stats" className="ml-3 text-[var(--pc-title)]" />
             <div className="min-w-0 flex-1 text-sm font-semibold text-pc-text group-hover:text-pc-accent">{t("common.playerChampions.title")}</div>
             <span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent" aria-hidden="true">→</span>
           </Link>
 
           <Link href={`/players/${id}/friends`} className="group flex items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-3 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary">
-            {/* Flaticon UIcons solid `fi-ss-user-add`: https://www.flaticon.com/free-icon-font/user-add_3917698 */}
-            <i aria-hidden="true" className="fi-ss-user-add block w-11 shrink-0 pl-3 text-[1.575rem] leading-none text-[var(--pc-title)]" />
+            <CardIcon name="friends" className="ml-3 text-[var(--pc-title)]" />
             <div className="min-w-0 flex-1 text-sm font-semibold text-pc-text group-hover:text-pc-accent">{t("playerFriends.title")}</div>
             <span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent" aria-hidden="true">→</span>
           </Link>

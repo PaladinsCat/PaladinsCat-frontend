@@ -1,18 +1,19 @@
 /**
- * Render player relationship summary card with `fi-ss-people-network-partner`, `PlayerRelationshipBars`.
+ * Render player relationship summary card with `CardIcon`, `PlayerRelationshipBars`.
  * refs: none
  */
 "use client";
 
 import { useEffect, useState } from "react";
 import DetailLink from "@/components/detail-link";
+import CardIcon from "@/components/card-icon";
 import PlayerRelationshipBars from "@/components/player-relationship-bars";
 import { fetchPlayerRelationshipSummary, type PlayerRelationshipSummary } from "@/lib/api-client";
 import { getPercentageColor } from "@/lib/stat-quality";
 import { useLocalization } from "@/lib/localization-context";
 
 /**
- * Render player relationship summary card with `fi-ss-people-network-partner`, `PlayerRelationshipBars`.
+ * Render player relationship summary card with `CardIcon`, `PlayerRelationshipBars`.
  * refs: none
  * I/O types: `{ playerId }: { playerId: string } -> JSX.Element`.
  */
@@ -42,8 +43,7 @@ export default function PlayerRelationshipSummaryCard({ playerId }: { playerId: 
     <section>
       <div className="pc-card p-3">
         <div className="flex items-start gap-3">
-          {/* Flaticon UIcons solid `fi-ss-people-network-partner`: https://www.flaticon.com/free-icon-font/people-network-partner_15852126 */}
-          <i aria-hidden="true" className="fi-ss-people-network-partner block w-9 shrink-0 text-[1.8rem] leading-none text-[var(--pc-title)]" />
+          <CardIcon name="relationships" className="w-9 text-[var(--pc-title)]" />
           <div className="min-w-0 flex-1">
             <p className="text-xs text-pc-text-muted">{t("common.relationships.description")}</p>
             <div className="mt-3 flex h-2 overflow-hidden rounded-full bg-pc-bg-secondary" aria-hidden="true">

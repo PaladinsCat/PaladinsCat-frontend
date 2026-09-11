@@ -1,0 +1,13 @@
+{
+  "features.kind.new": "New",
+  "features.kind.improved": "Improved",
+  "features.kind.fixed": "Fixed",
+  "features.category.analytics": "Analytics",
+  "features.category.players": "Players",
+  "features.category.champions": "Champions",
+  "features.category.stats": "Stats",
+  "features.category.community": "Community",
+  "features.category.experience": "Experience",
+  "features.upcoming": "Upcoming",
+  "features.empty": "No feature announcements are active."
+}

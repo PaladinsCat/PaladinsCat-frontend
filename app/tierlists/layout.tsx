@@ -3,6 +3,7 @@
  * refs: none
  */
 import { createLocalizedMetadata } from "@/lib/server-localization";
+import { AccountAccess } from "@/components/account-access";
 
 /**
  * Build localized metadata for /tierlists, including the title and any canonical, description, and crawler directives configured for this route.
@@ -22,5 +23,5 @@ export async function generateMetadata() {
  * I/O types: `{ children }: { children: React.ReactNode } -> ReactNode`.
  */
 export default function TierListsLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return <AccountAccess>{children}</AccountAccess>;
 }

@@ -7,7 +7,7 @@ import { notFound } from "next/navigation";
 import { STATIC_CHAMPIONS } from "@/lib/static-champions";
 import { championSlug } from "@/lib/utils";
 import { getServerChampionData } from "@/lib/server-champion-data";
-import { getInitialChampionPageData } from "@/lib/server-champion-page";
+import { getServerChampionChangelog } from "@/lib/server-champion-changelog";
 import ChampionDetailPageClient from "./champion-detail-client";
 
 /**
@@ -33,15 +33,15 @@ export default async function ChampionDetailPage({
   const champion = STATIC_CHAMPIONS.find((entry) => championSlug(entry.name) === slug);
   if (!champion) notFound();
 
-  const [initialChampionData, initialPageData] = await Promise.all([
+  const [initialChampionData, initialChampionChangelog] = await Promise.all([
     getServerChampionData(slug).catch(() => undefined),
-    getInitialChampionPageData(slug).catch(() => null),
+    getServerChampionChangelog(slug).catch(() => undefined),
   ]);
 
   return (
     <ChampionDetailPageClient
       initialChampionData={initialChampionData}
-      initialPageData={initialPageData}
+      initialChampionChangelog={initialChampionChangelog}
     />
   );
 }

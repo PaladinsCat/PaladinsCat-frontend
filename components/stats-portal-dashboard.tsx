@@ -12,17 +12,23 @@ import {
   fetchMatchHourlyStats,
   fetchPresenceHourlyStats,
   fetchPresenceStats,
+  fetchSkinStats,
   fetchStatsPageData,
+  fetchTalents,
   type MatchHourlyStats,
   type PresenceHourlyStats,
   type PresenceStats,
+  type SkinStat,
   type StatsPageData,
 } from "@/lib/api-client";
 import { stationaryChartSeries } from "@/lib/chart-colors";
 import { getChampionIconSafe } from "@/lib/champion-icons";
+import { useAuth } from "@/lib/auth-context";
 import { useLobbyTier } from "@/lib/lobby-tier-context";
 import { useLocalization } from "@/lib/localization-context";
+import { verifiedDestination } from "@/lib/verified-access";
 import { getRankIconPath } from "@/lib/tier-utils";
+import { getPercentageColor } from "@/lib/stat-quality";
 
 type Accent = "cyan" | "violet" | "amber" | "emerald" | "sky";
 
@@ -39,10 +45,15 @@ function DashboardCard({
   className?: string;
   children: ReactNode;
 }) {
+  const { user, isLoading } = useAuth();
+  const gatedHref = verifiedDestination(href, user, isLoading);
+
   return (
     <Link
-      href={href}
+      href={gatedHref ?? href}
       prefetch={false}
+      aria-disabled={isLoading}
+      onClick={isLoading ? (event) => event.preventDefault() : undefined}
       data-card-accent={accent}
       className={`pc-card pc-home-feature-card group flex min-h-56 min-w-0 flex-col overflow-hidden focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-pc-accent ${className}`}
     >
@@ -111,6 +122,8 @@ export default function StatsPortalDashboard() {
   const [presence, setPresence] = useState<PresenceStats | null>(null);
   const [presenceHourly, setPresenceHourly] = useState<PresenceHourlyStats | null>(null);
   const [matchupData, setMatchupData] = useState<ChampionMatchupPreviews | null>(null);
+  const [highestWinRateSkins, setHighestWinRateSkins] = useState<SkinStat[]>([]);
+  const [loadoutChampions, setLoadoutChampions] = useState<Array<{ championId: number; championName: string; totalPlays: number }>>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -123,19 +136,40 @@ export default function StatsPortalDashboard() {
       fetchPresenceStats(),
       fetchPresenceHourlyStats(),
       fetchChampionMatchupPreviews(controller.signal),
-    ]).then(([statsResult, activityResult, presenceResult, presenceHourlyResult, matchupResult]) => {
+      fetchSkinStats({ tierMin: lobbyTier.tierMin, tierMax: lobbyTier.tierMax, limit: 5, sort: "winRate" }),
+      fetchTalents({ tierMin: lobbyTier.tierMin, tierMax: lobbyTier.tierMax }),
+    ]).then(([statsResult, activityResult, presenceResult, presenceHourlyResult, matchupResult, skinWinRateResult, talentsResult]) => {
       if (cancelled) return;
       setData(statsResult.status === "fulfilled" ? statsResult.value : null);
       setActivity(activityResult.status === "fulfilled" ? activityResult.value : null);
       setPresence(presenceResult.status === "fulfilled" ? presenceResult.value : null);
       setPresenceHourly(presenceHourlyResult.status === "fulfilled" ? presenceHourlyResult.value : null);
       setMatchupData(matchupResult.status === "fulfilled" ? matchupResult.value : null);
+      setHighestWinRateSkins(skinWinRateResult.status === "fulfilled" ? skinWinRateResult.value : []);
+      if (talentsResult.status === "fulfilled") {
+        const totals = new Map<number, { championId: number; championName: string; totalPlays: number }>();
+        for (const talent of talentsResult.value) {
+          const current = totals.get(talent.championId) ?? { championId: talent.championId, championName: talent.championName, totalPlays: 0 };
+          current.totalPlays += talent.totalPlays;
+          totals.set(talent.championId, current);
+        }
+        setLoadoutChampions([...totals.values()].sort((a, b) => b.totalPlays - a.totalPlays).slice(0, 5));
+      } else {
+        setLoadoutChampions([]);
+      }
       setLoading(false);
     });
     return () => { cancelled = true; controller.abort(); };
   }, [lobbyTierReady, lobbyTier.tierMax, lobbyTier.tierMin]);
 
   const skins = data?.skinSort === "plays" ? data.skins.slice(0, 5) : [];
+  const purchasedItems = useMemo(() => [...(data?.overview.items ?? [])]
+    .sort((a, b) => b.totalUsage - a.totalUsage)
+    .slice(0, 3), [data]);
+  const highestWinRateItems = useMemo(() => [...(data?.overview.items ?? [])]
+    .filter((item) => item.totalUsage > 0)
+    .sort((a, b) => b.winRate - a.winRate || b.totalUsage - a.totalUsage)
+    .slice(0, 3), [data]);
   const matchupRows = useMemo(() => {
     const seen = new Set<string>();
     return (matchupData?.champions ?? []).flatMap(champion => [...champion.strong, ...champion.weak].map(opponent => ({
@@ -253,14 +287,27 @@ export default function StatsPortalDashboard() {
 
       </section>
 
-      <section aria-label={t("nav.game")} className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+      <section aria-label={t("nav.game")} className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
         <DashboardCard href="/stats/items" title={t("menu.items")} accent="amber">
-          {loading ? <LoadingPreview /> : !data?.overview.items.length ? <EmptyPreview /> : <div className="space-y-4">
-            {[...data.overview.items].sort((a,b)=>b.totalUsage-a.totalUsage).slice(0,3).map(item => <div key={item.itemId} className="flex min-w-0 items-center gap-3">
-              <Image src={`/images/items/${item.itemName.replace(/\s+/g, "_")}_Icon.avif`} alt="" width={36} height={36} className="h-9 w-9 shrink-0 object-contain" />
-              <span className="min-w-0 flex-1 truncate text-sm font-semibold">{item.itemName}</span>
-              <span className="text-sm tabular-nums text-pc-accent">{formatNumber(item.totalUsage)}</span>
-            </div>)}
+          {loading ? <LoadingPreview /> : purchasedItems.length === 0 ? <EmptyPreview /> : <div className="space-y-4">
+            <div>
+              <div className="mb-2 text-xs font-semibold text-pc-text-muted">{t("generated.matches.purchasedItems")}</div>
+              <div className="grid grid-cols-3 gap-2">
+                {purchasedItems.map(item => <div key={`usage:${item.itemId}`} className="flex min-w-0 items-center gap-2">
+                  <Image src={`/images/items/${item.itemName.replace(/\s+/g, "_")}_Icon.avif`} alt="" width={32} height={32} className="h-8 w-8 shrink-0 rounded object-contain" />
+                  <div className="min-w-0"><div className="truncate text-xs font-semibold text-pc-text">{item.itemName}</div><div className="text-xs tabular-nums text-pc-accent">{formatNumber(item.totalUsage)}</div></div>
+                </div>)}
+              </div>
+            </div>
+            <div>
+              <div className="mb-2 text-xs font-semibold text-pc-text-muted">{t("skins.sortWinRate")}</div>
+              <div className="grid grid-cols-3 gap-2">
+                {highestWinRateItems.map(item => <div key={`win-rate:${item.itemId}`} className="flex min-w-0 items-center gap-2">
+                  <Image src={`/images/items/${item.itemName.replace(/\s+/g, "_")}_Icon.avif`} alt="" width={32} height={32} className="h-8 w-8 shrink-0 rounded object-contain" />
+                  <div className="min-w-0"><div className="truncate text-xs font-semibold text-pc-text">{item.itemName}</div><div className="text-xs font-semibold tabular-nums" style={{ color: getPercentageColor(item.winRate) }}>{formatPercent(item.winRate)}</div></div>
+                </div>)}
+              </div>
+            </div>
           </div>}
         </DashboardCard>
         <DashboardCard href="/stats/maps" title={t("menu.maps")} accent="sky">
@@ -273,8 +320,8 @@ export default function StatsPortalDashboard() {
           </div>}
         </DashboardCard>
         <DashboardCard href="/stats/compositions" title={t("menu.teamCompositions")} accent="emerald">
-          {loading ? <LoadingPreview /> : !data?.compositions.length ? <EmptyPreview /> : <div className="space-y-4">
-            {[...data.compositions].sort((a,b)=>b.totalMatches-a.totalMatches).slice(0,3).map(comp => <div key={comp.composition} className="flex items-center justify-between gap-3">
+          {loading ? <LoadingPreview /> : !data?.compositions.length ? <EmptyPreview /> : <div className="space-y-3">
+            {[...data.compositions].sort((a,b)=>b.totalMatches-a.totalMatches).slice(0,5).map(comp => <div key={comp.composition} className="flex items-center justify-between gap-3">
               <div className="flex gap-3">{([
                 ["frontline", "Class_Front_Line_Icon"], ["damage", "Class_Damage_Icon"], ["flank", "Class_Flank_Icon"], ["support", "Class_Support_Icon"],
               ] as const).map(([role,icon]) => <span key={role} className="inline-flex items-center gap-1 text-sm tabular-nums">
@@ -284,26 +331,38 @@ export default function StatsPortalDashboard() {
             </div>)}
           </div>}
         </DashboardCard>
+        <DashboardCard href="/stats/loadouts" title={t("stats.loadouts.title")} accent="violet">
+          {loading ? <LoadingPreview /> : loadoutChampions.length === 0 ? <EmptyPreview /> : <div className="space-y-3">
+            {loadoutChampions.map((champion) => <div key={champion.championId} className="flex min-w-0 items-center gap-3">
+              <Image src={getChampionIconSafe(champion.championName)} alt="" width={36} height={36} className="h-9 w-9 shrink-0 rounded-lg object-contain" />
+              <span className="min-w-0 flex-1 truncate text-sm font-semibold text-pc-text">{champion.championName}</span>
+              <span className="text-sm tabular-nums text-pc-accent">{formatNumber(champion.totalPlays)}</span>
+            </div>)}
+          </div>}
+        </DashboardCard>
       </section>
 
       <section aria-label={t("stats.portal.activity")} className="grid grid-cols-1 gap-5 md:grid-cols-2">
         <DashboardCard href="/stats/skins" title={t("menu.skinStats")} accent="violet">
           {loading ? <LoadingPreview /> : skins.length === 0 ? <EmptyPreview /> : (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between text-xs text-pc-text-muted">
-                <span>{t("common.sort.totalPlays")}</span>
-
-              </div>
-              {skins.map(skin => (
-                <div key={`${skin.championId}:${skin.skinId}`} className="flex min-w-0 items-center gap-3">
-                  <Image src={getChampionIconSafe(skin.championName)} alt="" width={36} height={36} className="h-9 w-9 shrink-0 rounded-full object-contain" />
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-semibold text-pc-text">{skin.skinName}</div>
-                    <div className="truncate text-xs text-pc-text-muted">{skin.championName}</div>
+            <div className="grid flex-1 gap-5 sm:grid-cols-2">
+              {[
+                { label: t("common.sort.totalPlays"), rows: skins, value: (skin: SkinStat) => formatNumber(skin.totalPlays), winRate: false },
+                { label: t("skins.sortWinRate"), rows: highestWinRateSkins, value: (skin: SkinStat) => formatPercent(skin.winRate), winRate: true },
+              ].map((column, columnIndex) => <div key={column.label} className={columnIndex ? "border-t border-pc-border pt-4 sm:border-l sm:border-t-0 sm:pl-5 sm:pt-0" : ""}>
+                <div className="mb-3 text-xs font-semibold text-pc-text-muted">{column.label}</div>
+                <div className="space-y-3">
+                  {column.rows.map(skin => <div key={`${column.label}:${skin.championId}:${skin.skinId}`} className="flex min-w-0 items-center gap-2">
+                    <Image src={getChampionIconSafe(skin.championName)} alt="" width={32} height={32} className="h-8 w-8 shrink-0 rounded-full object-contain" />
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-xs font-semibold text-pc-text">{skin.skinName}</div>
+                      <div className="truncate text-xs text-pc-text-muted">{skin.championName}</div>
+                    </div>
+                    <span className={`text-xs font-semibold tabular-nums ${column.winRate ? "" : "text-pc-accent"}`} style={column.winRate ? { color: getPercentageColor(skin.winRate) } : undefined}>{column.value(skin)}</span>
                   </div>
-                  <span className="text-sm font-semibold tabular-nums text-pc-accent">{formatNumber(skin.totalPlays)}</span>
+                  )}
                 </div>
-              ))}
+              </div>)}
             </div>
           )}
         </DashboardCard>

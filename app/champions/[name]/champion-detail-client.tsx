@@ -1,81 +1,20 @@
-/**
- * Manage interactive state for the champions name champion-detail-client client view.
- * Coordinate local events and consume the declared component inputs.
- * refs: none
- */
+/** Render one champion's reference information without match statistics. */
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useParams, useSearchParams, notFound } from "next/navigation";
-import { STATIC_CHAMPIONS } from "@/lib/static-champions";
-import { getChampionIconSafe } from "@/lib/champion-icons";
-import { LoadingPanel } from "@/components/async-state";
-import SmartImage from "@/components/SmartImage";
+import { notFound, useParams } from "next/navigation";
 import CanonicalTalentImage from "@/components/canonical-talent-image";
-import { championSlug } from "@/lib/utils";
-import { getPercentageColor, getStatQuality } from "@/lib/stat-quality";
-import {
-  getChampionData,
-  type ChampionData,
-  type ChampionSkill,
-  type ChampionTalent,
-} from "@/lib/champion-data";
-import {
-  normalizeChampionTalentStatsResponse,
-  type ChampionTalentStatsResponse,
-  type ChampionTalentStat,
-  type ItemStat,
-  type PublicStatsScope,
-} from "@/lib/api-client";
-import { getStoredLobbyTierFilter, withStoredLobbyTier } from "@/lib/lobby-tier";
+import ChampionLoadoutGrid from "@/components/champion-loadout-grid";
+import ChampionChangelog from "@/components/champion-changelog";
+import SmartImage from "@/components/SmartImage";
+import { getChampionIconSafe } from "@/lib/champion-icons";
+import { getChampionData, type ChampionData, type ChampionSkill, type ChampionTalent } from "@/lib/champion-data";
 import { useLocalization } from "@/lib/localization-context";
 import { EN_MESSAGES, type TranslationKey } from "@/lib/localization/messages";
-import { CHAMPION_PAGE_CLIENT_TIMEOUT_MS, type ChampionPagePayload } from "@/lib/champion-page-data";
-
-// Keep this client request on the neutral same-origin proxy. Some embedded
-// browsers block background requests below /api, while /_pc is forwarded to
-// the same backend and serves the Redis-backed page bundle.
-const CHAMPION_DATA_BASE = "/_pc";
-
-function championDescriptionKey(
-  championName: string,
-  section: "skills" | "talents",
-  entryName: string,
-): TranslationKey | null {
-  const candidate = `champions.${championSlug(championName)}.${section}.${championSlug(entryName)}.description`;
-  return candidate in EN_MESSAGES ? candidate as TranslationKey : null;
-}
-
-const ITEM_CATEGORY_BY_NAME: Record<string, string> = {
-  "Blast Shields": "Defense", Guardian: "Defense", Haven: "Defense", Illuminate: "Defense", Resilience: "Defense", Sentinel: "Defense",
-  Chronos: "Utility", Hoard: "Utility", "Master Riding": "Utility", "Morale Boost": "Utility", Nimble: "Utility",
-  Bloodbath: "Healing", "Kill to Heal": "Healing", "Life Rip": "Healing", Meditation: "Healing", Rejuvenate: "Healing", Veteran: "Healing",
-  Bulldozer: "Offense", "Deft Hands": "Offense", Lethality: "Offense", "Trigger Scent": "Offense", Wrecker: "Offense",
-};
-
-const ITEM_CATEGORIES = ["Defense", "Utility", "Healing", "Offense"] as const;
-
-function itemIcon(name: string) {
-  return `/images/items/${name.replace(/\s+/g, "_")}_Icon.avif`;
-}
-function itemCategoryColor(category: string) {
-  return category === "Offense" ? "text-red-400" : category === "Defense" ? "text-blue-400" : category === "Healing" ? "text-emerald-400" : "text-amber-400";
-}
-
-// Tier/trend types from existing API
-interface TierStat {
-  tier: string;
-  winRate: number;
-  pickRate: number;
-  totalPlays: number;
-}
-
-interface PatchTrend {
-  trendWeek: string;
-  weeklyWinRate: number;
-  weeklyPlays: number;
-}
+import { STATIC_CHAMPIONS } from "@/lib/static-champions";
+import { championSlug } from "@/lib/utils";
+import type { ChampionChangelog as ChampionChangelogData } from "@/lib/champion-changelog";
 
 const ROLE_ICONS: Record<string, string> = {
   Frontline: "/images/icons/Class_Front_Line_Icon.avif",
@@ -84,484 +23,121 @@ const ROLE_ICONS: Record<string, string> = {
   Support: "/images/icons/Class_Support_Icon.avif",
 };
 
-/**
- * Render /champions/[name]/champion-detail-client.tsx using `StatBadge`, `LoadingPanel`.
- * Render the ChampionDetailPage view for champions name champion-detail-client.
- * refs: none
- * I/O types: `{ initialChampionData = null, initialPageData = null, }: { initialChampionData?: ChampionData | null; initialPageData?: ChampionPagePayload | null; } -> JSX.Element`.
- */
+function championDescriptionKey(championName: string, section: "skills" | "talents", entryName: string): TranslationKey | null {
+  const candidate = `champions.${championSlug(championName)}.${section}.${championSlug(entryName)}.description`;
+  return candidate in EN_MESSAGES ? candidate as TranslationKey : null;
+}
+
+/** Keep champion pages limited to stable catalog data: profile, skills, talents, and cards. */
 export default function ChampionDetailPage({
   initialChampionData = null,
-  initialPageData = null,
+  initialChampionChangelog = null,
 }: {
   initialChampionData?: ChampionData | null;
-  initialPageData?: ChampionPagePayload | null;
+  initialChampionChangelog?: ChampionChangelogData | null;
 }) {
-  const { t , formatNumber, formatPercent} = useLocalization();
+  const { t } = useLocalization();
   const params = useParams();
-  const searchParams = useSearchParams();
   const rawName = params?.name;
   const name = Array.isArray(rawName) ? rawName[0] ?? "" : rawName ?? "";
-  const requestedScope = searchParams.get("scope");
-  const statsScope: PublicStatsScope = (
-    ["casual", "bot", "team_deathmatch", "arcade", "wave_defense", "experiment", "newcomer"] as string[]
-  ).includes(requestedScope ?? "") ? requestedScope as PublicStatsScope : "ranked";
-
+  const staticChampion = STATIC_CHAMPIONS.find((champion) => championSlug(champion.name) === championSlug(name));
   const [championData, setChampionData] = useState<ChampionData | null>(initialChampionData);
-  const [dataLoaded, setDataLoaded] = useState(Boolean(initialChampionData));
-  const [talentStats, setTalentStats] = useState<ChampionTalentStatsResponse | null>(() => (
-    initialPageData?.talentStats ? normalizeChampionTalentStatsResponse(initialPageData.talentStats) : null
-  ));
-  const [championItems, setChampionItems] = useState<ItemStat[]>(initialPageData?.items ?? []);
-  const [tierStats, setTierStats] = useState<TierStat[]>([]);
-  const [patchTrends, setPatchTrends] = useState<PatchTrend[]>([]);
-  const [loading, setLoading] = useState(!initialPageData);
-
-  // Synced data reveal: the layout is pre-drawn (headers, profile, card
-  // shells). The data sections are gated behind `loading`, so they mount
-  // together when the fetch settles, and every section shares the same
-  // reveal key (name + scope) so they fade in as one surface instead of
-  // spawning one by one as each fetch resolves. Changing the scope or
-  // champion changes the key, remounting the sections and replaying the fade.
-  const revealKey = `${name}::${statsScope}`;
-
-  // Static champion reference metadata lets direct /champions/[name] routes
-  // resolve icons/roles before DB-backed stats load. It must never provide
-  // synthetic match or performance numbers.
-  const staticChampion = STATIC_CHAMPIONS.find(
-    (c) => championSlug(c.name) === name.toLowerCase()
-  );
+  const [loaded, setLoaded] = useState(Boolean(initialChampionData));
 
   useEffect(() => {
+    if (initialChampionData && championSlug(initialChampionData.name) === championSlug(name)) return;
     let cancelled = false;
-    const preserveInitialChampionData = initialChampionData != null
-      && championSlug(initialChampionData.name) === championSlug(name);
-
-    if (!preserveInitialChampionData) setDataLoaded(false);
     getChampionData(name)
-      .then((data) => {
-        if (cancelled) return;
-        setChampionData(data ? { ...data, roles: data.roles.length > 0 ? data.roles : staticChampion?.roles ?? [] } : null);
-      })
-      .catch(() => {
-        if (!cancelled && !preserveInitialChampionData) setChampionData(null);
-      })
-      .finally(() => {
-        if (!cancelled) setDataLoaded(true);
-      });
+      .then((data) => { if (!cancelled) setChampionData(data ?? null); })
+      .catch(() => { if (!cancelled) setChampionData(null); })
+      .finally(() => { if (!cancelled) setLoaded(true); });
+    return () => { cancelled = true; };
+  }, [initialChampionData, name]);
 
-    return () => {
-      cancelled = true;
-    };
-  }, [initialChampionData, staticChampion?.roles, name]);
+  if (loaded && !championData && !staticChampion) return notFound();
+  const displayName = championData?.name ?? staticChampion?.name ?? name;
 
-  useEffect(() => {
-    if (!championData) {
-      setLoading(false);
-      return;
-    }
-    if (!staticChampion) {
-      setLoading(false);
-      return;
-    }
-    const applyPageData = (data: ChampionPagePayload) => {
-      setTalentStats(data.talentStats ? normalizeChampionTalentStatsResponse(data.talentStats) : null);
-      setChampionItems(data.items);
-    };
-
-    const preserveInitialRankedData = statsScope === "ranked" && initialPageData != null;
-    if (preserveInitialRankedData && getStoredLobbyTierFilter() === "all") return;
-    if (!preserveInitialRankedData) {
-      setLoading(true);
-      setTalentStats(null);
-      setChampionItems([]);
-      setTierStats([]);
-      setPatchTrends([]);
-    }
-
-    if (statsScope !== "ranked") {
-      setTalentStats(null);
-      setLoading(false);
-      return;
-    }
-
-    // One cached bundle replaces the old fan-out of champion-specific
-    // requests. Redis serves a warm entry immediately and refreshes it in the
-    // background after its TTL.
-    fetch(`${CHAMPION_DATA_BASE}${withStoredLobbyTier(`/champions/${championSlug(staticChampion.name)}/page-data`)}`, {
-      signal: AbortSignal.timeout(CHAMPION_PAGE_CLIENT_TIMEOUT_MS),
-    })
-      .then((response) => {
-        if (!response.ok) throw new Error(t("generated.champions.championPageDataUnavailable"));
-        return response.json() as Promise<ChampionPagePayload>;
-      })
-      .then(applyPageData)
-      .catch(() => {
-        if (!preserveInitialRankedData) {
-          setTalentStats(null);
-          setChampionItems([]);
-        }
-      })
-      .finally(() => setLoading(false));
-  }, [championData, initialPageData, staticChampion, statsScope]);
-
-
-  const talentStatsById = useMemo(() => {
-    return new Map((talentStats?.talents ?? []).map((stat) => [stat.talentId, stat]));
-  }, [talentStats]);
-
-  const maxTalentPickRate = useMemo(() => {
-    const total = talentStats?.totalMatches ?? 0;
-    if (total <= 0) return 100;
-    return Math.max(1, ...(talentStats?.talents ?? []).map((stat) => (stat.totalPlays / total) * 100));
-  }, [talentStats]);
-  const maxTierPickRate = useMemo(() => Math.max(1, ...tierStats.map((tier) => tier.pickRate)), [tierStats]);
-  const maxTrendPlays = useMemo(() => Math.max(1, ...patchTrends.map((trend) => trend.weeklyPlays)), [patchTrends]);
-  if (dataLoaded && !championData && !staticChampion) return notFound();
-
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        <Link href="/champions" className="text-pc-text-secondary hover:text-pc-accent transition-colors">
-          {t("generated.champions.backToChampions")}</Link>
-        <h1 className="pc-heading pc-heading-lg text-pc-accent">
-          {championData?.name ?? staticChampion?.name ?? name}
-        </h1>
-      </div>
-
-      {/* Two-column: Champion Profile (left) + talent summaries (right) */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Left column — Champion Profile + Skills (~1/4) */}
-        <div className="lg:col-span-1 space-y-6">
-          <div className="pc-card">
-            <div className="flex flex-col items-center text-center gap-4">
-              <SmartImage
-                src={getChampionIconSafe(championData?.name ?? staticChampion?.name ?? name)}
-                alt={championData?.name ?? staticChampion?.name ?? name}
-                width={112}
-                height={112}
-                fetchPriority="high"
-                className="w-28 h-28 rounded-xl border border-pc-border object-contain bg-pc-bg/50"
-              />
-              <div className="flex flex-wrap justify-center gap-2">
-                {(championData?.roles ?? staticChampion?.roles ?? []).map((role) => (
-                  <span key={role} className="text-xs flex items-center gap-1.5 px-3 py-1 rounded-full bg-pc-accent/10 text-pc-accent border border-pc-accent/20">
-                    {ROLE_ICONS[role] && <SmartImage src={ROLE_ICONS[role]} alt={role} className="w-3.5 h-3.5" />}
-                    {role}
-                  </span>
-                ))}
-              </div>
-              {championData?.stats && (
-                <div className="grid grid-cols-2 gap-x-6 gap-y-3 w-full">
-                  <StatBadge label={t("common.metrics.health")} value={championData.stats.health} />
-                  <StatBadge label={t("common.metrics.speed")} value={`${championData.stats.speed}`} />
-                  <StatBadge label={t("common.metrics.range")} value={championData.stats.range} />
-                  <StatBadge label={t("common.metrics.speedUnits")} value={championData.stats.speedUnits} />
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Skills */}
-          {championData?.skills && championData.skills.length > 0 && (
-            <>
-              <h2 className="pc-card-title mb-2 shadow-sm">{t("generated.champions.skills")}</h2>
-              <div className="pc-card">
-              <div className="space-y-3">
-                {championData.skills.map((skill) => (
-                  <SkillCard key={skill.name} championName={championData.name} skill={skill} />
-                ))}
-              </div>
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* Right column — talent summaries (~3/4) */}
-        <div className="lg:col-span-3 space-y-6">
-          {loading ? (
-            <LoadingPanel compact />
-          ) : (
-            <div key={`reveal-${revealKey}`} className="pc-data-sync space-y-6">
-          {/* Talents */}
-          {championData?.talents && championData.talents.length > 0 && (
-            <>
-              <div className="mb-2 flex flex-wrap items-baseline gap-2">
-                <h2 className="pc-card-title shadow-sm">{t("generated.champions.talents")}</h2>
-                <span className="text-xs font-medium text-pc-accent-light drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]">
-                  {t("generated.champions.openATalentToViewItsLoadoutCards")}</span>
-              </div>
-              <div className="pc-card">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {championData.talents.map((talent) => {
-                  const stat: ChampionTalentStat | undefined = talentStatsById.get(talent.id);
-                  return (
-                    <TalentCard
-                      key={talent.name}
-                      championName={championData.name}
-                      talent={talent}
-                      stat={stat ?? undefined}
-                      totalMatches={talentStats?.totalMatches ?? 0}
-                      maxPickRate={maxTalentPickRate}
-                      href={stat ? `/champions/${name}/talents/${stat.talentId}?returnTo=${encodeURIComponent(`/champions/${name}`)}` : undefined}
-                    />
-                  );
-                })}
-              </div>
-              </div>
-            </>
-          )}
-
-          {/* Champion-specific ranked item purchases. */}
-          {statsScope === "ranked" && <section className="space-y-2">
-            <h2 className="pc-card-title shadow-sm">{t("generated.champions.itemStats")}</h2>
-            <div className="pc-card space-y-4 p-4">
-              {championItems.length === 0 ? (
-                <div className="text-sm text-pc-text-muted">{t("generated.champions.noRankedItemStatisticsAreAvailableYet")}</div>
-              ) : (
-                ITEM_CATEGORIES.map((category) => {
-                  const items = championItems.filter((item) => (ITEM_CATEGORY_BY_NAME[item.itemName] ?? "Utility") === category);
-                  if (items.length === 0) return null;
-                  return (
-                    <div key={category}>
-                      <span className={`mb-2 block text-xs font-bold uppercase tracking-wider ${itemCategoryColor(category)}`}>{category}</span>
-                      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-5">
-                        {items.map((item) => {
-                          const quality = getStatQuality(item.winRate, 1, 1);
-                          return (
-                            <Link
-                              key={item.itemId}
-                              href={`/game/items/${item.itemId}`}
-                              className="group flex flex-col items-center rounded-lg border border-transparent py-1 text-center transition-colors hover:border-pc-accent-mid"
-                              style={{ borderColor: quality.borderColor }}
-                            >
-                              <img src={itemIcon(item.itemName)} alt="" className="mb-1 h-12 w-12 rounded-md object-contain" />
-                              <div className="w-full truncate text-xs font-medium leading-tight text-pc-text group-hover:text-pc-accent">{item.itemName}</div>
-                              <div className="mt-0.5 flex items-center gap-1 text-xs">
-                                <span style={{ color: getPercentageColor(item.winRate) }}>{t("generated.champions.wr")}{" "}{formatPercent(item.winRate)}</span>
-                                <span className="text-pc-text-muted">·</span>
-                                <span style={{ color: getPercentageColor(item.pickRate) }}>{t("generated.champions.pr")}{" "}{formatPercent((item.pickRate ?? 0))}</span>
-                              </div>
-                            </Link>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          </section>}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Tier Performance */}
-      {tierStats.length > 0 && (
-        <div className="pc-card">
-          <h2 className="pc-card-title mb-4">{t("generated.champions.performanceByTier")}</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {tierStats.map((tierStat) => {
-              const quality = getStatQuality(tierStat.winRate, tierStat.pickRate, maxTierPickRate);
-              return (
-                <div
-                  key={tierStat.tier}
-                  className="pc-surface-light rounded-lg p-4 border transition-colors"
-                  style={{ borderColor: quality.borderColor }}
-                >
-                  <div className="text-sm font-medium text-pc-accent mb-2">{tierStat.tier}</div>
-                  <div className="grid grid-cols-3 gap-2 text-center">
-                    <div>
-                      <div className="text-xs text-pc-text-muted">{t("generated.champions.wr")}</div>
-                      <div className="text-sm font-mono" style={{ color: getPercentageColor(tierStat.winRate) }}>
-                        {formatPercent(tierStat.winRate)}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-pc-text-muted">{t("generated.champions.pr")}</div>
-                      <div className="text-sm font-mono" style={{ color: getPercentageColor(tierStat.pickRate) }}>{formatPercent(tierStat.pickRate)}</div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-pc-text-muted">{t("generated.champions.plays")}</div>
-                      <div className="text-sm font-mono text-pc-text">{formatNumber(tierStat.totalPlays)}</div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Win Rate Trends */}
-      {patchTrends.length > 0 && (
-        <div className="pc-card">
-          <h2 className="pc-card-title mb-4">{t("generated.champions.winRateTrends")}</h2>
-          <div className="overflow-x-auto">
-            <table className="pc-table w-full">
-              <thead>
-                <tr>
-                  <th>{t("generated.champions.week")}</th>
-                  <th>{t("generated.champions.winRate")}</th>
-                  <th>{t("generated.champions.plays")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {patchTrends.map((t) => {
-                  const quality = getStatQuality(t.weeklyWinRate, t.weeklyPlays, maxTrendPlays);
-                  return (
-                    <tr key={t.trendWeek}>
-                      <td className="text-pc-text text-sm">{t.trendWeek}</td>
-                      <td className="font-mono text-sm" style={{ color: getPercentageColor(t.weeklyWinRate) }}>
-                        {formatPercent(t.weeklyWinRate)}
-                      </td>
-                      <td className="text-pc-text-muted text-sm">{formatNumber(t.weeklyPlays)}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
+  return <div className="space-y-6">
+    <div className="flex items-center gap-4">
+      <Link href="/champions" className="text-pc-text-secondary transition-colors hover:text-pc-accent">{t("generated.champions.backToChampions")}</Link>
+      <h1 className="pc-heading pc-heading-lg">{displayName}</h1>
     </div>
-  );
+
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
+      <div className="space-y-6 lg:col-span-1">
+        <div className="pc-card">
+          <div className="flex flex-col items-center gap-4 text-center">
+            <SmartImage src={getChampionIconSafe(displayName)} alt={displayName} width={112} height={112} fetchPriority="high" className="h-28 w-28 rounded-xl object-contain" />
+            <div className="flex flex-wrap justify-center gap-2">
+              {(championData?.roles ?? staticChampion?.roles ?? []).map((role) => <span key={role} className="flex items-center gap-1.5 rounded-full bg-pc-accent/10 px-3 py-1 text-xs text-pc-accent">
+                {ROLE_ICONS[role] && <SmartImage src={ROLE_ICONS[role]} alt="" className="h-3.5 w-3.5" />}
+                {role}
+              </span>)}
+            </div>
+            {championData?.stats && <div className="grid w-full grid-cols-2 gap-x-6 gap-y-3">
+              <StatBadge label={t("common.metrics.health")} value={championData.stats.health} />
+              <StatBadge label={t("common.metrics.speed")} value={championData.stats.speed} />
+              <StatBadge label={t("common.metrics.range")} value={championData.stats.range} />
+              <StatBadge label={t("common.metrics.speedUnits")} value={championData.stats.speedUnits} />
+            </div>}
+          </div>
+        </div>
+
+        {championData?.skills?.length ? <section className="space-y-2">
+          <h2 className="pc-card-title">{t("generated.champions.skills")}</h2>
+          <div className="pc-card space-y-3">{championData.skills.map((skill) => <SkillCard key={skill.name} championName={displayName} skill={skill} />)}</div>
+        </section> : null}
+      </div>
+
+      <div className="space-y-6 lg:col-span-3">
+        {championData?.talents?.length ? <section className="space-y-2">
+          <h2 className="pc-card-title">{t("generated.champions.talents")}</h2>
+          <div className="pc-card grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {championData.talents.map((talent) => <TalentCard key={talent.id} championName={displayName} talent={talent} />)}
+          </div>
+        </section> : null}
+
+        {championData?.loadouts?.length ? <section className="space-y-2">
+          <h2 className="pc-card-title">{t("generated.champions.loadoutCards")}</h2>
+          <ChampionLoadoutGrid championSlug={championSlug(displayName)} loadouts={championData.loadouts} />
+        </section> : null}
+      </div>
+    </div>
+
+    {initialChampionChangelog && <ChampionChangelog history={initialChampionChangelog} />}
+  </div>;
 }
 
 function StatBadge({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="text-center">
-      <div className="text-xs text-pc-text-muted">{label}</div>
-      <div className="text-sm font-mono text-pc-text">{value}</div>
-    </div>
-  );
+  return <div className="text-center"><div className="text-xs text-pc-text-muted">{label}</div><div className="font-mono text-sm text-pc-text">{value}</div></div>;
 }
 
 function SkillCard({ championName, skill }: { championName: string; skill: ChampionSkill }) {
   const { t } = useLocalization();
   const icons = [skill.iconUrl, skill.iconUrl2, skill.iconUrl3].filter(Boolean) as string[];
-  const [activeIdx, setActiveIdx] = useState(0);
-
-  // Cycle through available icons every 2.5s
+  const [activeIndex, setActiveIndex] = useState(0);
   useEffect(() => {
     if (icons.length <= 1) return;
-    const interval = setInterval(() => {
-      setActiveIdx((prev) => (prev + 1) % icons.length);
-    }, 2500);
-    return () => clearInterval(interval);
+    const interval = window.setInterval(() => setActiveIndex((current) => (current + 1) % icons.length), 2500);
+    return () => window.clearInterval(interval);
   }, [icons.length]);
-
-  const activeIcon = icons[activeIdx] || "";
   const descriptionKey = championDescriptionKey(championName, "skills", skill.name);
-  const description = descriptionKey ? t(descriptionKey) : skill.description;
-
-  return (
-    <div className="pc-surface-light rounded-lg p-4 border border-pc-border flex items-start gap-4">
-      <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-pc-bg-elevated border border-pc-border flex items-center justify-center overflow-hidden">
-        {activeIcon ? (
-          <SmartImage
-            src={activeIcon}
-            alt={skill.name}
-            className="w-full h-full object-contain transition-opacity duration-300"
-            onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-          />
-        ) : (
-          <span className="text-xs font-mono text-pc-accent">{skill.key}</span>
-        )}
-      </div>
-      <div className="flex-1">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="text-sm font-medium text-pc-text">{skill.name}</span>
-          {skill.damage && (
-            <span className="text-xs font-mono text-pc-text-muted">{t("generated.champions.dmg")}{" "}{skill.damage}</span>
-          )}
-          {skill.cooldown && (
-            <span className="text-xs font-mono text-pc-text-muted">{t("generated.champions.cd")}{" "}{skill.cooldown}</span>
-          )}
-        </div>
-        {description && (
-          <p className="text-xs text-pc-text-secondary leading-relaxed">{description}</p>
-        )}
-      </div>
+  return <div className="pc-surface-light flex items-start gap-4 rounded-lg border border-pc-border p-4">
+    <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-pc-bg-elevated">
+      {icons[activeIndex] ? <SmartImage src={icons[activeIndex]} alt={skill.name} className="h-full w-full object-contain" /> : <span className="font-mono text-xs text-pc-accent">{skill.key}</span>}
     </div>
-  );
+    <div className="min-w-0 flex-1">
+      <div className="mb-1 flex flex-wrap items-center gap-2"><span className="text-sm font-medium text-pc-text">{skill.name}</span>{skill.damage && <span className="font-mono text-xs text-pc-text-muted">{t("generated.champions.dmg")} {skill.damage}</span>}{skill.cooldown && <span className="font-mono text-xs text-pc-text-muted">{t("generated.champions.cd")} {skill.cooldown}</span>}</div>
+      {skill.description && <p className="text-xs leading-relaxed text-pc-text-secondary">{descriptionKey ? t(descriptionKey) : skill.description}</p>}
+    </div>
+  </div>;
 }
 
-function TalentCard({
-  championName,
-  talent,
-  stat,
-  totalMatches,
-  maxPickRate,
-  href,
-}: {
-  championName: string;
-  talent: ChampionTalent;
-  stat?: ChampionTalentStat;
-  totalMatches?: number;
-  maxPickRate?: number;
-  href?: string;
-}) {
-  const { t, formatNumber, formatPercent } = useLocalization();
-  const formatPlays = (value: number) => formatNumber(value, { notation: "compact", maximumFractionDigits: 1 });
-  const pickRate = stat && totalMatches && totalMatches > 0 ? (stat.totalPlays / totalMatches) * 100 : 0;
-  const quality = stat ? getStatQuality(stat.winRate, pickRate, maxPickRate ?? 100) : null;
+function TalentCard({ championName, talent }: { championName: string; talent: ChampionTalent }) {
+  const { t } = useLocalization();
   const descriptionKey = championDescriptionKey(championName, "talents", talent.name);
-
-  const content = (
-    <>
-      <div className="flex-shrink-0 w-14 h-14 flex items-center justify-center overflow-hidden">
-        <CanonicalTalentImage
-          talentId={talent.id}
-          talentName={talent.name}
-          alt={talent.name}
-          className="w-full h-full object-contain"
-          fallbackClassName="w-full h-full"
-        />
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="text-xs font-medium text-pc-accent mb-0.5">{talent.name}</div>
-        {talent.description && (
-          <p className="text-xs text-pc-text-secondary leading-relaxed">{descriptionKey ? t(descriptionKey) : talent.description}</p>
-        )}
-        {talent.category && (
-          <div className="text-xs text-pc-text-muted mt-1">{t("generated.champions.linked")}{" "}{talent.category}</div>
-        )}
-        {stat && stat.totalPlays > 0 && (
-          <div className="flex items-center gap-2 mt-2 text-xs flex-wrap">
-            <span className={quality?.textClass ?? "text-pc-text"} style={{ color: quality?.color ?? getPercentageColor(stat.winRate) }}>
-              <span className="text-pc-text-muted mr-1">{t("generated.champions.wr")}</span>
-              {formatPercent(stat.winRate)}
-            </span>
-            <span className="text-pc-border">|</span>
-            <span className="text-pc-text-muted">
-              <span className="mr-1">{t("generated.champions.pr")}</span>
-              <span style={{ color: getPercentageColor(pickRate) }}>{formatPercent(pickRate)}</span>
-            </span>
-            <span className="text-pc-border">|</span>
-            <span className="text-pc-text-muted overflow-wrap break-word">
-              <span className="mr-1">{t("generated.champions.matches")}</span>
-              <span style={quality ? { color: quality.color } : undefined}>{formatPlays(stat.totalPlays)}</span>
-            </span>
-          </div>
-        )}
-      </div>
-    </>
-  );
-
-  const className = `pc-surface-light flex w-full items-start gap-3 rounded-lg border p-3 text-left transition-colors ${href ? "cursor-pointer hover:border-pc-accent-mid" : "cursor-default"}`;
-  const style = quality ? { borderColor: quality.borderColor } : undefined;
-
-  return href ? (
-    <Link href={href} className={className} style={style}>
-      {content}
-    </Link>
-  ) : (
-    <div className={className} style={style}>
-      {content}
-    </div>
-  );
+  return <div className="pc-surface-light flex items-start gap-3 rounded-lg border border-pc-border p-3">
+    <CanonicalTalentImage talentId={talent.id} talentName={talent.name} alt="" className="h-14 w-14 shrink-0 object-contain" fallbackClassName="h-14 w-14 shrink-0" />
+    <div className="min-w-0 flex-1"><div className="mb-0.5 text-xs font-medium text-pc-accent">{talent.name}</div><p className="text-xs leading-relaxed text-pc-text-secondary">{descriptionKey ? t(descriptionKey) : talent.description}</p></div>
+  </div>;
 }

@@ -5,6 +5,7 @@
  * refs: none
  */
 import { createLocalizedMetadata } from "@/lib/server-localization";
+import { VerifiedAccess } from "@/components/verified-access";
 
 /**
  * Build SEO metadata for the player layout route.
@@ -23,5 +24,5 @@ export async function generateMetadata() {
  * I/O types: `{ children }: { children: React.ReactNode } -> ReactNode`.
  */
 export default function PlayersLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return <VerifiedAccess>{children}</VerifiedAccess>;
 }

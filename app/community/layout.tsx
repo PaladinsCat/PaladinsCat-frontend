@@ -1,5 +1,6 @@
 /** Supply localized canonical metadata for the community directory. · refs: none */
 import { createLocalizedMetadata } from "@/lib/server-localization";
+import { AccountAccess } from "@/components/account-access";
 
 /**
  * Generate canonical community metadata.  Returns: `Promise<Metadata>`. · refs: none
@@ -15,4 +16,6 @@ export async function generateMetadata() {
  * Preserve community child routes beneath their shared metadata boundary.  Returns: `React.JSX.Element`. · refs: none
  * I/O types: `{ children }: { children: React.ReactNode } -> ReactNode`.
  */
-export default function CommunityLayout({ children }: { children: React.ReactNode }) { return children; }
+export default function CommunityLayout({ children }: { children: React.ReactNode }) {
+  return <AccountAccess>{children}</AccountAccess>;
+}

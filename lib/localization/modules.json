@@ -6,6 +6,8 @@
   "ui/async",
   "pages/home",
   "pages/community",
+  "pages/features",
+  "pages/matches",
   "pages/player-friends",
   "pages/champion-matchups",
   "pages/player-trends",

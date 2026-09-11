@@ -31,12 +31,12 @@
     "audit-image-assets": "node scripts/audit-image-assets.mjs",
     "audit-champion-data": "node scripts/audit-champion-data.mjs && node scripts/sync-champion-reference-data.mjs",
     "sync-champion-reference-data": "node scripts/sync-champion-reference-data.mjs --write",
+    "sync-champion-changelogs": "python scripts/update-champion-changelogs.py",
     "check-localization-catalog": "node scripts/check-localization-catalog.mjs",
     "check-localization-keys": "node scripts/check-localization-keys.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
-    "@flaticon/flaticon-uicons": "^3.3.1",
     "@heroui/react": "^3.2.4",
     "@heroui/system": "^2.4.28",
     "@heroui/theme": "^2.4.26",

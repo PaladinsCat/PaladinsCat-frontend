@@ -12,16 +12,10 @@ import Link from "next/link";
 import { ExternalLink, FileImage, Link2 } from "lucide-react";
 import type { CheaterEvidence } from "@/lib/api-client";
 import { useLocalization } from "@/lib/localization-context";
+import ExternalVideoConsent from "@/components/ExternalVideoConsent";
 
 function evidenceImageUrl(url: string, format: "avif" | "original") {
   return `${url}${url.includes("?") ? "&" : "?"}format=${format}`;
-}
-
-function evidenceEmbedUrl(url: string, provider: CheaterEvidence["provider"]) {
-  if (provider !== "twitch" || typeof window === "undefined") return url;
-  const embedUrl = new URL(url);
-  embedUrl.searchParams.set("parent", window.location.hostname);
-  return embedUrl.toString();
 }
 
 /**
@@ -48,9 +42,9 @@ export default function CheaterEvidencePost({
         {images.map((url, index) => <picture key={url} className="block aspect-video bg-pc-bg"><source srcSet={evidenceImageUrl(url, "avif")} type="image/avif" /><img src={evidenceImageUrl(url, "original")} alt={t("moderation.evidenceImageAlt", { value1: formatNumber(index + 1), value2: item.subjectName })} loading="lazy" decoding="async" className="h-full w-full object-contain" /></picture>)}
       </div>}
       {item.embedUrl && (item.provider === "medal" || item.provider === "discord") ? (
-        <div className="aspect-video bg-black"><video controls playsInline preload="metadata" src={item.embedUrl} title={t("moderation.evidenceClipTitle", { value1: item.provider === "discord" ? "Discord" : "Medal", value2: item.subjectName })} className="h-full w-full object-contain" /></div>
+        <ExternalVideoConsent provider={item.provider} src={item.embedUrl} title={t("moderation.evidenceClipTitle", { value1: item.provider === "discord" ? "Discord" : "Medal", value2: item.subjectName })} directVideo />
       ) : item.embedUrl ? (
-        <div className="aspect-video bg-black"><iframe src={evidenceEmbedUrl(item.embedUrl, item.provider)} title={t("moderation.evidenceVideoTitle", { value1: item.provider || "Video", value2: item.subjectName })} className="h-full w-full" allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" /></div>
+        <ExternalVideoConsent provider={item.provider || "external"} src={item.embedUrl} title={t("moderation.evidenceVideoTitle", { value1: item.provider || "Video", value2: item.subjectName })} />
       ) : null}
       <div className="space-y-3 p-4">
         <div className="flex items-start justify-between gap-3">

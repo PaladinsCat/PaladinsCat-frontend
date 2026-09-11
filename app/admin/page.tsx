@@ -6,7 +6,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Activity, Bell, Database, Eye, EyeOff, Gamepad2, Gauge, HeartPulse, KeyRound, RefreshCw, ScrollText, Users } from "lucide-react";
+import { Activity, Bell, Database, Eye, EyeOff, Gamepad2, Gauge, KeyRound, RefreshCw, ScrollText, Users } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { fetchAdminDashboard, searchManagedAccounts, updateManagedAccountRole, type AdminDashboard, type ManagedAccount } from "@/lib/admin-dashboard-api";
 import { ContentFade, ErrorState, LoadingPanel } from "@/components/async-state";
@@ -81,7 +81,6 @@ export default function AdminDashboardPage({ mode = "admin" }: { mode?: "admin" 
   const totals = dashboard.site.totals;
   const pipeline = dashboard.site.pipeline;
   const budgetPercent = apiBudget.limit > 0 ? Math.min(100, (apiBudget.used / apiBudget.limit) * 100) : 0;
-  const activeWindowMinutes = Math.ceil(summary.activeWindowSeconds / 60);
   const ingestCoverage = totals.matches > 0 ? ((totals.directMatches + totals.recoveredMatches) / totals.matches) * 100 : 0;
 
   return (
@@ -103,9 +102,8 @@ export default function AdminDashboardPage({ mode = "admin" }: { mode?: "admin" 
 
       {error && <div className="rounded-xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-xs text-amber-200">{t("generated.admin.showingThePreviousSnapshotRefreshFailed")}{" "}{error}</div>}
 
-      <section className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
-        <MetricCard icon={HeartPulse} label={t("operations.activeUsers")} value={formatNumber(summary.activeUsers)} detail={t("operations.activeWindow", { minutes: activeWindowMinutes })} />
-        <MetricCard icon={Users} label={t("generated.admin.visitorsToday")} value={formatNumber(summary.visitorsToday)} detail={t("generated.admin.valueYesterday", { value: formatNumber(summary.visitorsYesterday) })} />
+      <p className="text-xs text-pc-text-muted">{t("operations.anonymousTraffic")}</p>
+      <section className="grid grid-cols-2 gap-3 md:grid-cols-3">
         <MetricCard icon={Eye} label={t("generated.admin.pageViewsToday")} value={formatNumber(summary.viewsToday)} detail={t("generated.admin.valueOverSevenDays", { value: formatNumber(summary.views7d) })} />
         <MetricCard icon={Gamepad2} label={t("generated.admin.trackedMatches")} value={formatNumber(totals.matches)} detail={t("generated.admin.valueRanked", { value: formatNumber(totals.rankedMatches) })} />
         <MetricCard icon={Gauge} label={t("generated.admin.hiRezBudget")} value={formatNumber(apiBudget.remaining)} detail={t("generated.admin.budgetUsed", { used: formatNumber(apiBudget.used), limit: formatNumber(apiBudget.limit) })} />
@@ -233,8 +231,8 @@ function SectionTitle({ icon: Icon, title, subtitle }: { icon: typeof Activity; 
 
 function TrafficChart({ dashboard }: { dashboard: AdminDashboard }) {
   const { formatNumber, locale } = useLocalization();
-  const max = Math.max(1, ...dashboard.traffic.daily.map((row) => Math.max(row.pageViews, row.visitors)));
-  return <div className="mt-5 flex h-52 items-end gap-1.5 overflow-x-auto border-b border-pc-border pb-2">{dashboard.traffic.daily.map((row) => <div key={row.date} className="group flex min-w-9 flex-1 flex-col items-center justify-end gap-1"><div className="text-xs text-pc-text-muted opacity-0 transition-opacity group-hover:opacity-100">{formatNumber(row.visitors)}/{formatNumber(row.pageViews)}</div><div className="relative flex h-36 w-full max-w-9 items-end justify-center"><div className="w-5 rounded-t bg-pc-accent-deep/70" style={{ height: `${Math.max(2, (row.pageViews / max) * 100)}%` }} /><div className="absolute bottom-0 w-2 rounded-t bg-pc-accent" style={{ height: `${Math.max(2, (row.visitors / max) * 100)}%` }} /></div><span className="text-xs text-pc-text-muted">{new Intl.DateTimeFormat(locale, { weekday: "short", timeZone: "UTC" }).format(new Date(`${row.date}T00:00:00Z`))}</span><span className="text-xs tabular-nums text-pc-text-secondary">{formatNumber(row.matches)}</span></div>)}</div>;
+  const max = Math.max(1, ...dashboard.traffic.daily.map((row) => row.pageViews));
+  return <div className="mt-5 flex h-52 items-end gap-1.5 overflow-x-auto border-b border-pc-border pb-2">{dashboard.traffic.daily.map((row) => <div key={row.date} className="group flex min-w-9 flex-1 flex-col items-center justify-end gap-1"><div className="text-xs text-pc-text-muted opacity-0 transition-opacity group-hover:opacity-100">{formatNumber(row.pageViews)}</div><div className="relative flex h-36 w-full max-w-9 items-end justify-center"><div className="w-5 rounded-t bg-pc-accent-deep/70" style={{ height: `${Math.max(2, (row.pageViews / max) * 100)}%` }} /></div><span className="text-xs text-pc-text-muted">{new Intl.DateTimeFormat(locale, { weekday: "short", timeZone: "UTC" }).format(new Date(`${row.date}T00:00:00Z`))}</span><span className="text-xs tabular-nums text-pc-text-secondary">{formatNumber(row.matches)}</span></div>)}</div>;
 }
 
 function ApiKeyCard({ apiKey, index, showKeyId }: { apiKey: AdminDashboard["hirez"]["keys"][number]; index: number; showKeyId: boolean }) {

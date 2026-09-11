@@ -33,6 +33,7 @@ import { LoadingIndicator } from "@/components/async-state";
 import { MatchPlayerLink, matchPlayerKey } from "./player-identity";
 import CanonicalTalentImage from "@/components/canonical-talent-image";
 import { useLocalization } from "@/lib/localization-context";
+import { formatScalingDescription } from "@/lib/scaling-description";
 
 type Props = { team1Players: MatchPlayerDetail[]; team2Players: MatchPlayerDetail[]; team1Wins: boolean; team2Wins: boolean; factMap: Map<string, MatchFactPlayer> };
 
@@ -137,25 +138,6 @@ function Asset({ sources, alt, level, tone = "border-pc-border", transparent = f
   </div>;
 }
 
-function cleanNumber(value: number, formatNumber: (value: number, options?: Intl.NumberFormatOptions) => string) {
-  return formatNumber(value, { maximumFractionDigits: 2 });
-}
-
-function formatDescription(description: string | null | undefined, level: number, formatNumber: (value: number, options?: Intl.NumberFormatOptions) => string) {
-  if (!description) return null;
-  return description
-    // Hi-Rez reference descriptions carry legacy category/ability markers
-    // such as "[Armor]" and "[Dimensional Link]". They are metadata, can be
-    // stale, and should not be presented as part of the effect sentence.
-    .replace(/^\s*(?:\[[^\]]+\]\s*)+/, "")
-    .replace(/\{\s*(?:scale\s*=\s*)?(-?(?:\d+(?:\.\d*)?|\.\d+))\s*\|\s*(-?(?:\d+(?:\.\d*)?|\.\d+))\s*\}/gi, (_match, base: string, increase: string) => (
-      cleanNumber(Number(base) + Number(increase) * Math.max(0, level - 1), formatNumber)
-    ))
-    .replace(/\{\s*(-?(?:\d+(?:\.\d*)?|\.\d+))\s*\}/g, (_match, value: string) => (
-      cleanNumber(Number(value), formatNumber)
-    ));
-}
-
 type DetailMetric = {
   winRate: number;
   pickRate: number;
@@ -254,7 +236,7 @@ function PlayerBuildRow({
   const items = fact?.items ?? [];
   const itemIdsKey = items.map((item) => item.item_id).join(",");
   const selectedTalent = talents[0] ?? null;
-  const championPath = `/champions/${championSlug(player.champion_name || "")}`;
+  const championPath = `/stats/loadouts/${championSlug(player.champion_name || "")}`;
   const returnToQuery = encodeURIComponent(returnTo);
   const matchId = returnTo.match(/^\/matches\/(\d+)/)?.[1];
   const preserveMatchPosition = () => {
@@ -413,7 +395,7 @@ function PlayerBuildRow({
           {talents.map((talent) => {
             const entry = findReference("talents", talent.talent_id, talent.talent_name);
             const name = talent.talent_name ?? entry?.name ?? t("common.entity.talentNumber", { number: talent.talent_id });
-            return <DetailEntry key={`talent-detail-${talent.talent_id}`} name={name} href={`${championPath}/talents/${talent.talent_id}?returnTo=${returnToQuery}`} onNavigate={preserveMatchPosition} label={t("generated.matches.talent")} description={formatDescription(entry?.description, 1, formatNumber) ?? (reference ? t("common.fallback.descriptionUnavailable") : <LoadingIndicator className="gap-1.5 text-xs" />)} sources={[]} canonicalTalent={{ talentId: talent.talent_id, talentName: talent.talent_name }} transparentIcon metric={talentMetric} showMetrics metricsLoaded={loadoutMetrics !== null} maxPickRate={100} />;
+            return <DetailEntry key={`talent-detail-${talent.talent_id}`} name={name} href={`${championPath}?talentId=${talent.talent_id}&returnTo=${returnToQuery}`} onNavigate={preserveMatchPosition} label={t("generated.matches.talent")} description={formatScalingDescription(entry?.description, 1, formatNumber) ?? (reference ? t("common.fallback.descriptionUnavailable") : <LoadingIndicator className="gap-1.5 text-xs" />)} sources={[]} canonicalTalent={{ talentId: talent.talent_id, talentName: talent.talent_name }} transparentIcon metric={talentMetric} showMetrics metricsLoaded={loadoutMetrics !== null} maxPickRate={100} />;
           })}
           {cards.map((card) => {
             const entry = findReference("cards", card.card_id, card.card_name);
@@ -421,7 +403,7 @@ function PlayerBuildRow({
             const name = card.card_name ?? entry?.name ?? t("common.entity.cardNumber", { number: card.card_id });
             const query = new URLSearchParams({ returnTo });
             if (selectedTalent) query.set("talentId", String(selectedTalent.talent_id));
-            return <DetailEntry key={`card-detail-${card.card_id}`} name={name} href={`${championPath}/cards/${card.card_id}?${query.toString()}`} onNavigate={preserveMatchPosition} label={t("common.match.cardLevel", { level })} description={formatDescription(entry?.description, level, formatNumber) ?? (reference ? t("common.fallback.descriptionUnavailable") : <LoadingIndicator className="gap-1.5 text-xs" />)} sources={[entry?.iconUrl, card.icon_url, card.fallback_icon_url]} level={level} tone="border-pc-accent/30" metric={cardMetricAtRecordedLevel(card.card_id, card.card_name, level)} showMetrics metricsLoaded={loadoutMetrics !== null} maxPickRate={maxLoadoutLevelPickRate} playsLabel={t("common.count.picks")} />;
+            return <DetailEntry key={`card-detail-${card.card_id}`} name={name} href={`${championPath}/cards/${card.card_id}?${query.toString()}`} onNavigate={preserveMatchPosition} label={t("common.match.cardLevel", { level })} description={formatScalingDescription(entry?.description, level, formatNumber) ?? (reference ? t("common.fallback.descriptionUnavailable") : <LoadingIndicator className="gap-1.5 text-xs" />)} sources={[entry?.iconUrl, card.icon_url, card.fallback_icon_url]} level={level} tone="border-pc-accent/30" metric={cardMetricAtRecordedLevel(card.card_id, card.card_name, level)} showMetrics metricsLoaded={loadoutMetrics !== null} maxPickRate={maxLoadoutLevelPickRate} playsLabel={t("common.count.picks")} />;
           })}
           {talents.length === 0 && cards.length === 0 && <p className="text-xs text-pc-text-muted">{t("generated.matches.noTalentOrLoadoutCardsWereRecorded")}</p>}
         </section>
@@ -437,7 +419,7 @@ function PlayerBuildRow({
               ?? (entry?.descriptionKey ? t(entry.descriptionKey) : null)
               ?? item.description;
             const itemMetric = itemMetricAtRecordedSlotAndLevel(item.item_id, item.item_name, item.slot, item.item_level ?? 0);
-            return <DetailEntry key={`item-detail-${item.slot}-${item.item_id}`} name={name} href={`/game/items/${item.item_id}?returnTo=${returnToQuery}`} onNavigate={preserveMatchPosition} label={t("common.match.itemSlotLevel", { slot: item.slot, level })} description={formatDescription(description, tierDescription ? 1 : level, formatNumber) ?? (reference ? t("common.fallback.descriptionUnavailable") : <LoadingIndicator className="gap-1.5 text-xs" />)} sources={[entry?.iconUrl, item.icon_url, item.fallback_icon_url]} level={level} metric={itemMetric} showMetrics metricsLoaded={itemMetrics !== null} maxPickRate={maxItemPickRate} playsLabel={t("common.count.uses")} />;
+            return <DetailEntry key={`item-detail-${item.slot}-${item.item_id}`} name={name} href={`/game/items/${item.item_id}?returnTo=${returnToQuery}`} onNavigate={preserveMatchPosition} label={t("common.match.itemSlotLevel", { slot: item.slot, level })} description={formatScalingDescription(description, tierDescription ? 1 : level, formatNumber) ?? (reference ? t("common.fallback.descriptionUnavailable") : <LoadingIndicator className="gap-1.5 text-xs" />)} sources={[entry?.iconUrl, item.icon_url, item.fallback_icon_url]} level={level} metric={itemMetric} showMetrics metricsLoaded={itemMetrics !== null} maxPickRate={maxItemPickRate} playsLabel={t("common.count.uses")} />;
           })}
           {items.length === 0 && <p className="text-xs text-pc-text-muted">{t("generated.matches.noPurchasedItemsWereRecorded")}</p>}
         </section>

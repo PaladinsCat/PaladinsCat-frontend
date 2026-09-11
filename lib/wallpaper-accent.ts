@@ -291,16 +291,22 @@ export function pickWallpaperAccent(pixels: Uint8ClampedArray): string | null {
 }
 
 /**
- * Samples an image in a tiny canvas. Cross-origin images safely fall back. · refs: none
- * I/O types: `source: string -> Promise<WallpaperAccents>`.
+ * Samples an image in a tiny canvas, retrying a compatible source when decoding fails. · refs: none
+ * I/O types: `source: string, fallbackSource?: string -> Promise<WallpaperAccents>`.
  */
-export async function extractWallpaperAccents(source: string): Promise<WallpaperAccents> {
+export async function extractWallpaperAccents(source: string, fallbackSource?: string): Promise<WallpaperAccents> {
   try {
     const image = new Image();
     image.crossOrigin = "anonymous";
     image.decoding = "async";
     image.src = source;
-    await image.decode();
+    try {
+      await image.decode();
+    } catch (error) {
+      if (!fallbackSource) throw error;
+      image.src = fallbackSource;
+      await image.decode();
+    }
 
     const canvas = document.createElement("canvas");
     canvas.width = SAMPLE_SIZE;

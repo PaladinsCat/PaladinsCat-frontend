@@ -7,8 +7,9 @@
 import { Fragment } from "react";
 import { useLocalization } from "@/lib/localization-context";
 import type { TranslationKey } from "@/lib/localization/messages";
+import ExternalVideoConsent from "@/components/ExternalVideoConsent";
 
-type VideoEmbed = { src: string; titleKey: TranslationKey };
+type VideoEmbed = { provider: string; src: string; titleKey: TranslationKey };
 
 function trimUrl(url: string) {
   return url.replace(/[),.!?;:]+$/, "");
@@ -20,15 +21,15 @@ function videoEmbed(url: string): VideoEmbed | null {
     const host = parsed.hostname.replace(/^www\./, "").toLowerCase();
     if (host === "youtu.be") {
       const id = parsed.pathname.slice(1).split("/")[0];
-      return /^[A-Za-z0-9_-]{11}$/.test(id) ? { src: `https://www.youtube-nocookie.com/embed/${id}`, titleKey: "common.media.youtubeVideo" } : null;
+      return /^[A-Za-z0-9_-]{11}$/.test(id) ? { provider: "youtube", src: `https://www.youtube-nocookie.com/embed/${id}`, titleKey: "common.media.youtubeVideo" } : null;
     }
     if (host === "youtube.com" || host === "m.youtube.com") {
       const id = parsed.searchParams.get("v") ?? (parsed.pathname.startsWith("/embed/") ? parsed.pathname.split("/")[2] : "");
-      return /^[A-Za-z0-9_-]{11}$/.test(id) ? { src: `https://www.youtube-nocookie.com/embed/${id}`, titleKey: "common.media.youtubeVideo" } : null;
+      return /^[A-Za-z0-9_-]{11}$/.test(id) ? { provider: "youtube", src: `https://www.youtube-nocookie.com/embed/${id}`, titleKey: "common.media.youtubeVideo" } : null;
     }
     if (host === "vimeo.com") {
       const id = parsed.pathname.split("/").filter(Boolean)[0];
-      return /^\d+$/.test(id) ? { src: `https://player.vimeo.com/video/${id}`, titleKey: "common.media.vimeoVideo" } : null;
+      return /^\d+$/.test(id) ? { provider: "vimeo", src: `https://player.vimeo.com/video/${id}`, titleKey: "common.media.vimeoVideo" } : null;
     }
   } catch {
     // An invalid pasted URL is kept as plain text rather than rendered as a link.
@@ -63,7 +64,7 @@ export default function CommunityRichContent({ content }: { content: string }) {
         if (!/^https?:\/\//i.test(part)) return null;
         const embed = videoEmbed(trimUrl(part));
         if (!embed) return null;
-        return <div key={`embed-${index}`} className="aspect-video overflow-hidden rounded-xl border border-pc-border bg-black shadow-lg"><iframe src={embed.src} title={t(embed.titleKey)} className="h-full w-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen /></div>;
+        return <ExternalVideoConsent key={`embed-${index}`} provider={embed.provider} src={embed.src} title={t(embed.titleKey)} />;
       })}
     </div>
   );

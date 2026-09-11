@@ -5,6 +5,44 @@
 import { NextRequest, NextResponse } from "next/server";
 import { readFileSync } from "node:fs";
 import { GUEST_COOKIE, GUEST_TTL_SECONDS, issueGuest, validGuest, safeWebsiteRequest, websiteApiPath } from "./lib/website-gate";
+import { isAccountOnlyPath, isVerifiedOnlyPath } from "./lib/verified-access";
+import { serverApiBase } from "./lib/server-api";
+
+const ACCOUNT_SESSION_COOKIE = "__Host-pc_session";
+type AccountSessionState = "guest" | "unverified" | "verified" | "unavailable";
+
+/** Validate the opaque browser session through the backend auth owner. */
+async function accountSessionState(request: NextRequest): Promise<AccountSessionState> {
+  const session = request.cookies.get(ACCOUNT_SESSION_COOKIE)?.value;
+  if (!session) return "guest";
+  try {
+    const response = await fetch(`${serverApiBase()}/auth/me`, {
+      headers: { accept: "application/json", authorization: `Bearer ${session}` },
+      cache: "no-store",
+      signal: AbortSignal.timeout(2_500),
+    });
+    if (response.status === 401 || response.status === 403) return "guest";
+    if (!response.ok) return "unavailable";
+    const account = await response.json() as { linked_player_id?: unknown };
+    const linkedPlayerId = Number(account.linked_player_id);
+    return Number.isSafeInteger(linkedPlayerId) && linkedPlayerId > 0 ? "verified" : "unverified";
+  } catch {
+    return "unavailable";
+  }
+}
+
+/** Redirect a protected website request without accepting caller-controlled origins. */
+function accessRedirect(request: NextRequest, destination: "/auth/login" | "/link-account") {
+  const url = request.nextUrl.clone();
+  url.pathname = destination;
+  url.search = "";
+  if (destination === "/auth/login") {
+    url.searchParams.set("redirect", `${request.nextUrl.pathname}${request.nextUrl.search}`);
+  }
+  const response = NextResponse.redirect(url);
+  response.headers.set("Cache-Control", "private, no-store");
+  return response;
+}
 
 /**
  * Content-Security-Policy with a per-request nonce.
@@ -25,7 +63,7 @@ import { GUEST_COOKIE, GUEST_TTL_SECONDS, issueGuest, validGuest, safeWebsiteReq
  * `proxy` file convention (https://nextjs.org/docs/messages/middleware-to-proxy).
  * refs: none
  */
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // The production nonce policy makes Next's development runtime defer client
   // hydration. Dev servers must not be used as a public surface; let Next
   // handle its local assets and HMR without injecting production headers.
@@ -35,9 +73,10 @@ export function proxy(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
   // Do not let percent-encoded namespace aliases reach a rewrite without admission.
+  let decodedPath: string;
   try {
-    const decoded = decodeURIComponent(path);
-    if (websiteApiPath(decoded) && !websiteApiPath(path)) {
+    decodedPath = decodeURIComponent(path);
+    if (websiteApiPath(decodedPath) && !websiteApiPath(path)) {
       return NextResponse.json({ error: { code: "NON_CANONICAL_API_PATH" } }, { status: 400, headers: { "Cache-Control": "private, no-store" } });
     }
   } catch {
@@ -53,10 +92,24 @@ export function proxy(request: NextRequest) {
     response.headers.set("Cache-Control", "private, no-store");
     return response;
   }
+  const verifiedOnly = isVerifiedOnlyPath(decodedPath);
+  if (verifiedOnly || isAccountOnlyPath(decodedPath)) {
+    const state = await accountSessionState(request);
+    if (state === "guest") return accessRedirect(request, "/auth/login");
+    if (verifiedOnly && state === "unverified") return accessRedirect(request, "/link-account");
+    if (state === "unavailable") {
+      return NextResponse.json({ error: { code: "AUTHENTICATION_UNAVAILABLE" } }, {
+        status: 503, headers: { "Cache-Control": "private, no-store" },
+      });
+    }
+  }
   const origin = process.env.PALADINSCAT_PUBLIC_ORIGIN || "https://paladinscat.com";
   let secret: string;
   try {
-    secret = readFileSync(process.env.PALADINSCAT_WEBSITE_GATE_SECRET_FILE || "", "utf8").trim();
+    secret = readFileSync(
+      /* turbopackIgnore: true */ process.env.PALADINSCAT_WEBSITE_GATE_SECRET_FILE || "",
+      "utf8",
+    ).trim();
     if (!/^[a-f0-9]{64}$/i.test(secret)) throw new Error("Invalid website gate secret");
   } catch {
     return NextResponse.json({ error: { code: "WEBSITE_GATE_UNAVAILABLE" } }, {

@@ -4,8 +4,11 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
+  DEFAULT_CUSTOM_WALLPAPER_ROTATION_MS,
+  getCustomWallpaperRotationMs,
   getWallpaperEnabled,
   resolveCustomWallpapers,
+  type CustomWallpaperRotationMs,
   type ResolvedCustomWallpaper,
   WALLPAPER_CHANGE_EVENT,
 } from "@/lib/wallpaper-preference";
@@ -20,12 +23,12 @@ import {
 
 type WallpaperSlide = BuiltInWallpaper | string;
 
-const INTERVAL_MS = 10_000;
+const BUILT_IN_WALLPAPER_INTERVAL_MS = 60 * 60 * 1000;
 
 /**
  * MapSlideshow — rotating background slideshow of Paladins maps.
  *
- * Crossfade transition between maps, cycling every 10 seconds.
+ * Built-in maps cycle hourly; custom collections use their browser-local speed.
  * Starts with a deterministic first map to avoid SSR hydration mismatch,
  * then shuffles order client-side after mount.
  * refs: none
@@ -34,6 +37,7 @@ const INTERVAL_MS = 10_000;
 export default function MapSlideshow() {
   const [wallpaperEnabled, setWallpaperEnabled] = useState(true);
   const [customWallpapers, setCustomWallpapers] = useState<ResolvedCustomWallpaper[]>([]);
+  const [customWallpaperIntervalMs, setCustomWallpaperIntervalMs] = useState<CustomWallpaperRotationMs>(DEFAULT_CUSTOM_WALLPAPER_ROTATION_MS);
   // Deterministic on server: always start at index 0
   const [index, setIndex] = useState(0);
   // Null until client mounts and shuffles
@@ -47,6 +51,7 @@ export default function MapSlideshow() {
     const syncWallpaperPreferences = async () => {
       const version = ++refreshVersion;
       setWallpaperEnabled(getWallpaperEnabled());
+      setCustomWallpaperIntervalMs(getCustomWallpaperRotationMs());
       const wallpapers = await resolveCustomWallpapers().catch(() => []);
       if (active && version === refreshVersion) {
         setCustomWallpapers(wallpapers);
@@ -93,6 +98,9 @@ export default function MapSlideshow() {
     () => customWallpapers.length > 0 ? customWallpapers.map((wallpaper) => wallpaper.source) : order,
     [customWallpapers, order],
   );
+  const rotationIntervalMs = customWallpapers.length > 0
+    ? customWallpaperIntervalMs
+    : BUILT_IN_WALLPAPER_INTERVAL_MS;
 
   useEffect(() => {
     setIndex(0);
@@ -102,9 +110,9 @@ export default function MapSlideshow() {
     if (!slides || slides.length <= 1) return;
     const id = setInterval(() => {
       setIndex((i) => (i + 1) % slides.length);
-    }, INTERVAL_MS);
+    }, rotationIntervalMs);
     return () => clearInterval(id);
-  }, [slides]);
+  }, [rotationIntervalMs, slides]);
 
   // Before client mount, render the first map in static order (matches SSR)
   const currentWallpaper = slides?.[index] ?? DEFAULT_WALLPAPERS[0];
@@ -114,6 +122,9 @@ export default function MapSlideshow() {
     : `image-set(url(${JSON.stringify(currentWallpaper.avif)}) type("image/avif"), url(${JSON.stringify(currentWallpaper.png)}) type("image/png"))`;
   const currentWallpaperAccentSource = typeof currentWallpaper === "string"
     ? currentWallpaper
+    : currentWallpaper.avif;
+  const currentWallpaperAccentFallback = typeof currentWallpaper === "string"
+    ? undefined
     : currentWallpaper.png;
 
   useEffect(() => {
@@ -126,7 +137,7 @@ export default function MapSlideshow() {
       return () => { active = false; };
     }
 
-    void extractWallpaperAccents(currentWallpaperAccentSource).then(({ primary, secondary, tertiary, fourth }) => {
+    void extractWallpaperAccents(currentWallpaperAccentSource, currentWallpaperAccentFallback).then(({ primary, secondary, tertiary, fourth }) => {
       if (!active) return;
       if (primary) document.documentElement.style.setProperty(HOME_CAT_ACCENT_PROPERTY, primary);
       else document.documentElement.style.removeProperty(HOME_CAT_ACCENT_PROPERTY);
@@ -138,7 +149,7 @@ export default function MapSlideshow() {
       else document.documentElement.style.removeProperty(HOME_FOURTH_ACCENT_PROPERTY);
     });
     return () => { active = false; };
-  }, [currentWallpaperAccentSource, wallpaperActive]);
+  }, [currentWallpaperAccentSource, currentWallpaperAccentFallback, wallpaperActive]);
 
   useEffect(() => () => {
     document.documentElement.style.removeProperty(HOME_CAT_ACCENT_PROPERTY);

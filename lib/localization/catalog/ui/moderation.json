@@ -290,5 +290,15 @@
   "moderation.repeatedAfk": "Repeated AFK behavior",
   "moderation.winTrading": "Win trading",
   "moderation.linkedIdentity": "Linked player identity",
-  "moderation.banEvasion": "Ban evasion"
+  "moderation.banEvasion": "Ban evasion",
+  "moderation.cosmeticEvidenceTitle": "Cosmetic Evidence",
+  "moderation.cosmeticEvidenceDescription": "Cosmetics this account holds that it could not legitimately have earned — impossible ranked frames or exclusive titles.",
+  "moderation.cosmeticEvidenceType": "Evidence type",
+  "moderation.cosmeticEvidenceName": "Cosmetic",
+  "moderation.cosmeticEvidenceReason": "Why it is evidence",
+  "moderation.cosmeticEvidenceAccountCreated": "Account created",
+  "moderation.cosmeticEvidenceObserved": "Observed",
+  "moderation.cosmeticEvidenceImpossibleFrame": "Impossible frame",
+  "moderation.cosmeticEvidenceImpossibleTitle": "Impossible title",
+  "moderation.cosmeticEvidenceNone": "No impossible or exclusive cosmetics detected for this account."
 }

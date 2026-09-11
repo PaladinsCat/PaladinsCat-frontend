@@ -9,6 +9,8 @@ import Link from "next/link";
 import PlayerName, { PlayerModerationTag } from "@/components/player-name";
 import type { MatchPlayerDetail } from "@/lib/api-client";
 import { useLocalization } from "@/lib/localization-context";
+import { useAuth } from "@/lib/auth-context";
+import { verifiedDestination } from "@/lib/verified-access";
 
 /**
  * Render trackedPrivateId from its declared props and match data.
@@ -68,6 +70,7 @@ export function privateAccountCode(player: MatchPlayerDetail): string | null {
  */
 export function MatchPlayerLink({ player, className = "" }: { player: MatchPlayerDetail; className?: string }) {
   const { t } = useLocalization();
+  const { user, isLoading } = useAuth();
   const privateId = trackedPrivateId(player);
   const href = matchPlayerHref(player);
   const content = privateId ? (
@@ -95,7 +98,8 @@ export function MatchPlayerLink({ player, className = "" }: { player: MatchPlaye
     </PlayerName>
   );
 
-  return href ? <Link href={href} className={className} title={privateId ? t("generated.matches.privateAccountValue1", { value1: privateId }) : player.player_name}>{content}</Link> : <span className={className}>{content}</span>;
+  const destination = href ? verifiedDestination(href, user, isLoading) : null;
+  return href ? <Link href={destination ?? href} aria-disabled={isLoading} onClick={isLoading ? (event) => event.preventDefault() : undefined} className={className} title={privateId ? t("generated.matches.privateAccountValue1", { value1: privateId }) : player.player_name}>{content}</Link> : <span className={className}>{content}</span>;
 }
 
 /**
@@ -106,10 +110,13 @@ export function MatchPlayerLink({ player, className = "" }: { player: MatchPlaye
  */
 export function MatchPlayerReference({ player, className = "" }: { player: MatchPlayerDetail; className?: string }) {
   const { t } = useLocalization();
+  const { user, isLoading } = useAuth();
   const privateId = trackedPrivateId(player);
   const privateCode = privateAccountCode(player);
   if (privateId) {
-    return <Link href={`/players/private-accounts/${privateId}`} className={className}>{privateCode}</Link>;
+    const href = `/players/private-accounts/${privateId}`;
+    const destination = verifiedDestination(href, user, isLoading);
+    return <Link href={destination ?? href} aria-disabled={isLoading} onClick={isLoading ? (event) => event.preventDefault() : undefined} className={className}>{privateCode}</Link>;
   }
   if (Number(player.player_id) === 0) return <span className={className}>{t("generated.matches.p")}</span>;
   return <span className={className}>{t("generated.matches.pid")}{" "}{player.player_id}</span>;

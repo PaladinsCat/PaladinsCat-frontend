@@ -17,14 +17,19 @@ import {
   type AccountDetails,
 } from "@/lib/api-client";
 import {
+  CUSTOM_WALLPAPER_ROTATION_OPTIONS,
+  DEFAULT_CUSTOM_WALLPAPER_ROTATION_MS,
   clearCustomWallpaper,
   addCustomWallpaperFiles,
   addCustomWallpaperUrl,
+  getCustomWallpaperRotationMs,
   getWallpaperEnabled,
   removeCustomWallpaper,
   resolveCustomWallpapers,
+  setCustomWallpaperRotationMs,
   setWallpaperEnabled,
   WALLPAPER_CHANGE_EVENT,
+  type CustomWallpaperRotationMs,
   type ResolvedCustomWallpaper,
 } from "@/lib/wallpaper-preference";
 import { useLocalization } from "@/lib/localization-context";
@@ -45,6 +50,7 @@ export default function AccountPage() {
   const [success, setSuccess] = useState<string | null>(null);
   const [customWallpapers, setCustomWallpapersState] = useState<ResolvedCustomWallpaper[]>([]);
   const [wallpaperEnabled, setWallpaperEnabledState] = useState(true);
+  const [customWallpaperRotationMs, setCustomWallpaperRotationState] = useState<CustomWallpaperRotationMs>(DEFAULT_CUSTOM_WALLPAPER_ROTATION_MS);
   const [wallpaperUrl, setWallpaperUrl] = useState("");
   const [wallpaperError, setWallpaperError] = useState<string | null>(null);
 
@@ -100,7 +106,10 @@ export default function AccountPage() {
   }, [refreshCustomWallpaper]);
 
   useEffect(() => {
-    const syncWallpaperPreference = () => setWallpaperEnabledState(getWallpaperEnabled());
+    const syncWallpaperPreference = () => {
+      setWallpaperEnabledState(getWallpaperEnabled());
+      setCustomWallpaperRotationState(getCustomWallpaperRotationMs());
+    };
     syncWallpaperPreference();
     window.addEventListener(WALLPAPER_CHANGE_EVENT, syncWallpaperPreference);
     window.addEventListener("storage", syncWallpaperPreference);
@@ -344,7 +353,30 @@ export default function AccountPage() {
           </div>
         )}
 
-        {customWallpapers.length > 1 && <p className="mb-3 text-xs text-pc-text-muted">{customWallpapers.length} {t("generated.account.imagesCycleEvery10SecondsWithTheMapWallpaperCrossfade")}</p>}
+        {customWallpapers.length > 1 && (
+          <div className="mb-4 max-w-xs">
+            <label htmlFor="custom-wallpaper-rotation" className="mb-1 block text-xs font-medium text-pc-text-secondary">
+              {t("generated.account.wallpaperRotationSpeed")}
+            </label>
+            <select
+              id="custom-wallpaper-rotation"
+              value={customWallpaperRotationMs}
+              onChange={(event) => {
+                const intervalMs = Number(event.target.value) as CustomWallpaperRotationMs;
+                setCustomWallpaperRotationState(intervalMs);
+                setCustomWallpaperRotationMs(intervalMs);
+              }}
+              className="pc-select w-full"
+            >
+              {CUSTOM_WALLPAPER_ROTATION_OPTIONS.map((option) => (
+                <option key={option.intervalMs} value={option.intervalMs}>{t(option.labelKey)}</option>
+              ))}
+            </select>
+            <p className="mt-2 text-xs text-pc-text-muted">
+              {customWallpapers.length} {t("generated.account.imagesCycleEvery10SecondsWithTheMapWallpaperCrossfade")}
+            </p>
+          </div>
+        )}
         {customWallpapers.length === 1 && <p className="mb-3 text-xs text-pc-text-muted">{t("generated.account.oneImageIsShownAsAStaticWallpaper")}</p>}
 
         {wallpaperError && <p className="mb-3 rounded-lg border border-red-700/50 bg-red-900/30 p-3 text-sm text-red-400">{wallpaperError}</p>}

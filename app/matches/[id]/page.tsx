@@ -4,6 +4,7 @@
  * refs: none
  */
 import { notFound } from "next/navigation";
+import { headers } from "next/headers";
 import { deriveMissingMatchCreditRates, type MatchDetailWithBans } from "@/lib/api-client";
 import { fetchServerJson } from "@/lib/server-api";
 import MatchDetailClient from "./match-detail-client";
@@ -14,6 +15,7 @@ type MatchResponse = {
   storage_status?: MatchDetailWithBans["storage_status"];
   dataStatus?: MatchDetailWithBans["dataStatus"];
   dataHash?: string;
+  access?: MatchDetailWithBans["access"];
 };
 
 // Match documents are public but contain a request-specific path and may read
@@ -43,9 +45,16 @@ export default async function MatchDetailPage({
 
   let initialMatch: MatchDetailWithBans | null = null;
   try {
+    const incoming = await headers();
+    const forwarded = new Headers();
+    for (const name of ["cookie", "cf-connecting-ip", "x-forwarded-for"] as const) {
+      const value = incoming.get(name);
+      if (value) forwarded.set(name, value);
+    }
     const raw = await fetchServerJson<MatchResponse>(`/matches/${matchId}`, {
       cache: "no-store",
       timeoutMs: 5_000,
+      headers: forwarded,
     });
     const detail = raw.matches?.[0];
     if (detail) {
@@ -54,6 +63,7 @@ export default async function MatchDetailPage({
         storageStatus: detail.storageStatus ?? raw.storageStatus ?? raw.storage_status,
         dataStatus: detail.dataStatus ?? raw.dataStatus,
         dataHash: detail.dataHash ?? raw.dataHash,
+        access: detail.access ?? raw.access,
       });
     }
   } catch (error) {

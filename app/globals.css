@@ -1,6 +1,4 @@
-@import url("https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css");
 @import "tailwindcss" source(none);
-@import "@flaticon/flaticon-uicons/css/solid/straight.css";
 @source "../app";
 @source "../components";
 @source "../lib";
@@ -148,11 +146,11 @@
   --pc-text-secondary: oklch(0.620 0.005 280); /* #98989f — secondary text, descriptions */
   --pc-text-muted: oklch(0.450 0.005 280);    /* #6a6a71 — labels, placeholders, disabled */
 
-  /* Shared glass surface — translucent backgrounds for cards, inputs, panels.
-     Uses rgba() for guaranteed alpha-channel support across browsers. */
-  --pc-glass-bg: rgba(24, 25, 31, 0.82);
-  --pc-glass-bg-light: rgba(24, 25, 31, 0.45);
-  --pc-glass-bg-subtle: rgba(24, 25, 31, 0.35);
+  /* Shared glass surface — dark, low-transparency backgrounds for cards,
+     inputs, and panels. Uses rgba() for cross-browser alpha support. */
+  --pc-glass-bg: rgba(16, 17, 22, 0.94);
+  --pc-glass-bg-light: rgba(16, 17, 22, 0.84);
+  --pc-glass-bg-subtle: rgba(16, 17, 22, 0.74);
   --pc-glass-blur: blur(12px) saturate(0.9) brightness(0.9) contrast(0.9);
 
   /* ── shadcn/ui theme variables — mapped to PaladinsCat dark theme ── */
@@ -865,12 +863,6 @@ html[data-home-wallpaper-phase="returning"] .pc-home-explore * {
 
 .pc-home-feature-card .pc-home-card-icon {
   color: var(--pc-card-accent);
-  background: color-mix(in srgb, var(--pc-card-accent) 10%, transparent);
-  border-color: color-mix(in srgb, var(--pc-card-accent) 24%, transparent);
-}
-
-.pc-home-feature-card:hover .pc-home-card-icon {
-  box-shadow: 0 0 24px color-mix(in srgb, var(--pc-card-accent) 18%, transparent);
 }
 
 .pc-home-feature-card:hover .pc-home-card-arrow {

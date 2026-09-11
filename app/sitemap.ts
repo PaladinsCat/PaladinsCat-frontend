@@ -48,7 +48,6 @@ const staticRoutes: Array<{
   { path: "/stats/activity", changeFrequency: "hourly", priority: 0.8 },
   { path: "/stats/activity/details", changeFrequency: "hourly", priority: 0.7 },
   { path: "/stats/tiers", changeFrequency: "hourly", priority: 0.8 },
-  { path: "/stats/talents", changeFrequency: "daily", priority: 0.75 },
   { path: "/stats/loadouts", changeFrequency: "daily", priority: 0.75 },
   { path: "/builds", changeFrequency: "daily", priority: 0.8 },
   { path: "/community", changeFrequency: "daily", priority: 0.8 },

@@ -11,25 +11,9 @@
 export type BuiltInWallpaper = { avif: string; png: string };
 
 const WALLPAPER_IDS = [
-  "1024399",
-  "1024395",
-  "1024394",
-  "1024390",
-  "1024421",
-  "1024418",
-  "1024425",
-  "1024416",
-  "1024415",
-  "1024405",
-  "1024406",
-  "1024387",
-  "1024389",
-  "1024401",
-  "1024412",
-  "1024420",
-  "1024411",
-  "1024409",
-  "1024408",
+  "androxus-moonlight",
+  "dj-maeve",
+  "inara-forest",
 ] as const;
 
 // Full-scene artwork only. Tactical overhead map layouts remain available to

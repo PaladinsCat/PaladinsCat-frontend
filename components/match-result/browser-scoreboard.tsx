@@ -94,7 +94,9 @@ function TeamRows({ team }: { team: MatchResultPlayer[] }) {
     const stat = metrics[index]!;
     const talent = entry.factData?.talents?.[0];
     const championHref = player.champion_name ? `/champions/${championSlug(player.champion_name)}` : null;
-    const talentHref = talent?.talent_id && championHref ? `${championHref}/talents/${talent.talent_id}` : null;
+    const talentHref = talent?.talent_id && player.champion_name
+      ? `/stats/loadouts/${championSlug(player.champion_name)}?talentId=${talent.talent_id}`
+      : null;
     const tier = tierFor(entry);
     const party = getPartyNumber(player);
     const peak = (key: keyof Metrics, onlyIfPositive = false) => stat[key] === maximum(key) && (!onlyIfPositive || stat[key] > 0);

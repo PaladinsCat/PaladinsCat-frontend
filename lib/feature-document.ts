@@ -4,8 +4,10 @@
  * it does not persist content or depend on authenticated user state.
  * refs: documents/06-reference/frontend-design-system.md#editorial-or-marketing
  */
-import matter from "gray-matter";
+import { readFile } from "node:fs/promises";
+import { resolve } from "node:path";
 import { unstable_cache } from "next/cache";
+import { activeNewFeatures, parseNewFeaturesDocument, type NewFeatureEntry } from "@/lib/feature-feed";
 
 const FEATURES_GITHUB_REPO = process.env.FEATURES_GITHUB_REPO || "PaladinsCat/PaladinsCat";
 const FEATURES_GITHUB_PATH = (process.env.FEATURES_GITHUB_PATH || "docs/features/new-features.md").replace(/^\/+|\/+$/g, "");
@@ -31,51 +33,24 @@ export function getFeatureSourceUrl(): string {
  * refs: documents/06-reference/frontend-design-system.md#editorial-or-marketing
  */
 export interface FeatureDocument {
-  title: string;
-  description: string;
-  updatedAt: string;
-  content: string;
+  title: "New Features";
+  entries: NewFeatureEntry[];
   sourceUrl: string;
 }
 
-function readString(value: unknown): string | undefined {
-  return typeof value === "string" && value.trim() ? value.trim() : undefined;
-}
-
-function deriveTitle(content: string): string {
-  const match = content.match(/^#\s+(.+)$/m);
-  return match?.[1]?.trim() || "New Features";
-}
-
-function deriveDescription(content: string): string {
-  const quote = content
-    .split(/\r?\n/)
-    .find((line) => line.trim().startsWith(">"));
-  if (quote) return quote.replace(/^\s*>\s*/, "").trim();
-
-  return content
-    .split(/\r?\n\s*\r?\n/)
-    .map((paragraph) => paragraph.trim())
-    .find((paragraph) => paragraph && !paragraph.startsWith("#"))
-    ?.replace(/[*_`]/g, "")
-    .trim() || "Latest PaladinsCat features and updates.";
-}
-
 function parseFeatureDocument(rawContent: string): FeatureDocument {
-  const { data, content } = matter(rawContent);
-  const frontmatter = data as Record<string, unknown>;
-  const renderedContent = content
-    .replace(/<!--[\s\S]*?-->/g, "")
-    .replace(/^\s*#\s+.+(?:\r?\n)+/, "")
-    .trim();
+  const document = parseNewFeaturesDocument(rawContent);
+  return { ...document, entries: activeNewFeatures(document.entries), sourceUrl: getFeatureSourceUrl() };
+}
 
-  return {
-    title: readString(frontmatter.title) || deriveTitle(content),
-    description: readString(frontmatter.description) || deriveDescription(content),
-    updatedAt: readString(frontmatter.updatedAt) || "",
-    content: renderedContent,
-    sourceUrl: getFeatureSourceUrl(),
-  };
+async function readLocalFeatureDocument(): Promise<FeatureDocument | null> {
+  if (process.env.NODE_ENV !== "development") return null;
+  try {
+    const localPath = process.env.FEATURES_LOCAL_PATH || resolve(process.cwd(), "..", "paladinscat-public", FEATURES_GITHUB_PATH);
+    return parseFeatureDocument(await readFile(localPath, "utf8"));
+  } catch {
+    return null;
+  }
 }
 
 async function fetchFeatureDocumentUncached(): Promise<FeatureDocument> {
@@ -101,6 +76,8 @@ const getCachedFeatureDocument = unstable_cache(
  * I/O types: `none -> Promise<FeatureDocument | null>`.
  */
 export async function getFeatureDocument(): Promise<FeatureDocument | null> {
+  const localDocument = await readLocalFeatureDocument();
+  if (localDocument) return localDocument;
   try {
     return await getCachedFeatureDocument();
   } catch (error) {
