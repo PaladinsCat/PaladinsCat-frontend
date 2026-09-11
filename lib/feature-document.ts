@@ -4,8 +4,6 @@
  * it does not persist content or depend on authenticated user state.
  * refs: documents/06-reference/frontend-design-system.md#editorial-or-marketing
  */
-import { readFile } from "node:fs/promises";
-import { resolve } from "node:path";
 import { unstable_cache } from "next/cache";
 import { activeNewFeatures, parseNewFeaturesDocument, type NewFeatureEntry } from "@/lib/feature-feed";
 
@@ -42,16 +40,6 @@ function parseFeatureDocument(rawContent: string): FeatureDocument {
   return { ...document, entries: activeNewFeatures(document.entries), sourceUrl: getFeatureSourceUrl() };
 }
 
-async function readLocalFeatureDocument(): Promise<FeatureDocument | null> {
-  if (process.env.NODE_ENV !== "development") return null;
-  try {
-    const localPath = process.env.FEATURES_LOCAL_PATH || resolve(process.cwd(), "..", "paladinscat-public", FEATURES_GITHUB_PATH);
-    return parseFeatureDocument(await readFile(localPath, "utf8"));
-  } catch {
-    return null;
-  }
-}
-
 async function fetchFeatureDocumentUncached(): Promise<FeatureDocument> {
   const response = await fetch(FEATURES_GITHUB_RAW_URL, {
     headers: { "User-Agent": "PaladinsCat-Features" },
@@ -75,8 +63,6 @@ const getCachedFeatureDocument = unstable_cache(
  * I/O types: `none -> Promise<FeatureDocument | null>`.
  */
 export async function getFeatureDocument(): Promise<FeatureDocument | null> {
-  const localDocument = await readLocalFeatureDocument();
-  if (localDocument) return localDocument;
   try {
     return await getCachedFeatureDocument();
   } catch (error) {
