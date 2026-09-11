@@ -22,7 +22,6 @@ export interface NewFeatureEntry {
 }
 
 export interface NewFeaturesDocument {
-  title: "New Features";
   entries: NewFeatureEntry[];
 }
 
@@ -77,7 +76,7 @@ export function parseNewFeaturesDocument(rawContent: string): NewFeaturesDocumen
     seen.add(entry.id);
     entries.push(entry);
   }
-  return { title: "New Features", entries };
+  return { entries };
 }
 
 /**

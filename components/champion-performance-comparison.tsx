@@ -140,7 +140,12 @@ export default function ChampionPerformanceComparison({ scope = "ranked", queueI
                 if (average == null) return null;
                 const tier = Math.round(average);
                 const rank = resolveEffectiveTier(tier, 0);
-                return <ComparisonTooltip className={`ml-auto flex items-center gap-1 whitespace-nowrap text-xs ${getTierColor(rank.displayTier)}`} description={`${t("common.metricHelp.tier")} ${t("generated.champions.avgTier")}: ${rank.displayName} (${formatNumber(average, { maximumFractionDigits: 1 })})`}>
+                return <ComparisonTooltip className={`ml-auto flex items-center gap-1 whitespace-nowrap text-xs ${getTierColor(rank.displayTier)}`} description={t("stats.performance.tierDetail", {
+                  help: t("common.metricHelp.tier"),
+                  label: t("generated.champions.avgTier"),
+                  tier: rank.displayName,
+                  value: formatNumber(average, { maximumFractionDigits: 1 }),
+                })}>
                   <img src={getRankIconPath(tier, 0)} alt={rank.displayName} width={24} height={24} className="h-6 w-6 object-contain" />
                   {formatNumber(average, { maximumFractionDigits: 1 })}
                 </ComparisonTooltip>;
@@ -160,10 +165,26 @@ export default function ChampionPerformanceComparison({ scope = "ranked", queueI
             const baseCountDescription = count == null ? t("stats.performance.countUnavailable") : t(metric === "winRate" ? "stats.performance.winCountHelp" : "stats.performance.banCountHelp", { count: formatNumber(count), champion: champion.name });
             const summary = details.find(item => item.championId === champion.id);
             const countDescription = metric === "winRate" && summary?.wins != null
-              ? `${baseCountDescription} ${t("generated.players.wins")}: ${formatNumber(summary.wins)} · ${t("generated.players.losses")}: ${formatNumber(Math.max(0, summary.totalPlays - summary.wins))}`
+              ? t("stats.performance.winLossDetail", {
+                base: baseCountDescription,
+                winsLabel: t("generated.players.wins"),
+                wins: formatNumber(summary.wins),
+                lossesLabel: t("generated.players.losses"),
+                losses: formatNumber(Math.max(0, summary.totalPlays - summary.wins)),
+              })
               : baseCountDescription;
             return <td key={metric} className="whitespace-nowrap px-3 py-3 text-right align-top tabular-nums text-pc-text" style={percentage && value != null ? { color: getPercentageColor(value) } : undefined}>
-              {averages ? <ComparisonTooltip className="ml-auto flex flex-col items-end" description={percentage ? `${t(`common.metricHelp.${metric}`)} ${countDescription}` : `${t(`common.metricHelp.${metric}`)} ${t(LABELS[metric])}: ${formatNumber(value, { maximumFractionDigits: decimals })}. ${range ?? t("stats.performance.countUnavailable")}. ${t("generated.champions.global")}: ${formatNumber(baseline, { maximumFractionDigits: decimals })} (${formatPercent(delta, { signDisplay: "always", maximumFractionDigits: 1 })})`}>
+              {averages ? <ComparisonTooltip className="ml-auto flex flex-col items-end" description={percentage
+                ? t("stats.performance.helpWithDetail", { help: t(`common.metricHelp.${metric}`), detail: countDescription })
+                : t("stats.performance.metricDetail", {
+                  help: t(`common.metricHelp.${metric}`),
+                  label: t(LABELS[metric]),
+                  value: formatNumber(value, { maximumFractionDigits: decimals }),
+                  range: range ?? t("stats.performance.countUnavailable"),
+                  globalLabel: t("generated.champions.global"),
+                  globalValue: formatNumber(baseline, { maximumFractionDigits: decimals }),
+                  delta: formatPercent(delta, { signDisplay: "always", maximumFractionDigits: 1 }),
+                })}>
                 {percentage ? <>
                   <span>{formatPercent(value, { maximumFractionDigits: 2 })}</span>
                   <span className="mt-1 text-xs text-pc-text-secondary">{formatNumber(count)}</span>

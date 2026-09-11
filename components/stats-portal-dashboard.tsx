@@ -78,7 +78,8 @@ function LoadingPreview() {
 }
 
 function EmptyPreview() {
-  return <div className="flex flex-1 items-center text-sm text-pc-text-muted">Live preview unavailable</div>;
+  const { t } = useLocalization();
+  return <div className="flex flex-1 items-center text-sm text-pc-text-muted">{t("stats.portal.previewUnavailable")}</div>;
 }
 
 function TrendSparkline({ values, color, label }: { values: number[]; color: string; label: string }) {
@@ -115,6 +116,8 @@ function TrendSparkline({ values, color, label }: { values: number[]; color: str
 
 /** Render a compact dashboard whose cards preview their destination's live data. */
 export default function StatsPortalDashboard() {
+  const { user, isLoading: authLoading } = useAuth();
+  const canReadStats = user?.linkedPlayerId != null;
   const { t, formatNumber, formatPercent } = useLocalization();
   const { definition: lobbyTier, ready: lobbyTierReady } = useLobbyTier();
   const [data, setData] = useState<StatsPageData | null>(null);
@@ -127,7 +130,14 @@ export default function StatsPortalDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!lobbyTierReady) return;
+    if (!lobbyTierReady || authLoading) return;
+    if (!canReadStats) {
+      setData(null); setActivity(null); setPresence(null); setPresenceHourly(null);
+      setMatchupData(null); setHighestWinRateSkins([]); setLoadoutChampions([]);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
     let cancelled = false;
     const controller = new AbortController();
     Promise.allSettled([
@@ -160,7 +170,7 @@ export default function StatsPortalDashboard() {
       setLoading(false);
     });
     return () => { cancelled = true; controller.abort(); };
-  }, [lobbyTierReady, lobbyTier.tierMax, lobbyTier.tierMin]);
+  }, [authLoading, canReadStats, lobbyTierReady, lobbyTier.tierMax, lobbyTier.tierMin]);
 
   const skins = data?.skinSort === "plays" ? data.skins.slice(0, 5) : [];
   const purchasedItems = useMemo(() => [...(data?.overview.items ?? [])]
@@ -180,16 +190,16 @@ export default function StatsPortalDashboard() {
       .filter(row => { const key=[row.championId,row.opponentChampionId].sort((a,b)=>a-b).join(":"); if(seen.has(key)) return false; seen.add(key); return true; }).slice(0,5);
   }, [matchupData]);
   const metrics = [
-    { label: "DPM", key: "dpm", color: "text-red-400" },
-    { label: "WDPM", key: "wpm", color: "text-orange-400" },
-    { label: "SDPM", key: "apm", color: "text-fuchsia-400" },
-    { label: "HPM", key: "hpm", color: "text-emerald-400" },
-    { label: "SHPM", key: "shpm", color: "text-teal-400" },
-    { label: "ECPM", key: "egpm", color: "text-yellow-400" },
-    { label: "SPM", key: "mpm", color: "text-blue-400" },
-    { label: "KDA", key: "kda", color: "text-violet-400" },
-    { label: "KPM", key: "kpm", color: "text-cyan-400" },
-    { label: "DEPM", key: "deaths_per_minute", color: "text-rose-400" },
+    { label: t("common.metrics.dpm"), key: "dpm", color: "text-red-400" },
+    { label: t("common.metrics.wpm"), key: "wpm", color: "text-orange-400" },
+    { label: t("common.metrics.apm"), key: "apm", color: "text-fuchsia-400" },
+    { label: t("common.metrics.hpm"), key: "hpm", color: "text-emerald-400" },
+    { label: t("common.metrics.shpm"), key: "shpm", color: "text-teal-400" },
+    { label: t("common.metrics.ecpm"), key: "egpm", color: "text-yellow-400" },
+    { label: t("common.metrics.spm"), key: "mpm", color: "text-blue-400" },
+    { label: t("common.metrics.kda"), key: "kda", color: "text-violet-400" },
+    { label: t("common.metrics.kpm"), key: "kpm", color: "text-cyan-400" },
+    { label: t("common.metrics.deathsPerMinute"), key: "deaths_per_minute", color: "text-rose-400" },
   ].map(metric => ({ ...metric, summary: data?.overview.metrics[metric.key as keyof typeof data.overview.metrics], decimals: ["kda","kpm","deaths_per_minute"].includes(metric.key) ? 2 : 0 }));
   const baselineOrder = ["Global", "Damage", "Flank", "Support", "Frontline"];
   const baselines = [...(data?.baselines ?? [])]
@@ -261,8 +271,8 @@ export default function StatsPortalDashboard() {
                   <span className={`mt-1 text-2xl font-bold tabular-nums ${color}`}>
                     {summary?.sampleSize ? formatNumber(summary.mean, { maximumFractionDigits: decimals }) : "—"}
                   </span>
-                  <span className="mt-2 text-xs tabular-nums text-pc-text-muted">P10 {summary?.sampleSize ? formatNumber(summary.p10, {maximumFractionDigits: decimals}) : "—"}</span>
-                  <span className="text-xs tabular-nums text-pc-text-muted">P90 {summary?.sampleSize ? formatNumber(summary.p90, {maximumFractionDigits: decimals}) : "—"}</span>
+                  <span className="mt-2 text-xs tabular-nums text-pc-text-muted">{t("generated.champions.p10")} {summary?.sampleSize ? formatNumber(summary.p10, {maximumFractionDigits: decimals}) : "—"}</span>
+                  <span className="text-xs tabular-nums text-pc-text-muted">{t("generated.champions.p90")} {summary?.sampleSize ? formatNumber(summary.p90, {maximumFractionDigits: decimals}) : "—"}</span>
                 </div>
               ))}
             </div>
@@ -274,7 +284,7 @@ export default function StatsPortalDashboard() {
             <div className="space-y-4">
               {matchupRows.map(row => <div key={`${row.championId}:${row.opponentChampionId}`} className="flex min-w-0 items-center gap-2 text-sm">
                 <Image src={getChampionIconSafe(row.championName)} alt="" width={28} height={28} className="h-7 w-7 shrink-0 rounded-full" />
-                <span className="min-w-0 flex-1 truncate">{row.championName} vs {row.opponentChampionName}</span>
+                <span className="min-w-0 flex-1 truncate">{t("stats.matchups.pair", { champion: row.championName, opponent: row.opponentChampionName })}</span>
                 <Image src={getChampionIconSafe(row.opponentChampionName)} alt="" width={28} height={28} className="h-7 w-7 shrink-0 rounded-full" />
                 <div className="text-right tabular-nums">
                   <div className="font-semibold text-pc-accent">{formatPercent(row.wins / row.encounters * 100)}</div>

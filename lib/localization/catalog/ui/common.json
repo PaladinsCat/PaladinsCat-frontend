@@ -13,6 +13,8 @@
   "common.format.minutesShort": "{minutes}m",
   "common.format.secondsShort": "{seconds}s",
   "common.format.winLossCompact": "{wins}W/{losses}L",
+  "common.dev.loadingFrameVerification": "Local player-frame verification",
+  "common.dev.previewAvatar": "Preview avatar",
   "common.fallback.general": "General",
   "common.severity.high": "High",
   "common.severity.medium": "Medium",

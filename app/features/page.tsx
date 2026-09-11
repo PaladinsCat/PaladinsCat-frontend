@@ -28,7 +28,7 @@ export const revalidate = 0;
 export async function generateMetadata() {
   const { t } = await getServerLocalization();
   const document = await getFeatureDocument();
-  const title = document?.title || t("home.newFeatures");
+  const title = t("home.newFeatures");
   const description = document?.entries[0]?.summary || t("home.newFeaturesIntro");
   return {
     title,
@@ -65,7 +65,7 @@ export default async function FeaturesPage() {
       <section className="rounded-2xl border border-pc-border bg-pc-bg-elevated/95 p-5 shadow-2xl backdrop-blur-sm sm:p-8 lg:p-10">
         <div className="flex flex-wrap items-start justify-between gap-5 border-b border-pc-border pb-8">
           <div>
-            <h1 className="mt-3 text-4xl font-bold tracking-tight text-pc-text">{document?.title || t("home.newFeatures")}</h1>
+            <h1 className="mt-3 text-4xl font-bold tracking-tight text-pc-text">{t("home.newFeatures")}</h1>
           </div>
           <a href={sourceUrl} target="_blank" rel="noopener noreferrer" className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-pc-border px-3 py-2 text-sm font-semibold text-pc-text-secondary transition-colors hover:border-pc-accent-mid hover:text-pc-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent">
             <GitBranch className="h-4 w-4" aria-hidden="true" />

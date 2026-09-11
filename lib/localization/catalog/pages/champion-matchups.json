@@ -30,5 +30,6 @@
   "stats.matchups.previewNote": "Matchup exclusions",
   "stats.matchups.previewExclusions": "Cassie is excluded because known match drops distort her win rates. Kasumi is excluded because throw picks distort hers. Both champions remain available in the full matchup detail tables.",
   "stats.matchups.global": "Global matchup",
-  "stats.matchups.compareTalents": "Compare talents"
+  "stats.matchups.compareTalents": "Compare talents",
+  "stats.matchups.pair": "{champion} vs {opponent}"
 }

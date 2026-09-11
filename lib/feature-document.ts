@@ -33,7 +33,6 @@ export function getFeatureSourceUrl(): string {
  * refs: documents/06-reference/frontend-design-system.md#editorial-or-marketing
  */
 export interface FeatureDocument {
-  title: "New Features";
   entries: NewFeatureEntry[];
   sourceUrl: string;
 }

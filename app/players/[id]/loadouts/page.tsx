@@ -17,7 +17,12 @@ import { getPlayerLoadoutChampionRoster, type PlayerLoadoutChampion } from "@/li
 import { useLocalization } from "@/lib/localization-context";
 
 
-const ROLE_ORDER = ["Frontline", "Damage", "Flank", "Support"];
+const ROLE_ORDER = [
+  { value: "Frontline", labelKey: "common.roles.frontline" },
+  { value: "Damage", labelKey: "common.roles.damage" },
+  { value: "Flank", labelKey: "common.roles.flank" },
+  { value: "Support", labelKey: "common.roles.support" },
+] as const;
 
 function formatCooldown(seconds: number) {
   const minutes = Math.floor(Math.max(0, seconds) / 60);
@@ -50,9 +55,9 @@ export default function PlayerLoadoutsPage() {
       setData(response);
       setError(response.refreshError);
     }
-    catch (cause) { setError(cause instanceof Error ? cause.message : "Could not load player loadouts."); }
+    catch (cause) { setError(cause instanceof Error ? cause.message : t("generated.players.loadoutsUnavailable")); }
     finally { setLoading(false); }
-  }, [playerId]);
+  }, [playerId, t]);
 
   useEffect(() => { void load(); }, [load]);
   useEffect(() => { getPlayerLoadoutChampionRoster().then(setChampions); }, []);
@@ -79,7 +84,7 @@ export default function PlayerLoadoutsPage() {
       setData(response);
       setError(response.refreshError);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Could not refresh player loadouts.");
+      setError(cause instanceof Error ? cause.message : t("generated.players.loadoutsUnavailable"));
     } finally {
       setRefreshing(false);
     }
@@ -102,8 +107,8 @@ export default function PlayerLoadoutsPage() {
 
       {error && <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-200">{error}</div>}
       {ROLE_ORDER.map((role) => {
-        const championsForRole = champions.filter((champion) => champion.roles.includes(role));
-        return <section key={role}><h2 className="mb-3 text-sm font-bold text-pc-text">{role}</h2><div className="flex flex-wrap gap-1">{championsForRole.map((champion) => { const deckCount = counts.get(champion.id) ?? 0; return <Link key={champion.id} href={`/players/${playerId}/loadouts/${champion.id}`} className="group w-24 rounded-lg border border-pc-border bg-pc-bg-elevated p-[2px] text-center transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary"><img src={getChampionIconSafe(champion.name)} alt="" className="mx-auto h-12 w-12 rounded-lg object-contain" /><div className="mt-0.5 truncate text-xs font-semibold text-pc-text group-hover:text-pc-accent">{champion.name}</div><div className={deckCount > 0 ? "text-xs text-emerald-400" : "text-xs text-pc-text-muted"}>{deckCount > 0 ? `${deckCount} ${deckCount === 1 ? "deck" : "decks"}` : "No decks"}</div></Link>; })}</div></section>;
+        const championsForRole = champions.filter((champion) => champion.roles.includes(role.value));
+        return <section key={role.value}><h2 className="mb-3 text-sm font-bold text-pc-text">{t(role.labelKey)}</h2><div className="flex flex-wrap gap-1">{championsForRole.map((champion) => { const deckCount = counts.get(champion.id) ?? 0; return <Link key={champion.id} href={`/players/${playerId}/loadouts/${champion.id}`} className="group w-24 rounded-lg border border-pc-border bg-pc-bg-elevated p-[2px] text-center transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary"><img src={getChampionIconSafe(champion.name)} alt="" className="mx-auto h-12 w-12 rounded-lg object-contain" /><div className="mt-0.5 truncate text-xs font-semibold text-pc-text group-hover:text-pc-accent">{champion.name}</div><div className={deckCount > 0 ? "text-xs text-emerald-400" : "text-xs text-pc-text-muted"}>{deckCount > 0 ? t(deckCount === 1 ? "common.count.savedDeckOne" : "common.count.savedDeckMany", { count: deckCount }) : t("generated.players.noSavedDeck")}</div></Link>; })}</div></section>;
       })}
 
     </div>

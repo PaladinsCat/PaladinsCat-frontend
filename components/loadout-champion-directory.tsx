@@ -10,10 +10,10 @@ import { useLocalization } from "@/lib/localization-context";
 import { championSlug } from "@/lib/utils";
 
 const ROLES = [
-  { value: "Frontline", label: "common.roles.frontline", icon: "/images/icons/Class_Front_Line_Icon.avif" },
-  { value: "Damage", label: "common.roles.damage", icon: "/images/icons/Class_Damage_Icon.avif" },
-  { value: "Flank", label: "common.roles.flank", icon: "/images/icons/Class_Flank_Icon.avif" },
-  { value: "Support", label: "common.roles.support", icon: "/images/icons/Class_Support_Icon.avif" },
+  { value: "Frontline", labelKey: "common.roles.frontline", icon: "/images/icons/Class_Front_Line_Icon.avif" },
+  { value: "Damage", labelKey: "common.roles.damage", icon: "/images/icons/Class_Damage_Icon.avif" },
+  { value: "Flank", labelKey: "common.roles.flank", icon: "/images/icons/Class_Flank_Icon.avif" },
+  { value: "Support", labelKey: "common.roles.support", icon: "/images/icons/Class_Support_Icon.avif" },
 ] as const;
 
 /** List all champions and filter them by their canonical class. */
@@ -34,7 +34,7 @@ export default function LoadoutChampionDirectory() {
       </button>
       {ROLES.map((entry) => <button type="button" key={entry.value} onClick={() => setRole(entry.value)} aria-pressed={role === entry.value} className={`flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${role === entry.value ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-muted hover:text-pc-text"}`}>
         <SmartImage src={entry.icon} alt="" aria-hidden="true" className="h-5 w-5" />
-        {t(entry.label)}
+        {t(entry.labelKey)}
       </button>)}
     </div>
 
@@ -47,7 +47,7 @@ export default function LoadoutChampionDirectory() {
             <h2 className="truncate text-sm font-semibold text-pc-text transition-colors group-hover:text-pc-accent">{champion.name}</h2>
             {roleEntry && <span className="mt-1 inline-flex items-center gap-1 text-xs text-pc-text-muted">
               <SmartImage src={roleEntry.icon} alt="" aria-hidden="true" className="h-3.5 w-3.5" />
-              {t(roleEntry.label)}
+              {t(roleEntry.labelKey)}
             </span>}
           </div>
         </Link>;
