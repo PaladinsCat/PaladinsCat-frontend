@@ -117,7 +117,12 @@ function TrendSparkline({ values, color, label }: { values: number[]; color: str
 /** Render a compact dashboard whose cards preview their destination's live data. */
 export default function StatsPortalDashboard() {
   const { user, isLoading: authLoading } = useAuth();
-  const canReadStats = user?.linkedPlayerId != null;
+  const canReadStats = !authLoading && user?.linkedPlayerId != null;
+  return <StatsPortalContent key={canReadStats ? "verified" : "limited"} canReadStats={canReadStats} />;
+}
+
+/** Reset restricted previews when the account changes; guests keep directory links. */
+function StatsPortalContent({ canReadStats }: { canReadStats: boolean }) {
   const { t, formatNumber, formatPercent } = useLocalization();
   const { definition: lobbyTier, ready: lobbyTierReady } = useLobbyTier();
   const [data, setData] = useState<StatsPageData | null>(null);
@@ -127,17 +132,10 @@ export default function StatsPortalDashboard() {
   const [matchupData, setMatchupData] = useState<ChampionMatchupPreviews | null>(null);
   const [highestWinRateSkins, setHighestWinRateSkins] = useState<SkinStat[]>([]);
   const [loadoutChampions, setLoadoutChampions] = useState<Array<{ championId: number; championName: string; totalPlays: number }>>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(canReadStats);
 
   useEffect(() => {
-    if (!lobbyTierReady || authLoading) return;
-    if (!canReadStats) {
-      setData(null); setActivity(null); setPresence(null); setPresenceHourly(null);
-      setMatchupData(null); setHighestWinRateSkins([]); setLoadoutChampions([]);
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
+    if (!lobbyTierReady || !canReadStats) return;
     let cancelled = false;
     const controller = new AbortController();
     Promise.allSettled([
@@ -170,7 +168,7 @@ export default function StatsPortalDashboard() {
       setLoading(false);
     });
     return () => { cancelled = true; controller.abort(); };
-  }, [authLoading, canReadStats, lobbyTierReady, lobbyTier.tierMax, lobbyTier.tierMin]);
+  }, [canReadStats, lobbyTierReady, lobbyTier.tierMax, lobbyTier.tierMin]);
 
   const skins = data?.skinSort === "plays" ? data.skins.slice(0, 5) : [];
   const purchasedItems = useMemo(() => [...(data?.overview.items ?? [])]

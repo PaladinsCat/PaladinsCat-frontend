@@ -5,7 +5,8 @@
 "use client";
 
 import { LockKeyhole } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { useLocalization } from "@/lib/localization-context";
 
 /**
@@ -16,6 +17,10 @@ import { useLocalization } from "@/lib/localization-context";
 export function OperationsAuthWall() {
   const { t } = useLocalization();
   const pathname = usePathname();
+  const router = useRouter();
+  useEffect(() => {
+    router.replace(`/auth/login?redirect=${encodeURIComponent(pathname)}`);
+  }, [pathname, router]);
   return (
     <div className="mx-auto max-w-xl pc-card p-7 text-center">
       <LockKeyhole className="mx-auto h-8 w-8 text-pc-accent" />

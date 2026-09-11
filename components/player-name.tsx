@@ -6,6 +6,7 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { fetchPlayerModeration, mergePlayerModeration, type PlayerModeration } from "@/lib/player-moderation";
+import { useAuth } from "@/lib/auth-context";
 import { useLocalization } from "@/lib/localization-context";
 import { hasPlayerTag } from "@/lib/player-tag-threshold";
 
@@ -115,6 +116,8 @@ export function PlayerModerationTag({
   altAccountVoteCount,
   verified,
 }: PlayerModerationTagProps) {
+  const { user } = useAuth();
+  const canLookup = user?.linkedPlayerId != null;
   const { t } = useLocalization();
   const suppliedModeration = {
     cheater,
@@ -145,6 +148,7 @@ export function PlayerModerationTag({
     // the secondary bulk request overwrite those supplied values, which made a
     // match row banner and its CHEATER tag disagree while their caches expired.
     setModeration(mergePlayerModeration(EMPTY_MODERATION, suppliedModeration));
+    if (!canLookup) return;
     let active = true;
     fetchPlayerModeration(playerId).then((state) => {
       if (active) {
@@ -152,7 +156,7 @@ export function PlayerModerationTag({
       }
     });
     return () => { active = false; };
-  }, [afkWintrade, afkWintradeVoteCount, altAccount, altAccountVoteCount, automaticAfk, automaticAfkCount, boosted, boostedMatchCount, cheater, dropper, dropperVoteCount, exploiter, masterFeedingCount, playerId, susCount, verified, wallShooterCount]);
+  }, [canLookup, afkWintrade, afkWintradeVoteCount, altAccount, altAccountVoteCount, automaticAfk, automaticAfkCount, boosted, boostedMatchCount, cheater, dropper, dropperVoteCount, exploiter, masterFeedingCount, playerId, susCount, verified, wallShooterCount]);
 
   const communityAfk = moderation.afkWintrade && hasPlayerTag(moderation.afkWintradeVoteCount);
   const automaticAfkTagged = moderation.automaticAfk;

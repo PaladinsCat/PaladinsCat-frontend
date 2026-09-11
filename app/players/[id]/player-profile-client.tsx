@@ -136,7 +136,7 @@ export default function PlayerProfileClient({
   };
   const formatCooldown = (remainingMs: number) => formatDuration(Math.ceil(remainingMs / 1000));
   const router = useRouter();
-  const { isLoggedIn, isAdmin, isApproved } = useAuth();
+  const { user, isLoading: authLoading, isLoggedIn, isAdmin, isApproved } = useAuth();
 
   const [response, setResponse] = useState<PlayerResponse | null>(initialResponse);
   const [matches, setMatches] = useState<MatchRecord[]>([]);
@@ -144,6 +144,7 @@ export default function PlayerProfileClient({
   const [matchesLoading, setMatchesLoading] = useState(true);
   const displayProfileLoading = useRouteSettledLoading(profileLoading);
   const [error, setError] = useState<string | null>(null);
+  const fullAccess = user?.linkedPlayerId != null && response?.access?.fullAccess !== false;
 
   // Button states
   const [refreshing, setRefreshing] = useState(false);
@@ -173,6 +174,7 @@ export default function PlayerProfileClient({
   // response even though the bulk moderation endpoint exposes it. Keep the
   // profile badge working across both response shapes.
   useEffect(() => {
+    if (!fullAccess) return;
     const directValue = response?.player.verified;
     if (typeof directValue === "boolean") {
       setVerifiedFallback(directValue);
@@ -185,7 +187,7 @@ export default function PlayerProfileClient({
       if (active) setVerifiedFallback(verified);
     });
     return () => { active = false; };
-  }, [id, response?.player.verified]);
+  }, [fullAccess, id, response?.player.verified]);
 
   // Open report modal — redirect to login if not authenticated
   const openReportModal = useCallback((type: Exclude<ReportType, 'approve'>) => {
@@ -242,13 +244,15 @@ export default function PlayerProfileClient({
   // discover the avatar in the initial HTML. Browser fetches remain the
   // fallback for server failures and the source of truth after a refresh.
   useEffect(() => {
-    if (!id || (fetchKey === 0 && initialResponse)) return;
+    if (!id || authLoading || !user || (fetchKey === 0 && initialResponse)) return;
     let cancelled = false;
     setProfileLoading(true);
 
     fetch(`${API_BASE}/players/${encodeURIComponent(id)}`)
       .then(async (res) => {
         const data = await res.json();
+        if (res.status === 401) router.replace(`/auth/login?redirect=${encodeURIComponent(`/players/${id}`)}`);
+        if (res.status === 403 && data?.error?.code === "VERIFICATION_REQUIRED") router.replace("/link-account");
         if (!res.ok) throw new Error(data?.error?.message || PLAYER_PROFILE_ERROR_KEYS.failedToLoadProfile);
         return data as PlayerResponse;
       })
@@ -264,12 +268,13 @@ export default function PlayerProfileClient({
       .catch((err) => {
         if (!cancelled) {
           setError(err instanceof Error ? err.message : "Failed to load player profile");
+          setResponse(null);
           setProfileLoading(false);
         }
       });
 
     return () => { cancelled = true; };
-  }, [fetchKey, id, initialResponse]);
+  }, [authLoading, fetchKey, id, initialResponse, router, user]);
 
   useEffect(() => {
     if (!refreshCooldownUntil) return;
@@ -413,7 +418,7 @@ export default function PlayerProfileClient({
 
   // Fetch matches independently — doesn't block profile rendering
   useEffect(() => {
-    if (!id) return;
+    if (!id || !response || error) return;
     let cancelled = false;
     setMatchesLoading(true);
 
@@ -429,7 +434,7 @@ export default function PlayerProfileClient({
       });
 
     return () => { cancelled = true; };
-  }, [id, historyFetchKey]);
+  }, [id, historyFetchKey, response, error]);
 
   if (displayProfileLoading) {
     return <RouteSkeleton variant="profile" />;
@@ -492,13 +497,13 @@ export default function PlayerProfileClient({
       <PlayersBackLink />
 
       {/* ── Header ── */}
-      <div className="grid items-start grid-cols-1 gap-5 lg:grid-cols-3">
-      <div className="space-y-5 lg:col-span-2">
+      <div className={`grid items-start grid-cols-1 gap-5 ${fullAccess ? "lg:grid-cols-3" : ""}`}>
+      <div className={`space-y-5 ${fullAccess ? "lg:col-span-2" : ""}`}>
       <div className={`pc-card relative self-start ${actionMenuOpen ? 'z-40' : 'z-10'}`}>
         <LoadingOverlay visible={refreshing} />
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
         {/* Keep live/refresh controls visible; consolidate voting and moderation. */}
-        <div ref={actionMenuRef} className="relative order-2 flex shrink-0 flex-wrap items-center justify-end gap-2 self-stretch lg:self-center">
+        {fullAccess && <div ref={actionMenuRef} className="relative order-2 flex shrink-0 flex-wrap items-center justify-end gap-2 self-stretch lg:self-center">
           <button
             type="button"
             onClick={handleCurrentMatch}
@@ -627,6 +632,7 @@ export default function PlayerProfileClient({
           )}
         </div>
 
+        }
         <div className="order-1 min-w-0 flex-1">
         <div className="flex flex-col items-start gap-4 min-[420px]:flex-row min-[420px]:items-center">
           <PlayerLoadingFrame
@@ -671,6 +677,13 @@ export default function PlayerProfileClient({
                             )}
               <span className="text-sm font-medium text-pc-accent/80 sm:text-base">▸ {loadingFrameName}</span>
             </div>
+            {!fullAccess && <div className="mt-4 space-y-3 text-sm text-pc-text-muted">
+              <p>{player.region} · {player.platform} · {t("generated.players.lvl")} {formatNumber(player.level)}</p>
+              <StatGrid>
+                <StatRow label={t("generated.players.created")} value={formatDate(player.created_datetime)} />
+                <StatRow label={t("generated.players.lastLogin")} value={formatDateTime(player.last_login_datetime)} />
+              </StatGrid>
+            </div>}
           </div>
         </div>
         </div>
@@ -679,7 +692,7 @@ export default function PlayerProfileClient({
         {/* Account + Recent Matches stay in the same left stack as the title. */}
         <div className="space-y-5">
           {/* Account Overview */}
-          <div>
+          {fullAccess && <div>
             <div className="pc-card">
               <div className="grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(12rem,0.65fr)]">
                 <div className="min-w-0">
@@ -732,6 +745,7 @@ export default function PlayerProfileClient({
             </div>
           </div>
 
+          }
           {/* Recent Matches */}
           <div>
             <div>
@@ -811,7 +825,7 @@ export default function PlayerProfileClient({
       </div>
 
       {/* Sidebar cards and player ratings form an independent right stack. */}
-      <div className="self-start space-y-5 lg:col-span-1">
+      {fullAccess && <div className="self-start space-y-5 lg:col-span-1">
           <Link href={`/players/${id}/loadouts`} className="group flex items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-3 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary">
             <CardIcon name="loadouts" className="ml-3 text-[var(--pc-title)]" />
             <div className="min-w-0 flex-1 text-sm font-semibold text-pc-text group-hover:text-pc-accent">{t("generated.players.playerLoadouts")}</div>
@@ -946,9 +960,10 @@ export default function PlayerProfileClient({
             </div>
           )}
         </div>
+      }
       </div>
 
-      <PlayerTrendsPanel playerId={id} showTitle={false} />
+      {fullAccess && <PlayerTrendsPanel playerId={id} showTitle={false} />}
 
       {/* ── Current Match Modal ── */}
       {showCurrentMatch && (

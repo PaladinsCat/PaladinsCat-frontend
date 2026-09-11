@@ -2,11 +2,16 @@
 
 const LEGACY_STATS_PATHS = ["/game/items", "/game/maps", "/game/compositions"] as const;
 const VERIFIED_PORTALS = ["/stats", "/players"] as const;
-const ACCOUNT_PORTALS = ["/community", "/builds", "/tierlists"] as const;
+const ACCOUNT_PORTALS = ["/community", "/builds", "/tierlists", "/account", "/link-account", "/operations/tickets"] as const;
+
+/** Only the base numeric profile is available to an unlinked account. */
+export function isLimitedProfilePath(path: string): boolean {
+  return /^\/players\/[1-9]\d*\/?$/.test(path.split(/[?#]/, 1)[0]);
+}
 
 /** Identify every Community-menu route that requires a signed-in account. */
 export function isAccountOnlyPath(path: string): boolean {
-  return ACCOUNT_PORTALS.some((portal) => path === portal || path.startsWith(`${portal}/`));
+  return isLimitedProfilePath(path) || ACCOUNT_PORTALS.some((portal) => path === portal || path.startsWith(`${portal}/`));
 }
 
 /** Return the requested Community destination once browser authentication is known. */
@@ -17,6 +22,7 @@ export function accountDestination(requestedPath: string, user: object | null, i
 
 /** Identify every detail route whose portal remains public but content requires verification. */
 export function isVerifiedOnlyPath(path: string): boolean {
+  if (isLimitedProfilePath(path)) return false;
   if (VERIFIED_PORTALS.some((portal) => path.startsWith(`${portal}/`))) return true;
   return LEGACY_STATS_PATHS.some((prefix) => path === prefix || path.startsWith(`${prefix}/`));
 }
@@ -29,6 +35,6 @@ export function verifiedDestination(
 ): string | null {
   if (isLoading) return null;
   if (!user) return `/auth/login?redirect=${encodeURIComponent(requestedPath)}`;
-  if (user.linkedPlayerId == null) return "/link-account";
+  if (user.linkedPlayerId == null && !isLimitedProfilePath(requestedPath)) return "/link-account";
   return requestedPath;
 }

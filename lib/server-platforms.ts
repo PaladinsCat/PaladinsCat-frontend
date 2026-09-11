@@ -5,8 +5,8 @@
  */
 import "server-only";
 
-import { unstable_cache } from "next/cache";
-import { fetchServerJson } from "@/lib/server-api";
+import { cache } from "react";
+import { fetchAccountServerJson } from "@/lib/server-api";
 import type { PlatformStat } from "@/app/stats/platforms/platforms-client";
 
 type PlatformStatRaw = {
@@ -29,9 +29,9 @@ function displayPercent(value: number | string): number {
   return Math.abs(parsed) <= 1 ? parsed * 100 : parsed;
 }
 
-const getCachedPlatforms = unstable_cache(
+const getCachedPlatforms = cache(
   async (): Promise<PlatformStat[]> => {
-    const rows = await fetchServerJson<PlatformStatRaw[]>("/stats/platforms", {
+    const rows = await fetchAccountServerJson<PlatformStatRaw[]>("/stats/platforms", {
       cache: "no-store",
       timeoutMs: 700,
     });
@@ -45,8 +45,6 @@ const getCachedPlatforms = unstable_cache(
       avgHpm: numberOrZero(row.avg_hpm),
     }));
   },
-  ["platform-stats-initial-v1"],
-  { revalidate: 300, tags: ["platform-stats"] },
 );
 
 /**

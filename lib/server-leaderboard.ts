@@ -3,9 +3,9 @@
  */
 import "server-only";
 
-import { unstable_cache } from "next/cache";
+import { cache } from "react";
 import type { RankedPlayer } from "@/lib/api-client";
-import { fetchServerJson } from "@/lib/server-api";
+import { fetchAccountServerJson } from "@/lib/server-api";
 
 type RawRankedPlayer = {
   player_id: string;
@@ -30,9 +30,9 @@ function rowsFrom(raw: unknown): RawRankedPlayer[] {
   return [];
 }
 
-const getCachedGrandmasterLeaderboard = unstable_cache(
+const getCachedGrandmasterLeaderboard = cache(
   async (): Promise<RankedPlayer[]> => {
-    const raw = await fetchServerJson<unknown>("/stats/ranked-leaderboard?tier=26&top=100", { timeoutMs: 2_000 });
+    const raw = await fetchAccountServerJson<unknown>("/stats/ranked-leaderboard?tier=26&top=100", { timeoutMs: 2_000 });
     return rowsFrom(raw).map((row) => ({
       rank: row.rank,
       player_id: row.player_id,
@@ -48,8 +48,6 @@ const getCachedGrandmasterLeaderboard = unstable_cache(
       leaveRate: row.leaverate,
     }));
   },
-  ["ranked-leaderboard-grandmaster-initial-v1"],
-  { revalidate: 300, tags: ["ranked-leaderboard"] },
 );
 
 /**

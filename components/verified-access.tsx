@@ -5,7 +5,7 @@ import { useEffect, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { useAuth } from "@/lib/auth-context";
-import { isVerifiedOnlyPath, verifiedDestination } from "@/lib/verified-access";
+import { isAccountOnlyPath, isVerifiedOnlyPath, verifiedDestination } from "@/lib/verified-access";
 import { localPreviewAccessEnabled, useLocalPreviewAccess } from "@/lib/use-local-preview-access";
 
 /** Keep public directory portals visible while routing detail-page visitors by account state. */
@@ -14,7 +14,7 @@ export function VerifiedAccess({ children }: { children: ReactNode }) {
   const router = useRouter();
   const { user, isLoading } = useAuth();
   const localPreview = useLocalPreviewAccess();
-  const protectedPath = isVerifiedOnlyPath(pathname) && !localPreview;
+  const protectedPath = (isVerifiedOnlyPath(pathname) || isAccountOnlyPath(pathname)) && !localPreview;
   const destination = verifiedDestination(pathname, user, isLoading);
 
   useEffect(() => {

@@ -4,10 +4,20 @@
  * refs: none
  */
 import "server-only";
+import { cookies } from "next/headers";
 
 type ServerFetchOptions = Omit<RequestInit, "signal"> & {
   timeoutMs?: number;
 };
+
+/** Forward the caller's session for protected SSR reads; never share account responses. */
+export async function fetchAccountServerJson<T>(path: string, options: ServerFetchOptions = {}): Promise<T> {
+  const session = (await cookies()).get("__Host-pc_session")?.value;
+  if (!session) throw new Error("Login required");
+  return fetchServerJson<T>(path, {
+    ...options, cache: "no-store", headers: { ...options.headers, Authorization: `Bearer ${session}` },
+  });
+}
 
 /** Resolve the absolute internal backend origin used by server-owned requests. */
 export function serverApiBase(): string {

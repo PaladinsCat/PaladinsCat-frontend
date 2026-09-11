@@ -17,11 +17,24 @@ test("protects stats and player details while leaving both portals public", () =
   for (const path of [
     "/stats/performance", "/stats/champions", "/stats/items", "/stats/items/1",
     "/stats/maps", "/stats/compositions", "/stats/skins", "/stats/ecpm",
-    "/stats/tiers", "/stats/activity", "/players/713736801", "/players/cheaters",
+    "/stats/tiers", "/stats/activity", "/players/713736801/loadouts", "/players/cheaters",
     "/game/items", "/game/maps/Bazaar",
     "/game/compositions",
   ]) {
     assert.equal(isVerifiedOnlyPath(path), true, path);
+  }
+});
+
+test("unlinked accounts can open only base profiles, with guests sent to login", () => {
+  for (const path of ["/players/16706730", "/players/16706730/", "/players/16706730?tab=matches"]) {
+    assert.equal(isAccountOnlyPath(path), true);
+    assert.equal(isVerifiedOnlyPath(path), false);
+    assert.equal(verifiedDestination(path, null, false), `/auth/login?redirect=${encodeURIComponent(path)}`);
+    assert.equal(verifiedDestination(path, { linkedPlayerId: null }, false), path);
+  }
+  for (const path of ["/players/16706730/loadouts", "/players/16706730/friends", "/players/16706730/champions", "/players/private-accounts/1"]) {
+    assert.equal(isVerifiedOnlyPath(path), true);
+    assert.equal(verifiedDestination(path, { linkedPlayerId: null }, false), "/link-account");
   }
 });
 

@@ -83,6 +83,7 @@ interface ChampionRating {
  * refs: endpoints: GET /players/{id}
  */
 export interface PlayerResponse {
+  access?: { fullAccess: boolean; limit: number | null; remaining: number | null; resetAtMs: number | null };
   player: PlayerData;
   queueRatings: QueueRating[];
   championRatings: ChampionRating[];
