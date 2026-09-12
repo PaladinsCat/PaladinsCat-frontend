@@ -108,7 +108,7 @@ export interface ChampionMatchupPreviews {
   }>;
 }
 
-interface RawChampionMatchupPreviews {
+export interface RawChampionMatchupPreviews {
   champions: Array<{
     champion_id: number;
     strong: ChampionRelationship[];
@@ -122,6 +122,11 @@ export async function fetchChampionMatchupPreviews(signal: AbortSignal): Promise
     "/stats/champions/matchup-previews?days=all",
     { signal, retries: 0 },
   );
+  return mapChampionMatchupPreviews(result);
+}
+
+/** Normalize the same aggregate contract for the directory and matchup pages. */
+export function mapChampionMatchupPreviews(result: RawChampionMatchupPreviews): ChampionMatchupPreviews {
   const normalize = (relationship: ChampionRelationship): ChampionRelationship => ({
     ...relationship,
     wins: Number(relationship.wins),

@@ -6,18 +6,12 @@ import Image from "next/image";
 import { useEffect, useId, useMemo, useState, type ReactNode } from "react";
 import { matchMapImagePath } from "@/lib/map-images";
 import { STATIC_CHAMPIONS } from "@/lib/static-champions";
-import { fetchChampionMatchupPreviews, type ChampionMatchupPreviews } from "@/lib/champion-matchups-api";
+import { type ChampionMatchupPreviews } from "@/lib/champion-matchups-api";
+import { fetchStatsPortalPreview } from "@/lib/stats-portal-api";
 import { PerformanceOverviewCard } from "@/components/PerformanceOverviewCard";
 import {
   fetchMatchHourlyStats,
-  fetchPresenceHourlyStats,
-  fetchPresenceStats,
-  fetchSkinStats,
-  fetchStatsPageData,
-  fetchTalents,
   type MatchHourlyStats,
-  type PresenceHourlyStats,
-  type PresenceStats,
   type SkinStat,
   type StatsPageData,
 } from "@/lib/api-client";
@@ -116,59 +110,43 @@ function TrendSparkline({ values, color, label }: { values: number[]; color: str
 
 /** Render a compact dashboard whose cards preview their destination's live data. */
 export default function StatsPortalDashboard() {
-  const { user, isLoading: authLoading } = useAuth();
-  const canReadStats = !authLoading && user?.linkedPlayerId != null;
-  return <StatsPortalContent key={canReadStats ? "verified" : "limited"} canReadStats={canReadStats} />;
+  return <StatsPortalContent />;
 }
 
-/** Reset restricted previews when the account changes; guests keep directory links. */
-function StatsPortalContent({ canReadStats }: { canReadStats: boolean }) {
+/** Aggregate previews are public; destination links still enforce account access. */
+function StatsPortalContent() {
   const { t, formatNumber, formatPercent } = useLocalization();
   const { definition: lobbyTier, ready: lobbyTierReady } = useLobbyTier();
   const [data, setData] = useState<StatsPageData | null>(null);
   const [activity, setActivity] = useState<MatchHourlyStats | null>(null);
-  const [presence, setPresence] = useState<PresenceStats | null>(null);
-  const [presenceHourly, setPresenceHourly] = useState<PresenceHourlyStats | null>(null);
+  const [presence, setPresence] = useState<{ public_players: number } | null>(null);
+  const [presenceHourly, setPresenceHourly] = useState<{ hourly_by_region: Array<{ date: string; hour: number; total: number }> } | null>(null);
   const [matchupData, setMatchupData] = useState<ChampionMatchupPreviews | null>(null);
   const [highestWinRateSkins, setHighestWinRateSkins] = useState<SkinStat[]>([]);
   const [loadoutChampions, setLoadoutChampions] = useState<Array<{ championId: number; championName: string; totalPlays: number }>>([]);
-  const [loading, setLoading] = useState(canReadStats);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!lobbyTierReady || !canReadStats) return;
+    if (!lobbyTierReady) return;
     let cancelled = false;
     const controller = new AbortController();
     Promise.allSettled([
-      fetchStatsPageData({ tierMin: lobbyTier.tierMin, tierMax: lobbyTier.tierMax }),
+      fetchStatsPortalPreview({ tierMin: lobbyTier.tierMin, tierMax: lobbyTier.tierMax }, controller.signal),
       fetchMatchHourlyStats(),
-      fetchPresenceStats(),
-      fetchPresenceHourlyStats(),
-      fetchChampionMatchupPreviews(controller.signal),
-      fetchSkinStats({ tierMin: lobbyTier.tierMin, tierMax: lobbyTier.tierMax, limit: 5, sort: "winRate" }),
-      fetchTalents({ tierMin: lobbyTier.tierMin, tierMax: lobbyTier.tierMax }),
-    ]).then(([statsResult, activityResult, presenceResult, presenceHourlyResult, matchupResult, skinWinRateResult, talentsResult]) => {
+    ]).then(([previewResult, activityResult]) => {
       if (cancelled) return;
-      setData(statsResult.status === "fulfilled" ? statsResult.value : null);
+      const preview = previewResult.status === "fulfilled" ? previewResult.value : null;
+      setData(preview?.data ?? null);
       setActivity(activityResult.status === "fulfilled" ? activityResult.value : null);
-      setPresence(presenceResult.status === "fulfilled" ? presenceResult.value : null);
-      setPresenceHourly(presenceHourlyResult.status === "fulfilled" ? presenceHourlyResult.value : null);
-      setMatchupData(matchupResult.status === "fulfilled" ? matchupResult.value : null);
-      setHighestWinRateSkins(skinWinRateResult.status === "fulfilled" ? skinWinRateResult.value : []);
-      if (talentsResult.status === "fulfilled") {
-        const totals = new Map<number, { championId: number; championName: string; totalPlays: number }>();
-        for (const talent of talentsResult.value) {
-          const current = totals.get(talent.championId) ?? { championId: talent.championId, championName: talent.championName, totalPlays: 0 };
-          current.totalPlays += talent.totalPlays;
-          totals.set(talent.championId, current);
-        }
-        setLoadoutChampions([...totals.values()].sort((a, b) => b.totalPlays - a.totalPlays).slice(0, 5));
-      } else {
-        setLoadoutChampions([]);
-      }
+      setPresence(preview?.presence ?? null);
+      setPresenceHourly(preview?.presenceHourly ?? null);
+      setMatchupData(preview?.matchups ?? null);
+      setHighestWinRateSkins(preview?.skins ?? []);
+      setLoadoutChampions(preview?.loadoutChampions ?? []);
       setLoading(false);
     });
     return () => { cancelled = true; controller.abort(); };
-  }, [canReadStats, lobbyTierReady, lobbyTier.tierMax, lobbyTier.tierMin]);
+  }, [lobbyTierReady, lobbyTier.tierMax, lobbyTier.tierMin]);
 
   const skins = data?.skinSort === "plays" ? data.skins.slice(0, 5) : [];
   const purchasedItems = useMemo(() => [...(data?.overview.items ?? [])]

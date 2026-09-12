@@ -5265,6 +5265,11 @@ export async function fetchStatsPageData(params?: { tierMin?: number; tierMax?: 
   if (params?.tierMin != null) query.set('tierMin', String(params.tierMin));
   if (params?.tierMax != null) query.set('tierMax', String(params.tierMax));
   const raw = await fetchJson<any>(`/stats/page-data${query.toString() ? `?${query.toString()}` : ''}`, { unwrapData: false });
+  return mapStatsPageData(raw);
+}
+
+/** Shared normalization for the full stats bundle and its public preview subset. */
+export function mapStatsPageData(raw: any): StatsPageData {
   const skinRows = (rows: any[]): SkinStat[] => rows.map((row) => ({
     skinId: Number(row.skin_id), skinName: String(row.skin_name ?? 'Unknown Skin'), championId: Number(row.champion_id), championName: String(row.champion_name ?? 'Unknown Champion'),
     totalPlays: Number(row.total_plays ?? 0), wins: Number(row.wins ?? 0), losses: Number(row.losses ?? 0), winRate: Number(row.win_rate ?? 0),
