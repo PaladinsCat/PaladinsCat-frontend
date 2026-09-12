@@ -22,11 +22,11 @@ import { SegmentedControl } from "@/components/ui/segmented-control";
 
 
 const METRICS = [
-  { key: "gpm", labelKey: "common.metrics.creditsPerMinute", color: "text-yellow-400", role: undefined },
+  { key: "cpm", labelKey: "common.metrics.creditsPerMinute", color: "text-yellow-400", role: undefined },
   { key: "hpm", labelKey: "common.metrics.healingPerMinute", color: "text-emerald-400", role: "Support" },
   { key: "dpm", labelKey: "common.metrics.damagePerMinute", color: "text-red-400", role: "Damage" },
   { key: "spm", labelKey: "common.metrics.shieldingPerMinute", color: "text-blue-400", role: "Frontline" },
-] as const satisfies ReadonlyArray<{ key: "gpm" | "hpm" | "dpm" | "spm"; labelKey: TranslationKey; color: string; role?: "Support" | "Damage" | "Frontline" }>;
+] as const satisfies ReadonlyArray<{ key: "cpm" | "hpm" | "dpm" | "spm"; labelKey: TranslationKey; color: string; role?: "Support" | "Damage" | "Frontline" }>;
 
 type PerformanceScope = "ranked" | "casual";
 type PerformanceMode = "match" | "account" | "champion";
@@ -42,7 +42,7 @@ export default function PerformanceLeaderboardPage({ mode = "match" }: { mode?: 
     ? t("menu.performanceLeaderboard")
     : t("stats.scope.performance", { mode: t(mode === "account" ? "generated.players.account" : "generated.players.champion") });
   const [scope, setScope] = useState<PerformanceScope>("ranked");
-  const [metric, setMetric] = useState<(typeof METRICS)[number]["key"]>("gpm");
+  const [metric, setMetric] = useState<(typeof METRICS)[number]["key"]>("cpm");
   const [result, setResult] = useState<{
     key: string;
     rows: PerformanceLeaderboardEntry[];

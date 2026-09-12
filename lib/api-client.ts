@@ -1198,11 +1198,11 @@ export interface PerformanceLeaderboardEntry {
  * Fetch performance leaderboard data for client consumers.
  *
  * refs: none
- * I/O types: `params: { metric: 'dpm' | 'hpm' | 'gpm' | 'spm'; limit?: number; role?: string; region?: string; queueId?: number; scope?: 'ranked' | 'casual'; mode?: 'match' | 'account' | 'champion'; } -> Promise<PerformanceLeaderboardEntry[]>`.
+ * I/O types: `params: { metric: 'dpm' | 'hpm' | 'gpm' | 'cpm' | 'spm'; limit?: number; role?: string; region?: string; queueId?: number; scope?: 'ranked' | 'casual'; mode?: 'match' | 'account' | 'champion'; } -> Promise<PerformanceLeaderboardEntry[]>`.
  * Request `GET '/players/leaderboard/performance?${query.toString()}'` through the shared API transport. Return `[]` on a caught request failure.
  */
 export async function fetchPerformanceLeaderboard(params: {
-  metric: 'dpm' | 'hpm' | 'gpm' | 'spm';
+  metric: 'dpm' | 'hpm' | 'gpm' | 'cpm' | 'spm';
   limit?: number;
   role?: string;
   region?: string;
@@ -1337,7 +1337,7 @@ export interface PerformanceMetricSummary {
  * Name a backend-supported performance metric. I/O: string literal -> PerformanceMetricKey.
  * refs: endpoints: GET /stats/performance-metrics
  */
-export type PerformanceMetricKey = 'dpm' | 'wpm' | 'apm' | 'hpm' | 'shpm' | 'gpm' | 'egpm' | 'spm' | 'kda' | 'kpm' | 'deaths_per_minute';
+export type PerformanceMetricKey = 'dpm' | 'wpm' | 'apm' | 'hpm' | 'shpm' | 'gpm' | 'cpm' | 'egpm' | 'spm' | 'kda' | 'kpm' | 'deaths_per_minute';
 
 /**
  * Group performance metric summaries returned for the selected population.
@@ -1385,7 +1385,7 @@ export async function fetchPerformanceMetrics(params?: {
   try {
     const raw = await fetchJson<Record<string, any>>(`/stats/performance-metrics${query.toString() ? `?${query.toString()}` : ''}`);
     return Object.fromEntries(
-      Object.entries(raw).filter(([metric]) => ['dpm', 'wpm', 'apm', 'hpm', 'shpm', 'gpm', 'egpm', 'spm', 'kda', 'kpm', 'deaths_per_minute'].includes(metric))
+      Object.entries(raw).filter(([metric]) => ['dpm', 'wpm', 'apm', 'hpm', 'shpm', 'gpm', 'cpm', 'egpm', 'spm', 'kda', 'kpm', 'deaths_per_minute'].includes(metric))
         .map(([metric, summary]) => [metric, mapMetricSummary(summary)])
     ) as PerformanceMetricsResponse;
   } catch {
