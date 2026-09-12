@@ -20,7 +20,7 @@ export const runtime = "nodejs";
  */
 export const maxDuration = 180;
 
-const FORWARDED_REQUEST_HEADERS = ["accept", "authorization", "content-type", "x-csrf-token"] as const;
+const FORWARDED_REQUEST_HEADERS = ["accept", "authorization", "content-type", "x-csrf-token", "origin", "x-forwarded-proto"] as const;
 const FORWARDED_RESPONSE_HEADERS = ["cache-control", "content-type"] as const;
 
 /** Resolve the backend base address from the server-only runtime setting. */
@@ -35,6 +35,14 @@ function forwardRequestHeaders(request: NextRequest): Headers {
     const value = request.headers.get(name);
     if (value) headers.set(name, value);
   }
+  // OIDC sessions live in an HttpOnly cookie rather than a browser bearer token.
+  // Preserve the backend identity owner's cookie contract without forwarding
+  // unrelated browser cookies.
+  const cookies = ["__Host-pc_session", "__Host-pc_csrf"]
+    .map((name) => request.cookies.get(name))
+    .filter((cookie) => cookie?.value)
+    .map((cookie) => `${cookie!.name}=${cookie!.value}`);
+  if (cookies.length) headers.set("cookie", cookies.join("; "));
   return headers;
 }
 
