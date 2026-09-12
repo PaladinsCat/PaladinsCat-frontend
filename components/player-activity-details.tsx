@@ -156,7 +156,7 @@ export default function PlayerActivityDetails() {
               </div>
             )}
           </div>
-          <label className="flex items-center gap-2 text-xs text-pc-text-secondary">
+          <label className="flex w-full flex-col items-start gap-1 text-xs text-pc-text-secondary sm:w-auto sm:flex-row sm:items-center sm:gap-2">
             {t("playerActivity.queue")}
             <select
               value={selectedQueue}
@@ -164,7 +164,7 @@ export default function PlayerActivityDetails() {
                 setSelectedQueue(event.target.value === "all" ? "all" : Number(event.target.value));
                 setPage(1);
               }}
-              className="rounded-lg border border-pc-border bg-pc-bg px-2.5 py-1.5 text-xs text-pc-text"
+              className="pc-select min-h-11"
             >
               <option value="all">{t("playerActivity.allQueues")}</option>
               {queues.map(queue => (
@@ -175,7 +175,7 @@ export default function PlayerActivityDetails() {
             </select>
           </label>
           {activeTab === "players" && (
-            <label className="flex items-center gap-2 text-xs text-pc-text-secondary">
+            <label className="flex w-full flex-col items-start gap-1 text-xs text-pc-text-secondary sm:w-auto sm:flex-row sm:items-center sm:gap-2">
               {t("playerActivity.sort")}
               <select
                 value={playerSort}
@@ -183,7 +183,7 @@ export default function PlayerActivityDetails() {
                   setPlayerSort(event.target.value as PresencePlayerSort);
                   setPage(1);
                 }}
-                className="rounded-lg border border-pc-border bg-pc-bg px-2.5 py-1.5 text-xs text-pc-text"
+                className="pc-select min-h-11"
               >
                 <option value="matches">{t("playerActivity.sortMostMatches")}</option>
                 <option value="alphabetical">{t("playerActivity.sortAlphabetical")}</option>
@@ -208,7 +208,7 @@ export default function PlayerActivityDetails() {
               setActiveTab(tab);
               setPage(1);
             }}
-            className={`border-b-2 px-4 py-2.5 text-sm font-semibold transition-colors ${
+            className={`pc-touch-target border-b-2 px-4 py-2.5 text-sm font-semibold transition-colors ${
               activeTab === tab
                 ? "border-pc-accent text-pc-accent"
                 : "border-transparent text-pc-text-muted hover:text-pc-text"

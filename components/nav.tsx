@@ -380,22 +380,23 @@ export default function Nav() {
 
           {/* ── Mobile Layout ── */}
           <div className="flex items-center justify-between min-[1180px]:hidden" style={{ height: 64 }}>
-            <Link href="/" className="relative text-xl font-bold text-pc-text hover:text-pc-text-muted transition-colors flex items-center gap-2">
-              <img src="/images/icons/paladinscat.avif" alt="" className="w-7 h-7" />
+            <Link href="/" className="relative min-w-0 shrink-0 text-base font-bold text-pc-text transition-colors hover:text-pc-text-muted sm:text-xl">
+              <span className="flex items-center gap-1 sm:gap-2"><img src="/images/icons/paladinscat.avif" alt="" className="h-6 w-6 sm:h-7 sm:w-7" />
               {t("generated.common.paladinscat")}
+              </span>
               {liteMode && (
-                <span className="absolute -right-7 -top-2.5 rounded bg-pc-accent px-1 text-xs font-bold leading-tight text-pc-bg" aria-label={t("menu.liteMode")}>
+                <span className="absolute right-0 -top-3 rounded bg-pc-accent px-1 text-xs font-bold leading-tight text-pc-bg sm:-right-7 sm:-top-2.5" aria-label={t("menu.liteMode")}>
                   {t("menu.lite")}
                 </span>
               )}
             </Link>
 
-            <div className="flex items-center gap-1" suppressHydrationWarning>
+            <div className="flex shrink-0 items-center gap-1" suppressHydrationWarning>
               <LanguageMenu />
               <NotificationMenu />
               <button
                 onClick={() => setSideMenuOpen(true)}
-                className="text-pc-text hover:text-pc-accent transition-colors p-2"
+                className="pc-touch-target p-2 text-pc-text transition-colors hover:text-pc-accent"
                 aria-label={t("generated.common.menu")}
               >
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M3 12h18M3 6h18M3 18h18" /></svg>

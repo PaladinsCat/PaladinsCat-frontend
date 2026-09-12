@@ -175,11 +175,11 @@ export function BarChartComponent({
               dataKey={xKey}
               stroke={chartTextSecondary}
               fontSize={12}
-              height={xAxisIcons ? 52 : undefined}
+              height={xAxisIcons ? 72 : undefined}
               interval={xAxisIcons ? 0 : undefined}
               tick={xAxisIcons ? ({ x, y, payload }) => <g transform={`translate(${x},${y})`}>
-                <image href={xAxisIcons[String(payload.value)]} x={-10} y={4} width={20} height={20} aria-hidden="true" />
-                <text x={0} y={40} textAnchor="middle" fill={chartTextSecondary} fontSize={12}>{payload.value}</text>
+                <image href={xAxisIcons[String(payload.value)]} x={-10} y={2} width={20} height={20} aria-hidden="true" />
+                <text x={0} y={42} textAnchor="middle" fill={chartTextSecondary} fontSize={12} className="pc-chart-axis-label"><title>{payload.value}</title>{payload.value}</text>
               </g> : { fill: chartTextSecondary }}
             />
           )}

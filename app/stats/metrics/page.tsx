@@ -112,7 +112,7 @@ function PerformanceData({ scope, metric, queueId, initialData }: {
         <h2 id="performance-distribution" className="pc-heading text-xl">{t("stats.performance.distribution")}</h2>
       </header>
       <div className="overflow-x-auto" role="region" aria-label={t("stats.performance.distribution")} tabIndex={0}>
-        <table className="w-full whitespace-nowrap text-sm">
+        <table className="w-full min-w-[44rem] whitespace-nowrap text-sm">
           <caption className="sr-only">{t(METRICS[metric].full)} · {t(scope === "ranked" ? "stats.performance.ranked" : "stats.performance.casual")}</caption>
           <thead><tr className="border-b border-pc-border text-xs text-pc-text-secondary">
             <th scope="col" className="px-4 py-3 text-left sm:pl-6">{t("stats.performance.role")}</th>

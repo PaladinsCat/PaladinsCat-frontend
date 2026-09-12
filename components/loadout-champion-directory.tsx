@@ -28,11 +28,11 @@ export default function LoadoutChampionDirectory() {
   return <div className="space-y-6">
     <h1 className="pc-heading pc-heading-lg">{t("stats.loadouts.title")}</h1>
 
-    <div role="group" aria-label={t("generated.champions.class.41ff354")} className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-      <button type="button" onClick={() => setRole(null)} aria-pressed={role == null} className={`shrink-0 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${role == null ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-muted hover:text-pc-text"}`}>
+    <div role="group" aria-label={t("generated.champions.class.41ff354")} className="flex flex-wrap gap-2 pb-1">
+      <button type="button" onClick={() => setRole(null)} aria-pressed={role == null} className={`pc-touch-target rounded-lg px-3 py-2 text-sm font-medium transition-colors ${role == null ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-muted hover:text-pc-text"}`}>
         {t("generated.stats.all")}
       </button>
-      {ROLES.map((entry) => <button type="button" key={entry.value} onClick={() => setRole(entry.value)} aria-pressed={role === entry.value} className={`flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${role === entry.value ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-muted hover:text-pc-text"}`}>
+      {ROLES.map((entry) => <button type="button" key={entry.value} onClick={() => setRole(entry.value)} aria-pressed={role === entry.value} className={`pc-touch-target flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${role === entry.value ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-muted hover:text-pc-text"}`}>
         <SmartImage src={entry.icon} alt="" aria-hidden="true" className="h-5 w-5" />
         {t(entry.labelKey)}
       </button>)}
@@ -44,7 +44,7 @@ export default function LoadoutChampionDirectory() {
         return <Link key={champion.id} href={`/stats/loadouts/${championSlug(champion.name)}`} className="group flex min-h-20 items-center gap-3.5 rounded-xl border border-pc-border bg-pc-bg-elevated p-3 transition-[border-color,background-color,transform] duration-200 hover:-translate-y-0.5 hover:border-pc-accent-mid hover:bg-pc-bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent motion-reduce:transform-none">
           <SmartImage src={getChampionIconSafe(champion.name)} alt="" width={48} height={48} className="h-12 w-12 shrink-0 rounded-lg object-contain" />
           <div className="min-w-0 flex-1">
-            <h2 className="truncate text-sm font-semibold text-pc-text transition-colors group-hover:text-pc-accent">{champion.name}</h2>
+            <h2 className="break-words text-sm font-semibold text-pc-text transition-colors group-hover:text-pc-accent">{champion.name}</h2>
             {roleEntry && <span className="mt-1 inline-flex items-center gap-1 text-xs text-pc-text-muted">
               <SmartImage src={roleEntry.icon} alt="" aria-hidden="true" className="h-3.5 w-3.5" />
               {t(roleEntry.labelKey)}

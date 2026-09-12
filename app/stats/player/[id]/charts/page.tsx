@@ -61,16 +61,16 @@ export default function PlayerChartsPage({ params }: { params: Promise<{ id: str
 
   return (
     <ContentFade className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link href={`/players/${id}`} className="text-pc-text-secondary hover:text-pc-accent transition-colors">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+          <Link href={`/players/${id}`} className="pc-touch-target inline-flex items-center text-pc-text-secondary transition-colors hover:text-pc-accent">
             {t("generated.stats.backToProfile")}</Link>
           <h1 className="pc-heading pc-heading-lg">{t("generated.stats.playerCharts")}</h1>
         </div>
         <select
           value={days}
           onChange={(e) => setDays(parseInt(e.target.value, 10))}
-          className="px-3 py-2 bg-pc-bg-elevated border border-pc-border rounded-lg text-pc-text focus:outline-none focus:ring-2 focus:ring-pc-accent/50"
+          className="pc-select w-full sm:w-auto"
         >
           <option value={7}>{t("generated.stats.last7Days")}</option>
           <option value={30}>{t("generated.stats.last30Days")}</option>
@@ -79,13 +79,13 @@ export default function PlayerChartsPage({ params }: { params: Promise<{ id: str
       </div>
 
       {/* KDA Chart */}
-      <div className="bg-pc-bg-elevated rounded-lg border border-pc-border p-6">
+      <div className="pc-card min-w-0 p-4 sm:p-6">
         <h2 className="pc-card-title mb-4">{t("generated.stats.kdaHistory")}</h2>
         {kdaData.length === 0 ? (
           <p className="text-pc-text-muted text-center py-8">{t("generated.stats.noKdaDataAvailable")}</p>
         ) : (
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={kdaData.map((d) => ({ ...d, label: formatMonthDay(d.date) }))} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
+            <LineChart data={kdaData.map((d) => ({ ...d, label: formatMonthDay(d.date) }))} margin={{ top: 5, right: 8, left: 8, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--pc-bg-elevated)" />
               <XAxis dataKey="label" stroke="var(--pc-text-muted)" fontSize={12} />
               <YAxis stroke="var(--pc-text-muted)" fontSize={12} />
@@ -103,13 +103,13 @@ export default function PlayerChartsPage({ params }: { params: Promise<{ id: str
       </div>
 
       {/* DPM Chart */}
-      <div className="bg-pc-bg-elevated rounded-lg border border-pc-border p-6">
+      <div className="pc-card min-w-0 p-4 sm:p-6">
         <h2 className="pc-card-title mb-4">{t("generated.stats.damagePerMinute")}</h2>
         {dpmData.length === 0 ? (
           <p className="text-pc-text-muted text-center py-8">{t("generated.stats.noDpmDataAvailable")}</p>
         ) : (
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={dpmData.map((d) => ({ ...d, label: formatMonthDay(d.date) }))} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
+            <LineChart data={dpmData.map((d) => ({ ...d, label: formatMonthDay(d.date) }))} margin={{ top: 5, right: 8, left: 8, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--pc-bg-elevated)" />
               <XAxis dataKey="label" stroke="var(--pc-text-muted)" fontSize={12} />
               <YAxis stroke="var(--pc-text-muted)" fontSize={12} />
@@ -126,13 +126,13 @@ export default function PlayerChartsPage({ params }: { params: Promise<{ id: str
       </div>
 
       {/* Glicko-2 Chart */}
-      <div className="bg-pc-bg-elevated rounded-lg border border-pc-border p-6">
+      <div className="pc-card min-w-0 p-4 sm:p-6">
         <h2 className="pc-card-title mb-4">{t("generated.stats.glicko2Rating")}</h2>
         {glickoData.length === 0 ? (
           <p className="text-pc-text-muted text-center py-8">{t("generated.stats.noRatingDataAvailable")}</p>
         ) : (
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={glickoData.map((d) => ({ ...d, label: formatMonthDay(d.date) }))} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
+            <LineChart data={glickoData.map((d) => ({ ...d, label: formatMonthDay(d.date) }))} margin={{ top: 5, right: 8, left: 8, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--pc-bg-elevated)" />
               <XAxis dataKey="label" stroke="var(--pc-text-muted)" fontSize={12} />
               <YAxis stroke="var(--pc-text-muted)" fontSize={12} />

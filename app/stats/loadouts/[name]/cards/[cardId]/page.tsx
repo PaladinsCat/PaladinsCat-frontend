@@ -214,7 +214,7 @@ export default function ChampionCardDetailPage() {
             <button
               type="button"
               onClick={() => selectTalent(null)}
-              className="text-xs px-3 py-1 rounded-lg border border-pc-border text-pc-text-secondary hover:text-pc-accent hover:border-pc-accent-mid transition-colors"
+              className="pc-touch-target rounded-lg border border-pc-border px-3 py-1 text-xs text-pc-text-secondary transition-colors hover:border-pc-accent-mid hover:text-pc-accent"
             >
               {t("generated.champions.clear")}</button>
           )}
@@ -275,7 +275,7 @@ function TalentPairingCard({
     <button
       type="button"
       onClick={onSelect}
-      className={`pc-surface-light rounded-lg p-3 border text-left transition-colors ${selected ? "ring-1 ring-pc-accent border-pc-accent-mid" : "hover:border-pc-accent-mid"}`}
+      className={`pc-surface-light min-h-11 rounded-lg border p-3 text-left transition-colors ${selected ? "ring-1 ring-pc-accent border-pc-accent-mid" : "hover:border-pc-accent-mid"}`}
       style={{ borderColor: selected ? quality.color : quality.borderColor }}
     >
       <div className="flex items-start gap-3">

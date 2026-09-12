@@ -963,6 +963,20 @@ html[data-home-wallpaper-phase="returning"] .pc-home-explore * {
   min-width: 44px;
 }
 
+/* Keep icon-backed chart labels horizontal on desktop; rotate only when the
+ * narrow plot cannot provide one readable label per role. */
+.pc-chart-axis-label {
+  transform: none;
+}
+
+@media (max-width: 639px) {
+  .pc-chart-axis-label {
+    transform: rotate(-35deg);
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+}
+
 main :where(a, button, input, select, textarea):focus-visible {
   outline: 2px solid var(--pc-accent);
   outline-offset: 2px;

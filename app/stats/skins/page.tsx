@@ -159,8 +159,8 @@ export default function SkinStatsPage() {
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <button onClick={() => setFilterRole(null)} className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${filterRole === null ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-muted hover:text-pc-text"}`}>{t("skins.allClasses")}</button>
-        {ROLES.map((role) => <button key={role.value} onClick={() => setFilterRole(filterRole === role.value ? null : role.value)} className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${filterRole === role.value ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-muted hover:text-pc-text"}`}><img src={role.icon} alt="" className="h-5 w-5" />{t(role.labelKey)}</button>)}
+        <button onClick={() => setFilterRole(null)} className={`pc-touch-target rounded-lg px-3 py-2 text-sm font-medium transition-colors ${filterRole === null ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-muted hover:text-pc-text"}`}>{t("skins.allClasses")}</button>
+        {ROLES.map((role) => <button key={role.value} onClick={() => setFilterRole(filterRole === role.value ? null : role.value)} className={`pc-touch-target flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${filterRole === role.value ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-muted hover:text-pc-text"}`}><img src={role.icon} alt="" className="h-5 w-5" />{t(role.labelKey)}</button>)}
       </div>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(16rem,0.65fr)_minmax(0,2fr)]">
