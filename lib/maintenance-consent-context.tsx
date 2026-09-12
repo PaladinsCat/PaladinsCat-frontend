@@ -57,6 +57,8 @@ export function MaintenanceConsentProvider({ children }: { children: ReactNode }
   useEffect(() => {
     paused.current = false;
     savingRef.current = false;
+    // Discard the previous account's private permission before loading this account.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSaving(false); setReady(false); setSnapshot(null); setError(false);
     reload();
     const visible = () => { if (document.visibilityState === "visible") reload(); };
@@ -67,6 +69,8 @@ export function MaintenanceConsentProvider({ children }: { children: ReactNode }
     channel.current = bus;
     if (bus) bus.onmessage = () => reload(); // No user identifier or choice is broadcast.
     return () => {
+      // This is a request revision, not a DOM ref: invalidating its latest value is intentional.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       ++sequence.current; pending.current?.abort(); allowedRef.current = false;
       window.removeEventListener("focus", visible);
       document.removeEventListener("visibilitychange", visible);
@@ -99,7 +103,7 @@ export function MaintenanceConsentProvider({ children }: { children: ReactNode }
     return startAnonymousPresence(async (signal) => {
       try { await sendMaintenancePresence(signal); }
       catch {
-        if (!signal.aborted) { allowedRef.current = false; reload(); }
+        if (!signal.aborted) { allowedRef.current = false; setReady(false); reload(); }
       }
     }, () => allowedRef.current && !paused.current);
   }, [allowed, reload]);

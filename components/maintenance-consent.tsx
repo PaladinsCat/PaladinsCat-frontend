@@ -18,9 +18,9 @@ export function MaintenanceConsentPanel({ settings = false }: { settings?: boole
       <Clock3 size={20} aria-hidden="true" className="mt-0.5 shrink-0 text-pc-text-muted" />
       <div className="min-w-0 flex-1 space-y-3">
         <h2 id={settings ? "maintenance-setting-title" : "maintenance-banner-title"} className="font-semibold text-pc-text">{t("maintenanceConsent.title")}</h2>
-        <p className="text-sm text-pc-text-muted">{t("maintenanceConsent.description")}</p>
-        <p className="text-xs text-pc-text-muted">{t("maintenanceConsent.scope")}</p>
-        <p className="text-xs text-pc-text-muted">{t("maintenanceConsent.security")}</p>
+        <p className="text-sm text-pc-text-secondary">{t("maintenanceConsent.description")}</p>
+        <p className="text-xs text-pc-text-secondary">{t("maintenanceConsent.scope")}</p>
+        <p className="text-xs text-pc-text-secondary">{t("maintenanceConsent.security")}</p>
         <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
           <Link href="/privacy#maintenance-presence" className="text-pc-accent underline underline-offset-4">{t("maintenanceConsent.details")}</Link>
           {!settings && <Link href="/account#maintenance-privacy" className="text-pc-accent underline underline-offset-4">{t("maintenanceConsent.settings")}</Link>}
@@ -32,7 +32,7 @@ export function MaintenanceConsentPanel({ settings = false }: { settings?: boole
             <button type="button" className={button} disabled={saving} onClick={() => void choose(false, settings ? "account_settings" : "login_banner")}>{t("maintenanceConsent.decline")}</button>
             <button type="button" className={button} disabled={saving} onClick={() => void choose(true, settings ? "account_settings" : "login_banner")}>{t("maintenanceConsent.allow")}</button>
           </div>}
-        {saving && <p role="status" className="text-xs text-pc-text-muted">{t("maintenanceConsent.saving")}</p>}
+        {saving && <p role="status" className="text-xs text-pc-text-secondary">{t("maintenanceConsent.saving")}</p>}
       </div>
     </div>
   </section>;
@@ -41,5 +41,5 @@ export function MaintenanceConsentPanel({ settings = false }: { settings?: boole
 export function MaintenanceConsentBanner() {
   const { choice, ready } = useMaintenanceConsent();
   if (!ready || choice?.decision !== "unset") return null;
-  return <div className="fixed inset-x-0 bottom-20 z-40 max-h-[70svh] overflow-y-auto px-3 lg:bottom-4" data-maintenance-consent-banner><MaintenanceConsentPanel /></div>;
+  return <div className="fixed inset-x-0 bottom-20 z-40 max-h-[calc(100svh-7rem)] overflow-y-auto px-3 lg:bottom-4" data-maintenance-consent-banner><MaintenanceConsentPanel /></div>;
 }

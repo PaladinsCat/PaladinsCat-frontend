@@ -100,8 +100,8 @@ export async function proxy(request: NextRequest) {
   }
   const api = websiteApiPath(path);
   const protectedPage = isVerifiedOnlyPath(decodedPath) || isAccountOnlyPath(decodedPath);
-  // This one bodyless endpoint cannot participate in guest/account admission.
-  // Its dedicated handler strips transport metadata before the anonymous counter.
+  // Aggregate GET only. Collection uses /auth/account/maintenance-presence
+  // through normal admission, authentication, CSRF and backend consent checks.
   if (path === "/api/analytics/presence") {
     if (!anonymousPresenceRequestAllowed(request, process.env.PALADINSCAT_PUBLIC_ORIGIN || "https://paladinscat.com")) {
       return new NextResponse(null, { status: 400, headers: { "Cache-Control": "no-store" } });
