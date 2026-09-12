@@ -6,7 +6,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { fetchKdaHistory, fetchDpmHistory, fetchGlickoHistory, type KdaHistoryEntry, type DpmHistoryEntry, type GlickoHistoryEntry } from "@/lib/api-client";
+import { fetchPlayerChartHistory, type KdaHistoryEntry, type DpmHistoryEntry, type GlickoHistoryEntry } from "@/lib/api-client";
 import { useLocalization } from "@/lib/localization-context";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
 import { RouteSkeleton } from "@/components/route-skeleton";
@@ -35,12 +35,9 @@ export default function PlayerChartsPage({ params }: { params: Promise<{ id: str
   const loadData = useCallback(async () => {
     if (!id) return;
     setLoading(true);
+    setError(null);
     try {
-      const [kda, dpm, glicko] = await Promise.all([
-        fetchKdaHistory(id, days, 50).catch(() => []),
-        fetchDpmHistory(id, days, 50).catch(() => []),
-        fetchGlickoHistory(id, days, 50).catch(() => []),
-      ]);
+      const { kda, dpm, glicko } = await fetchPlayerChartHistory(id, days, 50);
       setKdaData(kda);
       setDpmData(dpm);
       setGlickoData(glicko);
@@ -49,7 +46,7 @@ export default function PlayerChartsPage({ params }: { params: Promise<{ id: str
     } finally {
       setLoading(false);
     }
-  }, [id, days]);
+  }, [id, days, t]);
 
   useEffect(() => {
     loadData();
@@ -94,9 +91,9 @@ export default function PlayerChartsPage({ params }: { params: Promise<{ id: str
                 labelStyle={{ color: "var(--pc-text-muted)" }}
               />
               <Legend />
-              <Line type="monotone" dataKey="kills" stroke="var(--pc-chart-green)" strokeWidth={2} dot={{ r: 3 }} />
-              <Line type="monotone" dataKey="deaths" stroke="var(--pc-chart-red)" strokeWidth={2} dot={{ r: 3 }} />
-              <Line type="monotone" dataKey="assists" stroke="var(--pc-chart-sky)" strokeWidth={2} dot={{ r: 3 }} />
+              <Line isAnimationActive={false} type="monotone" dataKey="kills" stroke="var(--pc-chart-green)" strokeWidth={2} dot={{ r: 3 }} />
+              <Line isAnimationActive={false} type="monotone" dataKey="deaths" stroke="var(--pc-chart-red)" strokeWidth={2} dot={{ r: 3 }} />
+              <Line isAnimationActive={false} type="monotone" dataKey="assists" stroke="var(--pc-chart-sky)" strokeWidth={2} dot={{ r: 3 }} />
             </LineChart>
           </ResponsiveContainer>
         )}
@@ -118,8 +115,8 @@ export default function PlayerChartsPage({ params }: { params: Promise<{ id: str
                 labelStyle={{ color: "var(--pc-text-muted)" }}
               />
               <Legend />
-              <Line type="monotone" dataKey="playerDpm" stroke="var(--pc-chart-green)" strokeWidth={2} dot={{ r: 3 }} name={t("generated.stats.player.[id].charts.page.playerdpm")} />
-              <Line type="monotone" dataKey="avgDpm" stroke="var(--pc-chart-amber)" strokeWidth={2} dot={{ r: 3 }} name={t("generated.stats.player.[id].charts.page.serveraverage")} />
+              <Line isAnimationActive={false} type="monotone" dataKey="playerDpm" stroke="var(--pc-chart-green)" strokeWidth={2} dot={{ r: 3 }} name={t("generated.stats.player.[id].charts.page.playerdpm")} />
+              <Line isAnimationActive={false} type="monotone" dataKey="avgDpm" stroke="var(--pc-chart-amber)" strokeWidth={2} dot={{ r: 3 }} name={t("generated.stats.player.[id].charts.page.serveraverage")} />
             </LineChart>
           </ResponsiveContainer>
         )}
@@ -141,7 +138,7 @@ export default function PlayerChartsPage({ params }: { params: Promise<{ id: str
                 labelStyle={{ color: "var(--pc-text-muted)" }}
               />
               <Legend />
-              <Line type="monotone" dataKey="rating" stroke="var(--pc-chart-violet)" strokeWidth={2} dot={{ r: 3 }} name={t("generated.stats.player.[id].charts.page.rating")} />
+              <Line isAnimationActive={false} type="monotone" dataKey="rating" stroke="var(--pc-chart-violet)" strokeWidth={2} dot={{ r: 3 }} name={t("generated.stats.player.[id].charts.page.rating")} />
             </LineChart>
           </ResponsiveContainer>
         )}

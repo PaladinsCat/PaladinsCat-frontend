@@ -7,7 +7,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { Tooltip } from "@base-ui/react/tooltip";
-import { fetchChampionPerformanceDistributions, fetchChampions, fetchStatsChampions, fetchPerformanceMetrics, type StatsChampion, type ChampionPerformanceDistribution, type PerformanceMetricKey, type PerformanceMetricsResponse } from "@/lib/api-client";
+import { fetchChampionPerformanceComparison, fetchChampions, fetchStatsChampions, fetchPerformanceMetrics, type StatsChampion, type ChampionPerformanceDistribution, type PerformanceMetricKey, type PerformanceMetricsResponse } from "@/lib/api-client";
 import { getPercentageColor } from "@/lib/stat-quality";
 import { STATIC_CHAMPIONS } from "@/lib/static-champions";
 import { getChampionIconSafe } from "@/lib/champion-icons";
@@ -67,7 +67,7 @@ export default function ChampionPerformanceComparison({ scope = "ranked", queueI
     let active = true;
     Promise.all([
       scope === "ranked" ? fetchChampions({ scope: "ranked" }) : Promise.resolve([]),
-      Promise.all([...new Set<PerformanceMetricKey>([...GAME_PERFORMANCE_METRICS, "wpm", "apm"])].map(async metric => ({ metric, rows: await fetchChampionPerformanceDistributions({ metric, queueId, scope }).catch(error => { if (scope === "ranked" && metric === "shpm") return []; throw error; }) }))),
+      fetchChampionPerformanceComparison({ queueId, scope }),
       scope === "ranked" ? fetchStatsChampions({ scope: "ranked", limit: 100 }) : Promise.resolve([]),
       fetchPerformanceMetrics({ scope, queueId }),
     ]).then(([champions, results, summary, globalMetrics]) => {

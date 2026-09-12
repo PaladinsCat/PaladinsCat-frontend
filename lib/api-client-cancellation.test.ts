@@ -35,6 +35,31 @@ test("player chart series reuse a minute-bounded backend cache key", () => {
   assert.equal(Date.parse(query.get("to")!) - Date.parse(query.get("from")!), 30 * 86_400_000);
 });
 
+test("stats charts combine requests without losing metric groups or missing ratings", async () => {
+  const names = ["fetchChampionPerformanceComparison", "mapChampionPerformanceRows", "fetchPlayerChartHistory", "playerChartPath", "mapKdaHistory", "mapDpmHistory", "mapGlickoHistory"];
+  const declarations = source.statements.filter(node => ts.isFunctionDeclaration(node) && names.includes(node.name?.text ?? ""));
+  assert.equal(declarations.length, names.length);
+  const code = ts.transpileModule(declarations.map(node => node.getText(source)).join("\n"), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
+  const paths: string[] = [];
+  let response: unknown = [{ metric: "spm", rows: [{ champion_id: 1, champion_name: "Test", class: "Front Line", mean: "12", min: "1", max: "20", median: "10", mode: "9", p10: "2", p90: "18", avg_value: "12", total_matches: 5 }] }];
+  const api = {} as Pick<typeof import("./api-client"), "fetchChampionPerformanceComparison" | "fetchPlayerChartHistory">;
+  new Function("exports", "fetchJson", code)(api, async (path: string) => { paths.push(path); return response; });
+  const comparison = await api.fetchChampionPerformanceComparison({ queueId: 424, scope: "casual" });
+  assert.equal(paths.length, 1);
+  const query = new URL(paths[0], "https://example.test").searchParams;
+  assert.equal(query.get("metric"), "all");
+  assert.equal(query.get("queueId"), "424");
+  assert.equal(query.get("scope"), "casual");
+  assert.equal(comparison[0].metric, "spm");
+  assert.equal(comparison[0].rows[0].mean, 12);
+  response = [{ entry_datetime: "2026-09-12", kills: "5", deaths: "2", assists: "3", damage_per_minute: "100", rating: null }];
+  const charts = await api.fetchPlayerChartHistory("123", 7, 50);
+  assert.equal(paths.length, 2, "all three player series use one additional request");
+  assert.equal(charts.kda[0].kills, 5);
+  assert.equal(charts.dpm[0].playerDpm, 100);
+  assert.deepEqual(charts.glicko, []);
+});
+
 test("talent statistics preserve request failures instead of inventing zeros", async () => {
   const talent = source.statements.find(node => ts.isFunctionDeclaration(node) && node.name?.text === "fetchChampionTalentStats");
   assert.ok(talent);

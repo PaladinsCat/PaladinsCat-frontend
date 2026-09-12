@@ -1440,6 +1440,24 @@ export interface ChampionPerformanceDistribution {
  * Request `GET '/stats/performance-metrics/by-champion?${query.toString()}'` through the shared API transport. Uncaught network/API errors reject the returned promise.
  * I/O types: `params: { metric: PerformanceMetricKey; championId?: number; queueId?: number; } -> Promise<ChampionPerformanceDistribution[]>`.
  */
+type ChampionPerformanceRow = {
+  champion_id: number; champion_name: string; class: string;
+  min: number | string; max: number | string; mean: number | string;
+  median: number | string; mode: number | string; p10?: number | string; p90?: number | string; avg_value: number | string;
+  total_matches: number;
+};
+
+/** Fetch the stats owner's complete comparison in one cached request. */
+export async function fetchChampionPerformanceComparison(params: {
+  queueId: number; scope: 'ranked' | 'casual';
+}): Promise<Array<{ metric: PerformanceMetricKey; rows: ChampionPerformanceDistribution[] }>> {
+  const query = new URLSearchParams({ scope: params.scope, queueId: String(params.queueId), metric: 'all' });
+  const groups = await fetchJson<Array<{ metric: PerformanceMetricKey; rows: ChampionPerformanceRow[] }>>(
+    `/stats/performance-metrics/by-champion?${query.toString()}`,
+  );
+  return groups.map(group => ({ metric: group.metric, rows: mapChampionPerformanceRows(group.rows) }));
+}
+
 export async function fetchChampionPerformanceDistributions(params: {
   metric: PerformanceMetricKey;
   championId?: number;
@@ -1451,12 +1469,11 @@ export async function fetchChampionPerformanceDistributions(params: {
   query.set('metric', params.metric);
   if (params.championId != null) query.set('championId', String(params.championId));
   if (params.queueId != null) query.set('queueId', String(params.queueId));
-  const raw = await fetchJson<Array<{
-    champion_id: number; champion_name: string; class: string;
-    min: number | string; max: number | string; mean: number | string;
-    median: number | string; mode: number | string; p10?: number | string; p90?: number | string; avg_value: number | string;
-    total_matches: number;
-  }>>(`/stats/performance-metrics/by-champion?${query.toString()}`);
+  const raw = await fetchJson<ChampionPerformanceRow[]>(`/stats/performance-metrics/by-champion?${query.toString()}`);
+  return mapChampionPerformanceRows(raw);
+}
+
+function mapChampionPerformanceRows(raw: ChampionPerformanceRow[]): ChampionPerformanceDistribution[] {
   return raw.map((r) => ({
     championId: r.champion_id,
     championName: r.champion_name,
@@ -6579,7 +6596,10 @@ function playerChartPath(playerId: string, days: number, limit: number) {
  */
 export async function fetchKdaHistory(playerId: string, days: number = 30, limit: number = 50): Promise<KdaHistoryEntry[]> {
   const raw = await fetchJson<PlayerChartRow[]>(playerChartPath(playerId, days, limit));
+  return mapKdaHistory(raw);
+}
 
+function mapKdaHistory(raw: PlayerChartRow[]): KdaHistoryEntry[] {
   return raw.map((r) => ({
     date: r.entry_datetime,
     kills: Number(r.kills ?? 0),
@@ -6597,6 +6617,10 @@ export async function fetchKdaHistory(playerId: string, days: number = 30, limit
  */
 export async function fetchDpmHistory(playerId: string, days: number = 30, limit: number = 50): Promise<DpmHistoryEntry[]> {
   const raw = await fetchJson<PlayerChartRow[]>(playerChartPath(playerId, days, limit));
+  return mapDpmHistory(raw);
+}
+
+function mapDpmHistory(raw: PlayerChartRow[]): DpmHistoryEntry[] {
   const values = raw.map((r) => Number(r.damage_per_minute ?? 0)).filter((value) => Number.isFinite(value));
   const avgDpm = values.length > 0 ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
 
@@ -6616,7 +6640,10 @@ export async function fetchDpmHistory(playerId: string, days: number = 30, limit
  */
 export async function fetchGlickoHistory(playerId: string, days: number = 30, limit: number = 50): Promise<GlickoHistoryEntry[]> {
   const raw = await fetchJson<PlayerChartRow[]>(playerChartPath(playerId, days, limit));
+  return mapGlickoHistory(raw);
+}
 
+function mapGlickoHistory(raw: PlayerChartRow[]): GlickoHistoryEntry[] {
   return raw
     .filter((r) => r.rating != null)
     .map((r) => ({
@@ -6626,6 +6653,12 @@ export async function fetchGlickoHistory(playerId: string, days: number = 30, li
 }
 
 // ── Match Types ──
+
+/** Load all player chart series from the same response and time window. */
+export async function fetchPlayerChartHistory(playerId: string, days: number = 30, limit: number = 50) {
+  const raw = await fetchJson<PlayerChartRow[]>(playerChartPath(playerId, days, limit));
+  return { kda: mapKdaHistory(raw), dpm: mapDpmHistory(raw), glicko: mapGlickoHistory(raw) };
+}
 
 /**
  * MatchPlayerDetail — local type for match player data from the API.
