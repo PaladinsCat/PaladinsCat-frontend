@@ -8,6 +8,7 @@ import { SITE_URL } from "@/lib/seo";
 import { STATIC_CHAMPIONS } from "@/lib/static-champions";
 import { championSlug } from "@/lib/utils";
 import { getAllPosts, getPostLink } from "@/lib/blog";
+import { isAccountOnlyPath, isVerifiedOnlyPath } from "@/lib/verified-access";
 
 const PLAYER_ROLES = ["frontline", "damage", "flank", "support"] as const;
 // These URLs remain useful after a map leaves rotation because their historic
@@ -98,5 +99,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  return [...staticEntries, ...championEntries, ...roleEntries, ...mapEntries, ...blogEntries];
+  const entries = [...staticEntries, ...championEntries, ...roleEntries, ...mapEntries, ...blogEntries];
+  return entries.filter((entry) => {
+    const path = new URL(entry.url).pathname;
+    return !isVerifiedOnlyPath(path) && !isAccountOnlyPath(path);
+  });
 }

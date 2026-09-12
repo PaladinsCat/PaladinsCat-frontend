@@ -50,6 +50,13 @@ function accessRedirect(request: NextRequest, destination: "/auth/login" | "/lin
   }
   const response = NextResponse.redirect(url);
   response.headers.set("Cache-Control", "private, no-store");
+  response.headers.set("X-Robots-Tag", "noindex, nofollow");
+  return response;
+}
+
+/** Add crawler exclusion to any response for a protected page. */
+function markProtectedResponse(response: NextResponse): NextResponse {
+  response.headers.set("X-Robots-Tag", "noindex, nofollow");
   return response;
 }
 
@@ -92,6 +99,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.json({ error: { code: "INVALID_PATH" } }, { status: 400 });
   }
   const api = websiteApiPath(path);
+  const protectedPage = isVerifiedOnlyPath(decodedPath) || isAccountOnlyPath(decodedPath);
   // This one bodyless endpoint cannot participate in guest/account admission.
   // Its dedicated handler strips transport metadata before the anonymous counter.
   if (path === "/api/analytics/presence") {
@@ -112,19 +120,19 @@ export async function proxy(request: NextRequest) {
     return response;
   }
   const verifiedOnly = isVerifiedOnlyPath(decodedPath);
-  if (verifiedOnly || isAccountOnlyPath(decodedPath)) {
+  if (protectedPage) {
     const { state, retryAfter } = await accountSessionState(request);
     if (state === "guest") return accessRedirect(request, "/auth/login");
     if (verifiedOnly && state === "unverified") return accessRedirect(request, "/link-account");
     if (state === "rate-limited") {
       const headers = new Headers({ "Cache-Control": "private, no-store" });
       if (retryAfter) headers.set("Retry-After", retryAfter);
-      return NextResponse.json({ error: { code: "AUTHENTICATION_RATE_LIMITED" } }, { status: 429, headers });
+      return markProtectedResponse(NextResponse.json({ error: { code: "AUTHENTICATION_RATE_LIMITED" } }, { status: 429, headers }));
     }
     if (state === "unavailable") {
-      return NextResponse.json({ error: { code: "AUTHENTICATION_UNAVAILABLE" } }, {
+      return markProtectedResponse(NextResponse.json({ error: { code: "AUTHENTICATION_UNAVAILABLE" } }, {
         status: 503, headers: { "Cache-Control": "private, no-store" },
-      });
+      }));
     }
   }
   const origin = process.env.PALADINSCAT_PUBLIC_ORIGIN || "https://paladinscat.com";
@@ -136,9 +144,10 @@ export async function proxy(request: NextRequest) {
     ).trim();
     if (!/^[a-f0-9]{64}$/i.test(secret)) throw new Error("Invalid website gate secret");
   } catch {
-    return NextResponse.json({ error: { code: "WEBSITE_GATE_UNAVAILABLE" } }, {
+    const response = NextResponse.json({ error: { code: "WEBSITE_GATE_UNAVAILABLE" } }, {
       status: 503, headers: { "Cache-Control": "private, no-store" },
     });
+    return protectedPage ? markProtectedResponse(response) : response;
   }
   const admitted = validGuest(request.cookies.get(GUEST_COOKIE)?.value, secret, origin);
   if (api) {
@@ -188,6 +197,7 @@ export async function proxy(request: NextRequest) {
   });
   response.headers.set("Content-Security-Policy", csp);
   response.headers.set("Cache-Control", "private, no-store");
+  if (protectedPage) markProtectedResponse(response);
   if (!admitted && request.method === "GET" && request.headers.get("accept")?.includes("text/html")) {
     response.cookies.set(GUEST_COOKIE, issueGuest(secret, origin), {
       httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: GUEST_TTL_SECONDS,
@@ -204,6 +214,6 @@ export async function proxy(request: NextRequest) {
 export const config = {
   // Cover both API aliases as well as documents; static assets need no guest cookie.
   matcher: [
-    "/((?!_next/static|_next/image|_next/webpack-hmr|images/|fonts/|locales/|robots.txt|sitemap\\.xml|manifest\\.webmanifest).*)",
+    "/((?!_next/static|_next/image|_next/webpack-hmr|images/|fonts/|locales/|robots.txt|sitemap\\.xml|ads\\.txt$|manifest\\.webmanifest).*)",
   ],
 };
