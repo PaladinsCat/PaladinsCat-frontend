@@ -3,7 +3,7 @@
  * refs: none
  */
 import type { PerformanceMetricSummary } from "@/lib/api-client";
-import { fetchServerJson } from "@/lib/server-api";
+import { fetchAccountServerJson } from "@/lib/server-api";
 import type { Metadata } from "next";
 import { getServerLocalization } from "@/lib/server-localization";
 import { performanceSelection, type GamePerformanceMetric, type PerformanceScope } from "@/lib/performance-selection";
@@ -38,7 +38,7 @@ function unwrapRecord(raw: unknown): RawRecord {
 
 async function getInitialData(scope: PerformanceScope, metric: GamePerformanceMetric, queueId: number): Promise<MetricsInitialData | null> {
   try {
-    const dashboardRaw = await fetchServerJson<RawRecord>(`/stats/performance-metrics?metric=${metric}&scope=${scope}&includeRoles=1&queueId=${queueId}`, { timeoutMs: 5000 });
+    const dashboardRaw = await fetchAccountServerJson<RawRecord>(`/stats/performance-metrics?metric=${metric}&scope=${scope}&includeRoles=1&queueId=${queueId}`, { timeoutMs: 5000 });
     const dashboard = unwrapRecord(dashboardRaw);
     if (!dashboard[metric] || (dashboard.scope && dashboard.scope !== scope) || (scope === "casual" && (!Array.isArray(dashboard.queue_ids) || dashboard.queue_ids.length !== 1 || dashboard.queue_ids[0] !== queueId))) return null;
     const roles = dashboard.roles && typeof dashboard.roles === "object" && !Array.isArray(dashboard.roles)

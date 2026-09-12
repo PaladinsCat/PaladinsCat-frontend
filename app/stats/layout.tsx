@@ -23,5 +23,5 @@ export async function generateMetadata() {
  * I/O types: `{ children }: { children: React.ReactNode } -> ReactNode`.
  */
 export default function StatsLayout({ children }: { children: React.ReactNode }) {
-  return <VerifiedAccess><div className="min-w-0 max-w-full">{children}</div></VerifiedAccess>;
+  return <VerifiedAccess><div className="pc-stats-pages min-w-0 max-w-full">{children}</div></VerifiedAccess>;
 }

@@ -1404,6 +1404,13 @@ main :where(a, button, input, select, textarea):focus-visible {
   animation: pc-route-fade-in 200ms ease-out both;
 }
 
+/* Statistics should become visible when their data arrives, without adding
+   a second 200ms reveal to the network and rendering latency. */
+.pc-stats-pages .pc-content-fade,
+.pc-stats-pages .pc-metric-fade {
+  animation: none;
+}
+
 @keyframes pc-route-fade-in {
   from { opacity: 0; }
   to { opacity: 1; }

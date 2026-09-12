@@ -15,6 +15,26 @@ const exported: { fetchJson?: (path:string,options?:RequestInit & {timeoutMs?:nu
 new Function("exports","API_BASE","FETCH_TIMEOUT_MS","csrfHeader","withStoredLobbyTier","API_ERROR_KEYS","ApiRequestError",compiled)(exported,"/api",10000,()=>null,(path:string)=>path,{genericFailure:"failed"},Error);
 const fetchJson=exported.fetchJson!;
 
+test("player chart series reuse a minute-bounded backend cache key", () => {
+  const node = source.statements.find(node => ts.isFunctionDeclaration(node) && node.name?.text === "playerChartPath");
+  assert.ok(node);
+  const code = ts.transpileModule(node.getText(source), { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText;
+  let now = Date.parse("2026-09-12T18:30:01.123Z");
+  class Clock extends Date {
+    constructor(value: number = now) { super(value); }
+  }
+  const path = new Function("Date", `${code}; return playerChartPath;`)(Clock) as (id: string, days: number, limit: number) => string;
+  const first = path("123", 30, 50);
+  now += 20_000;
+  assert.equal(path("123", 30, 50), first);
+  assert.notEqual(path("456", 30, 50), first);
+  assert.notEqual(path("123", 7, 50), first);
+  now += 60_000;
+  assert.notEqual(path("123", 30, 50), first);
+  const query = new URL(first, "https://example.test").searchParams;
+  assert.equal(Date.parse(query.get("to")!) - Date.parse(query.get("from")!), 30 * 86_400_000);
+});
+
 test("talent statistics preserve request failures instead of inventing zeros", async () => {
   const talent = source.statements.find(node => ts.isFunctionDeclaration(node) && node.name?.text === "fetchChampionTalentStats");
   assert.ok(talent);

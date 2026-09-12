@@ -161,7 +161,7 @@ export default function PlayerActivityPanel({
         }
         setHourlyStats(overview.hourly);
         setDroppedIdsByHour(overview.droppedIdsByHour);
-        setPresence(presenceResult);
+        if (presenceResult) setPresence(presenceResult);
         setActivityUnavailable(false);
       } catch {
         // Keep the last confirmed activity visible during a transient API
@@ -174,22 +174,28 @@ export default function PlayerActivityPanel({
     };
     // The server already obtained the first payload. Refresh it on the normal
     // cadence instead of reissuing the same requests during hydration.
-    if (!serverData?.overview?.hourly) void load();
+    if (!serverData?.overview?.hourly || !serverData?.presence) void load();
     const interval = window.setInterval(() => void load(), 60_000);
     return () => { active = false; window.clearInterval(interval); };
   }, [serverData]);
 
   useEffect(() => {
     let active = true;
+    // A queue change must not retain another queue's chart. Background
+    // refreshes keep this queue's last successful response visible.
+    let hasData = selectedPlayerQueue === "all" && serverData?.presenceHourly != null;
     const load = async () => {
-      setPresenceHourlyLoading(true);
+      if (!hasData) setPresenceHourlyLoading(true);
       const result = await fetchPresenceHourlyStats(selectedPlayerQueue === "all" ? undefined : selectedPlayerQueue).catch(() => null);
       if (active) {
-        setPresenceHourly(result);
+        if (result) {
+          setPresenceHourly(result);
+          hasData = true;
+        }
         setPresenceHourlyLoading(false);
       }
     };
-    if (!serverData?.presenceHourly) void load();
+    if (!hasData) void load();
     const interval = window.setInterval(() => void load(), 60_000);
     return () => { active = false; window.clearInterval(interval); };
   }, [selectedPlayerQueue, serverData]);
@@ -298,7 +304,13 @@ export default function PlayerActivityPanel({
         hourly={playerHourly}
         queues={queues}
         selectedQueue={selectedPlayerQueue}
-        onQueueChange={setSelectedPlayerQueue}
+        onQueueChange={(queue) => {
+          if (queue === selectedPlayerQueue) return;
+          const seed = queue === "all" ? serverData?.presenceHourly ?? null : null;
+          setPresenceHourly(seed);
+          setPresenceHourlyLoading(seed == null);
+          setSelectedPlayerQueue(queue);
+        }}
         breakdown={playerBreakdown}
         onBreakdownChange={setPlayerBreakdown}
         regionOrder={activeRegions.map(region => region.region)}

@@ -6558,6 +6558,9 @@ type PlayerChartRow = {
 
 function playerChartPath(playerId: string, days: number, limit: number) {
   const to = new Date();
+  // Completed-match charts tolerate minute granularity. Millisecond bounds
+  // created a distinct backend cache key on every render and for each series.
+  to.setUTCSeconds(0, 0);
   const from = new Date(to.getTime() - days * 24 * 60 * 60 * 1000);
   const query = new URLSearchParams({
     limit: String(limit),
