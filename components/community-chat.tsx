@@ -90,7 +90,8 @@ export default function CommunityChat() {
     setSending(true);
     setError(null);
     try {
-      await sendChatMessage(draft.trim());
+      const message = await sendChatMessage(draft.trim());
+      setMessages((current) => mergeChatMessages(current, [message]));
       setDraft("");
       follow.current = true;
       setUnseen(false);
@@ -100,9 +101,14 @@ export default function CommunityChat() {
 
   async function remove(id: number) {
     if (!window.confirm(t("community.deleteMessageConfirm"))) return;
-    try { await deleteChatMessage(id); }
+    try {
+      const message = await deleteChatMessage(id);
+      setMessages((current) => mergeChatMessages(current, [message]));
+    }
     catch (err) { setError(err instanceof Error ? err.message : t("community.chatError")); }
   }
+
+  const visibleMessages = messages.filter((message) => !message.deleted_at);
 
   return <section aria-labelledby="community-chat-title" className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated">
     <header className="flex flex-wrap items-center justify-between gap-2 border-b border-pc-border px-4 py-3">
@@ -114,14 +120,14 @@ export default function CommunityChat() {
       if (el) { follow.current = el.scrollHeight - el.scrollTop - el.clientHeight < 64; if (follow.current) setUnseen(false); }
     }}>
       {hasMore && <button type="button" onClick={loadOlder} disabled={older} className="mb-3 w-full text-sm text-pc-accent disabled:opacity-50">{t("community.olderMessages")}</button>}
-      {loading ? <p className="text-sm text-pc-text-secondary">{t("community.connecting")}</p> : !messages.length && <p className="py-10 text-center text-sm text-pc-text-secondary">{t("community.chatEmpty")}</p>}
-      {messages.map((message) => <article key={message.id} className="group py-2">
+      {loading ? <p className="text-sm text-pc-text-secondary">{t("community.connecting")}</p> : !visibleMessages.length && <p className="py-10 text-center text-sm text-pc-text-secondary">{t("community.chatEmpty")}</p>}
+      {visibleMessages.map((message) => <article key={message.id} className="group py-2">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
           <span className="inline-flex items-center gap-1 font-semibold text-pc-text">{message.username}{message.linked_player_id != null && <VerifiedPlayerBadge />}</span>
           <time dateTime={message.created_at} className="text-xs text-pc-text-muted">{formatDateTime(message.created_at)}</time>
-          {!message.deleted_at && user && (user.id === message.user_id || user.isAdmin) && <button type="button" onClick={() => remove(message.id)} className="ml-auto text-xs text-pc-text-secondary hover:text-red-400">{t("generated.community.delete")}</button>}
+          {user && (user.id === message.user_id || user.isAdmin) && <button type="button" onClick={() => remove(message.id)} className="ml-auto text-xs text-pc-text-secondary hover:text-red-400">{t("generated.community.delete")}</button>}
         </div>
-        <p className={`whitespace-pre-wrap break-words text-sm [overflow-wrap:anywhere] ${message.deleted_at ? "italic text-pc-text-muted" : "text-pc-text"}`}>{message.deleted_at ? t("community.messageDeleted") : message.content}</p>
+        <p className="whitespace-pre-wrap break-words text-sm [overflow-wrap:anywhere] text-pc-text">{message.content}</p>
       </article>)}
     </div>
     {unseen && <button type="button" className="w-full bg-pc-accent/15 py-2 text-sm text-pc-accent" onClick={() => { follow.current = true; setUnseen(false); if (scroller.current) scroller.current.scrollTop = scroller.current.scrollHeight; }}>{t("community.newMessages")}</button>}

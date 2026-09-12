@@ -53,19 +53,21 @@ function authHeaders() {
   return { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) };
 }
 /**
- * POST chat content with the current authorization headers and shared CSRF handling. Return the created message ID; disable retries to avoid duplicate sends after a lost response. Network/API failures reject the promise.
- * I/O types: `content: string -> Promise<{ id: number; }>`.
+ * POST chat content with the current authorization headers and shared CSRF handling. Return the committed message; disable retries to avoid duplicate sends after a lost response. Network/API failures reject the promise.
+ * I/O types: `content: string -> Promise<ChatMessage>`.
  * refs: doc: documents/02-technical/api/community-interactions.md
  */
-export function sendChatMessage(content: string) {
+export async function sendChatMessage(content: string): Promise<ChatMessage> {
   // Retrying a committed POST after a lost response could duplicate a message.
-  return fetchJson<{ id: number }>("/community/chat", { method: "POST", headers: authHeaders(), body: JSON.stringify({ content }), retries: 0 });
+  const result = await fetchJson<{ id: number; message: ChatMessage }>("/community/chat", { method: "POST", headers: authHeaders(), body: JSON.stringify({ content }), retries: 0 });
+  return normalizeChatMessage(result.message);
 }
 /**
- * DELETE the selected chat message using current authorization headers and shared CSRF handling. Disable retries; network/API failures reject the promise.
- * I/O types: `id: number -> Promise<unknown>`.
+ * DELETE the selected chat message using current authorization headers and shared CSRF handling. Return the committed tombstone. Disable retries; network/API failures reject the promise.
+ * I/O types: `id: number -> Promise<ChatMessage>`.
  * refs: doc: documents/02-technical/api/community-interactions.md
  */
-export function deleteChatMessage(id: number) {
-  return fetchJson(`/community/chat/${id}`, { method: "DELETE", headers: authHeaders(), retries: 0 });
+export async function deleteChatMessage(id: number): Promise<ChatMessage> {
+  const result = await fetchJson<{ deleted: boolean; message: ChatMessage }>(`/community/chat/${id}`, { method: "DELETE", headers: authHeaders(), retries: 0 });
+  return normalizeChatMessage(result.message);
 }
