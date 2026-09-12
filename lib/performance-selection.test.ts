@@ -6,10 +6,19 @@ import { withStoredLobbyTier } from "./lobby-tier.ts";
 import { routeUsesLobbyTierSelector } from "./lobby-tier-route.ts";
 
 test("casual deep links keep supported measures and replace ranked-only KDA", () => {
-  assert.deepEqual(performanceSelection("casual", "hpm"), { scope: "casual", metric: "hpm" });
-  assert.deepEqual(performanceSelection("casual", "kda"), { scope: "casual", metric: "dpm" });
-  assert.deepEqual(performanceSelection("ranked", "kda"), { scope: "ranked", metric: "kda" });
-  assert.deepEqual(performanceSelection("unknown", "unknown"), { scope: "ranked", metric: "dpm" });
+  assert.deepEqual(performanceSelection("casual", "hpm"), { scope: "casual", metric: "hpm", queueId: 424 });
+  assert.deepEqual(performanceSelection("casual", "kda"), { scope: "casual", metric: "kda", queueId: 424 });
+  assert.deepEqual(performanceSelection("ranked", "kda"), { scope: "ranked", metric: "kda", queueId: 486 });
+  assert.deepEqual(performanceSelection("unknown", "unknown"), { scope: "ranked", metric: "dpm", queueId: 486 });
+});
+
+test("casual deep links preserve each supported physical queue", () => {
+  for (const queueId of [424, 452, 469]) {
+    assert.deepEqual(performanceSelection("casual", "dpm", String(queueId)), {
+      scope: "casual", metric: "dpm", queueId,
+    });
+  }
+  assert.equal(performanceSelection("casual", "dpm", "486").queueId, 424);
 });
 
 test("a saved Diamond+ filter scopes ranked but leaves casual requests unchanged", () => {
