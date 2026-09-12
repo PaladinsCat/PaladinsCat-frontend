@@ -32,9 +32,9 @@ function ComparisonTooltip({ description, children, className = "" }: { descript
   </Tooltip.Root>;
 }
 
-const LABELS = { gpm: "common.metrics.cpm", wpm: "common.metrics.wpm", apm: "common.metrics.apm", winRate: "common.sort.winRate", banRate: "common.metrics.banRate", dpm: "common.metrics.dpm", hpm: "common.metrics.hpm", egpm: "common.metrics.ecpm", shpm: "common.metrics.shpm", mpm: "common.metrics.spm", kda: "common.metrics.kda", kpm: "common.metrics.kpm", deaths_per_minute: "common.metrics.deathsPerMinute" } as const;
+const LABELS = { gpm: "common.metrics.cpm", wpm: "common.metrics.wpm", apm: "common.metrics.apm", winRate: "common.sort.winRate", banRate: "common.metrics.banRate", dpm: "common.metrics.dpm", hpm: "common.metrics.hpm", egpm: "common.metrics.ecpm", shpm: "common.metrics.shpm", spm: "common.metrics.spm", kda: "common.metrics.kda", kpm: "common.metrics.kpm", deaths_per_minute: "common.metrics.deathsPerMinute" } as const;
 const COLUMNS = ["winRate", "banRate", ...GAME_PERFORMANCE_METRICS] as const;
-const METRIC_COLORS: Partial<Record<PerformanceMetricKey, string>> = { dpm: "text-red-400", wpm: "text-orange-400", apm: "text-fuchsia-400", egpm: "text-yellow-400", shpm: "text-teal-400", hpm: "text-emerald-400", mpm: "text-blue-400", kda: "text-violet-400", kpm: "text-cyan-400", deaths_per_minute: "text-rose-400" };
+const METRIC_COLORS: Partial<Record<PerformanceMetricKey, string>> = { dpm: "text-red-400", wpm: "text-orange-400", apm: "text-fuchsia-400", egpm: "text-yellow-400", shpm: "text-teal-400", hpm: "text-emerald-400", spm: "text-blue-400", kda: "text-violet-400", kpm: "text-cyan-400", deaths_per_minute: "text-rose-400" };
 type ComparisonMetric = (typeof COLUMNS)[number];
 const CLASSES = [
   { value: "Frontline", labelKey: "common.roles.frontline", icon: "Class_Front_Line_Icon" },

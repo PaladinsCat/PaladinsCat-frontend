@@ -14,7 +14,7 @@
   "bot.previewCommand": "/profile",
   "bot.previewPlayerValue": "player-name",
   "bot.previewFound": "Player profile found",
-  "bot.previewDetails": "Level · XP · ranked KBM/controller · win rate · KDA · DPM/HPM/MPM/EGPM",
+  "bot.previewDetails": "Level · XP · ranked KBM/controller · win rate · KDA · DPM/HPM/SPM/EGPM",
   "bot.previewHint": "Type a name or player ID, or save a default once with /save.",
   "bot.featuresEyebrow": "Everything your squad needs",
   "bot.featuresTitle": "Useful answers, without the tab switching",

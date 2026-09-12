@@ -569,7 +569,7 @@ export async function fetchCheaterPlayers(params?: { name?: string; cheater?: bo
       dropper?: boolean; dropper_vote_count?: number; afk_wintrade?: boolean; afk_wintrade_vote_count?: number; boosted?: boolean; alt_account?: boolean; alt_account_vote_count?: number;
       weirdo_count?: number; hall_of_fame_count?: number;
       avg_dpm?: number | null; avg_hpm?: number | null; avg_egpm?: number | null;
-      avg_mpm?: number | null; total_matches?: number; win_rate?: number | null;
+      avg_spm?: number | null; total_matches?: number; win_rate?: number | null;
       top_reasons?: Array<{ reason?: string; count?: number }>;
     }>>(`/players/search?${query.toString()}`);
     return raw.map(r => ({
@@ -582,7 +582,7 @@ export async function fetchCheaterPlayers(params?: { name?: string; cheater?: bo
       weirdoCount: r.weirdo_count ?? 0,
       hallOfFameCount: r.hall_of_fame_count ?? 0,
       avgDpm: r.avg_dpm ?? null, avgHpm: r.avg_hpm ?? null,
-      avgCpm: r.avg_egpm ?? null, avgSpm: r.avg_mpm ?? null,
+      avgCpm: r.avg_egpm ?? null, avgSpm: r.avg_spm ?? null,
       totalMatches: Number(r.total_matches) || 0, winRate: r.win_rate != null ? Number(r.win_rate) : null,
       topReasons: (r.top_reasons ?? []).map((reason) => ({ reason: reason.reason ?? "", count: Number(reason.count ?? 0) })).filter((reason) => reason.reason.length > 0),
     }));
@@ -838,7 +838,7 @@ function mapAutomaticAfkPlayer(row: any): AutomaticAfkPlayer {
     avgDpm: row.avg_dpm == null ? null : Number(row.avg_dpm),
     avgHpm: row.avg_hpm == null ? null : Number(row.avg_hpm),
     avgCpm: row.avg_egpm == null ? null : Number(row.avg_egpm),
-    avgSpm: row.avg_mpm == null ? null : Number(row.avg_mpm),
+    avgSpm: row.avg_spm == null ? null : Number(row.avg_spm),
     totalMatches: Number(row.total_matches ?? 0),
     winRate: row.win_rate == null ? null : Number(row.win_rate),
     topReasons: [],
@@ -899,7 +899,7 @@ function mapAutomaticWallShooterPlayer(row: any): AutomaticWallShooterPlayer {
     avgDpm: row.avg_dpm == null ? null : Number(row.avg_dpm),
     avgHpm: row.avg_hpm == null ? null : Number(row.avg_hpm),
     avgCpm: row.avg_egpm == null ? null : Number(row.avg_egpm),
-    avgSpm: row.avg_mpm == null ? null : Number(row.avg_mpm),
+    avgSpm: row.avg_spm == null ? null : Number(row.avg_spm),
     totalMatches: Number(row.total_matches ?? 0),
     winRate: row.win_rate == null ? null : Number(row.win_rate),
     topReasons: [],
@@ -1198,11 +1198,11 @@ export interface PerformanceLeaderboardEntry {
  * Fetch performance leaderboard data for client consumers.
  *
  * refs: none
- * I/O types: `params: { metric: 'dpm' | 'hpm' | 'gpm' | 'mpm'; limit?: number; role?: string; region?: string; queueId?: number; scope?: 'ranked' | 'casual'; mode?: 'match' | 'account' | 'champion'; } -> Promise<PerformanceLeaderboardEntry[]>`.
+ * I/O types: `params: { metric: 'dpm' | 'hpm' | 'gpm' | 'spm'; limit?: number; role?: string; region?: string; queueId?: number; scope?: 'ranked' | 'casual'; mode?: 'match' | 'account' | 'champion'; } -> Promise<PerformanceLeaderboardEntry[]>`.
  * Request `GET '/players/leaderboard/performance?${query.toString()}'` through the shared API transport. Return `[]` on a caught request failure.
  */
 export async function fetchPerformanceLeaderboard(params: {
-  metric: 'dpm' | 'hpm' | 'gpm' | 'mpm';
+  metric: 'dpm' | 'hpm' | 'gpm' | 'spm';
   limit?: number;
   role?: string;
   region?: string;
@@ -1337,7 +1337,7 @@ export interface PerformanceMetricSummary {
  * Name a backend-supported performance metric. I/O: string literal -> PerformanceMetricKey.
  * refs: endpoints: GET /stats/performance-metrics
  */
-export type PerformanceMetricKey = 'dpm' | 'wpm' | 'apm' | 'hpm' | 'shpm' | 'gpm' | 'egpm' | 'mpm' | 'kda' | 'kpm' | 'deaths_per_minute';
+export type PerformanceMetricKey = 'dpm' | 'wpm' | 'apm' | 'hpm' | 'shpm' | 'gpm' | 'egpm' | 'spm' | 'kda' | 'kpm' | 'deaths_per_minute';
 
 /**
  * Group performance metric summaries returned for the selected population.
@@ -1385,7 +1385,7 @@ export async function fetchPerformanceMetrics(params?: {
   try {
     const raw = await fetchJson<Record<string, any>>(`/stats/performance-metrics${query.toString() ? `?${query.toString()}` : ''}`);
     return Object.fromEntries(
-      Object.entries(raw).filter(([metric]) => ['dpm', 'wpm', 'apm', 'hpm', 'shpm', 'gpm', 'egpm', 'mpm', 'kda', 'kpm', 'deaths_per_minute'].includes(metric))
+      Object.entries(raw).filter(([metric]) => ['dpm', 'wpm', 'apm', 'hpm', 'shpm', 'gpm', 'egpm', 'spm', 'kda', 'kpm', 'deaths_per_minute'].includes(metric))
         .map(([metric, summary]) => [metric, mapMetricSummary(summary)])
     ) as PerformanceMetricsResponse;
   } catch {
@@ -1483,8 +1483,8 @@ export interface BaselineEntry {
   avgCpm: number;
   avgDpm: number;
   avgHpm: number;
-  avgShpm: number;
-  avgSpm: number;
+  avgShpm: number | null;
+  avgSpm: number | null;
   avgKda: number;
   p10Cpm: number;
   p90Cpm: number;
@@ -1517,7 +1517,7 @@ export async function fetchBaselines(params?: { role?: string; queueId?: number;
     const raw = await fetchJson<Array<{
       role: string; queue_id: number;
       avg_gpm: number; avg_dpm: number; avg_hpm: number;
-      avg_shpm: number; avg_mpm: number; avg_kda: number;
+      avg_shpm: number; avg_spm: number; avg_kda: number;
       p10_gpm: number; p90_gpm: number; p10_dpm: number; p90_dpm: number;
       avg_egpm: number; p10_egpm: number; p25_egpm: number; p75_egpm: number; p90_egpm: number; max_egpm: number;
       sample_size: number; updated_at?: string | null;
@@ -1525,7 +1525,7 @@ export async function fetchBaselines(params?: { role?: string; queueId?: number;
     const mapped = raw.map(r => ({
       role: r.role, queueId: r.queue_id,
       avgCpm: Number(r.avg_gpm ?? 0), avgDpm: Number(r.avg_dpm ?? 0), avgHpm: Number(r.avg_hpm ?? 0),
-      avgShpm: Number(r.avg_shpm ?? 0), avgSpm: Number(r.avg_mpm ?? 0), avgKda: Number(r.avg_kda ?? 0),
+      avgShpm: r.avg_shpm == null ? null : Number(r.avg_shpm), avgSpm: r.avg_spm == null ? null : Number(r.avg_spm), avgKda: Number(r.avg_kda ?? 0),
       p10Cpm: Number(r.p10_gpm ?? 0), p90Cpm: Number(r.p90_gpm ?? 0), p10Dpm: Number(r.p10_dpm ?? 0), p90Dpm: Number(r.p90_dpm ?? 0),
       avgEcpm: Number(r.avg_egpm ?? 0), p10Ecpm: Number(r.p10_egpm ?? 0), p25Ecpm: Number(r.p25_egpm ?? 0),
       p75Ecpm: Number(r.p75_egpm ?? 0), p90Ecpm: Number(r.p90_egpm ?? 0), maxEcpm: Number(r.max_egpm ?? 0),
@@ -1539,7 +1539,7 @@ export async function fetchBaselines(params?: { role?: string; queueId?: number;
       if (global) {
         mapped.unshift({
           role: 'Global', queueId: params?.queueId ?? 486,
-          avgCpm: global.mean, avgDpm: 0, avgHpm: 0, avgShpm: 0, avgSpm: 0, avgKda: 0,
+          avgCpm: global.mean, avgDpm: 0, avgHpm: 0, avgShpm: null, avgSpm: null, avgKda: 0,
           p10Cpm: global.p10, p90Cpm: global.p90, p10Dpm: 0, p90Dpm: 0,
           avgEcpm: global.mean, p10Ecpm: global.p10, p25Ecpm: global.p25,
           p75Ecpm: global.p75, p90Ecpm: global.p90, maxEcpm: global.max,
@@ -1659,7 +1659,7 @@ function mapBoostedPlayer(row: any): BoostedPlayer {
     boosted: hasPlayerTag(partyMatchCount), altAccount: Boolean(row.alt_account),
     weirdoCount: Number(row.weirdo_count ?? 0), hallOfFameCount: Number(row.hall_of_fame_count ?? 0),
     avgDpm: row.avg_dpm ?? null, avgHpm: row.avg_hpm ?? null,
-    avgCpm: row.avg_egpm ?? null, avgSpm: row.avg_mpm ?? null,
+    avgCpm: row.avg_egpm ?? null, avgSpm: row.avg_spm ?? null,
     totalMatches: Number(row.total_matches ?? 0), winRate: row.win_rate == null ? null : Number(row.win_rate),
     topReasons: [],
     partyMatchCount,
@@ -2271,7 +2271,7 @@ export function mapPlayersOverviewResponse(raw: any): PlayersOverview {
     boosted: Boolean(row.boosted), altAccount: Boolean(row.alt_account),
     weirdoCount: Number(row.weirdo_count ?? 0), hallOfFameCount: Number(row.hall_of_fame_count ?? 0),
     avgDpm: row.avg_dpm == null ? null : Number(row.avg_dpm), avgHpm: row.avg_hpm == null ? null : Number(row.avg_hpm),
-    avgCpm: row.avg_egpm == null ? null : Number(row.avg_egpm), avgSpm: row.avg_mpm == null ? null : Number(row.avg_mpm),
+    avgCpm: row.avg_egpm == null ? null : Number(row.avg_egpm), avgSpm: row.avg_spm == null ? null : Number(row.avg_spm),
     totalMatches: Number(row.total_matches ?? 0), winRate: row.win_rate == null ? null : Number(row.win_rate),
     topReasons: Array.isArray(row.top_reasons) ? row.top_reasons.map((reason: any) => ({ reason: String(reason?.reason ?? ""), count: Number(reason?.count ?? 0) })).filter((reason: { reason: string }) => reason.reason.length > 0) : [],
   });
@@ -5232,7 +5232,7 @@ function mapBaselineRows(rows: any[]): BaselineEntry[] {
   return rows.map((row) => ({
     role: String(row.role ?? ''), queueId: Number(row.queue_id ?? 486),
     avgCpm: Number(row.avg_gpm ?? 0), avgDpm: Number(row.avg_dpm ?? 0), avgHpm: Number(row.avg_hpm ?? 0),
-    avgShpm: Number(row.avg_shpm ?? 0), avgSpm: Number(row.avg_mpm ?? 0), avgKda: Number(row.avg_kda ?? 0),
+    avgShpm: row.avg_shpm == null ? null : Number(row.avg_shpm), avgSpm: row.avg_spm == null ? null : Number(row.avg_spm), avgKda: Number(row.avg_kda ?? 0),
     p10Cpm: Number(row.p10_gpm ?? 0), p90Cpm: Number(row.p90_gpm ?? 0), p10Dpm: Number(row.p10_dpm ?? 0), p90Dpm: Number(row.p90_dpm ?? 0),
     avgEcpm: Number(row.avg_egpm ?? 0), p10Ecpm: Number(row.p10_egpm ?? 0), p25Ecpm: Number(row.p25_egpm ?? 0),
     p75Ecpm: Number(row.p75_egpm ?? 0), p90Ecpm: Number(row.p90_egpm ?? 0), maxEcpm: Number(row.max_egpm ?? 0),

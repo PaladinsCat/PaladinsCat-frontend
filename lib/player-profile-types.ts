@@ -39,7 +39,7 @@ interface PlayerData {
   avg_dpm: number | null;
   avg_hpm: number | null;
   avg_shpm: number | null;
-  avg_mpm: number | null;
+  avg_spm: number | null;
   derived_rates?: { kpm: number | null; deaths_per_minute: number | null } | null;
   cheater: boolean;
   exploiter: boolean;

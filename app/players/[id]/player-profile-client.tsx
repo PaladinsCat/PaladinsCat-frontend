@@ -36,6 +36,7 @@ import { getPercentageColor } from "@/lib/stat-quality";
 import type { PlayerResponse } from "@/lib/player-profile-types";
 import PlayerRelationshipSummaryCard from "@/components/player-relationship-summary";
 import PlayerTrendsPanel from "@/components/player-trends";
+import { LoginRequired } from "@/components/login-required";
 
 interface RefreshFeedback {
   kind: 'warning' | 'success' | 'error';
@@ -142,7 +143,7 @@ export default function PlayerProfileClient({
   const [matches, setMatches] = useState<MatchRecord[]>([]);
   const [profileLoading, setProfileLoading] = useState(initialResponse === null);
   const [matchesLoading, setMatchesLoading] = useState(true);
-  const displayProfileLoading = useRouteSettledLoading(profileLoading);
+  const displayProfileLoading = useRouteSettledLoading(profileLoading && (authLoading || !!user));
   const [error, setError] = useState<string | null>(null);
   const fullAccess = user?.linkedPlayerId != null && response?.access?.fullAccess !== false;
 
@@ -435,6 +436,10 @@ export default function PlayerProfileClient({
 
     return () => { cancelled = true; };
   }, [id, historyFetchKey, response, error]);
+
+  if (!authLoading && !user) {
+    return <LoginRequired returnPath={`/players/${id}`} />;
+  }
 
   if (displayProfileLoading) {
     return <RouteSkeleton variant="profile" />;
@@ -932,10 +937,10 @@ export default function PlayerProfileClient({
                 <StatRow label={t("common.metrics.kpm")} value={player.derived_rates?.kpm != null ? formatNumber(Number(player.derived_rates.kpm), { maximumFractionDigits: 2 }) : "—"} />
                 <StatRow label={t("common.metrics.deathsPerMinute")} value={player.derived_rates?.deaths_per_minute != null ? formatNumber(Number(player.derived_rates.deaths_per_minute), { maximumFractionDigits: 2 }) : "—"} />
                 <StatRow label={t("generated.players.healingMin")} value={player.avg_hpm != null ? formatNumber(player.avg_hpm) : "—"} color="text-emerald-400" />
-                <StatRow label={t("generated.players.shieldingMin")} value={player.avg_mpm != null ? formatNumber(player.avg_mpm) : "—"} color="text-sky-400" />
+                <StatRow label={t("generated.players.shieldingMin")} value={player.avg_spm != null ? formatNumber(player.avg_spm) : "—"} color="text-sky-400" />
                 <StatRow label={t("generated.players.creditsMin")} value={player.avg_egpm != null ? formatNumber(player.avg_egpm) : "—"} color="text-yellow-400" />
                 {player.avg_shpm != null && (
-                  <StatRow label={t("generated.players.shieldingMin")} value={formatNumber(player.avg_shpm)} color="text-violet-400" />
+                  <StatRow label={t("common.metrics.shpm")} value={formatNumber(player.avg_shpm)} color="text-violet-400" />
                 )}
               </div>
             </div>

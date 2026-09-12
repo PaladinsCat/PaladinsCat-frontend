@@ -9,11 +9,11 @@ export type PerformanceScope = "ranked" | "casual";
  * Name selectable metrics, preserving damage DPM and explicit deaths/min.
  * I/O: type only; refs: migrations: 169
  */
-export type GamePerformanceMetric = "dpm" | "wpm" | "apm" | "hpm" | "shpm" | "gpm" | "egpm" | "mpm" | "kda" | "kpm" | "deaths_per_minute";
+export type GamePerformanceMetric = "dpm" | "wpm" | "apm" | "hpm" | "shpm" | "gpm" | "egpm" | "spm" | "kda" | "kpm" | "deaths_per_minute";
 /**
  * List stable metric query keys. I/O: readonly string tuple; refs: endpoints: GET /stats/performance-metrics
  */
-export const GAME_PERFORMANCE_METRICS = ["dpm", "wpm", "apm", "hpm", "shpm", "gpm", "egpm", "mpm", "kda", "kpm", "deaths_per_minute"] as const;
+export const GAME_PERFORMANCE_METRICS = ["dpm", "wpm", "apm", "hpm", "shpm", "gpm", "egpm", "spm", "kda", "kpm", "deaths_per_minute"] as const;
 
 /**
  * Normalize URL selectors to a supported scope/metric pair without side effects.

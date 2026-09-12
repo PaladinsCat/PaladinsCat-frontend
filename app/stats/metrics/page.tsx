@@ -24,7 +24,7 @@ const METRICS = {
   shpm: { labelKey: "common.metrics.shpm", full: "common.metrics.selfHealingPerMinute" },
   gpm: { labelKey: "common.metrics.cpm", full: "common.metrics.creditsPerMinute" },
   egpm: { labelKey: "common.metrics.ecpm", full: "common.metrics.effectiveCreditsPerMinute" },
-  mpm: { labelKey: "common.metrics.spm", full: "common.metrics.shieldingPerMinute" },
+  spm: { labelKey: "common.metrics.spm", full: "common.metrics.shieldingPerMinute" },
   kda: { labelKey: "common.metrics.kda", full: "common.metrics.kdaRatio" },
   kpm: { labelKey: "common.metrics.kpm", full: "common.metrics.killsAssistsPerMinute" },
   deaths_per_minute: { labelKey: "common.metrics.deathsPerMinute", full: "common.metrics.deathsPerMinute" },

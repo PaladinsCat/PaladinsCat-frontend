@@ -25,8 +25,8 @@ const METRICS = [
   { key: "gpm", labelKey: "common.metrics.creditsPerMinute", color: "text-yellow-400", role: undefined },
   { key: "hpm", labelKey: "common.metrics.healingPerMinute", color: "text-emerald-400", role: "Support" },
   { key: "dpm", labelKey: "common.metrics.damagePerMinute", color: "text-red-400", role: "Damage" },
-  { key: "mpm", labelKey: "common.metrics.shieldingPerMinute", color: "text-blue-400", role: "Frontline" },
-] as const satisfies ReadonlyArray<{ key: "gpm" | "hpm" | "dpm" | "mpm"; labelKey: TranslationKey; color: string; role?: "Support" | "Damage" | "Frontline" }>;
+  { key: "spm", labelKey: "common.metrics.shieldingPerMinute", color: "text-blue-400", role: "Frontline" },
+] as const satisfies ReadonlyArray<{ key: "gpm" | "hpm" | "dpm" | "spm"; labelKey: TranslationKey; color: string; role?: "Support" | "Damage" | "Frontline" }>;
 
 type PerformanceScope = "ranked" | "casual";
 type PerformanceMode = "match" | "account" | "champion";

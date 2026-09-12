@@ -4,6 +4,7 @@
 import { useEffect, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { RouteSkeleton } from "@/components/route-skeleton";
+import { LoginRequired } from "@/components/login-required";
 import { useAuth } from "@/lib/auth-context";
 import { isAccountOnlyPath, isVerifiedOnlyPath, verifiedDestination } from "@/lib/verified-access";
 import { localPreviewAccessEnabled, useLocalPreviewAccess } from "@/lib/use-local-preview-access";
@@ -25,6 +26,7 @@ export function VerifiedAccess({ children }: { children: ReactNode }) {
   }, [destination, pathname, protectedPath, router, user]);
 
   if (!protectedPath) return children;
+  if (!isLoading && !user) return <LoginRequired returnPath={pathname} />;
   if (destination == null || destination !== pathname) return <RouteSkeleton variant="dashboard" />;
   return children;
 }

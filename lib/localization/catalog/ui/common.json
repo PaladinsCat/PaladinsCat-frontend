@@ -226,7 +226,7 @@
   "common.metricHelp.apm": "Average skill damage dealt per minute, excluding weapon damage.",
   "common.metricHelp.hpm": "Average healing provided per minute.",
   "common.metricHelp.gpm": "Average credits earned per minute.",
-  "common.metricHelp.mpm": "Average damage absorbed by shields per minute.",
+  "common.metricHelp.spm": "Average damage absorbed by shields per minute.",
   "common.metricHelp.kda": "Kills plus half of assists, divided by deaths; a deathless match uses one as the divisor.",
   "common.metricHelp.kpm": "Kills plus half of assists per minute.",
   "common.metricHelp.deaths_per_minute": "Average deaths per minute. Lower is better.",

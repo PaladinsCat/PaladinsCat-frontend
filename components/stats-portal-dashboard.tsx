@@ -194,7 +194,7 @@ function StatsPortalContent({ canReadStats }: { canReadStats: boolean }) {
     { label: t("common.metrics.hpm"), key: "hpm", color: "text-emerald-400" },
     { label: t("common.metrics.shpm"), key: "shpm", color: "text-teal-400" },
     { label: t("common.metrics.ecpm"), key: "egpm", color: "text-yellow-400" },
-    { label: t("common.metrics.spm"), key: "mpm", color: "text-blue-400" },
+    { label: t("common.metrics.spm"), key: "spm", color: "text-blue-400" },
     { label: t("common.metrics.kda"), key: "kda", color: "text-violet-400" },
     { label: t("common.metrics.kpm"), key: "kpm", color: "text-cyan-400" },
     { label: t("common.metrics.deathsPerMinute"), key: "deaths_per_minute", color: "text-rose-400" },
