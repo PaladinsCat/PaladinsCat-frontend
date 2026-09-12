@@ -41,11 +41,9 @@ export function MaintenanceConsentProvider({ children }: { children: ReactNode }
   const reload = useCallback(() => {
     if (userId === null || isLoading || savingRef.current) return;
     const revision = ++sequence.current;
-    allowedRef.current = false;
     pending.current?.abort();
     const controller = new AbortController();
     pending.current = controller;
-    setReady(false);
     void getMaintenanceConsent(controller.signal).then((value) => {
       if (owner.current !== userId || revision !== sequence.current) return;
       setSnapshot({ userId, choice: value }); setReady(true); setError(false);
