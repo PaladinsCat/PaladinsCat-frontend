@@ -10,25 +10,33 @@ import { serverApiBase } from "./lib/server-api";
 import { anonymousPresenceRequestAllowed } from "./lib/anonymous-presence-gate";
 
 const ACCOUNT_SESSION_COOKIE = "__Host-pc_session";
-type AccountSessionState = "guest" | "unverified" | "verified" | "unavailable";
+type AccountSessionState = "guest" | "unverified" | "verified" | "rate-limited" | "unavailable";
+type AccountSessionCheck = { state: AccountSessionState; retryAfter?: string };
 
 /** Validate the opaque browser session through the backend auth owner. */
-async function accountSessionState(request: NextRequest): Promise<AccountSessionState> {
+async function accountSessionState(request: NextRequest): Promise<AccountSessionCheck> {
   const session = request.cookies.get(ACCOUNT_SESSION_COOKIE)?.value;
-  if (!session) return "guest";
+  if (!session) return { state: "guest" };
   try {
+    const headers = new Headers({ accept: "application/json", authorization: `Bearer ${session}` });
+    // Preserve the edge-owned client identity so auth checks do not share the frontend container's quota.
+    const clientAddress = request.headers.get("cf-connecting-ip");
+    if (clientAddress) headers.set("cf-connecting-ip", clientAddress);
     const response = await fetch(`${serverApiBase()}/auth/me`, {
-      headers: { accept: "application/json", authorization: `Bearer ${session}` },
+      headers,
       cache: "no-store",
       signal: AbortSignal.timeout(2_500),
     });
-    if (response.status === 401 || response.status === 403) return "guest";
-    if (!response.ok) return "unavailable";
+    if (response.status === 401 || response.status === 403) return { state: "guest" };
+    if (response.status === 429) {
+      return { state: "rate-limited", retryAfter: response.headers.get("retry-after") || undefined };
+    }
+    if (!response.ok) return { state: "unavailable" };
     const account = await response.json() as { linked_player_id?: unknown };
     const linkedPlayerId = Number(account.linked_player_id);
-    return Number.isSafeInteger(linkedPlayerId) && linkedPlayerId > 0 ? "verified" : "unverified";
+    return { state: Number.isSafeInteger(linkedPlayerId) && linkedPlayerId > 0 ? "verified" : "unverified" };
   } catch {
-    return "unavailable";
+    return { state: "unavailable" };
   }
 }
 
@@ -105,9 +113,14 @@ export async function proxy(request: NextRequest) {
   }
   const verifiedOnly = isVerifiedOnlyPath(decodedPath);
   if (verifiedOnly || isAccountOnlyPath(decodedPath)) {
-    const state = await accountSessionState(request);
+    const { state, retryAfter } = await accountSessionState(request);
     if (state === "guest") return accessRedirect(request, "/auth/login");
     if (verifiedOnly && state === "unverified") return accessRedirect(request, "/link-account");
+    if (state === "rate-limited") {
+      const headers = new Headers({ "Cache-Control": "private, no-store" });
+      if (retryAfter) headers.set("Retry-After", retryAfter);
+      return NextResponse.json({ error: { code: "AUTHENTICATION_RATE_LIMITED" } }, { status: 429, headers });
+    }
     if (state === "unavailable") {
       return NextResponse.json({ error: { code: "AUTHENTICATION_UNAVAILABLE" } }, {
         status: 503, headers: { "Cache-Control": "private, no-store" },
