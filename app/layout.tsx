@@ -11,10 +11,11 @@ import BottomNav from "@/components/bottom-nav";
 import MapSlideshow from "@/components/MapSlideshow";
 import PageLayout from "@/components/PageLayout";
 import { AuthProvider } from "@/lib/auth-context";
+import { MaintenanceConsentProvider } from "@/lib/maintenance-consent-context";
+import { MaintenanceConsentBanner } from "@/components/maintenance-consent";
 import { TimeZoneProvider } from "@/lib/time-zone-context";
 import { LocalizationProvider } from "@/lib/localization-context";
 import { LobbyTierProvider } from "@/lib/lobby-tier-context";
-import LobbyTierBanner from "@/components/LobbyTierBanner";
 import SiteAnalytics from "@/components/SiteAnalytics";
 import DeploymentUpdateBanner from "@/components/DeploymentUpdateBanner";
 import SiteBanner from "@/components/SiteBanner";
@@ -161,15 +162,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 />
         <AuthProvider>
           <LocalizationProvider initialLocale={locale} initialMessages={messages}>
+            <MaintenanceConsentProvider>
             <TimeZoneProvider>
               <LobbyTierProvider>
               <LiteModeProvider>
               <SiteAnalytics />
+              <MaintenanceConsentBanner />
               <MapSlideshow />
               <Nav />
               <DeploymentUpdateBanner />
               <SiteBanner />
-              <LobbyTierBanner />
               <HirezOutageBanner />
               {/* Content container: responsive width that fills common desktop sizes */}
               <main className="min-h-[calc(100svh-4rem)] flex-1 w-full min-w-0 mx-auto px-3 py-5 pb-28 sm:px-6 sm:py-8 lg:px-8 xl:px-12 2xl:px-16">
@@ -183,6 +185,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               </LiteModeProvider>
               </LobbyTierProvider>
             </TimeZoneProvider>
+            </MaintenanceConsentProvider>
           </LocalizationProvider>
         </AuthProvider>
       </body>

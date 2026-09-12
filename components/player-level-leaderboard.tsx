@@ -266,7 +266,7 @@ export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
               <th className="px-3 py-3 text-right">{t("generated.players.wins")}</th>
               <th className="px-3 py-3 text-right">{t("generated.players.losses")}</th>
               <th className="px-3 py-3 text-right">{t("generated.players.winRate")}</th>
-              <th className="px-3 py-3 text-right">{t("generated.players.kda")}</th>
+              {mode === "champion" && <th className="px-3 py-3 text-right">{t("generated.players.kda")}</th>}
               <th className="px-4 py-3">{t("generated.players.region")}</th>
             </tr>
           </thead>
@@ -282,7 +282,7 @@ export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
             <td className="px-3 py-3 text-right tabular-nums text-pc-text-secondary">{formatNumber(row.wins)}</td>
             <td className="px-3 py-3 text-right tabular-nums text-pc-text-secondary">{formatNumber(row.losses)}</td>
             <td className="px-3 py-3 text-right font-semibold tabular-nums" style={row.winRate == null ? undefined : { color: getPercentageColor(row.winRate) }}>{formatPercent(row.winRate)}</td>
-            <td className="px-3 py-3 text-right tabular-nums text-pc-text-secondary">{formatNumber(row.kda, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+            {mode === "champion" && <td className="px-3 py-3 text-right tabular-nums text-pc-text-secondary">{formatNumber(row.kda, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>}
             <td className="px-4 py-3 text-pc-text-muted">{row.region ?? "—"}</td>
           </tr>)}</tbody>
         </table>

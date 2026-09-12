@@ -40,7 +40,9 @@ export interface ChartProps {
   showXAxis?: boolean;
   showYAxis?: boolean;
   showValueLabels?: boolean;
+  showDots?: boolean;
   valueLabelFormatter?: (value: unknown) => string;
+  tooltipValueFormatter?: (value: unknown) => string;
   xAxisIcons?: Record<string, string>;
 }
 
@@ -64,13 +66,15 @@ export function LineChartComponent({
   showXAxis = true,
   showYAxis = true,
   showValueLabels = false,
+  showDots = true,
   valueLabelFormatter,
+  tooltipValueFormatter,
 }: ChartProps) {
   return (
     <div className="w-full">
       {title && <h3 className="text-lg font-semibold mb-2 text-pc-text">{title}</h3>}
       <ResponsiveContainer width="100%" height={height}>
-        <LineChart data={data} margin={{ top: showValueLabels ? 24 : 5, right: 20, left: 20, bottom: 5 }}>
+        <LineChart data={data} throttleDelay={0} margin={{ top: showValueLabels ? 24 : 5, right: 20, left: 20, bottom: 5 }}>
           {percentageScale && (
             <defs>
               <linearGradient id="bounded-percentage-spectrum" x1="0" y1="1" x2="0" y2="0">
@@ -100,9 +104,12 @@ export function LineChartComponent({
           )}
           {showTooltip && (
             <Tooltip
+              isAnimationActive={false}
+              formatter={tooltipValueFormatter}
+              cursor={{ stroke: "var(--pc-accent-mid)", strokeWidth: 1 }}
               contentStyle={{
-                backgroundColor: chartGrid,
-                border: `1px solid ${chartGrid}`,
+                backgroundColor: "var(--pc-bg-elevated)",
+                border: "1px solid var(--pc-border)",
                 borderRadius: "0.5rem",
                 color: chartText,
               }}
@@ -117,7 +124,9 @@ export function LineChartComponent({
               dataKey={key}
               stroke={percentageScale ? "url(#bounded-percentage-spectrum)" : colors[index % colors.length]}
               strokeWidth={2}
-              dot={{ r: 3 }}
+              dot={showDots ? { r: 3 } : false}
+              activeDot={{ r: 4 }}
+              isAnimationActive={false}
               label={showValueLabels ? {
                 position: "top",
                 fill: chartText,

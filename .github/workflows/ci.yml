@@ -29,6 +29,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Dependency security regression tests
+        timeout-minutes: 2
+        run: node --test scripts/security-dependencies.test.mjs
+
       - name: Lint
         run: npm run lint
 
@@ -37,6 +41,9 @@ jobs:
 
       - name: Operations security tests
         run: npm run test:operations
+
+      - name: Anonymous presence privacy tests
+        run: npm run test:anonymous-presence
 
       - name: Champion page request tests
         run: npm run test:champion-page

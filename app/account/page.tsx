@@ -11,6 +11,7 @@ import { useTimeZone } from "@/lib/time-zone-context";
 import { fixedUtcOffsetFromTimeZone, fixedUtcOffsetToTimeZone, getFixedUtcOffsetOptions, getSupportedTimeZones } from "@/lib/time-zone";
 import { LoadingIndicator, LoadingPanel } from "@/components/async-state";
 import PlayerLinkCard from "@/components/player-link-card";
+import { MaintenanceConsentPanel } from "@/components/maintenance-consent";
 import {
   getAccountDetails,
   updateProfile,
@@ -410,6 +411,8 @@ export default function AccountPage() {
           <p className="text-xs text-pc-text-muted">{t("generated.account.selectOneOrMoreImagesEachUploadedImageCanBe")}</p>
         </div>
       </section>
+
+      <MaintenanceConsentPanel settings />
 
       {/* ── Profile Info ── */}
       <section className="rounded-2xl border border-white/5 pc-glass p-6">

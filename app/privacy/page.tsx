@@ -13,12 +13,13 @@ import {
   Send,
   ShieldCheck,
   UserRoundCheck,
+  UsersRound,
   Waypoints,
 } from "lucide-react";
 import PublicPolicyPage, { type PublicPolicySection } from "@/components/PublicPolicyPage";
 import { getServerLocalization } from "@/lib/server-localization";
 
-const POLICY_DATE = new Date(Date.UTC(2026, 8, 10));
+const POLICY_DATE = new Date(Date.UTC(2026, 8, 12));
 
 /**
  * Render the localized privacy policy with its dated policy sections.  Returns: `Promise<React.JSX.Element>`. · refs: none
@@ -29,6 +30,9 @@ export default async function PrivacyPage() {
   const sections: PublicPolicySection[] = [
     { id: "controller", title: t("generated.privacy.text0Controller"), body: t("generated.privacy.bodyController"), icon: Building2, link: { href: "mailto:nabicook@proton.me?subject=Privacy%20request", label: "nabicook@proton.me" } },
     { id: "collection", title: t("generated.privacy.text1InformationWeCollect"), body: t("generated.privacy.bodyDataCollection"), icon: Database },
+    { id: "maintenance-presence", title: t("generated.privacy.presenceTitle"), body: t("generated.privacy.presenceBody"), icon: UsersRound, link: { href: "/account#maintenance-privacy", label: t("maintenanceConsent.settings") } },
+    { id: "consent-records", title: t("generated.privacy.consentRecordsTitle"), body: t("generated.privacy.consentRecordsBody"), icon: FileClock },
+    { id: "rate-limiting", title: t("generated.privacy.rateLimitingTitle"), body: t("generated.privacy.rateLimitingBody"), icon: ShieldCheck },
     { id: "use", title: t("generated.privacy.text2HowWeUseYourInformation"), body: t("generated.privacy.bodyHowWeUseYourInformation"), icon: UserRoundCheck },
     { id: "browser-storage", title: t("generated.privacy.text3CookiesLocalStorage"), body: t("generated.privacy.bodyCookies"), icon: Cookie },
     { id: "retention", title: t("generated.privacy.text4DataRetention"), body: t("generated.privacy.bodyDataRetention"), icon: FileClock },

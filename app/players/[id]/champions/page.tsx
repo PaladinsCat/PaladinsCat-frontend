@@ -7,7 +7,6 @@
 "use client";
 
 import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { useParams } from "next/navigation";
 import { EmptyState, ErrorState, LoadingIndicator, LoadingPanel } from "@/components/async-state";
 import PlayersPageHeader from "@/components/ui/players-page-header";
@@ -15,9 +14,9 @@ import PlayerTrendsPanel from "@/components/player-trends";
 import { fetchPlayerChampionStats, refreshPlayerChampionStats, type PlayerChampionCumulativeMetrics, type PlayerChampionStat } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championMasteryLevelFromXp } from "@/lib/champion-mastery";
-import { calculateKda, formatKda } from "@/lib/kda";
 import { getPercentageColor } from "@/lib/stat-quality";
 import { useLocalization } from "@/lib/localization-context";
+import type { PlayerChampionScope } from "@/lib/api-client";
 
 
 const ROLES = [
@@ -40,7 +39,7 @@ const CHAMPION_METRICS = [
   { key: "deaths_per_minute", labelKey: "common.metrics.deathsPerMinute" },
 ] as const satisfies ReadonlyArray<{ key: keyof PlayerChampionCumulativeMetrics; labelKey: string }>;
 
-type SortKey = "level" | "kda" | "winRate" | "playTime" | "rating";
+type SortKey = "level" | "matches" | "winRate" | "rating";
 
 function metricComparison(value: number | null, global: number | null): number | null {
   if (value == null || global == null || global <= 0) return null;
@@ -65,6 +64,8 @@ export default function PlayerChampionStatsPage() {
   const [stats, setStats] = useState<PlayerChampionStat[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [filterRole, setFilterRole] = useState<string | null>(null);
+  const [scope, setScope] = useState<PlayerChampionScope>("ranked");
+  const [expandedChampions, setExpandedChampions] = useState<Set<number>>(() => new Set());
   const [sortBy, setSortBy] = useState<SortKey>("level");
   const [sortDescending, setSortDescending] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -74,11 +75,11 @@ export default function PlayerChampionStatsPage() {
     if (!playerId) return;
     setError(null);
     try {
-      setStats(await fetchPlayerChampionStats(playerId));
+      setStats(await fetchPlayerChampionStats(playerId, scope));
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Could not load champion stats.");
     }
-  }, [playerId]);
+  }, [playerId, scope]);
 
   useEffect(() => { void load(); }, [load]);
   useEffect(() => {
@@ -103,7 +104,7 @@ export default function PlayerChampionStatsPage() {
     try {
       const response = await refreshPlayerChampionStats(playerId);
       setRefreshRemainingSeconds(response.freshness.remaining_seconds);
-      setStats(await fetchPlayerChampionStats(playerId));
+      setStats(await fetchPlayerChampionStats(playerId, scope));
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Could not refresh champion stats.");
     } finally {
@@ -117,9 +118,8 @@ export default function PlayerChampionStatsPage() {
       const direction = sortDescending ? -1 : 1;
       const values: Record<SortKey, [number, number]> = {
         level: [championMasteryLevelFromXp(a.xp), championMasteryLevelFromXp(b.xp)],
-        kda: [calculateKda(a.kills, a.deaths, a.assists), calculateKda(b.kills, b.deaths, b.assists)],
+        matches: [a.matchesPlayed, b.matchesPlayed],
         winRate: [a.winRate ?? -1, b.winRate ?? -1],
-        playTime: [a.minutesPlayed, b.minutesPlayed],
         rating: [a.rating ?? -1, b.rating ?? -1],
       };
       const [left, right] = values[sortBy];
@@ -135,7 +135,6 @@ export default function PlayerChampionStatsPage() {
     return {
       active,
       matches,
-      minutes: active.reduce((total, champion) => total + champion.minutesPlayed, 0),
       winRate: matches > 0 ? (wins / matches) * 100 : 0,
     };
   }, [stats]);
@@ -155,12 +154,11 @@ export default function PlayerChampionStatsPage() {
         actions={<button type="button" onClick={refresh} disabled={refreshing || refreshRemainingSeconds > 0} className="rounded-lg border border-pc-border bg-pc-bg-elevated px-3 py-2 text-xs font-semibold text-pc-text hover:border-pc-accent-mid hover:text-pc-accent disabled:cursor-not-allowed disabled:opacity-50">{refreshing ? <LoadingIndicator className="gap-2" /> : refreshRemainingSeconds > 0 ? t("generated.players.refreshInValue1", { value1: formatDuration(refreshRemainingSeconds) }) : t("common.playerChampions.refresh")}</button>}
       />
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-3">
         {([
           [t("generated.champions.champions"), formatNumber(summary.active.length)],
           [t("generated.players.matches"), formatNumber(summary.matches)],
           [t("common.metrics.winRate"), t("common.playerChampions.winPercentage", { value: formatNumber(summary.winRate, { maximumFractionDigits: 1 }) })],
-          [t("generated.players.playtime"), t("common.format.minutesShort", { minutes: formatNumber(summary.minutes) })],
         ] as const).map(([label, value]) => (
           <div key={label} className="pc-glass rounded-xl p-4">
             <div className="text-xs uppercase tracking-wide text-pc-text-muted">{label}</div>
@@ -171,7 +169,7 @@ export default function PlayerChampionStatsPage() {
 
       <PlayerTrendsPanel playerId={playerId} champions />
 
-      <div className="grid gap-4">
+      {scope === "ranked" && <div className="grid gap-4">
         <section className="pc-glass rounded-xl p-4">
           <h2 className="pc-card-title">{t("generated.players.championRatings")}</h2>
           <p className="mt-1 text-xs text-pc-text-muted">{t("generated.players.rating")} · {t("generated.players.deviation")} · {t("generated.players.volatility")}</p>
@@ -197,19 +195,25 @@ export default function PlayerChampionStatsPage() {
             </div>
           )}
         </section>
-      </div>
+      </div>}
 
       <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
         <div className="flex flex-wrap items-center gap-2">
           <button type="button" onClick={() => setFilterRole(null)} className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] ${filterRole === null ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-muted hover:text-pc-text"}`}>{t("generated.champions.all")}</button>
           {ROLES.map((role) => <button key={role.value} type="button" onClick={() => setFilterRole(filterRole === role.value ? null : role.value)} className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] ${filterRole === role.value ? "bg-pc-accent text-pc-bg" : "pc-surface text-pc-muted hover:text-pc-text"}`}><img src={role.icon} alt="" className="h-5 w-5" />{t(role.labelKey)}</button>)}
+          <label className="ml-2 grid gap-1 text-xs text-pc-text-secondary">
+            {t("stats.scope.label")}
+            <select value={scope} onChange={(event) => { setStats(null); setScope(event.target.value as PlayerChampionScope); setExpandedChampions(new Set()); }} className="pc-select">
+              <option value="ranked">{t("stats.scope.ranked")}</option>
+              <option value="casual">{t("stats.scope.casual")}</option>
+            </select>
+          </label>
         </div>
         <div className="flex items-center gap-2">
           <select value={sortBy} onChange={(event) => setSortBy(event.target.value as SortKey)} className="pc-select">
             <option value="level">{t("common.playerChampions.sortLevel")}</option>
-            <option value="kda">{t("common.metrics.kda")}</option>
+            <option value="matches">{t("generated.players.matches")}</option>
             <option value="winRate">{t("common.metrics.winRate")}</option>
-            <option value="playTime">{t("generated.players.playtime")}</option>
             <option value="rating">{t("generated.players.rating")}</option>
           </select>
           <button type="button" onClick={() => setSortDescending((descending) => !descending)} className="pc-select flex cursor-pointer items-center gap-1" title={sortDescending ? t("generated.champions.descending") : t("generated.champions.ascending")}>{sortDescending ? "↓" : "↑"}</button>
@@ -218,53 +222,49 @@ export default function PlayerChampionStatsPage() {
 
       {champions.length === 0 ? <EmptyState title={t("common.playerChampions.empty")} /> : (
         <div className="pc-card-flush overflow-x-auto">
-          <table className="w-full min-w-[720px] text-sm">
+          <table className="w-full min-w-[620px] text-sm">
             <thead>
               <tr className="border-b border-pc-border bg-pc-bg-secondary text-left text-xs uppercase tracking-wide text-pc-text-muted">
                 <th className="px-1.5 py-2">{t("common.playerChampions.champion")}</th>
                 <th className="px-1.5 py-2">{t("generated.players.lvl")}</th>
                 <th className="px-1.5 py-2">{t("generated.players.championXp")}</th>
-                <th className="px-1.5 py-2">{t("common.playerChampions.kdaShort")}</th>
-                <th className="px-1.5 py-2">{t("common.metrics.kdaRatio")}</th>
+                <th className="px-1.5 py-2">{t("generated.players.matches")}</th>
                 <th className="px-1.5 py-2">{t("common.playerChampions.winsShort")}</th>
                 <th className="px-1.5 py-2">{t("common.playerChampions.lossesShort")}</th>
                 <th className="px-1.5 py-2">{t("common.metrics.winRate")}</th>
                 <th className="px-1.5 py-2">{t("generated.players.rating")}</th>
-                <th className="px-1.5 py-2">{t("generated.players.deviation")}</th>
-                <th className="px-1.5 py-2">{t("generated.players.volatility")}</th>
-                <th className="px-1.5 py-2">{t("generated.players.playtime")}</th>
               </tr>
             </thead>
             <tbody>
-              {champions.map((champion) => (
+              {champions.map((champion) => {
+                const expanded = expandedChampions.has(champion.championId);
+                const detailsId = `champion-${champion.championId}-metrics`;
+                return (
                 <Fragment key={champion.championId}>
                   <tr className="hover:bg-pc-bg-secondary">
                     <td className="px-1.5 py-1.5">
                       <div className="flex items-center gap-1.5">
                         <img src={getChampionIconSafe(champion.championName)} alt="" className="h-5 w-5 shrink-0 rounded object-contain" />
                         <span className="font-medium text-pc-text">{champion.championName}</span>
+                        <button type="button" aria-expanded={expanded} aria-controls={detailsId} aria-label={`${t(expanded ? "generated.matches.collapse" : "generated.matches.expand")} ${t("generated.matches.details")}`} onClick={() => setExpandedChampions((current) => { const next = new Set(current); if (next.has(champion.championId)) next.delete(champion.championId); else next.add(champion.championId); return next; })} className="ml-auto rounded px-1 text-pc-text-secondary hover:bg-pc-bg-elevated hover:text-pc-accent">{expanded ? "▾" : "▸"}</button>
                       </div>
                     </td>
                     <td className="px-1.5 py-1.5 font-mono text-xs text-pc-accent">{championMasteryLevelFromXp(champion.xp)}</td>
                     <td className="px-1.5 py-1.5 font-mono text-xs text-pc-text-secondary">{formatNumber(champion.xp)}</td>
-                    <td className="px-1.5 py-1.5 font-mono text-xs text-pc-text-secondary">{formatNumber(champion.kills)}/{formatNumber(champion.deaths)}/{formatNumber(champion.assists)}</td>
-                    <td className="px-1.5 py-1.5 font-mono text-xs text-pc-text-secondary">{formatKda(champion.kills, champion.deaths, champion.assists)}</td>
+                    <td className="px-1.5 py-1.5 font-mono text-xs text-pc-text-secondary">{formatNumber(champion.matchesPlayed)}</td>
                     <td className="px-1.5 py-1.5 font-mono text-xs text-pc-text-secondary">{formatNumber(champion.wins)}</td>
                     <td className="px-1.5 py-1.5 font-mono text-xs text-pc-text-secondary">{formatNumber(champion.losses)}</td>
                     <td className="px-1.5 py-1.5 font-mono text-xs">{champion.winRate != null ? (
                       <span className="font-medium" style={{ color: getPercentageColor(champion.winRate) }}>{t("common.playerChampions.winPercentage", { value: formatNumber(champion.winRate) })}</span>
                     ) : "—"}</td>
                     <td className="px-1.5 py-1.5 font-mono text-xs text-pc-text-secondary">{champion.rating != null ? formatNumber(champion.rating) : "—"}</td>
-                    <td className="px-1.5 py-1.5 font-mono text-xs text-pc-text-secondary">{champion.ratingDeviation != null ? formatNumber(champion.ratingDeviation) : "—"}</td>
-                    <td className="px-1.5 py-1.5 font-mono text-xs text-pc-text-secondary">{champion.volatility != null ? formatNumber(champion.volatility, { maximumFractionDigits: 4 }) : "—"}</td>
-                    <td className="px-1.5 py-1.5 font-mono text-xs text-pc-text-secondary">{t("common.format.minutesShort", { minutes: formatNumber(champion.minutesPlayed) })}</td>
                   </tr>
-                  <tr className="border-b border-pc-border/50 last:border-0">
-                    <td colSpan={12} className="px-1.5 pb-2 pt-0.5">
+                  {expanded && <tr id={detailsId} className="border-b border-pc-border/50 last:border-0">
+                    <td colSpan={8} className="px-1.5 pb-2 pt-0.5">
                       <div className="grid grid-cols-4 gap-x-2 gap-y-0.5 pl-8 text-xs leading-4 text-pc-text-muted sm:grid-cols-8">
                         {CHAMPION_METRICS.map((metric) => (
                           <span key={metric.key} className="whitespace-nowrap">
-                            <span className="font-semibold text-pc-text-secondary">{t(metric.labelKey)}</span> {champion.cumulativeMetrics[metric.key] == null ? "—" : formatNumber(champion.cumulativeMetrics[metric.key] ?? 0, { maximumFractionDigits: metric.key === "kpm" || metric.key === "deaths_per_minute" ? 2 : 0 })}
+                            <span className="font-semibold text-pc-text-secondary">{t(metric.labelKey)}</span> {champion.cumulativeMetrics[metric.key] == null ? "—" : formatNumber(champion.cumulativeMetrics[metric.key] ?? 0, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </span>
                         ))}
                       </div>
@@ -279,9 +279,10 @@ export default function PlayerChampionStatsPage() {
                         })}
                       </div>
                     </td>
-                  </tr>
+                  </tr>}
                 </Fragment>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>

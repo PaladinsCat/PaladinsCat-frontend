@@ -7,6 +7,7 @@ import { readFileSync } from "node:fs";
 import { GUEST_COOKIE, GUEST_TTL_SECONDS, issueGuest, validGuest, safeWebsiteRequest, websiteApiPath } from "./lib/website-gate";
 import { isAccountOnlyPath, isVerifiedOnlyPath } from "./lib/verified-access";
 import { serverApiBase } from "./lib/server-api";
+import { anonymousPresenceRequestAllowed } from "./lib/anonymous-presence-gate";
 
 const ACCOUNT_SESSION_COOKIE = "__Host-pc_session";
 type AccountSessionState = "guest" | "unverified" | "verified" | "unavailable";
@@ -83,6 +84,16 @@ export async function proxy(request: NextRequest) {
     return NextResponse.json({ error: { code: "INVALID_PATH" } }, { status: 400 });
   }
   const api = websiteApiPath(path);
+  // This one bodyless endpoint cannot participate in guest/account admission.
+  // Its dedicated handler strips transport metadata before the anonymous counter.
+  if (path === "/api/analytics/presence") {
+    if (!anonymousPresenceRequestAllowed(request, process.env.PALADINSCAT_PUBLIC_ORIGIN || "https://paladinscat.com")) {
+      return new NextResponse(null, { status: 400, headers: { "Cache-Control": "no-store" } });
+    }
+    const response = NextResponse.next();
+    response.headers.set("Cache-Control", "no-store");
+    return response;
+  }
   // Developer routes authenticate in Rust; Next-owned OIDC endpoints retain
   // their state/CSRF/signature checks, including provider callbacks without a guest cookie.
   const oidcEndpoint = ["login", "callback", "logout", "account", "backchannel-logout"]

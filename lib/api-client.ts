@@ -3743,14 +3743,16 @@ export interface PlayerChampionStat {
   lastUpdated: string | null;
 }
 
+export type PlayerChampionScope = "ranked" | "casual";
+
 /**
  * Fetch player champion stats data for client consumers.
  *
  * refs: none
- * Request `GET '/players/${playerId}/champions'` through the shared API transport. Uncaught network/API errors reject the returned promise.
- * I/O types: `playerId: string | number -> Promise<PlayerChampionStat[]>`.
+ * Request `GET '/players/${playerId}/champions?scope=ranked|casual'` through the shared API transport. Uncaught network/API errors reject the returned promise.
+ * I/O types: `playerId: string | number, scope: PlayerChampionScope -> Promise<PlayerChampionStat[]>`.
  */
-export async function fetchPlayerChampionStats(playerId: string | number): Promise<PlayerChampionStat[]> {
+export async function fetchPlayerChampionStats(playerId: string | number, scope: PlayerChampionScope = "ranked"): Promise<PlayerChampionStat[]> {
   type RawCumulativeMetrics = {
     kpm?: number | string | null;
     deaths_per_minute?: number | string | null;
@@ -3797,7 +3799,7 @@ export async function fetchPlayerChampionStats(playerId: string | number): Promi
     rating_matches?: number | string | null;
     last_updated?: string | null;
   };
-  const raw = await fetchJson<RawStat[]>(`/players/${playerId}/champions`);
+  const raw = await fetchJson<RawStat[]>(`/players/${playerId}/champions?scope=${scope}`);
   const numberOrZero = (value: number | string | null | undefined) => {
     const parsed = Number(value ?? 0);
     return Number.isFinite(parsed) ? parsed : 0;
