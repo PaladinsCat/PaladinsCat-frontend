@@ -91,21 +91,21 @@ async function fetchToken(): Promise<string> {
   const clientId = required("PALADINSCAT_SERVICE_OIDC_CLIENT_ID");
   const keyFile = required("PALADINSCAT_SERVICE_OIDC_PRIVATE_KEY_FILE");
   validateEndpoints(issuer, tokenUrl);
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10_000);
+  // Keep the deadline active through body decoding, not just response headers.
+  const signal = AbortSignal.timeout(10_000);
   const response = await fetch(tokenUrl, {
     method: "POST",
     headers: { "content-type": "application/x-www-form-urlencoded" },
     cache: "no-store",
     redirect: "error",
-    signal: controller.signal,
+    signal,
     body: new URLSearchParams({
       grant_type: "client_credentials",
       client_id: clientId,
       client_assertion_type: "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
       client_assertion: clientAssertion(issuer, clientId, keyFile),
     }),
-  }).finally(() => clearTimeout(timeout));
+  });
   if (!response.ok) throw new Error("OIDC service authentication failed");
   const body = await boundedJson(response);
   if (body.token_type !== "Bearer" || typeof body.access_token !== "string"

@@ -42,14 +42,32 @@ async function readParResponse(response: Response) {
 }
 
 async function startOidc(intent: "login" | "create", returnPath: string, clientIp?: string) {
+  try {
+    return await performOidcStart(intent, returnPath, clientIp);
+  } catch {
+    // Service-token, configuration-file and transaction transport failures must
+    // not escape as an unhandled 500 or expose credential-bearing exceptions.
+    return temporarilyUnavailable();
+  }
+}
+
+function temporarilyUnavailable() {
+  return new NextResponse("OIDC is temporarily unavailable. Please try again shortly.", {
+    status: 503,
+    headers: { "Cache-Control": "private, no-store", "Retry-After": "5" },
+  });
+}
+
+async function performOidcStart(intent: "login" | "create", returnPath: string, clientIp?: string) {
   const transaction = createTransaction(returnPath);
   const issuer = normalizedHttpsIssuer(process.env.OIDC_ISSUER);
   const clientId = process.env.OIDC_CLIENT_ID;
   const clientSecret = oidcClientSecret();
   if (!issuer || !clientId || !clientSecret) return new NextResponse("OIDC is not configured", { status: 503 });
   const serverIssuer = resolveInternalIssuer(issuer, process.env.OIDC_INTERNAL_ISSUER);
-  const stored = await fetch(`${backend()}/auth/oidc/transactions`, { method: "POST", headers: { ...await oidcBffServiceHeaders(), ...(clientIp ? { "x-forwarded-for": clientIp } : {}), "content-type": "application/json" }, cache: "no-store", body: JSON.stringify({ state: transaction.state, nonce: transaction.nonce, verifier: transaction.verifier, return_path: transaction.returnPath }) });
-  if (stored.status !== 201) return new NextResponse("OIDC is temporarily unavailable", { status: 503 });
+  const serviceHeaders = await oidcBffServiceHeaders();
+  const stored = await fetch(`${backend()}/auth/oidc/transactions`, { method: "POST", headers: { ...serviceHeaders, ...(clientIp ? { "x-forwarded-for": clientIp } : {}), "content-type": "application/json" }, cache: "no-store", signal: AbortSignal.timeout(3_000), body: JSON.stringify({ state: transaction.state, nonce: transaction.nonce, verifier: transaction.verifier, return_path: transaction.returnPath }) });
+  if (stored.status !== 201) return temporarilyUnavailable();
   const par = buildPushedAuthorizationRequest(serverIssuer, clientId, `${origin()}/api/auth/oidc/callback`, transaction);
   par.form.set("client_secret", clientSecret);
   // Registration is a fixed Keycloak prompt, never a browser-supplied auth parameter.
@@ -62,7 +80,7 @@ async function startOidc(intent: "login" | "create", returnPath: string, clientI
     const parsed = pushed.ok ? await readParResponse(pushed) : null;
     requestUri = parsed?.requestUri;
   } catch { /* fail closed below */ } finally { clearTimeout(timeout); }
-  if (!requestUri) return new NextResponse("OIDC is temporarily unavailable", { status: 503 });
+  if (!requestUri) return temporarilyUnavailable();
   // A 307 preserves the form POST to Keycloak; use 303 so the authorization endpoint receives a GET.
   const response = NextResponse.redirect(buildParAuthorizationUrl(issuer, clientId, requestUri), { status: 303 });
   response.cookies.set(TX_COOKIE, transaction.state, { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 600 });
