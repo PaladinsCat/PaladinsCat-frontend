@@ -24,7 +24,7 @@ export type AdminMaintenance = {
     averageActiveConsentSeconds: number | null;
     lastEventAt: string | null;
   };
-  consentTrend: Array<{ date: string; accepted: number; withdrawn: number }>;
+  hourlyActivity: Array<{ hour: string; estimatedActivePages: number | null }>;
 };
 /**
  * Define admin api key as `{ devId: string; status: string; used: number; dailyLimit: number; remaining: number; callsTotal: number; consecutiveFailures: number; lastUsed: string | null; lastSyncAt: string | null; lastSyncError: string | null; }`.
@@ -125,8 +125,8 @@ export async function fetchAdminDashboard(mode: "admin" | "developer" = "admin")
         averageActiveConsentSeconds: nullableNumber(raw.maintenance?.consent?.average_active_consent_seconds),
         lastEventAt: raw.maintenance?.consent?.last_event_at ? String(raw.maintenance.consent.last_event_at) : null,
       },
-      consentTrend: (raw.maintenance?.consent_trend ?? []).map((row: any) => ({
-        date: String(row.date), accepted: numberValue(row.accepted), withdrawn: numberValue(row.withdrawn),
+      hourlyActivity: (raw.maintenance?.hourly_activity ?? []).map((row: any) => ({
+        hour: String(row.hour), estimatedActivePages: nullableNumber(row.estimated_active_pages),
       })),
     },
     site: {

@@ -5,7 +5,7 @@ import { spawn, spawnSync } from "node:child_process";
 import { setTimeout as delay } from "node:timers/promises";
 import { chromium, expect } from "@playwright/test";
 
-const version = "maintenance-presence-2026-09-12-v1";
+const version = "maintenance-presence-2026-09-14-v2";
 const user = { id: 1, username: "Consent fixture", email: "fixture@example.invalid", avatar_url: null, bio: null,
   is_admin: false, is_approved: true, linked_player_id: null, created_at: "2026-09-12T00:00:00Z", last_login: null, time_zone: "UTC" };
 let loggedIn = false, decision = "unset", failSave = false, pulses = 0;

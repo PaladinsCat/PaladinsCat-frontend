@@ -21,7 +21,7 @@ type PreviewAccount = { id: number; username: string; email: string; role: Accou
 const PREVIEW_DASHBOARD: AdminDashboard = {
   generatedAt: "2026-08-12T12:00:00Z",
   traffic: { summary: { viewsToday: 1294, views7d: 7420 }, daily: ["2026-08-06", "2026-08-07", "2026-08-08", "2026-08-09", "2026-08-10", "2026-08-11", "2026-08-12"].map((date, index) => ({ date, pageViews: 688 + index * 81, matches: 920 + index * 33 })), topPages: [{ path: "/players", pageViews: 921 }, { path: "/matches", pageViews: 643 }, { path: "/champions", pageViews: 512 }] },
-  maintenance: { consent: { acceptedAccounts: 64, declinedAccounts: 18, unsetAccounts: 39, obsoleteAccounts: 5, decidedAccounts: 82, acceptedShare: 78.05, averageActiveConsentSeconds: 3 * 86400 + 6 * 3600, lastEventAt: "2026-08-12T11:55:00Z" }, consentTrend: ["2026-08-06", "2026-08-07", "2026-08-08", "2026-08-09", "2026-08-10", "2026-08-11", "2026-08-12"].map((date, index) => ({ date, accepted: index % 3 === 0 ? 4 : 2, withdrawn: index === 4 ? 2 : 1 })) },
+  maintenance: { consent: { acceptedAccounts: 64, declinedAccounts: 18, unsetAccounts: 39, obsoleteAccounts: 5, decidedAccounts: 82, acceptedShare: 78.05, averageActiveConsentSeconds: 3 * 86400 + 6 * 3600, lastEventAt: "2026-08-12T11:55:00Z" }, hourlyActivity: Array.from({ length: 24 }, (_, index) => ({ hour: new Date(Date.parse("2026-08-11T12:00:00Z") + index * 3600000).toISOString(), estimatedActivePages: 10 + (index % 5) * 5 })) },
   site: { totals: { matches: 248531, rankedMatches: 128650, casualMatches: 119881, directMatches: 234012, recoveredMatches: 14219, incompleteMatches: 300, players: 98234, registeredUsers: 126, verifiedAccounts: 88, communityBuilds: 87, databaseBytes: 1073741824 }, pipeline: { bufferPending: 0, bufferProjectionPending: 0, bufferProcessing: 1, bufferFailed: 0, bufferProcessed: 248531 } },
   hirez: { keys: [{ devId: "preview-key", status: "healthy", used: 120, dailyLimit: 5000, remaining: 4880, callsTotal: 20932, consecutiveFailures: 0, lastUsed: "2026-08-12T11:58:00Z", lastSyncAt: "2026-08-12T11:58:00Z", lastSyncError: null }], hourly: Array.from({ length: 12 }, (_, index) => ({ hour: `${String(index + 8).padStart(2, "0")}:00`, calls: 60 + index * 9 })), endpoints: [{ consumer: "frontend", endpoint: "getplayer", calls: 892, avgResponseMs: 183 }, { consumer: "worker", endpoint: "getmatchdetails", calls: 428, avgResponseMs: 241 }] },
 };
@@ -135,7 +135,7 @@ export default function AdminDashboardPage({ mode = "admin" }: { mode?: "admin" 
             <SmallStat label={t("generated.admin.acceptanceRate")} value={formatPercent(consent.acceptedShare)} />
           </div>
           <p className="mt-3 text-xs text-pc-text-muted">{t("generated.admin.lastConsentChange")} {consent.lastEventAt ? formatDateTime(consent.lastEventAt) : t("generated.admin.never")}</p>
-          <ConsentTrendChart rows={dashboard.maintenance.consentTrend} />
+          <HourlyActivityChart rows={dashboard.maintenance.hourlyActivity} />
         </div>
         <AnonymousPresenceCard />
       </section>
@@ -266,29 +266,27 @@ function TrafficChart({ dashboard }: { dashboard: AdminDashboard }) {
   return <div className="mt-5 flex h-52 items-end gap-1.5 overflow-x-auto border-b border-pc-border pb-2">{dashboard.traffic.daily.map((row) => <div key={row.date} className="group flex min-w-9 flex-1 flex-col items-center justify-end gap-1"><div className="text-xs text-pc-text-muted opacity-0 transition-opacity group-hover:opacity-100">{formatNumber(row.pageViews)}</div><div className="relative flex h-36 w-full max-w-9 items-end justify-center"><div className="w-5 rounded-t bg-pc-accent-deep/70" style={{ height: `${Math.max(2, (row.pageViews / max) * 100)}%` }} /></div><span className="text-xs text-pc-text-muted">{new Intl.DateTimeFormat(locale, { weekday: "short", timeZone: "UTC" }).format(new Date(`${row.date}T00:00:00Z`))}</span><span className="text-xs tabular-nums text-pc-text-secondary">{formatNumber(row.matches)}</span></div>)}</div>;
 }
 
-function ConsentTrendChart({ rows }: { rows: Array<{ date: string; accepted: number; withdrawn: number }> }) {
+function HourlyActivityChart({ rows }: { rows: Array<{ hour: string; estimatedActivePages: number | null }> }) {
   const { t, formatNumber, locale } = useLocalization();
-  const max = Math.max(1, ...rows.map((row) => Math.max(row.accepted, row.withdrawn)));
+  const max = Math.max(1, ...rows.map((row) => row.estimatedActivePages ?? 0));
   return <div className="mt-5">
-    <div className="mb-3 flex flex-wrap gap-3 text-xs text-pc-text-muted">
-      <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-pc-accent" />{t("generated.admin.consentAcceptedChanges")}</span>
-      <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-amber-400" />{t("generated.admin.consentWithdrawnChanges")}</span>
-    </div>
+    <div className="mb-3 text-xs font-semibold text-pc-text-muted">{t("generated.admin.hourlyActivity24Hours")}</div>
     <div className="flex h-48 items-end gap-1.5 overflow-x-auto border-b border-pc-border pb-2">
       {rows.map((row) => {
-        const date = new Intl.DateTimeFormat(locale, { weekday: "short", timeZone: "UTC" }).format(new Date(`${row.date}T00:00:00Z`));
-        const label = t("generated.admin.consentTrendTooltip", { date, accepted: formatNumber(row.accepted), withdrawn: formatNumber(row.withdrawn) });
-        return <div key={row.date} className="group flex min-w-9 flex-1 flex-col items-center justify-end gap-1" title={label} aria-label={label}>
-          <div className="flex h-36 w-full max-w-9 items-end justify-center gap-0.5">
-            <div className="w-2 rounded-t bg-pc-accent" style={{ height: row.accepted > 0 ? `${Math.max(4, (row.accepted / max) * 100)}%` : "0%" }} />
-            <div className="w-2 rounded-t bg-amber-400" style={{ height: row.withdrawn > 0 ? `${Math.max(4, (row.withdrawn / max) * 100)}%` : "0%" }} />
+        const date = new Intl.DateTimeFormat(locale, { weekday: "short", hour: "numeric", timeZone: "UTC" }).format(new Date(row.hour));
+        const label = row.estimatedActivePages == null
+          ? t("generated.admin.hourlyActivityUnavailable", { date })
+          : t("generated.admin.hourlyActivityTooltip", { date, value: formatNumber(row.estimatedActivePages) });
+        return <div key={row.hour} className="group flex min-w-9 flex-1 flex-col items-center justify-end gap-1" title={label} aria-label={label}>
+          <div className="relative flex h-36 w-full max-w-9 items-end justify-center">
+            <div className="w-5 rounded-t bg-pc-accent-mid/70" style={{ height: row.estimatedActivePages == null ? "2px" : `${Math.max(4, (row.estimatedActivePages / max) * 100)}%` }} />
           </div>
           <span className="text-xs text-pc-text-muted">{date}</span>
-          <span className="text-xs tabular-nums text-pc-text-secondary">{formatNumber(row.accepted + row.withdrawn)}</span>
+          <span className="text-xs tabular-nums text-pc-text-secondary">{row.estimatedActivePages == null ? formatNumber(null) : formatNumber(row.estimatedActivePages)}</span>
         </div>;
       })}
     </div>
-    <p className="mt-2 text-xs text-pc-text-muted">{t("generated.admin.consentChangesSubtitle")}</p>
+    <p className="mt-2 text-xs text-pc-text-muted">{t("generated.admin.hourlyActivitySubtitle")}</p>
   </div>;
 }
 
