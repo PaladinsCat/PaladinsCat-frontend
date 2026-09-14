@@ -5,10 +5,27 @@
 import { accountAuthHeaders, fetchJson } from "./api-client";
 
 /**
- * Define admin daily traffic as `{ date: string; visitors: number; pageViews: number; matches: number }`.
+ * Define admin daily traffic as `{ date: string; pageViews: number; matches: number }`.
  * refs: doc: documents/02-technical/api/api-server.md
  */
-export type AdminDailyTraffic = { date: string; visitors: number; pageViews: number; matches: number };
+export type AdminDailyTraffic = { date: string; pageViews: number; matches: number };
+/**
+ * Define the anonymous consent maintenance report without exposing account identifiers.
+ * refs: migrations/tracked/196_maintenance_presence_consent.sql
+ */
+export type AdminMaintenance = {
+  consent: {
+    acceptedAccounts: number;
+    declinedAccounts: number;
+    unsetAccounts: number;
+    obsoleteAccounts: number;
+    decidedAccounts: number;
+    acceptedShare: number | null;
+    averageActiveConsentSeconds: number | null;
+    lastEventAt: string | null;
+  };
+  consentTrend: Array<{ date: string; accepted: number; withdrawn: number }>;
+};
 /**
  * Define admin api key as `{ devId: string; status: string; used: number; dailyLimit: number; remaining: number; callsTotal: number; consecutiveFailures: number; lastUsed: string | null; lastSyncAt: string | null; lastSyncError: string | null; }`.
  * refs: doc: documents/02-technical/api/api-server.md
@@ -27,16 +44,17 @@ export type AdminApiKey = {
 };
 
 /**
- * Define admin dashboard as `{ generatedAt: string; traffic: { summary: { activeUsers: number; activeWindowSeconds: number; heartbeatSeconds: number; visitorsToday: number; viewsToday: number; visitorsYesterday: number; visitorDays7d: number; views7d: number }; daily: AdminDailyTraffic[]; topPages: Array<{ path: string; pageViews: number }>; }; site: { totals: { matches: number; rankedMatches: number; casualMatches: number; directMatches: number; recoveredMatches: number; incompleteMatches: number; players: number; registeredUsers: number; verifiedAccounts: number; communityBuilds: number; databaseBytes: number }; pipeline: { bufferPending: number; bufferProjectionPending: number; bufferProcessing: number; bufferFailed: number; bufferProcessed: number }; }; hirez: { keys: AdminApiKey[]; hourly: Array<{ hour: string; calls: number }>; endpoints: Array<{ consumer: string; endpoint: string; calls: number; avgResponseMs: number }>; }; }`.
+ * Define admin dashboard as `{ generatedAt: string; traffic: { summary: { viewsToday: number; views7d: number }; daily: AdminDailyTraffic[]; topPages: Array<{ path: string; pageViews: number }>; }; maintenance: AdminMaintenance; site: ...; hirez: ... }`.
  * refs: doc: documents/02-technical/api/api-server.md
  */
 export type AdminDashboard = {
   generatedAt: string;
   traffic: {
-    summary: { activeUsers: number; activeWindowSeconds: number; heartbeatSeconds: number; visitorsToday: number; viewsToday: number; visitorsYesterday: number; visitorDays7d: number; views7d: number };
+    summary: { viewsToday: number; views7d: number };
     daily: AdminDailyTraffic[];
     topPages: Array<{ path: string; pageViews: number }>;
   };
+  maintenance: AdminMaintenance;
   site: {
     totals: { matches: number; rankedMatches: number; casualMatches: number; directMatches: number; recoveredMatches: number; incompleteMatches: number; players: number; registeredUsers: number; verifiedAccounts: number; communityBuilds: number; databaseBytes: number };
     pipeline: { bufferPending: number; bufferProjectionPending: number; bufferProcessing: number; bufferFailed: number; bufferProcessed: number };
@@ -49,6 +67,11 @@ export type AdminDashboard = {
 };
 
 const numberValue = (value: unknown) => Number(value ?? 0) || 0;
+const nullableNumber = (value: unknown): number | null => {
+  if (value == null) return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
 
 
 // User-facing error keys — resolved at the UI layer via t()
@@ -83,19 +106,28 @@ export async function fetchAdminDashboard(mode: "admin" | "developer" = "admin")
     generatedAt: String(raw.generated_at ?? new Date().toISOString()),
     traffic: {
       summary: {
-        activeUsers: numberValue(summary.active_users),
-        activeWindowSeconds: numberValue(summary.active_window_seconds) || 300,
-        heartbeatSeconds: numberValue(summary.heartbeat_seconds) || 60,
-        visitorsToday: numberValue(summary.visitors_today),
         viewsToday: numberValue(summary.views_today),
-        visitorsYesterday: numberValue(summary.visitors_yesterday),
-        visitorDays7d: numberValue(summary.visitor_days_7d),
         views7d: numberValue(summary.views_7d),
       },
       daily: (raw.traffic?.daily ?? []).map((row: any) => ({
-        date: String(row.date), visitors: numberValue(row.visitors), pageViews: numberValue(row.page_views), matches: numberValue(row.matches),
+        date: String(row.date), pageViews: numberValue(row.page_views), matches: numberValue(row.matches),
       })),
       topPages: (raw.traffic?.top_pages ?? []).map((row: any) => ({ path: String(row.path), pageViews: numberValue(row.page_views) })),
+    },
+    maintenance: {
+      consent: {
+        acceptedAccounts: numberValue(raw.maintenance?.consent?.accepted_accounts),
+        declinedAccounts: numberValue(raw.maintenance?.consent?.declined_accounts),
+        unsetAccounts: numberValue(raw.maintenance?.consent?.unset_accounts),
+        obsoleteAccounts: numberValue(raw.maintenance?.consent?.obsolete_accounts),
+        decidedAccounts: numberValue(raw.maintenance?.consent?.decided_accounts),
+        acceptedShare: nullableNumber(raw.maintenance?.consent?.accepted_share),
+        averageActiveConsentSeconds: nullableNumber(raw.maintenance?.consent?.average_active_consent_seconds),
+        lastEventAt: raw.maintenance?.consent?.last_event_at ? String(raw.maintenance.consent.last_event_at) : null,
+      },
+      consentTrend: (raw.maintenance?.consent_trend ?? []).map((row: any) => ({
+        date: String(row.date), accepted: numberValue(row.accepted), withdrawn: numberValue(row.withdrawn),
+      })),
     },
     site: {
       totals: {

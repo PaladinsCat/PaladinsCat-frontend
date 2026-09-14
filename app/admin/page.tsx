@@ -6,9 +6,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Activity, Bell, Database, Eye, EyeOff, Gamepad2, Gauge, KeyRound, RefreshCw, ScrollText, Users } from "lucide-react";
+import { Activity, Bell, Database, Eye, EyeOff, Gamepad2, Gauge, KeyRound, RefreshCw, ScrollText, ShieldCheck, Users } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { fetchAdminDashboard, searchManagedAccounts, updateManagedAccountRole, type AdminDashboard, type ManagedAccount } from "@/lib/admin-dashboard-api";
+import { AnonymousPresenceCard } from "@/components/anonymous-presence-card";
 import { ContentFade, ErrorState, LoadingPanel } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { getPercentageColor } from "@/lib/stat-quality";
@@ -19,7 +20,8 @@ type AccountRole = "User" | "Moderator" | "Developer" | "Admin";
 type PreviewAccount = { id: number; username: string; email: string; role: AccountRole };
 const PREVIEW_DASHBOARD: AdminDashboard = {
   generatedAt: "2026-08-12T12:00:00Z",
-  traffic: { summary: { activeUsers: 42, activeWindowSeconds: 300, heartbeatSeconds: 60, visitorsToday: 184, viewsToday: 1294, visitorsYesterday: 171, visitorDays7d: 1086, views7d: 7420 }, daily: ["2026-08-06", "2026-08-07", "2026-08-08", "2026-08-09", "2026-08-10", "2026-08-11", "2026-08-12"].map((date, index) => ({ date, visitors: 112 + index * 11, pageViews: 688 + index * 81, matches: 920 + index * 33 })), topPages: [{ path: "/players", pageViews: 921 }, { path: "/matches", pageViews: 643 }, { path: "/champions", pageViews: 512 }] },
+  traffic: { summary: { viewsToday: 1294, views7d: 7420 }, daily: ["2026-08-06", "2026-08-07", "2026-08-08", "2026-08-09", "2026-08-10", "2026-08-11", "2026-08-12"].map((date, index) => ({ date, pageViews: 688 + index * 81, matches: 920 + index * 33 })), topPages: [{ path: "/players", pageViews: 921 }, { path: "/matches", pageViews: 643 }, { path: "/champions", pageViews: 512 }] },
+  maintenance: { consent: { acceptedAccounts: 64, declinedAccounts: 18, unsetAccounts: 39, obsoleteAccounts: 5, decidedAccounts: 82, acceptedShare: 78.05, averageActiveConsentSeconds: 3 * 86400 + 6 * 3600, lastEventAt: "2026-08-12T11:55:00Z" }, consentTrend: ["2026-08-06", "2026-08-07", "2026-08-08", "2026-08-09", "2026-08-10", "2026-08-11", "2026-08-12"].map((date, index) => ({ date, accepted: index % 3 === 0 ? 4 : 2, withdrawn: index === 4 ? 2 : 1 })) },
   site: { totals: { matches: 248531, rankedMatches: 128650, casualMatches: 119881, directMatches: 234012, recoveredMatches: 14219, incompleteMatches: 300, players: 98234, registeredUsers: 126, verifiedAccounts: 88, communityBuilds: 87, databaseBytes: 1073741824 }, pipeline: { bufferPending: 0, bufferProjectionPending: 0, bufferProcessing: 1, bufferFailed: 0, bufferProcessed: 248531 } },
   hirez: { keys: [{ devId: "preview-key", status: "healthy", used: 120, dailyLimit: 5000, remaining: 4880, callsTotal: 20932, consecutiveFailures: 0, lastUsed: "2026-08-12T11:58:00Z", lastSyncAt: "2026-08-12T11:58:00Z", lastSyncError: null }], hourly: Array.from({ length: 12 }, (_, index) => ({ hour: `${String(index + 8).padStart(2, "0")}:00`, calls: 60 + index * 9 })), endpoints: [{ consumer: "frontend", endpoint: "getplayer", calls: 892, avgResponseMs: 183 }, { consumer: "worker", endpoint: "getmatchdetails", calls: 428, avgResponseMs: 241 }] },
 };
@@ -30,8 +32,16 @@ const PREVIEW_DASHBOARD: AdminDashboard = {
  * I/O types: `{ mode = "admin" }: { mode?: "admin" | "developer" } -> JSX.Element | null`.
  */
 export default function AdminDashboardPage({ mode = "admin" }: { mode?: "admin" | "developer" }) {
-  const { t, formatNumber , formatDateTime} = useLocalization();
+  const { t, formatNumber, formatPercent, formatDateTime } = useLocalization();
   const formatBytes = (value: number) => formatNumber(value, { notation: "compact", maximumFractionDigits: 2, style: "unit", unit: "byte", unitDisplay: "short" });
+  const formatConsentDuration = (seconds: number | null) => {
+    if (seconds == null) return formatNumber(null);
+    const totalMinutes = Math.max(1, Math.round(seconds / 60));
+    if (totalMinutes < 60) return t("common.format.minutesShort", { minutes: formatNumber(totalMinutes) });
+    const totalHours = Math.floor(totalMinutes / 60);
+    if (totalHours < 24) return t("common.format.hoursShort", { hours: formatNumber(totalHours) });
+    return t("common.format.daysHoursShort", { days: formatNumber(Math.floor(totalHours / 24)), hours: formatNumber(totalHours % 24) });
+  };
   const router = useRouter();
   const { user, isLoading: authLoading } = useAuth();
   const developerMode = mode === "developer";
@@ -82,6 +92,7 @@ export default function AdminDashboardPage({ mode = "admin" }: { mode?: "admin" 
   const pipeline = dashboard.site.pipeline;
   const budgetPercent = apiBudget.limit > 0 ? Math.min(100, (apiBudget.used / apiBudget.limit) * 100) : 0;
   const ingestCoverage = totals.matches > 0 ? ((totals.directMatches + totals.recoveredMatches) / totals.matches) * 100 : 0;
+  const consent = dashboard.maintenance.consent;
 
   return (
     <ContentFade className="space-y-7">
@@ -107,6 +118,26 @@ export default function AdminDashboardPage({ mode = "admin" }: { mode?: "admin" 
         <MetricCard icon={Eye} label={t("generated.admin.pageViewsToday")} value={formatNumber(summary.viewsToday)} detail={t("generated.admin.valueOverSevenDays", { value: formatNumber(summary.views7d) })} />
         <MetricCard icon={Gamepad2} label={t("generated.admin.trackedMatches")} value={formatNumber(totals.matches)} detail={t("generated.admin.valueRanked", { value: formatNumber(totals.rankedMatches) })} />
         <MetricCard icon={Gauge} label={t("generated.admin.hiRezBudget")} value={formatNumber(apiBudget.remaining)} detail={t("generated.admin.budgetUsed", { used: formatNumber(apiBudget.used), limit: formatNumber(apiBudget.limit) })} />
+      </section>
+
+      <section className="grid grid-cols-1 gap-5 xl:grid-cols-3">
+        <div className="pc-card xl:col-span-2">
+          <SectionTitle icon={ShieldCheck} title={t("generated.admin.consentMaintenance")} subtitle={t("generated.admin.consentMaintenanceSubtitle")} />
+          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <SmallStat label={t("generated.admin.consentAccepted")} value={formatNumber(consent.acceptedAccounts)} />
+            <SmallStat label={t("generated.admin.consentDeclined")} value={formatNumber(consent.declinedAccounts)} tone={consent.declinedAccounts > 0 ? "warn" : "normal"} />
+            <SmallStat label={t("generated.admin.consentUnset")} value={formatNumber(consent.unsetAccounts)} />
+            <SmallStat label={t("generated.admin.consentObsolete")} value={formatNumber(consent.obsoleteAccounts)} tone={consent.obsoleteAccounts > 0 ? "warn" : "normal"} />
+            <SmallStat label={t("generated.admin.consentDecided")} value={formatNumber(consent.decidedAccounts)} />
+          </div>
+          <div className="mt-3 grid grid-cols-2 gap-3">
+            <SmallStat label={t("generated.admin.averageActiveConsent")} value={formatConsentDuration(consent.averageActiveConsentSeconds)} />
+            <SmallStat label={t("generated.admin.acceptanceRate")} value={formatPercent(consent.acceptedShare)} />
+          </div>
+          <p className="mt-3 text-xs text-pc-text-muted">{t("generated.admin.lastConsentChange")} {consent.lastEventAt ? formatDateTime(consent.lastEventAt) : t("generated.admin.never")}</p>
+          <ConsentTrendChart rows={dashboard.maintenance.consentTrend} />
+        </div>
+        <AnonymousPresenceCard />
       </section>
 
       <section className="grid grid-cols-1 gap-5 xl:grid-cols-3">
@@ -233,6 +264,32 @@ function TrafficChart({ dashboard }: { dashboard: AdminDashboard }) {
   const { formatNumber, locale } = useLocalization();
   const max = Math.max(1, ...dashboard.traffic.daily.map((row) => row.pageViews));
   return <div className="mt-5 flex h-52 items-end gap-1.5 overflow-x-auto border-b border-pc-border pb-2">{dashboard.traffic.daily.map((row) => <div key={row.date} className="group flex min-w-9 flex-1 flex-col items-center justify-end gap-1"><div className="text-xs text-pc-text-muted opacity-0 transition-opacity group-hover:opacity-100">{formatNumber(row.pageViews)}</div><div className="relative flex h-36 w-full max-w-9 items-end justify-center"><div className="w-5 rounded-t bg-pc-accent-deep/70" style={{ height: `${Math.max(2, (row.pageViews / max) * 100)}%` }} /></div><span className="text-xs text-pc-text-muted">{new Intl.DateTimeFormat(locale, { weekday: "short", timeZone: "UTC" }).format(new Date(`${row.date}T00:00:00Z`))}</span><span className="text-xs tabular-nums text-pc-text-secondary">{formatNumber(row.matches)}</span></div>)}</div>;
+}
+
+function ConsentTrendChart({ rows }: { rows: Array<{ date: string; accepted: number; withdrawn: number }> }) {
+  const { t, formatNumber, locale } = useLocalization();
+  const max = Math.max(1, ...rows.map((row) => Math.max(row.accepted, row.withdrawn)));
+  return <div className="mt-5">
+    <div className="mb-3 flex flex-wrap gap-3 text-xs text-pc-text-muted">
+      <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-pc-accent" />{t("generated.admin.consentAcceptedChanges")}</span>
+      <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-amber-400" />{t("generated.admin.consentWithdrawnChanges")}</span>
+    </div>
+    <div className="flex h-48 items-end gap-1.5 overflow-x-auto border-b border-pc-border pb-2">
+      {rows.map((row) => {
+        const date = new Intl.DateTimeFormat(locale, { weekday: "short", timeZone: "UTC" }).format(new Date(`${row.date}T00:00:00Z`));
+        const label = t("generated.admin.consentTrendTooltip", { date, accepted: formatNumber(row.accepted), withdrawn: formatNumber(row.withdrawn) });
+        return <div key={row.date} className="group flex min-w-9 flex-1 flex-col items-center justify-end gap-1" title={label} aria-label={label}>
+          <div className="flex h-36 w-full max-w-9 items-end justify-center gap-0.5">
+            <div className="w-2 rounded-t bg-pc-accent" style={{ height: row.accepted > 0 ? `${Math.max(4, (row.accepted / max) * 100)}%` : "0%" }} />
+            <div className="w-2 rounded-t bg-amber-400" style={{ height: row.withdrawn > 0 ? `${Math.max(4, (row.withdrawn / max) * 100)}%` : "0%" }} />
+          </div>
+          <span className="text-xs text-pc-text-muted">{date}</span>
+          <span className="text-xs tabular-nums text-pc-text-secondary">{formatNumber(row.accepted + row.withdrawn)}</span>
+        </div>;
+      })}
+    </div>
+    <p className="mt-2 text-xs text-pc-text-muted">{t("generated.admin.consentChangesSubtitle")}</p>
+  </div>;
 }
 
 function ApiKeyCard({ apiKey, index, showKeyId }: { apiKey: AdminDashboard["hirez"]["keys"][number]; index: number; showKeyId: boolean }) {
