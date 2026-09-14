@@ -12,7 +12,7 @@ import {
   type ResolvedCustomWallpaper,
   WALLPAPER_CHANGE_EVENT,
 } from "@/lib/wallpaper-preference";
-import { DEFAULT_WALLPAPERS, type BuiltInWallpaper } from "@/lib/wallpaper-images";
+import { DEFAULT_WALLPAPERS, randomizeWallpaperOrder, type BuiltInWallpaper } from "@/lib/wallpaper-images";
 import {
   extractWallpaperAccents,
   HOME_CAT_ACCENT_PROPERTY,
@@ -30,7 +30,7 @@ const BUILT_IN_WALLPAPER_INTERVAL_MS = 60 * 60 * 1000;
  *
  * Built-in maps cycle hourly; custom collections use their browser-local speed.
  * Starts with a deterministic first map to avoid SSR hydration mismatch,
- * then shuffles order client-side after mount.
+ * then randomizes the client-side order after mount.
  * refs: none
  * I/O types: `none -> JSX.Element`.
  */
@@ -82,14 +82,7 @@ export default function MapSlideshow() {
     // Shuffle once on mount
     if (!mounted.current) {
       mounted.current = true;
-      // Preserve the server-rendered first wallpaper through hydration. An
-      // immediate replacement starts a second large image request before LCP.
-      const [first, ...arr] = DEFAULT_WALLPAPERS;
-      for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-      }
-      setOrder([first, ...arr]);
+      setOrder(randomizeWallpaperOrder(DEFAULT_WALLPAPERS));
     }
   }, []);
 

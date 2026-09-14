@@ -28,3 +28,25 @@ export const DEFAULT_WALLPAPERS: BuiltInWallpaper[] = WALLPAPER_IDS.map((id) => 
   avif: `/images/wallpapers/${id}.avif`,
   png: `/images/wallpapers/${id}.png`,
 }));
+
+/**
+ * Randomize built-in wallpapers while ensuring the client does not start on the SSR fallback.
+ * refs: none
+ */
+export function randomizeWallpaperOrder(
+  wallpapers: readonly BuiltInWallpaper[],
+  random: () => number = Math.random,
+): BuiltInWallpaper[] {
+  const randomized = [...wallpapers];
+  for (let index = randomized.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(random() * (index + 1));
+    [randomized[index], randomized[swapIndex]] = [randomized[swapIndex], randomized[index]];
+  }
+
+  if (randomized.length > 1 && randomized[0] === wallpapers[0]) {
+    const swapIndex = 1 + Math.floor(random() * (randomized.length - 1));
+    [randomized[0], randomized[swapIndex]] = [randomized[swapIndex], randomized[0]];
+  }
+
+  return randomized;
+}
