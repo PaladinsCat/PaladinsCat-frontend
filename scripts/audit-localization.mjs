@@ -47,6 +47,22 @@ function isTranslationKeyArgument(node) {
   return false;
 }
 
+// A template literal is fully localized when every interpolation is a t()/translate()
+// call and there is no non-whitespace literal text (head or span tails). Such a label
+// carries no hardcoded UI text, so it must not be flagged.
+function isFullyLocalizedTemplate(node) {
+  if (!ts.isTemplateExpression(node)) return false;
+  if (node.head.text.trim() !== "") return false;
+  const spans = node.templateSpans;
+  if (spans.length === 0) return false;
+  for (const span of spans) {
+    const expr = span.expression;
+    if (!(ts.isCallExpression(expr) && ts.isIdentifier(expr.expression) && ["t", "translate"].includes(expr.expression.text))) return false;
+    if (span.literal.text.trim() !== "") return false;
+  }
+  return true;
+}
+
 function containingJsxExpression(node) {
   let current = node.parent;
   while (current) {
@@ -164,7 +180,7 @@ for (const directory of sourceDirectories) {
         }
       }
 
-      if ((ts.isStringLiteralLike(node) || ts.isTemplateExpression(node)) && !isTranslationKeyArgument(node)) {
+      if ((ts.isStringLiteralLike(node) || ts.isTemplateExpression(node)) && !isTranslationKeyArgument(node) && !isFullyLocalizedTemplate(node)) {
         const text = literalText(node, source);
         const expression = containingJsxExpression(node);
         if (expression && isProgramControlLiteral(node, expression)) {
