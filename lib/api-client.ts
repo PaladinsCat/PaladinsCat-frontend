@@ -714,6 +714,7 @@ export async function fetchCheaterEvidence(params: { limit?: number; offset?: nu
   const query = new URLSearchParams({
     limit: String(params.limit ?? 20),
     offset: String(params.offset ?? 0),
+    publicOnly: "true",
   });
   const raw = await fetchJson<{ items?: any[]; total?: number | string }>(`/cheaters/evidence?${query.toString()}`);
   return {
