@@ -3790,6 +3790,8 @@ export interface PlayerChampionStat {
   deaths: number;
   assists: number;
   minutesPlayed: number;
+  gold: number;
+  lastPlayed: string | null;
   matchesPlayed: number;
   winRate: number | null;
   rankedWins: number;
@@ -3839,6 +3841,8 @@ export async function fetchPlayerChampionStats(playerId: string | number, scope:
     deaths?: number | string | null;
     assists?: number | string | null;
     minutes_played?: number | string | null;
+    gold?: number | string | null;
+    last_played?: string | null;
     matches_played?: number | string | null;
     win_rate?: number | string | null;
     ranked_wins?: number | string | null;
@@ -3887,6 +3891,8 @@ export async function fetchPlayerChampionStats(playerId: string | number, scope:
       deaths: numberOrZero(stat.deaths),
       assists: numberOrZero(stat.assists),
       minutesPlayed: numberOrZero(stat.minutes_played),
+      gold: numberOrZero(stat.gold),
+      lastPlayed: stat.last_played ?? null,
       matchesPlayed: numberOrZero(stat.matches_played),
       winRate: numberOrNull(stat.win_rate),
       rankedWins: numberOrZero(stat.ranked_wins),
