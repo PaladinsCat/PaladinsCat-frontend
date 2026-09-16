@@ -300,5 +300,15 @@
   "moderation.cosmeticEvidenceObserved": "Observed",
   "moderation.cosmeticEvidenceImpossibleFrame": "Impossible frame",
   "moderation.cosmeticEvidenceImpossibleTitle": "Impossible title",
-  "moderation.cosmeticEvidenceNone": "No impossible or exclusive cosmetics detected for this account."
+  "moderation.cosmeticEvidenceNone": "No impossible or exclusive cosmetics detected for this account.",
+  "moderation.evidenceTitle": "Evidence",
+  "moderation.evidenceDescription": "All recorded evidence for this account — user reports from the evidence portal, system flags (win trade, talent abuse), and impossible or exclusive cosmetics.",
+  "moderation.evidenceNone": "No evidence recorded for this account.",
+  "moderation.evidenceSource": "Source",
+  "moderation.evidenceReason": "Reason",
+  "moderation.evidenceReported": "User reported",
+  "moderation.evidenceSystem": "System flagged",
+  "moderation.evidenceCosmetic": "Cosmetic",
+  "moderation.evidenceWinTrade": "Win trade",
+  "moderation.evidenceTalentAbuse": "Talent abuse"
 }

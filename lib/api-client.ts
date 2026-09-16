@@ -533,6 +533,34 @@ export interface CosmeticEvidence {
 }
 
 /**
+ * Describe a stored evidence record from the evidence portal or an
+ * operator/system flag (e.g. win-trade). Unlike computed cosmetic evidence,
+ * these are concrete, match-linked records.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
+export interface ExploiterFlagEvidence {
+  id: number;
+  title: string;
+  description: string;
+  matchId: number | null;
+  sourceUrl: string | null;
+  origin: string;
+  createdAt: string;
+}
+
+/**
+ * Describe a moderation flag (vote) recorded against an exploiter. The reason
+ * string is free-form and extensible — new flag types surface without a code
+ * change.
+ * refs: doc: documents/02-technical/api/api-server.md
+ */
+export interface ExploiterFlag {
+  voteType: string;
+  reason: string;
+  createdAt: string;
+}
+
+/**
  * Combine exploiter identity and moderation flags with supporting matches.
  * refs: doc: documents/02-technical/api/api-server.md
  */
@@ -540,6 +568,8 @@ export interface ExploiterEvidenceDetail {
   player: Pick<CheaterPlayer, "id" | "name" | "platform" | "region" | "cheater" | "exploiter">;
   matches: ExploiterEvidenceMatch[];
   cosmeticEvidence: CosmeticEvidence[];
+  flagEvidence: ExploiterFlagEvidence[];
+  flags: ExploiterFlag[];
 }
 
 /**
@@ -1927,6 +1957,20 @@ export async function fetchExploiterEvidence(playerId: string): Promise<Exploite
       reason: String(row.reason ?? ""),
       accountCreatedDate: row.accountCreatedDate ?? null,
       observedDate: row.observedDate ?? null,
+    })),
+    flagEvidence: (raw.flagEvidence ?? []).map((row: any) => ({
+      id: Number(row.id),
+      title: String(row.title ?? ""),
+      description: String(row.description ?? ""),
+      matchId: row.matchId == null ? null : Number(row.matchId),
+      sourceUrl: row.sourceUrl == null ? null : String(row.sourceUrl),
+      origin: String(row.origin ?? "unknown"),
+      createdAt: String(row.createdAt ?? ""),
+    })),
+    flags: (raw.flags ?? []).map((row: any) => ({
+      voteType: String(row.voteType ?? "unknown"),
+      reason: String(row.reason ?? ""),
+      createdAt: String(row.createdAt ?? ""),
     })),
   };
 }
