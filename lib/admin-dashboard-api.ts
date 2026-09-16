@@ -11,7 +11,7 @@ import { accountAuthHeaders, fetchJson } from "./api-client";
 export type AdminDailyTraffic = { date: string; pageViews: number; matches: number };
 /**
  * Define the anonymous consent maintenance report without exposing account identifiers.
- * refs: migrations/tracked/196_maintenance_presence_consent.sql
+ * refs: migrations/tracked/196_maintenance_presence_consent.sql; migrations/tracked/202_maintenance_presence_hourly.sql
  */
 export type AdminMaintenance = {
   consent: {
@@ -24,7 +24,7 @@ export type AdminMaintenance = {
     averageActiveConsentSeconds: number | null;
     lastEventAt: string | null;
   };
-  hourlyActivity: Array<{ hour: string; estimatedActivePages: number | null }>;
+  hourlyActivity: Array<{ hour: string; estimatedActivePages: number }>;
 };
 /**
  * Define admin api key as `{ devId: string; status: string; used: number; dailyLimit: number; remaining: number; callsTotal: number; consecutiveFailures: number; lastUsed: string | null; lastSyncAt: string | null; lastSyncError: string | null; }`.
@@ -126,7 +126,7 @@ export async function fetchAdminDashboard(mode: "admin" | "developer" = "admin")
         lastEventAt: raw.maintenance?.consent?.last_event_at ? String(raw.maintenance.consent.last_event_at) : null,
       },
       hourlyActivity: (raw.maintenance?.hourly_activity ?? []).map((row: any) => ({
-        hour: String(row.hour), estimatedActivePages: nullableNumber(row.estimated_active_pages),
+        hour: String(row.hour), estimatedActivePages: numberValue(row.estimated_active_pages),
       })),
     },
     site: {

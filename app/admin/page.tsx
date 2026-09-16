@@ -266,24 +266,21 @@ function TrafficChart({ dashboard }: { dashboard: AdminDashboard }) {
   return <div className="mt-5 flex h-52 items-end gap-1.5 overflow-x-auto border-b border-pc-border pb-2">{dashboard.traffic.daily.map((row) => <div key={row.date} className="group flex min-w-9 flex-1 flex-col items-center justify-end gap-1"><div className="text-xs text-pc-text-muted opacity-0 transition-opacity group-hover:opacity-100">{formatNumber(row.pageViews)}</div><div className="relative flex h-36 w-full max-w-9 items-end justify-center"><div className="w-5 rounded-t bg-pc-accent-deep/70" style={{ height: `${Math.max(2, (row.pageViews / max) * 100)}%` }} /></div><span className="text-xs text-pc-text-muted">{new Intl.DateTimeFormat(locale, { weekday: "short", timeZone: "UTC" }).format(new Date(`${row.date}T00:00:00Z`))}</span><span className="text-xs tabular-nums text-pc-text-secondary">{formatNumber(row.matches)}</span></div>)}</div>;
 }
 
-function HourlyActivityChart({ rows }: { rows: Array<{ hour: string; estimatedActivePages: number | null }> }) {
+function HourlyActivityChart({ rows }: { rows: Array<{ hour: string; estimatedActivePages: number }> }) {
   const { t, formatNumber, locale } = useLocalization();
-  const max = Math.max(1, ...rows.map((row) => row.estimatedActivePages ?? 0));
-  const unavailableLabel = t("generated.admin.hourlyActivityUnavailable", { date: t("generated.admin.hourlyActivity24Hours") });
+  const max = Math.max(1, ...rows.map((row) => row.estimatedActivePages));
   return <div className="mt-5">
     <div className="mb-3 text-xs font-semibold text-pc-text-muted">{t("generated.admin.hourlyActivity24Hours")}</div>
     <div className="flex h-48 items-end gap-1.5 overflow-x-auto border-b border-pc-border pb-2">
-      {rows.length === 0 ? <div role="status" className="flex h-36 w-full items-center justify-center rounded-lg border border-dashed border-pc-border text-center text-xs text-pc-text-muted">{unavailableLabel}</div> : rows.map((row) => {
+      {rows.map((row) => {
         const date = new Intl.DateTimeFormat(locale, { weekday: "short", hour: "numeric", timeZone: "UTC" }).format(new Date(row.hour));
-        const label = row.estimatedActivePages == null
-          ? t("generated.admin.hourlyActivityUnavailable", { date })
-          : t("generated.admin.hourlyActivityTooltip", { date, value: formatNumber(row.estimatedActivePages) });
+        const label = t("generated.admin.hourlyActivityTooltip", { date, value: formatNumber(row.estimatedActivePages) });
         return <div key={row.hour} className="group flex min-w-9 flex-1 flex-col items-center justify-end gap-1" title={label} aria-label={label}>
           <div className="relative flex h-36 w-full max-w-9 items-end justify-center">
-            <div className="w-5 rounded-t bg-pc-accent-mid/70" style={{ height: row.estimatedActivePages == null ? "2px" : `${Math.max(4, (row.estimatedActivePages / max) * 100)}%` }} />
+            <div className="w-5 rounded-t bg-pc-accent-mid/70" style={{ height: `${row.estimatedActivePages > 0 ? Math.max(4, (row.estimatedActivePages / max) * 100) : 2}%` }} />
           </div>
           <span className="text-xs text-pc-text-muted">{date}</span>
-          <span className="text-xs tabular-nums text-pc-text-secondary">{row.estimatedActivePages == null ? formatNumber(null) : formatNumber(row.estimatedActivePages)}</span>
+          <span className="text-xs tabular-nums text-pc-text-secondary">{formatNumber(row.estimatedActivePages)}</span>
         </div>;
       })}
     </div>

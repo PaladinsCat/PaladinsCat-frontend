@@ -345,7 +345,7 @@
   "operations.anonymousTrafficWithPresence": "Anonymous page totals and optional signed-in maintenance presence. Presence covers participating pages, not every visitor.",
   "maintenanceConsent.title": "Help us plan quieter maintenance",
   "maintenanceConsent.description": "May we measure activity from your visible pages to help choose maintenance windows? This is optional. Declining does not affect your account or access.",
-  "maintenanceConsent.scope": "If allowed, a visible public page sends an empty signal every 30 seconds. Your login verifies your saved choice; the service keeps only a public minute estimate and a private bounded 24-hour hourly activity summary in memory, not account IDs, page URLs, IPs, or browsing history. The in-memory summary is cleared on restart. Your choice and its versioned history are saved with your account and apply across devices.",
+  "maintenanceConsent.scope": "If allowed, a visible public page sends an empty signal every 30 seconds. Your login verifies your saved choice; the service stores only an anonymous pulse count for each UTC hour so administrators can choose quieter maintenance windows. It does not store account IDs, page URLs, IPs, or individual pulse events, and keeps only the current and previous 24 hours. Your choice and its versioned history are saved with your account and apply across devices.",
   "maintenanceConsent.security": "Essential IP-based rate limiting and bot protection remain active whichever option you choose.",
   "maintenanceConsent.details": "Purpose, data and retention",
   "maintenanceConsent.settings": "Privacy settings",

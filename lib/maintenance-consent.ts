@@ -1,7 +1,7 @@
 /** Account API contract. No consent state is inferred from login or browser storage. */
 import { accountAuthHeaders, fetchJson } from "@/lib/api-client";
 
-export const MAINTENANCE_POLICY_VERSION = "maintenance-presence-2026-09-14-v2";
+export const MAINTENANCE_POLICY_VERSION = "maintenance-presence-2026-09-16-v3";
 export type MaintenanceConsent = {
   decision: "unset" | "accepted" | "declined";
   policy_version: string;
