@@ -269,10 +269,11 @@ function TrafficChart({ dashboard }: { dashboard: AdminDashboard }) {
 function HourlyActivityChart({ rows }: { rows: Array<{ hour: string; estimatedActivePages: number | null }> }) {
   const { t, formatNumber, locale } = useLocalization();
   const max = Math.max(1, ...rows.map((row) => row.estimatedActivePages ?? 0));
+  const unavailableLabel = t("generated.admin.hourlyActivityUnavailable", { date: t("generated.admin.hourlyActivity24Hours") });
   return <div className="mt-5">
     <div className="mb-3 text-xs font-semibold text-pc-text-muted">{t("generated.admin.hourlyActivity24Hours")}</div>
     <div className="flex h-48 items-end gap-1.5 overflow-x-auto border-b border-pc-border pb-2">
-      {rows.map((row) => {
+      {rows.length === 0 ? <div role="status" className="flex h-36 w-full items-center justify-center rounded-lg border border-dashed border-pc-border text-center text-xs text-pc-text-muted">{unavailableLabel}</div> : rows.map((row) => {
         const date = new Intl.DateTimeFormat(locale, { weekday: "short", hour: "numeric", timeZone: "UTC" }).format(new Date(row.hour));
         const label = row.estimatedActivePages == null
           ? t("generated.admin.hourlyActivityUnavailable", { date })
