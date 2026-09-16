@@ -5,7 +5,6 @@
 "use client";
 
 import { useEffect, useMemo, useState, type DragEvent, type FormEvent } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { fetchChampions, getAuthToken, hasCookieAuthSession, type Champion } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
@@ -19,6 +18,7 @@ import {
 import { TIER_ORDER, tierTone } from "@/components/tier-list-board";
 import { LoadingIndicator } from "@/components/async-state";
 import { useLocalization } from "@/lib/localization-context";
+import ContextBackLink from "@/components/context-back-link";
 
 type GroupKey = TierName | "tray";
 type Groups = Record<GroupKey, number[]>;
@@ -161,7 +161,7 @@ export default function TierListEditor({
   };
 
   return <form onSubmit={submit} className="space-y-6">
-    <div><Link href={initialList ? `/tierlists/${initialList.id}` : "/tierlists"} className="text-xs text-pc-accent hover:underline">{t("tierLists.back")}</Link><h1 className="mt-2 pc-heading pc-heading-lg text-pc-accent">{t(editing ? "tierLists.edit" : "tierLists.create")}</h1><p className="mt-1 text-sm text-pc-text-secondary">{t("tierLists.description")}</p></div>
+    <div><ContextBackLink fallbackHref={initialList ? `/tierlists/${initialList.id}` : "/tierlists"} label={t("tierLists.back")} className="text-xs text-pc-accent hover:underline" /><h1 className="mt-2 pc-heading pc-heading-lg text-pc-accent">{t(editing ? "tierLists.edit" : "tierLists.create")}</h1><p className="mt-1 text-sm text-pc-text-secondary">{t("tierLists.description")}</p></div>
     {error && <div className="rounded-lg border border-rose-700/50 bg-rose-950/40 p-3 text-sm text-rose-300">{error}</div>}
     <div className="grid gap-4 rounded-xl border border-pc-border bg-pc-bg-elevated p-4 md:grid-cols-2">
       <label className="text-xs text-pc-text-secondary">{t("tierLists.name")}<input required maxLength={160} value={title} onChange={(event) => setTitle(event.target.value)} placeholder={t("tierLists.namePlaceholder")} className="mt-1.5 w-full rounded-lg border border-pc-border bg-pc-bg-secondary px-3 py-2 text-sm text-pc-text" /></label>

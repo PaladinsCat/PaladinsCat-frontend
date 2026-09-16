@@ -4,8 +4,8 @@
  */
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { AlertTriangle, Calculator, ChevronRight, Download, ExternalLink, Info, X } from "lucide-react";
+import ContextBackLink from "@/components/context-back-link";
 import { useAuth } from "@/lib/auth-context";
 import {
   fetchChampions,
@@ -560,7 +560,7 @@ export default function DiminishingReturnsPage() {
         </div>
       )}
 
-      <div className="text-center text-xs text-pc-text-muted"><Link href="/community" className="hover:text-pc-accent">← {t("nav.community")}</Link></div>
+      <div className="text-center text-xs text-pc-text-muted"><ContextBackLink fallbackHref="/community" label={t("nav.community")} className="text-xs" /></div>
     </div>
   );
 }

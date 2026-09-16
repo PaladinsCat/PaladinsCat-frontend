@@ -3,9 +3,9 @@
  * refs: none
  */
 "use client";
-import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ArrowLeft, CircleDot, Code2, LockKeyhole, Plus, X } from "lucide-react";
+import { CircleDot, Code2, LockKeyhole, Plus, X } from "lucide-react";
+import ContextBackLink from "@/components/context-back-link";
 import { useAuth } from "@/lib/auth-context";
 import { useLocalization } from "@/lib/localization-context";
 import { createWorkItem, listWorkItems, updateWorkItem, type WorkItem } from "@/lib/operations-api";
@@ -57,7 +57,7 @@ export default function ProjectsPage() {
   </div>;
 }
 
-function AccessWall() { const {t}=useLocalization(); return <div className="mx-auto max-w-xl pc-card p-7 text-center"><LockKeyhole className="mx-auto h-8 w-8 text-pc-accent" /><h1 className="mt-3 text-xl font-bold text-pc-text">{t("generated.operations.projects")}</h1><p className="mt-2 text-sm text-pc-text-secondary">{t("generated.operations.projectsRestricted")}</p><Link href="/operations/tickets" className="pc-btn-secondary mt-5 inline-flex items-center gap-2 text-sm"><ArrowLeft className="h-4 w-4" /> {t("generated.operations.tickets")}</Link></div>; }
+function AccessWall() { const {t}=useLocalization(); return <div className="mx-auto max-w-xl pc-card p-7 text-center"><LockKeyhole className="mx-auto h-8 w-8 text-pc-accent" /><h1 className="mt-3 text-xl font-bold text-pc-text">{t("generated.operations.projects")}</h1><p className="mt-2 text-sm text-pc-text-secondary">{t("generated.operations.projectsRestricted")}</p><ContextBackLink fallbackHref="/operations/tickets" label={t("generated.operations.tickets")} className="pc-btn-secondary mt-5 gap-2 text-sm" /></div>; }
 function WorkCard({ item, onClick }: { item: WorkItem; onClick: () => void }) { const priority = item.priority === "high" ? "text-rose-300" : item.priority === "low" ? "text-pc-text-muted" : "text-amber-200"; return <button type="button" onClick={onClick} className="block w-full rounded-xl border border-pc-border bg-pc-bg-elevated p-3 text-left transition hover:border-pc-accent/50"><div className="flex items-center justify-between gap-2"><span className="font-mono text-xs font-semibold text-pc-accent">{item.code}</span><span className={`text-xs ${priority}`}>{item.priority}</span></div><h3 className="mt-2 text-sm font-semibold leading-snug text-pc-text">{item.title}</h3><div className="mt-3 flex items-center justify-between gap-2 text-xs text-pc-text-muted"><span className="truncate">{item.component}</span>{item.assignee ? <span className="inline-flex items-center gap-1"><Code2 className="h-3 w-3" />{item.assignee}</span> : <CircleDot className="h-3.5 w-3.5" />}</div></button>; }
 function TaskDialog({ item, onClose, onSave }: { item: WorkItem; onClose: () => void; onSave: (form: FormData) => void }) {
   const {t}=useLocalization(); const knownProject = projectComponents.includes(item.component as typeof projectComponents[number]); const [project, setProject] = useState(knownProject ? item.component : "__custom");

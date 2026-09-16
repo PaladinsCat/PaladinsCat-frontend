@@ -4,8 +4,7 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import ContextBackLink from "@/components/context-back-link";
 import { useLocalization } from "@/lib/localization-context";
 import { LoadingPanel } from "@/components/async-state";
 import CheaterEvidencePost from "@/components/cheater-evidence-post";
@@ -30,7 +29,7 @@ export default function EvidenceDetailPage({ params }: { params: Promise<{ id: s
   }, [id]);
 
   if (loading) return <LoadingPanel compact />;
-  const backLink = <Link href="/players/cheaters/evidence" className="inline-flex items-center gap-2 text-sm text-pc-text-secondary hover:text-pc-accent"><ArrowLeft className="h-4 w-4" aria-hidden="true" />{t("moderation.evidencePortal")}</Link>;
+  const backLink = <ContextBackLink fallbackHref="/players/cheaters/evidence" label={t("moderation.evidencePortal")} className="gap-2" />;
   if (!evidence) return <div className="space-y-6">{backLink}<div className="pc-card text-sm text-pc-text-secondary">{t("moderation.evidenceNotFound")}</div></div>;
   return <div className="mx-auto max-w-5xl space-y-6 px-4 py-8" data-testid="evidence-detail">{backLink}<CheaterEvidencePost item={evidence} formatDateTime={formatDateTime} /></div>;
 }

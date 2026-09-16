@@ -149,6 +149,10 @@ function StatsPortalContent() {
   }, [lobbyTierReady, lobbyTier.tierMax, lobbyTier.tierMin]);
 
   const skins = data?.skinSort === "plays" ? data.skins.slice(0, 5) : [];
+  const skinColumns = [
+    { label: t("common.sort.totalPlays"), rows: skins, value: (skin: SkinStat) => formatNumber(skin.totalPlays), winRate: false },
+    { label: t("skins.sortWinRate"), rows: highestWinRateSkins, value: (skin: SkinStat) => formatPercent(skin.winRate), winRate: true },
+  ].filter((column) => column.rows.length > 0);
   const purchasedItems = useMemo(() => [...(data?.overview.items ?? [])]
     .sort((a, b) => b.totalUsage - a.totalUsage)
     .slice(0, 3), [data]);
@@ -330,12 +334,9 @@ function StatsPortalContent() {
 
       <section aria-label={t("stats.portal.activity")} className="grid grid-cols-1 gap-5 md:grid-cols-2">
         <DashboardCard href="/stats/skins" title={t("menu.skinStats")} accent="violet">
-          {loading ? <LoadingPreview /> : skins.length === 0 ? <EmptyPreview /> : (
-            <div className="grid flex-1 gap-5 sm:grid-cols-2">
-              {[
-                { label: t("common.sort.totalPlays"), rows: skins, value: (skin: SkinStat) => formatNumber(skin.totalPlays), winRate: false },
-                { label: t("skins.sortWinRate"), rows: highestWinRateSkins, value: (skin: SkinStat) => formatPercent(skin.winRate), winRate: true },
-              ].map((column, columnIndex) => <div key={column.label} className={columnIndex ? "border-t border-pc-border pt-4 sm:border-l sm:border-t-0 sm:pl-5 sm:pt-0" : ""}>
+          {loading ? <LoadingPreview /> : skinColumns.length === 0 ? <EmptyPreview /> : (
+            <div className={`grid flex-1 gap-5 ${skinColumns.length > 1 ? "sm:grid-cols-2" : ""}`}>
+              {skinColumns.map((column, columnIndex) => <div key={column.label} className={columnIndex ? "border-t border-pc-border pt-4 sm:border-l sm:border-t-0 sm:pl-5 sm:pt-0" : ""}>
                 <div className="mb-3 text-xs font-semibold text-pc-text-muted">{column.label}</div>
                 <div className="space-y-3">
                   {column.rows.map(skin => <div key={`${column.label}:${skin.championId}:${skin.skinId}`} className="flex min-w-0 items-center gap-2">

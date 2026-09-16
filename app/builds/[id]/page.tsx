@@ -6,7 +6,6 @@
 "use client";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
-import Link from "next/link";
 import { getBuildDetail, toggleBuildLike, getAuthUser, getAuthToken, hasCookieAuthSession, type Build } from "@/lib/api-client";
 import { formatLocalDateTime } from "@/lib/time-format";
 import { championSlug } from "@/lib/utils";
@@ -14,6 +13,7 @@ import { loadBuildReferenceData, type BuildReferenceData } from "@/lib/build-ref
 import { LoadingPanel } from "@/components/async-state";
 import CanonicalTalentImage from "@/components/canonical-talent-image";
 import { useLocalization } from "@/lib/localization-context";
+import ContextBackLink from "@/components/context-back-link";
 
 
 function AssetImage({ src, alt }: { src?: string | null; alt: string }) {
@@ -103,8 +103,7 @@ export default function BuildDetailPage({ params }: { params: Promise<{ id: stri
 
   return (
     <div className="space-y-6">
-      <Link href="/builds" className="text-pc-text-secondary hover:text-pc-accent transition-colors">
-        {t("generated.builds.backToBuilds")}</Link>
+      <ContextBackLink fallbackHref="/builds" label={t("generated.builds.backToBuilds")} />
 
       <div className="pc-card">
         <div className="flex items-start justify-between gap-4">

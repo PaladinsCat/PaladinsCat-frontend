@@ -7,7 +7,6 @@
 
 import { useEffect, useMemo, useState, type FormEvent, type KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import {
   createBuild,
   fetchChampions,
@@ -29,6 +28,7 @@ import { championSlug } from "@/lib/utils";
 import { AsyncButton, LoadingPanel } from "@/components/async-state";
 import CanonicalTalentImage from "@/components/canonical-talent-image";
 import { useLocalization } from "@/lib/localization-context";
+import ContextBackLink from "@/components/context-back-link";
 
 const MAX_ITEMS = 4;
 const MAX_CARDS = 5;
@@ -324,8 +324,7 @@ export default function CreateBuildPage() {
 
   return (
     <div className="space-y-6">
-      <Link href="/builds" className="text-pc-text-secondary hover:text-pc-accent transition-colors">
-        {t("generated.builds.backToBuilds")}</Link>
+      <ContextBackLink fallbackHref="/builds" label={t("generated.builds.backToBuilds")} />
 
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>

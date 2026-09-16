@@ -4,7 +4,8 @@
  * refs: documents/06-reference/frontend-design-system.md#editorial-or-marketing
  */
 import Link from "next/link";
-import { ArrowLeft, GitBranch } from "lucide-react";
+import { GitBranch } from "lucide-react";
+import ContextBackLink from "@/components/context-back-link";
 import { getServerLocalization } from "@/lib/server-localization";
 import { getFeatureDocument, getFeatureSourceUrl } from "@/lib/feature-document";
 import type { NewFeatureEntry } from "@/lib/feature-feed";
@@ -57,10 +58,11 @@ export default async function FeaturesPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
-      <Link href="/" className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-pc-text-secondary transition-colors hover:text-pc-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent">
-        <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-        {t("home.backToHome")}
-      </Link>
+      <ContextBackLink
+        fallbackHref="/"
+        label={t("home.backToHome")}
+        className="mb-6 text-sm font-semibold"
+      />
 
       <section className="rounded-2xl border border-pc-border bg-pc-bg-elevated/95 p-5 shadow-2xl backdrop-blur-sm sm:p-8 lg:p-10">
         <div className="flex flex-wrap items-start justify-between gap-5 border-b border-pc-border pb-8">

@@ -12,7 +12,8 @@ test("guest directory loads bounded previews while detail links still require lo
       expect(url.searchParams.get("tierMin")).not.toBe("undefined");
       return route.fulfill({ json: {
         page: { overview: { metrics: { dpm: { mean: 12345, sample_size: 10, p10: 100, p90: 20000 } } }, skins: [], baselines: [], compositions: [] },
-        skins: [], loadoutChampions: [], matchups: { champions: [] },
+        skins: [{ skin_id: 7, skin_name: "Fallback Skin", champion_id: 1, champion_name: "Bomb King", total_plays: 12, wins: 7, losses: 5, win_rate: 58.33 }],
+        loadoutChampions: [], matchups: { champions: [] },
         presence: { public_players: 456 }, presenceHourly: { hourly_by_region: [] },
       } });
     }
@@ -25,6 +26,9 @@ test("guest directory loads bounded previews while detail links still require lo
   const performance = page.locator('a[data-card-accent][href*="stats%2Fperformance"]');
   await expect(performance).toContainText("12,345", { timeout: 30_000 });
   await expect(performance).toHaveAttribute("href", "/auth/login?redirect=%2Fstats%2Fperformance");
+  const skins = page.locator('a[data-card-accent][href*="stats%2Fskins"]');
+  await expect(skins).toContainText("Fallback Skin");
+  await expect(skins).not.toContainText("Live preview unavailable");
   expect(paths).toContain("/api/stats/portal-preview");
   for (const detail of ["/api/stats/page-data", "/api/stats/talents", "/api/stats/skins", "/api/stats/presence", "/api/stats/presence/hourly", "/api/stats/champions/matchup-previews"]) {
     expect(paths).not.toContain(detail);

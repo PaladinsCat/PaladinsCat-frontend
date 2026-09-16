@@ -4,6 +4,7 @@
  */
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import ContextBackLink from "@/components/context-back-link";
 import { getAllPosts, getPostBySlug, getPostLink, resolveBlogAssetUrl, resolveBlogLink } from "@/lib/blog";
 import { BLOG_COPY_KEYS } from "@/lib/blog-copy";
 import { getServerLocalization } from "@/lib/server-localization";
@@ -88,12 +89,11 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
-      <Link
-        href="/blog"
-        className="inline-flex items-center gap-1 text-sm text-pc-accent hover:underline mb-6"
-      >
-        ← {t(BLOG_COPY_KEYS.backToBlog)}
-      </Link>
+      <ContextBackLink
+        fallbackHref="/blog"
+        label={t(BLOG_COPY_KEYS.backToBlog)}
+        className="mb-6 text-sm text-pc-accent hover:underline"
+      />
 
       <article className="rounded-2xl border border-pc-border bg-pc-bg-elevated/95 p-5 shadow-2xl backdrop-blur-sm sm:p-8 lg:p-10">
         <h1 className="text-4xl font-bold text-pc-text mb-4">

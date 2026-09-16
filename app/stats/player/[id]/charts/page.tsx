@@ -4,8 +4,8 @@
  */
 "use client";
 import { useEffect, useState, useCallback } from "react";
-import Link from "next/link";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import ContextBackLink from "@/components/context-back-link";
 import { fetchPlayerChartHistory, type KdaHistoryEntry, type DpmHistoryEntry, type GlickoHistoryEntry } from "@/lib/api-client";
 import { useLocalization } from "@/lib/localization-context";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
@@ -60,8 +60,7 @@ export default function PlayerChartsPage({ params }: { params: Promise<{ id: str
     <ContentFade className="space-y-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex min-w-0 items-center gap-3 sm:gap-4">
-          <Link href={`/players/${id}`} className="pc-touch-target inline-flex items-center text-pc-text-secondary transition-colors hover:text-pc-accent">
-            {t("generated.stats.backToProfile")}</Link>
+          <ContextBackLink fallbackHref={`/players/${id}`} label={t("generated.stats.backToProfile")} className="pc-touch-target" />
           <h1 className="pc-heading pc-heading-lg">{t("generated.stats.playerCharts")}</h1>
         </div>
         <select

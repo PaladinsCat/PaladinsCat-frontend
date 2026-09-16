@@ -4,12 +4,12 @@
  */
 "use client";
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Send } from "lucide-react";
-import { createPost, getAuthUser, getAuthToken, hasCookieAuthSession } from "@/lib/api-client";
+import { createPost, getAuthUser, getAuthToken, hasCookieAuthSession, isApiErrorKey } from "@/lib/api-client";
 import { AsyncButton } from "@/components/async-state";
 import { useLocalization } from "@/lib/localization-context";
+import ContextBackLink from "@/components/context-back-link";
 import SubmissionMediaFields from "@/components/submission-media-fields";
 
 /**
@@ -54,7 +54,7 @@ export default function CreatePostPage() {
       router.push(`/community/${post.id}`);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("generated.community.create.page.failedtocreatepost"));
+      setError(err instanceof Error && isApiErrorKey(err.message) ? t(err.message) : err instanceof Error ? err.message : t("generated.community.create.page.failedtocreatepost"));
     } finally {
       setLoading(false);
     }
@@ -63,8 +63,7 @@ export default function CreatePostPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div className="flex items-center gap-4">
-        <Link href="/community" className="text-pc-text-secondary hover:text-pc-accent transition-colors">
-          {t("generated.community.backToCommunity")}</Link>
+        <ContextBackLink fallbackHref="/community" label={t("generated.community.backToCommunity")} />
         <h1 className="pc-heading pc-heading-lg">{t("generated.community.createPost")}</h1>
       </div>
 

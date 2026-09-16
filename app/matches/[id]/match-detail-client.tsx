@@ -24,7 +24,6 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import Link from "next/link";
 import {
   fetchMatchDetail,
   type MatchDetailWithBans,
@@ -46,7 +45,8 @@ import { ErrorState } from "@/components/async-state";
 import { RouteSkeleton } from "@/components/route-skeleton";
 import { readBrowserResult, removeBrowserResult, writeBrowserResult } from "@/lib/browser-result-cache";
 import { getQueueLabel } from "@/lib/queue-labels";
-import { LocalizedText, useLocalization } from "@/lib/localization-context";
+import { useLocalization } from "@/lib/localization-context";
+import ContextBackLink from "@/components/context-back-link";
 import { useAuth } from "@/lib/auth-context";
 import { matchDetailSections } from "@/lib/match-access";
 
@@ -371,8 +371,11 @@ export default function MatchDetailPage({ initialMatch = null }: { initialMatch?
     return (
       <div className="space-y-4">
         <ErrorState title={t("generated.matches.matchDetailsUnavailable")} message={error} onRetry={() => setReloadKey((key) => key + 1)} />
-        <Link href="/matches" className="text-pc-accent hover:underline mt-4 inline-block">
-          <LocalizedText id="generated.matches.backToMatches" /></Link>
+        <ContextBackLink
+          fallbackHref="/matches"
+          label={t("generated.matches.backToMatches")}
+          className="mt-4 text-pc-accent hover:underline"
+        />
       </div>
     );
   }

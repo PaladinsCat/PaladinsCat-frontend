@@ -2,7 +2,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { notFound, useParams } from "next/navigation";
 import CanonicalTalentImage from "@/components/canonical-talent-image";
 import ChampionLoadoutGrid from "@/components/champion-loadout-grid";
@@ -11,6 +10,7 @@ import SmartImage from "@/components/SmartImage";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { getChampionData, type ChampionData, type ChampionSkill, type ChampionTalent } from "@/lib/champion-data";
 import { useLocalization } from "@/lib/localization-context";
+import ContextBackLink from "@/components/context-back-link";
 import { EN_MESSAGES, type TranslationKey } from "@/lib/localization/messages";
 import { STATIC_CHAMPIONS } from "@/lib/static-champions";
 import { championSlug } from "@/lib/utils";
@@ -59,7 +59,7 @@ export default function ChampionDetailPage({
 
   return <div className="space-y-6">
     <div className="flex items-center gap-4">
-      <Link href="/champions" className="text-pc-text-secondary transition-colors hover:text-pc-accent">{t("generated.champions.backToChampions")}</Link>
+      <ContextBackLink fallbackHref="/champions" label={t("generated.champions.backToChampions")} />
       <h1 className="pc-heading pc-heading-lg">{displayName}</h1>
     </div>
 

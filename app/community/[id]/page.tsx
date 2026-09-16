@@ -27,6 +27,7 @@ import { orderReplies } from "@/lib/community-replies";
 import { LoadingIndicator, LoadingPanel } from "@/components/async-state";
 import { VerifiedPlayerBadge } from "@/components/player-name";
 import { useLocalization } from "@/lib/localization-context";
+import ContextBackLink from "@/components/context-back-link";
 
 /**
  * Render the /community/[id] route with `LoadingPanel`, `LoadingIndicator`, `VerifiedPlayerBadge`, `CommunityRichContent`.
@@ -231,8 +232,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 px-4 py-8">
-      <Link href="/community" className="text-pc-text-secondary hover:text-pc-accent transition-colors">
-        {t("generated.community.backToCommunity")}</Link>
+      <ContextBackLink fallbackHref="/community" label={t("generated.community.backToCommunity")} />
 
       {actionError && (
         <div className="rounded-lg border border-red-700/50 bg-red-900/30 p-3 text-sm text-red-400">
