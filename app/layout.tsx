@@ -22,8 +22,9 @@ import SiteBanner from "@/components/SiteBanner";
 import ImageAssetFallback from "@/components/ImageAssetFallback";
 import CoreUiDragGuard from "@/components/CoreUiDragGuard";
 import LiteModeProvider from "@/components/LiteModeProvider";
+import RestrictedAccountGate from "@/components/restricted-account-gate";
 import { cn } from "@/lib/utils";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { SEO_KEYWORDS, SITE_NAME, SITE_URL, serializeJsonLd } from "@/lib/seo";
 import { getServerLocalization } from "@/lib/server-localization";
 
@@ -84,6 +85,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { locale, messages, t } = await getServerLocalization();
   const nonce = (await headers()).get("x-nonce") ?? undefined;
+  const hasServerSession = (await cookies()).has("__Host-pc_session");
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [
@@ -162,6 +164,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 />
         <AuthProvider>
           <LocalizationProvider initialLocale={locale} initialMessages={messages}>
+            <RestrictedAccountGate hasServerSession={hasServerSession}>
             <MaintenanceConsentProvider>
             <TimeZoneProvider>
               <LobbyTierProvider>
@@ -186,6 +189,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               </LobbyTierProvider>
             </TimeZoneProvider>
             </MaintenanceConsentProvider>
+            </RestrictedAccountGate>
           </LocalizationProvider>
         </AuthProvider>
       </body>

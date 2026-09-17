@@ -10,8 +10,9 @@ import { serverApiBase } from "./lib/server-api";
 import { anonymousPresenceRequestAllowed } from "./lib/anonymous-presence-gate";
 
 const ACCOUNT_SESSION_COOKIE = "__Host-pc_session";
+const ACCESS_POLICY_PATH = "/prototype/access-policy";
 type AccountSessionState = "guest" | "unverified" | "verified" | "rate-limited" | "unavailable";
-type AccountSessionCheck = { state: AccountSessionState; retryAfter?: string };
+type AccountSessionCheck = { state: AccountSessionState; retryAfter?: string; restricted?: boolean };
 
 /** Validate the opaque browser session through the backend auth owner. */
 async function accountSessionState(request: NextRequest): Promise<AccountSessionCheck> {
@@ -32,16 +33,31 @@ async function accountSessionState(request: NextRequest): Promise<AccountSession
       return { state: "rate-limited", retryAfter: response.headers.get("retry-after") || undefined };
     }
     if (!response.ok) return { state: "unavailable" };
-    const account = await response.json() as { linked_player_id?: unknown };
+    const account = await response.json() as {
+      linked_player_id?: unknown;
+      access_restriction_kind?: unknown;
+      access_restriction?: unknown;
+    };
+    const restrictionKind = typeof account.access_restriction_kind === "string"
+      ? account.access_restriction_kind.trim()
+      : "";
+    const restrictionCode = account.access_restriction && typeof account.access_restriction === "object"
+      && !Array.isArray(account.access_restriction)
+      && typeof (account.access_restriction as { code?: unknown }).code === "string"
+      ? (account.access_restriction as { code: string }).code.trim()
+      : "";
     const linkedPlayerId = Number(account.linked_player_id);
-    return { state: Number.isSafeInteger(linkedPlayerId) && linkedPlayerId > 0 ? "verified" : "unverified" };
+    return {
+      state: Number.isSafeInteger(linkedPlayerId) && linkedPlayerId > 0 ? "verified" : "unverified",
+      restricted: Boolean(restrictionKind || restrictionCode),
+    };
   } catch {
     return { state: "unavailable" };
   }
 }
 
 /** Redirect a protected website request without accepting caller-controlled origins. */
-function accessRedirect(request: NextRequest, destination: "/auth/login" | "/link-account") {
+function accessRedirect(request: NextRequest, destination: "/auth/login" | "/link-account" | typeof ACCESS_POLICY_PATH) {
   const url = request.nextUrl.clone();
   url.pathname = destination;
   url.search = "";
@@ -80,14 +96,15 @@ function markProtectedResponse(response: NextResponse): NextResponse {
  * refs: none
  */
 export async function proxy(request: NextRequest) {
+  const path = request.nextUrl.pathname;
   // The production nonce policy makes Next's development runtime defer client
   // hydration. Dev servers must not be used as a public surface; let Next
   // handle its local assets and HMR without injecting production headers.
-  if (process.env.NODE_ENV === "development") {
-    return NextResponse.next();
-  }
-
-  const path = request.nextUrl.pathname;
+  let accountCheck: AccountSessionCheck | undefined;
+  const getAccountCheck = async () => {
+    accountCheck ??= await accountSessionState(request);
+    return accountCheck;
+  };
   // Do not let percent-encoded namespace aliases reach a rewrite without admission.
   let decodedPath: string;
   try {
@@ -119,9 +136,22 @@ export async function proxy(request: NextRequest) {
     response.headers.set("Cache-Control", "private, no-store");
     return response;
   }
+  if (
+    path !== ACCESS_POLICY_PATH
+    && !api
+    && request.cookies.has(ACCOUNT_SESSION_COOKIE)
+    && request.headers.get("accept")?.includes("text/html")
+  ) {
+    const check = await getAccountCheck();
+    if (check.restricted) return accessRedirect(request, ACCESS_POLICY_PATH);
+  }
+  if (process.env.NODE_ENV === "development") {
+    return NextResponse.next();
+  }
   const verifiedOnly = isVerifiedOnlyPath(decodedPath);
   if (protectedPage) {
-    const { state, retryAfter } = await accountSessionState(request);
+    const { state, retryAfter, restricted } = await getAccountCheck();
+    if (restricted) return accessRedirect(request, ACCESS_POLICY_PATH);
     if (state === "guest") return accessRedirect(request, "/auth/login");
     if (verifiedOnly && state === "unverified") return accessRedirect(request, "/link-account");
     if (state === "rate-limited") {

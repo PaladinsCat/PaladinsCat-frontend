@@ -234,5 +234,11 @@
   "common.metricHelp.banRate": "Percentage of ranked matches in which this champion was banned.",
   "common.metricHelp.tier": "Average ranked tier of players using this champion.",
   "common.media.externalVideoPrivacy": "This video is hosted by {value1}. PaladinsCat stores only the link and does not host the video file. Loading it connects your browser to the provider.",
-  "common.media.loadExternalVideo": "Load video from {value1}"
+  "common.media.loadExternalVideo": "Load video from {value1}",
+  "common.access.restrictedTitle": "Access restricted",
+  "common.access.contactModeration": "Contact moderation",
+  "common.access.appealSubject": "PaladinsCat account access appeal",
+  "common.access.checkingAccount": "Checking account access",
+  "common.access.signingOut": "Signing out…",
+  "common.access.signOut": "Sign out"
 }

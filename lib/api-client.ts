@@ -5549,6 +5549,31 @@ export async function fetchTalents(tier?: { tierMin?: number; tierMax?: number }
 
 // ── Auth Types ──
 
+export interface AccessRestriction {
+  code: string;
+  label: string;
+  detail: string;
+}
+
+function parseAccessRestriction(value: unknown, fallbackCode?: unknown): AccessRestriction | null {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    const record = value as Record<string, unknown>;
+    const code = typeof record.code === "string" ? record.code.trim() : "";
+    const label = typeof record.label === "string" ? record.label.trim() : "";
+    const detail = typeof record.detail === "string" ? record.detail.trim() : "";
+    if (code && label && detail) return { code, label, detail };
+  }
+
+  const code = typeof fallbackCode === "string" ? fallbackCode.trim() : "";
+  return code
+    ? {
+        code,
+        label: "Account access restriction",
+        detail: "This account is restricted under a PaladinsCat access policy.",
+      }
+    : null;
+}
+
 /**
  * Describe the signed-in account, access flags, profile, and linked player.
  * refs: doc: documents/02-technical/security/auth.md
@@ -5567,6 +5592,7 @@ export interface AuthUser {
   timeZone: string | null;
   linkedPlayerId: number | null;
   linkedPlayerName: string | null;
+  accessRestriction: AccessRestriction | null;
 }
 
 /**
@@ -5684,6 +5710,7 @@ export async function register(username: string, email: string, password: string
     isAdmin: raw.user.is_admin ?? false, isApproved: raw.user.is_approved ?? false,
     createdAt: raw.user.created_at ?? new Date().toISOString(), lastLogin: raw.user.last_login ?? null,
     timeZone: raw.user.time_zone ?? null, linkedPlayerId: null, linkedPlayerName: null,
+    accessRestriction: null,
   }, token: raw.token, expiresAt: raw.expires_at ?? new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString() };
   setAuthSession(session);
   return session;
@@ -5697,7 +5724,7 @@ export async function register(username: string, email: string, password: string
  * I/O types: `username: string; password: string -> Promise<AuthSession>`.
  */
 export async function login(username: string, password: string): Promise<AuthSession> {
-  const raw = await fetchJson<{ user: { id: number; username: string; email?: string | null; avatar_url?: string | null; bio?: string | null; is_admin?: boolean; is_approved?: boolean; created_at?: string; last_login?: string | null; time_zone?: string | null; linked_player_id?: number | null; linked_player_name?: string | null }; token: string; expires_at?: string }>("/auth/login", {
+  const raw = await fetchJson<{ user: { id: number; username: string; email?: string | null; avatar_url?: string | null; bio?: string | null; is_admin?: boolean; is_approved?: boolean; created_at?: string; last_login?: string | null; time_zone?: string | null; linked_player_id?: number | null; linked_player_name?: string | null; access_restriction?: unknown; access_restriction_kind?: string | null }; token: string; expires_at?: string }>("/auth/login", {
     method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username, password }),
   });
   const session: AuthSession = { user: {
@@ -5707,6 +5734,7 @@ export async function login(username: string, password: string): Promise<AuthSes
     createdAt: raw.user.created_at ?? new Date().toISOString(), lastLogin: raw.user.last_login ?? null,
     timeZone: raw.user.time_zone ?? null, linkedPlayerId: raw.user.linked_player_id ?? null,
     linkedPlayerName: raw.user.linked_player_name ?? null,
+    accessRestriction: parseAccessRestriction(raw.user.access_restriction, raw.user.access_restriction_kind),
   }, token: raw.token, expiresAt: raw.expires_at ?? new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString() };
   setAuthSession(session);
   return session;
@@ -5781,6 +5809,8 @@ export async function getMe(_userId?: number): Promise<AuthUser> {
     time_zone?: string | null;
     linked_player_id?: number | null;
     linked_player_name?: string | null;
+    access_restriction?: unknown;
+    access_restriction_kind?: string | null;
   }>(`/auth/me`, {
     headers: accountAuthHeaders(token),
   });
@@ -5799,6 +5829,7 @@ export async function getMe(_userId?: number): Promise<AuthUser> {
     timeZone: raw.time_zone ?? null,
     linkedPlayerId: raw.linked_player_id ?? null,
     linkedPlayerName: raw.linked_player_name ?? null,
+    accessRestriction: parseAccessRestriction(raw.access_restriction, raw.access_restriction_kind),
   };
 }
 
@@ -5835,6 +5866,7 @@ export async function getUserProfile(userId: number): Promise<AuthUser> {
     timeZone: null,
     linkedPlayerId: null,
     linkedPlayerName: null,
+    accessRestriction: null,
   };
 }
 
@@ -5934,7 +5966,7 @@ export async function markAccountNotificationRead(notificationId: number): Promi
  */
 export async function getAccountDetails(): Promise<AccountDetails> {
   const raw = await fetchJson<{
-    user: { id: number; username: string; email: string; avatar_url: string | null; bio: string | null; is_admin?: boolean; is_approved?: boolean; linked_player_id: number | null; created_at: string; last_login: string | null; time_zone?: string | null };
+    user: { id: number; username: string; email: string; avatar_url: string | null; bio: string | null; is_admin?: boolean; is_approved?: boolean; linked_player_id: number | null; created_at: string; last_login: string | null; time_zone?: string | null; access_restriction?: unknown; access_restriction_kind?: string | null };
     linkedPlayer: AccountDetails["linkedPlayer"];
   }>("/auth/account", {
     headers: accountAuthHeaders(),
@@ -5953,6 +5985,7 @@ export async function getAccountDetails(): Promise<AccountDetails> {
       timeZone: raw.user.time_zone ?? null,
       linkedPlayerId: raw.user.linked_player_id ?? null,
       linkedPlayerName: raw.linkedPlayer?.name ?? null,
+      accessRestriction: parseAccessRestriction(raw.user.access_restriction, raw.user.access_restriction_kind),
       linked_player_id: raw.user.linked_player_id,
     },
     linkedPlayer: raw.linkedPlayer,
