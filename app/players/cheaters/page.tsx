@@ -16,7 +16,9 @@ import { getPercentageColor } from "@/lib/stat-quality";
 const EMPTY_PORTAL: CheaterPortal = { activeCount: 0, inactiveCount: 0, evidenceCount: 0, latest: [] };
 
 function entryHref(entry: CheaterPortalEntry): string {
-  return entry.kind === "private" ? `/players/private-accounts/${entry.subjectId}` : `/players/${entry.playerId ?? entry.subjectId}`;
+  return entry.kind === "private"
+    ? `/players/private-accounts/${entry.subjectId}`
+    : `/evidence/${encodeURIComponent(String(entry.playerId ?? entry.subjectId))}`;
 }
 
 type NumberFormatter = (value: number | null | undefined, options?: Intl.NumberFormatOptions) => string;
@@ -146,7 +148,7 @@ export default function CheatersPage() {
           </div>
         </Link>
 
-        <Link href="/players/cheaters/evidence" data-card-accent="tertiary" title={t("moderation.viewOrSubmitEvidence")} aria-label={t("moderation.viewOrSubmitEvidence")} className="pc-glass pc-home-feature-card group relative flex h-full min-h-64 flex-col items-center justify-center overflow-hidden rounded-2xl border border-white/5 p-6 text-center shadow-lg transition-[transform,border-color] duration-[280ms] hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent">
+        <Link href="/evidence" data-card-accent="tertiary" title={t("moderation.viewOrSubmitEvidence")} aria-label={t("moderation.viewOrSubmitEvidence")} className="pc-glass pc-home-feature-card group relative flex h-full min-h-64 flex-col items-center justify-center overflow-hidden rounded-2xl border border-white/5 p-6 text-center shadow-lg transition-[transform,border-color] duration-[280ms] hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent">
           <ArrowRight className="pc-home-card-arrow absolute right-5 top-5 h-4 w-4 text-pc-text-muted transition-[transform,color] duration-[120ms] group-hover:translate-x-1 group-hover:text-amber-200" aria-hidden="true" />
           <span className="pc-card-icon flex h-12 w-12 items-center justify-center">
             <FileImage className="h-6 w-6" aria-hidden="true" />

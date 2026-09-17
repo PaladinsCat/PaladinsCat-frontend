@@ -88,7 +88,7 @@ export default function CheaterEvidenceReviewPage() {
 
   return (
     <div className="space-y-6">
-      <PlayersPageHeader title={t("moderation.evidenceReview")} actions={<Link href="/players/cheaters/evidence" className="text-sm font-semibold text-pc-accent hover:text-pc-accent-secondary">{t("moderation.evidencePortal")}</Link>} />
+      <PlayersPageHeader title={t("moderation.evidenceReview")} actions={<Link href="/evidence" className="text-sm font-semibold text-pc-accent hover:text-pc-accent-secondary">{t("moderation.evidencePortal")}</Link>} />
       {error && <div className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-300">{error}</div>}
       {loading ? <LoadingPanel compact /> : items.length === 0 ? <div className="pc-card text-sm text-pc-text-muted">{t("moderation.noEvidenceForReview")}</div> : (
         <div className="space-y-4" data-testid="evidence-review-queue">

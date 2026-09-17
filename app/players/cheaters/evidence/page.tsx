@@ -64,7 +64,7 @@ export default function CheaterEvidencePage() {
 
   return (
     <div className="space-y-6">
-      <PlayersPageHeader title={t("moderation.evidencePortal")} actions={<><Link href="/players/cheaters/evidence/submit" className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-pc-accent px-4 py-2 text-sm font-semibold text-black"><Plus className="h-4 w-4" aria-hidden="true" />{t("moderation.submitEvidence")}</Link>{isAdmin && <Link href="/players/cheaters/evidence/review" className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-pc-border px-4 py-2 text-sm font-semibold text-pc-text"><ShieldCheck className="h-4 w-4" aria-hidden="true" />{t("moderation.reviewQueue")}</Link>}</>} />
+      <PlayersPageHeader title={t("moderation.evidencePortal")} actions={<><Link href="/evidence/submit" className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-pc-accent px-4 py-2 text-sm font-semibold text-black"><Plus className="h-4 w-4" aria-hidden="true" />{t("moderation.submitEvidence")}</Link>{isAdmin && <Link href="/evidence/review" className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-pc-border px-4 py-2 text-sm font-semibold text-pc-text"><ShieldCheck className="h-4 w-4" aria-hidden="true" />{t("moderation.reviewQueue")}</Link>}</>} />
       {error && <div className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-300">{error}</div>}
 
       <div className="flex items-center justify-between gap-3 text-xs text-pc-text-muted">

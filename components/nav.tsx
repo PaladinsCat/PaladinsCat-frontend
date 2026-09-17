@@ -176,6 +176,7 @@ export default function Nav() {
       title: t("generated.players.moderation"),
       links: [
         { href: "/players/cheaters", label: t("generated.players.cheaters") },
+        { href: "/evidence", label: t("moderation.evidencePortal") },
         { href: "/players/boosted", label: t("moderation.boostedPlayers") },
         { href: "/players/suspicious", label: t("generated.players.suspiciousPlayers") },
         { href: "/players/droppers", label: t("moderation.droppersTitle") },

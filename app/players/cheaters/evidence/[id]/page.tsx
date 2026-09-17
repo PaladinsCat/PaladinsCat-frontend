@@ -29,7 +29,7 @@ export default function EvidenceDetailPage({ params }: { params: Promise<{ id: s
   }, [id]);
 
   if (loading) return <LoadingPanel compact />;
-  const backLink = <ContextBackLink fallbackHref="/players/cheaters/evidence" label={t("moderation.evidencePortal")} className="gap-2" />;
+  const backLink = <ContextBackLink fallbackHref="/evidence" label={t("moderation.evidencePortal")} className="gap-2" />;
   if (!evidence) return <div className="space-y-6">{backLink}<div className="pc-card text-sm text-pc-text-secondary">{t("moderation.evidenceNotFound")}</div></div>;
   return <div className="mx-auto max-w-5xl space-y-6 px-4 py-8" data-testid="evidence-detail">{backLink}<CheaterEvidencePost item={evidence} formatDateTime={formatDateTime} /></div>;
 }

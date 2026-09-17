@@ -48,7 +48,7 @@ export default function CheaterEvidencePost({
       ) : null}
       <div className="space-y-3 p-4">
         <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0"><h2 className="truncate text-base font-semibold text-pc-text"><Link href={`/players/cheaters/evidence/${encodeURIComponent(item.id)}`} className="transition-colors hover:text-pc-accent">{item.title}</Link></h2><p className="mt-0.5 truncate text-xs font-medium text-amber-200">{item.subjectName}</p></div>
+          <div className="min-w-0"><h2 className="truncate text-base font-semibold text-pc-text"><Link href={`/evidence/reports/${encodeURIComponent(item.id)}`} className="transition-colors hover:text-pc-accent">{item.title}</Link></h2><p className="mt-0.5 truncate text-xs font-medium text-amber-200">{item.subjectName}</p></div>
           {item.provider && <span className="shrink-0 rounded-full border border-pc-border px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-pc-text-muted">{item.provider}</span>}
         </div>
         {item.description && <p className="text-sm leading-6 text-pc-text-secondary">{item.description}</p>}

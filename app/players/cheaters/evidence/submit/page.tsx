@@ -89,7 +89,7 @@ export default function SubmitCheaterEvidencePage() {
   }
 
   if (!canPreview) {
-    return <div className="space-y-6"><PlayersPageHeader title={t("moderation.submitEvidence")} /><div className="pc-card text-sm text-pc-text-secondary">{t("moderation.signInSubmitEvidence")} <Link href="/auth/login?redirect=%2Fplayers%2Fcheaters%2Fevidence%2Fsubmit" className="font-semibold text-pc-accent hover:text-pc-accent-secondary">{t("generated.auth.signIn.ada2e9e")}</Link></div></div>;
+    return <div className="space-y-6"><PlayersPageHeader title={t("moderation.submitEvidence")} /><div className="pc-card text-sm text-pc-text-secondary">{t("moderation.signInSubmitEvidence")} <Link href="/auth/login?redirect=%2Fevidence%2Fsubmit" className="font-semibold text-pc-accent hover:text-pc-accent-secondary">{t("generated.auth.signIn.ada2e9e")}</Link></div></div>;
   }
 
   return (

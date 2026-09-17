@@ -641,8 +641,8 @@ function normalizeCheaterPortalEntry(row: any): CheaterPortalEntry {
     : null;
   return {
     kind: row.kind === "private" ? "private" : "player",
-    subjectId: String(row.subjectId ?? row.subject_id ?? ""),
-    playerId: row.playerId == null && row.player_id == null ? null : Number(row.playerId ?? row.player_id),
+    subjectId: String(row.subjectId ?? row.subject_id ?? row.playerId ?? row.player_id ?? row.id ?? ""),
+    playerId: row.playerId == null && row.player_id == null && row.id == null ? null : Number(row.playerId ?? row.player_id ?? row.id),
     name: String(row.name ?? "Unknown subject"),
     platform: row.platform ?? row.platform_name ?? null,
     lastSeen: row.lastSeen ?? row.last_seen ?? null,
@@ -703,6 +703,40 @@ export async function fetchActiveCheaters(params: { q?: string; limit?: number; 
   query.set("limit", String(params.limit ?? 20));
   query.set("offset", String(params.offset ?? 0));
   const raw = await fetchJson<{ items?: any[]; total?: number | string }>(`/cheaters/active?${query.toString()}`);
+  return {
+    items: (raw.items ?? []).map(normalizeCheaterPortalEntry),
+    total: Number(raw.total ?? 0),
+  };
+}
+
+/**
+ * Fetch the paginated recent-exploiter directory. Ordering and the rolling
+ * 30-day boundary are owned by the backend directory endpoint.
+ * refs: endpoints: GET /players/exploiters/active
+ */
+export async function fetchActiveExploiters(params: { q?: string; limit?: number; offset?: number } = {}): Promise<ActiveCheaterPage> {
+  const query = new URLSearchParams();
+  if (params.q?.trim()) query.set("q", params.q.trim());
+  query.set("limit", String(params.limit ?? 20));
+  query.set("offset", String(params.offset ?? 0));
+  const raw = await fetchJson<{ items?: any[]; total?: number | string }>(`/players/exploiters/active?${query.toString()}`);
+  return {
+    items: (raw.items ?? []).map(normalizeCheaterPortalEntry),
+    total: Number(raw.total ?? 0),
+  };
+}
+
+/**
+ * Fetch the paginated historical-exploiter directory. Ordering and the
+ * rolling 30-day boundary are owned by the backend directory endpoint.
+ * refs: endpoints: GET /players/exploiters/inactive
+ */
+export async function fetchInactiveExploiters(params: { q?: string; limit?: number; offset?: number } = {}): Promise<InactiveCheaterPage> {
+  const query = new URLSearchParams();
+  if (params.q?.trim()) query.set("q", params.q.trim());
+  query.set("limit", String(params.limit ?? 20));
+  query.set("offset", String(params.offset ?? 0));
+  const raw = await fetchJson<{ items?: any[]; total?: number | string }>(`/players/exploiters/inactive?${query.toString()}`);
   return {
     items: (raw.items ?? []).map(normalizeCheaterPortalEntry),
     total: Number(raw.total ?? 0),
@@ -1973,6 +2007,42 @@ export async function fetchExploiterEvidence(playerId: string): Promise<Exploite
       createdAt: String(row.createdAt ?? ""),
     })),
   };
+}
+
+/**
+ * Fetch the shared player evidence dashboard. Exploiters use the rich
+ * evidence payload; cheaters fall back to their published user reports so
+ * both moderation categories share the same evidence-page design.
+ * refs: endpoints: GET /players/exploiters/:id · GET /cheaters/:id
+ */
+export async function fetchPlayerEvidenceDashboard(playerId: string): Promise<ExploiterEvidenceDetail> {
+  try {
+    return await fetchExploiterEvidence(playerId);
+  } catch {
+    const detail = await fetchCheaterDetail(playerId);
+    return {
+      player: {
+        id: detail.player.id,
+        name: detail.player.name,
+        platform: detail.player.platform ?? "Unknown",
+        region: "Unknown",
+        cheater: true,
+        exploiter: false,
+      },
+      matches: [],
+      cosmeticEvidence: [],
+      flagEvidence: detail.evidence.map((item) => ({
+        id: Number(item.id),
+        title: item.title,
+        description: item.description,
+        matchId: item.matchId == null ? null : Number(item.matchId),
+        sourceUrl: item.sourceUrl,
+        origin: "player_submitted",
+        createdAt: item.createdAt,
+      })),
+      flags: [],
+    };
+  }
 }
 
 /**
