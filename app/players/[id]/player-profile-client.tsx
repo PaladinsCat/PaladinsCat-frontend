@@ -190,8 +190,18 @@ export default function PlayerProfileClient({
     return () => { active = false; };
   }, [fullAccess, id, response?.player.verified]);
 
-  // Open report modal — redirect to login if not authenticated
+  // Suspicious reports use the shared evidence portal; other moderation actions
+  // continue through the report modal.
   const openReportModal = useCallback((type: Exclude<ReportType, 'approve'>) => {
+    if (type === 'suspicious') {
+      const evidencePath = `/evidence/submit?playerId=${encodeURIComponent(id)}`;
+      if (!isLoggedIn) {
+        router.push(`/auth/login?redirect=${encodeURIComponent(evidencePath)}`);
+        return;
+      }
+      router.push(evidencePath);
+      return;
+    }
     if (!isLoggedIn) {
       router.push(`/auth/login?redirect=/players/${id}`);
       return;

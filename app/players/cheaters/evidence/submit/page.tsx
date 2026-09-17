@@ -10,6 +10,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Info, Search, Send, X } from "lucide-react";
 import PlayersPageHeader from "@/components/ui/players-page-header";
 import { fetchPlayerSearch, submitCheaterEvidence, type PlayerSearchResult } from "@/lib/api-client";
@@ -31,6 +32,9 @@ export default function SubmitCheaterEvidencePage() {
   const { isLoggedIn } = useAuth();
   const { t } = useLocalization();
   const canPreview = isLoggedIn || process.env.NODE_ENV === "development";
+  const searchParams = useSearchParams();
+  const presetPlayerId = searchParams.get("playerId")?.trim() ?? "";
+  const loginRedirect = `/evidence/submit${presetPlayerId ? `?playerId=${encodeURIComponent(presetPlayerId)}` : ""}`;
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<PlayerSearchResult[]>([]);
   const [selected, setSelected] = useState<PlayerSearchResult | null>(null);
@@ -41,6 +45,21 @@ export default function SubmitCheaterEvidencePage() {
   const [submitting, setSubmitting] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (selected || !/^\d+$/.test(presetPlayerId)) return;
+    let active = true;
+    fetchPlayerSearch(presetPlayerId)
+      .then((players) => {
+        const player = players.find((candidate) => String(candidate.id) === presetPlayerId);
+        if (!active || !player) return;
+        setSelected(player);
+        setQuery(player.name);
+        setResults([]);
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [presetPlayerId, selected]);
 
   useEffect(() => {
     if (selected || query.trim().length < 2) {
@@ -89,7 +108,7 @@ export default function SubmitCheaterEvidencePage() {
   }
 
   if (!canPreview) {
-    return <div className="space-y-6"><PlayersPageHeader title={t("moderation.submitEvidence")} /><div className="pc-card text-sm text-pc-text-secondary">{t("moderation.signInSubmitEvidence")} <Link href="/auth/login?redirect=%2Fevidence%2Fsubmit" className="font-semibold text-pc-accent hover:text-pc-accent-secondary">{t("generated.auth.signIn.ada2e9e")}</Link></div></div>;
+    return <div className="space-y-6"><PlayersPageHeader title={t("moderation.submitEvidence")} /><div className="pc-card text-sm text-pc-text-secondary">{t("moderation.signInSubmitEvidence")} <Link href={`/auth/login?redirect=${encodeURIComponent(loginRedirect)}`} className="font-semibold text-pc-accent hover:text-pc-accent-secondary">{t("generated.auth.signIn.ada2e9e")}</Link></div></div>;
   }
 
   return (
