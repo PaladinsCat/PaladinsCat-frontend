@@ -22,7 +22,7 @@ const styles: Record<Accent, {
   icon: string;
   border: string;
   hover: string;
-  title: string;
+  titleClass: string;
   arrow: string;
   Icon: LucideIcon;
 }> = {
@@ -30,7 +30,7 @@ const styles: Record<Accent, {
     icon: "text-red-300",
     border: "border-red-400/25",
     hover: "hover:border-red-400/60 hover:bg-red-500/[0.05]",
-    title: "group-hover:text-red-100",
+    titleClass: "group-hover:text-red-100",
     arrow: "group-hover:text-red-200",
     Icon: ShieldAlert,
   },
@@ -38,7 +38,7 @@ const styles: Record<Accent, {
     icon: "text-orange-300",
     border: "border-orange-400/25",
     hover: "hover:border-orange-400/60 hover:bg-orange-500/[0.05]",
-    title: "group-hover:text-orange-100",
+    titleClass: "group-hover:text-orange-100",
     arrow: "group-hover:text-orange-200",
     Icon: ShieldAlert,
   },
@@ -46,7 +46,7 @@ const styles: Record<Accent, {
     icon: "text-violet-300",
     border: "border-pc-border",
     hover: "hover:border-violet-400/50 hover:bg-violet-500/[0.05]",
-    title: "group-hover:text-violet-100",
+    titleClass: "group-hover:text-violet-100",
     arrow: "group-hover:text-violet-200",
     Icon: History,
   },
@@ -133,7 +133,7 @@ export default function ModerationPlayerDirectory({
               <div className="flex min-w-0 items-start gap-3">
                 <Icon className={`mt-0.5 h-5 w-5 shrink-0 ${style.icon}`} aria-hidden="true" />
                 <div className="min-w-0">
-                  <h2 className={`truncate text-sm font-semibold text-pc-text ${style.title}`}>{entry.name}</h2>
+                  <h2 className={`truncate text-sm font-semibold text-pc-text ${style.titleClass}`}>{entry.name}</h2>
                   <p className="mt-1 truncate text-xs text-pc-text-secondary">{entry.reason || fallbackReason}</p>
                   {inactive && <p className="mt-2 text-xs text-pc-text-muted">{t("moderation.lastObserved", { value1: formatDateTime(entry.lastSeen) })}</p>}
                 </div>
