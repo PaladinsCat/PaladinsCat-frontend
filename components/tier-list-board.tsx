@@ -82,7 +82,7 @@ export default function TierListBoard({
             const image = ultimate?.iconUrl ?? getChampionIconSafe(champion.championName);
             return <div key={champion.championId} title={label} className="group relative">
               <img src={image} alt={label} className={`${compact ? "h-9 w-9 sm:h-11 sm:w-11" : "h-11 w-11 sm:h-14 sm:w-14"} rounded-lg border border-pc-border bg-pc-bg object-contain`} />
-              {!compact && <span className="pointer-events-none absolute inset-x-0 bottom-0 truncate rounded-b-lg bg-black/75 px-1 py-0.5 text-center text-xs text-white opacity-0 transition-opacity group-hover:opacity-100">{label}{ultimate && <span className="block text-[10px] text-white/75">{champion.championName}</span>}</span>}
+              {!compact && <span className="pointer-events-none absolute inset-x-0 bottom-0 truncate rounded-b-lg bg-black/75 px-1 py-0.5 text-center text-xs text-white opacity-0 transition-opacity group-hover:opacity-100">{label}{ultimate && <span className="block text-xs text-white/75">{champion.championName}</span>}</span>}
             </div>;
           })}
         </div>

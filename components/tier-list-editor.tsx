@@ -170,7 +170,7 @@ export default function TierListEditor({
     return <div key={champion.id} title={label} draggable onDragStart={(event) => { event.dataTransfer.effectAllowed = "move"; event.dataTransfer.setData("application/x-paladinscat-champion", String(champion.id)); }} className="group relative flex w-16 cursor-grab flex-col items-center rounded-lg border border-pc-border bg-pc-bg p-1.5 active:cursor-grabbing sm:w-20">
       <img src={image} alt={label} className="h-10 w-10 rounded object-contain sm:h-12 sm:w-12" />
       <span className="mt-1 w-full truncate text-center text-xs text-pc-text-secondary">{label}</span>
-      {ultimate && <span className="w-full truncate text-center text-[10px] text-pc-text-muted">{champion.name}</span>}
+      {ultimate && <span className="w-full truncate text-center text-xs text-pc-text-muted">{champion.name}</span>}
       <select aria-label={t("tierLists.moveItem", { name: label })} value={group === "tray" ? "" : group} onChange={(event) => moveChampion(champion.id, (event.target.value || "tray") as GroupKey)} className="mt-1 w-full rounded border border-pc-border bg-pc-bg-secondary px-0.5 py-0.5 text-xs text-pc-text sm:hidden">
         <option value="">{t("tierLists.tray")}</option>{TIER_ORDER.map((tier) => <option key={tier} value={tier}>{tier}</option>)}
       </select>
