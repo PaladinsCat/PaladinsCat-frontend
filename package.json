@@ -45,7 +45,7 @@
     "@next/swc-wasm-nodejs": "^16.3.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "daisyui": "^5.7.22",
+    "daisyui": "^5.7.42",
     "framer-motion": "^12.43.0",
     "gray-matter": "^4.0.3",
     "html-to-image": "^1.11.13",
