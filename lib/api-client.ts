@@ -5551,8 +5551,8 @@ export async function fetchTalents(tier?: { tierMin?: number; tierMax?: number }
 
 export interface AccessRestriction {
   code: string;
-  label: string;
-  detail: string;
+  label?: string;
+  detail?: string;
 }
 
 function parseAccessRestriction(value: unknown, fallbackCode?: unknown): AccessRestriction | null {
@@ -5564,14 +5564,11 @@ function parseAccessRestriction(value: unknown, fallbackCode?: unknown): AccessR
     if (code && label && detail) return { code, label, detail };
   }
 
+  // The backend sends only the restriction kind (a code); label/detail are
+  // backend-provided when present. The UI localizes its own surface, so no
+  // hardcoded English copy is carried here.
   const code = typeof fallbackCode === "string" ? fallbackCode.trim() : "";
-  return code
-    ? {
-        code,
-        label: "Account access restriction",
-        detail: "This account is restricted under a PaladinsCat access policy.",
-      }
-    : null;
+  return code ? { code } : null;
 }
 
 /**

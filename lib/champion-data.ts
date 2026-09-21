@@ -110,6 +110,22 @@ export async function getChampionData(slug: string): Promise<ChampionData | unde
   return data[championSlug(slug)];
 }
 
+/** Describe the ultimate ability used by an ultimate tier list entry. */
+export interface ChampionUltimate {
+  name: string;
+  iconUrl: string;
+}
+
+/** Resolve the canonical ultimate ability for a champion by its game data. */
+export async function getChampionUltimate(name: string): Promise<ChampionUltimate | undefined> {
+  const champion = await getChampionData(name);
+  const skill = champion?.skills.find((candidate) =>
+    candidate.key.toUpperCase() === "E" || candidate.cooldown?.toLowerCase() === "ultimate",
+  );
+  if (!skill?.name || !skill.iconUrl) return undefined;
+  return { name: skill.name, iconUrl: skill.iconUrl };
+}
+
 async function loadCanonicalTalentImages(): Promise<Map<number, string>> {
   if (!canonicalTalentImagesPromise) {
     canonicalTalentImagesPromise = loadChampionDataMap().then((champions) => {

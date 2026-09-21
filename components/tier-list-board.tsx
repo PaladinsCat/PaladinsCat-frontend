@@ -2,8 +2,12 @@
  * Render tier list board.
  * refs: none
  */
+"use client";
+
+import { useEffect, useState, type RefObject } from "react";
+import { getChampionUltimate, type ChampionUltimate } from "@/lib/champion-data";
 import { getChampionIconSafe } from "@/lib/champion-icons";
-import type { TierListEntry, TierName } from "@/lib/tierlists-api";
+import type { TierListEntry, TierListMode, TierName } from "@/lib/tierlists-api";
 
 /**
  * Order tier-list rows from S through A, B, C, D, and F.
@@ -32,19 +36,55 @@ export function tierTone(tier: TierName): string {
 /**
  * Render tier list board.
  * refs: none
- * I/O types: `{ entries, compact = false }: { entries: TierListEntry[]; compact?: boolean } -> JSX.Element`.
+ * I/O types: `{ entries, compact = false, mode = "champion" }: TierListBoardProps -> JSX.Element`.
  */
-export default function TierListBoard({ entries, compact = false }: { entries: TierListEntry[]; compact?: boolean }) {
-  return <div className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-secondary/50">
+export default function TierListBoard({
+  entries,
+  compact = false,
+  mode = "champion",
+  boardRef,
+}: {
+  entries: TierListEntry[];
+  compact?: boolean;
+  mode?: TierListMode;
+  boardRef?: RefObject<HTMLDivElement | null>;
+}) {
+  const [ultimates, setUltimates] = useState<Record<number, ChampionUltimate>>({});
+
+  useEffect(() => {
+    let active = true;
+    if (mode !== "ultimate") {
+      return () => { active = false; };
+    }
+    const championNames = Array.from(new Map(entries.map((entry) => [entry.championId, entry.championName])).entries());
+    void Promise.all(championNames.map(async ([championId, championName]) => [championId, await getChampionUltimate(championName)] as const))
+      .then((resolved) => {
+        if (!active) return;
+        const next: Record<number, ChampionUltimate> = {};
+        for (const [championId, ultimate] of resolved) {
+          if (ultimate) next[championId] = ultimate;
+        }
+        setUltimates(next);
+      })
+      .catch(() => { if (active) setUltimates({}); });
+    return () => { active = false; };
+  }, [entries, mode]);
+
+  return <div ref={boardRef} className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-secondary/50">
     {TIER_ORDER.map((tier) => {
       const champions = entries.filter((entry) => entry.tier === tier).sort((a, b) => a.position - b.position);
       return <div key={tier} className="grid grid-cols-[3.25rem_minmax(0,1fr)] border-b border-pc-border/70 last:border-b-0 sm:grid-cols-[4.25rem_minmax(0,1fr)]">
         <div className={`flex items-center justify-center border-r text-xl font-black sm:text-2xl ${TIER_TONES[tier]}`}>{tier}</div>
         <div className={`flex min-h-14 flex-wrap content-start gap-1.5 p-2 ${compact ? "sm:min-h-16" : "sm:min-h-20 sm:gap-2 sm:p-3"}`}>
-          {champions.map((champion) => <div key={champion.championId} title={champion.championName} className="group relative">
-            <img src={getChampionIconSafe(champion.championName)} alt={champion.championName} className={`${compact ? "h-9 w-9 sm:h-11 sm:w-11" : "h-11 w-11 sm:h-14 sm:w-14"} rounded-lg border border-pc-border bg-pc-bg object-contain`} />
-            {!compact && <span className="pointer-events-none absolute inset-x-0 bottom-0 truncate rounded-b-lg bg-black/75 px-1 py-0.5 text-center text-xs text-white opacity-0 transition-opacity group-hover:opacity-100">{champion.championName}</span>}
-          </div>)}
+          {champions.map((champion) => {
+            const ultimate = mode === "ultimate" ? ultimates[champion.championId] : undefined;
+            const label = ultimate?.name ?? champion.championName;
+            const image = ultimate?.iconUrl ?? getChampionIconSafe(champion.championName);
+            return <div key={champion.championId} title={label} className="group relative">
+              <img src={image} alt={label} className={`${compact ? "h-9 w-9 sm:h-11 sm:w-11" : "h-11 w-11 sm:h-14 sm:w-14"} rounded-lg border border-pc-border bg-pc-bg object-contain`} />
+              {!compact && <span className="pointer-events-none absolute inset-x-0 bottom-0 truncate rounded-b-lg bg-black/75 px-1 py-0.5 text-center text-xs text-white opacity-0 transition-opacity group-hover:opacity-100">{label}{ultimate && <span className="block text-xs text-white/75">{champion.championName}</span>}</span>}
+            </div>;
+          })}
         </div>
       </div>;
     })}

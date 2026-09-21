@@ -55,4 +55,11 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Auth UI browser tests
-        run: npm run test:ui:auth
+        env:
+          PALADINSCAT_WEBSITE_GATE_SECRET_FILE: ${{ runner.temp }}/auth-ui-gate-key
+          PALADINSCAT_PUBLIC_ORIGIN: http://127.0.0.1:3100
+        run: |
+          # Exercise the production gate with a disposable test-only signing key.
+          node -e "require('node:fs').writeFileSync(process.env.PALADINSCAT_WEBSITE_GATE_SECRET_FILE, require('node:crypto').randomBytes(32).toString('hex'), { mode: 0o600 })"
+          trap 'rm -f -- "$PALADINSCAT_WEBSITE_GATE_SECRET_FILE"' EXIT
+          npm run test:ui:auth

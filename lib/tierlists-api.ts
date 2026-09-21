@@ -15,6 +15,9 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api";
  */
 export type TierName = "S" | "A" | "B" | "C" | "D" | "F";
 
+/** Describe what a tier list ranks. */
+export type TierListMode = "champion" | "ultimate";
+
 /**
  * Describe tier list entry with championId, championName, tier, position.
  * refs: doc: documents/02-technical/api/api-server.md
@@ -41,6 +44,7 @@ export interface TierListSummary {
   viewCount: number;
   commentCount: number;
   createdAt: string;
+  mode: TierListMode;
   entries: TierListEntry[];
 }
 
@@ -55,6 +59,7 @@ type RawTierList = {
   view_count: number;
   comment_count: number;
   created_at: string;
+  mode?: string;
   entries?: TierListEntry[];
 };
 
@@ -84,6 +89,7 @@ function mapTierList(raw: RawTierList): TierListSummary {
     viewCount: Number(raw.view_count ?? 0),
     commentCount: Number(raw.comment_count ?? 0),
     createdAt: String(raw.created_at),
+    mode: raw.mode === "ultimate" ? "ultimate" : "champion",
     entries: Array.isArray(raw.entries) ? raw.entries.map((entry) => ({
       championId: Number(entry.championId),
       championName: String(entry.championName),
@@ -126,13 +132,14 @@ export async function fetchTierList(postId: number): Promise<TierListSummary> {
 export async function createTierList(input: {
   title: string;
   description: string;
+  mode: TierListMode;
   entries: Array<{ championId: number; tier: TierName; position: number }>;
   token: string | null;
 }): Promise<{ postId: number }> {
   return requestJson<{ postId: number }>("/tierlists", {
     method: "POST",
     headers: { "Content-Type": "application/json", ...accountAuthHeaders(input.token) },
-    body: JSON.stringify({ title: input.title, description: input.description, entries: input.entries }),
+    body: JSON.stringify({ title: input.title, description: input.description, mode: input.mode, entries: input.entries }),
   });
 }
 
@@ -146,12 +153,13 @@ export async function createTierList(input: {
 export async function updateTierList(postId: number, input: {
   title: string;
   description: string;
+  mode: TierListMode;
   entries: Array<{ championId: number; tier: TierName; position: number }>;
   token: string | null;
 }): Promise<{ postId: number }> {
   return requestJson<{ postId: number }>(`/tierlists/${postId}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json", ...accountAuthHeaders(input.token) },
-    body: JSON.stringify({ title: input.title, description: input.description, entries: input.entries }),
+    body: JSON.stringify({ title: input.title, description: input.description, mode: input.mode, entries: input.entries }),
   });
 }

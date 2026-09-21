@@ -36,6 +36,13 @@ import { readFileSync } from "node:fs";
 
 const port = Number(process.env.PALADINSCAT_DEV_PROXY_PORT || 3001);
 const targetBase = (process.env.PALADINSCAT_DEV_PROXY_TARGET || "https://paladinscat.com").replace(/\/+$/, "");
+const targetUrl = new URL(targetBase);
+const loopback = ["127.0.0.1", "[::1]", "localhost"].includes(targetUrl.hostname);
+if ((targetUrl.protocol !== "https:" && !(loopback && targetUrl.protocol === "http:")) ||
+    targetUrl.username || targetUrl.password || targetUrl.pathname !== "/" ||
+    targetUrl.search || targetUrl.hash) {
+  throw new Error("Developer credentials require an HTTPS origin or an HTTP loopback origin.");
+}
 
 // Credential: prefer the env var; otherwise read the file path.
 let apiKey = process.env.PALADINSCAT_DEV_PROXY_API_KEY || "";
@@ -47,7 +54,6 @@ if (apiKey.length < 40) {
   process.exit(2);
 }
 
-const targetUrl = new URL(targetBase);
 const transport = targetUrl.protocol === "https:" ? https : http;
 
 const server = http.createServer((req, res) => {

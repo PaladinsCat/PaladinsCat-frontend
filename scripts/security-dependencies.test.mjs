@@ -10,6 +10,14 @@ const sharp = nextRequire("sharp");
 const matter = require("gray-matter");
 const semver = require("semver");
 
+test("query parser enforces the comma-array limit for bracket keys", () => {
+  const qs = require("qs");
+  assert.ok(semver.gte(require("qs/package.json").version, "6.16.0"));
+  assert.throws(() => qs.parse("a[]=1,2,3,4", {
+    comma: true, arrayLimit: 3, throwOnLimitExceeded: true,
+  }), RangeError);
+});
+
 test("runtime dependencies include the advisory fixes", () => {
   assert.ok(semver.gte(sharp.versions.sharp, "0.35.4"));
   assert.ok(semver.gte(sharp.versions.heif, "1.23.2"));
@@ -37,7 +45,7 @@ test("gray-matter preserves ordinary frontmatter and rejects excessive empty mer
   assert.throws(() => matter(small, { maxTotalMergeKeys: 3 }), /maxTotalMergeKeys/);
 });
 
-test("Next optimizes PNG to WebP and retains its AVIF decode block", { timeout: 10000 }, async () => {
+test("Next optimizes PNG and AVIF with the patched decoder", { timeout: 10000 }, async () => {
   sharp.concurrency(2);
   const source = { create: { width: 8, height: 8, channels: 3, background: "#336699" } };
   const png = await sharp(source).png().toBuffer();
@@ -53,5 +61,13 @@ test("Next optimizes PNG to WebP and retains its AVIF decode block", { timeout: 
   assert.equal(metadata.format, "webp");
   assert.equal(metadata.width, 4);
   assert.equal(metadata.height, 4);
-  await assert.rejects(() => optimizerSharp(avif).metadata(), /blocked|unsupported/i);
+  // Next 16.3.4 intentionally restores AVIF after the libheif fix checked above.
+  const avifResult = await optimizeImage({
+    buffer: avif, contentType: "image/webp", quality: 75, width: 4,
+    concurrency: 2, timeoutInSeconds: 5,
+  });
+  const avifMetadata = await sharp(avifResult).metadata();
+  assert.equal(avifMetadata.format, "webp");
+  assert.equal(avifMetadata.width, 4);
+  assert.equal(avifMetadata.height, 4);
 });
