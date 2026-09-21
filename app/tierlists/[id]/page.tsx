@@ -3,7 +3,7 @@
  * refs: none
  */
 "use client";
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -21,6 +21,7 @@ import {
 } from "@/lib/api-client";
 import { fetchTierList, type TierListSummary } from "@/lib/tierlists-api";
 import TierListBoard from "@/components/tier-list-board";
+import TierListExportButton from "@/components/tier-list-export-button";
 import CommunityRichContent from "@/components/CommunityRichContent";
 import ContextBackLink from "@/components/context-back-link";
 import { LoadingIndicator, LoadingPanel } from "@/components/async-state";
@@ -36,6 +37,7 @@ import { useLocalization } from "@/lib/localization-context";
 export default function TierListDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { t , formatDateTime} = useLocalization();
   const router = useRouter();
+  const tierListRef = useRef<HTMLDivElement | null>(null);
   const [id, setId] = useState<number | null>(null);
   const [list, setList] = useState<TierListSummary | null>(null);
   const [discussion, setDiscussion] = useState<PostDetail | null>(null);
@@ -151,9 +153,9 @@ export default function TierListDetailPage({ params }: { params: Promise<{ id: s
     <ContextBackLink fallbackHref="/tierlists" label={t("tierLists.back")} />
     {error && <div className="rounded-lg border border-rose-700/50 bg-rose-950/40 p-3 text-sm text-rose-300">{error}</div>}
     <article className="space-y-5 rounded-xl border border-pc-border bg-pc-bg-elevated p-4 sm:p-6">
-      <div className="flex items-start justify-between gap-4"><div><h1 className="text-2xl font-bold text-pc-text sm:text-3xl">{discussion.post.title}</h1><div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-pc-text-muted"><span className="inline-flex items-center gap-1">{t("tierLists.createdBy", { name: discussion.post.username })}{discussion.post.linkedPlayerId != null && <VerifiedPlayerBadge />}</span><span>{formatDateTime(discussion.post.createdAt)}</span><span>👁 {discussion.post.viewCount}</span></div></div>{canManageList && <div className="flex shrink-0 gap-2"><Link href={`/tierlists/${list.id}/edit`} className="rounded-lg border border-pc-border px-3 py-1.5 text-xs text-pc-text-secondary hover:border-pc-accent/50 hover:text-pc-accent">{t("tierLists.edit")}</Link><button type="button" onClick={removeList} disabled={deletingList} className="rounded-lg border border-rose-700/50 px-3 py-1.5 text-xs text-rose-400 hover:bg-rose-950/30 disabled:opacity-50">{deletingList ? t("generated.community.deleting") : t("generated.community.delete")}</button></div>}</div>
+      <div className="flex items-start justify-between gap-4"><div><h1 className="text-2xl font-bold text-pc-text sm:text-3xl">{discussion.post.title}</h1><div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-pc-text-muted"><span className="inline-flex items-center gap-1">{t("tierLists.createdBy", { name: discussion.post.username })}{discussion.post.linkedPlayerId != null && <VerifiedPlayerBadge />}</span><span>{formatDateTime(discussion.post.createdAt)}</span><span>👁 {discussion.post.viewCount}</span></div></div><div className="flex shrink-0 gap-2"><TierListExportButton tierListId={list.id} mode={list.mode} target={tierListRef} />{canManageList && <><Link href={`/tierlists/${list.id}/edit`} className="rounded-lg border border-pc-border px-3 py-1.5 text-xs text-pc-text-secondary hover:border-pc-accent/50 hover:text-pc-accent">{t("tierLists.edit")}</Link><button type="button" onClick={removeList} disabled={deletingList} className="rounded-lg border border-rose-700/50 px-3 py-1.5 text-xs text-rose-400 hover:bg-rose-950/30 disabled:opacity-50">{deletingList ? t("generated.community.deleting") : t("generated.community.delete")}</button></>}</div></div>
       {discussion.post.content && <div className="text-sm text-pc-text-secondary"><CommunityRichContent content={discussion.post.content} /></div>}
-      <TierListBoard entries={list.entries} />
+      <TierListBoard entries={list.entries} mode={list.mode} boardRef={tierListRef} />
       <div className="border-t border-pc-border pt-4"><button type="button" onClick={like} className="text-pc-text-secondary transition-colors hover:text-pc-accent">❤ {discussion.post.likes}</button></div>
     </article>
     <section className="rounded-xl border border-pc-border bg-pc-bg-elevated p-4 sm:p-6">
