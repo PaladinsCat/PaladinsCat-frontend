@@ -42,6 +42,30 @@ const MAP_ARTWORK: Record<string, string> = {
   "ice mines": "Ranked_Ice_Mines",
 };
 
+/**
+ * Fandom's current map-infobox loading artwork, kept separate from overhead
+ * layouts and match/scoreboard artwork.
+ * refs: https://paladins.fandom.com/wiki/Category:Loading_screen_images
+ */
+const MAP_LOADING_ARTWORK: Record<string, string> = {
+  "ascension peak": "Ascension_Peak_Loading",
+  brightmarsh: "Brightmarsh_Loading",
+  "dragon arena": "Dragon_Arena_Loading",
+  "fish market": "Fish_Market_Loading",
+  "foremans rise": "Foremans_Rise_Loading",
+  "frog isle": "Frog_Isle_Loading",
+  "jaguar falls": "Jaguar_Falls_Loading",
+  "serpent beach": "Serpent_Beach_Loading",
+  "snowfall junction": "Snowfall_Junction_Loading",
+  "splitstone quarry": "Splitstone_Quarry_Loading",
+  "stone keep": "Stone_Keep_Loading",
+  "stone keep classic": "Stone_Keep_Loading",
+  "stone keep v2 night": "Stone_Keep_Loading",
+  "warders gate": "Warders_Gate_Loading",
+  bazaar: "Bazaar_Loading",
+  "ice mines": "Ice_Mines_Loading",
+};
+
 const MATCH_MAP_ARTWORK: Record<string, string> = {
   abyss: "Match_Abyss",
   "ascension peak": "Match_Ascension_Peak",
@@ -99,6 +123,18 @@ export function mapImagePath(mapName: string): string {
   // A neutral map card is preferable to a missing wallpaper for historic,
   // experimental, or newly introduced maps without published loading art.
   return `/images/maps/${artwork ?? DEFAULT_MAP_ARTWORK}.png`;
+}
+
+/**
+ * Normalize a map name and return its dedicated loading-screen artwork path;
+ * fall back to the established map artwork for maps without a unique source.
+ * refs: none
+ * I/O types: `mapName: string -> string`.
+ */
+export function mapLoadingImagePath(mapName: string): string {
+  const lookupKey = mapLookupKey(mapName.trim().replace(/^ranked\s+/i, ""));
+  const artwork = MAP_LOADING_ARTWORK[lookupKey] ?? MAP_ARTWORK[lookupKey] ?? DEFAULT_MAP_ARTWORK;
+  return `/images/maps/${artwork}.png`;
 }
 
 /**

@@ -3,7 +3,7 @@ import { access, readFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
-import { mapImagePath, matchMapImagePath, matchMapImageSources } from "../lib/map-images.ts";
+import { mapImagePath, mapLoadingImagePath, matchMapImagePath, matchMapImageSources } from "../lib/map-images.ts";
 
 const testDir = path.dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = path.resolve(testDir, "../../..");
@@ -27,6 +27,33 @@ test("maps with published loading art never fall back to a missing filename", ()
   assert.equal(mapImagePath("Trade District"), "/images/maps/Trade_District_Loading.png");
   assert.equal(mapImagePath("Magistrate's Archives"), "/images/maps/Magistrates_Archives_Loading.png");
   assert.equal(mapImagePath("LIVE Magistrate's Archives (Onslaught)"), "/images/maps/Magistrates_Archives_Loading.png");
+});
+
+test("map detail heroes use dedicated Fandom loading artwork", () => {
+  const expected = {
+    "Ascension Peak": "Ascension_Peak_Loading",
+    Brightmarsh: "Brightmarsh_Loading",
+    "Dragon Arena": "Dragon_Arena_Loading",
+    "Fish Market": "Fish_Market_Loading",
+    "Foreman's Rise": "Foremans_Rise_Loading",
+    "Frog Isle": "Frog_Isle_Loading",
+    "Jaguar Falls": "Jaguar_Falls_Loading",
+    "Serpent Beach": "Serpent_Beach_Loading",
+    "Snowfall Junction": "Snowfall_Junction_Loading",
+    "Splitstone Quarry": "Splitstone_Quarry_Loading",
+    "Stone Keep": "Stone_Keep_Loading",
+    "Stone Keep (Classic)": "Stone_Keep_Loading",
+    "Stone Keep V2 Night": "Stone_Keep_Loading",
+    "Warder's Gate": "Warders_Gate_Loading",
+    Bazaar: "Bazaar_Loading",
+    "Ice Mines": "Ice_Mines_Loading",
+  };
+
+  for (const [mapName, stem] of Object.entries(expected)) {
+    assert.equal(mapLoadingImagePath(mapName), `/images/maps/${stem}.png`);
+  }
+  assert.equal(mapLoadingImagePath("Hole"), "/images/maps/Test_Maps_Loading.png");
+  assert.equal(mapLoadingImagePath("Sniper Haven"), "/images/maps/Test_Maps_Loading.png");
 });
 
 test("scoreboard artwork is independent of queue labels and site wallpapers", () => {

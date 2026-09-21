@@ -1,5 +1,5 @@
 /**
- * Own client adapters for reading and editing player-authored champion tier lists.
+ * Own client adapters for reading and editing player-authored tier lists.
  *
  * This module handles API requests and account headers; it does not render tier-list pages.
  * refs: none
@@ -16,18 +16,29 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api";
 export type TierName = "S" | "A" | "B" | "C" | "D" | "F";
 
 /** Describe what a tier list ranks. */
-export type TierListMode = "champion" | "ultimate";
+export type TierListMode = "champion" | "ultimate" | "map";
 
 /**
- * Describe tier list entry with championId, championName, tier, position.
+ * Describe a champion tier-list entry with championId, championName, tier, position.
  * refs: doc: documents/02-technical/api/api-server.md
  */
-export interface TierListEntry {
+export interface TierListChampionEntry {
+  entityType: "champion";
   championId: number;
   championName: string;
   tier: TierName;
   position: number;
 }
+
+/** Describe a map placement returned by the tier-list API. */
+export interface TierListMapEntry {
+  entityType: "map";
+  mapName: string;
+  tier: TierName;
+  position: number;
+}
+
+export type TierListEntry = TierListChampionEntry | TierListMapEntry;
 
 /**
  * Describe tier list summary with id, userId, username, linkedPlayerId, title, description, likes.
@@ -60,7 +71,13 @@ type RawTierList = {
   comment_count: number;
   created_at: string;
   mode?: string;
-  entries?: TierListEntry[];
+  entries?: Array<{
+    championId?: unknown;
+    championName?: unknown;
+    mapName?: unknown;
+    tier: TierName;
+    position: number;
+  }>;
 };
 
 async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
@@ -89,13 +106,25 @@ function mapTierList(raw: RawTierList): TierListSummary {
     viewCount: Number(raw.view_count ?? 0),
     commentCount: Number(raw.comment_count ?? 0),
     createdAt: String(raw.created_at),
-    mode: raw.mode === "ultimate" ? "ultimate" : "champion",
-    entries: Array.isArray(raw.entries) ? raw.entries.map((entry) => ({
-      championId: Number(entry.championId),
-      championName: String(entry.championName),
-      tier: entry.tier,
-      position: Number(entry.position),
-    })) : [],
+    mode: raw.mode === "ultimate" || raw.mode === "map" ? raw.mode : "champion",
+    entries: Array.isArray(raw.entries) ? raw.entries.flatMap((entry): TierListEntry[] => {
+      if (entry.mapName != null) {
+        return [{
+          entityType: "map" as const,
+          mapName: String(entry.mapName),
+          tier: entry.tier,
+          position: Number(entry.position),
+        }];
+      }
+      const championId = Number(entry.championId);
+      return Number.isFinite(championId) ? [{
+        entityType: "champion" as const,
+        championId,
+        championName: String(entry.championName ?? ""),
+        tier: entry.tier,
+        position: Number(entry.position),
+      }] : [];
+    }) : [],
   };
 }
 
@@ -112,7 +141,7 @@ export async function fetchTierLists(limit = 30): Promise<TierListSummary[]> {
 }
 
 /**
- * Fetch one tier list and its champion placements by post ID.
+ * Fetch one tier list and its placements by post ID.
  *
  * Accepts postId; returns a tier-list summary after an authenticated-capable API request.
  * refs: none
@@ -127,13 +156,16 @@ export async function fetchTierList(postId: number): Promise<TierListSummary> {
  *
  * Accepts input; returns the created summary after an authenticated state-changing API request.
  * refs: none
- * I/O types: `input: { title: string; description: string; entries: Array<{ championId: number; tier: TierName; position: number }>; token: string | null; } -> Promise<{ postId: number }>`.
+ * I/O types: `input: { title: string; description: string; mode: TierListMode; entries: Array<...>; token: string | null; } -> Promise<{ postId: number }>`.
  */
 export async function createTierList(input: {
   title: string;
   description: string;
   mode: TierListMode;
-  entries: Array<{ championId: number; tier: TierName; position: number }>;
+  entries: Array<
+    | { championId: number; tier: TierName; position: number }
+    | { mapName: string; tier: TierName; position: number }
+  >;
   token: string | null;
 }): Promise<{ postId: number }> {
   return requestJson<{ postId: number }>("/tierlists", {
@@ -144,7 +176,7 @@ export async function createTierList(input: {
 }
 
 /**
- * Replace the editable fields and entries of an existing tier list.
+ * Replace the editable fields, mode, and entries of an existing tier list.
  *
  * Accepts postId and input; returns the updated summary after an authenticated API mutation.
  * refs: none
@@ -154,7 +186,10 @@ export async function updateTierList(postId: number, input: {
   title: string;
   description: string;
   mode: TierListMode;
-  entries: Array<{ championId: number; tier: TierName; position: number }>;
+  entries: Array<
+    | { championId: number; tier: TierName; position: number }
+    | { mapName: string; tier: TierName; position: number }
+  >;
   token: string | null;
 }): Promise<{ postId: number }> {
   return requestJson<{ postId: number }>(`/tierlists/${postId}`, {

@@ -20,7 +20,7 @@ import { getChampionIconSafe } from "@/lib/champion-icons";
 import { getChampionData } from "@/lib/champion-data";
 import { championSlug } from "@/lib/utils";
 import { getPercentageColor, getStatQuality } from "@/lib/stat-quality";
-import { mapImagePath } from "@/lib/map-images";
+import { mapLoadingImagePath } from "@/lib/map-images";
 import { STATIC_CHAMPIONS } from "@/lib/static-champions";
 import { LoadingIndicator } from "@/components/async-state";
 import ContextBackLink from "@/components/context-back-link";
@@ -283,7 +283,7 @@ export default function MapDetailPage() {
       <ContextBackLink fallbackHref={`/game/maps?scope=${statsScope}`} label={t("menu.maps")} />
 
       <section className="relative overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated">
-        <SmartImage src={mapImagePath(map.name)} alt="" className="absolute inset-0 h-full w-full object-cover opacity-25" />
+        <SmartImage src={mapLoadingImagePath(map.name)} alt="" className="absolute inset-0 h-full w-full object-cover opacity-25" />
         <div className="absolute inset-0 bg-gradient-to-r from-pc-bg-elevated via-pc-bg-elevated/90 to-pc-bg-elevated/45" />
         <div className="relative grid gap-5 p-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end sm:p-7">
           <div><p className="text-xs font-bold uppercase tracking-[0.18em] text-pc-text-muted">{t(STATS_SCOPE_LABEL_KEYS[statsScope])}</p><h1 className="mt-1 pc-heading pc-heading-lg">{map.name.replace(/^Ranked\s+/, "")}</h1></div>

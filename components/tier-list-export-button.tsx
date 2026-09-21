@@ -17,9 +17,11 @@ type TierListExportButtonProps = {
 };
 
 async function tierListPng(board: HTMLElement): Promise<string> {
+  const exportWidth = 1280;
+  const canvasWidth = 2048;
   const originalStyle = board.style.cssText;
   board.setAttribute("data-image-export", "true");
-  board.style.width = "1280px";
+  board.style.width = `${exportWidth}px`;
   board.style.maxWidth = "none";
   board.style.transform = "none";
   try {
@@ -31,9 +33,16 @@ async function tierListPng(board: HTMLElement): Promise<string> {
         image.addEventListener("error", () => resolve(), { once: true });
       });
     }));
+    const computedStyle = window.getComputedStyle(board);
+    const exportHeight = board.clientHeight
+      + parseFloat(computedStyle.borderTopWidth || "0")
+      + parseFloat(computedStyle.borderBottomWidth || "0");
+    const canvasHeight = Math.max(1, Math.round(exportHeight * canvasWidth / exportWidth));
     return await toPng(board, {
-      width: 1280,
-      canvasWidth: 2048,
+      width: exportWidth,
+      height: exportHeight,
+      canvasWidth,
+      canvasHeight,
       pixelRatio: 1,
       cacheBust: false,
       backgroundColor: "var(--pc-bg-secondary)",
