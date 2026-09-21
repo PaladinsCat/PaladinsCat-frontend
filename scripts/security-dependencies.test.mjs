@@ -37,7 +37,7 @@ test("gray-matter preserves ordinary frontmatter and rejects excessive empty mer
   assert.throws(() => matter(small, { maxTotalMergeKeys: 3 }), /maxTotalMergeKeys/);
 });
 
-test("Next optimizes PNG to WebP and retains its AVIF decode block", { timeout: 10000 }, async () => {
+test("Next optimizes PNG and AVIF with the patched decoder", { timeout: 10000 }, async () => {
   sharp.concurrency(2);
   const source = { create: { width: 8, height: 8, channels: 3, background: "#336699" } };
   const png = await sharp(source).png().toBuffer();
@@ -53,5 +53,13 @@ test("Next optimizes PNG to WebP and retains its AVIF decode block", { timeout: 
   assert.equal(metadata.format, "webp");
   assert.equal(metadata.width, 4);
   assert.equal(metadata.height, 4);
-  await assert.rejects(() => optimizerSharp(avif).metadata(), /blocked|unsupported/i);
+  // Next 16.3.4 intentionally restores AVIF after the libheif fix checked above.
+  const avifResult = await optimizeImage({
+    buffer: avif, contentType: "image/webp", quality: 75, width: 4,
+    concurrency: 2, timeoutInSeconds: 5,
+  });
+  const avifMetadata = await sharp(avifResult).metadata();
+  assert.equal(avifMetadata.format, "webp");
+  assert.equal(avifMetadata.width, 4);
+  assert.equal(avifMetadata.height, 4);
 });

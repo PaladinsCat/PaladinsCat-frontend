@@ -295,7 +295,7 @@ export default function ChampionRateDetailPage({
                 {section.champions.map((champion) => {
                   const rowVsClassPct = pctDiff(champion.value, section.average);
                   const rowVsGlobalPct = pctDiff(champion.value, globalAverage);
-                  return <Link key={champion.id} href={`/champions/${championSlug(champion.name)}?scope=${statsScope}`} className="flex min-w-0 items-center gap-3 p-3 transition-colors hover:bg-pc-bg/50">
+                  return <Link key={champion.id} href={`/champions/${championSlug(champion.name)}?scope=${encodeURIComponent(statsScope)}`} className="flex min-w-0 items-center gap-3 p-3 transition-colors hover:bg-pc-bg/50">
                     <img src={getChampionIconSafe(champion.name)} alt="" className="h-9 w-9 shrink-0 rounded-lg object-contain" />
                     <div className="min-w-0 flex-1"><div className="truncate text-sm font-semibold text-pc-text">{champion.name}</div><div className="mt-0.5 flex flex-wrap gap-x-2 text-xs"><span className={rowVsClassPct >= 0 ? "text-emerald-400" : "text-red-400"}>{formatSignedPercent(rowVsClassPct)} {t("generated.champions.class")}</span><span className={rowVsGlobalPct >= 0 ? "text-emerald-400" : "text-red-400"}>{formatSignedPercent(rowVsGlobalPct)} {t("generated.champions.global.9027cc5")}</span><span className="text-pc-text-muted">{formatNumber(champion.matches)} {t("generated.champions.matches.9f3e924")}</span></div></div>
                     <span className="shrink-0 text-right font-mono text-sm font-bold" style={{ color: metricColor(config, champion.value) }}>{formatRate(champion.value)}{config.key === "banRate" && <span className="block text-xs font-normal text-pc-text-muted">{formatNumber(champion.bans)} {t("generated.stats.bans")}</span>}</span>
@@ -325,7 +325,7 @@ export default function ChampionRateDetailPage({
                       return (
                         <tr key={champion.id} className="border-b border-pc-border/40 hover:bg-pc-bg/50 transition-colors">
                           <td className="px-2.5 py-1.5">
-                            <Link href={`/champions/${championSlug(champion.name)}?scope=${statsScope}`} className="flex items-center gap-2 min-w-0 group">
+                            <Link href={`/champions/${championSlug(champion.name)}?scope=${encodeURIComponent(statsScope)}`} className="flex items-center gap-2 min-w-0 group">
                               <img src={getChampionIconSafe(champion.name)} alt={champion.name} className="h-6 w-6 shrink-0 rounded object-contain" />
                               <span className="text-pc-text font-medium truncate group-hover:text-pc-accent transition-colors">{champion.name}</span>
                             </Link>
