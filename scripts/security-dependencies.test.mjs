@@ -10,6 +10,14 @@ const sharp = nextRequire("sharp");
 const matter = require("gray-matter");
 const semver = require("semver");
 
+test("query parser enforces the comma-array limit for bracket keys", () => {
+  const qs = require("qs");
+  assert.ok(semver.gte(require("qs/package.json").version, "6.16.0"));
+  assert.throws(() => qs.parse("a[]=1,2,3,4", {
+    comma: true, arrayLimit: 3, throwOnLimitExceeded: true,
+  }), RangeError);
+});
+
 test("runtime dependencies include the advisory fixes", () => {
   assert.ok(semver.gte(sharp.versions.sharp, "0.35.4"));
   assert.ok(semver.gte(sharp.versions.heif, "1.23.2"));
