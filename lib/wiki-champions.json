@@ -474,7 +474,7 @@
         "name": "Judgement",
         "key": "LMB",
         "damage": "",
-        "cooldown": "Ultimate",
+        "cooldown": "",
         "description": "Throw your hammer in an attack chain, dealing 525, 525, 630 damage. Dealing and taking damage increases your Ire, which can augment your abilities and provide passive benefits.",
         "iconUrl": "/images/skills/WeaponAttack_Azaan_Icon.png"
       },
@@ -3145,7 +3145,7 @@
         "name": "Guardian Spirit",
         "key": "Q",
         "damage": "",
-        "cooldown": "Ultimate",
+        "cooldown": "16s / 6s",
         "description": "",
         "iconUrl": "/images/skills/Ability_Guardian_Spirit.png",
         "iconUrl2": "/images/skills/Ability_Guardian_Spirit_2.png"
@@ -3437,7 +3437,7 @@
         "name": "Yokai Doll",
         "key": "LMB",
         "damage": "",
-        "cooldown": "Ultimate",
+        "cooldown": "",
         "description": "Stab your doll to deal damage to foes and Curse them, increasing the damage they take from you and lowering the damage they deal.",
         "iconUrl": "/images/skills/WeaponAttack_Kasumi_Icon.png"
       },
@@ -5937,7 +5937,7 @@
         "name": "Spirit Link",
         "key": "Q",
         "damage": "",
-        "cooldown": "Ultimate",
+        "cooldown": "1s",
         "description": "",
         "iconUrl": "/images/skills/Ability_Spirit_Link.png"
       },
@@ -7971,7 +7971,7 @@
         "name": "Grappling Hook",
         "key": "F",
         "damage": "200",
-        "cooldown": "Ultimate",
+        "cooldown": "12s",
         "description": "Grapple to walls and stick to them for up to 5s becoming stealthed for the duration.",
         "iconUrl": "/images/skills/Ability_Grappling_Hook.png"
       },

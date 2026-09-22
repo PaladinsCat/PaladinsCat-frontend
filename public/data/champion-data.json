@@ -733,7 +733,7 @@
         "iconUrl3": null,
         "damage": "525, 525, 630",
         "healing": null,
-        "cooldown": "Ultimate",
+        "cooldown": null,
         "description": "Throw your hammer in an attack chain, dealing 525, 525, 630 damage. Dealing and taking damage increases your Ire, which can augment your abilities and provide passive benefits."
       },
       {
@@ -4801,7 +4801,7 @@
         "iconUrl3": null,
         "damage": null,
         "healing": null,
-        "cooldown": "Ultimate",
+        "cooldown": "16s / 6s",
         "description": "Summon Luna to your side to unleash your wrath in a series of hits. Luna Stuns targets hit by Light Bow, and heals allies around her for 300 per second."
       },
       {
@@ -5255,7 +5255,7 @@
         "iconUrl3": null,
         "damage": "300 - 600 /0.65s",
         "healing": null,
-        "cooldown": "Ultimate",
+        "cooldown": null,
         "description": "Stab your doll to deal damage to foes and Curse them, increasing the damage they take from you and lowering the damage they deal."
       },
       {
@@ -9085,7 +9085,7 @@
         "iconUrl3": null,
         "damage": null,
         "healing": null,
-        "cooldown": "Ultimate",
+        "cooldown": "1s",
         "description": "Tether to an ally or enemy. While Linked to an ally, you passively Heal them and grant them Ultimate charge. While Linked to an enemy, passively Slow and deal damage to them."
       },
       {
@@ -12190,7 +12190,7 @@
         "iconUrl3": null,
         "damage": "200",
         "healing": null,
-        "cooldown": "Ultimate",
+        "cooldown": "12s",
         "description": "Grapple to walls and stick to them for up to 5s becoming stealthed for the duration."
       },
       {

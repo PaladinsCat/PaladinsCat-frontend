@@ -48,6 +48,16 @@ for (const [storedSlug, champion] of Object.entries(data)) {
       if (!present(entry?.name)) errors.push(`${label}: missing name`);
       if (section === "skills" && !present(entry?.key)) errors.push(`${label}: missing skill key`);
       if (!present(entry?.description)) errors.push(`${label}: missing description`);
+      if (section === "skills") {
+        const key = normalized(entry?.key).toUpperCase();
+        const cooldown = normalized(entry?.cooldown).toLowerCase();
+        if (key === "E" && cooldown !== "ultimate") {
+          errors.push(`${label}: E skill must be marked Ultimate`);
+        }
+        if (key !== "E" && cooldown === "ultimate") {
+          errors.push(`${label}: non-E skill must not be marked Ultimate`);
+        }
+      }
       if (entrySlugs.has(entrySlug)) errors.push(`${label}: duplicate entry slug`);
       entrySlugs.add(entrySlug);
 
@@ -56,6 +66,12 @@ for (const [storedSlug, champion] of Object.entries(data)) {
         errors.push(`${label}: missing canonical English description (${messageKey})`);
       } else if (normalized(messages[messageKey]) !== normalized(entry?.description)) {
         errors.push(`${label}: canonical data and English catalog descriptions differ`);
+      }
+    }
+    if (section === "skills") {
+      const ultimateSlots = entries.filter((entry) => normalized(entry?.key).toUpperCase() === "E");
+      if (ultimateSlots.length !== 1) {
+        errors.push(`${storedSlug}.skills: expected exactly one E skill, found ${ultimateSlots.length}`);
       }
     }
   }

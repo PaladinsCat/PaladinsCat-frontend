@@ -87,9 +87,9 @@ async function loadChampionDataMap(): Promise<ChampionDataMap> {
     // transform, type-check, and bundle every champion whenever one champion
     // page compiled. Fetching static JSON preserves the same local data while
     // keeping production memory bounded for the 2GB VPS Docker stack.
-    // Version the static URL when its schema changes so CDN/browser caches do
-    // not serve the pre-ID talent objects to the canonical image registry.
-    championDataPromise = fetch("/data/champion-data.json?v=talent-ids-1")
+    // Version the static URL when its data semantics change so CDN/browser
+    // caches do not serve an older champion snapshot.
+    championDataPromise = fetch("/data/champion-data.json?v=ultimate-slots-2")
       .then((response) => {
         if (!response.ok) {
           throw new Error(`Failed to load champion data: ${response.status}`);
@@ -119,9 +119,10 @@ export interface ChampionUltimate {
 /** Resolve the canonical ultimate ability for a champion by its game data. */
 export async function getChampionUltimate(name: string): Promise<ChampionUltimate | undefined> {
   const champion = await getChampionData(name);
-  const skill = champion?.skills.find((candidate) =>
-    candidate.key.toUpperCase() === "E" || candidate.cooldown?.toLowerCase() === "ultimate",
-  );
+  // E is the canonical ultimate slot. Keep the cooldown marker only as a
+  // compatibility fallback for older champion snapshots.
+  const skill = champion?.skills.find((candidate) => candidate.key.trim().toUpperCase() === "E")
+    ?? champion?.skills.find((candidate) => candidate.cooldown?.trim().toLowerCase() === "ultimate");
   if (!skill?.name || !skill.iconUrl) return undefined;
   return { name: skill.name, iconUrl: skill.iconUrl };
 }
