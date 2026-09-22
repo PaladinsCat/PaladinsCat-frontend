@@ -3077,6 +3077,12 @@ export async function fetchJson<T>(path: string, options?: RequestInit & { retri
       }
       throw error;
     }
+    // Cloudflare challenges describe edge admission, not the account session.
+    // Do not let their 403 clear cached auth or retry an interactive challenge.
+    if (res.headers.get("cf-mitigated") === "challenge") {
+      clearTimeout(timeoutId);
+      throw new Error(API_ERROR_KEYS.genericFailure);
+    }
     if (!res.ok) {
       if (res.status >= 500 && attempt < retries) {
         clearTimeout(timeoutId);
@@ -3085,6 +3091,9 @@ export async function fetchJson<T>(path: string, options?: RequestInit & { retri
       }
       const errBody = await res.json().catch(() => null).finally(() => clearTimeout(timeoutId));
       options?.signal?.throwIfAborted();
+      if (errBody?.error?.code === "WEBSITE_SESSION_REQUIRED") {
+        throw new Error(API_ERROR_KEYS.genericFailure);
+      }
       const message = typeof errBody?.error === "string" ? errBody.error : errBody?.error?.message;
       // Expected client errors are intentionally written by the backend for the
       // person making the request (validation, conflicts, rate limits, and so on).
