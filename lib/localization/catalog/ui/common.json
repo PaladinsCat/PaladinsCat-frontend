@@ -240,5 +240,13 @@
   "common.access.appealSubject": "PaladinsCat account access appeal",
   "common.access.checkingAccount": "Checking account access",
   "common.access.signingOut": "Signing out…",
-  "common.access.signOut": "Sign out"
+  "common.access.signOut": "Sign out",
+  "common.nameHistory.previous": "Previously {name}",
+  "common.nameHistory.history": "History",
+  "common.nameHistory.title": "Previous names",
+  "common.nameHistory.observed": "Observed date ranges, newest first. These are when PaladinsCat recorded each name, not exact rename times.",
+  "common.nameHistory.retry": "Retry name history",
+  "common.nameHistory.failed": "Name history could not be loaded.",
+  "common.nameHistory.loading": "Loading…",
+  "common.nameHistory.more": "Load older names"
 }

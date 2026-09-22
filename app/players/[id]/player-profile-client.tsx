@@ -24,6 +24,7 @@ import { DataTableSkeleton, RouteSkeleton } from "@/components/route-skeleton";
 import { formatKda } from "@/lib/kda";
 import PlayerName, { PlayerModerationTag } from "@/components/player-name";
 import PlayerLoadingFrame from "@/components/player-loading-frame";
+import PlayerNameHistory from "@/components/player-name-history";
 import { displayLoadingFrameName } from "@/lib/loading-frame-assets";
 import { fetchPlayerModeration } from "@/lib/player-moderation";
 import { useLocalization } from "@/lib/localization-context";
@@ -662,6 +663,7 @@ export default function PlayerProfileClient({
               <h1 className="min-w-0 break-words text-2xl font-bold leading-tight text-pc-text sm:text-3xl">
                 {player.name}
               </h1>
+              <PlayerNameHistory key={`${id}:${player.name}:${fetchKey}`} playerId={id} />
               <PlayerModerationTag
                 playerId={player.id}
                 cheater={player.cheater}
