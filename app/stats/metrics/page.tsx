@@ -5,7 +5,7 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import ChampionPerformanceComparison from "@/components/champion-performance-comparison";
+import ChampionPerformanceComparison, { type ChampionPerformanceInitialData } from "@/components/champion-performance-comparison";
 import PageHeader from "@/components/ui/page-header";
 import { SegmentedRouteLinks } from "@/components/ui/segmented-control";
 import { BarChartComponent } from "@/components/Chart";
@@ -57,6 +57,7 @@ export type MetricsInitialData = {
   queueId: number;
   metric: GamePerformanceMetric;
   dashboard: { summary: PerformanceMetricSummary; roles: Record<string, PerformanceMetricSummary> };
+  comparison?: ChampionPerformanceInitialData | null;
 };
 
 function PerformanceData({ scope, metric, queueId, initialData }: {
@@ -142,6 +143,7 @@ function MetricsContent({ initialData }: { initialData?: MetricsInitialData | nu
     return `/stats/performance?scope=${selection.scope}&metric=${performanceMetricName(selection.metric)}&queueId=${selection.queueId}`;
   };
   const seed = initialData?.scope === scope && initialData.queueId === queueId && initialData.metric === metric && (scope === "casual" || filter === "all") ? initialData : null;
+  const comparison = initialData?.scope === scope && initialData.queueId === queueId ? initialData.comparison : null;
   return <div className="space-y-6">
     <PageHeader parentHref="/stats" parentLabel={t("stats.portal.title")} title={t(scope === "ranked" ? "stats.performance.rankedTitle" : "stats.performance.casualTitle")} />
     <div className="space-y-4">
@@ -150,7 +152,7 @@ function MetricsContent({ initialData }: { initialData?: MetricsInitialData | nu
       <SegmentedRouteLinks label={t("menu.performanceMetrics")} value={metric} items={GAME_PERFORMANCE_METRICS.filter(value => scope === "casual" || value !== "gpm").map(value => ({ value, label: t(METRICS[value].labelKey), href: href(scope, value) }))} />
     </div>
     {scope === "casual" || ready ? <PerformanceData key={`${scope}:${queueId}:${metric}:${scope === "ranked" ? filter : "all"}`} scope={scope} queueId={queueId} metric={metric} initialData={seed} /> : <div className="pc-card min-h-80"><LoadingIndicator /></div>}
-    {(scope === "casual" || ready) && <ChampionPerformanceComparison key={`${scope}:${queueId}:${filter}`} scope={scope} queueId={queueId} />}
+    {(scope === "casual" || ready) && <ChampionPerformanceComparison key={`${scope}:${queueId}:${filter}`} scope={scope} queueId={queueId} initialData={comparison} />}
   </div>;
 }
 

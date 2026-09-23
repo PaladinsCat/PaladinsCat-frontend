@@ -10,7 +10,6 @@ import { type ChampionMatchupPreviews } from "@/lib/champion-matchups-api";
 import { fetchStatsPortalPreview } from "@/lib/stats-portal-api";
 import { PerformanceOverviewCard } from "@/components/PerformanceOverviewCard";
 import {
-  fetchMatchHourlyStats,
   type MatchHourlyStats,
   type SkinStat,
   type StatsPageData,
@@ -130,19 +129,25 @@ function StatsPortalContent() {
     if (!lobbyTierReady) return;
     let cancelled = false;
     const controller = new AbortController();
-    Promise.allSettled([
-      fetchStatsPortalPreview({ tierMin: lobbyTier.tierMin, tierMax: lobbyTier.tierMax }, controller.signal),
-      fetchMatchHourlyStats(),
-    ]).then(([previewResult, activityResult]) => {
+    fetchStatsPortalPreview({ tierMin: lobbyTier.tierMin, tierMax: lobbyTier.tierMax }, controller.signal).then((preview) => {
       if (cancelled) return;
-      const preview = previewResult.status === "fulfilled" ? previewResult.value : null;
-      setData(preview?.data ?? null);
-      setActivity(activityResult.status === "fulfilled" ? activityResult.value : null);
+      setData(preview.data);
+      setActivity(preview.activity);
       setPresence(preview?.presence ?? null);
       setPresenceHourly(preview?.presenceHourly ?? null);
       setMatchupData(preview?.matchups ?? null);
       setHighestWinRateSkins(preview?.skins ?? []);
       setLoadoutChampions(preview?.loadoutChampions ?? []);
+      setLoading(false);
+    }).catch(() => {
+      if (cancelled) return;
+      setData(null);
+      setActivity(null);
+      setPresence(null);
+      setPresenceHourly(null);
+      setMatchupData(null);
+      setHighestWinRateSkins([]);
+      setLoadoutChampions([]);
       setLoading(false);
     });
     return () => { cancelled = true; controller.abort(); };

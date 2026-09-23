@@ -1,5 +1,5 @@
 /** Read the bounded, public directory contract; never request protected detail as a fallback. */
-import { fetchJson, mapStatsPageData } from "@/lib/api-client";
+import { fetchJson, mapStatsPageData, type MatchHourlyStats } from "@/lib/api-client";
 import { mapChampionMatchupPreviews, type RawChampionMatchupPreviews } from "@/lib/champion-matchups-api";
 
 interface RawPortalPreview {
@@ -9,6 +9,7 @@ interface RawPortalPreview {
   matchups: RawChampionMatchupPreviews | null;
   presence: { public_players: number } | null;
   presenceHourly: { hourly_by_region: Array<{ date: string; hour: number; total: number }> } | null;
+  activity: MatchHourlyStats | null;
 }
 
 export async function fetchStatsPortalPreview(tier: { tierMin?: number; tierMax?: number }, signal: AbortSignal) {
@@ -23,5 +24,6 @@ export async function fetchStatsPortalPreview(tier: { tierMin?: number; tierMax?
     matchups: raw.matchups == null ? null : mapChampionMatchupPreviews(raw.matchups),
     presence: raw.presence,
     presenceHourly: raw.presenceHourly,
+    activity: raw.activity ?? null,
   };
 }

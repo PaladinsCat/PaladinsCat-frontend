@@ -7,7 +7,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { Tooltip } from "@base-ui/react/tooltip";
-import { fetchChampionPerformanceComparison, fetchChampions, fetchStatsChampions, fetchPerformanceMetrics, type StatsChampion, type ChampionPerformanceDistribution, type PerformanceMetricKey, type PerformanceMetricsResponse } from "@/lib/api-client";
+import { fetchChampionPerformanceComparison, fetchStatsChampions, fetchPerformanceMetrics, type StatsChampion, type ChampionPerformanceDistribution, type PerformanceMetricKey, type PerformanceMetricsResponse } from "@/lib/api-client";
 import { getPercentageColor } from "@/lib/stat-quality";
 import { STATIC_CHAMPIONS } from "@/lib/static-champions";
 import { getChampionIconSafe } from "@/lib/champion-icons";
@@ -47,12 +47,18 @@ type ChampionMeasures = Partial<Record<ComparisonMetric, number>> & { matches?: 
 type Averages = Map<number, ChampionMeasures>;
 type SortKey = "name" | ComparisonMetric;
 
+export type ChampionPerformanceInitialData = {
+  results: Array<{ metric: PerformanceMetricKey; rows: ChampionPerformanceDistribution[] }>;
+  details: StatsChampion[];
+  global: PerformanceMetricsResponse;
+};
+
 /**
  * Render champion performance comparison with `ErrorState`, `SegmentedControl`, `LoadingIndicator`.
  * I/O types: `none -> JSX.Element`.
  * refs: none
  */
-export default function ChampionPerformanceComparison({ scope = "ranked", queueId = 486 }: { scope?: "ranked" | "casual"; queueId?: number }) {
+export default function ChampionPerformanceComparison({ scope = "ranked", queueId = 486, initialData = null }: { scope?: "ranked" | "casual"; queueId?: number; initialData?: ChampionPerformanceInitialData | null }) {
   const columns = COLUMNS.filter(metric => scope === "casual" ? metric !== "winRate" && metric !== "banRate" : metric !== "gpm");
   const { t, formatNumber, formatPercent, locale } = useLocalization();
   const [averages, setAverages] = useState<Averages | null>(null);
@@ -65,24 +71,19 @@ export default function ChampionPerformanceComparison({ scope = "ranked", queueI
   const [sort, setSort] = useState<{ key: SortKey; ascending: boolean }>({ key: "name", ascending: true });
   useEffect(() => {
     let active = true;
-    Promise.all([
-      scope === "ranked" ? fetchChampions({ scope: "ranked" }) : Promise.resolve([]),
-      fetchChampionPerformanceComparison({ queueId, scope }),
-      scope === "ranked" ? fetchStatsChampions({ scope: "ranked", limit: 100 }) : Promise.resolve([]),
-      fetchPerformanceMetrics({ scope, queueId }),
-    ]).then(([champions, results, summary, globalMetrics]) => {
+    const hydrate = (summary: StatsChampion[], results: Array<{ metric: PerformanceMetricKey; rows: ChampionPerformanceDistribution[] }>, globalMetrics: PerformanceMetricsResponse) => {
       const next: Averages = new Map();
       const full = new Map<number, Partial<Record<PerformanceMetricKey, ChampionPerformanceDistribution>>>();
-      for (const champion of champions) {
+      for (const champion of summary) {
         const rates: ChampionMeasures = {};
-        const matches = champion.totalMatches ?? champion.totalPlays;
+        const matches = champion.totalPlays;
         if (matches != null && Number.isFinite(matches)) rates.matches = matches;
         if (champion.totalBans != null && Number.isFinite(champion.totalBans)) rates.bans = champion.totalBans;
         for (const key of ["winRate", "banRate"] as const) {
           const value = champion[key];
           if (value != null && Number.isFinite(value)) rates[key] = value;
         }
-        next.set(champion.id, rates);
+        next.set(champion.championId, rates);
       }
       for (const { metric, rows } of results) for (const row of rows) {
         full.set(row.championId, { ...full.get(row.championId), [metric]: row });
@@ -92,9 +93,20 @@ export default function ChampionPerformanceComparison({ scope = "ranked", queueI
         next.set(row.championId, champion);
       }
       if (active) { setAverages(next); setDetails(summary); setDistributions(full); setGlobal(globalMetrics); }
+    };
+    if (initialData) {
+      hydrate(initialData.details, initialData.results, initialData.global);
+      return () => { active = false; };
+    }
+    Promise.all([
+      scope === "ranked" ? fetchStatsChampions({ scope: "ranked", limit: 100 }) : Promise.resolve([]),
+      fetchChampionPerformanceComparison({ queueId, scope }),
+      fetchPerformanceMetrics({ scope, queueId }),
+    ]).then(([summary, results, globalMetrics]) => {
+      hydrate(summary, results, globalMetrics);
     }).catch(() => { if (active) setFailed(true); });
     return () => { active = false; };
-  }, [attempt, scope, queueId]);
+  }, [attempt, initialData, scope, queueId]);
 
   const rows = STATIC_CHAMPIONS.filter(champion => championClass === "all" || champion.roles.includes(championClass)).sort((a, b) => {
     const byName = a.name.localeCompare(b.name, locale);

@@ -13,6 +13,7 @@ export interface ChampionRelationship {
 }
 
 export interface ChampionTalentMatchupRow {
+  championTalentId: number;
   opponentChampionId: number;
   opponentChampionName: string;
   opponentTalentId: number;
@@ -57,6 +58,7 @@ export async function fetchChampionRelationships(
 interface RawChampionTalentMatchups {
   talents: Array<{ talent_id: number; talent_name: string }>;
   rows: Array<{
+    champion_talent_id: number;
     opponent_champion_id: number;
     opponent_champion_name: string;
     opponent_talent_id: number;
@@ -87,6 +89,7 @@ export async function fetchChampionTalentMatchups(
       talentName: talent.talent_name,
     })),
     rows: result.rows.map((row) => ({
+      championTalentId: Number(row.champion_talent_id),
       opponentChampionId: Number(row.opponent_champion_id),
       opponentChampionName: row.opponent_champion_name,
       opponentTalentId: Number(row.opponent_talent_id),

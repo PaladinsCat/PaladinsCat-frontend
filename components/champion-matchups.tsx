@@ -10,10 +10,10 @@ import SmartImage from "@/components/SmartImage";
 import CanonicalTalentImage from "@/components/canonical-talent-image";
 import PageHeader from "@/components/ui/page-header";
 import { SegmentedControl } from "@/components/ui/segmented-control";
-import { fetchChampions, type Champion } from "@/lib/api-client";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { championSlug } from "@/lib/utils";
 import { getChampionData, type ChampionTalent } from "@/lib/champion-data";
+import { STATIC_CHAMPIONS, type StaticChampion } from "@/lib/static-champions";
 import { getPercentageColor } from "@/lib/stat-quality";
 import { useLocalization } from "@/lib/localization-context";
 import {
@@ -35,8 +35,11 @@ const ROLES = [
 export default function ChampionMatchups({ initialSlug }: { initialSlug?: string }): React.JSX.Element {
   const router = useRouter();
   const { t, formatNumber, formatPercent } = useLocalization();
-  const [roster, setRoster] = useState<Champion[]>([]);
-  const [champion, setChampion] = useState(0);
+  const [roster] = useState<StaticChampion[]>(STATIC_CHAMPIONS);
+  const [champion, setChampion] = useState(() => (
+    STATIC_CHAMPIONS.find((entry) => championSlug(entry.name) === championSlug(initialSlug ?? ""))?.id
+      ?? Number(STATIC_CHAMPIONS[0]?.id ?? 0)
+  ));
   const [relationships, setRelationships] = useState<ChampionRelationship[]>([]);
   const [opponentTalents, setOpponentTalents] = useState<Map<number, ChampionTalent[]>>(new Map());
   const [talentMatchups, setTalentMatchups] = useState<TalentMatchups[]>([]);
@@ -47,40 +50,22 @@ export default function ChampionMatchups({ initialSlug }: { initialSlug?: string
   const [retry, setRetry] = useState(0);
 
   useEffect(() => {
-    let live = true;
-    fetchChampions().then((rows) => {
-      if (!live) return;
-      const currentSlug = decodeURIComponent(window.location.pathname.split("/")[3] ?? initialSlug ?? "");
-      const selected = rows.find((candidate) => championSlug(candidate.name) === currentSlug) ?? rows[0];
-      setRoster(rows);
-      setChampion(Number(selected?.id ?? 0));
-      if (!rows.length) {
-        setGlobalError(true);
-        setGlobalLoading(false);
-      }
-    }).catch(() => {
-      if (live) {
-        setGlobalError(true);
-        setGlobalLoading(false);
-      }
-    });
-    return () => { live = false; };
-  }, [initialSlug, retry]);
-
-  useEffect(() => {
     if (!champion) return;
     const controller = new AbortController();
-    Promise.all(roster.map(async (entry) => ({
-      entry,
-      current: await getChampionData(championSlug(entry.name)),
-    })))
-      .then(async (champions) => {
+    Promise.all([
+      Promise.all(roster.map(async (entry) => ({
+        entry,
+        current: await getChampionData(championSlug(entry.name)),
+      }))),
+      fetchChampionTalentMatchups(champion, 0, controller.signal),
+    ])
+      .then(([champions, matchup]) => {
         const selected = champions.find(({ entry }) => Number(entry.id) === champion)?.current;
         if (!selected?.talents.length) throw new Error("Champion talents are unavailable");
-        const matchups = await Promise.all(selected.talents.map(async (talent) => ({
+        const matchups = selected.talents.map((talent) => ({
           talent,
-          rows: (await fetchChampionTalentMatchups(champion, Number(talent.id), controller.signal)).rows,
-        })));
+          rows: matchup.rows.filter((row) => row.championTalentId === Number(talent.id)),
+        }));
         if (controller.signal.aborted) return;
         const opponents = champions.filter(({ entry }) => Number(entry.id) !== champion);
         const byOpponent = new Map(opponents.map(({ entry, current }) => [Number(entry.id), current?.talents ?? []]));

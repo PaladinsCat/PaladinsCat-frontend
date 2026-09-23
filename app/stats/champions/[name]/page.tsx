@@ -9,5 +9,5 @@ import ChampionMatchups from "@/components/champion-matchups";
  */
 export default async function Page({params}: {params: Promise<{name: string}>}): Promise<React.JSX.Element> {
   const {name} = await params;
-  return <ChampionMatchups initialSlug={name} />;
+  return <ChampionMatchups key={name} initialSlug={name} />;
 }
