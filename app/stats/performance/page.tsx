@@ -2,8 +2,7 @@
  * Render the /stats/performance route with `MetricsPage`.
  * refs: none
  */
-import type { ChampionPerformanceDistribution, PerformanceMetricKey, PerformanceMetricSummary, PerformanceMetricsResponse, StatsChampion } from "@/lib/api-client";
-import type { ChampionPerformanceInitialData } from "@/components/champion-performance-comparison";
+import { mapPerformancePageData } from "@/lib/api-client";
 import { fetchAccountServerJson } from "@/lib/server-api";
 import type { Metadata } from "next";
 import { getServerLocalization } from "@/lib/server-localization";
@@ -12,100 +11,12 @@ import MetricsPage, { type MetricsInitialData } from "../metrics/page";
 
 type RawRecord = Record<string, unknown>;
 
-function mapSummary(raw: unknown): PerformanceMetricSummary {
-  const value = raw && typeof raw === "object" ? raw as RawRecord : {};
-  const number = (key: string) => Number(value[key] ?? 0);
-  return {
-    min: number("min"),
-    max: number("max"),
-    mean: number("mean"),
-    median: number("median"),
-    mode: number("mode"),
-    p10: number("p10"),
-    p25: number("p25"),
-    p75: number("p75"),
-    p90: number("p90"),
-    sampleSize: Number(value.sample_size ?? value.sampleSize ?? 0),
-  };
-}
-
-function unwrapRecord(raw: unknown): RawRecord {
-  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
-  const value = raw as RawRecord;
-  return value.data && typeof value.data === "object" && !Array.isArray(value.data)
-    ? value.data as RawRecord
-    : value;
-}
-
-const PERFORMANCE_KEYS = new Set<PerformanceMetricKey>(["dpm", "wpm", "apm", "hpm", "shpm", "gpm", "cpm", "egpm", "spm", "kda", "kpm", "deaths_per_minute"]);
-
-function mapDistribution(raw: unknown): ChampionPerformanceDistribution {
-  const value = raw && typeof raw === "object" ? raw as RawRecord : {};
-  const number = (key: string) => Number(value[key] ?? 0);
-  return {
-    championId: number("champion_id"), championName: String(value.champion_name ?? ""), className: String(value.class ?? ""),
-    min: number("min"), max: number("max"), mean: number("mean"), median: number("median"), mode: number("mode"),
-    p10: number("p10"), p90: number("p90"), avgValue: number("avg_value"), totalMatches: number("total_matches"),
-  };
-}
-
-function displayPercent(value: unknown): number {
-  const number = Number(value ?? 0);
-  return Math.abs(number) <= 1 ? number * 100 : number;
-}
-
-function mapChampionRows(raw: unknown): StatsChampion[] {
-  return (Array.isArray(raw) ? raw : []).map((entry) => {
-    const value = entry && typeof entry === "object" ? entry as RawRecord : {};
-    const number = (key: string) => value[key] == null ? undefined : Number(value[key]);
-    return {
-      championId: Number(value.champion_id ?? 0), championName: String(value.champion_name ?? ""),
-      wins: number("wins"), winRate: displayPercent(value.win_rate), totalPlays: number("total_matches") ?? number("total_plays") ?? 0,
-      banRate: value.ban_rate == null ? undefined : displayPercent(value.ban_rate), totalBans: number("ban_total") ?? 0,
-      pickRate: value.pick_rate == null ? undefined : displayPercent(value.pick_rate), kda: number("kda"),
-      avgDamage: number("avg_damage"), avgCredits: number("avg_gold"), avgHeal: number("avg_heal"),
-      avgShielding: number("avg_mitigation"), avgLeagueTier: number("avg_league_tier"),
-    };
-  });
-}
-
-function mapGlobalMetrics(raw: unknown): PerformanceMetricsResponse {
-  const value = unwrapRecord(raw);
-  return Object.fromEntries(Object.entries(value)
-    .filter(([key]) => PERFORMANCE_KEYS.has(key as PerformanceMetricKey))
-    .map(([key, summary]) => [key, mapSummary(summary)])) as PerformanceMetricsResponse;
-}
-
-function mapComparison(raw: unknown): ChampionPerformanceInitialData["results"] {
-  return (Array.isArray(raw) ? raw : []).flatMap((entry) => {
-    const value = entry && typeof entry === "object" ? entry as RawRecord : {};
-    const metric = String(value.metric ?? "");
-    if (!PERFORMANCE_KEYS.has(metric as PerformanceMetricKey)) return [];
-    return [{ metric: metric as PerformanceMetricKey, rows: (Array.isArray(value.rows) ? value.rows : []).map(mapDistribution) }];
-  });
-}
-
 async function getInitialData(scope: PerformanceScope, metric: GamePerformanceMetric, queueId: number): Promise<MetricsInitialData | null> {
   try {
-    const page = await fetchAccountServerJson<RawRecord>(`/stats/performance-page-data?metric=${metric}&scope=${scope}&queueId=${queueId}`, { timeoutMs: 5000 });
-    const dashboard = unwrapRecord(page.dashboard);
-    if (!dashboard[metric] || (dashboard.scope && dashboard.scope !== scope) || (scope === "casual" && (!Array.isArray(dashboard.queue_ids) || dashboard.queue_ids.length !== 1 || dashboard.queue_ids[0] !== queueId))) return null;
-    const roles = dashboard.roles && typeof dashboard.roles === "object" && !Array.isArray(dashboard.roles)
-      ? Object.fromEntries(Object.entries(dashboard.roles).map(([role, summary]) => [role, mapSummary(summary)]))
-      : {};
-    return {
-      scope,
-      queueId,
-      metric,
-      dashboard: { summary: mapSummary(dashboard[metric]), roles },
-      comparison: {
-        results: mapComparison(page.comparison),
-        details: mapChampionRows(page.champions),
-        global: mapGlobalMetrics(page.globalMetrics),
-      },
-    };
+    const page = await fetchAccountServerJson<RawRecord>(`/stats/performance-page-data?metric=${metric}&scope=${scope}&queueId=${queueId}`, { timeoutMs: 900 });
+    return mapPerformancePageData(page, scope, metric, queueId);
   } catch (error) {
-    console.error("[stats/performance] Server metric fetch failed; using browser fallback", error);
+    console.error("[stats/performance] Server page-data fetch failed; using bounded browser fallback", error);
     return null;
   }
 }

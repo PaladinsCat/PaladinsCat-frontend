@@ -5,12 +5,12 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import ChampionPerformanceComparison, { type ChampionPerformanceInitialData } from "@/components/champion-performance-comparison";
+import ChampionPerformanceComparison from "@/components/champion-performance-comparison";
 import PageHeader from "@/components/ui/page-header";
 import { SegmentedRouteLinks } from "@/components/ui/segmented-control";
 import { BarChartComponent } from "@/components/Chart";
 import { EmptyState, ErrorState, LoadingIndicator } from "@/components/async-state";
-import { fetchPerformanceMetricDashboard, type PerformanceMetricSummary } from "@/lib/api-client";
+import { fetchPerformanceMetricDashboard, fetchPerformancePageData, type PerformancePageData } from "@/lib/api-client";
 import { stationaryChartSeries } from "@/lib/chart-colors";
 import { useLocalization } from "@/lib/localization-context";
 import { useLobbyTier } from "@/lib/lobby-tier-context";
@@ -49,16 +49,10 @@ const COLUMNS = [
 ] as const;
 
 /**
- * Define metrics initial data as `{ scope: PerformanceScope; metric: GamePerformanceMetric; dashboard: { summary: PerformanceMetricSummary; roles: Record<string, PerformanceMetricSummary> }; }`.
+ * Reuse the complete performance-page bundle for initial and fallback data.
  * refs: none
  */
-export type MetricsInitialData = {
-  scope: PerformanceScope;
-  queueId: number;
-  metric: GamePerformanceMetric;
-  dashboard: { summary: PerformanceMetricSummary; roles: Record<string, PerformanceMetricSummary> };
-  comparison?: ChampionPerformanceInitialData | null;
-};
+export type MetricsInitialData = PerformancePageData;
 
 function PerformanceData({ scope, metric, queueId, initialData }: {
   scope: PerformanceScope;
@@ -142,8 +136,30 @@ function MetricsContent({ initialData }: { initialData?: MetricsInitialData | nu
     const selection = performanceSelection(nextScope, nextMetric, String(nextQueue));
     return `/stats/performance?scope=${selection.scope}&metric=${performanceMetricName(selection.metric)}&queueId=${selection.queueId}`;
   };
+  const selectionReady = scope === "casual" || ready;
+  const comparisonSeed = initialData?.scope === scope && initialData.queueId === queueId ? initialData.comparison : null;
+  const needsBundle = !comparisonSeed;
   const seed = initialData?.scope === scope && initialData.queueId === queueId && initialData.metric === metric && (scope === "casual" || filter === "all") ? initialData : null;
-  const comparison = initialData?.scope === scope && initialData.queueId === queueId ? initialData.comparison : null;
+  const bundleKey = `${scope}:${queueId}:${metric}:${scope === "ranked" ? filter : "all"}`;
+  const [clientBundle, setClientBundle] = useState<{ key: string; data: MetricsInitialData } | null>(null);
+  const [failedBundleKey, setFailedBundleKey] = useState<string | null>(null);
+  const [bundleAttempt, setBundleAttempt] = useState(0);
+  const clientData = clientBundle?.key === bundleKey ? clientBundle.data : null;
+  const pageData = seed ?? clientData;
+  const comparisonData = clientData?.comparison ?? comparisonSeed;
+  useEffect(() => {
+    if (!selectionReady || !needsBundle) return;
+    const controller = new AbortController();
+    fetchPerformancePageData(scope, metric, queueId, controller.signal)
+      .then(data => setClientBundle({ key: bundleKey, data }))
+      .catch(() => { if (!controller.signal.aborted) setFailedBundleKey(bundleKey); });
+    return () => controller.abort();
+  }, [selectionReady, needsBundle, scope, metric, queueId, bundleKey, bundleAttempt]);
+
+  const retryBundle = () => {
+    setFailedBundleKey(null);
+    setBundleAttempt(value => value + 1);
+  };
   return <div className="space-y-6">
     <PageHeader parentHref="/stats" parentLabel={t("stats.portal.title")} title={t(scope === "ranked" ? "stats.performance.rankedTitle" : "stats.performance.casualTitle")} />
     <div className="space-y-4">
@@ -151,8 +167,13 @@ function MetricsContent({ initialData }: { initialData?: MetricsInitialData | nu
       {scope === "casual" && <SegmentedRouteLinks label={t("performance.modeLabel")} value={String(queueId)} items={CASUAL_PERFORMANCE_MODES.map(mode => ({ value: String(mode.queueId), label: t(mode.labelKey), href: href(scope, metric, mode.queueId) }))} />}
       <SegmentedRouteLinks label={t("menu.performanceMetrics")} value={metric} items={GAME_PERFORMANCE_METRICS.filter(value => scope === "casual" || value !== "gpm").map(value => ({ value, label: t(METRICS[value].labelKey), href: href(scope, value) }))} />
     </div>
-    {scope === "casual" || ready ? <PerformanceData key={`${scope}:${queueId}:${metric}:${scope === "ranked" ? filter : "all"}`} scope={scope} queueId={queueId} metric={metric} initialData={seed} /> : <div className="pc-card min-h-80"><LoadingIndicator /></div>}
-    {(scope === "casual" || ready) && <ChampionPerformanceComparison key={`${scope}:${queueId}:${filter}`} scope={scope} queueId={queueId} initialData={comparison} />}
+    {!selectionReady ? <div className="pc-card min-h-80"><LoadingIndicator /></div>
+      : needsBundle && !clientData && failedBundleKey === bundleKey ? <ErrorState message={t("stats.performance.unavailable")} onRetry={retryBundle} />
+        : needsBundle && !clientData ? <div className="pc-card min-h-80" role="status"><LoadingIndicator /></div>
+          : <>
+            <PerformanceData key={`${scope}:${queueId}:${metric}:${filter}`} scope={scope} queueId={queueId} metric={metric} initialData={pageData} />
+            <ChampionPerformanceComparison key={`${scope}:${queueId}:${filter}`} scope={scope} queueId={queueId} initialData={comparisonData} />
+          </>}
   </div>;
 }
 

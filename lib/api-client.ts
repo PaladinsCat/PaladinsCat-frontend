@@ -7,6 +7,7 @@
  */
 import { identityCutoverEnabled } from "./identity-cutover";
 import { hasPlayerTag } from "./player-tag-threshold";
+import type { GamePerformanceMetric, PerformanceScope } from "./performance-selection";
 
 // Browser-facing backend URL.
 //
@@ -1410,6 +1411,18 @@ export type PerformanceMetricKey = 'dpm' | 'wpm' | 'apm' | 'hpm' | 'shpm' | 'gpm
  */
 export type PerformanceMetricsResponse = Partial<Record<PerformanceMetricKey, PerformanceMetricSummary>>;
 
+export type PerformancePageData = {
+  scope: PerformanceScope;
+  queueId: number;
+  metric: GamePerformanceMetric;
+  dashboard: { summary: PerformanceMetricSummary; roles: Record<string, PerformanceMetricSummary> };
+  comparison: {
+    results: Array<{ metric: PerformanceMetricKey; rows: ChampionPerformanceDistribution[] }>;
+    details: StatsChampion[];
+    global: PerformanceMetricsResponse;
+  };
+};
+
 function mapMetricSummary(raw: any): PerformanceMetricSummary {
   return {
     min: Number(raw?.min ?? 0),
@@ -1469,7 +1482,7 @@ export async function fetchPerformanceMetricDashboard(metric: PerformanceMetricK
   roles: Record<string, PerformanceMetricSummary>;
 }> {
   const query = new URLSearchParams({ metric, includeRoles: '1', scope, queueId: String(queueId) });
-  const raw = await fetchJson<Record<string, any>>(`/stats/performance-metrics?${query.toString()}`);
+  const raw = await fetchJson<Record<string, any>>(`/stats/performance-metrics?${query.toString()}`, { retries: 1, timeoutMs: 1500 });
   if (!raw[metric] || (raw.scope && raw.scope !== scope) || (scope === 'casual' && (raw.queue_ids?.length !== 1 || raw.queue_ids[0] !== queueId))) throw new Error('Performance population mismatch or missing measure');
   return {
     summary: mapMetricSummary(raw[metric]),
@@ -4411,6 +4424,110 @@ function mapStatsChampionRows(raw: Array<{
     avgShielding: num(r.avg_mitigation),
     avgLeagueTier: num(r.avg_league_tier),
   }));
+}
+
+const PERFORMANCE_PAGE_METRICS = [
+  "kpm", "deaths_per_minute", "dpm", "wpm", "apm", "hpm", "shpm", "gpm", "egpm", "spm", "kda",
+] as const satisfies readonly PerformanceMetricKey[];
+
+function isRecord(value: unknown): value is Record<string, any> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function unwrapPerformanceRecord(value: unknown): Record<string, any> | null {
+  if (!isRecord(value)) return null;
+  return isRecord(value.data) ? value.data : value;
+}
+
+function isPerformanceSummary(value: unknown): boolean {
+  if (!isRecord(value)) return false;
+  return ["min", "max", "mean", "median", "mode", "p10", "p25", "p75", "p90"]
+    .every(key => value[key] != null && Number.isFinite(Number(value[key])))
+    && (value.sample_size ?? value.sampleSize) != null
+    && Number.isFinite(Number(value.sample_size ?? value.sampleSize));
+}
+
+/** Validate and map the complete page bundle; partial 200 responses must be retried, not rendered as empty charts. */
+export function mapPerformancePageData(raw: unknown, scope: PerformanceScope, metric: GamePerformanceMetric, queueId: number): PerformancePageData {
+  if (!isRecord(raw)) throw new Error("Invalid performance page data");
+  const dashboard = unwrapPerformanceRecord(raw.dashboard);
+  const roles = dashboard && isRecord(dashboard.roles) ? dashboard.roles : null;
+  const selectedSummary = dashboard?.[metric];
+  if (!dashboard || dashboard.scope !== scope || !isPerformanceSummary(selectedSummary) || !roles
+    || !["Frontline", "Damage", "Flank", "Support"].every(role => isPerformanceSummary(roles[role]))) {
+    throw new Error("Incomplete performance dashboard data");
+  }
+  if (scope === "casual" && (!Array.isArray(dashboard.queue_ids) || dashboard.queue_ids.length !== 1 || Number(dashboard.queue_ids[0]) !== queueId)) {
+    throw new Error("Performance population mismatch");
+  }
+
+  const rawGroups = raw.comparison;
+  if (!Array.isArray(rawGroups) || rawGroups.length !== PERFORMANCE_PAGE_METRICS.length) {
+    throw new Error("Incomplete champion performance data");
+  }
+  const seen = new Set<string>();
+  const results = rawGroups.map(group => {
+    if (!isRecord(group) || typeof group.metric !== "string" || !PERFORMANCE_PAGE_METRICS.includes(group.metric as typeof PERFORMANCE_PAGE_METRICS[number])
+      || seen.has(group.metric) || !Array.isArray(group.rows)) {
+      throw new Error("Incomplete champion performance data");
+    }
+    seen.add(group.metric);
+    if (group.rows.some((row: unknown) => !isRecord(row) || row.champion_id == null || !Number.isFinite(Number(row.champion_id))
+      || !Number.isFinite(Number(row.mean)) || !Number.isFinite(Number(row.total_matches)))) {
+      throw new Error("Invalid champion performance rows");
+    }
+    return { metric: group.metric as PerformanceMetricKey, rows: mapChampionPerformanceRows(group.rows as ChampionPerformanceRow[]) };
+  });
+  if (PERFORMANCE_PAGE_METRICS.some(key => !seen.has(key))) throw new Error("Incomplete champion performance data");
+
+  const globalSource = unwrapPerformanceRecord(raw.globalMetrics);
+  if (!globalSource || PERFORMANCE_PAGE_METRICS.some(key => !isPerformanceSummary(globalSource[key]))) {
+    throw new Error("Incomplete global performance data");
+  }
+  const global = Object.fromEntries(PERFORMANCE_PAGE_METRICS.map(key => [key, mapMetricSummary(globalSource[key])])) as PerformanceMetricsResponse;
+  if (!Array.isArray(raw.champions)) throw new Error("Invalid champion summary data");
+
+  return {
+    scope,
+    queueId,
+    metric,
+    dashboard: {
+      summary: mapMetricSummary(selectedSummary),
+      roles: Object.fromEntries(Object.entries(roles).map(([role, summary]) => [role, mapMetricSummary(summary)])),
+    },
+    comparison: {
+      results,
+      details: mapStatsChampionRows(raw.champions as Parameters<typeof mapStatsChampionRows>[0]),
+      global,
+    },
+  };
+}
+
+/** Make one bounded retry for a transient or incomplete page-data response. */
+export async function fetchPerformancePageData(
+  scope: PerformanceScope,
+  metric: GamePerformanceMetric,
+  queueId: number,
+  signal?: AbortSignal,
+): Promise<PerformancePageData> {
+  const query = new URLSearchParams({ metric, scope, queueId: String(queueId) });
+  let lastError: unknown;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    signal?.throwIfAborted();
+    try {
+      const raw = await fetchJson<Record<string, unknown>>(`/stats/performance-page-data?${query.toString()}`, {
+        cache: "no-store", retries: 0, timeoutMs: 1500, unwrapData: false, signal,
+      });
+      return mapPerformancePageData(raw, scope, metric, queueId);
+    } catch (error) {
+      signal?.throwIfAborted();
+      lastError = error;
+      if (attempt === 1 || (error instanceof ApiRequestError && error.status < 500)
+        || (error instanceof Error && error.message === API_ERROR_KEYS.genericFailure)) throw error;
+      await new Promise(resolve => setTimeout(resolve, 250));
+    }
+  }
+  throw lastError;
 }
 
 /**
