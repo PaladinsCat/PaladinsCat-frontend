@@ -23,6 +23,7 @@ taskflow/
 src/backend/
 src/discord-bot/
 .next/
+.next-*/
 out/
 public/locales/
 *.log
