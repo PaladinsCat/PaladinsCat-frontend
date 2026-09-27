@@ -9,10 +9,15 @@ import PlayerDirectoryPagination, { usePersistentDirectoryPage } from "@/compone
 
 const PLAYER_DIRECTORY_PAGE_SIZE = 32;
 /**
- * Share the fixed 4rem player-directory card dimensions, truncation, surface, and hover transition classes.
+ * Share the rounded surface, border, and background across player-directory cards.
  * refs: none
  */
-export const PLAYER_DIRECTORY_CARD_CLASS = "flex h-16 min-h-16 min-w-0 overflow-hidden rounded-xl border bg-pc-bg-elevated px-3 py-2 transition-colors";
+export const PLAYER_DIRECTORY_CARD_SURFACE_CLASS = "min-w-0 overflow-hidden rounded-xl border bg-pc-bg-elevated transition-colors";
+/**
+ * Share the compact 4rem directory-card dimensions and padding.
+ * refs: none
+ */
+export const PLAYER_DIRECTORY_CARD_CLASS = `flex h-16 min-h-16 ${PLAYER_DIRECTORY_CARD_SURFACE_CLASS} px-3 py-2`;
 
 /**
  * Render player directory grid with `PlayerDirectoryPagination`.

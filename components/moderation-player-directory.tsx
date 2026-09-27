@@ -6,6 +6,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { ArrowRight, History, ShieldAlert, type LucideIcon } from "lucide-react";
 import { LoadingPanel } from "@/components/async-state";
+import { PLAYER_DIRECTORY_CARD_SURFACE_CLASS } from "@/components/player-directory-grid";
 import PlayerDirectoryPagination, { usePersistentDirectoryPage } from "@/components/player-directory-pagination";
 import PlayerDirectorySearch from "@/components/player-directory-search";
 import PlayersPageHeader from "@/components/ui/players-page-header";
@@ -129,7 +130,7 @@ export default function ModerationPlayerDirectory({
       ) : (
         <div className={`grid grid-cols-1 gap-3 ${inactive ? "md:grid-cols-2" : "md:grid-cols-2 lg:grid-cols-3"} ${loading ? "opacity-60" : ""}`}>
           {items.map((entry) => (
-            <Link key={`${entry.kind}:${entry.subjectId}`} href={entryHref(entry)} className={`group ${inactive ? "rounded-xl" : "flex min-h-24 items-center justify-between"} gap-3 ${style.border} bg-pc-bg-elevated p-4 transition-[border-color,background-color] duration-[200ms] ${style.hover} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent`}>
+            <Link key={`${entry.kind}:${entry.subjectId}`} href={entryHref(entry)} className={`group ${PLAYER_DIRECTORY_CARD_SURFACE_CLASS} ${inactive ? "" : "flex min-h-24 items-center justify-between"} gap-3 ${style.border} p-4 duration-[200ms] ${style.hover} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent`}>
               <div className="flex min-w-0 items-start gap-3">
                 <Icon className={`mt-0.5 h-5 w-5 shrink-0 ${style.icon}`} aria-hidden="true" />
                 <div className="min-w-0">
