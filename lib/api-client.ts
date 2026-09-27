@@ -853,14 +853,20 @@ export async function fetchCheaterEvidenceReviewImage(id: string, position: numb
 
 /**
  * Apply an administrator's evidence review decision without retrying a state transition.
- * I/O types: `id: string; decision: "approve" | "deny"; note: string -> Promise<void>`.
+ * I/O types: `id: string; decision: "approve" | "deny"; tag?: "cheater" | "exploit" -> Promise<void>`.
  * refs: doc: documents/02-technical/api/api-server.md
  */
-export async function reviewCheaterEvidence(id: string, decision: "approve" | "deny", note = ""): Promise<void> {
+export async function reviewCheaterEvidence(
+  id: string,
+  decision: "approve" | "deny",
+  tag?: "cheater" | "exploit",
+  note = "",
+): Promise<void> {
+  if (decision === "approve" && !tag) throw new Error("Choose a tag before approving evidence.");
   await fetchJson(`/cheaters/evidence/${encodeURIComponent(id)}/review`, {
     method: "POST",
     headers: { ...accountAuthHeaders(), "Content-Type": "application/json" },
-    body: JSON.stringify({ decision, note }),
+    body: JSON.stringify({ decision, note, ...(tag ? { tag } : {}) }),
     retries: 0,
   });
 }

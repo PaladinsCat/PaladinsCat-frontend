@@ -49,17 +49,17 @@ const nextConfig: NextConfig = {
       "/players/hall-of-fame",
       "/players/class/:role",
     ];
-    return [
-      ...pages.map((src) => ({ source: src, destination: src })),
-      // Browser clients call same-origin /api/*; the Next server strips that
-      // proxy prefix and forwards to the backend service. This keeps the public
-      // website working even when the direct backend debug port is filtered.
-      { source: "/api/:path*", destination: `${apiDestination}/:path*` },
-      // Champion page bundles are requested by the browser as a neutral data
-      // route. Some embedded browsers block navigations/fetches under /api,
-      // even though the same-origin backend response is healthy.
-      { source: "/_pc/:path*", destination: `${apiDestination}/:path*` },
-    ];
+    return {
+      beforeFiles: pages.map((src) => ({ source: src, destination: src })),
+      // App-owned API handlers, including dynamic review routes, must match
+      // before unmatched API paths fall through to the backend.
+      fallback: [
+        { source: "/api/:path*", destination: `${apiDestination}/:path*` },
+        // Champion page bundles use a neutral route because some embedded
+        // browsers block navigations/fetches under /api.
+        { source: "/_pc/:path*", destination: `${apiDestination}/:path*` },
+      ],
+    };
   },
   async headers() {
     return [

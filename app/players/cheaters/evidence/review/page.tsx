@@ -55,6 +55,7 @@ export default function CheaterEvidenceReviewPage() {
   const { isAdmin } = useAuth();
   const { formatDateTime, formatNumber, t } = useLocalization();
   const [items, setItems] = useState<CheaterEvidenceReviewItem[]>([]);
+  const [reviewTags, setReviewTags] = useState<Record<string, "cheater" | "exploit">>({});
   const [loading, setLoading] = useState(true);
   const [workingId, setWorkingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -73,7 +74,7 @@ export default function CheaterEvidenceReviewPage() {
     setWorkingId(id);
     setError(null);
     try {
-      await reviewCheaterEvidence(id, decision);
+      await reviewCheaterEvidence(id, decision, decision === "approve" ? reviewTags[id] ?? "cheater" : undefined);
       setItems((current) => current.filter((item) => item.id !== id));
     } catch (reviewError) {
       setError(reviewError instanceof Error ? reviewError.message : t("moderation.reviewDecisionFailed"));
@@ -101,7 +102,23 @@ export default function CheaterEvidenceReviewPage() {
             {item.matchId && <p className="text-xs text-pc-text-muted">{t("moderation.supportingMatchNumber", { value1: item.matchId })}</p>}
             {item.imageCount > 0 && <div className="grid gap-2 sm:grid-cols-2">{Array.from({ length: item.imageCount }, (_, position) => <PendingEvidenceImage key={position} evidenceId={item.id} position={position} />)}</div>}
             {item.sourceUrl && <a href={item.sourceUrl} target="_blank" rel="noreferrer" className="inline-flex text-sm font-semibold text-pc-accent hover:text-pc-accent-secondary"><ExternalLink className="mr-1.5 h-4 w-4" aria-hidden="true" />{t("moderation.openSubmittedSource")}</a>}
-            <div className="flex justify-end gap-2 border-t border-pc-border pt-4"><button type="button" disabled={workingId === item.id} onClick={() => void review(item.id, "deny")} className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-red-400/35 px-3 py-2 text-sm font-semibold text-red-200 disabled:opacity-50"><X className="h-4 w-4" aria-hidden="true" />{t("moderation.deny")}</button><button type="button" disabled={workingId === item.id} onClick={() => void review(item.id, "approve")} className="inline-flex min-h-10 items-center gap-1.5 rounded-lg bg-pc-accent px-3 py-2 text-sm font-semibold text-black disabled:opacity-50"><Check className="h-4 w-4" aria-hidden="true" />{t("moderation.approve")}</button></div>
+            <div className="flex flex-wrap items-center justify-end gap-2 border-t border-pc-border pt-4">
+              <label className="mr-auto flex items-center gap-2 text-sm text-pc-text-secondary">
+                <span className="sr-only">{t("moderation.evidenceReview")}</span>
+                <select
+                  aria-label={t("moderation.evidenceReview")}
+                  value={reviewTags[item.id] ?? "cheater"}
+                  onChange={(event) => setReviewTags((current) => ({ ...current, [item.id]: event.target.value as "cheater" | "exploit" }))}
+                  disabled={workingId === item.id}
+                  className="min-h-10 rounded-lg border border-pc-border bg-pc-bg px-3 py-2 text-sm text-pc-text"
+                >
+                  <option value="cheater">{t("moderation.confirmedCheater")}</option>
+                  <option value="exploit">{t("moderation.exploiterShort")}</option>
+                </select>
+              </label>
+              <button type="button" disabled={workingId === item.id} onClick={() => void review(item.id, "deny")} className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-red-400/35 px-3 py-2 text-sm font-semibold text-red-200 disabled:opacity-50"><X className="h-4 w-4" aria-hidden="true" />{t("moderation.deny")}</button>
+              <button type="button" disabled={workingId === item.id} onClick={() => void review(item.id, "approve")} className="inline-flex min-h-10 items-center gap-1.5 rounded-lg bg-pc-accent px-3 py-2 text-sm font-semibold text-black disabled:opacity-50"><Check className="h-4 w-4" aria-hidden="true" />{t("moderation.approve")}</button>
+            </div>
           </article>)}
         </div>
       )}
