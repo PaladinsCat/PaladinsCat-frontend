@@ -277,6 +277,7 @@ export interface ActiveCheaterPage {
  */
 export interface CheaterEvidence {
   id: string;
+  origin: EvidenceOrigin;
   playerId: number | null;
   subjectName: string;
   title: string;
@@ -298,6 +299,8 @@ export interface CheaterEvidencePage {
   items: CheaterEvidence[];
   total: number;
 }
+
+export type EvidenceOrigin = "player_submitted" | "automated" | "unknown";
 
 /**
  * Pending administrator-review evidence metadata. · refs: endpoints: GET /cheaters/evidence/review
@@ -545,7 +548,7 @@ export interface ExploiterFlagEvidence {
   description: string;
   matchId: number | null;
   sourceUrl: string | null;
-  origin: string;
+  origin: EvidenceOrigin;
   createdAt: string;
 }
 
@@ -749,6 +752,11 @@ function mediaApiUrl(url: string): string {
 }
 
 function normalizeCheaterEvidence(row: any): CheaterEvidence {
+  const origin: EvidenceOrigin = row.origin == null
+    ? "player_submitted"
+    : row.origin === "player_submitted" || row.origin === "automated" || row.origin === "unknown"
+      ? row.origin
+      : "unknown";
   const imageUrls = Array.isArray(row.imageUrls)
     ? row.imageUrls.filter((url: unknown): url is string => typeof url === "string").map(mediaApiUrl)
     : Array.isArray(row.images)
@@ -756,6 +764,7 @@ function normalizeCheaterEvidence(row: any): CheaterEvidence {
       : typeof row.imageUrl === "string" ? [mediaApiUrl(row.imageUrl)] : [];
   return {
     id: String(row.id),
+    origin,
     playerId: row.playerId == null ? null : Number(row.playerId),
     subjectName: String(row.subjectName ?? "Unknown subject"),
     title: String(row.title ?? "Evidence"),
@@ -783,7 +792,7 @@ export async function fetchCheaterEvidence(params: { limit?: number; offset?: nu
   });
   const raw = await fetchJson<{ items?: any[]; total?: number | string }>(`/cheaters/evidence?${query.toString()}`);
   return {
-    items: (raw.items ?? []).map(normalizeCheaterEvidence),
+    items: (raw.items ?? []).map(normalizeCheaterEvidence).filter((item) => item.origin === "player_submitted"),
     total: Number(raw.total ?? 0),
   };
 }
@@ -816,7 +825,9 @@ export async function submitCheaterEvidence(form: FormData): Promise<{ evidence:
  */
 export async function fetchCheaterEvidenceDetail(id: string): Promise<CheaterEvidence> {
   const raw = await fetchJson<{ evidence: any }>(`/cheaters/evidence/${encodeURIComponent(id)}`);
-  return normalizeCheaterEvidence(raw.evidence);
+  const evidence = normalizeCheaterEvidence(raw.evidence);
+  if (evidence.origin !== "player_submitted") throw new Error("Evidence post was not found");
+  return evidence;
 }
 
 /**
@@ -828,7 +839,7 @@ export async function fetchCheaterEvidenceReview(params: { limit?: number; offse
   const query = new URLSearchParams({ limit: String(params.limit ?? 20), offset: String(params.offset ?? 0) });
   const raw = await fetchJson<{ items?: any[]; total?: number | string }>(`/cheaters/evidence/review?${query.toString()}`, { headers: accountAuthHeaders() });
   return {
-    items: (raw.items ?? []).map((row) => ({ ...normalizeCheaterEvidence(row), imageCount: Number(row.imageCount ?? 0), submittedBy: String(row.submittedBy ?? "Unknown") })),
+    items: (raw.items ?? []).map((row) => ({ ...normalizeCheaterEvidence(row), imageCount: Number(row.imageCount ?? 0), submittedBy: String(row.submittedBy ?? "Unknown") })).filter((item) => item.origin === "player_submitted"),
     total: Number(raw.total ?? 0),
   };
 }
@@ -2017,7 +2028,7 @@ export async function fetchExploiterEvidence(playerId: string): Promise<Exploite
       description: String(row.description ?? ""),
       matchId: row.matchId == null ? null : Number(row.matchId),
       sourceUrl: row.sourceUrl == null ? null : String(row.sourceUrl),
-      origin: String(row.origin ?? "unknown"),
+      origin: row.origin === "automated" || row.origin === "player_submitted" ? row.origin : "unknown",
       createdAt: String(row.createdAt ?? ""),
     })),
     flags: (raw.flags ?? []).map((row: any) => ({
@@ -2030,8 +2041,8 @@ export async function fetchExploiterEvidence(playerId: string): Promise<Exploite
 
 /**
  * Fetch the shared player evidence dashboard. Exploiters use the rich
- * evidence payload; cheaters fall back to their published user reports so
- * both moderation categories share the same evidence-page design.
+ * evidence payload; cheaters fall back to published user and automated
+ * evidence while preserving each server-owned source.
  * refs: endpoints: GET /players/exploiters/:id · GET /cheaters/:id
  */
 export async function fetchPlayerEvidenceDashboard(playerId: string): Promise<ExploiterEvidenceDetail> {
@@ -2056,7 +2067,7 @@ export async function fetchPlayerEvidenceDashboard(playerId: string): Promise<Ex
         description: item.description,
         matchId: item.matchId == null ? null : Number(item.matchId),
         sourceUrl: item.sourceUrl,
-        origin: "player_submitted",
+        origin: item.origin,
         createdAt: item.createdAt,
       })),
       flags: [],

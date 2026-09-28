@@ -36,6 +36,9 @@ export default function CheaterEvidencePost({
 }) {
   const { formatNumber, t } = useLocalization();
   const images = item.imageUrls.length > 0 ? item.imageUrls : item.imageUrl ? [item.imageUrl] : [];
+  const subjectHref = item.playerId !== null
+    ? `/evidence/${encodeURIComponent(String(item.playerId))}`
+    : `/evidence/reports/${encodeURIComponent(item.id)}`;
   return (
     <article className="overflow-hidden rounded-xl border border-pc-border bg-pc-bg-elevated">
       {images.length > 0 && <div className={`grid gap-px bg-pc-border ${images.length > 1 ? "sm:grid-cols-2" : "grid-cols-1"}`}>
@@ -48,7 +51,7 @@ export default function CheaterEvidencePost({
       ) : null}
       <div className="space-y-3 p-4">
         <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0"><h2 className="truncate text-base font-semibold text-pc-text"><Link href={`/evidence/reports/${encodeURIComponent(item.id)}`} className="transition-colors hover:text-pc-accent">{item.title}</Link></h2><p className="mt-0.5 truncate text-xs font-medium text-amber-200">{item.subjectName}</p></div>
+          <div className="min-w-0"><h2 className="truncate text-base font-semibold text-pc-text"><Link href={`/evidence/reports/${encodeURIComponent(item.id)}`} className="transition-colors hover:text-pc-accent">{item.title}</Link></h2><p className="mt-0.5 truncate text-xs font-medium text-amber-200"><Link href={subjectHref} className="transition-colors hover:text-amber-100 hover:underline">{item.subjectName}</Link></p></div>
           {item.provider && <span className="shrink-0 rounded-full border border-pc-border px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-pc-text-muted">{item.provider}</span>}
         </div>
         {item.description && <p className="text-sm leading-6 text-pc-text-secondary">{item.description}</p>}
