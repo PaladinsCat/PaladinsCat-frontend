@@ -4,6 +4,8 @@
  */
 import { defineConfig } from "@playwright/test";
 
+const useDevelopmentServer = process.env.PLAYWRIGHT_USE_DEV_SERVER === "1";
+
 /** Provide this exported item.
  * Contract: accepts the parameters shown in the signature and returns the declared value; side effects follow the implementation.
  * refs: none
@@ -19,7 +21,9 @@ export default defineConfig({
     trace: "retain-on-failure",
   },
   webServer: {
-    command: "npm run start -- --hostname 127.0.0.1 --port 3100",
+    command: useDevelopmentServer
+      ? "npm run dev -- --hostname 127.0.0.1 --port 3100"
+      : "npm run start -- --hostname 127.0.0.1 --port 3100",
     url: "http://127.0.0.1:3100",
     reuseExistingServer: false,
     timeout: 60_000,

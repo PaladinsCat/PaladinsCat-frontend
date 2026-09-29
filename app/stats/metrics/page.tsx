@@ -10,7 +10,7 @@ import PageHeader from "@/components/ui/page-header";
 import { SegmentedRouteLinks } from "@/components/ui/segmented-control";
 import { BarChartComponent } from "@/components/Chart";
 import { EmptyState, ErrorState, LoadingIndicator } from "@/components/async-state";
-import { fetchPerformanceMetricDashboard, type PerformanceDashboardPageData } from "@/lib/api-client";
+import { fetchPerformancePageData, type PerformancePageData } from "@/lib/api-client";
 import { stationaryChartSeries } from "@/lib/chart-colors";
 import { useLocalization } from "@/lib/localization-context";
 import { useLobbyTier } from "@/lib/lobby-tier-context";
@@ -48,34 +48,15 @@ const COLUMNS = [
   { key: "sampleSize", labelKey: "generated.stats.samples" },
 ] as const;
 
-/**
- * Reuse the selected performance dashboard for initial and fallback data.
- * refs: none
- */
-export type MetricsInitialData = PerformanceDashboardPageData;
+/** Reuse the complete cached page bundle for the dashboard and comparison. */
+export type MetricsInitialData = PerformancePageData;
 
-function PerformanceData({ scope, metric, queueId, initialData }: {
+function PerformanceData({ scope, metric, dashboard }: {
   scope: PerformanceScope;
-  queueId: number;
   metric: GamePerformanceMetric;
-  initialData?: MetricsInitialData | null;
+  dashboard: PerformancePageData["dashboard"];
 }) {
   const { t, formatNumber } = useLocalization();
-  const [fetchedDashboard, setDashboard] = useState<MetricsInitialData["dashboard"] | null>(null);
-  const dashboard = initialData?.dashboard ?? fetchedDashboard;
-  const [failed, setFailed] = useState(false);
-  const [attempt, setAttempt] = useState(0);
-  useEffect(() => {
-    if (initialData && attempt === 0) return;
-    let active = true;
-    fetchPerformanceMetricDashboard(metric, scope, queueId).then(data => {
-      if (active) setDashboard(data);
-    }).catch(() => { if (active) setFailed(true); });
-    return () => { active = false; };
-  }, [scope, metric, queueId, initialData, attempt]);
-
-  if (failed) return <ErrorState message={t("stats.performance.unavailable")} onRetry={() => { setFailed(false); setAttempt(value => value + 1); }} />;
-  if (!dashboard) return <div className="pc-card min-h-80" role="status"><LoadingIndicator /></div>;
   if (!dashboard.summary.sampleSize) return <EmptyState title={t("stats.performance.empty")} />;
 
   const decimals = metric === "kda" || metric === "kpm" || metric === "deaths_per_minute" ? 2 : 0;
@@ -132,12 +113,30 @@ function MetricsContent({ initialData }: { initialData?: MetricsInitialData | nu
   const params = useSearchParams();
   const { filter, ready } = useLobbyTier();
   const { scope, metric, queueId } = performanceSelection(params.get("scope"), params.get("metric"), params.get("queueId"));
+  const requestKey = `${scope}:${queueId}:${metric}`;
+  const [fetchedPageData, setFetchedPageData] = useState<PerformancePageData | null>(null);
+  const [failedKey, setFailedKey] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
   const href = (nextScope: PerformanceScope, nextMetric: GamePerformanceMetric, nextQueue = queueId) => {
     const selection = performanceSelection(nextScope, nextMetric, String(nextQueue));
     return `/stats/performance?scope=${selection.scope}&metric=${performanceMetricName(selection.metric)}&queueId=${selection.queueId}`;
   };
   const selectionReady = scope === "casual" || ready;
   const seed = initialData?.scope === scope && initialData.queueId === queueId && initialData.metric === metric && (scope === "casual" || filter === "all") ? initialData : null;
+  const fetchedMatches = fetchedPageData?.scope === scope && fetchedPageData.queueId === queueId && fetchedPageData.metric === metric;
+  const pageData = seed ?? (fetchedMatches ? fetchedPageData : null);
+  const failed = failedKey === requestKey && !pageData;
+  useEffect(() => {
+    if (!selectionReady || seed || fetchedMatches) return;
+    const controller = new AbortController();
+    fetchPerformancePageData(scope, metric, queueId, controller.signal).then(data => {
+      setFetchedPageData(data);
+      setFailedKey(current => current === requestKey ? null : current);
+    }).catch(() => {
+      if (!controller.signal.aborted) setFailedKey(requestKey);
+    });
+    return () => controller.abort();
+  }, [attempt, fetchedMatches, metric, queueId, requestKey, scope, seed, selectionReady]);
   return <div className="space-y-6">
     <PageHeader parentHref="/stats" parentLabel={t("stats.portal.title")} title={t(scope === "ranked" ? "stats.performance.rankedTitle" : "stats.performance.casualTitle")} />
     <div className="space-y-4">
@@ -145,11 +144,12 @@ function MetricsContent({ initialData }: { initialData?: MetricsInitialData | nu
       {scope === "casual" && <SegmentedRouteLinks label={t("performance.modeLabel")} value={String(queueId)} items={CASUAL_PERFORMANCE_MODES.map(mode => ({ value: String(mode.queueId), label: t(mode.labelKey), href: href(scope, metric, mode.queueId) }))} />}
       <SegmentedRouteLinks label={t("menu.performanceMetrics")} value={metric} items={GAME_PERFORMANCE_METRICS.filter(value => scope === "casual" || value !== "gpm").map(value => ({ value, label: t(METRICS[value].labelKey), href: href(scope, value) }))} />
     </div>
-    {!selectionReady ? <div className="pc-card min-h-80"><LoadingIndicator /></div>
-      : <>
-        <PerformanceData key={`${scope}:${queueId}:${metric}:${filter}`} scope={scope} queueId={queueId} metric={metric} initialData={seed} />
-        <ChampionPerformanceComparison key={`${scope}:${queueId}:${filter}`} scope={scope} queueId={queueId} />
-      </>}
+    {!selectionReady || (!pageData && !failed) ? <div className="pc-card min-h-80" role="status"><LoadingIndicator /></div>
+      : failed ? <ErrorState message={t("stats.performance.unavailable")} onRetry={() => { setFailedKey(null); setAttempt(value => value + 1); }} />
+        : pageData && <>
+          <PerformanceData key={`${scope}:${queueId}:${metric}:${filter}`} scope={scope} metric={metric} dashboard={pageData.dashboard} />
+          <ChampionPerformanceComparison key={`${scope}:${queueId}:${filter}`} scope={scope} queueId={queueId} initialData={pageData.comparison} />
+        </>}
   </div>;
 }
 

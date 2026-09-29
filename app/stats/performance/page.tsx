@@ -2,7 +2,7 @@
  * Render the /stats/performance route with `MetricsPage`.
  * refs: none
  */
-import { mapPerformanceDashboardPageData } from "@/lib/api-client";
+import { mapPerformancePageData } from "@/lib/api-client";
 import { fetchAccountServerJson } from "@/lib/server-api";
 import type { Metadata } from "next";
 import { getServerLocalization } from "@/lib/server-localization";
@@ -13,8 +13,8 @@ type RawRecord = Record<string, unknown>;
 
 async function getInitialData(scope: PerformanceScope, metric: GamePerformanceMetric, queueId: number): Promise<MetricsInitialData | null> {
   try {
-    const dashboard = await fetchAccountServerJson<RawRecord>(`/stats/performance-metrics?metric=${metric}&includeRoles=1&scope=${scope}&queueId=${queueId}`, { timeoutMs: 900 });
-    return mapPerformanceDashboardPageData(dashboard, scope, metric, queueId);
+    const pageData = await fetchAccountServerJson<RawRecord>(`/stats/performance-page-data?metric=${metric}&scope=${scope}&queueId=${queueId}`, { timeoutMs: 900 });
+    return mapPerformancePageData(pageData, scope, metric, queueId);
   } catch (error) {
     console.error("[stats/performance] Server page-data fetch failed; using bounded browser fallback", error);
     return null;
