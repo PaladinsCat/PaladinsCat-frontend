@@ -10,7 +10,7 @@ import PageHeader from "@/components/ui/page-header";
 import { SegmentedRouteLinks } from "@/components/ui/segmented-control";
 import { BarChartComponent } from "@/components/Chart";
 import { EmptyState, ErrorState, LoadingIndicator } from "@/components/async-state";
-import { fetchPerformanceMetricDashboard, fetchPerformancePageData, type PerformancePageData } from "@/lib/api-client";
+import { fetchPerformanceMetricDashboard, type PerformanceDashboardPageData } from "@/lib/api-client";
 import { stationaryChartSeries } from "@/lib/chart-colors";
 import { useLocalization } from "@/lib/localization-context";
 import { useLobbyTier } from "@/lib/lobby-tier-context";
@@ -49,10 +49,10 @@ const COLUMNS = [
 ] as const;
 
 /**
- * Reuse the complete performance-page bundle for initial and fallback data.
+ * Reuse the selected performance dashboard for initial and fallback data.
  * refs: none
  */
-export type MetricsInitialData = PerformancePageData;
+export type MetricsInitialData = PerformanceDashboardPageData;
 
 function PerformanceData({ scope, metric, queueId, initialData }: {
   scope: PerformanceScope;
@@ -137,29 +137,7 @@ function MetricsContent({ initialData }: { initialData?: MetricsInitialData | nu
     return `/stats/performance?scope=${selection.scope}&metric=${performanceMetricName(selection.metric)}&queueId=${selection.queueId}`;
   };
   const selectionReady = scope === "casual" || ready;
-  const comparisonSeed = initialData?.scope === scope && initialData.queueId === queueId ? initialData.comparison : null;
-  const needsBundle = !comparisonSeed;
   const seed = initialData?.scope === scope && initialData.queueId === queueId && initialData.metric === metric && (scope === "casual" || filter === "all") ? initialData : null;
-  const bundleKey = `${scope}:${queueId}:${metric}:${scope === "ranked" ? filter : "all"}`;
-  const [clientBundle, setClientBundle] = useState<{ key: string; data: MetricsInitialData } | null>(null);
-  const [failedBundleKey, setFailedBundleKey] = useState<string | null>(null);
-  const [bundleAttempt, setBundleAttempt] = useState(0);
-  const clientData = clientBundle?.key === bundleKey ? clientBundle.data : null;
-  const pageData = seed ?? clientData;
-  const comparisonData = clientData?.comparison ?? comparisonSeed;
-  useEffect(() => {
-    if (!selectionReady || !needsBundle) return;
-    const controller = new AbortController();
-    fetchPerformancePageData(scope, metric, queueId, controller.signal)
-      .then(data => setClientBundle({ key: bundleKey, data }))
-      .catch(() => { if (!controller.signal.aborted) setFailedBundleKey(bundleKey); });
-    return () => controller.abort();
-  }, [selectionReady, needsBundle, scope, metric, queueId, bundleKey, bundleAttempt]);
-
-  const retryBundle = () => {
-    setFailedBundleKey(null);
-    setBundleAttempt(value => value + 1);
-  };
   return <div className="space-y-6">
     <PageHeader parentHref="/stats" parentLabel={t("stats.portal.title")} title={t(scope === "ranked" ? "stats.performance.rankedTitle" : "stats.performance.casualTitle")} />
     <div className="space-y-4">
@@ -168,12 +146,10 @@ function MetricsContent({ initialData }: { initialData?: MetricsInitialData | nu
       <SegmentedRouteLinks label={t("menu.performanceMetrics")} value={metric} items={GAME_PERFORMANCE_METRICS.filter(value => scope === "casual" || value !== "gpm").map(value => ({ value, label: t(METRICS[value].labelKey), href: href(scope, value) }))} />
     </div>
     {!selectionReady ? <div className="pc-card min-h-80"><LoadingIndicator /></div>
-      : needsBundle && !clientData && failedBundleKey === bundleKey ? <ErrorState message={t("stats.performance.unavailable")} onRetry={retryBundle} />
-        : needsBundle && !clientData ? <div className="pc-card min-h-80" role="status"><LoadingIndicator /></div>
-          : <>
-            <PerformanceData key={`${scope}:${queueId}:${metric}:${filter}`} scope={scope} queueId={queueId} metric={metric} initialData={pageData} />
-            <ChampionPerformanceComparison key={`${scope}:${queueId}:${filter}`} scope={scope} queueId={queueId} initialData={comparisonData} />
-          </>}
+      : <>
+        <PerformanceData key={`${scope}:${queueId}:${metric}:${filter}`} scope={scope} queueId={queueId} metric={metric} initialData={seed} />
+        <ChampionPerformanceComparison key={`${scope}:${queueId}:${filter}`} scope={scope} queueId={queueId} />
+      </>}
   </div>;
 }
 

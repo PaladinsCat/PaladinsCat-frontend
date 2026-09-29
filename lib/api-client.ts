@@ -1440,6 +1440,8 @@ export type PerformancePageData = {
   };
 };
 
+export type PerformanceDashboardPageData = Pick<PerformancePageData, "scope" | "queueId" | "metric" | "dashboard">;
+
 function mapMetricSummary(raw: any): PerformanceMetricSummary {
   return {
     min: Number(raw?.min ?? 0),
@@ -4465,6 +4467,28 @@ function isPerformanceSummary(value: unknown): boolean {
 }
 
 /** Validate and map the complete page bundle; partial 200 responses must be retried, not rendered as empty charts. */
+export function mapPerformanceDashboardPageData(raw: unknown, scope: PerformanceScope, metric: GamePerformanceMetric, queueId: number): PerformanceDashboardPageData {
+  const dashboard = unwrapPerformanceRecord(raw);
+  const roles = dashboard && isRecord(dashboard.roles) ? dashboard.roles : null;
+  const selectedSummary = dashboard?.[metric];
+  if (!dashboard || dashboard.scope !== scope || !isPerformanceSummary(selectedSummary) || !roles
+    || !["Frontline", "Damage", "Flank", "Support"].every(role => isPerformanceSummary(roles[role]))) {
+    throw new Error("Incomplete performance dashboard data");
+  }
+  if (scope === "casual" && (!Array.isArray(dashboard.queue_ids) || dashboard.queue_ids.length !== 1 || Number(dashboard.queue_ids[0]) !== queueId)) {
+    throw new Error("Performance population mismatch");
+  }
+  return {
+    scope,
+    queueId,
+    metric,
+    dashboard: {
+      summary: mapMetricSummary(selectedSummary),
+      roles: Object.fromEntries(Object.entries(roles).map(([role, summary]) => [role, mapMetricSummary(summary)])),
+    },
+  };
+}
+
 export function mapPerformancePageData(raw: unknown, scope: PerformanceScope, metric: GamePerformanceMetric, queueId: number): PerformancePageData {
   if (!isRecord(raw)) throw new Error("Invalid performance page data");
   const dashboard = unwrapPerformanceRecord(raw.dashboard);
