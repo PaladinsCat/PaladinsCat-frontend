@@ -333,20 +333,23 @@ function SearchPageBody() {
 
     const timer = window.setTimeout(() => {
       dispatch({ type: "search-start", generation });
-      Promise.all([
-        fetchUniversalSearch(q, 36).catch((): UniversalSearchResponse => ({
-          query: q,
-          total: 0,
-          data: [],
-        })),
-        loadStaticReferenceIndex().then((index) => staticReferenceResults(q, index)).catch(() => [] as UniversalSearchResult[]),
-      ])
-        .then(([response, staticResults]) => {
+      const staticResultsPromise = loadStaticReferenceIndex()
+        .then((index) => staticReferenceResults(q, index))
+        .catch(() => [] as UniversalSearchResult[]);
+      fetchUniversalSearch(q, 36).catch((): UniversalSearchResponse => ({
+        query: q,
+        total: 0,
+        data: [],
+      }))
+        .then((response) => {
           dispatch({
             type: "search-result",
             generation,
-            results: mergeResults([...response.data, ...staticResults]).slice(0, 48),
+            results: mergeResults(response.data).slice(0, 48),
             remoteNotice: isLikelyMatchId(q) ? remoteLookupNotice("match-id", response.remote) : null,
+          });
+          return staticResultsPromise.then((staticResults) => {
+            dispatch({ type: "search-append", generation, results: staticResults });
           });
         })
         .catch(() => {

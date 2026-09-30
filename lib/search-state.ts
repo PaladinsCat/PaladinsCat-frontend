@@ -75,6 +75,7 @@ export type SearchAction =
   | { type: "search-empty" }
   | { type: "search-start"; generation: number }
   | { type: "search-result"; generation: number; results: UniversalSearchResult[]; remoteNotice: string | null }
+  | { type: "search-append"; generation: number; results: UniversalSearchResult[] }
   | { type: "search-error"; generation: number; error: string }
   | { type: "remote-start"; target: UniversalSearchRemoteTarget }
   | { type: "remote-result"; results: UniversalSearchResult[]; remoteNotice: string | null }
@@ -149,6 +150,9 @@ export function searchReducer(state: SearchState, action: SearchAction): SearchS
         error: null,
         remoteNotice: action.remoteNotice,
       };
+    case "search-append":
+      if (action.generation !== state.generation) return state;
+      return { ...state, results: mergeResults([...state.results, ...action.results]).slice(0, 48) };
     case "search-error":
       if (action.generation !== state.generation) return state;
       return { ...state, results: [], loading: false, error: action.error };

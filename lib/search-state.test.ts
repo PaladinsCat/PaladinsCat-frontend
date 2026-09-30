@@ -88,3 +88,30 @@ test("clear immediately invalidates an in-flight search", () => {
   assert.deepEqual(state.results, []);
   assert.equal(state.loading, false);
 });
+
+test("player results appear before reference data and late data cannot replace a new query", () => {
+  let state = createInitialSearchState("coldsnapy");
+  state = searchReducer(state, {
+    type: "search-result",
+    generation: 0,
+    results: [playerResult("ColdSnapys")],
+    remoteNotice: null,
+  });
+  assert.equal(state.loading, false);
+  assert.deepEqual(state.results.map((result) => result.title), ["ColdSnapys"]);
+
+  state = searchReducer(state, {
+    type: "search-append",
+    generation: 0,
+    results: [playerResult("Reference")],
+  });
+  assert.deepEqual(state.results.map((result) => result.title), ["ColdSnapys", "Reference"]);
+
+  state = searchReducer(state, { type: "set-query", query: "androxus" });
+  state = searchReducer(state, {
+    type: "search-append",
+    generation: 0,
+    results: [playerResult("Stale")],
+  });
+  assert.deepEqual(state.results.map((result) => result.title), ["ColdSnapys", "Reference"]);
+});

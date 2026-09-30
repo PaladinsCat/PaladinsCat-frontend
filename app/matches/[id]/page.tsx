@@ -51,7 +51,7 @@ export default async function MatchDetailPage({
       const value = incoming.get(name);
       if (value) forwarded.set(name, value);
     }
-    const raw = await fetchServerJson<MatchResponse>(`/matches/${matchId}`, {
+    const raw = await fetchServerJson<MatchResponse>(`/matches/${matchId}?skipRecovery=true`, {
       cache: "no-store",
       timeoutMs: 5_000,
       headers: forwarded,
