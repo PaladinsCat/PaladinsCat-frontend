@@ -5,6 +5,7 @@
  * refs: none
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -55,8 +56,8 @@ export default function AltAccountsPage() {
         setTotal(result.total);
         setTotalPages(result.totalPages);
       })
-      .catch(() => {
-        if (active) setError(t("moderation.altDirectoryLoadFailed"));
+      .catch((cause) => {
+        if (active) setError(formatApiErrorMessage(cause, t, t("moderation.altDirectoryLoadFailed")));
       })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };

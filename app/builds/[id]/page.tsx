@@ -4,6 +4,7 @@
  * refs: none
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { getBuildDetail, toggleBuildLike, getAuthUser, getAuthToken, hasCookieAuthSession, type Build } from "@/lib/api-client";
@@ -65,8 +66,8 @@ export default function BuildDetailPage({ params }: { params: Promise<{ id: stri
       loadBuildReferenceData(data.championId, championSlug(data.championName))
         .then(setReferenceData)
         .catch(() => setReferenceData(null));
-    } catch {
-      setError(t("generated.builds.failedToLoadBuild"));
+    } catch (cause) {
+      setError(formatApiErrorMessage(cause, t, t("generated.builds.failedToLoadBuild")));
     } finally {
       setLoading(false);
     }

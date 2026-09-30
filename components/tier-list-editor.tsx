@@ -101,7 +101,7 @@ export default function TierListEditor({
         ));
         if (sorted.length === 0) setError(t("tierLists.loadError"));
       })
-      .catch(() => { if (active) setError(t("tierLists.loadError")); })
+      .catch((cause) => { if (active) setError(formatApiErrorMessage(cause, t, t("tierLists.loadError"))); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, [initialList, t]);

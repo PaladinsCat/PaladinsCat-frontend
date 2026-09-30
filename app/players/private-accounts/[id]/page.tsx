@@ -5,6 +5,7 @@
  * refs: none
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -61,7 +62,7 @@ export default function PrivateAccountDetailPage() {
         setDetail(result);
         if (result.account.id !== privateId) router.replace(`/players/private-accounts/${result.account.id}`);
       })
-      .catch(() => { if (!cancelled) setError(t("generated.players.privateAccountDetailsCouldNotBeLoaded")); });
+      .catch((cause) => { if (!cancelled) setError(formatApiErrorMessage(cause, t, t("generated.players.privateAccountDetailsCouldNotBeLoaded"))); });
     return () => { cancelled = true; };
   }, [privateId, reloadKey, router]);
 

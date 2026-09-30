@@ -5,6 +5,7 @@
  * refs: none
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -51,7 +52,7 @@ export default function AutomaticAfkPlayerDetailPage() {
     setError(null);
     fetchAutomaticAfkPlayerDetail(playerId)
       .then((result) => { if (!cancelled) setDetail(result); })
-      .catch(() => { if (!cancelled) setError(t("generated.players.playerProfileUnavailable")); });
+      .catch((cause) => { if (!cancelled) setError(formatApiErrorMessage(cause, t, "Could not load AFK or win-trade case")); });
     return () => { cancelled = true; };
   }, [playerId]);
 

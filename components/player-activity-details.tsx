@@ -3,6 +3,7 @@
  * refs: none
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
@@ -65,8 +66,8 @@ export default function PlayerActivityDetails() {
           }
           setPlayerResponse(next);
         }
-      } catch {
-        if (active) setError(t("playerActivity.detailsLoadError"));
+      } catch (cause) {
+        if (active) setError(formatApiErrorMessage(cause, t, t("playerActivity.detailsLoadError")));
       } finally {
         if (active) setLoading(false);
       }

@@ -5,6 +5,7 @@
  * refs: none
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
@@ -107,8 +108,8 @@ export default function LeaderboardPage() {
         const data = await fetchRankedLeaderboard({ tier: String(tier), top });
         if (cancelled) return;
         setPlayers(data);
-      } catch {
-        if (!cancelled) setError(t("generated.players.failedToLoadLeaderboardData"));
+      } catch (cause) {
+        if (!cancelled) setError(formatApiErrorMessage(cause, t, t("generated.players.failedToLoadLeaderboardData")));
       } finally {
         if (!cancelled) setLoading(false);
       }

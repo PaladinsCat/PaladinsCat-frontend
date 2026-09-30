@@ -5,6 +5,7 @@
  *   endpoints: GET /cheaters/evidence, POST /cheaters/evidence, GET /cheaters/evidence/{id}/file
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
@@ -51,8 +52,8 @@ export default function CheaterEvidencePage() {
         setTotal(result.total);
         setError(null);
       })
-      .catch(() => {
-        if (active) setError(t("moderation.evidencePortalLoadFailed"));
+      .catch((cause) => {
+        if (active) setError(formatApiErrorMessage(cause, t, t("moderation.evidencePortalLoadFailed")));
       })
       .finally(() => {
         if (active) setLoading(false);

@@ -3,6 +3,7 @@
  * refs: none
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 import { useEffect, useState, useCallback } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import ContextBackLink from "@/components/context-back-link";
@@ -41,8 +42,8 @@ export default function PlayerChartsPage({ params }: { params: Promise<{ id: str
       setKdaData(kda);
       setDpmData(dpm);
       setGlickoData(glicko);
-    } catch {
-      setError(t("generated.stats.failedToLoadChartData"));
+    } catch (cause) {
+      setError(formatApiErrorMessage(cause, t, t("generated.stats.failedToLoadChartData")));
     } finally {
       setLoading(false);
     }

@@ -221,7 +221,7 @@ export default function CreateBuildPage() {
         if (cancelled) return;
         setChampions([...rows].sort((a, b) => a.name.localeCompare(b.name)));
       })
-      .catch(() => setError(t("generated.builds.failedToLoadChampions")))
+      .catch((cause) => setError(formatApiErrorMessage(cause, t, t("generated.builds.failedToLoadChampions"))))
       .finally(() => {
         if (!cancelled) setLoadingChampions(false);
       });
@@ -248,8 +248,8 @@ export default function CreateBuildPage() {
       .then((data) => {
         if (!cancelled) setReferenceData(data);
       })
-      .catch(() => {
-        if (!cancelled) setError(t("generated.builds.failedToLoadChampionBuildReferences"));
+      .catch((cause) => {
+        if (!cancelled) setError(formatApiErrorMessage(cause, t, t("generated.builds.failedToLoadChampionBuildReferences")));
       })
       .finally(() => {
         if (!cancelled) setLoadingReference(false);

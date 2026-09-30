@@ -1,5 +1,6 @@
 /** Party evidence detail route for exact stacks and canonical pairs. · refs: none */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
@@ -34,8 +35,8 @@ export default function PartyDetailPage() {
     setError(null);
     try {
       setDetail(await fetchPartyDetail(kind, key, { page, pageSize: PAGE_SIZE }));
-    } catch {
-      setError(t("generated.players.rankedPartiesCouldNotBeLoaded"));
+    } catch (cause) {
+      setError(formatApiErrorMessage(cause, t, t("generated.players.rankedPartiesCouldNotBeLoaded")));
     } finally {
       setLoading(false);
     }

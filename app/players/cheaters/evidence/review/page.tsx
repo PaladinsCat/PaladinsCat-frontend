@@ -65,7 +65,7 @@ export default function CheaterEvidenceReviewPage() {
     setLoading(true);
     return fetchCheaterEvidenceReview()
       .then(({ items: pending }) => { setItems(pending); setError(null); })
-      .catch(() => setError(t("moderation.reviewQueueLoadFailed")))
+      .catch((cause) => setError(formatApiErrorMessage(cause, t, t("moderation.reviewQueueLoadFailed"))))
       .finally(() => setLoading(false));
   }, [t]);
 

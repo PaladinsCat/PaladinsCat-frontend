@@ -4,6 +4,7 @@
  * refs: none
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -78,11 +79,11 @@ export default function MatchesPage() {
         setTotal(recent.length);
         setTotalPages(1);
       }
-    } catch {
+    } catch (cause) {
       setMatches([]);
       setTotal(0);
       setTotalPages(1);
-      setError(t("generated.matches.weCouldnTLoadMatchDataRightNowPleaseTry"));
+      setError(formatApiErrorMessage(cause, t, "Could not load matches"));
     } finally {
       setLoading(false);
     }

@@ -77,8 +77,8 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
       setDetail(data);
       setPostTitle(data.post.title);
       setPostContent(data.post.content);
-    } catch {
-      setError(t("generated.community.failedToLoadPost"));
+    } catch (cause) {
+      setError(formatApiErrorMessage(cause, t, t("generated.community.failedToLoadPost")));
     } finally {
       setLoading(false);
     }

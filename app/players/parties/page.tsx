@@ -5,6 +5,7 @@
  * refs: none
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -73,8 +74,8 @@ export default function RankedPartiesPage() {
         setTotal(result.total);
         setTotalPages(result.totalPages);
       })
-      .catch(() => {
-        if (!cancelled) setError(t("generated.players.rankedPartiesCouldNotBeLoaded"));
+      .catch((cause) => {
+        if (!cancelled) setError(formatApiErrorMessage(cause, t, t("generated.players.rankedPartiesCouldNotBeLoaded")));
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
