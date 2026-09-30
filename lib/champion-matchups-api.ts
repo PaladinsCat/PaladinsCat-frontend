@@ -1,7 +1,9 @@
-/** Read cumulative ranked champion relationships through the shared API transport.
+/** Read ranked champion relationships from the rolling 30-day window.
  * refs: endpoints: GET /stats/champions/{champion_id}/matchups · migrations: 176
  */
 import { fetchJson } from "@/lib/api-client";
+
+const RANKED_MATCHUP_WINDOW_DAYS = 30;
 
 export interface ChampionRelationship {
   opponentChampionId: number;
@@ -30,7 +32,7 @@ export interface ChampionTalentMatchups {
   rows: ChampionTalentMatchupRow[];
 }
 
-/** Load every opponent relationship across stored ranked history. */
+/** Load opponent relationships from the rolling 30-day ranked window. */
 export async function fetchChampionRelationships(
   championId: number,
   signal: AbortSignal,
@@ -71,13 +73,13 @@ interface RawChampionTalentMatchups {
   }>;
 }
 
-/** Load the selected champion talent's observed ranked matchups. */
+/** Load the selected champion talent's observed ranked matchups from the rolling 30-day window. */
 export async function fetchChampionTalentMatchups(
   championId: number,
   talentId: number,
   signal: AbortSignal,
 ): Promise<ChampionTalentMatchups> {
-  const query = new URLSearchParams({ queueId: "486", days: "all" });
+  const query = new URLSearchParams({ queueId: "486", days: String(RANKED_MATCHUP_WINDOW_DAYS) });
   if (talentId > 0) query.set("talentId", String(talentId));
   const result = await fetchJson<RawChampionTalentMatchups>(
     `/stats/champions/${championId}/matchups?${query}`,

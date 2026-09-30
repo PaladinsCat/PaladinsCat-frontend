@@ -1,4 +1,4 @@
-/** Browse cumulative ranked champion relationships across stored ranked history.
+/** Browse ranked champion relationships over the rolling 30-day window.
  * refs: see: lib/champion-matchups-api.ts · documents/06-reference/design/frontend-design-system.md
  */
 "use client";
