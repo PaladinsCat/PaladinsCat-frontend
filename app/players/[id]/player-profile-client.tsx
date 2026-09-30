@@ -143,6 +143,7 @@ export default function PlayerProfileClient({
 
   const [response, setResponse] = useState<PlayerResponse | null>(initialResponse);
   const [matches, setMatches] = useState<MatchRecord[]>([]);
+  const [matchesError, setMatchesError] = useState<Error | null>(null);
   const [profileLoading, setProfileLoading] = useState(initialResponse === null);
   const [matchesLoading, setMatchesLoading] = useState(true);
   const displayProfileLoading = useRouteSettledLoading(profileLoading && (authLoading || !!user));
@@ -434,13 +435,14 @@ export default function PlayerProfileClient({
     if (!id || !response || error) return;
     let cancelled = false;
     setMatchesLoading(true);
+    setMatchesError(null);
 
     fetchPlayerMatches(id, { limit: "20" })
       .then((data) => {
         if (!cancelled) setMatches(data);
       })
-      .catch(() => {
-        if (!cancelled) setMatches([]);
+      .catch((failure) => {
+        if (!cancelled) setMatchesError(failure instanceof Error ? failure : new Error("Could not load recent matches"));
       })
       .finally(() => {
         if (!cancelled) setMatchesLoading(false);
@@ -766,17 +768,28 @@ export default function PlayerProfileClient({
           }
           {/* Recent Matches */}
           <div>
+            <div className="mb-2 flex flex-wrap items-center gap-2">
+              <h2 className="text-sm font-semibold text-pc-text">{t("generated.players.recentMatches")}</h2>
+              {player.cheater && <span className="player-status-tag rounded bg-[var(--pc-bg-secondary)] px-1.5 py-0.5 text-xs font-bold text-red-400" aria-label={t("generated.players.confirmedCheater")}>{t("generated.players.cheater")}</span>}
+              {player.exploiter && <span className="player-status-tag rounded bg-[var(--pc-bg-secondary)] px-1.5 py-0.5 text-xs font-bold text-orange-400" aria-label={t("moderation.exploiterAria")}>{t("moderation.exploiterShort")}</span>}
+            </div>
             <div>
               {matchesLoading ? (
                 <DataTableSkeleton rows={6} className="border-0" />
+              ) : matchesError ? (
+                <ErrorState
+                  title={t("generated.players.recentMatches")}
+                  message={formatApiErrorMessage(matchesError, t, t("generated.matches.weCouldnTLoadMatchDataRightNowPleaseTry"))}
+                  onRetry={() => setHistoryFetchKey((key) => key + 1)}
+                />
               ) : matches.length === 0 ? (
                 <p className="text-pc-text-muted text-sm">{t("generated.players.noMatchesRecordedYet")}</p>
               ) : (
                 <>
                 <div className="space-y-2 lg:hidden">
-                  {matches.filter((match) => match.championName).map((match) => <Link key={match.matchId} href={`/matches/${match.matchId}`} className="pc-mobile-panel flex min-w-0 items-center gap-3 p-3">
+                  {matches.map((match) => <Link key={match.matchId} href={`/matches/${match.matchId}`} className="pc-mobile-panel flex min-w-0 items-center gap-3 p-3">
                     <img src={getChampionIconSafe(match.championName)} alt="" className="h-10 w-10 shrink-0 rounded-lg object-contain" />
-                    <div className="min-w-0 flex-1"><div className="flex min-w-0 items-center gap-2"><span className="truncate text-sm font-semibold text-pc-text">{match.championName}</span><span className={`shrink-0 text-xs font-bold ${match.isWinner ? "text-emerald-400" : "text-rose-400"}`}>{match.isWinner ? t("generated.players.win") : t("generated.players.loss")}</span></div><div className="truncate text-xs text-pc-text-muted">{match.queueId === 486 ? t("generated.players.ranked") : t("generated.players.casual")} · {displayMatchMap(match.mapGame, match.queueId)}</div><div className="mt-1 text-xs text-pc-text-muted">{formatDateTime(match.entryDatetime)}</div></div>
+                    <div className="min-w-0 flex-1"><div className="flex min-w-0 items-center gap-2"><span className="truncate text-sm font-semibold text-pc-text">{match.championName || t("generated.matches.unknown")}</span><span className={`shrink-0 text-xs font-bold ${match.isWinner ? "text-emerald-400" : "text-rose-400"}`}>{match.isWinner ? t("generated.players.win") : t("generated.players.loss")}</span></div><div className="truncate text-xs text-pc-text-muted">{match.queueId === 486 ? t("generated.players.ranked") : t("generated.players.casual")} · {displayMatchMap(match.mapGame, match.queueId)}</div><div className="mt-1 text-xs text-pc-text-muted">{formatDateTime(match.entryDatetime)}</div></div>
                     <div className="shrink-0 text-right"><div className="font-mono text-sm font-bold text-pc-text">{match.kills}/{match.deaths}/{match.assists}</div><div className="text-xs uppercase text-pc-text-muted">{formatKda(match.kills, match.deaths, match.assists)} {t("generated.players.kda")}</div><div className="mt-1 font-mono text-xs text-pc-text-secondary">{formatMatchDuration(match.duration)}</div></div>
                   </Link>)}
                 </div>
@@ -797,7 +810,7 @@ export default function PlayerProfileClient({
                       </tr>
                     </thead>
                     <tbody>
-                      {matches.filter((m) => m.championName).map((m) => {
+                      {matches.map((m) => {
                         const kda = formatKda(m.kills, m.deaths, m.assists);
                         return (
                           <tr key={m.matchId} className="border-b border-pc-border/30 hover:bg-pc-bg-secondary/50 transition-colors">
@@ -808,8 +821,8 @@ export default function PlayerProfileClient({
                             </td>
                             <td className="px-3 py-1.5">
                               <div className="flex items-center gap-1.5">
-                                <img src={getChampionIconSafe(m.championName)} alt={m.championName} className="w-5 h-5 rounded object-contain" />
-                                <span className="text-xs text-pc-text">{m.championName}</span>
+                                <img src={getChampionIconSafe(m.championName)} alt={m.championName || ""} className="w-5 h-5 rounded object-contain" />
+                                <span className="text-xs text-pc-text">{m.championName || t("generated.matches.unknown")}</span>
                               </div>
                             </td>
                             <td className="px-3 py-1.5">
