@@ -3,6 +3,7 @@
  * refs: none
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { fetchTierLists, type TierListSummary } from "@/lib/tierlists-api";
@@ -27,7 +28,7 @@ export default function TierListsPage() {
   useEffect(() => {
     fetchTierLists()
       .then(setLists)
-      .catch((reason) => setError(reason instanceof Error ? reason.message : t("generated.tierlists.page.failedtoloadtierlists")))
+      .catch((reason) => setError(formatApiErrorMessage(reason, t, t("generated.app.tierlists.page.failedtoloadtierlists"))))
       .finally(() => setLoading(false));
   }, []);
 

@@ -4,6 +4,7 @@
  * refs: none
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 
 import { useEffect, useMemo, useState, type FormEvent, type KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
@@ -322,7 +323,7 @@ export default function CreateBuildPage() {
       );
       router.push(`/builds/${build.id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("generated.builds.create.page.failedtocreatebuild"));
+      setError(formatApiErrorMessage(err, t, t("generated.app.builds.create.page.failedtocreatebuild")));
     } finally {
       setSubmitting(false);
     }

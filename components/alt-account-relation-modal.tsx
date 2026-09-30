@@ -3,6 +3,7 @@
  * refs: none
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Search, Trash2, UserRoundCheck, X } from "lucide-react";
@@ -53,7 +54,7 @@ export default function AltAccountRelationModal({
     try {
       setRelations(await fetchMyAltAccountRelations(playerId));
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : t("moderation.altRelationLoadFailed"));
+      setError(formatApiErrorMessage(cause, t, t("moderation.altRelationLoadFailed")));
     } finally {
       setLoadingRelations(false);
     }
@@ -127,7 +128,7 @@ export default function AltAccountRelationModal({
       await loadRelations();
       onSuccess();
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : t("moderation.altRelationSaveFailed"));
+      setError(formatApiErrorMessage(cause, t, t("moderation.altRelationSaveFailed")));
     } finally {
       setSubmitting(false);
     }
@@ -147,7 +148,7 @@ export default function AltAccountRelationModal({
       }
       onSuccess();
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : t("moderation.altRelationClearFailed"));
+      setError(formatApiErrorMessage(cause, t, t("moderation.altRelationClearFailed")));
     } finally {
       setClearingId(null);
     }

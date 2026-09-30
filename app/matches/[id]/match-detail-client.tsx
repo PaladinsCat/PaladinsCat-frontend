@@ -22,6 +22,7 @@
  */
 "use client";
 
+import { formatApiErrorMessage } from "@/lib/api-errors";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import {
@@ -277,9 +278,7 @@ export default function MatchDetailPage({ initialMatch = null }: { initialMatch?
           .catch(() => undefined);
 
       } catch (err: unknown) {
-        if (!cancelled) setError(err instanceof Error && err.message
-          ? err.message
-          : t("generated.matches.[id].page.failedtoloadmatch"));
+        if (!cancelled) setError(formatApiErrorMessage(err, t, t("generated.app.matches.[id].page.failedtoloadmatch")));
       } finally {
         if (!cancelled) setLoading(false);
       }

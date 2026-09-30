@@ -3,6 +3,7 @@
  * refs: none
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 import { useEffect, useState } from "react";
 import { CircleDot, Code2, LockKeyhole, Plus, X } from "lucide-react";
 import ContextBackLink from "@/components/context-back-link";
@@ -27,13 +28,13 @@ export default function ProjectsPage() {
   const [selected, setSelected] = useState<WorkItem | null>(null);
   const isManager = user?.isAdmin === true || user?.isProjectDeveloper === true;
   const [error,setError]=useState<string|null>(null);
-  useEffect(()=>{if(isManager) void listWorkItems().then(setItems).catch(reason=>setError(reason instanceof Error?reason.message:"Unable to load projects"));},[isManager]);
+  useEffect(()=>{if(isManager) void listWorkItems().then(setItems).catch(reason=>setError(formatApiErrorMessage(reason, t, "Unable to load projects")));},[isManager]);
 
   if (isLoading) return <div className="pc-card p-8 text-sm text-pc-text-secondary">{t("generated.operations.ticketLoading")}</div>;
   if (!isManager) return <AccessWall />;
 
   async function addWorkItem() {
-    try { const created=await createWorkItem({title:t("generated.operations.projectsUntitled"),component:"Frontend"}); const next=await listWorkItems(); setItems(next); setSelected(next.find(item=>item.id===created.id)??null); } catch(reason) { setError(reason instanceof Error?reason.message:t("generated.operations.statsLoadFailed")); }
+    try { const created=await createWorkItem({title:t("generated.operations.projectsUntitled"),component:"Frontend"}); const next=await listWorkItems(); setItems(next); setSelected(next.find(item=>item.id===created.id)??null); } catch(reason) { setError(formatApiErrorMessage(reason, t, "Unable to create project")); }
   }
   async function save(form: FormData) {
     if (!selected) return;
@@ -46,7 +47,7 @@ export default function ProjectsPage() {
       assignee: String(form.get("assignee") ?? "").trim() || null,
       details: String(form.get("details") ?? "").trim(),
     };
-    try { await updateWorkItem(updated.id,updated); setItems(await listWorkItems()); setSelected(null); } catch(reason) { setError(reason instanceof Error?reason.message:"Unable to save task"); }
+    try { await updateWorkItem(updated.id,updated); setItems(await listWorkItems()); setSelected(null); } catch(reason) { setError(formatApiErrorMessage(reason, t, "Unable to save task")); }
   }
 
   const columnLabel:Record<Column,string>={Backlog:t("generated.operations.projectsBacklog"),Building:t("generated.operations.projectsBuilding"),Review:t("generated.operations.projectsReview"),Done:t("generated.operations.projectsDone")};

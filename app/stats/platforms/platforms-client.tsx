@@ -3,6 +3,7 @@
  * refs: none
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 import { useEffect, useState } from "react";
 import { fetchPlatforms } from "@/lib/api-client";
 import { getPercentageColor } from "@/lib/stat-quality";
@@ -44,9 +45,9 @@ export default function PlatformsPage({ initialPlatforms = null }: { initialPlat
     if (initialPlatforms != null) return;
     fetchPlatforms({ timeoutMs: 750 })
       .then(setPlatforms)
-      .catch(setError)
+      .catch((error: unknown) => setError(formatApiErrorMessage(error, t, "Could not load platform statistics")))
       .finally(() => setLoading(false));
-  }, [initialPlatforms]);
+  }, [initialPlatforms, t]);
 
   const platformData = selectedPlatform
     ? platforms.filter((p) => p.platform === selectedPlatform)
@@ -86,7 +87,7 @@ export default function PlatformsPage({ initialPlatforms = null }: { initialPlat
       {displayLoading ? (
         <RouteSkeleton variant="detail" />
       ) : error ? (
-        <ErrorState message={String(error)} />
+        <ErrorState message={error} />
       ) : chartData.length === 0 ? (
         <EmptyState title={t("generated.stats.noPlatformStatistics")} description={t("generated.stats.platformComparisonsWillAppearWhenRankedDataIsAvailable")} />
       ) : (

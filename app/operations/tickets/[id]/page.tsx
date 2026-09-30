@@ -3,6 +3,7 @@
  * refs: none
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { MessageSquare, Trash2 } from "lucide-react";
@@ -19,10 +20,10 @@ import { commentTicket, deleteTicket, getTicket, updateTicket, type TicketStatus
 export default function TicketDetailPage() {
   const { user,isLoading }=useAuth(); const { t }=useLocalization(); const params=useParams<{id:string}>(); const router=useRouter(); const id=String(params.id??"");
   const [data,setData]=useState<Awaited<ReturnType<typeof getTicket>>|null>(null); const [error,setError]=useState<string|null>(null); const [busy,setBusy]=useState(false);
-  useEffect(()=>{if(isLoading||!user)return;void getTicket(id).then(setData).catch(reason=>setError(reason instanceof Error?reason.message:"Ticket not found"));},[id,isLoading,user]);
-  async function add(form:FormData) { const body=String(form.get("comment")??"").trim(); if(!body)return; setBusy(true); try { setData(await commentTicket(id,body)); } catch(reason) { setError(reason instanceof Error?reason.message:"Unable to add comment"); } finally { setBusy(false); } }
-  async function status(value:TicketStatus) { setBusy(true); try { setData(await updateTicket(id,value)); } catch(reason) { setError(reason instanceof Error?reason.message:"Unable to update ticket"); } finally { setBusy(false); } }
-  async function remove() { if(!data||!window.confirm(t("generated.admin.delete")))return; setBusy(true); setError(null); try { await deleteTicket(id); router.replace("/operations/tickets"); } catch(reason) { setError(reason instanceof Error?reason.message:"Unable to delete ticket"); setBusy(false); } }
+  useEffect(()=>{if(isLoading||!user)return;void getTicket(id).then(setData).catch(reason=>setError(formatApiErrorMessage(reason, t, "Ticket not found")));},[id,isLoading,user]);
+  async function add(form:FormData) { const body=String(form.get("comment")??"").trim(); if(!body)return; setBusy(true); try { setData(await commentTicket(id,body)); } catch(reason) { setError(formatApiErrorMessage(reason, t, "Unable to add comment")); } finally { setBusy(false); } }
+  async function status(value:TicketStatus) { setBusy(true); try { setData(await updateTicket(id,value)); } catch(reason) { setError(formatApiErrorMessage(reason, t, "Unable to update ticket")); } finally { setBusy(false); } }
+  async function remove() { if(!data||!window.confirm(t("generated.admin.delete")))return; setBusy(true); setError(null); try { await deleteTicket(id); router.replace("/operations/tickets"); } catch(reason) { setError(formatApiErrorMessage(reason, t, "Unable to delete ticket")); setBusy(false); } }
   if(isLoading)return <div className="pc-card p-6 text-sm text-pc-text-secondary">{t("generated.operations.ticketLoading")}</div>;
   if(!user)return <OperationsAuthWall/>;
   if(error&&!data)return <div className="pc-card p-6"><ContextBackLink fallbackHref="/operations/tickets" label={t("generated.operations.tickets")} className="pc-btn-secondary gap-2 text-sm" /><p className="mt-4 text-sm text-pc-text-secondary">{error}</p></div>;

@@ -3,6 +3,7 @@
  * refs: none
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 import { useEffect, useState } from 'react';
 import { RefreshCw, Save } from 'lucide-react';
 import {
@@ -39,7 +40,7 @@ export default function AdminChangelogPage() {
       setEntries(rows);
       setDrafts(Object.fromEntries(rows.map((entry) => [entry.id, entry.changelog])));
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : 'Failed to load changelog entries.');
+      setError(formatApiErrorMessage(reason, t, 'Failed to load changelog entries.'));
     } finally {
       setLoading(false);
     }
@@ -59,7 +60,7 @@ export default function AdminChangelogPage() {
       setDrafts((current) => ({ ...current, [updated.id]: updated.changelog }));
       setStatus(`Saved release ${updated.version || `#${updated.id}`}.`);
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : 'Failed to save changelog entry.');
+      setError(formatApiErrorMessage(reason, t, 'Failed to save changelog entry.'));
     } finally {
       setSavingId(null);
     }

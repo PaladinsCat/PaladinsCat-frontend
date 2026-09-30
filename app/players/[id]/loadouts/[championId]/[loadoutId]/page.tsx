@@ -5,6 +5,7 @@
  * refs: none
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
@@ -75,7 +76,7 @@ export default function PlayerLoadoutDetailPage() {
       setFreshness(data.freshness);
       setLoadout(data.loadout.championId === championId ? data.loadout : null);
     }).catch((cause) => {
-      if (!cancelled) setError(cause instanceof Error ? cause.message : t("generated.players.[id].loadouts.[championId].[loadoutId].page.couldnotloadthissaveddeck"));
+      if (!cancelled) setError(formatApiErrorMessage(cause, t, t("generated.app.players.[id].loadouts.[championId].[loadoutId].page.couldnotloadthissaveddeck")));
     });
     fetchPlayerProfile(playerId).then((profile) => {
       if (!cancelled && profile.name) setPlayerName(profile.name);

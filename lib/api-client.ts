@@ -8,6 +8,10 @@
 import { identityCutoverEnabled } from "./identity-cutover";
 import { hasPlayerTag } from "./player-tag-threshold";
 import type { GamePerformanceMetric, PerformanceScope } from "./performance-selection";
+import { API_ERROR_KEYS, ApiRequestError } from "./api-errors";
+export { API_ERROR_KEYS, ApiRequestError };
+export { formatApiErrorMessage, isApiErrorKey } from "./api-errors";
+export type { ApiErrorKey, ApiRequestFailureKind } from "./api-errors";
 
 // Browser-facing backend URL.
 //
@@ -3029,38 +3033,6 @@ export interface TierSummary {
 const FETCH_TIMEOUT_MS = 10000;
 
 
-// User-facing error keys — resolved at the UI layer via t()
-/**
- * Name the shared api error keys value used by API-client callers.
- *
- * Exposes a typed constant with no network, authentication, cache, or persistence side effects.
- * refs: none
- */
-export const API_ERROR_KEYS = {
-  genericFailure: "generated.api.genericFailure",
-  unexpectedFetchFailure: "generated.api.unexpectedFetchFailure",
-  notAuthenticated: "generated.api.notAuthenticated",
-  authenticationRequired: "generated.api.authenticationRequired",
-} as const;
-
-/**
- * Select a recognized API error message key.
- * refs: doc: documents/02-technical/api/api-server.md
- */
-export type ApiErrorKey = (typeof API_ERROR_KEYS)[keyof typeof API_ERROR_KEYS];
-
-/**
- * IsApiErrorKey for the API-client data path.
- *
- * Accepts value; returns isApiErrorKey data from local computation without network, authentication, cache, or persistence effects.
- * refs: none
- * I/O types: `value: unknown -> value is ApiErrorKey`.
- */
-export function isApiErrorKey(value: unknown): value is ApiErrorKey {
-  return typeof value === "string"
-    && (Object.values(API_ERROR_KEYS) as string[]).includes(value);
-}
-
 /**
  * Fetch json data for client consumers.
  *
@@ -3069,6 +3041,15 @@ export function isApiErrorKey(value: unknown): value is ApiErrorKey {
  * I/O types: `path: string; options?: RequestInit & { retries?: number; unwrapData?: boolean; timeoutMs?: number } -> Promise<T>`.
  */
 export async function fetchJson<T>(path: string, options?: RequestInit & { retries?: number; unwrapData?: boolean; timeoutMs?: number }): Promise<T> {
+  const endpointForDiagnostics = (candidate: string) => {
+    try {
+      return new URL(candidate, "https://paladinscat.invalid").pathname.replace(/\/\d+(?=\/|$)/g, "/:id");
+    } catch {
+      return candidate.split("?")[0].replace(/\/\d+(?=\/|$)/g, "/:id");
+    }
+  };
+  const safeErrorCode = (value: unknown) => typeof value === "string" && /^[A-Za-z0-9_-]{1,64}$/.test(value) ? value : undefined;
+  const safeRequestId = (value: unknown) => typeof value === "string" && /^[A-Za-z0-9:_-]{1,100}$/.test(value) ? value : undefined;
   const retries = options?.retries ?? 2;
   const unwrapData = options?.unwrapData ?? true;
   const timeoutMs = options?.timeoutMs ?? FETCH_TIMEOUT_MS;
@@ -3098,7 +3079,7 @@ export async function fetchJson<T>(path: string, options?: RequestInit & { retri
     try {
       const signal = options?.signal ? AbortSignal.any([options.signal, controller.signal]) : controller.signal;
       res = await fetch(`${API_BASE}${scopedPath}`, { ...fetchOptions, signal });
-    } catch (error) {
+    } catch {
       // A network failure or a timeout abort is transient: retry it with the
       // same backoff as 5xx responses instead of surfacing it immediately.
       clearTimeout(timeoutId);
@@ -3107,13 +3088,26 @@ export async function fetchJson<T>(path: string, options?: RequestInit & { retri
         await new Promise((r) => setTimeout(r, 500 * (attempt + 1)));
         continue;
       }
-      throw error;
+      const kind = controller.signal.aborted ? "timeout" : "network";
+      const requestError = new ApiRequestError(API_ERROR_KEYS.genericFailure, undefined, {
+        kind,
+        endpoint: endpointForDiagnostics(scopedPath),
+        method,
+        timeoutMs,
+      });
+      if (kind === "timeout") requestError.name = "AbortError";
+      throw requestError;
     }
     // Cloudflare challenges describe edge admission, not the account session.
     // Do not let their 403 clear cached auth or retry an interactive challenge.
     if (res.headers.get("cf-mitigated") === "challenge") {
       clearTimeout(timeoutId);
-      throw new Error(API_ERROR_KEYS.genericFailure);
+      throw new ApiRequestError(API_ERROR_KEYS.genericFailure, res.status, {
+        kind: "edge-challenge",
+        endpoint: endpointForDiagnostics(scopedPath),
+        method,
+        code: "CF_CHALLENGE",
+      });
     }
     if (!res.ok) {
       if (res.status >= 500 && attempt < retries) {
@@ -3124,26 +3118,65 @@ export async function fetchJson<T>(path: string, options?: RequestInit & { retri
       const errBody = await res.json().catch(() => null).finally(() => clearTimeout(timeoutId));
       options?.signal?.throwIfAborted();
       if (errBody?.error?.code === "WEBSITE_SESSION_REQUIRED") {
-        throw new Error(API_ERROR_KEYS.genericFailure);
+        throw new ApiRequestError(API_ERROR_KEYS.genericFailure, res.status, {
+          kind: "session-required",
+          endpoint: endpointForDiagnostics(scopedPath),
+          method,
+          code: "WEBSITE_SESSION_REQUIRED",
+        });
       }
       const message = typeof errBody?.error === "string" ? errBody.error : errBody?.error?.message;
+      const code = safeErrorCode(errBody?.error?.code);
+      const requestId = safeRequestId(errBody?.error?.requestId);
       // Expected client errors are intentionally written by the backend for the
       // person making the request (validation, conflicts, rate limits, and so on).
       // Preserve them instead of collapsing every response into a generic key.
       if (res.status < 500 && typeof message === "string" && message.trim()) {
-        throw new ApiRequestError(message.trim(), res.status);
+        throw new ApiRequestError(message.trim(), res.status, {
+          kind: "http",
+          endpoint: endpointForDiagnostics(scopedPath),
+          method,
+          code,
+          requestId,
+        });
       }
-      throw new ApiRequestError(API_ERROR_KEYS.genericFailure, res.status);
+      throw new ApiRequestError(API_ERROR_KEYS.genericFailure, res.status, {
+        kind: "http",
+        endpoint: endpointForDiagnostics(scopedPath),
+        method,
+        code,
+        requestId,
+      });
     }
-    const json = await res.json().finally(() => clearTimeout(timeoutId));
+    let json: unknown;
+    try {
+      json = await res.json();
+    } catch (error) {
+      options?.signal?.throwIfAborted();
+      const kind = error instanceof Error && error.name === "AbortError" ? "timeout" : "invalid-response";
+      const requestError = new ApiRequestError(API_ERROR_KEYS.genericFailure, res.status, {
+        kind,
+        endpoint: endpointForDiagnostics(scopedPath),
+        method,
+        timeoutMs,
+      });
+      if (kind === "timeout") requestError.name = "AbortError";
+      throw requestError;
+    } finally {
+      clearTimeout(timeoutId);
+    }
     options?.signal?.throwIfAborted();
     // Handle normalized list envelopes when callers only need the rows.
-    if (unwrapData && json && json.data !== undefined) {
+    if (unwrapData && json && typeof json === "object" && "data" in json && json.data !== undefined) {
       return json.data as T;
     }
     return json as T;
   }
-  throw new Error(API_ERROR_KEYS.unexpectedFetchFailure);
+  throw new ApiRequestError(API_ERROR_KEYS.unexpectedFetchFailure, undefined, {
+    kind: "retry-exhausted",
+    endpoint: endpointForDiagnostics(path),
+    method,
+  });
 }
 
 function numberOrNull(value: number | string | null | undefined): number | null {
@@ -3263,13 +3296,6 @@ function mapNotification(raw: {
   };
 }
 
-class ApiRequestError extends Error {
-  constructor(message: string, readonly status: number) {
-    super(message);
-    this.name = "ApiRequestError";
-  }
-}
-
 /**
  * IsAuthenticationRejection for the API-client data path.
  *
@@ -3278,7 +3304,10 @@ class ApiRequestError extends Error {
  * I/O types: `error: unknown -> boolean`.
  */
 export function isAuthenticationRejection(error: unknown): boolean {
-  return error instanceof ApiRequestError && (error.status === 401 || error.status === 403);
+  return error instanceof ApiRequestError
+    && error.kind !== "edge-challenge"
+    && error.kind !== "session-required"
+    && (error.status === 401 || error.status === 403);
 }
 
 // ── Notifications ──
@@ -4563,7 +4592,7 @@ export async function fetchPerformancePageData(
     } catch (error) {
       signal?.throwIfAborted();
       lastError = error;
-      if (attempt === 1 || (error instanceof ApiRequestError && error.status < 500)
+      if (attempt === 1 || (error instanceof ApiRequestError && error.status != null && error.status < 500)
         || (error instanceof Error && error.message === API_ERROR_KEYS.genericFailure)) throw error;
       await new Promise(resolve => setTimeout(resolve, 250));
     }
@@ -5328,7 +5357,7 @@ export interface ChampionCardDetailResponse {
  * Fetch champion card detail data for client consumers.
  *
  * refs: none
- * Request `GET '/stats/cards/${championId}/${cardId}?mode=${mode}${talentId ? '&talentId=${talentId}' : ''}'` through the shared API transport. Return `null` on a caught request failure.
+ * Request `GET '/stats/cards/${championId}/${cardId}?mode=${mode}${talentId ? '&talentId=${talentId}' : ''}'` through the shared API transport. Propagate request failures so the caller can report the actual cause.
  * I/O types: champion/card IDs, optional talent and tier bounds -> ranked card detail.
  */
 export async function fetchChampionCardDetail(
@@ -5337,48 +5366,44 @@ export async function fetchChampionCardDetail(
   mode: 'ranked' = 'ranked',
   talentId?: number | null,
   tier?: { tierMin?: number; tierMax?: number },
-): Promise<ChampionCardDetailResponse | null> {
-  try {
-    const query = new URLSearchParams({ mode });
-    if (talentId) query.set('talentId', String(talentId));
-    if (tier?.tierMin != null) query.set('tierMin', String(tier.tierMin));
-    if (tier?.tierMax != null) query.set('tierMax', String(tier.tierMax));
-    const raw = await fetchJson<ChampionCardDetailResponse>(
-      `/stats/cards/${championId}/${cardId}?${query.toString()}`
-    );
+): Promise<ChampionCardDetailResponse> {
+  const query = new URLSearchParams({ mode });
+  if (talentId) query.set('talentId', String(talentId));
+  if (tier?.tierMin != null) query.set('tierMin', String(tier.tierMin));
+  if (tier?.tierMax != null) query.set('tierMax', String(tier.tierMax));
+  const raw = await fetchJson<ChampionCardDetailResponse>(
+    `/stats/cards/${championId}/${cardId}?${query.toString()}`
+  );
 
-    return {
-      ...raw,
-      cardId: Number(raw.cardId) || cardId,
-      championId: Number(raw.championId) || championId,
-      talentId: raw.talentId == null ? null : Number(raw.talentId),
-      totalPlays: Number(raw.totalPlays) || 0,
-      wins: Number(raw.wins) || 0,
-      losses: Number(raw.losses) || 0,
-      winRate: toDisplayPercent(raw.winRate) ?? 0,
-      levels: (raw.levels ?? []).map((level) => ({
-        level: Number(level.level) || 0,
-        plays: Number(level.plays) || 0,
-        winRate: toDisplayPercent(level.winRate) ?? 0,
-      })),
-      talents: (raw.talents ?? []).map((talent) => ({
-        talentId: Number(talent.talentId) || 0,
-        talentName: talent.talentName ?? 'Unknown',
-        totalPlays: Number(talent.totalPlays) || 0,
-        wins: Number(talent.wins) || 0,
-        losses: Number(talent.losses) || 0,
-        winRate: toDisplayPercent(talent.winRate) ?? 0,
-      })),
-    };
-  } catch {
-    return null;
-  }
+  return {
+    ...raw,
+    cardId: Number(raw.cardId) || cardId,
+    championId: Number(raw.championId) || championId,
+    talentId: raw.talentId == null ? null : Number(raw.talentId),
+    totalPlays: Number(raw.totalPlays) || 0,
+    wins: Number(raw.wins) || 0,
+    losses: Number(raw.losses) || 0,
+    winRate: toDisplayPercent(raw.winRate) ?? 0,
+    levels: (raw.levels ?? []).map((level) => ({
+      level: Number(level.level) || 0,
+      plays: Number(level.plays) || 0,
+      winRate: toDisplayPercent(level.winRate) ?? 0,
+    })),
+    talents: (raw.talents ?? []).map((talent) => ({
+      talentId: Number(talent.talentId) || 0,
+      talentName: talent.talentName ?? 'Unknown',
+      totalPlays: Number(talent.totalPlays) || 0,
+      wins: Number(talent.wins) || 0,
+      losses: Number(talent.losses) || 0,
+      winRate: toDisplayPercent(talent.winRate) ?? 0,
+    })),
+  };
 }
 /**
  * Fetch champion card stats data for client consumers.
  *
  * refs: none
- * Request `GET '/stats/cards/${championId}?${query.toString()}'` through the shared API transport. Return `{ totalMatches: 0, cards: [] }` on a caught request failure.
+ * Request `GET '/stats/cards/${championId}?${query.toString()}'` through the shared API transport. Propagate request failures so unavailable data is not presented as an empty result.
  * I/O types: `championId: number; mode: 'ranked'; talentId?: number | null; tier?: { tierMin?: number; tierMax?: number } -> Promise<ChampionCardStatsResponse>`.
  */
 export async function fetchChampionCardStats(
@@ -5387,12 +5412,11 @@ export async function fetchChampionCardStats(
   talentId?: number | null,
   tier?: { tierMin?: number; tierMax?: number }
 ): Promise<ChampionCardStatsResponse> {
-  try {
-    const query = new URLSearchParams({ mode });
-    if (talentId) query.set('talentId', String(talentId));
-    if (tier?.tierMin != null) query.set('tierMin', String(tier.tierMin));
-    if (tier?.tierMax != null) query.set('tierMax', String(tier.tierMax));
-    const raw = await fetchJson<{
+  const query = new URLSearchParams({ mode });
+  if (talentId) query.set('talentId', String(talentId));
+  if (tier?.tierMin != null) query.set('tierMin', String(tier.tierMin));
+  if (tier?.tierMax != null) query.set('tierMax', String(tier.tierMax));
+  const raw = await fetchJson<{
       totalMatches: number | string;
       cards: Array<{
         cardId: number | string;
@@ -5407,12 +5431,9 @@ export async function fetchChampionCardStats(
           winRate: number | string;
         }>;
       }>;
-    }>(`/stats/cards/${championId}?${query.toString()}`);
+  }>(`/stats/cards/${championId}?${query.toString()}`);
 
-    return normalizeChampionCardStatsResponse(raw);
-  } catch {
-    return { totalMatches: 0, cards: [] };
-  }
+  return normalizeChampionCardStatsResponse(raw);
 }
 
 /**
@@ -6316,7 +6337,7 @@ export async function reportPlayer(playerId: string | number, opts: ReportOption
  */
 export async function reportPrivateAccount(privateId: string | number, opts: ReportOptions): Promise<{ success: boolean; message: string }> {
   if (opts.type !== 'suspicious' && opts.type !== 'cheater') {
-    throw new Error(API_ERROR_KEYS.genericFailure);
+    throw new Error("Private account reports must use Suspicious or Cheater as the report type.");
   }
   const token = getAuthToken();
   if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.authenticationRequired);

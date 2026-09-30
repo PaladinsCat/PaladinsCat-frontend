@@ -3,6 +3,7 @@
  * refs: none
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -58,7 +59,7 @@ export default function AdminDashboardPage({ mode = "admin" }: { mode?: "admin" 
     try {
       setDashboard(await fetchAdminDashboard(developerMode ? "developer" : "admin"));
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : t("generated.admin.page.admindashboardunavailable"));
+      setError(formatApiErrorMessage(reason, t, t("generated.app.admin.page.admindashboardunavailable")));
     } finally {
       setLoading(false);
     }

@@ -3,6 +3,7 @@
  * refs: none
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import TierListEditor from "@/components/tier-list-editor";
@@ -41,7 +42,7 @@ export default function EditTierListPage({ params }: { params: Promise<{ id: str
         setList(tierList);
       })
       .catch((reason) => {
-        if (active) setError(reason instanceof Error ? reason.message : t("tierLists.updateError"));
+        if (active) setError(formatApiErrorMessage(reason, t, t("tierLists.updateError")));
       });
     return () => { active = false; };
   }, [authLoading, params, router, t, user]);

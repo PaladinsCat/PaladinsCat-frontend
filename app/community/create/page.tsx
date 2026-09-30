@@ -3,10 +3,11 @@
  * refs: none
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Send } from "lucide-react";
-import { createPost, getAuthUser, getAuthToken, hasCookieAuthSession, isApiErrorKey } from "@/lib/api-client";
+import { createPost, getAuthUser, getAuthToken, hasCookieAuthSession } from "@/lib/api-client";
 import { AsyncButton } from "@/components/async-state";
 import { useLocalization } from "@/lib/localization-context";
 import ContextBackLink from "@/components/context-back-link";
@@ -54,7 +55,7 @@ export default function CreatePostPage() {
       router.push(`/community/${post.id}`);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error && isApiErrorKey(err.message) ? t(err.message) : err instanceof Error ? err.message : t("generated.community.create.page.failedtocreatepost"));
+      setError(formatApiErrorMessage(err, t, t("generated.app.community.create.page.failedtocreatepost")));
     } finally {
       setLoading(false);
     }

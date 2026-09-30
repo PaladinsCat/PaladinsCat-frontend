@@ -3,6 +3,7 @@
  * refs: none
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Clock3, ImageIcon, UserRound, UserRoundCog } from "lucide-react";
@@ -13,6 +14,7 @@ import { LoadingIndicator, LoadingPanel } from "@/components/async-state";
 import PlayerLinkCard from "@/components/player-link-card";
 import { MaintenanceConsentPanel } from "@/components/maintenance-consent";
 import {
+  ApiRequestError,
   getAccountDetails,
   updateProfile,
   type AccountDetails,
@@ -76,18 +78,20 @@ export default function AccountPage() {
       setBio(data.user.bio ?? "");
     } catch (err) {
       if (err instanceof Error) {
-        if (err.message === "Not authenticated" || err.message.includes("401")) {
+        if ((err instanceof ApiRequestError && err.status === 401)
+          || err.message === "Not authenticated"
+          || err.message.includes("401")) {
           router.push("/auth/login");
           return;
         }
-        setError(err.message);
+        setError(formatApiErrorMessage(err, t, t("generated.account.failedToLoadAccountDetails")));
       } else {
         setError(t("generated.account.failedToLoadAccountDetails"));
       }
     } finally {
       setLoading(false);
     }
-  }, [router]);
+  }, [router, t]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -135,7 +139,7 @@ export default function AccountPage() {
       await updateProfile({ bio });
       setSuccess(t("generated.account.profileUpdated"));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update profile");
+      setError(formatApiErrorMessage(err, t, "Failed to update profile"));
     } finally {
       setSavingProfile(false);
     }
@@ -151,7 +155,7 @@ export default function AccountPage() {
       await refresh();
       setSuccess(t("generated.account.timeZoneUpdated"));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update time zone");
+      setError(formatApiErrorMessage(err, t, "Failed to update time zone"));
     } finally {
       setSavingTimeZone(false);
     }
@@ -166,7 +170,7 @@ export default function AccountPage() {
       setSuccess(t("generated.account.customWallpaperSavedForThisBrowser"));
       await refreshCustomWallpaper();
     } catch (err) {
-      setWallpaperError(err instanceof Error ? err.message : "Unable to save this wallpaper.");
+      setWallpaperError(formatApiErrorMessage(err, t, "Unable to save this wallpaper."));
     }
   };
 
@@ -188,7 +192,7 @@ export default function AccountPage() {
       setSuccess(t("generated.account.customWallpaperSavedForThisBrowser"));
       await refreshCustomWallpaper();
     } catch (err) {
-      setWallpaperError(err instanceof Error ? err.message : "Unable to save this wallpaper.");
+      setWallpaperError(formatApiErrorMessage(err, t, "Unable to save this wallpaper."));
     }
   };
 
@@ -199,7 +203,7 @@ export default function AccountPage() {
       setSuccess(t("generated.account.customWallpaperRemoved"));
       await refreshCustomWallpaper();
     } catch (err) {
-      setWallpaperError(err instanceof Error ? err.message : "Unable to remove this wallpaper.");
+      setWallpaperError(formatApiErrorMessage(err, t, "Unable to remove this wallpaper."));
     }
   };
 
@@ -211,7 +215,7 @@ export default function AccountPage() {
       setSuccess(t("generated.account.customWallpaperRemovedMapWallpapersAreActiveAgain"));
       await refreshCustomWallpaper();
     } catch (err) {
-      setWallpaperError(err instanceof Error ? err.message : "Unable to remove this wallpaper.");
+      setWallpaperError(formatApiErrorMessage(err, t, "Unable to remove this wallpaper."));
     }
   };
 

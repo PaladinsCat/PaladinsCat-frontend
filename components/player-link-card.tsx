@@ -3,6 +3,7 @@
  * refs: none
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
@@ -76,7 +77,7 @@ export default function PlayerLinkCard({ linkedPlayer, onChanged }: Props) {
       const next = await startPlayerLinkVerification(Number(result.id));
       setVerification(next); setSearchResults([]); setSearchQuery("");
       setSuccess(t("generated.players.verificationPinGeneratedForValue1", { value1: result.name }));
-    } catch (err) { setError(err instanceof Error ? err.message : t("generated.account.linkPinFailed")); }
+    } catch (err) { setError(formatApiErrorMessage(err, t, t("generated.account.linkPinFailed"))); }
     finally { setLinking(false); }
   }, []);
 
@@ -87,7 +88,7 @@ export default function PlayerLinkCard({ linkedPlayer, onChanged }: Props) {
       setVerification(null); setSuccess(t("generated.players.linkedToValue1", { value1: result.player.name }));
       await onChanged();
     } catch (err) {
-      const message = err instanceof Error ? err.message : t("generated.account.linkVerifyFailed");
+      const message = formatApiErrorMessage(err, t, t("generated.account.linkVerifyFailed"));
       setError(isApiErrorKey(message) ? t(message) : message);
     }
     finally { setLinking(false); }
@@ -96,13 +97,13 @@ export default function PlayerLinkCard({ linkedPlayer, onChanged }: Props) {
   const unlink = useCallback(async () => {
     setLinking(true); setError(null); setSuccess(null);
     try { await unlinkPlayer(); setSuccess(t("generated.players.playerLinkRemoved")); await onChanged(); }
-    catch (err) { setError(err instanceof Error ? err.message : t("generated.account.unlinkFailed")); }
+    catch (err) { setError(formatApiErrorMessage(err, t, t("generated.account.unlinkFailed"))); }
     finally { setLinking(false); }
   }, [onChanged]);
 
   const cancel = useCallback(async () => {
     try { await cancelPlayerLinkVerification(); setVerification(null); }
-    catch (err) { setError(err instanceof Error ? err.message : t("generated.account.cancelVerifyFailed")); }
+    catch (err) { setError(formatApiErrorMessage(err, t, t("generated.account.cancelVerifyFailed"))); }
   }, []);
 
   return <section className="bg-pc-bg-elevated rounded-lg border border-pc-border p-6">

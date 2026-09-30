@@ -3,6 +3,7 @@
  * refs: none
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 import { useEffect, useState } from "react";
 import {
   createAdminNotification,
@@ -97,7 +98,7 @@ export default function AdminNotificationsPage() {
       setActivityBanner(banner);
       setStatus(t("generated.admin.notifications.page.loadednotifications"));
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("generated.admin.notifications.page.failedtoloadnotifications"));
+      setError(formatApiErrorMessage(err, t, t("generated.app.admin.notifications.page.failedtoloadnotifications")));
     } finally {
       setLoading(false);
     }
@@ -119,7 +120,7 @@ export default function AdminNotificationsPage() {
       await load();
       setStatus(t("generated.admin.notifications.page.notificationcreated"));
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("generated.admin.notifications.page.failedtocreatenotification"));
+      setError(formatApiErrorMessage(err, t, t("generated.app.admin.notifications.page.failedtocreatenotification")));
     }
   }
 
@@ -132,7 +133,7 @@ export default function AdminNotificationsPage() {
       await load();
       setStatus(t("generated.admin.notifications.page.notificationsaved"));
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("generated.admin.notifications.page.failedtosavenotification"));
+      setError(formatApiErrorMessage(err, t, t("generated.app.admin.notifications.page.failedtosavenotification")));
     } finally {
       setSavingId(null);
     }
@@ -147,7 +148,7 @@ export default function AdminNotificationsPage() {
       await load();
       setStatus(t("generated.admin.notifications.page.notificationdeleted"));
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("generated.admin.notifications.page.failedtodeletenotification"));
+      setError(formatApiErrorMessage(err, t, t("generated.app.admin.notifications.page.failedtodeletenotification")));
     } finally {
       setSavingId(null);
     }
@@ -164,7 +165,7 @@ export default function AdminNotificationsPage() {
       setActivityBanner(saved);
       setStatus(t("generated.admin.notifications.page.notificationsaved"));
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("generated.admin.notifications.page.failedtosavenotification"));
+      setError(formatApiErrorMessage(err, t, t("generated.app.admin.notifications.page.failedtosavenotification")));
     } finally {
       setSavingBanner(false);
     }

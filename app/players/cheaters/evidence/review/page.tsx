@@ -5,6 +5,7 @@
  *        GET /cheaters/evidence/{id}/media/{position}, POST /cheaters/evidence/{id}/review
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
@@ -77,7 +78,7 @@ export default function CheaterEvidenceReviewPage() {
       await reviewCheaterEvidence(id, decision, decision === "approve" ? reviewTags[id] ?? "cheater" : undefined);
       setItems((current) => current.filter((item) => item.id !== id));
     } catch (reviewError) {
-      setError(reviewError instanceof Error ? reviewError.message : t("moderation.reviewDecisionFailed"));
+      setError(formatApiErrorMessage(reviewError, t, t("moderation.reviewDecisionFailed")));
     } finally {
       setWorkingId(null);
     }

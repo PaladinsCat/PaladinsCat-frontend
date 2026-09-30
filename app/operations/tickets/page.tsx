@@ -3,6 +3,7 @@
  * refs: none
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Bug, CheckCircle2, Lightbulb, Send } from "lucide-react";
@@ -18,8 +19,8 @@ const PAGE_SIZE = 20;
  */
 export default function TicketsPage() {
   const { user,isLoading }=useAuth(); const { t }=useLocalization(); const [tickets,setTickets]=useState<Ticket[]>([]); const [page,setPage]=useState(1); const [pages,setPages]=useState(1); const [type,setType]=useState<TicketType>("bug"); const [sent,setSent]=useState(false); const [error,setError]=useState<string|null>(null); const [submitting,setSubmitting]=useState(false);
-  useEffect(()=>{if(isLoading||!user)return;void listTickets(page,PAGE_SIZE).then(result=>{setTickets(result.data);setPages(Math.max(1,result.page.total_pages));}).catch(reason=>setError(reason instanceof Error?reason.message:t("generated.operations.statsLoadFailed")));},[isLoading,page,t,user]);
-  async function submit(form:FormData){const title=String(form.get("title")??"").trim(),details=String(form.get("details")??"").trim();if(!title||!details)return;setSubmitting(true);setError(null);try{await createTicket({kind:type,title,details});setSent(true);setPage(1);const result=await listTickets(1,PAGE_SIZE);setTickets(result.data);setPages(Math.max(1,result.page.total_pages));}catch(reason){setError(reason instanceof Error?reason.message:t("generated.operations.statsLoadFailed"));}finally{setSubmitting(false)}}
+  useEffect(()=>{if(isLoading||!user)return;void listTickets(page,PAGE_SIZE).then(result=>{setTickets(result.data);setPages(Math.max(1,result.page.total_pages));}).catch(reason=>setError(formatApiErrorMessage(reason, t, "Unable to load tickets")));},[isLoading,page,t,user]);
+  async function submit(form:FormData){const title=String(form.get("title")??"").trim(),details=String(form.get("details")??"").trim();if(!title||!details)return;setSubmitting(true);setError(null);try{await createTicket({kind:type,title,details});setSent(true);setPage(1);const result=await listTickets(1,PAGE_SIZE);setTickets(result.data);setPages(Math.max(1,result.page.total_pages));}catch(reason){setError(formatApiErrorMessage(reason, t, "Unable to create ticket"));}finally{setSubmitting(false)}}
   const labels:Record<Ticket["status"],string>={received:t("generated.operations.ticketReceived"),under_review:t("generated.operations.ticketUnderReview"),planned:t("generated.operations.ticketPlanned"),closed:t("generated.operations.ticketClosed")};
   if(isLoading)return <div className="pc-card p-6 text-sm text-pc-text-secondary">{t("generated.operations.ticketLoading")}</div>;
   if(!user)return <OperationsAuthWall/>;

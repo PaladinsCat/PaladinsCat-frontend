@@ -66,7 +66,7 @@ export default function ChampionCardDetailPage() {
     key: string;
     championData: ChampionData | null;
     detail: ChampionCardDetailResponse | null;
-    error: string | null;
+    error: Error | string | null;
   }>({ key: "", championData: null, detail: null, error: null });
   const { championData, detail, error } = result;
 
@@ -85,7 +85,6 @@ export default function ChampionCardDetailPage() {
           tierMax: lobbyTier.tierMax,
       }),
     ]).then(([localData, cardDetail]) => {
-        if (!cardDetail) throw new Error(t("generated.champions.cardStatsNotFound"));
         if (cancelled) return;
         setResult({ key: requestKey, championData: localData ?? null, detail: cardDetail, error: null });
       })
@@ -95,7 +94,7 @@ export default function ChampionCardDetailPage() {
           key: requestKey,
           championData: null,
           detail: null,
-          error: err instanceof Error ? err.message : t("generated.champions.[name].cards.[cardId].page.unabletoloadcardstats"),
+          error: err instanceof Error ? err : t("generated.champions.[name].cards.[cardId].page.unabletoloadcardstats"),
         });
       });
 

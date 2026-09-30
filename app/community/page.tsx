@@ -3,6 +3,7 @@
  * refs: none
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { fetchPosts, fetchTwitchStreams, type Post, type TwitchStream } from "@/lib/api-client";
@@ -34,7 +35,7 @@ export default function CommunityPage() {
         const data = await fetchPosts({ limit: "50" });
         setPosts(data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : t("generated.community.page.failedtoloadposts"));
+        setError(formatApiErrorMessage(err, t, t("generated.app.community.page.failedtoloadposts")));
       } finally {
         setLoading(false);
       }

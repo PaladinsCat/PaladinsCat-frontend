@@ -3,6 +3,7 @@
  * refs: none
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -110,7 +111,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
         post: { ...prev.post, likes: newLikes },
       } : null);
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : t("generated.community.[id].page.failedtoupdatelike"));
+      setActionError(formatApiErrorMessage(err, t, t("generated.app.community.[id].page.failedtoupdatelike")));
     }
   }
 
@@ -127,7 +128,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
       setDetail((prev) => prev ? { ...prev, post } : null);
       setEditingPost(false);
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : t("generated.community.[id].page.failedtosavepost"));
+      setActionError(formatApiErrorMessage(err, t, t("generated.app.community.[id].page.failedtosavepost")));
     } finally {
       setSavingPost(false);
     }
@@ -145,7 +146,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
       router.push("/community");
       router.refresh();
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : t("generated.community.[id].page.failedtodeletepost"));
+      setActionError(formatApiErrorMessage(err, t, t("generated.app.community.[id].page.failedtodeletepost")));
       setDeletingPost(false);
     }
   }
@@ -167,7 +168,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
       setNewComment("");
       setReplyTo(null);
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : t("generated.community.[id].page.failedtoaddcomment"));
+      setActionError(formatApiErrorMessage(err, t, t("generated.app.community.[id].page.failedtoaddcomment")));
     } finally {
       setCommenting(false);
     }
@@ -195,7 +196,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
       setEditingCommentId(null);
       setCommentContent("");
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : t("generated.community.[id].page.failedtosavecomment"));
+      setActionError(formatApiErrorMessage(err, t, t("generated.app.community.[id].page.failedtosavecomment")));
     } finally {
       setBusyCommentId(null);
     }
@@ -216,7 +217,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
         comments: prev.comments.filter((comment) => comment.id !== commentId).map((comment) => comment.parentId === commentId ? { ...comment, parentId: null } : comment),
       } : null);
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : t("generated.community.[id].page.failedtodeletecomment"));
+      setActionError(formatApiErrorMessage(err, t, t("generated.app.community.[id].page.failedtodeletecomment")));
     } finally {
       setBusyCommentId(null);
     }

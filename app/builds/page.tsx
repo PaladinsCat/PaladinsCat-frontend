@@ -4,6 +4,7 @@
  * refs: none
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -37,7 +38,7 @@ export default function BuildsPage() {
         });
         setBuilds(data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : t("generated.builds.page.failedtoloadbuilds"));
+        setError(formatApiErrorMessage(err, t, t("generated.app.builds.page.failedtoloadbuilds")));
       } finally {
         setLoading(false);
       }

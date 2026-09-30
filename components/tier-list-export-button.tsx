@@ -3,6 +3,7 @@
  * refs: none
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 
 import { useState, type RefObject } from "react";
 import { toPng } from "html-to-image";
@@ -75,7 +76,7 @@ export default function TierListExportButton({ tierListId, mode, target }: TierL
       anchor.remove();
       setMessage(t("tierLists.exportedImage"));
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : t("tierLists.exportError"));
+      setMessage(formatApiErrorMessage(error, t, t("tierLists.exportError")));
     } finally {
       setExporting(false);
     }

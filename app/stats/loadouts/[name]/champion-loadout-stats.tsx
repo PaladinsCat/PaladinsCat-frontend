@@ -16,6 +16,7 @@ import {
   type ChampionTalentStat,
   type ChampionTalentStatsResponse,
 } from "@/lib/api-client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 import { useLobbyTier } from "@/lib/lobby-tier-context";
 import { useLocalization } from "@/lib/localization-context";
 import { getPercentageColor, getStatQuality } from "@/lib/stat-quality";
@@ -25,6 +26,14 @@ import { championDescriptionKey } from "@/lib/localization/champion-description-
 function positiveInteger(value: string | null): number | null {
   const parsed = Number(value);
   return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : null;
+}
+
+class ChampionStatsRequestFailure {
+  constructor(readonly request: "talent" | "card", readonly cause: unknown) {}
+}
+
+function identifyStatsRequest<T>(request: "talent" | "card", promise: Promise<T>): Promise<T> {
+  return promise.catch((cause: unknown) => { throw new ChampionStatsRequestFailure(request, cause); });
 }
 
 /** Load and render ranked card statistics, optionally filtered by one talent. */
@@ -40,25 +49,31 @@ export default function ChampionLoadoutStats({ championId, championData }: { cha
     key: string;
     talents: ChampionTalentStatsResponse | null;
     cards: ChampionCardStatsResponse | null;
+    errorTitle: string | null;
     error: string | null;
-  }>({ key: "", talents: null, cards: null, error: null });
+  }>({ key: "", talents: null, cards: null, errorTitle: null, error: null });
 
   useEffect(() => {
     if (!lobbyTierReady) return;
     let cancelled = false;
-    Promise.all([
-      fetchChampionTalentStats(championId, "ranked", { tierMin: lobbyTier.tierMin, tierMax: lobbyTier.tierMax }),
-      fetchChampionCardStats(championId, "ranked", selectedTalentId, { tierMin: lobbyTier.tierMin, tierMax: lobbyTier.tierMax }),
+    void Promise.all([
+      identifyStatsRequest("talent", fetchChampionTalentStats(championId, "ranked", { tierMin: lobbyTier.tierMin, tierMax: lobbyTier.tierMax })),
+      identifyStatsRequest("card", fetchChampionCardStats(championId, "ranked", selectedTalentId, { tierMin: lobbyTier.tierMin, tierMax: lobbyTier.tierMax })),
     ]).then(([talents, cards]) => {
       if (cancelled) return;
-      setResult({ key: requestKey, talents, cards, error: null });
+      setResult({ key: requestKey, talents, cards, errorTitle: null, error: null });
     }).catch((reason: unknown) => {
       if (cancelled) return;
+      const failure = reason instanceof ChampionStatsRequestFailure ? reason : null;
+      const title = failure?.request === "talent"
+        ? t("generated.champions.talentStatisticsUnavailable")
+        : t("generated.champions.cardStatisticsUnavailable");
       setResult({
         key: requestKey,
         talents: null,
         cards: null,
-        error: reason instanceof Error ? reason.message : t("generated.champions.cardStatisticsUnavailable"),
+        errorTitle: title,
+        error: formatApiErrorMessage(failure?.cause ?? reason, t, title),
       });
     });
     return () => { cancelled = true; };
@@ -76,7 +91,8 @@ export default function ChampionLoadoutStats({ championId, championData }: { cha
   }
 
   if (!lobbyTierReady || result.key !== requestKey) return <RouteSkeleton variant="detail" />;
-  if (result.error || !result.talents || !result.cards) return <ErrorState title={t("generated.champions.cardStatisticsUnavailable")} message={result.error ?? t("generated.champions.noCardDataForQueue")} />;
+  if (result.error) return <ErrorState title={result.errorTitle ?? t("generated.champions.cardStatisticsUnavailable")} message={result.error} />;
+  if (!result.talents || !result.cards) return <ErrorState title={!result.talents ? t("generated.champions.talentStatisticsUnavailable") : t("generated.champions.cardStatisticsUnavailable")} message={t("generated.champions.noCardDataForQueue")} />;
   const talentStats = result.talents;
   const cardStats = result.cards;
 

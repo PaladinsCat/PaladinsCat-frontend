@@ -3,6 +3,7 @@
  * refs: none
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 
 import { Fragment, useEffect, useMemo, useState, type DragEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
@@ -180,11 +181,11 @@ export default function TierListEditor({
       router.push(`/tierlists/${result.postId}`);
       router.refresh();
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : t(
+      setError(formatApiErrorMessage(reason, t, t(
         editing
           ? "tierLists.updateError"
-          : "generated.tierlists.create.page.failedtopublishtierlist",
-      ));
+          : "generated.app.tierlists.create.page.failedtopublishtierlist",
+      )));
       setSaving(false);
     }
   }

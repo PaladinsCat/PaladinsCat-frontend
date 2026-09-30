@@ -3,6 +3,7 @@
  * refs: none
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 
 import { useState, type RefObject } from "react";
 import { toPng } from "html-to-image";
@@ -75,7 +76,7 @@ export default function LoadoutExportButton(props: LoadoutExportButtonProps) {
         loadout.removeAttribute("data-image-export");
       }
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : t("generated.players.couldNotSaveTheLoadoutImage"));
+      setMessage(formatApiErrorMessage(error, t, t("generated.players.couldNotSaveTheLoadoutImage")));
     } finally {
       setExporting(false);
     }

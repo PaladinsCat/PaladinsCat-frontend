@@ -5,6 +5,7 @@
  * refs: none
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
@@ -39,7 +40,7 @@ export default function PlayerRelationshipsPage() {
     fetchPlayerRelationshipSummary(playerId, 50).then((value) => {
       if (active) setSummary(value);
     }).catch((cause) => {
-      if (active) setError(cause instanceof Error ? cause.message : t("common.relationships.loadFailed"));
+      if (active) setError(formatApiErrorMessage(cause, t, t("common.relationships.loadFailed")));
     });
     return () => { active = false; };
   }, [playerId, t]);

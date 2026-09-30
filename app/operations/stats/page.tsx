@@ -3,6 +3,7 @@
  * refs: none
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 import { useEffect, useState } from "react";
 import { Database, HeartPulse, Users } from "lucide-react";
 import { fetchPublicOperationsStats, type PublicOperationsStats } from "@/lib/operations-api";
@@ -33,7 +34,7 @@ export default function OperationsStatsPage() {
     let active = true;
     const load = () => fetchPublicOperationsStats()
       .then((next) => { if (active) { setData(next); setError(null); } })
-      .catch((reason) => { if (active) setError(reason instanceof Error ? reason.message : t("generated.operations.statsLoadFailed")); });
+      .catch((reason) => { if (active) setError(formatApiErrorMessage(reason, t, t("generated.operations.statsLoadFailed"))); });
     void load();
     const interval = window.setInterval(() => void load(), 60_000);
     return () => { active = false; window.clearInterval(interval); };

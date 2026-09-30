@@ -3,6 +3,7 @@
  * refs: none
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, Calculator, ChevronRight, Download, ExternalLink, Info, X } from "lucide-react";
 import ContextBackLink from "@/components/context-back-link";
@@ -210,7 +211,7 @@ export default function DiminishingReturnsPage() {
         if (!cancelled) setChampions([...rows].sort((left, right) => left.name.localeCompare(right.name)));
       })
       .catch((cause) => {
-        if (!cancelled) setError(cause instanceof Error ? cause.message : t("generated.builds.failedToLoadChampions"));
+        if (!cancelled) setError(formatApiErrorMessage(cause, t, t("generated.builds.failedToLoadChampions")));
       });
     return () => { cancelled = true; };
   }, [t]);
@@ -229,7 +230,7 @@ export default function DiminishingReturnsPage() {
     loadBuildReferenceData(champion.id, championSlug(champion.name))
       .then((value) => { if (!cancelled) setReference(value); })
       .catch((cause) => {
-        if (!cancelled) setError(cause instanceof Error ? cause.message : t("generated.builds.failedToLoadChampionBuildReferences"));
+        if (!cancelled) setError(formatApiErrorMessage(cause, t, t("generated.builds.failedToLoadChampionBuildReferences")));
       })
       .finally(() => { if (!cancelled) setLoadingReference(false); });
     return () => { cancelled = true; };
@@ -343,7 +344,7 @@ export default function DiminishingReturnsPage() {
       const response = await fetchPlayerLoadouts(user.linkedPlayerId);
       setLoadouts(response.loadouts);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : t("diminishingReturns.loadoutUnavailable"));
+      setError(formatApiErrorMessage(cause, t, t("diminishingReturns.loadoutUnavailable")));
       setLoadouts([]);
     } finally {
       setLoadingLoadouts(false);

@@ -5,6 +5,7 @@
  * refs: none
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
@@ -55,7 +56,7 @@ export default function PlayerLoadoutsPage() {
       setData(response);
       setError(response.refreshError);
     }
-    catch (cause) { setError(cause instanceof Error ? cause.message : t("generated.players.loadoutsUnavailable")); }
+    catch (cause) { setError(formatApiErrorMessage(cause, t, t("generated.players.loadoutsUnavailable"))); }
     finally { setLoading(false); }
   }, [playerId, t]);
 
@@ -84,7 +85,7 @@ export default function PlayerLoadoutsPage() {
       setData(response);
       setError(response.refreshError);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : t("generated.players.loadoutsUnavailable"));
+      setError(formatApiErrorMessage(cause, t, t("generated.players.loadoutsUnavailable")));
     } finally {
       setRefreshing(false);
     }

@@ -3,6 +3,7 @@
  * refs: none
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -58,7 +59,7 @@ export default function TierListDetailPage({ params }: { params: Promise<{ id: s
       setList(tierList);
       setDiscussion(post);
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : t("generated.tierlists.[id].page.failedtoloadtierlist"));
+      setError(formatApiErrorMessage(reason, t, t("generated.app.tierlists.[id].page.failedtoloadtierlist")));
     } finally {
       setLoading(false);
     }
@@ -79,7 +80,7 @@ export default function TierListDetailPage({ params }: { params: Promise<{ id: s
     try {
       const likes = await togglePostLike(discussion.post.id, auth.user.id, auth.token);
       setDiscussion((current) => current ? { ...current, post: { ...current.post, likes } } : null);
-    } catch (reason) { setError(reason instanceof Error ? reason.message : t("generated.tierlists.[id].page.failedtoupdatelike")); }
+    } catch (reason) { setError(formatApiErrorMessage(reason, t, t("generated.app.tierlists.[id].page.failedtoupdatelike"))); }
   }
 
   async function submitComment(event: FormEvent) {
@@ -92,7 +93,7 @@ export default function TierListDetailPage({ params }: { params: Promise<{ id: s
       const created = await addComment(discussion.post.id, auth.user.id, comment.trim(), null, auth.token);
       setDiscussion((current) => current ? { ...current, comments: [...current.comments, created] } : null);
       setComment("");
-    } catch (reason) { setError(reason instanceof Error ? reason.message : t("generated.tierlists.[id].page.failedtoaddcomment")); }
+    } catch (reason) { setError(formatApiErrorMessage(reason, t, t("generated.app.tierlists.[id].page.failedtoaddcomment"))); }
     finally { setCommenting(false); }
   }
 
@@ -112,7 +113,7 @@ export default function TierListDetailPage({ params }: { params: Promise<{ id: s
       setDiscussion((current) => current ? { ...current, comments: current.comments.map((item) => item.id === commentId ? updated : item) } : null);
       setEditingCommentId(null);
       setEditingComment("");
-    } catch (reason) { setError(reason instanceof Error ? reason.message : t("generated.tierlists.[id].page.failedtoupdatecomment")); }
+    } catch (reason) { setError(formatApiErrorMessage(reason, t, t("generated.app.tierlists.[id].page.failedtoupdatecomment"))); }
     finally { setBusyCommentId(null); }
   }
 
@@ -124,7 +125,7 @@ export default function TierListDetailPage({ params }: { params: Promise<{ id: s
     try {
       await deleteComment(commentId, auth.token);
       setDiscussion((current) => current ? { ...current, comments: current.comments.filter((item) => item.id !== commentId) } : null);
-    } catch (reason) { setError(reason instanceof Error ? reason.message : t("generated.tierlists.[id].page.failedtodeletecomment")); }
+    } catch (reason) { setError(formatApiErrorMessage(reason, t, t("generated.app.tierlists.[id].page.failedtodeletecomment"))); }
     finally { setBusyCommentId(null); }
   }
 
@@ -138,7 +139,7 @@ export default function TierListDetailPage({ params }: { params: Promise<{ id: s
       router.push("/tierlists");
       router.refresh();
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : t("generated.tierlists.[id].page.failedtodeletetierlist"));
+      setError(formatApiErrorMessage(reason, t, t("generated.app.tierlists.[id].page.failedtodeletetierlist")));
       setDeletingList(false);
     }
   }

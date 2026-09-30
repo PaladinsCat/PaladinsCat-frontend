@@ -8,6 +8,7 @@ import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { AlertTriangle, Inbox, LoaderCircle, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLocalization } from "@/lib/localization-context";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 
 /**
  * Wrap children in the shared content-fade container, merging optional classes.
@@ -131,7 +132,7 @@ export function EmptyState({
 /**
  * Render a localized error card with optional message; show a retry button invoking onRetry only when supplied.
  * refs: doc: documents/06-reference/design/frontend-async-ui.md
- * I/O types: `{ title, message, onRetry, className, }: { title?: string; message?: string; onRetry?: () => void; className?: string; } -> JSX.Element`.
+ * I/O types: `{ title, message, onRetry, className, }: { title?: string; message?: string | Error; onRetry?: () => void; className?: string; } -> JSX.Element`.
  */
 export function ErrorState({
   title,
@@ -140,16 +141,17 @@ export function ErrorState({
   className,
 }: {
   title?: string;
-  message?: string;
+  message?: string | Error;
   onRetry?: () => void;
   className?: string;
 }) {
   const { t } = useLocalization();
+  const displayMessage = message == null ? null : formatApiErrorMessage(message, t, title);
   return (
     <ContentFade className={cn("pc-card flex min-h-40 flex-col items-center justify-center px-5 py-10 text-center", className)}>
       <AlertTriangle className="mb-3 h-7 w-7 text-amber-400" aria-hidden="true" />
       <h2 className="text-sm font-semibold text-pc-text">{title ?? t("async.couldNotLoad")}</h2>
-      {message && <p className="mt-1 max-w-lg text-xs leading-relaxed text-pc-text-muted">{message}</p>}
+      {displayMessage && <p className="mt-1 max-w-lg text-xs leading-relaxed text-pc-text-muted">{displayMessage}</p>}
       {onRetry && (
         <button type="button" onClick={onRetry} className="pc-btn-secondary mt-4 inline-flex items-center gap-2 text-sm">
           <RefreshCw className="h-4 w-4" aria-hidden="true" />

@@ -5,6 +5,7 @@
  * refs: none
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
@@ -246,7 +247,7 @@ export default function PlayerProfileClient({
       setActionMenuOpen(false);
       setFetchKey((key) => key + 1);
     } catch (err) {
-      setRefreshFeedback({ kind: 'error', message: err instanceof Error ? err.message : 'Unable to clear tag' });
+      setRefreshFeedback({ kind: 'error', message: formatApiErrorMessage(err, t, 'Unable to clear tag') });
     } finally {
       setClearingTag(null);
     }
@@ -279,7 +280,7 @@ export default function PlayerProfileClient({
       })
       .catch((err) => {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : "Failed to load player profile");
+          setError(formatApiErrorMessage(err, t, "Failed to load player profile"));
           setResponse(null);
           setProfileLoading(false);
         }
@@ -403,7 +404,7 @@ export default function PlayerProfileClient({
       setRefreshCooldownUntil(null);
       setRefreshFeedback({
         kind: 'error',
-        message: err instanceof Error ? err.message : PLAYER_PROFILE_ERROR_KEYS.failedToRefreshProfile,
+        message: formatApiErrorMessage(err, t, t(PLAYER_PROFILE_ERROR_KEYS.failedToRefreshProfile)),
       });
     } finally {
       setRefreshing(false);
@@ -423,7 +424,7 @@ export default function PlayerProfileClient({
       setCurrentMatch(data);
     } catch (error) {
       setCurrentMatch({
-        error: error instanceof Error ? error.message : PLAYER_PROFILE_ERROR_KEYS.failedToFetchLiveMatchData,
+        error: formatApiErrorMessage(error, t, t(PLAYER_PROFILE_ERROR_KEYS.failedToFetchLiveMatchData)),
       });
     }
   }, [id]);

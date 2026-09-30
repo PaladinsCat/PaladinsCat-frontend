@@ -7,6 +7,7 @@
  * refs: endpoints: GET /players/search · endpoints: POST /cheaters/evidence
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -101,7 +102,7 @@ export default function SubmitCheaterEvidencePage() {
       setNotice(t("moderation.evidenceSubmitted"));
       setDescription(""); setMatchId(""); setSourceUrl(""); setFiles([]);
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : t("moderation.evidenceSubmitFailed"));
+      setError(formatApiErrorMessage(submitError, t, t("moderation.evidenceSubmitFailed")));
     } finally {
       setSubmitting(false);
     }

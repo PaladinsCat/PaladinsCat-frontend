@@ -16,6 +16,7 @@ import {
   type MatchFactPlayer,
   type MatchPlayerDetail,
 } from "@/lib/api-client";
+import { ApiRequestError, formatApiErrorMessage } from "@/lib/api-errors";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import {
   itemDescriptionAtLevel,
@@ -155,6 +156,7 @@ function DetailEntry({
   metric,
   showMetrics = false,
   metricsLoaded = false,
+  metricsErrorLabel,
   maxPickRate = 1,
   playsLabel,
   loadingLabel: _loadingLabel,
@@ -172,6 +174,7 @@ function DetailEntry({
   metric?: DetailMetric;
   showMetrics?: boolean;
   metricsLoaded?: boolean;
+  metricsErrorLabel?: string;
   maxPickRate?: number;
   playsLabel?: string;
   loadingLabel?: string;
@@ -203,7 +206,7 @@ function DetailEntry({
           <span className="rounded-md border px-1.5 py-0.5 font-semibold" style={{ color: getPercentageColor(metric.winRate), borderColor: quality?.borderColor, background: quality?.background }}>{t("generated.matches.wr")}{" "}{formatPercent(metric.winRate)}</span>
           <span className="rounded-md border border-pc-border bg-pc-bg px-1.5 py-0.5" style={{ color: getPercentageColor(metric.pickRate) }}>{t("generated.matches.pr")}{" "}{formatPercent(metric.pickRate)}</span>
           <span className="text-pc-text-muted">{formatNumber(metric.plays)} {playsLabel ?? t("generated.stats.plays.0effba4")}</span>
-        </> : metricsLoaded ? <span className="text-pc-text-muted">{t("generated.matches.noRankedSampleInThisLobbyScope")}</span> : <LoadingIndicator className="gap-1.5 text-xs" />}
+        </> : metricsErrorLabel ? <span className="text-amber-300">{metricsErrorLabel}</span> : metricsLoaded ? <span className="text-pc-text-muted">{t("generated.matches.noRankedSampleInThisLobbyScope")}</span> : <LoadingIndicator className="gap-1.5 text-xs" />}
       </div>}
     </div>
   </article>;
@@ -254,6 +257,8 @@ function PlayerBuildRow({
     talents: ChampionTalentStatsResponse;
     cards: ChampionCardStatsResponse;
   } | null>(null);
+  const [loadoutMetricsError, setLoadoutMetricsError] = useState<string | null>(null);
+  const [loadoutMetricsErrorTitle, setLoadoutMetricsErrorTitle] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(false);
   const disclosureId = useId();
   const expandedCacheKey = `${RESULT_CACHE_PREFIX}:expanded:${returnTo}:${player.player_id}`;
@@ -296,11 +301,23 @@ function PlayerBuildRow({
     if (!expanded || !lobbyTierReady) return;
     let cancelled = false;
     setLoadoutMetrics(null);
+    setLoadoutMetricsError(null);
+    setLoadoutMetricsErrorTitle(null);
     getScopedLoadoutMetrics(player.champion_id, selectedTalent?.talent_id ?? null, lobbyScope, lobbyTierMin, lobbyTierMax)
       .then((metrics) => { if (!cancelled) setLoadoutMetrics(metrics); })
-      .catch(() => { if (!cancelled) setLoadoutMetrics(null); });
+      .catch((error: unknown) => {
+        if (cancelled) return;
+        setLoadoutMetrics(null);
+        const isTalentError = error instanceof ApiRequestError && error.endpoint?.startsWith("/stats/talents/");
+        setLoadoutMetricsError(formatApiErrorMessage(error, t, isTalentError
+          ? t("generated.champions.talentStatisticsUnavailable")
+          : t("generated.champions.cardStatisticsUnavailable")));
+        setLoadoutMetricsErrorTitle(isTalentError
+          ? t("generated.champions.talentStatisticsUnavailable")
+          : t("generated.champions.cardStatisticsUnavailable"));
+      });
     return () => { cancelled = true; };
-  }, [expanded, lobbyScope, lobbyTierMax, lobbyTierMin, lobbyTierReady, player.champion_id, selectedTalent?.talent_id]);
+  }, [expanded, lobbyScope, lobbyTierMax, lobbyTierMin, lobbyTierReady, player.champion_id, selectedTalent?.talent_id, t]);
   const findReference = (kind: "items" | "cards" | "talents", id: number, name: string | null | undefined) => (
     reference?.[kind].find((entry) => entry.id === id)
     ?? reference?.[kind].find((entry) => (
@@ -387,6 +404,7 @@ function PlayerBuildRow({
         <span className="text-xs font-semibold uppercase tracking-[0.14em] text-pc-text-muted">{t("generated.matches.rankedPerformance")}</span>
         {lobbyTierReady ? <span className="text-xs font-semibold text-pc-accent">{lobbyScopeLabel}</span> : <LoadingIndicator className="gap-1.5 text-xs" />}
       </div>
+      {loadoutMetricsError && <p role="alert" className="mb-3 rounded-lg border border-amber-400/25 bg-amber-400/5 px-3 py-2 text-xs text-amber-200">{loadoutMetricsErrorTitle ?? t("generated.champions.cardStatisticsUnavailable")}: {loadoutMetricsError}</p>}
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <section className="space-y-2">
           <div>
@@ -397,7 +415,7 @@ function PlayerBuildRow({
             const entry = findReference("talents", talent.talent_id, talent.talent_name);
             const name = talent.talent_name ?? entry?.name ?? t("common.entity.talentNumber", { number: talent.talent_id });
             const descriptionKey = championDescriptionKey(player.champion_name || "", "talents", entry?.name ?? name);
-            return <DetailEntry key={`talent-detail-${talent.talent_id}`} name={name} href={`${championPath}?talentId=${talent.talent_id}&returnTo=${returnToQuery}`} onNavigate={preserveMatchPosition} label={t("generated.matches.talent")} description={formatScalingDescription(descriptionKey ? t(descriptionKey) : entry?.description, 1, formatNumber) ?? (reference ? t("common.fallback.descriptionUnavailable") : <LoadingIndicator className="gap-1.5 text-xs" />)} sources={[]} canonicalTalent={{ talentId: talent.talent_id, talentName: talent.talent_name }} transparentIcon metric={talentMetric} showMetrics metricsLoaded={loadoutMetrics !== null} maxPickRate={100} />;
+            return <DetailEntry key={`talent-detail-${talent.talent_id}`} name={name} href={`${championPath}?talentId=${talent.talent_id}&returnTo=${returnToQuery}`} onNavigate={preserveMatchPosition} label={t("generated.matches.talent")} description={formatScalingDescription(descriptionKey ? t(descriptionKey) : entry?.description, 1, formatNumber) ?? (reference ? t("common.fallback.descriptionUnavailable") : <LoadingIndicator className="gap-1.5 text-xs" />)} sources={[]} canonicalTalent={{ talentId: talent.talent_id, talentName: talent.talent_name }} transparentIcon metric={talentMetric} showMetrics metricsLoaded={loadoutMetrics !== null} metricsErrorLabel={loadoutMetricsError ? loadoutMetricsErrorTitle ?? t("generated.champions.cardStatisticsUnavailable") : undefined} maxPickRate={100} />;
           })}
           {cards.map((card) => {
             const entry = findReference("cards", card.card_id, card.card_name);
@@ -406,7 +424,7 @@ function PlayerBuildRow({
             const query = new URLSearchParams({ returnTo });
             if (selectedTalent) query.set("talentId", String(selectedTalent.talent_id));
             const descriptionKey = championDescriptionKey(player.champion_name || "", "loadouts", entry?.name ?? name);
-            return <DetailEntry key={`card-detail-${card.card_id}`} name={name} href={`${championPath}/cards/${card.card_id}?${query.toString()}`} onNavigate={preserveMatchPosition} label={t("common.match.cardLevel", { level })} description={formatScalingDescription(descriptionKey ? t(descriptionKey) : entry?.description, level, formatNumber) ?? (reference ? t("common.fallback.descriptionUnavailable") : <LoadingIndicator className="gap-1.5 text-xs" />)} sources={[entry?.iconUrl, card.icon_url, card.fallback_icon_url]} level={level} tone="border-pc-accent/30" metric={cardMetricAtRecordedLevel(card.card_id, card.card_name, level)} showMetrics metricsLoaded={loadoutMetrics !== null} maxPickRate={maxLoadoutLevelPickRate} playsLabel={t("common.count.picks")} />;
+            return <DetailEntry key={`card-detail-${card.card_id}`} name={name} href={`${championPath}/cards/${card.card_id}?${query.toString()}`} onNavigate={preserveMatchPosition} label={t("common.match.cardLevel", { level })} description={formatScalingDescription(descriptionKey ? t(descriptionKey) : entry?.description, level, formatNumber) ?? (reference ? t("common.fallback.descriptionUnavailable") : <LoadingIndicator className="gap-1.5 text-xs" />)} sources={[entry?.iconUrl, card.icon_url, card.fallback_icon_url]} level={level} tone="border-pc-accent/30" metric={cardMetricAtRecordedLevel(card.card_id, card.card_name, level)} showMetrics metricsLoaded={loadoutMetrics !== null} metricsErrorLabel={loadoutMetricsError ? loadoutMetricsErrorTitle ?? t("generated.champions.cardStatisticsUnavailable") : undefined} maxPickRate={maxLoadoutLevelPickRate} playsLabel={t("common.count.picks")} />;
           })}
           {talents.length === 0 && cards.length === 0 && <p className="text-xs text-pc-text-muted">{t("generated.matches.noTalentOrLoadoutCardsWereRecorded")}</p>}
         </section>

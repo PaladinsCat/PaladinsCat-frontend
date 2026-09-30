@@ -3,6 +3,7 @@
  * refs: doc: documents/02-technical/api/community-interactions.md
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
@@ -57,7 +58,7 @@ export default function CommunityChat() {
           if (!follow.current) setUnseen(true);
         } catch { setStatus("reconnecting"); }
       });
-    }).catch((err) => { if (active) setError(err instanceof Error ? err.message : t("community.chatError")); })
+    }).catch((err) => { if (active) setError(formatApiErrorMessage(err, t, "Could not load chat messages")); })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; stream?.close(); };
   }, [attempt, t]);
@@ -80,7 +81,7 @@ export default function CommunityChat() {
       prependHeight.current = scroller.current?.scrollHeight ?? null;
       setMessages((current) => mergeChatMessages(current, history.messages));
       setHasMore(history.hasMore);
-    } catch (err) { setError(err instanceof Error ? err.message : t("community.chatError")); }
+    } catch (err) { setError(formatApiErrorMessage(err, t, "Could not load older chat messages")); }
     finally { setOlder(false); }
   }
 
@@ -95,7 +96,7 @@ export default function CommunityChat() {
       setDraft("");
       follow.current = true;
       setUnseen(false);
-    } catch (err) { setError(err instanceof Error ? err.message : t("community.chatError")); }
+    } catch (err) { setError(formatApiErrorMessage(err, t, "Could not send chat message")); }
     finally { setSending(false); }
   }
 
@@ -105,7 +106,7 @@ export default function CommunityChat() {
       const message = await deleteChatMessage(id);
       setMessages((current) => mergeChatMessages(current, [message]));
     }
-    catch (err) { setError(err instanceof Error ? err.message : t("community.chatError")); }
+    catch (err) { setError(formatApiErrorMessage(err, t, "Could not delete chat message")); }
   }
 
   const visibleMessages = messages.filter((message) => !message.deleted_at);

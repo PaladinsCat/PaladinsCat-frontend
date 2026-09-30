@@ -5,6 +5,7 @@
  * refs: none
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 
 import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
@@ -78,7 +79,7 @@ export default function PlayerChampionStatsPage() {
     try {
       setStats(await fetchPlayerChampionStats(playerId, scope));
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Could not load champion stats.");
+      setError(formatApiErrorMessage(cause, t, "Could not load champion stats."));
     }
   }, [playerId, scope]);
 
@@ -107,7 +108,7 @@ export default function PlayerChampionStatsPage() {
       setRefreshRemainingSeconds(response.freshness.remaining_seconds);
       setStats(await fetchPlayerChampionStats(playerId, scope));
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Could not refresh champion stats.");
+      setError(formatApiErrorMessage(cause, t, "Could not refresh champion stats."));
     } finally {
       setRefreshing(false);
     }

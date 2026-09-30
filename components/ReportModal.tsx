@@ -3,6 +3,7 @@
  * refs: none
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 
 import { useState, useRef, useEffect } from "react";
 import { reportPlayer, type ReportOptions, type ReportType } from "@/lib/api-client";
@@ -160,7 +161,7 @@ export default function ReportModal({ playerId, type, onClose, onSuccess, submit
       setSuccess(true);
       setTimeout(onSuccess, 500);
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("generated.report.actionFailed"));
+      setError(formatApiErrorMessage(err, t, "Unable to submit player report"));
     } finally {
       setSubmitting(false);
     }

@@ -4,6 +4,7 @@
  * refs: none
  */
 "use client";
+import { formatApiErrorMessage } from "@/lib/api-errors";
 
 import { useEffect, useState, type RefObject } from "react";
 import { toPng } from "html-to-image";
@@ -94,7 +95,7 @@ export default function MatchExportButton(props: MatchExportButtonProps) {
       anchor.remove();
       setMessage(t("generated.matches.pngSaved"));
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : t("generated.components.matchResult.matchExportButton.couldNotSaveMatchImage"));
+      setMessage(formatApiErrorMessage(error, t, t("generated.components.matchResult.matchExportButton.couldNotSaveMatchImage")));
     } finally {
       setExporting(false);
     }
