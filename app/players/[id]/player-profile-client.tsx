@@ -770,8 +770,6 @@ export default function PlayerProfileClient({
           <div>
             <div className="mb-2 flex flex-wrap items-center gap-2">
               <h2 className="text-sm font-semibold text-pc-text">{t("generated.players.recentMatches")}</h2>
-              {player.cheater && <span className="player-status-tag rounded bg-[var(--pc-bg-secondary)] px-1.5 py-0.5 text-xs font-bold text-red-400" aria-label={t("generated.players.confirmedCheater")}>{t("generated.players.cheater")}</span>}
-              {player.exploiter && <span className="player-status-tag rounded bg-[var(--pc-bg-secondary)] px-1.5 py-0.5 text-xs font-bold text-orange-400" aria-label={t("moderation.exploiterAria")}>{t("moderation.exploiterShort")}</span>}
             </div>
             <div>
               {matchesLoading ? (
