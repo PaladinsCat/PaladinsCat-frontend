@@ -25,6 +25,7 @@ import { useLocalization } from "@/lib/localization-context";
 import { useLobbyTier } from "@/lib/lobby-tier-context";
 import { STATIC_CHAMPIONS } from "@/lib/static-champions";
 import { formatScalingDescription } from "@/lib/scaling-description";
+import { championDescriptionKey } from "@/lib/localization/champion-description-key";
 
 function parseMaybeNumber(value: string | string[] | null | undefined): number | null {
   const raw = Array.isArray(value) ? value[0] : value;
@@ -168,6 +169,7 @@ export default function ChampionCardDetailPage() {
   }
 
   const championDisplayName = championData?.name ?? detail.championName ?? name;
+  const cardDescriptionKey = cardMeta && championDescriptionKey(championDisplayName, "loadouts", cardMeta.name);
   return (
     <div className="space-y-6">
       <header><ContextBackLink fallbackHref={`/stats/loadouts/${name}`} label={championDisplayName} /><h1 className="mt-2 pc-heading pc-heading-lg">{detail.cardName}</h1></header>
@@ -187,7 +189,7 @@ export default function ChampionCardDetailPage() {
             <div>
               <div className="text-xs uppercase tracking-wider text-pc-text-muted mb-1">{championDisplayName} {t("generated.champions.loadoutCard")}</div>
               <p className="text-sm text-pc-text-secondary leading-relaxed">
-                {formatScalingDescription(cardMeta?.description, 1, formatNumber)
+                {formatScalingDescription(cardDescriptionKey ? t(cardDescriptionKey) : cardMeta?.description, 1, formatNumber)
                   ?? t("generated.champions.noLocalCardDescriptionIsAvailableYet")}
               </p>
             </div>

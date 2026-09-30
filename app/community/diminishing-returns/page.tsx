@@ -27,6 +27,7 @@ import { LoadingPanel } from "@/components/async-state";
 import SmartImage from "@/components/SmartImage";
 import CanonicalTalentImage from "@/components/canonical-talent-image";
 import { useLocalization } from "@/lib/localization-context";
+import { championDescriptionKey } from "@/lib/localization/champion-description-key";
 import {
   calculateAdditiveValue,
   calculateDiminishedValue,
@@ -265,14 +266,14 @@ export default function DiminishingReturnsPage() {
 
   const selectedTalent = reference?.talents.find((talent) => talent.id === selectedTalentId) ?? null;
   const effectAnalysis = useMemo(() => {
-    if (!reference) return { effects: [] as DetectedEffect[], unsupported: [] as Array<{ id: number; name: string; description: string }> };
+    if (!reference) return { effects: [] as DetectedEffect[], unsupported: [] as Array<{ id: number; name: string; type: "talent" | "card" | "item"; description: string }> };
     const values: DetectedEffect[] = [];
-    const unsupported: Array<{ id: number; name: string; description: string }> = [];
+    const unsupported: Array<{ id: number; name: string; type: "talent" | "card" | "item"; description: string }> = [];
     const collect = (input: Parameters<typeof detectDescriptionEffects>[0]) => {
       const detected = detectDescriptionEffects(input);
       values.push(...detected);
       const hasWeaponOverride = input.type === "talent" && extractWeaponDamageOverride(input.description) != null;
-      if (!detected.length && !hasWeaponOverride) unsupported.push({ id: input.id, name: input.name, description: resolveScaledDescription(input.description, input.level ?? 1) });
+      if (!detected.length && !hasWeaponOverride) unsupported.push({ id: input.id, name: input.name, type: input.type, description: resolveScaledDescription(input.description, input.level ?? 1) });
     };
     if (selectedTalent) {
       collect({ id: selectedTalent.id, name: selectedTalent.name, type: "talent", description: selectedTalent.description });
@@ -467,7 +468,10 @@ export default function DiminishingReturnsPage() {
               <section className="pc-card space-y-4">
                 <div className="flex items-center justify-between"><div><h2 className="pc-card-title">{t("diminishingReturns.talent")}</h2><p className="text-xs text-pc-text-muted">{t("diminishingReturns.noTalent")}</p></div>{selectedTalentId && <button type="button" onClick={() => setSelectedTalentId(null)} className="text-xs text-pc-text-muted hover:text-pc-accent">{t("diminishingReturns.noTalent")}</button>}</div>
                 <div className="grid gap-3 md:grid-cols-3">
-                  {reference.talents.map((talent: BuildTalentReference) => <SelectionCard key={talent.id} name={talent.name} description={talent.description} selected={talent.id === selectedTalentId} onToggle={() => setSelectedTalentId((current) => current === talent.id ? null : talent.id)} imageNode={<CanonicalTalentImage talentId={talent.id} talentName={talent.name} alt="" className="h-11 w-11 shrink-0 rounded-lg border border-pc-border object-cover" fallbackClassName="h-11 w-11 shrink-0 rounded-lg border border-pc-border bg-pc-bg" />} />)}
+                  {reference.talents.map((talent: BuildTalentReference) => {
+                    const key = championDescriptionKey(champion?.name ?? "", "talents", talent.name);
+                    return <SelectionCard key={talent.id} name={talent.name} description={key ? t(key) : talent.description} selected={talent.id === selectedTalentId} onToggle={() => setSelectedTalentId((current) => current === talent.id ? null : talent.id)} imageNode={<CanonicalTalentImage talentId={talent.id} talentName={talent.name} alt="" className="h-11 w-11 shrink-0 rounded-lg border border-pc-border object-cover" fallbackClassName="h-11 w-11 shrink-0 rounded-lg border border-pc-border bg-pc-bg" />} />;
+                  })}
                 </div>
               </section>
 
@@ -476,7 +480,8 @@ export default function DiminishingReturnsPage() {
                 <div className="grid gap-3 md:grid-cols-2">
                   {reference.cards.map((card) => {
                     const level = cardSelections.get(card.id);
-                    return <SelectionCard key={card.id} name={card.name} image={card.iconUrl} description={resolveScaledDescription(card.description, level ?? 1)} selected={level != null} disabled={level == null && selectedCards.length >= MAX_CARDS} level={level} maximumLevel={5} onToggle={() => toggleCard(card)} onLevelChange={(next) => setSelectedCards((current) => current.map((entry) => entry.id === card.id ? { ...entry, level: next } : entry))} />;
+                    const key = championDescriptionKey(champion?.name ?? "", "loadouts", card.name);
+                    return <SelectionCard key={card.id} name={card.name} image={card.iconUrl} description={resolveScaledDescription(key ? t(key) : card.description, level ?? 1)} selected={level != null} disabled={level == null && selectedCards.length >= MAX_CARDS} level={level} maximumLevel={5} onToggle={() => toggleCard(card)} onLevelChange={(next) => setSelectedCards((current) => current.map((entry) => entry.id === card.id ? { ...entry, level: next } : entry))} />;
                   })}
                 </div>
               </section>
@@ -528,7 +533,10 @@ export default function DiminishingReturnsPage() {
                 {unsupportedEffects.length > 0 && <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-3">
                   <h3 className="text-sm font-semibold text-amber-200">{t("diminishingReturns.unsupportedTitle")}</h3>
                   <p className="mt-1 text-xs leading-5 text-pc-text-muted">{t("diminishingReturns.unsupportedDescription")}</p>
-                  <div className="mt-2 space-y-2">{unsupportedEffects.map((source) => <div key={source.id}><p className="text-xs font-semibold text-pc-text">{source.name}</p><p className="text-xs leading-4 text-pc-text-muted">{source.description || t("diminishingReturns.noDetectedEffect")}</p></div>)}</div>
+                  <div className="mt-2 space-y-2">{unsupportedEffects.map((source) => {
+                    const key = source.type === "item" ? null : championDescriptionKey(champion?.name ?? "", source.type === "card" ? "loadouts" : "talents", source.name);
+                    return <div key={source.id}><p className="text-xs font-semibold text-pc-text">{source.name}</p><p className="text-xs leading-4 text-pc-text-muted">{(key ? t(key) : source.description) || t("diminishingReturns.noDetectedEffect")}</p></div>;
+                  })}</div>
                 </div>}
               </section>
 

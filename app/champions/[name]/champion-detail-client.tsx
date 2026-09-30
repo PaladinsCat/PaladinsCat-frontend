@@ -11,7 +11,7 @@ import { getChampionIconSafe } from "@/lib/champion-icons";
 import { getChampionData, type ChampionData, type ChampionSkill, type ChampionTalent } from "@/lib/champion-data";
 import { useLocalization } from "@/lib/localization-context";
 import ContextBackLink from "@/components/context-back-link";
-import { EN_MESSAGES, type TranslationKey } from "@/lib/localization/messages";
+import { championDescriptionKey } from "@/lib/localization/champion-description-key";
 import { STATIC_CHAMPIONS } from "@/lib/static-champions";
 import { championSlug } from "@/lib/utils";
 import type { ChampionChangelog as ChampionChangelogData } from "@/lib/champion-changelog";
@@ -22,11 +22,6 @@ const ROLE_ICONS: Record<string, string> = {
   Flank: "/images/icons/Class_Flank_Icon.avif",
   Support: "/images/icons/Class_Support_Icon.avif",
 };
-
-function championDescriptionKey(championName: string, section: "skills" | "talents", entryName: string): TranslationKey | null {
-  const candidate = `champions.${championSlug(championName)}.${section}.${championSlug(entryName)}.description`;
-  return candidate in EN_MESSAGES ? candidate as TranslationKey : null;
-}
 
 /** Keep champion pages limited to stable catalog data: profile, skills, talents, and cards. */
 export default function ChampionDetailPage({

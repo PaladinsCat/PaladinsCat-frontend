@@ -4306,7 +4306,7 @@ function mapPlayerLoadout(raw: any): PlayerLoadout {
     deckKey: String(raw.deck_key ?? ""),
     championId: Number(raw.champion_id),
     championName: String(raw.champion_name ?? `Champion ${raw.champion_id}`),
-    loadoutName: String(raw.loadout_name ?? "Unnamed Loadout"),
+    loadoutName: String(raw.loadout_name ?? ""),
     cardIds: Array.isArray(raw.card_ids) ? raw.card_ids.map(Number) : [],
     cardLevels: Array.isArray(raw.card_levels) ? raw.card_levels.map(Number) : [],
     talentId: raw.talent_id == null ? null : Number(raw.talent_id),

@@ -34,6 +34,7 @@ import { MatchPlayerLink, matchPlayerKey } from "./player-identity";
 import CanonicalTalentImage from "@/components/canonical-talent-image";
 import { useLocalization } from "@/lib/localization-context";
 import { formatScalingDescription } from "@/lib/scaling-description";
+import { championDescriptionKey } from "@/lib/localization/champion-description-key";
 
 type Props = { team1Players: MatchPlayerDetail[]; team2Players: MatchPlayerDetail[]; team1Wins: boolean; team2Wins: boolean; factMap: Map<string, MatchFactPlayer> };
 
@@ -395,7 +396,8 @@ function PlayerBuildRow({
           {talents.map((talent) => {
             const entry = findReference("talents", talent.talent_id, talent.talent_name);
             const name = talent.talent_name ?? entry?.name ?? t("common.entity.talentNumber", { number: talent.talent_id });
-            return <DetailEntry key={`talent-detail-${talent.talent_id}`} name={name} href={`${championPath}?talentId=${talent.talent_id}&returnTo=${returnToQuery}`} onNavigate={preserveMatchPosition} label={t("generated.matches.talent")} description={formatScalingDescription(entry?.description, 1, formatNumber) ?? (reference ? t("common.fallback.descriptionUnavailable") : <LoadingIndicator className="gap-1.5 text-xs" />)} sources={[]} canonicalTalent={{ talentId: talent.talent_id, talentName: talent.talent_name }} transparentIcon metric={talentMetric} showMetrics metricsLoaded={loadoutMetrics !== null} maxPickRate={100} />;
+            const descriptionKey = championDescriptionKey(player.champion_name || "", "talents", entry?.name ?? name);
+            return <DetailEntry key={`talent-detail-${talent.talent_id}`} name={name} href={`${championPath}?talentId=${talent.talent_id}&returnTo=${returnToQuery}`} onNavigate={preserveMatchPosition} label={t("generated.matches.talent")} description={formatScalingDescription(descriptionKey ? t(descriptionKey) : entry?.description, 1, formatNumber) ?? (reference ? t("common.fallback.descriptionUnavailable") : <LoadingIndicator className="gap-1.5 text-xs" />)} sources={[]} canonicalTalent={{ talentId: talent.talent_id, talentName: talent.talent_name }} transparentIcon metric={talentMetric} showMetrics metricsLoaded={loadoutMetrics !== null} maxPickRate={100} />;
           })}
           {cards.map((card) => {
             const entry = findReference("cards", card.card_id, card.card_name);
@@ -403,7 +405,8 @@ function PlayerBuildRow({
             const name = card.card_name ?? entry?.name ?? t("common.entity.cardNumber", { number: card.card_id });
             const query = new URLSearchParams({ returnTo });
             if (selectedTalent) query.set("talentId", String(selectedTalent.talent_id));
-            return <DetailEntry key={`card-detail-${card.card_id}`} name={name} href={`${championPath}/cards/${card.card_id}?${query.toString()}`} onNavigate={preserveMatchPosition} label={t("common.match.cardLevel", { level })} description={formatScalingDescription(entry?.description, level, formatNumber) ?? (reference ? t("common.fallback.descriptionUnavailable") : <LoadingIndicator className="gap-1.5 text-xs" />)} sources={[entry?.iconUrl, card.icon_url, card.fallback_icon_url]} level={level} tone="border-pc-accent/30" metric={cardMetricAtRecordedLevel(card.card_id, card.card_name, level)} showMetrics metricsLoaded={loadoutMetrics !== null} maxPickRate={maxLoadoutLevelPickRate} playsLabel={t("common.count.picks")} />;
+            const descriptionKey = championDescriptionKey(player.champion_name || "", "loadouts", entry?.name ?? name);
+            return <DetailEntry key={`card-detail-${card.card_id}`} name={name} href={`${championPath}/cards/${card.card_id}?${query.toString()}`} onNavigate={preserveMatchPosition} label={t("common.match.cardLevel", { level })} description={formatScalingDescription(descriptionKey ? t(descriptionKey) : entry?.description, level, formatNumber) ?? (reference ? t("common.fallback.descriptionUnavailable") : <LoadingIndicator className="gap-1.5 text-xs" />)} sources={[entry?.iconUrl, card.icon_url, card.fallback_icon_url]} level={level} tone="border-pc-accent/30" metric={cardMetricAtRecordedLevel(card.card_id, card.card_name, level)} showMetrics metricsLoaded={loadoutMetrics !== null} maxPickRate={maxLoadoutLevelPickRate} playsLabel={t("common.count.picks")} />;
           })}
           {talents.length === 0 && cards.length === 0 && <p className="text-xs text-pc-text-muted">{t("generated.matches.noTalentOrLoadoutCardsWereRecorded")}</p>}
         </section>

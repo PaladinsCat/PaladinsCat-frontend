@@ -20,6 +20,7 @@ import { useLobbyTier } from "@/lib/lobby-tier-context";
 import { useLocalization } from "@/lib/localization-context";
 import { getPercentageColor, getStatQuality } from "@/lib/stat-quality";
 import { championSlug } from "@/lib/utils";
+import { championDescriptionKey } from "@/lib/localization/champion-description-key";
 
 function positiveInteger(value: string | null): number | null {
   const parsed = Number(value);
@@ -88,6 +89,7 @@ export default function ChampionLoadoutStats({ championId, championData }: { cha
     <section className="grid grid-cols-1 gap-3 md:grid-cols-3">
       {championData.talents.slice(0, 3).map((talent) => <TalentStatCard
         key={talent.id}
+        championName={championData.name}
         talent={talent}
         stat={statsByTalent.get(talent.id)}
         totalMatches={talentStats.totalMatches}
@@ -111,7 +113,8 @@ export default function ChampionLoadoutStats({ championId, championData }: { cha
   </div>;
 }
 
-function TalentStatCard({ talent, stat, totalMatches, maxTalentPlays, selected, onSelect }: {
+function TalentStatCard({ championName, talent, stat, totalMatches, maxTalentPlays, selected, onSelect }: {
+  championName: string;
   talent: ChampionTalent;
   stat?: ChampionTalentStat;
   totalMatches: number;
@@ -120,13 +123,14 @@ function TalentStatCard({ talent, stat, totalMatches, maxTalentPlays, selected, 
   onSelect: () => void;
 }) {
   const { t, formatNumber, formatPercent, formatRecord } = useLocalization();
+  const descriptionKey = championDescriptionKey(championName, "talents", talent.name);
   const pickRate = stat && totalMatches > 0 ? stat.totalPlays / totalMatches * 100 : 0;
   const quality = stat ? getStatQuality(stat.winRate, stat.totalPlays, maxTalentPlays) : null;
   return <button type="button" onClick={onSelect} aria-pressed={selected} className={`pc-card flex items-start gap-3 text-left transition-colors hover:border-pc-accent-mid ${selected ? "ring-1 ring-pc-accent" : ""}`} style={quality ? { borderColor: quality.borderColor } : undefined}>
     <CanonicalTalentImage talentId={talent.id} talentName={talent.name} alt="" className="h-14 w-14 shrink-0 object-contain" fallbackClassName="h-14 w-14 shrink-0" />
     <div className="min-w-0 flex-1">
       <h2 className="text-sm font-semibold text-pc-accent">{talent.name}</h2>
-      <p className="mt-1 text-xs leading-relaxed text-pc-text-secondary">{talent.description}</p>
+      <p className="mt-1 text-xs leading-relaxed text-pc-text-secondary">{descriptionKey ? t(descriptionKey) : talent.description}</p>
       <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs tabular-nums text-pc-text-muted">
         <span>{t("generated.champions.wr")} <strong style={stat ? { color: getPercentageColor(stat.winRate) } : undefined}>{stat ? formatPercent(stat.winRate) : "—"}</strong></span>
         <span>{t("generated.champions.pr")} <strong>{stat ? formatPercent(pickRate) : "—"}</strong></span>

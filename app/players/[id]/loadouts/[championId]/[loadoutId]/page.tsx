@@ -17,6 +17,7 @@ import { getChampionIconSafe } from "@/lib/champion-icons";
 import { loadBuildCardReferences, type BuildCardReference } from "@/lib/build-reference";
 import { championSlug } from "@/lib/utils";
 import { useLocalization } from "@/lib/localization-context";
+import { championDescriptionKey } from "@/lib/localization/champion-description-key";
 import styles from "./page.module.css";
 
 function cardDescription(description: string | null | undefined, level: number, formatValue: (value: number) => string) {
@@ -100,13 +101,14 @@ export default function PlayerLoadoutDetailPage() {
         <div className={styles.identity}>
           <div className={styles.brand}><SmartImage src="/images/icons/paladinscat.png" alt="" /><span>{t("generated.common.paladinscat")}</span><span className={styles.tag}>{t("generated.matches.loadout")}</span></div>
           <div className={styles.playerName}>{playerName}</div>
-          <div className={styles.context}><span>{championName}</span><span>{loadout.loadoutName || "Unnamed Loadout"}</span></div>
+          <div className={styles.context}><span>{championName}</span><span>{loadout.loadoutName || t("generated.matches.loadout")}</span></div>
         </div>
       </header>
       <section className={styles.cards} aria-label={t("generated.players.deckCards")}>
         {entries.map(({ cardId, level, card }) => {
           const name = card?.name || t("generated.players.cardValue1", { value1: cardId });
-          const description = cardDescription(card?.description, level, formatCardValue);
+          const descriptionKey = card && championDescriptionKey(championName, "loadouts", card.name);
+          const description = cardDescription(descriptionKey ? t(descriptionKey) : card?.description, level, formatCardValue);
           return <article key={cardId} className={styles.card} aria-label={t("common.match.cardLevel", { level })}>
             <SmartImage src={card?.iconUrl || "/images/icons/Player_Loadouts_Icon.png"} alt="" className={styles.cardArt} />
             <SmartImage src={loadoutFrame(level)} alt="" className={styles.cardFrame} />

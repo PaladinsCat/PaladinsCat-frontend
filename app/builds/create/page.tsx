@@ -28,6 +28,7 @@ import { championSlug } from "@/lib/utils";
 import { AsyncButton, LoadingPanel } from "@/components/async-state";
 import CanonicalTalentImage from "@/components/canonical-talent-image";
 import { useLocalization } from "@/lib/localization-context";
+import { championDescriptionKey } from "@/lib/localization/champion-description-key";
 import ContextBackLink from "@/components/context-back-link";
 
 const MAX_ITEMS = 4;
@@ -87,11 +88,14 @@ function ItemTile({ item, selected, disabled, onToggle }: {
   );
 }
 
-function TalentTile({ talent, selected, onSelect }: {
+function TalentTile({ championName, talent, selected, onSelect }: {
+  championName: string;
   talent: BuildTalentReference;
   selected: boolean;
   onSelect: () => void;
 }) {
+  const { t } = useLocalization();
+  const descriptionKey = championDescriptionKey(championName, "talents", talent.name);
   return (
     <button
       type="button"
@@ -104,14 +108,15 @@ function TalentTile({ talent, selected, onSelect }: {
       <CanonicalTalentImage talentId={talent.id} talentName={talent.name} alt={talent.name} className="h-10 w-10 shrink-0 rounded-md border border-pc-border object-cover" fallbackClassName="h-10 w-10 shrink-0 rounded-md border border-pc-border bg-pc-bg-secondary" />
       <span className="min-w-0 flex-1">
         <span className="block text-sm font-semibold text-pc-text">{talent.name}</span>
-        <span className="mt-1 line-clamp-3 block text-xs text-pc-text-secondary">{talent.description}</span>
+        <span className="mt-1 line-clamp-3 block text-xs text-pc-text-secondary">{descriptionKey ? t(descriptionKey) : talent.description}</span>
         <SelectionBadge selected={selected} />
       </span>
     </button>
   );
 }
 
-function CardTile({ card, selection, disabled, onToggle, onLevelChange }: {
+function CardTile({ championName, card, selection, disabled, onToggle, onLevelChange }: {
+  championName: string;
   card: BuildCardReference;
   selection?: BuildCardSelection;
   disabled: boolean;
@@ -119,6 +124,7 @@ function CardTile({ card, selection, disabled, onToggle, onLevelChange }: {
   onLevelChange: (level: number) => void;
 }) {
   const { t } = useLocalization();
+  const descriptionKey = championDescriptionKey(championName, "loadouts", card.name);
   const selected = Boolean(selection);
   const blocked = (disabled && !selected) || card.id <= 0;
 
@@ -153,7 +159,7 @@ function CardTile({ card, selection, disabled, onToggle, onLevelChange }: {
             </span>
             <SelectionBadge selected={selected} />
           </div>
-          <p className="mt-1 line-clamp-2 text-xs text-pc-text-secondary">{card.description}</p>
+          <p className="mt-1 line-clamp-2 text-xs text-pc-text-secondary">{descriptionKey ? t(descriptionKey) : card.description}</p>
         </div>
       </div>
 
@@ -438,6 +444,7 @@ export default function CreateBuildPage() {
                 {referenceData.talents.map((talent) => (
                   <TalentTile
                     key={talent.id}
+                    championName={selectedChampion?.name ?? ""}
                     talent={talent}
                     selected={selectedTalentId === talent.id}
                     onSelect={() => setSelectedTalentId((current) => (current === talent.id ? null : talent.id))}
@@ -465,6 +472,7 @@ export default function CreateBuildPage() {
                     {cards.map((card) => (
                       <CardTile
                         key={card.id}
+                        championName={selectedChampion?.name ?? ""}
                         card={card}
                         selection={selectedCardMap.get(card.id)}
                         disabled={selectedCards.length >= MAX_CARDS}

@@ -9,6 +9,7 @@ import type { ChampionCardStat, ChampionCardStatsResponse } from "@/lib/api-clie
 import { getPercentageColor, getStatQuality } from "@/lib/stat-quality";
 import { useLocalization } from "@/lib/localization-context";
 import { formatScalingDescription } from "@/lib/scaling-description";
+import { championDescriptionKey } from "@/lib/localization/champion-description-key";
 
 function statNameKey(value: string | null | undefined): string {
   return String(value ?? "").normalize("NFKD").toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -73,6 +74,7 @@ export default function ChampionLoadoutGrid({
               const detailCardId = stat?.cardId ?? card.id;
               const href = cardStats ? `${detailPath}/${detailCardId}${params.size > 0 ? `?${params.toString()}` : ""}` : null;
               const className = `pc-surface-light block rounded-lg border p-3 text-left ${href ? "transition-colors hover:border-pc-accent-mid" : ""}`;
+              const descriptionKey = championDescriptionKey(championSlug, "loadouts", card.name);
               const content = (
                 <div className="flex items-start gap-3">
                   {card.iconUrl ? (
@@ -85,7 +87,7 @@ export default function ChampionLoadoutGrid({
                   <div className="min-w-0 flex-1">
                     <div className="mb-0.5 text-xs font-medium text-pc-accent">{card.name}</div>
                     <p className="text-xs leading-relaxed text-pc-text-secondary">
-                      {formatScalingDescription(card.description, 1, formatNumber)}
+                      {formatScalingDescription(descriptionKey ? t(descriptionKey) : card.description, 1, formatNumber)}
                     </p>
                     {stat && stat.totalPlays > 0 && (
                       <div className="mt-2 space-y-1.5">
