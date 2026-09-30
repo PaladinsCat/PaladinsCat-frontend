@@ -266,14 +266,14 @@ export default function DiminishingReturnsPage() {
 
   const selectedTalent = reference?.talents.find((talent) => talent.id === selectedTalentId) ?? null;
   const effectAnalysis = useMemo(() => {
-    if (!reference) return { effects: [] as DetectedEffect[], unsupported: [] as Array<{ id: number; name: string; type: "talent" | "card" | "item"; description: string }> };
+    if (!reference) return { effects: [] as DetectedEffect[], unsupported: [] as Array<{ id: number; name: string; type: "talent" | "card" | "item"; level: number; description: string }> };
     const values: DetectedEffect[] = [];
-    const unsupported: Array<{ id: number; name: string; type: "talent" | "card" | "item"; description: string }> = [];
+    const unsupported: Array<{ id: number; name: string; type: "talent" | "card" | "item"; level: number; description: string }> = [];
     const collect = (input: Parameters<typeof detectDescriptionEffects>[0]) => {
       const detected = detectDescriptionEffects(input);
       values.push(...detected);
       const hasWeaponOverride = input.type === "talent" && extractWeaponDamageOverride(input.description) != null;
-      if (!detected.length && !hasWeaponOverride) unsupported.push({ id: input.id, name: input.name, type: input.type, description: resolveScaledDescription(input.description, input.level ?? 1) });
+      if (!detected.length && !hasWeaponOverride) unsupported.push({ id: input.id, name: input.name, type: input.type, level: input.level ?? 1, description: resolveScaledDescription(input.description, input.level ?? 1) });
     };
     if (selectedTalent) {
       collect({ id: selectedTalent.id, name: selectedTalent.name, type: "talent", description: selectedTalent.description });
@@ -535,7 +535,7 @@ export default function DiminishingReturnsPage() {
                   <p className="mt-1 text-xs leading-5 text-pc-text-muted">{t("diminishingReturns.unsupportedDescription")}</p>
                   <div className="mt-2 space-y-2">{unsupportedEffects.map((source) => {
                     const key = source.type === "item" ? null : championDescriptionKey(champion?.name ?? "", source.type === "card" ? "loadouts" : "talents", source.name);
-                    return <div key={source.id}><p className="text-xs font-semibold text-pc-text">{source.name}</p><p className="text-xs leading-4 text-pc-text-muted">{(key ? t(key) : source.description) || t("diminishingReturns.noDetectedEffect")}</p></div>;
+                    return <div key={source.id}><p className="text-xs font-semibold text-pc-text">{source.name}</p><p className="text-xs leading-4 text-pc-text-muted">{(key ? resolveScaledDescription(t(key), source.level) : source.description) || t("diminishingReturns.noDetectedEffect")}</p></div>;
                   })}</div>
                 </div>}
               </section>
