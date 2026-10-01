@@ -264,43 +264,6 @@ export default function HomePage({ children }: { children?: ReactNode }) {
       description: t("seo.home.topic.community.description"),
     },
   ];
-  const communityCards = [
-    {
-      href: "https://discord.gg/FXDdbCFPB",
-      image: "/images/projects/paladins-impact-project.avif",
-      imageAlt: t("home.communityPipLogoAlt"),
-      title: t("home.communityPipTitle"),
-      description: t("home.communityPipDescription"),
-    },
-    {
-      href: "https://discord.gg/paladinsgame",
-      image: "/images/projects/paladins-discord.avif",
-      imageAlt: t("home.communityOfficialLogoAlt"),
-      title: t("home.communityOfficialTitle"),
-      description: t("home.communityOfficialDescription"),
-    },
-    {
-      href: "https://discord.gg/VqYMXAR",
-      image: "/images/icons/paladinscat.avif",
-      imageAlt: t("home.logoAlt"),
-      title: t("home.communityPaladinsCatTitle"),
-      description: t("home.communityPaladinsCatDescription"),
-    },
-    {
-      href: "https://discord.gg/YPXJEaNPPe",
-      image: "/images/projects/tempest.avif",
-      imageAlt: t("home.tempestLogoAlt"),
-      title: t("home.communityTempestTitle"),
-      description: t("home.communityTempestDescription"),
-    },
-    {
-      href: "https://discord.com/invite/YPWtdVwFPR",
-      image: "/images/projects/round-table.avif",
-      imageAlt: t("home.communityRoundTableLogoAlt"),
-      title: t("home.communityRoundTableTitle"),
-      description: t("home.communityRoundTableDescription"),
-    },
-  ];
 
   return (
     <div
@@ -486,6 +449,7 @@ export default function HomePage({ children }: { children?: ReactNode }) {
         </motion.div>
         {children}
 
+        <div hidden>
         <motion.h2
           initial={animateHome ? { opacity: 0, y: 18 } : false}
           whileInView={{ opacity: 1, y: 0 }}
@@ -497,43 +461,31 @@ export default function HomePage({ children }: { children?: ReactNode }) {
           <span className="mt-1 block">{t("home.communityTitleRest")}</span>
         </motion.h2>
 
-        <motion.div
-          initial={animateHome ? "hidden" : false}
-          whileInView="visible"
+        <motion.a
+          href="https://discord.gg/YPXJEaNPPe"
+          target="_blank"
+          rel="noopener noreferrer"
+          initial={animateHome ? { opacity: 0, y: 18 } : false}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.25 }}
-          variants={{
-            hidden: {},
-            visible: { transition: { staggerChildren: 0.11 } },
-          }}
-          className="mt-10 grid gap-3 sm:mt-12 sm:grid-cols-2 lg:grid-cols-5"
+          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          whileHover={reduceMotion ? undefined : { y: -4 }}
+          whileTap={reduceMotion ? undefined : { scale: 0.985 }}
+          className="pc-glass pc-home-feature-card group mx-auto mt-10 flex max-w-2xl flex-col items-center gap-6 rounded-2xl border border-white/5 p-8 text-center shadow-lg transition-shadow duration-300 hover:shadow-pc-card-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent sm:mt-12 sm:flex-row sm:p-10 sm:text-left"
         >
-          {communityCards.map(({ href, image, imageAlt, title, description }) => (
-            <motion.a
-              key={href}
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              variants={{
-                hidden: { opacity: 0, y: 18 },
-                visible: { opacity: 1, y: 0 },
-              }}
-              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-              whileHover={reduceMotion ? undefined : { y: -4 }}
-              whileTap={reduceMotion ? undefined : { scale: 0.985 }}
-              className="pc-glass pc-home-feature-card group relative flex min-h-36 flex-col items-center justify-center rounded-2xl border border-white/5 p-4 text-center shadow-lg transition-shadow duration-300 hover:shadow-pc-card-hover"
-            >
-              <Image
-                src={image}
-                alt={imageAlt}
-                width={56}
-                height={56}
-                className="h-12 w-12 rounded-xl object-cover drop-shadow-[0_5px_14px_rgba(0,0,0,0.4)]"
-              />
-              <h3 className="mt-3 text-sm font-bold text-pc-text">{title}</h3>
-              <p className="mt-1.5 max-w-[12rem] text-xs leading-5 text-pc-text-secondary">{description}</p>
-            </motion.a>
-          ))}
-        </motion.div>
+          <Image
+            src="/images/projects/tempest.avif"
+            alt={t("home.tempestLogoAlt")}
+            width={128}
+            height={128}
+            className="h-32 w-32 shrink-0 rounded-2xl object-cover drop-shadow-[0_5px_14px_rgba(0,0,0,0.4)]"
+          />
+          <div>
+            <h3 className="text-3xl font-bold tracking-tight text-pc-text sm:text-4xl">{t("home.communityTempestTitle")}</h3>
+            <p className="mt-3 text-base leading-6 text-pc-text-secondary">{t("home.communityTempestDescription")}</p>
+          </div>
+        </motion.a>
+        </div>
       </section>
 
     </div>

@@ -7,6 +7,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { Search } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { SUPPORTED_LOCALES, useLocalization } from "@/lib/localization-context";
 import {
@@ -17,7 +18,32 @@ import {
 import { getLiteMode, setLiteMode, LITE_MODE_CHANGE_EVENT } from "@/lib/lite-mode";
 import PlayerName from "@/components/player-name";
 import NotificationMenu from "@/components/notification-menu";
+import HomeSearch from "@/components/home-search";
 import { BLOG_COPY_KEYS } from "@/lib/blog-copy";
+
+/** Reuse the homepage search behavior inside the header's fade toggle. */
+function HeaderSearch({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+  const { t } = useLocalization();
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  return (
+    <div className="pc-header-search-slot" data-header-search data-open={open}
+      onKeyDown={(event) => {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          onOpenChange(false);
+          buttonRef.current?.focus();
+        }
+      }}>
+    <button ref={buttonRef} type="button" aria-label={t("search.submit")} aria-expanded={open}
+      aria-hidden={open} tabIndex={open ? -1 : 0}
+      onClick={() => onOpenChange(true)}
+      className="pc-header-search-trigger flex h-11 w-11 items-center justify-center rounded-lg text-pc-text-secondary hover:bg-pc-bg-elevated hover:text-pc-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent">
+      <Search className="h-4 w-4" aria-hidden="true" />
+    </button>
+    <HomeSearch variant="header" active={open} onNavigate={() => onOpenChange(false)} />
+    </div>
+  );
+}
 
 function LanguageMenu() {
   const { locale, setLocale, t } = useLocalization();
@@ -46,14 +72,14 @@ function LanguageMenu() {
       <button
         type="button"
         onClick={() => setOpen((current) => !current)}
-        className="inline-flex h-9 items-center gap-1.5 rounded-lg px-2 text-sm text-pc-text-secondary transition-colors hover:bg-pc-bg-elevated hover:text-pc-accent"
+        className="inline-flex h-11 w-11 items-center justify-center gap-1.5 rounded-lg px-2 text-sm text-pc-text-secondary transition-colors hover:bg-pc-bg-elevated hover:text-pc-accent min-[480px]:h-9 min-[480px]:w-auto"
         aria-label={t("nav.language")}
         aria-haspopup="listbox"
         aria-expanded={open}
       >
         <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="12" cy="12" r="10" /><path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20M12 2a15.3 15.3 0 0 0 0 20" /></svg>
-        <span className="max-w-20 truncate text-xs font-semibold tracking-wide">{activeLocale.code.toUpperCase()}</span>
-        <svg className={`h-3 w-3 transition-transform ${open ? "rotate-180" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+        <span className="hidden max-w-20 truncate text-xs font-semibold tracking-wide min-[480px]:inline">{activeLocale.code.toUpperCase()}</span>
+        <svg className={`hidden h-3 w-3 transition-transform min-[480px]:block ${open ? "rotate-180" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
       </button>
       {open && (
         <div className="absolute right-0 top-full z-30 mt-2 w-60 overflow-hidden rounded-xl border border-pc-border bg-pc-bg-secondary p-1 shadow-lg" role="listbox" aria-label={t("nav.language")}>
@@ -89,6 +115,17 @@ export default function Nav() {
   const { user, isLoading: authLoading, logout } = useAuth();
   const { t } = useLocalization();
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const navRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (!searchOpen) return;
+    const closeOutsideSearch = (event: PointerEvent) => {
+      const target = event.target;
+      if (!(target instanceof Element) || !navRef.current?.contains(target) || !target.closest("[data-header-search]")) setSearchOpen(false);
+    };
+    window.addEventListener("pointerdown", closeOutsideSearch);
+    return () => window.removeEventListener("pointerdown", closeOutsideSearch);
+  }, [searchOpen]);
   const [wallpaperEnabled, setWallpaperEnabledState] = useState(true);
   const [liteMode, setLiteModeState] = useState(false);
   const canAccessProjects = user?.isAdmin === true || user?.isProjectDeveloper === true;
@@ -294,10 +331,10 @@ export default function Nav() {
   return (
     <>
       {/* Nav: sticky top, shared glass surface, subtle bottom border, shadow for depth */}
-      <nav className="pc-glass sticky top-0 z-50 border-b border-pc-border shadow-sm">
+      <nav ref={navRef} className="pc-glass sticky top-0 z-50 border-b border-pc-border shadow-sm">
         <div className="mx-auto max-w-[1536px] px-4 sm:px-6 lg:px-8">
-          {/* ── Desktop Layout: equal side tracks keep the destinations centered ── */}
-          <div className="hidden grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center min-[1180px]:grid" style={{ height: 64 }}>
+          {/* Equal side tracks keep the destinations centered independently of controls. */}
+          <div className="hidden grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4 min-[1180px]:grid" style={{ height: 64 }}>
             {/* Left: fixed-width logo */}
             <div className="min-w-0 justify-self-start">
               <Link href="/" className="relative text-xl font-bold text-pc-text hover:text-pc-text-muted transition-colors flex items-center gap-2">
@@ -312,7 +349,7 @@ export default function Nav() {
             </div>
 
             {/* Center: grouped destinations use the same hover/focus behavior as Account. */}
-            <div className="flex min-w-0 items-center justify-center gap-2 xl:gap-4 xl:px-4 2xl:gap-7 2xl:px-8">
+            <div inert={searchOpen} aria-hidden={searchOpen} className={`pc-header-destinations flex items-center justify-center gap-4 2xl:gap-7 ${searchOpen ? "pointer-events-none opacity-0" : "opacity-100"}`}>
               {headerGroups.map((group) => {
                 const groupActive = group.links.some((link) => isActive(link.href));
                 if (group.links.length === 1) {
@@ -344,8 +381,8 @@ export default function Nav() {
             </div>
 
             {/* Right: grouped menu and account controls */}
-            {/* Player search lives on /players page; champion search on /champions page */}
-            <div className="flex min-w-0 justify-self-end items-center justify-end gap-3" suppressHydrationWarning>
+            <div className="relative flex min-w-0 justify-self-end items-center justify-end gap-2" suppressHydrationWarning>
+              <HeaderSearch open={searchOpen} onOpenChange={setSearchOpen} />
               <LanguageMenu />
               <NotificationMenu />
               <button
@@ -380,10 +417,10 @@ export default function Nav() {
           </div>
 
           {/* ── Mobile Layout ── */}
-          <div className="flex items-center justify-between min-[1180px]:hidden" style={{ height: 64 }}>
-            <Link href="/" className="relative min-w-0 shrink-0 text-base font-bold text-pc-text transition-colors hover:text-pc-text-muted sm:text-xl">
+          <div className="flex items-center gap-3 min-[1180px]:hidden" style={{ height: 64 }}>
+            <Link href="/" aria-label={t("generated.common.paladinscat")} className={`relative ${searchOpen ? "hidden min-[480px]:block" : "block"} shrink-0 text-base font-bold text-pc-text transition-colors hover:text-pc-text-muted sm:text-xl`}>
               <span className="flex items-center gap-1 sm:gap-2"><img src="/images/icons/paladinscat.avif" alt="" className="h-6 w-6 sm:h-7 sm:w-7" />
-              {t("generated.common.paladinscat")}
+              <span className="hidden md:inline">{t("generated.common.paladinscat")}</span>
               </span>
               {liteMode && (
                 <span className="absolute right-0 -top-3 rounded bg-pc-accent px-1 text-xs font-bold leading-tight text-pc-bg sm:-right-7 sm:-top-2.5" aria-label={t("menu.liteMode")}>
@@ -392,7 +429,8 @@ export default function Nav() {
               )}
             </Link>
 
-            <div className="flex shrink-0 items-center gap-1" suppressHydrationWarning>
+            <div className="flex min-w-0 flex-1 items-center justify-end gap-1" suppressHydrationWarning>
+              <HeaderSearch open={searchOpen} onOpenChange={setSearchOpen} />
               <LanguageMenu />
               <NotificationMenu />
               <button

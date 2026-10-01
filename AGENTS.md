@@ -7,3 +7,12 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+## Icon source and licensing
+
+- Flaticon / UIcons are banned across all projects because of licensing. Do not
+  add their packages, fonts, glyphs, assets, CDN links, or icon classes.
+- Reuse existing icons and the existing Lucide component for the same action.
+  A layout or consistency request does not authorize replacing the icon family.
+- Canonical rule: `../paladinscat-wiki/documents/06-reference/design/frontend-design-system.md`,
+  "Typography and iconography". Feature cards use `docs/card-icon-design.md`.

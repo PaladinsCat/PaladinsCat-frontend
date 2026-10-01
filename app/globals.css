@@ -5,6 +5,47 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+:root {
+  --pc-search-width: 28rem;
+  --pc-motion-fast: 120ms;
+  --pc-motion-base: 200ms;
+  --pc-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+}
+
+.pc-search-width { max-width: var(--pc-search-width); }
+.pc-header-search-slot {
+  position: relative;
+  height: 44px;
+  min-width: 0;
+  flex: 1 1 var(--pc-search-width);
+  max-width: var(--pc-search-width);
+}
+.pc-header-search, .pc-header-search-trigger {
+  position: absolute;
+  right: 0;
+  top: 0;
+  transition: opacity var(--pc-motion-base) var(--pc-ease-standard);
+}
+.pc-header-search { width: 100%; opacity: 0; pointer-events: none; }
+.pc-header-search[data-open="true"] { opacity: 1; pointer-events: auto; }
+.pc-header-search-slot[data-open="true"] .pc-header-search-trigger { opacity: 0; pointer-events: none; }
+.pc-header-search input::-webkit-search-cancel-button { appearance: none; }
+.pc-header-destinations { transition: opacity var(--pc-motion-fast) var(--pc-ease-standard); }
+@media (max-width: 479px) {
+  /* Anchor the header dropdown to the nav, outside the input's glass container. */
+  .pc-header-search-dropdown { position: fixed; left: 1rem; right: 1rem; top: 4rem; }
+}
+@media (min-width: 1180px) {
+  .pc-header-search-slot { flex: none; width: 44px; }
+  .pc-header-search { width: var(--pc-search-width); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pc-header-search, .pc-header-search-trigger, .pc-header-destinations { transition-duration: 1ms; }
+}
+html.pc-lite .pc-header-search,
+html.pc-lite .pc-header-search-trigger,
+html.pc-lite .pc-header-destinations { transition-duration: 1ms; }
+
 /* Self-hosted so browsers that block third-party font requests still render Inter. */
 @font-face {
   font-family: "Inter";
