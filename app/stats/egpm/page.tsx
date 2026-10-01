@@ -50,7 +50,10 @@ export default function EgpmDetailPage() {
     setLoading(true);
     fetchBaselines({ queueId: 486 })
       .then((next) => { if (!cancelled) setRows(next); })
-      .catch(() => { if (!cancelled) setRows([]); })
+      .catch(() => {
+        // Keep last snapshot on failure (wiki: failed fetch must not overwrite
+        // existing data with empty). Initial load stays empty (no data yet).
+      })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, []);

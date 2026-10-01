@@ -81,6 +81,10 @@ export default function PerformanceLeaderboardPage({ mode = "match" }: { mode?: 
           rows: data,
           summary: metrics[metric] ?? null,
         });
+      })
+      .catch(() => {
+        // Keep last snapshot on failure (wiki: failed fetch must not overwrite
+        // existing data with empty). Initial load stays empty (no data yet).
       });
     return () => { active = false; };
   }, [config.role, metric, mode, requestKey, scope]);

@@ -114,7 +114,11 @@ export default function PlayerLevelLeaderboard({ mode }: { mode: LevelMode }) {
   useEffect(() => {
     let active = true;
     fetchPlayerLevelLeaderboard(mode, 100, leaderboardFilters)
-      .then((data) => { if (active) { setRows(data); setLoadedLeaderboardScopeKey(leaderboardScopeKey); } });
+      .then((data) => { if (active) { setRows(data); setLoadedLeaderboardScopeKey(leaderboardScopeKey); } })
+      .catch(() => {
+        // Keep last snapshot on failure (wiki: failed fetch must not overwrite
+        // existing data with empty). Initial load stays empty (no data yet).
+      });
     return () => { active = false; };
   }, [leaderboardFilters, leaderboardScopeKey, mode]);
 

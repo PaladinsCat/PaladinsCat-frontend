@@ -1195,8 +1195,9 @@ export async function fetchClassLeaderboard(params: { role: string; limit?: numb
       totalWins: Number(r.total_wins ?? 0),
       region: r.region ?? null,
     }));
-  } catch {
-    return [];
+  } catch (e) {
+    // Propagate: failed fetch must not return empty data (wiki: frontend-async-ui.md L42)
+    throw e;
   }
 }
 
@@ -1258,8 +1259,9 @@ export async function fetchChampionElo(params: {
       region: r.region ?? null,
     }));
     return { data: coerced, total: raw.total ?? 0 };
-  } catch {
-    return { data: [], total: 0 };
+  } catch (e) {
+    // Propagate: failed fetch must not return empty data (wiki: frontend-async-ui.md L42)
+    throw e;
   }
 }
 
@@ -1325,8 +1327,9 @@ export async function fetchPerformanceLeaderboard(params: {
       platform: r.platform ?? null,
       totalMatches: r.total_matches == null ? null : Number(r.total_matches),
     }));
-  } catch {
-    return [];
+  } catch (e) {
+    // Propagate: failed fetch must not return empty data (wiki: frontend-async-ui.md L42)
+    throw e;
   }
 }
 
@@ -1398,8 +1401,9 @@ export async function fetchPlayerLevelLeaderboard(mode: 'account' | 'champion', 
       region: row.region ?? null,
       platform: row.platform ?? null,
     }));
-  } catch {
-    return [];
+  } catch (e) {
+    // Propagate: failed fetch must not return empty data (wiki: frontend-async-ui.md L42)
+    throw e;
   }
 }
 
@@ -1489,8 +1493,9 @@ export async function fetchPerformanceMetrics(params?: {
       Object.entries(raw).filter(([metric]) => ['dpm', 'wpm', 'apm', 'hpm', 'shpm', 'gpm', 'cpm', 'egpm', 'spm', 'kda', 'kpm', 'deaths_per_minute'].includes(metric))
         .map(([metric, summary]) => [metric, mapMetricSummary(summary)])
     ) as PerformanceMetricsResponse;
-  } catch {
-    return {};
+  } catch (e) {
+    // Propagate: failed fetch must not return empty data (wiki: frontend-async-ui.md L42)
+    throw e;
   }
 }
 
@@ -1666,8 +1671,9 @@ export async function fetchBaselines(params?: { role?: string; queueId?: number;
       }
     }
     return mapped;
-  } catch {
-    return [];
+  } catch (e) {
+    // Propagate: failed fetch must not return empty data (wiki: frontend-async-ui.md L42)
+    throw e;
   }
 }
 

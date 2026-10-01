@@ -26,6 +26,7 @@ import { useLocalization } from "@/lib/localization-context";
 import PlayersPageHeader from "@/components/ui/players-page-header";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { getPercentageColor } from "@/lib/stat-quality";
+import { ChevronDown, Medal, X } from "lucide-react";
 
 type ELOMode = "champion" | "account";
 
@@ -48,11 +49,11 @@ type TabKey = (typeof TABS)[number]["key"];
 
 function RankBadge({ rank }: { rank: number }) {
   if (rank === 1)
-    return <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-yellow-500/20 text-yellow-400 font-bold text-sm">🥇</span>;
+    return <span role="img" aria-label={String(rank)} className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-yellow-500/20 text-yellow-400 font-bold text-sm"><Medal aria-hidden="true" size={16} className="inline shrink-0 align-middle" /></span>;
   if (rank === 2)
-    return <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-gray-400/20 text-gray-300 font-bold text-sm">🥈</span>;
+    return <span role="img" aria-label={String(rank)} className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-gray-400/20 text-gray-300 font-bold text-sm"><Medal aria-hidden="true" size={16} className="inline shrink-0 align-middle" /></span>;
   if (rank === 3)
-    return <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-600/20 text-amber-600 font-bold text-sm">🥉</span>;
+    return <span role="img" aria-label={String(rank)} className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-600/20 text-amber-600 font-bold text-sm"><Medal aria-hidden="true" size={16} className="inline shrink-0 align-middle" /></span>;
   return <span className="inline-flex items-center justify-center w-7 h-7 text-pc-text-muted text-sm">{rank}</span>;
 }
 
@@ -168,9 +169,8 @@ function ChampionEloContent({ fixedMode }: { fixedMode?: ELOMode }) {
         setTotal(result.total);
       })
       .catch(() => {
-        if (cancelled) return;
-        setPlayers([]);
-        setTotal(0);
+        // Keep last snapshot on failure (wiki: failed fetch must not overwrite
+        // existing data with empty). Initial load stays empty (no data yet).
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -197,7 +197,8 @@ function ChampionEloContent({ fixedMode }: { fixedMode?: ELOMode }) {
         setAccountPlayers(result);
       })
       .catch(() => {
-        if (!cancelled) setAccountPlayers([]);
+        // Keep last snapshot on failure (wiki: failed fetch must not overwrite
+        // existing data with empty). Initial load stays empty (no data yet).
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -266,7 +267,7 @@ function ChampionEloContent({ fixedMode }: { fixedMode?: ELOMode }) {
                   ) : (
                     t("generated.players.allChampions.0654ced")
                   )}
-                  <span className="text-xs ml-1">▾</span>
+                  <span className="text-xs ml-1"><ChevronDown aria-hidden="true" size={12} className="inline shrink-0 align-middle" /></span>
                 </button>
 
                 {dropdownOpen && (
@@ -336,7 +337,7 @@ function ChampionEloContent({ fixedMode }: { fixedMode?: ELOMode }) {
                     className="absolute right-2 top-1/2 -translate-y-1/2 text-pc-text-muted hover:text-pc-text text-xs"
                     aria-label={t("generated.players.clearSearch")}
                   >
-                    ✕
+                    <X aria-hidden="true" size={16} className="inline shrink-0 align-middle" />
                   </button>
                 )}
                 </span>

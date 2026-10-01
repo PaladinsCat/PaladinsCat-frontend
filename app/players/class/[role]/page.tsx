@@ -16,6 +16,7 @@ import { useLocalization } from "@/lib/localization-context";
 import PlayersPageHeader from "@/components/ui/players-page-header";
 import { SegmentedRouteLinks } from "@/components/ui/segmented-control";
 import { getPercentageColor } from "@/lib/stat-quality";
+import { Medal } from "lucide-react";
 
 
 const VALID_ROLES = ["Frontline", "Damage", "Flank", "Support"] as const;
@@ -43,20 +44,20 @@ interface ClassEloEntry {
 function RankBadge({ rank }: { rank: number }) {
   if (rank === 1)
     return (
-      <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-yellow-500/20 text-yellow-400 font-bold text-sm">
-        🥇
+      <span role="img" aria-label={String(rank)} className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-yellow-500/20 text-yellow-400 font-bold text-sm">
+        <Medal aria-hidden="true" size={16} className="inline shrink-0 align-middle" />
       </span>
     );
   if (rank === 2)
     return (
-      <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-gray-400/20 text-gray-300 font-bold text-sm">
-        🥈
+      <span role="img" aria-label={String(rank)} className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-gray-400/20 text-gray-300 font-bold text-sm">
+        <Medal aria-hidden="true" size={16} className="inline shrink-0 align-middle" />
       </span>
     );
   if (rank === 3)
     return (
-      <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-600/20 text-amber-600 font-bold text-sm">
-        🥉
+      <span role="img" aria-label={String(rank)} className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-600/20 text-amber-600 font-bold text-sm">
+        <Medal aria-hidden="true" size={16} className="inline shrink-0 align-middle" />
       </span>
     );
   return (
@@ -129,9 +130,8 @@ export default function ClassEloPage() {
           }))
         );
       } catch {
-        if (!cancelled) {
-          setData([]);
-        }
+        // Keep last snapshot on failure (wiki: failed fetch must not overwrite
+        // existing data with empty). Initial load stays empty (no data yet).
       } finally {
         if (!cancelled) setLoading(false);
       }
