@@ -9,7 +9,7 @@ import { fetchPlayerModeration, mergePlayerModeration, type PlayerModeration } f
 import { useAuth } from "@/lib/auth-context";
 import { useLocalization } from "@/lib/localization-context";
 import { hasPlayerTag } from "@/lib/player-tag-threshold";
-import { BadgeCheck } from "lucide-react";
+import SmartImage from "@/components/SmartImage";
 
 const EMPTY_MODERATION: PlayerModeration = {
   cheater: false,
@@ -55,7 +55,7 @@ export function VerifiedPlayerBadge({ className = "", iconClassName = "h-3.5 w-3
   const { t } = useLocalization();
   return (
     <span className={`inline-flex shrink-0 ${className}`} role="img" aria-label={t("generated.players.verifiedPaladinscatPlayer")} title={t("generated.players.verifiedPaladinscatPlayer")}>
-      <BadgeCheck aria-hidden="true" className={`verified-player-icon ${iconClassName} text-pc-accent`} />
+      <SmartImage src="/images/icons/Verified_Player_Support_Icon.avif" alt="" className={`verified-player-icon ${iconClassName} object-contain`} />
     </span>
   );
 }
