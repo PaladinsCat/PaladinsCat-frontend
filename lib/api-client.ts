@@ -3483,6 +3483,65 @@ export async function deleteAdminNotification(id: number): Promise<void> {
   });
 }
 
+export interface ExploitExceptionRow {
+  playerId: string;
+  playerName: string | null;
+  reason: string;
+  appealRef: string | null;
+  grantedAt: string;
+  expiresAt: string | null;
+  grantedBy: string | null;
+  revokedAt: string | null;
+  revokedBy: string | null;
+  revokeReason: string | null;
+}
+
+/**
+ * Fetch all active exploit exceptions for the admin portal.
+ * refs: none
+ * I/O types: `none -> Promise<ExploitExceptionRow[]>`.
+ */
+export async function fetchExploitExceptions(): Promise<ExploitExceptionRow[]> {
+  const token = getAuthToken();
+  if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.notAuthenticated);
+  const raw = await fetchJson<{ exceptions: any[] }>(`/admin/players/exploiters/exceptioned`, {
+    headers: accountAuthHeaders(token),
+  });
+  return (raw.exceptions ?? []).map((r: any) => ({
+    playerId: String(r.player_id),
+    playerName: r.player_name ?? null,
+    reason: r.reason ?? "",
+    appealRef: r.appeal_ref ?? null,
+    grantedAt: r.granted_at ?? "",
+    expiresAt: r.expires_at ?? null,
+    grantedBy: r.granted_by ?? null,
+    revokedAt: r.revoked_at ?? null,
+    revokedBy: r.revoked_by ?? null,
+    revokeReason: r.revoke_reason ?? null,
+  }));
+}
+
+/**
+ * Grant or clear the exploit exception for a Paladins player.
+ * refs: none
+ * I/O types: `playerId: string; body: { granted: boolean; reason?: string; appealRef?: string; expiresAt?: string } -> Promise<void>`.
+ */
+export async function setExploitException(
+  playerId: string,
+  body: { granted: boolean; reason?: string; appealRef?: string; expiresAt?: string },
+): Promise<void> {
+  const token = getAuthToken();
+  if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.notAuthenticated);
+  await fetchJson<{ player: { id: number; name: string | null }; granted: boolean }>(
+    `/admin/players/${encodeURIComponent(playerId)}/exploit-exception`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", ...accountAuthHeaders(token) },
+      body: JSON.stringify(body),
+    },
+  );
+}
+
 /**
  * Fetch admin activity banner data for client consumers.
  *
