@@ -9,6 +9,7 @@ import PageHeader from "@/components/ui/page-header";
 import { EmptyState, ErrorState } from "@/components/async-state";
 import { DataCardSkeleton } from "@/components/route-skeleton";
 import PlatformIcon from "@/components/platform-icon";
+import PlayerName from "@/components/player-name";
 import { useLocalization } from "@/lib/localization-context";
 import { fetchPlayerFriends, type PlayerFriendsResponse } from "@/lib/player-friends-api";
 
@@ -35,7 +36,14 @@ export default function PlayerFriendsPage() {
     <section className="min-h-56" aria-busy={loading}>
       {loading ? <DataCardSkeleton /> : failed || !data || data.status === "unavailable" ? <ErrorState title={t("playerFriends.unavailable")} onRetry={() => setAttempt(value => value + 1)} /> : data.status === "private" ? <EmptyState title={t("playerFriends.private")} /> : <>
         {data.freshness.expired && <p className="mb-3 text-sm text-pc-text-muted" role="status">{t("playerFriends.stale")}</p>}
-        {data.friends.length === 0 ? <EmptyState title={t("playerFriends.empty")} /> : <ul className="pc-card min-h-56 divide-y divide-pc-border p-4">{data.friends.map(friend => <li key={friend.id}><Link href={`/players/${friend.id}`} className="flex items-center gap-2 py-3 text-pc-text hover:text-pc-accent"><PlatformIcon platform={friend.platform} /><span className="min-w-0 break-words">{friend.name}</span></Link></li>)}</ul>}
+        {data.friends.length === 0 ? <EmptyState title={t("playerFriends.empty")} /> : <ul className="pc-card grid grid-cols-1 gap-x-6 p-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {data.friends.map(friend => <li key={friend.id} className="min-w-0 border-b border-pc-border">
+            <Link href={`/players/${friend.id}`} className="flex min-h-14 min-w-0 items-center gap-2 py-3 text-pc-text hover:text-pc-accent">
+              <PlatformIcon platform={friend.platform} />
+              <PlayerName playerId={friend.id} className="max-h-none! overflow-visible! [&>span:last-child]:max-h-none [&>span:last-child]:overflow-visible">{friend.name}</PlayerName>
+            </Link>
+          </li>)}
+        </ul>}
       </>}
     </section>
   </div>;
