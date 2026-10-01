@@ -29,7 +29,6 @@ import PlayerNameHistory from "@/components/player-name-history";
 import { displayLoadingFrameName } from "@/lib/loading-frame-assets";
 import { fetchPlayerModeration } from "@/lib/player-moderation";
 import { useLocalization } from "@/lib/localization-context";
-import { estimateLiveTeamWinChance } from "@/lib/live-team-estimate";
 import { parsePlayerTitle, parsePlayerTitleSegments } from "@/lib/player-title";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
 import { csrfHeader } from "@/lib/csrf";
@@ -474,9 +473,15 @@ export default function PlayerProfileClient({
   }
 
   const { player, queueRatings } = response;
-  const currentMatchWinChance = estimateLiveTeamWinChance(
-    Array.isArray(currentMatch?.players) ? currentMatch.players : [],
-  );
+  // Win-chance is owned by the backend live read-model (single source, R-A/R-C).
+  // The frontend only formats the backend-provided team_one/two_win_chance fields.
+  const currentMatchWinChance =
+    currentMatch?.team_one_win_chance != null && currentMatch?.team_two_win_chance != null
+      ? {
+          teamOne: Number(currentMatch.team_one_win_chance),
+          teamTwo: Number(currentMatch.team_two_win_chance),
+        }
+      : null;
   // `wins`/`losses` are the account-wide Hi-Rez totals. The denormalized
   // `total_*` columns are ranked-ingest aggregates and must not drive the
   // global profile performance summary.
