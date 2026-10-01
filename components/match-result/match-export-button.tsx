@@ -7,7 +7,7 @@
 import { formatApiErrorMessage } from "@/lib/api-errors";
 
 import { useEffect, useState, type RefObject } from "react";
-import { toPng } from "html-to-image";
+import { toSvg } from "html-to-image";
 import { LoadingIndicator } from "@/components/async-state";
 import { useLocalization } from "@/lib/localization-context";
 
@@ -27,6 +27,7 @@ async function scoreboardPng(scoreboard: HTMLElement) {
   const exportMapSource = exportMap?.dataset.exportSrc;
   if (exportMap && exportMapSource) exportMap.src = exportMapSource;
   scoreboard.setAttribute("data-image-export", "true");
+  const elements = [scoreboard, ...scoreboard.querySelectorAll<HTMLElement>("*")];
   try {
     const talentDeadline = performance.now() + 2_000;
     while (scoreboard.querySelector('span.talent-icon[role="img"]') && performance.now() < talentDeadline) {
@@ -40,17 +41,37 @@ async function scoreboardPng(scoreboard: HTMLElement) {
         image.addEventListener("error", () => resolve(), { once: true });
       });
     }));
-    return await toPng(scoreboard, {
+    // html-to-image floors every copied font size and subtracts 0.1px.
+    // Restore the web view's computed sizes in its embedded SVG before rasterizing.
+    for (const element of elements) {
+      element.setAttribute("data-export-font-size", getComputedStyle(element).fontSize);
+    }
+    const svgUrl = await toSvg(scoreboard, {
       width: 1280,
       height: 720,
-      canvasWidth: 2048,
-      canvasHeight: 1152,
-      pixelRatio: 1,
       cacheBust: false,
-      backgroundColor: "var(--pc-bg-secondary)",
       style: { transform: "none", transformOrigin: "top left" },
     });
+    const svg = new DOMParser().parseFromString(decodeURIComponent(svgUrl.split(",")[1]!), "image/svg+xml");
+    for (const element of svg.querySelectorAll<HTMLElement>("[data-export-font-size]")) {
+      // Append without CSSOM shorthand normalization, which changes copied grid/flex styles.
+      element.setAttribute("style", `${element.getAttribute("style")};font-size:${element.getAttribute("data-export-font-size")}`);
+      element.removeAttribute("data-export-font-size");
+    }
+    const image = new Image();
+    image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(new XMLSerializer().serializeToString(svg))}`;
+    await image.decode();
+    const canvas = document.createElement("canvas");
+    canvas.width = 2048;
+    canvas.height = 1152;
+    const context = canvas.getContext("2d");
+    if (!context) throw new Error("Canvas unavailable");
+    context.fillStyle = getComputedStyle(scoreboard).backgroundColor;
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    return canvas.toDataURL("image/png");
   } finally {
+    for (const element of elements) element.removeAttribute("data-export-font-size");
     scoreboard.removeAttribute("data-image-export");
     exportMap?.removeAttribute("src");
   }

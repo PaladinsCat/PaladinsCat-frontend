@@ -45,10 +45,11 @@ export default function PlatformIcon({ platform }: PlatformIconProps) {
 
   return (
     <span className="player-platform-icon inline-flex h-[18px] w-[18px] shrink-0 items-center justify-center" title={t(asset.labelKey)} aria-label={t(asset.labelKey)} role="img">
-      <picture>
-        <source srcSet={asset.avif} type="image/avif" />
-        <img src={asset.png} alt="" width={18} height={18} loading="eager" decoding="async" />
-      </picture>
+      {/* A direct source is embedded in exported SVGs; picture sources stay external. */}
+      <img src={asset.avif} alt="" width={18} height={18} loading="eager" decoding="async" onError={(event) => {
+        const image = event.currentTarget;
+        if (image.src !== new URL(asset.png, window.location.href).href) image.src = asset.png;
+      }} />
     </span>
   );
 }

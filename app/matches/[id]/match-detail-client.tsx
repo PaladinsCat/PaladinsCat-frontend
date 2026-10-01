@@ -197,7 +197,7 @@ export default function MatchDetailPage({ initialMatch = null }: { initialMatch?
   const [match, setMatch] = useState<MatchDetailWithBans | null>(initialMatch);
   const [fact, setFact] = useState<MatchFact | null>(() => embeddedFact(initialMatch));
   const [snapshots, setSnapshots] = useState<RatingSnapshot[]>(() => embeddedSnapshots(initialMatch));
-  const [loading, setLoading] = useState(initialMatch == null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
   const accessScope = user?.linkedPlayerId != null ? "verified" : user ? "account" : "guest";
@@ -211,18 +211,13 @@ export default function MatchDetailPage({ initialMatch = null }: { initialMatch?
       // Direct navigations receive the complete public payload in the RSC
       // response. Do not immediately issue the same browser request again.
       if (reloadKey === 0 && initialMatch?.access?.tier === accessScope) {
-        setMatch(initialMatch);
+        // Resolve current moderation before the scoreboard's first paint/export.
+        const currentMatch = await withCurrentStoredModeration(initialMatch).catch(() => initialMatch);
+        if (cancelled) return;
+        setMatch(currentMatch);
         setFact(embeddedFact(initialMatch));
         setSnapshots(embeddedSnapshots(initialMatch));
         setLoading(false);
-        // Overlay current moderation so freshly-flagged players show
-        // immediately on direct navigations (RSC payload has the
-        // ingest-time snapshot, which may predate the flag).
-        void withCurrentStoredModeration(initialMatch)
-          .then((currentMatch) => {
-            if (!cancelled) setMatch(currentMatch);
-          })
-          .catch(() => undefined);
         return;
       }
       setLoading(true);
@@ -233,19 +228,13 @@ export default function MatchDetailPage({ initialMatch = null }: { initialMatch?
         const cached = reloadKey === 0 ? readBrowserResult<CachedMatchResult>(cacheKey) : null;
         if (cached) {
           if (cancelled) return;
-          // Paint the complete cached payload immediately. Moderation is a
-          // small freshness update, not a prerequisite for the scoreboard;
-          // never hold data-ready behind this secondary request pair.
-          setMatch(cached.match);
+          const currentMatch = cached.match
+            ? await withCurrentStoredModeration(cached.match).catch(() => cached.match)
+            : null;
+          if (cancelled) return;
+          setMatch(currentMatch);
           setFact(embeddedFact(cached.match, cached.fact));
           setSnapshots(embeddedSnapshots(cached.match, cached.snapshots));
-          if (cached.match) {
-            void withCurrentStoredModeration(cached.match)
-              .then((currentMatch) => {
-                if (!cancelled) setMatch(currentMatch);
-              })
-              .catch(() => undefined);
-          }
           return;
         }
 
@@ -257,25 +246,19 @@ export default function MatchDetailPage({ initialMatch = null }: { initialMatch?
           setError(t("generated.matches.matchDetailsUnavailable"));
           return;
         }
-        setMatch(detailResult);
+        const currentMatch = await withCurrentStoredModeration(detailResult).catch(() => detailResult);
+        if (cancelled) return;
+        setMatch(currentMatch);
         const factResult = embeddedFact(detailResult);
         const snapResult = embeddedSnapshots(detailResult);
         setFact(factResult);
         setSnapshots(snapResult);
 
         writeBrowserResult(cacheKey, {
-          match: detailResult,
+          match: currentMatch,
           fact: factResult,
           snapshots: snapResult,
         }, MATCH_RESULT_CACHE_TTL_MS);
-
-        // Overlay current moderation so freshly-flagged players show
-        // immediately on fresh fetches (payload snapshot may predate the flag).
-        void withCurrentStoredModeration(detailResult)
-          .then((currentMatch) => {
-            if (!cancelled) setMatch(currentMatch);
-          })
-          .catch(() => undefined);
 
       } catch (err: unknown) {
         if (!cancelled) setError(formatApiErrorMessage(err, t, t("generated.app.matches.[id].page.failedtoloadmatch")));
