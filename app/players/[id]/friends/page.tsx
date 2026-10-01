@@ -27,7 +27,7 @@ export default function PlayerFriendsPage() {
   useEffect(() => {
     const controller = new AbortController();
     setLoading(true); setFailed(false); setData(null);
-    fetchPlayerFriends(id, controller.signal).then(value => { if (!controller.signal.aborted) setData(value); }).catch(() => { if (!controller.signal.aborted) setFailed(true); }).finally(() => { if (!controller.signal.aborted) setLoading(false); });
+    fetchPlayerFriends(id, { refresh: true, signal: controller.signal }).then(value => { if (!controller.signal.aborted) setData(value); }).catch(() => { if (!controller.signal.aborted) setFailed(true); }).finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
   }, [id, attempt]);
   return <div className="space-y-6">

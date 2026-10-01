@@ -21,8 +21,9 @@ export type PlayerFriendsResponse = {
  * Load a player's saved friends with server-owned refresh policy.
  * I/O: id: string, signal?: AbortSignal -> Promise<PlayerFriendsResponse>; rejects failed HTTP responses.
  * refs: endpoints: GET /players/{id}/friends
- * I/O types: `id: string; signal?: AbortSignal -> Promise<PlayerFriendsResponse>`.
+ * I/O types: `id: string; options?: { refresh?: boolean; signal?: AbortSignal } -> Promise<PlayerFriendsResponse>`.
  */
-export async function fetchPlayerFriends(id: string, signal?: AbortSignal): Promise<PlayerFriendsResponse> {
-  return fetchJson<PlayerFriendsResponse>(`/players/${encodeURIComponent(id)}/friends`, { signal, cache: "no-store", retries: 0, timeoutMs: 30_000 });
+export async function fetchPlayerFriends(id: string, options?: { refresh?: boolean; signal?: AbortSignal }): Promise<PlayerFriendsResponse> {
+  const query = options?.refresh ? "?refresh=true" : "";
+  return fetchJson<PlayerFriendsResponse>(`/players/${encodeURIComponent(id)}/friends${query}`, { signal: options?.signal, cache: "no-store", retries: 0, timeoutMs: 30_000 });
 }
