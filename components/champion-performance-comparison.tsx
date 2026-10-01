@@ -43,6 +43,7 @@ const CLASSES = [
   { value: "Support", labelKey: "common.roles.support", icon: "Class_Support_Icon" },
 ] as const;
 type ChampionClass = "all" | (typeof CLASSES)[number]["value"];
+type ClassAverages = Partial<Record<Exclude<ChampionClass, "all">, PerformanceMetricsResponse>>;
 type ChampionMeasures = Partial<Record<ComparisonMetric, number>> & { matches?: number; bans?: number };
 type Averages = Map<number, ChampionMeasures>;
 type SortKey = "name" | ComparisonMetric;
@@ -64,14 +65,14 @@ export default function ChampionPerformanceComparison({ scope = "ranked", queueI
   const [averages, setAverages] = useState<Averages | null>(null);
   const [details, setDetails] = useState<StatsChampion[]>([]);
   const [distributions, setDistributions] = useState<Map<number, Partial<Record<PerformanceMetricKey, ChampionPerformanceDistribution>>>>(new Map());
-  const [global, setGlobal] = useState<PerformanceMetricsResponse>({});
+  const [classAverages, setClassAverages] = useState<ClassAverages>({});
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const [championClass, setChampionClass] = useState<ChampionClass>("all");
   const [sort, setSort] = useState<{ key: SortKey; ascending: boolean }>({ key: "name", ascending: true });
   useEffect(() => {
     let active = true;
-    const hydrate = (summary: StatsChampion[], results: Array<{ metric: PerformanceMetricKey; rows: ChampionPerformanceDistribution[] }>, globalMetrics: PerformanceMetricsResponse) => {
+    const hydrate = (summary: StatsChampion[], results: Array<{ metric: PerformanceMetricKey; rows: ChampionPerformanceDistribution[] }>, classMetrics: ClassAverages) => {
       const next: Averages = new Map();
       const full = new Map<number, Partial<Record<PerformanceMetricKey, ChampionPerformanceDistribution>>>();
       for (const champion of summary) {
@@ -92,18 +93,14 @@ export default function ChampionPerformanceComparison({ scope = "ranked", queueI
         if (COLUMNS.includes(metric as ComparisonMetric)) champion[metric as ComparisonMetric] = row.mean;
         next.set(row.championId, champion);
       }
-      if (active) { setAverages(next); setDetails(summary); setDistributions(full); setGlobal(globalMetrics); }
+      if (active) { setAverages(next); setDetails(summary); setDistributions(full); setClassAverages(classMetrics); }
     };
-    if (initialData) {
-      hydrate(initialData.details, initialData.results, initialData.global);
-      return () => { active = false; };
-    }
     Promise.all([
-      scope === "ranked" ? fetchStatsChampions({ scope: "ranked", limit: 100 }) : Promise.resolve([]),
-      fetchChampionPerformanceComparison({ queueId, scope }),
-      fetchPerformanceMetrics({ scope, queueId }),
-    ]).then(([summary, results, globalMetrics]) => {
-      hydrate(summary, results, globalMetrics);
+      initialData ? Promise.resolve(initialData.details) : scope === "ranked" ? fetchStatsChampions({ scope: "ranked", limit: 100 }) : Promise.resolve([]),
+      initialData ? Promise.resolve(initialData.results) : fetchChampionPerformanceComparison({ queueId, scope }),
+      Promise.all(CLASSES.map(async role => [role.value, await fetchPerformanceMetrics({ scope, queueId, role: role.value })] as const)),
+    ]).then(([summary, results, classMetrics]) => {
+      hydrate(summary, results, Object.fromEntries(classMetrics));
     }).catch(() => { if (active) setFailed(true); });
     return () => { active = false; };
   }, [attempt, initialData, scope, queueId]);
@@ -168,7 +165,10 @@ export default function ChampionPerformanceComparison({ scope = "ranked", queueI
             const value = averages?.get(champion.id)?.[metric];
             const percentage = metric === "winRate" || metric === "banRate";
             const key = metric as PerformanceMetricKey;
-            const baseline = global[key]?.mean;
+            const role = CLASSES.find(role => champion.roles.includes(role.value));
+            const classSummary = role ? classAverages[role.value]?.[key] : undefined;
+            const baseline = classSummary?.sampleSize ? classSummary.mean : undefined;
+            const baselineLabel = role ? t("performance.roleMetric", { role: t(role.labelKey), metric: t("generated.stats.average") }) : t("generated.players.class");
             const distribution = distributions.get(champion.id)?.[key];
             const delta = value != null && baseline != null && baseline !== 0 ? (value - baseline) / baseline * 100 : null;
             const decimals = ["kda", "kpm", "deaths_per_minute"].includes(metric) ? 2 : 0;
@@ -193,7 +193,7 @@ export default function ChampionPerformanceComparison({ scope = "ranked", queueI
                   label: t(LABELS[metric]),
                   value: formatNumber(value, { maximumFractionDigits: decimals }),
                   range: range ?? t("stats.performance.countUnavailable"),
-                  globalLabel: t("generated.champions.global"),
+                  globalLabel: baselineLabel,
                   globalValue: formatNumber(baseline, { maximumFractionDigits: decimals }),
                   delta: formatPercent(delta, { signDisplay: "always", maximumFractionDigits: 1 }),
                 })}>
@@ -202,7 +202,7 @@ export default function ChampionPerformanceComparison({ scope = "ranked", queueI
                   <span className="mt-1 text-xs text-pc-text-secondary">{formatNumber(count)}</span>
                 </> : <>
                   <span className={METRIC_COLORS[key]}>{formatNumber(value, { maximumFractionDigits: decimals })}</span>
-                  <span className="mt-1 text-xs text-pc-text-muted">{t("generated.champions.global")} {formatNumber(baseline, { maximumFractionDigits: decimals })}</span>
+                  <span className="mt-1 text-xs text-pc-text-muted">{baselineLabel} {formatNumber(baseline, { maximumFractionDigits: decimals })}</span>
                   <span className={`text-xs ${delta == null ? "text-pc-text-muted" : (metric === "deaths_per_minute" ? delta <= 0 : delta >= 0) ? "text-emerald-400" : "text-rose-400"}`}>{formatPercent(delta, { signDisplay: "always", maximumFractionDigits: 1 })}</span>
                 </>}
               </ComparisonTooltip> : <span className="pc-skeleton ml-auto block h-4 w-12 rounded" />}

@@ -22,6 +22,13 @@ Production and non-loopback hosts cannot use it, even with the flag set.
 It does not create an account, bypass backend permissions, or grant write access.
 Without the switch, normal authentication is required.
 
+For a real signed-in session with the existing local OIDC fixture, start its
+Keycloak, PostgreSQL, Redis, backend and Caddy services, then run
+`./scripts/Start-PaladinsCatDevProxy.ps1 -LocalOidc` and open `https://localhost`.
+This uses the current npm frontend, local account cookies and the local database.
+The browser must trust the fixture's local CA; `-LocalAuthBypass` must be off.
+See the wiki's `local-dev-auth` runbook for fixture prerequisites and limits.
+
 `/dev/loading-frames` exercises all 82 player-frame assets using the real component.
 This route requires the same local-only opt-in. Run its WebP/PNG browser checks
 with `npx playwright test --config test/loading-frames.config.ts` while the local

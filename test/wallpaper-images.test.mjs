@@ -7,11 +7,11 @@ import { DEFAULT_WALLPAPERS, randomizeWallpaperOrder } from "../lib/wallpaper-im
 const publicRoot = path.resolve(import.meta.dirname, "../public");
 
 test("default wallpaper rotation uses only full-scene wallpaper assets", async () => {
-  assert.equal(DEFAULT_WALLPAPERS.length, 3);
+  assert.equal(DEFAULT_WALLPAPERS.length, 10);
 
   for (const wallpaper of DEFAULT_WALLPAPERS) {
-    assert.match(wallpaper.avif, /^\/images\/wallpapers\/[a-z0-9-]+\.avif$/);
-    assert.match(wallpaper.png, /^\/images\/wallpapers\/[a-z0-9-]+\.png$/);
+    assert.match(wallpaper.avif, /^\/images\/wallpaper-new\/[A-Za-z_]+\.avif$/);
+    assert.match(wallpaper.png, /^\/images\/wallpaper-new\/[A-Za-z_]+\.png$/);
     assert.doesNotMatch(wallpaper.avif, /overhead/i);
     await Promise.all([
       access(path.join(publicRoot, wallpaper.avif)),

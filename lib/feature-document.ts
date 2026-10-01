@@ -37,7 +37,7 @@ export interface FeatureDocument {
 
 function parseFeatureDocument(rawContent: string): FeatureDocument {
   const document = parseNewFeaturesDocument(rawContent);
-  return { ...document, entries: activeNewFeatures(document.entries), sourceUrl: getFeatureSourceUrl() };
+  return { ...document, sourceUrl: getFeatureSourceUrl() };
 }
 
 async function fetchFeatureDocumentUncached(): Promise<FeatureDocument> {
@@ -52,7 +52,7 @@ async function fetchFeatureDocumentUncached(): Promise<FeatureDocument> {
 
 const getCachedFeatureDocument = unstable_cache(
   fetchFeatureDocumentUncached,
-  ["feature-document-v1", FEATURES_GITHUB_REPO, FEATURES_GITHUB_REF, FEATURES_GITHUB_PATH],
+  ["feature-document-v2", FEATURES_GITHUB_REPO, FEATURES_GITHUB_REF, FEATURES_GITHUB_PATH],
   { revalidate: 300, tags: ["features"] },
 );
 
@@ -64,7 +64,8 @@ const getCachedFeatureDocument = unstable_cache(
  */
 export async function getFeatureDocument(): Promise<FeatureDocument | null> {
   try {
-    return await getCachedFeatureDocument();
+    const document = await getCachedFeatureDocument();
+    return { ...document, entries: activeNewFeatures(document.entries) };
   } catch (error) {
     console.error("[features] unable to load GitHub document", error);
     return null;

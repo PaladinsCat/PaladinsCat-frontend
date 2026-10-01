@@ -13,6 +13,14 @@
 }
 
 .pc-search-width { max-width: var(--pc-search-width); }
+.pc-site-header {
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--pc-bg) 75%, transparent),
+    color-mix(in srgb, var(--pc-bg) 35%, transparent) 60%,
+    transparent
+  );
+}
 .pc-header-search-slot {
   position: relative;
   height: 44px;

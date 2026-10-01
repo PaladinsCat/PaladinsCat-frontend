@@ -11,10 +11,12 @@ param(
   [string]$DistDir = '.next-dev-proxy',
   [switch]$OpenBrowser,
   [switch]$LocalAuthBypass,
+  [switch]$LocalOidc,
   [string]$ApiKeyFile = ''
 )
 
 $ErrorActionPreference = 'Stop'
+if ($LocalOidc -and $LocalAuthBypass) { throw 'Choose LocalOidc or LocalAuthBypass; a real session must not use the UI bypass.' }
 $frontendRoot = Split-Path -Parent $PSScriptRoot
 $nextPackage = Join-Path $frontendRoot 'node_modules\next\package.json'
 if (-not (Test-Path -LiteralPath $nextPackage -PathType Leaf)) {
@@ -28,7 +30,7 @@ $npm = (Get-Command npm.cmd -ErrorAction Stop).Source
 $startInfo = [System.Diagnostics.ProcessStartInfo]::new()
 $startInfo.FileName = $npm
 $startInfo.Arguments = "run dev -- --port $Port"
-if ($LocalAuthBypass) { $startInfo.Arguments += " --hostname 127.0.0.1" }
+if ($LocalAuthBypass -or $LocalOidc) { $startInfo.Arguments += " --hostname 127.0.0.1" }
 $startInfo.WorkingDirectory = $frontendRoot
 $startInfo.UseShellExecute = $false
 $startInfo.CreateNoWindow = $true
@@ -37,6 +39,29 @@ $startInfo.Environment['NEXT_SERVER_API_URL'] = $TargetApi.TrimEnd('/')
 $startInfo.Environment['NEXT_DIST_DIR'] = $DistDir
 $startInfo.Environment['BROWSER'] = 'none'
 $startInfo.Environment['NEXT_PUBLIC_LOCAL_AUTH_BYPASS'] = $(if ($LocalAuthBypass) { '1' } else { '0' })
+
+if ($LocalOidc) {
+  $mockRoot = Join-Path (Split-Path -Parent $frontendRoot) 'local\mock'
+  $localFiles = @{
+    OIDC_CLIENT_SECRET_FILE = 'secrets\web-client-secret.txt'
+    PALADINSCAT_SERVICE_OIDC_PRIVATE_KEY_FILE = 'service-identities\paladinscat-frontend-service\private-key.pem'
+    PALADINSCAT_WEBSITE_GATE_SECRET_FILE = 'secrets\website-gate.txt'
+    NODE_EXTRA_CA_CERTS = 'certs\ca.crt'
+  }
+  foreach ($name in $localFiles.Keys) {
+    $file = Join-Path $mockRoot $localFiles[$name]
+    if (-not (Test-Path -LiteralPath $file -PathType Leaf)) { throw "Local OIDC requires $file." }
+    $startInfo.Environment[$name] = $file
+  }
+  $startInfo.Environment['NEXT_SERVER_API_URL'] = 'https://localhost:18082'
+  $startInfo.Environment['PALADINSCAT_PUBLIC_ORIGIN'] = 'https://localhost'
+  $startInfo.Environment['OIDC_ISSUER'] = 'https://localhost/realms/paladinscat'
+  $startInfo.Environment['OIDC_CLIENT_ID'] = 'paladinscat-web'
+  $startInfo.Environment.Remove('OIDC_INTERNAL_ISSUER') | Out-Null
+  $startInfo.Environment['PALADINSCAT_SERVICE_OIDC_ISSUER'] = 'https://localhost/realms/paladinscat'
+  $startInfo.Environment['PALADINSCAT_SERVICE_OIDC_TOKEN_URL'] = 'https://localhost/realms/paladinscat/protocol/openid-connect/token'
+  $startInfo.Environment['PALADINSCAT_SERVICE_OIDC_CLIENT_ID'] = 'paladinscat-frontend-service'
+}
 
 # Local-auth bypass: the target backend requires either an OIDC session or a
 # developer credential. With no local OIDC session, requests would 401 and the
@@ -81,6 +106,6 @@ if ($LocalAuthBypass) {
 
 $process = [System.Diagnostics.Process]::Start($startInfo)
 Write-Output "DEV_PROXY_PID=$($process.Id)"
-Write-Output "DEV_PROXY_URL=http://localhost:$Port"
+Write-Output "DEV_PROXY_URL=$(if ($LocalOidc) { 'https://localhost' } else { "http://localhost:$Port" })"
 Write-Output "DEV_PROXY_API=$($startInfo.Environment['NEXT_SERVER_API_URL'])"
-if ($OpenBrowser) { Start-Process "http://localhost:$Port" }
+if ($OpenBrowser) { Start-Process $(if ($LocalOidc) { 'https://localhost' } else { "http://localhost:$Port" }) }

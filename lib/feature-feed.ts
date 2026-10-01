@@ -15,7 +15,8 @@ export interface NewFeatureEntry {
   category: NewFeatureCategory;
   status: NewFeatureStatus;
   targetVersion: string;
-  publishedAt?: string;
+  publishedAt: string;
+  sourceUrl: string;
   title: string;
   summary: string;
   href?: string;
@@ -39,6 +40,17 @@ function validHref(value: string): boolean {
   return (value.startsWith("/") && !value.startsWith("//")) || /^https:\/\//i.test(value);
 }
 
+/** Accept a public GitHub announcement, release, or repository document. */
+function validSourceUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && url.hostname === "github.com" && !url.username && !url.password && !url.port
+      && /^\/[^/]+\/[^/]+\/(?:blob\/.+|releases\/tag\/.+|discussions\/\d+|issues\/\d+)$/.test(url.pathname);
+  } catch {
+    return false;
+  }
+}
+
 /** Parse one source entry, returning null when it violates the public contract. */
 function parseEntry(value: unknown): NewFeatureEntry | null {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
@@ -48,17 +60,17 @@ function parseEntry(value: unknown): NewFeatureEntry | null {
   const category = requiredString(record, "category") as NewFeatureCategory | null;
   const status = (requiredString(record, "status") || "released") as NewFeatureStatus;
   const targetVersion = requiredString(record, "targetVersion");
-  const publishedAt = requiredString(record, "publishedAt") || undefined;
+  const publishedAt = requiredString(record, "publishedAt");
+  const sourceUrl = requiredString(record, "sourceUrl");
   const title = requiredString(record, "title");
   const summary = requiredString(record, "summary");
   const href = requiredString(record, "href") || undefined;
 
   if (!id || !ID_PATTERN.test(id) || !kind || !KINDS.has(kind) || !category || !CATEGORIES.has(category)) return null;
   if (!STATUSES.has(status) || !targetVersion || !title || !summary || (href && !validHref(href))) return null;
-  if (status === "released" && (!publishedAt || !Number.isFinite(Date.parse(publishedAt)))) return null;
-  if (publishedAt && !Number.isFinite(Date.parse(publishedAt))) return null;
-  if (status === "upcoming" && publishedAt) return null;
-  return { id, kind, category, status, targetVersion, publishedAt, title, summary, href };
+  if (!publishedAt || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/.test(publishedAt) || !Number.isFinite(Date.parse(publishedAt))) return null;
+  if (!sourceUrl || !validSourceUrl(sourceUrl)) return null;
+  return { id, kind, category, status, targetVersion, publishedAt, sourceUrl, title, summary, href };
 }
 
 /**
@@ -80,7 +92,7 @@ export function parseNewFeaturesDocument(rawContent: string): NewFeaturesDocumen
 }
 
 /**
- * Return upcoming entries plus releases inside the seven-day visibility window, newest first.
+ * Return dated announcements inside the seven-day visibility window, newest first.
  * I/O types: `entries: NewFeatureEntry[]; now?: Date -> NewFeatureEntry[]`.
  */
 export function activeNewFeatures(entries: NewFeatureEntry[], now = new Date()): NewFeatureEntry[] {
@@ -89,13 +101,11 @@ export function activeNewFeatures(entries: NewFeatureEntry[], now = new Date()):
   return entries
     .map((entry, index) => ({ entry, index }))
     .filter(({ entry }) => {
-      if (entry.status === "upcoming") return true;
-      const published = Date.parse(entry.publishedAt || "");
+      const published = Date.parse(entry.publishedAt);
       return published <= nowMs && nowMs < published + windowMs;
     })
     .sort((left, right) => {
-      if (left.entry.status !== right.entry.status) return left.entry.status === "upcoming" ? -1 : 1;
-      const dateOrder = Date.parse(right.entry.publishedAt || "") - Date.parse(left.entry.publishedAt || "");
+      const dateOrder = Date.parse(right.entry.publishedAt) - Date.parse(left.entry.publishedAt);
       return (Number.isFinite(dateOrder) && dateOrder !== 0) ? dateOrder : left.index - right.index;
     })
     .map(({ entry }) => entry);

@@ -330,8 +330,8 @@ export default function Nav() {
 
   return (
     <>
-      {/* Nav: sticky top, shared glass surface, subtle bottom border, shadow for depth */}
-      <nav ref={navRef} className="pc-glass sticky top-0 z-50 border-b border-pc-border shadow-sm">
+      {/* Keep navigation readable while the wallpaper shows through the fading gradient. */}
+      <nav ref={navRef} className="pc-site-header sticky top-0 z-50">
         <div className="mx-auto max-w-[1536px] px-4 sm:px-6 lg:px-8">
           {/* Equal side tracks keep the destinations centered independently of controls. */}
           <div className="hidden grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4 min-[1180px]:grid" style={{ height: 64 }}>

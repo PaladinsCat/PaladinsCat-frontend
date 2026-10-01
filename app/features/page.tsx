@@ -84,22 +84,26 @@ export default async function FeaturesPage() {
                   <span className="text-pc-text-muted" aria-hidden="true">·</span>
                   <span className="text-pc-text-secondary">{categoryLabels[entry.category]}</span>
                 </div>
-                <h2 className="mt-3 text-xl font-bold leading-tight text-pc-text">{entry.title}</h2>
+                <h2 className="mt-3 text-xl font-bold leading-tight text-pc-text">
+                  {!entry.href ? entry.title : entry.href.startsWith("/") ? (
+                    <Link href={entry.href} className="hover:text-pc-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent">{entry.title}</Link>
+                  ) : (
+                    <a href={entry.href} target="_blank" rel="noopener noreferrer" className="hover:text-pc-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent">{entry.title}</a>
+                  )}
+                </h2>
                 <p className="mt-2 flex-1 text-base leading-7 text-pc-text-secondary">{entry.summary}</p>
-                <div className="mt-5 flex items-center justify-between gap-3 border-t border-pc-border pt-3 text-sm text-pc-text-muted">
-                  <span>{entry.targetVersion}</span>
-                  {entry.status === "upcoming" ? <span>{t("features.upcoming")}</span> : entry.publishedAt ? <time dateTime={entry.publishedAt}>{dateFormatter.format(new Date(entry.publishedAt))}</time> : null}
+                <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-pc-border pt-3 text-sm text-pc-text-muted">
+                  <span>{entry.targetVersion}{entry.status === "upcoming" ? ` · ${t("features.upcoming")}` : ""}</span>
+                  <time dateTime={entry.publishedAt}>{dateFormatter.format(new Date(entry.publishedAt))}</time>
+                  <a href={entry.sourceUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-pc-text-secondary hover:text-pc-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent">
+                    <GitBranch className="h-4 w-4" aria-hidden="true" />
+                    {t("common.github")}
+                  </a>
                 </div>
               </>
             );
             const className = "pc-home-feature-card group flex min-h-64 flex-col rounded-xl border border-pc-border bg-pc-bg-secondary/70 p-5 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent";
-            if (!entry.href) return <article key={entry.id} className={className}>{content}</article>;
-            const external = !entry.href.startsWith("/");
-            return external ? (
-              <a key={entry.id} href={entry.href} target="_blank" rel="noopener noreferrer" className={className}>{content}</a>
-            ) : (
-              <Link key={entry.id} href={entry.href} className={className}>{content}</Link>
-            );
+            return <article key={entry.id} className={className}>{content}</article>;
           })}
         </div>
         {!document?.entries.length ? <p className="pt-6 text-base text-pc-text-secondary">{t("features.empty")}</p> : null}

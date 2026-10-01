@@ -11,9 +11,16 @@
 export type BuiltInWallpaper = { avif: string; png: string };
 
 const WALLPAPER_IDS = [
-  "androxus-moonlight",
-  "dj-maeve",
-  "inara-forest",
+  "Frog_Isle_Loading",
+  "Frozen_Guard_Loading",
+  "Match_Snowfall_Junction",
+  "Warders_Gate_Loading",
+  "Match_Bazaar",
+  "Ascension_Peak_Loading",
+  "Match_Frostbite_Cavern",
+  "Ice_Mines_Loading",
+  "Jaguar_Falls_Loading",
+  "Brightmarsh_Loading",
 ] as const;
 
 // Full-scene artwork only. Tactical overhead map layouts remain available to
@@ -25,8 +32,8 @@ const WALLPAPER_IDS = [
  * refs: none
  */
 export const DEFAULT_WALLPAPERS: BuiltInWallpaper[] = WALLPAPER_IDS.map((id) => ({
-  avif: `/images/wallpapers/${id}.avif`,
-  png: `/images/wallpapers/${id}.png`,
+  avif: `/images/wallpaper-new/${id}.avif`,
+  png: `/images/wallpaper-new/${id}.png`,
 }));
 
 /**
