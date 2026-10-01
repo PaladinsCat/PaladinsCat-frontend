@@ -3112,7 +3112,14 @@ export async function fetchJson<T>(path: string, options?: RequestInit & { retri
     if (!res.ok) {
       if (res.status >= 500 && attempt < retries) {
         clearTimeout(timeoutId);
-        await new Promise((r) => setTimeout(r, 500 * (attempt + 1)));
+        const backoffMs = 500 * (attempt + 1);
+        const retryAfterSeconds = Number(res.headers.get("retry-after"));
+        // Busy reads advertise when cache preparation can be retried. Keep the
+        // existing attempt limit and bound the server-directed wait to 30s.
+        const delayMs = method === "GET" && res.status === 503 && Number.isFinite(retryAfterSeconds) && retryAfterSeconds > 0
+          ? Math.max(backoffMs, Math.min(retryAfterSeconds * 1000, 30_000))
+          : backoffMs;
+        await new Promise((r) => setTimeout(r, delayMs));
         continue;
       }
       const errBody = await res.json().catch(() => null).finally(() => clearTimeout(timeoutId));
