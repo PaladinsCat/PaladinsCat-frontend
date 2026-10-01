@@ -19,15 +19,11 @@ export function computeDamageStats(p: MatchPlayerDetail) {
   // `damage_done_physical` field. Magical and in-hand values are optional
   // breakdown fields already included in that total.
   const totalDamage = p.damage_done_physical;
+  const weaponDamage = p.damage_done_in_hand ?? totalDamage;
 
   // Explicit zero is valid. The separate tag prevents a missing provider
   // field from being mistaken for zero weapon damage and all skill damage.
-  // Older records may be tagged available despite an invalid negative split.
-  const hasWeaponBreakdown = p.damage_breakdown_available === true
-    && p.damage_done_in_hand != null
-    && Number.isFinite(p.damage_done_in_hand)
-    && p.damage_done_in_hand >= 0;
-  const weaponDamage = hasWeaponBreakdown ? p.damage_done_in_hand! : totalDamage;
+  const hasWeaponBreakdown = p.damage_breakdown_available === true;
   const nonWeaponDamage = hasWeaponBreakdown
     ? Math.max(totalDamage - weaponDamage, 0)
     : null;
