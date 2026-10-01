@@ -93,7 +93,7 @@ export default async function FeaturesPage() {
                 </h2>
                 <p className="mt-2 flex-1 text-base leading-7 text-pc-text-secondary">{entry.summary}</p>
                 <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-pc-border pt-3 text-sm text-pc-text-muted">
-                  <span>{entry.targetVersion}{entry.status === "upcoming" ? ` · ${t("features.upcoming")}` : ""}</span>
+                  <span>{entry.targetVersion}{entry.status === "upcoming" && <> {"·"} {t("features.upcoming")}</>}</span>
                   <time dateTime={entry.publishedAt}>{dateFormatter.format(new Date(entry.publishedAt))}</time>
                   <a href={entry.sourceUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-pc-text-secondary hover:text-pc-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent">
                     <GitBranch className="h-4 w-4" aria-hidden="true" />

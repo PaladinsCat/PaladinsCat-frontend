@@ -19,6 +19,7 @@ import { formatKda } from "@/lib/kda";
 import { getPercentageColor } from "@/lib/stat-quality";
 import { useLocalization } from "@/lib/localization-context";
 import type { PlayerChampionScope } from "@/lib/api-client";
+import { ArrowDown, ArrowUp, ChevronDown, ChevronRight } from "lucide-react";
 
 
 const ROLES = [
@@ -286,7 +287,7 @@ export default function PlayerChampionStatsPage() {
             <option value="winRate">{t("common.metrics.winRate")}</option>
             <option value="rating">{t("generated.players.rating")}</option>
           </select>
-          <button type="button" onClick={() => setSortDescending((descending) => !descending)} className="pc-select flex cursor-pointer items-center gap-1" title={sortDescending ? t("generated.champions.descending") : t("generated.champions.ascending")}>{sortDescending ? "↓" : "↑"}</button>
+          <button type="button" onClick={() => setSortDescending((descending) => !descending)} className="pc-select flex cursor-pointer items-center gap-1" title={sortDescending ? t("generated.champions.descending") : t("generated.champions.ascending")}>{sortDescending ? <ArrowDown aria-hidden="true" size={16} className="inline shrink-0 align-middle" /> : <ArrowUp aria-hidden="true" size={16} className="inline shrink-0 align-middle" />}</button>
         </div>
       </div>
 
@@ -321,7 +322,7 @@ export default function PlayerChampionStatsPage() {
                       <div className="flex items-center gap-1.5">
                         <img src={getChampionIconSafe(champion.championName)} alt="" className="h-5 w-5 shrink-0 rounded object-contain" />
                         <span className="font-medium text-pc-text">{champion.championName}</span>
-                        <button type="button" aria-expanded={expanded} aria-controls={detailsId} aria-label={`${t(expanded ? "generated.matches.collapse" : "generated.matches.expand")} ${t("generated.matches.details")}`} onClick={() => setExpandedChampions((current) => { const next = new Set(current); if (next.has(champion.championId)) next.delete(champion.championId); else next.add(champion.championId); return next; })} className="ml-auto rounded px-1 text-pc-text-secondary hover:bg-pc-bg-elevated hover:text-pc-accent">{expanded ? "▾" : "▸"}</button>
+                        <button type="button" aria-expanded={expanded} aria-controls={detailsId} aria-label={`${t(expanded ? "generated.matches.collapse" : "generated.matches.expand")} ${t("generated.matches.details")}`} onClick={() => setExpandedChampions((current) => { const next = new Set(current); if (next.has(champion.championId)) next.delete(champion.championId); else next.add(champion.championId); return next; })} className="ml-auto rounded px-1 text-pc-text-secondary hover:bg-pc-bg-elevated hover:text-pc-accent">{expanded ? <ChevronDown aria-hidden="true" size={12} className="inline shrink-0 align-middle" /> : <ChevronRight aria-hidden="true" size={12} className="inline shrink-0 align-middle" />}</button>
                       </div>
                     </td>
                     <td className="px-1.5 py-1.5 font-mono text-xs text-pc-accent">{championMasteryLevelFromXp(champion.xp)}</td>

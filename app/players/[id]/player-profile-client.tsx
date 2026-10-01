@@ -39,6 +39,7 @@ import type { PlayerResponse } from "@/lib/player-profile-types";
 import PlayerRelationshipSummaryCard from "@/components/player-relationship-summary";
 import PlayerTrendsPanel from "@/components/player-trends";
 import { LoginRequired } from "@/components/login-required";
+import { ArrowDown, ArrowRight, ArrowUp, ChevronRight, CirclePlay, Menu, RefreshCw, X } from "lucide-react";
 
 interface RefreshFeedback {
   kind: 'warning' | 'success' | 'error';
@@ -64,9 +65,9 @@ interface PlayerRefreshActionResponse {
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api";
 
-function trendArrow(trend: number): string {
-  if (trend > 0) return "↑";
-  if (trend < 0) return "↓";
+function trendArrow(trend: number): React.ReactNode {
+  if (trend > 0) return <ArrowUp size={16} className="inline align-middle" aria-hidden="true" />;
+  if (trend < 0) return <ArrowDown size={16} className="inline align-middle" aria-hidden="true" />;
   return "—";
 }
 
@@ -77,7 +78,7 @@ function trendColor(trend: number): string {
 }
 
 // Inline stat row: label + value
-function StatRow({ label, value, color, style }: { label: string; value: string; color?: string; style?: React.CSSProperties }) {
+function StatRow({ label, value, color, style }: { label: string; value: React.ReactNode; color?: string; style?: React.CSSProperties }) {
   return (
     <div className="flex min-w-0 items-start justify-between gap-3">
       <span className="min-w-0 break-words text-xs text-pc-text-muted">{label}</span>
@@ -529,7 +530,7 @@ export default function PlayerProfileClient({
             className="inline-flex items-center gap-1.5 rounded-lg border border-pc-border/70 bg-pc-bg-secondary/90 px-3 py-2 text-xs font-semibold text-pc-text transition-colors hover:border-pc-accent-mid hover:text-pc-accent"
             title={t("generated.players.checkCurrentMatch")}
           >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+            <CirclePlay aria-hidden="true" size={15} />
             {t("generated.players.current")}</button>
 
           <button
@@ -539,7 +540,7 @@ export default function PlayerProfileClient({
             className="inline-flex items-center gap-1.5 rounded-lg border border-pc-border/70 bg-pc-bg-secondary/90 px-3 py-2 text-xs font-semibold text-pc-text transition-colors hover:border-pc-accent-mid hover:text-pc-accent disabled:cursor-not-allowed disabled:opacity-50"
             title={t("common.playerRefresh.quotaTitle")}
           >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={refreshing ? 'animate-spin' : ''} aria-hidden="true"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+            <RefreshCw aria-hidden="true" size={15} className={refreshing ? 'animate-spin' : ''} />
             {refreshing ? t("generated.players.refreshing") : refreshRemainingMs > 0 ? t("generated.players.refreshInValue1", { value1: formatCooldown(refreshRemainingMs) }) : t("generated.players.refresh")}
           </button>
 
@@ -553,7 +554,7 @@ export default function PlayerProfileClient({
             aria-haspopup="menu"
             aria-expanded={actionMenuOpen}
           >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
+            <Menu aria-hidden="true" size={15} />
             {t("generated.players.actions")}</button>
 
           {actionMenuOpen && (
@@ -695,7 +696,7 @@ export default function PlayerProfileClient({
                                   : parsedTitle.text}
                               </span>
                             )}
-              <span className="text-sm font-medium text-pc-accent/80 sm:text-base">▸ {loadingFrameName}</span>
+              <span className="text-sm font-medium text-pc-accent/80 sm:text-base"><ChevronRight aria-hidden="true" size={12} className="inline shrink-0 align-middle" /> {loadingFrameName}</span>
             </div>
             {!fullAccess && <div className="mt-4 space-y-3 text-sm text-pc-text-muted">
               <p>{player.region} · {player.platform} · {t("generated.players.lvl")} {formatNumber(player.level)}</p>
@@ -858,18 +859,18 @@ export default function PlayerProfileClient({
           <Link href={`/players/${id}/loadouts`} className="group flex items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-3 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary">
             <CardIcon name="loadouts" className="ml-3 text-[var(--pc-title)]" />
             <div className="min-w-0 flex-1 text-sm font-semibold text-pc-text group-hover:text-pc-accent">{t("generated.players.playerLoadouts")}</div>
-            <span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent" aria-hidden="true">→</span>
+            <span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent" aria-hidden="true"><ArrowRight aria-hidden="true" size={16} className="inline shrink-0 align-middle" /></span>
           </Link>
           <Link href={`/players/${id}/champions`} className="group flex items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-3 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary">
             <CardIcon name="champion-stats" className="ml-3 text-[var(--pc-title)]" />
             <div className="min-w-0 flex-1 text-sm font-semibold text-pc-text group-hover:text-pc-accent">{t("common.playerChampions.title")}</div>
-            <span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent" aria-hidden="true">→</span>
+            <span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent" aria-hidden="true"><ArrowRight aria-hidden="true" size={16} className="inline shrink-0 align-middle" /></span>
           </Link>
 
           <Link href={`/players/${id}/friends`} className="group flex items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-3 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary">
             <CardIcon name="friends" className="ml-3 text-[var(--pc-title)]" />
             <div className="min-w-0 flex-1 text-sm font-semibold text-pc-text group-hover:text-pc-accent">{t("playerFriends.title")}</div>
-            <span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent" aria-hidden="true">→</span>
+            <span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent" aria-hidden="true"><ArrowRight aria-hidden="true" size={16} className="inline shrink-0 align-middle" /></span>
           </Link>
           <PlayerRelationshipSummaryCard playerId={id} />
 
@@ -886,7 +887,7 @@ export default function PlayerProfileClient({
                   <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
                     <StatRow label={t("generated.players.rank")} value={`#${effectiveTier.displayRank}`} color="text-pc-accent" />
                     <StatRow label={t("generated.players.prev")} value={`#${player.kbm_prev_rank}`} />
-                    <StatRow label={t("generated.players.trend")} value={`${trendArrow(player.kbm_trend)} ${Math.abs(player.kbm_trend)}`} color={trendColor(player.kbm_trend)} />
+                    <StatRow label={t("generated.players.trend")} value={<span aria-label={player.kbm_trend === 0 ? undefined : t("common.summary.valueMetric", { value: formatNumber(Math.abs(player.kbm_trend)), metric: t(player.kbm_trend > 0 ? "generated.players.ascending" : "generated.players.descending") })}>{trendArrow(player.kbm_trend)} {Math.abs(player.kbm_trend)}</span>} color={trendColor(player.kbm_trend)} />
                     <StatRow label={t("common.metrics.deserted")} value={formatNumber(player.kbm_leaves)} />
                   </div>
                 </div>
@@ -1001,7 +1002,7 @@ export default function PlayerProfileClient({
             <div className="mb-5 flex items-center justify-between">
               <h3 className="text-xl font-bold text-pc-text sm:text-2xl">{t("generated.players.currentMatch")}</h3>
               <button onClick={() => setShowCurrentMatch(false)} className="text-pc-text-muted hover:text-pc-text transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                <X aria-hidden="true" size={22} />
               </button>
             </div>
             {!currentMatch ? (

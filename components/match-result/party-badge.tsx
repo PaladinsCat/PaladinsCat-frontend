@@ -45,7 +45,7 @@ export default function PartyBadge({
       title={t("common.party.queuedTogether", { number: partyNumber })}
       aria-label={t("common.party.label", { number: partyNumber })}
     >
-      <Users aria-hidden="true" className="h-3 w-3" strokeWidth={2.25} />
+      <Users aria-hidden="true" className="h-3 w-3" />
       {partyNumber}
     </span>
   );

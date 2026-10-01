@@ -10,6 +10,7 @@ import { toPng } from "html-to-image";
 import { LoadingIndicator } from "@/components/async-state";
 import { useLocalization } from "@/lib/localization-context";
 import type { TierListMode } from "@/lib/tierlists-api";
+import { Download } from "lucide-react";
 
 type TierListExportButtonProps = {
   tierListId: number;
@@ -85,7 +86,7 @@ export default function TierListExportButton({ tierListId, mode, target }: TierL
   return <div className="flex items-center gap-2">
     {message && <span className="hidden text-xs text-pc-text-secondary sm:inline" role="status">{message}</span>}
     <button type="button" onClick={exportImage} disabled={exporting} className="inline-flex items-center gap-1.5 rounded-lg border border-pc-border bg-pc-bg-secondary px-3 py-1.5 text-xs font-semibold text-pc-text transition-colors hover:border-pc-accent-mid hover:text-pc-accent disabled:cursor-not-allowed disabled:opacity-60" title={t("tierLists.exportImage")}>
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
+      <Download aria-hidden="true" size={14} />
       {exporting ? <LoadingIndicator className="gap-2" /> : t("tierLists.exportImage")}
     </button>
   </div>;

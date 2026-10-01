@@ -2,6 +2,7 @@
  * refs: none
  */
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
 /**
  * Render an accessible detail navigation link with the supplied destination, label, and optional classes.
@@ -21,6 +22,6 @@ export default function DetailLink({
     href={href}
     className={`group/detail inline-flex min-h-11 shrink-0 items-center gap-1 rounded-lg px-2 text-xs font-semibold text-pc-text-secondary transition-colors hover:bg-pc-bg-elevated hover:text-pc-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent sm:min-h-8 ${className}`}
   >
-    <span>{label}</span><span aria-hidden="true">→</span>
+    <span>{label}</span><span aria-hidden="true"><ArrowRight aria-hidden="true" size={16} className="inline shrink-0 align-middle" /></span>
   </Link>;
 }

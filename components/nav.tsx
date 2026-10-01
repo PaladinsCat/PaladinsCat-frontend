@@ -7,7 +7,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Search } from "lucide-react";
+import { Search, ChevronDown, Globe2, Menu, X } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { SUPPORTED_LOCALES, useLocalization } from "@/lib/localization-context";
 import {
@@ -77,9 +77,9 @@ function LanguageMenu() {
         aria-haspopup="listbox"
         aria-expanded={open}
       >
-        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="12" cy="12" r="10" /><path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20M12 2a15.3 15.3 0 0 0 0 20" /></svg>
+        <Globe2 aria-hidden="true" className="h-4 w-4" />
         <span className="hidden max-w-20 truncate text-xs font-semibold tracking-wide min-[480px]:inline">{activeLocale.code.toUpperCase()}</span>
-        <svg className={`hidden h-3 w-3 transition-transform min-[480px]:block ${open ? "rotate-180" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+        <ChevronDown aria-hidden="true" className={`hidden h-3 w-3 transition-transform min-[480px]:block ${open ? "rotate-180" : ""}`} />
       </button>
       {open && (
         <div className="absolute right-0 top-full z-30 mt-2 w-60 overflow-hidden rounded-xl border border-pc-border bg-pc-bg-secondary p-1 shadow-lg" role="listbox" aria-label={t("nav.language")}>
@@ -359,7 +359,7 @@ export default function Nav() {
                   <div key={group.title} className="group relative flex items-center">
                     <span className={`pc-nav-link inline-flex items-center gap-1 ${groupActive ? "pc-nav-link-active" : ""}`}>
                       {group.title}
-                      <svg className="h-3.5 w-3.5 transition-transform group-hover:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+                      <ChevronDown aria-hidden="true" className="h-3.5 w-3.5 transition-transform group-hover:rotate-180" />
                     </span>
                     <div className="pointer-events-none invisible absolute left-1/2 top-full z-20 w-64 -translate-x-1/2 pt-2 opacity-0 transition-all group-hover:pointer-events-auto group-hover:visible group-hover:opacity-100">
                       <div className="max-h-[calc(100vh-5rem)] overflow-y-auto overscroll-contain rounded-lg border border-pc-border bg-pc-bg-secondary p-2 shadow-md" role="menu" aria-label={group.title}>
@@ -391,7 +391,7 @@ export default function Nav() {
                 aria-label={t("nav.openSiteMenu")}
                 aria-expanded={sideMenuOpen}
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
+                <Menu aria-hidden="true" size={16} />
                 {t("nav.menu")}
               </button>
               {resolvedUser ? (
@@ -438,7 +438,7 @@ export default function Nav() {
                 className="pc-touch-target p-2 text-pc-text transition-colors hover:text-pc-accent"
                 aria-label={t("generated.common.menu")}
               >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M3 12h18M3 6h18M3 18h18" /></svg>
+                <Menu aria-hidden="true" size={24} />
               </button>
             </div>
           </div>
@@ -451,7 +451,7 @@ export default function Nav() {
           <aside className="absolute inset-y-0 right-0 flex w-[min(24rem,calc(100vw-2rem))] flex-col border-l border-pc-border bg-pc-bg-secondary shadow-lg">
             <div className="flex items-center justify-between border-b border-pc-border px-5 py-4">
               <Link href="/" onClick={() => setSideMenuOpen(false)} className="flex items-center gap-2 font-bold text-pc-text"><img src="/images/icons/paladinscat.avif" alt="" className="h-6 w-6" />{t("generated.common.paladinscat")}</Link>
-              <button onClick={() => setSideMenuOpen(false)} className="rounded-lg p-2 text-pc-text-secondary hover:bg-pc-bg-elevated hover:text-pc-accent" aria-label={t("nav.closeSiteMenu")}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
+              <button onClick={() => setSideMenuOpen(false)} className="rounded-lg p-2 text-pc-text-secondary hover:bg-pc-bg-elevated hover:text-pc-accent" aria-label={t("nav.closeSiteMenu")}><X aria-hidden="true" size={20} /></button>
             </div>
             <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-5">
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">

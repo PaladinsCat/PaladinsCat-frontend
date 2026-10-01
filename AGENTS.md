@@ -14,5 +14,8 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
   add their packages, fonts, glyphs, assets, CDN links, or icon classes.
 - Reuse existing icons and the existing Lucide component for the same action.
   A layout or consistency request does not authorize replacing the icon family.
+- Interface and topic icons use Lucide's 24px canvas, 2-unit rounded outline.
+  Topic mappings live in `components/card-icon.tsx`; shared stroke styling lives
+  in `app/globals.css`. Preserve game artwork and official brand/platform logos.
 - Canonical rule: `../paladinscat-wiki/documents/06-reference/design/frontend-design-system.md`,
   "Typography and iconography". Feature cards use `docs/card-icon-design.md`.

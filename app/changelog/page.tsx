@@ -10,6 +10,7 @@ import { LoadingPanel } from "@/components/async-state";
 import { usePersistentDirectoryPage } from "@/components/player-directory-pagination";
 import { useLocalization } from "@/lib/localization-context";
 import type { TranslationKey } from "@/lib/localization/messages";
+import { Activity } from "lucide-react";
 
 const PER_PAGE = 10;
 
@@ -135,7 +136,7 @@ function VersionHistoryGraph({ entries }: { entries: ChangelogPage["data"] }) {
   return (
     <div className="pc-card sticky top-20">
       <h2 className="text-sm font-bold text-pc-text mb-4 flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-pc-accent"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>
+        <Activity aria-hidden="true" size={14} className="text-pc-accent" />
         {t("generated.changelog.versionHistory")}</h2>
 
       <div className="space-y-0">

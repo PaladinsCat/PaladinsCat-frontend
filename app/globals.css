@@ -6,10 +6,19 @@
 @import "shadcn/tailwind.css";
 
 :root {
+  --pc-icon-stroke: 2;
   --pc-search-width: 28rem;
   --pc-motion-fast: 120ms;
   --pc-motion-base: 200ms;
   --pc-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* One outline style for interface and topic icons; artwork keeps its own rendering. */
+.lucide {
+  flex-shrink: 0;
+  stroke-width: var(--pc-icon-stroke);
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .pc-search-width { max-width: var(--pc-search-width); }

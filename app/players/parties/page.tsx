@@ -9,7 +9,7 @@ import { formatApiErrorMessage } from "@/lib/api-errors";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Search } from "lucide-react";
+import { Search, ArrowRight } from "lucide-react";
 import { LoadingPanel } from "@/components/async-state";
 import PlayerDirectoryPagination, { usePersistentDirectoryPage } from "@/components/player-directory-pagination";
 import PlayerName from "@/components/player-name";
@@ -28,7 +28,7 @@ type DirectoryMode = "stacks" | "pairs";
 
 function MatchCount({ count, href }: { count: number; href: string }) {
   const { t, formatNumber } = useLocalization();
-  return <Link href={href} className="shrink-0 text-xs font-semibold tabular-nums text-pc-accent hover:underline">{formatNumber(count)} {t("generated.players.match")}{count === 1 ? "" : t("generated.players.es")} →</Link>;
+  return <Link href={href} className="shrink-0 text-xs font-semibold tabular-nums text-pc-accent hover:underline">{formatNumber(count)} {t("generated.players.match")}{count === 1 ? "" : t("generated.players.es")} <ArrowRight aria-hidden="true" size={16} className="inline shrink-0 align-middle" /></Link>;
 }
 
 /**

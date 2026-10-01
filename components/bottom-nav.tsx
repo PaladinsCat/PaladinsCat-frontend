@@ -8,7 +8,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Home,
-  Sword,
+  Swords,
   BarChart3,
   Users,
   Menu,
@@ -17,7 +17,7 @@ import { useLocalization } from "@/lib/localization-context";
 
 const items = [
   { href: "/", labelKey: "menu.home", icon: Home },
-  { href: "/champions", labelKey: "nav.champions", icon: Sword },
+  { href: "/champions", labelKey: "nav.champions", icon: Swords },
   { href: "/stats", labelKey: "nav.stats", icon: BarChart3 },
   { href: "/players", labelKey: "nav.players", icon: Users },
 ] as const;
@@ -52,7 +52,7 @@ export default function BottomNav() {
               aria-label={t(item.labelKey)}
             >
               <item.icon
-                className={`w-5 h-5 ${isActive ? "stroke-[2.5]" : "stroke-[1.5]"}`}
+                className="h-5 w-5" aria-hidden="true"
               />
               <span className="mt-0.5 max-w-full truncate text-xs font-medium leading-none">{t(item.labelKey)}</span>
             </Link>
@@ -64,7 +64,7 @@ export default function BottomNav() {
           className="flex h-12 min-w-0 flex-col items-center justify-center rounded-xl px-0.5 text-pc-text-muted transition-all duration-200 hover:bg-pc-bg-secondary hover:text-pc-text"
           aria-label={t("bottomNav.moreNavigation")}
         >
-          <Menu className="h-5 w-5 stroke-[1.5]" />
+          <Menu className="h-5 w-5" aria-hidden="true" />
           <span className="mt-0.5 text-xs font-medium leading-none">{t("bottomNav.more")}</span>
         </button>
       </div>

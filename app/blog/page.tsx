@@ -6,6 +6,7 @@ import { BLOG_CATEGORIES, getAllPosts, getPostLink, isBlogCategory, type BlogCat
 import { BLOG_COPY_KEYS } from "@/lib/blog-copy";
 import { getServerLocalization } from "@/lib/server-localization";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
 // Blog content is owned by GitHub. Always render against its current contents
 // while keeping this public route at /blog.
@@ -134,9 +135,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                 </p>
                 <div className="flex items-center gap-1 text-sm text-pc-accent group-hover:opacity-80 transition-opacity">
                   {t(BLOG_COPY_KEYS.readMore)}
-                  <svg className="h-4 w-4 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M512 14m125l7777" />
-                  </svg>
+                  <ArrowRight aria-hidden="true" className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                 </div>
               </article>
             </Link>

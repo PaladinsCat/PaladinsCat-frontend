@@ -1,3 +1,5 @@
+import { BadgeCheck, Star, Trophy } from "lucide-react";
+
 /**
  * Badge component — reusable status/role badges Pattern source: Paladins.guru (Verified/Supporter badges on user content) Variants: - verified: green accent, checkmark icon, for verified players
  * - supporter: gold accent, star icon, for supporting members
@@ -54,25 +56,17 @@ const variantStyles: Record<BadgeVariant, { bg: string; text: string; border: st
   },
 };
 
-// Icon components — inline SVGs for zero dependency
+// Status badges use the same Lucide geometry as the rest of the interface.
 const CheckIcon = () => (
-  <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="mr-1">
-    <path d="M2 6l3 3 5-6" />
-  </svg>
+  <BadgeCheck aria-hidden="true" size={10} className="mr-1 shrink-0" />
 );
 
 const StarIcon = () => (
-  <svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor" className="mr-1">
-    <path d="M6 1l1.5 3.5L11 5l-2.5 2.5L7.5 11 6 8.5 4.5 11 3.5 7.5 1 5l3.5-.5z" />
-  </svg>
+  <Star aria-hidden="true" size={10} className="mr-1 shrink-0" />
 );
 
 const TrophyIcon = () => (
-  <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="mr-1">
-    <path d="M4 1h4v3.5a2 2 0 01-4 0V1z" />
-    <path d="M5 11h2" />
-    <path d="M5 8v3" />
-  </svg>
+  <Trophy aria-hidden="true" size={10} className="mr-1 shrink-0" />
 );
 
 const iconMap: Record<string, React.ReactNode> = {

@@ -18,6 +18,7 @@ import { useLocalization } from "@/lib/localization-context";
 import type { TranslationKey } from "@/lib/localization/messages";
 import PlayersPageHeader from "@/components/ui/players-page-header";
 import { useInitialLeaderboard } from "./initial-data";
+import { ArrowDown, ArrowUp, ChevronDown, ChevronRight, Medal, X } from "lucide-react";
 
 const TIER_GROUPS: ReadonlyArray<{
   group: string;
@@ -54,11 +55,11 @@ const MOBILE_TIER_OPTIONS: Array<{ value: string; labelKey: TranslationKey }> = 
 
 function RankBadge({ rank }: { rank: number }) {
   if (rank === 1)
-    return <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-yellow-500/20 text-yellow-400 font-bold text-sm">🥇</span>;
+    return <span role="img" aria-label={String(rank)} className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-yellow-500/20 text-yellow-400 font-bold text-sm"><Medal aria-hidden="true" size={16} className="inline shrink-0 align-middle" /></span>;
   if (rank === 2)
-    return <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-gray-400/20 text-gray-300 font-bold text-sm">🥈</span>;
+    return <span role="img" aria-label={String(rank)} className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-gray-400/20 text-gray-300 font-bold text-sm"><Medal aria-hidden="true" size={16} className="inline shrink-0 align-middle" /></span>;
   if (rank === 3)
-    return <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-600/20 text-amber-600 font-bold text-sm">🥉</span>;
+    return <span role="img" aria-label={String(rank)} className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-600/20 text-amber-600 font-bold text-sm"><Medal aria-hidden="true" size={16} className="inline shrink-0 align-middle" /></span>;
   return <span className="inline-flex items-center justify-center w-7 h-7 text-pc-text-muted text-sm">{rank}</span>;
 }
 
@@ -181,7 +182,7 @@ export default function LeaderboardPage() {
                   {SORT_OPTIONS.map((option) => <option key={option.key} value={option.key}>{t(option.labelKey)}</option>)}
                 </select>
                 <button type="button" onClick={() => setSortDir((direction) => direction === "asc" ? "desc" : "asc")} className="pc-touch-target rounded-lg border border-pc-border bg-pc-bg px-3 text-pc-accent" aria-label={t("generated.players.sortValue1", { value1: sortDir === "asc" ? t("generated.players.descending") : t("generated.players.ascending") })}>
-                  {sortDir === "asc" ? "↑" : "↓"}
+                  {sortDir === "asc" ? <ArrowUp aria-hidden="true" size={16} className="inline shrink-0 align-middle" /> : <ArrowDown aria-hidden="true" size={16} className="inline shrink-0 align-middle" />}
                 </button>
               </div>
             </label>
@@ -240,7 +241,7 @@ export default function LeaderboardPage() {
                       }`}
                     >
                       <span>{t(group.groupKey)}</span>
-                      <span className="text-xs text-pc-text-muted">{isExpanded ? "▾" : "▸"}</span>
+                      <span className="text-xs text-pc-text-muted">{isExpanded ? <ChevronDown aria-hidden="true" size={12} className="inline shrink-0 align-middle" /> : <ChevronRight aria-hidden="true" size={12} className="inline shrink-0 align-middle" />}</span>
                     </button>
                     {isExpanded && (
                       <div className="ml-2 mt-0.5 space-y-0.5 border-l border-pc-border/50 pl-2">
@@ -288,7 +289,7 @@ export default function LeaderboardPage() {
                 >
                   <span>{t(opt.labelKey)}</span>
                   {sortKey === opt.key && (
-                    <span className="text-xs">{sortDir === "asc" ? "↑" : "↓"}</span>
+                    <span className="text-xs">{sortDir === "asc" ? <ArrowUp aria-hidden="true" size={16} className="inline shrink-0 align-middle" /> : <ArrowDown aria-hidden="true" size={16} className="inline shrink-0 align-middle" />}</span>
                   )}
                 </button>
               ))}
@@ -309,9 +310,10 @@ export default function LeaderboardPage() {
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery("")}
+                  aria-label={t("generated.players.clearSearch")}
                   className="absolute right-2 top-1/2 -translate-y-1/2 text-pc-text-muted hover:text-pc-text text-xs"
                 >
-                  ✕
+                  <X aria-hidden="true" size={16} className="inline shrink-0 align-middle" />
                 </button>
               )}
             </div>
@@ -369,7 +371,7 @@ export default function LeaderboardPage() {
                     <div className="shrink-0 text-right">
                       <div className="font-mono text-sm font-bold text-pc-accent">{formatNumber(player.points)}</div>
                       <div className="text-xs uppercase tracking-wide text-pc-text-muted">{t("generated.players.points")}</div>
-                      {player.trend != null && player.trend !== 0 && <div className={`mt-0.5 text-xs ${player.trend > 0 ? "text-emerald-400" : "text-red-400"}`}>{player.trend > 0 ? "▲" : "▼"}{Math.abs(player.trend)}</div>}
+                      {player.trend != null && player.trend !== 0 && <div aria-label={t("common.summary.valueMetric", { value: formatNumber(Math.abs(player.trend)), metric: t(player.trend > 0 ? "generated.players.ascending" : "generated.players.descending") })} className={`mt-0.5 text-xs ${player.trend > 0 ? "text-emerald-400" : "text-red-400"}`}>{player.trend > 0 ? <ArrowUp aria-hidden="true" size={16} className="inline shrink-0 align-middle" /> : <ArrowDown aria-hidden="true" size={16} className="inline shrink-0 align-middle" />}{Math.abs(player.trend)}</div>}
                     </div>
                   </Link>
                 );
@@ -418,8 +420,8 @@ export default function LeaderboardPage() {
                           <td className="py-2.5 px-4 text-right text-pc-text font-medium">{formatNumber(p.points)}</td>
                           <td className="py-2.5 px-4 text-right">
                             {p.trend != null && p.trend !== 0 ? (
-                              <span className={`text-xs ${p.trend > 0 ? "text-emerald-400" : "text-red-400"}`}>
-                                {p.trend > 0 ? "▲" : "▼"}{Math.abs(p.trend)}
+                              <span aria-label={t("common.summary.valueMetric", { value: formatNumber(Math.abs(p.trend)), metric: t(p.trend > 0 ? "generated.players.ascending" : "generated.players.descending") })} className={`text-xs ${p.trend > 0 ? "text-emerald-400" : "text-red-400"}`}>
+                                {p.trend > 0 ? <ArrowUp aria-hidden="true" size={16} className="inline shrink-0 align-middle" /> : <ArrowDown aria-hidden="true" size={16} className="inline shrink-0 align-middle" />}{Math.abs(p.trend)}
                               </span>
                             ) : (
                               <span className="text-pc-text-muted text-xs">—</span>

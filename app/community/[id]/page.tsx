@@ -29,6 +29,7 @@ import { LoadingIndicator, LoadingPanel } from "@/components/async-state";
 import { VerifiedPlayerBadge } from "@/components/player-name";
 import { useLocalization } from "@/lib/localization-context";
 import ContextBackLink from "@/components/context-back-link";
+import { Eye, Heart } from "lucide-react";
 
 /**
  * Render the /community/[id] route with `LoadingPanel`, `LoadingIndicator`, `VerifiedPlayerBadge`, `CommunityRichContent`.
@@ -302,7 +303,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
             <div className="flex items-center gap-4 mt-3 text-pc-text-secondary text-sm">
               <span className="inline-flex items-center gap-1">{t("generated.community.by")}{" "}{post.username}{post.linkedPlayerId != null && <VerifiedPlayerBadge />}</span>
               <span>{formatDateTime(post.createdAt)}</span>
-              <span>👁 {post.viewCount}</span>
+              <span aria-label={t("generated.community.value1Views", { value1: post.viewCount })}><Eye aria-hidden="true" size={14} className="inline shrink-0 align-middle" /> {post.viewCount}</span>
             </div>
             <div className="mt-4"><CommunityRichContent content={post.content} /></div>
             <CommunityPostMedia post={post} />
@@ -312,9 +313,10 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
           <button
             type="button"
             onClick={handleLike}
+            aria-label={t("generated.community.value1Likes", { value1: post.likes })}
             className="flex items-center gap-2 text-pc-text-secondary hover:text-pc-accent transition-colors"
           >
-            ❤ {post.likes}
+            <Heart aria-hidden="true" size={14} className="inline shrink-0 align-middle" /> {post.likes}
           </button>
         </div>
       </div>

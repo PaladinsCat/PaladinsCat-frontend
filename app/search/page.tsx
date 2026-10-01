@@ -28,6 +28,7 @@ import {
   searchReducer,
   typeSort,
 } from "@/lib/search-state";
+import { ArrowRight, Search, X } from "lucide-react";
 
 const TYPE_LABEL: Record<UniversalSearchType, string> = {
   player: "Player",
@@ -162,7 +163,7 @@ const SearchResultGroups = memo(function SearchResultGroups({
                     <PlayerSearchSubtitle result={result} />
                   </p>
                 </div>
-                <span className="shrink-0 text-lg text-pc-text-muted transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-pc-accent" aria-hidden="true">→</span>
+                <span className="shrink-0 text-lg text-pc-text-muted transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-pc-accent" aria-hidden="true"><ArrowRight aria-hidden="true" size={16} className="inline shrink-0 align-middle" /></span>
                 <span className="sr-only">{t("generated.search.view")}</span>
               </Link>
             ))}
@@ -322,15 +323,7 @@ function SearchPageBody() {
                 }}
                 className="absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-pc-text-muted transition-colors hover:bg-pc-bg hover:text-pc-accent"
               >
-                <svg viewBox="0 0 20 20" aria-hidden="true" className="h-4 w-4">
-                  <path
-                    d="M5.6 5.6 10 10m0 0 4.4 4.4M10 10l4.4-4.4M10 10l-4.4 4.4"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                  />
-                </svg>
+                <X aria-hidden="true" className="h-4 w-4" />
               </button>
             )}
           </div>
@@ -340,16 +333,7 @@ function SearchPageBody() {
             title={t("generated.search.search")}
             className="pc-glass pc-accent-icon-button flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-pc-border text-pc-text-muted transition-colors hover:border-pc-accent-mid hover:text-pc-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent"
           >
-            <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4">
-              <path
-                d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.35-4.35"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            <Search aria-hidden="true" className="h-4 w-4" />
           </button>
         </form>
       </section>

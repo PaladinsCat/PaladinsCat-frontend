@@ -9,6 +9,7 @@ import { useState, useRef, useEffect } from "react";
 import { reportPlayer, type ReportOptions, type ReportType } from "@/lib/api-client";
 import { useLocalization } from "@/lib/localization-context";
 import type { TranslationKey } from "@/lib/localization/messages";
+import { Check, X } from "lucide-react";
 
 type PlayerAction = Exclude<ReportType, "approve">;
 
@@ -200,12 +201,12 @@ export default function ReportModal({ playerId, type, onClose, onSuccess, submit
       <div className="w-full max-w-md mx-4 bg-pc-bg-elevated border border-pc-border rounded-xl p-5 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-bold text-pc-text">{actionLabel}</h2>
-          <button onClick={onClose} className="text-pc-text-muted hover:text-pc-text transition-colors" aria-label={t("generated.components.close")}>✕</button>
+          <button onClick={onClose} className="text-pc-text-muted hover:text-pc-text transition-colors" aria-label={t("generated.components.close")}><X aria-hidden="true" size={16} className="inline shrink-0 align-middle" /></button>
         </div>
 
         {success ? (
           <div className="text-center py-6">
-            <div className="text-emerald-400 text-2xl mb-2">✓</div>
+            <div className="text-emerald-400 text-2xl mb-2"><Check aria-hidden="true" size={24} className="inline shrink-0 align-middle" /></div>
             <p className="text-pc-text text-sm">{t(reasonRequired ? "generated.components.yourReasonWasRecorded" : "moderation.voteRecorded")}</p>
           </div>
         ) : (

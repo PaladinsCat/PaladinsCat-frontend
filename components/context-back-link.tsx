@@ -6,6 +6,7 @@
 
 import type { ReactNode } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 
 /**
  * Accept a leading-slash internal path and reject missing values and protocol-relative // destinations with null.
@@ -53,7 +54,7 @@ export default function ContextBackLink({
 
   return (
     <button type="button" onClick={goBack} className={classes}>
-      <span aria-hidden="true">←</span>
+      <span aria-hidden="true"><ArrowLeft aria-hidden="true" size={16} className="inline shrink-0 align-middle" /></span>
       {labelContent}
     </button>
   );

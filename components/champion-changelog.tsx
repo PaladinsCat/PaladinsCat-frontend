@@ -3,6 +3,7 @@
 import SmartImage from "@/components/SmartImage";
 import type { ChampionChangelog as ChampionChangelogData } from "@/lib/champion-changelog";
 import { useLocalization } from "@/lib/localization-context";
+import { ArrowUpRight, ChevronRight } from "lucide-react";
 
 const CATEGORY_KEYS = {
   General: "champions.changelog.categories.general",
@@ -26,7 +27,7 @@ export default function ChampionChangelog({ history }: { history: ChampionChange
     <div className="flex items-center justify-between gap-3">
       <h2 className="pc-card-title">{t("champions.changelog.title")}</h2>
       <a href={history.sourceUrl} target="_blank" rel="noreferrer" className="text-xs text-pc-text-muted transition-colors hover:text-pc-accent">
-        {t("champions.changelog.source")} ↗
+        {t("champions.changelog.source")} <ArrowUpRight aria-hidden="true" size={16} className="inline shrink-0 align-middle" />
       </a>
     </div>
     <div className="pc-card-flush overflow-hidden">
@@ -35,7 +36,7 @@ export default function ChampionChangelog({ history }: { history: ChampionChange
           <span>{t(CATEGORY_KEYS[category.name as keyof typeof CATEGORY_KEYS] ?? "champions.changelog.categories.general")}</span>
           <span className="flex items-center gap-2 text-xs font-normal text-pc-text-muted">
             {formatNumber(category.entries.length)}
-            <span aria-hidden="true" className="transition-transform group-open:rotate-90">›</span>
+            <span aria-hidden="true" className="transition-transform group-open:rotate-90"><ChevronRight aria-hidden="true" size={12} className="inline shrink-0 align-middle" /></span>
           </span>
         </summary>
         <div className="divide-y divide-pc-border border-t border-pc-border">

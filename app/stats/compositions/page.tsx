@@ -12,6 +12,7 @@ import { usePersistentDirectoryPage } from "@/components/player-directory-pagina
 import { useLocalization } from "@/lib/localization-context";
 import { getPercentageColor } from "@/lib/stat-quality";
 import { useRouteSettledLoading } from "@/lib/route-transition-context";
+import { ArrowDown, ArrowUp } from "lucide-react";
 
 
 type SortKey = "totalMatches" | "winRate";
@@ -95,8 +96,8 @@ export default function CompositionStatsPage() {
 
       <div className="flex flex-wrap items-center gap-2 lg:hidden">
         <span className="text-xs text-pc-text-muted">{t("generated.stats.sort")}</span>
-        <button onClick={() => changeSort("totalMatches")} className={`pc-touch-target rounded-lg border px-3 text-xs ${sortKey === "totalMatches" ? "border-pc-accent bg-pc-accent/15 text-pc-accent" : "border-pc-border bg-pc-bg-elevated text-pc-text-secondary"}`}>{t("generated.stats.matches")}{" "}{sortKey === "totalMatches" && (descending ? "↓" : "↑")}</button>
-        <button onClick={() => changeSort("winRate")} className={`pc-touch-target rounded-lg border px-3 text-xs ${sortKey === "winRate" ? "border-pc-accent bg-pc-accent/15 text-pc-accent" : "border-pc-border bg-pc-bg-elevated text-pc-text-secondary"}`}>{t("generated.stats.winRate")}{" "}{sortKey === "winRate" && (descending ? "↓" : "↑")}</button>
+        <button onClick={() => changeSort("totalMatches")} className={`pc-touch-target rounded-lg border px-3 text-xs ${sortKey === "totalMatches" ? "border-pc-accent bg-pc-accent/15 text-pc-accent" : "border-pc-border bg-pc-bg-elevated text-pc-text-secondary"}`}>{t("generated.stats.matches")}{" "}{sortKey === "totalMatches" && (descending ? <ArrowDown aria-hidden="true" size={16} className="inline shrink-0 align-middle" /> : <ArrowUp aria-hidden="true" size={16} className="inline shrink-0 align-middle" />)}</button>
+        <button onClick={() => changeSort("winRate")} className={`pc-touch-target rounded-lg border px-3 text-xs ${sortKey === "winRate" ? "border-pc-accent bg-pc-accent/15 text-pc-accent" : "border-pc-border bg-pc-bg-elevated text-pc-text-secondary"}`}>{t("generated.stats.winRate")}{" "}{sortKey === "winRate" && (descending ? <ArrowDown aria-hidden="true" size={16} className="inline shrink-0 align-middle" /> : <ArrowUp aria-hidden="true" size={16} className="inline shrink-0 align-middle" />)}</button>
       </div>
 
       <div className="space-y-2 lg:hidden">
@@ -114,9 +115,9 @@ export default function CompositionStatsPage() {
             <tr>
               <th className="w-[18%] px-4 py-3">{t("generated.stats.composition")}</th>
               {CLASS_COLUMNS.map((column) => <th key={column.key} className="w-[10%] px-2 py-3 text-right">{t(column.labelKey)}</th>)}
-              <th className="px-3 py-3 text-right"><button onClick={() => changeSort("totalMatches")} className="hover:text-pc-accent">{t("generated.stats.matches")}{" "}{sortKey === "totalMatches" && (descending ? "↓" : "↑")}</button></th>
+              <th className="px-3 py-3 text-right"><button onClick={() => changeSort("totalMatches")} className="hover:text-pc-accent">{t("generated.stats.matches")}{" "}{sortKey === "totalMatches" && (descending ? <ArrowDown aria-hidden="true" size={16} className="inline shrink-0 align-middle" /> : <ArrowUp aria-hidden="true" size={16} className="inline shrink-0 align-middle" />)}</button></th>
               <th className="px-3 py-3 text-right">{t("generated.stats.wL")}</th>
-              <th className="px-4 py-3 text-right"><button onClick={() => changeSort("winRate")} className="hover:text-pc-accent">{t("generated.stats.winRate.49a3838")}{" "}{sortKey === "winRate" && (descending ? "↓" : "↑")}</button></th>
+              <th className="px-4 py-3 text-right"><button onClick={() => changeSort("winRate")} className="hover:text-pc-accent">{t("generated.stats.winRate.49a3838")}{" "}{sortKey === "winRate" && (descending ? <ArrowDown aria-hidden="true" size={16} className="inline shrink-0 align-middle" /> : <ArrowUp aria-hidden="true" size={16} className="inline shrink-0 align-middle" />)}</button></th>
             </tr>
           </thead>
           <tbody>

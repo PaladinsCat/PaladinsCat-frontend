@@ -13,6 +13,7 @@ import { LoadingPanel } from "@/components/async-state";
 import { VerifiedPlayerBadge } from "@/components/player-name";
 import { useLocalization } from "@/lib/localization-context";
 import CommunityChat from "@/components/community-chat";
+import { ArrowRight, Eye, Heart, Radio } from "lucide-react";
 
 const HIDDEN_TWITCH_CHANNEL_LOGINS = new Set(["paladins2ttv"]);
 
@@ -91,11 +92,11 @@ export default function CommunityPage() {
                       <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-pc-text-muted sm:text-sm">
                         <span className="inline-flex min-w-0 items-center gap-1 truncate">{t("generated.community.by")}{" "}{post.username}{post.linkedPlayerId != null && <VerifiedPlayerBadge />}</span>
                         <span>{formatDateTime(post.createdAt)}</span>
-                        <span aria-label={t("generated.community.value1Likes", { value1: post.likes })}>❤ {post.likes}</span>
-                        <span aria-label={t("generated.community.value1Views", { value1: post.viewCount })}>👁 {post.viewCount}</span>
+                        <span aria-label={t("generated.community.value1Likes", { value1: post.likes })}><Heart aria-hidden="true" size={14} className="inline shrink-0 align-middle" /> {post.likes}</span>
+                        <span aria-label={t("generated.community.value1Views", { value1: post.viewCount })}><Eye aria-hidden="true" size={14} className="inline shrink-0 align-middle" /> {post.viewCount}</span>
                       </div>
                     </div>
-                    <span className="shrink-0 text-pc-text-muted">→</span>
+                    <span className="shrink-0 text-pc-text-muted"><ArrowRight aria-hidden="true" size={16} className="inline shrink-0 align-middle" /></span>
                   </div>
                 </Link>
               ))}
@@ -144,7 +145,7 @@ export default function CommunityPage() {
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5 text-xs">
                         <span className="truncate font-semibold text-pc-text group-hover:text-pc-accent">{stream.userName}</span>
-                        <span className="shrink-0 text-rose-400">● {formatNumber(stream.viewerCount)}</span>
+                        <span className="shrink-0 text-rose-400"><Radio aria-hidden="true" size={14} className="inline shrink-0 align-middle" /> {formatNumber(stream.viewerCount)}</span>
                       </div>
                       <p className="mt-1 line-clamp-2 text-xs leading-snug text-pc-text-secondary">{stream.title || t("generated.community.playingPaladins")}</p>
                       {stream.language && <span className="mt-1 block text-xs uppercase tracking-wide text-pc-text-muted">{stream.language}</span>}

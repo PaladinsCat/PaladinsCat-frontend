@@ -22,6 +22,7 @@ import { useLocalization } from "@/lib/localization-context";
 import { verifiedDestination } from "@/lib/verified-access";
 import { getRankIconPath } from "@/lib/tier-utils";
 import { getPercentageColor } from "@/lib/stat-quality";
+import { ArrowRight } from "lucide-react";
 
 type Accent = "cyan" | "violet" | "amber" | "emerald" | "sky";
 
@@ -52,7 +53,7 @@ function DashboardCard({
     >
       <div className="mb-5 flex items-center gap-3">
         <h2 className="min-w-0 flex-1 text-lg font-bold text-pc-text">{title}</h2>
-        <span aria-hidden="true" className="text-lg leading-none text-pc-text-muted transition-colors group-hover:text-pc-accent">→</span>
+        <span aria-hidden="true" className="text-lg leading-none text-pc-text-muted transition-colors group-hover:text-pc-accent"><ArrowRight aria-hidden="true" size={16} className="inline shrink-0 align-middle" /></span>
       </div>
       <div className="flex flex-1 flex-col">{children}</div>
     </Link>

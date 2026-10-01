@@ -8,6 +8,7 @@
 import type { RatingSnapshot } from "@/lib/api-client";
 import PlayerName from "@/components/player-name";
 import { useLocalization } from "@/lib/localization-context";
+import { ArrowRight } from "lucide-react";
 
 /**
  * Render RatingSnapshots from its declared props and match data.
@@ -31,7 +32,7 @@ export default function RatingSnapshots({ snapshots }: { snapshots: RatingSnapsh
       <div className="space-y-2 sm:hidden">
         {snapshots.map((snapshot) => <article key={snapshot.player_id} className="rounded-xl border border-pc-border bg-pc-bg-secondary/50 p-3">
           <div className="flex min-w-0 items-center justify-between gap-3"><div className="truncate text-sm font-semibold text-pc-text"><PlayerName playerId={snapshot.player_id}>{snapshot.player_name}</PlayerName></div><span className={`shrink-0 font-mono text-sm font-bold ${snapshot.mu_change == null ? "text-pc-text-secondary" : snapshot.mu_change >= 0 ? "text-emerald-400" : "text-red-400"}`}>{formatChange(snapshot.mu_change)}</span></div>
-          <dl className="mt-3 grid grid-cols-2 gap-2"><div><dt className="text-xs uppercase text-pc-text-muted">{t("generated.matches.rating")}</dt><dd className="font-mono text-xs text-pc-text-secondary">{formatRating(snapshot.mu_before)} → {formatRating(snapshot.mu_after)}</dd></div><div><dt className="text-xs uppercase text-pc-text-muted">{t("generated.matches.deviation")}</dt><dd className="font-mono text-xs text-pc-text-secondary">{formatRating(snapshot.phi_before)} → {formatRating(snapshot.phi_after)}</dd></div></dl>
+          <dl className="mt-3 grid grid-cols-2 gap-2"><div><dt className="text-xs uppercase text-pc-text-muted">{t("generated.matches.rating")}</dt><dd className="font-mono text-xs text-pc-text-secondary">{formatRating(snapshot.mu_before)} <ArrowRight aria-hidden="true" size={16} className="inline shrink-0 align-middle" /> {formatRating(snapshot.mu_after)}</dd></div><div><dt className="text-xs uppercase text-pc-text-muted">{t("generated.matches.deviation")}</dt><dd className="font-mono text-xs text-pc-text-secondary">{formatRating(snapshot.phi_before)} <ArrowRight aria-hidden="true" size={16} className="inline shrink-0 align-middle" /> {formatRating(snapshot.phi_after)}</dd></div></dl>
         </article>)}
       </div>
       <div className="hidden overflow-x-auto sm:block">
