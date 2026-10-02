@@ -37,17 +37,17 @@ function championsByClass(counts: Record<string, number>) {
 
 /**
  * Render up to limit co-play partners with match-count bars normalized to the visible maximum, win records, and role distribution. Track the expanded partner locally and reveal champion details only when showDetails is enabled.
- * I/O types: `{ rows, tone = "cyan", limit, showDetails = false }: { rows: PlayerRelationshipRow[]; tone?: "cyan" | "violet" | "amber"; limit?: number; showDetails?: boolean } -> JSX.Element`.
+ * I/O types: `{ rows, tone = "cyan", limit, showDetails = false, className = "space-y-3" }: { rows: PlayerRelationshipRow[]; tone?: "cyan" | "violet" | "amber"; limit?: number; showDetails?: boolean; className?: string } -> JSX.Element`.
  * refs: none
  */
-export default function PlayerRelationshipBars({ rows, tone = "cyan", limit, showDetails = false }: { rows: PlayerRelationshipRow[]; tone?: "cyan" | "violet" | "amber"; limit?: number; showDetails?: boolean }) {
+export default function PlayerRelationshipBars({ rows, tone = "cyan", limit, showDetails = false, className = "space-y-3" }: { rows: PlayerRelationshipRow[]; tone?: "cyan" | "violet" | "amber"; limit?: number; showDetails?: boolean; className?: string }) {
   const { formatNumber, formatPercent, formatRecord, t } = useLocalization();
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const visible = limit ? rows.slice(0, limit) : rows;
   const maximum = Math.max(1, ...visible.map((row) => row.matchCount));
   const barClass = tone === "violet" ? "bg-violet-400" : tone === "amber" ? "bg-amber-400" : "bg-cyan-400";
 
-  return <div className="space-y-3">{visible.map((row) => {
+  return <div className={className}>{visible.map((row) => {
     const roles = orderedCounts(row.partnerRoleCounts);
     const roleTotal = roles.reduce((total, [, count]) => total + count, 0);
     const championGroups = championsByClass(row.partnerChampionCounts);
