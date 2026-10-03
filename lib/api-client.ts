@@ -868,13 +868,13 @@ export async function fetchCheaterEvidenceReviewImage(id: string, position: numb
 
 /**
  * Apply an administrator's evidence review decision without retrying a state transition.
- * I/O types: `id: string; decision: "approve" | "deny"; tag?: "cheater" | "exploit" -> Promise<void>`.
+ * I/O types: `id: string; decision: "approve" | "deny"; tag?: "cheater" | "exploit" | "suspicious" -> Promise<void>`.
  * refs: doc: documents/02-technical/api/api-server.md
  */
 export async function reviewCheaterEvidence(
   id: string,
   decision: "approve" | "deny",
-  tag?: "cheater" | "exploit",
+  tag?: "cheater" | "exploit" | "suspicious",
   note = "",
 ): Promise<void> {
   if (decision === "approve" && !tag) throw new Error("Choose a tag before approving evidence.");

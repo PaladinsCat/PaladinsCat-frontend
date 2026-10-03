@@ -13,7 +13,7 @@ import { LoadingPanel } from "@/components/async-state";
 import PlayerName from "@/components/player-name";
 import PlayerDirectoryGrid, { PLAYER_DIRECTORY_CARD_CLASS } from "@/components/player-directory-grid";
 import { useLocalization } from "@/lib/localization-context";
-import { hasPlayerTag } from "@/lib/player-tag-threshold";
+import { hasSuspiciousTag } from "@/lib/player-tag-threshold";
 import PlayersPageHeader from "@/components/ui/players-page-header";
 import PlayerDirectorySearch from "@/components/player-directory-search";
 import TagCriteriaTip from "@/components/tag-criteria-tip";
@@ -127,7 +127,7 @@ export default function SuspiciousPage() {
           {(entry) => {
             const isPrivate = entry.kind === "private";
             const susCount = isPrivate ? entry.account.susCount : entry.player.susCount;
-            const visibleSusCount = hasPlayerTag(susCount) ? susCount : 0;
+            const visibleSusCount = hasSuspiciousTag(susCount) ? susCount : 0;
             const reasons = isPrivate ? entry.account.topReasons : entry.player.topReasons;
             return (
             <Link

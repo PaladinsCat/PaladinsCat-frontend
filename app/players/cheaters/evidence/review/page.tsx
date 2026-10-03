@@ -56,7 +56,7 @@ export default function CheaterEvidenceReviewPage() {
   const { isAdmin } = useAuth();
   const { formatDateTime, formatNumber, t } = useLocalization();
   const [items, setItems] = useState<CheaterEvidenceReviewItem[]>([]);
-  const [reviewTags, setReviewTags] = useState<Record<string, "cheater" | "exploit">>({});
+  const [reviewTags, setReviewTags] = useState<Record<string, "cheater" | "exploit" | "suspicious">>({});
   const [loading, setLoading] = useState(true);
   const [workingId, setWorkingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -109,12 +109,13 @@ export default function CheaterEvidenceReviewPage() {
                 <select
                   aria-label={t("moderation.evidenceReview")}
                   value={reviewTags[item.id] ?? "cheater"}
-                  onChange={(event) => setReviewTags((current) => ({ ...current, [item.id]: event.target.value as "cheater" | "exploit" }))}
+                  onChange={(event) => setReviewTags((current) => ({ ...current, [item.id]: event.target.value as "cheater" | "exploit" | "suspicious" }))}
                   disabled={workingId === item.id}
                   className="min-h-10 rounded-lg border border-pc-border bg-pc-bg px-3 py-2 text-sm text-pc-text"
                 >
                   <option value="cheater">{t("moderation.confirmedCheater")}</option>
                   <option value="exploit">{t("moderation.exploiterShort")}</option>
+                  <option value="suspicious">{t("moderation.suspiciousReviewOption")}</option>
                 </select>
               </label>
               <button type="button" disabled={workingId === item.id} onClick={() => void review(item.id, "deny")} className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-red-400/35 px-3 py-2 text-sm font-semibold text-red-200 disabled:opacity-50"><X className="h-4 w-4" aria-hidden="true" />{t("moderation.deny")}</button>

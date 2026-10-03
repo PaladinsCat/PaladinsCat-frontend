@@ -8,7 +8,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { fetchPlayerModeration, mergePlayerModeration, type PlayerModeration } from "@/lib/player-moderation";
 import { useAuth } from "@/lib/auth-context";
 import { useLocalization } from "@/lib/localization-context";
-import { hasPlayerTag } from "@/lib/player-tag-threshold";
+import { hasPlayerTag, hasSuspiciousTag } from "@/lib/player-tag-threshold";
 import SmartImage from "@/components/SmartImage";
 
 const EMPTY_MODERATION: PlayerModeration = {
@@ -174,7 +174,7 @@ export function PlayerModerationTag({
     {moderation.exploiter && <span className={`${PLAYER_TAG_CLASS} exploiter text-orange-400`} aria-label={t("moderation.exploiterAria")}>{t("moderation.exploiterShort")}</span>}
     {!moderation.cheater && !moderation.exploiter && <>
       {moderation.dropper && hasPlayerTag(moderation.dropperVoteCount) && <span className={`${PLAYER_TAG_CLASS} dropper text-rose-300`}>{t("moderation.dropShort")}</span>}
-      {hasPlayerTag(moderation.susCount) && <span className={`${PLAYER_TAG_CLASS} suspicious text-amber-400`} aria-label={t("generated.players.suspiciousPlayerWithValue1Flags", { value1: moderation.susCount })}>{t("generated.players.sus")}</span>}
+      {hasSuspiciousTag(moderation.susCount) && <span className={`${PLAYER_TAG_CLASS} suspicious text-amber-400`} aria-label={t("generated.players.suspiciousPlayerWithValue1Flags", { value1: moderation.susCount })}>{t("generated.players.sus")}</span>}
       {(communityAfk || automaticAfkTagged) && <span className={`${PLAYER_TAG_CLASS} afk border ${automaticAfkTagged ? communityAfk ? "border-red-400/50 text-sky-300" : "border-red-400/50 text-red-300" : "border-sky-400/50 text-sky-300"}`}>{t("moderation.afkShort")}</span>}
       {(wallShooter || hasPlayerTag(moderation.wallShooterCount)) && <span className={`${PLAYER_TAG_CLASS} wall-shooter text-cyan-300`}>{t("moderation.wallShort")}</span>}
       {(masterFeeding || hasPlayerTag(moderation.masterFeedingCount)) && <span className={`${PLAYER_TAG_CLASS} master-feeding text-rose-300`}>{t("moderation.feedShort")}</span>}
