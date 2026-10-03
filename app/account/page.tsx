@@ -487,11 +487,12 @@ export default function AccountPage() {
       {/* Identity credentials are exclusively managed by Keycloak. */}
       <section className="rounded-2xl border border-white/5 pc-glass p-6 lg:col-span-2">
         <h2 className="mb-4 text-lg font-semibold text-pc-text">{t("generated.common.account")}</h2>
-        <form action="/api/auth/oidc/account" method="post">
-          <button type="submit" className="rounded-xl bg-pc-accent px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-pc-accent-secondary">
-            {t("generated.account.changePassword")}
-          </button>
-        </form>
+        <a
+          href="https://auth.paladinscat.com/realms/paladinscat/account/"
+          className="inline-block rounded-xl bg-pc-accent px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-pc-accent-secondary"
+        >
+          {t("generated.account.changePassword")}
+        </a>
       </section>
       </div>
     </div>

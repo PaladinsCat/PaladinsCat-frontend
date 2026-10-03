@@ -178,7 +178,7 @@ test("PaladinsCat login entry points use native links into the server-side OIDC 
   assert.doesNotMatch(nav, /action="\/api\/auth\/oidc\/login"/);
   assert.match(register, /process\.env\.PALADINSCAT_PUBLIC_ORIGIN \|\| new URL\(request\.url\)\.origin/);
   assert.match(register, /NextResponse\.redirect\(new URL\("\/api\/auth\/oidc\/login\?intent=create", publicOrigin\), 307\)/);
-  assert.match(account, /action="\/api\/auth\/oidc\/account" method="post"/);
+  assert.match(account, /href="https:\/\/auth\.paladinscat\.com\/realms\/paladinscat\/account\/"/);
   assert.match(account, /if \(authLoading\) return/);
   assert.match(accountRoute, /requireSameOrigin/);
   assert.match(accountRoute, /keycloakAccountUrl\(process\.env\.OIDC_ISSUER\)/);
