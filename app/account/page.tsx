@@ -437,13 +437,6 @@ export default function AccountPage() {
           </div>
           <div>
             <label className="block text-sm font-medium text-pc-text-secondary mb-1">
-              {t("generated.account.email")}</label>
-            <div className="rounded-xl border border-pc-border bg-pc-bg-secondary px-3 py-2.5 text-pc-text">
-              {user.email}
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-pc-text-secondary mb-1">
               {t("generated.account.memberSince")}</label>
             <div className="rounded-xl border border-pc-border bg-pc-bg-secondary px-3 py-2.5 text-pc-text">
               {formatDate(user.createdAt)}
