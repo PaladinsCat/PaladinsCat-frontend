@@ -5,7 +5,7 @@
  * refs: none
  */
 "use client";
-import { formatApiErrorMessage } from "@/lib/api-errors";
+import { ApiRequestError, formatApiErrorMessage } from "@/lib/api-errors";
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
@@ -417,15 +417,19 @@ export default function PlayerProfileClient({
     setShowCurrentMatch(true);
     setCurrentMatch(null);
     try {
-      const res = await fetch(`${API_BASE}/live/players/${id}`, { cache: 'no-store' });
+      const res = await fetch(`${API_BASE}/live/players/${id}`, { cache: 'no-store', signal: AbortSignal.timeout(60_000) });
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data?.error?.message || data?.error || PLAYER_PROFILE_ERROR_KEYS.failedToFetchLiveMatchData);
       }
       setCurrentMatch(data);
     } catch (error) {
+      const failure = error instanceof Error && error.name === 'TimeoutError'
+        ? new ApiRequestError(PLAYER_PROFILE_ERROR_KEYS.failedToFetchLiveMatchData, undefined, {
+          kind: 'timeout', method: 'GET', endpoint: `/live/players/${id}`, timeoutMs: 60_000,
+        }) : error;
       setCurrentMatch({
-        error: formatApiErrorMessage(error, t, t(PLAYER_PROFILE_ERROR_KEYS.failedToFetchLiveMatchData)),
+        error: formatApiErrorMessage(failure, t, t(PLAYER_PROFILE_ERROR_KEYS.failedToFetchLiveMatchData)),
       });
     }
   }, [id]);
