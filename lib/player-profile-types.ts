@@ -106,6 +106,7 @@ export interface PlayerResponse {
     was_expired?: boolean;
     attempted: boolean;
     refreshed: boolean;
+    deferred?: boolean;
     source: "database" | "hirez" | "stale-database";
     error?: string | null;
   };

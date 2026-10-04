@@ -333,6 +333,13 @@ export default function PlayerProfileClient({
     setRefreshFeedback({ kind, message });
   }, []);
 
+  useEffect(() => {
+    const quota = response?.refreshQuota;
+    if (response?.profileRefresh?.deferred && quota?.remaining === 0) {
+      showRefreshCooldown(quota.reset_at, quota.remaining_seconds, 'warning', t("common.playerRefresh.limitReached"));
+    }
+  }, [response?.profileRefresh?.deferred, response?.refreshQuota, showRefreshCooldown, t]);
+
   // One Refresh bypasses the shared TTL and updates the whole provider bundle.
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -378,6 +385,11 @@ export default function PlayerProfileClient({
       setResponse(previous => previous ? { ...previous,
         presence: data.presence, statusRefresh: data.statusRefresh,
         profileRefresh: data.profileRefresh ?? previous.profileRefresh,
+        refreshQuota: data.refreshQuota ? {
+          remaining: data.refreshQuota.remaining ?? 0,
+          reset_at: data.refreshQuota.reset_at ?? null,
+          remaining_seconds: data.refreshQuota.remaining_seconds ?? 0,
+        } : null,
       } : previous);
       if (!data.refreshQuota) {
         setRefreshCooldownUntil(null);

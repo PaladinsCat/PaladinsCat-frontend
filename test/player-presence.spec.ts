@@ -2,13 +2,20 @@ import { expect, test, type Page } from "@playwright/test";
 
 const playerId = "728968546";
 
-async function profile(page: Page, status: number, statusString = "God Selection", fail = false, quotaReached = false) {
+async function profile(page: Page, status: number, statusString = "God Selection", fail = false, quotaReached = false, automaticQuotaReached = false) {
   let presenceCalls = 0;
   let profileCalls = 0;
   let refreshCalls = 0;
   let refreshed = false;
   let releaseRefresh: (() => void) | undefined;
-  const bundle = () => ({
+  const bundle = () => automaticQuotaReached ? {
+    presence: null,
+    statusRefresh: { refreshed: false, error: "The shared refresh limit has been reached." },
+    profileRefresh: { ttl_seconds: 30, remaining_seconds: 0, expired: true, deferred: true,
+      attempted: false, refreshed: false, source: "stale-database", error: "The shared refresh limit has been reached.",
+      refreshed_at: "2026-10-04T01:00:00Z", expires_at: "2026-10-04T01:00:30Z" },
+    refreshQuota: { remaining: 0, reset_at: new Date(Date.now() + 120_000).toISOString(), remaining_seconds: 120 },
+  } : ({
     presence: fail ? null : { status: refreshed ? 3 : status, status_string: statusString, Match: refreshed ? 1282373812 : 0, ret_msg: null },
     statusRefresh: { refreshed, error: fail ? "Hi-Rez returned no usable player status. Refresh the profile to retry." : null },
     profileRefresh: { ttl_seconds: 30, remaining_seconds: 30, expired: false,
@@ -117,4 +124,18 @@ test("shared quota rejection keeps status and history and applies Retry-After", 
   await expect(page.locator('a[href="/matches/1281434754"]')).toHaveCount(2);
   expect(request.refreshes()).toBe(1);
   expect(request.calls()).toBe(0);
+});
+
+test("exhausted automatic refresh keeps the stored profile and history on load and reload", async ({ page }) => {
+  const request = await profile(page, 2, "God Selection", false, false, true);
+  await expect(page.getByRole("button", { name: /Refresh in/ })).toBeDisabled();
+  await expect(page.getByText("Player profile unavailable", { exact: true })).toHaveCount(0);
+  await expect(page.getByTestId("player-presence")).toHaveText("Player status unavailable");
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "TioSallyzZ", exact: true })).toBeVisible();
+  await expect(page.locator('a[href="/matches/1281434754"]')).toHaveCount(2);
+  await expect(page.getByRole("button", { name: /Refresh in/ })).toBeDisabled();
+  expect(request.refreshes()).toBe(0);
+  expect(request.calls()).toBe(0);
+  await page.getByTestId("player-presence").locator("xpath=ancestor::div[contains(@class,'pc-card')][1]").screenshot({ path: "../local/profile-quota-fallback.png" });
 });
