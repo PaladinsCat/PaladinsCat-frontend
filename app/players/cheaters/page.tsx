@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, FileImage, History, ShieldAlert } from "lucide-react";
 import { LoadingPanel } from "@/components/async-state";
+import CheaterActivityPanel from "@/components/cheater-activity-panel";
 import PlatformIcon from "@/components/platform-icon";
 import PlayersPageHeader from "@/components/ui/players-page-header";
 import { fetchCheaterPortal, fetchPlayersOverview, type CheaterPortal, type CheaterPortalEntry } from "@/lib/api-client";
@@ -172,6 +173,7 @@ export default function CheatersPage() {
           </div>
         )}
       </section>
+      <CheaterActivityPanel />
     </div>
   );
 }

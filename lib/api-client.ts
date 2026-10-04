@@ -257,6 +257,34 @@ export interface CheaterPortal {
   latest: CheaterPortalEntry[];
 }
 
+/** Distinct flagged-player activity; UTC buckets and match-server regions. */
+export interface CheaterActivitySeries {
+  total24h: number;
+  regions: Array<{ region: string; total24h: number }>;
+  hourly: Array<{ date: string; hour: number; total: number; regions: Record<string, number> }>;
+}
+
+/** All-queue and per-queue series from the read-only cheater activity endpoint. */
+export interface CheaterActivity {
+  windowHours: number;
+  observedAt: string;
+  matches: CheaterActivitySeries;
+  players: CheaterActivitySeries;
+  queues: Array<{ queueId: number; queueName: string; matches: CheaterActivitySeries; players: CheaterActivitySeries }>;
+  breakdown: PresenceBreakdownStats;
+}
+
+/** Shared player breakdown inputs; uncertainty metadata is optional for exact tagged-player counts. */
+export type PresenceBreakdownStats = Pick<PresenceStats, "public_players" | "public_by_platform" | "public_by_region"> & {
+  public_by_queue: Array<{ queue_id: number; queue_name: string; players: number }>;
+  profile_coverage?: Pick<PresenceStats["profile_coverage"], "total" | "platform_known">;
+  private_players?: number;
+  unresolved_private_observations?: number;
+  unresolved_player_slots_upper?: number;
+  public_players_lower_bound?: number;
+  public_players_upper_bound?: number;
+};
+
 /**
  * Page historical cheater records with their total count.
  * refs: doc: documents/02-technical/api/api-server.md
@@ -680,6 +708,14 @@ export async function fetchCheaterPortal(): Promise<CheaterPortal> {
       ? raw.latest.map(normalizeCheaterPortalEntry)
       : Array.isArray(raw.active) ? raw.active.map(normalizeCheaterPortalEntry) : [],
   };
+}
+
+/** Fetch all queue variants together; switching queues needs no extra request.
+ * Contract: no inputs -> Promise<CheaterActivity>; network failures reject.
+ * refs: GET /cheaters/activity
+ */
+export async function fetchCheaterActivity(): Promise<CheaterActivity> {
+  return fetchJson<CheaterActivity>("/cheaters/activity", { retries: 0 });
 }
 
 /**

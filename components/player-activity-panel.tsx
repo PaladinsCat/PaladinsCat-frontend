@@ -7,7 +7,7 @@
 import { createContext, Fragment, useContext, useEffect, useId, useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { Info } from "lucide-react";
-import { fetchMatchesOverview, fetchPresenceHourlyStats, fetchPresenceStats, type MatchHourlyStats, type MatchQueueActivity, type MatchesOverview, type PresenceHourlyStats, type PresenceStats } from "@/lib/api-client";
+import { fetchMatchesOverview, fetchPresenceHourlyStats, fetchPresenceStats, type MatchHourlyStats, type MatchQueueActivity, type MatchesOverview, type PresenceHourlyStats, type PresenceStats, type PresenceBreakdownStats } from "@/lib/api-client";
 import { LoadingPanel } from "@/components/async-state";
 import { LineChartComponent } from "@/components/Chart";
 import DetailLink from "@/components/detail-link";
@@ -15,7 +15,7 @@ import { stationaryChartSeries } from "@/lib/chart-colors";
 import { useLocalization } from "@/lib/localization-context";
 import { getPercentageColor } from "@/lib/stat-quality";
 
-const REGION_COLORS: Record<string, string> = {
+export const REGION_COLORS: Record<string, string> = {
   NA: stationaryChartSeries.emerald,
   EU: stationaryChartSeries.sky,
   SEA: stationaryChartSeries.violet,
@@ -363,7 +363,8 @@ export default function PlayerActivityPanel({
   );
 }
 
-function ActivityBar({
+/** Render a proportional stacked activity bar from a bucket and its series colors. */
+export function ActivityBar({
   entry,
   max,
   formatNumber,
@@ -409,7 +410,8 @@ function ChartHelp({ title, text }: { title: string; text: ReactNode }) {
   </span>;
 }
 
-function HourlyCardHeader({
+/** Render activity title, queue selector and total; queue changes invoke the caller. */
+export function HourlyCardHeader({
   title,
   subtitle,
   helpText,
@@ -426,7 +428,7 @@ function HourlyCardHeader({
   helpText?: ReactNode;
   queueLabel: string;
   allQueuesLabel: string;
-  queues: MatchQueueActivity[];
+  queues: Pick<MatchQueueActivity, "queueId" | "queueName">[];
   selectedQueue: "all" | number;
   onQueueChange: (queue: "all" | number) => void;
   total: number | null;
@@ -630,7 +632,8 @@ function WeeklySeriesChart({
   </div>;
 }
 
-function PlayerPresenceBreakdown({
+/** Render the shared queue/platform/region layout; exact populations omit uncertainty controls. */
+export function PlayerPresenceBreakdown({
   presence,
   formatNumber,
   title,
@@ -645,8 +648,10 @@ function PlayerPresenceBreakdown({
   coverageLabel,
   overlapNote,
   detailsLabel,
+  exact = false,
+  showStatements: statementsOverride,
 }: {
-  presence: PresenceStats;
+  presence: PresenceBreakdownStats;
   formatNumber: (value: number) => string;
   title: string;
   queueTitle: string;
@@ -660,8 +665,11 @@ function PlayerPresenceBreakdown({
   coverageLabel: string;
   overlapNote: string;
   detailsLabel: string;
+  exact?: boolean;
+  showStatements?: boolean;
 }) {
-  const showStatements = useContext(ActivityStatementContext);
+  const contextStatements = useContext(ActivityStatementContext);
+  const showStatements = statementsOverride ?? contextStatements;
   const queues = presence.public_by_queue ?? [];
   const platforms = presence.public_by_platform ?? [];
   const regions = [...(presence.public_by_region ?? [])]
@@ -686,7 +694,7 @@ function PlayerPresenceBreakdown({
     presence.public_players_upper_bound ?? playerLowerBound + unresolvedUpper,
   );
 
-  return <section className="pc-card overflow-hidden">
+  return <ActivityStatementContext.Provider value={showStatements}><section className="pc-card overflow-hidden">
     <div className="flex flex-wrap items-start justify-between gap-3 border-b border-pc-border/50 p-4">
       <div>
         <div className="text-xs font-semibold uppercase tracking-wider text-pc-text-muted">{title}</div>
@@ -694,29 +702,29 @@ function PlayerPresenceBreakdown({
         <div className="mt-1 font-mono text-3xl font-bold text-pc-accent">{formatNumber(presence.public_players)}</div>
         <ActivityChartStatement className="mt-1" />
         <div className="text-xs text-pc-text-muted">{publicLabel}</div>
-        <div className="mt-2 text-xs text-pc-text-secondary">
+        {!exact && <div className="mt-2 text-xs text-pc-text-secondary">
           {possibleTotalLabel}:{" "}
           <span className="font-mono text-pc-text">
             {formatNumber(playerLowerBound)}
             {"–"}
             {formatNumber(playerUpperBound)}
           </span>
-        </div>
+        </div>}
       </div>
-      <div className="flex flex-col items-end gap-3">
+      {!exact && <div className="flex flex-col items-end gap-3">
         <DetailLink href="/stats/activity/details" label={detailsLabel} />
         <div className="flex flex-wrap justify-end gap-2 text-xs">
           <span className="rounded-full border border-violet-400/30 bg-violet-400/10 px-2.5 py-1 text-violet-200">
-            {privateLabel}: {formatNumber(presence.private_players)}
+            {privateLabel}: {formatNumber(presence.private_players ?? 0)}
           </span>
           <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-2.5 py-1 text-amber-200">
-            {unresolvedLabel}: {formatNumber(presence.unresolved_private_observations)}
+            {unresolvedLabel}: {formatNumber(presence.unresolved_private_observations ?? 0)}
           </span>
           <span className="rounded-full border border-rose-400/30 bg-rose-400/10 px-2.5 py-1 text-rose-200">
             {unresolvedRangeLabel}: +0–{formatNumber(unresolvedUpper)}
           </span>
         </div>
-      </div>
+      </div>}
     </div>
     <div className="grid grid-cols-1 divide-y divide-pc-border/50 lg:grid-cols-2 lg:divide-x lg:divide-y-0">
       <div className="p-4">
@@ -780,7 +788,7 @@ function PlayerPresenceBreakdown({
         </div>
       </div>
     </div>
-  </section>;
+  </section></ActivityStatementContext.Provider>;
 }
 
 function ActivityChartStatement({ className = "" }: { className?: string }) {
