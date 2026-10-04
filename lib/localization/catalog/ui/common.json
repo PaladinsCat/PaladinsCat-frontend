@@ -3,6 +3,7 @@
   "performance.mean": "Mean",
   "performance.p10p90": "P10–P90",
   "performance.roleMetric": "{role} {metric}",
+  "performance.classAvg": "Class Avg",
   "common.format.durationShort": "{minutes}m {seconds}s",
   "common.format.clock": "{minutes}:{seconds}",
   "common.format.daysHoursShort": "{days}d {hours}h",

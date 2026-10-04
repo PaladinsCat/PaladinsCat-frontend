@@ -202,7 +202,7 @@ export default function ChampionPerformanceComparison({ scope = "ranked", queueI
                   <span className="mt-1 text-xs text-pc-text-secondary">{formatNumber(count)}</span>
                 </> : <>
                   <span className={METRIC_COLORS[key]}>{formatNumber(value, { maximumFractionDigits: decimals })}</span>
-                  <span className="mt-1 text-xs text-pc-text-muted">{baselineLabel} {formatNumber(baseline, { maximumFractionDigits: decimals })}</span>
+                  <span className="mt-1 text-xs text-pc-text-muted">{t("performance.classAvg")} {formatNumber(baseline, { maximumFractionDigits: decimals })}</span>
                   <span className={`text-xs ${delta == null ? "text-pc-text-muted" : (metric === "deaths_per_minute" ? delta <= 0 : delta >= 0) ? "text-emerald-400" : "text-rose-400"}`}>{formatPercent(delta, { signDisplay: "always", maximumFractionDigits: 1 })}</span>
                 </>}
               </ComparisonTooltip> : <span className="pc-skeleton ml-auto block h-4 w-12 rounded" />}
