@@ -8,7 +8,8 @@ import { useEffect, useState } from "react";
 import DetailLink from "@/components/detail-link";
 import CardIcon from "@/components/card-icon";
 import PlayerRelationshipBars from "@/components/player-relationship-bars";
-import { fetchPlayerRelationshipSummary, type PlayerRelationshipSummary } from "@/lib/api-client";
+import { fetchPlayerRelationshipSummary, type PlayerRelationshipSummary, type RelationshipScope } from "@/lib/api-client";
+import { SegmentedControl } from "@/components/ui/segmented-control";
 import { getPercentageColor } from "@/lib/stat-quality";
 import { useLocalization } from "@/lib/localization-context";
 
@@ -19,15 +20,17 @@ import { useLocalization } from "@/lib/localization-context";
  */
 export default function PlayerRelationshipSummaryCard({ playerId }: { playerId: string }) {
   const { t, formatNumber, formatPercent } = useLocalization();
-  const [summary, setSummary] = useState<PlayerRelationshipSummary | null>(null);
+  const [scope, setScope] = useState<RelationshipScope>("ranked");
+  const [loaded, setLoaded] = useState<PlayerRelationshipSummary | null>(null);
+  const summary = loaded?.playerId === playerId && loaded.scope === scope ? loaded : null;
 
   useEffect(() => {
     let active = true;
-    fetchPlayerRelationshipSummary(playerId, 4).then((value) => {
-      if (active) setSummary(value);
+    fetchPlayerRelationshipSummary(playerId, 4, scope).then((value) => {
+      if (active) setLoaded(value);
     }).catch(() => undefined);
     return () => { active = false; };
-  }, [playerId]);
+  }, [playerId, scope]);
 
   const teammateMatches = summary?.totals.teammateMatches ?? 0;
   const opponentMatches = summary?.totals.opponentMatches ?? 0;
@@ -42,10 +45,11 @@ export default function PlayerRelationshipSummaryCard({ playerId }: { playerId: 
   return (
     <section>
       <div className="pc-card p-3">
+        <div className="mb-3"><SegmentedControl label={t("common.relationships.title")} items={[{ value: "ranked", label: t("generated.players.ranked") }, { value: "casual", label: t("generated.players.casual") }]} value={scope} onChange={setScope} /></div>
         <div className="flex items-start gap-3">
           <CardIcon name="relationships" className="w-9 text-[var(--pc-title)]" />
           <div className="min-w-0 flex-1">
-            <p className="text-xs text-pc-text-muted">{t("common.relationships.description")}</p>
+            <p className="text-xs text-pc-text-muted">{t(scope === "casual" ? "common.relationships.casualDescription" : "common.relationships.description")}</p>
             <div className="mt-3 flex h-2 overflow-hidden rounded-full bg-pc-bg-secondary" aria-hidden="true">
               <div className="bg-cyan-400" style={{ width: `${teammateShare}%` }} />
               <div className="bg-violet-400" style={{ width: `${100 - teammateShare}%` }} />
@@ -59,7 +63,7 @@ export default function PlayerRelationshipSummaryCard({ playerId }: { playerId: 
           </div>
         </div>
         {summary && summary.partyPartners.length > 0 && <div className="mt-4 border-t border-pc-border/50 pt-3"><PlayerRelationshipBars rows={summary.partyPartners} limit={3} tone="amber" showDetails /></div>}
-        <DetailLink href={`/players/${playerId}/relationships`} label={t("generated.matches.details")} className="mt-4 w-full justify-between" />
+        <DetailLink href={`/players/${playerId}/relationships?scope=${scope}`} label={t("generated.matches.details")} className="mt-4 w-full justify-between" />
       </div>
     </section>
   );

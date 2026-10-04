@@ -8,10 +8,11 @@
 import { formatApiErrorMessage } from "@/lib/api-errors";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { ErrorState, LoadingPanel } from "@/components/async-state";
 import PlayerRelationshipsView from "@/components/player-relationships-view";
-import { fetchPlayerRelationshipSummary, type PlayerRelationshipSummary } from "@/lib/api-client";
+import { fetchPlayerRelationshipSummary, type PlayerRelationshipSummary, type RelationshipScope } from "@/lib/api-client";
+import { SegmentedControl } from "@/components/ui/segmented-control";
 import { useLocalization } from "@/lib/localization-context";
 
 /**
@@ -23,23 +24,27 @@ export default function PlayerRelationshipsPage() {
   const { t } = useLocalization();
   const params = useParams<{ id: string }>();
   const playerId = String(params.id ?? "");
-  const [summary, setSummary] = useState<PlayerRelationshipSummary | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const scope: RelationshipScope = searchParams.get("scope") === "casual" ? "casual" : "ranked";
+  const [loaded, setLoaded] = useState<PlayerRelationshipSummary | null>(null);
+  const summary = loaded?.playerId === playerId && loaded.scope === scope ? loaded : null;
+  const [failure, setFailure] = useState<{ playerId: string; scope: RelationshipScope; message: string } | null>(null);
+  const error = failure?.playerId === playerId && failure.scope === scope ? failure.message : null;
 
   useEffect(() => {
     if (!playerId) return;
     let active = true;
-    setError(null);
-    fetchPlayerRelationshipSummary(playerId, 50).then((value) => {
-      if (active) setSummary(value);
+    fetchPlayerRelationshipSummary(playerId, 50, scope).then((value) => {
+      if (active) { setLoaded(value); setFailure(null); }
     }).catch((cause) => {
-      if (active) setError(formatApiErrorMessage(cause, t, t("common.relationships.loadFailed")));
+      if (active) setFailure({ playerId, scope, message: formatApiErrorMessage(cause, t, t("common.relationships.loadFailed")) });
     });
     return () => { active = false; };
-  }, [playerId, t]);
+  }, [playerId, scope, t]);
 
-  if (!summary && !error) return <LoadingPanel />;
-  if (!summary) return <ErrorState title={t("common.relationships.loadFailed")} message={error ?? t("common.relationships.loadFailed")} />;
-
-  return <PlayerRelationshipsView summary={summary} />;
+  return <div className="space-y-4">
+    <SegmentedControl label={t("common.relationships.title")} items={[{ value: "ranked", label: t("generated.players.ranked") }, { value: "casual", label: t("generated.players.casual") }]} value={scope} onChange={value => { setFailure(null); router.replace(`/players/${playerId}/relationships?scope=${value}`, { scroll: false }); }} />
+    {summary ? <PlayerRelationshipsView key={scope} summary={summary} /> : error ? <ErrorState title={t("common.relationships.loadFailed")} message={error} /> : <LoadingPanel />}
+  </div>;
 }

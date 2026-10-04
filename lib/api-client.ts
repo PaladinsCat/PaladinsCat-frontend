@@ -1896,8 +1896,12 @@ export interface PlayerRelationshipRow {
  * Aggregate a player co-play network and relationship groups.
  * refs: doc: documents/02-technical/api/api-server.md
  */
+export type RelationshipScope = "ranked" | "casual";
+
 export interface PlayerRelationshipSummary {
   playerId: string;
+  scope?: RelationshipScope;
+  queueIds?: number[];
   totals: {
     uniqueTeammates: number;
     uniqueOpponents: number;
@@ -1934,6 +1938,8 @@ type RawRelationshipRow = {
 
 type RawRelationshipSummary = {
   player_id?: string | number;
+  scope?: RelationshipScope;
+  queue_ids?: number[];
   totals?: Record<string, string | number | null>;
   teammates?: RawRelationshipRow[];
   opponents?: RawRelationshipRow[];
@@ -1967,14 +1973,16 @@ function mapRelationshipRow(row: RawRelationshipRow): PlayerRelationshipRow {
  * Fetch player relationship summary data for client consumers.
  *
  * refs: none
- * Request `GET '/coplay/summary/${encodeURIComponent(String(playerId))}?limit=${Math.min(Math.max(limit, 1), 50)}&contract=metrics-v3'` through the shared API transport. Uncaught network/API errors reject the returned promise.
- * I/O types: `playerId: string | number; limit: number -> Promise<PlayerRelationshipSummary>`.
+ * Ranked remains the default; casual combines queues 424, 452 and 469.
+ * I/O types: `playerId: string | number; limit: number; scope: RelationshipScope -> Promise<PlayerRelationshipSummary>`.
  */
-export async function fetchPlayerRelationshipSummary(playerId: string | number, limit = 6): Promise<PlayerRelationshipSummary> {
-  const raw = await fetchJson<RawRelationshipSummary>(`/coplay/summary/${encodeURIComponent(String(playerId))}?limit=${Math.min(Math.max(limit, 1), 50)}&contract=metrics-v3`);
+export async function fetchPlayerRelationshipSummary(playerId: string | number, limit = 6, scope: RelationshipScope = "ranked"): Promise<PlayerRelationshipSummary> {
+  const raw = await fetchJson<RawRelationshipSummary>(`/coplay/summary/${encodeURIComponent(String(playerId))}?limit=${Math.min(Math.max(limit, 1), 50)}&contract=metrics-v3&scope=${scope}`);
   const totals = raw.totals ?? {};
   return {
     playerId: String(raw.player_id ?? playerId),
+    scope: raw.scope ?? scope,
+    queueIds: raw.queue_ids ?? (scope === "casual" ? [424, 452, 469] : [486]),
     totals: {
       uniqueTeammates: Number(totals.unique_teammates ?? 0),
       uniqueOpponents: Number(totals.unique_opponents ?? 0),

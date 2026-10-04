@@ -16,6 +16,7 @@ type Mode = "teammates" | "opponents" | "party";
 export default function PlayerRelationshipsView({ summary }: { summary: PlayerRelationshipSummary }) {
   const { t, formatNumber, formatPercent } = useLocalization();
   const [mode, setMode] = useState<Mode>("teammates");
+  const casual = summary.scope === "casual";
   const rows = mode === "opponents" ? summary.opponents : mode === "party" ? summary.partyPartners : summary.teammates;
   const partyMetricMatches = summary.totals.partyMetricMatches;
   const partyWinRate = partyMetricMatches > 0 ? (summary.totals.partyWins / partyMetricMatches) * 100 : null;
@@ -27,7 +28,7 @@ export default function PlayerRelationshipsView({ summary }: { summary: PlayerRe
 
   return (
     <div className="space-y-6">
-      <PlayersPageHeader title={t("common.relationships.rankedTitle")} />
+      <PlayersPageHeader title={t(casual ? "common.relationships.casualTitle" : "common.relationships.rankedTitle")} description={casual ? t("common.relationships.casualDescription") : undefined} />
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         {[
@@ -41,10 +42,10 @@ export default function PlayerRelationshipsView({ summary }: { summary: PlayerRe
 
       <section className="pc-card">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-pc-border pb-4">
-          <div className="flex items-center gap-2"><Swords aria-hidden="true" className="h-5 w-5 text-pc-accent" /><h2 className="text-lg font-bold text-pc-text">{t("common.relationships.encounterMix")}</h2></div>
+          <div className="flex items-center gap-2"><Swords aria-hidden="true" className="h-5 w-5 text-pc-accent" /><h2 className="text-lg font-bold text-pc-text">{t(casual ? "common.relationships.casualEncounterMix" : "common.relationships.encounterMix")}</h2></div>
           <SegmentedControl label={t("common.relationships.title")} items={tabs.map((tab) => ({ value: tab.mode, label: <>{tab.label} · {formatNumber(tab.count)}</> }))} value={mode} onChange={setMode} />
         </div>
-        {rows.length === 0 ? <EmptyState title={t("common.relationships.empty")} /> : <PlayerRelationshipBars rows={rows} tone={mode === "opponents" ? "violet" : mode === "party" ? "amber" : "cyan"} showDetails className="grid grid-cols-1 items-start gap-3 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4" />}
+        {rows.length === 0 ? <EmptyState title={t(casual ? "common.relationships.casualEmpty" : "common.relationships.empty")} /> : <PlayerRelationshipBars rows={rows} tone={mode === "opponents" ? "violet" : mode === "party" ? "amber" : "cyan"} showDetails className="grid grid-cols-1 items-start gap-3 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4" />}
       </section>
     </div>
   );
