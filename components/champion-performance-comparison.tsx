@@ -52,6 +52,7 @@ export type ChampionPerformanceInitialData = {
   results: Array<{ metric: PerformanceMetricKey; rows: ChampionPerformanceDistribution[] }>;
   details: StatsChampion[];
   global: PerformanceMetricsResponse;
+  classAverages?: ClassAverages;
 };
 
 /**
@@ -98,9 +99,10 @@ export default function ChampionPerformanceComparison({ scope = "ranked", queueI
     Promise.all([
       initialData ? Promise.resolve(initialData.details) : scope === "ranked" ? fetchStatsChampions({ scope: "ranked", limit: 100 }) : Promise.resolve([]),
       initialData ? Promise.resolve(initialData.results) : fetchChampionPerformanceComparison({ queueId, scope }),
-      Promise.all(CLASSES.map(async role => [role.value, await fetchPerformanceMetrics({ scope, queueId, role: role.value })] as const)),
+      initialData?.classAverages ? Promise.resolve(initialData.classAverages)
+        : Promise.all(CLASSES.map(async role => [role.value, await fetchPerformanceMetrics({ scope, queueId, role: role.value })] as const)).then(Object.fromEntries),
     ]).then(([summary, results, classMetrics]) => {
-      hydrate(summary, results, Object.fromEntries(classMetrics));
+      hydrate(summary, results, classMetrics);
     }).catch(() => { if (active) setFailed(true); });
     return () => { active = false; };
   }, [attempt, initialData, scope, queueId]);

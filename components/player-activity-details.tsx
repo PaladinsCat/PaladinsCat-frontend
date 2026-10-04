@@ -227,7 +227,7 @@ export default function PlayerActivityDetails() {
       ) : (
         <div className="space-y-5">
           {activeTab === "matches" ? (
-            <ul className="flex flex-wrap gap-x-5 gap-y-2 border-y border-pc-border/60 py-4 font-mono text-sm">
+            <ul className="pc-card flex flex-wrap gap-x-5 gap-y-2 font-mono text-sm">
               {matchIds.map(match => (
                 <li key={`${match.match_id}:${match.queue_id}`}>
                   <Link
@@ -240,7 +240,7 @@ export default function PlayerActivityDetails() {
               ))}
             </ul>
           ) : (
-            <div className="flex flex-wrap gap-x-5 gap-y-2 border-y border-pc-border/60 py-4 text-sm">
+            <div className="pc-card flex flex-wrap gap-x-5 gap-y-2 text-sm">
               {players.map(player => (
                 <Link
                   key={player.player_id}

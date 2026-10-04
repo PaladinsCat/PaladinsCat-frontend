@@ -1481,6 +1481,7 @@ export type PerformancePageData = {
     results: Array<{ metric: PerformanceMetricKey; rows: ChampionPerformanceDistribution[] }>;
     details: StatsChampion[];
     global: PerformanceMetricsResponse;
+    classAverages?: Record<string, PerformanceMetricsResponse>;
   };
 };
 
@@ -3180,7 +3181,9 @@ export async function fetchJson<T>(path: string, options?: RequestInit & { retri
       // Expected client errors are intentionally written by the backend for the
       // person making the request (validation, conflicts, rate limits, and so on).
       // Preserve them instead of collapsing every response into a generic key.
-      if (res.status < 500 && typeof message === "string" && message.trim()) {
+      const isTagClearError = method === "POST" && endpointForDiagnostics(scopedPath) === "/players/:id/clear-tag"
+        && ["PLAYER_TAG_BUSY", "PLAYER_TAG_TIMEOUT", "PLAYER_TAG_CLEAR_FAILED"].includes(code || "");
+      if ((res.status < 500 || isTagClearError) && typeof message === "string" && message.trim()) {
         throw new ApiRequestError(message.trim(), res.status, {
           kind: "http",
           endpoint: endpointForDiagnostics(scopedPath),
@@ -4663,6 +4666,16 @@ export function mapPerformancePageData(raw: unknown, scope: PerformanceScope, me
     throw new Error("Incomplete global performance data");
   }
   const global = Object.fromEntries(PERFORMANCE_PAGE_METRICS.map(key => [key, mapMetricSummary(globalSource[key])])) as PerformanceMetricsResponse;
+  const classAverages: Record<string, PerformanceMetricsResponse> = {};
+  if (raw.classMetrics != null) {
+    for (const role of ["Frontline", "Damage", "Flank", "Support"]) {
+      const source = isRecord(raw.classMetrics) ? unwrapPerformanceRecord(raw.classMetrics[role]) : null;
+      if (!source || PERFORMANCE_PAGE_METRICS.some(key => !isPerformanceSummary(source[key]))) {
+        throw new Error(`Incomplete ${role} performance data`);
+      }
+      classAverages[role] = Object.fromEntries(PERFORMANCE_PAGE_METRICS.map(key => [key, mapMetricSummary(source[key])])) as PerformanceMetricsResponse;
+    }
+  }
   if (!Array.isArray(raw.champions)) throw new Error("Invalid champion summary data");
 
   return {
@@ -4677,6 +4690,7 @@ export function mapPerformancePageData(raw: unknown, scope: PerformanceScope, me
       results,
       details: mapStatsChampionRows(raw.champions as Parameters<typeof mapStatsChampionRows>[0]),
       global,
+      classAverages: raw.classMetrics != null ? classAverages : undefined,
     },
   };
 }
@@ -6465,10 +6479,10 @@ export async function reportPrivateAccount(privateId: string | number, opts: Rep
 export type ClearablePlayerTag = 'cheater' | 'exploiter' | 'suspicious' | 'dropper' | 'afk_wintrade' | 'alt_account';
 
 /**
- * Clear player tag from the account state.
+ * Clear a player moderation tag through the authenticated backend transaction.
  *
- * Accepts playerId, tag; returns clearPlayerTag data while reading or changing local auth state without a backend request.
- * refs: none
+ * One bounded POST attempt: writes are never automatically replayed after a timeout.
+ * refs: endpoints: POST /players/:id/clear-tag
  * I/O types: `playerId: string | number; tag: ClearablePlayerTag -> Promise<{ success: boolean; message: string; cleared: boolean }>`.
  */
 export async function clearPlayerTag(playerId: string | number, tag: ClearablePlayerTag): Promise<{ success: boolean; message: string; cleared: boolean }> {
@@ -6478,6 +6492,8 @@ export async function clearPlayerTag(playerId: string | number, tag: ClearablePl
     method: "POST",
     headers: { "Content-Type": "application/json", ...accountAuthHeaders() },
     body: JSON.stringify({ tag }),
+    retries: 0,
+    timeoutMs: 15_000,
   });
 }
 

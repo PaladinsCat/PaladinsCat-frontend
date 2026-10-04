@@ -17,6 +17,9 @@ function completePageData() {
     comparison: groups,
     champions: [{ champion_id: 2281, champion_name: "Bomb King", win_rate: 0.56, total_matches: 42, wins: 24, ban_total: 0 }],
     globalMetrics: Object.fromEntries(metrics.map(metric => [metric, summary(12345)])),
+    classMetrics: Object.fromEntries(["Frontline", "Damage", "Flank", "Support"].map(role => [role,
+      Object.fromEntries(metrics.map(metric => [metric, summary(10000)])),
+    ])),
   };
 }
 
@@ -45,7 +48,10 @@ test("performance page retries one incomplete bundle and hydrates both chart sec
   await expect(page.getByRole("heading", { name: "Ranked Performance Metrics" })).toBeVisible();
   await expect(page.getByText("12,345").first()).toBeVisible();
   await expect(page.getByRole("heading", { name: "Champion comparison" })).toBeVisible();
-  await expect(page.getByRole("row", { name: /Bomb King/ })).toBeVisible();
+  const champion = page.getByRole("row", { name: /Bomb King/ });
+  await expect(champion).toBeVisible();
+  await expect(champion.getByText("12,345", { exact: true }).first()).toBeVisible();
+  await expect(champion.getByText(/10,000/).first()).toBeVisible();
   expect(bundleCalls).toBe(2);
   expect(performanceFallbackCalls).toEqual([]);
 });

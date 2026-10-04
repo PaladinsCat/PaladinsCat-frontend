@@ -35,6 +35,7 @@ import { csrfHeader } from "@/lib/csrf";
 import { playerAvatarProxyPath } from "@/lib/player-avatar-proxy";
 import { getPercentageColor } from "@/lib/stat-quality";
 import type { PlayerResponse } from "@/lib/player-profile-types";
+import PlayerPresence from "@/components/player-presence";
 import PlayerRelationshipSummaryCard from "@/components/player-relationship-summary";
 import PlayerTrendsPanel from "@/components/player-trends";
 import { LoginRequired } from "@/components/login-required";
@@ -46,6 +47,9 @@ interface RefreshFeedback {
 }
 
 interface PlayerRefreshActionResponse {
+  presence?: PlayerResponse["presence"];
+  statusRefresh?: PlayerResponse["statusRefresh"];
+  profileRefresh?: PlayerResponse["profileRefresh"];
   message?: string;
   error?: {
     message?: string;
@@ -248,7 +252,7 @@ export default function PlayerProfileClient({
       setActionMenuOpen(false);
       setFetchKey((key) => key + 1);
     } catch (err) {
-      setRefreshFeedback({ kind: 'error', message: formatApiErrorMessage(err, t, 'Unable to clear tag') });
+      setRefreshFeedback({ kind: 'error', message: formatApiErrorMessage(err, t, t('moderation.clearTagFailed', { tag })) });
     } finally {
       setClearingTag(null);
     }
@@ -262,7 +266,7 @@ export default function PlayerProfileClient({
     let cancelled = false;
     setProfileLoading(true);
 
-    fetch(`${API_BASE}/players/${encodeURIComponent(id)}`)
+    fetch(`${API_BASE}/players/${encodeURIComponent(id)}`, { cache: 'no-store', signal: AbortSignal.timeout(65_000) })
       .then(async (res) => {
         const data = await res.json();
         if (res.status === 401) router.replace(`/auth/login?redirect=${encodeURIComponent(`/players/${id}`)}`);
@@ -329,9 +333,7 @@ export default function PlayerProfileClient({
     setRefreshFeedback({ kind, message });
   }, []);
 
-  // Profile fields retain their own TTL, but each permitted action asks the
-  // backend to re-check match history. This lets a visitor retry after an early
-  // click while ingestion is still registering the newest matches.
+  // One Refresh bypasses the shared TTL and updates the whole provider bundle.
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
     setRefreshFeedback(null);
@@ -341,6 +343,7 @@ export default function PlayerProfileClient({
         method: 'POST',
         credentials: 'same-origin',
         headers: csrf ? { 'X-CSRF-Token': csrf } : undefined,
+        signal: AbortSignal.timeout(65_000),
       });
       let data: PlayerRefreshActionResponse;
       const responseBody = await res.text();
@@ -371,10 +374,14 @@ export default function PlayerProfileClient({
         throw new Error(data?.error?.message || PLAYER_PROFILE_ERROR_KEYS.failedToRefreshProfile);
       }
 
-      const relatedRefreshError = data?.historyRefresh?.error || data?.championStatsRefresh?.error;
+      const relatedRefreshError = data?.profileRefresh?.error || data?.historyRefresh?.error || data?.championStatsRefresh?.error || data?.statusRefresh?.error;
+      setResponse(previous => previous ? { ...previous,
+        presence: data.presence, statusRefresh: data.statusRefresh,
+        profileRefresh: data.profileRefresh ?? previous.profileRefresh,
+      } : previous);
       if (!data.refreshQuota) {
         setRefreshCooldownUntil(null);
-        setRefreshFeedback({ kind: 'success', message: data.message || t("common.playerRefresh.success", { remaining: formatNumber(5) }) });
+        setRefreshFeedback({ kind: relatedRefreshError ? 'warning' : 'success', message: relatedRefreshError || data.message || t("common.playerRefresh.success", { remaining: formatNumber(5) }) });
         setFetchKey(k => k + 1);
         setHistoryFetchKey((key) => key + 1);
         return;
@@ -385,13 +392,13 @@ export default function PlayerProfileClient({
           data?.refreshQuota?.reset_at,
           data?.refreshQuota?.remaining_seconds,
           relatedRefreshError ? 'warning' : 'success',
-          t("common.playerRefresh.limitReached"),
+          [relatedRefreshError, t("common.playerRefresh.limitReached")].filter(Boolean).join(' '),
         );
       } else {
         setRefreshCooldownUntil(null);
         setRefreshFeedback({
           kind: relatedRefreshError ? 'warning' : 'success',
-          message: t(
+          message: relatedRefreshError || t(
             relatedRefreshError
               ? "common.playerRefresh.partial"
               : "common.playerRefresh.success",
@@ -533,6 +540,7 @@ export default function PlayerProfileClient({
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
         {/* Keep live/refresh controls visible; consolidate voting and moderation. */}
         {fullAccess && <div ref={actionMenuRef} className="relative order-2 flex shrink-0 flex-wrap items-center justify-end gap-2 self-stretch lg:self-center">
+          <PlayerPresence status={response.presence} error={response.statusRefresh?.error} loading={refreshing} />
           <button
             type="button"
             onClick={handleCurrentMatch}

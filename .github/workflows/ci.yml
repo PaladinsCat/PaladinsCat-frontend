@@ -48,6 +48,9 @@ jobs:
       - name: Champion page request tests
         run: npm run test:champion-page
 
+      - name: Performance page cache tests
+        run: node --test lib/performance-page-data.test.mjs
+
       - name: Build
         run: npm run build
 

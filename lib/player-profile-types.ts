@@ -82,7 +82,17 @@ interface ChampionRating {
  * I/O: API JSON object -> PlayerResponse.
  * refs: endpoints: GET /players/{id}
  */
+export interface PlayerStatus {
+  status: number;
+  status_string?: string | null;
+  [field: string]: unknown;
+}
+
 export interface PlayerResponse {
+  presence?: PlayerStatus | null;
+  statusRefresh?: { refreshed: boolean; error?: string | null };
+  historyRefresh?: { refreshed: boolean; error?: string | null };
+  refreshQuota?: { remaining: number; reset_at: string | null; remaining_seconds: number } | null;
   access?: { fullAccess: boolean; limit: number | null; remaining: number | null; resetAtMs: number | null };
   player: PlayerData;
   queueRatings: QueueRating[];
@@ -97,6 +107,6 @@ export interface PlayerResponse {
     attempted: boolean;
     refreshed: boolean;
     source: "database" | "hirez" | "stale-database";
-    error?: string;
+    error?: string | null;
   };
 }
