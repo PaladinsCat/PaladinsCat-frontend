@@ -6583,7 +6583,7 @@ export async function submitCustomTag(playerId: string | number, tagText: string
   return fetchJson<{ success: boolean; message: string; status: string }>(`/players/${playerId}/custom-tag`, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...accountAuthHeaders() },
-    body: JSON.stringify({ tag_text: tagText, reason: reason ?? null }),
+    body: JSON.stringify({ tagText: tagText, reason: reason ?? null }),
     retries: 0,
     timeoutMs: 15_000,
   });
