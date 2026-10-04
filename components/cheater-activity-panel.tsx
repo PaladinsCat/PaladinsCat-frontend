@@ -29,6 +29,10 @@ export default function CheaterActivityPanel() {
   }, []);
 
   const selected = queue === "all" ? activity : activity?.queues.find(item => item.queueId === queue);
+  const titles = {
+    matches: `${t("generated.players.cheaters")} · ${t("playerActivity.matches24h")}`,
+    players: `${t("generated.players.cheaters")} · ${t("playerActivity.players24h")}`,
+  };
 
   return <div className="space-y-6">
   <div className="grid grid-cols-1 gap-4 lg:grid-cols-2" data-testid="cheater-activity">
@@ -38,7 +42,7 @@ export default function CheaterActivityPanel() {
       const regionOrder = series?.regions.map(region => region.region) ?? [];
       return <section key={metric} className="pc-card min-w-0 p-3 sm:p-4">
         <HourlyCardHeader
-          title={`${t("generated.players.cheaters")} · ${t(metric === "matches" ? "playerActivity.matches24h" : "playerActivity.players24h")}`}
+          title={titles[metric]}
           queueLabel={t("playerActivity.queue")}
           allQueuesLabel={t("playerActivity.allQueues")}
           queues={activity?.queues ?? []}
@@ -77,7 +81,7 @@ export default function CheaterActivityPanel() {
       exact
       showStatements={false}
       formatNumber={formatNumber}
-      title={`${t("generated.players.cheaters")} · ${t("playerActivity.players24h")}`}
+      title={titles.players}
       queueTitle={t("playerActivity.playersByQueue")}
       platformTitle={t("playerActivity.playersByPlatform")}
       regionTitle={t("playerActivity.playersByRegion")}
