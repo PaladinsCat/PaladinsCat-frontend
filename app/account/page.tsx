@@ -12,6 +12,7 @@ import { useTimeZone } from "@/lib/time-zone-context";
 import { fixedUtcOffsetFromTimeZone, fixedUtcOffsetToTimeZone, getFixedUtcOffsetOptions, getSupportedTimeZones } from "@/lib/time-zone";
 import { LoadingIndicator, LoadingPanel } from "@/components/async-state";
 import PlayerLinkCard from "@/components/player-link-card";
+import PlayerTagVisibilityPanel from "@/components/player-tag-visibility";
 import { MaintenanceConsentPanel } from "@/components/maintenance-consent";
 import {
   ApiRequestError,
@@ -483,6 +484,17 @@ export default function AccountPage() {
           }}
         />
       </div>
+
+      {/* ── Tag visibility (own linked player only) ── */}
+      {linkedPlayer && (
+        <section className="rounded-2xl border border-white/5 pc-glass p-6 lg:col-span-2">
+          <PlayerTagVisibilityPanel
+            playerId={String(linkedPlayer.id)}
+            isOwnVerified
+            refreshKey={0}
+          />
+        </section>
+      )}
 
       {/* Identity credentials are exclusively managed by Keycloak. */}
       <section className="rounded-2xl border border-white/5 pc-glass p-6 lg:col-span-2">
