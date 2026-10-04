@@ -19,8 +19,9 @@ test("cheater charts follow latest records, share queue selection, and keep 24 h
     activeCount: 2, inactiveCount: 0, evidenceCount: 0, latest: [],
   } }));
   await page.route("**/api/players/overview**", route => route.fulfill({ json: {} }));
-  await page.route("**/api/cheaters/activity", route => {
+  await page.route("**/api/cheaters/activity", async route => {
     calls += 1;
+    await new Promise(resolve => setTimeout(resolve, 100));
     return route.fulfill({ json: { windowHours: 24, observedAt: "2026-10-02T23:30:00Z", matches: series, players: series,
       queues: [{ queueId: 486, queueName: "Ranked Siege", matches: ranked, players: ranked }],
       breakdown: { public_players: 2,
@@ -48,6 +49,7 @@ test("cheater charts follow latest records, share queue selection, and keep 24 h
   const chartBox = await charts.boundingBox();
   expect(chartBox!.y).toBeGreaterThan(latest!.y + latest!.height);
   const initialCalls = calls;
+  expect(initialCalls).toBe(1);
   await charts.getByRole("combobox").first().selectOption("486");
   await expect(charts.getByRole("combobox").last()).toHaveValue("486");
   await expect(charts.getByText("NA · 1", { exact: true })).toHaveCount(0);
