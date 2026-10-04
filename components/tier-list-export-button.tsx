@@ -19,11 +19,26 @@ type TierListExportButtonProps = {
 };
 
 async function tierListPng(board: HTMLElement): Promise<string> {
+  const MAX_PER_ROW = 8;
   const originalStyle = board.style.cssText;
   board.setAttribute("data-image-export", "true");
   board.style.maxWidth = "none";
   board.style.transform = "none";
   try {
+    // Measure icon size, gap, and label width from the live DOM to compute
+    // a board width that fits exactly MAX_PER_ROW champions per tier row.
+    const tierContent = board.querySelector<HTMLElement>(".flex-wrap");
+    const firstIcon = tierContent?.querySelector<HTMLElement>("img");
+    const iconSize = firstIcon ? Math.round(firstIcon.getBoundingClientRect().width) : 56;
+    const gap = tierContent ? parseFloat(window.getComputedStyle(tierContent).columnGap || "0") : 8;
+    const padding = tierContent ? parseFloat(window.getComputedStyle(tierContent).paddingLeft || "0") : 12;
+    const labelEl = board.querySelector<HTMLElement>(".grid > div");
+    const labelWidth = labelEl ? Math.round(labelEl.getBoundingClientRect().width) : 68;
+    const boardBorder = parseFloat(window.getComputedStyle(board).borderLeftWidth || "0");
+    const contentWidth = MAX_PER_ROW * iconSize + (MAX_PER_ROW - 1) * gap;
+    const exportWidth = Math.round(boardBorder * 2 + labelWidth + contentWidth + padding * 2);
+    board.style.width = `${exportWidth}px`;
+
     await document.fonts.ready;
     await Promise.all(Array.from(board.querySelectorAll("img")).map((image) => {
       if (image.complete) return image.decode?.().catch(() => undefined) ?? Promise.resolve();
@@ -33,7 +48,6 @@ async function tierListPng(board: HTMLElement): Promise<string> {
       });
     }));
     const computedStyle = window.getComputedStyle(board);
-    const exportWidth = Math.round(board.getBoundingClientRect().width);
     const exportHeight = board.clientHeight
       + parseFloat(computedStyle.borderTopWidth || "0")
       + parseFloat(computedStyle.borderBottomWidth || "0");
