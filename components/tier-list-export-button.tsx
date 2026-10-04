@@ -19,11 +19,8 @@ type TierListExportButtonProps = {
 };
 
 async function tierListPng(board: HTMLElement): Promise<string> {
-  const exportWidth = 1280;
-  const canvasWidth = 2048;
   const originalStyle = board.style.cssText;
   board.setAttribute("data-image-export", "true");
-  board.style.width = `${exportWidth}px`;
   board.style.maxWidth = "none";
   board.style.transform = "none";
   try {
@@ -36,10 +33,13 @@ async function tierListPng(board: HTMLElement): Promise<string> {
       });
     }));
     const computedStyle = window.getComputedStyle(board);
+    const exportWidth = Math.round(board.getBoundingClientRect().width);
     const exportHeight = board.clientHeight
       + parseFloat(computedStyle.borderTopWidth || "0")
       + parseFloat(computedStyle.borderBottomWidth || "0");
-    const canvasHeight = Math.max(1, Math.round(exportHeight * canvasWidth / exportWidth));
+    const scale = 2;
+    const canvasWidth = Math.round(exportWidth * scale);
+    const canvasHeight = Math.round(exportHeight * scale);
     return await toPng(board, {
       width: exportWidth,
       height: exportHeight,
