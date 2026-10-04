@@ -30,6 +30,7 @@ export type PlayerModeration = {
   noobCount: number;
   hypercarryCount: number;
   verified: boolean;
+  customTag: string | null;
 };
 
 const EMPTY: PlayerModeration = {
@@ -55,6 +56,7 @@ const EMPTY: PlayerModeration = {
   noobCount: 0,
   hypercarryCount: 0,
   verified: false,
+  customTag: null,
 };
 const TTL_MS = 5 * 60 * 1000;
 const cache = new Map<number, { value: PlayerModeration; expiresAt: number }>();
@@ -103,6 +105,7 @@ export function mergePlayerModeration(
     noobCount: supplied.noobCount === undefined ? fallback.noobCount : Number(supplied.noobCount) || 0,
     hypercarryCount: supplied.hypercarryCount === undefined ? fallback.hypercarryCount : Number(supplied.hypercarryCount) || 0,
     verified: supplied.verified === undefined ? fallback.verified : Boolean(supplied.verified),
+    customTag: supplied.customTag === undefined ? fallback.customTag : supplied.customTag,
   };
 }
 
@@ -121,6 +124,7 @@ type BulkPlayer = {
   alt_account_vote_count?: number;
   automatic_afk?: boolean;
   automatic_afk_count?: number;
+  automatic_tag_expires_at?: number | null;
   wall_shooter_count?: number;
   master_feeding_count?: number;
   tank_diff_count?: number;
@@ -130,6 +134,7 @@ type BulkPlayer = {
   noob_count?: number;
   hypercarry_count?: number;
   verified?: boolean;
+  custom_tag?: string | null;
 };
 
 function moderationRows(json: { data?: { players?: BulkPlayer[] }; players?: BulkPlayer[] }): BulkPlayer[] {
@@ -160,6 +165,7 @@ function moderationFromRow(player: BulkPlayer): PlayerModeration {
     noobCount: Number(player.noob_count ?? 0),
     hypercarryCount: Number(player.hypercarry_count ?? 0),
     verified: Boolean(player.verified),
+    customTag: player.custom_tag ?? null,
   };
 }
 
@@ -186,7 +192,7 @@ export async function fetchPlayerModerationBatch(playerIds: Array<string | numbe
     const id = Number(player.id);
     const value = moderationFromRow(player);
     results.set(id, value);
-    cache.set(id, { value, expiresAt });
+    cache.set(id, { value, expiresAt: Math.min(expiresAt, player.automatic_tag_expires_at ?? expiresAt) });
   }
   return results;
 }
@@ -237,6 +243,7 @@ export async function fetchPrivateAccountModerationBatch(
     noobCount: 0,
     hypercarryCount: 0,
     verified: false,
+    customTag: null,
   }]));
 }
 
@@ -253,7 +260,8 @@ async function flush() {
     const expiresAt = Date.now() + TTL_MS;
     for (const id of ids) {
       const value = results.get(id) ?? EMPTY;
-      cache.set(id, { value, expiresAt });
+      const expiry = moderationRows(json).find((row) => Number(row.id) === id)?.automatic_tag_expires_at;
+      cache.set(id, { value, expiresAt: Math.min(expiresAt, expiry ?? expiresAt) });
       const resolvers = pending.get(id) ?? [];
       pending.delete(id);
       resolvers.forEach((resolve) => resolve(value));

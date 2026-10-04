@@ -34,6 +34,7 @@ const EMPTY_MODERATION: PlayerModeration = {
   noobCount: 0,
   hypercarryCount: 0,
   verified: false,
+  customTag: null,
 };
 
 const PLAYER_TAG_CLASS = "player-status-tag shrink-0 rounded bg-[var(--pc-bg-secondary)] px-1.5 py-0.5 text-[10px] font-bold leading-none";
@@ -85,6 +86,7 @@ export type PlayerModerationTagProps = {
   altAccount?: boolean;
   altAccountVoteCount?: number;
   verified?: boolean;
+  customTag?: string | null;
 };
 
 /**
@@ -113,6 +115,7 @@ export function PlayerModerationTag({
   altAccount,
   altAccountVoteCount,
   verified,
+  customTag,
 }: PlayerModerationTagProps) {
   const { user } = useAuth();
   const canLookup = user?.linkedPlayerId != null;
@@ -167,8 +170,10 @@ export function PlayerModerationTag({
     ["CARRY", moderation.hypercarryCount],
   ] as const).filter(([, count]) => hasPlayerTag(count)).map(([tag]) => tag);
   if (automaticTag && !automaticTags.includes(automaticTag)) automaticTags.push(automaticTag);
+  const effectiveCustomTag = customTag ?? moderation.customTag;
 
   return <span className="inline-flex max-h-10 min-w-0 flex-wrap items-center gap-1 overflow-hidden">
+    {effectiveCustomTag && <span className={`${PLAYER_TAG_CLASS} custom-tag border border-violet-400/50 text-violet-300`} title={t("moderation.customTag")}>{effectiveCustomTag}</span>}
     {moderation.verified && <VerifiedPlayerBadge />}
     {moderation.cheater && <span className={`${PLAYER_TAG_CLASS} cheater text-red-400`} aria-label={t("generated.players.confirmedCheater")}>{t("generated.players.cheater")}</span>}
     {moderation.exploiter && <span className={`${PLAYER_TAG_CLASS} exploiter text-orange-400`} aria-label={t("moderation.exploiterAria")}>{t("moderation.exploiterShort")}</span>}

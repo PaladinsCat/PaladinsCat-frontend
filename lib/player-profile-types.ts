@@ -48,6 +48,7 @@ interface PlayerData {
   alt_account: boolean;
   boosted: boolean;
   verified?: boolean | null;
+  custom_tag?: string | null;
   sus_count: number;
   weirdo_count: number;
   hall_of_fame_count: number;

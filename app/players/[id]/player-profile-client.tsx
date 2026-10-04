@@ -38,6 +38,7 @@ import type { PlayerResponse } from "@/lib/player-profile-types";
 import PlayerPresence from "@/components/player-presence";
 import PlayerRelationshipSummaryCard from "@/components/player-relationship-summary";
 import PlayerTrendsPanel from "@/components/player-trends";
+import PlayerTagVisibilityPanel from "@/components/player-tag-visibility";
 import { LoginRequired } from "@/components/login-required";
 import { ArrowDown, ArrowRight, ArrowUp, ChevronRight, CirclePlay, Menu, RefreshCw, X } from "lucide-react";
 
@@ -153,6 +154,8 @@ export default function PlayerProfileClient({
   const displayProfileLoading = useRouteSettledLoading(profileLoading && (authLoading || !!user));
   const [error, setError] = useState<string | null>(null);
   const fullAccess = user?.linkedPlayerId != null && response?.access?.fullAccess !== false;
+  // Self-service tag visibility is only for the viewer's own verified profile.
+  const isOwnVerified = user?.linkedPlayerId != null && Number(id) === Number(user.linkedPlayerId);
 
   // Button states
   const [refreshing, setRefreshing] = useState(false);
@@ -707,6 +710,7 @@ export default function PlayerProfileClient({
                 boosted={player.boosted}
                 altAccount={player.alt_account}
                 verified={Boolean(player.verified ?? verifiedFallback)}
+                customTag={player.custom_tag ?? null}
               />
             </div>
             {/* Title + loading frame */}
@@ -741,6 +745,9 @@ export default function PlayerProfileClient({
       </div>
         {/* Account + Recent Matches stay in the same left stack as the title. */}
         <div className="space-y-5">
+          {isOwnVerified && (
+            <PlayerTagVisibilityPanel playerId={id} isOwnVerified={isOwnVerified} refreshKey={fetchKey} />
+          )}
           {/* Account Overview */}
           {fullAccess && <div>
             <div className="pc-card">

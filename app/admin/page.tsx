@@ -7,7 +7,7 @@ import { formatApiErrorMessage } from "@/lib/api-errors";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Activity, Bell, Database, Eye, EyeOff, Gamepad2, Gauge, KeyRound, RefreshCw, ScrollText, ShieldCheck, Users } from "lucide-react";
+import { Activity, Bell, Database, Eye, EyeOff, Gamepad2, Gauge, KeyRound, RefreshCw, ScrollText, ShieldCheck, Tag, Users } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { fetchAdminDashboard, searchManagedAccounts, updateManagedAccountRole, type AdminDashboard, type ManagedAccount } from "@/lib/admin-dashboard-api";
 import { AnonymousPresenceCard } from "@/components/anonymous-presence-card";
@@ -107,6 +107,7 @@ export default function AdminDashboardPage({ mode = "admin" }: { mode?: "admin" 
           <a href="https://auth.paladinscat.com/admin/paladinscat/console/" target="_blank" rel="noreferrer" className="pc-btn-secondary inline-flex items-center gap-2 text-sm"><KeyRound className="h-4 w-4" /> {t("generated.admin.identityAdmin")}</a>
           <Link href="/admin/notifications" className="pc-btn-secondary inline-flex items-center gap-2 text-sm"><Bell className="h-4 w-4" /> {t("generated.admin.notifications")}</Link>
           <Link href="/admin/changelog" className="pc-btn-secondary inline-flex items-center gap-2 text-sm"><ScrollText className="h-4 w-4" /> {t("generated.admin.changelog")}</Link>
+          <Link href="/admin/custom-tags" className="pc-btn-secondary inline-flex items-center gap-2 text-sm"><Tag className="h-4 w-4" /> {t("moderation.customTagReviewTitle")}</Link>
           <button type="button" onClick={() => void load()} disabled={loading} className="pc-btn-secondary inline-flex items-center gap-2 text-sm disabled:opacity-60">
             <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} /> {t("generated.admin.refresh")}</button>
         </div>

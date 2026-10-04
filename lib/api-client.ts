@@ -6505,6 +6505,157 @@ export async function clearPlayerTag(playerId: string | number, tag: ClearablePl
   });
 }
 
+// ── Tag visibility (self-service) ──
+
+/**
+ * The 8 automatic cosmetic performance tags a verified player may hide.
+ * These are the `automatic_player_metric_flags` metrics. `automatic_afk` is
+ * intentionally excluded (not self-toggleable).
+ */
+export type CosmeticTagKey =
+  | "wall_shooter"
+  | "master_feeding"
+  | "tank_diff"
+  | "support_diff"
+  | "dps_diff"
+  | "flank_diff"
+  | "noob"
+  | "hypercarry";
+
+/** A single owned tag with its current public visibility. */
+export interface PlayerTagVisibility {
+  tag: CosmeticTagKey;
+  count: number | null;
+  visible: boolean;
+}
+
+/** The custom-tag request lifecycle for a player. */
+export interface PlayerCustomTag {
+  status: "pending" | "approved" | "rejected";
+  tagText: string | null;
+  reviewNote: string | null;
+}
+
+/**
+ * Read the self-service tag-visibility state for a player.
+ *
+ * Returns only the cosmetic tags the player currently owns, each with its
+ * `hidden` flag, plus the player's custom-tag request (if any).
+ * refs: endpoints: GET /players/:id/tag-visibility
+ */
+export async function fetchTagVisibility(playerId: string | number): Promise<{
+  tags: PlayerTagVisibility[];
+  customTag: PlayerCustomTag | null;
+}> {
+  const token = getAuthToken();
+  if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.authenticationRequired);
+  return fetchJson<{ tags: PlayerTagVisibility[]; customTag: PlayerCustomTag | null }>(`/players/${playerId}/tag-visibility`, {
+    method: "GET",
+    headers: { ...accountAuthHeaders() },
+    retries: 0,
+    timeoutMs: 15_000,
+  });
+}
+
+/**
+ * Set the public visibility of one owned cosmetic tag (hide or show).
+ * refs: endpoints: POST /players/:id/tag-visibility
+ */
+export async function setTagVisibility(playerId: string | number, tag: CosmeticTagKey, hidden: boolean): Promise<{ success: boolean; message: string }> {
+  const token = getAuthToken();
+  if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.authenticationRequired);
+  return fetchJson<{ success: boolean; message: string }>(`/players/${playerId}/tag-visibility`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...accountAuthHeaders() },
+    body: JSON.stringify({ tag, hidden }),
+    retries: 0,
+    timeoutMs: 15_000,
+  });
+}
+
+/**
+ * Submit a custom-tag request for admin approval (max one per player).
+ * refs: endpoints: POST /players/:id/custom-tag
+ */
+export async function submitCustomTag(playerId: string | number, tagText: string, reason?: string): Promise<{ success: boolean; message: string; status: string }> {
+  const token = getAuthToken();
+  if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.authenticationRequired);
+  return fetchJson<{ success: boolean; message: string; status: string }>(`/players/${playerId}/custom-tag`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...accountAuthHeaders() },
+    body: JSON.stringify({ tag_text: tagText, reason: reason ?? null }),
+    retries: 0,
+    timeoutMs: 15_000,
+  });
+}
+
+/**
+ * Cancel the player's own pending custom-tag request.
+ * refs: endpoints: DELETE /players/:id/custom-tag
+ */
+export async function cancelCustomTag(playerId: string | number): Promise<{ success: boolean; message: string }> {
+  const token = getAuthToken();
+  if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.authenticationRequired);
+  return fetchJson<{ success: boolean; message: string }>(`/players/${playerId}/custom-tag`, {
+    method: "DELETE",
+    headers: { ...accountAuthHeaders() },
+    retries: 0,
+    timeoutMs: 15_000,
+  });
+}
+
+/** An admin-facing custom-tag request row. */
+export interface AdminCustomTagRow {
+  id: number;
+  player_id: number;
+  tag_text: string;
+  reason: string | null;
+  status: "pending" | "approved" | "rejected";
+  requested_by: number | null;
+  requested_by_username: string | null;
+  reviewed_by: number | null;
+  reviewed_at: string | null;
+  review_note: string | null;
+  created_at: string;
+  updated_at: string;
+  player_name: string;
+}
+
+/**
+ * List custom-tag requests for the admin portal.
+ * refs: endpoints: GET /admin/custom-tags
+ */
+export async function fetchAdminCustomTags(): Promise<{ items: AdminCustomTagRow[]; count: number }> {
+  const token = getAuthToken();
+  if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.authenticationRequired);
+  return fetchJson<{ items: AdminCustomTagRow[]; count: number }>(`/admin/custom-tags`, {
+    method: "GET",
+    headers: { ...accountAuthHeaders() },
+    retries: 0,
+    timeoutMs: 15_000,
+  });
+}
+
+/**
+ * Approve or reject a custom-tag request.
+ * refs: endpoints: POST /admin/custom-tags/:id/review
+ */
+export async function reviewAdminCustomTag(
+  id: number,
+  status: "approved" | "rejected",
+  reviewNote?: string
+): Promise<{ id: number; status: string }> {
+  const token = getAuthToken();
+  if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.authenticationRequired);
+  return fetchJson<{ id: number; status: string }>(`/admin/custom-tags/${id}/review`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...accountAuthHeaders() },
+    body: JSON.stringify({ status, ...(reviewNote ? { reviewNote } : {}) }),
+    retries: 0,
+    timeoutMs: 15_000,
+  });
+}
+
 // ── Community Types ──
 
 /**
