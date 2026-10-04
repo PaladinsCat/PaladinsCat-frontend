@@ -14,6 +14,14 @@ import { useLocalization } from "@/lib/localization-context";
 
 const colors: Record<string, string> = { ...REGION_COLORS, SA: stationaryChartSeries.orange, ASIA: stationaryChartSeries.violet };
 
+let pendingActivity: Promise<CheaterActivity> | null = null;
+
+/** Share an unfinished load when account initialization remounts the panel. */
+function loadActivity() {
+  pendingActivity ??= fetchCheaterActivity().finally(() => { pendingActivity = null; });
+  return pendingActivity;
+}
+
 /** Reuse the activity-page anatomy for distinct cheater matches and players. */
 export default function CheaterActivityPanel() {
   const { t, formatNumber, formatHourFromUtcBucket } = useLocalization();
@@ -23,7 +31,7 @@ export default function CheaterActivityPanel() {
 
   useEffect(() => {
     let active = true;
-    fetchCheaterActivity().then(data => { if (active) setActivity(data); })
+    loadActivity().then(data => { if (active) setActivity(data); })
       .catch(() => { if (active) setFailed(true); });
     return () => { active = false; };
   }, []);
