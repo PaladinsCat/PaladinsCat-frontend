@@ -7,6 +7,7 @@
  */
 import { identityCutoverEnabled } from "./identity-cutover";
 import { hasPlayerTag } from "./player-tag-threshold";
+import { normalizeMatchPerformanceTags, type PerformanceMatchTag } from "./player-match-tags";
 import type { GamePerformanceMetric, PerformanceScope } from "./performance-selection";
 import { API_ERROR_KEYS, ApiRequestError } from "./api-errors";
 export { API_ERROR_KEYS, ApiRequestError };
@@ -114,6 +115,7 @@ export interface MatchRecord {
   leagueTier: number | null;
   source: string | null;
   authoritative: boolean;
+  performanceTags: PerformanceMatchTag[];
 }
 
 /**
@@ -4370,6 +4372,7 @@ export async function fetchPlayerMatches(id: string, params?: { limit?: string; 
     league_tier?: number | string | null;
     source?: string | null;
     authoritative?: boolean;
+    performance_tags?: unknown;
     entry_datetime: string;
   }>>(`/players/${id}/matches${query.toString() ? `?${query.toString()}` : ''}`);
 
@@ -4392,6 +4395,7 @@ export async function fetchPlayerMatches(id: string, params?: { limit?: string; 
     leagueTier: m.league_tier == null ? null : Number(m.league_tier),
     source: m.source ?? null,
     authoritative: m.authoritative === true,
+    performanceTags: normalizeMatchPerformanceTags(m.performance_tags),
   }));
 }
 
@@ -6537,6 +6541,7 @@ export interface PlayerCustomTag {
   status: "pending" | "approved" | "rejected";
   tagText: string | null;
   reviewNote: string | null;
+  visible: boolean;
 }
 
 /**
@@ -6561,10 +6566,10 @@ export async function fetchTagVisibility(playerId: string | number): Promise<{
 }
 
 /**
- * Set the public visibility of one owned cosmetic tag (hide or show).
+ * Set the visibility of an owned cosmetic tag or approved custom tag.
  * refs: endpoints: POST /players/:id/tag-visibility
  */
-export async function setTagVisibility(playerId: string | number, tag: CosmeticTagKey, hidden: boolean): Promise<{ success: boolean; message: string }> {
+export async function setTagVisibility(playerId: string | number, tag: CosmeticTagKey | "custom", hidden: boolean): Promise<{ success: boolean; message: string }> {
   const token = getAuthToken();
   if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.authenticationRequired);
   return fetchJson<{ success: boolean; message: string }>(`/players/${playerId}/tag-visibility`, {
@@ -6593,7 +6598,7 @@ export async function submitCustomTag(playerId: string | number, tagText: string
 }
 
 /**
- * Cancel the player's own pending custom-tag request.
+ * Remove the player's own approved custom tag or cancel a pending request.
  * refs: endpoints: DELETE /players/:id/custom-tag
  */
 export async function cancelCustomTag(playerId: string | number): Promise<{ success: boolean; message: string }> {
@@ -6613,7 +6618,7 @@ export interface AdminCustomTagRow {
   player_id: number;
   tag_text: string;
   reason: string | null;
-  status: "pending" | "approved" | "rejected";
+  status: "pending" | "approved" | "rejected" | "removed";
   requested_by: number | null;
   requested_by_username: string | null;
   reviewed_by: number | null;

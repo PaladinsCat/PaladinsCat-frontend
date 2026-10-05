@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import { PlayersBackLink } from "@/components/ui/players-page-header";
 import { getChampionIconSafe } from "@/lib/champion-icons";
 import { clearPlayerTag, fetchPlayerMatches, type ClearablePlayerTag, type MatchRecord, type ReportType } from "@/lib/api-client";
+import PlayerMatchTags from "@/components/player-match-tags";
 import { getTierColor, resolveEffectiveTier, getRankIconPath } from "@/lib/tier-utils";
 import { useAuth } from "@/lib/auth-context";
 import ReportModal from "@/components/ReportModal";
@@ -819,7 +820,7 @@ export default function PlayerProfileClient({
                 <div className="space-y-2 lg:hidden">
                   {matches.map((match) => <Link key={match.matchId} href={`/matches/${match.matchId}`} className="pc-mobile-panel flex min-w-0 items-center gap-3 p-3">
                     <img src={getChampionIconSafe(match.championName)} alt="" className="h-10 w-10 shrink-0 rounded-lg object-contain" />
-                    <div className="min-w-0 flex-1"><div className="flex min-w-0 items-center gap-2"><span className="truncate text-sm font-semibold text-pc-text">{match.championName || t("generated.matches.unknown")}</span><span className={`shrink-0 text-xs font-bold ${match.isWinner ? "text-emerald-400" : "text-rose-400"}`}>{match.isWinner ? t("generated.players.win") : t("generated.players.loss")}</span></div><div className="truncate text-xs text-pc-text-muted">{match.queueId === 486 ? t("generated.players.ranked") : t("generated.players.casual")} · {displayMatchMap(match.mapGame, match.queueId)}</div><div className="mt-1 text-xs text-pc-text-muted">{formatDateTime(match.entryDatetime)}</div></div>
+                    <div className="min-w-0 flex-1"><div className="mb-1 flex flex-wrap items-center gap-1.5"><span className="font-mono text-xs text-pc-accent">#{match.matchId}</span><PlayerMatchTags tags={match.performanceTags} /></div><div className="flex min-w-0 items-center gap-2"><span className="truncate text-sm font-semibold text-pc-text">{match.championName || t("generated.matches.unknown")}</span><span className={`shrink-0 text-xs font-bold ${match.isWinner ? "text-emerald-400" : "text-rose-400"}`}>{match.isWinner ? t("generated.players.win") : t("generated.players.loss")}</span></div><div className="truncate text-xs text-pc-text-muted">{match.queueId === 486 ? t("generated.players.ranked") : t("generated.players.casual")} · {displayMatchMap(match.mapGame, match.queueId)}</div><div className="mt-1 text-xs text-pc-text-muted">{formatDateTime(match.entryDatetime)}</div></div>
                     <div className="shrink-0 text-right"><div className="font-mono text-sm font-bold text-pc-text">{match.kills}/{match.deaths}/{match.assists}</div><div className="text-xs uppercase text-pc-text-muted">{formatKda(match.kills, match.deaths, match.assists)} {t("generated.players.kda")}</div><div className="mt-1 font-mono text-xs text-pc-text-secondary">{formatMatchDuration(match.duration)}</div></div>
                   </Link>)}
                 </div>
@@ -828,6 +829,7 @@ export default function PlayerProfileClient({
                     <thead>
                       <tr className="border-b border-pc-border text-pc-text-muted text-left text-xs">
                         <th className="px-3 py-1.5">{t("generated.players.match.0335207")}</th>
+                        <th className="px-3 py-1.5 capitalize">{t("generated.players.flags")}</th>
                         <th className="px-3 py-1.5">{t("generated.players.champion")}</th>
                         <th className="px-3 py-1.5">{t("generated.players.queue")}</th>
                         <th className="px-3 py-1.5">{t("common.playerChampions.killsShort")}</th>
@@ -849,6 +851,7 @@ export default function PlayerProfileClient({
                                 #{m.matchId}
                               </Link>
                             </td>
+                            <td className="px-3 py-1.5"><PlayerMatchTags tags={m.performanceTags} /></td>
                             <td className="px-3 py-1.5">
                               <div className="flex items-center gap-1.5">
                                 <img src={getChampionIconSafe(m.championName)} alt={m.championName || ""} className="w-5 h-5 rounded object-contain" />

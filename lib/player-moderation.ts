@@ -63,6 +63,11 @@ const cache = new Map<number, { value: PlayerModeration; expiresAt: number }>();
 const pending = new Map<number, Array<(value: PlayerModeration) => void>>();
 let timer: ReturnType<typeof setTimeout> | null = null;
 
+/** Drop this player's cached badges after their tag preferences change. */
+export function invalidatePlayerModeration(playerId: string | number): void {
+  cache.delete(Number(playerId));
+}
+
 
 // User-facing error keys — resolved at the UI layer via t()
 /**

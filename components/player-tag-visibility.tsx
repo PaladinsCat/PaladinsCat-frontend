@@ -4,14 +4,15 @@
  * Shows ONLY the automatic cosmetic performance tags the player currently has
  * (hide-only semantics — the player can never enable a tag they do not own)
  * and lets them hide or re-show each one sitewide. Also exposes the single
- * custom-tag request (max one, admin-approved, displayed first).
+ * custom-tag request (max one, admin-approved, displayed first). Approved tags
+ * may be hidden/re-shown or removed by their owner without another review.
  *
  * The panel renders only when the viewer is the verified linked owner of the
  * profile; the backend re-enforces the same gate on every write.
  *
  * refs:
  *   endpoints: GET/POST /players/:id/tag-visibility, POST/DELETE /players/:id/custom-tag
- *   migrations: 241
+ *   migrations: 241, 243
  */
 "use client";
 
@@ -27,6 +28,7 @@ import {
 } from "@/lib/api-client";
 import { formatApiErrorMessage } from "@/lib/api-errors";
 import { useLocalization } from "@/lib/localization-context";
+import { invalidatePlayerModeration } from "@/lib/player-moderation";
 
 const TAG_LABELS: Record<CosmeticTagKey, string> = {
   wall_shooter: "Wall",
@@ -90,7 +92,8 @@ export default function PlayerTagVisibilityPanel({
     setSavingTag(tag);
     setError(null);
     try {
-      await setTagVisibility(playerId, tag, !visible);
+      await setTagVisibility(playerId, tag, visible);
+      invalidatePlayerModeration(playerId);
       setTags((prev) =>
         prev
           ? prev.map((row) =>
@@ -129,11 +132,27 @@ export default function PlayerTagVisibilityPanel({
     setCustomError(null);
     try {
       await cancelCustomTag(playerId);
+      invalidatePlayerModeration(playerId);
       const data = await fetchTagVisibility(playerId);
       setTags(data.tags);
       setCustomTag(data.customTag);
     } catch (err) {
-      setCustomError(formatApiErrorMessage(err, t, t("moderation.customTagCancelFailed")));
+      setCustomError(formatApiErrorMessage(err, t, t("moderation.tagVisibilitySaveFailed")));
+    } finally {
+      setCustomBusy(false);
+    }
+  };
+
+  const toggleCustom = async () => {
+    if (!customTag || customTag.status !== "approved") return;
+    setCustomBusy(true);
+    setCustomError(null);
+    try {
+      await setTagVisibility(playerId, "custom", customTag.visible);
+      invalidatePlayerModeration(playerId);
+      setCustomTag({ ...customTag, visible: !customTag.visible });
+    } catch (err) {
+      setCustomError(formatApiErrorMessage(err, t, t("moderation.tagVisibilitySaveFailed")));
     } finally {
       setCustomBusy(false);
     }
@@ -231,20 +250,38 @@ export default function PlayerTagVisibilityPanel({
                   ? t("moderation.customTagPending")
                   : t("moderation.customTagRejected")}
             </span>
-            {customTag.status === "pending" && (
+            {customTag.status === "approved" && (
+              <button
+                type="button"
+                disabled={customBusy}
+                onClick={() => void toggleCustom()}
+                className={`ml-auto rounded-md border px-2.5 py-1 text-xs font-medium transition disabled:opacity-50 ${
+                  customTag.visible
+                    ? "border-pc-border/60 text-pc-text-secondary hover:border-pc-accent/60"
+                    : "border-violet-400/50 text-violet-300"
+                }`}
+                aria-pressed={!customTag.visible}
+              >
+                {customTag.visible ? t("moderation.hideTag") : t("moderation.showTag")}
+                <span className="ml-1.5 text-xs uppercase tracking-wide text-pc-text-muted">
+                  {customTag.visible ? t("moderation.tagVisible") : t("moderation.tagHidden")}
+                </span>
+              </button>
+            )}
+            {(customTag.status === "pending" || customTag.status === "approved") && (
               <button
                 type="button"
                 disabled={customBusy}
                 onClick={() => void cancelCustom()}
-                className="ml-auto rounded-md border border-pc-border/60 px-2.5 py-1 text-xs text-pc-text-secondary hover:border-pc-accent/60 disabled:opacity-50"
+                className={`${customTag.status === "pending" ? "ml-auto " : ""}rounded-md border border-pc-border/60 px-2.5 py-1 text-xs text-pc-text-secondary hover:border-pc-accent/60 disabled:opacity-50`}
               >
-                {t("moderation.customTagCancel")}
+                {customTag.status === "approved" ? t("generated.account.remove") : t("moderation.customTagCancel")}
               </button>
             )}
           </div>
         )}
 
-        <div className="mt-3 space-y-2">
+        {customTag?.status !== "approved" && <div className="mt-3 space-y-2">
           <input
             type="text"
             value={customInput}
@@ -268,7 +305,7 @@ export default function PlayerTagVisibilityPanel({
           >
             {customBusy ? "…" : t("moderation.customTagSubmit")}
           </button>
-        </div>
+        </div>}
       </div>
     </div>
   );
