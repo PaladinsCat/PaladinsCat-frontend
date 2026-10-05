@@ -370,13 +370,16 @@ export function ActivityBar({
   formatNumber,
   colors = REGION_COLORS,
   seriesOrder,
+  playersByRegion,
 }: {
   entry: DisplayActivity["hourly"][number];
   max: number;
   formatNumber: (value: number) => string;
   colors?: Record<string, string>;
   seriesOrder?: string[];
+  playersByRegion?: Record<string, Array<{ playerId: number; name: string }>>;
 }) {
+  const tooltipId = useId();
   const seriesRank = new Map((seriesOrder ?? []).map((series, index) => [series, index]));
   const parts = Object.entries(entry.regions)
     .filter(([, value]) => value > 0)
@@ -384,17 +387,23 @@ export function ActivityBar({
       - (seriesRank.get(right[0]) ?? seriesRank.size));
   return <div className="relative h-3 min-w-0 rounded-full bg-pc-bg">
     <div className="flex h-full rounded-full" style={{ width: `${(entry.total / max) * 100}%` }}>
-      {parts.map(([region, value], index) => <span
+      {parts.map(([region, value], index) => <div
         key={region}
-        className={`group relative h-full ${
+        data-activity-region={region}
+        tabIndex={playersByRegion ? 0 : undefined}
+        aria-describedby={`${tooltipId}-${region}`}
+        className={`group h-full focus-visible:outline-2 focus-visible:outline-pc-accent ${playersByRegion ? "" : "relative"} ${
           index === 0 ? "rounded-l-full" : ""
         } ${index === parts.length - 1 ? "rounded-r-full" : ""}`}
         style={{ width: `${(value / entry.total) * 100}%`, backgroundColor: colors[region] ?? colors.Unknown ?? REGION_COLORS.Unknown }}
       >
-        <span className="pointer-events-none invisible absolute bottom-full left-1/2 z-30 mb-2 -translate-x-1/2 whitespace-nowrap rounded-md border border-pc-border bg-pc-bg-secondary px-2 py-1 font-mono text-xs font-semibold text-pc-text opacity-0 shadow-lg transition-[opacity,transform] duration-150 group-hover:visible group-hover:-translate-y-0.5 group-hover:opacity-100">
+        <div id={`${tooltipId}-${region}`} role="tooltip" className={`invisible absolute bottom-full z-30 rounded-md border border-pc-border bg-pc-bg-secondary px-2 py-1 font-mono text-xs font-semibold text-pc-text opacity-0 shadow-lg transition-[opacity,transform] duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 motion-reduce:transition-none ${playersByRegion ? "left-0 w-[min(18rem,60vw)]" : "pointer-events-none left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap group-hover:-translate-y-0.5"}`}>
           {region} · {formatNumber(value)}
-        </span>
-      </span>)}
+          {playersByRegion?.[region] && <ul tabIndex={0} className="mt-1 max-h-48 space-y-1 overflow-y-auto overscroll-contain border-t border-pc-border pt-1 font-sans font-normal">
+            {playersByRegion[region].map(player => <li key={player.playerId} className="break-words">{player.name}</li>)}
+          </ul>}
+        </div>
+      </div>)}
     </div>
   </div>;
 }

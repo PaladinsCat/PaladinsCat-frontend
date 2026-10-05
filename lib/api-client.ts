@@ -261,7 +261,10 @@ export interface CheaterPortal {
 export interface CheaterActivitySeries {
   total24h: number;
   regions: Array<{ region: string; total24h: number }>;
-  hourly: Array<{ date: string; hour: number; total: number; regions: Record<string, number> }>;
+  hourly: Array<{
+    date: string; hour: number; total: number; regions: Record<string, number>;
+    playersByRegion?: Record<string, Array<{ playerId: number; name: string }>>;
+  }>;
 }
 
 /** All-queue and per-queue series from the read-only cheater activity endpoint. */

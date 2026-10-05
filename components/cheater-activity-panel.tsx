@@ -75,7 +75,8 @@ export default function CheaterActivityPanel() {
               const current = index === series.hourly.length - 1;
               return <div key={`${hour.date}|${hour.hour}`} data-activity-hour={`${hour.date}|${hour.hour}`} className={`grid grid-cols-[3.5rem_1fr_2.5rem] items-center gap-2 rounded px-1 py-1 ${current ? "bg-pc-accent/8 ring-1 ring-pc-accent/20" : "hover:bg-pc-bg-secondary/50"}`}>
                 <span suppressHydrationWarning className={`text-right font-mono text-xs ${current ? "font-semibold text-pc-accent" : "text-pc-text-muted"}`}>{formatHourFromUtcBucket(hour.date, hour.hour)}</span>
-                <ActivityBar entry={hour} max={max} formatNumber={formatNumber} colors={colors} seriesOrder={regionOrder} />
+                <ActivityBar entry={hour} max={max} formatNumber={formatNumber} colors={colors} seriesOrder={regionOrder}
+                  playersByRegion={metric === "players" ? hour.playersByRegion : undefined} />
                 <span className={`text-right font-mono text-xs font-semibold ${hour.total > 0 ? "text-pc-text" : "text-pc-text-muted/30"}`}>{hour.total || "-"}</span>
               </div>;
             })}

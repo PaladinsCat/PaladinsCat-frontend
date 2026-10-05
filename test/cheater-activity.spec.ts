@@ -3,10 +3,12 @@ import { expect, test } from "@playwright/test";
 const hours = Array.from({ length: 24 }, (_, index) => ({
   date: "2026-10-02", hour: index, total: index === 22 ? 2 : 0,
   regions: index === 22 ? { EU: 1, NA: 1 } : {},
+  playersByRegion: index === 22 ? { EU: [{ playerId: 1, name: 'Alpha <EU>' }], NA: [{ playerId: 2, name: 'Beta' }] } : {},
 }));
 const series = { total24h: 2, regions: [{ region: "EU", total24h: 1 }, { region: "NA", total24h: 1 }], hourly: hours };
 const ranked = { total24h: 1, regions: [{ region: "EU", total24h: 1 }], hourly: hours.map(hour => ({
   ...hour, total: hour.total ? 1 : 0, regions: hour.total ? { EU: 1 } : {},
+  playersByRegion: hour.total ? { EU: [{ playerId: 1, name: 'Alpha <EU>' }] } : {},
 })) };
 
 test("cheater charts follow latest records, share queue selection, and keep 24 hours on mobile", async ({ page }) => {
@@ -50,15 +52,41 @@ test("cheater charts follow latest records, share queue selection, and keep 24 h
   expect(chartBox!.y).toBeGreaterThan(latest!.y + latest!.height);
   const initialCalls = calls;
   expect(initialCalls).toBe(1);
+  const players = charts.locator('section').last();
+  const activeHour = players.locator('[data-activity-hour="2026-10-02|22"]');
+  const eu = activeHour.locator('[data-activity-region="EU"]');
+  const na = activeHour.locator('[data-activity-region="NA"]');
+  await expect(eu.getByRole('tooltip')).not.toBeVisible();
+  await eu.hover();
+  await expect(eu.getByRole('tooltip')).toBeVisible();
+  await expect(eu.getByRole('listitem')).toHaveText(['Alpha <EU>']);
+  await expect(eu.getByRole('tooltip')).not.toContainText('Beta');
+  await eu.getByRole('listitem').hover();
+  await expect(eu.getByRole('tooltip')).toBeVisible();
+  await na.hover();
+  await expect(na.getByRole('tooltip')).toBeVisible();
+  await expect(na.getByRole('listitem')).toHaveText(['Beta']);
+  await charts.getByRole('heading').last().hover();
+  await expect(na.getByRole('tooltip')).not.toBeVisible();
+  await eu.focus();
+  await expect(eu.getByRole('tooltip')).toBeVisible();
   await charts.getByRole("combobox").first().selectOption("486");
   await expect(charts.getByRole("combobox").last()).toHaveValue("486");
   await expect(charts.getByText("NA · 1", { exact: true })).toHaveCount(0);
   await expect(charts.getByText("EU · 1", { exact: true }).filter({ visible: true })).toHaveCount(2);
   expect(calls).toBe(initialCalls);
+  await eu.hover();
+  await expect(eu.getByRole('listitem')).toHaveText(['Alpha <EU>']);
+  await expect(activeHour.locator('[data-activity-region="NA"]')).toHaveCount(0);
   await charts.screenshot({ path: "../local/cheater-activity-desktop.png" });
   await breakdown.screenshot({ path: "../local/cheater-breakdown-desktop.png" });
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(charts.locator("[data-activity-hour]")).toHaveCount(48);
+  await eu.focus();
+  await expect(eu.getByRole('tooltip')).toBeVisible();
+  const tooltip = await eu.getByRole('tooltip').boundingBox();
+  expect(tooltip!.x).toBeGreaterThanOrEqual(0);
+  expect(tooltip!.x + tooltip!.width).toBeLessThanOrEqual(390);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await charts.screenshot({ path: "../local/cheater-activity-mobile.png" });
   await expect(breakdown.getByRole("heading", { name: "Players by platform", exact: true })).toBeVisible();
