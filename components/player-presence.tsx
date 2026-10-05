@@ -20,7 +20,8 @@ export default function PlayerPresence({ status, error, loading }: {
   const { t } = useLocalization();
   const details = status && Number.isInteger(status.status) ? statuses[status.status] : undefined;
   const Icon = details?.icon ?? CircleHelp;
-  const label = error || !status ? t("common.playerPresence.unavailable")
+  // A failed refresh keeps the last known status; the warning stays in its title.
+  const label = !status ? t("common.playerPresence.unavailable")
     : details ? t(details.key) : status.status_string?.trim() || t("common.playerPresence.unknown");
   return (
     <div data-testid="player-presence" role="status" aria-live="polite" aria-busy={loading}

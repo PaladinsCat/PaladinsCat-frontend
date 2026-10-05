@@ -91,7 +91,7 @@ export interface PlayerStatus {
 
 export interface PlayerResponse {
   presence?: PlayerStatus | null;
-  statusRefresh?: { refreshed: boolean; error?: string | null };
+  statusRefresh?: { refreshed: boolean; cached?: boolean; refreshed_at?: string | null; error?: string | null };
   historyRefresh?: { refreshed: boolean; error?: string | null };
   refreshQuota?: { remaining: number; reset_at: string | null; remaining_seconds: number } | null;
   access?: { fullAccess: boolean; limit: number | null; remaining: number | null; resetAtMs: number | null };
@@ -102,6 +102,7 @@ export interface PlayerResponse {
     ttl_seconds: number;
     refreshed_at: string | null;
     expires_at: string | null;
+    next_refresh_at?: string | null;
     remaining_seconds: number;
     expired: boolean;
     was_expired?: boolean;
