@@ -20,6 +20,7 @@ import featureMessages from "./catalog/pages/features.json";
 import localizationMessages from "./catalog/pages/localization.json";
 import diminishingReturnsMessages from "./catalog/pages/diminishing-returns.json";
 import paladinsCatBotMessages from "./catalog/pages/paladinscat-bot.json";
+import adminEmailMessages from "./catalog/pages/admin-email.json";
 import statusMessages from "./catalog/system/status.json";
 import generatedUiMessages from "./catalog/generated/ui.json";
 import seoMessages from "./catalog/seo/metadata.json";
@@ -49,6 +50,7 @@ export const EN_MESSAGES = {
   ...localizationMessages,
   ...diminishingReturnsMessages,
   ...paladinsCatBotMessages,
+  ...adminEmailMessages,
   ...statusMessages,
   ...talentMessages,
   ...itemMessages,

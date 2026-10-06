@@ -3548,6 +3548,95 @@ export async function deleteAdminNotification(id: number): Promise<void> {
   });
 }
 
+export interface AdminEmailMessage {
+  id: number;
+  address: string;
+  direction: "in" | "out";
+  imap_uid: number;
+  subject: string;
+  sender: string;
+  recipient: string;
+  received_at: string | null;
+  read_at: string | null;
+  created_at: string;
+  body?: string;
+}
+
+export interface AdminEmailPollResult {
+  configured: boolean;
+  inserted: number;
+  address?: string;
+  message?: string;
+}
+
+/**
+ * Fetch admin email messages for the email UI (inbox/sent).
+ *
+ * refs: none
+ * Request `GET '/admin/email'` with optional `address`/`direction` filters.
+ * I/O types: `address?: string; direction?: "in" | "out" -> Promise<AdminEmailMessage[]>`.
+ */
+export async function fetchAdminEmails(
+  address?: string,
+  direction?: "in" | "out"
+): Promise<AdminEmailMessage[]> {
+  const token = getAuthToken();
+  if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.notAuthenticated);
+  const params = new URLSearchParams();
+  if (address) params.set("address", address);
+  if (direction) params.set("direction", direction);
+  const qs = params.toString();
+  const raw = await fetchJson<any[]>(`/admin/email${qs ? `?${qs}` : ""}`, {
+    headers: accountAuthHeaders(token),
+  });
+  return raw;
+}
+
+/**
+ * Read one admin email message by id (includes body).
+ *
+ * refs: none
+ * I/O types: `id: number -> Promise<AdminEmailMessage>`.
+ */
+export async function fetchAdminEmail(id: number): Promise<AdminEmailMessage> {
+  const token = getAuthToken();
+  if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.notAuthenticated);
+  return await fetchJson<AdminEmailMessage>(`/admin/email/${id}`, {
+    headers: accountAuthHeaders(token),
+  });
+}
+
+/**
+ * Mark an admin email message read (idempotent).
+ *
+ * refs: none
+ * I/O types: `id: number -> Promise<{ id: number; read_at: string }>`.
+ */
+export async function markAdminEmailRead(id: number): Promise<{ id: number; read_at: string }> {
+  const token = getAuthToken();
+  if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.notAuthenticated);
+  return await fetchJson<{ id: number; read_at: string }>(`/admin/email/${id}/read`, {
+    method: "POST",
+    headers: accountAuthHeaders(token),
+  });
+}
+
+/**
+ * Trigger an IMAP poll for the configured mailbox. Returns the number of
+ * newly inserted rows; `configured: false` is a friendly no-op state.
+ *
+ * refs: none
+ * I/O types: `none -> Promise<AdminEmailPollResult>`.
+ */
+export async function pollAdminEmail(): Promise<AdminEmailPollResult> {
+  const token = getAuthToken();
+  if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.notAuthenticated);
+  return await fetchJson<AdminEmailPollResult>(`/admin/email/poll`, {
+    method: "POST",
+    headers: accountAuthHeaders(token),
+  });
+}
+
 export interface ExploitExceptionRow {
   playerId: string;
   playerName: string | null;
