@@ -5903,7 +5903,7 @@ function parseAccessRestriction(value: unknown, fallbackCode?: unknown): AccessR
 export interface AuthUser {
   id: number;
   username: string;
-  email: string;
+  email: string | null;
   avatarUrl: string | null;
   bio: string | null;
   isAdmin: boolean;
@@ -6020,7 +6020,7 @@ export function clearAuth() {
  *
  * Accepts username, email, password; returns register data through a backend request, carrying authentication headers and applying the operation server-side.
  * refs: none
- * I/O types: `username: string; email: string; password: string -> Promise<AuthSession>`.
+ * I/O types: `username: string; email: string | null; password: string -> Promise<AuthSession>`.
  */
 export async function register(username: string, email: string, password: string): Promise<AuthSession> {
   const raw = await fetchJson<{ user: { id: number; username: string; email?: string | null; avatar_url?: string | null; bio?: string | null; is_admin?: boolean; is_approved?: boolean; created_at?: string; last_login?: string | null; time_zone?: string | null }; token: string; expires_at?: string }>("/auth/register", {
@@ -6120,7 +6120,7 @@ export async function getMe(_userId?: number): Promise<AuthUser> {
     user_id?: number;
     id?: number;
     username: string;
-    email: string;
+    email: string | null;
     avatar_url: string | null;
     bio: string | null;
     is_admin?: boolean;
@@ -6166,7 +6166,7 @@ export async function getUserProfile(userId: number): Promise<AuthUser> {
   const raw = await fetchJson<{
     id: number;
     username: string;
-    email: string;
+    email: string | null;
     avatar_url: string | null;
     bio: string | null;
     is_admin?: boolean;
@@ -6288,7 +6288,7 @@ export async function markAccountNotificationRead(notificationId: number): Promi
  */
 export async function getAccountDetails(): Promise<AccountDetails> {
   const raw = await fetchJson<{
-    user: { id: number; username: string; email: string; avatar_url: string | null; bio: string | null; is_admin?: boolean; is_approved?: boolean; linked_player_id: number | null; created_at: string; last_login: string | null; time_zone?: string | null; access_restriction?: unknown; access_restriction_kind?: string | null };
+    user: { id: number; username: string; email: string | null; avatar_url: string | null; bio: string | null; is_admin?: boolean; is_approved?: boolean; linked_player_id: number | null; created_at: string; last_login: string | null; time_zone?: string | null; access_restriction?: unknown; access_restriction_kind?: string | null };
     linkedPlayer: AccountDetails["linkedPlayer"];
   }>("/auth/account", {
     headers: accountAuthHeaders(),

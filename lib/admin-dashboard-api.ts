@@ -157,10 +157,10 @@ export async function fetchAdminDashboard(mode: "admin" | "developer" = "admin")
 }
 
 /**
- * Define managed account as `{ id: number; username: string; email: string; role: "user" | "moderator" | "developer" | "admin" }`.
+ * Define managed account as `{ id: number; username: string; email: string | null; role: "user" | "moderator" | "developer" | "admin" }`.
  * refs: doc: documents/02-technical/security/auth.md
  */
-export type ManagedAccount = { id: number; username: string; email: string; role: "user" | "moderator" | "developer" | "admin" };
+export type ManagedAccount = { id: number; username: string; email: string | null; role: "user" | "moderator" | "developer" | "admin" };
 /**
  * Fetch administrator account-search results with the URL-encoded query and current account headers; network/API failures reject the promise.
  * refs: none

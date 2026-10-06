@@ -18,7 +18,7 @@ import { formatLocalDateTime } from "@/lib/time-format";
 import { useLocalization } from "@/lib/localization-context";
 
 type AccountRole = "User" | "Moderator" | "Developer" | "Admin";
-type PreviewAccount = { id: number; username: string; email: string; role: AccountRole };
+type PreviewAccount = { id: number; username: string; email: string | null; role: AccountRole };
 const PREVIEW_DASHBOARD: AdminDashboard = {
   generatedAt: "2026-08-12T12:00:00Z",
   traffic: { summary: { viewsToday: 1294, views7d: 7420 }, daily: ["2026-08-06", "2026-08-07", "2026-08-08", "2026-08-09", "2026-08-10", "2026-08-11", "2026-08-12"].map((date, index) => ({ date, pageViews: 688 + index * 81, matches: 920 + index * 33 })), topPages: [{ path: "/players", pageViews: 921 }, { path: "/matches", pageViews: 643 }, { path: "/champions", pageViews: 512 }] },

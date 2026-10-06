@@ -126,6 +126,7 @@ test("authorization parameters are pushed server-side and the browser gets only 
   const transaction = createTransaction("/");
   const pushed = buildPushedAuthorizationRequest("https://auth.paladinscat.com/realms/paladinscat", "paladinscat-web", "https://paladinscat.com/api/auth/oidc/callback", transaction);
   assert.equal(pushed.endpoint.pathname, "/realms/paladinscat/protocol/openid-connect/ext/par/request");
+  assert.equal(pushed.form.get("scope"), "openid profile");
   assert.equal(pushed.form.get("state"), transaction.state);
   assert.equal(pushed.form.get("nonce"), transaction.nonce);
   assert.equal(pushed.form.get("code_challenge_method"), "S256");

@@ -142,7 +142,7 @@ export function resolveInternalIssuer(issuer: string, override: string | undefin
 }
 
 /**
- * Build the Keycloak PAR endpoint and form containing client ID, code response type, openid/profile/email scopes, redirect URI, state, nonce, and the S256 PKCE challenge. Perform no HTTP request; invalid URL construction throws.
+ * Build the Keycloak PAR endpoint and form containing client ID, code response type, openid/profile scopes, redirect URI, state, nonce, and the S256 PKCE challenge. Perform no HTTP request; invalid URL construction throws.
  * refs: none
  * I/O types: `serverIssuer: string; clientId: string; redirectUri: string; transaction: OidcTransaction -> { endpoint: URL; form: URLSearchParams }`.
  */
@@ -151,7 +151,7 @@ export function buildPushedAuthorizationRequest(serverIssuer: string, clientId: 
   const form = new URLSearchParams();
   form.set("client_id", clientId);
   form.set("response_type", "code");
-  form.set("scope", "openid profile email");
+  form.set("scope", "openid profile");
   form.set("redirect_uri", redirectUri);
   form.set("state", transaction.state);
   form.set("nonce", transaction.nonce);
