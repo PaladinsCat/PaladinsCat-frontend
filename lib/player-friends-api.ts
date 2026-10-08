@@ -9,7 +9,7 @@ import { fetchJson } from "./api-client";
  * refs: endpoints: GET /players/{id}/friends
  */
 export type PlayerFriendsResponse = {
-  friends: Array<{ id: string; name: string; platform: string | null }>;
+  friends: Array<{ id: string; name: string; platform: string | null; status: "Friend" | "Blocked" }>;
   total: number;
   status: "ready" | "private" | "unavailable";
   freshness: { ttl_seconds: number; refreshed_at: string | null; expires_at: string | null; expired: boolean; remaining_seconds: number };

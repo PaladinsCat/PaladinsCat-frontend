@@ -1,10 +1,12 @@
 {
   "playerFriends.title": "Friends",
+  "playerFriends.blocked": "Blocked",
+  "playerFriends.blockedEmpty": "No blocked players to show.",
   "playerFriends.profile": "Player profile",
   "playerFriends.empty": "No friends to show.",
-  "playerFriends.private": "This friends list is private.",
+  "playerFriends.private": "This list is private.",
   "playerFriends.unavailable": "Friends are unavailable right now.",
-  "playerFriends.stale": "Showing the last saved friends list.",
+  "playerFriends.stale": "Showing the last saved list.",
   "playerFriends.loading": "Loading friends…",
   "playerFriends.retry": "Try again"
 }
