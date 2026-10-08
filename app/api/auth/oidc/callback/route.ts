@@ -4,7 +4,7 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { newCsrfToken, normalizedHttpsIssuer, safeReturnPath, parseTransaction, resolveInternalIssuer, stateMatches, validateIdToken } from "@/lib/oidc-security";
-import { oidcBffServiceHeaders } from "@/lib/oidc-bff-service";
+import { oidcBffServiceHeaders, type CfForwardHeaders } from "@/lib/oidc-bff-service";
 import { oidcClientSecret } from "@/lib/oidc-client-secret";
 
 /**
@@ -25,6 +25,17 @@ function clear(response: NextResponse) { response.cookies.set(TX_COOKIE, "", { h
 function one(url: URL, name: string): string | null {
   const values = url.searchParams.getAll(name);
   return values.length === 1 ? values[0] : null;
+}
+// Forward only the Cloudflare edge headers (cf-connecting-ip, cf-ray) to the backend for
+// security-event logging. No other browser headers cross this boundary; the backend hashes
+// the IP and the frontend never stores or logs the raw value.
+function cfForwardHeaders(request: NextRequest): CfForwardHeaders {
+  const headers: CfForwardHeaders = {};
+  const connectingIp = request.headers.get("cf-connecting-ip")?.trim();
+  const ray = request.headers.get("cf-ray")?.trim();
+  if (connectingIp) headers["cf-connecting-ip"] = connectingIp;
+  if (ray) headers["cf-ray"] = ray;
+  return headers;
 }
 
 /**
@@ -57,7 +68,7 @@ export async function GET(request: NextRequest) {
   // The validated id_token crosses this server-to-server boundary only; the backend stores it (encrypted) so RP-initiated logout can name the SSO session via id_token_hint.
   const exchangeBody: { access_token: string; id_token: string; refresh_token: string; session_ttl_hours?: number } = { access_token: token.access_token, id_token: token.id_token, refresh_token: token.refresh_token };
   if (keepSignedIn) exchangeBody.session_ttl_hours = 72;
-  const exchange = await fetch(`${backend()}/auth/oidc/exchange`, { method: "POST", headers: { ...await oidcBffServiceHeaders(), "content-type": "application/json" }, cache: "no-store", body: JSON.stringify(exchangeBody) });
+  const exchange = await fetch(`${backend()}/auth/oidc/exchange`, { method: "POST", headers: { ...await oidcBffServiceHeaders(cfForwardHeaders(request)), "content-type": "application/json" }, cache: "no-store", body: JSON.stringify(exchangeBody) });
   if (!exchange.ok) { const response = NextResponse.redirect(new URL("/auth/login?oidc_error=1", origin())); clear(response); return response; }
   const result = await exchange.json() as { token?: string; expires_at?: string };
   if (!result.token || result.token.length > 512 || !result.expires_at) { const response = NextResponse.redirect(new URL("/auth/login?oidc_error=1", origin())); clear(response); return response; }

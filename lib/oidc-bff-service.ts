@@ -127,10 +127,19 @@ async function serviceToken(): Promise<string> {
 
 // Server-only: this credential is minted at runtime and is never available to browser JS.
 /**
- * Return an Authorization Bearer header using the server-only service token. Reuse the cached token until its usable expiry, share an in-flight fetch, and reject if obtaining the token fails.
+ * Cloudflare edge headers forwarded to the backend for security-event logging. Only cf-connecting-ip and cf-ray are forwarded; the backend hashes the IP and the frontend never stores or logs the raw value.
  * refs: none
- * I/O types: `none -> Promise<HeadersInit>`.
  */
-export async function oidcBffServiceHeaders(): Promise<HeadersInit> {
-  return { authorization: `Bearer ${await serviceToken()}` };
+export type CfForwardHeaders = { "cf-connecting-ip"?: string; "cf-ray"?: string };
+
+/**
+ * Return an Authorization Bearer header using the server-only service token, plus the optional Cloudflare edge headers (cf-connecting-ip and cf-ray) when provided. Reuse the cached token until its usable expiry, share an in-flight fetch, and reject if obtaining the token fails.
+ * refs: none
+ * I/O types: `cfHeaders?: CfForwardHeaders -> Promise<HeadersInit>`.
+ */
+export async function oidcBffServiceHeaders(cfHeaders?: CfForwardHeaders): Promise<HeadersInit> {
+  const headers: Record<string, string> = { authorization: `Bearer ${await serviceToken()}` };
+  if (cfHeaders?.["cf-connecting-ip"]) headers["cf-connecting-ip"] = cfHeaders["cf-connecting-ip"];
+  if (cfHeaders?.["cf-ray"]) headers["cf-ray"] = cfHeaders["cf-ray"];
+  return headers;
 }

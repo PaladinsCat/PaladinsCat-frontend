@@ -16,6 +16,7 @@
     "test:champion-icons": "node --experimental-strip-types --test lib/champion-icons.test.ts",
     "test:champion-page": "node --experimental-strip-types --test lib/champion-page-data.test.ts",
     "test:oidc": "node --experimental-strip-types --test lib/oidc-security.test.ts",
+    "test:oidc-callback": "node --test lib/oidc-callback-route.test.mjs",
     "test:public-v1": "node --experimental-strip-types --test lib/public-v1.test.ts",
     "test:website-gate": "node --experimental-strip-types --test lib/website-gate.test.ts lib/website-proxy.test.mjs",
     "test:deployment-polling": "node --test lib/deployment-polling.test.mjs",

@@ -271,6 +271,34 @@ test("callback exchange requests 72h only when the ID token authorizes it and si
   assert.doesNotMatch(callback, /maxAge: 60 \* 60 \* 8/);
 });
 
+test("callback forwards only the Cloudflare edge headers to the backend exchange", () => {
+  const callback = readFileSync(new URL("../app/api/auth/oidc/callback/route.ts", import.meta.url), "utf8");
+  // Reads exactly the two Cloudflare edge headers and nothing else from the request.
+  assert.match(callback, /headers\.get\("cf-connecting-ip"\)/);
+  assert.match(callback, /headers\.get\("cf-ray"\)/);
+  // The exchange (the backend login-event call) is the only backend fetch that carries them.
+  assert.match(callback, /\/auth\/oidc\/exchange.*oidcBffServiceHeaders\(cfForwardHeaders\(request\)\)/);
+  // The consume call stays header-free (bare oidcBffServiceHeaders(), no CF headers) so the
+  // visitor IP is not attached to non-login events.
+  assert.match(callback, /\/auth\/oidc\/transactions\/consume.*oidcBffServiceHeaders\(\)/);
+  // No other browser header (cookie, authorization, user-agent, x-forwarded-for) is forwarded.
+  assert.doesNotMatch(callback, /headers\.get\("(cookie|authorization|user-agent|x-forwarded-for)"\)/i);
+});
+
+test("the raw visitor IP is never logged or stored in the frontend OIDC flow", () => {
+  const callback = readFileSync(new URL("../app/api/auth/oidc/callback/route.ts", import.meta.url), "utf8");
+  const bff = readFileSync(new URL("./oidc-bff-service.ts", import.meta.url), "utf8");
+  // Neither file contains any logging call (the IP must not be written to a log sink).
+  for (const source of [callback, bff]) {
+    assert.doesNotMatch(source, /console\.(log|error|warn|info|debug)\s*\(/);
+    assert.doesNotMatch(source, /logger\./);
+  }
+  // The CF headers are only ever placed on the outgoing fetch headers, never persisted to a cookie
+  // or serialized into a response body.
+  assert.doesNotMatch(callback, /cookies\.set\([^)]*cf-connecting-ip/i);
+  assert.doesNotMatch(callback, /JSON\.stringify\([^)]*cf-connecting-ip/);
+});
+
 test("backchannel logout route verifies the token then calls the v1 backend revocation", () => {
   const route = readFileSync(new URL("../app/api/auth/oidc/backchannel-logout/route.ts", import.meta.url), "utf8");
   assert.match(route, /validateLogoutToken\(logoutToken, issuer, clientId, serverIssuer\)/);
