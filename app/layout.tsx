@@ -20,6 +20,7 @@ import SiteAnalytics from "@/components/SiteAnalytics";
 import DeploymentUpdateBanner from "@/components/DeploymentUpdateBanner";
 import SiteBanner from "@/components/SiteBanner";
 import ImageAssetFallback from "@/components/ImageAssetFallback";
+import FingerprintBootstrap from "@/components/FingerprintBootstrap";
 import CoreUiDragGuard from "@/components/CoreUiDragGuard";
 import LiteModeProvider from "@/components/LiteModeProvider";
 import RestrictedAccountGate from "@/components/restricted-account-gate";
@@ -152,6 +153,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className="min-h-screen bg-pc-bg text-pc-text flex flex-col">
         <CoreUiDragGuard />
         <ImageAssetFallback />
+        <FingerprintBootstrap />
         {/* suppressHydrationWarning: the per-request CSP nonce is injected into
             the server-rendered script but absent from the client hydration tree
             (browsers strip it after execution) — a known Next.js dev-mode

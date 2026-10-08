@@ -130,7 +130,15 @@ async function serviceToken(): Promise<string> {
  * Bounded browser inputs forwarded to the backend for security-event logging. Forwards the Cloudflare edge headers (cf-connecting-ip, cf-ray) plus the two bounded browser inputs (user-agent, accept-language); the backend hashes the IP and the browser signature and the frontend never stores or logs the raw value.
  * refs: none
  */
-export type CfForwardHeaders = { "cf-connecting-ip"?: string; "cf-ray"?: string; "user-agent"?: string; "accept-language"?: string };
+export type CfForwardHeaders = {
+  "cf-connecting-ip"?: string;
+  "cf-ray"?: string;
+  "user-agent"?: string;
+  "accept-language"?: string;
+  "x-paladinscat-fp-screen"?: string;
+  "x-paladinscat-fp-timezone"?: string;
+  "x-paladinscat-fp-platform"?: string;
+};
 
 // Cap a forwarded header at 512 characters so no unbounded browser input crosses the boundary; return undefined when empty after trim.
 function bounded(value: string | null | undefined): string | undefined {
@@ -146,7 +154,15 @@ function bounded(value: string | null | undefined): string | undefined {
  */
 export async function oidcBffServiceHeaders(cfHeaders?: CfForwardHeaders): Promise<HeadersInit> {
   const headers: Record<string, string> = { authorization: `Bearer ${await serviceToken()}` };
-  for (const key of ["cf-connecting-ip", "cf-ray", "user-agent", "accept-language"] as const) {
+  for (const key of [
+    "cf-connecting-ip",
+    "cf-ray",
+    "user-agent",
+    "accept-language",
+    "x-paladinscat-fp-screen",
+    "x-paladinscat-fp-timezone",
+    "x-paladinscat-fp-platform",
+  ] as const) {
     const value = bounded(cfHeaders?.[key]);
     if (value) headers[key] = value;
   }

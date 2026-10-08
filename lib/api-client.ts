@@ -46,6 +46,7 @@ import { championSlug } from "./utils";
 import { getChampionIconSafe } from "./champion-icons";
 import { getStoredLobbyTierFilter, withStoredLobbyTier } from "./lobby-tier";
 import { csrfHeader } from "./csrf";
+import { fingerprintHeaders } from "./fingerprint";
 import type { MatchAccessTier } from "./match-access";
 
 export type {
@@ -3120,6 +3121,9 @@ export async function fetchJson<T>(path: string, options?: RequestInit & { retri
   const method = (fetchOptions.method || "GET").toUpperCase();
   const csrf = typeof document !== "undefined" ? csrfHeader(document.cookie, method) : null;
   if (csrf) headers.set("X-CSRF-Token", csrf);
+  // Pseudonymized browser fingerprint for security access capture (profile_view
+  // / report). Coarse device characteristics only; the backend hashes them.
+  for (const [name, value] of Object.entries(fingerprintHeaders())) headers.set(name, value);
   fetchOptions.headers = headers;
   fetchOptions.credentials = "same-origin";
 
