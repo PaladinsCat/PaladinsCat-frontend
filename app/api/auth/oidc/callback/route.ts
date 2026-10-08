@@ -26,15 +26,20 @@ function one(url: URL, name: string): string | null {
   const values = url.searchParams.getAll(name);
   return values.length === 1 ? values[0] : null;
 }
-// Forward only the Cloudflare edge headers (cf-connecting-ip, cf-ray) to the backend for
-// security-event logging. No other browser headers cross this boundary; the backend hashes
-// the IP and the frontend never stores or logs the raw value.
+// Forward the Cloudflare edge headers (cf-connecting-ip, cf-ray) plus the two bounded browser
+// inputs (user-agent, accept-language) to the backend for security-event logging. No other
+// browser headers cross this boundary; the backend hashes the IP and the browser signature and
+// the frontend never stores or logs the raw value.
 function cfForwardHeaders(request: NextRequest): CfForwardHeaders {
   const headers: CfForwardHeaders = {};
   const connectingIp = request.headers.get("cf-connecting-ip")?.trim();
   const ray = request.headers.get("cf-ray")?.trim();
+  const userAgent = request.headers.get("user-agent")?.trim();
+  const acceptLanguage = request.headers.get("accept-language")?.trim();
   if (connectingIp) headers["cf-connecting-ip"] = connectingIp;
   if (ray) headers["cf-ray"] = ray;
+  if (userAgent) headers["user-agent"] = userAgent;
+  if (acceptLanguage) headers["accept-language"] = acceptLanguage;
   return headers;
 }
 

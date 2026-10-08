@@ -127,19 +127,28 @@ async function serviceToken(): Promise<string> {
 
 // Server-only: this credential is minted at runtime and is never available to browser JS.
 /**
- * Cloudflare edge headers forwarded to the backend for security-event logging. Only cf-connecting-ip and cf-ray are forwarded; the backend hashes the IP and the frontend never stores or logs the raw value.
+ * Bounded browser inputs forwarded to the backend for security-event logging. Forwards the Cloudflare edge headers (cf-connecting-ip, cf-ray) plus the two bounded browser inputs (user-agent, accept-language); the backend hashes the IP and the browser signature and the frontend never stores or logs the raw value.
  * refs: none
  */
-export type CfForwardHeaders = { "cf-connecting-ip"?: string; "cf-ray"?: string };
+export type CfForwardHeaders = { "cf-connecting-ip"?: string; "cf-ray"?: string; "user-agent"?: string; "accept-language"?: string };
+
+// Cap a forwarded header at 512 characters so no unbounded browser input crosses the boundary; return undefined when empty after trim.
+function bounded(value: string | null | undefined): string | undefined {
+  const trimmed = value?.trim();
+  if (!trimmed) return undefined;
+  return trimmed.slice(0, 512);
+}
 
 /**
- * Return an Authorization Bearer header using the server-only service token, plus the optional Cloudflare edge headers (cf-connecting-ip and cf-ray) when provided. Reuse the cached token until its usable expiry, share an in-flight fetch, and reject if obtaining the token fails.
+ * Return an Authorization Bearer header using the server-only service token, plus the optional bounded browser inputs (cf-connecting-ip, cf-ray, user-agent, accept-language) when provided and non-empty. Each is trimmed and capped at 512 characters. Reuse the cached token until its usable expiry, share an in-flight fetch, and reject if obtaining the token fails.
  * refs: none
  * I/O types: `cfHeaders?: CfForwardHeaders -> Promise<HeadersInit>`.
  */
 export async function oidcBffServiceHeaders(cfHeaders?: CfForwardHeaders): Promise<HeadersInit> {
   const headers: Record<string, string> = { authorization: `Bearer ${await serviceToken()}` };
-  if (cfHeaders?.["cf-connecting-ip"]) headers["cf-connecting-ip"] = cfHeaders["cf-connecting-ip"];
-  if (cfHeaders?.["cf-ray"]) headers["cf-ray"] = cfHeaders["cf-ray"];
+  for (const key of ["cf-connecting-ip", "cf-ray", "user-agent", "accept-language"] as const) {
+    const value = bounded(cfHeaders?.[key]);
+    if (value) headers[key] = value;
+  }
   return headers;
 }

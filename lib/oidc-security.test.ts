@@ -271,18 +271,20 @@ test("callback exchange requests 72h only when the ID token authorizes it and si
   assert.doesNotMatch(callback, /maxAge: 60 \* 60 \* 8/);
 });
 
-test("callback forwards only the Cloudflare edge headers to the backend exchange", () => {
+test("callback forwards the Cloudflare edge headers and bounded browser inputs to the backend exchange", () => {
   const callback = readFileSync(new URL("../app/api/auth/oidc/callback/route.ts", import.meta.url), "utf8");
-  // Reads exactly the two Cloudflare edge headers and nothing else from the request.
+  // Reads the Cloudflare edge headers plus the two bounded browser inputs and nothing else from the request.
   assert.match(callback, /headers\.get\("cf-connecting-ip"\)/);
   assert.match(callback, /headers\.get\("cf-ray"\)/);
+  assert.match(callback, /headers\.get\("user-agent"\)/);
+  assert.match(callback, /headers\.get\("accept-language"\)/);
   // The exchange (the backend login-event call) is the only backend fetch that carries them.
   assert.match(callback, /\/auth\/oidc\/exchange.*oidcBffServiceHeaders\(cfForwardHeaders\(request\)\)/);
   // The consume call stays header-free (bare oidcBffServiceHeaders(), no CF headers) so the
   // visitor IP is not attached to non-login events.
   assert.match(callback, /\/auth\/oidc\/transactions\/consume.*oidcBffServiceHeaders\(\)/);
-  // No other browser header (cookie, authorization, user-agent, x-forwarded-for) is forwarded.
-  assert.doesNotMatch(callback, /headers\.get\("(cookie|authorization|user-agent|x-forwarded-for)"\)/i);
+  // No other browser header (cookie, authorization, x-forwarded-for) is forwarded.
+  assert.doesNotMatch(callback, /headers\.get\("(cookie|authorization|x-forwarded-for)"\)/i);
 });
 
 test("the raw visitor IP is never logged or stored in the frontend OIDC flow", () => {
