@@ -60,31 +60,42 @@ export default function PlayerLoadoutDetailPage() {
   const playerId = String(params.id ?? "");
   const championId = Number(params.championId ?? 0);
   const loadoutId = Number(params.loadoutId ?? 0);
-  const [loadout, setLoadout] = useState<PlayerLoadout | null>(null);
-  const [freshness, setFreshness] = useState<PlayerLoadoutFreshness | null>(null);
-  const [playerName, setPlayerName] = useState(`Player ${playerId}`);
-  const [references, setReferences] = useState<BuildCardReference[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const requestKey = `${playerId}:${championId}:${loadoutId}`;
+  const [savedDeck, setSavedDeck] = useState<{ requestKey: string; loadout: PlayerLoadout | null; freshness: PlayerLoadoutFreshness } | null>(null);
+  const loadout = savedDeck?.requestKey === requestKey ? savedDeck.loadout : null;
+  const freshness = savedDeck?.requestKey === requestKey ? savedDeck.freshness : null;
+  const [playerIdentity, setPlayerIdentity] = useState<{ playerId: string; name: string } | null>(null);
+  const playerName = playerIdentity?.playerId === playerId ? playerIdentity.name : `Player ${playerId}`;
+  const [cardReferences, setCardReferences] = useState<{ key: string; cards: BuildCardReference[] } | null>(null);
+  const [loadError, setLoadError] = useState<{ requestKey: string; message: string } | null>(null);
+  const error = loadError?.requestKey === requestKey ? loadError.message : null;
   const loadoutRef = useRef<HTMLElement>(null);
   const championName = loadout?.championId === championId ? loadout.championName : "";
+  const referenceKey = `${championId}:${championName}`;
   const formatCardValue = (value: number) => formatNumber(value, { maximumFractionDigits: 2 });
 
   useEffect(() => {
     let cancelled = false;
     fetchPlayerLoadoutDeck(playerId, loadoutId).then((data) => {
       if (cancelled) return;
-      setFreshness(data.freshness);
-      setLoadout(data.loadout.championId === championId ? data.loadout : null);
+      setSavedDeck({ requestKey, freshness: data.freshness, loadout: data.loadout.championId === championId ? data.loadout : null });
     }).catch((cause) => {
-      if (!cancelled) setError(formatApiErrorMessage(cause, t, t("generated.app.players.[id].loadouts.[championId].[loadoutId].page.couldnotloadthissaveddeck")));
+      if (!cancelled) setLoadError({ requestKey, message: formatApiErrorMessage(cause, t, t("generated.app.players.[id].loadouts.[championId].[loadoutId].page.couldnotloadthissaveddeck")) });
     });
     fetchPlayerProfile(playerId).then((profile) => {
-      if (!cancelled && profile.name) setPlayerName(profile.name);
+      if (!cancelled && profile.name) setPlayerIdentity({ playerId, name: profile.name });
     }).catch(() => undefined);
     return () => { cancelled = true; };
-  }, [playerId, championId, loadoutId, t]);
-  useEffect(() => { if (!championName) return; loadBuildCardReferences(championId, championSlug(championName)).then(setReferences).catch(() => setReferences([])); }, [championId, championName]);
-  const cardsById = useMemo(() => new Map(references.map((card) => [card.id, card])), [references]);
+  }, [playerId, championId, loadoutId, requestKey, t]);
+  useEffect(() => {
+    if (!championName) return;
+    let cancelled = false;
+    loadBuildCardReferences(championId, championSlug(championName))
+      .then((cards) => { if (!cancelled) setCardReferences({ key: referenceKey, cards }); })
+      .catch(() => { if (!cancelled) setCardReferences({ key: referenceKey, cards: [] }); });
+    return () => { cancelled = true; };
+  }, [championId, championName, referenceKey]);
+  const cardsById = useMemo(() => new Map(cardReferences?.key === referenceKey ? cardReferences.cards.map((card) => [card.id, card]) : []), [cardReferences, referenceKey]);
 
   if (error) return <ErrorState title={t("generated.players.loadoutUnavailable")} message={error} />;
   if (!loadout && !freshness) return <LoadingPanel />;
