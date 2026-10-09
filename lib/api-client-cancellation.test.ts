@@ -12,7 +12,7 @@ const declaration = source.statements.find(node=>ts.isFunctionDeclaration(node)&
 assert.ok(declaration);
 const compiled=ts.transpileModule(declaration.getText(source),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
 const exported: { fetchJson?: (path:string,options?:RequestInit & {timeoutMs?:number;retries?:number})=>Promise<unknown> }={};
-new Function("exports","API_BASE","FETCH_TIMEOUT_MS","csrfHeader","withStoredLobbyTier","API_ERROR_KEYS","ApiRequestError",compiled)(exported,"/api",10000,()=>null,(path:string)=>path,{genericFailure:"failed"},Error);
+new Function("exports","API_BASE","FETCH_TIMEOUT_MS","csrfHeader","withStoredLobbyTier","API_ERROR_KEYS","ApiRequestError","fingerprintHeaders",compiled)(exported,"/api",10000,()=>null,(path:string)=>path,{genericFailure:"failed"},Error,()=>({}));
 const fetchJson=exported.fetchJson!;
 
 test("player chart series reuse a minute-bounded backend cache key", () => {
