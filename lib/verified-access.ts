@@ -20,10 +20,10 @@ export function accountDestination(requestedPath: string, user: object | null, i
   return user ? requestedPath : `/auth/login?redirect=${encodeURIComponent(requestedPath)}`;
 }
 
-/** Identify every detail route whose portal remains public but content requires verification. */
+/** Identify directory roots and detail routes that require verification. */
 export function isVerifiedOnlyPath(path: string): boolean {
   if (isLimitedProfilePath(path)) return false;
-  if (VERIFIED_PORTALS.some((portal) => path.startsWith(`${portal}/`))) return true;
+  if (VERIFIED_PORTALS.some((portal) => path === portal || path.startsWith(`${portal}/`))) return true;
   return LEGACY_STATS_PATHS.some((prefix) => path === prefix || path.startsWith(`${prefix}/`));
 }
 

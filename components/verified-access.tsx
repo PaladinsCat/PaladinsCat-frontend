@@ -1,4 +1,4 @@
-/** Enforces verified-account access for gated detail routes. */
+/** Enforces verified-account access for gated directories and detail routes. */
 "use client";
 
 import { useEffect, type ReactNode } from "react";
@@ -9,7 +9,7 @@ import { useAuth } from "@/lib/auth-context";
 import { isAccountOnlyPath, isVerifiedOnlyPath, verifiedDestination } from "@/lib/verified-access";
 import { localPreviewAccessEnabled, useLocalPreviewAccess } from "@/lib/use-local-preview-access";
 
-/** Keep public directory portals visible while routing detail-page visitors by account state. */
+/** Withhold protected content while routing visitors by account state. */
 export function VerifiedAccess({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();

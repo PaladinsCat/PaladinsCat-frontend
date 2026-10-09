@@ -11,10 +11,9 @@ test("protects every Community menu route with account access", () => {
   assert.equal(accountDestination("/community", { linkedPlayerId: null }, false), "/community");
 });
 
-test("protects stats and player details while leaving both portals public", () => {
-  assert.equal(isVerifiedOnlyPath("/stats"), false);
-  assert.equal(isVerifiedOnlyPath("/players"), false);
+test("protects stats and player directory roots and details", () => {
   for (const path of [
+    "/stats", "/stats/", "/players", "/players/",
     "/stats/performance", "/stats/champions", "/stats/items", "/stats/items/1",
     "/stats/maps", "/stats/compositions", "/stats/skins", "/stats/ecpm",
     "/stats/tiers", "/stats/activity", "/players/713736801/loadouts", "/players/cheaters",
@@ -22,6 +21,18 @@ test("protects stats and player details while leaving both portals public", () =
     "/game/compositions",
   ]) {
     assert.equal(isVerifiedOnlyPath(path), true, path);
+  }
+  for (const path of ["/", "/features", "/stats-extra", "/players-extra"]) {
+    assert.equal(isVerifiedOnlyPath(path), false, path);
+  }
+});
+
+test("directory roots wait for authentication and use the subpage access wall", () => {
+  for (const path of ["/players", "/stats"]) {
+    assert.equal(verifiedDestination(path, null, true), null, path);
+    assert.equal(verifiedDestination(path, null, false), `/auth/login?redirect=${encodeURIComponent(path)}`, path);
+    assert.equal(verifiedDestination(path, { linkedPlayerId: null }, false), "/link-account", path);
+    assert.equal(verifiedDestination(path, { linkedPlayerId: 42 }, false), path, path);
   }
 });
 
