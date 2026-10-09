@@ -18,6 +18,7 @@ import { clearPlayerTag, fetchPlayerMatches, type ClearablePlayerTag, type Match
 import PlayerMatchTags from "@/components/player-match-tags";
 import { getTierColor, resolveEffectiveTier, getRankIconPath } from "@/lib/tier-utils";
 import { useAuth } from "@/lib/auth-context";
+import { hasStatsAccess } from "@/lib/verified-access";
 import ReportModal from "@/components/ReportModal";
 import AltAccountRelationModal from "@/components/alt-account-relation-modal";
 import { formatLocalDate, formatLocalDateTime } from "@/lib/time-format";
@@ -154,7 +155,7 @@ export default function PlayerProfileClient({
   const [matchesLoading, setMatchesLoading] = useState(true);
   const displayProfileLoading = useRouteSettledLoading(profileLoading && (authLoading || !!user));
   const [error, setError] = useState<string | null>(null);
-  const fullAccess = user?.linkedPlayerId != null && response?.access?.fullAccess !== false;
+  const fullAccess = hasStatsAccess(user) && response?.access?.fullAccess !== false;
 
   // Button states
   const [refreshing, setRefreshing] = useState(false);
@@ -273,6 +274,7 @@ export default function PlayerProfileClient({
         const data = await res.json();
         if (res.status === 401) router.replace(`/auth/login?redirect=${encodeURIComponent(`/players/${id}`)}`);
         if (res.status === 403 && data?.error?.code === "VERIFICATION_REQUIRED") router.replace("/link-account");
+        if (res.status === 403 && data?.error?.code === "INVITATION_REQUIRED") router.replace("/account#invitation");
         if (!res.ok) throw new Error(data?.error?.message || PLAYER_PROFILE_ERROR_KEYS.failedToLoadProfile);
         return data as PlayerResponse;
       })
@@ -710,6 +712,7 @@ export default function PlayerProfileClient({
                 altAccount={player.alt_account}
                 verified={Boolean(player.verified ?? verifiedFallback)}
                 customTag={player.custom_tag ?? null}
+                customTagColor={player.custom_tag_color ?? null}
               />
             </div>
             {/* Title + loading frame */}

@@ -11,8 +11,8 @@ import { anonymousPresenceRequestAllowed } from "./lib/anonymous-presence-gate";
 
 const ACCOUNT_SESSION_COOKIE = "__Host-pc_session";
 const ACCESS_POLICY_PATH = "/prototype/access-policy";
-type AccountSessionState = "guest" | "unverified" | "verified" | "rate-limited" | "unavailable";
-type AccountSessionCheck = { state: AccountSessionState; retryAfter?: string; restricted?: boolean };
+type AccountSessionState = "guest" | "unverified" | "uninvited" | "verified" | "rate-limited" | "unavailable";
+type AccountSessionCheck = { state: AccountSessionState; retryAfter?: string; restricted?: boolean; invitationRequired?: boolean };
 
 /** Validate the opaque browser session through the backend auth owner. */
 async function accountSessionState(request: NextRequest): Promise<AccountSessionCheck> {
@@ -35,6 +35,8 @@ async function accountSessionState(request: NextRequest): Promise<AccountSession
     if (!response.ok) return { state: "unavailable" };
     const account = await response.json() as {
       linked_player_id?: unknown;
+      invitation_active?: unknown;
+      invitation_required?: unknown;
       access_restriction_kind?: unknown;
       access_restriction?: unknown;
     };
@@ -48,8 +50,10 @@ async function accountSessionState(request: NextRequest): Promise<AccountSession
       : "";
     const linkedPlayerId = Number(account.linked_player_id);
     return {
-      state: Number.isSafeInteger(linkedPlayerId) && linkedPlayerId > 0 ? "verified" : "unverified",
+      state: Number.isSafeInteger(linkedPlayerId) && linkedPlayerId > 0
+        ? (account.invitation_required === false || account.invitation_active === true ? "verified" : "uninvited") : "unverified",
       restricted: Boolean(restrictionKind || restrictionCode),
+      invitationRequired: account.invitation_required !== false,
     };
   } catch {
     return { state: "unavailable" };
@@ -57,10 +61,11 @@ async function accountSessionState(request: NextRequest): Promise<AccountSession
 }
 
 /** Redirect a protected website request without accepting caller-controlled origins. */
-function accessRedirect(request: NextRequest, destination: "/auth/login" | "/link-account" | typeof ACCESS_POLICY_PATH) {
+function accessRedirect(request: NextRequest, destination: "/auth/login" | "/link-account" | "/account" | typeof ACCESS_POLICY_PATH) {
   const url = request.nextUrl.clone();
   url.pathname = destination;
   url.search = "";
+  url.hash = destination === "/account" ? "invitation" : "";
   if (destination === "/auth/login") {
     url.searchParams.set("redirect", `${request.nextUrl.pathname}${request.nextUrl.search}`);
   }
@@ -150,10 +155,12 @@ export async function proxy(request: NextRequest) {
   }
   const verifiedOnly = isVerifiedOnlyPath(decodedPath);
   if (protectedPage) {
-    const { state, retryAfter, restricted } = await getAccountCheck();
+    const { state, retryAfter, restricted, invitationRequired } = await getAccountCheck();
+    const requiresEntitlement = verifiedOnly && !(invitationRequired === false && isAccountOnlyPath(decodedPath));
     if (restricted) return accessRedirect(request, ACCESS_POLICY_PATH);
     if (state === "guest") return accessRedirect(request, "/auth/login");
-    if (verifiedOnly && state === "unverified") return accessRedirect(request, "/link-account");
+    if (requiresEntitlement && state === "unverified") return accessRedirect(request, "/link-account");
+    if (requiresEntitlement && state === "uninvited") return accessRedirect(request, "/account");
     if (state === "rate-limited") {
       const headers = new Headers({ "Cache-Control": "private, no-store" });
       if (retryAfter) headers.set("Retry-After", retryAfter);

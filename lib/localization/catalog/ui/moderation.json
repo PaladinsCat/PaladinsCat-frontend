@@ -381,5 +381,7 @@
   "moderation.customTagReviewApproved": "Custom tag approved.",
   "moderation.customTagReviewRejected": "Custom tag rejected.",
   "moderation.customTagReviewFailed": "The review decision could not be saved.",
-  "moderation.customTagReviewHistory": "History"
+  "moderation.customTagReviewHistory": "History",
+  "moderation.customTagColor": "Tag color",
+  "moderation.customTagSaveColor": "Save color"
 }

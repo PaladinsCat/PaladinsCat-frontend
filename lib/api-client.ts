@@ -6007,6 +6007,9 @@ export interface AuthUser {
   timeZone: string | null;
   linkedPlayerId: number | null;
   linkedPlayerName: string | null;
+  invitationActive?: boolean;
+  invitationRequired?: boolean;
+  invitationExpiresAt?: string | null;
   accessRestriction: AccessRestriction | null;
 }
 
@@ -6224,6 +6227,9 @@ export async function getMe(_userId?: number): Promise<AuthUser> {
     time_zone?: string | null;
     linked_player_id?: number | null;
     linked_player_name?: string | null;
+    invitation_active?: boolean;
+    invitation_required?: boolean;
+    invitation_expires_at?: string | null;
     access_restriction?: unknown;
     access_restriction_kind?: string | null;
   }>(`/auth/me`, {
@@ -6244,6 +6250,9 @@ export async function getMe(_userId?: number): Promise<AuthUser> {
     timeZone: raw.time_zone ?? null,
     linkedPlayerId: raw.linked_player_id ?? null,
     linkedPlayerName: raw.linked_player_name ?? null,
+    invitationActive: raw.invitation_active === true,
+    invitationRequired: raw.invitation_required !== false,
+    invitationExpiresAt: raw.invitation_expires_at ?? null,
     accessRestriction: parseAccessRestriction(raw.access_restriction, raw.access_restriction_kind),
   };
 }
@@ -6405,6 +6414,50 @@ export async function getAccountDetails(): Promise<AccountDetails> {
     },
     linkedPlayer: raw.linkedPlayer,
   };
+}
+
+/** Only identity candidates needed to link an account are exposed here. */
+export async function fetchLinkPlayerSearch(query: string): Promise<PlayerSearchResult[]> {
+  return fetchJson(`/auth/account/player-search?q=${encodeURIComponent(query)}`, { headers: accountAuthHeaders() });
+}
+
+export interface InvitationPolicy { enabled: boolean }
+export async function getInvitationPolicy(): Promise<InvitationPolicy> {
+  return fetchJson("/admin/invitations/policy", { headers: accountAuthHeaders() });
+}
+export async function setInvitationPolicy(enabled: boolean): Promise<InvitationPolicy> {
+  return fetchJson("/admin/invitations/policy", { method: "PUT", headers: accountAuthHeaders(), body: JSON.stringify({ enabled }) });
+}
+export interface InvitationStatus {
+  required: boolean;
+  active: boolean;
+  status: "none" | "active" | "expired" | "revoked";
+  expires_at: string | null;
+}
+export interface AdminInvitation {
+  id: number;
+  issued_at: string;
+  issued_by_username: string | null;
+  redeemed_by_username: string | null;
+  redeemed_at: string | null;
+  expires_at: string | null;
+  revoked_at: string | null;
+  status: "unused" | "active" | "expired" | "revoked";
+}
+export async function getInvitationStatus(): Promise<InvitationStatus> {
+  return fetchJson("/auth/account/invitation", { headers: accountAuthHeaders() });
+}
+export async function redeemInvitation(code: string): Promise<InvitationStatus> {
+  return fetchJson("/auth/account/invitation", { method: "POST", headers: accountAuthHeaders(), body: JSON.stringify({ code }) });
+}
+export async function getAdminInvitations(page: number): Promise<{ items: AdminInvitation[]; has_more: boolean }> {
+  return fetchJson(`/admin/invitations?page=${page}`, { headers: accountAuthHeaders() });
+}
+export async function issueAdminInvitation(): Promise<{ code: string }> {
+  return fetchJson("/admin/invitations", { method: "POST", headers: accountAuthHeaders() });
+}
+export async function expireAdminInvitation(id: number): Promise<void> {
+  await fetchJson(`/admin/invitations/${id}/expire`, { method: "POST", headers: accountAuthHeaders() });
 }
 
 /**
@@ -6633,6 +6686,7 @@ export interface PlayerTagVisibility {
 export interface PlayerCustomTag {
   status: "pending" | "approved" | "rejected";
   tagText: string | null;
+  tagColor: string;
   reviewNote: string | null;
   visible: boolean;
 }
@@ -6678,13 +6732,26 @@ export async function setTagVisibility(playerId: string | number, tag: CosmeticT
  * Submit a custom-tag request for admin approval (max one per player).
  * refs: endpoints: POST /players/:id/custom-tag
  */
-export async function submitCustomTag(playerId: string | number, tagText: string, reason?: string): Promise<{ success: boolean; message: string; status: string }> {
+export async function submitCustomTag(playerId: string | number, tagText: string, reason?: string, tagColor?: string): Promise<{ success: boolean; message: string; status: string }> {
   const token = getAuthToken();
   if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.authenticationRequired);
   return fetchJson<{ success: boolean; message: string; status: string }>(`/players/${playerId}/custom-tag`, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...accountAuthHeaders() },
-    body: JSON.stringify({ tagText: tagText, reason: reason ?? null }),
+    body: JSON.stringify({ tagText: tagText, reason: reason ?? null, tagColor }),
+    retries: 0,
+    timeoutMs: 15_000,
+  });
+}
+
+/** Save the verified owner's active tag color without changing approval. */
+export async function setCustomTagColor(playerId: string | number, tagColor: string): Promise<{ tagColor: string }> {
+  const token = getAuthToken();
+  if (!token && !hasCookieAuthSession()) throw new Error(API_ERROR_KEYS.authenticationRequired);
+  return fetchJson<{ tagColor: string }>(`/players/${playerId}/custom-tag`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...accountAuthHeaders() },
+    body: JSON.stringify({ tagColor }),
     retries: 0,
     timeoutMs: 15_000,
   });
@@ -6710,6 +6777,7 @@ export interface AdminCustomTagRow {
   id: number;
   player_id: number;
   tag_text: string;
+  tag_color: string;
   reason: string | null;
   status: "pending" | "approved" | "rejected" | "removed";
   requested_by: number | null;

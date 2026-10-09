@@ -10,7 +10,7 @@ import Link from "next/link";
 import { formatLocalTime } from "@/lib/time-format";
 import {
   cancelPlayerLinkVerification,
-  fetchPlayerSearch,
+  fetchLinkPlayerSearch,
   getPlayerLinkVerification,
   isApiErrorKey,
   startPlayerLinkVerification,
@@ -55,7 +55,7 @@ export default function PlayerLinkCard({ linkedPlayer, onChanged }: Props) {
       }
       setSearching(true);
       try {
-        const results = await fetchPlayerSearch(query);
+        const results = await fetchLinkPlayerSearch(query);
         if (active) setSearchResults(results);
       } catch {
         if (active) setSearchResults([]);

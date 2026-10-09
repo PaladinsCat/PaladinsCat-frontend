@@ -49,6 +49,7 @@ interface PlayerData {
   boosted: boolean;
   verified?: boolean | null;
   custom_tag?: string | null;
+  custom_tag_color?: string | null;
   sus_count: number;
   weirdo_count: number;
   hall_of_fame_count: number;

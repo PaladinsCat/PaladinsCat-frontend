@@ -97,7 +97,7 @@ export default function AdminCustomTagsPage() {
             {pending.map((row) => (
               <li key={row.id} className="pc-card space-y-3">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded border border-violet-400/50 px-1.5 py-0.5 text-sm font-medium text-violet-300">{row.tag_text}</span>
+                  <span className="rounded border border-violet-400/50 px-1.5 py-0.5 text-sm font-medium text-violet-300" style={row.tag_color ? { color: row.tag_color, borderColor: `${row.tag_color}80` } : undefined}>{row.tag_text}</span>
                   <span className="text-sm text-pc-text">{row.player_name}</span>
                   <span className="text-xs text-pc-text-muted">{t("moderation.playerId", { value1: row.player_id })}</span>
                   {row.requested_by_username && (
@@ -144,7 +144,7 @@ export default function AdminCustomTagsPage() {
           <ul className="space-y-2">
             {reviewed.map((row) => (
               <li key={row.id} className="flex flex-wrap items-center gap-2 rounded-lg border border-pc-border/40 px-3 py-2">
-                <span className="rounded border border-pc-border/50 px-1.5 py-0.5 text-xs text-pc-text-secondary">{row.tag_text}</span>
+                <span className="rounded border border-pc-border/50 px-1.5 py-0.5 text-xs text-pc-text-secondary" style={row.tag_color ? { color: row.tag_color, borderColor: `${row.tag_color}80` } : undefined}>{row.tag_text}</span>
                 <span className="text-sm text-pc-text">{row.player_name}</span>
                 <span className={`text-xs ${row.status === "approved" ? "text-emerald-400" : "text-red-400"}`}>{row.status}</span>
                 {row.review_note && <span className="text-xs text-pc-text-muted">“{row.review_note}”</span>}

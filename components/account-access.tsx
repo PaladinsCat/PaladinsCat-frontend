@@ -8,7 +8,7 @@ import { useAuth } from "@/lib/auth-context";
 import { accountDestination, isAccountOnlyPath } from "@/lib/verified-access";
 import { localPreviewAccessEnabled, useLocalPreviewAccess } from "@/lib/use-local-preview-access";
 
-/** Route guests to login while allowing every authenticated account through. */
+/** Preserve self-service and enforce the global policy on protected data. */
 export function AccountAccess({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();

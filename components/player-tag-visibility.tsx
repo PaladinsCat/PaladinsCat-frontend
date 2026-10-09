@@ -19,6 +19,7 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   cancelCustomTag,
+  setCustomTagColor,
   fetchTagVisibility,
   setTagVisibility,
   submitCustomTag,
@@ -63,6 +64,7 @@ export default function PlayerTagVisibilityPanel({
 
   // Custom-tag form state
   const [customInput, setCustomInput] = useState("");
+  const [customColor, setCustomColor] = useState("#c4b5fd");
   const [customReason, setCustomReason] = useState("");
   const [customBusy, setCustomBusy] = useState(false);
   const [customError, setCustomError] = useState<string | null>(null);
@@ -75,6 +77,7 @@ export default function PlayerTagVisibilityPanel({
       const data = await fetchTagVisibility(playerId);
       setTags(data.tags);
       setCustomTag(data.customTag);
+      setCustomColor(data.customTag?.tagColor ?? "#c4b5fd");
     } catch (err) {
       setError(formatApiErrorMessage(err, t, t("moderation.tagVisibilitySaveFailed")));
     } finally {
@@ -114,7 +117,7 @@ export default function PlayerTagVisibilityPanel({
     setCustomBusy(true);
     setCustomError(null);
     try {
-      await submitCustomTag(playerId, text, customReason.trim() || undefined);
+      await submitCustomTag(playerId, text, customReason.trim() || undefined, customColor);
       setCustomInput("");
       setCustomReason("");
       const data = await fetchTagVisibility(playerId);
@@ -122,6 +125,21 @@ export default function PlayerTagVisibilityPanel({
       setCustomTag(data.customTag);
     } catch (err) {
       setCustomError(formatApiErrorMessage(err, t, t("moderation.customTagSubmitFailed")));
+    } finally {
+      setCustomBusy(false);
+    }
+  };
+
+  const saveCustomColor = async () => {
+    if (!customTag) return;
+    setCustomBusy(true);
+    setCustomError(null);
+    try {
+      const saved = await setCustomTagColor(playerId, customColor);
+      setCustomTag({ ...customTag, tagColor: saved.tagColor });
+      invalidatePlayerModeration(playerId);
+    } catch (err) {
+      setCustomError(formatApiErrorMessage(err, t, t("moderation.tagVisibilitySaveFailed")));
     } finally {
       setCustomBusy(false);
     }
@@ -232,7 +250,7 @@ export default function PlayerTagVisibilityPanel({
 
         {customTag && (
           <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-pc-border/50 px-3 py-2">
-            <span className="rounded border border-violet-400/50 px-1.5 py-0.5 text-xs font-medium text-violet-300">
+            <span className="rounded border px-1.5 py-0.5 text-xs font-medium" style={{ color: customColor, borderColor: `${customColor}80` }}>
               {customTag.tagText}
             </span>
             <span
@@ -280,6 +298,15 @@ export default function PlayerTagVisibilityPanel({
             )}
           </div>
         )}
+
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <label className="flex items-center gap-2 text-xs text-pc-text-secondary">
+            {t("moderation.customTagColor")}
+            <input type="color" value={customColor} disabled={customBusy} onChange={(event) => setCustomColor(event.target.value)} className="h-8 w-10 cursor-pointer rounded border border-pc-border/60 bg-pc-bg" />
+          </label>
+          <span className="text-xs text-pc-text-muted">{customColor}</span>
+          {customTag && <button type="button" disabled={customBusy || customColor === customTag.tagColor} onClick={() => void saveCustomColor()} className="rounded-md border border-pc-border/60 px-2.5 py-1 text-xs text-pc-text-secondary hover:border-pc-accent/60 disabled:opacity-50">{t("moderation.customTagSaveColor")}</button>}
+        </div>
 
         {customTag?.status !== "approved" && <div className="mt-3 space-y-2">
           <input

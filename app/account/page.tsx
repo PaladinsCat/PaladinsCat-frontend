@@ -14,6 +14,7 @@ import { LoadingIndicator, LoadingPanel } from "@/components/async-state";
 import PlayerLinkCard from "@/components/player-link-card";
 import PlayerTagVisibilityPanel from "@/components/player-tag-visibility";
 import { MaintenanceConsentPanel } from "@/components/maintenance-consent";
+import { InvitationPanel } from "@/components/invitation-panel";
 import {
   ApiRequestError,
   getAccountDetails,
@@ -250,6 +251,7 @@ export default function AccountPage() {
             <h1 className="pc-heading pc-heading-lg">{t("generated.account.accountSettings")}</h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-pc-text-secondary sm:text-base">
               {t("generated.account.manageYourProfileLinkYourPaladinsPlayerAndChangeYour")}</p>
+            <a href="#invitation" className="mt-3 inline-block text-sm font-semibold text-pc-accent underline">{t("invitation.title")}</a>
           </div>
         </div>
       </section>
@@ -417,6 +419,7 @@ export default function AccountPage() {
         </div>
       </section>
 
+      <InvitationPanel />
       <MaintenanceConsentPanel settings />
 
       {/* ── Profile Info ── */}
@@ -486,7 +489,7 @@ export default function AccountPage() {
       </div>
 
       {/* ── Tag visibility (own linked player only) ── */}
-      {linkedPlayer && (
+      {linkedPlayer && (authUser?.invitationRequired === false || authUser?.invitationActive === true) && (
         <section className="rounded-2xl border border-white/5 pc-glass p-6 lg:col-span-2">
           <PlayerTagVisibilityPanel
             playerId={String(linkedPlayer.id)}

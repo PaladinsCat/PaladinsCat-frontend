@@ -56,6 +56,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (isAuthenticationRejection(error)) {
         clearAuth();
         setUser(null);
+      } else {
+        setUser((previous) => previous ? { ...previous, invitationActive: false, invitationRequired: true } : null);
       }
     } finally {
       setIsLoading(false);
@@ -66,7 +68,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Restore the cached session after mount so the nav shows the signed-in
     // user immediately (client-only; safe because this runs after hydration).
     // The async refresh below then confirms or clears it against the server.
-    setUser(getAuthUser());
+    const cached = getAuthUser();
+    setUser(cached ? { ...cached, invitationActive: false, invitationRequired: true } : null);
     void refresh();
     const syncSession = () => void refresh();
     const syncVisibleSession = () => {
@@ -82,10 +85,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [refresh]);
 
+  useEffect(() => {
+    if (!user?.invitationActive || !user.invitationExpiresAt) return;
+    const remaining = Date.parse(user.invitationExpiresAt) - Date.now();
+    if (!Number.isFinite(remaining)) return;
+    // Timers longer than the browser's signed 32-bit bound are capped and rechecked.
+    const timer = window.setTimeout(() => {
+      if (Date.parse(user.invitationExpiresAt!) <= Date.now()) setUser((previous) => previous ? { ...previous, invitationActive: false } : null);
+      void refresh();
+    }, Math.max(0, Math.min(remaining, 2_147_483_647)));
+    return () => window.clearTimeout(timer);
+  }, [refresh, user]);
+
   const handleLogin = useCallback(async (username: string, password: string) => {
     const session = await login(username, password);
     setUser(session.user);
-  }, []);
+    await refresh();
+  }, [refresh]);
 
   const handleLogout = useCallback(async () => {
     await logout();

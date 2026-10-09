@@ -1,10 +1,18 @@
-/** Owns verified-account routing for gated website sections. */
+/** Owns verified routing and the optional global invitation requirement. */
 
 const LEGACY_STATS_PATHS = ["/game/items", "/game/maps", "/game/compositions"] as const;
 const VERIFIED_PORTALS = ["/stats", "/players"] as const;
 const ACCOUNT_PORTALS = ["/community", "/builds", "/tierlists", "/account", "/link-account", "/operations/tickets"] as const;
 
-/** Only the base numeric profile is available to an unlinked account. */
+type AccessUser = { linkedPlayerId?: number | null; invitationActive?: boolean; invitationRequired?: boolean; invitationExpiresAt?: string | null };
+
+/** Cached display identity never substitutes for a current invitation grant. */
+export function hasStatsAccess(user: AccessUser | null): boolean {
+  return user != null && user.linkedPlayerId != null && (user.invitationRequired === false || (user.invitationActive === true
+    && (user.invitationExpiresAt == null || Date.parse(user.invitationExpiresAt) > Date.now())));
+}
+
+/** Base profiles keep limited account access until invitation enforcement is enabled. */
 export function isLimitedProfilePath(path: string): boolean {
   return /^\/players\/[1-9]\d*\/?$/.test(path.split(/[?#]/, 1)[0]);
 }
@@ -15,14 +23,17 @@ export function isAccountOnlyPath(path: string): boolean {
 }
 
 /** Return the requested Community destination once browser authentication is known. */
-export function accountDestination(requestedPath: string, user: object | null, isLoading: boolean): string | null {
+export function accountDestination(requestedPath: string, user: AccessUser | null, isLoading: boolean): string | null {
   if (isLoading) return null;
-  return user ? requestedPath : `/auth/login?redirect=${encodeURIComponent(requestedPath)}`;
+  if (!user) return `/auth/login?redirect=${encodeURIComponent(requestedPath)}`;
+  return isVerifiedOnlyPath(requestedPath.split(/[?#]/, 1)[0])
+    ? verifiedDestination(requestedPath, user, false) : requestedPath;
 }
 
 /** Identify directory roots and detail routes that require verification. */
 export function isVerifiedOnlyPath(path: string): boolean {
-  if (isLimitedProfilePath(path)) return false;
+  if (isLimitedProfilePath(path)) return true;
+  if (["/community", "/builds", "/tierlists", "/operations/tickets"].some((portal) => path === portal || path.startsWith(`${portal}/`))) return true;
   if (VERIFIED_PORTALS.some((portal) => path === portal || path.startsWith(`${portal}/`))) return true;
   return LEGACY_STATS_PATHS.some((prefix) => path === prefix || path.startsWith(`${prefix}/`));
 }
@@ -30,11 +41,14 @@ export function isVerifiedOnlyPath(path: string): boolean {
 /** Return the allowed gated destination once browser authentication is known. */
 export function verifiedDestination(
   requestedPath: string,
-  user: { linkedPlayerId: number | null } | null,
+  user: AccessUser | null,
   isLoading: boolean,
 ): string | null {
   if (isLoading) return null;
   if (!user) return `/auth/login?redirect=${encodeURIComponent(requestedPath)}`;
-  if (user.linkedPlayerId == null && !isLimitedProfilePath(requestedPath)) return "/link-account";
+  if (!isVerifiedOnlyPath(requestedPath.split(/[?#]/, 1)[0])) return requestedPath;
+  if (user.invitationRequired === false && isAccountOnlyPath(requestedPath.split(/[?#]/, 1)[0])) return requestedPath;
+  if (user.linkedPlayerId == null) return "/link-account";
+  if (!hasStatsAccess(user)) return "/account#invitation";
   return requestedPath;
 }

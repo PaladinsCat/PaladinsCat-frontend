@@ -31,6 +31,7 @@ export type PlayerModeration = {
   hypercarryCount: number;
   verified: boolean;
   customTag: string | null;
+  customTagColor: string | null;
 };
 
 const EMPTY: PlayerModeration = {
@@ -57,6 +58,7 @@ const EMPTY: PlayerModeration = {
   hypercarryCount: 0,
   verified: false,
   customTag: null,
+  customTagColor: null,
 };
 const TTL_MS = 5 * 60 * 1000;
 const cache = new Map<number, { value: PlayerModeration; expiresAt: number }>();
@@ -111,6 +113,7 @@ export function mergePlayerModeration(
     hypercarryCount: supplied.hypercarryCount === undefined ? fallback.hypercarryCount : Number(supplied.hypercarryCount) || 0,
     verified: supplied.verified === undefined ? fallback.verified : Boolean(supplied.verified),
     customTag: supplied.customTag === undefined ? fallback.customTag : supplied.customTag,
+    customTagColor: supplied.customTagColor === undefined ? fallback.customTagColor : supplied.customTagColor,
   };
 }
 
@@ -140,6 +143,7 @@ type BulkPlayer = {
   hypercarry_count?: number;
   verified?: boolean;
   custom_tag?: string | null;
+  custom_tag_color?: string | null;
 };
 
 function moderationRows(json: { data?: { players?: BulkPlayer[] }; players?: BulkPlayer[] }): BulkPlayer[] {
@@ -171,6 +175,7 @@ function moderationFromRow(player: BulkPlayer): PlayerModeration {
     hypercarryCount: Number(player.hypercarry_count ?? 0),
     verified: Boolean(player.verified),
     customTag: player.custom_tag ?? null,
+    customTagColor: player.custom_tag_color ?? null,
   };
 }
 
@@ -249,6 +254,7 @@ export async function fetchPrivateAccountModerationBatch(
     hypercarryCount: 0,
     verified: false,
     customTag: null,
+    customTagColor: null,
   }]));
 }
 

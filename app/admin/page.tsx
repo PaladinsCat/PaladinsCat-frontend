@@ -106,6 +106,7 @@ export default function AdminDashboardPage({ mode = "admin" }: { mode?: "admin" 
         <div className="flex flex-wrap items-center gap-2">
           <a href="https://auth.paladinscat.com/admin/paladinscat/console/" target="_blank" rel="noreferrer" className="pc-btn-secondary inline-flex items-center gap-2 text-sm"><KeyRound className="h-4 w-4" /> {t("generated.admin.identityAdmin")}</a>
           <Link href="/admin/notifications" className="pc-btn-secondary inline-flex items-center gap-2 text-sm"><Bell className="h-4 w-4" /> {t("generated.admin.notifications")}</Link>
+          {isAdmin && <Link href="/admin/invitations" className="pc-btn-secondary inline-flex items-center gap-2 text-sm"><KeyRound className="h-4 w-4" /> {t("invitation.adminTitle")}</Link>}
           <Link href="/admin/changelog" className="pc-btn-secondary inline-flex items-center gap-2 text-sm"><ScrollText className="h-4 w-4" /> {t("generated.admin.changelog")}</Link>
           <Link href="/admin/custom-tags" className="pc-btn-secondary inline-flex items-center gap-2 text-sm"><Tag className="h-4 w-4" /> {t("moderation.customTagReviewTitle")}</Link>
           <button type="button" onClick={() => void load()} disabled={loading} className="pc-btn-secondary inline-flex items-center gap-2 text-sm disabled:opacity-60">
