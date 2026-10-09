@@ -4,7 +4,7 @@
  * refs: none
  */
 import "server-only";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 
 type ServerFetchOptions = Omit<RequestInit, "signal"> & {
   timeoutMs?: number;
@@ -40,11 +40,15 @@ export function serverApiBase(): string {
  */
 export async function fetchServerJson<T>(path: string, options: ServerFetchOptions = {}): Promise<T> {
   const { timeoutMs = 10_000, ...requestOptions } = options;
+  // Forward the incoming client User-Agent so the backend can distinguish
+  // caller classes (e.g. the Wolper game overlay) for caller-aware caching.
+  const clientUa = (await headers()).get("user-agent") ?? undefined;
   const response = await fetch(`${serverApiBase()}${path.startsWith("/") ? path : `/${path}`}`, {
     ...requestOptions,
     cache: requestOptions.cache ?? "no-store",
     headers: {
       Accept: "application/json",
+      ...(clientUa ? { "x-client-ua": clientUa } : {}),
       ...requestOptions.headers,
     },
     signal: AbortSignal.timeout(timeoutMs),
