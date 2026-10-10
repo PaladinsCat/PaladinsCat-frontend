@@ -32,9 +32,12 @@ function one(url: URL, name: string): string | null {
 // Server-side invitation check for the just-established session. Returns true only when the
 // backend confirms an active invitation for this token; any transport/parse error fails open
 // (false) so a transient backend hiccup never strands a login on the Pro hand-off.
+// NOTE: the invitation route is mounted at the root (not under /v1), so we use the raw
+// backend base URL without the /v1 suffix that backend() appends.
 async function invitationActive(token: string): Promise<boolean> {
   try {
-    const response = await fetch(`${backend()}/auth/account/invitation`, {
+    const base = (process.env.NEXT_SERVER_API_URL || "http://localhost:3005").replace(/\/$/, "");
+    const response = await fetch(`${base}/auth/account/invitation`, {
       headers: { authorization: `Bearer ${token}` },
       cache: "no-store",
       signal: AbortSignal.timeout(3_000),
