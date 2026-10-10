@@ -59,23 +59,43 @@ function deriveMetadata(content: string): { title: string; date: string; excerpt
   const dateMatch = visibleContent.match(/\*\*Published:\*\*\s*(.+?)\s*(?:\s*&nbsp;|\s*\||\s*$)/m);
   const date = dateMatch ? dateMatch[1].trim() : "N/A";
 
-  const lines = visibleContent.split("\\n").filter(l => l.trim());
+  const lines = visibleContent.split(/\r?\n/);
   let excerpt = "";
-  for (const line of lines) {
+  let codeFence: string | null = null;
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index].trim();
+    const fence = line.match(/^(`{3,}|~{3,})/);
+    if (fence) {
+      if (!codeFence) codeFence = fence[1];
+      else if (fence[1][0] === codeFence[0] && fence[1].length >= codeFence.length) codeFence = null;
+      continue;
+    }
+    if (codeFence || !line) continue;
     if (line.startsWith(">")) {
-      const quote = line.replace(/^>\s*/, "").trim();
+      const quoteLines: string[] = [];
+      do {
+        quoteLines.push(lines[index].trim().replace(/^>\s*/, ""));
+        index += 1;
+      } while (index < lines.length && lines[index].trim().startsWith(">"));
+      index -= 1;
+      const quote = quoteLines.join(" ").replace(/\s+/g, " ").trim();
       if (quote && !quote.startsWith("[!")) {
         excerpt = quote.replace(/\*\*/g, "");
         break;
       }
       continue;
     }
-    if (line.startsWith("#") || line.startsWith("|") || line.startsWith("---") || line.startsWith("```")) continue;
-    if (line.includes("**") && line.includes("*")) continue;
-    if (line.trim().length > 0) {
-      excerpt = line.replace(/\*\*/g, "").trim();
-      break;
+    if (line.startsWith("#") || line.startsWith("|") || line.startsWith("---")) continue;
+    if (/^\*\*Published:\*\*/i.test(line)) continue;
+    const paragraphLines = [line];
+    while (index + 1 < lines.length) {
+      const nextLine = lines[index + 1].trim();
+      if (!nextLine || /^(?:[#>|]|-{3,}|`{3,}|~{3,})/.test(nextLine)) break;
+      paragraphLines.push(nextLine);
+      index += 1;
     }
+    excerpt = paragraphLines.join(" ").replace(/\*\*/g, "").trim();
+    break;
   }
   return { title, date, excerpt };
 }
@@ -233,7 +253,7 @@ function dateValue(d: string): number {
 
 const getCachedPosts = unstable_cache(
   fetchPostsFromGitHub,
-  ["blog-posts-v2"],
+  ["blog-posts-v3"],
   { revalidate: 300, tags: ["blog"] },
 );
 
