@@ -6448,7 +6448,7 @@ export async function getInvitationStatus(): Promise<InvitationStatus> {
   return fetchJson("/auth/account/invitation", { headers: accountAuthHeaders() });
 }
 export async function redeemInvitation(code: string): Promise<InvitationStatus> {
-  return fetchJson("/auth/account/invitation", { method: "POST", headers: accountAuthHeaders(), body: JSON.stringify({ code }) });
+  return fetchJson("/auth/account/invitation", { method: "POST", headers: { "Content-Type": "application/json", ...accountAuthHeaders() }, body: JSON.stringify({ code }) });
 }
 export async function getAdminInvitations(page: number): Promise<{ items: AdminInvitation[]; has_more: boolean }> {
   return fetchJson(`/admin/invitations?page=${page}`, { headers: accountAuthHeaders() });
