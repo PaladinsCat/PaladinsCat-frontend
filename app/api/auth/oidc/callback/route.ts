@@ -17,6 +17,8 @@ export const runtime = "nodejs";
 const TX_COOKIE = "__Host-pc_oidc_txn";
 const SESSION_COOKIE = "__Host-pc_session";
 const CSRF_COOKIE = "__Host-pc_csrf";
+// Dedicated Pro surface. Invitation-active accounts are handed off here on login (see GET).
+const PRO_ORIGIN = "https://pro.paladinscat.com";
 function origin() { return process.env.PALADINSCAT_PUBLIC_ORIGIN || "http://localhost:3000"; }
 function backend() {
   const base = (process.env.NEXT_SERVER_API_URL || "http://localhost:3005").replace(/\/$/, "");
@@ -26,6 +28,23 @@ function clear(response: NextResponse) { response.cookies.set(TX_COOKIE, "", { h
 function one(url: URL, name: string): string | null {
   const values = url.searchParams.getAll(name);
   return values.length === 1 ? values[0] : null;
+}
+// Server-side invitation check for the just-established session. Returns true only when the
+// backend confirms an active invitation for this token; any transport/parse error fails open
+// (false) so a transient backend hiccup never strands a login on the Pro hand-off.
+async function invitationActive(token: string): Promise<boolean> {
+  try {
+    const response = await fetch(`${backend()}/auth/account/invitation`, {
+      headers: { authorization: `Bearer ${token}` },
+      cache: "no-store",
+      signal: AbortSignal.timeout(3_000),
+    });
+    if (!response.ok) return false;
+    const body = await response.json() as { active?: boolean };
+    return body.active === true;
+  } catch {
+    return false;
+  }
 }
 // Forward the Cloudflare edge headers (cf-connecting-ip, cf-ray) plus the bounded browser
 // inputs to the backend for security-event logging. user-agent/accept-language come from the
@@ -87,7 +106,20 @@ export async function GET(request: NextRequest) {
   const expiresMs = Date.parse(result.expires_at);
   const sessionMaxAge = Number.isFinite(expiresMs) ? Math.floor((expiresMs - Date.now()) / 1000) : 60 * 60 * 8;
   if (sessionMaxAge <= 0) { const response = NextResponse.redirect(new URL("/auth/login?oidc_error=1", origin())); clear(response); return response; }
-  const response = NextResponse.redirect(new URL(safeReturnPath(tx.returnPath), origin()));
+  const returnPath = safeReturnPath(tx.returnPath);
+  // Invitation-active accounts belong on the dedicated Pro surface. Hand them off to Pro's
+  // OIDC login (not a bare page redirect): the session cookie is host-scoped, so a bare
+  // cross-origin redirect would land them on Pro without a session. Base and Pro share the
+  // same OIDC client, so the fresh Keycloak SSO session makes this a silent login that
+  // establishes the Pro session, and the validated return path is preserved. The origin
+  // guard makes this a no-op when the callback already runs on Pro (no loop).
+  const currentOrigin = origin().replace(/\/$/, "");
+  if (currentOrigin !== PRO_ORIGIN && await invitationActive(result.token)) {
+    const proLogin = new URL("/api/auth/oidc/login", PRO_ORIGIN);
+    proLogin.searchParams.set("return", returnPath);
+    return NextResponse.redirect(proLogin);
+  }
+  const response = NextResponse.redirect(new URL(returnPath, origin()));
   clear(response);
   response.cookies.set(SESSION_COOKIE, result.token, { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: sessionMaxAge });
   // Deliberately readable by same-origin JS only; backend requires it to match X-CSRF-Token on unsafe cookie-auth requests.
