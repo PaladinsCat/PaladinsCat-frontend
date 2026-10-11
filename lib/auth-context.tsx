@@ -4,8 +4,9 @@
  */
 "use client";
 
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from "react";
 import { cacheAuthUser, clearAuth, getAuthUser, getMe, isAuthenticationRejection, login, logout, type AuthUser } from "./api-client";
+import { shouldRevalidateStoredSession } from "./auth-session-sync";
 
 interface AuthContextValue {
   user: AuthUser | null;
@@ -43,25 +44,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // (error #418). The cached session is restored after mount instead.
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const confirmedUserId = useRef<number | null>(null);
+  const refreshInFlight = useRef<Promise<void> | null>(null);
+  const sessionRevision = useRef(0);
 
-  const refresh = useCallback(async () => {
-    try {
-      const me = await getMe();
-      cacheAuthUser(me);
-      setUser(me);
-    } catch (error) {
-      // A cached user without a confirmed token is only a display ghost. Clear
-      // it so protected UI does not stay unlocked after the server rejects the
-      // session or the browser loses the token.
-      if (isAuthenticationRejection(error)) {
-        clearAuth();
-        setUser(null);
-      } else {
-        setUser((previous) => previous ? { ...previous, invitationActive: false, invitationRequired: true } : null);
+  const refresh = useCallback(() => {
+    if (refreshInFlight.current) return refreshInFlight.current;
+    const revision = sessionRevision.current;
+    const request = (async () => {
+      try {
+        const me = await getMe();
+        if (revision !== sessionRevision.current) return;
+        confirmedUserId.current = me.id;
+        cacheAuthUser(me);
+        setUser((previous) => JSON.stringify(previous) === JSON.stringify(me) ? previous : me);
+      } catch (error) {
+        if (revision !== sessionRevision.current) return;
+        // A cached user without a confirmed token is only a display ghost. Clear
+        // it so protected UI does not stay unlocked after the server rejects the
+        // session or the browser loses the token.
+        if (isAuthenticationRejection(error)) {
+          confirmedUserId.current = null;
+          clearAuth();
+          setUser(null);
+        } else {
+          setUser((previous) => previous ? { ...previous, invitationActive: false, invitationRequired: true } : null);
+        }
+      } finally {
+        if (revision === sessionRevision.current) setIsLoading(false);
       }
-    } finally {
-      setIsLoading(false);
-    }
+    })();
+    refreshInFlight.current = request;
+    void request.finally(() => {
+      if (refreshInFlight.current === request) refreshInFlight.current = null;
+    });
+    return request;
   }, []);
 
   useEffect(() => {
@@ -72,14 +89,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(cached ? { ...cached, invitationActive: false, invitationRequired: true } : null);
     void refresh();
     const syncSession = () => void refresh();
+    const syncStorage = (event: StorageEvent) => {
+      if (event.storageArea !== window.localStorage
+        || !shouldRevalidateStoredSession(event, confirmedUserId.current)) return;
+      // A display-cache update is not a session transition. Different release
+      // bundles serialize different fields; fetching and rewriting each other's
+      // cache would keep old and new tabs in an endless refresh exchange.
+      sessionRevision.current += 1;
+      refreshInFlight.current = null;
+      if (event.key === null || event.newValue === null) {
+        confirmedUserId.current = null;
+        setUser(null);
+      }
+      void refresh();
+    };
     const syncVisibleSession = () => {
       if (document.visibilityState === "visible") void refresh();
     };
-    window.addEventListener("storage", syncSession);
+    window.addEventListener("storage", syncStorage);
     window.addEventListener("focus", syncSession);
     document.addEventListener("visibilitychange", syncVisibleSession);
     return () => {
-      window.removeEventListener("storage", syncSession);
+      window.removeEventListener("storage", syncStorage);
       window.removeEventListener("focus", syncSession);
       document.removeEventListener("visibilitychange", syncVisibleSession);
     };
@@ -90,21 +121,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const remaining = Date.parse(user.invitationExpiresAt) - Date.now();
     if (!Number.isFinite(remaining)) return;
     // Timers longer than the browser's signed 32-bit bound are capped and rechecked.
-    const timer = window.setTimeout(() => {
-      if (Date.parse(user.invitationExpiresAt!) <= Date.now()) setUser((previous) => previous ? { ...previous, invitationActive: false } : null);
-      void refresh();
-    }, Math.max(0, Math.min(remaining, 2_147_483_647)));
+    let timer: number;
+    const scheduleExpiry = () => {
+      timer = window.setTimeout(() => {
+        const timeLeft = Date.parse(user.invitationExpiresAt!) - Date.now();
+        if (timeLeft <= 0) setUser((previous) => previous ? { ...previous, invitationActive: false } : null);
+        void refresh();
+        // An unchanged refresh retains user identity. The capped checkpoint
+        // must explicitly rearm instead of relying on a React state change.
+        if (timeLeft > 0) scheduleExpiry();
+      }, Math.max(0, Math.min(Date.parse(user.invitationExpiresAt!) - Date.now(), 2_147_483_647)));
+    };
+    scheduleExpiry();
     return () => window.clearTimeout(timer);
   }, [refresh, user]);
 
   const handleLogin = useCallback(async (username: string, password: string) => {
+    sessionRevision.current += 1;
+    refreshInFlight.current = null;
     const session = await login(username, password);
     setUser(session.user);
     await refresh();
   }, [refresh]);
 
   const handleLogout = useCallback(async () => {
+    sessionRevision.current += 1;
+    refreshInFlight.current = null;
+    confirmedUserId.current = null;
     await logout();
+    sessionRevision.current += 1;
+    refreshInFlight.current = null;
+    confirmedUserId.current = null;
     setUser(null);
   }, []);
 

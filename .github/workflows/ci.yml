@@ -39,6 +39,10 @@ jobs:
       - name: TypeScript check
         run: npx tsc --noEmit
 
+      - name: Authentication synchronization tests
+        timeout-minutes: 2
+        run: node --test lib/auth-session-sync.test.mjs lib/auth-challenge.test.mjs
+
       - name: Operations security tests
         run: npm run test:operations
 
