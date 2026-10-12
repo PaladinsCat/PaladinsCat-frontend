@@ -49,6 +49,10 @@ jobs:
           npm run test:oidc
           npm run test:oidc-callback
 
+      - name: Public and Pro surface enforcement tests
+        timeout-minutes: 2
+        run: node --test lib/pro-surface.test.mjs lib/website-proxy.test.mjs
+
       - name: Operations security tests
         run: npm run test:operations
 

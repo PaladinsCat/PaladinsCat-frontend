@@ -42,15 +42,22 @@ export async function fetchServerJson<T>(path: string, options: ServerFetchOptio
   const { timeoutMs = 10_000, ...requestOptions } = options;
   // Forward the incoming client User-Agent so the backend can distinguish
   // caller classes (e.g. the Wolper game overlay) for caller-aware caching.
-  const clientUa = (await headers()).get("user-agent") ?? undefined;
+  const incoming = await headers();
+  const clientUa = incoming.get("user-agent") ?? undefined;
+  const surface = incoming.get("x-paladinscat-surface") === "pro" ? "pro" : "public";
+  const forwarded = new Headers(requestOptions.headers);
+  if (!forwarded.has("accept")) forwarded.set("accept", "application/json");
+  if (clientUa) forwarded.set("x-client-ua", clientUa);
+  // Caddy owns the ingress marker; caller-supplied fetch options cannot promote it.
+  forwarded.set("x-paladinscat-surface", surface);
+  if (surface === "pro") {
+    const session = (await cookies()).get("__Host-pc_session")?.value;
+    if (session) forwarded.set("authorization", `Bearer ${session}`);
+  }
   const response = await fetch(`${serverApiBase()}${path.startsWith("/") ? path : `/${path}`}`, {
     ...requestOptions,
     cache: requestOptions.cache ?? "no-store",
-    headers: {
-      Accept: "application/json",
-      ...(clientUa ? { "x-client-ua": clientUa } : {}),
-      ...requestOptions.headers,
-    },
+    headers: forwarded,
     signal: AbortSignal.timeout(timeoutMs),
   });
 

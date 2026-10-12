@@ -1,0 +1,51 @@
+/** Server-confirmed Pro entitlement and navigation-only native compatibility. */
+import { serverApiBase } from "./server-api";
+
+export const PUBLIC_ORIGIN = "https://paladinscat.com";
+export const PRO_ORIGIN = "https://pro.paladinscat.com";
+
+/** Native clients choose the cheaper public surface; this never grants access. */
+export function isWolper(headers: Headers): boolean {
+  return [headers.get("user-agent"), headers.get("x-client-ua")]
+    .some(agent => agent?.toLowerCase().includes("wolper"));
+}
+
+/** The global invitation rollout switch is not a Pro entitlement. */
+export function hasProAccess(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const account = value as Record<string, unknown>;
+  if (account.regulation_stage !== 0) return false;
+  if (typeof account.linked_player_id !== "number" || !Number.isSafeInteger(account.linked_player_id)
+      || account.linked_player_id <= 0 || account.invitation_active !== true) return false;
+  if (account.access_restriction != null) return false;
+  if (account.access_restriction_kind != null && account.access_restriction_kind !== "") return false;
+  if (account.invitation_expires_at != null
+      && (typeof account.invitation_expires_at !== "string" || Date.parse(account.invitation_expires_at) <= Date.now()
+        || !Number.isFinite(Date.parse(account.invitation_expires_at)))) return false;
+  return true;
+}
+
+/** Revalidate an opaque application session with its Rust owner, without cached grants. */
+export async function proveProSession(token: string, incoming?: Headers): Promise<boolean> {
+  if (!token || token.length > 512) return false;
+  try {
+    const headers = new Headers({ accept: "application/json", authorization: `Bearer ${token}` });
+    for (const key of ["cf-connecting-ip", "cf-ray", "user-agent"] as const) {
+      const value = incoming?.get(key);
+      if (value) headers.set(key, value);
+    }
+    const response = await fetch(`${serverApiBase()}/auth/me`, {
+      headers, cache: "no-store", redirect: "error", signal: AbortSignal.timeout(2_500),
+    });
+    return response.ok && hasProAccess(await response.json());
+  } catch {
+    return false;
+  }
+}
+
+/** Host-scoped sessions require a fresh Pro OIDC transaction, never a token in a URL. */
+export function proLoginUrl(path: string): URL {
+  const login = new URL("/api/auth/oidc/login", PRO_ORIGIN);
+  login.searchParams.set("return", path);
+  return login;
+}

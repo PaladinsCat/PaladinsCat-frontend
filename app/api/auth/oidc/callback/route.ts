@@ -7,6 +7,7 @@ import { newCsrfToken, normalizedHttpsIssuer, safeReturnPath, parseTransaction, 
 import { oidcBffServiceHeaders, type CfForwardHeaders } from "@/lib/oidc-bff-service";
 import { oidcClientSecret } from "@/lib/oidc-client-secret";
 import { FP_COOKIE, parseFingerprintCookie } from "@/lib/fingerprint";
+import { isWolper, proveProSession, PRO_ORIGIN, proLoginUrl } from "@/lib/pro-surface";
 
 /**
  * Selects the Node.js runtime required by this server handler.
@@ -17,14 +18,6 @@ export const runtime = "nodejs";
 const TX_COOKIE = "__Host-pc_oidc_txn";
 const SESSION_COOKIE = "__Host-pc_session";
 const CSRF_COOKIE = "__Host-pc_csrf";
-// Browser logins for invitation-active accounts hand off to the dedicated Pro surface.
-const PRO_ORIGIN = "https://pro.paladinscat.com";
-// Native Wolper validates its redirect hosts and then reads the public session.
-// Caller metadata selects navigation only; all OIDC and backend checks still apply.
-function needsPublicSession(request: NextRequest): boolean {
-  const userAgent = request.headers.get("user-agent")?.trim();
-  return userAgent === "Wolper, Scoreboard (@thprinkleth)" || userAgent === "Wolper Scoreboard/1.0";
-}
 function origin() { return process.env.PALADINSCAT_PUBLIC_ORIGIN || "http://localhost:3000"; }
 function backend() {
   const base = (process.env.NEXT_SERVER_API_URL || "http://localhost:3005").replace(/\/$/, "");
@@ -34,26 +27,6 @@ function clear(response: NextResponse) { response.cookies.set(TX_COOKIE, "", { h
 function one(url: URL, name: string): string | null {
   const values = url.searchParams.getAll(name);
   return values.length === 1 ? values[0] : null;
-}
-// Server-side invitation check for the just-established session. Returns true only when the
-// backend confirms an active invitation for this token; any transport/parse error fails open
-// (false) so a transient backend hiccup never strands a login on the Pro hand-off.
-// NOTE: the invitation route is mounted at the root (not under /v1), so we use the raw
-// backend base URL without the /v1 suffix that backend() appends.
-async function invitationActive(token: string): Promise<boolean> {
-  try {
-    const base = (process.env.NEXT_SERVER_API_URL || "http://localhost:3005").replace(/\/$/, "");
-    const response = await fetch(`${base}/auth/account/invitation`, {
-      headers: { authorization: `Bearer ${token}` },
-      cache: "no-store",
-      signal: AbortSignal.timeout(3_000),
-    });
-    if (!response.ok) return false;
-    const body = await response.json() as { active?: boolean };
-    return body.active === true;
-  } catch {
-    return false;
-  }
 }
 // Forward the Cloudflare edge headers (cf-connecting-ip, cf-ray) plus the bounded browser
 // inputs to the backend for security-event logging. user-agent/accept-language come from the
@@ -125,12 +98,13 @@ export async function GET(request: NextRequest) {
   // establishes the Pro session, and the validated return path is preserved. The origin
   // guard makes this a no-op when the callback already runs on Pro (no loop).
   const currentOrigin = origin().replace(/\/$/, "");
-  if (currentOrigin !== PRO_ORIGIN && !needsPublicSession(request) && await invitationActive(result.token)) {
-    const proLogin = new URL("/api/auth/oidc/login", PRO_ORIGIN);
-    proLogin.searchParams.set("return", returnPath);
-    return NextResponse.redirect(proLogin);
-  }
-  const response = NextResponse.redirect(new URL(returnPath, origin()));
+  const stayPublic = new URL(returnPath, origin()).searchParams.get("pc_surface") === "public";
+  const destination = currentOrigin !== PRO_ORIGIN && !stayPublic && !isWolper(request.headers)
+    && await proveProSession(result.token, request.headers) ? proLoginUrl(returnPath) : new URL(returnPath, origin());
+  // Keep the public session available for normal API/native reads, including Pro
+  // accounts. Pro creates a separate host-only cookie through its OIDC callback.
+  const response = NextResponse.redirect(destination);
+  response.headers.set("Cache-Control", "private, no-store");
   clear(response);
   response.cookies.set(SESSION_COOKIE, result.token, { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: sessionMaxAge });
   // Deliberately readable by same-origin JS only; backend requires it to match X-CSRF-Token on unsafe cookie-auth requests.
