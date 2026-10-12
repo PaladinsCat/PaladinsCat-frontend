@@ -1,0 +1,142 @@
+/** Exercise compiled Next cookie persistence with loopback-only HTTP fixtures. */
+import assert from "node:assert/strict";
+import { spawn } from "node:child_process";
+import fs from "node:fs";
+import { createServer } from "node:http";
+import { createRequire } from "node:module";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import ts from "typescript";
+
+const require = createRequire(import.meta.url);
+const repo = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+
+if (process.argv.includes("--serve")) {
+  // Rewrites are captured at build time. Change only this disposable child's
+  // in-memory manifest reads so compiled fallback requests cannot reach live APIs.
+  const fixtureManifest = (file, value) => {
+    if (!String(file).replaceAll("\\", "/").endsWith("/routes-manifest.json")) return value;
+    const manifest = JSON.parse(String(value));
+    for (const rewrite of manifest.rewrites.fallback) {
+      rewrite.destination = `${process.env.PC_FIXTURE_BACKEND}/:path*`;
+    }
+    const output = JSON.stringify(manifest);
+    return typeof value === "string" ? output : Buffer.from(output);
+  };
+  const read = fs.readFileSync.bind(fs);
+  fs.readFileSync = (file, options) => fixtureManifest(file, read(file, options));
+  const readAsync = fs.promises.readFile.bind(fs.promises);
+  fs.promises.readFile = async (file, options) => fixtureManifest(file, await readAsync(file, options));
+  // Fail before an accidental live request if a future Next release changes
+  // how rewrite manifests are loaded. Only loopback fixture traffic is allowed.
+  for (const name of ["node:http", "node:https"]) {
+    const transport = require(name), request = transport.request;
+    transport.request = (...args) => {
+      const target = args[0] instanceof URL || typeof args[0] === "string" ? new URL(args[0]) : args[0];
+      const host = target.hostname || target.host;
+      assert.ok(host === "127.0.0.1" || host === "localhost", `External fixture request denied: ${host}`);
+      return request(...args);
+    };
+  }
+  const { startServer } = require("next/dist/server/lib/start-server");
+  await startServer({ dir: repo, hostname: "127.0.0.1", port: Number(process.env.PC_FIXTURE_PORT), isDev: false });
+} else {
+  const pro = JSON.parse(fs.readFileSync(join(repo, "package.json"), "utf8")).name.endsWith("-pro");
+  const compiled = ts.transpileModule(fs.readFileSync(join(repo, "lib/website-gate.ts"), "utf8"), {
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+  }).outputText;
+  const loaded = { exports: {} };
+  new Function("require", "module", "exports", compiled)(require, loaded, loaded.exports);
+  const gate = loaded.exports;
+  const account = { id: 42, linked_player_id: "42", invitation_required: false, invitation_active: pro,
+    regulation_stage: 0, access_restriction_kind: null, access_restriction: null };
+  let authReads = 0;
+  const backend = createServer((request, response) => {
+    const path = new URL(request.url, "http://fixture.invalid").pathname;
+    response.setHeader("Content-Type", "application/json");
+    if (path === "/auth/me") {
+      authReads++;
+      const session = request.headers.authorization?.startsWith("Bearer ")
+        ? request.headers.authorization.slice(7) : request.headers.cookie?.match(/__Host-pc_session=([^;]+)/)?.[1];
+      response.statusCode = session === "fixture-session" ? 200 : 401;
+      response.end(JSON.stringify(session === "fixture-session" ? account : { error: { code: "SESSION_INVALID" } }));
+    } else {
+      response.end(JSON.stringify({ fixture: true, path }));
+    }
+  });
+  let child, secretFile;
+  try {
+    await new Promise(resolve => backend.listen(0, "127.0.0.1", resolve));
+    const backendOrigin = `http://127.0.0.1:${backend.address().port}`;
+    const reserve = createServer();
+    await new Promise(resolve => reserve.listen(0, "127.0.0.1", resolve));
+    const port = reserve.address().port;
+    await new Promise(resolve => reserve.close(resolve));
+    const origin = `http://127.0.0.1:${port}`;
+    const runtimeRoot = resolve(join(repo, "../local/runtime"));
+    const fixtureRoot = join(runtimeRoot, "operator-transient");
+    fs.mkdirSync(fixtureRoot, { recursive: true });
+    secretFile = join(fixtureRoot, `admission-http-${pro ? "pro" : "public"}-${process.pid}.fixture`);
+    const secret = "ab".repeat(32); // Disposable fixture, never a production credential.
+    fs.writeFileSync(secretFile, secret, { flag: "wx" });
+    child = spawn(process.execPath, [fileURLToPath(import.meta.url), "--serve"], {
+      cwd: repo, windowsHide: true, stdio: ["ignore", "pipe", "pipe"],
+      env: { ...process.env, NODE_ENV: "production", PC_FIXTURE_PORT: String(port), PC_FIXTURE_BACKEND: backendOrigin,
+        NEXT_SERVER_API_URL: backendOrigin, PALADINSCAT_PUBLIC_ORIGIN: origin, PALADINSCAT_WEBSITE_GATE_SECRET_FILE: secretFile },
+    });
+    let output = "";
+    child.stdout.on("data", chunk => { output = (output + chunk).slice(-8000); });
+    child.stderr.on("data", chunk => { output = (output + chunk).slice(-8000); });
+    const http = (path, headers = {}) => fetch(`${origin}${path}`, { redirect: "manual", signal: AbortSignal.timeout(5000),
+      headers: { accept: "application/json", "sec-fetch-site": "same-origin", origin, ...headers } });
+    const start = Date.now();
+    while (true) {
+      assert.ok(Date.now() - start < 30_000, `Compiled server startup exceeded 30 seconds: ${output}`);
+      assert.equal(child.exitCode, null, `Compiled server exited: ${output}`);
+      try { await http("/ads.txt"); break; } catch { await new Promise(resolve => setTimeout(resolve, 100)); }
+    }
+    for (const guest of [undefined, gate.issueGuest(secret, origin, Date.now() - (gate.GUEST_TTL_SECONDS + 1) * 1000)]) {
+      const accountCookie = `__Host-pc_session=fixture-session${guest ? `; ${gate.GUEST_COOKIE}=${guest}` : ""}`;
+      const session = await http("/api/auth/me", { cookie: accountCookie });
+      assert.equal(session.status, 200, `App-owned auth failed: ${output}`);
+      assert.deepEqual(await session.json(), account);
+      const admissionCookie = session.headers.getSetCookie().find(cookie => cookie.startsWith(`${gate.GUEST_COOKIE}=`));
+      assert.ok(admissionCookie, "Compiled auth response must persist renewed guest admission");
+      for (const attribute of [/; Path=\//i, /; HttpOnly/i, /; Secure/i, /; SameSite=Lax/i, /; Max-Age=86400/i]) {
+        assert.match(admissionCookie, attribute);
+      }
+      const token = admissionCookie.split(";", 1)[0].slice(gate.GUEST_COOKIE.length + 1);
+      assert.equal(gate.validGuest(token, secret, origin), true);
+      for (const path of ["/api/search/universal?q=fixture", "/api/players/search?q=fixture",
+        "/_pc/search/universal?q=fixture", "/_pc/players/search?q=fixture"]) {
+        const before = authReads;
+        const search = await http(path, { cookie: `__Host-pc_session=fixture-session; ${gate.GUEST_COOKIE}=${token}` });
+        assert.equal(search.status, 200, path);
+        assert.equal((await search.json()).fixture, true, path);
+        assert.equal(authReads - before, pro ? 1 : 0, "Warm reads preserve the existing surface proof policy");
+      }
+    }
+    const invalid = await http("/api/auth/me", { cookie: "__Host-pc_session=invalid" });
+    assert.equal(invalid.status, pro ? 307 : 403);
+    assert.equal(invalid.headers.getSetCookie().length, 0);
+    const foreign = await http("/api/auth/me", { cookie: "__Host-pc_session=fixture-session", origin: "https://foreign.invalid" });
+    assert.equal(foreign.status, 403);
+    assert.equal(foreign.headers.getSetCookie().length, 0);
+    console.log(JSON.stringify({ surface: pro ? "pro" : "public", compiledCookieFlows: 2, warmSearchReads: 8, invalidAndForeignDenied: true }));
+  } catch (error) {
+    console.error(error);
+    process.exitCode = 1;
+  } finally {
+    if (child && child.exitCode === null && child.signalCode === null) {
+      const stopped = await new Promise(resolve => {
+        const timer = setTimeout(() => resolve(false), 5000);
+        child.once("exit", () => { clearTimeout(timer); resolve(true); });
+        child.kill();
+      });
+      assert.equal(stopped, true, "Owned compiled server did not stop");
+    }
+    backend.closeAllConnections();
+    await new Promise(resolve => backend.close(resolve));
+    if (secretFile) fs.unlinkSync(secretFile);
+  }
+}
