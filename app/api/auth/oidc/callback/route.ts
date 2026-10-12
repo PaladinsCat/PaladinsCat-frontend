@@ -17,8 +17,14 @@ export const runtime = "nodejs";
 const TX_COOKIE = "__Host-pc_oidc_txn";
 const SESSION_COOKIE = "__Host-pc_session";
 const CSRF_COOKIE = "__Host-pc_csrf";
-// Dedicated Pro surface. Invitation-active accounts are handed off here on login (see GET).
+// Browser logins for invitation-active accounts hand off to the dedicated Pro surface.
 const PRO_ORIGIN = "https://pro.paladinscat.com";
+// Native Wolper validates its redirect hosts and then reads the public session.
+// Caller metadata selects navigation only; all OIDC and backend checks still apply.
+function needsPublicSession(request: NextRequest): boolean {
+  const userAgent = request.headers.get("user-agent")?.trim();
+  return userAgent === "Wolper, Scoreboard (@thprinkleth)" || userAgent === "Wolper Scoreboard/1.0";
+}
 function origin() { return process.env.PALADINSCAT_PUBLIC_ORIGIN || "http://localhost:3000"; }
 function backend() {
   const base = (process.env.NEXT_SERVER_API_URL || "http://localhost:3005").replace(/\/$/, "");
@@ -110,14 +116,16 @@ export async function GET(request: NextRequest) {
   const sessionMaxAge = Number.isFinite(expiresMs) ? Math.floor((expiresMs - Date.now()) / 1000) : 60 * 60 * 8;
   if (sessionMaxAge <= 0) { const response = NextResponse.redirect(new URL("/auth/login?oidc_error=1", origin())); clear(response); return response; }
   const returnPath = safeReturnPath(tx.returnPath);
-  // Invitation-active accounts belong on the dedicated Pro surface. Hand them off to Pro's
+  // Browser logins for invitation-active accounts continue on the dedicated Pro surface.
+  // Wolper must establish its session on the public host, which its API calls use.
+  // Hand browser sessions off to Pro's
   // OIDC login (not a bare page redirect): the session cookie is host-scoped, so a bare
   // cross-origin redirect would land them on Pro without a session. Base and Pro share the
   // same OIDC client, so the fresh Keycloak SSO session makes this a silent login that
   // establishes the Pro session, and the validated return path is preserved. The origin
   // guard makes this a no-op when the callback already runs on Pro (no loop).
   const currentOrigin = origin().replace(/\/$/, "");
-  if (currentOrigin !== PRO_ORIGIN && await invitationActive(result.token)) {
+  if (currentOrigin !== PRO_ORIGIN && !needsPublicSession(request) && await invitationActive(result.token)) {
     const proLogin = new URL("/api/auth/oidc/login", PRO_ORIGIN);
     proLogin.searchParams.set("return", returnPath);
     return NextResponse.redirect(proLogin);

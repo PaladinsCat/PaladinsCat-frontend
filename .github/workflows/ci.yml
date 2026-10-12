@@ -43,6 +43,12 @@ jobs:
         timeout-minutes: 2
         run: node --test lib/auth-session-sync.test.mjs lib/auth-challenge.test.mjs lib/auth-session-read.test.mjs
 
+      - name: OIDC callback compatibility tests
+        timeout-minutes: 2
+        run: |
+          npm run test:oidc
+          npm run test:oidc-callback
+
       - name: Operations security tests
         run: npm run test:operations
 
