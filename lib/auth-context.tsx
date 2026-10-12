@@ -68,7 +68,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           clearAuth();
           setUser(null);
         } else {
-          setUser((previous) => previous ? { ...previous, invitationActive: false, invitationRequired: true } : null);
+          // Transport/admission failures cannot change a server-confirmed
+          // account's tier. Preserve that same-session snapshot; display-only
+          // cache and replacement sessions still await their own proof.
+          setUser((previous) => previous && confirmedUserId.current === previous.id
+            ? previous
+            : previous ? { ...previous, invitationActive: false, invitationRequired: true } : null);
         }
       } finally {
         if (revision === sessionRevision.current) setIsLoading(false);
@@ -97,8 +102,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // cache would keep old and new tabs in an endless refresh exchange.
       sessionRevision.current += 1;
       refreshInFlight.current = null;
+      confirmedUserId.current = null;
       if (event.key === null || event.newValue === null) {
-        confirmedUserId.current = null;
         setUser(null);
       }
       void refresh();
@@ -139,6 +144,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const handleLogin = useCallback(async (username: string, password: string) => {
     sessionRevision.current += 1;
     refreshInFlight.current = null;
+    confirmedUserId.current = null;
     const session = await login(username, password);
     setUser(session.user);
     await refresh();

@@ -204,13 +204,39 @@ export async function proxy(request: NextRequest) {
   }
   const admitted = validGuest(request.cookies.get(GUEST_COOKIE)?.value, secret, origin);
   if (api) {
-    if (!admitted || !safeWebsiteRequest(request.headers, origin)) {
+    // A loaded tab can outlive its 24-hour guest admission while its genuine
+    // account session is still valid. Restore admission only after backend
+    // proof, without granting data permissions or relaxing origin checks.
+    if (!safeWebsiteRequest(request.headers, origin)) {
       return NextResponse.json({ error: { code: "WEBSITE_SESSION_REQUIRED", message: "Open the website to establish a guest session. External clients must use /api/v1 with a registered API key." } }, {
         status: 403, headers: { "Cache-Control": "private, no-store" },
       });
     }
+    if (!admitted) {
+      const { state, retryAfter } = await getAccountCheck();
+      if (state === "guest") {
+        return NextResponse.json({ error: { code: "WEBSITE_SESSION_REQUIRED", message: "Open the website to establish a guest session. External clients must use /api/v1 with a registered API key." } }, {
+          status: 403, headers: { "Cache-Control": "private, no-store" },
+        });
+      }
+      if (state === "rate-limited") {
+        const headers = new Headers({ "Cache-Control": "private, no-store" });
+        if (retryAfter) headers.set("Retry-After", retryAfter);
+        return NextResponse.json({ error: { code: "AUTHENTICATION_RATE_LIMITED" } }, { status: 429, headers });
+      }
+      if (state === "unavailable") {
+        return NextResponse.json({ error: { code: "AUTHENTICATION_UNAVAILABLE" } }, {
+          status: 503, headers: { "Cache-Control": "private, no-store" },
+        });
+      }
+    }
     const response = NextResponse.next();
     response.headers.set("Cache-Control", "private, no-store");
+    if (!admitted) {
+      response.cookies.set(GUEST_COOKIE, issueGuest(secret, origin), {
+        httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: GUEST_TTL_SECONDS,
+      });
+    }
     return response;
   }
 

@@ -3118,6 +3118,9 @@ export async function fetchJson<T>(path: string, options?: RequestInit & { retri
   // Legacy calls may interpolate a missing token. Let same-origin cookie auth
   // proceed instead of sending a malformed bearer credential that takes precedence.
   if (/^Bearer (null|undefined)$/i.test(headers.get("authorization") || "")) headers.delete("authorization");
+  // OIDC replaces the host cookie without rewriting an older tab's local
+  // token. App-generated legacy headers must not mask that fresh session.
+  if (hasCookieAuthSession() && headers.get("authorization") === `Bearer ${getAuthToken()}`) headers.delete("authorization");
   const method = (fetchOptions.method || "GET").toUpperCase();
   const csrf = typeof document !== "undefined" ? csrfHeader(document.cookie, method) : null;
   if (csrf) headers.set("X-CSRF-Token", csrf);
@@ -6304,6 +6307,7 @@ export async function getUserProfile(userId: number): Promise<AuthUser> {
  * I/O types: `token: string | null -> Record<string, string>`.
  */
 export function accountAuthHeaders(token: string | null = getAuthToken()): Record<string, string> {
+  if (hasCookieAuthSession() && token === getAuthToken()) return {};
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
