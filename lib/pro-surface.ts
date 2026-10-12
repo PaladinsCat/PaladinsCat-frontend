@@ -15,8 +15,13 @@ export function hasProAccess(value: unknown): boolean {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
   const account = value as Record<string, unknown>;
   if (account.regulation_stage !== 0) return false;
-  if (typeof account.linked_player_id !== "number" || !Number.isSafeInteger(account.linked_player_id)
-      || account.linked_player_id <= 0 || account.invitation_active !== true) return false;
+  const rawPlayerId = account.linked_player_id;
+  // PostgreSQL bigint IDs arrive as decimal strings in the real auth response.
+  // Accept only their canonical, positive representation within the safe range.
+  const linkedPlayerId = typeof rawPlayerId === "string" && /^[1-9][0-9]{0,15}$/.test(rawPlayerId)
+    && String(Number(rawPlayerId)) === rawPlayerId ? Number(rawPlayerId) : rawPlayerId;
+  if (typeof linkedPlayerId !== "number" || !Number.isSafeInteger(linkedPlayerId)
+      || linkedPlayerId <= 0 || account.invitation_active !== true) return false;
   if (account.access_restriction != null) return false;
   if (account.access_restriction_kind != null && account.access_restriction_kind !== "") return false;
   if (account.invitation_expires_at != null
