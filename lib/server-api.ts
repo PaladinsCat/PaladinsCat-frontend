@@ -35,6 +35,15 @@ export function serverApiBase(): string {
 
 /**
  * Fetches JSON from the backend with server-side caching, revalidation, and error handling.
+ *
+ * Forwards the caller's session (when one exists) on BOTH surfaces so the
+ * backend can apply verified-user tier exemptions (unlimited rate limits).
+ * The backend is the sole authority on whether a session grants unlimited
+ * access; the frontend must not gate it.
+ *
+ * Uses dynamic data sources (`headers()`, `cookies()`) — do NOT call inside
+ * an `unstable_cache` scope. Use `fetchServerJsonStatic` there instead.
+ *
  * refs: none
  * I/O types: `path: string; options: ServerFetchOptions -> Promise<T>`.
  */
@@ -50,10 +59,45 @@ export async function fetchServerJson<T>(path: string, options: ServerFetchOptio
   if (clientUa) forwarded.set("x-client-ua", clientUa);
   // Caddy owns the ingress marker; caller-supplied fetch options cannot promote it.
   forwarded.set("x-paladinscat-surface", surface);
-  if (surface === "pro") {
-    const session = (await cookies()).get("__Host-pc_session")?.value;
-    if (session) forwarded.set("authorization", `Bearer ${session}`);
+  // Forward the session on every surface. The backend's identity::session()
+  // resolves the token from the Authorization header (Bearer) or the
+  // __Host-pc_session cookie and applies has_unlimited_website_access() to
+  // grant verified users unlimited rate limits. Gating this on surface was a
+  // production bug: public-surface SSR reads dropped the session, so the
+  // backend treated verified users as guests and returned 429.
+  const session = (await cookies()).get("__Host-pc_session")?.value;
+  if (session) forwarded.set("authorization", `Bearer ${session}`);
+  const response = await fetch(`${serverApiBase()}${path.startsWith("/") ? path : `/${path}`}`, {
+    ...requestOptions,
+    cache: requestOptions.cache ?? "no-store",
+    headers: forwarded,
+    signal: AbortSignal.timeout(timeoutMs),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Server API ${response.status} for ${path}`);
   }
+  return response.json() as Promise<T>;
+}
+
+/**
+ * Fetches JSON from the backend for use inside `unstable_cache` boundaries.
+ *
+ * Does NOT call `headers()` or `cookies()` — safe for static cache scopes
+ * where Next.js rejects dynamic data sources. Always identifies as the
+ * public surface; no session is forwarded (champion catalog data is public
+ * and does not require tier-based access).
+ *
+ * refs: none
+ * I/O types: `path: string; options: ServerFetchOptions -> Promise<T>`.
+ */
+export async function fetchServerJsonStatic<T>(path: string, options: ServerFetchOptions = {}): Promise<T> {
+  const { timeoutMs = 10_000, ...requestOptions } = options;
+  const forwarded = new Headers(requestOptions.headers);
+  if (!forwarded.has("accept")) forwarded.set("accept", "application/json");
+  // Static scope: no dynamic headers available. Public surface is the only
+  // valid identity for cached catalog reads.
+  forwarded.set("x-paladinscat-surface", "public");
   const response = await fetch(`${serverApiBase()}${path.startsWith("/") ? path : `/${path}`}`, {
     ...requestOptions,
     cache: requestOptions.cache ?? "no-store",

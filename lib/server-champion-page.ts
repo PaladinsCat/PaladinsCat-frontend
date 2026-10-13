@@ -7,11 +7,11 @@ import "server-only";
 
 import { unstable_cache } from "next/cache";
 import type { ChampionPagePayload } from "@/lib/champion-page-data";
-import { fetchServerJson } from "@/lib/server-api";
+import { fetchServerJsonStatic } from "@/lib/server-api";
 import { championSlug } from "@/lib/utils";
 
 const getCachedChampionPageData = unstable_cache(
-  async (slug: string) => fetchServerJson<ChampionPagePayload>(
+  async (slug: string) => fetchServerJsonStatic<ChampionPagePayload>(
     `/champions/${encodeURIComponent(slug)}/page-data`,
     { timeoutMs: 700 },
   ),

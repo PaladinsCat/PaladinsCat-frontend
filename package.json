@@ -18,6 +18,7 @@
     "test:oidc": "node --experimental-strip-types --test lib/oidc-security.test.ts",
     "test:oidc-callback": "node --test lib/oidc-callback-route.test.mjs",
     "test:public-v1": "node --experimental-strip-types --test lib/public-v1.test.ts",
+    "test:server-api": "node --test lib/server-api.test.mjs",
     "test:website-gate": "node --experimental-strip-types --test lib/website-gate.test.ts lib/website-proxy.test.mjs",
     "test:deployment-polling": "node --test lib/deployment-polling.test.mjs",
     "test:ui:auth": "playwright test test/auth-login-ui.spec.ts",
