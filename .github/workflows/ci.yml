@@ -43,6 +43,10 @@ jobs:
         timeout-minutes: 2
         run: node --test lib/auth-session-sync.test.mjs lib/auth-challenge.test.mjs lib/auth-session-read.test.mjs lib/auth-credentials.test.mjs lib/server-api.test.mjs
 
+      - name: Player profile render tests
+        timeout-minutes: 2
+        run: node --test scripts/player-profile-render.test.mjs
+
       - name: OIDC callback compatibility tests
         timeout-minutes: 2
         run: |

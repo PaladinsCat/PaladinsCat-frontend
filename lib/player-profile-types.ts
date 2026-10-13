@@ -97,8 +97,8 @@ export interface PlayerResponse {
   refreshQuota?: { remaining: number; reset_at: string | null; remaining_seconds: number } | null;
   access?: { fullAccess: boolean; limit: number | null; remaining: number | null; resetAtMs: number | null };
   player: PlayerData;
-  queueRatings: QueueRating[];
-  championRatings: ChampionRating[];
+  queueRatings?: QueueRating[];
+  championRatings?: ChampionRating[];
   profileRefresh: {
     ttl_seconds: number;
     refreshed_at: string | null;
