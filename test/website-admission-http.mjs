@@ -1,6 +1,6 @@
 /** Exercise compiled Next cookie persistence with loopback-only HTTP fixtures. */
 import assert from "node:assert/strict";
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import { createServer } from "node:http";
 import { createRequire } from "node:module";
@@ -53,18 +53,21 @@ if (process.argv.includes("--serve")) {
   let authReads = 0;
   const backend = createServer((request, response) => {
     const path = new URL(request.url, "http://fixture.invalid").pathname;
+    const session = request.headers.authorization?.startsWith("Bearer ")
+      ? request.headers.authorization.slice(7) : request.headers.cookie?.match(/__Host-pc_session=([^;]+)/)?.[1];
     response.setHeader("Content-Type", "application/json");
     if (path === "/auth/me") {
       authReads++;
-      const session = request.headers.authorization?.startsWith("Bearer ")
-        ? request.headers.authorization.slice(7) : request.headers.cookie?.match(/__Host-pc_session=([^;]+)/)?.[1];
       response.statusCode = session === "fixture-session" ? 200 : 401;
       response.end(JSON.stringify(session === "fixture-session" ? account : { error: { code: "SESSION_INVALID" } }));
+    } else if (path === "/players/search" && session !== "fixture-session") {
+      response.statusCode = 401;
+      response.end(JSON.stringify({ error: { code: "LOGIN_REQUIRED" } }));
     } else {
       response.end(JSON.stringify({ fixture: true, path }));
     }
   });
-  let child, secretFile;
+  let child, secretFile, fixtureCreated = false;
   try {
     await new Promise(resolve => backend.listen(0, "127.0.0.1", resolve));
     const backendOrigin = `http://127.0.0.1:${backend.address().port}`;
@@ -79,6 +82,7 @@ if (process.argv.includes("--serve")) {
     secretFile = join(fixtureRoot, `admission-http-${pro ? "pro" : "public"}-${process.pid}.fixture`);
     const secret = "ab".repeat(32); // Disposable fixture, never a production credential.
     fs.writeFileSync(secretFile, secret, { flag: "wx" });
+    fixtureCreated = true;
     child = spawn(process.execPath, [fileURLToPath(import.meta.url), "--serve"], {
       cwd: repo, windowsHide: true, stdio: ["ignore", "pipe", "pipe"],
       env: { ...process.env, NODE_ENV: "production", PC_FIXTURE_PORT: String(port), PC_FIXTURE_BACKEND: backendOrigin,
@@ -95,9 +99,12 @@ if (process.argv.includes("--serve")) {
       assert.equal(child.exitCode, null, `Compiled server exited: ${output}`);
       try { await http("/ads.txt"); break; } catch { await new Promise(resolve => setTimeout(resolve, 100)); }
     }
+    const credentialModes = [{ cookie: "__Host-pc_session=fixture-session" }, ...(pro ? [] : [{ authorization: "Bearer fixture-session" }])];
+    let compiledCookieFlows = 0, warmSearchReads = 0;
+    for (const credentials of credentialModes) {
     for (const guest of [undefined, gate.issueGuest(secret, origin, Date.now() - (gate.GUEST_TTL_SECONDS + 1) * 1000)]) {
-      const accountCookie = `__Host-pc_session=fixture-session${guest ? `; ${gate.GUEST_COOKIE}=${guest}` : ""}`;
-      const session = await http("/api/auth/me", { cookie: accountCookie });
+      const accountCookie = [credentials.cookie, guest ? `${gate.GUEST_COOKIE}=${guest}` : ""].filter(Boolean).join("; ");
+      const session = await http("/api/auth/me", { ...credentials, cookie: accountCookie });
       assert.equal(session.status, 200, `App-owned auth failed: ${output}`);
       assert.deepEqual(await session.json(), account);
       const admissionCookie = session.headers.getSetCookie().find(cookie => cookie.startsWith(`${gate.GUEST_COOKIE}=`));
@@ -107,14 +114,17 @@ if (process.argv.includes("--serve")) {
       }
       const token = admissionCookie.split(";", 1)[0].slice(gate.GUEST_COOKIE.length + 1);
       assert.equal(gate.validGuest(token, secret, origin), true);
+      compiledCookieFlows++;
       for (const path of ["/api/search/universal?q=fixture", "/api/players/search?q=fixture",
         "/_pc/search/universal?q=fixture", "/_pc/players/search?q=fixture"]) {
         const before = authReads;
-        const search = await http(path, { cookie: `__Host-pc_session=fixture-session; ${gate.GUEST_COOKIE}=${token}` });
+        const search = await http(path, { ...credentials, cookie: [credentials.cookie, `${gate.GUEST_COOKIE}=${token}`].filter(Boolean).join("; ") });
         assert.equal(search.status, 200, path);
         assert.equal((await search.json()).fixture, true, path);
         assert.equal(authReads - before, pro ? 1 : 0, "Warm reads preserve the existing surface proof policy");
+        warmSearchReads++;
       }
+    }
     }
     const invalid = await http("/api/auth/me", { cookie: "__Host-pc_session=invalid" });
     assert.equal(invalid.status, pro ? 307 : 403);
@@ -122,7 +132,7 @@ if (process.argv.includes("--serve")) {
     const foreign = await http("/api/auth/me", { cookie: "__Host-pc_session=fixture-session", origin: "https://foreign.invalid" });
     assert.equal(foreign.status, 403);
     assert.equal(foreign.headers.getSetCookie().length, 0);
-    console.log(JSON.stringify({ surface: pro ? "pro" : "public", compiledCookieFlows: 2, warmSearchReads: 8, invalidAndForeignDenied: true }));
+    console.log(JSON.stringify({ surface: pro ? "pro" : "public", compiledCookieFlows, warmSearchReads, invalidAndForeignDenied: true }));
   } catch (error) {
     console.error(error);
     process.exitCode = 1;
@@ -137,6 +147,18 @@ if (process.argv.includes("--serve")) {
     }
     backend.closeAllConnections();
     await new Promise(resolve => backend.close(resolve));
-    if (secretFile) fs.unlinkSync(secretFile);
+    if (fixtureCreated) {
+      const target = fs.realpathSync(secretFile);
+      assert.equal(target, resolve(secretFile), "Fixture cleanup requires its exact resolved path");
+      assert.equal(dirname(target), fs.realpathSync(join(repo, "../local/runtime/operator-transient")), "Fixture cleanup must stay within local/runtime");
+      assert.equal(fs.lstatSync(target).isFile(), true, "Only the owned fixture file may be recycled");
+      assert.equal(fs.readFileSync(target, "utf8"), "ab".repeat(32), "Fixture contents changed before recycling");
+      const python = process.platform === "win32" ? "C:/Python314/python.exe" : "python3";
+      const recycled = spawnSync(python, ["-B", "-c", "import sys; from send2trash import send2trash; send2trash(sys.argv[1])", target], {
+        windowsHide: true, timeout: 10_000, encoding: "utf8",
+      });
+      assert.equal(recycled.status, 0, `Fixture recycling failed: ${recycled.stderr || recycled.error || "unknown error"}`);
+      assert.equal(fs.existsSync(target), false, "Owned fixture still exists after recycling");
+    }
   }
 }

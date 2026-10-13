@@ -16,8 +16,13 @@ type AccountSessionState = "guest" | "unverified" | "uninvited" | "verified" | "
 type AccountSessionCheck = { state: AccountSessionState; retryAfter?: string; restricted?: boolean; invitationRequired?: boolean; pro?: boolean };
 
 /** Validate the opaque browser session through the backend auth owner. */
-async function accountSessionState(request: NextRequest): Promise<AccountSessionCheck> {
-  const session = request.cookies.get(ACCOUNT_SESSION_COOKIE)?.value;
+async function accountSessionState(request: NextRequest, allowBearer = false): Promise<AccountSessionCheck> {
+  // API recovery must use the same credential as Rust. Browser document and
+  // Pro promotion checks retain their existing host-cookie-only authority.
+  const authorization = allowBearer ? request.headers.get("authorization") : null;
+  const bearer = authorization?.startsWith("Bearer ") ? authorization.slice(7) : "";
+  if (bearer.length > 512) return { state: "guest" };
+  const session = bearer || request.cookies.get(ACCOUNT_SESSION_COOKIE)?.value;
   if (!session) return { state: "guest" };
   try {
     const headers = new Headers({ accept: "application/json", authorization: `Bearer ${session}` });
@@ -109,7 +114,7 @@ export async function proxy(request: NextRequest) {
   // handle its local assets and HMR without injecting production headers.
   let accountCheck: AccountSessionCheck | undefined;
   const getAccountCheck = async () => {
-    accountCheck ??= await accountSessionState(request);
+    accountCheck ??= await accountSessionState(request, websiteApiPath(path));
     return accountCheck;
   };
   // Do not let percent-encoded namespace aliases reach a rewrite without admission.

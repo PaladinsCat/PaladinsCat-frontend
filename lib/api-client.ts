@@ -3115,6 +3115,18 @@ export async function fetchJson<T>(path: string, options?: RequestInit & { retri
   delete (fetchOptions as any).unwrapData;
   delete (fetchOptions as any).timeoutMs;
   const headers = new Headers(fetchOptions.headers);
+  // Search and general reads share the identity confirmed by getMe. Keep a
+  // legacy browser token on same-origin requests when no explicit credential
+  // was selected; OIDC accountAuthHeaders continues to prefer its cookie.
+  if (!headers.has("authorization") && !headers.has("x-api-key") && typeof window !== "undefined") {
+    try {
+      if (new URL(API_BASE, window.location.href).origin === window.location.origin) {
+        for (const [name, value] of Object.entries(accountAuthHeaders())) headers.set(name, value);
+      }
+    } catch {
+      // An invalid API origin cannot receive an implicit browser credential.
+    }
+  }
   // Legacy calls may interpolate a missing token. Let same-origin cookie auth
   // proceed instead of sending a malformed bearer credential that takes precedence.
   if (/^Bearer (null|undefined)$/i.test(headers.get("authorization") || "")) headers.delete("authorization");
