@@ -126,13 +126,42 @@ if (process.argv.includes("--serve")) {
       }
     }
     }
-    const invalid = await http("/api/auth/me", { cookie: "__Host-pc_session=invalid" });
-    assert.equal(invalid.status, pro ? 307 : 403);
-    assert.equal(invalid.headers.getSetCookie().length, 0);
+    let expiredBrowserFlows = 0;
+    if (!pro) {
+      for (const path of ["/api/auth/me", "/_pc/auth/me"]) {
+        for (const cookie of ["", `${gate.GUEST_COOKIE}=${gate.issueGuest(secret, origin, Date.now() - (gate.GUEST_TTL_SECONDS + 1) * 1000)}`,
+          "__Host-pc_session=invalid; __Host-pc_guest=tampered"]) {
+          const rejection = await http(path, { cookie });
+          assert.equal(rejection.status, 401, "Expired browser must receive the backend's real auth rejection");
+          assert.equal((await rejection.json()).error.code, "SESSION_INVALID");
+          const cookies = rejection.headers.getSetCookie();
+          assert.equal(cookies.some(value => value.startsWith("__Host-pc_session=") || value.startsWith("__Host-pc_csrf=")), false);
+          const guest = cookies.find(value => value.startsWith(`${gate.GUEST_COOKIE}=`));
+          assert.ok(guest, "Rejected auth control must persist unprivileged guest admission");
+          const guestHeader = guest.split(";", 1)[0];
+          const publicSearch = await http("/api/search/universal?q=fixture", { cookie: guestHeader });
+          assert.equal(publicSearch.status, 200);
+          assert.equal((await publicSearch.json()).fixture, true);
+          const protectedSearch = await http("/api/players/search?q=fixture", { cookie: guestHeader });
+          assert.equal(protectedSearch.status, 401);
+          assert.equal((await protectedSearch.json()).error.code, "LOGIN_REQUIRED");
+          expiredBrowserFlows++;
+        }
+      }
+      for (const path of ["/api/search/universal?q=fixture", "/api/players/search?q=fixture", "/_pc/players/search?q=fixture"]) {
+        const denied = await http(path);
+        assert.equal(denied.status, 403);
+        assert.equal(denied.headers.getSetCookie().length, 0);
+      }
+      const unsafe = await fetch(`${origin}/api/auth/me`, { method: "POST", redirect: "manual", signal: AbortSignal.timeout(5000),
+        headers: { "sec-fetch-site": "same-origin", origin } });
+      assert.equal(unsafe.status, 403);
+      assert.equal(unsafe.headers.getSetCookie().length, 0);
+    }
     const foreign = await http("/api/auth/me", { cookie: "__Host-pc_session=fixture-session", origin: "https://foreign.invalid" });
     assert.equal(foreign.status, 403);
     assert.equal(foreign.headers.getSetCookie().length, 0);
-    console.log(JSON.stringify({ surface: pro ? "pro" : "public", compiledCookieFlows, warmSearchReads, invalidAndForeignDenied: true }));
+    console.log(JSON.stringify({ surface: pro ? "pro" : "public", compiledCookieFlows, warmSearchReads, expiredBrowserFlows, foreignAndUnsafeDenied: true }));
   } catch (error) {
     console.error(error);
     process.exitCode = 1;

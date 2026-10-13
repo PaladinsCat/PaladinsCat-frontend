@@ -210,14 +210,18 @@ export async function proxy(request: NextRequest) {
   const admitted = validGuest(request.cookies.get(GUEST_COOKIE)?.value, secret, origin);
   if (api) {
     // A loaded tab can outlive its 24-hour guest admission while its genuine
-    // account session is still valid. Restore admission only after backend
+    // account session is still valid. Restore data admission only after backend
     // proof, without granting data permissions or relaxing origin checks.
     if (!safeWebsiteRequest(request.headers, origin)) {
       return NextResponse.json({ error: { code: "WEBSITE_SESSION_REQUIRED", message: "Open the website to establish a guest session. External clients must use /api/v1 with a registered API key." } }, {
         status: 403, headers: { "Cache-Control": "private, no-store" },
       });
     }
-    if (!admitted) {
+    // Expired browser credentials must reach the auth owner and return its 401,
+    // rather than an admission 403 that preserves stale verified display state.
+    const browserAuthControl = (path === "/api/auth/me" || path === "/_pc/auth/me")
+      && request.method === "GET" && request.headers.get("sec-fetch-site") === "same-origin";
+    if (!admitted && !browserAuthControl) {
       const { state, retryAfter } = await getAccountCheck();
       if (state === "guest") {
         return NextResponse.json({ error: { code: "WEBSITE_SESSION_REQUIRED", message: "Open the website to establish a guest session. External clients must use /api/v1 with a registered API key." } }, {
