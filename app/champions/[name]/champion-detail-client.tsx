@@ -53,58 +53,61 @@ export default function ChampionDetailPage({
   const displayName = championData?.name ?? staticChampion?.name ?? name;
 
   return <div className="space-y-6">
-    <div className="flex items-center gap-4">
-      <ContextBackLink fallbackHref="/champions" label={t("generated.champions.backToChampions")} />
-      <h1 className="pc-heading pc-heading-lg">{displayName}</h1>
-    </div>
+    <ContextBackLink fallbackHref="/champions" label={t("generated.champions.backToChampions")} />
 
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
-      <div className="space-y-6 lg:col-span-1">
-        <div className="pc-card">
-          <div className="flex flex-col items-center gap-4 text-center">
-            <SmartImage src={getChampionIconSafe(displayName)} alt={displayName} width={112} height={112} fetchPriority="high" className="h-28 w-28 rounded-xl object-contain" />
-            <div className="flex flex-wrap justify-center gap-2">
-              {(championData?.roles ?? staticChampion?.roles ?? []).map((role) => <span key={role} className="flex items-center gap-1.5 rounded-full bg-pc-accent/10 px-3 py-1 text-xs text-pc-accent">
-                {ROLE_ICONS[role] && <SmartImage src={ROLE_ICONS[role]} alt="" className="h-3.5 w-3.5" />}
-                {role}
-              </span>)}
-            </div>
-            {championData?.stats && <div className="grid w-full grid-cols-2 gap-x-6 gap-y-3">
-              <StatBadge label={t("common.metrics.health")} value={championData.stats.health} />
-              <StatBadge label={t("common.metrics.speed")} value={championData.stats.speed} />
-              <StatBadge label={t("common.metrics.range")} value={championData.stats.range} />
-              <StatBadge label={t("common.metrics.speedUnits")} value={championData.stats.speedUnits} />
-            </div>}
-          </div>
+    {/* Header band: portrait + identity + stats */}
+    <div className="pc-card flex flex-col gap-6 sm:flex-row sm:items-start">
+      <SmartImage src={getChampionIconSafe(displayName)} alt={displayName} width={112} height={112} fetchPriority="high" className="h-28 w-28 shrink-0 rounded-xl object-contain sm:h-32 sm:w-32" />
+      <div className="min-w-0 flex-1 space-y-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <h1 className="pc-heading pc-heading-lg">{displayName}</h1>
+          {(championData?.roles ?? staticChampion?.roles ?? []).map((role) => (
+            <span key={role} className="flex items-center gap-1.5 rounded-full bg-pc-accent/10 px-3 py-1 text-xs text-pc-accent">
+              {ROLE_ICONS[role] && <SmartImage src={ROLE_ICONS[role]} alt="" className="h-3.5 w-3.5" />}
+              {role}
+            </span>
+          ))}
         </div>
-
-        {championData?.skills?.length ? <section className="space-y-2">
-          <h2 className="pc-card-title">{t("generated.champions.skills")}</h2>
-          <div className="pc-card space-y-3">{championData.skills.map((skill) => <SkillCard key={skill.name} championName={displayName} skill={skill} />)}</div>
-        </section> : null}
-      </div>
-
-      <div className="space-y-6 lg:col-span-3">
-        {championData?.talents?.length ? <section className="space-y-2">
-          <h2 className="pc-card-title">{t("generated.champions.talents")}</h2>
-          <div className="pc-card grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {championData.talents.map((talent) => <TalentCard key={talent.id} championName={displayName} talent={talent} />)}
+        {championData?.stats && (
+          <div className="flex flex-wrap gap-x-6 gap-y-2">
+            <StatBadge label={t("common.metrics.health")} value={championData.stats.health} />
+            <StatBadge label={t("common.metrics.speed")} value={championData.stats.speed} />
+            <StatBadge label={t("common.metrics.range")} value={championData.stats.range} />
+            <StatBadge label={t("common.metrics.speedUnits")} value={championData.stats.speedUnits} />
           </div>
-        </section> : null}
-
-        {championData?.loadouts?.length ? <section className="space-y-2">
-          <h2 className="pc-card-title">{t("generated.champions.loadoutCards")}</h2>
-          <ChampionLoadoutGrid championSlug={championSlug(displayName)} loadouts={championData.loadouts} />
-        </section> : null}
+        )}
       </div>
     </div>
 
+    {/* Abilities */}
+    {championData?.skills?.length ? <section className="space-y-2">
+      <h2 className="pc-card-title">{t("generated.champions.skills")}</h2>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {championData.skills.map((skill) => <SkillCard key={skill.name} championName={displayName} skill={skill} />)}
+      </div>
+    </section> : null}
+
+    {/* Talents */}
+    {championData?.talents?.length ? <section className="space-y-2">
+      <h2 className="pc-card-title">{t("generated.champions.talents")}</h2>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {championData.talents.map((talent) => <TalentCard key={talent.id} championName={displayName} talent={talent} />)}
+      </div>
+    </section> : null}
+
+    {/* Loadout cards */}
+    {championData?.loadouts?.length ? <section className="space-y-2">
+      <h2 className="pc-card-title">{t("generated.champions.loadoutCards")}</h2>
+      <ChampionLoadoutGrid championSlug={championSlug(displayName)} loadouts={championData.loadouts} />
+    </section> : null}
+
+    {/* Changelog */}
     {initialChampionChangelog && <ChampionChangelog history={initialChampionChangelog} />}
   </div>;
 }
 
 function StatBadge({ label, value }: { label: string; value: string }) {
-  return <div className="text-center"><div className="text-xs text-pc-text-muted">{label}</div><div className="font-mono text-sm text-pc-text">{value}</div></div>;
+  return <div className="flex items-baseline gap-1.5"><span className="text-xs text-pc-text-muted">{label}</span><span className="font-mono text-sm text-pc-text">{value}</span></div>;
 }
 
 function SkillCard({ championName, skill }: { championName: string; skill: ChampionSkill }) {
@@ -117,12 +120,16 @@ function SkillCard({ championName, skill }: { championName: string; skill: Champ
     return () => window.clearInterval(interval);
   }, [icons.length]);
   const descriptionKey = championDescriptionKey(championName, "skills", skill.name);
-  return <div className="pc-surface-light flex items-start gap-4 rounded-lg border border-pc-border p-4">
+  return <div className="pc-surface-light flex items-start gap-3 rounded-lg border border-pc-border p-3">
     <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-pc-bg-elevated">
       {icons[activeIndex] ? <SmartImage src={icons[activeIndex]} alt={skill.name} className="h-full w-full object-contain" /> : <span className="font-mono text-xs text-pc-accent">{skill.key}</span>}
     </div>
     <div className="min-w-0 flex-1">
-      <div className="mb-1 flex flex-wrap items-center gap-2"><span className="text-sm font-medium text-pc-text">{skill.name}</span>{skill.damage && <span className="font-mono text-xs text-pc-text-muted">{t("generated.champions.dmg")} {skill.damage}</span>}{skill.cooldown && <span className="font-mono text-xs text-pc-text-muted">{t("generated.champions.cd")} {skill.cooldown}</span>}</div>
+      <div className="mb-1 flex flex-wrap items-center gap-2">
+        <span className="text-sm font-medium text-pc-text">{skill.name}</span>
+        {skill.damage && <span className="font-mono text-xs text-pc-text-muted">{t("generated.champions.dmg")} {skill.damage}</span>}
+        {skill.cooldown && <span className="font-mono text-xs text-pc-text-muted">{t("generated.champions.cd")} {skill.cooldown}</span>}
+      </div>
       {skill.description && <p className="text-xs leading-relaxed text-pc-text-secondary">{descriptionKey ? t(descriptionKey) : skill.description}</p>}
     </div>
   </div>;
@@ -133,6 +140,9 @@ function TalentCard({ championName, talent }: { championName: string; talent: Ch
   const descriptionKey = championDescriptionKey(championName, "talents", talent.name);
   return <div className="pc-surface-light flex items-start gap-3 rounded-lg border border-pc-border p-3">
     <CanonicalTalentImage talentId={talent.id} talentName={talent.name} alt="" className="h-14 w-14 shrink-0 object-contain" fallbackClassName="h-14 w-14 shrink-0" />
-    <div className="min-w-0 flex-1"><div className="mb-1 text-xs font-medium text-pc-accent">{talent.name}</div><p className="text-xs leading-relaxed text-pc-text-secondary">{descriptionKey ? t(descriptionKey) : talent.description}</p></div>
+    <div className="min-w-0 flex-1">
+      <div className="mb-1 text-xs font-medium text-pc-accent">{talent.name}</div>
+      <p className="text-xs leading-relaxed text-pc-text-secondary">{descriptionKey ? t(descriptionKey) : talent.description}</p>
+    </div>
   </div>;
 }
