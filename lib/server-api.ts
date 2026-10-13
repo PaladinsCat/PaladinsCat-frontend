@@ -57,6 +57,11 @@ export async function fetchServerJson<T>(path: string, options: ServerFetchOptio
   const forwarded = new Headers(requestOptions.headers);
   if (!forwarded.has("accept")) forwarded.set("accept", "application/json");
   if (clientUa) forwarded.set("x-client-ua", clientUa);
+  // Preserve Caddy's original HTTPS proof when a caller forwards browser
+  // cookies; the backend keeps its cookie transport and CSRF checks.
+  const forwardedProto = incoming.get("x-forwarded-proto");
+  if (forwardedProto) forwarded.set("x-forwarded-proto", forwardedProto);
+  else forwarded.delete("x-forwarded-proto");
   // Caddy owns the ingress marker; caller-supplied fetch options cannot promote it.
   forwarded.set("x-paladinscat-surface", surface);
   // Forward the session on every surface. The backend's identity::session()
