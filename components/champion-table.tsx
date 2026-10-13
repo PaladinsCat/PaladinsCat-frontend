@@ -274,7 +274,7 @@ export default function ChampionTable({
         <div
           className={relationshipDirectory
             ? "grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3"
-            : "grid grid-cols-2 gap-1.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 2xl:grid-cols-9"}
+            : "grid grid-cols-2 gap-1.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8"}
           aria-busy={dbAvailable === null}
         >
           {filtered.map((c) => {
@@ -322,8 +322,8 @@ export default function ChampionTable({
             return (
               <Link
                 key={c.id}
-                href={`/champions/${championSlug(c.name)}?scope=${statsScope}`}
-                className="group relative flex min-h-12 items-center gap-2 rounded-lg border border-pc-border bg-pc-bg-elevated p-3 transition-[border-color,background-color,transform] duration-200 hover:-translate-y-0.5 hover:border-pc-accent-mid hover:bg-pc-bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent motion-reduce:transform-none motion-reduce:transition-none"
+                href={`/champions/${championSlug(c.name)}`}
+                className="group relative flex min-h-12 items-center gap-2 rounded-lg border border-pc-border bg-pc-bg-elevated p-4 transition-[border-color,background-color,transform] duration-200 hover:-translate-y-0.5 hover:border-pc-accent-mid hover:bg-pc-bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent motion-reduce:transform-none motion-reduce:transition-none"
               >
                   {/* Portrait */}
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-pc-border/50 bg-pc-bg-elevated transition-colors duration-200 group-hover:border-pc-accent-deep/50 motion-reduce:transition-none">
