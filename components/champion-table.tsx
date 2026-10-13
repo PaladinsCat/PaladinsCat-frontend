@@ -15,7 +15,6 @@ import { championSlug } from "@/lib/utils";
 import { useLocalization } from "@/lib/localization-context";
 import { getStoredLobbyTierFilter } from "@/lib/lobby-tier";
 import { fetchChampionMatchupPreviews, type ChampionRelationship } from "@/lib/champion-matchups-api";
-import { ArrowDown, ArrowUp } from "lucide-react";
 import { ROUTE_CONTENT_SETTLE_MS } from "@/lib/route-transition-context";
 
 const ROLES = [
@@ -239,10 +238,10 @@ export default function ChampionTable({
               type="button"
               onClick={() => setFilterRole(null)}
               aria-pressed={filterRole === null}
-              className={`shrink-0 rounded-lg px-3 py-2 text-sm font-medium drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] transition-colors motion-reduce:transition-none ${
+              className={`shrink-0 rounded-lg px-3 py-2 text-sm font-medium transition-colors motion-reduce:transition-none ${
                 filterRole === null
                   ? "bg-pc-accent text-pc-bg"
-                  : "pc-surface text-pc-muted hover:text-pc-text"
+                  : "pc-surface text-pc-text-muted hover:text-pc-text"
               }`}
             >
               {t("generated.stats.all")}</button>
@@ -252,10 +251,10 @@ export default function ChampionTable({
                 key={r.value}
                 onClick={() => setFilterRole(r.value)}
                 aria-pressed={filterRole === r.value}
-                className={`flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] transition-colors motion-reduce:transition-none ${
+                className={`flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors motion-reduce:transition-none ${
                   filterRole === r.value
                     ? "bg-pc-accent text-pc-bg"
-                    : "pc-surface text-pc-muted hover:text-pc-text"
+                    : "pc-surface text-pc-text-muted hover:text-pc-text"
                 }`}
               >
                 <img src={r.icon} alt="" aria-hidden="true" className="h-5 w-5" />
@@ -264,34 +263,7 @@ export default function ChampionTable({
             ))}
         </div>
 
-        {!relationshipDirectory && <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-
-          <select
-            value={sortBy}
-            onChange={(event) => setSortBy(event.target.value as typeof sortBy)}
-            className="pc-select w-44 shrink-0"
-            aria-label={t("skins.sortBy")}
-          >
-            <option value="name">{t("generated.champions.name")}</option>
-            <option value="popularity">{t("generated.champions.popularity")}</option>
-          </select>
-          <button
-            type="button"
-            onClick={() => setSortDir(sortDir === "asc" ? "desc" : "asc")}
-            className="pc-surface flex h-[38px] w-11 shrink-0 items-center justify-center rounded-lg text-pc-text-secondary transition-colors hover:text-pc-text motion-reduce:transition-none"
-            aria-label={sortDir === "asc" ? t("generated.champions.ascending") : t("generated.champions.descending")}
-            title={sortDir === "asc" ? t("generated.champions.ascending") : t("generated.champions.descending")}
-          >
-            {sortDir === "asc" ? <ArrowUp aria-hidden="true" className="h-4 w-4" /> : <ArrowDown aria-hidden="true" className="h-4 w-4" />}
-          </button>
-        </div>}
       </div>
-
-      {/* DB status indicator */}
-      {!relationshipDirectory && dbAvailable === false && (
-        <div className="text-pc-muted text-sm italic">
-          {t("generated.champions.statsUnavailableShowingChampionListOnlyWinPickBanRates")}</div>
-      )}
 
       {/* Champion Grid */}
       {filtered.length === 0 ? (
@@ -302,7 +274,7 @@ export default function ChampionTable({
         <div
           className={relationshipDirectory
             ? "grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3"
-            : "grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"}
+            : "grid grid-cols-2 gap-1.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 2xl:grid-cols-9"}
           aria-busy={dbAvailable === null}
         >
           {filtered.map((c) => {
@@ -347,25 +319,19 @@ export default function ChampionTable({
             const roleIcon = c.roles && c.roles.length > 0
               ? ROLES.find(r => r.value === c.roles![0])?.icon
               : undefined;
-            const formatPlays = (n: number | null | undefined) => {
-              if (n == null) return "—";
-              if (n >= 1_000_000) return `${formatNumber((n / 1_000_000), { minimumFractionDigits: 1, maximumFractionDigits: 1 })}M`;
-              if (n >= 1_000) return `${formatNumber((n / 1_000), { minimumFractionDigits: 1, maximumFractionDigits: 1 })}K`;
-              return String(n);
-            };
             return (
               <Link
                 key={c.id}
                 href={`/champions/${championSlug(c.name)}?scope=${statsScope}`}
-                className="group relative flex min-h-20 items-center gap-3.5 rounded-xl border border-pc-border bg-pc-bg-elevated p-3 transition-[border-color,background-color,transform] duration-200 hover:-translate-y-0.5 hover:border-pc-accent-mid hover:bg-pc-bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent motion-reduce:transform-none motion-reduce:transition-none"
+                className="group relative flex min-h-12 items-center gap-2 rounded-lg border border-pc-border bg-pc-bg-elevated p-3 transition-[border-color,background-color,transform] duration-200 hover:-translate-y-0.5 hover:border-pc-accent-mid hover:bg-pc-bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pc-accent motion-reduce:transform-none motion-reduce:transition-none"
               >
                   {/* Portrait */}
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-pc-border/50 bg-pc-bg-elevated transition-colors duration-200 group-hover:border-pc-accent-deep/50 motion-reduce:transition-none">
-                    <SmartImage
-                      src={c.imagePath || getChampionIconSafe(c.name)}
-                      alt=""
-                      width={48}
-                      height={48}
+                                      <SmartImage
+                                        src={c.imagePath || getChampionIconSafe(c.name)}
+                                        alt=""
+                                        width={48}
+                                        height={48}
                       loading="lazy"
                       decoding="async"
                       className="w-full h-full object-contain"
@@ -373,26 +339,16 @@ export default function ChampionTable({
                   </div>
 
                   {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    {/* Row 1: name + role */}
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="text-pc-text font-semibold text-sm truncate group-hover:text-pc-accent transition-colors">
-                        {c.name}
-                      </h3>
-                      {c.roles && c.roles.length > 0 && (
-                        <span className="shrink-0 flex items-center gap-1 text-pc-text-muted text-xs px-1.5 py-0.5 rounded pc-surface-subtle">
-                          {roleIcon && <img src={roleIcon} alt="" aria-hidden="true" className="h-3 w-3" />}
-                          {c.roles[0]}
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="text-xs tabular-nums text-pc-text-muted">
-                      <span className="min-w-0 whitespace-nowrap text-right text-pc-text-muted">
-                        <span>{t("generated.champions.plays")}</span>
-                        <span className="text-pc-text-secondary">{formatPlays(c.totalPlays)}</span>
+                  <div className="flex-1 min-w-0 flex flex-col gap-2">
+                    <h3 className="text-pc-text font-semibold text-sm group-hover:text-pc-accent transition-colors leading-tight">
+                      {c.name}
+                    </h3>
+                    {c.roles && c.roles.length > 0 && (
+                      <span className="flex items-center gap-1 text-pc-text-muted text-xs leading-none">
+                        {roleIcon && <img src={roleIcon} alt="" aria-hidden="true" className="h-3 w-3" />}
+                        {c.roles[0]}
                       </span>
-                    </div>
+                    )}
                   </div>
               </Link>
             );

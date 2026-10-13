@@ -180,8 +180,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <HirezOutageBanner />
               {/* Content container: responsive width that fills common desktop sizes */}
               <main className="min-h-[calc(100svh-4rem)] flex-1 w-full min-w-0 mx-auto px-3 py-5 pb-28 sm:px-6 sm:py-8 lg:px-8 xl:px-12 2xl:px-16">
-                {/* Responsive max-width: 1280px up to xl, wider on larger screens */}
-                <div className="mx-auto min-w-0 max-w-7xl xl:max-w-[1400px] 2xl:max-w-[1600px]">
+                {/* Responsive max-width: 1152px up to xl, wider on larger screens */}
+                <div className="mx-auto min-w-0 max-w-6xl xl:max-w-[1200px] 2xl:max-w-[1400px]">
                   <PageLayout>{children}</PageLayout>
                 </div>
               </main>

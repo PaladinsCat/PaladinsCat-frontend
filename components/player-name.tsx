@@ -38,7 +38,7 @@ const EMPTY_MODERATION: PlayerModeration = {
   customTagColor: null,
 };
 
-const PLAYER_TAG_CLASS = "player-status-tag shrink-0 rounded bg-[var(--pc-bg-secondary)] px-1.5 py-0.5 text-[10px] font-bold leading-none";
+const PLAYER_TAG_CLASS = "player-status-tag shrink-0 rounded bg-[var(--pc-bg-secondary)] px-1.5 py-0.5 text-xs font-bold leading-none";
 const AUTOMATIC_TAG_ACCENT: Record<NonNullable<PlayerModerationTagProps["automaticTag"]>, string> = {
   TANK: "text-sky-300",
   SUP: "text-emerald-300",
