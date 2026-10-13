@@ -45,7 +45,7 @@ jobs:
 
       - name: Player profile render tests
         timeout-minutes: 2
-        run: node --test scripts/player-profile-render.test.mjs
+        run: node --test lib/player-profile-response.test.mjs lib/player-profile-server.test.mjs scripts/player-profile-render.test.mjs scripts/player-profile-acquisition.test.mjs
 
       - name: OIDC callback compatibility tests
         timeout-minutes: 2

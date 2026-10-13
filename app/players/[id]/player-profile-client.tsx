@@ -37,6 +37,7 @@ import { csrfHeader } from "@/lib/csrf";
 import { playerAvatarProxyPath } from "@/lib/player-avatar-proxy";
 import { getPercentageColor } from "@/lib/stat-quality";
 import type { PlayerResponse } from "@/lib/player-profile-types";
+import { decodePlayerProfileResponse, decodePlayerLiveMatchResponse, type NormalizedPlayerProfile } from "@/lib/player-profile-response";
 import PlayerPresence from "@/components/player-presence";
 import PlayerRelationshipSummaryCard from "@/components/player-relationship-summary";
 import PlayerTrendsPanel from "@/components/player-trends";
@@ -148,13 +149,15 @@ export default function PlayerProfileClient({
   const router = useRouter();
   const { user, isLoading: authLoading, isLoggedIn, isAdmin, isApproved } = useAuth();
 
-  const [response, setResponse] = useState<PlayerResponse | null>(initialResponse);
+  const initialProfile = initialResponse === null ? null : decodePlayerProfileResponse(initialResponse);
+  const [response, setResponse] = useState<NormalizedPlayerProfile | null>(() => initialProfile?.ok ? initialProfile.value : null);
   const [matches, setMatches] = useState<MatchRecord[]>([]);
   const [matchesError, setMatchesError] = useState<Error | null>(null);
   const [profileLoading, setProfileLoading] = useState(initialResponse === null);
   const [matchesLoading, setMatchesLoading] = useState(true);
   const displayProfileLoading = useRouteSettledLoading(profileLoading && (authLoading || !!user));
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(() => initialProfile !== null && !initialProfile.ok
+    ? t(PLAYER_PROFILE_ERROR_KEYS.failedToLoadProfile) : null);
   const fullAccess = hasStatsAccess(user) && response?.access?.fullAccess !== false;
 
   // Button states
@@ -276,7 +279,9 @@ export default function PlayerProfileClient({
         if (res.status === 403 && data?.error?.code === "VERIFICATION_REQUIRED") router.replace("/link-account");
         if (res.status === 403 && data?.error?.code === "INVITATION_REQUIRED") router.replace("/account#invitation");
         if (!res.ok) throw new Error(data?.error?.message || PLAYER_PROFILE_ERROR_KEYS.failedToLoadProfile);
-        return data as PlayerResponse;
+        const decoded = decodePlayerProfileResponse(data);
+        if (!decoded.ok) throw new Error(PLAYER_PROFILE_ERROR_KEYS.failedToLoadProfile);
+        return decoded.value;
       })
       .then((data) => {
         if (!cancelled) {
@@ -385,15 +390,24 @@ export default function PlayerProfileClient({
         throw new Error(data?.error?.message || PLAYER_PROFILE_ERROR_KEYS.failedToRefreshProfile);
       }
 
-      const relatedRefreshError = data?.profileRefresh?.error || data?.historyRefresh?.error || data?.championStatsRefresh?.error || data?.statusRefresh?.error;
-      setResponse(previous => previous ? { ...previous,
+      if (!data || typeof data !== 'object' || Array.isArray(data)
+        || (data.message != null && typeof data.message !== 'string')) {
+        throw new Error(PLAYER_PROFILE_ERROR_KEYS.failedToRefreshProfile);
+      }
+      const decoded = decodePlayerProfileResponse({ ...response,
         presence: data.presence, statusRefresh: data.statusRefresh,
-        profileRefresh: data.profileRefresh ?? previous.profileRefresh,
-        refreshQuota: data.refreshQuota ? {
-          remaining: data.refreshQuota.remaining ?? 0,
-          reset_at: data.refreshQuota.reset_at ?? null,
-          remaining_seconds: data.refreshQuota.remaining_seconds ?? 0,
-        } : null,
+        historyRefresh: data.historyRefresh, championStatsRefresh: data.championStatsRefresh,
+        profileRefresh: data.profileRefresh ?? response?.profileRefresh,
+        refreshQuota: data.refreshQuota,
+      });
+      if (!decoded.ok) throw new Error(PLAYER_PROFILE_ERROR_KEYS.failedToRefreshProfile);
+      const refreshed = decoded.value;
+      const relatedRefreshError = refreshed.profileRefresh?.error || refreshed.historyRefresh?.error
+        || refreshed.championStatsRefresh?.error || refreshed.statusRefresh?.error;
+      setResponse(previous => previous ? { ...previous,
+        presence: refreshed.presence, statusRefresh: refreshed.statusRefresh,
+        profileRefresh: refreshed.profileRefresh,
+        refreshQuota: refreshed.refreshQuota,
       } : previous);
       if (!data.refreshQuota) {
         setRefreshCooldownUntil(null);
@@ -433,7 +447,7 @@ export default function PlayerProfileClient({
     } finally {
       setRefreshing(false);
     }
-  }, [formatNumber, id, showRefreshCooldown, t]);
+  }, [formatNumber, id, response, showRefreshCooldown, t]);
 
   // Current match handler
   const handleCurrentMatch = useCallback(async () => {
@@ -445,7 +459,18 @@ export default function PlayerProfileClient({
       if (!res.ok) {
         throw new Error(data?.error?.message || data?.error || PLAYER_PROFILE_ERROR_KEYS.failedToFetchLiveMatchData);
       }
-      setCurrentMatch(data);
+      if (!data || typeof data !== 'object' || Array.isArray(data)
+        || (data.error != null && typeof data.error !== 'string')
+        || (data.pending != null && typeof data.pending !== 'boolean')) {
+        throw new Error(PLAYER_PROFILE_ERROR_KEYS.failedToFetchLiveMatchData);
+      }
+      if (data.match != null) {
+        const decoded = decodePlayerLiveMatchResponse(data);
+        if (!decoded.ok) throw new Error(PLAYER_PROFILE_ERROR_KEYS.failedToFetchLiveMatchData);
+        setCurrentMatch(decoded.value);
+      } else {
+        setCurrentMatch({ error: data.error, pending: data.pending, match: null });
+      }
     } catch (error) {
       const failure = error instanceof Error && error.name === 'TimeoutError'
         ? new ApiRequestError(PLAYER_PROFILE_ERROR_KEYS.failedToFetchLiveMatchData, undefined, {
