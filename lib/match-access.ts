@@ -4,7 +4,11 @@ export type MatchAccessTier = "guest" | "account" | "verified";
 
 export function matchDetailSections(tier: MatchAccessTier) {
   return {
-    loadouts: tier !== "guest",
+    // Two-tier visual model (2026-10-13): every tier sees loadouts; only
+    // verified sees full details. Guest now absorbs the former unverified
+    // (account) look — scoreboard + loadouts. The backend still distinguishes
+    // guest vs account for daily-lookup rate limits (5 vs 50), which is unchanged.
+    loadouts: true,
     fullDetails: tier === "verified",
   };
 }
