@@ -94,6 +94,7 @@ export interface PlayerResponse {
   presence?: PlayerStatus | null;
   statusRefresh?: { refreshed: boolean; cached?: boolean; refreshed_at?: string | null; error?: string | null };
   historyRefresh?: { refreshed: boolean; error?: string | null };
+  championStatsRefresh?: { refreshed?: boolean; error?: string | null };
   refreshQuota?: { remaining: number; reset_at: string | null; remaining_seconds: number } | null;
   access?: { fullAccess: boolean; limit: number | null; remaining: number | null; resetAtMs: number | null };
   player: PlayerData;

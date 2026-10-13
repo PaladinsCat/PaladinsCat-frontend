@@ -51,28 +51,38 @@ const stubs = {
   "@/lib/api-client": { clearPlayerTag: async () => {}, fetchPlayerMatches: async () => [] },
   "@/lib/player-moderation": { fetchPlayerModeration: async () => ({ verified: false }) },
 };
-const modules = new Map();
-function load(relative) {
-  if (modules.has(relative)) return modules.get(relative).exports;
-  const module = { exports: {} };
-  modules.set(relative, module);
-  if (relative.endsWith(".json")) { module.exports = JSON.parse(readSource(relative)); return module.exports; }
-  const code = ts.transpileModule(readSource(relative), {
-    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022,
-      jsx: ts.JsxEmit.ReactJSX, esModuleInterop: true },
-  }).outputText;
-  const requireSource = name => {
-    if (name in stubs) return stubs[name];
-    if (name.startsWith("@/components/")) return childModule;
-    const resolved = name.startsWith("@/") ? name.slice(2)
-      : name.startsWith(".") ? path.posix.normalize(path.posix.join(path.posix.dirname(relative), name)) : null;
-    if (resolved) return load(/\.(?:json|tsx?|mjs|js)$/.test(resolved) ? resolved : `${resolved}.ts`);
-    throw new Error(`Unexpected profile dependency: ${name}`);
-  };
-  new Function("require", "module", "exports", code)(requireSource, module, module.exports);
-  return module.exports;
+export function createLoader(overrides = {}) {
+  const modules = new Map();
+  function load(relative) {
+    if (modules.has(relative)) return modules.get(relative).exports;
+    const module = { exports: {} };
+    modules.set(relative, module);
+    if (relative.endsWith(".json")) { module.exports = JSON.parse(readSource(relative)); return module.exports; }
+    const code = ts.transpileModule(readSource(relative), {
+      compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022,
+        jsx: ts.JsxEmit.ReactJSX, esModuleInterop: true },
+    }).outputText;
+    const requireSource = name => {
+      if (name in overrides) return overrides[name];
+      if (name in stubs) return stubs[name];
+      // Presence and controlled failure are implicated in this contract and
+      // must execute real component code, rather than disappear behind stubs.
+      const realChild = ["@/components/player-presence", "@/components/async-state"].includes(name);
+      if (name.startsWith("@/components/") && !realChild) return childModule;
+      const resolved = name.startsWith("@/") ? name.slice(2)
+        : name.startsWith(".") ? path.posix.normalize(path.posix.join(path.posix.dirname(relative), name)) : null;
+      if (resolved) return load(/\.(?:json|tsx?|mjs|js)$/.test(resolved) ? resolved : `${resolved}.${realChild ? "tsx" : "ts"}`);
+      if (["clsx", "tailwind-merge"].includes(name)) return installed(name);
+      throw new Error(`Unexpected profile dependency: ${name}`);
+    };
+    new Function("require", "module", "exports", code)(requireSource, module, module.exports);
+    return module.exports;
+  }
+  return load;
 }
+const load = createLoader();
 const PlayerProfileClient = load("app/players/[id]/player-profile-client.tsx").default;
+const { hasStatsAccess } = load("lib/verified-access.ts");
 
 function normalProfile() {
   // The normal backend selects p.* and omits optional Pro ratings, derived
@@ -96,41 +106,95 @@ function normalProfile() {
       attempted: false, refreshed: false, source: "database" },
   };
 }
-function render(response) {
-  return renderToString(React.createElement(PlayerProfileClient, { id: String(response.player.id), initialResponse: response }));
+function render(response, component = PlayerProfileClient, viewer = "normal") {
+  auth.user = { ...auth.user, invitationActive: viewer === "Pro", invitationRequired: viewer === "Pro" };
+  return renderToString(React.createElement(component, { id: String(response?.player?.id || "16706730"), initialResponse: response }));
 }
 function assertPopulated(html, response) {
   const escapedName = renderToStaticMarkup(React.createElement(React.Fragment, null, response.player.name));
   assert.ok(html.includes(escapedName), "the full profile renders its actual player name");
-  assert.ok(html.includes("generated.players.overall"), "the confirmed non-Pro viewer receives the profile overview");
+  if (hasStatsAccess(auth.user) && response.access?.fullAccess !== false) {
+    assert.ok(html.includes("generated.players.overall"), "an admitted viewer receives the profile overview");
+  }
   assert.ok(!html.includes("generated.players.playerProfileUnavailable"));
   assert.ok(!html.includes("generated.players.failedToLoadProfile"));
 }
 
-test("a full normal profile renders with omitted Pro arrays and objects", () => {
-  const response = normalProfile();
-  assert.equal("queueRatings" in response, false);
-  assert.equal("championRatings" in response, false);
-  const html = render(response);
-  assertPopulated(html, response);
-  assert.ok(html.includes("123"), "ordinary account-wide wins survive");
-  assert.ok(html.includes("generated.players.noRankedRatingYet"), "absent optional rating renders its fallback");
-});
-
-test("empty rating arrays retain the populated profile", () => {
-  const response = { ...normalProfile(), queueRatings: [], championRatings: [] };
-  assertPopulated(render(response), response);
-});
-
-test("present queue ratings retain their main and additional rating content", () => {
-  const response = { ...normalProfile(), queueRatings: [
+function populatedRatings() {
+  return { queueRatings: [
     { queue_id: 486, mu: 1234, phi: 50, volatility: 0.06, matches_played: 10, wins: 7, losses: 3 },
     { queue_id: 424, mu: 2345, phi: 60, volatility: 0.06, matches_played: 20, wins: 12, losses: 8 },
-  ], championRatings: [] };
-  const html = render(response);
+  ], championRatings: [{ champion_id: 2056, champion_name: "Androxus", mu: 1500, phi: 60, matches_played: 10, wins: 6, losses: 4 }] };
+}
+for (const viewer of ["normal", "Pro"]) for (const state of ["omitted", "null", "empty", "populated"]) {
+  test(`profile-render ${viewer} ${state} ratings`, () => {
+    const response = normalProfile();
+    if (state === "null") Object.assign(response, { queueRatings: null, championRatings: null });
+    if (state === "empty") Object.assign(response, { queueRatings: [], championRatings: [] });
+    if (state === "populated") Object.assign(response, populatedRatings());
+    const html = render(response, PlayerProfileClient, viewer);
+    assertPopulated(html, response);
+    if (hasStatsAccess(auth.user)) {
+      assert.ok(html.includes("123"), "ordinary account-wide wins survive");
+      if (state === "populated") {
+        assert.ok(html.includes("1234"), "ranked rating content survives");
+        assert.ok(html.includes("2345"), "additional queue rating content survives");
+      } else assert.ok(html.includes("generated.players.noRankedRatingYet"));
+    }
+  });
+}
+test("profile-render absent optional objects", () => {
+  const response = normalProfile();
+  delete response.profileRefresh; delete response.globalStats;
+  const html = render(response, PlayerProfileClient, "Pro");
   assertPopulated(html, response);
-  assert.ok(html.includes("1234"), "the ranked rating survives");
-  assert.ok(html.includes("2345"), "additional queue ratings survive");
+  assert.ok(html.includes("data-testid=\"player-presence\""), "the real presence component executes without a status object");
+});
+test("profile-render limited profile", () => {
+  const response = normalProfile(); response.access.fullAccess = false; response.access.limit = 10; response.access.remaining = 3;
+  const html = render(response); assertPopulated(html, response);
+  assert.ok(!html.includes("1234"), "limited data cannot acquire an invented rating");
+});
+test("profile-render private profile", () => {
+  const response = normalProfile(); response.player.name = "Private contract player"; response.player.privacy_flag = "y";
+  response.player.title = null; response.player.loading_frame = null; response.player.avatar_url = null;
+  response.access.fullAccess = false;
+  assertPopulated(render(response), response);
+});
+function assertControlled(input) {
+  const html = render(input, PlayerProfileClient, "Pro");
+  assert.ok(/generated\.players\.(?:playerProfileUnavailable|failedToLoadProfile)|INVALID_PLAYER_PROFILE/.test(html),
+    "malformed data reaches the actual controlled failure surface");
+  assert.ok(!html.includes("Normal contract player"), "malformed data is not rendered as a successful profile");
+}
+test("profile-render rejects missing player", () => { assertControlled({}); });
+test("profile-render rejects malformed player", () => {
+  assertControlled({ ...normalProfile(), player: [] });
+  assertControlled({ ...normalProfile(), player: { ...normalProfile().player, title: {} } });
+});
+test("profile-render rejects malformed queue ratings", () => {
+  for (const queueRatings of ["ratings", {}, [null]]) assertControlled({ ...normalProfile(), queueRatings });
+});
+test("profile-render rejects malformed champion ratings", () => {
+  for (const championRatings of ["ratings", {}, [null]]) assertControlled({ ...normalProfile(), championRatings });
+});
+test("profile-render validates real presence objects", () => {
+  const response = { ...normalProfile(), presence: { status: 99, status_string: "Valid unknown activity" } };
+  const html = render(response, PlayerProfileClient, "Pro");
+  assertPopulated(html, response); assert.ok(html.includes("Valid unknown activity"));
+  assertControlled({ ...normalProfile(), presence: { status: 99, status_string: {} } });
+});
+test("profile-render injected malformed-element regression is detected", () => {
+  const broken = { ...normalProfile(), queueRatings: [null], championRatings: [] };
+  const injected = createLoader({ "@/lib/player-profile-response": {
+    decodePlayerProfileResponse: () => ({ ok: true, value: broken }),
+  } })("app/players/[id]/player-profile-client.tsx").default;
+  let rejected = false;
+  try {
+    const html = render(broken, injected, "Pro");
+    rejected = /generated\.players\.(?:playerProfileUnavailable|failedToLoadProfile)|INVALID_PLAYER_PROFILE/.test(html);
+  } catch (error) { rejected = error instanceof TypeError; }
+  assert.equal(rejected, true, "a decoder that falsely accepts malformed elements cannot produce a successful page");
 });
 
 test("the captured public API response renders for a linked non-Pro viewer", {
