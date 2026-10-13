@@ -66,7 +66,7 @@ export async function fetchServerJson<T>(path: string, options: ServerFetchOptio
   // production bug: public-surface SSR reads dropped the session, so the
   // backend treated verified users as guests and returned 429.
   const session = (await cookies()).get("__Host-pc_session")?.value;
-  if (session) forwarded.set("authorization", `Bearer ${session}`);
+  if (session && !forwarded.has("authorization")) forwarded.set("authorization", `Bearer ${session}`);
   const response = await fetch(`${serverApiBase()}${path.startsWith("/") ? path : `/${path}`}`, {
     ...requestOptions,
     cache: requestOptions.cache ?? "no-store",
