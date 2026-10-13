@@ -85,7 +85,7 @@ export default function ChampionLoadoutGrid({
                     </div>
                   )}
                   <div className="min-w-0 flex-1">
-                    <div className="mb-0.5 text-xs font-medium text-pc-accent">{card.name}</div>
+                    <div className="mb-1 text-xs font-medium text-pc-accent">{card.name}</div>
                     <p className="text-xs leading-relaxed text-pc-text-secondary">
                       {formatScalingDescription(descriptionKey ? t(descriptionKey) : card.description, 1, formatNumber)}
                     </p>
@@ -95,11 +95,11 @@ export default function ChampionLoadoutGrid({
                           <span className="min-w-0 whitespace-nowrap" style={{ color: getPercentageColor(stat.winRate) }}>
                             <span className="mr-1 text-pc-text-muted">{t("generated.champions.wr")}</span>{formatPercent(stat.winRate)}
                           </span>
-                          <span className="text-pc-border">|</span>
+                          <span className="text-pc-text-muted">|</span>
                           <span className="text-pc-text-muted"><span className="mr-1">{t("generated.champions.pr")}</span><span style={{ color: getPercentageColor(pickRate) }}>{formatPercent(pickRate)}</span></span>
-                          <span className="text-pc-border">|</span>
+                          <span className="text-pc-text-muted">|</span>
                           <span className="break-words text-pc-text-muted"><span className="mr-1">{t("generated.champions.picks")}</span><span style={quality ? { color: quality.color } : undefined}>{formatPlays(stat.totalPlays)}</span></span>
-                          <span className="text-pc-border">|</span>
+                          <span className="text-pc-text-muted">|</span>
                           <span className="break-words text-pc-text-muted">{formatRecord(stat.wins, stat.losses)}</span>
                         </div>
                         {stat.levels.length > 0 && (

@@ -133,6 +133,6 @@ function TalentCard({ championName, talent }: { championName: string; talent: Ch
   const descriptionKey = championDescriptionKey(championName, "talents", talent.name);
   return <div className="pc-surface-light flex items-start gap-3 rounded-lg border border-pc-border p-3">
     <CanonicalTalentImage talentId={talent.id} talentName={talent.name} alt="" className="h-14 w-14 shrink-0 object-contain" fallbackClassName="h-14 w-14 shrink-0" />
-    <div className="min-w-0 flex-1"><div className="mb-0.5 text-xs font-medium text-pc-accent">{talent.name}</div><p className="text-xs leading-relaxed text-pc-text-secondary">{descriptionKey ? t(descriptionKey) : talent.description}</p></div>
+    <div className="min-w-0 flex-1"><div className="mb-1 text-xs font-medium text-pc-accent">{talent.name}</div><p className="text-xs leading-relaxed text-pc-text-secondary">{descriptionKey ? t(descriptionKey) : talent.description}</p></div>
   </div>;
 }
