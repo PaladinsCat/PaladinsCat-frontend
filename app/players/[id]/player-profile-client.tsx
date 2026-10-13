@@ -499,7 +499,7 @@ export default function PlayerProfileClient({
     );
   }
 
-  const { player, queueRatings } = response;
+  const { player, queueRatings = [] } = response;
   // Win-chance is owned by the backend live read-model (single source, R-A/R-C).
   // The frontend only formats the backend-provided team_one/two_win_chance fields.
   const currentMatchWinChance =
