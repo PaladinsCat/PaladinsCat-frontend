@@ -78,15 +78,8 @@ export default function PlayersPageClient({ initialOverview }: { initialOverview
 
   // Card accents mirror the dominant semantic family used by each destination route.
   const cards = useMemo<DirectoryCard[]>(() => [
-    { href: "/players/private-accounts", titleKey: "generated.players.privateAccounts", count: directoryCounts.privateAccounts, icon: "lock", accent: "slate" },
-    { href: "/players/parties", titleKey: "generated.players.rankedParties", count: directoryCounts.parties, icon: "users-alt", accent: "cyan" },
-    { href: "/players/cheaters", titleKey: "generated.players.cheaters", count: communityCounts.cheaters, icon: "shield-exclamation", accent: "red" },
-    { href: "/players/boosted", titleKey: "moderation.boostedPlayers", count: communityCounts.boosted, icon: "rocket", accent: "orange" },
-    { href: "/players/suspicious", titleKey: "generated.players.suspiciousPlayers", count: communityCounts.suspicious, icon: "search-alt", accent: "amber" },
     { href: "/players/weirdos", titleKey: "moderation.weirdoTitle", count: communityCounts.weirdos, icon: "alien", accent: "violet" },
     { href: "/players/hall-of-fame", titleKey: "moderation.hallOfFameTitle", count: communityCounts.hallOfFame, icon: "crown", accent: "emerald" },
-    { href: "/players/droppers", titleKey: "moderation.droppersTitle", count: communityCounts.droppers, icon: "ban", accent: "rose" },
-    { href: "/players/afk-wintrade", titleKey: "moderation.afkWintradeTitle", count: communityCounts.afkWintrade, icon: "clock", accent: "sky" },
     { href: "/players/wall-shooters", titleKey: "moderation.wallShooterTitle", count: directoryCounts.wallShooters, icon: "block-brick", accent: "cyan" },
     { href: "/players/master-feeding", titleKey: "moderation.masterFeedingTitle", count: directoryCounts.masterFeeding, icon: "skull", accent: "rose" },
     { href: "/players/tank-diff", titleKey: "moderation.tankDiffTitle", count: directoryCounts.tankDiff, icon: "shield", accent: "sky" },
