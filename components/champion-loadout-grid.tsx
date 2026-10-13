@@ -52,12 +52,15 @@ export default function ChampionLoadoutGrid({
     (byCategory[category] ??= []).push(loadout);
   }
 
-  return (
-    <div className="pc-card">
-      {Object.entries(byCategory).map(([category, cards]) => (
-        <section key={category} className="mb-6 last:mb-0">
-          <h3 className="mb-2 text-xs font-medium uppercase tracking-wider text-pc-text-muted">{category}</h3>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+  const categories = Object.entries(byCategory);
+  const mid = Math.ceil(categories.length / 2);
+  const leftCategories = categories.slice(0, mid);
+  const rightCategories = categories.slice(mid);
+
+  const renderCategory = ([category, cards]: [string, ChampionLoadout[]]) => (
+    <section key={category} className="mb-6 last:mb-0">
+      <h3 className="mb-2 text-xs font-medium uppercase tracking-wider text-pc-text-muted">{category}</h3>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {cards.map((card) => {
               const stat: ChampionCardStat | undefined = statsById.get(card.id)
                 ?? statsByName.get(statNameKey(card.name));
@@ -131,9 +134,16 @@ export default function ChampionLoadoutGrid({
                 <div key={card.name} className={className} style={quality ? { borderColor: quality.borderColor } : undefined}>{content}</div>
               );
             })}
-          </div>
-        </section>
-      ))}
+      </div>
+    </section>
+  );
+
+  return (
+    <div className="pc-card">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div>{leftCategories.map(renderCategory)}</div>
+        <div>{rightCategories.map(renderCategory)}</div>
+      </div>
     </div>
   );
 }
