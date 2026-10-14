@@ -680,7 +680,7 @@ export default function PlayerProfileClient({
         <div className="flex flex-col gap-4 lg:flex-row lg:flex-wrap lg:items-center lg:justify-between lg:gap-6">
         {/* Keep live/refresh controls visible; consolidate voting and moderation. */}
         <div ref={actionMenuRef} className="relative order-2 flex shrink-0 flex-wrap items-center justify-end gap-2 self-stretch lg:self-center">
-          <PlayerPresence status={response.presence} error={response.statusRefresh?.error} loading={refreshing} />
+          {isPro && <PlayerPresence status={response.presence} error={response.statusRefresh?.error} loading={refreshing} />}
           <button
             type="button"
             onClick={handleCurrentMatch}
@@ -907,7 +907,7 @@ export default function PlayerProfileClient({
                     <StatRow label={t("generated.players.achievements")} value={formatNumber(player.total_achievements)} />
                     <StatRow label={t("generated.players.championXp")} value={formatLargeNumber(player.total_worshippers)} />
                   </StatGrid>
-                  {player.personal_status_message && (
+                  {isPro && player.personal_status_message && (
                     <div className="mt-3 border-t border-pc-border/50 pt-3">
                       <span className="text-xs text-pc-text-muted">{t("generated.players.status")}{" "}</span>
                       <span className="text-xs text-pc-text-secondary italic">{player.personal_status_message}</span>
