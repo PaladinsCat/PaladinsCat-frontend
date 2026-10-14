@@ -3,6 +3,7 @@
  * The route delegates typed server loading to the shared profile boundary.
  * refs: none
  */
+import { headers } from "next/headers";
 import { getServerPlayerProfile } from "@/lib/player-profile-server";
 import type { PlayerResponse } from "@/lib/player-profile-types";
 import PlayerProfileClient from "./player-profile-client";
@@ -33,11 +34,15 @@ export default async function PlayerProfilePage({
     console.error(`[players/${id}] Server profile fetch failed; using browser fallback`, error);
   }
 
+  const incoming = await headers();
+  const isPro = incoming.get("x-paladinscat-surface") === "pro";
+
   return (
     <PlayerProfileClient
       key={id}
       id={id}
       initialResponse={initialResponse}
+      isPro={isPro}
     />
   );
 }
