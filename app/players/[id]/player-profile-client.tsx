@@ -925,6 +925,88 @@ export default function PlayerProfileClient({
               </div>
             </div>
           </div>
+
+          {/* Glicko Rating */}
+          <div>
+            <div className="pc-card">
+              {kbmRating ? (
+                <div className="space-y-3">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-pc-accent font-mono">{formatNumber(Number(kbmRating.mu), { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
+                    <div className="text-xs text-pc-text-muted mt-0.5">{t("generated.players.glicko2Rating")}</div>
+                  </div>
+                  <div className="grid grid-cols-1 gap-2 text-center min-[400px]:grid-cols-2">
+                    <div className="p-2">
+                      <div className="text-xs text-pc-text-muted">{t("generated.players.deviation")}</div>
+                      <div className="text-xs font-mono text-pc-text">{formatNumber(Number(kbmRating.phi), { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
+                    </div>
+                    <div className="p-2">
+                      <div className="text-xs text-pc-text-muted">{t("generated.players.volatility")}</div>
+                      <div className="text-xs font-mono text-pc-text">{formatNumber(Number(kbmRating.volatility), { minimumFractionDigits: 4, maximumFractionDigits: 4 })}</div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 gap-2 border-t border-pc-border/50 pt-2 text-center min-[360px]:grid-cols-3">
+                    <div>
+                      <div className="text-xs text-pc-text-muted">{t("common.result.winShort")}</div>
+                      <div className="text-xs font-mono text-emerald-400">{Number.isFinite(Number(kbmRating.wins)) ? formatNumber(Number(kbmRating.wins)) : "—"}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-pc-text-muted">{t("common.result.lossShort")}</div>
+                      <div className="text-xs font-mono text-rose-400">{Number.isFinite(Number(kbmRating.losses)) ? formatNumber(Number(kbmRating.losses)) : "—"}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-pc-text-muted">{t("generated.players.wr.a175495")}</div>
+                      <div className="text-xs font-mono text-pc-text">
+                        {Number.isFinite(Number(kbmRating.wins)) && Number(kbmRating.matches_played) > 0
+                          ? t("generated.players.value1", { value1: formatNumber(((Number(kbmRating.wins) / Number(kbmRating.matches_played)) * 100), { minimumFractionDigits: 0, maximumFractionDigits: 0 }) })
+                          : "—"}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-pc-text-muted text-sm text-center py-4">{t("generated.players.noRankedRatingYet")}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Consolidated performance summary */}
+          <div>
+            <div className="pc-card p-3">
+              <div className="mb-1.5 text-xs uppercase tracking-wider text-pc-text-muted">{t("generated.players.averages")}</div>
+              <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
+                <StatRow label={t("generated.players.damageMin")} value={player.avg_dpm != null ? formatNumber(player.avg_dpm) : "—"} color="text-red-400" />
+                <StatRow label={t("common.metrics.kpm")} value={player.derived_rates?.kpm != null ? formatNumber(Number(player.derived_rates.kpm), { maximumFractionDigits: 2 }) : "—"} />
+                <StatRow label={t("common.metrics.deathsPerMinute")} value={player.derived_rates?.deaths_per_minute != null ? formatNumber(Number(player.derived_rates.deaths_per_minute), { maximumFractionDigits: 2 }) : "—"} />
+                <StatRow label={t("generated.players.healingMin")} value={player.avg_hpm != null ? formatNumber(player.avg_hpm) : "—"} color="text-emerald-400" />
+                <StatRow label={t("generated.players.shieldingMin")} value={player.avg_spm != null ? formatNumber(player.avg_spm) : "—"} color="text-sky-400" />
+                <StatRow label={t("generated.players.creditsMin")} value={player.avg_egpm != null ? formatNumber(player.avg_egpm) : "—"} color="text-yellow-400" />
+                {player.avg_shpm != null && (
+                  <StatRow label={t("common.metrics.shpm")} value={formatNumber(player.avg_shpm)} color="text-violet-400" />
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Queue Ratings (if multiple queues) */}
+          {queueRatings.length > 1 && (
+            <div>
+              <div className="pc-card">
+                <div className="space-y-2">
+                  {queueRatings.map((qr) => (
+                    <div key={qr.queue_id} className="flex items-center justify-between py-1.5 border-b border-pc-border/30 last:border-0">
+                      <span className="text-xs text-pc-text-muted">{t("generated.players.queue")}{" "}{qr.queue_id}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-mono text-pc-accent">{formatNumber(Number(qr.mu), { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
+                        <span className="text-xs text-pc-text-muted">φ{formatNumber(Number(qr.phi), { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Evidence — published reports, system flags, and cosmetic evidence */}
           {evidence && (evidence.flagEvidence.length > 0 || evidence.flags.length > 0 || evidence.cosmeticEvidence.length > 0) && (() => {
             const unified = buildUnifiedEvidence(evidence, t);
