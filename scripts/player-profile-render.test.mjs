@@ -108,7 +108,7 @@ function normalProfile() {
 }
 function render(response, component = PlayerProfileClient, viewer = "normal") {
   auth.user = { ...auth.user, invitationActive: viewer === "Pro", invitationRequired: viewer === "Pro" };
-  return renderToString(React.createElement(component, { id: String(response?.player?.id || "16706730"), initialResponse: response }));
+  return renderToString(React.createElement(component, { id: String(response?.player?.id || "16706730"), initialResponse: response, isPro: viewer === "Pro" }));
 }
 function assertPopulated(html, response) {
   const escapedName = renderToStaticMarkup(React.createElement(React.Fragment, null, response.player.name));
