@@ -7224,7 +7224,7 @@ type RawBuild = {
   champion_id: number;
   champion_name?: string;
   name: string;
-  items?: number[] | null;
+  items?: unknown;
   cards?: unknown;
   actives?: number[] | null;
   talents?: number[] | null;
@@ -7253,6 +7253,13 @@ function mapBuildCards(cards: unknown): BuildCardSelection[] {
     .filter((card): card is BuildCardSelection => card !== null);
 }
 
+function mapBuildItemIds(items: unknown): number[] {
+  if (!Array.isArray(items)) return [];
+  return items
+    .map((item) => Number(item))
+    .filter((itemId) => Number.isSafeInteger(itemId) && itemId > 0);
+}
+
 function mapBuild(raw: RawBuild): Build {
   return {
     id: raw.id,
@@ -7261,7 +7268,7 @@ function mapBuild(raw: RawBuild): Build {
     championId: raw.champion_id,
     championName: raw.champion_name ?? `Champion ${raw.champion_id}`,
     name: raw.name,
-    items: raw.items ?? [],
+    items: mapBuildItemIds(raw.items),
     cards: mapBuildCards(raw.cards),
     actives: raw.actives ?? [],
     talents: raw.talents ?? [],

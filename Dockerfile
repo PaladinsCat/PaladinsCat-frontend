@@ -19,11 +19,11 @@ ENV NEXT_BUILD_CPUS=${NEXT_BUILD_CPUS}
 ENV NEXT_PUBLIC_LOCALE_BASE_URL=${NEXT_PUBLIC_LOCALE_BASE_URL}
 ENV NEXT_PUBLIC_IDENTITY_CUTOVER_ENABLED=${NEXT_PUBLIC_IDENTITY_CUTOVER_ENABLED}
 COPY package.json package-lock.json tsconfig.json ./
-RUN npm ci
+RUN --mount=type=cache,id=npm-cache,target=/root/.npm npm ci
 COPY locales /locales
 ENV PALADINSCAT_LOCALES_REPO=/locales
 COPY . .
-RUN npm run build
+RUN --mount=type=cache,id=npm-cache,target=/root/.npm npm run build
 
 # Dev stage
 FROM node:22-alpine AS dev
@@ -42,7 +42,7 @@ RUN chown node:node /app
 USER node
 COPY --chown=node:node --from=builder /app/package.json ./package.json
 COPY --chown=node:node --from=builder /app/package-lock.json ./package-lock.json
-RUN npm ci --omit=dev
+RUN --mount=type=cache,id=npm-cache,target=/root/.npm npm ci --omit=dev
 COPY --chown=node:node --from=builder /app/.next ./.next
 COPY --chown=node:node --from=builder /app/public ./public
 EXPOSE 3000

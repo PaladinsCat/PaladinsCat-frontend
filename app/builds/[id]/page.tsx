@@ -77,7 +77,7 @@ export default function BuildDetailPage({ params }: { params: Promise<{ id: stri
     loadBuild();
   }, [loadBuild]);
 
-  const itemById = useMemo(() => new Map((referenceData?.items ?? []).map((item) => [item.id, item])), [referenceData]);
+  const itemById = useMemo(() => new Map((referenceData?.itemLookup ?? referenceData?.items ?? []).map((item) => [item.id, item])), [referenceData]);
   const cardById = useMemo(() => new Map((referenceData?.cards ?? []).map((card) => [card.id, card])), [referenceData]);
   const talentById = useMemo(() => new Map((referenceData?.talents ?? []).map((talent) => [talent.id, talent])), [referenceData]);
   const cardPointTotal = build?.cards.reduce((sum, card) => sum + card.level, 0) ?? 0;

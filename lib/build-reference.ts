@@ -35,6 +35,17 @@ export interface BuildItemReference {
 }
 
 /**
+ * Describe an item that may appear in a saved build, including retired catalog entries.
+ * refs: none
+ */
+export interface BuildItemDisplayReference {
+  id: number;
+  name: string;
+  iconUrl?: string | null;
+  category?: string | null;
+}
+
+/**
  * Describe build card reference with id, name, category, description (optional), iconUrl (optional).
  * refs: none
  */
@@ -65,7 +76,10 @@ export interface BuildTalentReference {
 export interface BuildReferenceData {
   championId: number;
   champion?: ChampionData;
+  /** Current store items available to the build editor. */
   items: BuildItemReference[];
+  /** Full ID lookup used to render saved builds created against older item catalogs. */
+  itemLookup?: BuildItemDisplayReference[];
   cards: BuildCardReference[];
   talents: BuildTalentReference[];
 }
@@ -167,7 +181,7 @@ function championIdOf(row: RawCard | RawTalent) {
   return Number(row.champion_id ?? row.championId ?? 0);
 }
 
-async function buildItems(): Promise<BuildItemReference[]> {
+async function buildItemData(): Promise<Pick<BuildReferenceData, "items" | "itemLookup">> {
   const [dbItems, localItems] = await Promise.all([
     fetchReferenceItems().catch(() => [] as RawItem[]),
     loadLocalItems(),
@@ -181,7 +195,7 @@ async function buildItems(): Promise<BuildItemReference[]> {
     dbByName.set(normalizeName(nameOf(row, "item")), row);
   }
 
-  return ACTIVE_ITEMS.map((item) => {
+  const items = ACTIVE_ITEMS.map((item) => {
     const key = normalizeName(item.name);
     const dbRow = dbByName.get(key);
     const localRow = localByName.get(key);
@@ -201,6 +215,32 @@ async function buildItems(): Promise<BuildItemReference[]> {
       sourceUrl: `https://paladins.fandom.com/wiki/${item.wikiSlug}`,
     };
   });
+
+  // Saved builds can retain IDs for items that have since left the active
+  // store. Keep the editor's options restricted to ACTIVE_ITEMS, while giving
+  // the detail page the complete server catalog for exact ID-based rendering.
+  const itemLookupById = new Map<number, BuildItemDisplayReference>();
+  for (const row of dbItems as RawItem[]) {
+    const id = idOf(row, "item");
+    const name = nameOf(row, "item").trim();
+    if (!Number.isSafeInteger(id) || id <= 0 || !name) continue;
+    const localRow = localByName.get(normalizeName(name));
+    itemLookupById.set(id, {
+      id,
+      name,
+      iconUrl: row.icon_url ?? row.iconUrl ?? localRow?.icon_url ?? localRow?.iconUrl ?? itemIconPath(name),
+    });
+  }
+  for (const item of items) {
+    itemLookupById.set(item.id, {
+      id: item.id,
+      name: item.name,
+      iconUrl: item.iconUrl,
+      category: item.category,
+    });
+  }
+
+  return { items, itemLookup: Array.from(itemLookupById.values()) };
 }
 
 /**
@@ -290,12 +330,12 @@ async function buildTalents(championId: number, champion?: ChampionData): Promis
  */
 export async function loadBuildReferenceData(championId: number, championSlug: string): Promise<BuildReferenceData> {
   const champion = championSlug ? await getChampionData(championSlug).catch(() => undefined) : undefined;
-  const [items, cards, talents] = await Promise.all([
-    buildItems(),
+  const [itemData, cards, talents] = await Promise.all([
+    buildItemData(),
     buildCards(championId, champion),
     buildTalents(championId, champion),
   ]);
-  return { championId, champion, items, cards, talents };
+  return { championId, champion, ...itemData, cards, talents };
 }
 
 /**
