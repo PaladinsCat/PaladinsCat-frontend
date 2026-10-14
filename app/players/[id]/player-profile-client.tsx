@@ -201,9 +201,11 @@ export const PLAYER_PROFILE_ERROR_KEYS = {
 export default function PlayerProfileClient({
   id,
   initialResponse,
+  isPro = false,
 }: {
   id: string;
   initialResponse: PlayerResponse | null;
+  isPro?: boolean;
 }) {
   const { t, formatDuration, formatNumber, formatPercent , formatDate, formatDateTime} = useLocalization();
   const formatLargeNumber = (value: string | number | null | undefined) => formatNumber(value == null ? null : Number(value));
@@ -970,7 +972,8 @@ export default function PlayerProfileClient({
             </div>
           </div>
 
-          {/* Consolidated performance summary */}
+          {/* Consolidated performance summary — Pro surface only */}
+          {isPro && (
           <div>
             <div className="pc-card p-3">
               <div className="mb-1.5 text-xs uppercase tracking-wider text-pc-text-muted">{t("generated.players.averages")}</div>
@@ -987,6 +990,7 @@ export default function PlayerProfileClient({
               </div>
             </div>
           </div>
+          )}
 
           {/* Queue Ratings (if multiple queues) */}
           {queueRatings.length > 1 && (
