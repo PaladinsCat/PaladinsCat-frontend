@@ -42,7 +42,7 @@ export interface BuildItemDisplayReference {
   id: number;
   name: string;
   iconUrl?: string | null;
-  category?: string | null;
+  category?: string;
 }
 
 /**
@@ -220,23 +220,25 @@ async function buildItemData(): Promise<Pick<BuildReferenceData, "items" | "item
   // store. Keep the editor's options restricted to ACTIVE_ITEMS, while giving
   // the detail page the complete server catalog for exact ID-based rendering.
   const itemLookupById = new Map<number, BuildItemDisplayReference>();
-  for (const row of dbItems as RawItem[]) {
-    const id = idOf(row, "item");
-    const name = nameOf(row, "item").trim();
-    if (!Number.isSafeInteger(id) || id <= 0 || !name) continue;
-    const localRow = localByName.get(normalizeName(name));
-    itemLookupById.set(id, {
-      id,
-      name,
-      iconUrl: row.icon_url ?? row.iconUrl ?? localRow?.icon_url ?? localRow?.iconUrl ?? itemIconPath(name),
-    });
-  }
   for (const item of items) {
     itemLookupById.set(item.id, {
       id: item.id,
       name: item.name,
       iconUrl: item.iconUrl,
       category: item.category,
+    });
+  }
+  for (const row of dbItems as RawItem[]) {
+    const id = idOf(row, "item");
+    const name = nameOf(row, "item").trim();
+    if (!Number.isSafeInteger(id) || id <= 0 || !name) continue;
+    const localRow = localByName.get(normalizeName(name));
+    const activeItem = itemLookupById.get(id);
+    itemLookupById.set(id, {
+      id,
+      name,
+      iconUrl: row.icon_url ?? row.iconUrl ?? localRow?.icon_url ?? localRow?.iconUrl ?? itemIconPath(name),
+      category: activeItem && normalizeName(activeItem.name) === normalizeName(name) ? activeItem.category : undefined,
     });
   }
 

@@ -7256,7 +7256,7 @@ function mapBuildCards(cards: unknown): BuildCardSelection[] {
 function mapBuildItemIds(items: unknown): number[] {
   if (!Array.isArray(items)) return [];
   return items
-    .map((item) => Number(item))
+    .map((item) => typeof item === "number" || (typeof item === "string" && item.trim() !== "") ? Number(item) : Number.NaN)
     .filter((itemId) => Number.isSafeInteger(itemId) && itemId > 0);
 }
 
