@@ -61,7 +61,10 @@ const server = http.createServer((req, res) => {
   // The real backend serves those under /api, so prepend /api to the incoming
   // path. (targetBase is the origin, e.g. https://paladinscat.com.)
   const incoming = req.url || "/";
-  const targetPath = "/api" + (incoming.startsWith("/") ? incoming : "/" + incoming);
+  // The website API (/api/players/:id) requires a browser session; the public
+  // API (/api/v1/players/:id) accepts x-api-key. Rewrite to /v1 so the
+  // developer credential is honored.
+  const targetPath = "/api/v1" + (incoming.startsWith("/") ? incoming : "/" + incoming);
   const headers = { ...req.headers };
   // Strip any Authorization (stale Bearer would force the OIDC path -> 401).
   delete headers.authorization;

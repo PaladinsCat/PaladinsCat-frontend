@@ -1,8 +1,11 @@
 /**
  * Submit one player-linked cheater-evidence report for moderation review.
  *
+ * Public report flow: profile -> report -> submit -> back to the profile page.
  * The route reuses the database player-search API and never exposes pending
- * evidence in the public feed.
+ * evidence in the public feed. After a successful submission it redirects back
+ * to the reported player's profile page rather than an evidence listing that
+ * no longer exists on the public surface.
  *
  * refs: endpoints: GET /players/search · endpoints: POST /cheaters/evidence
  */
@@ -11,7 +14,7 @@ import { formatApiErrorMessage } from "@/lib/api-errors";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Info, Search, Send, X } from "lucide-react";
 import PlayersPageHeader from "@/components/ui/players-page-header";
 import { fetchPlayerSearch, submitCheaterEvidence, type PlayerSearchResult } from "@/lib/api-client";
@@ -23,15 +26,16 @@ import SubmissionMediaFields from "@/components/submission-media-fields";
  * Render the authenticated, player-linked evidence submission form.
  *
  * I/O types: input none -> output `JSX.Element`; authenticated submission
- * sends one `FormData` payload after database player selection. Development
- * may render the form without a session for visual inspection, but never
- * sends an unauthenticated request.
+ * sends one `FormData` payload after database player selection, then redirects
+ * to the reported player's profile. Development may render the form without a
+ * session for visual inspection, but never sends an unauthenticated request.
  *
  * refs: endpoints: GET /players/search · endpoints: POST /cheaters/evidence
  */
 export default function SubmitCheaterEvidencePage() {
   const { isLoggedIn } = useAuth();
   const { t } = useLocalization();
+  const router = useRouter();
   const canPreview = isLoggedIn || process.env.NODE_ENV === "development";
   const searchParams = useSearchParams();
   const presetPlayerId = searchParams.get("playerId")?.trim() ?? "";
@@ -44,7 +48,6 @@ export default function SubmitCheaterEvidencePage() {
   const [sourceUrl, setSourceUrl] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
-  const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -89,7 +92,6 @@ export default function SubmitCheaterEvidencePage() {
     }
     setSubmitting(true);
     setError(null);
-    setNotice(null);
     const form = new FormData();
     form.set("player_id", String(selected.id));
     form.set("subject_name", selected.name);
@@ -99,8 +101,8 @@ export default function SubmitCheaterEvidencePage() {
     files.forEach((file) => form.append("images", file, file.name));
     try {
       await submitCheaterEvidence(form);
-      setNotice(t("moderation.evidenceSubmitted"));
-      setDescription(""); setMatchId(""); setSourceUrl(""); setFiles([]);
+      // Public report flow ends by returning to the reported player's profile.
+      router.push(`/players/${encodeURIComponent(String(selected.id))}`);
     } catch (submitError) {
       setError(formatApiErrorMessage(submitError, t, t("moderation.evidenceSubmitFailed")));
     } finally {
@@ -115,7 +117,6 @@ export default function SubmitCheaterEvidencePage() {
   return (
     <div className="space-y-6">
       <PlayersPageHeader title={t("moderation.submitEvidence")} description={t("moderation.submitEvidenceDescription")} />
-      {notice && <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">{notice}</div>}
       {error && <div className="rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3 text-sm text-red-300">{error}</div>}
       <form onSubmit={submit} className="pc-card space-y-6">
         <div className="grid gap-3 md:grid-cols-2">

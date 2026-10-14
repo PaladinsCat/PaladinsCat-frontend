@@ -104,6 +104,14 @@ if ($LocalAuthBypass) {
   $startInfo.Environment['NEXT_SERVER_API_URL'] = "http://127.0.0.1:$keyInjectorPort"
 }
 
+# Website gate origin: the browser sends Origin: http://localhost:$Port, so the
+# proxy's safeWebsiteRequest check must match. Only set when not using LocalOidc
+# (which already sets https://localhost).
+if (-not $LocalOidc) {
+  $startInfo.Environment['PALADINSCAT_PUBLIC_ORIGIN'] = "http://localhost:$Port"
+  $startInfo.Environment['PALADINSCAT_WEBSITE_GATE_SECRET_FILE'] = (Join-Path $frontendRoot 'secrets\website-gate.txt')
+}
+
 $process = [System.Diagnostics.Process]::Start($startInfo)
 Write-Output "DEV_PROXY_PID=$($process.Id)"
 Write-Output "DEV_PROXY_URL=$(if ($LocalOidc) { 'https://localhost' } else { "http://localhost:$Port" })"

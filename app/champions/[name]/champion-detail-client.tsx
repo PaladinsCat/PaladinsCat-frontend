@@ -82,7 +82,7 @@ export default function ChampionDetailPage({
     {/* Abilities */}
     {championData?.skills?.length ? <section className="space-y-2">
       <h2 className="pc-card-title">{t("generated.champions.skills")}</h2>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
         {championData.skills.map((skill) => <SkillCard key={skill.name} championName={displayName} skill={skill} />)}
       </div>
     </section> : null}

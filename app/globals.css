@@ -1454,6 +1454,14 @@ main :where(a, button, input, select, textarea):focus-visible {
   animation: pc-route-fade-in 120ms ease-out both;
 }
 
+/* Player profile: match width of player cards (max-w-2xl), centered */
+@media (min-width: 1024px) {
+  .pc-content-2-3 {
+    width: 933px;
+    max-width: 100%;
+  }
+}
+
 .pc-content-fade,
 .pc-metric-fade,
 .pc-overlay-fade {

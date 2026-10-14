@@ -109,6 +109,7 @@ function markProtectedResponse(response: NextResponse): NextResponse {
  */
 export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
+  const isSecure = (request.headers.get("x-forwarded-proto") ?? request.nextUrl.protocol.replace(":", "")) === "https";
   // The production nonce policy makes Next's development runtime defer client
   // hydration. Dev servers must not be used as a public surface; let Next
   // handle its local assets and HMR without injecting production headers.
@@ -129,6 +130,23 @@ export async function proxy(request: NextRequest) {
   }
   const api = websiteApiPath(path);
   const protectedPage = isVerifiedOnlyPath(decodedPath) || isAccountOnlyPath(decodedPath);
+  // Pro-only cheater/exploit evidence data must not be served on the public
+  // surface. The public report flow needs only the submission POST; every
+  // other cheater/exploit API path would otherwise fall through to the
+  // backend catch-all rewrite and leak the moderated feed. Block all of them
+  // here (both /api and /_pc aliases, checked on the decoded path so
+  // percent-encoded variants are covered too) and return 404 so the routes
+  // appear non-existent to cheaters probing the public surface.
+  const isCheaterExploitApi =
+    decodedPath.startsWith("/api/cheaters/") || decodedPath.startsWith("/_pc/cheaters/") ||
+    decodedPath.startsWith("/api/players/exploiters") || decodedPath.startsWith("/_pc/players/exploiters");
+  if (isCheaterExploitApi) {
+    const isPublicSubmit = request.method === "POST" &&
+      (decodedPath === "/api/cheaters/evidence" || decodedPath === "/_pc/cheaters/evidence");
+    if (!isPublicSubmit) {
+      return NextResponse.json({ error: { code: "NOT_FOUND" } }, { status: 404, headers: { "Cache-Control": "private, no-store" } });
+    }
+  }
   // Aggregate GET only. Collection uses /auth/account/maintenance-presence
   // through normal admission, authentication, CSRF and backend consent checks.
   if (path === "/api/analytics/presence") {
@@ -243,7 +261,7 @@ export async function proxy(request: NextRequest) {
     response.headers.set("Cache-Control", "private, no-store");
     if (!admitted) {
       response.cookies.set(GUEST_COOKIE, issueGuest(secret, origin), {
-        httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: GUEST_TTL_SECONDS,
+        httpOnly: true, secure: isSecure, sameSite: "lax", path: "/", maxAge: GUEST_TTL_SECONDS,
       });
     }
     return response;
@@ -288,7 +306,7 @@ export async function proxy(request: NextRequest) {
   if (protectedPage) markProtectedResponse(response);
   if (!admitted && request.method === "GET" && request.headers.get("accept")?.includes("text/html")) {
     response.cookies.set(GUEST_COOKIE, issueGuest(secret, origin), {
-      httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: GUEST_TTL_SECONDS,
+      httpOnly: true, secure: isSecure, sameSite: "lax", path: "/", maxAge: GUEST_TTL_SECONDS,
     });
     response.headers.set("Cache-Control", "private, no-store");
   }

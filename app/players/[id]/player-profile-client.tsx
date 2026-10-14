@@ -14,10 +14,11 @@ import CardIcon from "@/components/card-icon";
 import { useRouter } from "next/navigation";
 import { PlayersBackLink } from "@/components/ui/players-page-header";
 import { getChampionIconSafe } from "@/lib/champion-icons";
-import { clearPlayerTag, fetchPlayerMatches, type ClearablePlayerTag, type MatchRecord, type ReportType } from "@/lib/api-client";
+import { clearPlayerTag, fetchPlayerMatches, fetchPlayerEvidence, type ClearablePlayerTag, type MatchRecord, type ReportType, type ExploiterEvidenceDetail } from "@/lib/api-client";
 import PlayerMatchTags from "@/components/player-match-tags";
 import { getTierColor, resolveEffectiveTier, getRankIconPath } from "@/lib/tier-utils";
 import { useAuth } from "@/lib/auth-context";
+import { localPreviewAccessEnabled, useLocalPreviewAccess } from "@/lib/use-local-preview-access";
 import { hasStatsAccess } from "@/lib/verified-access";
 import ReportModal from "@/components/ReportModal";
 import AltAccountRelationModal from "@/components/alt-account-relation-modal";
@@ -99,6 +100,86 @@ function StatGrid({ children }: { children: React.ReactNode }) {
   return <div className="grid grid-cols-1 gap-x-4 gap-y-2 min-[400px]:grid-cols-2">{children}</div>;
 }
 
+/**
+ * A single row in the unified evidence section — one of a user report, a
+ * system flag (win trade / talent abuse / future type), or a computed cosmetic.
+ */
+interface UnifiedEvidence {
+  key: string;
+  category: string;
+  categoryTone: "reported" | "system" | "cosmetic";
+  title: string;
+  detail: string;
+  matchId: number | null;
+  sourceUrl: string | null;
+  when: string | null;
+}
+
+/**
+ * Classify a free-form flag reason into a display category so the evidence
+ * section is not hardcoded to cosmetic evidence. Extensible: an unrecognized
+ * reason falls back to the generic "system flagged" label rather than being
+ * dropped.
+ */
+function flagCategory(reason: string, voteType: string, t: (key: any) => string): string {
+  const text = `${reason} ${voteType}`.toLowerCase();
+  if (text.includes("win trade") || text.includes("win-trade") || voteType === "afk_wintrade") {
+    return t("moderation.evidenceWinTrade");
+  }
+  if (text.includes("talent") || text.includes("cosmetic")) {
+    return t("moderation.evidenceTalentAbuse");
+  }
+  return t("moderation.evidenceSystem");
+}
+
+/**
+ * Merge the portal/system evidence records, the moderation flags, and the
+ * computed cosmetic evidence into one ordered list for the evidence section.
+ * Returns: `UnifiedEvidence[]`.
+ */
+function buildUnifiedEvidence(detail: ExploiterEvidenceDetail, t: (key: any) => string): UnifiedEvidence[] {
+  const rows: UnifiedEvidence[] = [];
+  detail.flagEvidence.forEach((item) => {
+    if (item.origin !== "player_submitted" && item.origin !== "automated") return;
+    const systemFlagged = item.origin === "automated";
+    rows.push({
+      key: `fe-${item.id}`,
+      category: systemFlagged ? t("moderation.evidenceSystem") : t("moderation.evidenceReported"),
+      categoryTone: systemFlagged ? "system" : "reported",
+      title: item.title || item.description || "—",
+      detail: item.description || item.title || "",
+      matchId: item.matchId,
+      sourceUrl: item.sourceUrl,
+      when: item.createdAt || null,
+    });
+  });
+  detail.flags.forEach((flag, index) => {
+    rows.push({
+      key: `flag-${index}`,
+      category: flagCategory(flag.reason, flag.voteType, t),
+      categoryTone: "system",
+      title: flag.reason || flagCategory(flag.reason, flag.voteType, t),
+      detail: flag.reason || "",
+      matchId: null,
+      sourceUrl: null,
+      when: flag.createdAt || null,
+    });
+  });
+  detail.cosmeticEvidence.forEach((item, index) => {
+    rows.push({
+      key: `cos-${index}`,
+      category: t("moderation.evidenceCosmetic"),
+      categoryTone: "cosmetic",
+      title: item.name || item.kind,
+      detail: item.reason || "",
+      matchId: null,
+      sourceUrl: null,
+      when: item.observedDate || item.accountCreatedDate || null,
+    });
+  });
+  return rows;
+}
+
 
 // User-facing error keys — resolved at the UI layer via t()
 /**
@@ -148,11 +229,14 @@ export default function PlayerProfileClient({
   const formatCooldown = (remainingMs: number) => formatDuration(Math.ceil(remainingMs / 1000));
   const router = useRouter();
   const { user, isLoading: authLoading, isLoggedIn, isAdmin, isApproved } = useAuth();
+  const localPreview = useLocalPreviewAccess();
 
   const initialProfile = initialResponse === null ? null : decodePlayerProfileResponse(initialResponse);
   const [response, setResponse] = useState<NormalizedPlayerProfile | null>(() => initialProfile?.ok ? initialProfile.value : null);
   const [matches, setMatches] = useState<MatchRecord[]>([]);
   const [matchesError, setMatchesError] = useState<Error | null>(null);
+  const [evidence, setEvidence] = useState<ExploiterEvidenceDetail | null>(null);
+  const [evidenceLoading, setEvidenceLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(initialResponse === null);
   const [matchesLoading, setMatchesLoading] = useState(true);
   const displayProfileLoading = useRouteSettledLoading(profileLoading && (authLoading || !!user));
@@ -268,14 +352,14 @@ export default function PlayerProfileClient({
   // discover the avatar in the initial HTML. Browser fetches remain the
   // fallback for server failures and the source of truth after a refresh.
   useEffect(() => {
-    if (!id || authLoading || !user || (fetchKey === 0 && initialResponse)) return;
+    if (!id || authLoading || (!user && !localPreviewAccessEnabled()) || (fetchKey === 0 && initialResponse)) return;
     let cancelled = false;
     setProfileLoading(true);
 
     fetch(`${API_BASE}/players/${encodeURIComponent(id)}`, { cache: 'no-store', signal: AbortSignal.timeout(65_000) })
       .then(async (res) => {
         const data = await res.json();
-        if (res.status === 401) router.replace(`/auth/login?redirect=${encodeURIComponent(`/players/${id}`)}`);
+        if (res.status === 401 && !localPreviewAccessEnabled()) router.replace(`/auth/login?redirect=${encodeURIComponent(`/players/${id}`)}`);
         if (res.status === 403 && data?.error?.code === "VERIFICATION_REQUIRED") router.replace("/link-account");
         if (res.status === 403 && data?.error?.code === "INVITATION_REQUIRED") router.replace("/account#invitation");
         if (!res.ok) throw new Error(data?.error?.message || PLAYER_PROFILE_ERROR_KEYS.failedToLoadProfile);
@@ -489,7 +573,7 @@ export default function PlayerProfileClient({
     setMatchesLoading(true);
     setMatchesError(null);
 
-    fetchPlayerMatches(id, { limit: "20" })
+    fetchPlayerMatches(id, { limit: "10" })
       .then((data) => {
         if (!cancelled) setMatches(data);
       })
@@ -503,7 +587,21 @@ export default function PlayerProfileClient({
     return () => { cancelled = true; };
   }, [id, historyFetchKey, response, error]);
 
-  if (!authLoading && !user) {
+  // Fetch the player's published evidence independently — doesn't block profile
+  // rendering. Only players with published evidence (or a public exploiter tag)
+  // return data; others get an empty payload and the section is hidden.
+  useEffect(() => {
+    if (!id || !response || error) return;
+    let cancelled = false;
+    setEvidenceLoading(true);
+    fetchPlayerEvidence(id)
+      .then((data) => { if (!cancelled) setEvidence(data); })
+      .catch(() => { if (!cancelled) setEvidence(null); })
+      .finally(() => { if (!cancelled) setEvidenceLoading(false); });
+    return () => { cancelled = true; };
+  }, [id, response, error]);
+
+  if (!authLoading && !user && !localPreview) {
     return <LoginRequired returnPath={`/players/${id}`} />;
   }
 
@@ -541,7 +639,7 @@ export default function PlayerProfileClient({
   const globalLosses = Number(player.losses ?? 0);
   const globalMatches = globalWins + globalLosses;
   const winRate = globalMatches > 0 ? (globalWins / globalMatches) * 100 : 0;
-  const kbmRating = queueRatings.find((r) => r.queue_id === 486);
+  const kbmRating = (queueRatings ?? []).find((r) => r.queue_id === 486);
   const kbmMu = kbmRating ? Number(kbmRating.mu) : null;
   const effectiveTier = resolveEffectiveTier(player.kbm_tier, player.kbm_rank);
   const rankedTierLabel = effectiveTier.isGrandmaster ? "GM" : effectiveTier.displayName;
@@ -573,14 +671,13 @@ export default function PlayerProfileClient({
     <div className="space-y-5">
       <PlayersBackLink />
 
+      <div className="pc-content-2-3 mx-auto space-y-5">
       {/* ── Header ── */}
-      <div className={`grid items-start grid-cols-1 gap-5 ${fullAccess ? "lg:grid-cols-3" : ""}`}>
-      <div className={`space-y-5 ${fullAccess ? "lg:col-span-2" : ""}`}>
       <div className={`pc-card relative self-start ${actionMenuOpen ? 'z-40' : 'z-10'}`}>
         <LoadingOverlay visible={refreshing} />
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:flex-wrap lg:items-center lg:justify-between lg:gap-6">
         {/* Keep live/refresh controls visible; consolidate voting and moderation. */}
-        {fullAccess && <div ref={actionMenuRef} className="relative order-2 flex shrink-0 flex-wrap items-center justify-end gap-2 self-stretch lg:self-center">
+        <div ref={actionMenuRef} className="relative order-2 flex shrink-0 flex-wrap items-center justify-end gap-2 self-stretch lg:self-center">
           <PlayerPresence status={response.presence} error={response.statusRefresh?.error} loading={refreshing} />
           <button
             type="button"
@@ -634,10 +731,6 @@ export default function PlayerProfileClient({
                 <span>{t("generated.players.voteHallOfFame")}</span>
                 {player.hall_of_fame_count > 0 && <span className="text-xs tabular-nums">{player.hall_of_fame_count}</span>}
               </button>
-              <button type="button" role="menuitem" onClick={() => { setActionMenuOpen(false); openReportModal('dropper'); }} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-rose-300 transition-colors hover:bg-rose-500/10">
-                {t("moderation.voteDropper")}</button>
-              <button type="button" role="menuitem" onClick={() => { setActionMenuOpen(false); openReportModal('afk_wintrade'); }} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-sky-300 transition-colors hover:bg-sky-500/10">
-                {t("moderation.voteAfkWintrade")}</button>
               <button type="button" role="menuitem" onClick={() => { setActionMenuOpen(false); openAltRelationModal(); }} className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-fuchsia-300 transition-colors hover:bg-fuchsia-500/10">
                 {t("moderation.voteAltAccount")}</button>
 
@@ -710,7 +803,6 @@ export default function PlayerProfileClient({
           )}
         </div>
 
-        }
         <div className="order-1 min-w-0 flex-1">
         <div className="flex flex-col items-start gap-4 min-[420px]:flex-row min-[420px]:items-center">
           <PlayerLoadingFrame
@@ -758,22 +850,30 @@ export default function PlayerProfileClient({
                             )}
               <span className="text-sm font-medium text-pc-accent/80 sm:text-base"><ChevronRight aria-hidden="true" size={12} className="inline shrink-0 align-middle" /> {loadingFrameName}</span>
             </div>
-            {!fullAccess && <div className="mt-4 space-y-3 text-sm text-pc-text-muted">
-              <p>{player.region} · {player.platform} · {t("generated.players.lvl")} {formatNumber(player.level)}</p>
-              <StatGrid>
-                <StatRow label={t("generated.players.created")} value={formatDate(player.created_datetime)} />
-                <StatRow label={t("generated.players.lastLogin")} value={formatDateTime(player.last_login_datetime)} />
-              </StatGrid>
-            </div>}
           </div>
         </div>
         </div>
       </div>
       </div>
-        {/* Account + Recent Matches stay in the same left stack as the title. */}
-        <div className="space-y-5">
+
+      {/* Quick links: Loadouts + Champion Stats side by side */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Link href={`/players/${id}/loadouts`} className="group flex items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-3 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary">
+          <CardIcon name="loadouts" className="ml-3 text-[var(--pc-title)]" />
+          <div className="min-w-0 flex-1 text-sm font-semibold text-pc-text group-hover:text-pc-accent">{t("generated.players.playerLoadouts")}</div>
+          <span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent" aria-hidden="true"><ArrowRight aria-hidden="true" size={16} className="inline shrink-0 align-middle" /></span>
+        </Link>
+        <Link href={`/players/${id}/champions`} className="group flex items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-3 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary">
+          <CardIcon name="champion-stats" className="ml-3 text-[var(--pc-title)]" />
+          <div className="min-w-0 flex-1 text-sm font-semibold text-pc-text group-hover:text-pc-accent">{t("common.playerChampions.title")}</div>
+          <span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent" aria-hidden="true"><ArrowRight aria-hidden="true" size={16} className="inline shrink-0 align-middle" /></span>
+        </Link>
+      </div>
+
+      {/* Account + Recent Matches */}
+      <div className="space-y-5">
           {/* Account Overview */}
-          {fullAccess && <div>
+          <div>
             <div className="pc-card">
               <div className="grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(12rem,0.65fr)]">
                 <div className="min-w-0">
@@ -825,8 +925,61 @@ export default function PlayerProfileClient({
               </div>
             </div>
           </div>
-
-          }
+          {/* Evidence — published reports, system flags, and cosmetic evidence */}
+          {evidence && (evidence.flagEvidence.length > 0 || evidence.flags.length > 0 || evidence.cosmeticEvidence.length > 0) && (() => {
+            const unified = buildUnifiedEvidence(evidence, t);
+            return (
+              <div>
+                <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                  <h2 className="text-sm font-semibold text-pc-text">{t("moderation.evidenceTitle")}</h2>
+                  <span className="text-xs text-pc-text-muted">{formatNumber(unified.length)} {t("moderation.evidence")}</span>
+                </div>
+                <p className="mb-3 text-xs text-pc-text-muted">{t("moderation.evidenceDescription")}</p>
+                <div className="pc-card-flush overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-pc-border text-left text-xs text-pc-text-muted">
+                        <th className="px-3 py-1.5">{t("moderation.evidenceSource")}</th>
+                        <th className="px-3 py-1.5">{t("moderation.evidenceReason")}</th>
+                        <th className="px-3 py-1.5">{t("generated.players.match.0335207")}</th>
+                        <th className="px-3 py-1.5">{t("generated.players.played")}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {unified.map((item) => (
+                        <tr key={item.key} className="border-b border-pc-border/60 last:border-0">
+                          <td className="px-3 py-1.5">
+                            <span className={`rounded border px-1.5 py-0.5 text-xs font-semibold ${
+                              item.categoryTone === "reported"
+                                ? "border-emerald-400/30 bg-emerald-400/15 text-emerald-200"
+                                : item.categoryTone === "cosmetic"
+                                  ? "border-amber-400/30 bg-amber-400/15 text-amber-200"
+                                  : "border-violet-400/30 bg-violet-400/15 text-violet-200"
+                            }`}>{item.category}</span>
+                          </td>
+                          <td className="max-w-md px-3 py-1.5">
+                            <div className="font-semibold text-pc-text">{item.title || "—"}</div>
+                            {item.detail && item.detail !== item.title && (
+                              <div className="text-xs text-pc-text-muted">{item.detail}</div>
+                            )}
+                            {item.sourceUrl && (
+                              <a href={item.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-pc-accent hover:underline">{item.sourceUrl}</a>
+                            )}
+                          </td>
+                          <td className="px-3 py-1.5">
+                            {item.matchId != null ? (
+                              <Link href={`/matches/${item.matchId}`} className="font-mono text-xs text-pc-accent hover:text-pc-accent-secondary">#{item.matchId}</Link>
+                            ) : "—"}
+                          </td>
+                          <td className="whitespace-nowrap px-3 py-1.5 text-xs text-pc-text-muted">{item.when ? formatDate(item.when) : "—"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            );
+          })()}
           {/* Recent Matches */}
           <div>
             <div className="mb-2 flex flex-wrap items-center gap-2">
@@ -915,147 +1068,6 @@ export default function PlayerProfileClient({
           </div>
         </div>
       </div>
-
-      {/* Sidebar cards and player ratings form an independent right stack. */}
-      {fullAccess && <div className="self-start space-y-5 lg:col-span-1">
-          <Link href={`/players/${id}/loadouts`} className="group flex items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-3 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary">
-            <CardIcon name="loadouts" className="ml-3 text-[var(--pc-title)]" />
-            <div className="min-w-0 flex-1 text-sm font-semibold text-pc-text group-hover:text-pc-accent">{t("generated.players.playerLoadouts")}</div>
-            <span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent" aria-hidden="true"><ArrowRight aria-hidden="true" size={16} className="inline shrink-0 align-middle" /></span>
-          </Link>
-          <Link href={`/players/${id}/champions`} className="group flex items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-3 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary">
-            <CardIcon name="champion-stats" className="ml-3 text-[var(--pc-title)]" />
-            <div className="min-w-0 flex-1 text-sm font-semibold text-pc-text group-hover:text-pc-accent">{t("common.playerChampions.title")}</div>
-            <span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent" aria-hidden="true"><ArrowRight aria-hidden="true" size={16} className="inline shrink-0 align-middle" /></span>
-          </Link>
-
-          <Link href={`/players/${id}/friends`} className="group flex items-center gap-3 rounded-xl border border-pc-border bg-pc-bg-elevated p-3 transition-colors hover:border-pc-accent-mid hover:bg-pc-bg-secondary">
-            <CardIcon name="friends" className="ml-3 text-[var(--pc-title)]" />
-            <div className="min-w-0 flex-1 text-sm font-semibold text-pc-text group-hover:text-pc-accent">{t("playerFriends.title")}</div>
-            <span className="text-pc-text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-pc-accent" aria-hidden="true"><ArrowRight aria-hidden="true" size={16} className="inline shrink-0 align-middle" /></span>
-          </Link>
-          <PlayerRelationshipSummaryCard playerId={id} />
-
-          {/* KBM Ranked */}
-          <div>
-            <div className="pc-card p-3">
-              <div className="flex min-w-0 items-center gap-3">
-                <div className="w-14 shrink-0 text-center">
-                  <img src={rankIcon} alt={effectiveTier.displayName} className="mx-auto h-10 w-10 object-contain" />
-                  <div className={`mt-1 text-xs font-semibold ${tierColor}`}>{rankedTierLabel}</div>
-                  <div className="mt-0.5 text-xs text-pc-text-muted">{t("generated.players.season")}{" "}{player.kbm_season}</div>
-                </div>
-                <div className="min-w-0 flex-1 border-l border-pc-border/50 pl-3">
-                  <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
-                    <StatRow label={t("generated.players.rank")} value={`#${effectiveTier.displayRank}`} color="text-pc-accent" />
-                    <StatRow label={t("generated.players.prev")} value={`#${player.kbm_prev_rank}`} />
-                    <StatRow label={t("generated.players.trend")} value={<span aria-label={player.kbm_trend === 0 ? undefined : t("common.summary.valueMetric", { value: formatNumber(Math.abs(player.kbm_trend)), metric: t(player.kbm_trend > 0 ? "generated.players.ascending" : "generated.players.descending") })}>{trendArrow(player.kbm_trend)} {Math.abs(player.kbm_trend)}</span>} color={trendColor(player.kbm_trend)} />
-                    <StatRow label={t("common.metrics.deserted")} value={formatNumber(player.kbm_leaves)} />
-                  </div>
-                </div>
-              </div>
-              <div className="mt-3 grid grid-cols-3 gap-1.5 border-t border-pc-border/50 pt-2.5 text-center">
-                <div>
-                  <div className="text-xs text-pc-text-muted">{t("generated.players.wins")}</div>
-                  <div className="font-mono text-xs text-emerald-400">{player.kbm_wins}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-pc-text-muted">{t("generated.players.losses")}</div>
-                  <div className="font-mono text-xs text-rose-400">{player.kbm_losses}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-pc-text-muted">{t("generated.players.winRate")}</div>
-                  <div className="font-mono text-xs" style={kbmWr !== "—" ? { color: getPercentageColor(Number(kbmWr)) } : undefined}>{kbmWr}%</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Glicko Rating */}
-          <div>
-            <div className="pc-card">
-              {kbmRating ? (
-                <div className="space-y-3">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-pc-accent font-mono">{formatNumber(Number(kbmRating.mu), { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
-                    <div className="text-xs text-pc-text-muted mt-0.5">{t("generated.players.glicko2Rating")}</div>
-                  </div>
-                  <div className="grid grid-cols-1 gap-2 text-center min-[400px]:grid-cols-2">
-                    <div className="p-2">
-                      <div className="text-xs text-pc-text-muted">{t("generated.players.deviation")}</div>
-                      <div className="text-xs font-mono text-pc-text">{formatNumber(Number(kbmRating.phi), { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</div>
-                    </div>
-                    <div className="p-2">
-                      <div className="text-xs text-pc-text-muted">{t("generated.players.volatility")}</div>
-                      <div className="text-xs font-mono text-pc-text">{formatNumber(Number(kbmRating.volatility), { minimumFractionDigits: 4, maximumFractionDigits: 4 })}</div>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 gap-2 border-t border-pc-border/50 pt-2 text-center min-[360px]:grid-cols-3">
-                    <div>
-                      <div className="text-xs text-pc-text-muted">{t("common.result.winShort")}</div>
-                      <div className="text-xs font-mono text-emerald-400">{Number.isFinite(Number(kbmRating.wins)) ? formatNumber(Number(kbmRating.wins)) : "—"}</div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-pc-text-muted">{t("common.result.lossShort")}</div>
-                      <div className="text-xs font-mono text-rose-400">{Number.isFinite(Number(kbmRating.losses)) ? formatNumber(Number(kbmRating.losses)) : "—"}</div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-pc-text-muted">{t("generated.players.wr.a175495")}</div>
-                      <div className="text-xs font-mono text-pc-text">
-                        {Number.isFinite(Number(kbmRating.wins)) && Number(kbmRating.matches_played) > 0
-                          ? t("generated.players.value1", { value1: formatNumber(((Number(kbmRating.wins) / Number(kbmRating.matches_played)) * 100), { minimumFractionDigits: 0, maximumFractionDigits: 0 }) })
-                          : "—"}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <p className="text-pc-text-muted text-sm text-center py-4">{t("generated.players.noRankedRatingYet")}</p>
-              )}
-            </div>
-          </div>
-
-          {/* Consolidated performance summary */}
-          <div>
-            <div className="pc-card p-3">
-              <div className="mb-1.5 text-xs uppercase tracking-wider text-pc-text-muted">{t("generated.players.averages")}</div>
-              <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
-                <StatRow label={t("generated.players.damageMin")} value={player.avg_dpm != null ? formatNumber(player.avg_dpm) : "—"} color="text-red-400" />
-                <StatRow label={t("common.metrics.kpm")} value={player.derived_rates?.kpm != null ? formatNumber(Number(player.derived_rates.kpm), { maximumFractionDigits: 2 }) : "—"} />
-                <StatRow label={t("common.metrics.deathsPerMinute")} value={player.derived_rates?.deaths_per_minute != null ? formatNumber(Number(player.derived_rates.deaths_per_minute), { maximumFractionDigits: 2 }) : "—"} />
-                <StatRow label={t("generated.players.healingMin")} value={player.avg_hpm != null ? formatNumber(player.avg_hpm) : "—"} color="text-emerald-400" />
-                <StatRow label={t("generated.players.shieldingMin")} value={player.avg_spm != null ? formatNumber(player.avg_spm) : "—"} color="text-sky-400" />
-                <StatRow label={t("generated.players.creditsMin")} value={player.avg_egpm != null ? formatNumber(player.avg_egpm) : "—"} color="text-yellow-400" />
-                {player.avg_shpm != null && (
-                  <StatRow label={t("common.metrics.shpm")} value={formatNumber(player.avg_shpm)} color="text-violet-400" />
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Queue Ratings (if multiple queues) */}
-          {queueRatings.length > 1 && (
-            <div>
-              <div className="pc-card">
-                <div className="space-y-2">
-                  {queueRatings.map((qr) => (
-                    <div key={qr.queue_id} className="flex items-center justify-between py-1.5 border-b border-pc-border/30 last:border-0">
-                      <span className="text-xs text-pc-text-muted">{t("generated.players.queue")}{" "}{qr.queue_id}</span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-mono text-pc-accent">{formatNumber(Number(qr.mu), { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
-                        <span className="text-xs text-pc-text-muted">φ{formatNumber(Number(qr.phi), { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      }
-      </div>
-
-      {fullAccess && <PlayerTrendsPanel playerId={id} showTitle={false} />}
 
       {/* ── Current Match Modal ── */}
       {showCurrentMatch && (

@@ -240,12 +240,6 @@ export default function HomePage({ children }: { children?: ReactNode }) {
 
   const exploreCards = [
     {
-      href: "/features",
-      icon: "sparkles" as CardIconName,
-      title: t("home.newFeatures"),
-      description: t("home.exploreNewFeatures"),
-    },
-    {
       href: "/players",
       icon: "users" as CardIconName,
       title: t("menu.playerHub"),
@@ -409,7 +403,7 @@ export default function HomePage({ children }: { children?: ReactNode }) {
             hidden: {},
             visible: { transition: { staggerChildren: 0.11 } },
           }}
-          className="mt-10 grid auto-rows-fr gap-4 sm:mt-12 md:grid-cols-2 lg:grid-cols-4"
+          className="mt-10 grid auto-rows-fr gap-4 sm:mt-12 md:grid-cols-2 lg:grid-cols-3"
         >
           {exploreCards.map(({ href, icon, title, description }, index) => (
             <motion.div

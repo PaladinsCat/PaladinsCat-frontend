@@ -2045,11 +2045,12 @@ export async function fetchBoostedPlayerDetail(playerId: string): Promise<Booste
 }
 
 /**
- * Fetch the stored talent facts supporting an administrator-confirmed exploiter tag. · refs: none
- * I/O types: `playerId: string -> Promise<ExploiterEvidenceDetail>`.
+ * Normalize the raw evidence-dashboard payload (shared by the pro-only
+ * `/players/exploiters/{id}` route and the public `/players/{id}/evidence`
+ * route) into the typed `ExploiterEvidenceDetail` shape.
+ * I/O types: `raw: any, playerId: string -> ExploiterEvidenceDetail`.
  */
-export async function fetchExploiterEvidence(playerId: string): Promise<ExploiterEvidenceDetail> {
-  const raw = await fetchJson<any>(`/players/exploiters/${encodeURIComponent(playerId)}`);
+function parseEvidenceDetail(raw: any, playerId: string): ExploiterEvidenceDetail {
   return {
     player: {
       id: String(raw.player?.id ?? playerId),
@@ -2100,6 +2101,28 @@ export async function fetchExploiterEvidence(playerId: string): Promise<Exploite
       createdAt: String(row.createdAt ?? ""),
     })),
   };
+}
+
+/**
+ * Fetch the stored talent facts supporting an administrator-confirmed exploiter tag. · refs: none
+ * I/O types: `playerId: string -> Promise<ExploiterEvidenceDetail>`.
+ */
+export async function fetchExploiterEvidence(playerId: string): Promise<ExploiterEvidenceDetail> {
+  const raw = await fetchJson<any>(`/players/exploiters/${encodeURIComponent(playerId)}`);
+  return parseEvidenceDetail(raw, playerId);
+}
+
+/**
+ * Fetch a player's published evidence for the public profile page. Uses the
+ * public `/players/{id}/evidence` route (not blocked by the public proxy,
+ * unlike the pro-only `/players/exploiters/{id}` route) so the public player
+ * profile can list a player's evidence above the match history table.
+ * I/O types: `playerId: string -> Promise<ExploiterEvidenceDetail>`.
+ * refs: endpoints: GET /players/{id}/evidence
+ */
+export async function fetchPlayerEvidence(playerId: string): Promise<ExploiterEvidenceDetail> {
+  const raw = await fetchJson<any>(`/players/${encodeURIComponent(playerId)}/evidence`);
+  return parseEvidenceDetail(raw, playerId);
 }
 
 /**

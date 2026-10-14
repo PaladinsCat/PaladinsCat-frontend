@@ -43,8 +43,6 @@ const nextConfig: NextConfig = {
     const pages = [
       "/players/elo",
       "/players/leaderboard",
-      "/players/cheaters",
-      "/players/suspicious",
       "/players/weirdos",
       "/players/hall-of-fame",
       "/players/class/:role",
