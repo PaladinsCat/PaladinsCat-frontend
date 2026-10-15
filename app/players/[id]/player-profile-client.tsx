@@ -928,7 +928,8 @@ export default function PlayerProfileClient({
             </div>
           </div>
 
-          {/* Glicko Rating */}
+          {/* Glicko Rating — Pro surface only */}
+          {isPro && (
           <div>
             <div className="pc-card">
               {kbmRating ? (
@@ -971,6 +972,7 @@ export default function PlayerProfileClient({
               )}
             </div>
           </div>
+          )}
 
           {/* Consolidated performance summary — Pro surface only */}
           {isPro && (
