@@ -139,7 +139,11 @@ for (const viewer of ["normal", "Pro"]) for (const state of ["omitted", "null", 
       if (state === "populated") {
         assert.ok(html.includes("1234"), "ranked rating content survives");
         assert.ok(html.includes("2345"), "additional queue rating content survives");
-      } else assert.ok(html.includes("generated.players.noRankedRatingYet"));
+      } else if (viewer === "Pro") {
+        assert.ok(html.includes("generated.players.noRankedRatingYet"), "Pro viewers see the Glicko placeholder when ratings are absent");
+      } else {
+        assert.ok(!html.includes("generated.players.noRankedRatingYet"), "non-Pro viewers do not receive the Pro Glicko placeholder");
+      }
     }
   });
 }
