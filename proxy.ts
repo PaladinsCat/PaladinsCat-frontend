@@ -122,7 +122,7 @@ export async function proxy(request: NextRequest) {
   let decodedPath: string;
   try {
     decodedPath = decodeURIComponent(path);
-    if (websiteApiPath(decodedPath) && !websiteApiPath(path)) {
+    if (websiteApiPath(decodedPath.toLowerCase()) && !websiteApiPath(path)) {
       return NextResponse.json({ error: { code: "NON_CANONICAL_API_PATH" } }, { status: 400, headers: { "Cache-Control": "private, no-store" } });
     }
   } catch {
@@ -261,8 +261,20 @@ export async function proxy(request: NextRequest) {
       request: {
         headers: (() => {
           const h = new Headers(request.headers);
+          // Next.js rewrites proxy strips cf-connecting-ip/cf-ray on the
+          // server-to-server fetch to the backend. Custom headers survive
+          // the proxy hop, so pin the edge identity under x-paladinscat-*
+          // names that the Rust backend reads first.
           const clientIp = request.headers.get("cf-connecting-ip");
-          if (clientIp) h.set("cf-connecting-ip", clientIp);
+          if (clientIp) {
+            h.set("cf-connecting-ip", clientIp);
+            h.set("x-paladinscat-client-ip", clientIp);
+          }
+          const cfRay = request.headers.get("cf-ray");
+          if (cfRay) {
+            h.set("cf-ray", cfRay);
+            h.set("x-paladinscat-cf-ray", cfRay);
+          }
           return h;
         })(),
       },
