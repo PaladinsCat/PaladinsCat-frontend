@@ -38,7 +38,7 @@ jobs:
 
       - name: Dependency security regression tests
         timeout-minutes: 2
-        run: node --test scripts/security-dependencies.test.mjs
+        run: node --test scripts/security-dependencies.test.mjs scripts/security-braces.test.mjs scripts/security-braces-backport.test.mjs
 
       - name: Lint
         run: npm run lint

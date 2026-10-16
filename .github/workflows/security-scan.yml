@@ -3,10 +3,10 @@ name: Dependency security scan
 on:
   pull_request:
     branches: [main, master]
-    paths: ['package-lock.json', '.github/workflows/security-scan.yml']
+    paths: ['package.json', 'package-lock.json', 'vendor/**', 'scripts/security-braces*', '.github/workflows/security-scan.yml']
   push:
     branches: [main, master]
-    paths: ['package-lock.json', '.github/workflows/security-scan.yml']
+    paths: ['package.json', 'package-lock.json', 'vendor/**', 'scripts/security-braces*', '.github/workflows/security-scan.yml']
   schedule:
     - cron: '11 8 * * 1'
   workflow_dispatch:
@@ -29,6 +29,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # existing repository pin
         with:
           persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # existing repository pin
+        with:
+          node-version: '22'
       - name: Scan locked dependencies using a downloaded public advisory database
         shell: bash
         run: |
@@ -37,8 +40,8 @@ jobs:
           test -s 'package-lock.json' && test ! -L 'package-lock.json'
           cp 'package-lock.json' "$RUNNER_TEMP/security-scan/input/"
           cd "$RUNNER_TEMP/security-scan"
-          # Only the lockfile is analyzed; no dependency installation, scripts or private inventory API.
-          # Cargo.toml is intentionally absent so Rust dev dependencies remain included.
+          # Analyze the full npm lock, including dev dependencies. No dependency
+          # installation, lifecycle scripts or private inventory API are needed.
           sha256sum input/* > reports/input.sha256
           curl --fail --location --proto '=https' --tlsv1.2 --retry 2 --max-time 180 \
             https://github.com/aquasecurity/trivy/releases/download/v0.73.0/trivy_0.73.0_Linux-64bit.tar.gz -o trivy.tar.gz
@@ -53,10 +56,24 @@ jobs:
             --parallel 2 --timeout 5m --no-progress --list-all-pkgs \
             --format json --output reports/vulnerabilities.json input
           ./trivy convert --format cyclonedx --output reports/sbom.cdx.json reports/vulnerabilities.json
+          # Keep raw coverage even when the backport proof fails; never emit or
+          # apply VEX until every reviewed source/archive/lock hash is verified.
+          node --test "$GITHUB_WORKSPACE/scripts/security-braces-backport.test.mjs"
+          node "$GITHUB_WORKSPACE/scripts/security-braces-backport.mjs" prepare "$RUNNER_TEMP/security-scan/reports"
+          # Preserve the complete raw report above. The version stays 3.0.3, so the
+          # scanner still detects the advisory addressed by the reviewed backport.
+          ./trivy fs --cache-dir cache --offline-scan --skip-db-update --skip-java-db-update \
+            --skip-check-update --skip-version-check --scanners vuln --include-dev-deps \
+            --parallel 2 --timeout 5m --no-progress --list-all-pkgs \
+            --vex reports/braces.fixed.openvex.json \
+            --format json --output reports/adjudicated.json input
       - name: Reject unavailable coverage and HIGH or CRITICAL vulnerabilities
         shell: bash
         run: |
           set -euo pipefail
+          node scripts/security-braces-backport.mjs review \
+            "$RUNNER_TEMP/security-scan/reports/vulnerabilities.json" \
+            "$RUNNER_TEMP/security-scan/reports/adjudicated.json"
           cd "$RUNNER_TEMP/security-scan"
           python3 - <<'PY'
           import json
@@ -67,7 +84,7 @@ jobs:
               sys.exit("SCAN UNAVAILABLE: expected npm dependency inventory is empty.")
           print(f"Scanned {packages} locked packages.")
           PY
-          ./trivy convert --format table --severity HIGH,CRITICAL --exit-code 1 reports/vulnerabilities.json
+          ./trivy convert --scanners vuln --format table --severity HIGH,CRITICAL --exit-code 1 reports/adjudicated.json
       - name: Retain repository-private scan evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1, verified upstream commit

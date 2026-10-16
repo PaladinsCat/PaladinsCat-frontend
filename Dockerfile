@@ -19,6 +19,7 @@ ENV NEXT_BUILD_CPUS=${NEXT_BUILD_CPUS}
 ENV NEXT_PUBLIC_LOCALE_BASE_URL=${NEXT_PUBLIC_LOCALE_BASE_URL}
 ENV NEXT_PUBLIC_IDENTITY_CUTOVER_ENABLED=${NEXT_PUBLIC_IDENTITY_CUTOVER_ENABLED}
 COPY package.json package-lock.json tsconfig.json ./
+COPY vendor ./vendor
 RUN --mount=type=cache,id=npm-cache,target=/root/.npm npm ci
 COPY locales /locales
 ENV PALADINSCAT_LOCALES_REPO=/locales
@@ -29,6 +30,7 @@ RUN --mount=type=cache,id=npm-cache,target=/root/.npm npm run build
 FROM node:22-alpine AS dev
 WORKDIR /app
 COPY package.json ./
+COPY vendor ./vendor
 RUN npm install
 COPY locales /locales
 ENV PALADINSCAT_LOCALES_REPO=/locales

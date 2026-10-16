@@ -104,7 +104,7 @@ export default function AdminDashboardPage({ mode = "admin" }: { mode?: "admin" 
           <p className="mt-1 text-sm text-pc-text-secondary">{t("generated.admin.trafficPlatformHealthIngestionAndHiRezQuotaTelemetry")}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <a href="https://auth.paladinscat.com/admin/paladinscat/console/" target="_blank" rel="noreferrer" className="pc-btn-secondary inline-flex items-center gap-2 text-sm"><KeyRound className="h-4 w-4" /> {t("generated.admin.identityAdmin")}</a>
+          <a href="/admin/identity" target="_blank" rel="noreferrer" className="pc-btn-secondary inline-flex items-center gap-2 text-sm"><KeyRound className="h-4 w-4" /> {t("generated.admin.identityAdmin")}</a>
           <Link href="/admin/notifications" className="pc-btn-secondary inline-flex items-center gap-2 text-sm"><Bell className="h-4 w-4" /> {t("generated.admin.notifications")}</Link>
           {isAdmin && <Link href="/admin/invitations" className="pc-btn-secondary inline-flex items-center gap-2 text-sm"><KeyRound className="h-4 w-4" /> {t("invitation.adminTitle")}</Link>}
           <Link href="/admin/changelog" className="pc-btn-secondary inline-flex items-center gap-2 text-sm"><ScrollText className="h-4 w-4" /> {t("generated.admin.changelog")}</Link>
