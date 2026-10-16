@@ -257,7 +257,16 @@ export async function proxy(request: NextRequest) {
         });
       }
     }
-    const response = NextResponse.next();
+    const response = NextResponse.next({
+      request: {
+        headers: (() => {
+          const h = new Headers(request.headers);
+          const clientIp = request.headers.get("cf-connecting-ip");
+          if (clientIp) h.set("cf-connecting-ip", clientIp);
+          return h;
+        })(),
+      },
+    });
     response.headers.set("Cache-Control", "private, no-store");
     if (!admitted) {
       response.cookies.set(GUEST_COOKIE, issueGuest(secret, origin), {
