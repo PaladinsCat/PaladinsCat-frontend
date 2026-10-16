@@ -57,6 +57,13 @@ export async function fetchServerJson<T>(path: string, options: ServerFetchOptio
   const forwarded = new Headers(requestOptions.headers);
   if (!forwarded.has("accept")) forwarded.set("accept", "application/json");
   if (clientUa) forwarded.set("x-client-ua", clientUa);
+  // Preserve ingress identity and request correlation on SSR backend reads.
+  // Fetch options cannot supply identity absent from the incoming request.
+  for (const name of ["cf-connecting-ip", "cf-ray"]) {
+    const value = incoming.get(name)?.trim();
+    if (value) forwarded.set(name, value);
+    else forwarded.delete(name);
+  }
   // Preserve Caddy's original HTTPS proof when a caller forwards browser
   // cookies; the backend keeps its cookie transport and CSRF checks.
   const forwardedProto = incoming.get("x-forwarded-proto");
