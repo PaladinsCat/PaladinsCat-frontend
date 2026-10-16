@@ -1,6 +1,8 @@
+import { operatorBackendFetch } from "./operator-transport.mjs";
 /** Stop runaway session reads from already-loaded clients without caching auth. */
 import { createHash } from "node:crypto";
 import { serverApiBase } from "./server-api";
+import { accountSessionCookie } from "./operator-plane";
 
 export const AUTH_SESSION_READ_LIMIT = 30;
 export const AUTH_SESSION_READ_WINDOW_MS = 10_000;
@@ -23,7 +25,7 @@ function sessionKey(headers: Headers): string | null {
   // Match the backend's Bearer-first session_token resolution exactly.
   const authorization = headers.get("authorization");
   const bearer = authorization?.startsWith("Bearer ") ? authorization.slice(7) : "";
-  const prefix = "__Host-pc_session=";
+  const prefix = `${accountSessionCookie()}=`;
   const cookie = (headers.get("cookie") || "").split(";")
     .map((part) => part.trim()).find((part) => part.startsWith(prefix) && part.length > prefix.length);
   const token = bearer || cookie?.slice(prefix.length);
@@ -41,7 +43,7 @@ export function createSessionReadHandler(dependencies: Dependencies = {}): (requ
   const buckets = new Map<string, Bucket>();
   const now = dependencies.now || Date.now;
   const apiBase = dependencies.apiBase || serverApiBase;
-  const fetcher: typeof fetch = dependencies.fetcher || ((input, init) => fetch(input, init));
+  const fetcher: typeof fetch = dependencies.fetcher || ((input, init) => operatorBackendFetch(input, init));
   return async (request) => {
     const key = sessionKey(request.headers);
     if (key) {

@@ -9,8 +9,8 @@ import { isAccountOnlyPath, isVerifiedOnlyPath } from "./lib/verified-access";
 import { serverApiBase } from "./lib/server-api";
 import { anonymousPresenceRequestAllowed } from "./lib/anonymous-presence-gate";
 import { hasProAccess, isWolper, proLoginUrl } from "./lib/pro-surface";
+import { accountSessionCookie, assertOperatorConfiguration, isOperatorBff, operatorPathAllowed } from "./lib/operator-plane";
 
-const ACCOUNT_SESSION_COOKIE = "__Host-pc_session";
 const ACCESS_POLICY_PATH = "/prototype/access-policy";
 type AccountSessionState = "guest" | "unverified" | "uninvited" | "verified" | "rate-limited" | "unavailable";
 type AccountSessionCheck = { state: AccountSessionState; retryAfter?: string; restricted?: boolean; invitationRequired?: boolean; pro?: boolean };
@@ -22,7 +22,7 @@ async function accountSessionState(request: NextRequest, allowBearer = false): P
   const authorization = allowBearer ? request.headers.get("authorization") : null;
   const bearer = authorization?.startsWith("Bearer ") ? authorization.slice(7) : "";
   if (bearer.length > 512) return { state: "guest" };
-  const session = bearer || request.cookies.get(ACCOUNT_SESSION_COOKIE)?.value;
+  const session = bearer || request.cookies.get(accountSessionCookie())?.value;
   if (!session) return { state: "guest" };
   try {
     const headers = new Headers({ accept: "application/json", authorization: `Bearer ${session}` });
@@ -128,6 +128,32 @@ export async function proxy(request: NextRequest) {
   } catch {
     return NextResponse.json({ error: { code: "INVALID_PATH" } }, { status: 400 });
   }
+  if (isOperatorBff()) {
+    try { assertOperatorConfiguration(); } catch {
+      return NextResponse.json({ error: { code: "OPERATOR_UNAVAILABLE" } }, { status: 503, headers: { "Cache-Control": "private, no-store" } });
+    }
+    if (!operatorPathAllowed(path, request.method) || decodedPath !== path) {
+      return NextResponse.json({ error: { code: "NOT_FOUND" } }, { status: 404, headers: { "Cache-Control": "private, no-store" } });
+    }
+    if (path === "/") return NextResponse.redirect(new URL("/admin", process.env.PALADINSCAT_OPERATOR_ORIGIN));
+    const nonce = crypto.randomUUID().replaceAll("-", "");
+    const forwarded = new Headers(request.headers);
+    forwarded.set("x-nonce", nonce);
+    const response = NextResponse.next({ request: { headers: forwarded } });
+    response.headers.set("Cache-Control", "private, no-store");
+    response.headers.set("X-Robots-Tag", "noindex, nofollow");
+    response.headers.set("Content-Security-Policy", [
+      "default-src 'self'", `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
+      "style-src 'self' 'unsafe-inline'", "img-src 'self' data: blob:", "font-src 'self' data:",
+      "connect-src 'self'", "frame-ancestors 'none'", "object-src 'none'", "base-uri 'self'", "form-action 'self'",
+    ].join("; "));
+    response.headers.set("X-Content-Type-Options", "nosniff");
+    response.headers.set("X-Frame-Options", "DENY");
+    response.headers.set("Referrer-Policy", "no-referrer");
+    // Private admission, operator session and current DB role are enforced at
+    // their gateway/API owners. Public guest/Pro promotion never runs here.
+    return response;
+  }
   const api = websiteApiPath(path);
   const protectedPage = isVerifiedOnlyPath(decodedPath) || isAccountOnlyPath(decodedPath);
   // Pro-only cheater/exploit evidence data must not be served on the public
@@ -172,7 +198,7 @@ export async function proxy(request: NextRequest) {
       && request.nextUrl.searchParams.get("pc_surface") !== "public" && !isWolper(request.headers)
       && (request.method === "GET" || request.method === "HEAD")
       && (request.headers.get("accept")?.includes("text/html") || request.headers.get("rsc") === "1")
-      && request.cookies.has(ACCOUNT_SESSION_COOKIE)) {
+      && request.cookies.has(accountSessionCookie())) {
     const check = await getAccountCheck();
     if (check.pro) {
       const response = NextResponse.redirect(proLoginUrl(`${path}${request.nextUrl.search}`));
@@ -183,7 +209,7 @@ export async function proxy(request: NextRequest) {
   if (
     path !== ACCESS_POLICY_PATH
     && !api
-    && request.cookies.has(ACCOUNT_SESSION_COOKIE)
+    && request.cookies.has(accountSessionCookie())
     && request.headers.get("accept")?.includes("text/html")
   ) {
     const check = await getAccountCheck();

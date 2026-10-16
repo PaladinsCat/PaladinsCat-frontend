@@ -4,6 +4,7 @@
  * refs: none
  */
 import { createHash, createPublicKey, randomBytes, timingSafeEqual, verify, type JsonWebKey as NodeJsonWebKey } from "node:crypto";
+import { oidcFetch } from "./oidc-transport.ts";
 
 /**
  * Defines the  o i d c_ t r a n s a c t i o n_ t t l_ m s contract used by this module.
@@ -127,7 +128,7 @@ export function keycloakAccountUrl(issuer: string | undefined): URL | null {
 }
 
 /**
- * Use an override only when it exactly matches http://keycloak:8080 plus the external issuer pathname; otherwise retain the external issuer. An invalid external issuer throws during URL parsing.
+ * Use an override only when it exactly matches private HTTPS Keycloak plus the external issuer pathname; otherwise retain the external HTTPS issuer.
  * refs: none
  * I/O types: `issuer: string; override: string | undefined -> string`.
  */
@@ -136,7 +137,7 @@ export function resolveInternalIssuer(issuer: string, override: string | undefin
   if (!override) return issuer;
   try {
     const candidate = new URL(override);
-    const internal = new URL(`http://keycloak:8080${external.pathname}`);
+    const internal = new URL(`https://keycloak:8443${external.pathname}`);
     return candidate.href === internal.href ? internal.toString().replace(/\/$/, "") : issuer;
   } catch { return issuer; }
 }
@@ -214,7 +215,7 @@ export function validIdTokenHeader(header: Record<string, unknown>): boolean {
   return header.alg === "RS256" && typeof header.kid === "string" && (header.typ === undefined || header.typ === "ID" || header.typ === "JWT");
 }
 
-interface IdTokenClaims { iss?: string; aud?: string | string[]; azp?: string; exp?: number; iat?: number; nonce?: string; pc_keep_signed_in?: boolean; }
+interface IdTokenClaims { iss?: string; aud?: string | string[]; azp?: string; exp?: number; iat?: number; nonce?: string; pc_keep_signed_in?: boolean; auth_time?: number; acr?: string; }
 function decode(part: string): Record<string, unknown> { return JSON.parse(Buffer.from(part, "base64url").toString("utf8")) as Record<string, unknown>; }
 
 async function readBoundedJson(response: Response): Promise<{ keys?: Array<Record<string, unknown>> } | null> {
@@ -236,7 +237,7 @@ async function fetchJwks(issuer: string): Promise<Array<Record<string, unknown>>
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 2_000);
   try {
-    const response = await fetch(`${issuer.replace(/\/$/, "")}/protocol/openid-connect/certs`, { cache: "no-store", signal: controller.signal });
+    const response = await oidcFetch(`${issuer.replace(/\/$/, "")}/protocol/openid-connect/certs`, { cache: "no-store", signal: controller.signal });
     if (!response.ok || Number(response.headers.get("content-length") || 0) > JWKS_MAX_BYTES) return null;
     const body = await readBoundedJson(response);
     return body && Array.isArray(body.keys) && body.keys.length <= 32 ? body.keys : null;

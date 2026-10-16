@@ -1,3 +1,4 @@
+import { operatorBackendFetch } from "./operator-transport.mjs";
 /**
  * Fetches JSON from the backend with server-side caching, revalidation, and error handling.
  * Keeps server api server-side and aligned with its data source.
@@ -5,6 +6,7 @@
  */
 import "server-only";
 import { cookies, headers } from "next/headers";
+import { accountSessionCookie } from "./operator-plane";
 
 type ServerFetchOptions = Omit<RequestInit, "signal"> & {
   timeoutMs?: number;
@@ -12,7 +14,7 @@ type ServerFetchOptions = Omit<RequestInit, "signal"> & {
 
 /** Forward the caller's session for protected SSR reads; never share account responses. */
 export async function fetchAccountServerJson<T>(path: string, options: ServerFetchOptions = {}): Promise<T> {
-  const session = (await cookies()).get("__Host-pc_session")?.value;
+  const session = (await cookies()).get(accountSessionCookie())?.value;
   if (!session) throw new Error("Login required");
   return fetchServerJson<T>(path, {
     ...options, cache: "no-store", headers: { ...options.headers, Authorization: `Bearer ${session}` },
@@ -77,9 +79,9 @@ export async function fetchServerJson<T>(path: string, options: ServerFetchOptio
   // grant verified users unlimited rate limits. Gating this on surface was a
   // production bug: public-surface SSR reads dropped the session, so the
   // backend treated verified users as guests and returned 429.
-  const session = (await cookies()).get("__Host-pc_session")?.value;
+  const session = (await cookies()).get(accountSessionCookie())?.value;
   if (session && !forwarded.has("authorization")) forwarded.set("authorization", `Bearer ${session}`);
-  const response = await fetch(`${serverApiBase()}${path.startsWith("/") ? path : `/${path}`}`, {
+  const response = await operatorBackendFetch(`${serverApiBase()}${path.startsWith("/") ? path : `/${path}`}`, {
     ...requestOptions,
     cache: requestOptions.cache ?? "no-store",
     headers: forwarded,
@@ -110,7 +112,7 @@ export async function fetchServerJsonStatic<T>(path: string, options: ServerFetc
   // Static scope: no dynamic headers available. Public surface is the only
   // valid identity for cached catalog reads.
   forwarded.set("x-paladinscat-surface", "public");
-  const response = await fetch(`${serverApiBase()}${path.startsWith("/") ? path : `/${path}`}`, {
+  const response = await operatorBackendFetch(`${serverApiBase()}${path.startsWith("/") ? path : `/${path}`}`, {
     ...requestOptions,
     cache: requestOptions.cache ?? "no-store",
     headers: forwarded,

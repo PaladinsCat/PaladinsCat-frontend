@@ -15,8 +15,9 @@
     "test:items": "node --experimental-strip-types --test lib/active-items.test.ts",
     "test:champion-icons": "node --experimental-strip-types --test lib/champion-icons.test.ts",
     "test:champion-page": "node --experimental-strip-types --test lib/champion-page-data.test.ts",
-    "test:oidc": "node --experimental-strip-types --test lib/oidc-security.test.ts",
+    "test:oidc": "node --experimental-strip-types --test lib/oidc-security.test.ts lib/oidc-transport.test.mjs lib/oidc-login-route.test.mjs lib/oidc-callback-route.test.mjs lib/oidc-backchannel-route.test.mjs",
     "test:oidc-callback": "node --test lib/oidc-callback-route.test.mjs",
+    "test:operator": "node --experimental-strip-types --test lib/operator-plane.test.mjs lib/operator-https.test.mjs",
     "test:public-v1": "node --experimental-strip-types --test lib/public-v1.test.ts",
     "test:server-api": "node --test lib/server-api.test.mjs",
     "test:website-gate": "node --experimental-strip-types --test lib/website-gate.test.ts lib/website-proxy.test.mjs",
@@ -37,14 +38,16 @@
     "sync-champion-reference-data": "node scripts/sync-champion-reference-data.mjs --write",
     "sync-champion-changelogs": "python scripts/update-champion-changelogs.py",
     "check-localization-catalog": "node scripts/check-localization-catalog.mjs",
-    "check-localization-keys": "node scripts/check-localization-keys.mjs"
+    "check-localization-keys": "node scripts/check-localization-keys.mjs",
+    "test:api-namespace": "node --test lib/api-namespace.test.mjs",
+    "test:match-images": "node --test lib/match-image-route.test.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
     "@heroui/react": "^3.2.4",
     "@heroui/system": "^2.4.28",
     "@heroui/theme": "^2.4.26",
-    "@next/swc-wasm-nodejs": "^16.3.4",
+    "@next/swc-wasm-nodejs": "~16.3.8",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "daisyui": "^5.7.22",
@@ -52,14 +55,15 @@
     "gray-matter": "^4.0.3",
     "html-to-image": "^1.11.13",
     "lucide-react": "^1.44.0",
-    "next": "^16.3.4",
+    "next": "~16.3.8",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-markdown": "^10.1.0",
     "recharts": "^3.10.1",
     "remark-gfm": "^4.0.1",
     "tailwind-merge": "^3.6.0",
-    "tw-animate-css": "^1.4.0"
+    "tw-animate-css": "^1.4.0",
+    "undici": "7.29.1"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
@@ -68,7 +72,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19.2.5",
     "eslint": "^9.39.5",
-    "eslint-config-next": "^16.3.4",
+    "eslint-config-next": "~16.3.8",
     "openapi-typescript": "^7.13.0",
     "shadcn": "^4.21.0",
     "tailwindcss": "^4.0.0",
@@ -76,15 +80,23 @@
   },
   "overrides": {
     "browserslist": "4.28.8",
-    "fast-uri": "3.1.6",
+    "fast-uri": "3.1.8",
     "gray-matter": {
       "js-yaml": "3.15.2"
     },
     "js-yaml@^4": "4.3.2",
     "next": {
       "postcss": "8.5.26",
-      "sharp": "0.35.4"
+      "sharp": "0.35.5"
     },
-    "postcss-selector-parser": "7.1.3"
+    "postcss-selector-parser": "7.1.6",
+    "@modelcontextprotocol/sdk": "1.31.0",
+    "brace-expansion@^1": "1.1.21",
+    "brace-expansion@^2": "2.1.7",
+    "brace-expansion@^5": "5.0.12",
+    "ip-address": "10.7.1",
+    "proxy-addr": "2.0.8",
+    "source-map-js": "1.2.2",
+    "undici@^7": "7.29.1"
   }
 }

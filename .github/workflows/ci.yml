@@ -47,15 +47,20 @@ jobs:
         timeout-minutes: 2
         run: node --test lib/player-profile-response.test.mjs lib/player-profile-server.test.mjs scripts/player-profile-render.test.mjs scripts/player-profile-acquisition.test.mjs
 
-      - name: OIDC callback compatibility tests
-        timeout-minutes: 2
+      - name: OIDC transport, login and callback compatibility tests
+        timeout-minutes: 3
         run: |
+          python3 -m pip install --disable-pip-version-check Send2Trash==2.1.0
           npm run test:oidc
           npm run test:oidc-callback
+          npm run test:operator
 
       - name: Public and Pro surface enforcement tests
         timeout-minutes: 2
         run: node --test lib/pro-surface.test.mjs lib/website-proxy.test.mjs
+
+      - name: Test API namespace and match export authorization
+        run: npm run test:api-namespace && npm run test:match-images
 
       - name: Operations security tests
         run: npm run test:operations

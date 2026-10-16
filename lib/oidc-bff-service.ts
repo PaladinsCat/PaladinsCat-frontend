@@ -6,6 +6,7 @@
 import "server-only";
 import { createPrivateKey, createSign, randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
+import { oidcFetch } from "./oidc-transport";
 
 type CachedToken = { value: string; usableUntil: number };
 let cached: CachedToken | undefined;
@@ -53,9 +54,9 @@ function validateEndpoints(issuer: string, tokenUrl: string): void {
   const samePublicOrigin = issuerValue.protocol === "https:"
     && tokenValue.protocol === "https:"
     && tokenValue.origin === issuerValue.origin;
-  const privateKeycloak = tokenValue.protocol === "http:"
+  const privateKeycloak = tokenValue.protocol === "https:"
     && tokenValue.hostname === "keycloak"
-    && tokenValue.port === "8080";
+    && tokenValue.port === "8443";
   if (issuerValue.protocol !== "https:" || !issuerValue.hostname
       || issuerValue.username || issuerValue.password || !/^\/realms\/[^/]+$/.test(issuerValue.pathname)
       || issuerValue.search || issuerValue.hash || tokenValue.username || tokenValue.password
@@ -93,7 +94,7 @@ async function fetchToken(): Promise<string> {
   validateEndpoints(issuer, tokenUrl);
   // Keep the deadline active through body decoding, not just response headers.
   const signal = AbortSignal.timeout(10_000);
-  const response = await fetch(tokenUrl, {
+  const response = await oidcFetch(tokenUrl, {
     method: "POST",
     headers: { "content-type": "application/x-www-form-urlencoded" },
     cache: "no-store",

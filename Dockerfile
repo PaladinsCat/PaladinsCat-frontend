@@ -45,6 +45,10 @@ COPY --chown=node:node --from=builder /app/package-lock.json ./package-lock.json
 RUN --mount=type=cache,id=npm-cache,target=/root/.npm npm ci --omit=dev
 COPY --chown=node:node --from=builder /app/.next ./.next
 COPY --chown=node:node --from=builder /app/public ./public
+COPY --chown=node:node --from=builder /app/operator-server.mjs ./operator-server.mjs
+COPY --chown=node:node --from=builder /app/lib/operator-plane.ts ./lib/operator-plane.ts
+COPY --chown=node:node --from=builder /app/lib/operator-transport.mjs ./lib/operator-transport.mjs
+COPY --chown=node:node --from=builder /app/lib/operator-server-core.mjs ./lib/operator-server-core.mjs
 EXPOSE 3000
 CMD ["npx", "next", "start", "-p", "3000"]
 

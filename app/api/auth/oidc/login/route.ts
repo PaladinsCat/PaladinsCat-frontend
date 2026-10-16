@@ -1,3 +1,4 @@
+import { operatorBackendFetch } from "@/lib/operator-transport.mjs";
 /**
  * Start OIDC login or registration from a same-origin form. Return 403 for a foreign origin, 415 for unsupported media, and 400 for malformed forms or unsupported intent; store a transaction and submit PAR before setting the secure transaction cookie on a 303 redirect. Configuration or PAR failures return 503.
  * refs: none
@@ -6,7 +7,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { buildParAuthorizationUrl, buildPushedAuthorizationRequest, createTransaction, normalizedHttpsIssuer, parsePushedAuthorizationResponse, requireSameOrigin, resolveInternalIssuer, safeReturnPath } from "@/lib/oidc-security";
 import { oidcBffServiceHeaders } from "@/lib/oidc-bff-service";
 import { oidcClientSecret } from "@/lib/oidc-client-secret";
+import { oidcFetch } from "@/lib/oidc-transport";
 import { isIP } from "node:net";
+import { assertOperatorConfiguration, isOperatorBff, oidcTransactionCookie } from "@/lib/operator-plane";
 
 /**
  * Selects the Node.js runtime required by this server handler.
@@ -14,7 +17,6 @@ import { isIP } from "node:net";
  * refs: none
  */
 export const runtime = "nodejs";
-const TX_COOKIE = "__Host-pc_oidc_txn";
 const PAR_MAX_BYTES = 8 * 1024;
 function origin() { return process.env.PALADINSCAT_PUBLIC_ORIGIN || "http://localhost:3000"; }
 function backend() {
@@ -59,6 +61,8 @@ function temporarilyUnavailable() {
 }
 
 async function performOidcStart(intent: "login" | "create", returnPath: string, clientIp?: string) {
+  assertOperatorConfiguration();
+  if (isOperatorBff() && intent !== "login") return new NextResponse("Forbidden", { status: 403 });
   const transaction = createTransaction(returnPath);
   const issuer = normalizedHttpsIssuer(process.env.OIDC_ISSUER);
   const clientId = process.env.OIDC_CLIENT_ID;
@@ -66,24 +70,29 @@ async function performOidcStart(intent: "login" | "create", returnPath: string, 
   if (!issuer || !clientId || !clientSecret) return new NextResponse("OIDC is not configured", { status: 503 });
   const serverIssuer = resolveInternalIssuer(issuer, process.env.OIDC_INTERNAL_ISSUER);
   const serviceHeaders = await oidcBffServiceHeaders();
-  const stored = await fetch(`${backend()}/auth/oidc/transactions`, { method: "POST", headers: { ...serviceHeaders, ...(clientIp ? { "x-forwarded-for": clientIp } : {}), "content-type": "application/json" }, cache: "no-store", signal: AbortSignal.timeout(3_000), body: JSON.stringify({ state: transaction.state, nonce: transaction.nonce, verifier: transaction.verifier, return_path: transaction.returnPath }) });
+  const stored = await operatorBackendFetch(`${backend()}/auth/oidc/transactions`, { method: "POST", headers: { ...serviceHeaders, ...(clientIp ? { "x-forwarded-for": clientIp } : {}), "content-type": "application/json" }, cache: "no-store", signal: AbortSignal.timeout(3_000), body: JSON.stringify({ state: transaction.state, nonce: transaction.nonce, verifier: transaction.verifier, return_path: transaction.returnPath }) });
   if (stored.status !== 201) return temporarilyUnavailable();
   const par = buildPushedAuthorizationRequest(serverIssuer, clientId, `${origin()}/api/auth/oidc/callback`, transaction);
   par.form.set("client_secret", clientSecret);
+  if (isOperatorBff()) {
+    par.form.set("acr_values", process.env.PALADINSCAT_OPERATOR_REQUIRED_ACR || "2");
+    par.form.set("max_age", "0");
+    par.form.set("prompt", "login");
+  }
   // Registration is a fixed Keycloak prompt, never a browser-supplied auth parameter.
   if (intent === "create") par.form.set("prompt", "create");
   let requestUri: string | undefined;
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 3_000);
   try {
-    const pushed = await fetch(par.endpoint, { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, cache: "no-store", redirect: "error", signal: controller.signal, body: par.form });
+    const pushed = await oidcFetch(par.endpoint, { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, cache: "no-store", redirect: "error", signal: controller.signal, body: par.form });
     const parsed = pushed.ok ? await readParResponse(pushed) : null;
     requestUri = parsed?.requestUri;
   } catch { /* fail closed below */ } finally { clearTimeout(timeout); }
   if (!requestUri) return temporarilyUnavailable();
   // A 307 preserves the form POST to Keycloak; use 303 so the authorization endpoint receives a GET.
   const response = NextResponse.redirect(buildParAuthorizationUrl(issuer, clientId, requestUri), { status: 303 });
-  response.cookies.set(TX_COOKIE, transaction.state, { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 600 });
+  response.cookies.set(oidcTransactionCookie(), transaction.state, { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 600 });
   return response;
 }
 

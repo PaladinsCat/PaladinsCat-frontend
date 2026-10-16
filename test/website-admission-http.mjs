@@ -50,13 +50,35 @@ if (process.argv.includes("--serve")) {
   const gate = loaded.exports;
   const account = { id: 42, linked_player_id: "42", invitation_required: false, invitation_active: pro,
     regulation_stage: 0, access_restriction_kind: null, access_restriction: null };
-  let authReads = 0;
+  let authReads = 0, renders = 0, imageChecks = 0;
+  let imageGrant = "verified";
+  const imageId = "1281129406";
+  const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aX1sAAAAASUVORK5CYII=", "base64");
   const backend = createServer((request, response) => {
     const path = new URL(request.url, "http://fixture.invalid").pathname;
     const session = request.headers.authorization?.startsWith("Bearer ")
       ? request.headers.authorization.slice(7) : request.headers.cookie?.match(/__Host-pc_session=([^;]+)/)?.[1];
     response.setHeader("Content-Type", "application/json");
-    if (path === "/auth/me") {
+    if (path === '/matches/' + imageId) {
+      imageChecks++;
+      assert.equal(session, "fixture-session");
+      assert.equal(new URL(request.url, "http://fixture.invalid").searchParams.get("skipRecovery"), "true");
+      if (imageGrant === "denied") {
+        response.statusCode = 429; response.setHeader("Retry-After", "17");
+        response.end(JSON.stringify({ error: { code: "MATCH_DAILY_LIMIT_REACHED" } }));
+      } else {
+        const access = imageGrant === "verified"
+          ? { tier: "verified", limit: null, remaining: null, resetAtMs: null }
+          : { tier: imageGrant, limit: imageGrant === "guest" ? 5 : 50, remaining: 0, resetAtMs: 1800000000000 };
+        response.end(JSON.stringify({ count: 1, matches: [{ match: { match_id: imageId }, players: [] }],
+          ...(imageGrant === "missing" ? {} : { access }) }));
+      }
+    } else if (path === '/matches/' + imageId + '/image') {
+      renders++;
+      assert.equal(request.headers.authorization, undefined);
+      assert.equal(request.headers.cookie, undefined);
+      response.setHeader("Content-Type", "image/png"); response.end(png);
+    } else if (path === "/auth/me") {
       authReads++;
       response.statusCode = session === "fixture-session" ? 200 : 401;
       response.end(JSON.stringify(session === "fixture-session" ? account : { error: { code: "SESSION_INVALID" } }));
@@ -86,13 +108,13 @@ if (process.argv.includes("--serve")) {
     child = spawn(process.execPath, [fileURLToPath(import.meta.url), "--serve"], {
       cwd: repo, windowsHide: true, stdio: ["ignore", "pipe", "pipe"],
       env: { ...process.env, NODE_ENV: "production", PC_FIXTURE_PORT: String(port), PC_FIXTURE_BACKEND: backendOrigin,
-        NEXT_SERVER_API_URL: backendOrigin, PALADINSCAT_PUBLIC_ORIGIN: origin, PALADINSCAT_WEBSITE_GATE_SECRET_FILE: secretFile },
+        NEXT_SERVER_API_URL: backendOrigin, PALADINSCAT_RENDER_URL: backendOrigin, PALADINSCAT_PUBLIC_ORIGIN: origin, PALADINSCAT_WEBSITE_GATE_SECRET_FILE: secretFile },
     });
     let output = "";
     child.stdout.on("data", chunk => { output = (output + chunk).slice(-8000); });
     child.stderr.on("data", chunk => { output = (output + chunk).slice(-8000); });
     const http = (path, headers = {}) => fetch(`${origin}${path}`, { redirect: "manual", signal: AbortSignal.timeout(5000),
-      headers: { accept: "application/json", "sec-fetch-site": "same-origin", origin, ...headers } });
+      headers: { accept: "application/json", "sec-fetch-site": "same-origin", "x-forwarded-proto": "https", origin, ...headers } });
     const start = Date.now();
     while (true) {
       assert.ok(Date.now() - start < 30_000, `Compiled server startup exceeded 30 seconds: ${output}`);
@@ -161,7 +183,33 @@ if (process.argv.includes("--serve")) {
     const foreign = await http("/api/auth/me", { cookie: "__Host-pc_session=fixture-session", origin: "https://foreign.invalid" });
     assert.equal(foreign.status, 403);
     assert.equal(foreign.headers.getSetCookie().length, 0);
-    console.log(JSON.stringify({ surface: pro ? "pro" : "public", compiledCookieFlows, warmSearchReads, expiredBrowserFlows, foreignAndUnsafeDenied: true }));
+    const imageHeaders = { cookie: "__Host-pc_session=fixture-session; " + gate.GUEST_COOKIE + "=" + gate.issueGuest(secret, origin) };
+    let aliasDenials = 0;
+    for (const prefix of ["/API", "/Api", "/_PC", "/%61pi", "/%5Fpc"]) {
+      for (const feed of ["active", "inactive"]) {
+        const denied = await http(prefix + "/cheaters/" + feed, imageHeaders);
+        assert.equal(denied.status, 400, prefix);
+        assert.equal((await denied.json()).error.code, "NON_CANONICAL_API_PATH"); aliasDenials++;
+      }
+    }
+    for (const tier of ["guest", "account", "verified"]) {
+      imageGrant = tier;
+      const image = await http("/match-images/" + imageId, imageHeaders);
+      assert.equal(image.status, 200, tier);
+      assert.equal(image.headers.get("cache-control"), "private, no-store");
+      assert.deepEqual(Buffer.from(await image.arrayBuffer()), png);
+    }
+    imageGrant = "denied";
+    const quota = await http("/match-images/" + imageId, imageHeaders);
+    assert.equal(quota.status, 429, "Cached render must not bypass a fresh quota check");
+    assert.equal(quota.headers.get("retry-after"), "17");
+    assert.equal((await quota.json()).error.code, "MATCH_DAILY_LIMIT_REACHED");
+    imageGrant = "missing";
+    assert.equal((await http("/match-images/" + imageId, imageHeaders)).status, 503);
+    assert.equal(renders, 3, "Denied or unproven grants must not reach the renderer");
+    assert.equal(imageChecks, 5);
+    console.log(JSON.stringify({ surface: pro ? "pro" : "public", compiledCookieFlows, warmSearchReads, expiredBrowserFlows,
+      aliasDenials, imageChecks, renders, admissionChecksPassed: true }));
   } catch (error) {
     console.error(error);
     process.exitCode = 1;

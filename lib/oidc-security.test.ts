@@ -137,8 +137,8 @@ test("authorization parameters are pushed server-side and the browser gets only 
 });
 test("server issuer override permits only Keycloak's exact internal realm", () => {
   const issuer = "https://auth.paladinscat.com/realms/paladinscat";
-  assert.equal(resolveInternalIssuer(issuer, "http://keycloak:8080/realms/paladinscat"), "http://keycloak:8080/realms/paladinscat");
-  for (const value of [undefined, "http://keycloak:8080/realms/other", "http://backend-rust-api:3005/realms/paladinscat", "https://evil.example/realms/paladinscat"]) assert.equal(resolveInternalIssuer(issuer, value), issuer);
+  assert.equal(resolveInternalIssuer(issuer, "https://keycloak:8443/realms/paladinscat"), "https://keycloak:8443/realms/paladinscat");
+  for (const value of [undefined, "http://keycloak:8080/realms/paladinscat", "https://keycloak:8080/realms/paladinscat", "https://keycloak:8443/realms/other", "http://keycloak:8080/realms/other", "http://backend-rust-api:3005/realms/paladinscat", "https://evil.example/realms/paladinscat"]) assert.equal(resolveInternalIssuer(issuer, value), issuer);
 });
 test("PAR response requires a bounded-lived opaque request URI", () => {
   assert.deepEqual(parsePushedAuthorizationResponse({ request_uri: "urn:ietf:params:oauth:request_uri:abc_DEF-123", expires_in: 60 }), { requestUri: "urn:ietf:params:oauth:request_uri:abc_DEF-123", expiresIn: 60 });
@@ -233,7 +233,7 @@ test("frontend server calls use the pinned internal issuer without changing toke
   const login = readFileSync(new URL("../app/api/auth/oidc/login/route.ts", import.meta.url), "utf8");
   const callback = readFileSync(new URL("../app/api/auth/oidc/callback/route.ts", import.meta.url), "utf8");
   assert.match(login, /resolveInternalIssuer\(issuer, process\.env\.OIDC_INTERNAL_ISSUER\)/);
-  assert.match(callback, /fetch\(`\$\{serverIssuer\}\/protocol\/openid-connect\/token`/);
+  assert.match(callback, /oidcFetch\(`\$\{serverIssuer\}\/protocol\/openid-connect\/token`/);
   assert.match(callback, /const idClaims = await validateIdToken\(token\.id_token, issuer, clientId, tx\.nonce, serverIssuer\)/);
 });
 test("ID token typ accepts proven Keycloak and standard forms only", () => {
