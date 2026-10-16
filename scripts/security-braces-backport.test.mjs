@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, mkdtempSync, writeFileSync, symlinkSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import test from "node:test";
-import { verifyBackport, fixedVex, reviewReports } from "./security-braces-backport.mjs";
+import { verifyBackport, fixedVex, reviewReports, readBoundedFile } from "./security-braces-backport.mjs";
 
 const purl = "pkg:npm/braces@3.0.3";
 const read = (name) => readFileSync(new URL(`../${name}`, import.meta.url));
@@ -11,6 +13,20 @@ const vulnerability = (id = "CVE-2026-93687", name = "braces", version = "3.0.3"
 });
 const report = (vulns = []) => ({ Results: [{ Target: "package-lock.json", Type: "npm",
   Packages: [{ Name: "braces", Version: "3.0.3", Identifier: { PURL: purl } }], Vulnerabilities: vulns }] });
+
+test("descriptor reads admit exact size and reject oversize, directories and symlink inputs", () => {
+  const directory = mkdtempSync(join(tmpdir(), "pc-backport-read-"));
+  try {
+    const filename = join(directory, "report");
+    writeFileSync(filename, "1234");
+    assert.equal(readBoundedFile(filename, 4).toString(), "1234");
+    assert.throws(() => readBoundedFile(filename, 3));
+    assert.throws(() => readBoundedFile(directory, 4));
+    const link = join(directory, "link");
+    symlinkSync(filename, link);
+    assert.throws(() => readBoundedFile(link, 4));
+  } finally { rmSync(directory, { recursive: true, force: true }); }
+});
 
 test("backport source, archive and complete locked identity match reviewed hashes", () => {
   const manifest = verifyBackport();

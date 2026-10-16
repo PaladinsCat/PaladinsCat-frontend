@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { lstatSync, readFileSync, mkdirSync, writeFileSync } from "node:fs";
+import { constants, openSync, fstatSync, lstatSync, readSync, closeSync, mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -10,11 +10,29 @@ const purl = "pkg:npm/braces@3.0.3";
 const advisory = "CVE-2026-93687";
 const hash = (bytes, algorithm = "sha256", encoding = "hex") => createHash(algorithm).update(bytes).digest(encoding);
 
+/** Read the checked descriptor, bounded even if its file grows during the read. */
+export function readBoundedFile(filename, maximum) {
+  const fd = openSync(filename, constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0) | (constants.O_NONBLOCK ?? 0));
+  try {
+    const opened = fstatSync(fd);
+    const named = lstatSync(filename);
+    assert.ok(opened.isFile() && named.isFile() && !named.isSymbolicLink()
+      && opened.dev === named.dev && opened.ino === named.ino && opened.size <= maximum,
+    "Invalid backport input or scan report");
+    const bytes = Buffer.alloc(maximum + 1);
+    let size = 0;
+    while (size < bytes.length) {
+      const count = readSync(fd, bytes, size, bytes.length - size, null);
+      if (count === 0) break;
+      size += count;
+    }
+    assert.ok(size <= maximum, "Oversized backport input or scan report");
+    return bytes.subarray(0, size);
+  } finally { closeSync(fd); }
+}
+
 function boundedRead(relative, maximum = 1024 * 1024) {
-  const filename = path.join(root, relative);
-  const stat = lstatSync(filename);
-  assert.ok(stat.isFile() && !stat.isSymbolicLink() && stat.size <= maximum, `Invalid backport input: ${relative}`);
-  return readFileSync(filename);
+  return readBoundedFile(path.join(root, relative), maximum);
 }
 
 export function verifyBackport(read = boundedRead) {
@@ -109,10 +127,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     console.log("Exact reviewed braces backport verified.");
   } else if (command === "review" && destination && second && process.argv.length === 5) {
     verifyBackport();
-    const readReport = (filename) => {
-      assert.ok(lstatSync(filename).size <= 32 * 1024 * 1024, "Oversized scan report");
-      return JSON.parse(readFileSync(filename));
-    };
+    const readReport = (filename) => JSON.parse(readBoundedFile(filename, 32 * 1024 * 1024));
     console.log(JSON.stringify(reviewReports(readReport(destination), readReport(second))));
   } else {
     throw new Error("Expected prepare REPORT_DIRECTORY or review RAW_JSON ADJUDICATED_JSON");
