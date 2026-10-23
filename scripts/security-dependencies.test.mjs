@@ -51,7 +51,7 @@ test("Next optimizes PNG and AVIF with the patched decoder", { timeout: 10000 },
   const source = { create: { width: 8, height: 8, channels: 3, background: "#336699" } };
   const png = await sharp(source).png().toBuffer();
   const avif = await sharp(source).avif().toBuffer();
-  const { getSharp, optimizeImage } = nextRequire("next/dist/server/image-optimizer");
+  const { getSharp, optimizeImage } = nextRequire("next/dist/server/image-optimizer/transform");
   const optimizerSharp = getSharp(2);
   assert.equal(optimizerSharp, sharp);
   const result = await optimizeImage({
