@@ -87,7 +87,7 @@ jobs:
           ./trivy convert --scanners vuln --format table --severity HIGH,CRITICAL --exit-code 1 reports/adjudicated.json
       - name: Retain repository-private scan evidence
         if: always()
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.1, verified upstream commit
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2, verified upstream commit
         with:
           name: security-scan-dependencies
           path: ${{ runner.temp }}/security-scan/reports/
