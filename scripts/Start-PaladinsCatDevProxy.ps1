@@ -76,7 +76,7 @@ $keyInjectorPort = 3001
 $keyInjector = $null
 if ($LocalAuthBypass) {
   if (-not $apiKeyFile) {
-    $apiKeyFile = "C:\Users\nabi\PaladinsCat\local\runtime\developer-api\issued\pc_live_f94bf61a04cf4f87a6996a65b8cbfbb7.txt"
+    $apiKeyFile = "Z:\NABI\Project\PaladinsCat\local\runtime\developer-api\issued\pc_live_f94bf61a04cf4f87a6996a65b8cbfbb7.txt"
   }
   if (-not (Test-Path -LiteralPath $apiKeyFile -PathType Leaf)) {
     throw "API key file not found at $apiKeyFile; pass -ApiKeyFile <path> to a valid issued developer credential."
