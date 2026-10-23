@@ -26,7 +26,8 @@ test("runtime dependencies include the advisory fixes", () => {
 });
 
 test("build tools resolve patched YAML 4 and reject excessive empty merges", { timeout: 5000 }, () => {
-  for (const owner of ["@eslint/eslintrc", "@redocly/openapi-core", "cosmiconfig"]) {
+  // shadcn 4.22 no longer uses cosmiconfig; exercise the remaining YAML 4 consumers.
+  for (const owner of ["@eslint/eslintrc", "@redocly/openapi-core"]) {
     const ownerRequire = createRequire(require.resolve(owner));
     const yaml = ownerRequire("js-yaml");
     assert.ok(semver.satisfies(ownerRequire("js-yaml/package.json").version, ">=4.3.2 <5"), owner);
